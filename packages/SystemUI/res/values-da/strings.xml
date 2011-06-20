@@ -39,18 +39,34 @@
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"AUTO"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"Meddelelser"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Seneste"</string>
-    <string name="recent_tasks_empty" msgid="1905484479067697884">"Der er ingen nye programmer."</string>
+    <string name="recent_tasks_empty" msgid="1905484479067697884">"Der er ingen nye applikationer."</string>
     <string name="recent_tasks_app_label" msgid="3796483981246752469">"Programmer"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"Bluetooth-tethering anvendt"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="737483394044014246">"Konfigurer inputmetoder"</string>
     <string name="status_bar_use_physical_keyboard" msgid="3695516942412442936">"Brug fysisk tastatur"</string>
-    <string name="usb_device_permission_prompt" msgid="3816016361969816903">"Vil du tillade, at programmet <xliff:g id="APPLICATION">%1$s</xliff:g> får adgang til USB-enheden?"</string>
-    <string name="usb_accessory_permission_prompt" msgid="6888598803988889959">"Vil du tillade, at programmet <xliff:g id="APPLICATION">%1$s</xliff:g> får adgang til USB-ekstraudstyret?"</string>
+    <string name="usb_device_permission_prompt" msgid="3816016361969816903">"Vil du tillade, at applikationen <xliff:g id="APPLICATION">%1$s</xliff:g> får adgang til USB-enheden?"</string>
+    <string name="usb_accessory_permission_prompt" msgid="6888598803988889959">"Vil du tillade, at applikationen <xliff:g id="APPLICATION">%1$s</xliff:g> får adgang til USB-ekstraudstyret?"</string>
     <string name="usb_device_confirm_prompt" msgid="5161205258635253206">"Vil du åbne <xliff:g id="ACTIVITY">%1$s</xliff:g>, når denne USB-enhed er tilsluttet?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="3808984931830229888">"Vil du åbne <xliff:g id="ACTIVITY">%1$s</xliff:g>, når dette USB-ekstraudstyr er tilsluttet?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"Ingen inst. programmer virker med USB-ekstraudstyret. Få oplysninger om ekstraudstyret på <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"Ingen inst. applikationer virker med USB-ekstraudstyret. Få oplysninger om ekstraudstyret på <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB-ekstraudstyr"</string>
     <string name="label_view" msgid="6304565553218192990">"Vis"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Brug som standard til denne USB-enhed"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Brug som standard til dette USB-tilbehør"</string>
+    <!-- no translation found for compat_mode_on (6623839244840638213) -->
+    <skip />
+    <!-- no translation found for compat_mode_off (4434467572461327898) -->
+    <skip />
+    <!-- no translation found for compat_mode_help_header (7020175705401506719) -->
+    <skip />
+    <!-- no translation found for compat_mode_help_body (4946726776359270040) -->
+    <skip />
+    <!-- no translation found for usb_preference_title (6551050377388882787) -->
+    <skip />
+    <!-- no translation found for use_mtp_button_title (4333504413563023626) -->
+    <skip />
+    <!-- no translation found for use_ptp_button_title (7517127540301625751) -->
+    <skip />
+    <!-- no translation found for installer_cd_button_title (8485631662288445893) -->
+    <skip />
 </resources>

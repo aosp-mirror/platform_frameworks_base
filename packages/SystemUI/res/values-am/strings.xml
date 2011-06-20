@@ -19,13 +19,10 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for app_label (7164937344850004466) -->
-    <skip />
+    <string name="app_label" msgid="7164937344850004466">"የስርዓት UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"አጥራ"</string>
-    <!-- no translation found for status_bar_do_not_disturb_button (5812628897510997853) -->
-    <skip />
-    <!-- no translation found for status_bar_please_disturb_button (3345398298841572813) -->
-    <skip />
+    <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"አይረብሹ"</string>
+    <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"ማሳወቂያዎች አሳይ"</string>
     <!-- no translation found for status_bar_no_notifications_title (4755261167193833213) -->
     <skip />
     <!-- no translation found for status_bar_ongoing_events_title (1682504513316879202) -->
@@ -34,34 +31,22 @@
     <skip />
     <!-- no translation found for battery_low_title (7923774589611311406) -->
     <skip />
-    <!-- no translation found for battery_low_subtitle (1752040062087829196) -->
-    <skip />
-    <!-- no translation found for battery_low_percent_format (1077244949318261761) -->
-    <skip />
-    <!-- no translation found for invalid_charger (4549105996740522523) -->
-    <skip />
+    <string name="battery_low_subtitle" msgid="1752040062087829196">"ባትሪው እያነሰ ነው።"</string>
+    <string name="battery_low_percent_format" msgid="1077244949318261761">"<xliff:g id="NUMBER">%d%%</xliff:g> ቀሪ"</string>
+    <string name="invalid_charger" msgid="4549105996740522523">"USB ኃይል መሙያ አይታገዝም።"\n" የቀረበውን ኃይል መሙያ ብቻ ተጠቀም።"</string>
     <string name="battery_low_why" msgid="7279169609518386372">"የባትሪ ጥቅም"</string>
-    <!-- no translation found for status_bar_settings_settings_button (3023889916699270224) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_wifi_button (1733928151698311923) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_airplane (4879879698500955300) -->
-    <skip />
+    <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"ቅንብሮች"</string>
+    <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
+    <string name="status_bar_settings_airplane" msgid="4879879698500955300">"የአውሮፕላን ሁነታ"</string>
     <!-- no translation found for status_bar_settings_auto_rotation (3790482541357798421) -->
     <skip />
-    <!-- no translation found for status_bar_settings_mute_label (554682549917429396) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_auto_brightness_label (511453614962324674) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_notifications (397146176280905137) -->
-    <skip />
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"ድምጽ አጥፋ"</string>
+    <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"ራስ ሰር"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"ማሳወቂያዎች"</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"የቅርብ ጊዜ"</string>
-    <!-- no translation found for recent_tasks_empty (1905484479067697884) -->
-    <skip />
-    <!-- no translation found for recent_tasks_app_label (3796483981246752469) -->
-    <skip />
-    <!-- no translation found for bluetooth_tethered (7094101612161133267) -->
-    <skip />
+    <string name="recent_tasks_empty" msgid="1905484479067697884">"ምንም የቅርብ ጊዜ ትግበራዎች የሉም።"</string>
+    <string name="recent_tasks_app_label" msgid="3796483981246752469">"ትግበራዎች"</string>
+    <string name="bluetooth_tethered" msgid="7094101612161133267">"ብሉቱዝ አያይዝ"</string>
     <!-- no translation found for status_bar_input_method_settings_configure_input_methods (737483394044014246) -->
     <skip />
     <!-- no translation found for status_bar_use_physical_keyboard (3695516942412442936) -->
@@ -83,5 +68,21 @@
     <!-- no translation found for always_use_device (1450287437017315906) -->
     <skip />
     <!-- no translation found for always_use_accessory (1210954576979621596) -->
+    <skip />
+    <!-- no translation found for compat_mode_on (6623839244840638213) -->
+    <skip />
+    <!-- no translation found for compat_mode_off (4434467572461327898) -->
+    <skip />
+    <!-- no translation found for compat_mode_help_header (7020175705401506719) -->
+    <skip />
+    <!-- no translation found for compat_mode_help_body (4946726776359270040) -->
+    <skip />
+    <!-- no translation found for usb_preference_title (6551050377388882787) -->
+    <skip />
+    <!-- no translation found for use_mtp_button_title (4333504413563023626) -->
+    <skip />
+    <!-- no translation found for use_ptp_button_title (7517127540301625751) -->
+    <skip />
+    <!-- no translation found for installer_cd_button_title (8485631662288445893) -->
     <skip />
 </resources>

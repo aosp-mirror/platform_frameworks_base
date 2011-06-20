@@ -53,4 +53,20 @@
     <string name="label_view" msgid="6304565553218192990">"Zobrazit"</string>
     <string name="always_use_device" msgid="1450287437017315906">"Pro toto zařízení USB použít jako výchozí"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Pro toto periferní zařízení USB použít jako výchozí"</string>
+    <!-- no translation found for compat_mode_on (6623839244840638213) -->
+    <skip />
+    <!-- no translation found for compat_mode_off (4434467572461327898) -->
+    <skip />
+    <!-- no translation found for compat_mode_help_header (7020175705401506719) -->
+    <skip />
+    <!-- no translation found for compat_mode_help_body (4946726776359270040) -->
+    <skip />
+    <!-- no translation found for usb_preference_title (6551050377388882787) -->
+    <skip />
+    <!-- no translation found for use_mtp_button_title (4333504413563023626) -->
+    <skip />
+    <!-- no translation found for use_ptp_button_title (7517127540301625751) -->
+    <skip />
+    <!-- no translation found for installer_cd_button_title (8485631662288445893) -->
+    <skip />
 </resources>
