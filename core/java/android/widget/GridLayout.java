@@ -170,7 +170,6 @@ public class GridLayout extends ViewGroup {
 
     private static final String TAG = GridLayout.class.getName();
     private static final boolean DEBUG = false;
-    private static Paint GRID_PAINT;
     private static final double GOLDEN_RATIO = (1 + Math.sqrt(5)) / 2;
     private static final int MIN = 0;
     private static final int PRF = 1;
@@ -195,15 +194,6 @@ public class GridLayout extends ViewGroup {
     private static final int ALIGNMENT_MODE = styleable.GridLayout_alignmentMode;
     private static final int ROW_ORDER_PRESERVED = styleable.GridLayout_rowOrderPreserved;
     private static final int COLUMN_ORDER_PRESERVED = styleable.GridLayout_columnOrderPreserved;
-
-    // Static initialization
-
-    static {
-        if (DEBUG) {
-            GRID_PAINT = new Paint();
-            GRID_PAINT.setColor(Color.argb(50, 255, 255, 255));
-        }
-    }
 
     // Instance variables
 
@@ -605,7 +595,9 @@ public class GridLayout extends ViewGroup {
                 int row = 0;
                 int col = 0;
                 for (int i = 0, N = getChildCount(); i < N; i++) {
-                    LayoutParams lp = getLayoutParams1(getChildAt(i));
+                    View c = getChildAt(i);
+                    if (isGone(c)) continue;
+                    LayoutParams lp = getLayoutParams1(c);
 
                     Group colGroup = lp.columnGroup;
                     Interval cols = colGroup.span;
@@ -703,6 +695,15 @@ public class GridLayout extends ViewGroup {
         graphics.drawLine(dx + x1, dy + y1, dx + x2, dy + y2, paint);
     }
 
+    private void drawRectangle(Canvas graphics, int x1, int y1, int x2, int y2, Paint paint) {
+        // x2 = x2 - 1;
+        // y2 = y2 - 1;
+        graphics.drawLine(x1, y1, x1, y2, paint);
+        graphics.drawLine(x1, y1, x2, y1, paint);
+        graphics.drawLine(x1, y2, x2, y2, paint);
+        graphics.drawLine(x2, y1, x2, y2, paint);
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -711,15 +712,46 @@ public class GridLayout extends ViewGroup {
             int height = getHeight() - getPaddingTop() - getPaddingBottom();
             int width = getWidth() - getPaddingLeft() - getPaddingRight();
 
+            Paint paint = new Paint();
+            paint.setColor(Color.argb(50, 255, 255, 255));
+
             int[] xs = mHorizontalAxis.locations;
-            for (int i = 0, length = xs.length; i < length; i++) {
-                int x = xs[i];
-                drawLine(canvas, x, 0, x, height - 1, GRID_PAINT);
+            if (xs != null) {
+                for (int i = 0, length = xs.length; i < length; i++) {
+                    int x = xs[i];
+                    drawLine(canvas, x, 0, x, height - 1, paint);
+                }
             }
+
             int[] ys = mVerticalAxis.locations;
-            for (int i = 0, length = ys.length; i < length; i++) {
-                int y = ys[i];
-                drawLine(canvas, 0, y, width - 1, y, GRID_PAINT);
+            if (ys != null) {
+                for (int i = 0, length = ys.length; i < length; i++) {
+                    int y = ys[i];
+                    drawLine(canvas, 0, y, width - 1, y, paint);
+                }
+            }
+            // Draw bounds
+            paint.setColor(Color.BLUE);
+
+            for (int i = 0; i < getChildCount(); i++) {
+                View c = getChildAt(i);
+                drawRectangle(canvas,
+                        c.getLeft(),
+                        c.getTop(),
+                        c.getRight(),
+                        c.getBottom(), paint);
+            }
+
+            // Draw margins
+            paint.setColor(Color.YELLOW);
+
+            for (int i = 0; i < getChildCount(); i++) {
+                View c = getChildAt(i);
+                drawRectangle(canvas,
+                        c.getLeft() - getMargin(c, true, true),
+                        c.getTop() - getMargin(c, true, false),
+                        c.getRight() + getMargin(c, false, true),
+                        c.getBottom() + getMargin(c, false, false), paint);
             }
         }
     }
@@ -758,9 +790,35 @@ public class GridLayout extends ViewGroup {
 
     // Measurement
 
+    private boolean isGone(View c) {
+        return c.getVisibility() == View.GONE;
+    }
+
+    private void measureChildWithMargins(View child,
+            int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
+
+        LayoutParams lp = getLayoutParams(child);
+        int hMargins = getMargin(child, true, true) + getMargin(child, false, true);
+        int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
+                mPaddingLeft + mPaddingRight + hMargins, lp.width);
+        int vMargins = getMargin(child, true, false) + getMargin(child, false, false);
+        int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
+                mPaddingTop + mPaddingBottom + vMargins, lp.height);
+
+        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+    }
+
+    private void measureChildrenWithMargins(int widthMeasureSpec, int heightMeasureSpec) {
+        for (int i = 0, N = getChildCount(); i < N; i++) {
+            View c = getChildAt(i);
+            if (isGone(c)) continue;
+            measureChildWithMargins(c, widthMeasureSpec, heightMeasureSpec);
+        }
+    }
+
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
-        measureChildren(widthSpec, heightSpec);
+        measureChildrenWithMargins(widthSpec, heightSpec);
 
         int computedWidth = getPaddingLeft() + mHorizontalAxis.getMin() + getPaddingRight();
         int computedHeight = getPaddingTop() + mVerticalAxis.getMin() + getPaddingBottom();
@@ -824,26 +882,27 @@ public class GridLayout extends ViewGroup {
         mHorizontalAxis.layout(targetWidth - paddingLeft - paddingRight);
         mVerticalAxis.layout(targetHeight - paddingTop - paddingBottom);
 
-        for (int i = 0, size = getChildCount(); i < size; i++) {
-            View view = getChildAt(i);
-            LayoutParams lp = getLayoutParams(view);
+        for (int i = 0, N = getChildCount(); i < N; i++) {
+            View c = getChildAt(i);
+            if (isGone(c)) continue;
+            LayoutParams lp = getLayoutParams(c);
             Group columnGroup = lp.columnGroup;
             Group rowGroup = lp.rowGroup;
 
             Interval colSpan = columnGroup.span;
             Interval rowSpan = rowGroup.span;
 
-            int x1 = mHorizontalAxis.getLocationIncludingMargin(view, true, colSpan.min);
-            int y1 = mVerticalAxis.getLocationIncludingMargin(view, true, rowSpan.min);
+            int x1 = mHorizontalAxis.getLocationIncludingMargin(c, true, colSpan.min);
+            int y1 = mVerticalAxis.getLocationIncludingMargin(c, true, rowSpan.min);
 
-            int x2 = mHorizontalAxis.getLocationIncludingMargin(view, false, colSpan.max);
-            int y2 = mVerticalAxis.getLocationIncludingMargin(view, false, rowSpan.max);
+            int x2 = mHorizontalAxis.getLocationIncludingMargin(c, false, colSpan.max);
+            int y2 = mVerticalAxis.getLocationIncludingMargin(c, false, rowSpan.max);
 
             int cellWidth = x2 - x1;
             int cellHeight = y2 - y1;
 
-            int pWidth = getMeasurement(view, true, PRF);
-            int pHeight = getMeasurement(view, false, PRF);
+            int pWidth = getMeasurement(c, true, PRF);
+            int pHeight = getMeasurement(c, false, PRF);
 
             Alignment hAlign = columnGroup.alignment;
             Alignment vAlign = rowGroup.alignment;
@@ -859,18 +918,18 @@ public class GridLayout extends ViewGroup {
             int c2ay = protect(vAlign.getAlignmentValue(null, cellHeight - rowBounds.size(), type));
 
             if (mAlignmentMode == ALIGN_MARGINS) {
-                int leftMargin = getMargin(view, true, true);
-                int topMargin = getMargin(view, true, false);
-                int rightMargin = getMargin(view, false, true);
-                int bottomMargin = getMargin(view, false, false);
+                int leftMargin = getMargin(c, true, true);
+                int topMargin = getMargin(c, true, false);
+                int rightMargin = getMargin(c, false, true);
+                int bottomMargin = getMargin(c, false, false);
 
                 // Same calculation as getMeasurementIncludingMargin()
                 int mWidth = leftMargin + pWidth + rightMargin;
                 int mHeight = topMargin + pHeight + bottomMargin;
 
                 // Alignment offsets: the location of the view relative to its alignment group.
-                int a2vx = colBounds.before - hAlign.getAlignmentValue(view, mWidth, type);
-                int a2vy = rowBounds.before - vAlign.getAlignmentValue(view, mHeight, type);
+                int a2vx = colBounds.before - hAlign.getAlignmentValue(c, mWidth, type);
+                int a2vy = rowBounds.before - vAlign.getAlignmentValue(c, mHeight, type);
 
                 dx = c2ax + a2vx + leftMargin;
                 dy = c2ay + a2vy + topMargin;
@@ -879,19 +938,19 @@ public class GridLayout extends ViewGroup {
                 cellHeight -= topMargin + bottomMargin;
             } else {
                 // Alignment offsets: the location of the view relative to its alignment group.
-                int a2vx = colBounds.before - hAlign.getAlignmentValue(view, pWidth, type);
-                int a2vy = rowBounds.before - vAlign.getAlignmentValue(view, pHeight, type);
+                int a2vx = colBounds.before - hAlign.getAlignmentValue(c, pWidth, type);
+                int a2vy = rowBounds.before - vAlign.getAlignmentValue(c, pHeight, type);
 
                 dx = c2ax + a2vx;
                 dy = c2ay + a2vy;
             }
 
-            int width = hAlign.getSizeInCell(view, pWidth, cellWidth, type);
-            int height = vAlign.getSizeInCell(view, pHeight, cellHeight, type);
+            int width = hAlign.getSizeInCell(c, pWidth, cellWidth, type);
+            int height = vAlign.getSizeInCell(c, pHeight, cellHeight, type);
 
             int cx = paddingLeft + x1 + dx;
             int cy = paddingTop + y1 + dy;
-            view.layout(cx, cy, cx + width, cy + height);
+            c.layout(cx, cy, cx + width, cy + height);
         }
     }
 
@@ -946,8 +1005,10 @@ public class GridLayout extends ViewGroup {
         private int maxIndex() {
             // note the number Integer.MIN_VALUE + 1 comes up in undefined cells
             int count = -1;
-            for (int i = 0, size = getChildCount(); i < size; i++) {
-                LayoutParams params = getLayoutParams(getChildAt(i));
+            for (int i = 0, N = getChildCount(); i < N; i++) {
+                View c = getChildAt(i);
+                if (isGone(c)) continue;
+                LayoutParams params = getLayoutParams(c);
                 Group g = horizontal ? params.columnGroup : params.rowGroup;
                 count = max(count, g.span.min);
                 count = max(count, g.span.max);
@@ -980,9 +1041,13 @@ public class GridLayout extends ViewGroup {
         private PackedMap<Group, Bounds> createGroupBounds() {
             int N = getChildCount();
             Group[] groups = new Group[N];
+            Arrays.fill(groups, Group.GONE);
             Bounds[] bounds = new Bounds[N];
+            Arrays.fill(bounds, Bounds.GONE);
             for (int i = 0; i < N; i++) {
-                LayoutParams lp = getLayoutParams(getChildAt(i));
+                View c = getChildAt(i);
+                if (isGone(c)) continue;
+                LayoutParams lp = getLayoutParams(c);
                 Group group = horizontal ? lp.columnGroup : lp.rowGroup;
 
                 groups[i] = group;
@@ -993,11 +1058,13 @@ public class GridLayout extends ViewGroup {
         }
 
         private void computeGroupBounds() {
-            for (int i = 0; i < groupBounds.values.length; i++) {
-                groupBounds.values[i].reset();
+            Bounds[] values = groupBounds.values;
+            for (int i = 0; i < values.length; i++) {
+                values[i].reset();
             }
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
+                if (isGone(c)) continue;
                 LayoutParams lp = getLayoutParams(c);
                 Group g = horizontal ? lp.columnGroup : lp.rowGroup;
 
@@ -1110,7 +1177,7 @@ public class GridLayout extends ViewGroup {
         }
 
         private Arc[] topologicalSort(final Arc[] arcs, int start) {
-        // todo ensure the <start> vertex is added in edge cases
+            // todo ensure the <start> vertex is added in edge cases
             final List<Arc> result = new ArrayList<Arc>();
             new Object() {
                 Arc[][] arcsByFirstVertex = groupArcsByFirstVertex(arcs);
@@ -1159,11 +1226,13 @@ public class GridLayout extends ViewGroup {
         // todo unify with findUsed above. Both routines analyze which rows/columns are empty.
         private Collection<Interval> getSpacers() {
             List<Interval> result = new ArrayList<Interval>();
-            int N = getCount() + 1;
-            int[] leadingEdgeCount = new int[N];
-            int[] trailingEdgeCount = new int[N];
-            for (int i = 0, size = getChildCount(); i < size; i++) {
-                LayoutParams lp = getLayoutParams(getChildAt(i));
+            int V = getCount() + 1;
+            int[] leadingEdgeCount = new int[V];
+            int[] trailingEdgeCount = new int[V];
+            for (int i = 0, N = getChildCount(); i < N; i++) {
+                View c = getChildAt(i);
+                if (isGone(c)) continue;
+                LayoutParams lp = getLayoutParams(c);
                 Group g = horizontal ? lp.columnGroup : lp.rowGroup;
                 Interval span = g.span;
                 leadingEdgeCount[span.min]++;
@@ -1174,9 +1243,9 @@ public class GridLayout extends ViewGroup {
 
             // treat the parent's edges like peer edges of the opposite type
             trailingEdgeCount[0] = 1;
-            leadingEdgeCount[N - 1] = 1;
+            leadingEdgeCount[V - 1] = 1;
 
-            for (int i = 0; i < N; i++) {
+            for (int i = 0; i < V; i++) {
                 if (trailingEdgeCount[i] > 0) {
                     lastTrailingEdge = i;
                     continue; // if this is also a leading edge, don't add a space of length zero
@@ -1189,24 +1258,25 @@ public class GridLayout extends ViewGroup {
         }
 
         private Arc[] createArcs() {
-            List<Arc> spanToSize = new ArrayList<Arc>();
+            List<Arc> result = new ArrayList<Arc>();
 
             // Add all the preferred elements that were not defined by the user.
             PackedMap<Interval, MutableInt> spanSizes = getSpanSizes();
             for (int i = 0; i < spanSizes.keys.length; i++) {
                 Interval key = spanSizes.keys[i];
+                if (key == Interval.GONE) continue;
                 MutableInt value = spanSizes.values[i];
                 // todo remove value duplicate
-                include2(spanToSize, key, value, value, accommodateBothMinAndMax);
+                include2(result, key, value, value, accommodateBothMinAndMax);
             }
 
             // Find redundant rows/cols and glue them together with 0-length arcs to link the tree
-            boolean[] used = findUsed(spanToSize);
+            boolean[] used = findUsed(result);
             for (int i = 0; i < getCount(); i++) {
                 if (!used[i]) {
                     Interval span = new Interval(i, i + 1);
-                    include(spanToSize, span, new MutableInt(0));
-                    include(spanToSize, span.inverse(), new MutableInt(0));
+                    include(result, span, new MutableInt(0));
+                    include(result, span.inverse(), new MutableInt(0));
                 }
             }
 
@@ -1214,15 +1284,15 @@ public class GridLayout extends ViewGroup {
                 // Add preferred gaps
                 for (int i = 0; i < getCount(); i++) {
                     if (used[i]) {
-                        include2(spanToSize, new Interval(i, i + 1), 0, 0, false);
+                        include2(result, new Interval(i, i + 1), 0, 0, false);
                     }
                 }
             } else {
                 for (Interval gap : getSpacers()) {
-                    include2(spanToSize, gap, 0, 0, false);
+                    include2(result, gap, 0, 0, false);
                 }
             }
-            Arc[] arcs = spanToSize.toArray(new Arc[spanToSize.size()]);
+            Arc[] arcs = result.toArray(new Arc[result.size()]);
             return topologicalSort(arcs, 0);
         }
 
@@ -1310,8 +1380,9 @@ public class GridLayout extends ViewGroup {
 
         private void computeMargins(boolean leading) {
             int[] margins = leading ? leadingMargins : trailingMargins;
-            for (int i = 0, size = getChildCount(); i < size; i++) {
+            for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
+                if (isGone(c)) continue;
                 LayoutParams lp = getLayoutParams(c);
                 Group g = horizontal ? lp.columnGroup : lp.rowGroup;
                 Interval span = g.span;
@@ -1388,7 +1459,9 @@ public class GridLayout extends ViewGroup {
 
         private void computeWeights() {
             for (int i = 0, N = getChildCount(); i < N; i++) {
-                LayoutParams lp = getLayoutParams(getChildAt(i));
+                View c = getChildAt(i);
+                if (isGone(c)) continue;
+                LayoutParams lp = getLayoutParams(c);
                 Group g = horizontal ? lp.columnGroup : lp.rowGroup;
                 Interval span = g.span;
                 int penultimateIndex = span.max - 1;
@@ -1914,6 +1987,8 @@ public class GridLayout extends ViewGroup {
     of the values for each View.
     */
     private static class Bounds {
+        private static final Bounds GONE = new Bounds();
+
         public int before;
         public int after;
 
@@ -1956,6 +2031,8 @@ public class GridLayout extends ViewGroup {
      * {@code x} such that {@code min <= x < max}.
      */
     /* package */ static class Interval {
+        private static final Interval GONE = new Interval(UNDEFINED, UNDEFINED);
+
         /**
          * The minimum value.
          */
@@ -2041,6 +2118,8 @@ public class GridLayout extends ViewGroup {
      * {@code span} and {@code alignment}.
      */
     public static class Group {
+        private static final Group GONE = new Group(Interval.GONE, Alignment.GONE);
+
         /**
          * The grid indices of the leading and trailing edges of this cell group for the
          * appropriate axis.
@@ -2167,6 +2246,13 @@ public class GridLayout extends ViewGroup {
      * #BASELINE} and {@link #FILL}.
      */
     public static abstract class Alignment {
+        private static final Alignment GONE = new Alignment() {
+            public int getAlignmentValue(View view, int viewSize, int measurementType) {
+                assert false;
+                return 0;
+            }
+        };
+
         /**
          * Returns an alignment value. In the case of vertical alignments the value
          * returned should indicate the distance from the top of the view to the
@@ -2178,7 +2264,7 @@ public class GridLayout extends ViewGroup {
          * @param measurementType   This parameter is currently unused as GridLayout only supports
          *                          one type of measurement: {@link View#measure(int, int)}.
          *
-         * @return                  the alignment value
+         * @return the alignment value
          */
         public abstract int getAlignmentValue(View view, int viewSize, int measurementType);
 
@@ -2195,7 +2281,7 @@ public class GridLayout extends ViewGroup {
          * @param measurementType   This parameter is currently unused as GridLayout only supports
          *                          one type of measurement: {@link View#measure(int, int)}.
          *
-         * @return                  the aligned size
+         * @return the aligned size
          */
         public int getSizeInCell(View view, int viewSize, int cellSize, int measurementType) {
             return viewSize;
@@ -2269,7 +2355,6 @@ public class GridLayout extends ViewGroup {
                 return baseline;
             }
         }
-
     };
 
     /**
