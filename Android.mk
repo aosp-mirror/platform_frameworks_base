@@ -319,6 +319,9 @@ fwbase_dirs_to_document := \
 # include definition of libcore_to_document
 include $(LOCAL_PATH)/../../libcore/Docs.mk
 
+# include definition of libfilterfw_to_document
+include $(LOCAL_PATH)/../../system/media/mca/Docs.mk
+
 non_base_dirs := \
 	../../external/apache-http/src/org/apache/http
 
@@ -335,7 +338,8 @@ html_dirs := \
 framework_docs_LOCAL_SRC_FILES := \
 	$(call find-other-java-files, $(dirs_to_document)) \
 	$(call find-other-html-files, $(html_dirs)) \
-	$(addprefix ../../libcore/, $(call libcore_to_document, $(LOCAL_PATH)/../../libcore))
+	$(addprefix ../../libcore/, $(call libcore_to_document, $(LOCAL_PATH)/../../libcore)) \
+	$(addprefix ../../system/media/mca/, $(call libfilterfw_to_document, $(LOCAL_PATH)/../../system/media/mca))
 
 # This is used by ide.mk as the list of source files that are
 # always included.

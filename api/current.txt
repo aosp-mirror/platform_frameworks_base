@@ -11159,6 +11159,37 @@ package android.media.audiofx {
 
 }
 
+package android.media.effect {
+
+  public abstract class Effect {
+    ctor public Effect();
+    method public abstract void apply(int, int, int, int);
+    method public abstract java.lang.String getName();
+    method public abstract void release();
+    method public abstract void setParameter(java.lang.String, java.lang.Object);
+    method public void setUpdateListener(android.media.effect.EffectUpdateListener);
+  }
+
+  public class EffectContext {
+    method public static android.media.effect.EffectContext createWithCurrentGlContext();
+    method public android.media.effect.EffectFactory getFactory();
+    method public void release();
+  }
+
+  public class EffectFactory {
+    method public android.media.effect.Effect createEffect(java.lang.String);
+    method public static boolean isEffectSupported(java.lang.String);
+    field public static final java.lang.String EFFECT_BRIGHTNESS = "BrightnessEffect";
+    field public static final java.lang.String EFFECT_CONTRAST = "ContrastEffect";
+    field public static final java.lang.String EFFECT_FISHEYE = "FisheyeEffect";
+  }
+
+  public abstract interface EffectUpdateListener {
+    method public abstract void onEffectUpdated(android.media.effect.Effect, java.lang.Object);
+  }
+
+}
+
 package android.mtp {
 
   public final class MtpConstants {
