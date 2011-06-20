@@ -21704,7 +21704,10 @@ package android.view {
     method public void dispatchDisplayHint(int);
     method public boolean dispatchDragEvent(android.view.DragEvent);
     method protected void dispatchDraw(android.graphics.Canvas);
+    method protected boolean dispatchGenericFocusedEvent(android.view.MotionEvent);
     method public boolean dispatchGenericMotionEvent(android.view.MotionEvent);
+    method protected boolean dispatchGenericPointerEvent(android.view.MotionEvent);
+    method protected boolean dispatchHoverEvent(android.view.MotionEvent);
     method public boolean dispatchKeyEvent(android.view.KeyEvent);
     method public boolean dispatchKeyEventPreIme(android.view.KeyEvent);
     method public boolean dispatchKeyShortcutEvent(android.view.KeyEvent);
@@ -21892,6 +21895,7 @@ package android.view {
     method public void onFinishTemporaryDetach();
     method protected void onFocusChanged(boolean, int, android.graphics.Rect);
     method public boolean onGenericMotionEvent(android.view.MotionEvent);
+    method public void onHoverChanged(boolean);
     method public boolean onHoverEvent(android.view.MotionEvent);
     method public void onInitializeAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
     method public void onInitializeAccessibilityNodeInfo(android.view.accessibility.AccessibilityNodeInfo);
@@ -22168,6 +22172,10 @@ package android.view {
     method public abstract boolean onGenericMotion(android.view.View, android.view.MotionEvent);
   }
 
+  public static abstract interface View.OnHoverListener {
+    method public abstract boolean onHover(android.view.View, android.view.MotionEvent);
+  }
+
   public static abstract interface View.OnKeyListener {
     method public abstract boolean onKey(android.view.View, int, android.view.KeyEvent);
   }
@@ -22338,6 +22346,7 @@ package android.view {
     method protected void measureChildren(int, int);
     method public final void offsetDescendantRectToMyCoords(android.view.View, android.graphics.Rect);
     method public final void offsetRectIntoDescendantCoords(android.view.View, android.graphics.Rect);
+    method public boolean onInterceptHoverEvent(android.view.MotionEvent);
     method public boolean onInterceptTouchEvent(android.view.MotionEvent);
     method protected abstract void onLayout(boolean, int, int, int, int);
     method protected boolean onRequestFocusInDescendants(int, android.graphics.Rect);

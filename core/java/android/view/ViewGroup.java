@@ -143,8 +143,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @ViewDebug.ExportedProperty(category = "events")
     private float mLastTouchDownY;
 
-    // Child which last received ACTION_HOVER_ENTER and ACTION_HOVER_MOVE.
+    // The child which last received ACTION_HOVER_ENTER and ACTION_HOVER_MOVE.
+    // The child might not have actually handled the hover event, but we will
+    // continue sending hover events to it as long as the pointer remains over
+    // it and the view group does not intercept hover.
     private View mHoveredChild;
+
+    // True if the view group itself received a hover event.
+    // It might not have actually handled the hover event.
+    private boolean mHoveredSelf;
 
     /**
      * Internal flags.
@@ -1222,81 +1229,132 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return false;
     }
 
-    /** @hide */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected boolean dispatchHoverEvent(MotionEvent event) {
-        // Send the hover enter or hover move event to the view group first.
-        // If it handles the event then a hovered child should receive hover exit.
-        boolean handled = false;
-        final boolean interceptHover;
         final int action = event.getAction();
-        if (action == MotionEvent.ACTION_HOVER_EXIT) {
-            interceptHover = true;
-        } else {
-            handled = super.dispatchHoverEvent(event);
-            interceptHover = handled;
-        }
 
-        // Send successive hover events to the hovered child as long as the pointer
-        // remains within the child's bounds.
-        MotionEvent eventNoHistory = event;
-        if (mHoveredChild != null) {
+        // First check whether the view group wants to intercept the hover event.
+        final boolean interceptHover = onInterceptHoverEvent(event);
+        event.setAction(action); // restore action in case it was changed
+
+        // Figure out which child should receive the next hover event.
+        View newHoveredChild = null;
+        if (!interceptHover && action != MotionEvent.ACTION_HOVER_EXIT) {
             final float x = event.getX();
             final float y = event.getY();
-
-            if (interceptHover
-                    || !isTransformedTouchPointInView(x, y, mHoveredChild, null)) {
-                // Pointer exited the child.
-                // Send it a hover exit with only the most recent coordinates.  We could
-                // try to find the exact point in history when the pointer left the view
-                // but it is not worth the effort.
-                eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
-                eventNoHistory.setAction(MotionEvent.ACTION_HOVER_EXIT);
-                handled |= dispatchTransformedGenericPointerEvent(eventNoHistory, mHoveredChild);
-                eventNoHistory.setAction(action);
-                mHoveredChild = null;
-            } else {
-                // Pointer is still within the child.
-                //noinspection ConstantConditions
-                handled |= dispatchTransformedGenericPointerEvent(event, mHoveredChild);
-            }
-        }
-
-        // Find a new hovered child if needed.
-        if (!interceptHover && mHoveredChild == null
-                && (action == MotionEvent.ACTION_HOVER_ENTER
-                        || action == MotionEvent.ACTION_HOVER_MOVE)) {
             final int childrenCount = mChildrenCount;
             if (childrenCount != 0) {
                 final View[] children = mChildren;
-                final float x = event.getX();
-                final float y = event.getY();
-
                 for (int i = childrenCount - 1; i >= 0; i--) {
                     final View child = children[i];
-                    if (!canViewReceivePointerEvents(child)
-                            || !isTransformedTouchPointInView(x, y, child, null)) {
-                        continue;
+                    if (canViewReceivePointerEvents(child)
+                            && isTransformedTouchPointInView(x, y, child, null)) {
+                        newHoveredChild = child;
+                        break;
                     }
+                }
+            }
+        }
 
-                    // Found the hovered child.
-                    mHoveredChild = child;
+        MotionEvent eventNoHistory = event;
+        boolean handled = false;
+
+        // Send events to the hovered child.
+        if (mHoveredChild == newHoveredChild) {
+            if (newHoveredChild != null) {
+                // Send event to the same child as before.
+                handled |= dispatchTransformedGenericPointerEvent(event, newHoveredChild);
+            }
+        } else {
+            if (mHoveredChild != null) {
+                // Exit the old hovered child.
+                if (action == MotionEvent.ACTION_HOVER_EXIT) {
+                    // Send the exit as is.
+                    handled |= dispatchTransformedGenericPointerEvent(
+                            event, mHoveredChild); // exit
+                } else {
+                    // Synthesize an exit from a move or enter.
+                    // Ignore the result because hover focus is moving to a different view.
                     if (action == MotionEvent.ACTION_HOVER_MOVE) {
-                        // Pointer was moving within the view group and entered the child.
-                        // Send it a hover enter and hover move with only the most recent
-                        // coordinates.  We could try to find the exact point in history when
-                        // the pointer entered the view but it is not worth the effort.
-                        eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
-                        eventNoHistory.setAction(MotionEvent.ACTION_HOVER_ENTER);
-                        handled |= dispatchTransformedGenericPointerEvent(eventNoHistory, child);
-                        eventNoHistory.setAction(action);
-
-                        handled |= dispatchTransformedGenericPointerEvent(eventNoHistory, child);
-                    } else { /* must be ACTION_HOVER_ENTER */
-                        // Pointer entered the child.
-                        handled |= dispatchTransformedGenericPointerEvent(event, child);
+                        dispatchTransformedGenericPointerEvent(
+                                event, mHoveredChild); // move
                     }
-                    break;
+                    eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
+                    eventNoHistory.setAction(MotionEvent.ACTION_HOVER_EXIT);
+                    dispatchTransformedGenericPointerEvent(
+                            eventNoHistory, mHoveredChild); // exit
+                    eventNoHistory.setAction(action);
+                }
+                mHoveredChild = null;
+            }
+
+            if (newHoveredChild != null) {
+                // Enter the new hovered child.
+                if (action == MotionEvent.ACTION_HOVER_ENTER) {
+                    // Send the enter as is.
+                    handled |= dispatchTransformedGenericPointerEvent(
+                            event, newHoveredChild); // enter
+                    mHoveredChild = newHoveredChild;
+                } else if (action == MotionEvent.ACTION_HOVER_MOVE) {
+                    // Synthesize an enter from a move.
+                    eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
+                    eventNoHistory.setAction(MotionEvent.ACTION_HOVER_ENTER);
+                    handled |= dispatchTransformedGenericPointerEvent(
+                            eventNoHistory, newHoveredChild); // enter
+                    eventNoHistory.setAction(action);
+
+                    handled |= dispatchTransformedGenericPointerEvent(
+                            eventNoHistory, newHoveredChild); // move
+                    mHoveredChild = newHoveredChild;
+                }
+            }
+        }
+
+        // Send events to the view group itself if it is hovered.
+        boolean newHoveredSelf = !handled;
+        if (newHoveredSelf == mHoveredSelf) {
+            if (newHoveredSelf) {
+                // Send event to the view group as before.
+                handled |= super.dispatchHoverEvent(event);
+            }
+        } else {
+            if (mHoveredSelf) {
+                // Exit the view group.
+                if (action == MotionEvent.ACTION_HOVER_EXIT) {
+                    // Send the exit as is.
+                    handled |= super.dispatchHoverEvent(event); // exit
+                } else {
+                    // Synthesize an exit from a move or enter.
+                    // Ignore the result because hover focus is moving to a different view.
+                    if (action == MotionEvent.ACTION_HOVER_MOVE) {
+                        super.dispatchHoverEvent(event); // move
+                    }
+                    eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
+                    eventNoHistory.setAction(MotionEvent.ACTION_HOVER_EXIT);
+                    super.dispatchHoverEvent(eventNoHistory); // exit
+                    eventNoHistory.setAction(action);
+                }
+                mHoveredSelf = false;
+            }
+
+            if (newHoveredSelf) {
+                // Enter the view group.
+                if (action == MotionEvent.ACTION_HOVER_ENTER) {
+                    // Send the enter as is.
+                    handled |= super.dispatchHoverEvent(event); // enter
+                    mHoveredSelf = true;
+                } else if (action == MotionEvent.ACTION_HOVER_MOVE) {
+                    // Synthesize an enter from a move.
+                    eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
+                    eventNoHistory.setAction(MotionEvent.ACTION_HOVER_ENTER);
+                    handled |= super.dispatchHoverEvent(eventNoHistory); // enter
+                    eventNoHistory.setAction(action);
+
+                    handled |= super.dispatchHoverEvent(eventNoHistory); // move
+                    mHoveredSelf = true;
                 }
             }
         }
@@ -1306,25 +1364,49 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             eventNoHistory.recycle();
         }
 
-        // Send hover exit to the view group.  If there was a child, we will already have
-        // sent the hover exit to it.
-        if (action == MotionEvent.ACTION_HOVER_EXIT) {
-            handled |= super.dispatchHoverEvent(event);
-        }
-
         // Done.
         return handled;
     }
 
-    @Override
-    public boolean onHoverEvent(MotionEvent event) {
-        // Handle the event only if leaf. This guarantees that
-        // the leafs (or any custom class that returns true from
-        // this method) will get a change to process the hover.
-        //noinspection SimplifiableIfStatement
-        if (getChildCount() == 0) {
-            return super.onHoverEvent(event);
-        }
+    /**
+     * Implement this method to intercept hover events before they are handled
+     * by child views.
+     * <p>
+     * This method is called before dispatching a hover event to a child of
+     * the view group or to the view group's own {@link #onHoverEvent} to allow
+     * the view group a chance to intercept the hover event.
+     * This method can also be used to watch all pointer motions that occur within
+     * the bounds of the view group even when the pointer is hovering over
+     * a child of the view group rather than over the view group itself.
+     * </p><p>
+     * The view group can prevent its children from receiving hover events by
+     * implementing this method and returning <code>true</code> to indicate
+     * that it would like to intercept hover events.  The view group must
+     * continuously return <code>true</code> from {@link #onInterceptHoverEvent}
+     * for as long as it wishes to continue intercepting hover events from
+     * its children.
+     * </p><p>
+     * Interception preserves the invariant that at most one view can be
+     * hovered at a time by transferring hover focus from the currently hovered
+     * child to the view group or vice-versa as needed.
+     * </p><p>
+     * If this method returns <code>true</code> and a child is already hovered, then the
+     * child view will first receive a hover exit event and then the view group
+     * itself will receive a hover enter event in {@link #onHoverEvent}.
+     * Likewise, if this method had previously returned <code>true</code> to intercept hover
+     * events and instead returns <code>false</code> while the pointer is hovering
+     * within the bounds of one of a child, then the view group will first receive a
+     * hover exit event in {@link #onHoverEvent} and then the hovered child will
+     * receive a hover enter event.
+     * </p><p>
+     * The default implementation always returns false.
+     * </p>
+     *
+     * @param event The motion event that describes the hover.
+     * @return True if the view group would like to intercept the hover event
+     * and prevent its children from receiving it.
+     */
+    public boolean onInterceptHoverEvent(MotionEvent event) {
         return false;
     }
 
@@ -1335,7 +1417,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return MotionEvent.obtainNoHistory(event);
     }
 
-    /** @hide */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected boolean dispatchGenericPointerEvent(MotionEvent event) {
         // Send the event to the child under the pointer.
@@ -1362,7 +1446,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         return super.dispatchGenericPointerEvent(event);
     }
 
-    /** @hide */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected boolean dispatchGenericFocusedEvent(MotionEvent event) {
         // Send the event to the focused child or to this view group if it has focus.
