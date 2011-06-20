@@ -35,6 +35,8 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -52,6 +54,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
+import android.graphics.BitmapFactory;
 import android.inputmethodservice.InputMethodService;
 import android.os.Binder;
 import android.os.Environment;
@@ -153,6 +156,13 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final HashMap<String, InputMethodInfo> mMethodMap = new HashMap<String, InputMethodInfo>();
     private final LruCache<SuggestionSpan, InputMethodInfo> mSecureSuggestionSpans =
             new LruCache<SuggestionSpan, InputMethodInfo>(SECURE_SUGGESTION_SPANS_MAX_SIZE);
+
+    // Ongoing notification
+    private final NotificationManager mNotificationManager;
+    private final Notification mImeSwitcherNotification;
+    private final PendingIntent mImeSwitchPendingIntent;
+    private final boolean mShowOngoingImeSwitcherForPhones;
+    private boolean mNotificationShown;
 
     class SessionState {
         final ClientState client;
@@ -508,6 +518,25 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 handleMessage(msg);
             }
         });
+
+        mNotificationManager = (NotificationManager)
+                mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        mImeSwitcherNotification = new Notification();
+        mImeSwitcherNotification.icon = com.android.internal.R.drawable.ic_notification_ime_default;
+        mImeSwitcherNotification.when = 0;
+        mImeSwitcherNotification.flags = Notification.FLAG_ONGOING_EVENT;
+        mImeSwitcherNotification.tickerText = null;
+        mImeSwitcherNotification.defaults = 0; // please be quiet
+        mImeSwitcherNotification.sound = null;
+        mImeSwitcherNotification.vibrate = null;
+        Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        mImeSwitchPendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+        mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
+                com.android.internal.R.bool.show_ongoing_ime_switcher);
+
         synchronized (mMethodMap) {
             mFileManager = new InputMethodFileManager(mMethodMap);
         }
@@ -522,6 +551,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
         mStatusBar = statusBar;
         statusBar.setIconVisibility("ime", false);
+        mNotificationShown = false;
 
         // mSettings should be created before buildInputMethodListLocked
         mSettings = new InputMethodSettings(
@@ -1022,6 +1052,32 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
+    private boolean needsToShowImeSwitchOngoingNotification() {
+        if (!mShowOngoingImeSwitcherForPhones) return false;
+        synchronized (mMethodMap) {
+            List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
+            final int N = imis.size();
+            int count = 0;
+            for(int i = 0; i < N; ++i) {
+                final InputMethodInfo imi = imis.get(i);
+                final List<InputMethodSubtype> subtypes = getEnabledInputMethodSubtypeListLocked(
+                        imi, true);
+                final int subtypeCount = subtypes.size();
+                if (subtypeCount == 0) {
+                    ++count;
+                } else {
+                    for (int j = 0; j < subtypeCount; ++j) {
+                        if (!subtypes.get(j).isAuxiliary()) {
+                            ++count;
+                        }
+                    }
+                }
+                if (count > 1) return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) {
         int uid = Binder.getCallingUid();
@@ -1036,6 +1092,25 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mImeWindowVis = vis;
                 mBackDisposition = backDisposition;
                 mStatusBar.setImeWindowStatus(token, vis, backDisposition);
+                final boolean iconVisibility = (vis & InputMethodService.IME_ACTIVE) != 0;
+                if (iconVisibility && needsToShowImeSwitchOngoingNotification()) {
+                    final PackageManager pm = mContext.getPackageManager();
+                    final CharSequence label = mMethodMap.get(mCurMethodId).loadLabel(pm);
+                    final CharSequence title = mRes.getText(
+                            com.android.internal.R.string.select_input_method);
+                    mImeSwitcherNotification.setLatestEventInfo(
+                            mContext, title, label, mImeSwitchPendingIntent);
+                    mNotificationManager.notify(
+                            com.android.internal.R.string.select_input_method,
+                            mImeSwitcherNotification);
+                    mNotificationShown = true;
+                } else {
+                    if (mNotificationShown) {
+                        mNotificationManager.cancel(
+                                com.android.internal.R.string.select_input_method);
+                        mNotificationShown = false;
+                    }
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);

@@ -300,6 +300,21 @@ public final class Settings {
             "android.settings.INPUT_METHOD_SUBTYPE_SETTINGS";
 
     /**
+     * Activity Action: Show a dialog to select input method.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_SHOW_INPUT_METHOD_PICKER =
+            "android.settings.SHOW_INPUT_METHOD_PICKER";
+
+    /**
      * Activity Action: Show settings to manage the user input dictionary.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
