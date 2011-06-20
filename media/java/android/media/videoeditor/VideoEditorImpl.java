@@ -38,6 +38,7 @@ import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.media.videoeditor.MediaImageItem;
 import android.media.videoeditor.MediaItem;
+import android.media.MediaMetadataRetriever;
 import android.util.Log;
 import android.util.Xml;
 import android.view.Surface;
@@ -1833,12 +1834,32 @@ public class VideoEditorImpl implements VideoEditor {
             }
 
             Bitmap projectBitmap = null;
-            try {
-                projectBitmap = mI.getThumbnail(width, height, 500);
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException ("Illegal argument error creating project thumbnail");
-            } catch (IOException e) {
-                throw new IllegalArgumentException ("IO Error creating project thumbnail");
+            String filename = mI.getFilename();
+            if (mI instanceof MediaVideoItem) {
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(filename);
+                Bitmap bitmap = retriever.getFrameAtTime();
+                retriever.release();
+                retriever = null;
+                if (bitmap == null) {
+                    String msg = "Thumbnail extraction from " +
+                                    filename + " failed";
+                    throw new IllegalArgumentException(msg);
+                }
+                // Resize the thumbnail to the target size
+                projectBitmap =
+                    Bitmap.createScaledBitmap(bitmap, width, height, true);
+            } else {
+                try {
+                    projectBitmap = mI.getThumbnail(width, height, 500);
+                } catch (IllegalArgumentException e) {
+                    String msg = "Project thumbnail extraction from " +
+                                    filename + " failed";
+                    throw new IllegalArgumentException(msg);
+                } catch (IOException e) {
+                    String msg = "IO Error creating project thumbnail";
+                    throw new IllegalArgumentException(msg);
+                }
             }
 
             try {
