@@ -1983,7 +1983,14 @@ OMXCodec::BufferInfo* OMXCodec::dequeueBufferFromNativeWindow() {
 
 int64_t OMXCodec::retrieveDecodingTimeUs(bool isCodecSpecific) {
     CHECK(mIsEncoder);
-    CHECK(!mDecodingTimeList.empty());
+
+    if (mDecodingTimeList.empty()) {
+        CHECK(mNoMoreOutputData);
+        // No corresponding input frame available.
+        // This could happen when EOS is reached.
+        return 0;
+    }
+
     List<int64_t>::iterator it = mDecodingTimeList.begin();
     int64_t timeUs = *it;
 
@@ -2152,11 +2159,6 @@ void OMXCodec::on_message(const omx_message &msg) {
                     buffer->meta_data()->setInt32(kKeyIsUnreadable, true);
                 }
 
-                if (mIsEncoder) {
-                    int64_t decodingTimeUs = retrieveDecodingTimeUs(isCodecSpecific);
-                    buffer->meta_data()->setInt64(kKeyDecodingTime, decodingTimeUs);
-                }
-
                 buffer->meta_data()->setPointer(
                         kKeyPlatformPrivate,
                         msg.u.extended_buffer_data.platform_private);
@@ -2168,6 +2170,11 @@ void OMXCodec::on_message(const omx_message &msg) {
                 if (msg.u.extended_buffer_data.flags & OMX_BUFFERFLAG_EOS) {
                     CODEC_LOGV("No more output data.");
                     mNoMoreOutputData = true;
+                }
+
+                if (mIsEncoder) {
+                    int64_t decodingTimeUs = retrieveDecodingTimeUs(isCodecSpecific);
+                    buffer->meta_data()->setInt64(kKeyDecodingTime, decodingTimeUs);
                 }
 
                 if (mTargetTimeUs >= 0) {
