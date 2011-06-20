@@ -103,6 +103,7 @@ ContextSetSurface {
 	param uint32_t width
 	param uint32_t height
 	param RsNativeWindow sur
+        sync
 	}
 
 ContextDump {

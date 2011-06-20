@@ -321,8 +321,13 @@ bool rsdGLSetSurface(const Context *rsc, uint32_t w, uint32_t h, RsNativeWindow 
         dc->gl.height = 1;
     }
 
+    if (dc->gl.wndSurface != NULL) {
+        dc->gl.wndSurface->decStrong(NULL);
+    }
+
     dc->gl.wndSurface = (ANativeWindow *)sur;
     if (dc->gl.wndSurface != NULL) {
+        dc->gl.wndSurface->incStrong(NULL);
         dc->gl.width = w;
         dc->gl.height = h;
 

@@ -22,6 +22,7 @@ import android.content.Context;
 import android.graphics.PixelFormat;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.SurfaceTexture;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -35,7 +36,6 @@ import android.view.SurfaceView;
  * the screen.
  **/
 public class RenderScriptGL extends RenderScript {
-    private Surface mSurface;
     int mWidth;
     int mHeight;
 
@@ -160,7 +160,6 @@ public class RenderScriptGL extends RenderScript {
         super(ctx);
         mSurfaceConfig = new SurfaceConfig(sc);
 
-        mSurface = null;
         mWidth = 0;
         mHeight = 0;
         mDev = nDeviceCreate();
@@ -189,14 +188,31 @@ public class RenderScriptGL extends RenderScript {
      */
     public void setSurface(SurfaceHolder sur, int w, int h) {
         validate();
+        Surface s = null;
         if (sur != null) {
-            mSurface = sur.getSurface();
-        } else {
-            mSurface = null;
+            s = sur.getSurface();
         }
         mWidth = w;
         mHeight = h;
-        nContextSetSurface(w, h, mSurface);
+        nContextSetSurface(w, h, s);
+    }
+
+    /**
+     * Bind an os surface
+     *
+     * @hide
+     *
+     * @param w
+     * @param h
+     * @param sur
+     */
+    public void setSurfaceTexture(SurfaceTexture sur, int w, int h) {
+        validate();
+        //android.util.Log.v("rs", "set surface " + sur + " w=" + w + ", h=" + h);
+
+        mWidth = w;
+        mHeight = h;
+        nContextSetSurfaceTexture(w, h, sur);
     }
 
     /**

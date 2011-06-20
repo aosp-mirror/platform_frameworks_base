@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.SurfaceTexture;
 import android.os.Process;
 import android.util.Log;
 import android.view.Surface;
@@ -108,6 +109,11 @@ public class RenderScript {
     synchronized void nContextSetSurface(int w, int h, Surface sur) {
         validate();
         rsnContextSetSurface(mContext, w, h, sur);
+    }
+    native void rsnContextSetSurfaceTexture(int con, int w, int h, SurfaceTexture sur);
+    synchronized void nContextSetSurfaceTexture(int w, int h, SurfaceTexture sur) {
+        validate();
+        rsnContextSetSurfaceTexture(mContext, w, h, sur);
     }
     native void rsnContextSetPriority(int con, int p);
     synchronized void nContextSetPriority(int p) {
