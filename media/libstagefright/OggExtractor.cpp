@@ -730,8 +730,9 @@ status_t MyVorbisExtractor::verifyHeader(
             off64_t size;
             if (mSource->getSize(&size) == OK) {
                 uint64_t bps = approxBitrate();
-
-                mMeta->setInt64(kKeyDuration, size * 8000000ll / bps);
+                if (bps != 0) {
+                    mMeta->setInt64(kKeyDuration, size * 8000000ll / bps);
+                }
             }
             break;
         }
