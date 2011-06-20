@@ -2194,6 +2194,11 @@ writeProguardForLayouts(ProguardKeepSet* keep, const sp<AaptAssets>& assets)
             }
         }
     }
+    // Handle the overlays
+    sp<AaptAssets> overlay = assets->getOverlay();
+    if (overlay.get()) {
+        return writeProguardForLayouts(keep, overlay);
+    }
     return NO_ERROR;
 }
 
