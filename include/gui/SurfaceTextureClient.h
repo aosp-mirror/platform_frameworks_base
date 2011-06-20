@@ -80,6 +80,7 @@ private:
     int setUsage(uint32_t reqUsage);
 
     void freeAllBuffers();
+    int getSlotFromBufferLocked(android_native_buffer_t* buffer) const;
 
     int getConnectedApi() const;
 

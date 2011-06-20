@@ -143,12 +143,40 @@ int SurfaceTextureClient::dequeueBuffer(android_native_buffer_t** buffer) {
 int SurfaceTextureClient::cancelBuffer(android_native_buffer_t* buffer) {
     LOGV("SurfaceTextureClient::cancelBuffer");
     Mutex::Autolock lock(mMutex);
+    int i = getSlotFromBufferLocked(buffer);
+    if (i < 0) {
+        return i;
+    }
+    mSurfaceTexture->cancelBuffer(i);
+    return OK;
+}
+
+int SurfaceTextureClient::getSlotFromBufferLocked(
+        android_native_buffer_t* buffer) const {
+    bool dumpedState = false;
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
-        if (mSlots[i]->handle == buffer->handle) {
-            mSurfaceTexture->cancelBuffer(i);
-            return OK;
+        // XXX: Dump the slots whenever we hit a NULL entry while searching for
+        // a buffer.
+        if (mSlots[i] == NULL) {
+            if (!dumpedState) {
+                LOGD("getSlotFromBufferLocked: encountered NULL buffer in slot %d "
+                        "looking for buffer %p", i, buffer->handle);
+                for (int j = 0; j < NUM_BUFFER_SLOTS; j++) {
+                    if (mSlots[j] == NULL) {
+                        LOGD("getSlotFromBufferLocked:   %02d: NULL", j);
+                    } else {
+                        LOGD("getSlotFromBufferLocked:   %02d: %p", j, mSlots[j]->handle);
+                    }
+                }
+                dumpedState = true;
+            }
+        }
+
+        if (mSlots[i] != NULL && mSlots[i]->handle == buffer->handle) {
+            return i;
         }
     }
+    LOGE("getSlotFromBufferLocked: unknown buffer: %p", buffer->handle);
     return BAD_VALUE;
 }
 
@@ -169,13 +197,12 @@ int SurfaceTextureClient::queueBuffer(android_native_buffer_t* buffer) {
     } else {
         timestamp = mTimestamp;
     }
-    for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
-        if (mSlots[i]->handle == buffer->handle) {
-            return mSurfaceTexture->queueBuffer(i, timestamp);
-        }
+    int i = getSlotFromBufferLocked(buffer);
+    if (i < 0) {
+        return i;
     }
-    LOGE("queueBuffer: unknown buffer queued");
-    return BAD_VALUE;
+    mSurfaceTexture->queueBuffer(i, timestamp);
+    return OK;
 }
 
 int SurfaceTextureClient::query(int what, int* value) const {
