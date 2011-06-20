@@ -23,7 +23,6 @@
 // XXX needed for timing latency
 #include <utils/Timers.h>
 
-#include <sys/resource.h>
 #include <media/AudioTrack.h>
 #include <media/mediaplayer.h>
 

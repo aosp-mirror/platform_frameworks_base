@@ -21,7 +21,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <utils/Log.h>
-#include <sys/resource.h>
 #include <utils/RefBase.h>
 #include <utils/Timers.h>
 #include <cutils/properties.h>
