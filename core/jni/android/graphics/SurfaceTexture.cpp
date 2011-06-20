@@ -91,6 +91,8 @@ public:
     virtual void onFrameAvailable();
 
 private:
+    static JNIEnv* getJNIEnv();
+
     jobject mWeakThiz;
     jclass mClazz;
 };
@@ -101,17 +103,37 @@ JNISurfaceTextureContext::JNISurfaceTextureContext(JNIEnv* env,
     mClazz((jclass)env->NewGlobalRef(clazz))
 {}
 
+JNIEnv* JNISurfaceTextureContext::getJNIEnv() {
+    JNIEnv* env;
+    JavaVMAttachArgs args = {JNI_VERSION_1_4, NULL, NULL};
+    JavaVM* vm = AndroidRuntime::getJavaVM();
+    int result = vm->AttachCurrentThread(&env, (void*) &args);
+    if (result != JNI_OK) {
+        LOGE("thread attach failed: %#x", result);
+        return NULL;
+    }
+    return env;
+}
+
 JNISurfaceTextureContext::~JNISurfaceTextureContext()
 {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->DeleteGlobalRef(mWeakThiz);
-    env->DeleteGlobalRef(mClazz);
+    JNIEnv* env = getJNIEnv();
+    if (env != NULL) {
+        env->DeleteGlobalRef(mWeakThiz);
+        env->DeleteGlobalRef(mClazz);
+    } else {
+        LOGW("leaking JNI object references");
+    }
 }
 
 void JNISurfaceTextureContext::onFrameAvailable()
 {
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    env->CallStaticVoidMethod(mClazz, fields.postEvent, mWeakThiz);
+    JNIEnv *env = getJNIEnv();
+    if (env != NULL) {
+        env->CallStaticVoidMethod(mClazz, fields.postEvent, mWeakThiz);
+    } else {
+        LOGW("onFrameAvailable event will not posted");
+    }
 }
 
 // ----------------------------------------------------------------------------
