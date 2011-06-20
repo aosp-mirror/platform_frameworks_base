@@ -367,7 +367,15 @@ void SoftAAC::onQueueFilled(OMX_U32 portIndex) {
             inHeader->nFilledLen -= mConfig->inputBufferUsedLength;
             inHeader->nOffset += mConfig->inputBufferUsedLength;
         } else {
+            LOGW("AAC decoder returned error %d, substituting silence",
+                 decoderErr);
+
             memset(outHeader->pBuffer + outHeader->nOffset, 0, numOutBytes);
+
+            // Discard input buffer.
+            inHeader->nFilledLen = 0;
+
+            // fall through
         }
 
         if (mUpsamplingFactor == 2) {
