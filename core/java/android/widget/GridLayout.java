@@ -765,9 +765,12 @@ public class GridLayout extends ViewGroup {
         int computedWidth = getPaddingLeft() + mHorizontalAxis.getMin() + getPaddingRight();
         int computedHeight = getPaddingTop() + mVerticalAxis.getMin() + getPaddingBottom();
 
+        int measuredWidth = Math.max(computedWidth, getSuggestedMinimumWidth());
+        int measuredHeight = Math.max(computedHeight, getSuggestedMinimumHeight());
+
         setMeasuredDimension(
-                resolveSizeAndState(computedWidth, widthSpec, 0),
-                resolveSizeAndState(computedHeight, heightSpec, 0));
+                resolveSizeAndState(measuredWidth, widthSpec, 0),
+                resolveSizeAndState(measuredHeight, heightSpec, 0));
     }
 
     private int protect(int alignment) {
@@ -809,9 +812,9 @@ public class GridLayout extends ViewGroup {
      and sizing to each child view and then placing it in its cell.
      */
     @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        int targetWidth = r - l;
-        int targetHeight = b - t;
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        int targetWidth = right - left;
+        int targetHeight = bottom - top;
 
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
@@ -2172,9 +2175,8 @@ public class GridLayout extends ViewGroup {
          *
          * @param view              the view to which this alignment should be applied
          * @param viewSize          the measured size of the view
-         * @param measurementType   The type of measurement that should be made. This feature
-         *                          is currently unused as GridLayout only supports one
-         *                          type of measurement: {@link View#measure(int, int)}.
+         * @param measurementType   This parameter is currently unused as GridLayout only supports
+         *                          one type of measurement: {@link View#measure(int, int)}.
          *
          * @return                  the alignment value
          */
@@ -2190,9 +2192,8 @@ public class GridLayout extends ViewGroup {
          * @param view              the view to which this alignment should be applied
          * @param viewSize          the measured size of the view
          * @param cellSize          the size of the cell into which this view will be placed
-         * @param measurementType   The type of measurement that should be made. This feature
-         *                          is currently unused as GridLayout only supports one
-         *                          type of measurement: {@link View#measure(int, int)}.
+         * @param measurementType   This parameter is currently unused as GridLayout only supports
+         *                          one type of measurement: {@link View#measure(int, int)}.
          *
          * @return                  the aligned size
          */
