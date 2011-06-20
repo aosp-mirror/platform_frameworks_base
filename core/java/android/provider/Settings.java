@@ -3800,6 +3800,8 @@ public final class Settings {
         public static final String NETSTATS_UID_BUCKET_DURATION = "netstats_uid_bucket_duration";
         /** {@hide} */
         public static final String NETSTATS_UID_MAX_HISTORY = "netstats_uid_max_history";
+        /** {@hide} */
+        public static final String NETSTATS_TAG_MAX_HISTORY = "netstats_tag_max_history";
 
         /**
          * @hide

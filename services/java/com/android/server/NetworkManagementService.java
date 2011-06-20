@@ -965,14 +965,9 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                     final int uid = Integer.parseInt(t.nextToken());
                     final long rx = Long.parseLong(t.nextToken());
                     final long tx = Long.parseLong(t.nextToken());
-    
+
                     if (limitUid == UID_ALL || limitUid == uid) {
                         stats.addEntry(iface, uid, tag, rx, tx);
-                        if (tag != TAG_NONE) {
-                            // proc also counts tagged data in generic tag, so
-                            // we subtract it here to avoid double-counting.
-                            stats.combineEntry(iface, uid, TAG_NONE, -rx, -tx);
-                        }
                     }
                 } catch (NumberFormatException e) {
                     Slog.w(TAG, "problem parsing stats for idx " + idx + ": " + e);
