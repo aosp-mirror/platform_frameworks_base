@@ -463,7 +463,7 @@ public class ActionBarView extends AbsActionBarView {
                 }
             }
 
-            if ((flagsChanged &
+            if (mTitleLayout != null && (flagsChanged &
                     (ActionBar.DISPLAY_HOME_AS_UP | ActionBar.DISPLAY_SHOW_HOME)) != 0) {
                 final boolean homeAsUp = (options & ActionBar.DISPLAY_HOME_AS_UP) != 0;
                 final boolean titleUp = homeAsUp && !showHome;
@@ -650,27 +650,35 @@ public class ActionBarView extends AbsActionBarView {
     }
     
     private void initTitle() {
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        mTitleLayout = (LinearLayout) inflater.inflate(R.layout.action_bar_title_item, null);
-        mTitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_title);
-        mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
-        mTitleUpView = (View) mTitleLayout.findViewById(R.id.up);
+        if (mTitleLayout == null) {
+            LayoutInflater inflater = LayoutInflater.from(getContext());
+            mTitleLayout = (LinearLayout) inflater.inflate(R.layout.action_bar_title_item, null);
+            mTitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_title);
+            mSubtitleView = (TextView) mTitleLayout.findViewById(R.id.action_bar_subtitle);
+            mTitleUpView = (View) mTitleLayout.findViewById(R.id.up);
 
-        mTitleLayout.setOnClickListener(mUpClickListener);
+            mTitleLayout.setOnClickListener(mUpClickListener);
 
-        if (mTitleStyleRes != 0) {
-            mTitleView.setTextAppearance(mContext, mTitleStyleRes);
-        }
-        if (mTitle != null) {
-            mTitleView.setText(mTitle);
-        }
+            if (mTitleStyleRes != 0) {
+                mTitleView.setTextAppearance(mContext, mTitleStyleRes);
+            }
+            if (mTitle != null) {
+                mTitleView.setText(mTitle);
+            }
 
-        if (mSubtitleStyleRes != 0) {
-            mSubtitleView.setTextAppearance(mContext, mSubtitleStyleRes);
-        }
-        if (mSubtitle != null) {
-            mSubtitleView.setText(mSubtitle);
-            mSubtitleView.setVisibility(VISIBLE);
+            if (mSubtitleStyleRes != 0) {
+                mSubtitleView.setTextAppearance(mContext, mSubtitleStyleRes);
+            }
+            if (mSubtitle != null) {
+                mSubtitleView.setText(mSubtitle);
+                mSubtitleView.setVisibility(VISIBLE);
+            }
+
+            final boolean homeAsUp = (mDisplayOptions & ActionBar.DISPLAY_HOME_AS_UP) != 0;
+            final boolean titleUp = homeAsUp &&
+                    (mDisplayOptions & ActionBar.DISPLAY_SHOW_HOME) == 0;
+            mTitleUpView.setVisibility(titleUp ? VISIBLE : GONE);
+            mTitleLayout.setEnabled(titleUp);
         }
 
         addView(mTitleLayout);
@@ -750,7 +758,7 @@ public class ActionBarView extends AbsActionBarView {
 
         if (mExpandedActionView == null) {
             boolean showTitle = mTitleLayout != null && mTitleLayout.getVisibility() != GONE &&
-            (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
+                    (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
             if (showTitle) {
                 availableWidth = measureChildView(mTitleLayout, availableWidth, childSpecHeight, 0);
                 leftOfCenter = Math.max(0, leftOfCenter - mTitleLayout.getMeasuredWidth());
@@ -888,7 +896,7 @@ public class ActionBarView extends AbsActionBarView {
 
         if (mExpandedActionView == null) {
             final boolean showTitle = mTitleLayout != null && mTitleLayout.getVisibility() != GONE &&
-            (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
+                    (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0;
             if (showTitle) {
                 x += positionChild(mTitleLayout, x, y, contentHeight);
             }
@@ -1209,7 +1217,7 @@ public class ActionBarView extends AbsActionBarView {
                 addView(mExpandedHomeLayout);
             }
             mHomeLayout.setVisibility(GONE);
-            mTitleLayout.setVisibility(GONE);
+            if (mTitleLayout != null) mTitleLayout.setVisibility(GONE);
             if (mTabScrollView != null) mTabScrollView.setVisibility(GONE);
             if (mSpinner != null) mSpinner.setVisibility(GONE);
             if (mCustomNavView != null) mCustomNavView.setVisibility(GONE);
@@ -1226,7 +1234,11 @@ public class ActionBarView extends AbsActionBarView {
                 mHomeLayout.setVisibility(VISIBLE);
             }
             if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0) {
-                mTitleLayout.setVisibility(VISIBLE);
+                if (mTitleLayout == null) {
+                    initTitle();
+                } else {
+                    mTitleLayout.setVisibility(VISIBLE);
+                }
             }
             if (mTabScrollView != null && mNavigationMode == ActionBar.NAVIGATION_MODE_TABS) {
                 mTabScrollView.setVisibility(VISIBLE);
