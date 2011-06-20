@@ -32,6 +32,11 @@ import android.util.Log;
 public final class InputEventConsistencyVerifier {
     private static final boolean IS_ENG_BUILD = "eng".equals(Build.TYPE);
 
+    private static final String EVENT_TYPE_KEY = "KeyEvent";
+    private static final String EVENT_TYPE_TRACKBALL = "TrackballEvent";
+    private static final String EVENT_TYPE_TOUCH = "TouchEvent";
+    private static final String EVENT_TYPE_GENERIC_MOTION = "GenericMotionEvent";
+
     // The number of recent events to log when a problem is detected.
     // Can be set to 0 to disable logging recent events but the runtime overhead of
     // this feature is negligible on current hardware.
@@ -54,6 +59,7 @@ public final class InputEventConsistencyVerifier {
     // It does not make sense to examine the contents of the last event since it may have
     // been recycled.
     private InputEvent mLastEvent;
+    private String mLastEventType;
     private int mLastNestingLevel;
 
     // Copy of the most recent events.
@@ -185,7 +191,7 @@ public final class InputEventConsistencyVerifier {
      * and both dispatching methods call into the consistency verifier.
      */
     public void onKeyEvent(KeyEvent event, int nestingLevel) {
-        if (!startEvent(event, nestingLevel, "KeyEvent")) {
+        if (!startEvent(event, nestingLevel, EVENT_TYPE_KEY)) {
             return;
         }
 
@@ -247,7 +253,7 @@ public final class InputEventConsistencyVerifier {
      * and both dispatching methods call into the consistency verifier.
      */
     public void onTrackballEvent(MotionEvent event, int nestingLevel) {
-        if (!startEvent(event, nestingLevel, "TrackballEvent")) {
+        if (!startEvent(event, nestingLevel, EVENT_TYPE_TRACKBALL)) {
             return;
         }
 
@@ -310,23 +316,19 @@ public final class InputEventConsistencyVerifier {
      * and both dispatching methods call into the consistency verifier.
      */
     public void onTouchEvent(MotionEvent event, int nestingLevel) {
-        if (!startEvent(event, nestingLevel, "TouchEvent")) {
+        if (!startEvent(event, nestingLevel, EVENT_TYPE_TOUCH)) {
             return;
         }
 
         final int action = event.getAction();
         final boolean newStream = action == MotionEvent.ACTION_DOWN
                 || action == MotionEvent.ACTION_CANCEL;
-        if (mTouchEventStreamIsTainted || mTouchEventStreamUnhandled) {
-            if (newStream) {
-                mTouchEventStreamIsTainted = false;
-                mTouchEventStreamUnhandled = false;
-                mTouchEventStreamPointers = 0;
-            } else {
-                finishEvent(mTouchEventStreamIsTainted);
-                return;
-            }
+        if (newStream && (mTouchEventStreamIsTainted || mTouchEventStreamUnhandled)) {
+            mTouchEventStreamIsTainted = false;
+            mTouchEventStreamUnhandled = false;
+            mTouchEventStreamPointers = 0;
         }
+        final boolean wasTainted = mTouchEventStreamIsTainted;
 
         try {
             ensureMetaStateIsNormalized(event.getMetaState());
@@ -439,7 +441,7 @@ public final class InputEventConsistencyVerifier {
                 problem("Source was not SOURCE_CLASS_POINTER.");
             }
         } finally {
-            finishEvent(false);
+            finishEvent(wasTainted);
         }
     }
 
@@ -453,7 +455,7 @@ public final class InputEventConsistencyVerifier {
      * and both dispatching methods call into the consistency verifier.
      */
     public void onGenericMotionEvent(MotionEvent event, int nestingLevel) {
-        if (!startEvent(event, nestingLevel, "GenericMotionEvent")) {
+        if (!startEvent(event, nestingLevel, EVENT_TYPE_GENERIC_MOTION)) {
             return;
         }
 
@@ -568,21 +570,19 @@ public final class InputEventConsistencyVerifier {
     }
 
     private boolean startEvent(InputEvent event, int nestingLevel, String eventType) {
-        // Ignore the event if it is already tainted.
-        if (event.isTainted()) {
-            return false;
-        }
-
         // Ignore the event if we already checked it at a higher nesting level.
-        if (event == mLastEvent && nestingLevel < mLastNestingLevel) {
+        if (event == mLastEvent && nestingLevel < mLastNestingLevel
+                && eventType == mLastEventType) {
             return false;
         }
 
         if (nestingLevel > 0) {
             mLastEvent = event;
+            mLastEventType = eventType;
             mLastNestingLevel = nestingLevel;
         } else {
             mLastEvent = null;
+            mLastEventType = null;
             mLastNestingLevel = 0;
         }
 
@@ -593,27 +593,30 @@ public final class InputEventConsistencyVerifier {
 
     private void finishEvent(boolean tainted) {
         if (mViolationMessage != null && mViolationMessage.length() != 0) {
-            mViolationMessage.append("\n  in ").append(mCaller);
-            mViolationMessage.append("\n  ");
-            appendEvent(mViolationMessage, 0, mCurrentEvent, false);
+            if (!tainted) {
+                // Write a log message only if the event was not already tainted.
+                mViolationMessage.append("\n  in ").append(mCaller);
+                mViolationMessage.append("\n  ");
+                appendEvent(mViolationMessage, 0, mCurrentEvent, false);
 
-            if (RECENT_EVENTS_TO_LOG != 0 && mRecentEvents != null) {
-                mViolationMessage.append("\n  -- recent events --");
-                for (int i = 0; i < RECENT_EVENTS_TO_LOG; i++) {
-                    final int index = (mMostRecentEventIndex + RECENT_EVENTS_TO_LOG - i)
-                            % RECENT_EVENTS_TO_LOG;
-                    final InputEvent event = mRecentEvents[index];
-                    if (event == null) {
-                        break;
+                if (RECENT_EVENTS_TO_LOG != 0 && mRecentEvents != null) {
+                    mViolationMessage.append("\n  -- recent events --");
+                    for (int i = 0; i < RECENT_EVENTS_TO_LOG; i++) {
+                        final int index = (mMostRecentEventIndex + RECENT_EVENTS_TO_LOG - i)
+                                % RECENT_EVENTS_TO_LOG;
+                        final InputEvent event = mRecentEvents[index];
+                        if (event == null) {
+                            break;
+                        }
+                        mViolationMessage.append("\n  ");
+                        appendEvent(mViolationMessage, i + 1, event, mRecentEventsUnhandled[index]);
                     }
-                    mViolationMessage.append("\n  ");
-                    appendEvent(mViolationMessage, i + 1, event, mRecentEventsUnhandled[index]);
                 }
-            }
 
-            Log.d(mLogTag, mViolationMessage.toString());
+                Log.d(mLogTag, mViolationMessage.toString());
+                tainted = true;
+            }
             mViolationMessage.setLength(0);
-            tainted = true;
         }
 
         if (tainted) {
