@@ -32,6 +32,7 @@ import java.util.HashSet;
  */
 public class NetworkIdentitySet extends HashSet<NetworkIdentity> {
     private static final int VERSION_INIT = 1;
+    private static final int VERSION_ADD_ROAMING = 2;
 
     public NetworkIdentitySet() {
     }
@@ -46,7 +47,18 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> {
                     final int type = in.readInt();
                     final int subType = in.readInt();
                     final String subscriberId = readOptionalString(in);
-                    add(new NetworkIdentity(type, subType, subscriberId));
+                    add(new NetworkIdentity(type, subType, subscriberId, false));
+                }
+                break;
+            }
+            case VERSION_ADD_ROAMING: {
+                final int size = in.readInt();
+                for (int i = 0; i < size; i++) {
+                    final int type = in.readInt();
+                    final int subType = in.readInt();
+                    final String subscriberId = readOptionalString(in);
+                    final boolean roaming = in.readBoolean();
+                    add(new NetworkIdentity(type, subType, subscriberId, roaming));
                 }
                 break;
             }
@@ -57,13 +69,13 @@ public class NetworkIdentitySet extends HashSet<NetworkIdentity> {
     }
 
     public void writeToStream(DataOutputStream out) throws IOException {
-        out.writeInt(VERSION_INIT);
+        out.writeInt(VERSION_ADD_ROAMING);
         out.writeInt(size());
         for (NetworkIdentity ident : this) {
-            out.writeInt(VERSION_INIT);
             out.writeInt(ident.getType());
             out.writeInt(ident.getSubType());
             writeOptionalString(out, ident.getSubscriberId());
+            out.writeBoolean(ident.getRoaming());
         }
     }
 

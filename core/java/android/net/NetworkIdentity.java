@@ -33,11 +33,13 @@ public class NetworkIdentity {
     final int mType;
     final int mSubType;
     final String mSubscriberId;
+    final boolean mRoaming;
 
-    public NetworkIdentity(int type, int subType, String subscriberId) {
+    public NetworkIdentity(int type, int subType, String subscriberId, boolean roaming) {
         this.mType = type;
         this.mSubType = subType;
         this.mSubscriberId = subscriberId;
+        this.mRoaming = roaming;
     }
 
     @Override
@@ -50,7 +52,8 @@ public class NetworkIdentity {
         if (obj instanceof NetworkIdentity) {
             final NetworkIdentity ident = (NetworkIdentity) obj;
             return mType == ident.mType && mSubType == ident.mSubType
-                    && Objects.equal(mSubscriberId, ident.mSubscriberId);
+                    && Objects.equal(mSubscriberId, ident.mSubscriberId)
+                    && mRoaming == ident.mRoaming;
         }
         return false;
     }
@@ -66,8 +69,9 @@ public class NetworkIdentity {
         }
 
         final String scrubSubscriberId = mSubscriberId != null ? "valid" : "null";
+        final String roaming = mRoaming ? ", ROAMING" : "";
         return "[type=" + typeName + ", subType=" + subTypeName + ", subscriberId="
-                + scrubSubscriberId + "]";
+                + scrubSubscriberId + roaming + "]";
     }
 
     public int getType() {
@@ -82,6 +86,10 @@ public class NetworkIdentity {
         return mSubscriberId;
     }
 
+    public boolean getRoaming() {
+        return mRoaming;
+    }
+
     /**
      * Build a {@link NetworkIdentity} from the given {@link NetworkState},
      * assuming that any mobile networks are using the current IMSI.
@@ -94,18 +102,21 @@ public class NetworkIdentity {
         // comes from an authoritative source.
 
         final String subscriberId;
+        final boolean roaming;
         if (isNetworkTypeMobile(type)) {
+            final TelephonyManager telephony = (TelephonyManager) context.getSystemService(
+                    Context.TELEPHONY_SERVICE);
+            roaming = telephony.isNetworkRoaming();
             if (state.subscriberId != null) {
                 subscriberId = state.subscriberId;
             } else {
-                final TelephonyManager telephony = (TelephonyManager) context.getSystemService(
-                        Context.TELEPHONY_SERVICE);
                 subscriberId = telephony.getSubscriberId();
             }
         } else {
             subscriberId = null;
+            roaming = false;
         }
-        return new NetworkIdentity(type, subType, subscriberId);
+        return new NetworkIdentity(type, subType, subscriberId, roaming);
     }
 
 }

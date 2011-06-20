@@ -623,7 +623,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (LOGV) Slog.v(TAG, "ensureActiveMobilePolicyLocked()");
         final String subscriberId = getActiveSubscriberId();
         final NetworkIdentity probeIdent = new NetworkIdentity(
-                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId);
+                TYPE_MOBILE, TelephonyManager.NETWORK_TYPE_UNKNOWN, subscriberId, false);
 
         // examine to see if any policy is defined for active mobile
         boolean mobileDefined = false;
