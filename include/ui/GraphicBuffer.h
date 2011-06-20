@@ -74,6 +74,8 @@ public:
 
     GraphicBuffer();
 
+    GraphicBuffer(android_native_buffer_t*, bool);
+
     // creates w * h buffer
     GraphicBuffer(uint32_t w, uint32_t h, PixelFormat format, uint32_t usage);
 

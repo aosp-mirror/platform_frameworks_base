@@ -49,6 +49,19 @@ GraphicBuffer::GraphicBuffer()
     handle = NULL;
 }
 
+GraphicBuffer::GraphicBuffer(android_native_buffer_t*, bool)
+    : BASE(), mOwner(ownData), mBufferMapper(GraphicBufferMapper::get()),
+      mInitCheck(NO_ERROR), mIndex(-1)
+{
+    width  = 
+    height = 
+    stride = 
+    format = 
+    usage  = 0;
+    transform = 0;
+    handle = NULL;
+}
+
 GraphicBuffer::GraphicBuffer(uint32_t w, uint32_t h, 
         PixelFormat reqFormat, uint32_t reqUsage)
     : BASE(), mOwner(ownData), mBufferMapper(GraphicBufferMapper::get()),
