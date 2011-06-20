@@ -332,6 +332,28 @@ public final class NdefRecord implements Parcelable {
         return Uri.parse(new String(fullUri, Charsets.UTF_8));
     }
 
+    /**
+     * Creates an NDEF record of well known type URI.
+     * TODO: Make a public API
+     * @hide
+     */
+    public static NdefRecord createUri(Uri uri) {
+        String uriString = uri.toString();
+        byte prefix = 0x0;
+        for (int i = 1; i < URI_PREFIX_MAP.length; i++) {
+            if (uriString.startsWith(URI_PREFIX_MAP[i])) {
+                prefix = (byte) i;
+                uriString = uriString.substring(URI_PREFIX_MAP[i].length());
+                break;
+            }
+        }
+        byte[] uriBytes = uriString.getBytes(Charsets.UTF_8);
+        byte[] recordBytes = new byte[uriBytes.length + 1];
+        recordBytes[0] = prefix;
+        System.arraycopy(uriBytes, 0, recordBytes, 1, uriBytes.length);
+        return new NdefRecord(TNF_WELL_KNOWN, RTD_URI, new byte[0], recordBytes);
+    }
+
     private static byte[] concat(byte[]... arrays) {
         int length = 0;
         for (byte[] array : arrays) {
