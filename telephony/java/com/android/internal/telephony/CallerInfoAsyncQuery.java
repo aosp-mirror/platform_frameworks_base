@@ -51,6 +51,12 @@ public class CallerInfoAsyncQuery {
 
     private CallerInfoAsyncQueryHandler mHandler;
 
+    // If the CallerInfo query finds no contacts, should we use the
+    // PhoneNumberOfflineGeocoder to look up a "geo description"?
+    // (TODO: This could become a flag in config.xml if it ever needs to be
+    // configured on a per-product basis.)
+    private static final boolean ENABLE_UNKNOWN_NUMBER_GEO_DESCRIPTION = false;
+
     /**
      * Interface for a CallerInfoAsyncQueryHandler result return.
      */
@@ -242,22 +248,25 @@ public class CallerInfoAsyncQuery {
                     }
 
                     // Final step: look up the geocoded description.
-                    //
-                    // For now, do this only if we *don't* have a valid name (i.e. if
-                    // no contacts matched the phone number of the incoming call),
-                    // since that's the only case where the incoming-call UI cares
-                    // about this field.
-                    // (TODO: But if we ever want the UI to show the geoDescription
-                    // even when we *do* match a contact, we'll need to either call
-                    // updateGeoDescription() unconditionally here, or possibly add a
-                    // new parameter to CallerInfoAsyncQuery.startQuery() to force
-                    // the geoDescription field to be populated.)
-                    if (TextUtils.isEmpty(mCallerInfo.name)) {
-                        // Actually when no contacts match the incoming phone number,
-                        // the CallerInfo object is totally blank here (i.e. no name
-                        // *or* phoneNumber).  So we need to pass in cw.number as
-                        // a fallback number.
-                        mCallerInfo.updateGeoDescription(mQueryContext, cw.number);
+                    if (ENABLE_UNKNOWN_NUMBER_GEO_DESCRIPTION) {
+                        // Note we do this only if we *don't* have a valid name (i.e. if
+                        // no contacts matched the phone number of the incoming call),
+                        // since that's the only case where the incoming-call UI cares
+                        // about this field.
+                        //
+                        // (TODO: But if we ever want the UI to show the geoDescription
+                        // even when we *do* match a contact, we'll need to either call
+                        // updateGeoDescription() unconditionally here, or possibly add a
+                        // new parameter to CallerInfoAsyncQuery.startQuery() to force
+                        // the geoDescription field to be populated.)
+
+                        if (TextUtils.isEmpty(mCallerInfo.name)) {
+                            // Actually when no contacts match the incoming phone number,
+                            // the CallerInfo object is totally blank here (i.e. no name
+                            // *or* phoneNumber).  So we need to pass in cw.number as
+                            // a fallback number.
+                            mCallerInfo.updateGeoDescription(mQueryContext, cw.number);
+                        }
                     }
 
                     // Use the number entered by the user for display.
