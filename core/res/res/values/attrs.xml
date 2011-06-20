@@ -1661,6 +1661,10 @@
         <attr name="paddingRight" format="dimension" />
         <!-- Sets the padding, in pixels, of the bottom edge; see {@link android.R.attr#padding}. -->
         <attr name="paddingBottom" format="dimension" />
+        <!-- Sets the padding, in pixels, of the start edge; see {@link android.R.attr#padding}. -->
+        <attr name="paddingStart" format="dimension" />
+        <!-- Sets the padding, in pixels, of the end edge; see {@link android.R.attr#padding}. -->
+        <attr name="paddingEnd" format="dimension" />
 
         <!-- Boolean that controls whether a view can take focus.  By default the user can not
              move focus to a view; by setting this attribute to true the view is
