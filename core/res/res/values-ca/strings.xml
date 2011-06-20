@@ -46,6 +46,7 @@
     <string name="badPuk" msgid="5702522162746042460">"El PUK que heu escrit no és correcte."</string>
     <string name="mismatchPin" msgid="3695902225843339274">"Els PIN que heu introduït no coincideixen."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Escriviu un PIN que tingui de 4 a 8 números."</string>
+    <string name="invalidPuk" msgid="8761456210898036513">"Introdueix un PUK compost com a mínim de 8 nombres."</string>
     <string name="needPuk" msgid="919668385956251611">"La targeta SIM està bloquejada pel PUK. Escriviu el codi PUK per desbloquejar-la."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Escriviu el PUK2 per desbloquejar la targeta SIM."</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Identificació de trucada entrant"</string>
@@ -151,7 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Mode d\'avió"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mode d\'avió activat"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Mode d\'avió desactivat"</string>
-    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"+100"</string>
+    <!-- outdated translation 5833510281787786290 -->     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"+100"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode segur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Serveis de pagament"</string>
@@ -190,6 +191,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Permet a l\'aplicació rebre i processar missatges SMS. Les aplicacions malicioses poden supervisar els missatges o suprimir-los sense mostrar-vos-els."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"rebre MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Permet a l\'aplicació rebre i processar missatges MMS. Les aplicacions malicioses poden supervisar els missatges o suprimir-los sense mostrar-vos-els."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"recepció d\'emissions d\'emergència"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Permet que l\'aplicació rebi i processi missatges de difusió d\'emergència. Aquest permís només està disponible per a les aplicacions del sistema."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar missatges SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Permet a l\'aplicació enviar missatges SMS. Les aplicacions malicioses poden costar-vos diners en enviar missatges sense la vostra confirmació."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"llegir SMS o MMS"</string>
@@ -220,6 +223,8 @@
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Permet a una aplicació forçar una activitat en primer terme a tancar-se i tornar enrere. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"recuperar l\'estat intern del sistema"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"Permet a una aplicació recuperar l\'estat intern del sistema. Les aplicacions malicioses poden recuperar molta informació variada de privadesa i seguretat que normalment no haurien de necessitar mai."</string>
+    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"recuperació del contingut de la pantalla"</string>
+    <string name="permdesc_retrieve_window_content" msgid="3390962289797156152">"Permet que l\'aplicació recuperi el contingut de la finestra activa. Les aplicacions malicioses poden recuperar el contingut de tota la finestra i examinar-ne tot el text, excepte les contrasenyes."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"apagar parcialment"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Posa el gestor d\'activitats en estat d\'apagada. No fa una apagada completa."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"impedir els canvis d\'aplicació"</string>
@@ -265,10 +270,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Permet al titular enviar intencions a un administrador del sistema. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"canviar l\'orientació de la pantalla"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Permet a una aplicació canviar el gir de la pantalla en qualsevol moment. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"canvi de velocitat del punter"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Permet que una aplicació canviï la velocitat del punter del ratolí o del ratolí tàctil en qualsevol moment. Mai no s\'hauria de necessitar per a les aplicacions normals."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"enviar senyals Linux a les aplicacions"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Permet a l\'aplicació sol·licitar que el senyal subministrat s\'enviï a tots els processos persistents."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"fer que l\'aplicació s\'executi sempre"</string>
@@ -316,6 +319,14 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"escriure dades de contacte"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Permet que una aplicació modifiqui les dades de contactes (adreces) emmagatzemades a la tauleta. Les aplicacions malicioses poden utilitzar aquesta funció per esborrar o per modificar les teves dades de contactes."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Permet a una aplicació modificar les dades de contacte (adreça) emmagatzemades al telèfon. Les aplicacions malicioses poden utilitzar-ho per esborrar o modificar les dades de contacte."</string>
+    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6898987798303840534">"llegir els esdeveniments del calendari"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Permet que una aplicació llegeixi tots els esdeveniments del calendari emmagatzemats a la tauleta. Les aplicacions malicioses poden utilitzar aquesta funció per enviar els teus esdeveniments del calendari a altres persones."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Permet a una aplicació llegir tots els esdeveniments del calendari emmagatzemats al telèfon. Les aplicacions malicioses poden utilitzar-ho per enviar els vostres esdeveniments del calendari a altres persones."</string>
@@ -453,7 +464,7 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"controla Near Field Communication (NFC)"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Permet que una aplicació es comuniqui amb les etiquetes, les targetes i els lectors de Near Field Communication (NFC)"</string>
     <string name="permlab_vpn" msgid="8345800584532175312">"intercepta i modifica tot el trànsit de la xarxa"</string>
-    <string name="permdesc_vpn" msgid="5617893078989944219">"Permet que una aplicació intercepti i inspeccioni tot el trànsit de la xarxa, per exemple, per establir una connexió VPN. Les aplicacions malintencionades poden controlar, redirigir o modificar paquets de xarxa sense el teu coneixement."</string>
+    <string name="permdesc_vpn" msgid="7093963230333602420">"Permet que una aplicació intercepti i inspeccioni tot el trànsit de la xarxa per establir una connexió VPN. Les aplicacions malintencionades poden controlar, redirigir o modificar paquets de xarxa sense el teu coneixement."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"desactivar el bloqueig del teclat"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permet a una aplicació desactivar el bloqueig del teclat i qualsevol element de seguretat de contrasenyes associat. Un exemple d\'això és la desactivació per part del telèfon del bloqueig del teclat en rebre una trucada telefònica entrant i després la reactivació del bloqueig del teclat quan finalitza la trucada."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"llegir la configuració de sincronització"</string>
@@ -480,6 +491,14 @@
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permet a una aplicació llegir el sistema de fitxers de la memòria cau i escriure-hi."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"fes/rep trucades per Internet"</string>
     <string name="permdesc_use_sip" msgid="6320376185606661843">"Permet que una aplicació utilitzi el servei SIP per fer i rebre trucades per Internet."</string>
+    <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
+    <skip />
+    <!-- no translation found for permdesc_readNetworkUsageHistory (6040738474779135653) -->
+    <skip />
+    <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
+    <skip />
+    <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Defineix les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Controla la longitud i els caràcters permesos a les contrasenyes de desbloqueig de pantalla"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Supervisa els intents de desbloqueig de la pantalla"</string>
@@ -498,6 +517,10 @@
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Controla la freqüència amb què cal canviar la contrasenya de bloqueig de pantalla"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Encriptació d’emmagatzematge"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Requereix que les dades de l\'aplicació emmagatzemades estiguin encriptades"</string>
+    <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
+    <skip />
+    <!-- no translation found for policydesc_disableCamera (5680054212889413366) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Mòbil"</item>
@@ -612,6 +635,9 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Feina"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Altres"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Introduïu el codi PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="5965173481572346878">"Introdueix el codi PUK i el codi PIN nou"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Codi PUK"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="2987350144349051286">"Codi PIN nou"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Toca per introduir contrasenya"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Introduïu la contrasenya per desbloquejar-lo"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Introdueix el PIN per desbloquejar"</string>
@@ -636,6 +662,10 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"No hi ha cap targeta SIM a la tauleta."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"No hi ha cap targeta SIM al telèfon."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Inseriu una targeta SIM."</string>
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (7138450788301444298) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (1631853574702335453) -->
+    <skip />
     <string name="emergency_calls_only" msgid="6733978304386365407">"Només trucades d\'emergència"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Xarxa bloquejada"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"La targeta SIM està bloquejada pel PUK."</string>
@@ -924,6 +954,10 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Si activeu l\'emmagatzematge USB, algunes de les aplicacions que utilitzeu s\'aturaran i pot ser que no estiguin disponibles fins que desactiveu l\'emmagatzematge USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Error de l\'operació d\'USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"D\'acord"</string>
+    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <skip />
+    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formata l\'emmag. USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formata la targeta SD"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Vols formatar l\'emmagatzematge USB i esborrar tots els fitxers que hi ha emmagatzemats? L\'acció no es podrà desfer."</string>
@@ -991,6 +1025,14 @@
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocol de tunelització de capa 2"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"VPN L2TP/IPSec basada en clau compartida prèviament"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"VPN L2TP/IPSec basada en certificats"</string>
+    <!-- no translation found for vpn_ticker (285642105845608311) -->
+    <skip />
+    <!-- no translation found for vpn_title (5434034606697234123) -->
+    <skip />
+    <!-- no translation found for vpn_text (1610714069627824309) -->
+    <skip />
+    <!-- no translation found for vpn_text_long (4907843483284977618) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Trieu un fitxer"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"No s\'ha escollit cap fitxer"</string>
     <string name="reset" msgid="2448168080964209908">"Reinicia"</string>
@@ -1051,6 +1093,17 @@
     <string name="storage_internal" msgid="7556050805474115618">"Emmagatzematge intern"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"Targeta SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Emmagatzematge USB"</string>
-    <!-- no translation found for extract_edit_menu_button (302060189057163906) -->
+    <string name="extract_edit_menu_button" msgid="302060189057163906">"Edita..."</string>
+    <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (3354394590936526648) -->
+    <skip />
+    <!-- no translation found for data_usage_3g_limit_title (7093334419518706686) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7636489436819470761) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
     <skip />
 </resources>

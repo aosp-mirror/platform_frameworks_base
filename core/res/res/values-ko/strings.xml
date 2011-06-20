@@ -46,6 +46,7 @@
     <string name="badPuk" msgid="5702522162746042460">"입력한 PUK가 올바르지 않습니다."</string>
     <string name="mismatchPin" msgid="3695902225843339274">"입력한 PIN이 일치하지 않습니다."</string>
     <string name="invalidPin" msgid="3850018445187475377">"4~ 8자리 숫자로 된 PIN을 입력하세요."</string>
+    <string name="invalidPuk" msgid="8761456210898036513">"8자리 이상의 숫자 PUK를 입력합니다."</string>
     <string name="needPuk" msgid="919668385956251611">"SIM 카드의 PUK가 잠겨 있습니다. 잠금해제하려면 PUK 코드를 입력하세요."</string>
     <string name="needPuk2" msgid="4526033371987193070">"SIM 카드 잠금을 해제하려면 PUK2를 입력하세요."</string>
     <string name="ClipMmi" msgid="6952821216480289285">"발신자 번호"</string>
@@ -151,7 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"비행기 모드"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"비행기 모드 사용"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"비행기 모드 사용 안함"</string>
-    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
+    <!-- outdated translation 5833510281787786290 -->     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"안전 모드"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 시스템"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"요금이 부과되는 서비스"</string>
@@ -190,6 +191,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"애플리케이션이 SMS 메시지를 받고 처리할 수 있도록 합니다. 이 경우 악성 애플리케이션이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"MMS 수신"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"애플리케이션이 MMS 메시지를 받고 처리할 수 있도록 합니다. 이 경우 악성 애플리케이션이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"긴급 방송 수신"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"애플리케이션이 긴급 방송 메시지를 수신하고 처리할 수 있도록 합니다. 이 권한은 시스템 애플리케이션에만 사용할 수 있습니다."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS 메시지 보내기"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"애플리케이션이 SMS 메시지를 보낼 수 있도록 합니다. 이 경우 악성 애플리케이션이 사용자의 확인 없이 메시지를 전송하여 요금을 부과할 수 있습니다."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS 또는 MMS 읽기"</string>
@@ -220,6 +223,8 @@
     <string name="permdesc_forceBack" msgid="6534109744159919013">"애플리케이션이 포그라운드에 있는 활동을 강제로 닫고 되돌아갈 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"시스템 내부 상태 검색"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"애플리케이션이 시스템의 내부 상태를 검색할 수 있도록 합니다. 단, 악성 애플리케이션이 이 기능을 이용하여 일반적으로 필요하지 않은 다양한 개인정보와 보안정보를 검색할 수 있습니다."</string>
+    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"화면 콘텐츠 검색"</string>
+    <string name="permdesc_retrieve_window_content" msgid="3390962289797156152">"애플리케이션이 활성 창의 콘텐츠를 검색할 수 있도록 합니다. 악성 애플리케이션이 전체 창의 콘텐츠를 검색하여 비밀번호를 제외한 모든 텍스트를 조사할 수 있습니다."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"부분 종료"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"작업 관리자를 종료 상태로 설정합니다. 전체 종료를 수행하지는 않습니다."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"애플리케이션 전환 방지"</string>
@@ -265,10 +270,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"보유자가 기기 관리자에게 인텐트를 보낼 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"화면 방향 변경"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"애플리케이션이 언제든지 화면 회전을 변경할 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"포인터 속도 변경"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"애플리케이션이 언제든지 마우스 또는 트랙패드 포인터의 속도를 변경할 수 있도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"애플리케이션에 Linux 시그널 보내기"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"애플리케이션이 제공된 시그널을 모든 영구 프로세스로 보내도록 요청할 수 있도록 합니다."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"애플리케이션이 항상 실행되도록 설정"</string>
@@ -316,6 +319,14 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"연락처 데이터 작성"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"애플리케이션이 태블릿에 저장된 연락처(주소) 데이터를 수정할 수 있도록 합니다. 이 경우 악성 애플리케이션이 연락처 데이터를 지우거나 수정할 수 있습니다."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"애플리케이션이 휴대전화에 저장된 연락처(주소) 데이터를 수정할 수 있도록 합니다. 이 경우 악성 애플리케이션이 연락처 데이터를 지우거나 수정할 수 있습니다."</string>
+    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6898987798303840534">"캘린더 일정 읽기"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"애플리케이션이 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 캘린더 일정을 다른 사람에게 보낼 수 있습니다."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"애플리케이션이 휴대전화에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 캘린더 일정을 다른 사람에게 보낼 수 있습니다."</string>
@@ -453,7 +464,7 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"NFC(Near Field Communication) 제어"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"애플리케이션에서 NFC(Near Field Communication) 태그, 카드 및 리더와 통신할 수 있습니다."</string>
     <string name="permlab_vpn" msgid="8345800584532175312">"모든 네트워크 트래픽을 가로채고 수정"</string>
-    <string name="permdesc_vpn" msgid="5617893078989944219">"VPN 연결 설정과 같은 작업을 수행하기 위해 애플리케이션이 모든 네트워크 트래픽을 가로채고 검사하도록 허용합니다. 사용자 몰래 악성 애플리케이션이 네트워크 패킷을 모니터링, 리디렉션 또는 수정할 수 있습니다."</string>
+    <string name="permdesc_vpn" msgid="7093963230333602420">"애플리케이션이 모든 네트워크 트래픽을 가로채서 검사하여 VPN 연결을 설정하도록 허용합니다. 사용자 몰래 악성 애플리케이션이 네트워크 패킷을 모니터링, 리디렉션 또는 수정할 수 있습니다."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"키 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"애플리케이션이 키 잠금 및 관련 비밀번호 보안을 사용 중지할 수 있도록 합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용 중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
@@ -480,6 +491,14 @@
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"애플리케이션이 캐시 파일시스템을 읽고 쓸 수 있도록 합니다."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"인터넷 전화 걸기/받기"</string>
     <string name="permdesc_use_sip" msgid="6320376185606661843">"애플리케이션에서 SIP 서비스를 사용하여 인터넷 전화를 걸거나 받을 수 있습니다."</string>
+    <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
+    <skip />
+    <!-- no translation found for permdesc_readNetworkUsageHistory (6040738474779135653) -->
+    <skip />
+    <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
+    <skip />
+    <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"비밀번호 규칙 설정"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"화면 잠금해제 비밀번호에 허용되는 길이 및 문자 수를 제어합니다."</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"화면 잠금해제 시도 모니터링"</string>
@@ -498,6 +517,10 @@
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"화면 잠금 비밀번호 변경 빈도 설정"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"저장소 암호화 설정"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"저장한 애플리케이션 데이터를 암호화해야 합니다."</string>
+    <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
+    <skip />
+    <!-- no translation found for policydesc_disableCamera (5680054212889413366) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"집"</item>
     <item msgid="869923650527136615">"모바일"</item>
@@ -612,6 +635,9 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"직장"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"기타"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"PIN 코드 입력"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="5965173481572346878">"PUK 및 새 PIN 코드 입력"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK 코드"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="2987350144349051286">"새 PIN 코드"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"비밀번호를 입력하려면 터치하세요."</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"잠금을 해제하려면 비밀번호 입력"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"잠금을 해제하려면 PIN 입력"</string>
@@ -636,6 +662,10 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"태블릿에 SIM 카드가 없습니다."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"휴대전화에 SIM 카드가 없습니다."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"SIM 카드를 삽입하세요."</string>
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (7138450788301444298) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (1631853574702335453) -->
+    <skip />
     <string name="emergency_calls_only" msgid="6733978304386365407">"긴급 통화만"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"네트워크 잠김"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 카드가 PUK 잠김 상태입니다."</string>
@@ -924,6 +954,10 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"USB 저장소를 사용하면 사용 중인 일부 애플리케이션이 중지되어 USB 저장소를 사용 중지할 때까지 사용할 수 없게 됩니다."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB 작업 실패"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"확인"</string>
+    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <skip />
+    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"USB 저장소 포맷"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SD 카드 포맷"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"USB 저장소를 포맷하여 저장된 파일을 모두 지우시겠습니까? 수행한 후에는 작업을 취소할 수 없습니다."</string>
@@ -991,6 +1025,14 @@
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"L2TP(Layer 2 Tunneling Protocol)"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"사전 공유 키 기반 L2TP/IPSec VPN"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"인증서 기반 L2TP/IPSec VPN"</string>
+    <!-- no translation found for vpn_ticker (285642105845608311) -->
+    <skip />
+    <!-- no translation found for vpn_title (5434034606697234123) -->
+    <skip />
+    <!-- no translation found for vpn_text (1610714069627824309) -->
+    <skip />
+    <!-- no translation found for vpn_text_long (4907843483284977618) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"파일 선택"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"파일을 선택하지 않았습니다."</string>
     <string name="reset" msgid="2448168080964209908">"초기화"</string>
@@ -1051,6 +1093,17 @@
     <string name="storage_internal" msgid="7556050805474115618">"내부 저장공간"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"SD 카드"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 저장소"</string>
-    <!-- no translation found for extract_edit_menu_button (302060189057163906) -->
+    <string name="extract_edit_menu_button" msgid="302060189057163906">"수정..."</string>
+    <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (3354394590936526648) -->
+    <skip />
+    <!-- no translation found for data_usage_3g_limit_title (7093334419518706686) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7636489436819470761) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
     <skip />
 </resources>

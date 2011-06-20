@@ -46,6 +46,7 @@
     <string name="badPuk" msgid="5702522162746042460">"Mã PUK bạn đã nhập không chính xác."</string>
     <string name="mismatchPin" msgid="3695902225843339274">"Mã PIN bạn đã nhập không khớp."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Nhập mã PIN có từ 4 đến 8 số."</string>
+    <string name="invalidPuk" msgid="8761456210898036513">"Nhập PUK có từ 8 số trở lên."</string>
     <string name="needPuk" msgid="919668385956251611">"Thẻ SIM của bạn đã bị khoá PUK. Nhập mã PUK để mở khoá thẻ SIM đó."</string>
     <string name="needPuk2" msgid="4526033371987193070">"Nhập mã PUK2 để bỏ chặn thẻ SIM."</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Số gọi đến"</string>
@@ -151,7 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Chế độ trên máy bay"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Chế độ trên máy bay BẬT"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Chế độ trên máy bay TẮT"</string>
-    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
+    <!-- outdated translation 5833510281787786290 -->     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Chế độ an toàn"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Hệ thống Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Dịch vụ tính tiền của bạn"</string>
@@ -190,6 +191,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Cho phép ứng dụng nhận và xử lý tin nhắn SMS. Các ứng dụng độc hại có thể giám sát tin nhắn của bạn hoặc xoá chúng mà không cần hiển thị tin nhắn đó cho bạn."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"nhận MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Cho phép ứng dụng nhận và xử lý tin nhắn MMS. Các ứng dụng độc hại có thể giám sát tin nhắn của bạn hoặc xoá chúng mà không cần hiển thị tin nhắn đó cho bạn."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"nhận các truyền phát khẩn cấp"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Cho phép ứng dụng truy xuất và xử lý các thư phát khẩn cấp. Quyền này chỉ khả dụng đối với các ứng dụng hệ thống."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"gửi tin nhắn SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Cho phép ứng dụng gửi tin nhắn SMS. Các ứng dụng độc hại có thể khiến bạn tốn tiền bằng cách gửi tin nhắn mà không cần xác nhận của bạn."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"đọc SMS hoặc MMS"</string>
@@ -220,6 +223,8 @@
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Cho phép ứng dụng buộc bất kỳ hoạt động nào chạy trên nền đóng hoặc quay lại. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"truy xuất trạng thái bên trong của hệ thống"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"Cho phép ứng dụng truy xuất trạng thái nội bộ của hệ thống. Các ứng dụng độc hại có thể truy xuất nhiều thông tin riêng tư và bảo mật khác nhau mà thông thường không bao giờ cần đến."</string>
+    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"truy xuất nội dung màn hình"</string>
+    <string name="permdesc_retrieve_window_content" msgid="3390962289797156152">"Cho phép ứng dụng truy xuất nội dung của cửa sổ hiện hành. Các ứng dụng độc hại có thể truy xuất toàn bộ nội dung cửa sổ và kiểm tra tất cả văn bản của cửa sổ ngoại trừ mật khẩu."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"tắt từng phần"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Đặt trình quản lý hoạt động sang trạng thái tắt. Không thực hiện tắt hoàn toàn."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"ngăn chuyển đổi ứng dụng"</string>
@@ -265,10 +270,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Cho phép chủ nhân gửi các ý định đến quản trị viên thiết bị. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"thay đổi hướng màn hình"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Cho phép ứng dụng thay đổi việc xoay màn hình bất kỳ khi nào. Không cần thiết cho các ứng dụng thông thường."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"thay đổi tốc độ con trỏ"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Cho phép ứng dụng thay đổi tốc độ chuột hoặc con trỏ ô di chuột vào bất kỳ lúc nào. Không bao giờ cần cho các ứng dụng thông thường."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"gửi tín hiệu Linux đến ứng dụng"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Cho phép ứng dụng yêu cầu tín hiệu đã cung cấp được gửi đến tất cả các quá trình liên tục."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"đặt ứng dụng luôn chạy"</string>
@@ -316,6 +319,14 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"ghi dữ liệu liên hệ"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Cho phép ứng dụng sửa đổi dữ liệu (địa chỉ) liên hệ được lưu trữ trên máy tính bảng của bạn. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi dữ liệu liên hệ của bạn."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Cho phép ứng dụng sửa đổi dữ liệu liên hệ (địa chỉ) được lưu trữ trên điện thoại của bạn. Các ứng dụng độc hại có thể sử dụng quyền này để xoá hoặc sửa đổi dữ liệu liên hệ của bạn."</string>
+    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6898987798303840534">"Đọc sự kiện lịch"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Cho phép ứng dụng đọc tất cả các sự kiện lịch được lưu trữ trên máy tính bảng của bạn. Các ứng dụng độc hại có thể sử dụng quyền này để gửi các sự kiện lịch của bạn cho những người khác."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Cho phép ứng dụng đọc tất cả các sự kiện lịch được lưu trữ trên điện thoại của bạn. Các ứng dụng độc hại có thể sử dụng quyền này để gửi các sự kiện lịch của bạn cho những người khác."</string>
@@ -453,7 +464,7 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"kiểm soát Liên lạc trường gần"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Cho phép ứng dụng liên lạc với thẻ Liên lạc trường gần (NFC), thẻ và trình đọc."</string>
     <string name="permlab_vpn" msgid="8345800584532175312">"chặn và sửa đổi tất cả lưu lượng truy cập mạng"</string>
-    <string name="permdesc_vpn" msgid="5617893078989944219">"Cho phép ứng dụng chặn và kiểm tra tất cả lưu lượng truy cập mạng, ví dụ để thiết lập kết nối VPN. Các ứng dụng độc hại có thể giám sát, chuyển hướng hoặc sửa đổi gói tin mạng mà bạn không biết."</string>
+    <string name="permdesc_vpn" msgid="7093963230333602420">"Cho phép ứng dụng chặn và kiểm tra tất cả lưu lượng truy cập mạng để thiết lập kết nối VPN. Các ứng dụng độc hại có thể giám sát, chuyển hướng hoặc sửa đổi gói tin mạng mà bạn không biết."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"vô hiệu hoá khoá phím"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Cho phép ứng dụng vô hiệu hoá khoá phím và bất kỳ bảo mật mật khẩu được liên kết nào. Ví dụ thích hợp của việc này là điện thoại vô hiệu hoá khoá phím khi nhận được cuộc gọi đến sau đó bật lại khoá phím khi cuộc gọi kết thúc."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"đọc cài đặt đồng bộ hoá"</string>
@@ -480,6 +491,14 @@
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Cho phép ứng dụng đọc và ghi hệ thống tệp bộ nhớ cache."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"thực hiện/nhận cuộc gọi qua Internet"</string>
     <string name="permdesc_use_sip" msgid="6320376185606661843">"Cho phép ứng dụng sử dụng dịch vụ SIP để thực hiện/nhận cuộc gọi qua Internet."</string>
+    <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
+    <skip />
+    <!-- no translation found for permdesc_readNetworkUsageHistory (6040738474779135653) -->
+    <skip />
+    <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
+    <skip />
+    <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Đặt quy tắc mật khẩu"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Kiểm soát độ dài và ký tự được phép trong mật khẩu mở khóa màn hình"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Giám sát những lần thử mở khóa màn hình"</string>
@@ -498,6 +517,10 @@
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Kiểm soát tần suất bắt buộc phải thay đổi mật khẩu khóa màn hình"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Đặt mã hóa dung lượng lưu trữ"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Yêu cầu dữ liệu ứng dụng được lưu trữ phải được mã hóa"</string>
+    <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
+    <skip />
+    <!-- no translation found for policydesc_disableCamera (5680054212889413366) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Nhà riêng"</item>
     <item msgid="869923650527136615">"ĐT di động"</item>
@@ -612,6 +635,9 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Cơ quan"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Khác"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Nhập mã PIN"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="5965173481572346878">"Nhập PUK và mã PIN mới"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"Mã PUK"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="2987350144349051286">"Mã Pin mới"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"Chạm để nhập mật khẩu"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Nhập mật khẩu để mở khoá"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Nhập PIN để mở khóa"</string>
@@ -636,6 +662,10 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Không có thẻ SIM nào trong máy tính bảng."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Không có thẻ SIM nào trong điện thoại."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Vui lòng lắp thẻ SIM."</string>
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (7138450788301444298) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (1631853574702335453) -->
+    <skip />
     <string name="emergency_calls_only" msgid="6733978304386365407">"Chỉ cuộc gọi khẩn cấp"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Mạng đã khoá"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Thẻ SIM đã bị khoá PUK."</string>
@@ -924,6 +954,10 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Nếu bạn bật bộ lưu trữ USB, một số ứng dụng bạn đang sử dụng sẽ dừng và có thể không khả dụng cho tới khi bạn tắt bộ lưu trữ USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Thao tác USB không thành công"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
+    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <skip />
+    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Định dạng b.nhớ USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Định dạng thẻ SD"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Định dạng bộ nhớ USB, xóa tất cả tệp được lưu trữ tại đây? Không thể hoàn tác tác vụ!"</string>
@@ -991,6 +1025,14 @@
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Giao thức Đường hầm Tầng 2"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"L2TP/IPSec VPN dựa trên khoá chia sẻ trước"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"L2TP/IPSec VPN dựa trên chứng chỉ"</string>
+    <!-- no translation found for vpn_ticker (285642105845608311) -->
+    <skip />
+    <!-- no translation found for vpn_title (5434034606697234123) -->
+    <skip />
+    <!-- no translation found for vpn_text (1610714069627824309) -->
+    <skip />
+    <!-- no translation found for vpn_text_long (4907843483284977618) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Chọn tệp"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Không có tệp nào được chọn"</string>
     <string name="reset" msgid="2448168080964209908">"Đặt lại"</string>
@@ -1051,6 +1093,17 @@
     <string name="storage_internal" msgid="7556050805474115618">"Bộ nhớ trong"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"Thẻ SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Bộ lưu trữ USB"</string>
-    <!-- no translation found for extract_edit_menu_button (302060189057163906) -->
+    <string name="extract_edit_menu_button" msgid="302060189057163906">"Chỉnh sửa..."</string>
+    <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (3354394590936526648) -->
+    <skip />
+    <!-- no translation found for data_usage_3g_limit_title (7093334419518706686) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7636489436819470761) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
     <skip />
 </resources>

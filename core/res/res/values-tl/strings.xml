@@ -46,6 +46,7 @@
     <string name="badPuk" msgid="5702522162746042460">"Mali ang na-type mong PUK."</string>
     <string name="mismatchPin" msgid="3695902225843339274">"Hindi nagtugma ang ipinasok mong mga PIN."</string>
     <string name="invalidPin" msgid="3850018445187475377">"Mag-type ng PIN na 4 hanggang 8 numero."</string>
+    <string name="invalidPuk" msgid="8761456210898036513">"Mag-type ng PUK na may 8 numbero o mas mahaba."</string>
     <string name="needPuk" msgid="919668385956251611">"Na-PUK-lock ang iyong SIM card. I-type ang PUK code upang i-unlock ito."</string>
     <string name="needPuk2" msgid="4526033371987193070">"I-type ang PUK2 upang i-unblock ang SIM card."</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Papasok na Caller ID"</string>
@@ -151,7 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Airplane mode"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Naka-ON ang airplane mode"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Naka-OFF ang airplane mode"</string>
-    <string name="status_bar_notification_info_overflow" msgid="5833510281787786290">"100+"</string>
+    <!-- outdated translation 5833510281787786290 -->     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"100+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Mga serbisyong ginagastusan mo"</string>
@@ -190,6 +191,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Pinapayagan ang application na tumanggap at magproseso ng mga SMS na mensahe. Maaaring subaybayan ng mga nakakahamak na application ang iyong mga mensahe o tanggalin ang mga ito nang hindi ipinapakita sa iyo."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"tumanggap ng MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Pinapayagan ang application na tumanggap at magproseso ng mga MMS na mensahe. Maaaring subaybayan ng mga nakakahamak na application ang iyong mga mensahe o tanggalin ang mga ito nang hindi ipinapakita ang mga ito sa iyo."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"makatanggap ng mga emergency broadcast"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Pinapayagan ang application na mabawi at iproseso ang mga mensahe ng emergency broadcast. Available lang ang pahintulot na ito sa mga system application."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"magpadala ng mga SMS na mensahe"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Pinapayagan ang application na magpadala ng mga SMS na mensahe. Maaaring mapagastos ka ng mga nakakahamak na application sa pamamagitan ng pagpapadala ng mga mensahe nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"magbasa ng SMS o MMS"</string>
@@ -220,6 +223,8 @@
     <string name="permdesc_forceBack" msgid="6534109744159919013">"Pinapayagan ang isang application na puwersahin ang anumang aktibidad na nasa unahan upang isara at bumalik. Hindi kailanman dapat kailanganin para sa mga normal na application."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"ibalik ang panloob na katayuan ng system"</string>
     <string name="permdesc_dump" msgid="2198776174276275220">"Pinapayagan ang application na magbalik ng panloob na katayuan ng system. Maaaring magbalik ang mga nakakahamak na application ng maraming uri ng pribado at secure na impormasyon na hindi nila kailanman normal na kailangan."</string>
+    <string name="permlab_retrieve_window_content" msgid="8022588608994589938">"kunin ang nilalaman ng screen"</string>
+    <string name="permdesc_retrieve_window_content" msgid="3390962289797156152">"Pinapayagan ang application na makuha ang nilalaman ng aktibong window. Maaaring kunin ng mga nakakahamak na application ang buong nilalaman ng window at suriin ang lahat ng teksto nito bukod sa mga password."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"bahagyang pag-shutdown"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Inilalagay ang tagapamahala ng aktibidad sa katayuan ng pag-shutdown. Hindi nagsasagawa ng kumpletong pag-shutdown."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"pigilan ang mga paglipat ng app"</string>
@@ -265,10 +270,8 @@
     <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Pinapayagan ang holder na magpadala ng mga intensyon sa administrator ng device. Hindi kailanman dapat kailanganin para sa mga normal na application."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"baguhin ang orientation ng screen"</string>
     <string name="permdesc_setOrientation" msgid="6335814461615851863">"Pinapayagan ang isang application na baguhin ang pag-rotate ng screen anumang oras. Hindi kailanman dapat kailanganin para sa mga normal na application."</string>
-    <!-- no translation found for permlab_setPointerSpeed (9175371613322562934) -->
-    <skip />
-    <!-- no translation found for permdesc_setPointerSpeed (137436038503379864) -->
-    <skip />
+    <string name="permlab_setPointerSpeed" msgid="9175371613322562934">"baguhin ang bilis ng pointer"</string>
+    <string name="permdesc_setPointerSpeed" msgid="137436038503379864">"Pinapayagan ang isang application na baguhin ang bilis ng mouse o trackpad pointer anumang oras. Dapat na hindi kailanman kailanganin para sa mga normal na application."</string>
     <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"magpadala ng mga Linux signal sa mga application"</string>
     <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Pinapayagan ang application na hilinging ipadala ang na-supply na signal sa lahat ng mga paulit-ulit na proseso."</string>
     <string name="permlab_persistentActivity" msgid="8659652042401085862">"palaging patakbuhin ang mga application"</string>
@@ -316,6 +319,14 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"sumulat ng data ng pakikipag-ugnay"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Pinapayagan ang application na baguhin ang data ng contact (address) na nakaimbak sa iyong tablet. Maaari itong gamitin ng mga nakapanghahamak na application upang burahin o baguhin ang data ng iyong contact."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Pinapayagan ang isang application na baguhin ang data ng pakikipag-ugny (address) na nakaimbak sa iyong telepono. Magagamit ito ng mga nakakahamak na application upang burahin o baguhin ang iyong data ng pakikipag-ugnay."</string>
+    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
+    <skip />
     <string name="permlab_readCalendar" msgid="6898987798303840534">"basahin ang mga kaganapan sa kalendaryo"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Pinapayagan ang application na basahin ang lahat ng mga kaganapan sa kalendaryo na nakaimbak sa iyong tablet. Maaari itong gamitin ng mga nakapanghahamak na application upang ipadala ang iyong mga kaganapan sa kalendaryo sa mga ibang tao."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Pinapayagan ang isang application na basahin ang lahat ng mga kaganapan sa kalendaryong nakaimbak sa iyong telepono. Magagamit ito ng mga nakakahamak na application upang ipadala ang iyong mga kaganapan sa kalendaryo sa ibang tao."</string>
@@ -453,7 +464,7 @@
     <string name="permlab_nfc" msgid="4423351274757876953">"kontrolin ang Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Pinapayagan ang application na makipagkomunika sa mga Near Field Communication (NFC) na tag, card, at reader."</string>
     <string name="permlab_vpn" msgid="8345800584532175312">"harangin at baguhin ang lahat ng trapiko ng network"</string>
-    <string name="permdesc_vpn" msgid="5617893078989944219">"Pinapayagan ang isang application na harangin at suriin ang lahat ng trapiko ng network, halimbawa ang pagtaguyod ng koneksyon na VPN. Maaaring magsubabay, mag-redirect o magbago ng mga network packet ang mga nakakahamak na application nang hindi mo nalalaman."</string>
+    <string name="permdesc_vpn" msgid="7093963230333602420">"Pinapayagan ang isang application na harangin at suriin ang lahat ng trapiko ng network upang magtaguyod ng koneksyon ng VPN. Maaaring sumubaybay, mag-redirect, o magbago ng mga network packet nang hindi mo nalalaman."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"huwag paganahin ang keylock"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Pinapayagan ang isang application na huwag paganahin ang keylock at ang anumang nauugnay na seguridad sa password. Ang isang lehitimong halimbawa nito ay ang hindi pagpapagana ng telepono sa keylock kapag nakakatanggap ng papasok na tawag sa telepono, pagkatapos ay muling pagaganahin ang keylock kapag tapos na ang tawag."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"basahin ang mga setting ng sync"</string>
@@ -480,6 +491,14 @@
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Pinapayagan ang isang application na basahin at isulat ang cache filesystem."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"gumawa/tumanggap ng mga tawag sa Internet"</string>
     <string name="permdesc_use_sip" msgid="6320376185606661843">"Pinapayagan ang application upang gamitin ang serbisyong SIP upang gumawa/tumanggap ng mga tawag sa Internet."</string>
+    <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
+    <skip />
+    <!-- no translation found for permdesc_readNetworkUsageHistory (6040738474779135653) -->
+    <skip />
+    <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
+    <skip />
+    <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Kontrolin ang haba at mga character na pinapayagan sa mga password sa pag-unlock ng screen"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
@@ -498,6 +517,10 @@
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Kontrolin kung gaano kadalas dapat na mapalitan ang password sa pag-lock ng screen"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Itakda pag-encrypt ng imbakan"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Hinging naka-encrypt ang nakaimbak na data ng application"</string>
+    <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
+    <skip />
+    <!-- no translation found for policydesc_disableCamera (5680054212889413366) -->
+    <skip />
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Home"</item>
     <item msgid="869923650527136615">"Mobile"</item>
@@ -612,6 +635,9 @@
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Trabaho"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Iba pa"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Ipasok ang PIN code"</string>
+    <string name="keyguard_password_enter_puk_code" msgid="5965173481572346878">"Ilagay ang PUK at bagong PIN code"</string>
+    <string name="keyguard_password_enter_puk_prompt" msgid="1341112146710087048">"PUK code"</string>
+    <string name="keyguard_password_enter_pin_prompt" msgid="2987350144349051286">"Bagong Pin Code"</string>
     <string name="keyguard_password_entry_touch_hint" msgid="7906561917570259833"><font size="17">"I-touch pra mg-passwrd"</font></string>
     <string name="keyguard_password_enter_password_code" msgid="9138158344813213754">"Ipasok ang password upang i-unlock"</string>
     <string name="keyguard_password_enter_pin_password_code" msgid="638347075625491514">"Ipasok ang PIN upang i-unlock"</string>
@@ -636,6 +662,10 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Walang SIM card sa tablet."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Walang SIM card sa telepono."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Mangyaring magpasok ng SIM card."</string>
+    <!-- no translation found for lockscreen_missing_sim_instructions_long (7138450788301444298) -->
+    <skip />
+    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (1631853574702335453) -->
+    <skip />
     <string name="emergency_calls_only" msgid="6733978304386365407">"Mga pang-emergency na tawag lang"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Naka-lock ang network"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Naka-PUK-lock ang SIM card."</string>
@@ -924,6 +954,10 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Kung io-on mo ang USB storage, titigil ang ilang application na ginagamit mo at maaaring maging hindi available hanggang sa i-off mo ang USB storage."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Nabigo ang pagpapatakbo ng USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
+    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <skip />
+    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"I-format USB storage"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"I-format ang SD card"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"I-format ang imbakan na USB, na binubura ang lahat ng mga file na nakaimbak doon? Hindi maaaring maibalik ang pagkilos!"</string>
@@ -991,6 +1025,14 @@
     <string name="l2tp_vpn_description" msgid="3750692169378923304">"Layer 2 Tunneling Protocol"</string>
     <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Unang ibinahaging key na batay sa L2TP/IPSec VPN"</string>
     <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Batay sa certificate na L2TP/IPSec VPN"</string>
+    <!-- no translation found for vpn_ticker (285642105845608311) -->
+    <skip />
+    <!-- no translation found for vpn_title (5434034606697234123) -->
+    <skip />
+    <!-- no translation found for vpn_text (1610714069627824309) -->
+    <skip />
+    <!-- no translation found for vpn_text_long (4907843483284977618) -->
+    <skip />
     <string name="upload_file" msgid="2897957172366730416">"Pumili ng file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Walang napiling file"</string>
     <string name="reset" msgid="2448168080964209908">"I-reset"</string>
@@ -1051,6 +1093,17 @@
     <string name="storage_internal" msgid="7556050805474115618">"Panloob na Storage"</string>
     <string name="storage_sd_card" msgid="8921771478629812343">"SD Card"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB storage"</string>
-    <!-- no translation found for extract_edit_menu_button (302060189057163906) -->
+    <string name="extract_edit_menu_button" msgid="302060189057163906">"I-edit..."</string>
+    <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
+    <skip />
+    <!-- no translation found for data_usage_warning_body (3354394590936526648) -->
+    <skip />
+    <!-- no translation found for data_usage_3g_limit_title (7093334419518706686) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_title (7636489436819470761) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
     <skip />
 </resources>
