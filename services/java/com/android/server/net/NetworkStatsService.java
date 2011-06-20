@@ -31,6 +31,7 @@ import static android.provider.Settings.Secure.NETSTATS_NETWORK_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_MAX_HISTORY;
 import static android.provider.Settings.Secure.NETSTATS_PERSIST_THRESHOLD;
 import static android.provider.Settings.Secure.NETSTATS_POLL_INTERVAL;
+import static android.provider.Settings.Secure.NETSTATS_TAG_MAX_HISTORY;
 import static android.provider.Settings.Secure.NETSTATS_UID_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_UID_MAX_HISTORY;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
@@ -63,9 +64,9 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.LongSparseArray;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.util.TrustedTime;
 
 import com.android.internal.os.AtomicFile;
@@ -102,6 +103,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final int VERSION_NETWORK_INIT = 1;
     private static final int VERSION_UID_INIT = 1;
     private static final int VERSION_UID_WITH_IDENT = 2;
+    private static final int VERSION_UID_WITH_TAG = 3;
 
     private final Context mContext;
     private final INetworkManagementService mNetworkManager;
@@ -122,6 +124,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     // TODO: listen for kernel push events through netd instead of polling
     // TODO: watch for UID uninstall, and transfer stats into single bucket
 
+    // TODO: trim empty history objects entirely
+
     private static final long KB_IN_BYTES = 1024;
     private static final long MB_IN_BYTES = 1024 * KB_IN_BYTES;
     private static final long GB_IN_BYTES = 1024 * MB_IN_BYTES;
@@ -136,6 +140,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         public long getNetworkMaxHistory();
         public long getUidBucketDuration();
         public long getUidMaxHistory();
+        public long getTagMaxHistory();
         public long getTimeCacheMaxAge();
     }
 
@@ -146,16 +151,16 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Set of historical stats for known networks. */
     private HashMap<NetworkIdentitySet, NetworkStatsHistory> mNetworkStats = Maps.newHashMap();
     /** Set of historical stats for known UIDs. */
-    private HashMap<NetworkIdentitySet, SparseArray<NetworkStatsHistory>> mUidStats =
+    private HashMap<NetworkIdentitySet, LongSparseArray<NetworkStatsHistory>> mUidStats =
             Maps.newHashMap();
 
     /** Flag if {@link #mUidStats} have been loaded from disk. */
     private boolean mUidStatsLoaded = false;
 
-    private NetworkStats mLastNetworkPoll;
-    private NetworkStats mLastNetworkPersist;
+    private NetworkStats mLastNetworkSnapshot;
+    private NetworkStats mLastPersistNetworkSnapshot;
 
-    private NetworkStats mLastUidPoll;
+    private NetworkStats mLastUidSnapshot;
 
     private final HandlerThread mHandlerThread;
     private final Handler mHandler;
@@ -274,7 +279,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             for (NetworkIdentitySet ident : mNetworkStats.keySet()) {
                 if (templateMatches(template, ident)) {
                     final NetworkStatsHistory history = mNetworkStats.get(ident);
-                    combined.recordEntireHistory(history);
+                    if (history != null) {
+                        combined.recordEntireHistory(history);
+                    }
                 }
             }
             return combined;
@@ -282,18 +289,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public NetworkStatsHistory getHistoryForUid(NetworkTemplate template, int uid) {
+    public NetworkStatsHistory getHistoryForUid(NetworkTemplate template, int uid, int tag) {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
 
         synchronized (mStatsLock) {
             ensureUidStatsLoadedLocked();
+            final long packed = packUidAndTag(uid, tag);
 
             // combine all interfaces that match template
             final NetworkStatsHistory combined = new NetworkStatsHistory(
                     mSettings.getUidBucketDuration(), estimateUidBuckets());
             for (NetworkIdentitySet ident : mUidStats.keySet()) {
                 if (templateMatches(template, ident)) {
-                    final NetworkStatsHistory history = mUidStats.get(ident).get(uid);
+                    final NetworkStatsHistory history = mUidStats.get(ident).get(packed);
                     if (history != null) {
                         combined.recordEntireHistory(history);
                     }
@@ -329,7 +337,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public NetworkStats getSummaryForAllUid(NetworkTemplate template, long start, long end) {
+    public NetworkStats getSummaryForAllUid(
+            NetworkTemplate template, long start, long end, boolean includeTags) {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
 
         synchronized (mStatsLock) {
@@ -340,12 +349,23 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             for (NetworkIdentitySet ident : mUidStats.keySet()) {
                 if (templateMatches(template, ident)) {
-                    final SparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
+                    final LongSparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
                     for (int i = 0; i < uidStats.size(); i++) {
-                        final int uid = uidStats.keyAt(i);
-                        final NetworkStatsHistory history = uidStats.valueAt(i);
-                        total = history.getTotalData(start, end, total);
-                        stats.combineEntry(IFACE_ALL, uid, TAG_NONE, total[0], total[1]);
+                        final long packed = uidStats.keyAt(i);
+                        final int uid = unpackUid(packed);
+                        final int tag = unpackTag(packed);
+
+                        // always include summary under TAG_NONE, and include
+                        // other tags when requested.
+                        if (tag == TAG_NONE || includeTags) {
+                            final NetworkStatsHistory history = uidStats.valueAt(i);
+                            total = history.getTotalData(start, end, total);
+                            final long rx = total[0];
+                            final long tx = total[1];
+                            if (rx > 0 || tx > 0) {
+                                stats.combineEntry(IFACE_ALL, uid, tag, rx, tx);
+                            }
+                        }
                     }
                 }
             }
@@ -464,23 +484,24 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
                 : System.currentTimeMillis();
 
-        final NetworkStats ifaceStats;
-        final NetworkStats uidStats;
+        final NetworkStats networkSnapshot;
+        final NetworkStats uidSnapshot;
         try {
-            ifaceStats = mNetworkManager.getNetworkStatsSummary();
-            uidStats = detailedPoll ? mNetworkManager.getNetworkStatsDetail() : null;
+            networkSnapshot = mNetworkManager.getNetworkStatsSummary();
+            uidSnapshot = detailedPoll ? mNetworkManager.getNetworkStatsDetail() : null;
         } catch (RemoteException e) {
             Slog.w(TAG, "problem reading network stats");
             return;
         }
 
-        performNetworkPollLocked(ifaceStats, currentTime);
+        performNetworkPollLocked(networkSnapshot, currentTime);
         if (detailedPoll) {
-            performUidPollLocked(uidStats, currentTime);
+            performUidPollLocked(uidSnapshot, currentTime);
         }
 
         // decide if enough has changed to trigger persist
-        final NetworkStats persistDelta = computeStatsDelta(mLastNetworkPersist, ifaceStats);
+        final NetworkStats persistDelta = computeStatsDelta(
+                mLastPersistNetworkSnapshot, networkSnapshot);
         final long persistThreshold = mSettings.getPersistThreshold();
         for (String iface : persistDelta.getUniqueIfaces()) {
             final int index = persistDelta.findIndex(iface, UID_ALL, TAG_NONE);
@@ -490,7 +511,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 if (mUidStatsLoaded) {
                     writeUidStatsLocked();
                 }
-                mLastNetworkPersist = ifaceStats;
+                mLastPersistNetworkSnapshot = networkSnapshot;
                 break;
             }
         }
@@ -504,12 +525,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /**
      * Update {@link #mNetworkStats} historical usage.
      */
-    private void performNetworkPollLocked(NetworkStats networkStats, long currentTime) {
+    private void performNetworkPollLocked(NetworkStats networkSnapshot, long currentTime) {
         final HashSet<String> unknownIface = Sets.newHashSet();
 
-        final NetworkStats delta = computeStatsDelta(mLastNetworkPoll, networkStats);
+        final NetworkStats delta = computeStatsDelta(mLastNetworkSnapshot, networkSnapshot);
         final long timeStart = currentTime - delta.elapsedRealtime;
-        final long maxHistory = mSettings.getNetworkMaxHistory();
         for (int i = 0; i < delta.size; i++) {
             final String iface = delta.iface[i];
             final NetworkIdentitySet ident = mActiveIfaces.get(iface);
@@ -523,9 +543,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             final NetworkStatsHistory history = findOrCreateNetworkStatsLocked(ident);
             history.recordData(timeStart, currentTime, rx, tx);
+        }
+
+        // trim any history beyond max
+        final long maxHistory = mSettings.getNetworkMaxHistory();
+        for (NetworkStatsHistory history : mNetworkStats.values()) {
             history.removeBucketsBefore(currentTime - maxHistory);
         }
-        mLastNetworkPoll = networkStats;
+
+        mLastNetworkSnapshot = networkSnapshot;
 
         if (LOGD && unknownIface.size() > 0) {
             Slog.w(TAG, "unknown interfaces " + unknownIface.toString() + ", ignoring those stats");
@@ -535,15 +561,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /**
      * Update {@link #mUidStats} historical usage.
      */
-    private void performUidPollLocked(NetworkStats uidStats, long currentTime) {
+    private void performUidPollLocked(NetworkStats uidSnapshot, long currentTime) {
         ensureUidStatsLoadedLocked();
 
-        final NetworkStats delta = computeStatsDelta(mLastUidPoll, uidStats);
+        final NetworkStats delta = computeStatsDelta(mLastUidSnapshot, uidSnapshot);
         final long timeStart = currentTime - delta.elapsedRealtime;
-        final long maxHistory = mSettings.getUidMaxHistory();
-
-        // NOTE: historical UID stats ignore tags, and simply records all stats
-        // entries into a single UID bucket.
 
         for (int i = 0; i < delta.size; i++) {
             final String iface = delta.iface[i];
@@ -553,15 +575,32 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
 
             final int uid = delta.uid[i];
+            final int tag = delta.tag[i];
             final long rx = delta.rx[i];
             final long tx = delta.tx[i];
 
-            final NetworkStatsHistory history = findOrCreateUidStatsLocked(ident, uid);
+            final NetworkStatsHistory history = findOrCreateUidStatsLocked(ident, uid, tag);
             history.recordData(timeStart, currentTime, rx, tx);
-            history.removeBucketsBefore(currentTime - maxHistory);
         }
 
-        mLastUidPoll = uidStats;
+        // trim any history beyond max
+        final long maxUidHistory = mSettings.getUidMaxHistory();
+        final long maxTagHistory = mSettings.getTagMaxHistory();
+        for (LongSparseArray<NetworkStatsHistory> uidStats : mUidStats.values()) {
+            for (int i = 0; i < uidStats.size(); i++) {
+                final long packed = uidStats.keyAt(i);
+                final NetworkStatsHistory history = uidStats.valueAt(i);
+
+                // detailed tags are trimmed sooner than summary in TAG_NONE
+                if (unpackTag(packed) == TAG_NONE) {
+                    history.removeBucketsBefore(currentTime - maxUidHistory);
+                } else {
+                    history.removeBucketsBefore(currentTime - maxTagHistory);
+                }
+            }
+        }
+
+        mLastUidSnapshot = uidSnapshot;
     }
 
     /**
@@ -572,13 +611,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // migrate all UID stats into special "removed" bucket
         for (NetworkIdentitySet ident : mUidStats.keySet()) {
-            final SparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
-            final NetworkStatsHistory uidHistory = uidStats.get(uid);
-            if (uidHistory != null) {
-                final NetworkStatsHistory removedHistory = findOrCreateUidStatsLocked(
-                        ident, UID_REMOVED);
-                removedHistory.recordEntireHistory(uidHistory);
-                uidStats.remove(uid);
+            final LongSparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
+            for (int i = 0; i < uidStats.size(); i++) {
+                final long packed = uidStats.keyAt(i);
+                if (unpackUid(packed) == uid) {
+                    // only migrate combined TAG_NONE history
+                    if (unpackTag(packed) == TAG_NONE) {
+                        final NetworkStatsHistory uidHistory = uidStats.valueAt(i);
+                        final NetworkStatsHistory removedHistory = findOrCreateUidStatsLocked(
+                                ident, UID_REMOVED, TAG_NONE);
+                        removedHistory.recordEntireHistory(uidHistory);
+                    }
+                    uidStats.remove(packed);
+                }
             }
         }
 
@@ -590,10 +635,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private NetworkStatsHistory findOrCreateNetworkStatsLocked(NetworkIdentitySet ident) {
-        final long bucketDuration = mSettings.getNetworkBucketDuration();
         final NetworkStatsHistory existing = mNetworkStats.get(ident);
 
         // update when no existing, or when bucket duration changed
+        final long bucketDuration = mSettings.getNetworkBucketDuration();
         NetworkStatsHistory updated = null;
         if (existing == null) {
             updated = new NetworkStatsHistory(bucketDuration, 10);
@@ -611,20 +656,21 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
     }
 
-    private NetworkStatsHistory findOrCreateUidStatsLocked(NetworkIdentitySet ident, int uid) {
+    private NetworkStatsHistory findOrCreateUidStatsLocked(
+            NetworkIdentitySet ident, int uid, int tag) {
         ensureUidStatsLoadedLocked();
 
-        // find bucket for identity first, then find uid
-        SparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
+        LongSparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
         if (uidStats == null) {
-            uidStats = new SparseArray<NetworkStatsHistory>();
+            uidStats = new LongSparseArray<NetworkStatsHistory>();
             mUidStats.put(ident, uidStats);
         }
 
-        final long bucketDuration = mSettings.getUidBucketDuration();
-        final NetworkStatsHistory existing = uidStats.get(uid);
+        final long packed = packUidAndTag(uid, tag);
+        final NetworkStatsHistory existing = uidStats.get(packed);
 
         // update when no existing, or when bucket duration changed
+        final long bucketDuration = mSettings.getUidBucketDuration();
         NetworkStatsHistory updated = null;
         if (existing == null) {
             updated = new NetworkStatsHistory(bucketDuration, 10);
@@ -635,7 +681,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         if (updated != null) {
-            uidStats.put(uid, updated);
+            uidStats.put(packed, updated);
             return updated;
         } else {
             return existing;
@@ -719,17 +765,27 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 }
                 case VERSION_UID_WITH_IDENT: {
                     // uid := size *(NetworkIdentitySet size *(UID NetworkStatsHistory))
+
+                    // drop this data version, since this version only existed
+                    // for a short time.
+                    break;
+                }
+                case VERSION_UID_WITH_TAG: {
+                    // uid := size *(NetworkIdentitySet size *(UID tag NetworkStatsHistory))
                     final int ifaceSize = in.readInt();
                     for (int i = 0; i < ifaceSize; i++) {
                         final NetworkIdentitySet ident = new NetworkIdentitySet(in);
 
-                        final int uidSize = in.readInt();
-                        final SparseArray<NetworkStatsHistory> uidStats = new SparseArray<
-                                NetworkStatsHistory>(uidSize);
-                        for (int j = 0; j < uidSize; j++) {
+                        final int childSize = in.readInt();
+                        final LongSparseArray<NetworkStatsHistory> uidStats = new LongSparseArray<
+                                NetworkStatsHistory>(childSize);
+                        for (int j = 0; j < childSize; j++) {
                             final int uid = in.readInt();
+                            final int tag = in.readInt();
+                            final long packed = packUidAndTag(uid, tag);
+
                             final NetworkStatsHistory history = new NetworkStatsHistory(in);
-                            uidStats.put(uid, history);
+                            uidStats.put(packed, history);
                         }
 
                         mUidStats.put(ident, uidStats);
@@ -793,19 +849,23 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             final DataOutputStream out = new DataOutputStream(fos);
 
             out.writeInt(FILE_MAGIC);
-            out.writeInt(VERSION_UID_WITH_IDENT);
+            out.writeInt(VERSION_UID_WITH_TAG);
 
-            out.writeInt(mUidStats.size());
+            final int size = mUidStats.size();
+            out.writeInt(size);
             for (NetworkIdentitySet ident : mUidStats.keySet()) {
-                final SparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
+                final LongSparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
                 ident.writeToStream(out);
 
-                final int size = uidStats.size();
-                out.writeInt(size);
-                for (int i = 0; i < size; i++) {
-                    final int uid = uidStats.keyAt(i);
+                final int childSize = uidStats.size();
+                out.writeInt(childSize);
+                for (int i = 0; i < childSize; i++) {
+                    final long packed = uidStats.keyAt(i);
+                    final int uid = unpackUid(packed);
+                    final int tag = unpackTag(packed);
                     final NetworkStatsHistory history = uidStats.valueAt(i);
                     out.writeInt(uid);
+                    out.writeInt(tag);
                     history.writeToStream(out);
                 }
             }
@@ -864,11 +924,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 for (NetworkIdentitySet ident : mUidStats.keySet()) {
                     pw.print("  ident="); pw.println(ident.toString());
 
-                    final SparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
+                    final LongSparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
                     for (int i = 0; i < uidStats.size(); i++) {
-                        final int uid = uidStats.keyAt(i);
+                        final long packed = uidStats.keyAt(i);
+                        final int uid = unpackUid(packed);
+                        final int tag = unpackTag(packed);
                         final NetworkStatsHistory history = uidStats.valueAt(i);
-                        pw.print("    UID="); pw.println(uid);
+                        pw.print("    UID="); pw.print(uid);
+                        pw.print(" tag="); pw.println(tag);
                         history.dump("    ", pw);
                     }
                 }
@@ -902,7 +965,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             for (ApplicationInfo info : installedApps) {
                 final int uid = info.uid;
-                findOrCreateUidStatsLocked(ident, uid).generateRandom(
+                findOrCreateUidStatsLocked(ident, uid, TAG_NONE).generateRandom(
                         uidStart, uidEnd, uidRx, uidTx);
             }
         }
@@ -930,6 +993,23 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private static int estimateResizeBuckets(NetworkStatsHistory existing, long newBucketDuration) {
         return (int) (existing.bucketCount * existing.bucketDuration / newBucketDuration);
+    }
+
+    // @VisibleForTesting
+    public static long packUidAndTag(int uid, int tag) {
+        final long uidLong = uid;
+        final long tagLong = tag;
+        return (uidLong << 32) | (tagLong & 0xFFFFFFFFL);
+    }
+
+    // @VisibleForTesting
+    public static int unpackUid(long packed) {
+        return (int) (packed >> 32);
+    }
+
+    // @VisibleForTesting
+    public static int unpackTag(long packed) {
+        return (int) (packed & 0xFFFFFFFFL);
     }
 
     /**
@@ -977,6 +1057,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
         public long getUidMaxHistory() {
             return getSecureLong(NETSTATS_UID_MAX_HISTORY, 90 * DAY_IN_MILLIS);
+        }
+        public long getTagMaxHistory() {
+            return getSecureLong(NETSTATS_TAG_MAX_HISTORY, 30 * DAY_IN_MILLIS);
         }
         public long getTimeCacheMaxAge() {
             return DAY_IN_MILLIS;

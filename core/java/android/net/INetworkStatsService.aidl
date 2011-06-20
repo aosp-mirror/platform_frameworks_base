@@ -26,11 +26,11 @@ interface INetworkStatsService {
     /** Return historical stats for traffic that matches template. */
     NetworkStatsHistory getHistoryForNetwork(in NetworkTemplate template);
     /** Return historical stats for specific UID traffic that matches template. */
-    NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid);
+    NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid, int tag);
 
     /** Return usage summary for traffic that matches template. */
     NetworkStats getSummaryForNetwork(in NetworkTemplate template, long start, long end);
     /** Return usage summary per UID for traffic that matches template. */
-    NetworkStats getSummaryForAllUid(in NetworkTemplate template, long start, long end);
+    NetworkStats getSummaryForAllUid(in NetworkTemplate template, long start, long end, boolean includeTags);
 
 }
