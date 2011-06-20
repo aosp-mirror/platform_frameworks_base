@@ -449,27 +449,25 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
         final int action = event.getAction();
 
         boolean handled = false;
-        float x = event.getX();
-        float y = event.getY();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
-                handleDown(x, y);
+                handleDown(event);
                 handled = true;
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                handleMove(x, y);
+                handleMove(event);
                 handled = true;
                 break;
 
             case MotionEvent.ACTION_UP:
-                handleUp(x, y);
-                handleMove(x, y);
+                handleMove(event);
+                handleUp(event);
                 handled = true;
                 break;
 
             case MotionEvent.ACTION_CANCEL:
-                handleMove(x, y);
+                handleMove(event);
                 handled = true;
                 break;
         }
@@ -483,7 +481,9 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
         mHandleDrawable.setY(y);
     }
 
-    private void handleDown(float x, float y) {
+    private void handleDown(MotionEvent event) {
+        final float x = event.getX();
+        final float y = event.getY();
         final float dx = x - mWaveCenterX;
         final float dy = y - mWaveCenterY;
         if (dist2(dx,dy) <= square(mTapRadius)) {
@@ -498,66 +498,72 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
         }
     }
 
-    private void handleUp(float x, float y) {
+    private void handleUp(MotionEvent event) {
         if (DEBUG && mDragging) Log.v(TAG, "** Handle RELEASE");
-        switchToState(STATE_FINISH, x, y);
+        switchToState(STATE_FINISH, event.getX(), event.getY());
     }
 
-    private void handleMove(float x, float y) {
+    private void handleMove(MotionEvent event) {
         if (!mDragging) {
             return;
         }
 
-        float tx = x - mWaveCenterX;
-        float ty = y - mWaveCenterY;
-        float touchRadius = (float) Math.sqrt(dist2(tx, ty));
-        final float scale = touchRadius > mOuterRadius ? mOuterRadius / touchRadius : 1.0f;
-        float limitX = mWaveCenterX + tx * scale;
-        float limitY = mWaveCenterY + ty * scale;
-
         int activeTarget = -1;
-        boolean singleTarget = mTargetDrawables.size() == 1;
-        if (singleTarget) {
-            // Snap to outer ring if there's only one target
-            float snapRadius = mOuterRadius - mSnapMargin;
-            if (touchRadius > snapRadius) {
-                activeTarget = 0;
+        final int historySize = event.getHistorySize();
+        for (int k = 0; k < historySize + 1; k++) {
+            float x = k < historySize ? event.getHistoricalX(k) : event.getX();
+            float y = k < historySize ? event.getHistoricalY(k) : event.getY();
+            float tx = x - mWaveCenterX;
+            float ty = y - mWaveCenterY;
+            float touchRadius = (float) Math.sqrt(dist2(tx, ty));
+            final float scale = touchRadius > mOuterRadius ? mOuterRadius / touchRadius : 1.0f;
+            float limitX = mWaveCenterX + tx * scale;
+            float limitY = mWaveCenterY + ty * scale;
+
+            boolean singleTarget = mTargetDrawables.size() == 1;
+            if (singleTarget) {
+                // Snap to outer ring if there's only one target
+                float snapRadius = mOuterRadius - mSnapMargin;
+                if (touchRadius > snapRadius) {
+                    activeTarget = 0;
+                    x = limitX;
+                    y = limitY;
+                }
+            } else {
+                // If there's more than one target, snap to the closest one less than hitRadius away.
+                float best = Float.MAX_VALUE;
+                final float hitRadius2 = mHitRadius * mHitRadius;
+                for (int i = 0; i < mTargetDrawables.size(); i++) {
+                    // Snap to the first target in range
+                    TargetDrawable target = mTargetDrawables.get(i);
+                    float dx = limitX - target.getX();
+                    float dy = limitY - target.getY();
+                    float dist2 = dx*dx + dy*dy;
+                    if (target.isValid() && dist2 < hitRadius2 && dist2 < best) {
+                        activeTarget = i;
+                        best = dist2;
+                    }
+                }
                 x = limitX;
                 y = limitY;
             }
-        } else {
-            // If there's more than one target, snap to the closest one less than hitRadius away.
-            float best = Float.MAX_VALUE;
-            final float hitRadius2 = mHitRadius * mHitRadius;
-            for (int i = 0; i < mTargetDrawables.size(); i++) {
-                // Snap to the first target in range
-                TargetDrawable target = mTargetDrawables.get(i);
-                float dx = limitX - target.getX();
-                float dy = limitY - target.getY();
-                float dist2 = dx*dx + dy*dy;
-                if (target.isValid() && dist2 < hitRadius2 && dist2 < best) {
-                    activeTarget = i;
-                    best = dist2;
+            if (activeTarget != -1) {
+                switchToState(STATE_SNAP, x,y);
+                float newX = singleTarget ? limitX : mTargetDrawables.get(activeTarget).getX();
+                float newY = singleTarget ? limitY : mTargetDrawables.get(activeTarget).getY();
+                moveHandleTo(newX, newY, false);
+                TargetDrawable currentTarget = mTargetDrawables.get(activeTarget);
+                if (currentTarget.hasState(TargetDrawable.STATE_FOCUSED)) {
+                    currentTarget.setState(TargetDrawable.STATE_FOCUSED);
+                    mHandleDrawable.setAlpha(0.0f);
                 }
+            } else {
+                switchToState(STATE_TRACKING, x, y);
+                moveHandleTo(x, y, false);
+                mHandleDrawable.setAlpha(1.0f);
             }
-            x = limitX;
-            y = limitY;
         }
-        if (activeTarget != -1) {
-            switchToState(STATE_SNAP, x,y);
-            float newX = singleTarget ? limitX : mTargetDrawables.get(activeTarget).getX();
-            float newY = singleTarget ? limitY : mTargetDrawables.get(activeTarget).getY();
-            moveHandleTo(newX, newY, false);
-            TargetDrawable currentTarget = mTargetDrawables.get(activeTarget);
-            if (currentTarget.hasState(TargetDrawable.STATE_FOCUSED)) {
-                currentTarget.setState(TargetDrawable.STATE_FOCUSED);
-                mHandleDrawable.setAlpha(0.0f);
-            }
-        } else {
-            switchToState(STATE_TRACKING, x, y);
-            moveHandleTo(x, y, false);
-            mHandleDrawable.setAlpha(1.0f);
-        }
+
         // Draw handle outside parent's bounds
         invalidateGlobalRegion(mHandleDrawable);
 
