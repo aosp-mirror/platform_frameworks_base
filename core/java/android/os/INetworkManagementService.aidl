@@ -173,21 +173,6 @@ interface INetworkManagementService
     void detachPppd(String tty);
 
     /**
-     * Turn on USB RNDIS support - this will turn off thinks like adb/mass-storage
-     */
-    void startUsbRNDIS();
-
-    /**
-     * Turn off USB RNDIS support
-     */
-    void stopUsbRNDIS();
-
-    /**
-     * Check the status of USB RNDIS support
-     */
-    boolean isUsbRNDISStarted();
-
-    /**
      * Start Wifi Access Point
      */
     void startAccessPoint(in WifiConfiguration wifiConfig, String wlanIface, String softapIface);
