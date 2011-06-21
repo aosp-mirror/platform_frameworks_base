@@ -545,9 +545,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         final int recordCount = parcel.readInt();
         for (int i = 0; i < recordCount; i++) {
             AccessibilityRecord record = AccessibilityRecord.obtain();
-            readAccessibilityRecordFromParcel(record, parcel);
             // Do this to write the connection only once.
             record.setConnection(mConnection);
+            readAccessibilityRecordFromParcel(record, parcel);
             mRecords.add(record);
         }
     }
