@@ -416,12 +416,16 @@ void SampleTable::buildSampleEntriesTable() {
         uint32_t delta = mTimeToSample[2 * i + 1];
 
         for (uint32_t j = 0; j < n; ++j) {
-            CHECK(sampleIndex < mNumSampleSizes);
+            if (sampleIndex < mNumSampleSizes) {
+                // Technically this should always be the case if the file
+                // is well-formed, but you know... there's (gasp) malformed
+                // content out there.
 
-            mSampleTimeEntries[sampleIndex].mSampleIndex = sampleIndex;
+                mSampleTimeEntries[sampleIndex].mSampleIndex = sampleIndex;
 
-            mSampleTimeEntries[sampleIndex].mCompositionTime =
-                sampleTime + getCompositionTimeOffset(sampleIndex);
+                mSampleTimeEntries[sampleIndex].mCompositionTime =
+                    sampleTime + getCompositionTimeOffset(sampleIndex);
+            }
 
             ++sampleIndex;
             sampleTime += delta;
