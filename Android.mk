@@ -372,6 +372,7 @@ framework_docs_LOCAL_DROIDDOC_OPTIONS := \
     -since ./frameworks/base/api/10.xml 10 \
     -since ./frameworks/base/api/11.xml 11 \
     -since ./frameworks/base/api/12.xml 12 \
+    -since ./frameworks/base/api/13.xml 13 \
 		-werror -hide 113 \
 		-overview $(LOCAL_PATH)/core/java/overview.html
 
