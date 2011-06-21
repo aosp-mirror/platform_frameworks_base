@@ -173,11 +173,11 @@ protected:
     }
 
     virtual EGLint getSurfaceWidth() {
-        return 64;
+        return 512;
     }
 
     virtual EGLint getSurfaceHeight() {
-        return 64;
+        return 512;
     }
 
     void loadShader(GLenum shaderType, const char* pSource, GLuint* outShader) {
@@ -526,18 +526,19 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferNpot) {
     glClearColor(0.2, 0.2, 0.2, 0.2);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glViewport(0, 0, texWidth, texHeight);
     drawTexture();
 
     EXPECT_TRUE(checkPixel( 0,  0, 255, 127, 255, 255));
     EXPECT_TRUE(checkPixel(63,  0,   0, 133,   0, 255));
-    EXPECT_TRUE(checkPixel(63, 63,   0, 133,   0, 255));
-    EXPECT_TRUE(checkPixel( 0, 63, 255, 127, 255, 255));
+    EXPECT_TRUE(checkPixel(63, 65,   0, 133,   0, 255));
+    EXPECT_TRUE(checkPixel( 0, 65, 255, 127, 255, 255));
 
-    EXPECT_TRUE(checkPixel(22, 44, 247,  70, 255, 255));
-    EXPECT_TRUE(checkPixel(45, 52, 209,  32, 235, 255));
-    EXPECT_TRUE(checkPixel(52, 51, 100, 255,  73, 255));
+    EXPECT_TRUE(checkPixel(22, 44, 255, 127, 255, 255));
+    EXPECT_TRUE(checkPixel(45, 52, 255, 127, 255, 255));
+    EXPECT_TRUE(checkPixel(52, 51,  98, 255,  73, 255));
     EXPECT_TRUE(checkPixel( 7, 31, 155,   0, 118, 255));
-    EXPECT_TRUE(checkPixel(31,  9, 148,  71, 110, 255));
+    EXPECT_TRUE(checkPixel(31,  9, 107,  24,  87, 255));
     EXPECT_TRUE(checkPixel(29, 35, 255, 127, 255, 255));
     EXPECT_TRUE(checkPixel(36, 22, 155,  29,   0, 255));
 }
@@ -570,6 +571,7 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferPow2) {
     glClearColor(0.2, 0.2, 0.2, 0.2);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glViewport(0, 0, texWidth, texHeight);
     drawTexture();
 
     EXPECT_TRUE(checkPixel( 0,  0,   0, 133,   0, 255));
@@ -628,6 +630,7 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BufferWithCrop) {
         glClearColor(0.2, 0.2, 0.2, 0.2);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        glViewport(0, 0, 64, 64);
         drawTexture();
 
         EXPECT_TRUE(checkPixel( 0,  0,  82, 255,  35, 255));
@@ -675,28 +678,29 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledRGBABufferNpot) {
     glClearColor(0.2, 0.2, 0.2, 0.2);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glViewport(0, 0, texWidth, texHeight);
     drawTexture();
 
     EXPECT_TRUE(checkPixel( 0,  0,  35,  35,  35,  35));
     EXPECT_TRUE(checkPixel(63,  0, 231, 231, 231, 231));
-    EXPECT_TRUE(checkPixel(63, 63, 231, 231, 231, 231));
-    EXPECT_TRUE(checkPixel( 0, 63,  35,  35,  35,  35));
+    EXPECT_TRUE(checkPixel(63, 65, 231, 231, 231, 231));
+    EXPECT_TRUE(checkPixel( 0, 65,  35,  35,  35,  35));
 
     EXPECT_TRUE(checkPixel(15, 10,  35, 231, 231, 231));
-    EXPECT_TRUE(checkPixel(24, 63,  35, 231, 231,  35));
-    EXPECT_TRUE(checkPixel(19, 40,  87, 179,  35,  35));
+    EXPECT_TRUE(checkPixel(24, 63,  38, 228, 231,  35));
+    EXPECT_TRUE(checkPixel(19, 40,  35, 231,  35,  35));
     EXPECT_TRUE(checkPixel(38, 30, 231,  35,  35,  35));
     EXPECT_TRUE(checkPixel(42, 54,  35,  35,  35, 231));
-    EXPECT_TRUE(checkPixel(37, 33,  35, 231, 231, 231));
+    EXPECT_TRUE(checkPixel(37, 33, 228,  38,  38,  38));
     EXPECT_TRUE(checkPixel(31,  8, 231,  35,  35, 231));
-    EXPECT_TRUE(checkPixel(36, 47, 231,  35, 231, 231));
-    EXPECT_TRUE(checkPixel(24, 63,  35, 231, 231,  35));
-    EXPECT_TRUE(checkPixel(48,  3, 231, 231,  35,  35));
+    EXPECT_TRUE(checkPixel(36, 47, 228,  35, 231, 231));
+    EXPECT_TRUE(checkPixel(24, 63,  38, 228, 231,  35));
+    EXPECT_TRUE(checkPixel(48,  3, 228, 228,  38,  35));
     EXPECT_TRUE(checkPixel(54, 50,  35, 231, 231, 231));
-    EXPECT_TRUE(checkPixel(24, 25, 191, 191, 231, 231));
-    EXPECT_TRUE(checkPixel(10,  9,  93,  93, 231, 231));
+    EXPECT_TRUE(checkPixel(24, 25,  41,  41, 231, 231));
+    EXPECT_TRUE(checkPixel(10,  9,  38,  38, 231, 231));
     EXPECT_TRUE(checkPixel(29,  4,  35,  35,  35, 231));
-    EXPECT_TRUE(checkPixel(56, 31,  35, 231, 231,  35));
+    EXPECT_TRUE(checkPixel(56, 31,  38, 228, 231,  35));
     EXPECT_TRUE(checkPixel(58, 55,  35,  35, 231, 231));
 }
 
@@ -730,6 +734,7 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledRGBABufferPow2) {
     glClearColor(0.2, 0.2, 0.2, 0.2);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glViewport(0, 0, texWidth, texHeight);
     drawTexture();
 
     EXPECT_TRUE(checkPixel( 0,  0, 231, 231, 231, 231));
@@ -803,6 +808,7 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromGLFilledRGBABufferPow2) {
     glClearColor(0.2, 0.2, 0.2, 0.2);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glViewport(0, 0, texWidth, texHeight);
     drawTexture();
 
     EXPECT_TRUE(checkPixel( 0,  0, 153, 153, 153, 153));
