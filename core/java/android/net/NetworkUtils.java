@@ -80,16 +80,6 @@ public class NetworkUtils {
     public native static boolean runDhcp(String interfaceName, DhcpInfoInternal ipInfo);
 
     /**
-     * Initiate renewal on the Dhcp client daemon. This call blocks until it obtains
-     * a result (either success or failure) from the daemon.
-     * @param interfaceName the name of the interface to configure
-     * @param ipInfo if the request succeeds, this object is filled in with
-     * the IP address information.
-     * @return {@code true} for success, {@code false} for failure
-     */
-    public native static boolean runDhcpRenew(String interfaceName, DhcpInfoInternal ipInfo);
-
-    /**
      * Shut down the DHCP client daemon.
      * @param interfaceName the name of the interface for which the daemon
      * should be stopped
