@@ -85,6 +85,12 @@ public class FileFilter {
         // This first block of tests are for features for which Android
         // should pass all tests. They are skipped only temporarily.
         // TODO: Fix these failing tests and remove them from this list.
+        ignoreResultList.add("fast/dom/HTMLKeygenElement/keygen.html"); // Missing layoutTestController.shadowRoot()
+        ignoreResultList.add("fast/dom/Geolocation/window-close-crash.html"); // Missing layoutTestContoller.setCloseRemainingWindowsWhenComplete()
+        ignoreResultList.add("fast/dom/Geolocation/page-reload-cancel-permission-requests.html"); // Missing layoutTestController.numberOfPendingGeolocationPermissionRequests()
+        ignoreResultList.add("fast/dom/HTMLLinkElement/link-and-subresource-test.html"); // Missing layoutTestController.dumpResourceResponseMIMETypes()
+        ignoreResultList.add("fast/dom/HTMLLinkElement/prefetch.html"); // Missing layoutTestController.dumpResourceResponseMIMETypes()
+        ignoreResultList.add("fast/dom/HTMLLinkElement/subresource.html"); // Missing layoutTestController.dumpResourceResponseMIMETypes()
         ignoreResultList.add("fast/encoding/char-decoding.html"); // fails in Java HTTP stack, see http://b/issue?id=3047156
         ignoreResultList.add("fast/encoding/hanarei-blog32-fc2-com.html"); // fails in Java HTTP stack, see http://b/issue?id=3046986
         ignoreResultList.add("fast/encoding/mailto-always-utf-8.html"); // Requires waitForPolicyDelegate(), see http://b/issue?id=3043468
@@ -100,9 +106,16 @@ public class FileFilter {
         ignoreResultList.add("storage/open-database-creation-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
         ignoreResultList.add("storage/statement-error-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
         ignoreResultList.add("storage/statement-success-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
+        ignoreResultList.add("storage/storageinfo-query-usage.html"); // Need window.webkitStorageInfo
         ignoreResultList.add("storage/transaction-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
         ignoreResultList.add("storage/transaction-error-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
         ignoreResultList.add("storage/transaction-success-callback-isolated-world.html"); // Requires layoutTestController.evaluateScriptInIsolatedWorld()
+        ignoreResultList.add("storage/domstorage/localstorage/storagetracker/storage-tracker-1-prepare.html"); // Missing layoutTestController.originsWithLocalStorage()
+        ignoreResultList.add("storage/domstorage/localstorage/storagetracker/storage-tracker-2-create.html"); // Missing layoutTestController.originsWithLocalStorage()
+        ignoreResultList.add("storage/domstorage/localstorage/storagetracker/storage-tracker-3-delete-all.html"); // Missing layoutTestController.originsWithLocalStorage()
+        ignoreResultList.add("storage/domstorage/localstorage/storagetracker/storage-tracker-4-create.html"); // Missing layoutTestController.originsWithLocalStorage()
+        ignoreResultList.add("storage/domstorage/localstorage/storagetracker/storage-tracker-5-delete-one.html"); // Missing layoutTestController.originsWithLocalStorage()
+
 
         // Expected failures due to unsupported features or tests unsuitable for Android.
         ignoreResultList.add("fast/encoding/char-decoding-mac.html"); // Mac-specific encodings (also marked Won't Fix in Chromium, bug 7388)
@@ -119,6 +132,7 @@ public class FileFilter {
         ignoreResultList.add("storage/domstorage/localstorage/private-browsing-affects-storage.html"); // private browsing not supported
         ignoreResultList.add("storage/domstorage/sessionstorage/private-browsing-affects-storage.html"); // private browsing not supported
         ignoreResultList.add("storage/indexeddb"); // indexeddb not supported
+        ignoreResultList.add("storage/private-browsing-noread-nowrite.html"); // private browsing not supported
         ignoreResultList.add("storage/private-browsing-readonly.html"); // private browsing not supported
         ignoreResultList.add("websocket/tests/workers"); // workers not supported
         ignoreResultList.add("dom/xhtml/level2/html/htmldocument04.xhtml"); // /mnt/sdcard on SR uses lowercase filesystem, this test checks filename and is case senstive.
