@@ -488,7 +488,15 @@ public class InputMethodService extends AbstractInputMethodService {
             InputMethodService.this.onUpdateSelection(oldSelStart, oldSelEnd,
                     newSelStart, newSelEnd, candidatesStart, candidatesEnd);
         }
-        
+
+        @Override
+        public void viewClicked(boolean focusChanged) {
+            if (!isEnabled()) {
+                return;
+            }
+            InputMethodService.this.onViewClicked(focusChanged);
+        }
+
         /**
          * Call {@link InputMethodService#onUpdateCursor
          * InputMethodService.onUpdateCursor()}.
@@ -1606,6 +1614,16 @@ public class InputMethodService extends AbstractInputMethodService {
             eet.setSelection(newSelStart, newSelEnd);
             eet.finishInternalChanges();
         }
+    }
+
+    /**
+     * Called when the user tapped or clicked a text view.
+     * IMEs can't rely on this method being called because this was not part of the original IME
+     * protocol, so applications with custom text editing written before this method appeared will
+     * not call to inform the IME of this interaction.
+     * @param focusChanged true if the user changed the focused view by this click.
+     */
+    public void onViewClicked(boolean focusChanged) {
     }
 
     /**
