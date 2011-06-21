@@ -207,6 +207,11 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         getWindow().setFeatureInt(Window.FEATURE_PROGRESS, progress);
 
         Log.v(LOGTAG, "  Loading " + mTestUrl);
+
+        if (mTestUrl.contains("/dumpAsText/")) {
+            dumpAsText(false);
+        }
+
         mWebView.loadUrl(mTestUrl);
 
         if (mTimeoutInMillis > 0) {
