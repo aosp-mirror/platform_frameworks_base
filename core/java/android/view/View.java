@@ -2184,12 +2184,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     int mUserPaddingLeft;
 
     /**
-     * Cache the paddingTop set by the user to append to the scrollbar's size.
-     */
-    @ViewDebug.ExportedProperty(category = "padding")
-    int mUserPaddingTop;
-
-    /**
      * Cache if the user padding is relative.
      *
      */
@@ -2890,12 +2884,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
         // Cache user padding as we cannot fully resolve padding here (we dont have yet the resolved
         // layout direction). Those cached values will be used later during padding resolution.
-        mUserPaddingLeft = leftPadding;
-        mUserPaddingRight = rightPadding;
         mUserPaddingStart = startPadding;
         mUserPaddingEnd = endPadding;
-        mUserPaddingTop = topPadding;
-        mUserPaddingBottom = bottomPadding;
 
         if (viewFlagMasks != 0) {
             setFlags(viewFlagValues, viewFlagMasks);
@@ -8882,7 +8872,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                 }
         }
 
-        mPaddingTop = (mUserPaddingTop >= 0) ? mUserPaddingTop : mPaddingTop;
         mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
 
         recomputePadding();
