@@ -27,8 +27,14 @@ import android.util.TypedValue;
  *
  **/
 public class AllocationAdapter extends Allocation {
+    private boolean mConstrainedLOD;
+    private boolean mConstrainedFace;
+    private boolean mConstrainedY;
+    private boolean mConstrainedZ;
+
     private int mSelectedDimX;
     private int mSelectedDimY;
+    private int mSelectedDimZ;
     private int mSelectedCount;
     private Allocation mAlloc;
 
@@ -37,12 +43,13 @@ public class AllocationAdapter extends Allocation {
 
     AllocationAdapter(int id, RenderScript rs, Allocation alloc) {
         super(id, rs, null, alloc.mUsage);
-        Type t = alloc.getType();
-        mSelectedDimX = t.getX();
-        mSelectedDimY = t.getY();
-        mSelectedCount = t.getCount();
+        mAlloc = alloc;
     }
 
+
+    int getID() {
+        return mAlloc.getID();
+    }
 
     public void copyFrom(BaseObj[] d) {
         mRS.validate();
@@ -54,7 +61,7 @@ public class AllocationAdapter extends Allocation {
         for (int ct=0; ct < d.length; ct++) {
             i[ct] = d[ct].getID();
         }
-        subData1D(0, mType.getCount(), i);
+        subData1D(0, mAlloc.mType.getCount(), i);
     }
 
     void validateBitmap(Bitmap b) {
@@ -93,7 +100,7 @@ public class AllocationAdapter extends Allocation {
 
 
     public void subData(int xoff, FieldPacker fp) {
-        int eSize = mType.mElement.getSizeBytes();
+        int eSize = mAlloc.mType.mElement.getSizeBytes();
         final byte[] data = fp.getData();
 
         int count = data.length / eSize;
@@ -107,7 +114,7 @@ public class AllocationAdapter extends Allocation {
 
 
     public void subElementData(int xoff, int component_number, FieldPacker fp) {
-        if (component_number >= mType.mElement.mElements.length) {
+        if (component_number >= mAlloc.mType.mElement.mElements.length) {
             throw new RSIllegalArgumentException("Component_number " + component_number + " out of range.");
         }
         if(xoff < 0) {
@@ -115,7 +122,7 @@ public class AllocationAdapter extends Allocation {
         }
 
         final byte[] data = fp.getData();
-        int eSize = mType.mElement.mElements[component_number].getSizeBytes();
+        int eSize = mAlloc.mType.mElement.mElements[component_number].getSizeBytes();
 
         if (data.length != eSize) {
             throw new RSIllegalArgumentException("Field packer sizelength " + data.length +
@@ -133,12 +140,13 @@ public class AllocationAdapter extends Allocation {
         if(count < 1) {
             throw new RSIllegalArgumentException("Count must be >= 1.");
         }
-        if((off + count) > mSelectedDimX * mSelectedDimY) {
-            throw new RSIllegalArgumentException("Overflow, Available count " + mType.getCount() +
+        if((off + count) > mSelectedCount) {
+            throw new RSIllegalArgumentException("Overflow, Available count " + mAlloc.mType.getCount() +
                                                ", got " + count + " at offset " + off + ".");
         }
         if((len) < dataSize) {
-            throw new RSIllegalArgumentException("Array too small for allocation type.");
+            throw new RSIllegalArgumentException("Array too small for allocation type.  len = " +
+                                                 len + ", dataSize = " + dataSize);
         }
     }
 
@@ -223,8 +231,51 @@ public class AllocationAdapter extends Allocation {
         mRS.nAllocationRead(getID(), d);
     }
 
+    private void initLOD(int lod) {
+        if (lod < 0) {
+            throw new RSIllegalArgumentException("Attempting to set negative lod (" + lod + ").");
+        }
+
+        int tx = mAlloc.mType.getX();
+        int ty = mAlloc.mType.getY();
+        int tz = mAlloc.mType.getZ();
+
+        for (int ct=0; ct < lod; ct++) {
+            if ((tx==1) && (ty == 1) && (tz == 1)) {
+                throw new RSIllegalArgumentException("Attempting to set lod (" + lod + ") out of range.");
+            }
+
+            if (tx > 1) tx >>= 1;
+            if (ty > 1) ty >>= 1;
+            if (tz > 1) tz >>= 1;
+        }
+
+        mSelectedDimX = tx;
+        mSelectedDimY = ty;
+        mSelectedCount = tx;
+        if (ty > 1) {
+            mSelectedCount *= ty;
+        }
+        if (tz > 1) {
+            mSelectedCount *= tz;
+        }
+    }
+
+    /**
+     * Set the active LOD.  The LOD must be within the range for the
+     * type being adapted.
+     *
+     * @param lod The LOD to make active.
+     */
     public void setLOD(int lod) {
-        mSelectedLOD = lod;
+        if (!mAlloc.getType().hasMipmaps()) {
+            throw new RSInvalidStateException("Cannot set LOD when the allocation type does not include mipmaps.");
+        }
+        if (!mConstrainedLOD) {
+            throw new RSInvalidStateException("Cannot set LOD when the adapter includes mipmaps.");
+        }
+
+        initLOD(lod);
     }
 
     public void setFace(Type.CubemapFace cf) {
@@ -245,6 +296,11 @@ public class AllocationAdapter extends Allocation {
     static public AllocationAdapter create2D(RenderScript rs, Allocation a) {
         rs.validate();
         AllocationAdapter aa = new AllocationAdapter(0, rs, a);
+        aa.mConstrainedLOD = true;
+        aa.mConstrainedFace = true;
+        aa.mConstrainedY = false;
+        aa.mConstrainedZ = true;
+        aa.initLOD(0);
         return aa;
     }
 
