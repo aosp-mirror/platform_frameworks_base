@@ -184,12 +184,12 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
 
     private class MenuAdapter extends BaseAdapter {
         public int getCount() {
-            ArrayList<MenuItemImpl> items = mMenu.getVisibleItems();
+            ArrayList<MenuItemImpl> items = mMenu.getNonActionItems();
             return items.size() - mItemIndexOffset;
         }
 
         public MenuItemImpl getItem(int position) {
-            ArrayList<MenuItemImpl> items = mMenu.getVisibleItems();
+            ArrayList<MenuItemImpl> items = mMenu.getNonActionItems();
             return items.get(position + mItemIndexOffset);
         }
 
