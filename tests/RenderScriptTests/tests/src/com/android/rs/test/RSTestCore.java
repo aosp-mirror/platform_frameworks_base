@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2008-2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,7 @@ public class RSTestCore {
         unitTests = new ArrayList<UnitTest>();
 
         unitTests.add(new UT_primitives(this, mRes, mCtx));
+        unitTests.add(new UT_vector(this, mRes, mCtx));
         unitTests.add(new UT_rsdebug(this, mRes, mCtx));
         unitTests.add(new UT_rstime(this, mRes, mCtx));
         unitTests.add(new UT_rstypes(this, mRes, mCtx));
