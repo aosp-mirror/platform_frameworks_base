@@ -32,6 +32,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.ContentObserver;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
@@ -814,6 +815,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         final AtomicInteger mInteractionIdCounter = new AtomicInteger();
 
+        final Rect mTempBounds = new Rect();
+
         // the events pending events to be dispatched to this service
         final SparseArray<AccessibilityEvent> mPendingEvents =
             new SparseArray<AccessibilityEvent>();
@@ -932,9 +935,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 AccessibilityNodeInfo info = mCallback.getFindAccessibilityNodeInfoResultAndClear(
                         interactionId);
                 if (info != null) {
+                    applyCompatibilityScaleIfNeeded(info);
                     info.setConnection(this);
+                    info.setSealed(true);
                 }
-                info.setSealed(true);
                 return info;
             } catch (RemoteException re) {
                 if (DEBUG) {
@@ -979,6 +983,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     final int infoCount = infos.size();
                     for (int i = 0; i < infoCount; i++) {
                         AccessibilityNodeInfo info = infos.get(i);
+                        applyCompatibilityScaleIfNeeded(info);
                         info.setConnection(this);
                         info.setSealed(true);
                     }
@@ -1019,6 +1024,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 AccessibilityNodeInfo info =
                      mCallback.getFindAccessibilityNodeInfoResultAndClear(interactionId);
                 if (info != null) {
+                    applyCompatibilityScaleIfNeeded(info);
                     info.setConnection(this);
                     info.setSealed(true);
                 }
@@ -1092,6 +1098,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 Slog.i(LOG_TAG, "Trying to get interaction connection to windowId: " + windowId);
             }
             return mWindowIdToInteractionConnectionMap.get(windowId);
+        }
+
+        private void applyCompatibilityScaleIfNeeded(AccessibilityNodeInfo info) {
+            IBinder windowToken = mWindowIdToWindowTokenMap.get(info.getWindowId());
+            final float scale = mWindowManagerService.getWindowCompatibilityScale(windowToken);
+
+            if (Float.compare(scale, 1.0f) == 0) {
+                return;
+            }
+
+            Rect bounds = mTempBounds;
+            info.getBoundsInParent(bounds);
+            bounds.scale(scale);
+            info.setBoundsInParent(bounds);
+
+            info.getBoundsInScreen(bounds);
+            bounds.scale(scale);
+            info.setBoundsInScreen(bounds);
         }
     }
 

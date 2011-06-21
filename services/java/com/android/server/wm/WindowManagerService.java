@@ -2776,6 +2776,13 @@ public class WindowManagerService extends IWindowManager.Stub
         Binder.restoreCallingIdentity(origId);
     }
 
+    public float getWindowCompatibilityScale(IBinder windowToken) {
+        synchronized (mWindowMap) {
+            WindowState windowState = mWindowMap.get(windowToken);
+            return (windowState != null) ? windowState.mGlobalScale : 1.0f;
+        }
+    }
+
     private AttributeCache.Entry getCachedAnimations(WindowManager.LayoutParams lp) {
         if (DEBUG_ANIM) Slog.v(TAG, "Loading animations: layout params pkg="
                 + (lp != null ? lp.packageName : null)
