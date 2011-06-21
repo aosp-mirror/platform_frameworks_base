@@ -20,7 +20,8 @@
         android:layout_height="fill_parent">
 
     <FrameLayout android:layout_width="match_parent"
-                 android:layout_height="match_parent">
+                 android:layout_height="match_parent"
+                 android:background="#FFFFFFFF">
 
         <FrameLayout
                 android:layout_width="300dp"
@@ -79,6 +80,28 @@
         <FrameLayout
                 android:layout_width="300dp"
                 android:layout_height="300dp"
+                android:layout_gravity="top|right"
+                android:background="@*android:drawable/dialog_full_holo_dark"
+                android:layoutDirection="ltr">
+
+            <FrameLayout
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="top|left"
+                    android:background="#FF0000FF">
+            </FrameLayout>
+
+            <FrameLayout
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="bottom|right"
+                    android:background="#FFFFFFFF">
+            </FrameLayout>
+        </FrameLayout>
+
+        <FrameLayout
+                android:layout_width="300dp"
+                android:layout_height="300dp"
                 android:layout_gravity="bottom|left"
                 android:background="#FF888888"
                 android:paddingTop="20dip"
@@ -127,6 +150,28 @@
                     android:layout_height="100dp"
                     android:layout_gravity="bottom|right"
                     android:background="#FF00FF00">
+            </FrameLayout>
+        </FrameLayout>
+
+        <FrameLayout
+                android:layout_width="300dp"
+                android:layout_height="300dp"
+                android:layout_gravity="bottom|right"
+                android:background="@*android:drawable/menu_background_fill_parent_width"
+                android:layoutDirection="ltr">
+
+            <FrameLayout
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="top|left"
+                    android:background="#FF0000FF">
+            </FrameLayout>
+
+            <FrameLayout
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="bottom|right"
+                    android:background="#FFFFFFFF">
             </FrameLayout>
         </FrameLayout>
 
