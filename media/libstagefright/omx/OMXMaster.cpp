@@ -86,7 +86,11 @@ void OMXMaster::addPlugin(OMXPluginBase *plugin) {
 
         mPluginByComponentName.add(name8, plugin);
     }
-    CHECK_EQ(err, OMX_ErrorNoMore);
+
+    if (err != OMX_ErrorNoMore) {
+        LOGE("OMX plugin failed w/ error 0x%08x after registering %d "
+             "components", err, mPluginByComponentName.size());
+    }
 }
 
 void OMXMaster::clearPlugins() {
