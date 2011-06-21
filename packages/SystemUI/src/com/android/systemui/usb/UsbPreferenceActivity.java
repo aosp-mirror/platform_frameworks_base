@@ -39,6 +39,7 @@ public class UsbPreferenceActivity extends Activity implements View.OnClickListe
     private String mCurrentFunction;
     private String[] mFunctions;
     private String mInstallerImagePath;
+    private AlertDialog mDialog;
     private Button mMtpPtpButton;
     private Button mInstallerCdButton;
     private boolean mPtpActive;
@@ -71,7 +72,7 @@ public class UsbPreferenceActivity extends Activity implements View.OnClickListe
             mInstallerCdButton.setVisibility(View.GONE);
         }
 
-        dialogBuilder.show();
+        mDialog = dialogBuilder.show();
     }
 
     public void onClick(View v) {
@@ -88,6 +89,9 @@ public class UsbPreferenceActivity extends Activity implements View.OnClickListe
             mUsbManager.setMassStorageBackingFile(mInstallerImagePath);
         }
 
+        if (mDialog != null) {
+            mDialog.dismiss();
+        }
         finish();
     }
 }
