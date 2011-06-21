@@ -512,6 +512,19 @@ status_t FwdLockEngine::onCloseDecryptSession(int uniqueId,
         }
     }
 
+    if (NULL != decryptHandle) {
+        if (NULL != decryptHandle->decryptInfo) {
+            delete decryptHandle->decryptInfo;
+            decryptHandle->decryptInfo = NULL;
+        }
+
+        decryptHandle->copyControlVector.clear();
+        decryptHandle->extendedData.clear();
+
+        delete decryptHandle;
+        decryptHandle = NULL;
+    }
+
     LOGV("FwdLockEngine::onCloseDecryptSession Exit");
     return result;
 }
