@@ -423,6 +423,8 @@ web_docs_sample_code_flags := \
 		            resources/samples/NotePad "Note Pad" \
 		-samplecode $(sample_dir)/SampleSyncAdapter \
 		            resources/samples/SampleSyncAdapter "Sample Sync Adapter" \
+		-samplecode $(sample_dir)/RandomMusicPlayer \
+		            resources/samples/RandomMusicPlayer "Random Music Player" \
 		-samplecode $(sample_dir)/RenderScript \
 		            resources/samples/RenderScript "RenderScript" \
 		-samplecode $(sample_dir)/SearchableDictionary \
