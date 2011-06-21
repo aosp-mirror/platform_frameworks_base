@@ -78,8 +78,10 @@ public class UsbPreferenceActivity extends Activity implements View.OnClickListe
         if (v.equals(mMtpPtpButton)) {
             if (mPtpActive) {
                 mUsbManager.setPrimaryFunction(UsbManager.USB_FUNCTION_MTP);
+                mUsbManager.setDefaultFunction(UsbManager.USB_FUNCTION_MTP);
             } else {
                 mUsbManager.setPrimaryFunction(UsbManager.USB_FUNCTION_PTP);
+                mUsbManager.setDefaultFunction(UsbManager.USB_FUNCTION_PTP);
             }
         } else if (v.equals(mInstallerCdButton)) {
             mUsbManager.setPrimaryFunction(UsbManager.USB_FUNCTION_MASS_STORAGE);
