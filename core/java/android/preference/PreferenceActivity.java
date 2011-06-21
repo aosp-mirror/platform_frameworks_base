@@ -16,9 +16,6 @@
 
 package android.preference;
 
-import com.android.internal.util.XmlUtils;
-
-import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentBreadCrumbs;
 import android.app.FragmentManager;
@@ -26,7 +23,6 @@ import android.app.FragmentTransaction;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
@@ -41,22 +37,25 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This is the base class for an activity to show a hierarchy of preferences
@@ -66,7 +65,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * class.  If you are using PreferenceActivity in its old mode, the documentation
  * there applies to the deprecated APIs here.
  *
- * <p>This activity shows one or more headers of preferences, each of with
+ * <p>This activity shows one or more headers of preferences, each of which
  * is associated with a {@link PreferenceFragment} to display the preferences
  * of that header.  The actual layout and display of these associations can
  * however vary; currently there are two major approaches it may take:
@@ -117,7 +116,6 @@ import org.xmlpull.v1.XmlPullParserException;
 public abstract class PreferenceActivity extends ListActivity implements
         PreferenceManager.OnPreferenceTreeClickListener,
         PreferenceFragment.OnPreferenceStartFragmentCallback {
-    private static final String TAG = "PreferenceActivity";
 
     // Constants for state save/restore
     private static final String HEADERS_TAG = ":android:headers";
@@ -182,8 +180,6 @@ public abstract class PreferenceActivity extends ListActivity implements
 
     private final ArrayList<Header> mHeaders = new ArrayList<Header>();
 
-    private HeaderAdapter mAdapter;
-
     private FrameLayout mListFooter;
 
     private ViewGroup mPrefsContainer;
@@ -222,8 +218,8 @@ public abstract class PreferenceActivity extends ListActivity implements
                     ArrayList<Header> oldHeaders = new ArrayList<Header>(mHeaders);
                     mHeaders.clear();
                     onBuildHeaders(mHeaders);
-                    if (mAdapter != null) {
-                        mAdapter.notifyDataSetChanged();
+                    if (mAdapter instanceof BaseAdapter) {
+                        ((BaseAdapter) mAdapter).notifyDataSetChanged();
                     }
                     Header header = onGetNewHeader();
                     if (header != null && header.fragment != null) {
@@ -387,6 +383,7 @@ public abstract class PreferenceActivity extends ListActivity implements
         public Bundle extras;
 
         public Header() {
+            // Empty
         }
 
         /**
@@ -521,7 +518,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             if (headers != null) {
                 mHeaders.addAll(headers);
                 int curHeader = savedInstanceState.getInt(CUR_HEADER_TAG,
-                        (int)HEADER_ID_UNDEFINED);
+                        (int) HEADER_ID_UNDEFINED);
                 if (curHeader >= 0 && curHeader < mHeaders.size()) {
                     setSelectedHeader(mHeaders.get(curHeader));
                 }
@@ -567,8 +564,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             findViewById(com.android.internal.R.id.headers).setVisibility(View.GONE);
             mPrefsContainer.setVisibility(View.VISIBLE);
         } else if (mHeaders.size() > 0) {
-            mAdapter = new HeaderAdapter(this, mHeaders);
-            setListAdapter(mAdapter);
+            setListAdapter(new HeaderAdapter(this, mHeaders));
             if (!mSinglePane) {
                 // Multi-pane.
                 getListView().setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
@@ -715,6 +711,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param target The list in which to place the headers.
      */
     public void onBuildHeaders(List<Header> target) {
+        // Should be overloaded by subclasses
     }
 
     /**
@@ -743,6 +740,7 @@ public abstract class PreferenceActivity extends ListActivity implements
             int type;
             while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
                     && type != XmlPullParser.START_TAG) {
+                // Parse next until start tag is found
             }
 
             String nodeName = parser.getName();
@@ -951,7 +949,8 @@ public abstract class PreferenceActivity extends ListActivity implements
         super.onListItemClick(l, v, position, id);
 
         if (mAdapter != null) {
-            onHeaderClick(mHeaders.get(position), position);
+            Object item = mAdapter.getItem(position);
+            if (item instanceof Header) onHeaderClick((Header) item, position);
         }
     }
 
@@ -993,7 +992,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * @param fragmentName The name of the fragment to display.
      * @param args Optional arguments to supply to the fragment.
      * @param titleRes Optional resource ID of title to show for this item.
-     * @param titleRes Optional resource ID of short title to show for this item.
+     * @param shortTitleRes Optional resource ID of short title to show for this item.
      * @return Returns an Intent that can be launched to display the given
      * fragment.
      */
@@ -1032,7 +1031,7 @@ public abstract class PreferenceActivity extends ListActivity implements
      * code in which to report the result.
      * @param titleRes Resource ID of string to display for the title of
      * this set of preferences.
-     * @param titleRes Resource ID of string to display for the short title of
+     * @param shortTitleRes Resource ID of string to display for the short title of
      * this set of preferences.
      */
     public void startWithFragment(String fragmentName, Bundle args,
