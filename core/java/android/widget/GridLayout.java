@@ -535,7 +535,7 @@ public class GridLayout extends ViewGroup {
         return result;
     }
 
-    private int getDefaultMargin(View c, boolean leading, boolean horizontal) {
+    private int getDefaultMargin(View c, boolean horizontal, boolean leading) {
         // In the absence of any other information, calculate a default gap such
         // that, in a grid of identical components, the heights and the vertical
         // gaps are in the proportion of the golden ratio.
@@ -544,12 +544,12 @@ public class GridLayout extends ViewGroup {
         return (int) (c.getMeasuredHeight() / GOLDEN_RATIO / 2);
     }
 
-    private int getDefaultMargin(View c, boolean isAtEdge, boolean leading, boolean horizontal) {
+    private int getDefaultMargin(View c, boolean isAtEdge, boolean horizontal, boolean leading) {
         // todo remove DEFAULT_CONTAINER_MARGIN. Use padding? Seek advice on Themes/Styles, etc.
-        return isAtEdge ? DEFAULT_CONTAINER_MARGIN : getDefaultMargin(c, leading, horizontal);
+        return isAtEdge ? DEFAULT_CONTAINER_MARGIN : getDefaultMargin(c, horizontal, leading);
     }
 
-    private int getDefaultMarginValue(View c, LayoutParams p, boolean leading, boolean horizontal) {
+    private int getDefaultMarginValue(View c, LayoutParams p, boolean horizontal, boolean leading) {
         if (!mUseDefaultMargins) {
             return 0;
         }
@@ -558,15 +558,19 @@ public class GridLayout extends ViewGroup {
         Interval span = group.span;
         boolean isAtEdge = leading ? (span.min == 0) : (span.max == axis.getCount());
 
-        return getDefaultMargin(c, isAtEdge, leading, horizontal);
+        return getDefaultMargin(c, isAtEdge, horizontal, leading);
     }
 
-    private int getMargin(View view, boolean leading, boolean horizontal) {
+    private int getMargin(View view, boolean horizontal, boolean leading) {
         LayoutParams lp = getLayoutParams(view);
         int margin = horizontal ?
                 (leading ? lp.leftMargin : lp.rightMargin) :
                 (leading ? lp.topMargin : lp.bottomMargin);
-        return margin == UNDEFINED ? getDefaultMarginValue(view, lp, leading, horizontal) : margin;
+        return margin == UNDEFINED ? getDefaultMarginValue(view, lp, horizontal, leading) : margin;
+    }
+
+    private int getTotalMargin(View child, boolean horizontal) {
+        return getMargin(child, horizontal, true) + getMargin(child, horizontal, false);
     }
 
     private static int valueIfDefined(int value, int defaultValue) {
@@ -749,8 +753,8 @@ public class GridLayout extends ViewGroup {
                 View c = getChildAt(i);
                 drawRectangle(canvas,
                         c.getLeft() - getMargin(c, true, true),
-                        c.getTop() - getMargin(c, true, false),
-                        c.getRight() + getMargin(c, false, true),
+                        c.getTop() - getMargin(c, false, true),
+                        c.getRight() + getMargin(c, true, false),
                         c.getBottom() + getMargin(c, false, false), paint);
             }
         }
@@ -794,17 +798,12 @@ public class GridLayout extends ViewGroup {
         return c.getVisibility() == View.GONE;
     }
 
-    private void measureChildWithMargins(View child,
-            int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
-
+    private void measureChildWithMargins(View child, int widthMeasureSpec, int heightMeasureSpec) {
         LayoutParams lp = getLayoutParams(child);
-        int hMargins = getMargin(child, true, true) + getMargin(child, false, true);
-        int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
-                mPaddingLeft + mPaddingRight + hMargins, lp.width);
-        int vMargins = getMargin(child, true, false) + getMargin(child, false, false);
-        int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
-                mPaddingTop + mPaddingBottom + vMargins, lp.height);
-
+        int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
+                mPaddingLeft + mPaddingRight + getTotalMargin(child, true), lp.width);
+        int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
+                mPaddingTop + mPaddingBottom + getTotalMargin(child, false), lp.height);
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
@@ -842,9 +841,7 @@ public class GridLayout extends ViewGroup {
     private int getMeasurementIncludingMargin(View c, boolean horizontal, int measurementType) {
         int result = getMeasurement(c, horizontal, measurementType);
         if (mAlignmentMode == ALIGN_MARGINS) {
-            int leadingMargin = getMargin(c, true, horizontal);
-            int trailingMargin = getMargin(c, false, horizontal);
-            return result + leadingMargin + trailingMargin;
+            return result + getTotalMargin(c, horizontal);
         }
         return result;
     }
@@ -919,8 +916,8 @@ public class GridLayout extends ViewGroup {
 
             if (mAlignmentMode == ALIGN_MARGINS) {
                 int leftMargin = getMargin(c, true, true);
-                int topMargin = getMargin(c, true, false);
-                int rightMargin = getMargin(c, false, true);
+                int topMargin = getMargin(c, false, true);
+                int rightMargin = getMargin(c, true, false);
                 int bottomMargin = getMargin(c, false, false);
 
                 // Same calculation as getMeasurementIncludingMargin()
@@ -1387,7 +1384,7 @@ public class GridLayout extends ViewGroup {
                 Group g = horizontal ? lp.columnGroup : lp.rowGroup;
                 Interval span = g.span;
                 int index = leading ? span.min : span.max;
-                margins[index] = max(margins[index], getMargin(c, leading, horizontal));
+                margins[index] = max(margins[index], getMargin(c, horizontal, leading));
             }
         }
 
@@ -1817,7 +1814,8 @@ public class GridLayout extends ViewGroup {
         }
 
         private int getDefaultWeight(int size) {
-            return (size == MATCH_PARENT) ? DEFAULT_WEIGHT_1 : DEFAULT_WEIGHT_0;
+            //return (size == MATCH_PARENT) ? DEFAULT_WEIGHT_1 : DEFAULT_WEIGHT_0;
+            return DEFAULT_WEIGHT_0;
         }
 
         private void init(Context context, AttributeSet attrs, int defaultGravity) {
