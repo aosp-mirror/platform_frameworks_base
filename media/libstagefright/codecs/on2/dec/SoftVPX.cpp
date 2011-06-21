@@ -117,11 +117,27 @@ void SoftVPX::initPorts() {
     addPort(def);
 }
 
+static int GetCPUCoreCount() {
+    int cpuCoreCount = 1;
+#if defined(_SC_NPROCESSORS_ONLN)
+    cpuCoreCount = sysconf(_SC_NPROCESSORS_ONLN);
+#else
+    // _SC_NPROC_ONLN must be defined...
+    cpuCoreCount = sysconf(_SC_NPROC_ONLN);
+#endif
+    CHECK(cpuCoreCount >= 1);
+    LOGV("Number of CPU cores: %d", cpuCoreCount);
+    return cpuCoreCount;
+}
+
 status_t SoftVPX::initDecoder() {
     mCtx = new vpx_codec_ctx_t;
     vpx_codec_err_t vpx_err;
+    vpx_codec_dec_cfg_t cfg;
+    memset(&cfg, 0, sizeof(vpx_codec_dec_cfg_t));
+    cfg.threads = GetCPUCoreCount();
     if ((vpx_err = vpx_codec_dec_init(
-                (vpx_codec_ctx_t *)mCtx, &vpx_codec_vp8_dx_algo, NULL, 0))) {
+                (vpx_codec_ctx_t *)mCtx, &vpx_codec_vp8_dx_algo, &cfg, 0))) {
         LOGE("on2 decoder failed to initialize. (%d)", vpx_err);
         return UNKNOWN_ERROR;
     }
