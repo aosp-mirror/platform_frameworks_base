@@ -138,6 +138,10 @@ public class ICU_Delegate {
         return "";
     }
 
+    @LayoutlibDelegate
+    /*package*/ static String getScript(String locale) {
+        return "";
+    }
 
     @LayoutlibDelegate
     /*package*/ static String[] getISOLanguagesNative() {

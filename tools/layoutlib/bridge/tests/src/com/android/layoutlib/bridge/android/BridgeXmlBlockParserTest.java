@@ -38,7 +38,7 @@ public class BridgeXmlBlockParserTest extends TestCase {
     public void testXmlBlockParser() throws Exception {
 
         XmlPullParser parser = ParserFactory.create(
-                getClass().getResourceAsStream("com/android/layoutlib/testdata/layout1.xml"),
+                getClass().getResourceAsStream("/com/android/layoutlib/testdata/layout1.xml"),
                         "layout1.xml");
 
         parser = new BridgeXmlBlockParser(parser, null, false /* platformResourceFlag */);
