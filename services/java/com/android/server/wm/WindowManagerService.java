@@ -7817,18 +7817,30 @@ public class WindowManagerService extends IWindowManager.Stub
                             TAG, "Placing surface #" + i + " " + w.mSurface
                             + ": new=" + w.mShownFrame);
 
-                    int width, height;
-                    if ((w.mAttrs.flags & w.mAttrs.FLAG_SCALED) != 0) {
-                        // for a scaled surface, we just want to use
-                        // the requested size.
-                        width  = w.mRequestedWidth;
-                        height = w.mRequestedHeight;
-                    } else {
-                        width = w.mCompatFrame.width();
-                        height = w.mCompatFrame.height();
-                    }
-
                     if (w.mSurface != null) {
+                        int width, height;
+                        if ((w.mAttrs.flags & w.mAttrs.FLAG_SCALED) != 0) {
+                            // for a scaled surface, we just want to use
+                            // the requested size.
+                            width  = w.mRequestedWidth;
+                            height = w.mRequestedHeight;
+                        } else {
+                            width = w.mCompatFrame.width();
+                            height = w.mCompatFrame.height();
+                        }
+
+                        if (width < 1) {
+                            width = 1;
+                        }
+                        if (height < 1) {
+                            height = 1;
+                        }
+                        final boolean surfaceResized = w.mSurfaceW != width || w.mSurfaceH != height;
+                        if (surfaceResized) {
+                            w.mSurfaceW = width;
+                            w.mSurfaceH = height;
+                        }
+
                         if (w.mSurfaceX != w.mShownFrame.left
                                 || w.mSurfaceY != w.mShownFrame.top) {
                             try {
@@ -7848,21 +7860,11 @@ public class WindowManagerService extends IWindowManager.Stub
                             }
                         }
 
-                        if (width < 1) {
-                            width = 1;
-                        }
-                        if (height < 1) {
-                            height = 1;
-                        }
-
-                        if (w.mSurfaceW != width || w.mSurfaceH != height) {
+                        if (surfaceResized) {
                             try {
                                 if (SHOW_TRANSACTIONS) logSurface(w,
-                                        "SIZE " + w.mShownFrame.width() + "x"
-                                        + w.mShownFrame.height(), null);
+                                        "SIZE " + width + "x" + height, null);
                                 w.mSurfaceResized = true;
-                                w.mSurfaceW = width;
-                                w.mSurfaceH = height;
                                 w.mSurface.setSize(width, height);
                             } catch (RuntimeException e) {
                                 // If something goes wrong with the surface (such
@@ -7878,9 +7880,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
 
                     if (!w.mAppFreezing && w.mLayoutSeq == mLayoutSeq) {
-                        w.mContentInsetsChanged =
+                        w.mContentInsetsChanged |=
                             !w.mLastContentInsets.equals(w.mContentInsets);
-                        w.mVisibleInsetsChanged =
+                        w.mVisibleInsetsChanged |=
                             !w.mLastVisibleInsets.equals(w.mVisibleInsets);
                         boolean configChanged =
                             w.mConfiguration != mCurConfiguration
@@ -7892,24 +7894,20 @@ public class WindowManagerService extends IWindowManager.Stub
                         }
                         if (localLOGV) Slog.v(TAG, "Resizing " + w
                                 + ": configChanged=" + configChanged
-                                + " last=" + w.mLastCompatFrame + " frame=" + w.mCompatFrame);
-                        boolean frameChanged = !w.mLastCompatFrame.equals(w.mCompatFrame);
-                        if (frameChanged
-                                || w.mContentInsetsChanged
+                                + " last=" + w.mLastFrame + " frame=" + w.mFrame);
+                        w.mLastFrame.set(w.mFrame);
+                        if (w.mContentInsetsChanged
                                 || w.mVisibleInsetsChanged
                                 || w.mSurfaceResized
                                 || configChanged) {
                             if (DEBUG_RESIZE || DEBUG_ORIENTATION) {
                                 Slog.v(TAG, "Resize reasons: "
-                                        + "frameChanged=" + frameChanged
                                         + " contentInsetsChanged=" + w.mContentInsetsChanged
                                         + " visibleInsetsChanged=" + w.mVisibleInsetsChanged
                                         + " surfaceResized=" + w.mSurfaceResized
                                         + " configChanged=" + configChanged);
                             }
 
-                            w.mLastFrame.set(w.mFrame);
-                            w.mLastCompatFrame.set(w.mCompatFrame);
                             w.mLastContentInsets.set(w.mContentInsets);
                             w.mLastVisibleInsets.set(w.mVisibleInsets);
                             // If the screen is currently frozen, then keep
@@ -7944,9 +7942,12 @@ public class WindowManagerService extends IWindowManager.Stub
                                     w.mAppToken.allDrawn = false;
                                 }
                             }
-                            if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
-                                    "Resizing window " + w + " to " + w.mCompatFrame);
-                            mResizingWindows.add(w);
+                            if (!mResizingWindows.contains(w)) {
+                                if (DEBUG_RESIZE || DEBUG_ORIENTATION) Slog.v(TAG,
+                                        "Resizing window " + w + " to " + w.mSurfaceW
+                                        + "x" + w.mSurfaceH);
+                                mResizingWindows.add(w);
+                            }
                         } else if (w.mOrientationChanging) {
                             if (!w.mDrawPending && !w.mCommitDrawPending) {
                                 if (DEBUG_ORIENTATION) Slog.v(TAG,
@@ -8241,13 +8242,12 @@ public class WindowManagerService extends IWindowManager.Stub
                     if ((DEBUG_RESIZE || DEBUG_ORIENTATION || DEBUG_CONFIGURATION)
                             && configChanged) {
                         Slog.i(TAG, "Sending new config to window " + win + ": "
-                                + win.mCompatFrame.width() + "x" + win.mCompatFrame.height()
+                                + win.mSurfaceW + "x" + win.mSurfaceH
                                 + " / " + mCurConfiguration + " / 0x"
                                 + Integer.toHexString(diff));
                     }
                     win.mConfiguration = mCurConfiguration;
-                    win.mClient.resized(win.mCompatFrame.width(),
-                            win.mCompatFrame.height(), win.mLastContentInsets,
+                    win.mClient.resized(win.mSurfaceW, win.mSurfaceH, win.mLastContentInsets,
                             win.mLastVisibleInsets, win.mDrawPending,
                             configChanged ? win.mConfiguration : null);
                     win.mContentInsetsChanged = false;

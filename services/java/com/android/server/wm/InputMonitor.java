@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
@@ -152,6 +153,8 @@ final class InputMonitor {
         }
         mUpdateInputWindowsNeeded = false;
 
+        if (false) Slog.d(WindowManagerService.TAG, ">>>>>> ENTERED updateInputWindowsLw");
+        
         // Populate the input window list with information about all of the windows that
         // could potentially receive input.
         // As an optimization, we could try to prune the list of windows but this turns
@@ -232,6 +235,8 @@ final class InputMonitor {
         // Clear the list in preparation for the next round.
         // Also avoids keeping InputChannel objects referenced unnecessarily.
         mTempInputWindows.clear();
+        
+        if (false) Slog.d(WindowManagerService.TAG, "<<<<<<< EXITED updateInputWindowsLw");
     }
 
     /* Notifies that the input device configuration has changed. */

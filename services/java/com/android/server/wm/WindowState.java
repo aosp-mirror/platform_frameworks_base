@@ -111,7 +111,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
      * applied).
      */
     final Rect mShownFrame = new Rect();
-    final Rect mLastShownFrame = new Rect();
 
     /**
      * Set when we have changed the size of the surface, to know that
@@ -182,7 +181,6 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     // Frame that is scaled to the application's coordinate space when in
     // screen size compatibility mode.
     final Rect mCompatFrame = new Rect();
-    final Rect mLastCompatFrame = new Rect();
 
     final Rect mContainingFrame = new Rect();
     final Rect mDisplayFrame = new Rect();
@@ -1584,15 +1582,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
         pw.print(prefix); pw.print("mConfiguration="); pw.println(mConfiguration);
         pw.print(prefix); pw.print("mShownFrame=");
-                mShownFrame.printShortString(pw);
-                pw.print(" last="); mLastShownFrame.printShortString(pw);
-                pw.println();
+                mShownFrame.printShortString(pw); pw.println();
         pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
                 pw.print(" last="); mLastFrame.printShortString(pw);
                 pw.println();
         if (mEnforceSizeCompat) {
             pw.print(prefix); pw.print("mCompatFrame="); mCompatFrame.printShortString(pw);
-                    pw.print(" last="); mLastCompatFrame.printShortString(pw);
                     pw.println();
         }
         pw.print(prefix); pw.print("mContainingFrame=");
