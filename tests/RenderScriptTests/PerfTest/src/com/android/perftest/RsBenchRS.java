@@ -100,6 +100,7 @@ public class RsBenchRS {
 
     private ProgramVertex mProgVertex;
     private ProgramVertexFixedFunction.Constants mPVA;
+    private ProgramVertexFixedFunction.Constants mPvProjectionAlloc;
 
     // Custom shaders
     private ProgramVertex mProgVertexCustom;
@@ -388,6 +389,7 @@ public class RsBenchRS {
       i.Proj = projNorm;
       i.MVP = projNorm;
       mPvStarAlloc.set(i, 0, true);
+      mPvProjectionAlloc.setProjection(projNorm);
   }
 
     private void initProgramVertex() {
@@ -405,7 +407,13 @@ public class RsBenchRS {
         // For galaxy live wallpaper
         mPvStarAlloc = new ScriptField_VpConsts(mRS, 1);
         mScript.bind_vpConstants(mPvStarAlloc);
+        mPvProjectionAlloc = new ProgramVertexFixedFunction.Constants(mRS);
         updateProjectionMatrices();
+
+        pvb = new ProgramVertexFixedFunction.Builder(mRS);
+        ProgramVertex pvbp = pvb.create();
+        ((ProgramVertexFixedFunction)pvbp).bindConstants(mPvProjectionAlloc);
+        mScript.set_gPVBkProj(pvbp);
 
         ProgramVertex.Builder sb = new ProgramVertex.Builder(mRS);
         String t =  "varying vec4 varColor;\n" +
@@ -648,10 +656,10 @@ public class RsBenchRS {
         prepareTestData();
 
         initSamplers();
-        initProgramStore();
-        initProgramFragment();
         initMesh();
         initProgramVertex();
+        initProgramStore();
+        initProgramFragment();
         initFonts();
         loadImages();
         initProgramRaster();
@@ -673,7 +681,6 @@ public class RsBenchRS {
                                            b.create(),
                                            Allocation.USAGE_GRAPHICS_RENDER_TARGET);
         mScript.set_gRenderBufferDepth(offscreen);
-
 
         mTextureAllocs = new ScriptField_ListAllocs_s(mRS, 100);
         for (int i = 0; i < 100; i++) {

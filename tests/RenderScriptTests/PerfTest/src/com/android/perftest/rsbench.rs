@@ -393,19 +393,28 @@ static void displayIcons(int meshMode) {
     rsgBindProgramStore(gProgStoreBlendAlpha);
     rsgBindProgramFragment(gProgFragmentTexture);
     rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
+    rsgBindTexture(gProgFragmentTexture, 0, gTexTorus);
+    rsgDrawQuadTexCoords(
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, gRenderSurfaceH, 0.0f, 0.0f, 1.0f,
+            gRenderSurfaceW, gRenderSurfaceH, 0.0f, 1.0f, 1.0f,
+            gRenderSurfaceW, 0.0f, 0.0f, 1.0f, 0.0f);
 
     int meshCount = (int)pow(10.0f, (float)(meshMode + 1));
 
-    float size = 50.0;
+    float wSize = gRenderSurfaceW/(float)meshCount;
+    float hSize = gRenderSurfaceH/(float)meshCount;
     rs_matrix4x4 matrix;
-    rsMatrixLoadScale(&matrix, size, size, 1.0);
+    rsMatrixLoadScale(&matrix, wSize, hSize, 1.0);
 
     float yPos = 0;
+    float yPad = hSize / 2;
+    float xPad = wSize / 2;
     for (int y = 0; y < meshCount; y++) {
-        yPos = (y + 1) * 50;
+        yPos = y * hSize + yPad;
         float xPos = 0;
         for (int x = 0; x < meshCount; x++) {
-            xPos = (x + 1) * 50;
+            xPos = x * wSize + xPad;
             rs_matrix4x4 transMatrix;
             rsMatrixLoadTranslate(&transMatrix, xPos, yPos, 0);
             rsMatrixMultiply(&transMatrix, &matrix);
@@ -529,11 +538,12 @@ static void drawGalaxy() {
 }
 
 // Display images and text with live wallpaper in the background
-static void dispalyLiveWallPaper(int wResolution, int hResolution) {
+static void displayLiveWallPaper(int wResolution, int hResolution) {
     bindProgramVertexOrtho();
 
     drawGalaxy();
 
+    rsgBindProgramVertex(gProgVertex);
     rsgBindProgramStore(gProgStoreBlendAlpha);
     rsgBindProgramFragment(gProgFragmentTexture);
     rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
@@ -958,7 +968,7 @@ static void runTest(int index) {
         displayListView();
         break;
     case 30:
-        dispalyLiveWallPaper(7, 5);
+        displayLiveWallPaper(7, 5);
         break;
     }
 }
