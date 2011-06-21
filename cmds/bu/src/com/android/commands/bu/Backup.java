@@ -22,8 +22,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
 
-import java.io.FileDescriptor;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public final class Backup {
@@ -51,17 +49,19 @@ public final class Backup {
             return;
         }
 
+        int socketFd = Integer.parseInt(nextArg());
+
         String arg = nextArg();
         if (arg.equals("backup")) {
-            doFullBackup();
+            doFullBackup(socketFd);
         } else if (arg.equals("restore")) {
-            doFullRestore();
+            doFullRestore(socketFd);
         } else {
             Log.e(TAG, "Invalid operation '" + arg + "'");
         }
     }
 
-    private void doFullBackup() {
+    private void doFullBackup(int socketFd) {
         ArrayList<String> packages = new ArrayList<String>();
         boolean saveApks = false;
         boolean saveShared = false;
@@ -100,24 +100,20 @@ public final class Backup {
         }
 
         try {
-            ParcelFileDescriptor fd = ParcelFileDescriptor.dup(FileDescriptor.out);
+            ParcelFileDescriptor fd = ParcelFileDescriptor.adoptFd(socketFd);
             String[] packArray = new String[packages.size()];
             mBackupManager.fullBackup(fd, saveApks, saveShared, doEverything,
                     packages.toArray(packArray));
-        } catch (IOException e) {
-            Log.e(TAG, "Can't dup out");
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to invoke backup manager for backup");
         }
     }
 
-    private void doFullRestore() {
+    private void doFullRestore(int socketFd) {
         // No arguments to restore
         try {
-            ParcelFileDescriptor fd = ParcelFileDescriptor.dup(FileDescriptor.in);
+            ParcelFileDescriptor fd = ParcelFileDescriptor.adoptFd(socketFd);
             mBackupManager.fullRestore(fd);
-        } catch (IOException e) {
-            Log.e(TAG, "Can't dup System.in");
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to invoke backup manager for restore");
         }
