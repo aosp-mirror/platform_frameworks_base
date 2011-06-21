@@ -296,6 +296,8 @@ sp<M3UParser> LiveSession::fetchPlaylist(const char *url) {
         new M3UParser(url, buffer->data(), buffer->size());
 
     if (playlist->initCheck() != OK) {
+        LOGE("failed to parse .m3u8 playlist");
+
         return NULL;
     }
 

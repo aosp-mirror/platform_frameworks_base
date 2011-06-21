@@ -179,7 +179,7 @@ status_t M3UParser::parse(const void *_data, size_t size) {
                 if (mIsVariantPlaylist) {
                     return ERROR_MALFORMED;
                 }
-                err = parseMetaData(line, &itemMeta, "duration");
+                err = parseMetaDataDuration(line, &itemMeta, "durationUs");
             } else if (line.startsWith("#EXT-X-DISCONTINUITY")) {
                 if (mIsVariantPlaylist) {
                     return ERROR_MALFORMED;
@@ -203,9 +203,9 @@ status_t M3UParser::parse(const void *_data, size_t size) {
 
         if (!line.startsWith("#")) {
             if (!mIsVariantPlaylist) {
-                int32_t durationSecs;
+                int64_t durationUs;
                 if (itemMeta == NULL
-                        || !itemMeta->findInt32("duration", &durationSecs)) {
+                        || !itemMeta->findInt64("durationUs", &durationUs)) {
                     return ERROR_MALFORMED;
                 }
             }
@@ -247,6 +247,30 @@ status_t M3UParser::parseMetaData(
         *meta = new AMessage;
     }
     (*meta)->setInt32(key, x);
+
+    return OK;
+}
+
+// static
+status_t M3UParser::parseMetaDataDuration(
+        const AString &line, sp<AMessage> *meta, const char *key) {
+    ssize_t colonPos = line.find(":");
+
+    if (colonPos < 0) {
+        return ERROR_MALFORMED;
+    }
+
+    double x;
+    status_t err = ParseDouble(line.c_str() + colonPos + 1, &x);
+
+    if (err != OK) {
+        return err;
+    }
+
+    if (meta->get() == NULL) {
+        *meta = new AMessage;
+    }
+    (*meta)->setInt64(key, (int64_t)x * 1E6);
 
     return OK;
 }
@@ -408,6 +432,20 @@ status_t M3UParser::ParseInt32(const char *s, int32_t *x) {
     }
 
     *x = (int32_t)lval;
+
+    return OK;
+}
+
+// static
+status_t M3UParser::ParseDouble(const char *s, double *x) {
+    char *end;
+    double dval = strtod(s, &end);
+
+    if (end == s || (*end != '\0' && *end != ',')) {
+        return ERROR_MALFORMED;
+    }
+
+    *x = dval;
 
     return OK;
 }
