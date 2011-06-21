@@ -68,13 +68,15 @@ static bool ExceptionCheck(void* env)
 class MtpThread : public Thread {
 private:
     MtpDatabase*    mDatabase;
+    bool            mPtp;
     MtpServer*      mServer;
     MtpStorageList  mStorageList;
     int             mFd;
 
 public:
-    MtpThread(MtpDatabase* database)
+    MtpThread(MtpDatabase* database, bool usePtp)
         :   mDatabase(database),
+            mPtp(usePtp),
             mServer(NULL),
             mFd(-1)
     {
@@ -113,7 +115,7 @@ public:
 
         mFd = open("/dev/mtp_usb", O_RDWR);
         if (mFd >= 0) {
-            mServer = new MtpServer(mFd, mDatabase, AID_MEDIA_RW, 0664, 0775);
+            mServer = new MtpServer(mFd, mDatabase, mPtp, AID_MEDIA_RW, 0664, 0775);
             for (size_t i = 0; i < mStorageList.size(); i++) {
                 mServer->addStorage(mStorageList[i]);
             }
@@ -156,11 +158,11 @@ static sp<MtpThread> sThread;
 #endif // HAVE_ANDROID_OS
 
 static void
-android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase)
+android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, jboolean usePtp)
 {
 #ifdef HAVE_ANDROID_OS
     // create the thread and assign it to the smart pointer
-    sThread = new MtpThread(getMtpDatabase(env, javaDatabase));
+    sThread = new MtpThread(getMtpDatabase(env, javaDatabase), usePtp);
 #endif
 }
 
@@ -263,7 +265,7 @@ android_mtp_MtpServer_remove_storage(JNIEnv *env, jobject thiz, jint storageId)
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"native_setup",                "(Landroid/mtp/MtpDatabase;)V",
+    {"native_setup",                "(Landroid/mtp/MtpDatabase;Z)V",
                                             (void *)android_mtp_MtpServer_setup},
     {"native_start",                "()V",  (void *)android_mtp_MtpServer_start},
     {"native_stop",                 "()V",  (void *)android_mtp_MtpServer_stop},

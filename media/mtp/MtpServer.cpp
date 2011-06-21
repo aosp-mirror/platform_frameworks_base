@@ -95,10 +95,11 @@ static const MtpEventCode kSupportedEventCodes[] = {
     MTP_EVENT_STORE_REMOVED,
 };
 
-MtpServer::MtpServer(int fd, MtpDatabase* database,
+MtpServer::MtpServer(int fd, MtpDatabase* database, bool ptp,
                     int fileGroup, int filePerm, int directoryPerm)
     :   mFD(fd),
         mDatabase(database),
+        mPtp(ptp),
         mFileGroup(fileGroup),
         mFilePermission(filePerm),
         mDirectoryPermission(directoryPerm),
@@ -426,9 +427,20 @@ MtpResponseCode MtpServer::doGetDeviceInfo() {
 
     // fill in device info
     mData.putUInt16(MTP_STANDARD_VERSION);
-    mData.putUInt32(6); // MTP Vendor Extension ID
+    if (mPtp) {
+        mData.putUInt32(0);
+    } else {
+        // MTP Vendor Extension ID
+        mData.putUInt32(6);
+    }
     mData.putUInt16(MTP_STANDARD_VERSION);
-    string.set("microsoft.com: 1.0; android.com: 1.0;");
+    if (mPtp) {
+        // no extensions
+        string.set("");
+    } else {
+        // MTP extensions
+        string.set("microsoft.com: 1.0; android.com: 1.0;");
+    }
     mData.putString(string); // MTP Extensions
     mData.putUInt16(0); //Functional Mode
     mData.putAUInt16(kSupportedOperationCodes,

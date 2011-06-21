@@ -33,8 +33,8 @@ public class MtpServer {
         System.loadLibrary("media_jni");
     }
 
-    public MtpServer(MtpDatabase database) {
-        native_setup(database);
+    public MtpServer(MtpDatabase database, boolean usePtp) {
+        native_setup(database, usePtp);
     }
 
     public void start() {
@@ -69,7 +69,7 @@ public class MtpServer {
         native_remove_storage(storage.getStorageId());
     }
 
-    private native final void native_setup(MtpDatabase database);
+    private native final void native_setup(MtpDatabase database, boolean usePtp);
     private native final void native_start();
     private native final void native_stop();
     private native final void native_send_object_added(int handle);

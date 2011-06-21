@@ -39,6 +39,9 @@ private:
 
     MtpDatabase*        mDatabase;
 
+    // appear as a PTP device
+    bool                mPtp;
+
     // group to own new files and folders
     int                 mFileGroup;
     // permissions for new files and directories
@@ -87,7 +90,7 @@ private:
     Vector<ObjectEdit*>  mObjectEditList;
 
 public:
-                        MtpServer(int fd, MtpDatabase* database,
+                        MtpServer(int fd, MtpDatabase* database, bool ptp,
                                     int fileGroup, int filePerm, int directoryPerm);
     virtual             ~MtpServer();
 
