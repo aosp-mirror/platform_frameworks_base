@@ -1721,7 +1721,7 @@ public class PhoneStatusBar extends StatusBar {
                     || Intent.ACTION_SCREEN_OFF.equals(action)) {
                 boolean excludeRecents = false;
                 if (Intent.ACTION_CLOSE_SYSTEM_DIALOGS.equals(action)) {
-                    String reason = intent.getExtras().getString("reason");
+                    String reason = intent.getStringExtra("reason");
                     if (reason != null) {
                         excludeRecents = reason.equals("recentapps");
                     }
