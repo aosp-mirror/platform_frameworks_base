@@ -36,4 +36,6 @@
     <string name="bold_italic_text">Bold Italic String</string>
     <string name="mixed_text_1">he said in Arabic: &#x0644;&#x0627;. Wow this is cool</string>
     <string name="hebrew_text">&#x05DD;&#x05DE;</string>
+    <string name="menu_add">Add</string>
+    <string name="menu_delete">Delete</string>
 </resources>
