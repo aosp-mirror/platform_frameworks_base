@@ -48,7 +48,6 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.DhcpInfoInternal;
-import android.net.DhcpStateMachine;
 import android.net.InterfaceConfiguration;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -153,7 +152,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     private NetworkInfo mNetworkInfo;
     private SupplicantStateTracker mSupplicantStateTracker;
     private WpsStateMachine mWpsStateMachine;
-    private DhcpStateMachine mDhcpStateMachine;
 
     private AlarmManager mAlarmManager;
     private PendingIntent mScanIntent;
@@ -191,10 +189,10 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     static final int CMD_START_DRIVER                     = BASE + 13;
     /* Start the driver */
     static final int CMD_STOP_DRIVER                      = BASE + 14;
-    /* Indicates Static IP succeded */
-    static final int CMD_STATIC_IP_SUCCESS                = BASE + 15;
-    /* Indicates Static IP failed */
-    static final int CMD_STATIC_IP_FAILURE                = BASE + 16;
+    /* Indicates DHCP succeded */
+    static final int CMD_IP_CONFIG_SUCCESS                = BASE + 15;
+    /* Indicates DHCP failed */
+    static final int CMD_IP_CONFIG_FAILURE                = BASE + 16;
 
     /* Start the soft access point */
     static final int CMD_START_AP                         = BASE + 21;
@@ -344,11 +342,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
      */
     private static final int DEFAULT_MAX_DHCP_RETRIES = 9;
 
-    static final int POWER_MODE_ACTIVE = 1;
-    static final int POWER_MODE_AUTO = 0;
-
-    /* Tracks the power mode for restoration after a DHCP request/renewal goes through */
-    private int mPowerMode = POWER_MODE_AUTO;
+    private static final int POWER_MODE_ACTIVE = 1;
+    private static final int POWER_MODE_AUTO = 0;
 
     /**
      * See {@link Settings.Secure#WIFI_SCAN_INTERVAL_MS}. This is the default value if a
@@ -1416,10 +1411,8 @@ public class WifiStateMachine extends HierarchicalStateMachine {
          */
         NetworkUtils.resetConnections(mInterfaceName);
 
-        if (mDhcpStateMachine != null) {
-            mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
-            mDhcpStateMachine.quit();
-            mDhcpStateMachine = null;
+        if (!NetworkUtils.stopDhcp(mInterfaceName)) {
+            Log.e(TAG, "Could not stop DHCP");
         }
 
         /* Disable interface */
@@ -1443,99 +1436,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         mLastBssid= null;
         mLastNetworkId = -1;
 
-    }
-
-    void handlePreDhcpSetup() {
-        if (!mBluetoothConnectionActive) {
-            /*
-             * There are problems setting the Wi-Fi driver's power
-             * mode to active when bluetooth coexistence mode is
-             * enabled or sense.
-             * <p>
-             * We set Wi-Fi to active mode when
-             * obtaining an IP address because we've found
-             * compatibility issues with some routers with low power
-             * mode.
-             * <p>
-             * In order for this active power mode to properly be set,
-             * we disable coexistence mode until we're done with
-             * obtaining an IP address.  One exception is if we
-             * are currently connected to a headset, since disabling
-             * coexistence would interrupt that connection.
-             */
-            // Disable the coexistence mode
-            WifiNative.setBluetoothCoexistenceModeCommand(
-                    WifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
-        }
-
-        mPowerMode =  WifiNative.getPowerModeCommand();
-        if (mPowerMode < 0) {
-            // Handle the case where supplicant driver does not support
-            // getPowerModeCommand.
-            mPowerMode = WifiStateMachine.POWER_MODE_AUTO;
-        }
-        if (mPowerMode != WifiStateMachine.POWER_MODE_ACTIVE) {
-            WifiNative.setPowerModeCommand(WifiStateMachine.POWER_MODE_ACTIVE);
-        }
-    }
-
-
-    void handlePostDhcpSetup() {
-        /* restore power mode */
-        WifiNative.setPowerModeCommand(mPowerMode);
-
-        // Set the coexistence mode back to its default value
-        WifiNative.setBluetoothCoexistenceModeCommand(
-                WifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
-    }
-
-    private void handleSuccessfulIpConfiguration(DhcpInfoInternal dhcpInfoInternal) {
-        synchronized (mDhcpInfoInternal) {
-            mDhcpInfoInternal = dhcpInfoInternal;
-        }
-        mLastSignalLevel = -1; // force update of signal strength
-        WifiConfigStore.setIpConfiguration(mLastNetworkId, dhcpInfoInternal);
-        InetAddress addr = NetworkUtils.numericToInetAddress(dhcpInfoInternal.ipAddress);
-        mWifiInfo.setInetAddress(addr);
-        if (getNetworkDetailedState() == DetailedState.CONNECTED) {
-            //DHCP renewal in connected state
-            LinkProperties linkProperties = dhcpInfoInternal.makeLinkProperties();
-            linkProperties.setHttpProxy(WifiConfigStore.getProxyProperties(mLastNetworkId));
-            linkProperties.setInterfaceName(mInterfaceName);
-            if (!linkProperties.equals(mLinkProperties)) {
-                Log.d(TAG, "Link configuration changed for netId: " + mLastNetworkId
-                    + " old: " + mLinkProperties + "new: " + linkProperties);
-                NetworkUtils.resetConnections(mInterfaceName);
-                mLinkProperties = linkProperties;
-                sendLinkConfigurationChangedBroadcast();
-            }
-        } else {
-            configureLinkProperties();
-            setNetworkDetailedState(DetailedState.CONNECTED);
-            sendNetworkStateChangeBroadcast(mLastBssid);
-        }
-    }
-
-    private void handleFailedIpConfiguration() {
-        Log.e(TAG, "IP configuration failed");
-
-        mWifiInfo.setInetAddress(null);
-        /**
-         * If we've exceeded the maximum number of retries for DHCP
-         * to a given network, disable the network
-         */
-        if (++mReconnectCount > getMaxDhcpRetries()) {
-            Log.e(TAG, "Failed " +
-                    mReconnectCount + " times, Disabling " + mLastNetworkId);
-            WifiConfigStore.disableNetwork(mLastNetworkId);
-            mReconnectCount = 0;
-        }
-
-        /* DHCP times out after about 30 seconds, we do a
-         * disconnect and an immediate reconnect to try again
-         */
-        WifiNative.disconnectCommand();
-        WifiNative.reconnectCommand();
     }
 
     private boolean startSoftApWithConfig(WifiConfiguration config, int currentStatus) {
@@ -1562,7 +1462,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
         }
         return true;
     }
-
 
     /*********************************************************
      * Notifications from WifiMonitor
@@ -1741,8 +1640,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 case CMD_FORGET_NETWORK:
                 case CMD_RSSI_POLL:
                 case CMD_ENABLE_ALL_NETWORKS:
-                case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
-                case DhcpStateMachine.CMD_POST_DHCP_ACTION:
                     break;
                 case CMD_START_WPS:
                     /* Return failure when the state machine cannot handle WPS initiation*/
@@ -2605,18 +2502,74 @@ public class WifiStateMachine extends HierarchicalStateMachine {
     }
 
     class ConnectingState extends HierarchicalState {
+        boolean mModifiedBluetoothCoexistenceMode;
+        int mPowerMode;
+        boolean mUseStaticIp;
+        Thread mDhcpThread;
 
         @Override
         public void enter() {
             if (DBG) Log.d(TAG, getName() + "\n");
             EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+            mUseStaticIp = WifiConfigStore.isUsingStaticIp(mLastNetworkId);
+            if (!mUseStaticIp) {
+                mDhcpThread = null;
+                mModifiedBluetoothCoexistenceMode = false;
+                mPowerMode = POWER_MODE_AUTO;
 
-             if (!WifiConfigStore.isUsingStaticIp(mLastNetworkId)) {
-                //start DHCP
-                mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(
-                        mContext, WifiStateMachine.this, mInterfaceName);
-                mDhcpStateMachine.registerForPreDhcpNotification();
-                mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
+                if (!mBluetoothConnectionActive) {
+                    /*
+                     * There are problems setting the Wi-Fi driver's power
+                     * mode to active when bluetooth coexistence mode is
+                     * enabled or sense.
+                     * <p>
+                     * We set Wi-Fi to active mode when
+                     * obtaining an IP address because we've found
+                     * compatibility issues with some routers with low power
+                     * mode.
+                     * <p>
+                     * In order for this active power mode to properly be set,
+                     * we disable coexistence mode until we're done with
+                     * obtaining an IP address.  One exception is if we
+                     * are currently connected to a headset, since disabling
+                     * coexistence would interrupt that connection.
+                     */
+                    mModifiedBluetoothCoexistenceMode = true;
+
+                    // Disable the coexistence mode
+                    WifiNative.setBluetoothCoexistenceModeCommand(
+                            WifiNative.BLUETOOTH_COEXISTENCE_MODE_DISABLED);
+                }
+
+                mPowerMode =  WifiNative.getPowerModeCommand();
+                if (mPowerMode < 0) {
+                  // Handle the case where supplicant driver does not support
+                  // getPowerModeCommand.
+                    mPowerMode = POWER_MODE_AUTO;
+                }
+                if (mPowerMode != POWER_MODE_ACTIVE) {
+                    WifiNative.setPowerModeCommand(POWER_MODE_ACTIVE);
+                }
+
+                Log.d(TAG, "DHCP request started");
+                mDhcpThread = new Thread(new Runnable() {
+                    public void run() {
+                        DhcpInfoInternal dhcpInfoInternal = new DhcpInfoInternal();
+                        if (NetworkUtils.runDhcp(mInterfaceName, dhcpInfoInternal)) {
+                            Log.d(TAG, "DHCP request succeeded");
+                            synchronized (mDhcpInfoInternal) {
+                                mDhcpInfoInternal = dhcpInfoInternal;
+                            }
+                            WifiConfigStore.setIpConfiguration(mLastNetworkId, dhcpInfoInternal);
+                            sendMessage(CMD_IP_CONFIG_SUCCESS);
+                        } else {
+                            Log.d(TAG, "DHCP request failed: " +
+                                    NetworkUtils.getDhcpError());
+                            sendMessage(CMD_IP_CONFIG_FAILURE);
+                        }
+                    }
+                });
+                mDhcpThread.start();
             } else {
                 DhcpInfoInternal dhcpInfoInternal = WifiConfigStore.getIpConfiguration(
                         mLastNetworkId);
@@ -2628,13 +2581,16 @@ public class WifiStateMachine extends HierarchicalStateMachine {
                 try {
                     netd.setInterfaceConfig(mInterfaceName, ifcg);
                     Log.v(TAG, "Static IP configuration succeeded");
-                    sendMessage(CMD_STATIC_IP_SUCCESS, dhcpInfoInternal);
+                    synchronized (mDhcpInfoInternal) {
+                        mDhcpInfoInternal = dhcpInfoInternal;
+                    }
+                    sendMessage(CMD_IP_CONFIG_SUCCESS);
                 } catch (RemoteException re) {
                     Log.v(TAG, "Static IP configuration failed: " + re);
-                    sendMessage(CMD_STATIC_IP_FAILURE);
+                    sendMessage(CMD_IP_CONFIG_FAILURE);
                 } catch (IllegalStateException e) {
                     Log.v(TAG, "Static IP configuration failed: " + e);
-                    sendMessage(CMD_STATIC_IP_FAILURE);
+                    sendMessage(CMD_IP_CONFIG_FAILURE);
                 }
             }
          }
@@ -2643,26 +2599,44 @@ public class WifiStateMachine extends HierarchicalStateMachine {
           if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
 
           switch(message.what) {
-              case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
-                  handlePreDhcpSetup();
-                  mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE);
-                  break;
-              case DhcpStateMachine.CMD_POST_DHCP_ACTION:
-                  handlePostDhcpSetup();
-                  if (message.arg1 == DhcpStateMachine.DHCP_SUCCESS) {
-                      handleSuccessfulIpConfiguration((DhcpInfoInternal) message.obj);
-                      transitionTo(mConnectedState);
-                  } else if (message.arg1 == DhcpStateMachine.DHCP_FAILURE) {
-                      handleFailedIpConfiguration();
-                      transitionTo(mDisconnectingState);
+              case CMD_IP_CONFIG_SUCCESS:
+                  mLastSignalLevel = -1; // force update of signal strength
+                  InetAddress addr;
+                  synchronized (mDhcpInfoInternal) {
+                      addr = NetworkUtils.numericToInetAddress(mDhcpInfoInternal.ipAddress);
                   }
-                  break;
-              case CMD_STATIC_IP_SUCCESS:
-                  handleSuccessfulIpConfiguration((DhcpInfoInternal) message.obj);
+                  mWifiInfo.setInetAddress(addr);
+                  configureLinkProperties();
+                  if (getNetworkDetailedState() == DetailedState.CONNECTED) {
+                      sendLinkConfigurationChangedBroadcast();
+                  } else {
+                      setNetworkDetailedState(DetailedState.CONNECTED);
+                      sendNetworkStateChangeBroadcast(mLastBssid);
+                  }
+                  //TODO: The framework is not detecting a DHCP renewal and a possible
+                  //IP change. we should detect this and send out a config change broadcast
                   transitionTo(mConnectedState);
                   break;
-              case CMD_STATIC_IP_FAILURE:
-                  handleFailedIpConfiguration();
+              case CMD_IP_CONFIG_FAILURE:
+                  mWifiInfo.setInetAddress(null);
+
+                  Log.e(TAG, "IP configuration failed");
+                  /**
+                   * If we've exceeded the maximum number of retries for DHCP
+                   * to a given network, disable the network
+                   */
+                  if (++mReconnectCount > getMaxDhcpRetries()) {
+                      Log.e(TAG, "Failed " +
+                              mReconnectCount + " times, Disabling " + mLastNetworkId);
+                      WifiConfigStore.disableNetwork(mLastNetworkId);
+                      mReconnectCount = 0;
+                  }
+
+                  /* DHCP times out after about 30 seconds, we do a
+                   * disconnect and an immediate reconnect to try again
+                   */
+                  WifiNative.disconnectCommand();
+                  WifiNative.reconnectCommand();
                   transitionTo(mDisconnectingState);
                   break;
               case CMD_DISCONNECT:
@@ -2706,6 +2680,23 @@ public class WifiStateMachine extends HierarchicalStateMachine {
           EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
           return HANDLED;
       }
+
+      @Override
+      public void exit() {
+          /* reset power state & bluetooth coexistence if on DHCP */
+          if (!mUseStaticIp) {
+              if (mPowerMode != POWER_MODE_ACTIVE) {
+                  WifiNative.setPowerModeCommand(mPowerMode);
+              }
+
+              if (mModifiedBluetoothCoexistenceMode) {
+                  // Set the coexistence mode back to its default value
+                  WifiNative.setBluetoothCoexistenceModeCommand(
+                          WifiNative.BLUETOOTH_COEXISTENCE_MODE_SENSE);
+              }
+          }
+
+      }
     }
 
     class ConnectedState extends HierarchicalState {
@@ -2723,19 +2714,6 @@ public class WifiStateMachine extends HierarchicalStateMachine {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             boolean eventLoggingEnabled = true;
             switch (message.what) {
-              case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
-                  handlePreDhcpSetup();
-                  mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_PRE_DHCP_ACTION_COMPLETE);
-                  break;
-              case DhcpStateMachine.CMD_POST_DHCP_ACTION:
-                  handlePostDhcpSetup();
-                  if (message.arg1 == DhcpStateMachine.DHCP_SUCCESS) {
-                      handleSuccessfulIpConfiguration((DhcpInfoInternal) message.obj);
-                  } else if (message.arg1 == DhcpStateMachine.DHCP_FAILURE) {
-                      handleFailedIpConfiguration();
-                      transitionTo(mDisconnectingState);
-                  }
-                  break;
                 case CMD_DISCONNECT:
                     WifiNative.disconnectCommand();
                     transitionTo(mDisconnectingState);
