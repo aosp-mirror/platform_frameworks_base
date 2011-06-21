@@ -1247,18 +1247,9 @@ public class BluetoothService extends IBluetooth.Stub {
             return true;
         }
 
-        boolean ret;
-        // Just do the SDP if the device is already  created and UUIDs are not
-        // NULL, else create the device and then do SDP.
-        if (mDeviceProperties.isInCache(address) && getRemoteUuids(address) != null) {
-            String path = getObjectPathFromAddress(address);
-            if (path == null) return false;
-
-            // Use an empty string for the UUID pattern
-            ret = discoverServicesNative(path, "");
-        } else {
-            ret = createDeviceNative(address);
-        }
+        // If the device is already created, we will
+        // do the SDP on the callback of createDeviceNative.
+        boolean ret= createDeviceNative(address);
 
         mUuidIntentTracker.add(address);
         if (uuid != null) {
