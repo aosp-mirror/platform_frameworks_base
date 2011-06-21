@@ -336,6 +336,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
                 if (groupId != 0) {
                     seenGroups.put(groupId, true);
                 }
+                item.setIsActionButton(true);
             } else if (item.requestsActionButton()) {
                 // Items in a group with other items that already have an action slot
                 // can break the max actions rule, but not the width limit.
