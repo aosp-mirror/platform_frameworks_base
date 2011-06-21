@@ -48,7 +48,7 @@ public class ThumbnailUtils {
 
     /* Maximum pixels size for created bitmap. */
     private static final int MAX_NUM_PIXELS_THUMBNAIL = 512 * 384;
-    private static final int MAX_NUM_PIXELS_MICRO_THUMBNAIL = 128 * 128;
+    private static final int MAX_NUM_PIXELS_MICRO_THUMBNAIL = 160 * 120;
     private static final int UNCONSTRAINED = -1;
 
     /* Options used internally. */
