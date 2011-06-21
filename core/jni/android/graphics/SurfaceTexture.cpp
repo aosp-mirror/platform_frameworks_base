@@ -91,7 +91,8 @@ public:
     virtual void onFrameAvailable();
 
 private:
-    static JNIEnv* getJNIEnv();
+    static JNIEnv* getJNIEnv(bool* needsDetach);
+    static void detachJNI();
 
     jobject mWeakThiz;
     jclass mClazz;
@@ -103,36 +104,56 @@ JNISurfaceTextureContext::JNISurfaceTextureContext(JNIEnv* env,
     mClazz((jclass)env->NewGlobalRef(clazz))
 {}
 
-JNIEnv* JNISurfaceTextureContext::getJNIEnv() {
-    JNIEnv* env;
-    JavaVMAttachArgs args = {JNI_VERSION_1_4, NULL, NULL};
-    JavaVM* vm = AndroidRuntime::getJavaVM();
-    int result = vm->AttachCurrentThread(&env, (void*) &args);
-    if (result != JNI_OK) {
-        LOGE("thread attach failed: %#x", result);
-        return NULL;
+JNIEnv* JNISurfaceTextureContext::getJNIEnv(bool* needsDetach) {
+    *needsDetach = false;
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    if (env == NULL) {
+        JavaVMAttachArgs args = {JNI_VERSION_1_4, NULL, NULL};
+        JavaVM* vm = AndroidRuntime::getJavaVM();
+        int result = vm->AttachCurrentThread(&env, (void*) &args);
+        if (result != JNI_OK) {
+            LOGE("thread attach failed: %#x", result);
+            return NULL;
+        }
+        *needsDetach = true;
     }
     return env;
 }
 
+void JNISurfaceTextureContext::detachJNI() {
+    JavaVM* vm = AndroidRuntime::getJavaVM();
+    int result = vm->DetachCurrentThread();
+    if (result != JNI_OK) {
+        LOGE("thread detach failed: %#x", result);
+    }
+}
+
 JNISurfaceTextureContext::~JNISurfaceTextureContext()
 {
-    JNIEnv* env = getJNIEnv();
+    bool needsDetach = false;
+    JNIEnv* env = getJNIEnv(&needsDetach);
     if (env != NULL) {
         env->DeleteGlobalRef(mWeakThiz);
         env->DeleteGlobalRef(mClazz);
     } else {
         LOGW("leaking JNI object references");
     }
+    if (needsDetach) {
+        detachJNI();
+    }
 }
 
 void JNISurfaceTextureContext::onFrameAvailable()
 {
-    JNIEnv *env = getJNIEnv();
+    bool needsDetach = false;
+    JNIEnv* env = getJNIEnv(&needsDetach);
     if (env != NULL) {
         env->CallStaticVoidMethod(mClazz, fields.postEvent, mWeakThiz);
     } else {
         LOGW("onFrameAvailable event will not posted");
+    }
+    if (needsDetach) {
+        detachJNI();
     }
 }
 
