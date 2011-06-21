@@ -2913,7 +2913,7 @@ public class Camera {
          * @return a list of current metering areas
          */
         public List<Area> getMeteringAreas() {
-            return splitArea(KEY_METERING_AREAS);
+            return splitArea(get(KEY_METERING_AREAS));
         }
 
         /**
