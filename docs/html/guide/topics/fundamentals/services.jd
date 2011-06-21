@@ -670,7 +670,7 @@ foreground service must provide a notification for the status bar, which is plac
 either stopped or removed from the foreground.</p>
 
 <p>For example, a music player that plays music from a service should be set to run in the
-foreground, because the user it explicitly aware
+foreground, because the user is explicitly aware
 of its operation. The notification in the status bar might indicate the current song and allow
 the user to launch an activity to interact with the music player.</p>
 
