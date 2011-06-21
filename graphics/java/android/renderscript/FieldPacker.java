@@ -165,6 +165,22 @@ public class FieldPacker {
         addF32(v.w);
     }
 
+    public void addF64(Double2 v) {
+        addF64(v.x);
+        addF64(v.y);
+    }
+    public void addF64(Double3 v) {
+        addF64(v.x);
+        addF64(v.y);
+        addF64(v.z);
+    }
+    public void addF64(Double4 v) {
+        addF64(v.x);
+        addF64(v.y);
+        addF64(v.z);
+        addF64(v.w);
+    }
+
     public void addI8(Byte2 v) {
         addI8(v.x);
         addI8(v.y);
@@ -259,6 +275,38 @@ public class FieldPacker {
         addU32(v.y);
         addU32(v.z);
         addU32(v.w);
+    }
+
+    public void addI64(Long2 v) {
+        addI64(v.x);
+        addI64(v.y);
+    }
+    public void addI64(Long3 v) {
+        addI64(v.x);
+        addI64(v.y);
+        addI64(v.z);
+    }
+    public void addI64(Long4 v) {
+        addI64(v.x);
+        addI64(v.y);
+        addI64(v.z);
+        addI64(v.w);
+    }
+
+    public void addU64(Long2 v) {
+        addU64(v.x);
+        addU64(v.y);
+    }
+    public void addU64(Long3 v) {
+        addU64(v.x);
+        addU64(v.y);
+        addU64(v.z);
+    }
+    public void addU64(Long4 v) {
+        addU64(v.x);
+        addU64(v.y);
+        addU64(v.z);
+        addU64(v.w);
     }
 
     public void addMatrix(Matrix4f v) {

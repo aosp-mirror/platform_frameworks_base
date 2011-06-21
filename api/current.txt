@@ -16782,6 +16782,9 @@ package android.renderscript {
     method public void addF32(android.renderscript.Float3);
     method public void addF32(android.renderscript.Float4);
     method public void addF64(double);
+    method public void addF64(android.renderscript.Double2);
+    method public void addF64(android.renderscript.Double3);
+    method public void addF64(android.renderscript.Double4);
     method public void addI16(short);
     method public void addI16(android.renderscript.Short2);
     method public void addI16(android.renderscript.Short3);
@@ -16791,6 +16794,9 @@ package android.renderscript {
     method public void addI32(android.renderscript.Int3);
     method public void addI32(android.renderscript.Int4);
     method public void addI64(long);
+    method public void addI64(android.renderscript.Long2);
+    method public void addI64(android.renderscript.Long3);
+    method public void addI64(android.renderscript.Long4);
     method public void addI8(byte);
     method public void addI8(android.renderscript.Byte2);
     method public void addI8(android.renderscript.Byte3);
@@ -16808,6 +16814,9 @@ package android.renderscript {
     method public void addU32(android.renderscript.Long3);
     method public void addU32(android.renderscript.Long4);
     method public void addU64(long);
+    method public void addU64(android.renderscript.Long2);
+    method public void addU64(android.renderscript.Long3);
+    method public void addU64(android.renderscript.Long4);
     method public void addU8(short);
     method public void addU8(android.renderscript.Short2);
     method public void addU8(android.renderscript.Short3);
