@@ -562,9 +562,17 @@ public class LinearLayout extends ViewGroup {
             return (mShowDividers & SHOW_DIVIDER_BEGINNING) != 0;
         } else if (childIndex == getChildCount()) {
             return (mShowDividers & SHOW_DIVIDER_END) != 0;
-        } else {
-            return (mShowDividers & SHOW_DIVIDER_MIDDLE) != 0;
+        } else if ((mShowDividers & SHOW_DIVIDER_MIDDLE) != 0) {
+            boolean hasVisibleViewBefore = false;
+            for (int i = childIndex - 1; i >= 0; i--) {
+                if (getChildAt(i).getVisibility() != GONE) {
+                    hasVisibleViewBefore = true;
+                    break;
+                }
+            }
+            return hasVisibleViewBefore;
         }
+        return false;
     }
 
     /**
