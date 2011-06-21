@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,9 @@
 
 #include <RenderScript.h>
 #include <RenderScriptEnv.h>
+#include <gui/SurfaceTexture.h>
+#include <gui/SurfaceTextureClient.h>
+#include <android_runtime/android_graphics_SurfaceTexture.h>
 
 //#define LOG_API LOGE
 #define LOG_API(...)
@@ -198,6 +201,23 @@ nContextSetSurface(JNIEnv *_env, jobject _this, RsContext con, jint width, jint 
     }
 
     rsContextSetSurface(con, width, height, window);
+}
+
+static void
+nContextSetSurfaceTexture(JNIEnv *_env, jobject _this, RsContext con, jint width, jint height, jobject sur)
+{
+    LOG_API("nContextSetSurfaceTexture, con(%p), width(%i), height(%i), surface(%p)", con, width, height, (Surface *)sur);
+
+    sp<ANativeWindow> window;
+    sp<SurfaceTexture> st;
+    if (sur == 0) {
+
+    } else {
+        st = SurfaceTexture_getSurfaceTexture(_env, sur);
+        window = new SurfaceTextureClient(st);
+    }
+
+    rsContextSetSurface(con, width, height, window.get());
 }
 
 static void
@@ -1197,6 +1217,7 @@ static JNINativeMethod methods[] = {
 {"rsnContextFinish",                 "(I)V",                                  (void*)nContextFinish },
 {"rsnContextSetPriority",            "(II)V",                                 (void*)nContextSetPriority },
 {"rsnContextSetSurface",             "(IIILandroid/view/Surface;)V",          (void*)nContextSetSurface },
+{"rsnContextSetSurfaceTexture",      "(IIILandroid/graphics/SurfaceTexture;)V", (void*)nContextSetSurfaceTexture },
 {"rsnContextDestroy",                "(I)V",                                  (void*)nContextDestroy },
 {"rsnContextDump",                   "(II)V",                                 (void*)nContextDump },
 {"rsnContextPause",                  "(I)V",                                  (void*)nContextPause },
