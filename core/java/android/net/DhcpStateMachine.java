@@ -117,13 +117,14 @@ public class DhcpStateMachine extends HierarchicalStateMachine {
 
         PowerManager powerManager = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
         mDhcpRenewWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, WAKELOCK_TAG);
+        mDhcpRenewWakeLock.setReferenceCounted(false);
 
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 //DHCP renew
                 if (DBG) Log.d(TAG, "Sending a DHCP renewal " + this);
-                //acquire a 40s wakelock to finish DHCP renewal
+                //Lock released after 40s in worst case scenario
                 mDhcpRenewWakeLock.acquire(40000);
                 sendMessage(CMD_RENEW_DHCP);
             }
@@ -166,6 +167,7 @@ public class DhcpStateMachine extends HierarchicalStateMachine {
             switch (message.what) {
                 case CMD_RENEW_DHCP:
                     Log.e(TAG, "Error! Failed to handle a DHCP renewal on " + mInterfaceName);
+                    mDhcpRenewWakeLock.release();
                     break;
                 case HSM_QUIT_CMD:
                     mContext.unregisterReceiver(mBroadcastReceiver);
@@ -268,10 +270,12 @@ public class DhcpStateMachine extends HierarchicalStateMachine {
                         /* Notify controller before starting DHCP */
                         mController.sendMessage(CMD_PRE_DHCP_ACTION);
                         transitionTo(mWaitBeforeRenewalState);
+                        //mDhcpRenewWakeLock is released in WaitBeforeRenewalState
                     } else {
                         if (!runDhcp(DhcpAction.RENEW)) {
                             transitionTo(mStoppedState);
                         }
+                        mDhcpRenewWakeLock.release();
                     }
                     break;
                 case CMD_START_DHCP:
@@ -317,6 +321,10 @@ public class DhcpStateMachine extends HierarchicalStateMachine {
                     break;
             }
             return retValue;
+        }
+        @Override
+        public void exit() {
+            mDhcpRenewWakeLock.release();
         }
     }
 
