@@ -276,6 +276,33 @@ public final class BluetoothDevice implements Parcelable {
     public static final String ACTION_PAIRING_CANCEL =
             "android.bluetooth.device.action.PAIRING_CANCEL";
 
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CONNECTION_ACCESS_REQUEST =
+            "android.bluetooth.device.action.CONNECTION_ACCESS_REQUEST";
+
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CONNECTION_ACCESS_REPLY =
+            "android.bluetooth.device.action.CONNECTION_ACCESS_REPLY";
+
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CONNECTION_ACCESS_CANCEL =
+            "android.bluetooth.device.action.CONNECTION_ACCESS_CANCEL";
+    /**
+     * Used as an extra field in {@link #ACTION_CONNECTION_ACCESS_REPLY} intent.
+     * @hide
+     */
+    public static final String EXTRA_CONNECTION_ACCESS_RESULT =
+        "android.bluetooth.device.extra.CONNECTION_ACCESS_RESULT";
+
+    /**@hide*/
+    public static final int CONNECTION_ACCESS_YES = 1;
+
+    /**@hide*/
+    public static final int CONNECTION_ACCESS_NO = 2;
+
     /** A bond attempt succeeded
      * @hide */
     public static final int BOND_SUCCESS = 0;
