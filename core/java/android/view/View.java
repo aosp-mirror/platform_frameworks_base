@@ -11830,6 +11830,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         mPrivateFlags |= FORCE_LAYOUT;
         mPrivateFlags |= INVALIDATED;
 
+        if (mLayoutParams != null) {
+            mLayoutParams.resolveWithDirection(getResolvedLayoutDirection());
+        }
+
         if (mParent != null && !mParent.isLayoutRequested()) {
             mParent.requestLayout();
         }
