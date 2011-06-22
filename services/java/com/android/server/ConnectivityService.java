@@ -466,12 +466,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         INetworkManagementService nmService = INetworkManagementService.Stub.asInterface(b);
 
         mTethering = new Tethering(mContext, nmService, mHandler.getLooper());
-        mTetheringConfigValid = (((mNetTrackers[ConnectivityManager.TYPE_MOBILE_DUN] != null) ||
-                                  !mTethering.isDunRequired()) &&
-                                 (mTethering.getTetherableUsbRegexs().length != 0 ||
+        mTetheringConfigValid = ((mTethering.getTetherableUsbRegexs().length != 0 ||
                                   mTethering.getTetherableWifiRegexs().length != 0 ||
                                   mTethering.getTetherableBluetoothRegexs().length != 0) &&
-                                 mTethering.getUpstreamIfaceRegexs().length != 0);
+                                 mTethering.getUpstreamIfaceTypes().length != 0);
 
         mVpn = new Vpn(mContext, new VpnCallback());
 
@@ -1576,12 +1574,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
                 addPrivateDnsRoutes(mNetTrackers[netType]);
             }
-
-            /** Notify TetheringService if interface name has been changed. */
-            if (TextUtils.equals(mNetTrackers[netType].getNetworkInfo().getReason(),
-                                 Phone.REASON_LINK_PROPERTIES_CHANGED)) {
-                handleTetherIfaceChange(netType);
-            }
         } else {
             if (mNetConfigs[netType].isDefault()) {
                 removeDefaultRoute(mNetTrackers[netType]);
@@ -2409,14 +2401,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         @Override
         public void onChange(boolean selfChange) {
             mHandler.obtainMessage(mWhat).sendToTarget();
-        }
-    }
-
-    private void handleTetherIfaceChange(int type) {
-        String iface = mNetTrackers[type].getLinkProperties().getInterfaceName();
-
-        if (isTetheringSupported()) {
-            mTethering.handleTetherIfaceChange(iface);
         }
     }
 
