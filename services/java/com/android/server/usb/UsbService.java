@@ -146,19 +146,10 @@ public class UsbService extends IUsbManager.Stub {
         mSettingsManager.clearDefaults(packageName);
     }
 
-    public void setPrimaryFunction(String function) {
+    public void setCurrentFunction(String function, boolean makeDefault) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
         if (mDeviceManager != null) {
-            mDeviceManager.setPrimaryFunction(function);
-        } else {
-            throw new IllegalStateException("USB device mode not supported");
-        }
-    }
-
-    public void setDefaultFunction(String function) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_USB, null);
-        if (mDeviceManager != null) {
-            mDeviceManager.setDefaultFunction(function);
+            mDeviceManager.setCurrentFunction(function, makeDefault);
         } else {
             throw new IllegalStateException("USB device mode not supported");
         }

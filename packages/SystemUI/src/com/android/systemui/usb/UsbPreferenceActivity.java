@@ -78,14 +78,13 @@ public class UsbPreferenceActivity extends Activity implements View.OnClickListe
     public void onClick(View v) {
         if (v.equals(mMtpPtpButton)) {
             if (mPtpActive) {
-                mUsbManager.setPrimaryFunction(UsbManager.USB_FUNCTION_MTP);
-                mUsbManager.setDefaultFunction(UsbManager.USB_FUNCTION_MTP);
+                mUsbManager.setCurrentFunction(UsbManager.USB_FUNCTION_MTP, true);
             } else {
-                mUsbManager.setPrimaryFunction(UsbManager.USB_FUNCTION_PTP);
-                mUsbManager.setDefaultFunction(UsbManager.USB_FUNCTION_PTP);
+                mUsbManager.setCurrentFunction(UsbManager.USB_FUNCTION_PTP, true);
             }
         } else if (v.equals(mInstallerCdButton)) {
-            mUsbManager.setPrimaryFunction(UsbManager.USB_FUNCTION_MASS_STORAGE);
+            // installer CD is never default
+            mUsbManager.setCurrentFunction(UsbManager.USB_FUNCTION_MASS_STORAGE, false);
             mUsbManager.setMassStorageBackingFile(mInstallerImagePath);
         }
 

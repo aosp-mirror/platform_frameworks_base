@@ -509,9 +509,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
         try {
             if (enabled) {
-                usbManager.setPrimaryFunction(UsbManager.USB_FUNCTION_RNDIS);
+                usbManager.setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS, false);
             } else {
-                usbManager.setPrimaryFunction(null);
+                usbManager.setCurrentFunction(null, false);
             }
         } catch (Exception e) {
             Log.e(TAG, "Error toggling usb RNDIS", e);
