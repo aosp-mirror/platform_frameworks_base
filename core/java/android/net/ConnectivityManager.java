@@ -164,6 +164,12 @@ public class ConnectivityManager {
     public static final String EXTRA_ERRORED_TETHER = "erroredArray";
 
     /**
+     * The absence of APN..
+     * @hide
+     */
+    public static final int TYPE_NONE        = -1;
+
+    /**
      * The Default Mobile data connection.  When active, all data traffic
      * will use this connection by default.
      */
