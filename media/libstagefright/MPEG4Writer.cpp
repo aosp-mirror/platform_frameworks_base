@@ -205,6 +205,8 @@ private:
     // Duration is time scale based
     void addOneSttsTableEntry(size_t sampleCount, int32_t timescaledDur);
     void addOneCttsTableEntry(size_t sampleCount, int32_t timescaledDur);
+
+    bool isTrackMalFormed() const;
     void sendTrackSummary(bool hasMultipleTracks);
 
     // Write the boxes
@@ -1975,7 +1977,6 @@ status_t MPEG4Writer::Track::threadEntry() {
         }
 
         CHECK(timestampUs >= 0);
-
         LOGV("%s media time stamp: %lld and previous paused duration %lld",
                 mIsAudio? "Audio": "Video", timestampUs, previousPausedDurationUs);
         if (timestampUs > mTrackDurationUs) {
@@ -2082,11 +2083,10 @@ status_t MPEG4Writer::Track::threadEntry() {
 
     }
 
-    if (mSampleSizes.empty() ||                      // no samples written
-        (!mIsAudio && mNumStssTableEntries == 0) ||  // no sync frames for video
-        (OK != checkCodecSpecificData())) {          // no codec specific data
+    if (isTrackMalFormed()) {
         err = ERROR_MALFORMED;
     }
+
     mOwner->trackProgressStatus(mTrackId, -1, err);
 
     // Last chunk
@@ -2134,6 +2134,24 @@ status_t MPEG4Writer::Track::threadEntry() {
         return OK;
     }
     return err;
+}
+
+bool MPEG4Writer::Track::isTrackMalFormed() const {
+    if (mSampleSizes.empty()) {                      // no samples written
+        LOGE("The number of recorded samples is 0");
+        return true;
+    }
+
+    if (!mIsAudio && mNumStssTableEntries == 0) {  // no sync frames for video
+        LOGE("There are no sync frames for video track");
+        return true;
+    }
+
+    if (OK != checkCodecSpecificData()) {         // no codec specific data
+        return true;
+    }
+
+    return false;
 }
 
 void MPEG4Writer::Track::sendTrackSummary(bool hasMultipleTracks) {
