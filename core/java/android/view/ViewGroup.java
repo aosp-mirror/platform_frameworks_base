@@ -143,11 +143,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @ViewDebug.ExportedProperty(category = "events")
     private float mLastTouchDownY;
 
-    // The child which last received ACTION_HOVER_ENTER and ACTION_HOVER_MOVE.
-    // The child might not have actually handled the hover event, but we will
-    // continue sending hover events to it as long as the pointer remains over
-    // it and the view group does not intercept hover.
-    private View mHoveredChild;
+    // First hover target in the linked list of hover targets.
+    // The hover targets are children which have received ACTION_HOVER_ENTER.
+    // They might not have actually handled the hover event, but we will
+    // continue sending hover events to them as long as the pointer remains over
+    // their bounds and the view group does not intercept hover.
+    private HoverTarget mFirstHoverTarget;
 
     // True if the view group itself received a hover event.
     // It might not have actually handled the hover event.
@@ -1240,80 +1241,120 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final boolean interceptHover = onInterceptHoverEvent(event);
         event.setAction(action); // restore action in case it was changed
 
-        // Figure out which child should receive the next hover event.
-        View newHoveredChild = null;
+        MotionEvent eventNoHistory = event;
+        boolean handled = false;
+
+        // Send events to the hovered children and build a new list of hover targets until
+        // one is found that handles the event.
+        HoverTarget firstOldHoverTarget = mFirstHoverTarget;
+        mFirstHoverTarget = null;
         if (!interceptHover && action != MotionEvent.ACTION_HOVER_EXIT) {
             final float x = event.getX();
             final float y = event.getY();
             final int childrenCount = mChildrenCount;
             if (childrenCount != 0) {
                 final View[] children = mChildren;
+                HoverTarget lastHoverTarget = null;
                 for (int i = childrenCount - 1; i >= 0; i--) {
                     final View child = children[i];
-                    if (canViewReceivePointerEvents(child)
-                            && isTransformedTouchPointInView(x, y, child, null)) {
-                        newHoveredChild = child;
+                    if (!canViewReceivePointerEvents(child)
+                            || !isTransformedTouchPointInView(x, y, child, null)) {
+                        continue;
+                    }
+
+                    // Obtain a hover target for this child.  Dequeue it from the
+                    // old hover target list if the child was previously hovered.
+                    HoverTarget hoverTarget = firstOldHoverTarget;
+                    final boolean wasHovered;
+                    for (HoverTarget predecessor = null; ;) {
+                        if (hoverTarget == null) {
+                            hoverTarget = HoverTarget.obtain(child);
+                            wasHovered = false;
+                            break;
+                        }
+
+                        if (hoverTarget.child == child) {
+                            if (predecessor != null) {
+                                predecessor.next = hoverTarget.next;
+                            } else {
+                                firstOldHoverTarget = hoverTarget.next;
+                            }
+                            hoverTarget.next = null;
+                            wasHovered = true;
+                            break;
+                        }
+
+                        predecessor = hoverTarget;
+                        hoverTarget = hoverTarget.next;
+                    }
+
+                    // Enqueue the hover target onto the new hover target list.
+                    if (lastHoverTarget != null) {
+                        lastHoverTarget.next = hoverTarget;
+                    } else {
+                        lastHoverTarget = hoverTarget;
+                        mFirstHoverTarget = hoverTarget;
+                    }
+
+                    // Dispatch the event to the child.
+                    if (action == MotionEvent.ACTION_HOVER_ENTER) {
+                        if (!wasHovered) {
+                            // Send the enter as is.
+                            handled |= dispatchTransformedGenericPointerEvent(
+                                    event, child); // enter
+                        }
+                    } else if (action == MotionEvent.ACTION_HOVER_MOVE) {
+                        if (!wasHovered) {
+                            // Synthesize an enter from a move.
+                            eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
+                            eventNoHistory.setAction(MotionEvent.ACTION_HOVER_ENTER);
+                            handled |= dispatchTransformedGenericPointerEvent(
+                                    eventNoHistory, child); // enter
+                            eventNoHistory.setAction(action);
+
+                            handled |= dispatchTransformedGenericPointerEvent(
+                                    eventNoHistory, child); // move
+                        } else {
+                            // Send the move as is.
+                            handled |= dispatchTransformedGenericPointerEvent(event, child);
+                        }
+                    }
+                    if (handled) {
                         break;
                     }
                 }
             }
         }
 
-        MotionEvent eventNoHistory = event;
-        boolean handled = false;
+        // Send exit events to all previously hovered children that are no longer hovered.
+        while (firstOldHoverTarget != null) {
+            final View child = firstOldHoverTarget.child;
 
-        // Send events to the hovered child.
-        if (mHoveredChild == newHoveredChild) {
-            if (newHoveredChild != null) {
-                // Send event to the same child as before.
-                handled |= dispatchTransformedGenericPointerEvent(event, newHoveredChild);
-            }
-        } else {
-            if (mHoveredChild != null) {
-                // Exit the old hovered child.
-                if (action == MotionEvent.ACTION_HOVER_EXIT) {
-                    // Send the exit as is.
-                    handled |= dispatchTransformedGenericPointerEvent(
-                            event, mHoveredChild); // exit
-                } else {
-                    // Synthesize an exit from a move or enter.
-                    // Ignore the result because hover focus is moving to a different view.
-                    if (action == MotionEvent.ACTION_HOVER_MOVE) {
-                        dispatchTransformedGenericPointerEvent(
-                                event, mHoveredChild); // move
-                    }
-                    eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
-                    eventNoHistory.setAction(MotionEvent.ACTION_HOVER_EXIT);
+            // Exit the old hovered child.
+            if (action == MotionEvent.ACTION_HOVER_EXIT) {
+                // Send the exit as is.
+                handled |= dispatchTransformedGenericPointerEvent(
+                        event, child); // exit
+            } else {
+                // Synthesize an exit from a move or enter.
+                // Ignore the result because hover focus has moved to a different view.
+                if (action == MotionEvent.ACTION_HOVER_MOVE) {
                     dispatchTransformedGenericPointerEvent(
-                            eventNoHistory, mHoveredChild); // exit
-                    eventNoHistory.setAction(action);
+                            event, child); // move
                 }
-                mHoveredChild = null;
+                eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
+                eventNoHistory.setAction(MotionEvent.ACTION_HOVER_EXIT);
+                dispatchTransformedGenericPointerEvent(
+                        eventNoHistory, child); // exit
+                eventNoHistory.setAction(action);
             }
 
-            if (newHoveredChild != null) {
-                // Enter the new hovered child.
-                if (action == MotionEvent.ACTION_HOVER_ENTER) {
-                    // Send the enter as is.
-                    handled |= dispatchTransformedGenericPointerEvent(
-                            event, newHoveredChild); // enter
-                    mHoveredChild = newHoveredChild;
-                } else if (action == MotionEvent.ACTION_HOVER_MOVE) {
-                    // Synthesize an enter from a move.
-                    eventNoHistory = obtainMotionEventNoHistoryOrSelf(eventNoHistory);
-                    eventNoHistory.setAction(MotionEvent.ACTION_HOVER_ENTER);
-                    handled |= dispatchTransformedGenericPointerEvent(
-                            eventNoHistory, newHoveredChild); // enter
-                    eventNoHistory.setAction(action);
-
-                    handled |= dispatchTransformedGenericPointerEvent(
-                            eventNoHistory, newHoveredChild); // move
-                    mHoveredChild = newHoveredChild;
-                }
-            }
+            final HoverTarget nextOldHoverTarget = firstOldHoverTarget.next;
+            firstOldHoverTarget.recycle();
+            firstOldHoverTarget = nextOldHoverTarget;
         }
 
-        // Send events to the view group itself if it is hovered.
+        // Send events to the view group itself if no children have handled it.
         boolean newHoveredSelf = !handled;
         if (newHoveredSelf == mHoveredSelf) {
             if (newHoveredSelf) {
@@ -1366,6 +1407,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
         // Done.
         return handled;
+    }
+
+    /** @hide */
+    @Override
+    protected boolean hasHoveredChild() {
+        return mFirstHoverTarget != null;
     }
 
     /**
@@ -3423,10 +3470,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             mTransition.removeChild(this, view);
         }
 
-        if (view == mHoveredChild) {
-            mHoveredChild = null;
-        }
-
         boolean clearChildFocus = false;
         if (view == mFocused) {
             view.clearFocusForRemoval();
@@ -3490,7 +3533,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final OnHierarchyChangeListener onHierarchyChangeListener = mOnHierarchyChangeListener;
         final boolean notifyListener = onHierarchyChangeListener != null;
         final View focused = mFocused;
-        final View hoveredChild = mHoveredChild;
         final boolean detach = mAttachInfo != null;
         View clearChildFocus = null;
 
@@ -3502,10 +3544,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             if (mTransition != null) {
                 mTransition.removeChild(this, view);
-            }
-
-            if (view == hoveredChild) {
-                mHoveredChild = null;
             }
 
             if (view == focused) {
@@ -3565,7 +3603,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final OnHierarchyChangeListener listener = mOnHierarchyChangeListener;
         final boolean notify = listener != null;
         final View focused = mFocused;
-        final View hoveredChild = mHoveredChild;
         final boolean detach = mAttachInfo != null;
         View clearChildFocus = null;
 
@@ -3576,10 +3613,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             if (mTransition != null) {
                 mTransition.removeChild(this, view);
-            }
-
-            if (view == hoveredChild) {
-                mHoveredChild = null;
             }
 
             if (view == focused) {
@@ -5312,6 +5345,52 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             }
             target.child = child;
             target.pointerIdBits = pointerIdBits;
+            return target;
+        }
+
+        public void recycle() {
+            synchronized (sRecycleLock) {
+                if (sRecycledCount < MAX_RECYCLED) {
+                    next = sRecycleBin;
+                    sRecycleBin = this;
+                    sRecycledCount += 1;
+                } else {
+                    next = null;
+                }
+                child = null;
+            }
+        }
+    }
+
+    /* Describes a hovered view. */
+    private static final class HoverTarget {
+        private static final int MAX_RECYCLED = 32;
+        private static final Object sRecycleLock = new Object();
+        private static HoverTarget sRecycleBin;
+        private static int sRecycledCount;
+
+        // The hovered child view.
+        public View child;
+
+        // The next target in the target list.
+        public HoverTarget next;
+
+        private HoverTarget() {
+        }
+
+        public static HoverTarget obtain(View child) {
+            final HoverTarget target;
+            synchronized (sRecycleLock) {
+                if (sRecycleBin == null) {
+                    target = new HoverTarget();
+                } else {
+                    target = sRecycleBin;
+                    sRecycleBin = target.next;
+                     sRecycledCount--;
+                    target.next = null;
+                }
+            }
+            target.child = child;
             return target;
         }
 

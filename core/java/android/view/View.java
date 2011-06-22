@@ -2486,6 +2486,12 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     Rect mLocalDirtyRect;
 
     /**
+     * Set to true when the view is sending hover accessibility events because it
+     * is the innermost hovered view.
+     */
+    private boolean mSendingHoverAccessibilityEvents;
+
+    /**
      * Consistency verifier for debugging purposes.
      * @hide
      */
@@ -5200,12 +5206,37 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @return True if the event was handled by the view, false otherwise.
      */
     protected boolean dispatchHoverEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_HOVER_ENTER:
+                if (!hasHoveredChild() && !mSendingHoverAccessibilityEvents) {
+                    mSendingHoverAccessibilityEvents = true;
+                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+                }
+                break;
+            case MotionEvent.ACTION_HOVER_EXIT:
+                if (mSendingHoverAccessibilityEvents) {
+                    mSendingHoverAccessibilityEvents = false;
+                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+                }
+                break;
+        }
+
         if (mOnHoverListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
                 && mOnHoverListener.onHover(this, event)) {
             return true;
         }
 
         return onHoverEvent(event);
+    }
+
+    /**
+     * Returns true if the view has a child to which it has recently sent
+     * {@link MotionEvent#ACTION_HOVER_ENTER}.  If this view is hovered and
+     * it does not have a hovered child, then it must be the innermost hovered view.
+     * @hide
+     */
+    protected boolean hasHoveredChild() {
+        return false;
     }
 
     /**
@@ -5840,13 +5871,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @see #onHoverChanged
      */
     public boolean onHoverEvent(MotionEvent event) {
-        final int viewFlags = mViewFlags;
-        if ((viewFlags & ENABLED_MASK) == DISABLED) {
-            return false;
-        }
-
-        if ((viewFlags & CLICKABLE) == CLICKABLE
-                || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE) {
+        if (isHoverable()) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_HOVER_ENTER:
                     setHovered(true);
@@ -5857,8 +5882,23 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             }
             return true;
         }
-
         return false;
+    }
+
+    /**
+     * Returns true if the view should handle {@link #onHoverEvent}
+     * by calling {@link #setHovered} to change its hovered state.
+     *
+     * @return True if the view is hoverable.
+     */
+    private boolean isHoverable() {
+        final int viewFlags = mViewFlags;
+        if ((viewFlags & ENABLED_MASK) == DISABLED) {
+            return false;
+        }
+
+        return (viewFlags & CLICKABLE) == CLICKABLE
+                || (viewFlags & LONG_CLICKABLE) == LONG_CLICKABLE;
     }
 
     /**
@@ -5918,8 +5958,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @see #setHovered
      */
     public void onHoverChanged(boolean hovered) {
-        sendAccessibilityEvent(hovered ? AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
-                : AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
     }
 
     /**
