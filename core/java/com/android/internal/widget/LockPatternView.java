@@ -464,8 +464,7 @@ public class LockPatternView extends View {
                 break;
             case MeasureSpec.EXACTLY:
             default:
-                // use the specified size, if non-zero
-                result = specSize != 0 ? specSize : desired;
+                result = specSize;
         }
         return result;
     }

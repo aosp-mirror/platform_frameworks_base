@@ -101,6 +101,10 @@
         android:visibility="gone"
         />
 
+    <!-- We need MATCH_PARENT here only to force the size of the parent to be passed to
+    the pattern view for it to compute its size. This is an unusual case, caused by
+    LockPatternView's requirement to maintain a square aspect ratio based on the width
+    of the screen. -->
     <com.android.internal.widget.LockPatternView
         android:id="@+id/lockPattern"
         android:layout_width="match_parent"
@@ -109,6 +113,8 @@
         android:layout_marginRight="8dip"
         android:layout_marginBottom="4dip"
         android:layout_marginLeft="8dip"
+        android:layout_gravity="center|bottom"
+        android:layout_rowWeight="1"
      />
 
     <TextView
@@ -123,8 +129,7 @@
     <!-- Footer: an emergency call button and an initially hidden "Forgot pattern" button -->
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_gravity="center">
+        android:layout_gravity="fill_horizontal">
 
         <Button android:id="@+id/emergencyCallButton"
             android:layout_width="wrap_content"
