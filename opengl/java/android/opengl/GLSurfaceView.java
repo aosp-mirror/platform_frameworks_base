@@ -1096,6 +1096,10 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                     // on the expectation that the application will be closed soon.
                     Log.e("EglHelper", "eglSwapBuffers returned EGL_BAD_NATIVE_WINDOW. tid=" + Thread.currentThread().getId());
                     break;
+                case EGL10.EGL_BAD_CURRENT_SURFACE:
+                    // The window was presumably closed by the window manager.
+                    Log.e("EglHelper", "eglSwapBuffers returned EGL_BAD_CURRENT_SURFACE");
+                    break;
                 default:
                     throwEglException("eglSwapBuffers", error);
                 }
