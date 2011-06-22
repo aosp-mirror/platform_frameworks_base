@@ -388,13 +388,15 @@ private:
 
     sp<MediaSource> mSource;
     StreamType mStreamType;
+    bool mSawFirstIDRFrame;
 
     DISALLOW_EVIL_CONSTRUCTORS(DetectSyncSource);
 };
 
 DetectSyncSource::DetectSyncSource(const sp<MediaSource> &source)
     : mSource(source),
-      mStreamType(OTHER) {
+      mStreamType(OTHER),
+      mSawFirstIDRFrame(false) {
     const char *mime;
     CHECK(mSource->getFormat()->findCString(kKeyMIMEType, &mime));
 
@@ -410,6 +412,8 @@ DetectSyncSource::DetectSyncSource(const sp<MediaSource> &source)
 }
 
 status_t DetectSyncSource::start(MetaData *params) {
+    mSawFirstIDRFrame = false;
+
     return mSource->start(params);
 }
 
@@ -439,16 +443,30 @@ static bool isIDRFrame(MediaBuffer *buffer) {
 
 status_t DetectSyncSource::read(
         MediaBuffer **buffer, const ReadOptions *options) {
-    status_t err = mSource->read(buffer, options);
+    for (;;) {
+        status_t err = mSource->read(buffer, options);
 
-    if (err != OK) {
-        return err;
-    }
+        if (err != OK) {
+            return err;
+        }
 
-    if (mStreamType == AVC && isIDRFrame(*buffer)) {
-        (*buffer)->meta_data()->setInt32(kKeyIsSyncFrame, true);
-    } else {
-        (*buffer)->meta_data()->setInt32(kKeyIsSyncFrame, true);
+        if (mStreamType == AVC) {
+            bool isIDR = isIDRFrame(*buffer);
+            (*buffer)->meta_data()->setInt32(kKeyIsSyncFrame, isIDR);
+            if (isIDR) {
+                mSawFirstIDRFrame = true;
+            }
+        } else {
+            (*buffer)->meta_data()->setInt32(kKeyIsSyncFrame, true);
+        }
+
+        if (mStreamType != AVC || mSawFirstIDRFrame) {
+            break;
+        }
+
+        // Ignore everything up to the first IDR frame.
+        (*buffer)->release();
+        *buffer = NULL;
     }
 
     return OK;
@@ -944,6 +962,17 @@ int main(int argc, char **argv) {
                 if (extractor == NULL) {
                     fprintf(stderr, "could not create extractor.\n");
                     return -1;
+                }
+
+                sp<MetaData> meta = extractor->getMetaData();
+
+                if (meta != NULL) {
+                    const char *mime;
+                    CHECK(meta->findCString(kKeyMIMEType, &mime));
+
+                    if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
+                        syncInfoPresent = false;
+                    }
                 }
             }
 
