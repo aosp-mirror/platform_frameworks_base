@@ -1600,6 +1600,15 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService} to retrieve a
+     * {@link android.view.inputmethod.TextServiceManager} for accessing
+     * text services.
+     *
+     * @see #getSystemService
+     */
+    public static final String TEXT_SERVICE_MANAGER_SERVICE = "text_service_manager_service";
+
+    /**
+     * Use with {@link #getSystemService} to retrieve a
      * {@link android.appwidget.AppWidgetManager} for accessing AppWidgets.
      *
      * @hide

@@ -21,6 +21,7 @@ package android {
     field public static final java.lang.String BIND_DEVICE_ADMIN = "android.permission.BIND_DEVICE_ADMIN";
     field public static final java.lang.String BIND_INPUT_METHOD = "android.permission.BIND_INPUT_METHOD";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
+    field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
     field public static final java.lang.String BIND_WALLPAPER = "android.permission.BIND_WALLPAPER";
     field public static final java.lang.String BLUETOOTH = "android.permission.BLUETOOTH";
     field public static final java.lang.String BLUETOOTH_ADMIN = "android.permission.BLUETOOTH_ADMIN";
@@ -4733,6 +4734,7 @@ package android.content {
     field public static final java.lang.String SENSOR_SERVICE = "sensor";
     field public static final java.lang.String STORAGE_SERVICE = "storage";
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
+    field public static final java.lang.String TEXT_SERVICE_MANAGER_SERVICE = "text_service_manager_service";
     field public static final java.lang.String UI_MODE_SERVICE = "uimode";
     field public static final java.lang.String USB_SERVICE = "usb";
     field public static final java.lang.String VIBRATOR_SERVICE = "vibrator";
@@ -23336,6 +23338,19 @@ package android.view.inputmethod {
     field public int token;
   }
 
+  public abstract interface ISpellCheckerService implements android.os.IInterface {
+    method public abstract void cancel() throws android.os.RemoteException;
+    method public abstract java.lang.CharSequence getSuggestions(java.lang.CharSequence, int, int, java.lang.String) throws android.os.RemoteException;
+    method public abstract boolean isCorrect(java.lang.CharSequence, int, int, java.lang.String) throws android.os.RemoteException;
+  }
+
+  public static abstract class ISpellCheckerService.Stub extends android.os.Binder implements android.view.inputmethod.ISpellCheckerService {
+    ctor public ISpellCheckerService.Stub();
+    method public android.os.IBinder asBinder();
+    method public static android.view.inputmethod.ISpellCheckerService asInterface(android.os.IBinder);
+    method public boolean onTransact(int, android.os.Parcel, android.os.Parcel, int) throws android.os.RemoteException;
+  }
+
   public final class InputBinding implements android.os.Parcelable {
     ctor public InputBinding(android.view.inputmethod.InputConnection, android.os.IBinder, int, int);
     ctor public InputBinding(android.view.inputmethod.InputConnection, android.view.inputmethod.InputBinding);
@@ -23518,6 +23533,39 @@ package android.view.inputmethod {
     method public boolean isAuxiliary();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class SpellCheckerInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.content.ComponentName getComponent();
+    method public java.lang.String getId();
+    method public java.lang.String getPackageName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public abstract class SpellCheckerService extends android.app.Service {
+    ctor public SpellCheckerService();
+    method protected void cancel();
+    method protected static java.util.Locale constructLocaleFromString(java.lang.String);
+    method protected abstract java.lang.String[] getStringSuggestions(java.lang.CharSequence, int, int, java.lang.String);
+    method protected java.lang.CharSequence getSuggestions(java.lang.CharSequence, int, int, java.lang.String);
+    method protected abstract boolean isCorrect(java.lang.CharSequence, int, int, java.lang.String);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    field public static final java.lang.String SERVICE_INTERFACE;
+  }
+
+  public final class TextServiceManager {
+    method public void getSuggestions(java.lang.CharSequence, int, int, java.util.Locale, boolean, android.view.inputmethod.TextServiceManager.Callback);
+    method public void isCorrect(java.lang.CharSequence, android.view.inputmethod.TextServiceManager.Callback);
+    method public void isCorrect(java.lang.CharSequence, java.util.Locale, android.view.inputmethod.TextServiceManager.Callback);
+    method public void isCorrect(java.lang.CharSequence, int, int, java.util.Locale, android.view.inputmethod.TextServiceManager.Callback);
+    method public android.view.inputmethod.SpellCheckerInfo requestSpellCheckerConnection(java.util.Locale);
+  }
+
+  public static abstract interface TextServiceManager.Callback {
+    method public abstract void getSuggestionsResult(java.lang.CharSequence, int, int, java.util.Locale, java.lang.CharSequence);
+    method public abstract void isCorrectResult(java.lang.CharSequence, int, int, java.util.Locale, boolean);
   }
 
 }
