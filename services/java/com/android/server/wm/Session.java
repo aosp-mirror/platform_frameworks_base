@@ -153,11 +153,13 @@ final class Session extends IWindowSession.Stub
             int requestedWidth, int requestedHeight, int viewFlags,
             boolean insetsPending, Rect outFrame, Rect outContentInsets,
             Rect outVisibleInsets, Configuration outConfig, Surface outSurface) {
-        //Log.d(TAG, ">>>>>> ENTERED relayout from " + Binder.getCallingPid());
+        if (false) Slog.d(WindowManagerService.TAG, ">>>>>> ENTERED relayout from "
+                + Binder.getCallingPid());
         int res = mService.relayoutWindow(this, window, attrs,
                 requestedWidth, requestedHeight, viewFlags, insetsPending,
                 outFrame, outContentInsets, outVisibleInsets, outConfig, outSurface);
-        //Log.d(TAG, "<<<<<< EXITING relayout to " + Binder.getCallingPid());
+        if (false) Slog.d(WindowManagerService.TAG, "<<<<<< EXITING relayout to "
+                + Binder.getCallingPid());
         return res;
     }
 
