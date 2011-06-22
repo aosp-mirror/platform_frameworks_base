@@ -190,7 +190,6 @@ public class ICU_Delegate {
 
         // Used by DecimalFormatSymbols.
         result.zeroDigit = '0';
-        result.digit = '0';
         result.decimalSeparator = '.';
         result.groupingSeparator = ',';
         result.patternSeparator = ' ';
