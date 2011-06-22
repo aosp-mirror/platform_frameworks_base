@@ -28,6 +28,7 @@ import android.net.sip.ISipSessionListener;
 import android.net.sip.SipErrorCode;
 import android.net.sip.SipProfile;
 import android.net.sip.SipSession;
+import android.net.sip.SipSessionAdapter;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -89,6 +90,7 @@ class SipSessionGroup implements SipListener {
     private static final String THREAD_POOL_SIZE = "1";
     private static final int EXPIRY_TIME = 3600; // in seconds
     private static final int CANCEL_CALL_TIMER = 3; // in seconds
+    private static final int KEEPALIVE_TIMEOUT = 3; // in seconds
     private static final long WAKE_LOCK_HOLDING_TIME = 500; // in milliseconds
 
     private static final EventObject DEREGISTER = new EventObject("Deregister");
@@ -107,6 +109,7 @@ class SipSessionGroup implements SipListener {
     private SipSessionImpl mCallReceiverSession;
     private String mLocalIp;
 
+    private SipWakeupTimer mWakeupTimer;
     private SipWakeLock mWakeLock;
 
     // call-id-to-SipSession map
@@ -119,11 +122,19 @@ class SipSessionGroup implements SipListener {
      * @throws IOException if cannot assign requested address
      */
     public SipSessionGroup(String localIp, SipProfile myself, String password,
-            SipWakeLock wakeLock) throws SipException, IOException {
+            SipWakeupTimer timer, SipWakeLock wakeLock) throws SipException,
+            IOException {
         mLocalProfile = myself;
         mPassword = password;
+        mWakeupTimer = timer;
         mWakeLock = wakeLock;
         reset(localIp);
+    }
+
+    // TODO: remove this method once SipWakeupTimer can better handle variety
+    // of timeout values
+    void setWakeupTimer(SipWakeupTimer timer) {
+        mWakeupTimer = timer;
     }
 
     synchronized void reset(String localIp) throws SipException, IOException {
@@ -382,6 +393,12 @@ class SipSessionGroup implements SipListener {
         }
     }
 
+    static interface KeepAliveProcessCallback {
+        /** Invoked when the response of keeping alive comes back. */
+        void onResponse(boolean portChanged);
+        void onError(int errorCode, String description);
+    }
+
     class SipSessionImpl extends ISipSession.Stub {
         SipProfile mPeerProfile;
         SipSessionListenerProxy mProxy = new SipSessionListenerProxy();
@@ -392,12 +409,10 @@ class SipSessionGroup implements SipListener {
         ClientTransaction mClientTransaction;
         String mPeerSessionDescription;
         boolean mInCall;
-        SessionTimer mTimer;
+        SessionTimer mSessionTimer;
         int mAuthenticationRetryCount;
 
-        // for registration
-        boolean mReRegisterFlag = false;
-        int mRPort = 0;
+        private KeepAliveProcess mKeepAliveProcess;
 
         // lightweight timer
         class SessionTimer {
@@ -512,7 +527,9 @@ class SipSessionGroup implements SipListener {
                         try {
                             processCommand(command);
                         } catch (Throwable e) {
-                            Log.w(TAG, "command error: " + command, e);
+                            Log.w(TAG, "command error: " + command + ": "
+                                    + mLocalProfile.getUriString(),
+                                    getRootCause(e));
                             onError(e);
                         }
                     }
@@ -553,34 +570,6 @@ class SipSessionGroup implements SipListener {
             doCommandAsync(DEREGISTER);
         }
 
-        public boolean isReRegisterRequired() {
-            return mReRegisterFlag;
-        }
-
-        public void clearReRegisterRequired() {
-            mReRegisterFlag = false;
-        }
-
-        public void sendKeepAlive() {
-            mState = SipSession.State.PINGING;
-            try {
-                processCommand(new OptionsCommand());
-                for (int i = 0; i < 15; i++) {
-                    if (SipSession.State.PINGING != mState) break;
-                    Thread.sleep(200);
-                }
-                if (SipSession.State.PINGING == mState) {
-                    // FIXME: what to do if server doesn't respond
-                    reset();
-                    if (DEBUG) Log.w(TAG, "no response from ping");
-                }
-            } catch (SipException e) {
-                Log.e(TAG, "sendKeepAlive failed", e);
-            } catch (InterruptedException e) {
-                Log.e(TAG, "sendKeepAlive interrupted", e);
-            }
-        }
-
         private void processCommand(EventObject command) throws SipException {
             if (isLoggable(command)) Log.d(TAG, "process cmd: " + command);
             if (!process(command)) {
@@ -612,6 +601,11 @@ class SipSessionGroup implements SipListener {
             synchronized (SipSessionGroup.this) {
                 if (isClosed()) return false;
 
+                if (mKeepAliveProcess != null) {
+                    // event consumed by keepalive process
+                    if (mKeepAliveProcess.process(evt)) return true;
+                }
+
                 Dialog dialog = null;
                 if (evt instanceof RequestEvent) {
                     dialog = ((RequestEvent) evt).getDialog();
@@ -626,9 +620,6 @@ class SipSessionGroup implements SipListener {
                 case SipSession.State.REGISTERING:
                 case SipSession.State.DEREGISTERING:
                     processed = registeringToReady(evt);
-                    break;
-                case SipSession.State.PINGING:
-                    processed = keepAliveProcess(evt);
                     break;
                 case SipSession.State.READY_TO_CALL:
                     processed = readyForCall(evt);
@@ -754,10 +745,6 @@ class SipSessionGroup implements SipListener {
                 case SipSession.State.OUTGOING_CALL_CANCELING:
                     onError(SipErrorCode.TIME_OUT, event.toString());
                     break;
-                case SipSession.State.PINGING:
-                    reset();
-                    mReRegisterFlag = true;
-                    break;
 
                 default:
                     Log.d(TAG, "   do nothing");
@@ -776,48 +763,6 @@ class SipSessionGroup implements SipListener {
                 expires = Math.max(expires, expiresHeader.getExpires());
             }
             return expires;
-        }
-
-        private boolean keepAliveProcess(EventObject evt) throws SipException {
-            if (evt instanceof OptionsCommand) {
-                mClientTransaction = mSipHelper.sendKeepAlive(mLocalProfile,
-                        generateTag());
-                mDialog = mClientTransaction.getDialog();
-                addSipSession(this);
-                return true;
-            } else if (evt instanceof ResponseEvent) {
-                return parseOptionsResult(evt);
-            }
-            return false;
-        }
-
-        private boolean parseOptionsResult(EventObject evt) {
-            if (expectResponse(Request.OPTIONS, evt)) {
-                ResponseEvent event = (ResponseEvent) evt;
-                int rPort = getRPortFromResponse(event.getResponse());
-                if (rPort != -1) {
-                    if (mRPort == 0) mRPort = rPort;
-                    if (mRPort != rPort) {
-                        mReRegisterFlag = true;
-                        if (DEBUG) Log.w(TAG, String.format(
-                                "rport is changed: %d <> %d", mRPort, rPort));
-                        mRPort = rPort;
-                    } else {
-                        if (DEBUG_PING) Log.w(TAG, "rport is the same: " + rPort);
-                    }
-                } else {
-                    if (DEBUG) Log.w(TAG, "peer did not respond rport");
-                }
-                reset();
-                return true;
-            }
-            return false;
-        }
-
-        private int getRPortFromResponse(Response response) {
-            ViaHeader viaHeader = (ViaHeader)(response.getHeader(
-                    SIPHeaderNames.VIA));
-            return (viaHeader == null) ? -1 : viaHeader.getRPort();
         }
 
         private boolean registeringToReady(EventObject evt)
@@ -1138,15 +1083,15 @@ class SipSessionGroup implements SipListener {
         // timeout in seconds
         private void startSessionTimer(int timeout) {
             if (timeout > 0) {
-                mTimer = new SessionTimer();
-                mTimer.start(timeout);
+                mSessionTimer = new SessionTimer();
+                mSessionTimer.start(timeout);
             }
         }
 
         private void cancelSessionTimer() {
-            if (mTimer != null) {
-                mTimer.cancel();
-                mTimer = null;
+            if (mSessionTimer != null) {
+                mSessionTimer.cancel();
+                mSessionTimer = null;
             }
         }
 
@@ -1272,6 +1217,168 @@ class SipSessionGroup implements SipListener {
             onRegistrationFailed(getErrorCode(statusCode),
                     createErrorMessage(response));
         }
+
+        // Notes: SipSessionListener will be replaced by the keepalive process
+        // @param interval in seconds
+        public void startKeepAliveProcess(int interval,
+                KeepAliveProcessCallback callback) throws SipException {
+            synchronized (SipSessionGroup.this) {
+                startKeepAliveProcess(interval, mLocalProfile, callback);
+            }
+        }
+
+        // Notes: SipSessionListener will be replaced by the keepalive process
+        // @param interval in seconds
+        public void startKeepAliveProcess(int interval, SipProfile peerProfile,
+                KeepAliveProcessCallback callback) throws SipException {
+            synchronized (SipSessionGroup.this) {
+                if (mKeepAliveProcess != null) {
+                    throw new SipException("Cannot create more than one "
+                            + "keepalive process in a SipSession");
+                }
+                mPeerProfile = peerProfile;
+                mKeepAliveProcess = new KeepAliveProcess();
+                mProxy.setListener(mKeepAliveProcess);
+                mKeepAliveProcess.start(interval, callback);
+            }
+        }
+
+        public void stopKeepAliveProcess() {
+            synchronized (SipSessionGroup.this) {
+                if (mKeepAliveProcess != null) {
+                    mKeepAliveProcess.stop();
+                    mKeepAliveProcess = null;
+                }
+            }
+        }
+
+        class KeepAliveProcess extends SipSessionAdapter implements Runnable {
+            private static final String TAG = "SipKeepAlive";
+            private boolean mRunning = false;
+            private KeepAliveProcessCallback mCallback;
+
+            private boolean mPortChanged = false;
+            private int mRPort = 0;
+
+            // @param interval in seconds
+            void start(int interval, KeepAliveProcessCallback callback) {
+                if (mRunning) return;
+                mRunning = true;
+                mCallback = new KeepAliveProcessCallbackProxy(callback);
+                mWakeupTimer.set(interval * 1000, this);
+                if (DEBUG) {
+                    Log.d(TAG, "start keepalive:"
+                            + mLocalProfile.getUriString());
+                }
+
+                // No need to run the first time in a separate thread for now
+                run();
+            }
+
+            // return true if the event is consumed
+            boolean process(EventObject evt) throws SipException {
+                if (mRunning && (mState == SipSession.State.PINGING)) {
+                    if (evt instanceof ResponseEvent) {
+                        if (parseOptionsResult(evt)) {
+                            if (mPortChanged) {
+                                stop();
+                            } else {
+                                cancelSessionTimer();
+                                removeSipSession(SipSessionImpl.this);
+                            }
+                            mCallback.onResponse(mPortChanged);
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            // SipSessionAdapter
+            // To react to the session timeout event and network error.
+            @Override
+            public void onError(ISipSession session, int errorCode, String message) {
+                stop();
+                mCallback.onError(errorCode, message);
+            }
+
+            // SipWakeupTimer timeout handler
+            // To send out keepalive message.
+            @Override
+            public void run() {
+                synchronized (SipSessionGroup.this) {
+                    if (!mRunning) return;
+
+                    if (DEBUG_PING) {
+                        Log.d(TAG, "keepalive: " + mLocalProfile.getUriString()
+                                + " --> " + mPeerProfile);
+                    }
+                    try {
+                        sendKeepAlive();
+                    } catch (Throwable t) {
+                        Log.w(TAG, "keepalive error: " + ": "
+                                + mLocalProfile.getUriString(), getRootCause(t));
+                        // It's possible that the keepalive process is being stopped
+                        // during session.sendKeepAlive() so need to check mRunning
+                        // again here.
+                        if (mRunning) SipSessionImpl.this.onError(t);
+                    }
+                }
+            }
+
+            void stop() {
+                synchronized (SipSessionGroup.this) {
+                    if (DEBUG) {
+                        Log.d(TAG, "stop keepalive:" + mLocalProfile.getUriString()
+                                + ",RPort=" + mRPort);
+                    }
+                    mRunning = false;
+                    mWakeupTimer.cancel(this);
+                    reset();
+                }
+            }
+
+            private void sendKeepAlive() throws SipException, InterruptedException {
+                synchronized (SipSessionGroup.this) {
+                    mState = SipSession.State.PINGING;
+                    mClientTransaction = mSipHelper.sendOptions(
+                            mLocalProfile, mPeerProfile, generateTag());
+                    mDialog = mClientTransaction.getDialog();
+                    addSipSession(SipSessionImpl.this);
+
+                    startSessionTimer(KEEPALIVE_TIMEOUT);
+                    // when timed out, onError() will be called with SipErrorCode.TIME_OUT
+                }
+            }
+
+            private boolean parseOptionsResult(EventObject evt) {
+                if (expectResponse(Request.OPTIONS, evt)) {
+                    ResponseEvent event = (ResponseEvent) evt;
+                    int rPort = getRPortFromResponse(event.getResponse());
+                    if (rPort != -1) {
+                        if (mRPort == 0) mRPort = rPort;
+                        if (mRPort != rPort) {
+                            mPortChanged = true;
+                            if (DEBUG) Log.d(TAG, String.format(
+                                    "rport is changed: %d <> %d", mRPort, rPort));
+                            mRPort = rPort;
+                        } else {
+                            if (DEBUG) Log.d(TAG, "rport is the same: " + rPort);
+                        }
+                    } else {
+                        if (DEBUG) Log.w(TAG, "peer did not respond rport");
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            private int getRPortFromResponse(Response response) {
+                ViaHeader viaHeader = (ViaHeader)(response.getHeader(
+                        SIPHeaderNames.VIA));
+                return (viaHeader == null) ? -1 : viaHeader.getRPort();
+            }
+        }
     }
 
     /**
@@ -1363,15 +1470,16 @@ class SipSessionGroup implements SipListener {
         if (!isLoggable(s)) return false;
         if (evt == null) return false;
 
-        if (evt instanceof OptionsCommand) {
-            return DEBUG_PING;
-        } else if (evt instanceof ResponseEvent) {
+        if (evt instanceof ResponseEvent) {
             Response response = ((ResponseEvent) evt).getResponse();
             if (Request.OPTIONS.equals(response.getHeader(CSeqHeader.NAME))) {
                 return DEBUG_PING;
             }
             return DEBUG;
         } else if (evt instanceof RequestEvent) {
+            if (isRequestEvent(Request.OPTIONS, evt)) {
+                return DEBUG_PING;
+            }
             return DEBUG;
         }
         return false;
@@ -1384,12 +1492,6 @@ class SipSessionGroup implements SipListener {
             return ((ResponseEvent) evt).getResponse().toString();
         } else {
             return evt.toString();
-        }
-    }
-
-    private class OptionsCommand extends EventObject {
-        public OptionsCommand() {
-            super(SipSessionGroup.this);
         }
     }
 
@@ -1432,6 +1534,48 @@ class SipSessionGroup implements SipListener {
 
         public int getTimeout() {
             return mTimeout;
+        }
+    }
+
+    /** Class to help safely run KeepAliveProcessCallback in a different thread. */
+    static class KeepAliveProcessCallbackProxy implements KeepAliveProcessCallback {
+        private KeepAliveProcessCallback mCallback;
+
+        KeepAliveProcessCallbackProxy(KeepAliveProcessCallback callback) {
+            mCallback = callback;
+        }
+
+        private void proxy(Runnable runnable) {
+            // One thread for each calling back.
+            // Note: Guarantee ordering if the issue becomes important. Currently,
+            // the chance of handling two callback events at a time is none.
+            new Thread(runnable, "SIP-KeepAliveProcessCallbackThread").start();
+        }
+
+        public void onResponse(final boolean portChanged) {
+            if (mCallback == null) return;
+            proxy(new Runnable() {
+                public void run() {
+                    try {
+                        mCallback.onResponse(portChanged);
+                    } catch (Throwable t) {
+                        Log.w(TAG, "onResponse", t);
+                    }
+                }
+            });
+        }
+
+        public void onError(final int errorCode, final String description) {
+            if (mCallback == null) return;
+            proxy(new Runnable() {
+                public void run() {
+                    try {
+                        mCallback.onError(errorCode, description);
+                    } catch (Throwable t) {
+                        Log.w(TAG, "onError", t);
+                    }
+                }
+            });
         }
     }
 }
