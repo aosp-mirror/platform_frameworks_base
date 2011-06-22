@@ -25281,8 +25281,14 @@ package android.widget {
     method public void dismiss();
     method public android.view.Menu getMenu();
     method public android.view.MenuInflater getMenuInflater();
+    method public void inflate(int);
+    method public void setOnDismissListener(android.widget.PopupMenu.OnDismissListener);
     method public void setOnMenuItemClickListener(android.widget.PopupMenu.OnMenuItemClickListener);
     method public void show();
+  }
+
+  public static abstract interface PopupMenu.OnDismissListener {
+    method public abstract void onDismiss(android.widget.PopupMenu);
   }
 
   public static abstract interface PopupMenu.OnMenuItemClickListener {
