@@ -292,6 +292,10 @@ public:
         return mBitmapResources;
     }
 
+    const Vector<SkiaColorFilter*>& getFilterResources() const {
+        return mFilterResources;
+    }
+
     const Vector<SkiaShader*>& getShaders() const {
         return mShaders;
     }
@@ -306,10 +310,6 @@ public:
 
     const Vector<SkMatrix*>& getMatrices() const {
         return mMatrices;
-    }
-
-    const Vector<SkiaColorFilter*>& getFilterResources() const {
-        return mFilterResources;
     }
 
 private:
@@ -431,8 +431,7 @@ private:
         // which doesn't seem worth the extra cycles for this unlikely case.
         addInt((int) bitmap);
         mBitmapResources.add(bitmap);
-        Caches& caches = Caches::getInstance();
-        caches.resourceCache.incrementRefcount(bitmap);
+        Caches::getInstance().resourceCache.incrementRefcount(bitmap);
     }
 
     inline void addShader(SkiaShader* shader) {
@@ -456,8 +455,7 @@ private:
     inline void addColorFilter(SkiaColorFilter* colorFilter) {
         addInt((int) colorFilter);
         mFilterResources.add(colorFilter);
-        Caches& caches = Caches::getInstance();
-        caches.resourceCache.incrementRefcount(colorFilter);
+        Caches::getInstance().resourceCache.incrementRefcount(colorFilter);
     }
 
     Vector<SkBitmap*> mBitmapResources;

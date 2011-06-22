@@ -48,9 +48,6 @@ ResourceCache::~ResourceCache() {
 
 void ResourceCache::incrementRefcount(void* resource, ResourceType resourceType) {
     Mutex::Autolock _l(mLock);
-    for (size_t i = 0; i < mCache->size(); ++i) {
-        void* ref = mCache->valueAt(i);
-    }
     ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
     if (ref == NULL || mCache->size() == 0) {
         ref = new ResourceReference(resourceType);
@@ -144,7 +141,6 @@ void ResourceCache::destructor(SkPath* resource) {
     ref->destroyed = true;
     if (ref->refCount == 0) {
         deleteResourceReference(resource, ref);
-        return;
     }
 }
 
@@ -162,7 +158,6 @@ void ResourceCache::destructor(SkBitmap* resource) {
     ref->destroyed = true;
     if (ref->refCount == 0) {
         deleteResourceReference(resource, ref);
-        return;
     }
 }
 
@@ -180,7 +175,6 @@ void ResourceCache::destructor(SkiaShader* resource) {
     ref->destroyed = true;
     if (ref->refCount == 0) {
         deleteResourceReference(resource, ref);
-        return;
     }
 }
 
@@ -195,7 +189,6 @@ void ResourceCache::destructor(SkiaColorFilter* resource) {
     ref->destroyed = true;
     if (ref->refCount == 0) {
         deleteResourceReference(resource, ref);
-        return;
     }
 }
 
@@ -209,36 +202,32 @@ void ResourceCache::deleteResourceReference(void* resource, ResourceReference* r
     }
     if (ref->destroyed) {
         switch (ref->resourceType) {
-            case kBitmap:
-            {
-                SkBitmap* bitmap = (SkBitmap*)resource;
+            case kBitmap: {
+                SkBitmap* bitmap = (SkBitmap*) resource;
                 if (Caches::hasInstance()) {
                     Caches::getInstance().textureCache.removeDeferred(bitmap);
                 }
                 delete bitmap;
             }
             break;
-            case kPath:
-            {
-                SkPath* path = (SkPath*)resource;
+            case kPath: {
+                SkPath* path = (SkPath*) resource;
                 if (Caches::hasInstance()) {
                     Caches::getInstance().pathCache.removeDeferred(path);
                 }
                 delete path;
             }
             break;
-            case kShader:
-            {
-                SkiaShader* shader = (SkiaShader*)resource;
+            case kShader: {
+                SkiaShader* shader = (SkiaShader*) resource;
                 if (Caches::hasInstance()) {
                     Caches::getInstance().gradientCache.removeDeferred(shader->getSkShader());
                 }
                 delete shader;
             }
             break;
-            case kColorFilter:
-            {
-                SkiaColorFilter* filter = (SkiaColorFilter*)resource;
+            case kColorFilter: {
+                SkiaColorFilter* filter = (SkiaColorFilter*) resource;
                 delete filter;
             }
             break;
