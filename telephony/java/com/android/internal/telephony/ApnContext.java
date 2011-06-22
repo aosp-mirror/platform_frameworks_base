@@ -16,8 +16,6 @@
 
 package com.android.internal.telephony;
 
-import android.app.PendingIntent;
-
 import android.util.Log;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,8 +46,6 @@ public class ApnContext {
     DataConnectionAc mDataConnectionAc;
 
     String mReason;
-
-    PendingIntent mReconnectIntent;
 
     /**
      * user/app requested connection on this APN
@@ -90,9 +86,9 @@ public class ApnContext {
 
     public synchronized void setDataConnectionAc(DataConnectionAc dcac) {
         if (dcac != null) {
-            dcac.addApnContext(this);
+            dcac.addApnContextSync(this);
         } else {
-            if (mDataConnectionAc != null) mDataConnectionAc.removeApnContext(this);
+            if (mDataConnectionAc != null) mDataConnectionAc.removeApnContextSync(this);
         }
         mDataConnectionAc = dcac;
     }
@@ -167,16 +163,6 @@ public class ApnContext {
 
     public synchronized String getReason() {
         return mReason;
-    }
-
-    public synchronized void setReconnectIntent(PendingIntent intent) {
-        if (DBG)
-            log("set ReconnectIntent for type " + mApnType);
-        mReconnectIntent = intent;
-    }
-
-    public synchronized PendingIntent getReconnectIntent() {
-        return mReconnectIntent;
     }
 
     public boolean isReady() {

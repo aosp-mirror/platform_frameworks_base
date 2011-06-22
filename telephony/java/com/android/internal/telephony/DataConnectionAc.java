@@ -19,6 +19,7 @@ package com.android.internal.telephony;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
+import android.app.PendingIntent;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.net.ProxyProperties;
@@ -26,8 +27,6 @@ import android.os.Message;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * AsyncChannel to a DataConnection
@@ -35,7 +34,6 @@ import java.util.List;
 public class DataConnectionAc extends AsyncChannel {
     private static final boolean DBG = false;
     private String mLogTag;
-    private List<ApnContext> mApnList = null;
 
     public DataConnection dataConnection;
 
@@ -68,6 +66,21 @@ public class DataConnectionAc extends AsyncChannel {
     public static final int REQ_GET_REFCOUNT = BASE + 16;
     public static final int RSP_GET_REFCOUNT = BASE + 17;
 
+    public static final int REQ_ADD_APNCONTEXT = BASE + 18;
+    public static final int RSP_ADD_APNCONTEXT = BASE + 19;
+
+    public static final int REQ_REMOVE_APNCONTEXT = BASE + 20;
+    public static final int RSP_REMOVE_APNCONTEXT = BASE + 21;
+
+    public static final int REQ_GET_APNCONTEXT_LIST = BASE + 22;
+    public static final int RSP_GET_APNCONTEXT_LIST = BASE + 23;
+
+    public static final int REQ_SET_RECONNECT_INTENT = BASE + 24;
+    public static final int RSP_SET_RECONNECT_INTENT = BASE + 25;
+
+    public static final int REQ_GET_RECONNECT_INTENT = BASE + 26;
+    public static final int RSP_GET_RECONNECT_INTENT = BASE + 27;
+
     /**
      * enum used to notify action taken or necessary to be
      * taken after the link property is changed.
@@ -91,7 +104,6 @@ public class DataConnectionAc extends AsyncChannel {
     public DataConnectionAc(DataConnection dc, String logTag) {
         dataConnection = dc;
         mLogTag = logTag;
-        mApnList = Collections.synchronizedList(new ArrayList<ApnContext>());
     }
 
     /**
@@ -379,14 +391,35 @@ public class DataConnectionAc extends AsyncChannel {
     }
 
     /**
-     * Add ApnContext association.
+     * Request to add ApnContext association.
+     * Response RSP_ADD_APNCONTEXT when complete.
+     */
+    public void reqAddApnContext(ApnContext apnContext) {
+        Message response = sendMessageSynchronously(REQ_ADD_APNCONTEXT, apnContext);
+        if (DBG) log("reqAddApnContext");
+    }
+
+    /**
+     * Add ApnContext association synchronoulsy.
      *
      * @param ApnContext to associate
      */
-    public void addApnContext(ApnContext apnContext) {
-        if (!mApnList.contains(apnContext)) {
-            mApnList.add(apnContext);
+    public void addApnContextSync(ApnContext apnContext) {
+        Message response = sendMessageSynchronously(REQ_ADD_APNCONTEXT, apnContext);
+        if ((response != null) && (response.what == RSP_ADD_APNCONTEXT)) {
+            if (DBG) log("addApnContext ok");
+        } else {
+            log("addApnContext error response=" + response);
         }
+    }
+
+    /**
+     * Request to remove ApnContext association.
+     * Response RSP_REMOVE_APNCONTEXT when complete.
+     */
+    public void reqRemomveApnContext(ApnContext apnContext) {
+        Message response = sendMessageSynchronously(REQ_REMOVE_APNCONTEXT, apnContext);
+        if (DBG) log("reqRemomveApnContext");
     }
 
     /**
@@ -394,17 +427,111 @@ public class DataConnectionAc extends AsyncChannel {
      *
      * @param ApnContext to dissociate
      */
-    public void removeApnContext(ApnContext apnContext) {
-        mApnList.remove(apnContext);
+    public void removeApnContextSync(ApnContext apnContext) {
+        Message response = sendMessageSynchronously(REQ_REMOVE_APNCONTEXT, apnContext);
+        if ((response != null) && (response.what == RSP_REMOVE_APNCONTEXT)) {
+            if (DBG) log("removeApnContext ok");
+        } else {
+            log("removeApnContext error response=" + response);
+        }
     }
 
     /**
-     * Retrieve collection of ApnContext currently associated with the DataConnectionAc.
+     * Request to retrive ApnContext List associated with DC.
+     * Response RSP_GET_APNCONTEXT_LIST when complete.
+     */
+    public void reqGetApnList(ApnContext apnContext) {
+        Message response = sendMessageSynchronously(REQ_GET_APNCONTEXT_LIST);
+        if (DBG) log("reqGetApnList");
+    }
+
+    /**
+     * Retrieve Collection of ApnContext from the response message.
+     *
+     * @param Message sent from DC in response to REQ_GET_APNCONTEXT_LIST.
+     * @return Collection of ApnContext
+     */
+    public Collection<ApnContext> rspApnList(Message response) {
+        Collection<ApnContext> retVal = (Collection<ApnContext>)response.obj;
+        if (retVal == null) retVal = new ArrayList<ApnContext>();
+        return retVal;
+    }
+
+    /**
+     * Retrieve collection of ApnContext currently associated with
+     * the DataConnectionA synchronously.
      *
      * @return Collection of ApnContext
      */
-    public Collection<ApnContext> getApnList() {
-        return mApnList;
+    public Collection<ApnContext> getApnListSync() {
+        Message response = sendMessageSynchronously(REQ_GET_APNCONTEXT_LIST);
+        if ((response != null) && (response.what == RSP_GET_APNCONTEXT_LIST)) {
+            if (DBG) log("getApnList ok");
+            return rspApnList(response);
+        } else {
+            log("getApnList error response=" + response);
+            // return dummy list with no entry
+            return new ArrayList<ApnContext>();
+        }
+    }
+
+    /**
+     * Request to set Pending ReconnectIntent to DC.
+     * Response RSP_SET_RECONNECT_INTENT when complete.
+     */
+    public void reqSetReconnectIntent(PendingIntent intent) {
+        Message response = sendMessageSynchronously(REQ_SET_RECONNECT_INTENT, intent);
+        if (DBG) log("reqSetReconnectIntent");
+    }
+
+    /**
+     * Set pending reconnect intent to DC synchronously.
+     *
+     * @param PendingIntent to set.
+     */
+    public void setReconnectIntentSync(PendingIntent intent) {
+        Message response = sendMessageSynchronously(REQ_SET_RECONNECT_INTENT, intent);
+        if ((response != null) && (response.what == RSP_SET_RECONNECT_INTENT)) {
+            if (DBG) log("setReconnectIntent ok");
+        } else {
+            log("setReconnectIntent error response=" + response);
+        }
+    }
+
+    /**
+     * Request to get Pending ReconnectIntent to DC.
+     * Response RSP_GET_RECONNECT_INTENT when complete.
+     */
+    public void reqGetReconnectIntent() {
+        Message response = sendMessageSynchronously(REQ_GET_RECONNECT_INTENT);
+        if (DBG) log("reqGetReconnectIntent");
+    }
+
+    /**
+     * Retrieve reconnect intent from response message from DC.
+     *
+     * @param Message which contains the reconnect intent.
+     * @return PendingIntent from the response.
+     */
+    public PendingIntent rspReconnectIntent(Message response) {
+        PendingIntent retVal = (PendingIntent) response.obj;
+        return retVal;
+    }
+
+    /**
+     * Retrieve reconnect intent currently set in DC synchronously.
+     *
+     * @return PendingIntent reconnect intent current ly set in DC
+     */
+    public PendingIntent getReconnectIntentSync() {
+        Message response = sendMessageSynchronously(REQ_GET_RECONNECT_INTENT);
+        if ((response != null) && (response.what == RSP_GET_RECONNECT_INTENT)) {
+            if (DBG) log("getReconnectIntent ok");
+            return rspReconnectIntent(response);
+        } else {
+            log("getReconnectIntent error response=" + response);
+            return null;
+        }
     }
 
     private void log(String s) {
