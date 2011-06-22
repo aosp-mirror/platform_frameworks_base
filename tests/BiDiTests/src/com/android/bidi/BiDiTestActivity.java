@@ -100,8 +100,9 @@ public class BiDiTestActivity extends Activity {
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
 
         addItem(result, "Basic", BiDiTestBasic.class, R.id.basic);
+
         addItem(result, "Canvas", BiDiTestCanvas.class, R.id.canvas);
-        
+
         addItem(result, "Linear LTR", BiDiTestLinearLayoutLtr.class, R.id.linear_layout_ltr);
         addItem(result, "Linear RTL", BiDiTestLinearLayoutRtl.class, R.id.linear_layout_rtl);
         addItem(result, "Linear LOC", BiDiTestLinearLayoutLocale.class, R.id.linear_layout_locale);
@@ -120,6 +121,10 @@ public class BiDiTestActivity extends Activity {
         addItem(result, "Table LTR", BiDiTestTableLayoutLtr.class, R.id.table_layout_ltr);
         addItem(result, "Table RTL", BiDiTestTableLayoutRtl.class, R.id.table_layout_rtl);
         addItem(result, "Table LOC", BiDiTestTableLayoutLocale.class, R.id.table_layout_locale);
+
+        addItem(result, "TextView LTR", BiDiTestTextViewLtr.class, R.id.textview_ltr);
+        addItem(result, "TextView RTL", BiDiTestTextViewRtl.class, R.id.textview_rtl);
+        addItem(result, "TextView LOC", BiDiTestTextViewLocale.class, R.id.textview_locale);
 
         addItem(result, "ViewPadding", BiDiTestViewPadding.class, R.id.view_padding);
         addItem(result, "ViewPadding MIXED", BiDiTestViewPaddingMixed.class, R.id.view_padding_mixed);
