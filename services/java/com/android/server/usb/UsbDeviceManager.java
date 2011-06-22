@@ -77,9 +77,8 @@ public class UsbDeviceManager {
 
     private static final int MSG_UPDATE_STATE = 0;
     private static final int MSG_ENABLE_ADB = 1;
-    private static final int MSG_SET_PRIMARY_FUNCTION = 2;
-    private static final int MSG_SET_DEFAULT_FUNCTION = 3;
-    private static final int MSG_SYSTEM_READY = 4;
+    private static final int MSG_SET_CURRENT_FUNCTION = 2;
+    private static final int MSG_SYSTEM_READY = 3;
 
     // Delay for debouncing USB disconnects.
     // We often get rapid connect/disconnect events when enabling USB functions,
@@ -227,7 +226,7 @@ public class UsbDeviceManager {
                 mHandler.updateState(state);
             } else if ("START".equals(accessory)) {
                 Slog.d(TAG, "got accessory start");
-                setPrimaryFunction(UsbManager.USB_FUNCTION_ACCESSORY);
+                setCurrentFunction(UsbManager.USB_FUNCTION_ACCESSORY, false);
             }
         }
     };
@@ -371,6 +370,14 @@ public class UsbDeviceManager {
             sendMessage(m);
         }
 
+        public void sendMessage(int what, Object arg0, boolean arg1) {
+            removeMessages(what);
+            Message m = Message.obtain(this, what);
+            m.obj = arg0;
+            m.arg1 = (arg1 ? 1 : 0);
+            sendMessage(m);
+        }
+
         public void updateState(String state) {
             int connected, configured;
 
@@ -395,24 +402,30 @@ public class UsbDeviceManager {
             sendMessageDelayed(msg, (connected == 0) ? UPDATE_DELAY : 0);
         }
 
-        private boolean setUsbConfig(String config) {
-            // set the new configuration
-            SystemProperties.set("sys.usb.config", config);
+        private boolean waitForState(String state) {
             // wait for the transition to complete.
             // give up after 1 second.
             for (int i = 0; i < 20; i++) {
                 // State transition is done when sys.usb.conf.done is set to the new configuration
-                if (config.equals(SystemProperties.get("sys.usb.state"))) return true;
+                if (state.equals(SystemProperties.get("sys.usb.state"))) return true;
                 try {
                     // try again in 50ms
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
                 }
             }
+            Log.e(TAG, "waitForState(" + state + ") FAILED");
             return false;
         }
 
-        private void setCurrentFunctions(String functions) {
+        private boolean setUsbConfig(String config) {
+            Log.d(TAG, "setUsbConfig(" + config + ")");
+            // set the new configuration
+            SystemProperties.set("sys.usb.config", config);
+            return waitForState(config);
+        }
+
+        private void doSetCurrentFunctions(String functions) {
             if (!mCurrentFunctions.equals(functions)) {
                 if (!setUsbConfig("none") || !setUsbConfig(functions)) {
                     Log.e(TAG, "Failed to switch USB configuration to " + functions);
@@ -428,17 +441,14 @@ public class UsbDeviceManager {
             if (enable != mAdbEnabled) {
                 mAdbEnabled = enable;
                 String functions;
+                // Due to the persist.sys.usb.config property trigger, changing adb state requires
+                // switching to default function
                 if (enable) {
-                    functions = addFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ADB);
-                    mDefaultFunctions = addFunction(mDefaultFunctions,
-                            UsbManager.USB_FUNCTION_ADB);
+                    functions = addFunction(mDefaultFunctions, UsbManager.USB_FUNCTION_ADB);
                 } else {
-                    functions = removeFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ADB);
-                    mDefaultFunctions = removeFunction(mDefaultFunctions,
-                            UsbManager.USB_FUNCTION_ADB);
+                    functions = removeFunction(mDefaultFunctions, UsbManager.USB_FUNCTION_ADB);
                 }
-                SystemProperties.set("persist.sys.usb.config", mDefaultFunctions);
-                setCurrentFunctions(functions);
+                setCurrentFunction(functions, true);
                 updateAdbNotification(mAdbEnabled && mConnected);
             }
         }
@@ -449,7 +459,7 @@ public class UsbDeviceManager {
             } else {
                 functionList = removeFunction(functionList, UsbManager.USB_FUNCTION_ADB);
             }
-            setCurrentFunctions(functionList);
+            doSetCurrentFunctions(functionList);
         }
 
         private void updateCurrentAccessory() {
@@ -503,8 +513,6 @@ public class UsbDeviceManager {
 
         @Override
         public void handleMessage(Message msg) {
-            String function;
-
             switch (msg.what) {
                 case MSG_UPDATE_STATE:
                     mConnected = (msg.arg1 == 1);
@@ -518,7 +526,7 @@ public class UsbDeviceManager {
 
                     if (!mConnected) {
                         // restore defaults when USB is disconnected
-                        setCurrentFunctions(mDefaultFunctions);
+                        doSetCurrentFunctions(mDefaultFunctions);
                     }
                     if (mSystemReady) {
                         updateUsbState();
@@ -527,20 +535,31 @@ public class UsbDeviceManager {
                 case MSG_ENABLE_ADB:
                     setAdbEnabled(msg.arg1 == 1);
                     break;
-                case MSG_SET_PRIMARY_FUNCTION:
-                    function = (String)msg.obj;
-                    if (function == null) {
-                        function = mDefaultFunctions;
+                case MSG_SET_CURRENT_FUNCTION:
+                    String function = (String)msg.obj;
+                    boolean makeDefault = (msg.arg1 == 1);
+                    if (makeDefault) {
+                        if (function == null) {
+                            throw new NullPointerException();
+                        }
+                        if (mAdbEnabled) {
+                            function = addFunction(function, UsbManager.USB_FUNCTION_ADB);
+                        }
+
+                        setUsbConfig("none");
+                        // setting this property will change the current USB state
+                        // via a property trigger
+                        SystemProperties.set("persist.sys.usb.config", function);
+                        if (waitForState(function)) {
+                            mCurrentFunctions = function;
+                            mDefaultFunctions = function;
+                        }
+                    } else {
+                        if (function == null) {
+                            function = mDefaultFunctions;
+                        }
+                        setEnabledFunctions(function);
                     }
-                    setEnabledFunctions(function);
-                    break;
-                case MSG_SET_DEFAULT_FUNCTION:
-                    function = (String)msg.obj;
-                    if (mAdbEnabled) {
-                        function = addFunction(function, UsbManager.USB_FUNCTION_ADB);
-                    }
-                    SystemProperties.set("persist.sys.usb.config", function);
-                    mDefaultFunctions = function;
                     break;
                 case MSG_SYSTEM_READY:
                     updateUsbNotification(mConnected);
@@ -588,15 +607,8 @@ public class UsbDeviceManager {
             return nativeOpenAccessory();
         }
 
-    public void setPrimaryFunction(String function) {
-        mHandler.sendMessage(MSG_SET_PRIMARY_FUNCTION, function);
-    }
-
-    public void setDefaultFunction(String function) {
-        if (function == null) {
-            throw new NullPointerException();
-        }
-        mHandler.sendMessage(MSG_SET_DEFAULT_FUNCTION, function);
+    public void setCurrentFunction(String function, boolean makeDefault) {
+        mHandler.sendMessage(MSG_SET_CURRENT_FUNCTION, function, makeDefault);
     }
 
     public void setMassStorageBackingFile(String path) {

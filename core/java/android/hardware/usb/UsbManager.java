@@ -408,32 +408,18 @@ public class UsbManager {
     }
 
     /**
-     * Sets the primary USB function.
+     * Sets the current USB function.
      *
      * @param function name of the USB function
+     * @param makeDefault true if this should be set as the default
      *
      * {@hide}
      */
-    public void setPrimaryFunction(String function) {
+    public void setCurrentFunction(String function, boolean makeDefault) {
         try {
-            mService.setPrimaryFunction(function);
+            mService.setCurrentFunction(function, makeDefault);
         } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setPrimaryFunction", e);
-        }
-    }
-
-    /**
-     * Sets the default primary USB function.
-     *
-     * @param function name of the USB function
-     *
-     * {@hide}
-     */
-    public void setDefaultFunction(String function) {
-        try {
-            mService.setDefaultFunction(function);
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException in setDefaultFunction", e);
+            Log.e(TAG, "RemoteException in setCurrentFunction", e);
         }
     }
 

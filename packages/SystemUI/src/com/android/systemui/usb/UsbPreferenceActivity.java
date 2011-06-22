@@ -39,6 +39,7 @@ public class UsbPreferenceActivity extends Activity implements View.OnClickListe
     private String mCurrentFunction;
     private String[] mFunctions;
     private String mInstallerImagePath;
+    private AlertDialog mDialog;
     private Button mMtpPtpButton;
     private Button mInstallerCdButton;
     private boolean mPtpActive;
@@ -71,23 +72,25 @@ public class UsbPreferenceActivity extends Activity implements View.OnClickListe
             mInstallerCdButton.setVisibility(View.GONE);
         }
 
-        dialogBuilder.show();
+        mDialog = dialogBuilder.show();
     }
 
     public void onClick(View v) {
         if (v.equals(mMtpPtpButton)) {
             if (mPtpActive) {
-                mUsbManager.setPrimaryFunction(UsbManager.USB_FUNCTION_MTP);
-                mUsbManager.setDefaultFunction(UsbManager.USB_FUNCTION_MTP);
+                mUsbManager.setCurrentFunction(UsbManager.USB_FUNCTION_MTP, true);
             } else {
-                mUsbManager.setPrimaryFunction(UsbManager.USB_FUNCTION_PTP);
-                mUsbManager.setDefaultFunction(UsbManager.USB_FUNCTION_PTP);
+                mUsbManager.setCurrentFunction(UsbManager.USB_FUNCTION_PTP, true);
             }
         } else if (v.equals(mInstallerCdButton)) {
-            mUsbManager.setPrimaryFunction(UsbManager.USB_FUNCTION_MASS_STORAGE);
+            // installer CD is never default
+            mUsbManager.setCurrentFunction(UsbManager.USB_FUNCTION_MASS_STORAGE, false);
             mUsbManager.setMassStorageBackingFile(mInstallerImagePath);
         }
 
+        if (mDialog != null) {
+            mDialog.dismiss();
+        }
         finish();
     }
 }
