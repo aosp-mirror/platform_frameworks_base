@@ -252,7 +252,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Finds {@link AccessibilityNodeInfo}s by text. The match is case
-     * insensitive containment.
+     * insensitive containment. The search is relative to this info i.e.
+     * this info is the root of the traversed tree.
      *
      * @param text The searched text.
      * @return A list of node info.
@@ -260,7 +261,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByText(String text) {
         enforceSealed();
         if (!canPerformRequestOverConnection(mAccessibilityViewId)) {
-            return null;
+            return Collections.emptyList();
         }
         try {
             return mConnection.findAccessibilityNodeInfosByViewText(text, mAccessibilityWindowId,
