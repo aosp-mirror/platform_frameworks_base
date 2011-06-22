@@ -1000,8 +1000,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
                     + "x" + desiredWindowHeight + "...");
 
             boolean goodMeasure = false;
-            if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT
-                    || lp.height == ViewGroup.LayoutParams.WRAP_CONTENT) {
+            if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT) {
                 // On large screens, we don't want to allow dialogs to just
                 // stretch to fill the entire width of the screen to display
                 // one line of text.  First try doing the layout at a smaller
