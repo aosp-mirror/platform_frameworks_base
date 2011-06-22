@@ -103,8 +103,10 @@ private:
     void postTextEvent(int64_t delayUs = -1);
     void cancelTextEvent();
 
-    void notifyListener(
-            int msg, const void *data = NULL, size_t size = 0);
+    void notifyListener(int msg, const Parcel *parcel = NULL);
+
+    status_t extractAndAppendLocalDescriptions(int64_t timeUs);
+    status_t extractAndSendGlobalDescriptions();
 
     DISALLOW_EVIL_CONSTRUCTORS(TimedTextPlayer);
 };

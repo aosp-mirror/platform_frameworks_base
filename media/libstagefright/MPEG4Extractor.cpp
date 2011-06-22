@@ -889,11 +889,17 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
             uint32_t entry_count = U32_AT(&buffer[4]);
 
             if (entry_count > 1) {
-                // For now we only support a single type of media per track.
-
-                mLastTrack->skipTrack = true;
-                *offset += chunk_size;
-                break;
+                // For 3GPP timed text, there could be multiple tx3g boxes contain
+                // multiple text display formats. These formats will be used to
+                // display the timed text.
+                const char *mime;
+                CHECK(mLastTrack->meta->findCString(kKeyMIMEType, &mime));
+                if (strcasecmp(mime, MEDIA_MIMETYPE_TEXT_3GPP)) {
+                    // For now we only support a single type of media per track.
+                    mLastTrack->skipTrack = true;
+                    *offset += chunk_size;
+                    break;
+                }
             }
 
             off64_t stop_offset = *offset + chunk_size;
@@ -1324,9 +1330,53 @@ status_t MPEG4Extractor::parseChunk(off64_t *offset, int depth) {
             return parseDrmSINF(offset, data_offset);
         }
 
+        case FOURCC('h', 'd', 'l', 'r'):
+        {
+            uint32_t buffer;
+            if (mDataSource->readAt(
+                        data_offset + 8, &buffer, 4) < 4) {
+                return ERROR_IO;
+            }
+
+            uint32_t type = ntohl(buffer);
+            // For the 3GPP file format, the handler-type within the 'hdlr' box
+            // shall be 'text'
+            if (type == FOURCC('t', 'e', 'x', 't')) {
+                mLastTrack->meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_TEXT_3GPP);
+            }
+
+            *offset += chunk_size;
+            break;
+        }
+
         case FOURCC('t', 'x', '3', 'g'):
         {
-            mLastTrack->meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_TEXT_3GPP);
+            uint32_t type;
+            const void *data;
+            size_t size = 0;
+            if (!mLastTrack->meta->findData(
+                    kKeyTextFormatData, &type, &data, &size)) {
+                size = 0;
+            }
+
+            uint8_t *buffer = new uint8_t[size + chunk_size];
+
+            if (size > 0) {
+                memcpy(buffer, data, size);
+            }
+
+            if ((size_t)(mDataSource->readAt(*offset, buffer + size, chunk_size))
+                    < chunk_size) {
+                delete[] buffer;
+                buffer = NULL;
+
+                return ERROR_IO;
+            }
+
+            mLastTrack->meta->setData(
+                    kKeyTextFormatData, 0, buffer, size + chunk_size);
+
+            delete[] buffer;
 
             *offset += chunk_size;
             break;

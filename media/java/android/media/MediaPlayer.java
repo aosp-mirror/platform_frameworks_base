@@ -1568,7 +1568,14 @@ public class MediaPlayer
                 return;
             case MEDIA_TIMED_TEXT:
                 if (mOnTimedTextListener != null) {
-                    mOnTimedTextListener.onTimedText(mMediaPlayer, (String)msg.obj);
+                    if (msg.obj == null) {
+                        mOnTimedTextListener.onTimedText(mMediaPlayer, null);
+                    } else {
+                        if (msg.obj instanceof byte[]) {
+                            TimedText text = new TimedText((byte[])(msg.obj));
+                            mOnTimedTextListener.onTimedText(mMediaPlayer, text);
+                        }
+                    }
                 }
                 return;
 
@@ -1755,14 +1762,14 @@ public class MediaPlayer
     public interface OnTimedTextListener
     {
         /**
-         * Called to indicate the video size
+         * Called to indicate an avaliable timed text
          *
          * @param mp             the MediaPlayer associated with this callback
-         * @param text           the timed text sample which contains the
-         *                       text needed to be displayed.
+         * @param text           the timed text sample which contains the text
+         *                       needed to be displayed and the display format.
          * {@hide}
          */
-        public void onTimedText(MediaPlayer mp, String text);
+        public void onTimedText(MediaPlayer mp, TimedText text);
     }
 
     /**
