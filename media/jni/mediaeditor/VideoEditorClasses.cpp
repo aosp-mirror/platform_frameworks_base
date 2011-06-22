@@ -144,6 +144,7 @@ VIDEOEDIT_JAVA_DEFINE_CONSTANTS(ClipType)
     VIDEOEDIT_JAVA_CONSTANT_INIT("MP3",         M4VIDEOEDITING_kFileType_MP3),
     VIDEOEDIT_JAVA_CONSTANT_INIT("PCM",         M4VIDEOEDITING_kFileType_PCM),
     VIDEOEDIT_JAVA_CONSTANT_INIT("JPG",         M4VIDEOEDITING_kFileType_JPG),
+    VIDEOEDIT_JAVA_CONSTANT_INIT("PNG",         M4VIDEOEDITING_kFileType_PNG),
     VIDEOEDIT_JAVA_CONSTANT_INIT("M4V",         M4VIDEOEDITING_kFileType_M4V),
     VIDEOEDIT_JAVA_CONSTANT_INIT("UNSUPPORTED", M4VIDEOEDITING_kFileType_Unsupported)
 };
@@ -1394,8 +1395,8 @@ videoEditClasses_getClipSettings(
             pSettings->FileType = (M4VIDEOEDITING_FileType)videoEditJava_getClipTypeJavaToC(
                                         &converted, pEnv->GetIntField(object, fieldIds.fileType));
 
-            if ( pSettings->FileType == M4VIDEOEDITING_kFileType_JPG)
-            {
+            if (( pSettings->FileType == M4VIDEOEDITING_kFileType_JPG) ||
+                 ( pSettings->FileType == M4VIDEOEDITING_kFileType_PNG)) {
                  pSettings->FileType = M4VIDEOEDITING_kFileType_ARGB8888;
             }
 
