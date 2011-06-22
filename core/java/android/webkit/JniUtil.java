@@ -23,6 +23,10 @@ import android.util.Log;
 import java.io.InputStream;
 
 class JniUtil {
+
+    static {
+        System.loadLibrary("webcore");
+    }
     private static final String LOGTAG = "webkit";
     private JniUtil() {} // Utility class, do not instantiate.
 
