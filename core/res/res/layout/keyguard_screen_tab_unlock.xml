@@ -28,43 +28,14 @@
     android:id="@+id/root"
     android:clipChildren="false">
 
-    <TextView
-        android:id="@+id/carrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="10dip"
-        android:layout_marginRight="8dip"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:gravity="right|bottom"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        />
-
-    <!-- "emergency calls only" shown when sim is missing or PUKd -->
-    <TextView
-        android:id="@+id/emergencyCallText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/carrier"
-        android:layout_alignParentRight="true"
-        android:layout_marginTop="0dip"
-        android:layout_marginRight="8dip"
-        android:text="@string/emergency_calls_only"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="@color/white"
-       />
-
     <!-- time and date -->
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/carrier"
-        android:layout_marginTop="52dip"
-        android:layout_marginLeft="20dip"
-        android:layout_marginBottom="8dip"
-        >
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="16dip"
+        android:layout_marginTop="48dip"
+        android:layout_marginLeft="20dip">
 
         <!-- Because we can't have multi-tone fonts, we render two TextViews, one on
         top of the other. Hence the redundant layout... -->
@@ -73,7 +44,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="none"
-            android:textSize="72sp"
+            android:textSize="@dimen/keyguard_lockscreen_clock_font_size"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginBottom="6dip"
             android:textColor="@color/lockscreen_clock_background"
@@ -84,7 +55,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="none"
-            android:textSize="72sp"
+            android:textSize="@dimen/keyguard_lockscreen_clock_font_size"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginBottom="6dip"
             android:textColor="@color/lockscreen_clock_foreground"
@@ -92,51 +63,50 @@
             android:layout_alignTop="@id/timeDisplayBackground"
             />
 
-        <TextView android:id="@+id/am_pm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/timeDisplayBackground"
-            android:layout_alignBaseline="@id/timeDisplayBackground"
-            android:singleLine="true"
-            android:ellipsize="none"
-            android:textSize="22sp"
-            android:layout_marginLeft="8dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/lockscreen_clock_am_pm"
-            />
-
     </com.android.internal.widget.DigitalClock>
 
-    <TextView
-        android:id="@+id/date"
-        android:layout_width="wrap_content"
+    <LinearLayout android:id="@+id/date_alarm_status_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/time"
-        android:layout_marginLeft="24dip"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        />
+        android:layout_marginLeft="16dip"
+        android:layout_marginRight="16dip"
+        android:layout_marginTop="16dip"
+        android:layout_alignParentRight="true"
+        android:gravity="right"
+        android:orientation="horizontal">
 
-    <!-- TODO: Redo layout when we release on phones -->
-    <TextView
-        android:id="@+id/alarm_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="18sp"
-        android:drawablePadding="4dip"
-        android:layout_below="@id/date"
-        android:layout_marginTop="4dip"
-        android:layout_marginLeft="24dip"
-        />
+        <TextView
+            android:id="@+id/date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+            />
+
+        <TextView
+            android:id="@+id/alarm_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+            android:drawablePadding="4dip"
+            android:layout_marginLeft="16dip"
+            />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/status1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/alarm_status"
+        android:layout_below="@id/date_alarm_status_container"
         android:layout_marginTop="4dip"
-        android:layout_marginLeft="24dip"
+        android:layout_marginLeft="16dip"
+        android:layout_marginRight="16dip"
+        android:layout_alignParentRight="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:drawablePadding="4dip"
         />
 
@@ -146,9 +116,13 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/status1"
         android:layout_marginTop="4dip"
-        android:layout_marginLeft="24dip"
+        android:layout_marginLeft="16dip"
+        android:layout_marginRight="16dip"
+        android:layout_alignParentRight="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:drawablePadding="4dip"
+        android:visibility="gone"
         />
 
     <TextView
@@ -156,46 +130,89 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/status2"
-        android:layout_marginLeft="24dip"
+        android:layout_marginLeft="16dip"
+        android:layout_marginRight="16dip"
+        android:layout_alignParentRight="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:layout_marginTop="12dip"
         android:drawablePadding="4dip"
+        android:visibility="gone"
         />
 
-    <com.android.internal.widget.multiwaveview.MultiWaveView
-        android:id="@+id/unlock_widget"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="300dip"
-        android:layout_alignParentBottom="true"
-
-        android:targetDrawables="@array/lockscreen_targets_when_silent"
-        android:handleDrawable="@drawable/ic_lockscreen_handle"
-        android:waveDrawable="@drawable/ic_lockscreen_outerring"
-        android:outerRadius="@*android:dimen/multiwaveview_target_placement_radius"
-        android:snapMargin="@*android:dimen/multiwaveview_snap_margin"
-        android:hitRadius="@*android:dimen/multiwaveview_hit_radius"
-        android:vibrationDuration="20"
-        android:rightChevronDrawable="@drawable/ic_lockscreen_chevron_right"
-        android:feedbackCount="3"
-        android:horizontalOffset="0dip"
-        android:verticalOffset="60dip"
-        />
-
-    <!-- emergency call button shown when sim is PUKd and tab_selector is
-         hidden -->
+    <!-- emergency call button shown when sim is PUKd and tab_selector is hidden -->
     <Button
         android:id="@+id/emergencyCallButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="4dip"
+        android:layout_marginRight="16dip"
         android:drawableLeft="@drawable/ic_emergency"
-        android:layout_centerInParent="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="80dip"
+        android:layout_alignParentRight="true"
+        android:layout_below="@id/screenLocked"
         style="@style/Widget.Button.Transparent"
-        android:drawablePadding="8dip"
-        android:visibility="gone"
+        android:drawablePadding="4dip"
+        android:text="@string/lockscreen_emergency_call"
+        android:visibility="visible"
+        android:background="@null"
         />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:gravity="center_horizontal">
+
+        <com.android.internal.widget.multiwaveview.MultiWaveView
+            android:id="@+id/unlock_widget"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="300dip"
+            android:layout_alignParentBottom="true"
+
+            android:targetDrawables="@array/lockscreen_targets_when_silent"
+            android:handleDrawable="@drawable/ic_lockscreen_handle"
+            android:waveDrawable="@drawable/ic_lockscreen_outerring"
+            android:outerRadius="@dimen/multiwaveview_target_placement_radius"
+            android:snapMargin="@dimen/multiwaveview_snap_margin"
+            android:hitRadius="@dimen/multiwaveview_hit_radius"
+            android:rightChevronDrawable="@drawable/ic_lockscreen_chevron_right"
+            android:horizontalOffset="0dip"
+            android:verticalOffset="60dip"
+            android:feedbackCount="3"
+            android:vibrationDuration="20"
+            />
+
+        <TextView
+            android:id="@+id/carrier"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="8dip"
+            android:gravity="center_horizontal"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+            android:textColor="?android:attr/textColorSecondary"
+            />
+
+        <!-- "emergency calls only" shown when sim is missing or PUKd -->
+        <TextView
+            android:id="@+id/emergencyCallText"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/carrier"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="0dip"
+            android:layout_marginRight="8dip"
+            android:text="@string/emergency_calls_only"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+            android:textColor="?android:attr/textColorSecondary"
+            />
+
+    </RelativeLayout>
 
 </RelativeLayout>
 

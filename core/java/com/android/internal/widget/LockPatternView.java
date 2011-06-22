@@ -103,7 +103,8 @@ public class LockPatternView extends View {
     private boolean mTactileFeedbackEnabled = true;
     private boolean mPatternInProgress = false;
 
-    private float mDiameterFactor = 0.5f;
+    private float mDiameterFactor = 0.10f; // TODO: move to attrs
+    private final int mStrokeAlpha = 128;
     private float mHitFactor = 0.6f;
 
     private float mSquareWidth;
@@ -132,6 +133,7 @@ public class LockPatternView extends View {
     private int mAspect;
     private final Matrix mArrowMatrix = new Matrix();
     private final Matrix mCircleMatrix = new Matrix();
+
 
     /**
      * Represents a cell in the 3 X 3 matrix of the unlock pattern view.
@@ -267,17 +269,17 @@ public class LockPatternView extends View {
         mPathPaint.setAntiAlias(true);
         mPathPaint.setDither(true);
         mPathPaint.setColor(Color.WHITE);   // TODO this should be from the style
-        mPathPaint.setAlpha(128);
+        mPathPaint.setAlpha(mStrokeAlpha);
         mPathPaint.setStyle(Paint.Style.STROKE);
         mPathPaint.setStrokeJoin(Paint.Join.ROUND);
         mPathPaint.setStrokeCap(Paint.Cap.ROUND);
 
         // lot's of bitmaps!
-        mBitmapBtnDefault = getBitmapFor(R.drawable.btn_code_lock_default);
-        mBitmapBtnTouched = getBitmapFor(R.drawable.btn_code_lock_touched);
-        mBitmapCircleDefault = getBitmapFor(R.drawable.indicator_code_lock_point_area_default);
-        mBitmapCircleGreen = getBitmapFor(R.drawable.indicator_code_lock_point_area_green);
-        mBitmapCircleRed = getBitmapFor(R.drawable.indicator_code_lock_point_area_red);
+        mBitmapBtnDefault = getBitmapFor(R.drawable.btn_code_lock_default_holo);
+        mBitmapBtnTouched = getBitmapFor(R.drawable.btn_code_lock_touched_holo);
+        mBitmapCircleDefault = getBitmapFor(R.drawable.indicator_code_lock_point_area_default_holo);
+        mBitmapCircleGreen = getBitmapFor(R.drawable.indicator_code_lock_point_area_green_holo);
+        mBitmapCircleRed = getBitmapFor(R.drawable.indicator_code_lock_point_area_red_holo);
 
         mBitmapArrowGreenUp = getBitmapFor(R.drawable.indicator_code_lock_drag_direction_green_up);
         mBitmapArrowRedUp = getBitmapFor(R.drawable.indicator_code_lock_drag_direction_red_up);
@@ -889,11 +891,48 @@ public class LockPatternView extends View {
         final Path currentPath = mCurrentPath;
         currentPath.rewind();
 
+        // draw the circles
+        final int paddingTop = mPaddingTop;
+        final int paddingLeft = mPaddingLeft;
+
+        for (int i = 0; i < 3; i++) {
+            float topY = paddingTop + i * squareHeight;
+            //float centerY = mPaddingTop + i * mSquareHeight + (mSquareHeight / 2);
+            for (int j = 0; j < 3; j++) {
+                float leftX = paddingLeft + j * squareWidth;
+                drawCircle(canvas, (int) leftX, (int) topY, drawLookup[i][j]);
+            }
+        }
+
         // TODO: the path should be created and cached every time we hit-detect a cell
         // only the last segment of the path should be computed here
         // draw the path of the pattern (unless the user is in progress, and
         // we are in stealth mode)
         final boolean drawPath = (!mInStealthMode || mPatternDisplayMode == DisplayMode.Wrong);
+
+        // draw the arrows associated with the path (unless the user is in progress, and
+        // we are in stealth mode)
+        boolean oldFlag = (mPaint.getFlags() & Paint.FILTER_BITMAP_FLAG) != 0;
+        mPaint.setFilterBitmap(true); // draw with higher quality since we render with transforms
+        if (drawPath) {
+            for (int i = 0; i < count - 1; i++) {
+                Cell cell = pattern.get(i);
+                Cell next = pattern.get(i + 1);
+
+                // only draw the part of the pattern stored in
+                // the lookup table (this is only different in the case
+                // of animation).
+                if (!drawLookup[next.row][next.column]) {
+                    break;
+                }
+
+                float leftX = paddingLeft + cell.column * squareWidth;
+                float topY = paddingTop + cell.row * squareHeight;
+
+                drawArrow(canvas, leftX, topY, cell, next);
+            }
+        }
+
         if (drawPath) {
             boolean anyCircles = false;
             for (int i = 0; i < count; i++) {
@@ -924,41 +963,6 @@ public class LockPatternView extends View {
             canvas.drawPath(currentPath, mPathPaint);
         }
 
-        // draw the circles
-        final int paddingTop = mPaddingTop;
-        final int paddingLeft = mPaddingLeft;
-
-        for (int i = 0; i < 3; i++) {
-            float topY = paddingTop + i * squareHeight;
-            //float centerY = mPaddingTop + i * mSquareHeight + (mSquareHeight / 2);
-            for (int j = 0; j < 3; j++) {
-                float leftX = paddingLeft + j * squareWidth;
-                drawCircle(canvas, (int) leftX, (int) topY, drawLookup[i][j]);
-            }
-        }
-
-        // draw the arrows associated with the path (unless the user is in progress, and
-        // we are in stealth mode)
-        boolean oldFlag = (mPaint.getFlags() & Paint.FILTER_BITMAP_FLAG) != 0;
-        mPaint.setFilterBitmap(true); // draw with higher quality since we render with transforms
-        if (drawPath) {
-            for (int i = 0; i < count - 1; i++) {
-                Cell cell = pattern.get(i);
-                Cell next = pattern.get(i + 1);
-
-                // only draw the part of the pattern stored in
-                // the lookup table (this is only different in the case
-                // of animation).
-                if (!drawLookup[next.row][next.column]) {
-                    break;
-                }
-
-                float leftX = paddingLeft + cell.column * squareWidth;
-                float topY = paddingTop + cell.row * squareHeight;
-
-                drawArrow(canvas, leftX, topY, cell, next);
-            }
-        }
         mPaint.setFilterBitmap(oldFlag); // restore default flag
     }
 

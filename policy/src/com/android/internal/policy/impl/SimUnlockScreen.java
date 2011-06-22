@@ -99,7 +99,7 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
 
         mOkButton.setOnClickListener(this);
 
-        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCall);
+        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
         mEmergencyCallButton.setOnClickListener(this);
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
 

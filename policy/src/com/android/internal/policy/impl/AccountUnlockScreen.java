@@ -110,7 +110,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         mOk = (Button) findViewById(R.id.ok);
         mOk.setOnClickListener(this);
 
-        mEmergencyCall = (Button) findViewById(R.id.emergencyCall);
+        mEmergencyCall = (Button) findViewById(R.id.emergencyCallButton);
         mEmergencyCall.setOnClickListener(this);
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCall);
 
