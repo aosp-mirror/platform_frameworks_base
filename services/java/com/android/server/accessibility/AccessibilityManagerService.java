@@ -1104,7 +1104,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             IBinder windowToken = mWindowIdToWindowTokenMap.get(info.getWindowId());
             final float scale = mWindowManagerService.getWindowCompatibilityScale(windowToken);
 
-            if (Float.compare(scale, 1.0f) == 0) {
+            if (scale == 1.0f) {
                 return;
             }
 
