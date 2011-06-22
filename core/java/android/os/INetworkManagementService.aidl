@@ -226,4 +226,6 @@ interface INetworkManagementService
      */
     int getInterfaceTxThrottle(String iface);
 
+    void setBandwidthControlEnabled(boolean enabled);
+
 }

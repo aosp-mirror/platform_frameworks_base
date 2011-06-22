@@ -27,6 +27,7 @@ import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_REMOVED;
+import static android.provider.Settings.Secure.NETSTATS_ENABLED;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_MAX_HISTORY;
 import static android.provider.Settings.Secure.NETSTATS_PERSIST_THRESHOLD;
@@ -134,6 +135,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Settings that can be changed externally.
      */
     public interface NetworkStatsSettings {
+        public boolean getEnabled();
         public long getPollInterval();
         public long getPersistThreshold();
         public long getNetworkBucketDuration();
@@ -206,6 +208,18 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     public void systemReady() {
+        if (mSettings.getEnabled()) {
+            try {
+                // enable low-level bandwidth stats and control
+                // TODO: consider shipping with this enabled by default
+                mNetworkManager.setBandwidthControlEnabled(true);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "problem enabling bandwidth controls", e);
+            }
+        } else {
+            Slog.w(TAG, "detailed network stats disabled");
+        }
+
         synchronized (mStatsLock) {
             // read historical network stats from disk, since policy service
             // might need them right away. we delay loading detailed UID stats
@@ -1040,6 +1054,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return Settings.Secure.getLong(mResolver, name, def);
         }
 
+        public boolean getEnabled() {
+            return Settings.Secure.getInt(mResolver, NETSTATS_ENABLED, 1) != 0;
+        }
         public long getPollInterval() {
             return getSecureLong(NETSTATS_POLL_INTERVAL, 15 * MINUTE_IN_MILLIS);
         }

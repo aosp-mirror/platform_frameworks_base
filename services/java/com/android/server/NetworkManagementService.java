@@ -19,6 +19,7 @@ package com.android.server;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -1020,6 +1021,12 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
     public int getInterfaceTxThrottle(String iface) {
         return getInterfaceThrottle(iface, false);
+    }
+
+    @Override
+    public void setBandwidthControlEnabled(boolean enabled) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        mConnector.doCommand(String.format("bandwidth %s", (enabled ? "enable" : "disable")));
     }
 
     /**
