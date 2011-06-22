@@ -42,6 +42,7 @@ bool ColorConverter::isValid() const {
         case OMX_COLOR_FormatCbYCrY:
         case OMX_QCOM_COLOR_FormatYVU420SemiPlanar:
         case OMX_COLOR_FormatYUV420SemiPlanar:
+        case OMX_TI_COLOR_FormatYUV420PackedSemiPlanar:
             return true;
 
         default:
@@ -111,6 +112,10 @@ status_t ColorConverter::convert(
 
         case OMX_COLOR_FormatYUV420SemiPlanar:
             err = convertYUV420SemiPlanar(src, dst);
+            break;
+
+        case OMX_TI_COLOR_FormatYUV420PackedSemiPlanar:
+            err = convertTIYUV420PackedSemiPlanar(src, dst);
             break;
 
         default:
@@ -414,6 +419,102 @@ status_t ColorConverter::convertYUV420SemiPlanar(
         dst_ptr += dst.mWidth / 2;
     }
 
+    return OK;
+}
+
+status_t ColorConverter::convertTIYUV420PackedSemiPlanar(
+        const BitmapParams &src, const BitmapParams &dst) {
+
+/*
+The TIYUV420PackedSemiPlanar format is same as YUV420PackedSemiPlanar but with
+additional padding as shown in the diagram below. The padded width and padded
+height is different for different compression formats and it is read from the
+codec. In this color conversion routine, the padded resolution is obtained from
+src bitmap.
+
+ ------------------------------------
+|                                    |
+|                                    |
+|      -------------------------     |
+|     |                         |    |
+|     |                         |    |
+|     |          Y DATA         |    |
+|     |                         |    |
+|     |                         |    |
+|     |                         |    |
+|      -------------------------     |
+|                                    |
+|      ------------                  |
+|     |            |                 |
+|     |            |                 |
+|     |  UV DATA   |                 |
+|     |            |                 |
+|     |            |                 |
+|     |            |                 |
+|      ------------                  |
+|                                    |
+|                                    |
+ ------------------------------------
+*/
+
+    LOGV("src.mCropLeft = %d src.mCropTop =%d src.mWidth = %d src.mHeight = %d"
+        " dst.mWidth = %d dst.mHeight = %d", src.mCropLeft , src.mCropTop,
+        src.mWidth, src.mHeight, dst.mWidth, dst.mHeight);
+
+    size_t offset = (src.mWidth * src.mCropTop) + src.mCropLeft;
+
+    uint8_t *kAdjustedClip = initClip();
+
+    uint32_t *dst_ptr = (uint32_t *)dst.mBits;
+    const uint8_t *src_y = (const uint8_t *)src.mBits;
+    const uint8_t *src_u = (const uint8_t *)(src_y-offset) + (src.mWidth * src.mHeight);
+    src_u += ( ( src.mWidth * (src.mCropTop/2) ) + src.mCropLeft );
+    const uint8_t *src_v = src_u + 1;
+
+    for (size_t y = 0; y < dst.mHeight; ++y) {
+        for (size_t x = 0; x < dst.mWidth; x += 2) {
+
+            signed y1 = (signed)src_y[x] - 16;    //Y pixel
+            signed y2 = (signed)src_y[x + 1] - 16; //2nd Y pixel
+
+            signed u = (signed)src_u[x & ~1] - 128;   //U component
+            signed v = (signed)src_u[(x & ~1) + 1] - 128; //V component
+
+            signed u_b = u * 517;
+            signed u_g = -u * 100;
+            signed v_g = -v * 208;
+            signed v_r = v * 409;
+
+            signed tmp1 = y1 * 298;
+            signed b1 = (tmp1 + u_b) / 256;
+            signed g1 = (tmp1 + v_g + u_g) / 256;
+            signed r1 = (tmp1 + v_r) / 256;
+
+            signed tmp2 = y2 * 298;
+            signed b2 = (tmp2 + u_b) / 256;
+            signed g2 = (tmp2 + v_g + u_g) / 256;
+            signed r2 = (tmp2 + v_r) / 256;
+
+            uint32_t rgb1 =
+                ((kAdjustedClip[r1] >> 3) << 11)
+                | ((kAdjustedClip[g1] >> 2) << 5)
+                | (kAdjustedClip[b1] >> 3);
+
+            uint32_t rgb2 =
+                ((kAdjustedClip[r2] >> 3) << 11)
+                | ((kAdjustedClip[g1] >> 2) << 5)
+                | (kAdjustedClip[b1] >> 3);
+
+            dst_ptr[x / 2] = (rgb2 << 16) | rgb1;
+        }
+
+        src_y += src.mWidth; //increment Y-pixel line
+        if (y&1) {
+          src_u += src.mWidth; //increment U-V line
+        }
+
+        dst_ptr += dst.mWidth / 2;
+    }
     return OK;
 }
 
