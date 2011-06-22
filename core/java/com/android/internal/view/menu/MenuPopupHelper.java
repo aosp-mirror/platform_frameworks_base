@@ -126,6 +126,7 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
     public void onDismiss() {
         mPopup = null;
+        mMenu.close();
         if (mTreeObserver != null) {
             if (!mTreeObserver.isAlive()) mTreeObserver = mAnchorView.getViewTreeObserver();
             mTreeObserver.removeGlobalOnLayoutListener(this);
