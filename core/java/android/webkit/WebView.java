@@ -5707,8 +5707,8 @@ public class WebView extends AbsoluteLayout
             return false;
         }
         WebViewCore.CursorData data = cursorDataNoPosition();
-        data.mX = viewToContentX((int) event.getX());
-        data.mY = viewToContentY((int) event.getY());
+        data.mX = viewToContentX((int) event.getX() + mScrollX);
+        data.mY = viewToContentY((int) event.getY() + mScrollY);
         mWebViewCore.sendMessage(EventHub.SET_MOVE_MOUSE, data);
         return true;
     }
