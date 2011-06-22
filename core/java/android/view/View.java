@@ -2503,6 +2503,9 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         mViewFlags = SOUND_EFFECTS_ENABLED | HAPTIC_FEEDBACK_ENABLED | LAYOUT_DIRECTION_INHERIT;
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
+        mUserPaddingStart = -1;
+        mUserPaddingEnd = -1;
+        mUserPaddingRelative = false;
     }
 
     /**
@@ -2864,13 +2867,16 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
         mUserPaddingRelative = (startPadding >= 0 || endPadding >= 0);
 
+        // Cache user padding as we cannot fully resolve padding here (we dont have yet the resolved
+        // layout direction). Those cached values will be used later during padding resolution.
+        mUserPaddingStart = startPadding;
+        mUserPaddingEnd = endPadding;
+
         if (padding >= 0) {
             leftPadding = padding;
             topPadding = padding;
             rightPadding = padding;
             bottomPadding = padding;
-            startPadding = padding;
-            endPadding = padding;
         }
 
         // If the user specified the padding (either with android:padding or
@@ -2881,11 +2887,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                 topPadding >= 0 ? topPadding : mPaddingTop,
                 rightPadding >= 0 ? rightPadding : mPaddingRight,
                 bottomPadding >= 0 ? bottomPadding : mPaddingBottom);
-
-        // Cache user padding as we cannot fully resolve padding here (we dont have yet the resolved
-        // layout direction). Those cached values will be used later during padding resolution.
-        mUserPaddingStart = startPadding;
-        mUserPaddingEnd = endPadding;
 
         if (viewFlagMasks != 0) {
             setFlags(viewFlagValues, viewFlagMasks);
@@ -11026,6 +11027,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      */
     public void setPaddingRelative(int start, int top, int end, int bottom) {
         mUserPaddingRelative = true;
+
+        mUserPaddingStart = start;
+        mUserPaddingEnd = end;
+
         switch(getResolvedLayoutDirection()) {
             case LAYOUT_DIRECTION_RTL:
                 setPadding(end, top, start, bottom);
