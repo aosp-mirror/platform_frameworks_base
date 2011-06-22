@@ -498,6 +498,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             return;
         }
 
+        int width = WRAP_CONTENT;
         if (st.decorView == null || st.refreshDecorView) {
             if (st.decorView == null) {
                 // Initialize the panel decor, this will populate st.decorView
@@ -523,6 +524,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 // If the contents is fill parent for the width, set the
                 // corresponding background
                 backgroundResId = st.fullBackground;
+                width = MATCH_PARENT;
             } else {
                 // Otherwise, set the normal panel background
                 backgroundResId = st.background;
@@ -546,7 +548,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         st.isHandled = false;
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                WRAP_CONTENT, WRAP_CONTENT,
+                width, WRAP_CONTENT,
                 st.x, st.y, WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG,
                 WindowManager.LayoutParams.FLAG_DITHER
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
