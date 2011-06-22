@@ -43,6 +43,10 @@ bool DrmSupportInfo::operator==(const DrmSupportInfo& drmSupportInfo) const {
 }
 
 bool DrmSupportInfo::isSupportedMimeType(const String8& mimeType) const {
+    if (String8("") == mimeType) {
+        return false;
+    }
+
     for (unsigned int i = 0; i < mMimeTypeVector.size(); i++) {
         const String8 item = mMimeTypeVector.itemAt(i);
 
