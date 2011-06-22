@@ -14,13 +14,20 @@ page.title=Graphics
     </ol>
     </li>
   </ol>
+  <h2>See also</h2>
+  <ol>
+    <li><a href="{@docRoot}guide/topics/graphics/opengl.html">3D with OpenGL</a></li>
+    <li><a href="{@docRoot}guide/topics/renderscript/index.html">RenderScript</a></li>
+  </ol>
   </div>
 </div>
-<p>Android graphics are powered by a custom 2D graphics library and OpenGL ES 1.0
-for high performance 3D graphics. The most common 2D graphics APIs can be found in the 
-{@link android.graphics.drawable drawable package}. OpenGL APIs are available
-from the Khronos {@link javax.microedition.khronos.opengles OpenGL ES package},
-plus some Android {@link android.opengl OpenGL utilities}.</p>
+
+<p>Android graphics are powered by a custom 2D graphics library, and the framework provides
+support for high performance 3D graphics in the form of OpenGL ES and RenderScript. The most
+common 2D graphics APIs can be found in the {@link android.graphics.drawable drawable package}.
+OpenGL APIs are available from the Khronos {@link javax.microedition.khronos.opengles OpenGL ES} and
+the {@link android.opengl} packages. The RenderScript APIs are available in the 
+{@link android.renderscript} package.</p>
 
 <p>When starting a project, it's important to consider exactly what your graphical demands will be. 
 Varying graphical tasks are best accomplished with varying techniques. For example, graphics and animations
@@ -32,10 +39,10 @@ and which tasks they're best suited for.</p>
 
 <p>If you're specifically looking for information on drawing 3D graphics, this page won't
 help a lot. However, the information below about how to <a href="#draw-with-canvas">Draw with a
-Canvas</a> (and the section on SurfaceView), 
-will give you a quick idea of how you should draw to the View hierarchy. For more information
-on Android's 3D graphic utilities (provided by the OpenGL ES API), 
-read <a href="opengl.html">3D with OpenGL</a> and refer to other OpenGL documentation.</p>
+Canvas</a> (and the section on SurfaceView), will give you a quick idea of how you should draw to
+the View hierarchy. For more information on Android's 3D graphics APIs, see
+the <a href="opengl.html">3D with OpenGL</a> and  
+<a href="{@docRoot}guide/topics/renderscript/index.html">RenderScript</a> documents.</p>
 
 
 <h2 id="options">Consider your Options</h2>
