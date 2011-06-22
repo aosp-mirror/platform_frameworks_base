@@ -79,7 +79,6 @@ class BluetoothBondState {
         mService = service;
         mBluetoothInputProfileHandler =
             BluetoothInputProfileHandler.getInstance(mContext, mService);
-        getProfileProxy();
     }
 
     synchronized void setPendingOutgoingBonding(String address) {
@@ -109,6 +108,7 @@ class BluetoothBondState {
             mState.put(mService.getAddressFromObjectPath(device).toUpperCase(),
                     BluetoothDevice.BOND_BONDED);
         }
+        getProfileProxy();
     }
 
     public synchronized void setBondState(String address, int state) {
