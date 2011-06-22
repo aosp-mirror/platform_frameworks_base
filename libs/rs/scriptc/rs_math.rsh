@@ -258,4 +258,226 @@ extern void __attribute__((overloadable))
               rs_allocation output, const void * usrData,
               const rs_script_call_t *);
 
+
+
+/**
+ * Atomic add one to the value at addr.
+ * Equal to rsAtomicAdd(addr, 1)
+ *
+ * @param addr Address of value to increment
+ *
+ * @return old value
+ */
+extern int32_t __attribute__((overloadable))
+    rsAtomicInc(volatile int32_t* addr);
+/**
+ * Atomic add one to the value at addr.
+ * Equal to rsAtomicAdd(addr, 1)
+ *
+ * @param addr Address of value to increment
+ *
+ * @return old value
+ */
+extern uint32_t __attribute__((overloadable))
+    rsAtomicInc(volatile uint32_t* addr);
+
+/**
+ * Atomic subtract one from the value at addr. Equal to rsAtomicSub(addr, 1)
+ *
+ * @param addr Address of value to decrement
+ *
+ * @return old value
+ */
+extern int32_t __attribute__((overloadable))
+    rsAtomicDec(volatile int32_t* addr);
+/**
+ * Atomic subtract one from the value at addr. Equal to rsAtomicSub(addr, 1)
+ *
+ * @param addr Address of value to decrement
+ *
+ * @return old value
+ */
+extern uint32_t __attribute__((overloadable))
+    rsAtomicDec(volatile uint32_t* addr);
+
+/**
+ * Atomic add a value to the value at addr.  addr[0] += value
+ *
+ * @param addr Address of value to modify
+ * @param value Amount to add to the value at addr
+ *
+ * @return old value
+ */
+extern int32_t __attribute__((overloadable))
+    rsAtomicAdd(volatile int32_t* addr, int32_t value);
+/**
+ * Atomic add a value to the value at addr.  addr[0] += value
+ *
+ * @param addr Address of value to modify
+ * @param value Amount to add to the value at addr
+ *
+ * @return old value
+ */
+extern uint32_t __attribute__((overloadable))
+    rsAtomicAdd(volatile uint32_t* addr, uint32_t value);
+
+/**
+ * Atomic Subtract a value from the value at addr.  addr[0] -= value
+ *
+ * @param addr Address of value to modify
+ * @param value Amount to subtract from the value at addr
+ *
+ * @return old value
+ */
+extern int32_t __attribute__((overloadable))
+    rsAtomicSub(volatile int32_t* addr, int32_t value);
+/**
+ * Atomic Subtract a value from the value at addr.  addr[0] -= value
+ *
+ * @param addr Address of value to modify
+ * @param value Amount to subtract from the value at addr
+ *
+ * @return old value
+ */
+extern uint32_t __attribute__((overloadable))
+    rsAtomicSub(volatile uint32_t* addr, uint32_t value);
+
+/**
+ * Atomic Bitwise and a value from the value at addr.  addr[0] &= value
+ *
+ * @param addr Address of value to modify
+ * @param value Amount to and with the value at addr
+ *
+ * @return old value
+ */
+extern int32_t __attribute__((overloadable))
+    rsAtomicAnd(volatile int32_t* addr, int32_t value);
+/**
+ * Atomic Bitwise and a value from the value at addr.  addr[0] &= value
+ *
+ * @param addr Address of value to modify
+ * @param value Amount to and with the value at addr
+ *
+ * @return old value
+ */
+extern uint32_t __attribute__((overloadable))
+    rsAtomicAnd(volatile uint32_t* addr, uint32_t value);
+
+/**
+ * Atomic Bitwise or a value from the value at addr.  addr[0] |= value
+ *
+ * @param addr Address of value to modify
+ * @param value Amount to or with the value at addr
+ *
+ * @return old value
+ */
+extern int32_t __attribute__((overloadable))
+    rsAtomicOr(volatile int32_t* addr, int32_t value);
+/**
+ * Atomic Bitwise or a value from the value at addr.  addr[0] |= value
+ *
+ * @param addr Address of value to modify
+ * @param value Amount to or with the value at addr
+ *
+ * @return old value
+ */
+extern uint32_t __attribute__((overloadable))
+    rsAtomicOr(volatile uint32_t* addr, uint32_t value);
+
+/**
+ * Atomic Bitwise xor a value from the value at addr.  addr[0] ^= value
+ *
+ * @param addr Address of value to modify
+ * @param value Amount to xor with the value at addr
+ *
+ * @return old value
+ */
+extern uint32_t __attribute__((overloadable))
+    rsAtomicXor(volatile uint32_t* addr, uint32_t value);
+/**
+ * Atomic Bitwise xor a value from the value at addr.  addr[0] ^= value
+ *
+ * @param addr Address of value to modify
+ * @param value Amount to xor with the value at addr
+ *
+ * @return old value
+ */
+extern int32_t __attribute__((overloadable))
+    rsAtomicXor(volatile int32_t* addr, int32_t value);
+
+/**
+ * Atomic Set the value at addr to the min of addr and value
+ * addr[0] = rsMin(addr[0], value)
+ *
+ * @param addr Address of value to modify
+ * @param value comparison value
+ *
+ * @return old value
+ */
+extern uint32_t __attribute__((overloadable))
+    rsAtomicMin(volatile uint32_t* addr, uint32_t value);
+/**
+ * Atomic Set the value at addr to the min of addr and value
+ * addr[0] = rsMin(addr[0], value)
+ *
+ * @param addr Address of value to modify
+ * @param value comparison value
+ *
+ * @return old value
+ */
+extern int32_t __attribute__((overloadable))
+    rsAtomicMin(volatile int32_t* addr, int32_t value);
+
+/**
+ * Atomic Set the value at addr to the max of addr and value
+ * addr[0] = rsMax(addr[0], value)
+ *
+ * @param addr Address of value to modify
+ * @param value comparison value
+ *
+ * @return old value
+ */
+extern uint32_t __attribute__((overloadable))
+    rsAtomicMax(volatile uint32_t* addr, uint32_t value);
+/**
+ * Atomic Set the value at addr to the max of addr and value
+ * addr[0] = rsMin(addr[0], value)
+ *
+ * @param addr Address of value to modify
+ * @param value comparison value
+ *
+ * @return old value
+ */
+extern int32_t __attribute__((overloadable))
+    rsAtomicMax(volatile int32_t* addr, int32_t value);
+
+/**
+ * Compare-and-set operation with a full memory barrier.
+ *
+ * If the value at addr matches compareValue then newValue is written.
+ *
+ * @param addr The address to compare and replace if the compare passes.
+ * @param compareValue The value to test addr[0] against.
+ * @param newValue The value to write if the test passes.
+ *
+ * @return old value
+ */
+extern int32_t __attribute__((overloadable))
+    rsAtomicCas(volatile int32_t* addr, int32_t compareValue, int32_t newValue);
+
+/**
+ * Compare-and-set operation with a full memory barrier.
+ *
+ * If the value at addr matches compareValue then newValue is written.
+ *
+ * @param addr The address to compare and replace if the compare passes.
+ * @param compareValue The value to test addr[0] against.
+ * @param newValue The value to write if the test passes.
+ *
+ * @return old value
+ */
+extern uint32_t __attribute__((overloadable))
+    rsAtomicCas(volatile uint32_t* addr, int32_t compareValue, int32_t newValue);
+
+
 #endif

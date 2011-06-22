@@ -268,6 +268,87 @@ static float SC_frac(float v) {
 }
 
 
+static int32_t SC_AtomicCas(volatile int32_t *ptr, int32_t expectedValue, int32_t newValue) {
+    int32_t prev;
+
+    do {
+        int32_t ret = android_atomic_release_cas(expectedValue, newValue, ptr);
+        if (!ret) {
+            // The android cas return 0 if it wrote the value.  This means the
+            // previous value was the expected value and we can return.
+            return expectedValue;
+        }
+        // We didn't write the value and need to load the "previous" value.
+        prev = *ptr;
+
+        // A race condition exists where the expected value could appear after our cas failed
+        // above.  In this case loop until we have a legit previous value or the
+        // write passes.
+        } while (prev == expectedValue);
+    return prev;
+}
+
+
+static int32_t SC_AtomicInc(volatile int32_t *ptr) {
+    return android_atomic_inc(ptr);
+}
+
+static int32_t SC_AtomicDec(volatile int32_t *ptr) {
+    return android_atomic_dec(ptr);
+}
+
+static int32_t SC_AtomicAdd(volatile int32_t *ptr, int32_t value) {
+    return android_atomic_add(value, ptr);
+}
+
+static int32_t SC_AtomicSub(volatile int32_t *ptr, int32_t value) {
+    int32_t prev, status;
+    do {
+        prev = *ptr;
+        status = android_atomic_release_cas(prev, prev - value, ptr);
+    } while (__builtin_expect(status != 0, 0));
+    return prev;
+}
+
+static int32_t SC_AtomicAnd(volatile int32_t *ptr, int32_t value) {
+    return android_atomic_and(value, ptr);
+}
+
+static int32_t SC_AtomicOr(volatile int32_t *ptr, int32_t value) {
+    return android_atomic_or(value, ptr);
+}
+
+static int32_t SC_AtomicXor(volatile int32_t *ptr, int32_t value) {
+    int32_t prev, status;
+    do {
+        prev = *ptr;
+        status = android_atomic_release_cas(prev, prev ^ value, ptr);
+    } while (__builtin_expect(status != 0, 0));
+    return prev;
+}
+
+static int32_t SC_AtomicMin(volatile int32_t *ptr, int32_t value) {
+    int32_t prev, status;
+    do {
+        prev = *ptr;
+        int32_t n = rsMin(value, prev);
+        status = android_atomic_release_cas(prev, n, ptr);
+    } while (__builtin_expect(status != 0, 0));
+    return prev;
+}
+
+static int32_t SC_AtomicMax(volatile int32_t *ptr, int32_t value) {
+    int32_t prev, status;
+    do {
+        prev = *ptr;
+        int32_t n = rsMax(value, prev);
+        status = android_atomic_release_cas(prev, n, ptr);
+    } while (__builtin_expect(status != 0, 0));
+    return prev;
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Class implementation
 //////////////////////////////////////////////////////////////////////////////
@@ -424,6 +505,28 @@ static RsdSymbolTable gSyms[] = {
     { "_Z6rsRandf", (void *)&SC_randf, true },
     { "_Z6rsRandff", (void *)&SC_randf2, true },
     { "_Z6rsFracf", (void *)&SC_frac, true },
+
+    // Atomics
+    { "_Z11rsAtomicIncPVi", (void *)&SC_AtomicInc, true },
+    { "_Z11rsAtomicIncPVj", (void *)&SC_AtomicInc, true },
+    { "_Z11rsAtomicDecPVi", (void *)&SC_AtomicDec, true },
+    { "_Z11rsAtomicDecPVj", (void *)&SC_AtomicDec, true },
+    { "_Z11rsAtomicAddPVii", (void *)&SC_AtomicAdd, true },
+    { "_Z11rsAtomicAddPVjj", (void *)&SC_AtomicAdd, true },
+    { "_Z11rsAtomicSubPVii", (void *)&SC_AtomicSub, true },
+    { "_Z11rsAtomicSubPVjj", (void *)&SC_AtomicSub, true },
+    { "_Z11rsAtomicAndPVii", (void *)&SC_AtomicAnd, true },
+    { "_Z11rsAtomicAndPVjj", (void *)&SC_AtomicAnd, true },
+    { "_Z10rsAtomicOrPVii", (void *)&SC_AtomicOr, true },
+    { "_Z10rsAtomicOrPVjj", (void *)&SC_AtomicOr, true },
+    { "_Z11rsAtomicXorPVii", (void *)&SC_AtomicXor, true },
+    { "_Z11rsAtomicXorPVjj", (void *)&SC_AtomicXor, true },
+    { "_Z11rsAtomicMinPVii", (void *)&SC_AtomicMin, true },
+    { "_Z11rsAtomicMinPVjj", (void *)&SC_AtomicMin, true },
+    { "_Z11rsAtomicMaxPVii", (void *)&SC_AtomicMax, true },
+    { "_Z11rsAtomicMaxPVjj", (void *)&SC_AtomicMax, true },
+    { "_Z11rsAtomicCasPViii", (void *)&SC_AtomicCas, true },
+    { "_Z11rsAtomicCasPVjjj", (void *)&SC_AtomicCas, true },
 
     { NULL, NULL, false }
 };
