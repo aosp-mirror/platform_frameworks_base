@@ -844,9 +844,16 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return result;
     }
 
+    private boolean dataConnectionNotInUse(DataConnectionAc dcac) {
+        for (ApnContext apnContext : mApnContexts.values()) {
+            if (apnContext.getDataConnectionAc() == dcac) return false;
+        }
+        return true;
+    }
+
     private GsmDataConnection findFreeDataConnection() {
         for (DataConnectionAc dcac : mDataConnectionAsyncChannels.values()) {
-            if (dcac.isInactiveSync()) {
+            if (dcac.isInactiveSync() && dataConnectionNotInUse(dcac)) {
                 log("findFreeDataConnection: found free GsmDataConnection");
                 return (GsmDataConnection) dcac.dataConnection;
             }
