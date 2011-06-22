@@ -80,7 +80,8 @@ status_t AudioRecord::getMinFrameCount(
 // ---------------------------------------------------------------------------
 
 AudioRecord::AudioRecord()
-    : mStatus(NO_INIT), mSessionId(0)
+    : mStatus(NO_INIT), mSessionId(0),
+      mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
 {
 }
 
@@ -95,7 +96,8 @@ AudioRecord::AudioRecord(
         void* user,
         int notificationFrames,
         int sessionId)
-    : mStatus(NO_INIT), mSessionId(0)
+    : mStatus(NO_INIT), mSessionId(0),
+      mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
 {
     mStatus = set(inputSource, sampleRate, format, channelMask,
             frameCount, flags, cbf, user, notificationFrames, sessionId);
@@ -326,9 +328,11 @@ status_t AudioRecord::start()
             cblk->bufferTimeoutMs = MAX_RUN_TIMEOUT_MS;
             cblk->waitTimeMs = 0;
             if (t != 0) {
-               t->run("ClientRecordThread", ANDROID_PRIORITY_AUDIO);
+                t->run("ClientRecordThread", ANDROID_PRIORITY_AUDIO);
             } else {
-                setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_AUDIO);
+                mPreviousPriority = getpriority(PRIO_PROCESS, 0);
+                mPreviousSchedulingGroup = androidGetThreadSchedulingGroup(0);
+                androidSetThreadPriority(0, ANDROID_PRIORITY_AUDIO);
             }
         } else {
             mActive = 0;
@@ -363,7 +367,8 @@ status_t AudioRecord::stop()
         if (t != 0) {
             t->requestExit();
         } else {
-            setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_NORMAL);
+            setpriority(PRIO_PROCESS, 0, mPreviousPriority);
+            androidSetThreadSchedulingGroup(0, mPreviousSchedulingGroup);
         }
     }
 

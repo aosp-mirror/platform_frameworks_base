@@ -79,7 +79,8 @@ status_t AudioTrack::getMinFrameCount(
 // ---------------------------------------------------------------------------
 
 AudioTrack::AudioTrack()
-    : mStatus(NO_INIT)
+    : mStatus(NO_INIT),
+      mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
 {
 }
 
@@ -94,7 +95,8 @@ AudioTrack::AudioTrack(
         void* user,
         int notificationFrames,
         int sessionId)
-    : mStatus(NO_INIT)
+    : mStatus(NO_INIT),
+      mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
 {
     mStatus = set(streamType, sampleRate, format, channelMask,
             frameCount, flags, cbf, user, notificationFrames,
@@ -112,7 +114,8 @@ AudioTrack::AudioTrack(
         void* user,
         int notificationFrames,
         int sessionId)
-    : mStatus(NO_INIT)
+    : mStatus(NO_INIT),
+      mPreviousPriority(ANDROID_PRIORITY_NORMAL), mPreviousSchedulingGroup(ANDROID_TGROUP_DEFAULT)
 {
     mStatus = set(streamType, sampleRate, format, channelMask,
             0, flags, cbf, user, notificationFrames,
@@ -346,9 +349,11 @@ void AudioTrack::start()
         cblk->waitTimeMs = 0;
         android_atomic_and(~CBLK_DISABLED_ON, &cblk->flags);
         if (t != 0) {
-           t->run("AudioTrackThread", ANDROID_PRIORITY_AUDIO);
+            t->run("AudioTrackThread", ANDROID_PRIORITY_AUDIO);
         } else {
-            setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_AUDIO);
+            mPreviousPriority = getpriority(PRIO_PROCESS, 0);
+            mPreviousSchedulingGroup = androidGetThreadSchedulingGroup(0);
+            androidSetThreadPriority(0, ANDROID_PRIORITY_AUDIO);
         }
 
         ALOGV("start %p before lock cblk %p", this, mCblk);
@@ -370,7 +375,8 @@ void AudioTrack::start()
             if (t != 0) {
                 t->requestExit();
             } else {
-                setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_NORMAL);
+                setpriority(PRIO_PROCESS, 0, mPreviousPriority);
+                androidSetThreadSchedulingGroup(0, mPreviousSchedulingGroup);
             }
         }
     }
@@ -408,7 +414,8 @@ void AudioTrack::stop()
         if (t != 0) {
             t->requestExit();
         } else {
-            setpriority(PRIO_PROCESS, 0, ANDROID_PRIORITY_NORMAL);
+            setpriority(PRIO_PROCESS, 0, mPreviousPriority);
+            androidSetThreadSchedulingGroup(0, mPreviousSchedulingGroup);
         }
     }
 
