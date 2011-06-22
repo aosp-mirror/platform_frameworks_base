@@ -1120,6 +1120,13 @@
         android:description="@string/permdesc_bindInputMethod"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by a TextService (e.g. SpellCheckerService)
+         to ensure that only the system can bind to it. -->
+    <permission android:name="android.permission.BIND_TEXT_SERVICE"
+        android:label="@string/permlab_bindTextService"
+        android:description="@string/permdesc_bindTextService"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a {@link android.service.wallpaper.WallpaperService},
          to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_WALLPAPER"

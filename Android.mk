@@ -158,6 +158,11 @@ LOCAL_SRC_FILES += \
 	core/java/com/android/internal/os/IResultReceiver.aidl \
 	core/java/com/android/internal/statusbar/IStatusBar.aidl \
 	core/java/com/android/internal/statusbar/IStatusBarService.aidl \
+	core/java/com/android/internal/textservice/ISpellCheckerService.aidl \
+	core/java/com/android/internal/textservice/ISpellCheckerSession.aidl \
+	core/java/com/android/internal/textservice/ISpellCheckerSessionListener.aidl \
+	core/java/com/android/internal/textservice/ITextServicesManager.aidl \
+	core/java/com/android/internal/textservice/ITextServicesSessionListener.aidl \
 	core/java/com/android/internal/view/IInputContext.aidl \
 	core/java/com/android/internal/view/IInputContextCallback.aidl \
 	core/java/com/android/internal/view/IInputMethod.aidl \
@@ -266,6 +271,11 @@ aidl_files := \
 	frameworks/base/core/java/android/view/Surface.aidl \
 	frameworks/base/core/java/android/view/WindowManager.aidl \
 	frameworks/base/core/java/android/widget/RemoteViews.aidl \
+	frameworks/base/core/java/com/android/internal/textservice/ISpellCheckerService.aidl \
+	frameworks/base/core/java/com/android/internal/textservice/ISpellCheckerSession.aidl \
+	frameworks/base/core/java/com/android/internal/textservice/ISpellCheckerSessionListener.aidl \
+	frameworks/base/core/java/com/android/internal/textservice/ITextServicesManager.aidl \
+	frameworks/base/core/java/com/android/internal/textservice/ITextServicesSessionListener.aidl \
 	frameworks/base/core/java/com/android/internal/view/IInputContext.aidl \
 	frameworks/base/core/java/com/android/internal/view/IInputMethod.aidl \
 	frameworks/base/core/java/com/android/internal/view/IInputMethodCallback.aidl \

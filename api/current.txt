@@ -21,6 +21,7 @@ package android {
     field public static final java.lang.String BIND_DEVICE_ADMIN = "android.permission.BIND_DEVICE_ADMIN";
     field public static final java.lang.String BIND_INPUT_METHOD = "android.permission.BIND_INPUT_METHOD";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
+    field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
     field public static final java.lang.String BIND_WALLPAPER = "android.permission.BIND_WALLPAPER";
     field public static final java.lang.String BLUETOOTH = "android.permission.BLUETOOTH";
     field public static final java.lang.String BLUETOOTH_ADMIN = "android.permission.BLUETOOTH_ADMIN";
@@ -4783,6 +4784,7 @@ package android.content {
     field public static final java.lang.String SENSOR_SERVICE = "sensor";
     field public static final java.lang.String STORAGE_SERVICE = "storage";
     field public static final java.lang.String TELEPHONY_SERVICE = "phone";
+    field public static final java.lang.String TEXT_SERVICES_MANAGER_SERVICE = "textservices";
     field public static final java.lang.String UI_MODE_SERVICE = "uimode";
     field public static final java.lang.String USB_SERVICE = "usb";
     field public static final java.lang.String VIBRATOR_SERVICE = "vibrator";
@@ -17941,6 +17943,30 @@ package android.security {
 
 }
 
+package android.service.textservice {
+
+  public abstract class SpellCheckerService extends android.app.Service {
+    ctor public SpellCheckerService();
+    method public void cancel();
+    method public abstract android.view.textservice.SuggestionsInfo getSuggestions(android.view.textservice.TextInfo, int, java.lang.String);
+    method public android.view.textservice.SuggestionsInfo[] getSuggestionsMultiple(android.view.textservice.TextInfo[], java.lang.String, int, boolean);
+    method public final android.os.IBinder onBind(android.content.Intent);
+    field public static final java.lang.String SERVICE_INTERFACE;
+  }
+
+  public class SpellCheckerSession {
+    method public void close();
+    method public void getSuggestions(android.view.textservice.TextInfo, int);
+    method public void getSuggestions(android.view.textservice.TextInfo[], int, boolean);
+    method public boolean isSessionDisconnected();
+  }
+
+  public static abstract interface SpellCheckerSession.SpellCheckerSessionListener {
+    method public abstract void onGetSuggestions(android.view.textservice.SuggestionsInfo[]);
+  }
+
+}
+
 package android.service.wallpaper {
 
   public abstract class WallpaperService extends android.app.Service {
@@ -24012,6 +24038,54 @@ package android.view.inputmethod {
     method public boolean isAuxiliary();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+}
+
+package android.view.textservice {
+
+  public final class SpellCheckerInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.content.ComponentName getComponent();
+    method public java.lang.String getId();
+    method public java.lang.String getPackageName();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class SuggestionsInfo implements android.os.Parcelable {
+    ctor public SuggestionsInfo(int, java.lang.String[]);
+    ctor public SuggestionsInfo(int, java.lang.String[], int, int);
+    ctor public SuggestionsInfo(android.os.Parcel);
+    method public int describeContents();
+    method public int getCookie();
+    method public int getSequence();
+    method public java.lang.String getSuggestionAt(int);
+    method public int getSuggestionsAttributes();
+    method public int getSuggestionsCount();
+    method public void setCookieAndSequence(int, int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int RESULT_ATTR_IN_THE_DICTIONARY = 1; // 0x1
+    field public static final int RESULT_ATTR_LOOKS_TYPO = 4; // 0x4
+    field public static final int RESULT_ATTR_SUGGESTIONS_AVAILABLE = 2; // 0x2
+  }
+
+  public final class TextInfo implements android.os.Parcelable {
+    ctor public TextInfo(java.lang.String);
+    ctor public TextInfo(java.lang.String, int, int);
+    ctor public TextInfo(android.os.Parcel);
+    method public int describeContents();
+    method public int getCookie();
+    method public int getSequence();
+    method public java.lang.String getText();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+  }
+
+  public final class TextServicesManager {
+    method public android.view.textservice.SpellCheckerInfo getCurrentSpellChecker(java.util.Locale);
+    method public android.service.textservice.SpellCheckerSession newSpellCheckerSession(android.view.textservice.SpellCheckerInfo, java.util.Locale, android.service.textservice.SpellCheckerSession.SpellCheckerSessionListener);
   }
 
 }
