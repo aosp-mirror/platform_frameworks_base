@@ -25,8 +25,8 @@ page.title=Search Results
 
         // configure each of the searchers, for each tab
         devSiteSearcher = new google.search.WebSearch();
-        devSiteSearcher.setUserDefinedLabel("All Developers Site");
-        devSiteSearcher.setSiteRestriction("http://developer.android.com/");
+        devSiteSearcher.setUserDefinedLabel("All");
+        devSiteSearcher.setSiteRestriction("001482626316274216503:zu90b7s047u");
 
         devGuideSearcher = new google.search.WebSearch();
         devGuideSearcher.setUserDefinedLabel("Dev Guide");
@@ -47,10 +47,6 @@ page.title=Search Results
         sourceSiteSearcher = new google.search.WebSearch();
         sourceSiteSearcher.setUserDefinedLabel("Android Source");
         sourceSiteSearcher.setSiteRestriction("http://source.android.com");
-
-        homeSiteSearcher = new google.search.WebSearch();
-        homeSiteSearcher.setUserDefinedLabel("Android Home");
-        homeSiteSearcher.setSiteRestriction("http://www.android.com");
  
         // add each searcher to the search control
         searchControl.addSearcher(devSiteSearcher, searchOptions);
@@ -83,7 +79,7 @@ page.title=Search Results
         if (location.hash.indexOf("&t=") != -1) {
           searchControl.execute(decodeURI(getQuery(location.hash)));
         }
-        
+
         document.getElementById("search_autocomplete").focus();
         addTabListeners();
       }
@@ -108,12 +104,12 @@ page.title=Search Results
       // open a tab, specified by its array position
       function openTab() {
         tabIndex = location.hash.split("&t=")[1];
-        
+
         // show the appropriate tab
         var tabHeaders = $(".gsc-tabHeader");
         $(tabHeaders[tabIndex]).click();
       }
-      
+
       // add event listeners to each tab so we can track the browser history
       function addTabListeners() {
         var tabHeaders = $(".gsc-tabHeader");
@@ -125,7 +121,7 @@ page.title=Search Results
           });
         }
       }
-      
+
       function getQuery(hash) {
         var hashParts = hash.split('&t=');
         var queryParts = hashParts[0].split('=');
