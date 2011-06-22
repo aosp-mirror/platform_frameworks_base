@@ -406,12 +406,77 @@ status_t OMXNodeInstance::useBuffer(
     return OK;
 }
 
+status_t OMXNodeInstance::useGraphicBuffer2_l(
+        OMX_U32 portIndex, const sp<GraphicBuffer>& graphicBuffer,
+        OMX::buffer_id *buffer) {
+
+    // port definition
+    OMX_PARAM_PORTDEFINITIONTYPE def;
+    def.nSize = sizeof(OMX_PARAM_PORTDEFINITIONTYPE);
+    def.nVersion.s.nVersionMajor = 1;
+    def.nVersion.s.nVersionMinor = 0;
+    def.nVersion.s.nRevision = 0;
+    def.nVersion.s.nStep = 0;
+    def.nPortIndex = portIndex;
+    OMX_ERRORTYPE err = OMX_GetParameter(mHandle, OMX_IndexParamPortDefinition, &def);
+    if (err != OK)
+    {
+        LOGE("%s::%d:Error getting OMX_IndexParamPortDefinition", __FUNCTION__, __LINE__);
+        return err;
+    }
+
+    BufferMeta *bufferMeta = new BufferMeta(graphicBuffer);
+
+    OMX_BUFFERHEADERTYPE *header = NULL;
+    OMX_U8* bufferHandle = const_cast<OMX_U8*>(
+            reinterpret_cast<const OMX_U8*>(graphicBuffer->handle));
+
+    err = OMX_UseBuffer(
+            mHandle,
+            &header,
+            portIndex,
+            bufferMeta,
+            def.nBufferSize,
+            bufferHandle);
+
+    if (err != OMX_ErrorNone) {
+        LOGE("OMX_UseBuffer failed with error %d (0x%08x)", err, err);
+        delete bufferMeta;
+        bufferMeta = NULL;
+        *buffer = 0;
+        return UNKNOWN_ERROR;
+    }
+
+    CHECK_EQ(header->pBuffer, bufferHandle);
+    CHECK_EQ(header->pAppPrivate, bufferMeta);
+
+    *buffer = header;
+
+    addActiveBuffer(portIndex, *buffer);
+
+    return OK;
+}
+
+// XXX: This function is here for backwards compatibility.  Once the OMX
+// implementations have been updated this can be removed and useGraphicBuffer2
+// can be renamed to useGraphicBuffer.
 status_t OMXNodeInstance::useGraphicBuffer(
         OMX_U32 portIndex, const sp<GraphicBuffer>& graphicBuffer,
         OMX::buffer_id *buffer) {
     Mutex::Autolock autoLock(mLock);
 
+    // See if the newer version of the extension is present.
     OMX_INDEXTYPE index;
+    if (OMX_GetExtensionIndex(
+            mHandle,
+            const_cast<OMX_STRING>("OMX.google.android.index.useAndroidNativeBuffer2"),
+            &index) == OMX_ErrorNone) {
+        return useGraphicBuffer2_l(portIndex, graphicBuffer, buffer);
+    }
+
+    LOGW("Falling back to the deprecated useAndroidNativeBuffer support.  You "
+        "should switch to the useAndroidNativeBuffer2 extension.");
+
     OMX_ERRORTYPE err = OMX_GetExtensionIndex(
             mHandle,
             const_cast<OMX_STRING>("OMX.google.android.index.useAndroidNativeBuffer"),
