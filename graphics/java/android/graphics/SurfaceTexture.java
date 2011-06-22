@@ -131,6 +131,10 @@ public class SurfaceTexture {
      */
     public void updateTexImage() {
         nativeUpdateTexImage();
+        if (nativeGetQueuedCount() > 0) {
+            Message m = mEventHandler.obtainMessage();
+            mEventHandler.sendMessage(m);
+        }
     }
 
     /**
@@ -215,6 +219,7 @@ public class SurfaceTexture {
     private native long nativeGetTimestamp();
     private native void nativeSetDefaultBufferSize(int width, int height);
     private native void nativeUpdateTexImage();
+    private native int nativeGetQueuedCount();
 
     /*
      * We use a class initializer to allow the native code to cache some
