@@ -96,12 +96,9 @@ public class TextureView extends View {
     private SurfaceTexture mSurface;
     private SurfaceTextureListener mListener;
 
-    private final Runnable mUpdateLayerAction = new Runnable() {
-        @Override
-        public void run() {
-            updateLayer();
-        }
-    };
+    private final Object[] mLock = new Object[0];
+    private boolean mUpdateLayer;
+
     private SurfaceTexture.OnFrameAvailableListener mUpdateListener;
 
     /**
@@ -232,6 +229,8 @@ public class TextureView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if (mSurface != null) {
+            // No need to synchronize here, we set update layer to false only on the UI thread
+            mUpdateLayer = true;
             nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
             if (mListener != null) {
                 mListener.onSurfaceTextureSizeChanged(mSurface, getWidth(), getHeight());
@@ -255,13 +254,23 @@ public class TextureView extends View {
                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                     // Per SurfaceTexture's documentation, the callback may be invoked
                     // from an arbitrary thread
-                    post(mUpdateLayerAction);
+                    synchronized (mLock) {
+                        mUpdateLayer = true;
+                        postInvalidate();
+                    }
                 }
             };
             mSurface.setOnFrameAvailableListener(mUpdateListener);
 
             if (mListener != null) {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
+            }
+        }
+
+        synchronized (mLock) {
+            if (mUpdateLayer) {
+                mAttachInfo.mHardwareRenderer.updateTextureLayer(mLayer, getWidth(), getHeight());
+                mUpdateLayer = false;
             }
         }
 
@@ -278,21 +287,13 @@ public class TextureView extends View {
             // updates listener
             if (visibility == VISIBLE) {
                 mSurface.setOnFrameAvailableListener(mUpdateListener);
-                updateLayer();
+                // No need to synchronize here, we set update layer to false only on the UI thread
+                mUpdateLayer = true;
+                invalidate();
             } else {
                 mSurface.setOnFrameAvailableListener(null);
             }
         }
-    }
-
-    private void updateLayer() {
-        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
-            return;
-        }
-
-        mAttachInfo.mHardwareRenderer.updateTextureLayer(mLayer, getWidth(), getHeight());
-
-        invalidate();
     }
 
     /**
