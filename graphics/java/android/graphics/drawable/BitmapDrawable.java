@@ -405,8 +405,11 @@ public class BitmapDrawable extends Drawable {
 
     @Override
     public void setAlpha(int alpha) {
-        mBitmapState.mPaint.setAlpha(alpha);
-        invalidateSelf();
+        int oldAlpha = mBitmapState.mPaint.getAlpha();
+        if (alpha != oldAlpha) {
+            mBitmapState.mPaint.setAlpha(alpha);
+            invalidateSelf();
+        }
     }
 
     @Override
