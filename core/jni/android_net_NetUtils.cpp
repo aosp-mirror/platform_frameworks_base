@@ -36,16 +36,6 @@ int dhcp_do_request(const char *ifname,
                     const char *dns2,
                     const char *server,
                     uint32_t  *lease);
-
-int dhcp_do_request_renew(const char *ifname,
-                    const char *ipaddr,
-                    const char *gateway,
-                    uint32_t  *prefixLength,
-                    const char *dns1,
-                    const char *dns2,
-                    const char *server,
-                    uint32_t  *lease);
-
 int dhcp_stop(const char *ifname);
 int dhcp_release_lease(const char *ifname);
 char *dhcp_get_errmsg();
@@ -101,8 +91,7 @@ static jint android_net_utils_resetConnections(JNIEnv* env, jobject clazz, jstri
     return (jint)result;
 }
 
-static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstring ifname,
-        jobject info, bool renew)
+static jboolean android_net_utils_runDhcp(JNIEnv* env, jobject clazz, jstring ifname, jobject info)
 {
     int result;
     char  ipaddr[PROPERTY_VALUE_MAX];
@@ -116,14 +105,8 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
     const char *nameStr = env->GetStringUTFChars(ifname, NULL);
     if (nameStr == NULL) return (jboolean)false;
 
-    if (renew) {
-        result = ::dhcp_do_request_renew(nameStr, ipaddr, gateway, &prefixLength,
-                dns1, dns2, server, &lease);
-    } else {
-        result = ::dhcp_do_request(nameStr, ipaddr, gateway, &prefixLength,
-                dns1, dns2, server, &lease);
-    }
-
+    result = ::dhcp_do_request(nameStr, ipaddr, gateway, &prefixLength,
+                                        dns1, dns2, server, &lease);
     env->ReleaseStringUTFChars(ifname, nameStr);
     if (result == 0 && dhcpInfoInternalFieldIds.dhcpInfoInternalClass != NULL) {
         env->SetObjectField(info, dhcpInfoInternalFieldIds.ipaddress, env->NewStringUTF(ipaddr));
@@ -160,17 +143,6 @@ static jboolean android_net_utils_runDhcpCommon(JNIEnv* env, jobject clazz, jstr
     }
     return (jboolean)(result == 0);
 }
-
-static jboolean android_net_utils_runDhcp(JNIEnv* env, jobject clazz, jstring ifname, jobject info)
-{
-    return android_net_utils_runDhcpCommon(env, clazz, ifname, info, false);
-}
-
-static jboolean android_net_utils_runDhcpRenew(JNIEnv* env, jobject clazz, jstring ifname, jobject info)
-{
-    return android_net_utils_runDhcpCommon(env, clazz, ifname, info, true);
-}
-
 
 static jboolean android_net_utils_stopDhcp(JNIEnv* env, jobject clazz, jstring ifname)
 {
@@ -209,7 +181,6 @@ static JNINativeMethod gNetworkUtilMethods[] = {
     { "disableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_disableInterface },
     { "resetConnections", "(Ljava/lang/String;)I",  (void *)android_net_utils_resetConnections },
     { "runDhcp", "(Ljava/lang/String;Landroid/net/DhcpInfoInternal;)Z",  (void *)android_net_utils_runDhcp },
-    { "runDhcpRenew", "(Ljava/lang/String;Landroid/net/DhcpInfoInternal;)Z",  (void *)android_net_utils_runDhcpRenew },
     { "stopDhcp", "(Ljava/lang/String;)Z",  (void *)android_net_utils_stopDhcp },
     { "releaseDhcpLease", "(Ljava/lang/String;)Z",  (void *)android_net_utils_releaseDhcpLease },
     { "getDhcpError", "()Ljava/lang/String;", (void*) android_net_utils_getDhcpError },
