@@ -40,6 +40,7 @@ namespace android {
 class GraphicBuffer;
 class GraphicBufferMapper;
 class IOMX;
+class ISurfaceTexture;
 class Rect;
 class Surface;
 class SurfaceComposerClient;
@@ -154,6 +155,7 @@ public:
     bool        isValid();
     uint32_t    getFlags() const    { return mFlags; }
     uint32_t    getIdentity() const { return mIdentity; }
+    sp<ISurfaceTexture> getSurfaceTexture();
 
     // the lock/unlock APIs must be used from the same thread
     status_t    lock(SurfaceInfo* info, bool blocking = true);

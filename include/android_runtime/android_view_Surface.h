@@ -23,9 +23,14 @@
 
 namespace android {
 
+class Surface;
+
 extern sp<ANativeWindow> android_Surface_getNativeWindow(
         JNIEnv* env, jobject clazz);
 extern bool android_Surface_isInstanceOf(JNIEnv* env, jobject obj);
+
+/* Gets the underlying Surface from a Surface Java object. */
+extern sp<Surface> Surface_getSurface(JNIEnv* env, jobject thiz);
 
 } // namespace android
 

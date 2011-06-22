@@ -19,6 +19,7 @@ package android.graphics;
 import android.graphics.SurfaceTexture;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.view.Surface;
 
 /**
  *
@@ -32,6 +33,17 @@ public final class ParcelSurfaceTexture implements Parcelable {
      */
     @SuppressWarnings({"UnusedDeclaration"})
     private int mISurfaceTexture;
+
+    /**
+     * Create a new ParcelSurfaceTexture from a Surface
+     *
+     * @param surface The Surface to create a ParcelSurfaceTexture from.
+     *
+     * @return Returns a new ParcelSurfaceTexture for the given Surface.
+     */
+    public static ParcelSurfaceTexture fromSurface(Surface surface) {
+        return new ParcelSurfaceTexture(surface);
+    }
 
     /**
      * Create a new ParcelSurfaceTexture from a SurfaceTexture
@@ -75,8 +87,11 @@ public final class ParcelSurfaceTexture implements Parcelable {
     private ParcelSurfaceTexture(Parcel in) {
         nativeReadFromParcel(in);
     }
+    private ParcelSurfaceTexture(Surface surface) {
+        nativeInitFromSurface(surface);
+    }
     private ParcelSurfaceTexture(SurfaceTexture surfaceTexture) {
-        nativeInit(surfaceTexture);
+        nativeInitFromSurfaceTexture(surfaceTexture);
     }
 
     @Override
@@ -88,7 +103,8 @@ public final class ParcelSurfaceTexture implements Parcelable {
         }
     }
 
-    private native void nativeInit(SurfaceTexture surfaceTexture);
+    private native void nativeInitFromSurface(Surface surface);
+    private native void nativeInitFromSurfaceTexture(SurfaceTexture surfaceTexture);
     private native void nativeFinalize();
     private native void nativeWriteToParcel(Parcel dest, int flags);
     private native void nativeReadFromParcel(Parcel in);
