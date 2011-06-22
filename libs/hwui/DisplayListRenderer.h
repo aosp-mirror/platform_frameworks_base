@@ -419,7 +419,9 @@ private:
     inline void addMatrix(SkMatrix* matrix) {
         // Copying the matrix is cheap and prevents against the user changing the original
         // matrix before the operation that uses it
-        addInt((int) new SkMatrix(*matrix));
+        SkMatrix* copy = new SkMatrix(*matrix);
+        addInt((int) copy);
+        mMatrices.add(copy);
     }
 
     inline void addBitmap(SkBitmap* bitmap) {
