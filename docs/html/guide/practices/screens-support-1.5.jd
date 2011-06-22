@@ -18,7 +18,6 @@ an application designed for Android 1.5</li>
   <h2>In this document</h2>
   <ol>
     <li><a href="#strategies">Adding Multiple Screens Support</a></li>
-    <li><a href="#CompatMode">Compatibility Mode</a></li>
   </ol>
 
   <h2>See also</h2>
@@ -47,11 +46,13 @@ android:targetSdkVersion}</a> set to {@code "4"} or higher, then this document i
 default, an application written for Android 1.5 or below that does not set the <a
 href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
 android:targetSdkVersion}</a> set to {@code "4"} or higher runs in <a
-href="#CompatMode">compatibility mode</a> when on a device with a screen larger than the
+href="screen-compat-mode">screen compatibility mode</a> when on a device with a screen larger than
+the
 <em>normal</em> screen size (basically, the system displays the application in a small window
 that is roughly the size of the normal screen size).</p>
 
-<p>This document describes how to get your application out of <a href="#CompatMode">compatibility
+<p>This document describes how to get your application out of <a
+href="screen-compat-mode.html">screen compatibility
 mode</a> and instead support multiple screens, but also maintain compatibility with Android 1.5 and
 below.</p>
 
@@ -144,43 +145,3 @@ Android 3.0 and use the WXGA emulator skin.</p>
 href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a> to add
 complete support for different screen configurations.</p>
 
-
-<h2 id="CompatMode">Compatibility Mode</h2>
-
-<div class="figure" style="width:450px;margin:0">
-<img src="{@docRoot}images/screens_support/compat-mode-on.png" alt="" />
-<p class="img-caption"><strong>Figure 1.</strong> An application running in compatibility mode
-on an extra large screen.</p>
-</div>
-
-<p>To allow applications to run on larger screens without stretching the UI, Android provides a
-compatibility mode that draws an application's UI in a "postage stamp" window when on larger
-screens. That is, the system displays the application at the baseline size (<em>normal</em>) and
-density (<em>mdpi</em>), with a black border that fills the rest of the screen.</p>
-
-<p>Compatibility mode exists primarily to support application's developed for Android 1.5 (or lower)
-when running on larger screens, because multiple screen support was not added until Android 1.6,
-older applications were not designed to support different screen configurations.</p>
-
-<p>As such, if you've set your <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
-android:minSdkVersion}</a> to {@code "3"} or lower and have <em>not</em> set the <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-android:targetSdkVersion}</a> to {@code "4"} or higher, then compatibility mode is enabled and
-the system will not scale your application, because your application implicitly declares that it
-only supports the baseline screen configuration (normal screen size and medium density).</p>
-
-<p>To disable compatibility mode, set either <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
-android:minSdkVersion}</a> or <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-android:targetSdkVersion}</a> to {@code "4"} or higher. For more information, see the previous
-section about <a href="#strategies">Adding Multiple Screens Support</a>.</p>
-
-<p>You can also affect whether compatibility mode is enabled by using the <a
-href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
-&lt;supports-screens>}</a> element (you can enable it by setting {@code android:resizeable} or
-specific screen sizes to {@code "false"}). However, you should not explicitly enable compatibility
-mode for your application, but should instead apply the necessary techniques to <a
-href="{@docRoot}guide/practices/screens_support.html">supporting multiple screens</a> and allow your
-application to properly fit the screen on all screen sizes.</p>

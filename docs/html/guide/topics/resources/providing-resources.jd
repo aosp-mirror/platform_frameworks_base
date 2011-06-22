@@ -334,7 +334,7 @@ indicates the current locale.</p>
       </td>
     </tr>
     <tr id="SmallestScreenWidthQualifier">
-      <td>Smallest screen width</td>
+      <td>Smallest available width</td>
       <td><code>sw&lt;N&gt;dp</code><br/><br/>
         Examples:<br/>
         <code>sw320dp</code><br/>
@@ -381,7 +381,7 @@ indicates the current locale.</p>
       </td>
     </tr>
     <tr id="ScreenWidthQualifier">
-      <td>Screen width</td>
+      <td>Available width</td>
       <td><code>w&lt;N&gt;dp</code><br/><br/>
         Examples:<br/>
         <code>w720dp</code><br/>
@@ -389,7 +389,7 @@ indicates the current locale.</p>
         etc.
       </td>
       <td>
-        <p>Specifies a minimum screen width, in {@code dp} units at which the resource
+        <p>Specifies a minimum available screen width, in {@code dp} units at which the resource
           should be used&mdash;defined by the <code>&lt;N&gt;</code> value.  This
           configuration value will change when the orientation
           changes between landscape and portrait to match the current actual width.</p>
@@ -406,7 +406,7 @@ indicates the current locale.</p>
       </td>
     </tr>
     <tr id="ScreenHeightQualifier">
-      <td>Screen height</td>
+      <td>Available height</td>
       <td><code>h&lt;N&gt;dp</code><br/><br/>
         Examples:<br/>
         <code>h720dp</code><br/>
@@ -414,7 +414,7 @@ indicates the current locale.</p>
         etc.
       </td>
       <td>
-        <p>Specifies a minimum screen height, in "dp" units at which the resource
+        <p>Specifies a minimum available screen height, in "dp" units at which the resource
           should be used&mdash;defined by the <code>&lt;N&gt;</code> value.  This
           configuration value will change when the orientation
           changes between landscape and portrait to match the current actual height.</p>
