@@ -716,6 +716,16 @@ var ANDROID_RESOURCES = [
       en: 'Binding data to views using XML Adapters examples.'
     }
   },
+  {
+    tags: ['sample', 'new', 'accessibility'],
+    path: 'samples/TtsEngine/index.html',
+    title: {
+      en: 'Text To Speech Engine'
+    },
+    description: {
+      en: 'An example Text To Speech engine written using the android text to speech engine API.'
+    }
+  },
 
 /////////////////
 /// TUTORIALS ///
