@@ -203,7 +203,7 @@ it from other application components.</p>
 <p>Like activities (and other components), you must declare all services in your application's
 manifest file.</p>
 
-<p>To decalare your service, add a <a
+<p>To declare your service, add a <a
 href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element
 as a child of the <a
 href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
@@ -222,9 +222,17 @@ element. For example:</p>
 <p>There are other attributes you can include in the <a
 href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element to
 define properties such as permissions required to start the service and the process in
-which the service should run. See the <a
+which the service should run. The <a
+href="{@docRoot}guide/topics/manifest/service-element.html#nm">{@code android:name}</a>
+attribute is the only required attribute&mdash;it specifies the class name of the service. Once
+you publish your application, you should not change this name, because if you do, you might break
+some functionality where explicit intents are used to reference your service (read the blog post, <a
+href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Things
+That Cannot Change</a>).
+
+<p>See the <a
 href="{@docRoot}guide/topics/manifest/service-element.html">{@code &lt;service&gt;}</a> element
-reference for more information.</p>
+reference for more information about declaring your service in the manifest.</p>
 
 <p>Just like an activity, a service can define intent filters that allow other components to
 invoke the service using implicit intents. By declaring intent filters, components
