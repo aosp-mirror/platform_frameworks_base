@@ -926,7 +926,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (refCount == 0) {
                 configureRetry(dc, apnContext.getApnType());
             }
-            apnContext.setDataConnectionAc(mDataConnectionAsyncChannels.get(dc.getDataConnectionId()));
+            apnContext.setDataConnectionAc(dcac);
             apnContext.setApnSetting(apn);
             apnContext.setDataConnection(dc);
         }
