@@ -187,8 +187,20 @@ public class TransitionDrawable extends LayerDrawable implements Drawable.Callba
         final int alpha = mAlpha;
         final boolean crossFade = mCrossFade;
         final ChildDrawable[] array = mLayerState.mChildren;
-        Drawable d;
 
+        if (done) {
+            // the setAlpha() calls below trigger invalidation and redraw. If we're done, just draw
+            // the appropriate drawable[s] and return
+            if (!crossFade || alpha == 0) {
+                array[0].mDrawable.draw(canvas);
+            }
+            if (alpha == 0xFF) {
+                array[1].mDrawable.draw(canvas);
+            }
+            return;
+        }
+
+        Drawable d;
         d = array[0].mDrawable;
         if (crossFade) {
             d.setAlpha(255 - alpha);
