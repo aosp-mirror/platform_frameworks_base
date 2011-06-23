@@ -212,6 +212,12 @@ static jlong SurfaceTexture_getTimestamp(JNIEnv* env, jobject thiz)
     return surfaceTexture->getTimestamp();
 }
 
+static jint SurfaceTexture_getQueuedCount(JNIEnv* env, jobject thiz)
+{
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
+    return surfaceTexture->getQueuedCount();
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gSurfaceTextureMethods[] = {
@@ -221,7 +227,8 @@ static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeSetDefaultBufferSize", "(II)V", (void*)SurfaceTexture_setDefaultBufferSize },
     {"nativeUpdateTexImage",     "()V",   (void*)SurfaceTexture_updateTexImage },
     {"nativeGetTransformMatrix", "([F)V", (void*)SurfaceTexture_getTransformMatrix },
-    {"nativeGetTimestamp",       "()J",   (void*)SurfaceTexture_getTimestamp }
+    {"nativeGetTimestamp",       "()J",   (void*)SurfaceTexture_getTimestamp },
+    {"nativeGetQueuedCount",     "()I",   (void*)SurfaceTexture_getQueuedCount }
 };
 
 int register_android_graphics_SurfaceTexture(JNIEnv* env)
