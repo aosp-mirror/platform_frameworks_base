@@ -47,12 +47,15 @@ and specify {@code xlmns:android} and {@code package} attributes.</dd>
 to "{@code http://schemas.android.com/apk/res/android}".</dd>
 
 <dt><a name="package"></a>{@code package}</dt>
-<dd>A full Java package name for the application.  The name should 
+<dd>A full Java-language-style package name for the application.  The name should 
 be unique.  The name may contain uppercase or lowercase letters ('A'
 through 'Z'), numbers, and underscores ('_').  However, individual
-package name parts may only start with letters.  For example, applications
-published by Google could have names in the form
-<code>com.google.app.<i>application_name</i></code>.
+package name parts may only start with letters.
+
+<p>To avoid conflicts with other developers, you should use Internet domain ownership as the
+basis for your package names (in reverse). For example, applications published by Google start with
+<code>com.google</code>. You should also never use the <code>com.example</code> namespace when
+publishing your applications.</p>
 
   <p>
   The package name serves as a unique identifier for the application.
@@ -66,6 +69,12 @@ published by Google could have names in the form
   element's
   <code><a href="{@docRoot}guide/topics/manifest/activity-element.html#aff">taskAffinity</a></code> attribute).
   </p>
+
+  <p class="caution"><strong>Caution:</strong> Once you publish your application, you
+<strong>cannot change the package name</strong>. The package name defines your application's
+identity, so if you change it, then it is considered to be a different application and users of
+the previous version cannot update to the new version.</p>
+
 </dd>
 
 <dt><a name="uid"></a>{@code android:sharedUserId}</dt>

@@ -145,7 +145,7 @@ href="{@docRoot}guide/topics/ui/index.html">User Interface</a> documentation.</p
 <h3 id="Declaring">Declaring the activity in the manifest</h3>
 
 <p>You must declare your activity in the manifest file in order for it to
-be accessible to the system. To decalare your activity, open your manifest file and add an <a
+be accessible to the system. To declare your activity, open your manifest file and add an <a
 href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> element
 as a child of the <a
 href="{@docRoot}guide/topics/manifest/application-element.html">{@code &lt;application&gt;}</a>
@@ -163,9 +163,16 @@ element. For example:</p>
 
 <p>There are several other attributes that you can include in this element, to define properties
 such as the label for the activity, an icon for the activity, or a theme to style the activity's
-UI. See the <a
+UI. The <a href="{@docRoot}guide/topics/manifest/activity-element.html#nm">{@code android:name}</a>
+attribute is the only required attribute&mdash;it specifies the class name of the activity. Once
+you publish your application, you should not change this name, because if you do, you might break
+some functionality, such as application shortcuts (read the blog post, <a
+href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">Things
+That Cannot Change</a>).</p>
+
+<p>See the <a
 href="{@docRoot}guide/topics/manifest/activity-element.html">{@code &lt;activity&gt;}</a> element
-reference for more information about available attributes.</p>
+reference for more information about declaring your activity in the manifest.</p>
 
 
 <h4>Using intent filters</h4>
