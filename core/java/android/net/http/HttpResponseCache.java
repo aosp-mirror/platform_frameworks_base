@@ -70,12 +70,15 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * the hit rate, but it may also just waste filesystem space!
  *
  * <p>For some applications it may be preferable to create the cache in the
- * external storage directory. Although it often has more free space, external
- * storage is optional and&#8212;even if available&#8212;can disappear during
- * use. Retrieve the external cache directory using {@link Context#getExternalCacheDir()}. If this method
- * returns null, your application should fall back to either not caching or
- * caching on non-external storage. If the external storage is removed during
- * use, the cache hit rate will drop to zero and ongoing cache reads will fail.
+ * external storage directory. <strong>There are no access controls on the
+ * external storage directory so it should not be used for caches that could
+ * contain private data.</strong> Although it often has more free space,
+ * external storage is optional and&#8212;even if available&#8212;can disappear
+ * during use. Retrieve the external cache directory using {@link
+ * Context#getExternalCacheDir()}. If this method returns null, your application
+ * should fall back to either not caching or caching on non-external storage. If
+ * the external storage is removed during use, the cache hit rate will drop to
+ * zero and ongoing cache reads will fail.
  *
  * <p>Flushing the cache forces its data to the filesystem. This ensures that
  * all responses written to the cache will be readable the next time the
@@ -214,7 +217,7 @@ public final class HttpResponseCache extends ResponseCache implements Closeable 
      */
     public void flush() {
         try {
-            delegate.getCache().flush(); // TODO: fix flush() to not throw?
+            delegate.getCache().flush();
         } catch (IOException ignored) {
         }
     }
