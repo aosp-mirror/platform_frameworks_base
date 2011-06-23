@@ -71,6 +71,7 @@ import android.util.Slog;
 import android.util.TrustedTime;
 
 import com.android.internal.os.AtomicFile;
+import com.android.server.NativeDaemonConnectorException;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
 
@@ -214,7 +215,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 // TODO: consider shipping with this enabled by default
                 mNetworkManager.setBandwidthControlEnabled(true);
             } catch (RemoteException e) {
-                Slog.e(TAG, "problem enabling bandwidth controls", e);
+                Slog.e(TAG, "problem talking to netd while enabling bandwidth controls", e);
+            } catch (NativeDaemonConnectorException ndce) {
+                Slog.e(TAG, "problem enabling bandwidth controls", ndce);
             }
         } else {
             Slog.w(TAG, "detailed network stats disabled");
@@ -1055,6 +1058,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         public boolean getEnabled() {
+            if (!new File("/proc/net/xt_qtaguid/ctrl").exists()) {
+                Slog.w(TAG, "kernel does not support bandwidth control");
+                return false;
+            }
             return Settings.Secure.getInt(mResolver, NETSTATS_ENABLED, 1) != 0;
         }
         public long getPollInterval() {
