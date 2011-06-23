@@ -20,8 +20,6 @@
 
 #include <dlfcn.h>
 
-#include <sys/prctl.h>
-
 #include "../include/OMX.h"
 
 #include "../include/OMXNodeInstance.h"
@@ -38,10 +36,31 @@ namespace android {
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// This provides the underlying Thread used by CallbackDispatcher.
+// Note that deriving CallbackDispatcher from Thread does not work.
+
+struct OMX::CallbackDispatcherThread : public Thread {
+    CallbackDispatcherThread(CallbackDispatcher *dispatcher)
+        : mDispatcher(dispatcher) {
+    }
+
+private:
+    CallbackDispatcher *mDispatcher;
+
+    bool threadLoop();
+
+    CallbackDispatcherThread(const CallbackDispatcherThread &);
+    CallbackDispatcherThread &operator=(const CallbackDispatcherThread &);
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
 struct OMX::CallbackDispatcher : public RefBase {
     CallbackDispatcher(OMXNodeInstance *owner);
 
     void post(const omx_message &msg);
+
+    bool loop();
 
 protected:
     virtual ~CallbackDispatcher();
@@ -54,12 +73,9 @@ private:
     Condition mQueueChanged;
     List<omx_message> mQueue;
 
-    pthread_t mThread;
+    sp<CallbackDispatcherThread> mThread;
 
     void dispatch(const omx_message &msg);
-
-    static void *ThreadWrapper(void *me);
-    void threadEntry();
 
     CallbackDispatcher(const CallbackDispatcher &);
     CallbackDispatcher &operator=(const CallbackDispatcher &);
@@ -68,13 +84,8 @@ private:
 OMX::CallbackDispatcher::CallbackDispatcher(OMXNodeInstance *owner)
     : mOwner(owner),
       mDone(false) {
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-
-    pthread_create(&mThread, &attr, ThreadWrapper, this);
-
-    pthread_attr_destroy(&attr);
+    mThread = new CallbackDispatcherThread(this);
+    mThread->run("OMXCallbackDisp", ANDROID_PRIORITY_AUDIO);
 }
 
 OMX::CallbackDispatcher::~CallbackDispatcher() {
@@ -86,10 +97,8 @@ OMX::CallbackDispatcher::~CallbackDispatcher() {
     }
 
     // Don't call join on myself
-    CHECK(mThread != pthread_self());
-
-    void *dummy;
-    pthread_join(mThread, &dummy);
+    status_t status = mThread->join();
+    CHECK(status == NO_ERROR);
 }
 
 void OMX::CallbackDispatcher::post(const omx_message &msg) {
@@ -107,17 +116,7 @@ void OMX::CallbackDispatcher::dispatch(const omx_message &msg) {
     mOwner->onMessage(msg);
 }
 
-// static
-void *OMX::CallbackDispatcher::ThreadWrapper(void *me) {
-    static_cast<CallbackDispatcher *>(me)->threadEntry();
-
-    return NULL;
-}
-
-void OMX::CallbackDispatcher::threadEntry() {
-    androidSetThreadPriority(0, ANDROID_PRIORITY_AUDIO);
-    prctl(PR_SET_NAME, (unsigned long)"OMXCallbackDisp", 0, 0, 0);
-
+bool OMX::CallbackDispatcher::loop() {
     for (;;) {
         omx_message msg;
 
@@ -137,6 +136,14 @@ void OMX::CallbackDispatcher::threadEntry() {
 
         dispatch(msg);
     }
+
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+bool OMX::CallbackDispatcherThread::threadLoop() {
+    return mDispatcher->loop();
 }
 
 ////////////////////////////////////////////////////////////////////////////////

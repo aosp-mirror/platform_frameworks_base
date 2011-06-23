@@ -121,6 +121,7 @@ protected:
     virtual ~OMX();
 
 private:
+    struct CallbackDispatcherThread;
     struct CallbackDispatcher;
 
     Mutex mLock;
