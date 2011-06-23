@@ -3804,6 +3804,8 @@ public final class Settings {
                 "dream_timeout";
 
         /** {@hide} */
+        public static final String NETSTATS_ENABLED = "netstats_enabled";
+        /** {@hide} */
         public static final String NETSTATS_POLL_INTERVAL = "netstats_poll_interval";
         /** {@hide} */
         public static final String NETSTATS_PERSIST_THRESHOLD = "netstats_persist_threshold";
