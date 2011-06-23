@@ -25,6 +25,19 @@
     <!-- Size of the giant number (unread count) in the notifications -->
     <dimen name="status_bar_content_number_size">48sp</dimen>
 
+    <!-- The maximum number of action buttons that should be permitted within
+         an action bar/action mode. This will be used to determine how many
+         showAsAction="ifRoom" items can fit. "always" items can override this. -->
+    <integer name="max_action_buttons">5</integer>
+    <!-- Default height of an action bar. -->
+    <dimen name="action_bar_default_height">56dip</dimen>
+    <!-- Vertical padding around action bar icons. -->
+    <dimen name="action_bar_icon_vertical_padding">4dip</dimen>
+    <!-- Text size for action bar titles -->
+    <dimen name="action_bar_title_text_size">18dp</dimen>
+    <!-- Text size for action bar subtitles -->
+    <dimen name="action_bar_subtitle_text_size">14dp</dimen>
+
     <!-- Size of clock font in LockScreen. -->
     <dimen name="keyguard_pattern_unlock_clock_font_size">98sp</dimen>
 

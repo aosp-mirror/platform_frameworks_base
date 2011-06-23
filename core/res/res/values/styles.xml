@@ -1296,10 +1296,12 @@
 
     <style name="TextAppearance.Holo.Widget.ActionBar.Title"
            parent="TextAppearance.Holo.Medium">
+        <item name="android:textSize">@android:dimen/action_bar_title_text_size</item>
     </style>
 
     <style name="TextAppearance.Holo.Widget.ActionBar.Subtitle"
            parent="TextAppearance.Holo.Small">
+        <item name="android:textSize">@android:dimen/action_bar_subtitle_text_size</item>
     </style>
 
     <style name="TextAppearance.Holo.Widget.ActionMode">
