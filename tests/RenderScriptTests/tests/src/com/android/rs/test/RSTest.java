@@ -39,7 +39,7 @@ import java.lang.Runtime;
 public class RSTest extends Activity {
     //EventListener mListener = new EventListener();
 
-    private static final String LOG_TAG = "libRS_jni";
+    private static final String LOG_TAG = "RSTest";
     private static final boolean DEBUG  = false;
     private static final boolean LOG_ENABLED = false;
 
@@ -71,6 +71,14 @@ public class RSTest extends Activity {
         // to take appropriate action when the activity loses focus
         super.onPause();
         mView.pause();
+    }
+
+    @Override
+    protected void onStop() {
+        // Actually kill the app if we are stopping. We don't want to
+        // continue/resume this test ever. It should always start fresh.
+        finish();
+        super.onStop();
     }
 
     static void log(String message) {
