@@ -995,10 +995,12 @@ struct MyHandler : public AHandler {
         AString val;
         CHECK(GetAttribute(range.c_str(), "npt", &val));
 
+        bool seekable = true;
+
         float npt1, npt2;
         if (!ASessionDescription::parseNTPRange(val.c_str(), &npt1, &npt2)) {
             // This is a live stream and therefore not seekable.
-            return;
+            seekable = false;
         }
 
         i = response->mHeaders.indexOfKey("rtp-info");
@@ -1044,7 +1046,7 @@ struct MyHandler : public AHandler {
             ++n;
         }
 
-        mSeekable = true;
+        mSeekable = seekable;
     }
 
     sp<APacketSource> getPacketSource(size_t index) {

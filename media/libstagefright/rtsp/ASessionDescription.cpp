@@ -301,6 +301,9 @@ void ASessionDescription::ParseFormatDesc(
 // static
 bool ASessionDescription::parseNTPRange(
         const char *s, float *npt1, float *npt2) {
+    *npt1 = 0.0f;
+    *npt2 = 0.0f;
+
     if (s[0] == '-') {
         return false;  // no start time available.
     }
