@@ -4997,12 +4997,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         viewAncestor.requestTransitionStart(transition);
     }
 
-    /**
-     * This method will be called when we need to reset the layout direction resolution flag
-     *
-     */
     @Override
-    void resetLayoutDirectionResolution() {
+    protected void resetLayoutDirectionResolution() {
         super.resetLayoutDirectionResolution();
 
         // Take care of resetting the children resolution too

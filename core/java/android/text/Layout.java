@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2006 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -266,7 +266,7 @@ public abstract class Layout {
             }
         }
 
-        Alignment align = mAlignment;
+        Alignment paraAlign = mAlignment;
         TabStops tabStops = null;
         boolean tabStopsIsInitialized = false;
 
@@ -310,10 +310,10 @@ public abstract class Layout {
                                                     ParagraphStyle.class);
                     spans = getParagraphSpans(sp, start, spanEnd, ParagraphStyle.class);
 
-                    align = mAlignment;
+                    paraAlign = mAlignment;
                     for (int n = spans.length-1; n >= 0; n--) {
                         if (spans[n] instanceof AlignmentSpan) {
-                            align = ((AlignmentSpan) spans[n]).getAlignment();
+                            paraAlign = ((AlignmentSpan) spans[n]).getAlignment();
                             break;
                         }
                     }
@@ -358,6 +358,16 @@ public abstract class Layout {
                     tabStops.reset(TAB_INCREMENT, spans);
                 }
                 tabStopsIsInitialized = true;
+            }
+
+            // Determine whether the line aligns to normal, opposite, or center.
+            Alignment align = paraAlign;
+            if (align == Alignment.ALIGN_LEFT) {
+                align = (dir == DIR_LEFT_TO_RIGHT) ?
+                    Alignment.ALIGN_NORMAL : Alignment.ALIGN_OPPOSITE;
+            } else if (align == Alignment.ALIGN_RIGHT) {
+                align = (dir == DIR_LEFT_TO_RIGHT) ?
+                    Alignment.ALIGN_OPPOSITE : Alignment.ALIGN_NORMAL;
             }
 
             int x;
@@ -411,7 +421,9 @@ public abstract class Layout {
         int dir = getParagraphDirection(line);
 
         int x;
-        if (align == Alignment.ALIGN_NORMAL) {
+        if (align == Alignment.ALIGN_LEFT) {
+            x = left;
+        } else if (align == Alignment.ALIGN_NORMAL) {
             if (dir == DIR_LEFT_TO_RIGHT) {
                 x = left;
             } else {
@@ -430,7 +442,9 @@ public abstract class Layout {
                 }
             }
             int max = (int)getLineExtent(line, tabStops, false);
-            if (align == Alignment.ALIGN_OPPOSITE) {
+            if (align == Alignment.ALIGN_RIGHT) {
+                x = right - max;
+            } else if (align == Alignment.ALIGN_OPPOSITE) {
                 if (dir == DIR_LEFT_TO_RIGHT) {
                     x = right - max;
                 } else {
@@ -738,11 +752,15 @@ public abstract class Layout {
         int dir = getParagraphDirection(line);
         Alignment align = getParagraphAlignment(line);
 
-        if (align == Alignment.ALIGN_NORMAL) {
+        if (align == Alignment.ALIGN_LEFT) {
+            return 0;
+        } else if (align == Alignment.ALIGN_NORMAL) {
             if (dir == DIR_RIGHT_TO_LEFT)
                 return getParagraphRight(line) - getLineMax(line);
             else
                 return 0;
+        } else if (align == Alignment.ALIGN_RIGHT) {
+            return mWidth - getLineMax(line);
         } else if (align == Alignment.ALIGN_OPPOSITE) {
             if (dir == DIR_RIGHT_TO_LEFT)
                 return 0;
@@ -765,11 +783,15 @@ public abstract class Layout {
         int dir = getParagraphDirection(line);
         Alignment align = getParagraphAlignment(line);
 
-        if (align == Alignment.ALIGN_NORMAL) {
+        if (align == Alignment.ALIGN_LEFT) {
+            return getParagraphLeft(line) + getLineMax(line);
+        } else if (align == Alignment.ALIGN_NORMAL) {
             if (dir == DIR_RIGHT_TO_LEFT)
                 return mWidth;
             else
                 return getParagraphLeft(line) + getLineMax(line);
+        } else if (align == Alignment.ALIGN_RIGHT) {
+            return mWidth;
         } else if (align == Alignment.ALIGN_OPPOSITE) {
             if (dir == DIR_RIGHT_TO_LEFT)
                 return getLineMax(line);
@@ -1765,8 +1787,10 @@ public abstract class Layout {
         ALIGN_NORMAL,
         ALIGN_OPPOSITE,
         ALIGN_CENTER,
-        // XXX ALIGN_LEFT,
-        // XXX ALIGN_RIGHT,
+        /** @hide */
+        ALIGN_LEFT,
+        /** @hide */
+        ALIGN_RIGHT,
     }
 
     private static final int TAB_INCREMENT = 20;

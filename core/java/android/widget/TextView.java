@@ -340,6 +340,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private WordIterator mWordIterator;
 
+    // The alignment to pass to Layout, or null if not resolved.
+    private Layout.Alignment mLayoutAlignment;
+
+    // The default value for mTextAlign.
+    private TextAlign mTextAlign = TextAlign.INHERIT;
+
+    private static enum TextAlign {
+        INHERIT, GRAVITY, TEXT_START, TEXT_END, CENTER, VIEW_START, VIEW_END;
+    }
+
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
      * initializing freetype for our default font only once).
@@ -5529,6 +5539,73 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                       physicalWidth, false);
     }
 
+    @Override
+    protected void resetLayoutDirectionResolution() {
+        super.resetLayoutDirectionResolution();
+
+        if (mLayoutAlignment != null &&
+                (mTextAlign == TextAlign.VIEW_START ||
+                mTextAlign == TextAlign.VIEW_END)) {
+            mLayoutAlignment = null;
+        }
+    }
+
+    private Layout.Alignment getLayoutAlignment() {
+        if (mLayoutAlignment == null) {
+            Layout.Alignment alignment;
+            TextAlign textAlign = mTextAlign;
+            switch (textAlign) {
+                case INHERIT:
+                    // fall through to gravity temporarily
+                    // intention is to inherit value through view hierarchy.
+                case GRAVITY:
+                    switch (mGravity & Gravity.RELATIVE_HORIZONTAL_GRAVITY_MASK) {
+                        case Gravity.START:
+                            alignment = Layout.Alignment.ALIGN_NORMAL;
+                            break;
+                        case Gravity.END:
+                            alignment = Layout.Alignment.ALIGN_OPPOSITE;
+                            break;
+                        case Gravity.LEFT:
+                            alignment = Layout.Alignment.ALIGN_LEFT;
+                            break;
+                        case Gravity.RIGHT:
+                            alignment = Layout.Alignment.ALIGN_RIGHT;
+                            break;
+                        case Gravity.CENTER_HORIZONTAL:
+                            alignment = Layout.Alignment.ALIGN_CENTER;
+                            break;
+                        default:
+                            alignment = Layout.Alignment.ALIGN_NORMAL;
+                            break;
+                    }
+                    break;
+                case TEXT_START:
+                    alignment = Layout.Alignment.ALIGN_NORMAL;
+                    break;
+                case TEXT_END:
+                    alignment = Layout.Alignment.ALIGN_OPPOSITE;
+                    break;
+                case CENTER:
+                    alignment = Layout.Alignment.ALIGN_CENTER;
+                    break;
+                case VIEW_START:
+                    alignment = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
+                            Layout.Alignment.ALIGN_RIGHT : Layout.Alignment.ALIGN_LEFT;
+                    break;
+                case VIEW_END:
+                    alignment = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) ?
+                            Layout.Alignment.ALIGN_LEFT : Layout.Alignment.ALIGN_RIGHT;
+                    break;
+                default:
+                    alignment = Layout.Alignment.ALIGN_NORMAL;
+                    break;
+            }
+            mLayoutAlignment = alignment;
+        }
+        return mLayoutAlignment;
+    }
+
     /**
      * The width passed in is now the desired layout width,
      * not the full view width with padding.
@@ -5549,25 +5626,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             hintWidth = 0;
         }
 
-        final int layoutDirection = getResolvedLayoutDirection();
-        final int absoluteGravity = Gravity.getAbsoluteGravity(mGravity, layoutDirection);
-
-        Layout.Alignment alignment;
-        switch (absoluteGravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
-            case Gravity.CENTER_HORIZONTAL:
-                alignment = Layout.Alignment.ALIGN_CENTER;
-                break;
-
-            case Gravity.RIGHT:
-                // Note, Layout resolves ALIGN_OPPOSITE to left or
-                // right based on the paragraph direction.
-                alignment = Layout.Alignment.ALIGN_OPPOSITE;
-                break;
-
-            default:
-                alignment = Layout.Alignment.ALIGN_NORMAL;
-        }
-
+        Layout.Alignment alignment = getLayoutAlignment();
         boolean shouldEllipsize = mEllipsize != null && mInput == null;
 
         if (mText instanceof Spannable) {
