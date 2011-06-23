@@ -24,12 +24,18 @@ import android.net.LinkProperties;
 import android.net.ProxyProperties;
 import android.os.Message;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * AsyncChannel to a DataConnection
  */
 public class DataConnectionAc extends AsyncChannel {
     private static final boolean DBG = false;
     private String mLogTag;
+    private List<ApnContext> mApnList = null;
 
     public DataConnection dataConnection;
 
@@ -85,6 +91,7 @@ public class DataConnectionAc extends AsyncChannel {
     public DataConnectionAc(DataConnection dc, String logTag) {
         dataConnection = dc;
         mLogTag = logTag;
+        mApnList = Collections.synchronizedList(new ArrayList<ApnContext>());
     }
 
     /**
@@ -369,6 +376,35 @@ public class DataConnectionAc extends AsyncChannel {
         } else {
             log("restSync error response=" + response);
         }
+    }
+
+    /**
+     * Add ApnContext association.
+     *
+     * @param ApnContext to associate
+     */
+    public void addApnContext(ApnContext apnContext) {
+        if (!mApnList.contains(apnContext)) {
+            mApnList.add(apnContext);
+        }
+    }
+
+    /**
+     * Remove ApnContext associateion.
+     *
+     * @param ApnContext to dissociate
+     */
+    public void removeApnContext(ApnContext apnContext) {
+        mApnList.remove(apnContext);
+    }
+
+    /**
+     * Retrieve collection of ApnContext currently associated with the DataConnectionAc.
+     *
+     * @return Collection of ApnContext
+     */
+    public Collection<ApnContext> getApnList() {
+        return mApnList;
     }
 
     private void log(String s) {
