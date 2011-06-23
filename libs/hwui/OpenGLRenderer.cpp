@@ -639,7 +639,7 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     setupDrawTextureTransform();
     setupDrawColor(alpha, alpha, alpha, alpha);
     setupDrawColorFilter();
-    setupDrawBlending(layer->blend, layer->mode);
+    setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode);
     setupDrawProgram();
     setupDrawModelView(rect.left, rect.top, rect.right, rect.bottom);
     setupDrawPureColorUniforms();

@@ -170,9 +170,11 @@ public abstract class HardwareRenderer {
      * Creates a new hardware layer. A hardware layer built by calling this
      * method will be treated as a texture layer, instead of as a render target.
      * 
+     * @param isOpaque Whether the layer should be opaque or not
+     * 
      * @return A hardware layer
      */    
-    abstract HardwareLayer createHardwareLayer();
+    abstract HardwareLayer createHardwareLayer(boolean isOpaque);
     
     /**
      * Creates a new hardware layer.
@@ -202,8 +204,9 @@ public abstract class HardwareRenderer {
      * @param layer The hardware layer to update
      * @param width The layer's width
      * @param height The layer's height
+     * @param isOpaque Whether the layer is opaque
      */
-    abstract void updateTextureLayer(HardwareLayer layer, int width, int height);
+    abstract void updateTextureLayer(HardwareLayer layer, int width, int height, boolean isOpaque);
 
     /**
      * Copies the content of the specified layer into the specified bitmap.
@@ -803,8 +806,8 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        HardwareLayer createHardwareLayer() {
-            return new GLES20TextureLayer();
+        HardwareLayer createHardwareLayer(boolean isOpaque) {
+            return new GLES20TextureLayer(isOpaque);
         }
 
         @Override
@@ -818,8 +821,8 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void updateTextureLayer(HardwareLayer layer, int width, int height) {
-            ((GLES20TextureLayer) layer).update(width, height);
+        void updateTextureLayer(HardwareLayer layer, int width, int height, boolean isOpaque) {
+            ((GLES20TextureLayer) layer).update(width, height, isOpaque);
         }
 
         @Override

@@ -1233,6 +1233,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings({"ConstantConditions"})
     @Override
     protected boolean dispatchHoverEvent(MotionEvent event) {
         final int action = event.getAction();
@@ -3876,8 +3877,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (!childMatrix.isIdentity()) {
                     RectF boundingRect = attachInfo.mTmpTransformRect;
                     boundingRect.set(dirty);
+                    //boundingRect.inset(-0.5f, -0.5f);
                     childMatrix.mapRect(boundingRect);
-                    dirty.set((int) boundingRect.left, (int) boundingRect.top,
+                    dirty.set((int) (boundingRect.left - 0.5f),
+                            (int) (boundingRect.top - 0.5f),
                             (int) (boundingRect.right + 0.5f),
                             (int) (boundingRect.bottom + 0.5f));
                 }
