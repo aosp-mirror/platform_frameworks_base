@@ -55,11 +55,11 @@ public:
     Region* getRegion();
     GLint getTargetFbo();
 
-    static Layer* createTextureLayer();
+    static Layer* createTextureLayer(bool isOpaque);
     static Layer* createLayer(uint32_t width, uint32_t height, bool isOpaque = false);
     static bool resizeLayer(Layer* layer, uint32_t width, uint32_t height);
     static void updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
-            GLenum renderTarget, float* transform);
+            bool isOpaque, GLenum renderTarget, float* transform);
     static void destroyLayer(Layer* layer);
     static void destroyLayerDeferred(Layer* layer);
     static bool copyLayer(Layer* layer, SkBitmap* bitmap);

@@ -18,7 +18,6 @@ package com.android.test.hwui;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -89,21 +88,15 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
         rotationY.setRepeatMode(ObjectAnimator.REVERSE);
         rotationY.setRepeatCount(ObjectAnimator.INFINITE);
         rotationY.setDuration(4000);
-        rotationY.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                ((View) mTextureView.getParent()).invalidate();
-            }
-        });
 
-        ObjectAnimator alpha = ObjectAnimator.ofFloat(mTextureView, "alpha", 1.0f, 0.0f);
-        alpha.setRepeatMode(ObjectAnimator.REVERSE);
-        alpha.setRepeatCount(ObjectAnimator.INFINITE);
-        alpha.setDuration(4000);
+//        ObjectAnimator alpha = ObjectAnimator.ofFloat(mTextureView, "alpha", 1.0f, 0.0f);
+//        alpha.setRepeatMode(ObjectAnimator.REVERSE);
+//        alpha.setRepeatCount(ObjectAnimator.INFINITE);
+//        alpha.setDuration(4000);
 
-        mAnimatorSet = new AnimatorSet();
-        mAnimatorSet.play(alpha).with(rotationY);
-        mAnimatorSet.start();
+//        mAnimatorSet = new AnimatorSet();
+//        mAnimatorSet.play(alpha).with(rotationY);
+//        mAnimatorSet.start();
     }
 
     @Override

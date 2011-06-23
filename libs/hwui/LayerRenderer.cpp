@@ -166,13 +166,13 @@ void LayerRenderer::generateMesh() {
 // Layers management
 ///////////////////////////////////////////////////////////////////////////////
 
-Layer* LayerRenderer::createTextureLayer() {
+Layer* LayerRenderer::createTextureLayer(bool isOpaque) {
     LAYER_RENDERER_LOGD("Creating new texture layer");
 
     Layer* layer = new Layer(0, 0);
     layer->isCacheable = false;
     layer->isTextureLayer = true;
-    layer->blend = true;
+    layer->blend = !isOpaque;
     layer->empty = true;
     layer->fbo = 0;
     layer->colorFilter = NULL;
@@ -270,8 +270,9 @@ bool LayerRenderer::resizeLayer(Layer* layer, uint32_t width, uint32_t height) {
 }
 
 void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t height,
-        GLenum renderTarget, float* transform) {
+        bool isOpaque, GLenum renderTarget, float* transform) {
     if (layer) {
+        layer->blend = !isOpaque;
         layer->width = width;
         layer->height = height;
         layer->layer.set(0.0f, 0.0f, width, height);

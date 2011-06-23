@@ -96,9 +96,14 @@ public class TextureView extends View {
     private SurfaceTexture mSurface;
     private SurfaceTextureListener mListener;
 
-    private final Object[] mLock = new Object[0];
-    private boolean mUpdateLayer;
+    private boolean mOpaque = true;
 
+    private final Runnable mUpdateLayerAction = new Runnable() {
+        @Override
+        public void run() {
+            updateLayer();
+        }
+    };
     private SurfaceTexture.OnFrameAvailableListener mUpdateListener;
 
     /**
@@ -141,6 +146,28 @@ public class TextureView extends View {
 
     private void init() {
         mLayerPaint = new Paint();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isOpaque() {
+        return mOpaque;
+    }
+
+    /**
+     * Indicates whether the content of this TextureView is opaque. The
+     * content is assumed to be opaque by default.
+     * 
+     * @param opaque True if the content of this TextureView is opaque,
+     *               false otherwise
+     */
+    public void setOpaque(boolean opaque) {
+        if (opaque != mOpaque) {
+            mOpaque = opaque;
+            updateLayer();
+        }
     }
 
     @Override
@@ -212,7 +239,6 @@ public class TextureView extends View {
      */
     @Override
     public final void draw(Canvas canvas) {
-        super.draw(canvas);
     }
 
     /**
@@ -229,8 +255,6 @@ public class TextureView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if (mSurface != null) {
-            // No need to synchronize here, we set update layer to false only on the UI thread
-            mUpdateLayer = true;
             nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
             if (mListener != null) {
                 mListener.onSurfaceTextureSizeChanged(mSurface, getWidth(), getHeight());
@@ -245,7 +269,7 @@ public class TextureView extends View {
         }
 
         if (mLayer == null) {
-            mLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer();
+            mLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(mOpaque);
             mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
             nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
 
@@ -254,23 +278,13 @@ public class TextureView extends View {
                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                     // Per SurfaceTexture's documentation, the callback may be invoked
                     // from an arbitrary thread
-                    synchronized (mLock) {
-                        mUpdateLayer = true;
-                        postInvalidate();
-                    }
+                    post(mUpdateLayerAction);
                 }
             };
             mSurface.setOnFrameAvailableListener(mUpdateListener);
 
             if (mListener != null) {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
-            }
-        }
-
-        synchronized (mLock) {
-            if (mUpdateLayer) {
-                mAttachInfo.mHardwareRenderer.updateTextureLayer(mLayer, getWidth(), getHeight());
-                mUpdateLayer = false;
             }
         }
 
@@ -287,13 +301,21 @@ public class TextureView extends View {
             // updates listener
             if (visibility == VISIBLE) {
                 mSurface.setOnFrameAvailableListener(mUpdateListener);
-                // No need to synchronize here, we set update layer to false only on the UI thread
-                mUpdateLayer = true;
-                invalidate();
+                updateLayer();
             } else {
                 mSurface.setOnFrameAvailableListener(null);
             }
         }
+    }
+
+    private void updateLayer() {
+        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
+            return;
+        }
+
+        mAttachInfo.mHardwareRenderer.updateTextureLayer(mLayer, getWidth(), getHeight(), mOpaque);
+
+        invalidate();
     }
 
     /**

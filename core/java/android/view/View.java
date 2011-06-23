@@ -9674,10 +9674,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                 computeScroll();
                 canvas.translate(-mScrollX, -mScrollY);
                 mPrivateFlags |= DRAWN | DRAWING_CACHE_VALID;
+                mPrivateFlags &= ~DIRTY_MASK;
 
                 // Fast path for layouts with no backgrounds
                 if ((mPrivateFlags & SKIP_DRAW) == SKIP_DRAW) {
-                    mPrivateFlags &= ~DIRTY_MASK;
                     dispatchDraw(canvas);
                 } else {
                     draw(canvas);
