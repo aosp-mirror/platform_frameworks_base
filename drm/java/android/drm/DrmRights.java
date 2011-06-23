@@ -107,31 +107,24 @@ public class DrmRights {
 
     /**
      * Creates a <code>DrmRights</code> object with the given parameters.
-     *<p>
-     * The application can pass the processed data as a <code>String</code> or as binary data.
-     *<p>
-     * The following code snippet shows how to pass the processed data as a <code>String</code>:
-     *<p>
-     * new DrmRights(data.getBytes(), mimeType)
-     *<p>
-     * The following code snippet shows how to pass the processed data as binary data:
-     *<p>
-     * new DrmRights(binaryData[], mimeType)
      *
-     * @param data A {@link ProcessedData} object.
+     * @param data A {@link ProcessedData} object containing rights information.
+     *             data could be null because it's optional for some DRM schemes.
      * @param mimeType The MIME type.
      */
     public DrmRights(ProcessedData data, String mimeType) {
-        mData = data.getData();
+        if (data != null) {
+            mData = data.getData();
 
-        String accountId = data.getAccountId();
-        if (null != accountId && !accountId.equals("")) {
-            mAccountId = accountId;
-        }
+            String accountId = data.getAccountId();
+            if (null != accountId && !accountId.equals("")) {
+                mAccountId = accountId;
+            }
 
-        String subscriptionId = data.getSubscriptionId();
-        if (null != subscriptionId && !subscriptionId.equals("")) {
-            mSubscriptionId = subscriptionId;
+            String subscriptionId = data.getSubscriptionId();
+            if (null != subscriptionId && !subscriptionId.equals("")) {
+                mSubscriptionId = subscriptionId;
+            }
         }
 
         mMimeType = mimeType;

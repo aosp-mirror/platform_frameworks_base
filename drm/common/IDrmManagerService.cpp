@@ -107,6 +107,7 @@ static void clearDecryptHandle(DecryptHandle* handle) {
         handle->decryptInfo = NULL;
     }
     handle->copyControlVector.clear();
+    handle->extendedData.clear();
 }
 
 int BpDrmManagerService::addUniqueId(int uniqueId) {

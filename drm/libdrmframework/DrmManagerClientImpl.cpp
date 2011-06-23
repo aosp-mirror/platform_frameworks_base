@@ -145,7 +145,6 @@ DrmInfo* DrmManagerClientImpl::acquireDrmInfo(
 
 status_t DrmManagerClientImpl::saveRights(int uniqueId, const DrmRights& drmRights,
             const String8& rightsPath, const String8& contentPath) {
-    status_t status = DRM_ERROR_UNKNOWN;
     return getDrmManagerService()->saveRights(
                 uniqueId, drmRights, rightsPath, contentPath);
 }
