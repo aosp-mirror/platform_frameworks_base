@@ -693,17 +693,14 @@
 
     <!-- Theme for the search input bar. -->
     <style name="Theme.SearchBar" parent="Theme.Holo.Light.Panel">
-        <item name="windowContentOverlay">@null</item>        
         <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_light</item>
     </style>
 
     <style name="Theme.Holo.SearchBar" parent="Theme.Holo.Panel">
-        <item name="windowContentOverlay">@null</item>
         <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_dark</item>
     </style>
 
     <style name="Theme.Holo.Light.SearchBar" parent="Theme.Holo.Light.Panel">
-        <item name="windowContentOverlay">@null</item>
         <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_light</item>
     </style>
 
