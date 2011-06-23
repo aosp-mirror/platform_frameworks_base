@@ -25,12 +25,11 @@
                android:visibility="gone"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               android:layout_marginRight="-4dip" />
+               android:layout_marginRight="-8dip" />
     <ImageView android:id="@android:id/home"
                android:layout_width="wrap_content"
                android:layout_height="wrap_content"
-               android:paddingLeft="8dip"
-               android:paddingRight="8dip"
+               android:layout_marginRight="8dip"
                android:paddingTop="@dimen/action_bar_icon_vertical_padding"
                android:paddingBottom="@dimen/action_bar_icon_vertical_padding"
                android:layout_gravity="center"

@@ -50,6 +50,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.Window;
+import android.view.View.MeasureSpec;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -742,8 +743,14 @@ public class ActionBarView extends AbsActionBarView {
         View homeLayout = mExpandedActionView != null ? mExpandedHomeLayout : mHomeLayout;
 
         if (homeLayout.getVisibility() != GONE) {
-            homeLayout.measure(
-                    MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST),
+            final LayoutParams lp = homeLayout.getLayoutParams();
+            int homeWidthSpec;
+            if (lp.width < 0) {
+                homeWidthSpec = MeasureSpec.makeMeasureSpec(availableWidth, MeasureSpec.AT_MOST);
+            } else {
+                homeWidthSpec = MeasureSpec.makeMeasureSpec(lp.width, MeasureSpec.EXACTLY);
+            }
+            homeLayout.measure(homeWidthSpec,
                     MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
             final int homeWidth = homeLayout.getMeasuredWidth();
             availableWidth = Math.max(0, availableWidth - homeWidth);
@@ -1120,6 +1127,34 @@ public class ActionBarView extends AbsActionBarView {
             width += iconLp.leftMargin + mIconView.getMeasuredWidth() + iconLp.rightMargin;
             height = Math.max(height,
                     iconLp.topMargin + mIconView.getMeasuredHeight() + iconLp.bottomMargin);
+
+            final int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+            final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+            final int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+            final int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+            switch (widthMode) {
+                case MeasureSpec.AT_MOST:
+                    width = Math.min(width, widthSize);
+                    break;
+                case MeasureSpec.EXACTLY:
+                    width = widthSize;
+                    break;
+                case MeasureSpec.UNSPECIFIED:
+                default:
+                    break;
+            }
+            switch (heightMode) {
+                case MeasureSpec.AT_MOST:
+                    height = Math.min(height, heightSize);
+                    break;
+                case MeasureSpec.EXACTLY:
+                    height = heightSize;
+                    break;
+                case MeasureSpec.UNSPECIFIED:
+                default:
+                    break;
+            }
             setMeasuredDimension(width, height);
         }
 

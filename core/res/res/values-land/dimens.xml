@@ -31,6 +31,8 @@
 
     <!-- Default height of an action bar. -->
     <dimen name="action_bar_default_height">40dip</dimen>
+    <!-- Vertical padding around action bar icons. -->
+    <dimen name="action_bar_icon_vertical_padding">4dip</dimen>
 
     <!-- Size of clock font in LockScreen on Unsecure unlock screen. -->
     <dimen name="keyguard_lockscreen_clock_font_size">80sp</dimen>
