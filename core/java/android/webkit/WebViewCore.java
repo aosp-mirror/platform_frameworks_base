@@ -2358,7 +2358,7 @@ public final class WebViewCore {
                 mInitialViewState.mViewScale = mInitialViewState.mTextWrapScale =
                         mViewportInitialScale / 100.0f;
             } else if (mViewportWidth > 0 && mViewportWidth < webViewWidth &&
-                !mWebView.getSettings().getUseFixedViewport()) {
+                !getSettings().getUseFixedViewport()) {
                 mInitialViewState.mViewScale = mInitialViewState.mTextWrapScale =
                         (float) webViewWidth / mViewportWidth;
             } else {
