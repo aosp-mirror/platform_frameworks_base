@@ -1012,7 +1012,7 @@
          {@link #AndroidManifest manifest} tag. -->
     <declare-styleable name="AndroidManifestSupportsScreens" parent="AndroidManifest">
         <!-- Starting with {@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2},
-             this is the new way to specify the screens an application is
+             this is the new way to specify the minimum screen size an application is
              compatible with.  This attribute provides the required minimum
              "smallest screen width" (as per the -swNNNdp resource configuration)
              that the application can run on.  For example, a typical phone
@@ -1023,17 +1023,15 @@
              or xlargeScreens attributes will be used instead. -->
         <attr name="requiresSmallestWidthDp" format="integer" />
         <!-- Starting with {@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2},
-             this is the new way to specify the screens an application is
+             this is the new way to specify the largest screens an application is
              compatible with.  This attribute provides the maximum
              "smallest screen width" (as per the -swNNNdp resource configuration)
              that the application is designed for.  If this value is smaller than
              the "smallest screen width" of the device it is running on, the user
-             will of offered to run it in a compatibility mode that emulates a
-             smaller screen.  Currently the compatibility mode only emulates
-             phone screens, so it will not be used it the application provides
-             a requiresSmallestWidthDp that is larger than 320.  Typical values
-             used with this attribute are 320 for a phone screen, 600 for a
-             7" tablet, and 720 for a 10" tablet. -->
+             is offered to run it in a compatibility mode that emulates a
+             smaller screen and zooms it to fit the screen. Currently the compatibility mode only
+             emulates phone screens with a 320dp width, so compatibility mode is not applied if the
+             value for compatibleWidthLimitDp is larger than 320. -->
         <attr name="compatibleWidthLimitDp" format="integer" />
         <!-- Starting with {@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2},
              this is the new way to specify the screens an application is
@@ -1042,9 +1040,9 @@
              that the application can work well on.  If this value is smaller than
              the "smallest screen width" of the device it is running on, the
              application will be forced in to screen compatibility mode with
-             no way for the user to turn it off.  Currently the compatibility mode
-             only emulates phone screens, so even if this value is larger than 320
-             the width the app runs in will be a 320 phone dimension. -->
+             no way for the user to turn it off. Currently the compatibility mode only
+             emulates phone screens with a 320dp width, so compatibility mode is not applied if the
+             value for largestWidthLimitDp is larger than 320. -->
         <attr name="largestWidthLimitDp" format="integer" />
         <!-- Indicates whether the application supports smaller screen form-factors.
              A small screen is defined as one with a smaller aspect ratio than
