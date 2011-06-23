@@ -3009,6 +3009,7 @@ public final class RIL extends BaseCommands implements CommandsInterface {
             }
         } else {
             dataCall.status = p.readInt();
+            dataCall.suggestedRetryTime = p.readInt();
             dataCall.cid = p.readInt();
             dataCall.active = p.readInt();
             dataCall.type = p.readString();
