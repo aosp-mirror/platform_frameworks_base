@@ -5564,10 +5564,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private int reduceCompatConfigWidthSize(int curSize, int rotation, DisplayMetrics dm,
             int dw, int dh) {
-        dm.unscaledWidthPixels = mPolicy.getNonDecorDisplayWidth(rotation, dw);
-        dm.unscaledHeightPixels = mPolicy.getNonDecorDisplayHeight(rotation, dh);
+        dm.noncompatWidthPixels = mPolicy.getNonDecorDisplayWidth(rotation, dw);
+        dm.noncompatHeightPixels = mPolicy.getNonDecorDisplayHeight(rotation, dh);
         float scale = CompatibilityInfo.computeCompatibleScaling(dm, null);
-        int size = (int)(((dm.unscaledWidthPixels / scale) / dm.density) + .5f);
+        int size = (int)(((dm.noncompatWidthPixels / scale) / dm.density) + .5f);
         if (curSize == 0 || size < curSize) {
             curSize = size;
         }
@@ -5642,9 +5642,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // Override display width and height with what we are computing,
         // to be sure they remain consistent.
-        dm.widthPixels = dm.unscaledWidthPixels = mAppDisplayWidth
+        dm.widthPixels = dm.noncompatWidthPixels = mAppDisplayWidth
                 = mPolicy.getNonDecorDisplayWidth(mRotation, dw);
-        dm.heightPixels = dm.unscaledHeightPixels = mAppDisplayHeight
+        dm.heightPixels = dm.noncompatHeightPixels = mAppDisplayHeight
                 = mPolicy.getNonDecorDisplayHeight(mRotation, dh);
 
         mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,

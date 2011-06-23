@@ -107,8 +107,8 @@ public class Display {
                 CompatibilityInfo ci;
                 if (doCompat && (ci=mCompatibilityInfo.getIfNeeded()) != null) {
                     synchronized (mTmpMetrics) {
-                        mTmpMetrics.unscaledWidthPixels = outSize.x;
-                        mTmpMetrics.unscaledHeightPixels = outSize.y;
+                        mTmpMetrics.noncompatWidthPixels = outSize.x;
+                        mTmpMetrics.noncompatHeightPixels = outSize.y;
                         mTmpMetrics.density = mDensity;
                         ci.applyToDisplayMetrics(mTmpMetrics);
                         outSize.x = mTmpMetrics.widthPixels;
@@ -268,14 +268,15 @@ public class Display {
     }
 
     private void getNonSizeMetrics(DisplayMetrics outMetrics) {
-        outMetrics.density      = mDensity;
         outMetrics.densityDpi   = (int)((mDensity*DisplayMetrics.DENSITY_DEFAULT)+.5f);
-        outMetrics.scaledDensity= outMetrics.density;
-        outMetrics.xdpi         = mDpiX;
-        outMetrics.ydpi         = mDpiY;
 
-        outMetrics.unscaledWidthPixels  = outMetrics.widthPixels;
-        outMetrics.unscaledHeightPixels = outMetrics.heightPixels;
+        outMetrics.noncompatWidthPixels  = outMetrics.widthPixels;
+        outMetrics.noncompatHeightPixels = outMetrics.heightPixels;
+
+        outMetrics.density = outMetrics.noncompatDensity = mDensity;
+        outMetrics.scaledDensity = outMetrics.noncompatScaledDensity = outMetrics.density;
+        outMetrics.xdpi = outMetrics.noncompatXdpi = mDpiX;
+        outMetrics.ydpi = outMetrics.noncompatYdpi = mDpiY;
     }
 
     static IWindowManager getWindowManager() {
