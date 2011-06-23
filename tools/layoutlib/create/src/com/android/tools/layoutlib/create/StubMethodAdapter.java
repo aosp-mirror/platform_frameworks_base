@@ -31,7 +31,7 @@ class StubMethodAdapter implements MethodVisitor {
 
     private static String CONSTRUCTOR = "<init>";
     private static String CLASS_INIT = "<clinit>";
-    
+
     /** The parent method writer */
     private MethodVisitor mParentVisitor;
     /** The method return type. Can be null. */
@@ -40,7 +40,7 @@ class StubMethodAdapter implements MethodVisitor {
     private String mInvokeSignature;
     /** Flag to output the first line number. */
     private boolean mOutputFirstLineNumber = true;
-    /** Flag that is true when implementing a constructor, to accept all original 
+    /** Flag that is true when implementing a constructor, to accept all original
      *  code calling the original super constructor. */
     private boolean mIsInitMethod = false;
 
@@ -55,12 +55,12 @@ class StubMethodAdapter implements MethodVisitor {
         mInvokeSignature = invokeSignature;
         mIsStatic = isStatic;
         mIsNative = isNative;
-        
+
         if (CONSTRUCTOR.equals(methodName) || CLASS_INIT.equals(methodName)) {
             mIsInitMethod = true;
         }
     }
-    
+
     private void generateInvoke() {
         /* Generates the code:
          *  OverrideMethod.invoke("signature", mIsNative ? true : false, null or this);
@@ -188,7 +188,7 @@ class StubMethodAdapter implements MethodVisitor {
         }
         mParentVisitor.visitMaxs(maxStack, maxLocals);
     }
-    
+
     /**
      * End of visiting.
      * For non-constructor, generate the messaging code and the return statement
@@ -250,6 +250,7 @@ class StubMethodAdapter implements MethodVisitor {
                 generatePop();
                 generateInvoke();
                 mMessageGenerated = true;
+                //$FALL-THROUGH$
             default:
                 mParentVisitor.visitInsn(opcode);
             }
@@ -346,5 +347,5 @@ class StubMethodAdapter implements MethodVisitor {
             mParentVisitor.visitVarInsn(opcode, var);
         }
     }
-    
+
 }

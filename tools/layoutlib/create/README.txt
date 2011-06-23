@@ -30,9 +30,9 @@ The Android JAR can't be used directly in Eclipse:
 Consequently this tool:
 - parses the input JAR,
 - modifies some of the classes directly using some bytecode manipulation,
-- filters some packages and removes some that we don't want to end in the output JAR,
+- filters some packages and removes those we don't want in the output JAR,
 - injects some new classes,
-- and generates a modified JAR file that is suitable for the Android plugin
+- generates a modified JAR file that is suitable for the Android plugin
   for Eclipse to perform rendering.
 
 The ASM library is used to do the bytecode modification using its visitor pattern API.
@@ -63,7 +63,7 @@ with their dependencies and then only keep the ones we want.
 
 To do that, the analyzer is created with a list of base classes to keep -- everything
 that derives from these is kept. Currently the one such class is android.view.View:
-since we want to render layouts, anything that is sort of the view needs to be kept.
+since we want to render layouts, anything that is sort of a view needs to be kept.
 
 The analyzer is also given a list of class names to keep in the output.
 This is done using shell-like glob patterns that filter on the fully-qualified
@@ -90,6 +90,7 @@ and lists:
 - the classes to inject in the output JAR -- these classes are directly implemented
   in layoutlib_create and will be used to interface with the renderer in Eclipse.
 - specific methods to override (see method stubs details below).
+- specific methods for which to delegate calls.
 - specific methods to remove based on their return type.
 - specific classes to rename.
 
@@ -114,6 +115,9 @@ Methods are also changed from protected/private to public.
 The code of the methods is then kept as-is, except for native methods which are
 replaced by a stub. Methods that are to be overridden are also replaced by a stub.
 
+The transformed class is then fed through the DelegateClassAdapter to implement
+method delegates. 
+
 Finally fields are also visited and changed from protected/private to public.
 
 
@@ -131,8 +135,7 @@ method being called, its caller object and a flag indicating whether the
 method was native. We do not currently provide the parameters. The listener
 can however specify the return value of the overridden method.
 
-An extension being worked on is to actually replace these listeners by
-direct calls to a delegate class, complete with parameters.
+This strategy is now obsolete and replaced by the method delegates.
 
 
 - Strategies
@@ -159,6 +162,9 @@ As explained earlier, the creator doesn't have any replacement code for
 methods to override. Instead it removes the original code and replaces it
 by a call to a specific OveriddeMethod.invokeX(). The bridge then registers
 a listener on the method signature and can provide an implementation.
+
+This strategy is now obsolete and replaced by the method delegates.
+See strategy 5 below.
 
 
 3- Renaming classes
@@ -193,6 +199,24 @@ is native.
 In this case we have a strategy that tells the generator that anything returning, for
 example, the inner class Paint$Style in the Paint class should be discarded and the
 bridge will provide its own implementation.
+
+
+5- Method Delegates
+
+This strategy is used to override method implementations.
+Given a method SomeClass.MethodName(), 1 or 2 methods are generated:
+a- A copy of the original method named SomeClass.MethodName_Original().
+   The content is the original method as-is from the reader.
+   This step is omitted if the method is native, since it has no Java implementation.
+b- A brand new implementation of SomeClass.MethodName() which calls to a
+   non-existing static method named SomeClass_Delegate.MethodName().
+   The implementation of this 'delegate' method is done in layoutlib_brigde.
+
+The delegate method is a static method.
+If the original method is non-static, the delegate method receives the original 'this'
+as its first argument. If the original method is an inner non-static method, it also
+receives the inner 'this' as the second argument.
+
 
 
 - References -
