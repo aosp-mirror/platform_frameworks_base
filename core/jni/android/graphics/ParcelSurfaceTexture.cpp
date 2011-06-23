@@ -17,9 +17,11 @@
 #define LOG_TAG "ParcelSurfaceTexture"
 
 #include <gui/SurfaceTextureClient.h>
+#include <surfaceflinger/Surface.h>
 
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
+#include <android_runtime/android_view_Surface.h>
 
 #include <utils/Log.h>
 
@@ -96,7 +98,16 @@ static void ParcelSurfaceTexture_classInit(JNIEnv* env, jclass clazz)
     }
 }
 
-static void ParcelSurfaceTexture_init(JNIEnv* env, jobject thiz, jobject jSurfaceTexture)
+static void ParcelSurfaceTexture_initFromSurface(
+        JNIEnv* env, jobject thiz, jobject jSurface)
+{
+    sp<Surface> surface(Surface_getSurface(env, jSurface));
+    sp<ISurfaceTexture> iSurfaceTexture(surface->getSurfaceTexture());
+    ParcelSurfaceTexture_setISurfaceTexture(env, thiz, iSurfaceTexture);
+}
+
+static void ParcelSurfaceTexture_initFromSurfaceTexture(
+        JNIEnv* env, jobject thiz, jobject jSurfaceTexture)
 {
     sp<ISurfaceTexture> iSurfaceTexture(
             SurfaceTexture_getSurfaceTexture(env, jSurfaceTexture));
@@ -131,8 +142,10 @@ static void ParcelSurfaceTexture_readFromParcel(
 
 static JNINativeMethod gParcelSurfaceTextureMethods[] = {
     {"nativeClassInit", "()V",   (void*)ParcelSurfaceTexture_classInit },
-    {"nativeInit", "(Landroid/graphics/SurfaceTexture;)V",
-      (void *)ParcelSurfaceTexture_init },
+    {"nativeInitFromSurface", "(Landroid/view/Surface;)V",
+      (void *)ParcelSurfaceTexture_initFromSurface },
+    {"nativeInitFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)V",
+      (void *)ParcelSurfaceTexture_initFromSurfaceTexture },
     { "nativeFinalize", "()V", (void *)ParcelSurfaceTexture_finalize },
     { "nativeWriteToParcel", "(Landroid/os/Parcel;I)V",
       (void *)ParcelSurfaceTexture_writeToParcel },

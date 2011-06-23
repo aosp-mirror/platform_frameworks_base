@@ -156,7 +156,7 @@ static void setSurfaceControl(JNIEnv* env, jobject clazz,
 
 static sp<Surface> getSurface(JNIEnv* env, jobject clazz)
 {
-    sp<Surface> result((Surface*)env->GetIntField(clazz, so.surface));
+    sp<Surface> result(Surface_getSurface(env, clazz));
     if (result == 0) {
         /*
          * if this method is called from the WindowManager's process, it means
@@ -187,6 +187,11 @@ sp<ANativeWindow> android_Surface_getNativeWindow(
 bool android_Surface_isInstanceOf(JNIEnv* env, jobject obj) {
     jclass surfaceClass = env->FindClass(kSurfaceClassPathName);
     return env->IsInstanceOf(obj, surfaceClass);
+}
+
+sp<Surface> Surface_getSurface(JNIEnv* env, jobject clazz) {
+    sp<Surface> surface((Surface*)env->GetIntField(clazz, so.surface));
+    return surface;
 }
 
 static void setSurface(JNIEnv* env, jobject clazz, const sp<Surface>& surface)

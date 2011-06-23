@@ -421,6 +421,10 @@ status_t Surface::validate(bool inCancelBuffer) const
     return NO_ERROR;
 }
 
+sp<ISurfaceTexture> Surface::getSurfaceTexture() {
+    return mSurface != NULL ? mSurface->getSurfaceTexture() : NULL;
+}
+
 sp<IBinder> Surface::asBinder() const {
     return mSurface!=0 ? mSurface->asBinder() : 0;
 }
