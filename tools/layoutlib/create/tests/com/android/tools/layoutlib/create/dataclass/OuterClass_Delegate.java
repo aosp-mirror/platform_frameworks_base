@@ -26,5 +26,9 @@ public class OuterClass_Delegate {
     public static int get(OuterClass instance, int a, long b) {
         return 4 + a + (int) b;
     }
+
+    public static String privateMethod(OuterClass instance) {
+        return "outerPrivate_Delegate";
+    }
 }
 
