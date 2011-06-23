@@ -17,6 +17,8 @@
 package android.provider;
 
 
+import com.android.internal.util.ArrayUtils;
+
 import android.accounts.Account;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -37,6 +39,8 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
+
+import java.util.Arrays;
 
 /**
  * <p>
@@ -94,19 +98,19 @@ public final class CalendarContract {
      * Broadcast Action: This is the intent that gets fired when an alarm
      * notification needs to be posted for a reminder.
      */
-    public static final String EVENT_REMINDER_ACTION = "android.intent.action.EVENT_REMINDER";
+    public static final String ACTION_EVENT_REMINDER = "android.intent.action.EVENT_REMINDER";
 
     /**
      * Intent Extras key: The start time of an event or an instance of a
      * recurring event. (milliseconds since epoch)
      */
-    public static final String EVENT_BEGIN_TIME = "beginTime";
+    public static final String EXTRA_EVENT_BEGIN_TIME = "beginTime";
 
     /**
      * Intent Extras key: The end time of an event or an instance of a recurring
      * event. (milliseconds since epoch)
      */
-    public static final String EVENT_END_TIME = "endTime";
+    public static final String EXTRA_EVENT_END_TIME = "endTime";
 
     /**
      * This authority is used for writing to or querying from the calendar
@@ -279,7 +283,7 @@ public final class CalendarContract {
     /**
      * Columns specific to the Calendars Uri that other Uris can query.
      */
-    protected interface CalendarsColumns {
+    protected interface CalendarColumns {
         /**
          * The color of the calendar
          * <P>Type: INTEGER (color value)</P>
@@ -385,7 +389,7 @@ public final class CalendarContract {
      * Class that represents a Calendar Entity. There is one entry per calendar.
      * This is a helper class to make batch operations easier.
      */
-    public static class CalendarsEntity implements BaseColumns, SyncColumns, CalendarsColumns {
+    public static class CalendarEntity implements BaseColumns, SyncColumns, CalendarColumns {
 
         /**
          * The default Uri used when creating a new calendar EntityIterator.
@@ -567,7 +571,7 @@ public final class CalendarContract {
      * <li>{@link #CAL_SYNC10}</li>
      * </ul>
      */
-    public static class Calendars implements BaseColumns, SyncColumns, CalendarsColumns {
+    public static class Calendars implements BaseColumns, SyncColumns, CalendarColumns {
         private static final String WHERE_DELETE_FOR_ACCOUNT = Calendars.ACCOUNT_NAME + "=?"
                 + " AND "
                 + Calendars.ACCOUNT_TYPE + "=?";
@@ -589,37 +593,6 @@ public final class CalendarContract {
                 String[] selectionArgs, String orderBy) {
             return cr.query(CONTENT_URI, projection, selection, selectionArgs,
                     orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
-        }
-
-        /**
-         * Convenience method perform a delete on the Calendar provider. This is
-         * a blocking call and should not be used on the UI thread.
-         *
-         * @param cr the ContentResolver
-         * @param selection A filter to apply to rows before deleting, formatted
-         *            as an SQL WHERE clause (excluding the WHERE itself).
-         * @param selectionArgs Fill in the '?'s in the selection
-         * @return the count of rows that were deleted
-         */
-        public static int delete(ContentResolver cr, String selection, String[] selectionArgs)
-        {
-            return cr.delete(CONTENT_URI, selection, selectionArgs);
-        }
-
-        /**
-         * Convenience method to delete all calendars that match the account.
-         * This is a blocking call and should not be used on the UI thread.
-         *
-         * @param cr the ContentResolver
-         * @param account the account whose calendars and events should be
-         *            deleted
-         * @return the count of calendar rows that were deleted
-         */
-        public static int deleteCalendarsForAccount(ContentResolver cr, Account account) {
-            // delete all calendars that match this account
-            return CalendarContract.Calendars.delete(cr,
-                    WHERE_DELETE_FOR_ACCOUNT,
-                    new String[] { account.name, account.type });
         }
 
         /**
@@ -764,7 +737,7 @@ public final class CalendarContract {
         /**
          * the projection used by the attendees query
          */
-        public static final String[] PROJECTION = new String[] {
+        private static final String[] PROJECTION = new String[] {
                 _ID, ATTENDEE_NAME, ATTENDEE_EMAIL, ATTENDEE_RELATIONSHIP, ATTENDEE_STATUS,};
         private static final String ATTENDEES_WHERE = Attendees.EVENT_ID + "=?";
 
@@ -1444,7 +1417,7 @@ public final class CalendarContract {
      * views into other tables and cannot be changed through the Events table.
      */
     public static final class Events implements BaseColumns, SyncColumns, EventsColumns,
-            CalendarsColumns {
+            CalendarColumns {
 
         /**
          * Queries all events with the given projection. This is a blocking call
@@ -1556,9 +1529,12 @@ public final class CalendarContract {
      * days and minutes. The instances table is not writable and only provides a
      * way to query event occurrences.
      */
-    public static final class Instances implements BaseColumns, EventsColumns, CalendarsColumns {
+    public static final class Instances implements BaseColumns, EventsColumns, CalendarColumns {
 
-        private static final String WHERE_CALENDARS_SELECTED = Calendars.VISIBLE + "=1";
+        private static final String WHERE_CALENDARS_SELECTED = Calendars.VISIBLE + "=?";
+        private static final String[] WHERE_CALENDARS_ARGS = {
+            "1"
+        };
 
         /**
          * Performs a query to return all visible instances in the given range.
@@ -1581,7 +1557,7 @@ public final class CalendarContract {
             ContentUris.appendId(builder, begin);
             ContentUris.appendId(builder, end);
             return cr.query(builder.build(), projection, WHERE_CALENDARS_SELECTED,
-                         null, DEFAULT_SORT_ORDER);
+                    WHERE_CALENDARS_ARGS, DEFAULT_SORT_ORDER);
         }
 
         /**
@@ -1610,79 +1586,8 @@ public final class CalendarContract {
             ContentUris.appendId(builder, begin);
             ContentUris.appendId(builder, end);
             builder = builder.appendPath(searchQuery);
-            return cr.query(builder.build(), projection, WHERE_CALENDARS_SELECTED, null,
-                    DEFAULT_SORT_ORDER);
-        }
-
-        /**
-         * Performs a query to return all visible instances in the given range
-         * that match the given selection. This is a blocking function and
-         * should not be done on the UI thread. This will cause an expansion of
-         * recurring events to fill this time range if they are not already
-         * expanded and will slow down for larger time ranges with many
-         * recurring events.
-         *
-         * @param cr The ContentResolver to use for the query
-         * @param projection The columns to return
-         * @param begin The start of the time range to query in UTC millis since
-         *            epoch
-         * @param end The end of the time range to query in UTC millis since
-         *            epoch
-         * @param selection Filter on the query as an SQL WHERE statement
-         * @param selectionArgs Args to replace any '?'s in the selection
-         * @param orderBy How to order the rows as an SQL ORDER BY statement
-         * @return A Cursor of instances matching the selection
-         */
-        public static final Cursor query(ContentResolver cr, String[] projection, long begin,
-                long end, String selection, String[] selectionArgs, String orderBy) {
-            Uri.Builder builder = CONTENT_URI.buildUpon();
-            ContentUris.appendId(builder, begin);
-            ContentUris.appendId(builder, end);
-            if (TextUtils.isEmpty(selection)) {
-                selection = WHERE_CALENDARS_SELECTED;
-            } else {
-                selection = "(" + selection + ") AND " + WHERE_CALENDARS_SELECTED;
-            }
-            return cr.query(builder.build(), projection, selection, selectionArgs,
-                    orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
-        }
-
-        /**
-         * Performs a query to return all visible instances in the given range
-         * that match the given selection. This is a blocking function and
-         * should not be done on the UI thread. This will cause an expansion of
-         * recurring events to fill this time range if they are not already
-         * expanded and will slow down for larger time ranges with many
-         * recurring events.
-         *
-         * @param cr The ContentResolver to use for the query
-         * @param projection The columns to return
-         * @param begin The start of the time range to query in UTC millis since
-         *            epoch
-         * @param end The end of the time range to query in UTC millis since
-         *            epoch
-         * @param searchQuery A string of space separated search terms. Segments
-         *            enclosed by double quotes will be treated as a single
-         *            term.
-         * @param selection Filter on the query as an SQL WHERE statement
-         * @param selectionArgs Args to replace any '?'s in the selection
-         * @param orderBy How to order the rows as an SQL ORDER BY statement
-         * @return A Cursor of instances matching the selection
-         */
-        public static final Cursor query(ContentResolver cr, String[] projection, long begin,
-                long end, String searchQuery, String selection, String[] selectionArgs,
-                String orderBy) {
-            Uri.Builder builder = CONTENT_SEARCH_URI.buildUpon();
-            ContentUris.appendId(builder, begin);
-            ContentUris.appendId(builder, end);
-            builder = builder.appendPath(searchQuery);
-            if (TextUtils.isEmpty(selection)) {
-                selection = WHERE_CALENDARS_SELECTED;
-            } else {
-                selection = "(" + selection + ") AND " + WHERE_CALENDARS_SELECTED;
-            }
-            return cr.query(builder.build(), projection, selection, selectionArgs,
-                    orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
+            return cr.query(builder.build(), projection, WHERE_CALENDARS_SELECTED,
+                    WHERE_CALENDARS_ARGS, DEFAULT_SORT_ORDER);
         }
 
         /**
@@ -1790,7 +1695,6 @@ public final class CalendarContract {
          */
         public static final Uri URI =
                 Uri.parse("content://" + AUTHORITY + "/properties");
-        public static final String[] POJECTION = { KEY, VALUE };
 
         /**
          * If updating a property, this must be provided as the selection. All
@@ -1910,7 +1814,9 @@ public final class CalendarContract {
         /**
          * The projection used by the EventDays query.
          */
-        public static final String[] PROJECTION = { STARTDAY, ENDDAY };
+        private static final String[] PROJECTION = {
+                STARTDAY, ENDDAY
+        };
         private static final String SELECTION = "selected=1";
 
         /**
@@ -1994,7 +1900,7 @@ public final class CalendarContract {
         /**
          * The projection used by the reminders query.
          */
-        public static final String[] PROJECTION = new String[] {
+        private static final String[] PROJECTION = new String[] {
                 _ID, MINUTES, METHOD,};
         @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/reminders");
@@ -2089,7 +1995,7 @@ public final class CalendarContract {
     /**
      * Fields and helpers for accessing calendar alerts information. These
      * fields are for tracking which alerts have been fired. Scheduled alarms
-     * will generate an intent using {@link #EVENT_REMINDER_ACTION}. Apps that
+     * will generate an intent using {@link #ACTION_EVENT_REMINDER}. Apps that
      * receive this action may update the {@link #STATE} for the reminder when
      * they have finished handling it. Apps that have their notifications
      * disabled should not modify the table to ensure that they do not conflict
@@ -2098,7 +2004,7 @@ public final class CalendarContract {
      * state of a reminder.
      */
     public static final class CalendarAlerts implements BaseColumns,
-            CalendarAlertsColumns, EventsColumns, CalendarsColumns {
+            CalendarAlertsColumns, EventsColumns, CalendarColumns {
 
         /**
          * @hide
@@ -2271,7 +2177,7 @@ public final class CalendarContract {
          * keep scheduled reminders up to date but apps may use this to
          * implement snooze functionality without modifying the reminders table.
          * Scheduled alarms will generate an intent using
-         * {@link #EVENT_REMINDER_ACTION}.
+         * {@link #ACTION_EVENT_REMINDER}.
          *
          * @param context A context for referencing system resources
          * @param manager The AlarmManager to use or null
@@ -2290,7 +2196,7 @@ public final class CalendarContract {
                 manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
             }
 
-            Intent intent = new Intent(EVENT_REMINDER_ACTION);
+            Intent intent = new Intent(ACTION_EVENT_REMINDER);
             intent.setData(ContentUris.withAppendedId(CalendarContract.CONTENT_URI, alarmTime));
             intent.putExtra(ALARM_TIME, alarmTime);
             PendingIntent pi = PendingIntent.getBroadcast(context, 0, intent, 0);
