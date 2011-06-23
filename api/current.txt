@@ -10433,6 +10433,16 @@ package android.media {
     method public abstract void onScanCompleted(java.lang.String, android.net.Uri);
   }
 
+  public class Metadata {
+    method public boolean getBoolean(int);
+    method public boolean has(int);
+    method public java.util.Set<java.lang.Integer> keySet();
+    field public static final int PAUSE_AVAILABLE = 1; // 0x1
+    field public static final int SEEK_AVAILABLE = 4; // 0x4
+    field public static final int SEEK_BACKWARD_AVAILABLE = 2; // 0x2
+    field public static final int SEEK_FORWARD_AVAILABLE = 3; // 0x3
+  }
+
   public class Ringtone {
     method public int getStreamType();
     method public java.lang.String getTitle(android.content.Context);

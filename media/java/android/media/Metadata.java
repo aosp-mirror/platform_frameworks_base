@@ -32,17 +32,13 @@ import java.util.TimeZone;
    Class to hold the media's metadata.  Metadata are used
    for human consumption and can be embedded in the media (e.g
    shoutcast) or available from an external source. The source can be
-   local (e.g thumbnail stored in the DB) or remote (e.g caption
-   server).
+   local (e.g thumbnail stored in the DB) or remote.
 
    Metadata is like a Bundle. It is sparse and each key can occur at
    most once. The key is an integer and the value is the actual metadata.
 
    The caller is expected to know the type of the metadata and call
    the right get* method to fetch its value.
-
-   // FIXME: unhide.
-   {@hide}
  */
 public class Metadata
 {
@@ -59,69 +55,190 @@ public class Metadata
     // client to make the data purge-able once it is done with it.
     //
 
+    /**
+     * {@hide}
+     */
     public static final int ANY = 0;  // Never used for metadata returned, only for filtering.
                                       // Keep in sync with kAny in MediaPlayerService.cpp
 
+    // Playback capabilities.
+    /**
+     * Indicate whether the media can be paused
+     */
+    public static final int PAUSE_AVAILABLE         = 1; // Boolean
+    /**
+     * Indicate whether the media can be backward seeked
+     */
+    public static final int SEEK_BACKWARD_AVAILABLE = 2; // Boolean
+    /**
+     * Indicate whether the media can be forward seeked
+     */
+    public static final int SEEK_FORWARD_AVAILABLE  = 3; // Boolean
+    /**
+     * Indicate whether the media can be seeked
+     */
+    public static final int SEEK_AVAILABLE          = 4; // Boolean
+
     // TODO: Should we use numbers compatible with the metadata retriever?
-    public static final int TITLE = 1;           // String
-    public static final int COMMENT = 2;         // String
-    public static final int COPYRIGHT = 3;       // String
-    public static final int ALBUM = 4;           // String
-    public static final int ARTIST = 5;          // String
-    public static final int AUTHOR = 6;          // String
-    public static final int COMPOSER = 7;        // String
-    public static final int GENRE = 8;           // String
-    public static final int DATE = 9;            // Date
-    public static final int DURATION = 10;       // Integer(millisec)
-    public static final int CD_TRACK_NUM = 11;   // Integer 1-based
-    public static final int CD_TRACK_MAX = 12;   // Integer
-    public static final int RATING = 13;         // String
-    public static final int ALBUM_ART = 14;      // byte[]
-    public static final int VIDEO_FRAME = 15;    // Bitmap
-    public static final int CAPTION = 16;        // TimedText
+    /**
+     * {@hide}
+     */
+    public static final int TITLE                   = 5; // String
+    /**
+     * {@hide}
+     */
+    public static final int COMMENT                 = 6; // String
+    /**
+     * {@hide}
+     */
+    public static final int COPYRIGHT               = 7; // String
+    /**
+     * {@hide}
+     */
+    public static final int ALBUM                   = 8; // String
+    /**
+     * {@hide}
+     */
+    public static final int ARTIST                  = 9; // String
+    /**
+     * {@hide}
+     */
+    public static final int AUTHOR                  = 10; // String
+    /**
+     * {@hide}
+     */
+    public static final int COMPOSER                = 11; // String
+    /**
+     * {@hide}
+     */
+    public static final int GENRE                   = 12; // String
+    /**
+     * {@hide}
+     */
+    public static final int DATE                    = 13; // Date
+    /**
+     * {@hide}
+     */
+    public static final int DURATION                = 14; // Integer(millisec)
+    /**
+     * {@hide}
+     */
+    public static final int CD_TRACK_NUM            = 15; // Integer 1-based
+    /**
+     * {@hide}
+     */
+    public static final int CD_TRACK_MAX            = 16; // Integer
+    /**
+     * {@hide}
+     */
+    public static final int RATING                  = 17; // String
+    /**
+     * {@hide}
+     */
+    public static final int ALBUM_ART               = 18; // byte[]
+    /**
+     * {@hide}
+     */
+    public static final int VIDEO_FRAME             = 19; // Bitmap
 
-    public static final int BIT_RATE = 17;       // Integer, Aggregate rate of
-                                                 // all the streams in bps.
+    /**
+     * {@hide}
+     */
+    public static final int BIT_RATE                = 20; // Integer, Aggregate rate of
+                                                          // all the streams in bps.
 
-    public static final int AUDIO_BIT_RATE = 18; // Integer, bps
-    public static final int VIDEO_BIT_RATE = 19; // Integer, bps
-    public static final int AUDIO_SAMPLE_RATE = 20; // Integer, Hz
-    public static final int VIDEO_FRAME_RATE = 21;  // Integer, Hz
+    /**
+     * {@hide}
+     */
+    public static final int AUDIO_BIT_RATE          = 21; // Integer, bps
+    /**
+     * {@hide}
+     */
+    public static final int VIDEO_BIT_RATE          = 22; // Integer, bps
+    /**
+     * {@hide}
+     */
+    public static final int AUDIO_SAMPLE_RATE       = 23; // Integer, Hz
+    /**
+     * {@hide}
+     */
+    public static final int VIDEO_FRAME_RATE        = 24; // Integer, Hz
 
     // See RFC2046 and RFC4281.
-    public static final int MIME_TYPE = 22;      // String
-    public static final int AUDIO_CODEC = 23;    // String
-    public static final int VIDEO_CODEC = 24;    // String
+    /**
+     * {@hide}
+     */
+    public static final int MIME_TYPE               = 25; // String
+    /**
+     * {@hide}
+     */
+    public static final int AUDIO_CODEC             = 26; // String
+    /**
+     * {@hide}
+     */
+    public static final int VIDEO_CODEC             = 27; // String
 
-    public static final int VIDEO_HEIGHT = 25;   // Integer
-    public static final int VIDEO_WIDTH = 26;    // Integer
-    public static final int NUM_TRACKS = 27;     // Integer
-    public static final int DRM_CRIPPLED = 28;   // Boolean
+    /**
+     * {@hide}
+     */
+    public static final int VIDEO_HEIGHT            = 28; // Integer
+    /**
+     * {@hide}
+     */
+    public static final int VIDEO_WIDTH             = 29; // Integer
+    /**
+     * {@hide}
+     */
+    public static final int NUM_TRACKS              = 30; // Integer
+    /**
+     * {@hide}
+     */
+    public static final int DRM_CRIPPLED            = 31; // Boolean
 
-    // Playback capabilities.
-    public static final int PAUSE_AVAILABLE = 29;         // Boolean
-    public static final int SEEK_BACKWARD_AVAILABLE = 30; // Boolean
-    public static final int SEEK_FORWARD_AVAILABLE = 31;  // Boolean
-    public static final int SEEK_AVAILABLE = 32;          // Boolean
-
-    private static final int LAST_SYSTEM = 32;
+    private static final int LAST_SYSTEM = 31;
     private static final int FIRST_CUSTOM = 8192;
 
     // Shorthands to set the MediaPlayer's metadata filter.
+    /**
+     * {@hide}
+     */
     public static final Set<Integer> MATCH_NONE = Collections.EMPTY_SET;
+    /**
+     * {@hide}
+     */
     public static final Set<Integer> MATCH_ALL = Collections.singleton(ANY);
 
+    /**
+     * {@hide}
+     */
     public static final int STRING_VAL     = 1;
+    /**
+     * {@hide}
+     */
     public static final int INTEGER_VAL    = 2;
+    /**
+     * {@hide}
+     */
     public static final int BOOLEAN_VAL    = 3;
+    /**
+     * {@hide}
+     */
     public static final int LONG_VAL       = 4;
+    /**
+     * {@hide}
+     */
     public static final int DOUBLE_VAL     = 5;
-    public static final int TIMED_TEXT_VAL = 6;
-    public static final int DATE_VAL       = 7;
-    public static final int BYTE_ARRAY_VAL = 8;
+    /**
+     * {@hide}
+     */
+    public static final int DATE_VAL       = 6;
+    /**
+     * {@hide}
+     */
+    public static final int BYTE_ARRAY_VAL = 7;
     // FIXME: misses a type for shared heap is missing (MemoryFile).
     // FIXME: misses a type for bitmaps.
-    private static final int LAST_TYPE = 8;
+    private static final int LAST_TYPE = 7;
 
     private static final String TAG = "media.Metadata";
     private static final int kInt32Size = 4;
@@ -142,28 +259,8 @@ public class Metadata
             new HashMap<Integer, Integer>();
 
     /**
-     * Helper class to hold a triple (time, duration, text). Can be used to
-     * implement caption.
+     * {@hide}
      */
-    public class TimedText {
-        private Date mTime;
-        private int mDuration;  // millisec
-        private String mText;
-
-        public TimedText(Date time, int duration, String text) {
-            mTime = time;
-            mDuration = duration;
-            mText = text;
-        }
-
-        public String toString() {
-            StringBuilder res = new StringBuilder(80);
-            res.append(mTime).append("-").append(mDuration)
-                    .append(":").append(mText);
-            return res.toString();
-        }
-    }
-
     public Metadata() { }
 
     /**
@@ -273,6 +370,7 @@ public class Metadata
      *               should not modify the parcel after this call (and
      *               not call recycle on it.)
      * @return false if an error occurred.
+     * {@hide}
      */
     public boolean parse(Parcel parcel) {
         if (parcel.dataAvail() < kMetaHeaderSize) {
@@ -328,36 +426,59 @@ public class Metadata
     // Caller must make sure the key is present using the {@code has}
     // method otherwise a RuntimeException will occur.
 
+    /**
+     * {@hide}
+     */
     public String getString(final int key) {
         checkType(key, STRING_VAL);
         return mParcel.readString();
     }
 
+    /**
+     * {@hide}
+     */
     public int getInt(final int key) {
         checkType(key, INTEGER_VAL);
         return mParcel.readInt();
     }
 
+    /**
+     * Get the boolean value indicated by key
+     */
     public boolean getBoolean(final int key) {
         checkType(key, BOOLEAN_VAL);
         return mParcel.readInt() == 1;
     }
 
+    /**
+     * {@hide}
+     */
     public long getLong(final int key) {
-        checkType(key, LONG_VAL);
+        checkType(key, LONG_VAL);    /**
+     * {@hide}
+     */
         return mParcel.readLong();
     }
 
+    /**
+     * {@hide}
+     */
     public double getDouble(final int key) {
         checkType(key, DOUBLE_VAL);
         return mParcel.readDouble();
     }
 
+    /**
+     * {@hide}
+     */
     public byte[] getByteArray(final int key) {
         checkType(key, BYTE_ARRAY_VAL);
         return mParcel.createByteArray();
     }
 
+    /**
+     * {@hide}
+     */
     public Date getDate(final int key) {
         checkType(key, DATE_VAL);
         final long timeSinceEpoch = mParcel.readLong();
@@ -374,29 +495,30 @@ public class Metadata
         }
     }
 
-    public TimedText getTimedText(final int key) {
-        checkType(key, TIMED_TEXT_VAL);
-        final Date startTime = new Date(mParcel.readLong());  // epoch
-        final int duration = mParcel.readInt();  // millisec
-
-        return new TimedText(startTime,
-                             duration,
-                             mParcel.readString());
-    }
-
-    // @return the last available system metadata id. Ids are
-    // 1-indexed.
+    /**
+     * @return the last available system metadata id. Ids are
+     *         1-indexed.
+     * {@hide}
+     */
     public static int lastSytemId() { return LAST_SYSTEM; }
 
-    // @return the first available cutom metadata id.
+    /**
+     * @return the first available cutom metadata id.
+     * {@hide}
+     */
     public static int firstCustomId() { return FIRST_CUSTOM; }
 
-    // @return the last value of known type. Types are 1-indexed.
+    /**
+     * @return the last value of known type. Types are 1-indexed.
+     * {@hide}
+     */
     public static int lastType() { return LAST_TYPE; }
 
-    // Check val is either a system id or a custom one.
-    // @param val Metadata key to test.
-    // @return true if it is in a valid range.
+    /**
+     * Check val is either a system id or a custom one.
+     * @param val Metadata key to test.
+     * @return true if it is in a valid range.
+     **/
     private boolean checkMetadataId(final int val) {
         if (val <= ANY || (LAST_SYSTEM < val && val < FIRST_CUSTOM)) {
             Log.e(TAG, "Invalid metadata ID " + val);
@@ -405,7 +527,9 @@ public class Metadata
         return true;
     }
 
-    // Check the type of the data match what is expected.
+    /**
+     * Check the type of the data match what is expected.
+     */
     private void checkType(final int key, final int expectedType) {
         final int pos = mKeyToPosMap.get(key);
 

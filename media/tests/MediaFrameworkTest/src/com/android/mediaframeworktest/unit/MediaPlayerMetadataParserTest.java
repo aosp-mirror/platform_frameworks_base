@@ -277,11 +277,17 @@ public class MediaPlayerMetadataParserTest extends AndroidTestCase {
     // getBoolean
     @SmallTest
     public void testGetBoolean() throws Exception {
-        writeBooleanRecord(Metadata.DRM_CRIPPLED, true);
+        writeBooleanRecord(Metadata.PAUSE_AVAILABLE, true);
+        writeBooleanRecord(Metadata.SEEK_AVAILABLE, true);
+        writeBooleanRecord(Metadata.SEEK_BACKWARD_AVAILABLE, true);
+        writeBooleanRecord(Metadata.SEEK_FORWARD_AVAILABLE, true);
         adjustSize();
         assertParse();
 
-        assertEquals(true, mMetadata.getBoolean(Metadata.DRM_CRIPPLED));
+        assertEquals(true, mMetadata.getBoolean(Metadata.PAUSE_AVAILABLE));
+        assertEquals(true, mMetadata.getBoolean(Metadata.SEEK_AVAILABLE));
+        assertEquals(true, mMetadata.getBoolean(Metadata.SEEK_BACKWARD_AVAILABLE));
+        assertEquals(true, mMetadata.getBoolean(Metadata.SEEK_FORWARD_AVAILABLE));
     }
 
     // getLong
@@ -327,19 +333,6 @@ public class MediaPlayerMetadataParserTest extends AndroidTestCase {
         assertParse();
 
         assertEquals(new Date(0), mMetadata.getDate(Metadata.DATE));
-    }
-
-    // getTimedText
-    @SmallTest
-    public void testGetTimedText() throws Exception {
-        Date now = Calendar.getInstance().getTime();
-        writeTimedTextRecord(Metadata.CAPTION, now.getTime(),
-                             10, "Some caption");
-        adjustSize();
-        assertParse();
-
-        Metadata.TimedText caption = mMetadata.getTimedText(Metadata.CAPTION);
-        assertEquals("" + now + "-" + 10 + ":Some caption", caption.toString());
     }
 
     // ----------------------------------------------------------------------
@@ -414,19 +407,6 @@ public class MediaPlayerMetadataParserTest extends AndroidTestCase {
         mParcel.writeInt(Metadata.DATE_VAL);
         mParcel.writeLong(time);
         mParcel.writeString(tz);
-        adjustSize(start);
-    }
-
-    // Insert a TimedText record at the current position.
-    private void writeTimedTextRecord(int metadataId, long begin,
-                                      int duration, String text) {
-        final int start = mParcel.dataPosition();
-        mParcel.writeInt(-1);  // Placeholder for the length
-        mParcel.writeInt(metadataId);
-        mParcel.writeInt(Metadata.TIMED_TEXT_VAL);
-        mParcel.writeLong(begin);
-        mParcel.writeInt(duration);
-        mParcel.writeString(text);
         adjustSize(start);
     }
 }

@@ -32,7 +32,7 @@ namespace {
 // All these constants below must be kept in sync with Metadata.java.
 enum MetadataId {
     FIRST_SYSTEM_ID = 1,
-    LAST_SYSTEM_ID = 32,
+    LAST_SYSTEM_ID = 31,
     FIRST_CUSTOM_ID = 8192
 };
 
@@ -43,7 +43,6 @@ enum Types {
     BOOLEAN_VAL,
     LONG_VAL,
     DOUBLE_VAL,
-    TIMED_TEXT_VAL,
     DATE_VAL,
     BYTE_ARRAY_VAL,
 };
