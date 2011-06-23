@@ -890,7 +890,10 @@ public class AlertDialog extends Dialog implements DialogInterface {
         public AlertDialog create() {
             final AlertDialog dialog = new AlertDialog(P.mContext, mTheme, false);
             P.apply(dialog.mAlert);
-            dialog.setCanceledOnTouchOutside(P.mCancelable);
+            dialog.setCancelable(P.mCancelable);
+            if (P.mCancelable) {
+                dialog.setCanceledOnTouchOutside(true);
+            }
             dialog.setOnCancelListener(P.mOnCancelListener);
             if (P.mOnKeyListener != null) {
                 dialog.setOnKeyListener(P.mOnKeyListener);
