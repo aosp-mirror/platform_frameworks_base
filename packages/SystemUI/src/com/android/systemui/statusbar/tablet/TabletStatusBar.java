@@ -1040,7 +1040,7 @@ public class TabletStatusBar extends StatusBar implements
             }
         });
 
-        WindowManager.LayoutParams lp = mNotificationPanelParams = new WindowManager.LayoutParams(
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG,
