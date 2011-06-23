@@ -51,6 +51,8 @@ public final class CreateInfo implements ICreateInfo {
      * Returns The list of methods to stub out. Each entry must be in the form
      * "package.package.OuterClass$InnerClass#MethodName".
      * The list can be empty but must not be null.
+     * <p/>
+     * This usage is deprecated. Please use method 'delegates' instead.
      */
     public String[] getOverriddenMethods() {
         return OVERRIDDEN_METHODS;
@@ -153,6 +155,7 @@ public final class CreateInfo implements ICreateInfo {
     /**
      * The list of methods to stub out. Each entry must be in the form
      *  "package.package.OuterClass$InnerClass#MethodName".
+     *  This usage is deprecated. Please use method 'delegates' instead.
      */
     private final static String[] OVERRIDDEN_METHODS = new String[] {
     };

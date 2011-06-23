@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2010 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,36 +30,57 @@ import org.objectweb.asm.Type;
 import java.util.ArrayList;
 
 /**
- * This method adapter rewrites a method by discarding the original code and generating
- * a call to a delegate. Original annotations are passed along unchanged.
+ * This method adapter generates delegate methods.
  * <p/>
- * Calls are delegated to a class named <code>&lt;className&gt;_Delegate</code> with
- * static methods matching the methods to be overridden here. The methods have the
- * same return type. The argument type list is the same except the "this" reference is
- * passed first for non-static methods.
+ * Given a method {@code SomeClass.MethodName()}, this generates 1 or 2 methods:
+ * <ul>
+ * <li> A copy of the original method named {@code SomeClass.MethodName_Original()}.
+ *   The content is the original method as-is from the reader.
+ *   This step is omitted if the method is native, since it has no Java implementation.
+ * <li> A brand new implementation of {@code SomeClass.MethodName()} which calls to a
+ *   non-existing method named {@code SomeClass_Delegate.MethodName()}.
+ *   The implementation of this 'delegate' method is done in layoutlib_brigde.
+ * </ul>
+ * A method visitor is generally constructed to generate a single method; however
+ * here we might want to generate one or two depending on the context. To achieve
+ * that, the visitor here generates the 'original' method and acts as a no-op if
+ * no such method exists (e.g. when the original is a native method).
+ * The delegate method is generated after the {@code visitEnd} of the original method
+ * or by having the class adapter <em>directly</em> call {@link #generateDelegateCode()}
+ * for native methods.
  * <p/>
- * A new annotation is added.
+ * When generating the 'delegate', the implementation generates a call to a class
+ * class named <code>&lt;className&gt;_Delegate</code> with static methods matching
+ * the methods to be overridden here. The methods have the same return type.
+ * The argument type list is the same except the "this" reference is passed first
+ * for non-static methods.
  * <p/>
- * Note that native methods have, by definition, no code so there's nothing a visitor
- * can visit. That means the caller must call {@link #generateCode()} directly for
+ * A new annotation is added to these 'delegate' methods so that we can easily find them
+ * for automated testing.
+ * <p/>
+ * This class isn't intended to be generic or reusable.
+ * It is called by {@link DelegateClassAdapter}, which takes care of properly initializing
+ * the two method writers for the original and the delegate class, as needed, with their
+ * expected names.
+ * <p/>
+ * The class adapter also takes care of calling {@link #generateDelegateCode()} directly for
  * a native and use the visitor pattern for non-natives.
+ * Note that native methods have, by definition, no code so there's nothing a visitor
+ * can visit.
  * <p/>
- * Instances of this class are not re-usable. You need a new instance for each method.
+ * Instances of this class are not re-usable.
+ * The class adapter creates a new instance for each method.
  */
-class DelegateMethodAdapter implements MethodVisitor {
+class DelegateMethodAdapter2 implements MethodVisitor {
 
-    /**
-     * Suffix added to delegate classes.
-     */
+    /** Suffix added to delegate classes. */
     public static final String DELEGATE_SUFFIX = "_Delegate";
 
-    private static String CONSTRUCTOR = "<init>";
-    private static String CLASS_INIT = "<clinit>";
-
-    /** The parent method writer */
-    private MethodVisitor mParentVisitor;
-    /** Flag to output the first line number. */
-    private boolean mOutputFirstLineNumber = true;
+    /** The parent method writer to copy of the original method.
+     *  Null when dealing with a native original method. */
+    private MethodVisitor mOrgWriter;
+    /** The parent method writer to generate the delegating method. Never null. */
+    private MethodVisitor mDelWriter;
     /** The original method descriptor (return type + argument types.) */
     private String mDesc;
     /** True if the original method is static. */
@@ -70,17 +91,22 @@ class DelegateMethodAdapter implements MethodVisitor {
     private final String mMethodName;
     /** Logger object. */
     private final Log mLog;
-    /** True if {@link #visitCode()} has been invoked. */
-    private boolean mVisitCodeCalled;
+
+    /** Array used to capture the first line number information from the original method
+     *  and duplicate it in the delegate. */
+    private Object[] mDelegateLineNumber;
 
     /**
-     * Creates a new {@link DelegateMethodAdapter} that will transform this method
+     * Creates a new {@link DelegateMethodAdapter2} that will transform this method
      * into a delegate call.
      * <p/>
-     * See {@link DelegateMethodAdapter} for more details.
+     * See {@link DelegateMethodAdapter2} for more details.
      *
      * @param log The logger object. Must not be null.
-     * @param mv the method visitor to which this adapter must delegate calls.
+     * @param mvOriginal The parent method writer to copy of the original method.
+     *          Must be {@code null} when dealing with a native original method.
+     * @param mvDelegate The parent method writer to generate the delegating method.
+     *          Must never be null.
      * @param className The internal class name of the class to visit,
      *          e.g. <code>com/android/SomeClass$InnerClass</code>.
      * @param methodName The simple name of the method.
@@ -88,28 +114,20 @@ class DelegateMethodAdapter implements MethodVisitor {
      *          {@link Type#getArgumentTypes(String)})
      * @param isStatic True if the method is declared static.
      */
-    public DelegateMethodAdapter(Log log,
-            MethodVisitor mv,
+    public DelegateMethodAdapter2(Log log,
+            MethodVisitor mvOriginal,
+            MethodVisitor mvDelegate,
             String className,
             String methodName,
             String desc,
             boolean isStatic) {
         mLog = log;
-        mParentVisitor = mv;
+        mOrgWriter = mvOriginal;
+        mDelWriter = mvDelegate;
         mClassName = className;
         mMethodName = methodName;
         mDesc = desc;
         mIsStatic = isStatic;
-
-        if (CONSTRUCTOR.equals(methodName) || CLASS_INIT.equals(methodName)) {
-            // We're going to simplify by not supporting constructors.
-            // The only trick with a constructor is to find the proper super constructor
-            // and call it (and deciding if we should mirror the original method call to
-            // a custom constructor or call a default one.)
-            throw new UnsupportedOperationException(
-                    String.format("Delegate doesn't support overriding constructor %1$s:%2$s(%3$s)",
-                            className, methodName, desc));
-        }
     }
 
     /**
@@ -119,25 +137,25 @@ class DelegateMethodAdapter implements MethodVisitor {
      * (since they have no code to visit).
      * <p/>
      * Otherwise for non-native methods the {@link DelegateClassAdapter} simply needs to
-     * return this instance of {@link DelegateMethodAdapter} and let the normal visitor pattern
+     * return this instance of {@link DelegateMethodAdapter2} and let the normal visitor pattern
      * invoke it as part of the {@link ClassReader#accept(ClassVisitor, int)} workflow and then
      * this method will be invoked from {@link MethodVisitor#visitEnd()}.
      */
-    public void generateCode() {
+    public void generateDelegateCode() {
         /*
          * The goal is to generate a call to a static delegate method.
          * If this method is non-static, the first parameter will be 'this'.
          * All the parameters must be passed and then the eventual return type returned.
          *
          * Example, let's say we have a method such as
-         *   public void method_1(int a, Object b, ArrayList<String> c) { ... }
+         *   public void myMethod(int a, Object b, ArrayList<String> c) { ... }
          *
          * We'll want to create a body that calls a delegate method like this:
-         *   TheClass_Delegate.method_1(this, a, b, c);
+         *   TheClass_Delegate.myMethod(this, a, b, c);
          *
          * If the method is non-static and the class name is an inner class (e.g. has $ in its
          * last segment), we want to push the 'this' of the outer class first:
-         *   OuterClass_InnerClass_Delegate.method_1(
+         *   OuterClass_InnerClass_Delegate.myMethod(
          *     OuterClass.this,
          *     OuterClass$InnerClass.this,
          *     a, b, c);
@@ -147,20 +165,22 @@ class DelegateMethodAdapter implements MethodVisitor {
          *
          * The generated class name is the current class name with "_Delegate" appended to it.
          * One thing to realize is that we don't care about generics -- since generic types
-         * are erased at runtime, they have no influence on the method name being called.
+         * are erased at build time, they have no influence on the method name being called.
          */
 
         // Add our annotation
-        AnnotationVisitor aw = mParentVisitor.visitAnnotation(
+        AnnotationVisitor aw = mDelWriter.visitAnnotation(
                 Type.getObjectType(Type.getInternalName(LayoutlibDelegate.class)).toString(),
                 true); // visible at runtime
-        aw.visitEnd();
+        if (aw != null) {
+            aw.visitEnd();
+        }
 
-        if (!mVisitCodeCalled) {
-            // If this is a direct call to generateCode() as done by DelegateClassAdapter
-            // for natives, visitCode() hasn't been called yet.
-            mParentVisitor.visitCode();
-            mVisitCodeCalled = true;
+        mDelWriter.visitCode();
+
+        if (mDelegateLineNumber != null) {
+            Object[] p = mDelegateLineNumber;
+            mDelWriter.visitLineNumber((Integer) p[0], (Label) p[1]);
         }
 
         ArrayList<Type> paramTypes = new ArrayList<Type>();
@@ -186,8 +206,8 @@ class DelegateMethodAdapter implements MethodVisitor {
                 // that points to the outer class.
 
                 // Push this.getField("this$0") on the call stack.
-                mParentVisitor.visitVarInsn(Opcodes.ALOAD, 0); // var 0 = this
-                mParentVisitor.visitFieldInsn(Opcodes.GETFIELD,
+                mDelWriter.visitVarInsn(Opcodes.ALOAD, 0); // var 0 = this
+                mDelWriter.visitFieldInsn(Opcodes.GETFIELD,
                         mClassName,                 // class where the field is defined
                         "this$0",                   // field name
                         outerType.getDescriptor()); // type of the field
@@ -196,7 +216,7 @@ class DelegateMethodAdapter implements MethodVisitor {
             }
 
             // Push "this" for the instance method, which is always ALOAD 0
-            mParentVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+            mDelWriter.visitVarInsn(Opcodes.ALOAD, 0);
             maxStack++;
             pushedArg0 = true;
             paramTypes.add(Type.getObjectType(mClassName));
@@ -207,7 +227,7 @@ class DelegateMethodAdapter implements MethodVisitor {
         int maxLocals = pushedArg0 ? 1 : 0;
         for (Type t : argTypes) {
             int size = t.getSize();
-            mParentVisitor.visitVarInsn(t.getOpcode(Opcodes.ILOAD), maxLocals);
+            mDelWriter.visitVarInsn(t.getOpcode(Opcodes.ILOAD), maxLocals);
             maxLocals += size;
             maxStack += size;
             paramTypes.add(t);
@@ -220,16 +240,16 @@ class DelegateMethodAdapter implements MethodVisitor {
                 paramTypes.toArray(new Type[paramTypes.size()]));
 
         // Invoke the static delegate
-        mParentVisitor.visitMethodInsn(Opcodes.INVOKESTATIC,
+        mDelWriter.visitMethodInsn(Opcodes.INVOKESTATIC,
                 delegateClassName,
                 mMethodName,
                 desc);
 
         Type returnType = Type.getReturnType(mDesc);
-        mParentVisitor.visitInsn(returnType.getOpcode(Opcodes.IRETURN));
+        mDelWriter.visitInsn(returnType.getOpcode(Opcodes.IRETURN));
 
-        mParentVisitor.visitMaxs(maxStack, maxLocals);
-        mParentVisitor.visitEnd();
+        mDelWriter.visitMaxs(maxStack, maxLocals);
+        mDelWriter.visitEnd();
 
         // For debugging now. Maybe we should collect these and store them in
         // a text file for helping create the delegates. We could also compare
@@ -241,42 +261,60 @@ class DelegateMethodAdapter implements MethodVisitor {
 
     /* Pass down to visitor writer. In this implementation, either do nothing. */
     public void visitCode() {
-        mVisitCodeCalled = true;
-        mParentVisitor.visitCode();
+        if (mOrgWriter != null) {
+            mOrgWriter.visitCode();
+        }
     }
 
     /*
      * visitMaxs is called just before visitEnd if there was any code to rewrite.
-     * Skip the original.
      */
     public void visitMaxs(int maxStack, int maxLocals) {
+        if (mOrgWriter != null) {
+            mOrgWriter.visitMaxs(maxStack, maxLocals);
+        }
     }
 
-    /**
-     * End of visiting. Generate the messaging code.
-     */
+    /** End of visiting. Generate the delegating code. */
     public void visitEnd() {
-        generateCode();
+        if (mOrgWriter != null) {
+            mOrgWriter.visitEnd();
+        }
+        generateDelegateCode();
     }
 
     /* Writes all annotation from the original method. */
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
-        return mParentVisitor.visitAnnotation(desc, visible);
+        if (mOrgWriter != null) {
+            return mOrgWriter.visitAnnotation(desc, visible);
+        } else {
+            return null;
+        }
     }
 
     /* Writes all annotation default values from the original method. */
     public AnnotationVisitor visitAnnotationDefault() {
-        return mParentVisitor.visitAnnotationDefault();
+        if (mOrgWriter != null) {
+            return mOrgWriter.visitAnnotationDefault();
+        } else {
+            return null;
+        }
     }
 
     public AnnotationVisitor visitParameterAnnotation(int parameter, String desc,
             boolean visible) {
-        return mParentVisitor.visitParameterAnnotation(parameter, desc, visible);
+        if (mOrgWriter != null) {
+            return mOrgWriter.visitParameterAnnotation(parameter, desc, visible);
+        } else {
+            return null;
+        }
     }
 
     /* Writes all attributes from the original method. */
     public void visitAttribute(Attribute attr) {
-        mParentVisitor.visitAttribute(attr);
+        if (mOrgWriter != null) {
+            mOrgWriter.visitAttribute(attr);
+        }
     }
 
     /*
@@ -284,75 +322,110 @@ class DelegateMethodAdapter implements MethodVisitor {
      * viewers can direct to the correct method, even if the content doesn't match.
      */
     public void visitLineNumber(int line, Label start) {
-        if (mOutputFirstLineNumber) {
-            mParentVisitor.visitLineNumber(line, start);
-            mOutputFirstLineNumber = false;
+        // Capture the first line values for the new delegate method
+        if (mDelegateLineNumber == null) {
+            mDelegateLineNumber = new Object[] { line, start };
+        }
+        if (mOrgWriter != null) {
+            mOrgWriter.visitLineNumber(line, start);
         }
     }
 
     public void visitInsn(int opcode) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitInsn(opcode);
+        }
     }
 
     public void visitLabel(Label label) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitLabel(label);
+        }
     }
 
     public void visitTryCatchBlock(Label start, Label end, Label handler, String type) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitTryCatchBlock(start, end, handler, type);
+        }
     }
 
     public void visitMethodInsn(int opcode, String owner, String name, String desc) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitMethodInsn(opcode, owner, name, desc);
+        }
     }
 
     public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitFieldInsn(opcode, owner, name, desc);
+        }
     }
 
     public void visitFrame(int type, int nLocal, Object[] local, int nStack, Object[] stack) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitFrame(type, nLocal, local, nStack, stack);
+        }
     }
 
     public void visitIincInsn(int var, int increment) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitIincInsn(var, increment);
+        }
     }
 
     public void visitIntInsn(int opcode, int operand) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitIntInsn(opcode, operand);
+        }
     }
 
     public void visitJumpInsn(int opcode, Label label) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitJumpInsn(opcode, label);
+        }
     }
 
     public void visitLdcInsn(Object cst) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitLdcInsn(cst);
+        }
     }
 
     public void visitLocalVariable(String name, String desc, String signature,
             Label start, Label end, int index) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitLocalVariable(name, desc, signature, start, end, index);
+        }
     }
 
     public void visitLookupSwitchInsn(Label dflt, int[] keys, Label[] labels) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitLookupSwitchInsn(dflt, keys, labels);
+        }
     }
 
     public void visitMultiANewArrayInsn(String desc, int dims) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitMultiANewArrayInsn(desc, dims);
+        }
     }
 
     public void visitTableSwitchInsn(int min, int max, Label dflt, Label[] labels) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitTableSwitchInsn(min, max, dflt, labels);
+        }
     }
 
     public void visitTypeInsn(int opcode, String type) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitTypeInsn(opcode, type);
+        }
     }
 
     public void visitVarInsn(int opcode, int var) {
-        // Skip original code.
+        if (mOrgWriter != null) {
+            mOrgWriter.visitVarInsn(opcode, var);
+        }
     }
 
 }
