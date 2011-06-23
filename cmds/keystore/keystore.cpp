@@ -363,6 +363,7 @@ public:
                 response = writeMasterKey(pw);
             }
             if (response == NO_ERROR) {
+                memcpy(mMasterKey, masterKeyBlob.getValue(), MASTER_KEY_SIZE_BYTES);
                 setupMasterKeys();
             }
             return response;
