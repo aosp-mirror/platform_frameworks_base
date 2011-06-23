@@ -925,8 +925,8 @@ public class GridLayout extends ViewGroup {
                 int mHeight = topMargin + pHeight + bottomMargin;
 
                 // Alignment offsets: the location of the view relative to its alignment group.
-                int a2vx = colBounds.before - hAlign.getAlignmentValue(c, mWidth, type);
-                int a2vy = rowBounds.before - vAlign.getAlignmentValue(c, mHeight, type);
+                int a2vx = colBounds.getOffset(c, hAlign, type, mWidth);
+                int a2vy = rowBounds.getOffset(c, vAlign, type, mHeight);
 
                 dx = c2ax + a2vx + leftMargin;
                 dy = c2ay + a2vy + topMargin;
@@ -935,8 +935,8 @@ public class GridLayout extends ViewGroup {
                 cellHeight -= topMargin + bottomMargin;
             } else {
                 // Alignment offsets: the location of the view relative to its alignment group.
-                int a2vx = colBounds.before - hAlign.getAlignmentValue(c, pWidth, type);
-                int a2vy = rowBounds.before - vAlign.getAlignmentValue(c, pHeight, type);
+                int a2vx = colBounds.getOffset(c, hAlign, type, pWidth);
+                int a2vy = rowBounds.getOffset(c, vAlign, type, pHeight);
 
                 dx = c2ax + a2vx;
                 dy = c2ay + a2vy;
@@ -1048,7 +1048,7 @@ public class GridLayout extends ViewGroup {
                 Group group = horizontal ? lp.columnGroup : lp.rowGroup;
 
                 groups[i] = group;
-                bounds[i] = new Bounds();
+                bounds[i] = group.alignment.getBounds();
             }
 
             return new PackedMap<Group, Bounds>(groups, bounds);
@@ -1994,18 +1994,22 @@ public class GridLayout extends ViewGroup {
             reset();
         }
 
-        private void reset() {
+        protected void reset() {
             before = Integer.MIN_VALUE;
             after = Integer.MIN_VALUE;
         }
 
-        private void include(int before, int after) {
+        protected void include(int before, int after) {
             this.before = max(this.before, before);
             this.after = max(this.after, after);
         }
 
-        private int size() {
+        protected int size() {
             return before + after;
+        }
+
+        protected int getOffset(View c, Alignment alignment, int type, int size) {
+            return before - alignment.getAlignmentValue(c, size, type);
         }
 
         @Override
@@ -2233,15 +2237,18 @@ public class GridLayout extends ViewGroup {
      * {@link Group#alignment alignment}. Overall placement of the view in the cell
      * group is specified by the two alignments which act along each axis independently.
      * <p>
+     *  The GridLayout class defines the most common alignments used in general layout:
+     * {@link #TOP}, {@link #LEFT}, {@link #BOTTOM}, {@link #RIGHT}, {@link #CENTER}, {@link
+     * #BASELINE} and {@link #FILL}.
+     */
+    /*
      * An Alignment implementation must define {@link #getAlignmentValue(View, int, int)},
      * to return the appropriate value for the type of alignment being defined.
      * The enclosing algorithms position the children
      * so that the locations defined by the alignment values
      * are the same for all of the views in a group.
      * <p>
-     *  The GridLayout class defines the most common alignments used in general layout:
-     * {@link #TOP}, {@link #LEFT}, {@link #BOTTOM}, {@link #RIGHT}, {@link #CENTER}, {@link
-     * #BASELINE} and {@link #FILL}.
+
      */
     public static abstract class Alignment {
         private static final Alignment GONE = new Alignment() {
@@ -2250,6 +2257,9 @@ public class GridLayout extends ViewGroup {
                 return 0;
             }
         };
+
+        /*pp*/ Alignment() {
+        }
 
         /**
          * Returns an alignment value. In the case of vertical alignments the value
@@ -2264,7 +2274,7 @@ public class GridLayout extends ViewGroup {
          *
          * @return the alignment value
          */
-        public abstract int getAlignmentValue(View view, int viewSize, int measurementType);
+        /*pp*/ abstract int getAlignmentValue(View view, int viewSize, int measurementType);
 
         /**
          * Returns the size of the view specified by this alignment.
@@ -2281,8 +2291,12 @@ public class GridLayout extends ViewGroup {
          *
          * @return the aligned size
          */
-        public int getSizeInCell(View view, int viewSize, int cellSize, int measurementType) {
+        /*pp*/ int getSizeInCell(View view, int viewSize, int cellSize, int measurementType) {
             return viewSize;
+        }
+
+        /*pp*/ Bounds getBounds() {
+            return new Bounds();
         }
     }
 
@@ -2347,11 +2361,42 @@ public class GridLayout extends ViewGroup {
                 return UNDEFINED;
             }
             int baseline = view.getBaseline();
-            if (baseline == -1) {
-                return UNDEFINED;
-            } else {
-                return baseline;
-            }
+            return (baseline == -1) ? UNDEFINED : baseline;
+        }
+
+        @Override
+        public Bounds getBounds() {
+            return new Bounds() {
+                /*
+                In a baseline aligned row in which some components define a baseline
+                and some don't, we need a third variable to properly account for all
+                the sizes. This tracks the maximum size of all the components -
+                including those that don't define a baseline.
+                */
+                private int size;
+
+                @Override
+                protected void reset() {
+                    super.reset();
+                    size = 0;
+                }
+
+                @Override
+                protected void include(int before, int after) {
+                    super.include(before, after);
+                    size = max(size, before + after);
+                }
+
+                @Override
+                protected int size() {
+                    return max(super.size(), size);
+                }
+
+                @Override
+                protected int getOffset(View c, Alignment alignment, int type, int size) {
+                    return max(0, super.getOffset(c, alignment, type, size));
+                }
+            };
         }
     };
 

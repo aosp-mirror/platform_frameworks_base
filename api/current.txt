@@ -24878,9 +24878,6 @@ package android.widget {
   }
 
   public static abstract class GridLayout.Alignment {
-    ctor public GridLayout.Alignment();
-    method public abstract int getAlignmentValue(android.view.View, int, int);
-    method public int getSizeInCell(android.view.View, int, int, int);
   }
 
   public static class GridLayout.Group {
