@@ -77,7 +77,7 @@ class AppNotRespondingDialog extends BaseErrorDialog {
                 ? res.getString(resid, name1.toString(), name2.toString())
                 : res.getString(resid, name1.toString()));
 
-        setButton(DialogInterface.BUTTON_POSITIVE,
+        setButton(DialogInterface.BUTTON_NEGATIVE,
                 res.getText(com.android.internal.R.string.force_close),
                 mHandler.obtainMessage(FORCE_CLOSE));
         setButton(DialogInterface.BUTTON_NEUTRAL,
@@ -85,7 +85,7 @@ class AppNotRespondingDialog extends BaseErrorDialog {
                 mHandler.obtainMessage(WAIT));
 
         if (app.errorReportReceiver != null) {
-            setButton(DialogInterface.BUTTON_NEGATIVE,
+            setButton(DialogInterface.BUTTON_POSITIVE,
                     res.getText(com.android.internal.R.string.report),
                     mHandler.obtainMessage(WAIT_AND_REPORT));
         }
