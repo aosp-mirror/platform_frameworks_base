@@ -525,10 +525,6 @@ static void SC_debugP(const char *s, const void *p) {
 //                 ::= d  # double
 
 static RsdSymbolTable gSyms[] = {
-    { "__divsi3", (void *)&SC_divsi3, true },
-    { "__modsi3", (void *)&SC_modsi3, true },
-    { "__udivsi3", (void *)&SC_udivsi3, true },
-    { "__umodsi3", (void *)&SC_umodsi3, true },
     { "memset", (void *)&memset, true },
     { "memcpy", (void *)&memcpy, true },
 
