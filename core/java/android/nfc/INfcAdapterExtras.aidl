@@ -16,7 +16,6 @@
 
 package android.nfc;
 
-import android.nfc.ApduList;
 import android.os.Bundle;
 
 
@@ -29,4 +28,5 @@ interface INfcAdapterExtras {
     Bundle transceive(in byte[] data_in);
     int getCardEmulationRoute();
     void setCardEmulationRoute(int route);
+    void authenticate(in byte[] token);
 }

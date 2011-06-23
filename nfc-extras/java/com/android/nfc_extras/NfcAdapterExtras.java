@@ -18,7 +18,6 @@ package com.android.nfc_extras;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
-import android.nfc.ApduList;
 import android.nfc.INfcAdapterExtras;
 import android.nfc.NfcAdapter;
 import android.os.RemoteException;
@@ -206,5 +205,22 @@ public final class NfcAdapterExtras {
      */
     public NfcExecutionEnvironment getEmbeddedExecutionEnvironment() {
         return sEmbeddedEe;
+    }
+
+    /**
+     * Authenticate the client application.
+     *
+     * Some implementations of NFC Adapter Extras may require applications
+     * to authenticate with a token, before using other methods.
+     *
+     * @param a implementation specific token
+     * @throws a {@link java.lang.SecurityException} if authentication failed
+     */
+    public void authenticate(byte[] token) {
+        try {
+            sService.authenticate(token);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+        }
     }
 }
