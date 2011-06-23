@@ -213,7 +213,7 @@ dp and for a width of four cells.</p>
 <p class="note"><strong>Note:</strong> To make your app widget portable across
 devices, your app widget's minimum size should never be larger than 4 x 4 cells.
 See the <a
-href="{@docRoot}guide/practices/ui_guidelines/widget_design.htmll#sizes">App
+href="{@docRoot}guide/practices/ui_guidelines/widget_design.html#sizes">App
 Widget Design Guidelines</a> for more discussion of Home screen cell sizes.</p>
   </li>
   <li>The <code>updatePeriodMillis</code> attribute defines how often the App
