@@ -54,7 +54,7 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
             @Override
             public void onClick(View v) {
                 if (mAdded) {
-                    mAnimatorSet.cancel();
+                    if (mAnimatorSet != null) mAnimatorSet.cancel();
                     mContent.removeView(mTextureView);
                 } else {
                     mContent.addView(mTextureView);
@@ -84,10 +84,10 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
 
         mTextureView.setCameraDistance(5000);
 
-        ObjectAnimator rotationY = ObjectAnimator.ofFloat(mTextureView, "rotationY", 0.0f, 360.0f);
-        rotationY.setRepeatMode(ObjectAnimator.REVERSE);
-        rotationY.setRepeatCount(ObjectAnimator.INFINITE);
-        rotationY.setDuration(4000);
+//        ObjectAnimator rotationY = ObjectAnimator.ofFloat(mTextureView, "rotationY", 0.0f, 360.0f);
+//        rotationY.setRepeatMode(ObjectAnimator.REVERSE);
+//        rotationY.setRepeatCount(ObjectAnimator.INFINITE);
+//        rotationY.setDuration(4000);
 
 //        ObjectAnimator alpha = ObjectAnimator.ofFloat(mTextureView, "alpha", 1.0f, 0.0f);
 //        alpha.setRepeatMode(ObjectAnimator.REVERSE);

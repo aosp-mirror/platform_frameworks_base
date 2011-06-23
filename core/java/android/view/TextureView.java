@@ -166,7 +166,7 @@ public class TextureView extends View {
     public void setOpaque(boolean opaque) {
         if (opaque != mOpaque) {
             mOpaque = opaque;
-            updateLayer();
+            if (mLayer != null) updateLayer();
         }
     }
 
