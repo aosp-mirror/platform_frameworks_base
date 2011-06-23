@@ -70,7 +70,7 @@ status_t AudioRecord::getMinFrameCount(
     size <<= 1;
 
     if (audio_is_linear_pcm(format)) {
-        size /= channelCount * (format == AUDIO_FORMAT_PCM_16_BIT ? 2 : 1);
+        size /= channelCount * audio_bytes_per_sample(format);
     }
 
     *frameCount = size;
@@ -258,7 +258,7 @@ uint32_t AudioRecord::frameCount() const
 int AudioRecord::frameSize() const
 {
     if (audio_is_linear_pcm(mFormat)) {
-        return channelCount()*((format() == AUDIO_FORMAT_PCM_8_BIT) ? sizeof(uint8_t) : sizeof(int16_t));
+        return channelCount()*audio_bytes_per_sample(mFormat);
     } else {
         return sizeof(uint8_t);
     }
