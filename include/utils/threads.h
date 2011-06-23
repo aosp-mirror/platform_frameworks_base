@@ -133,13 +133,13 @@ extern pid_t androidGetTid();
 // Change the scheduling group of a particular thread.  The group
 // should be one of the ANDROID_TGROUP constants.  Returns BAD_VALUE if
 // grp is out of range, else another non-zero value with errno set if
-// the operation failed.
+// the operation failed.  Thread ID zero means current thread.
 extern int androidSetThreadSchedulingGroup(pid_t tid, int grp);
 
 // Change the priority AND scheduling group of a particular thread.  The priority
 // should be one of the ANDROID_PRIORITY constants.  Returns INVALID_OPERATION
 // if the priority set failed, else another value if just the group set failed;
-// in either case errno is set.
+// in either case errno is set.  Thread ID zero means current thread.
 extern int androidSetThreadPriority(pid_t tid, int prio);
 
 #ifdef __cplusplus
