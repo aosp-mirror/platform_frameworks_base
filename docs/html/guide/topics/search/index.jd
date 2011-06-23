@@ -52,7 +52,13 @@ example of the search dialog with optional search suggestions.</p>
 <p class="note"><strong>Note</strong>: The search framework does <em>not</em> provide APIs to
 search your data. To perform a search, you need to use APIs appropriate for your data. For example,
 if your data is stored in an SQLite database, you should use the {@link android.database.sqlite}
-APIs to perform searches.</p>
+APIs to perform searches.
+<br/><br/>
+Also, there is no guarantee that every device provides a dedicated SEARCH button to invoke the
+search interface in your application. When using the search dialog or a custom interface, you
+must always provide a search button in your UI that activates the search interface. For more
+information, see <a href="search-dialog.html#InvokingTheSearchDialog">Invoking the search
+dialog</a>.</p>
 
 <p>The following documents show you how to use Android's framework to implement search:</p>
 
