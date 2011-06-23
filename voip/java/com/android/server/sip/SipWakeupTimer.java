@@ -173,7 +173,7 @@ class SipWakeupTimer extends BroadcastReceiver {
 
         long triggerTime = event.mTriggerTime;
         if (DEBUG_TIMER) {
-            Log.d(TAG, " add event " + event + " scheduled at "
+            Log.d(TAG, " add event " + event + " scheduled on "
                     + showTime(triggerTime) + " at " + showTime(now)
                     + ", #events=" + mEventQueue.size());
             printQueue();
@@ -267,10 +267,10 @@ class SipWakeupTimer extends BroadcastReceiver {
         if (stopped() || mEventQueue.isEmpty()) return;
 
         for (MyEvent event : mEventQueue) {
-            if (event.mTriggerTime != triggerTime) break;
+            if (event.mTriggerTime != triggerTime) continue;
             if (DEBUG_TIMER) Log.d(TAG, "execute " + event);
 
-            event.mLastTriggerTime = event.mTriggerTime;
+            event.mLastTriggerTime = triggerTime;
             event.mTriggerTime += event.mPeriod;
 
             // run the callback in the handler thread to prevent deadlock
@@ -324,6 +324,8 @@ class SipWakeupTimer extends BroadcastReceiver {
         }
     }
 
+    // Sort the events by mMaxPeriod so that the first event can be used to
+    // align events with larger periods
     private static class MyEventComparator implements Comparator<MyEvent> {
         public int compare(MyEvent e1, MyEvent e2) {
             if (e1 == e2) return 0;
