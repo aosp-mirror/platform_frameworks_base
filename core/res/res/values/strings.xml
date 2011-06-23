@@ -2613,10 +2613,14 @@
     <!-- USB_STORAGE_ERROR dialog  ok button-->
     <string name="dlg_ok">OK</string>
 
-    <!-- USB_PREFERENCES: When the user connects the phone to a computer via USB, we show a notification asking if he wants to share files across.  This is the title -->
-    <string name="usb_preferences_notification_title">USB connected</string>
+    <!-- USB_PREFERENCES: Notification for wehen the user connects the phone to a computer via USB in MTP mode.  This is the title -->
+    <string name="usb_mtp_notification_title">Connected as a media device</string>
+    <!-- USB_PREFERENCES: Notification for wehen the user connects the phone to a computer via USB in PTP mode.  This is the title -->
+    <string name="usb_ptp_notification_title">Connected as a camera</string>
+    <!-- USB_PREFERENCES: Notification for wehen the user connects the phone to a computer via USB in mass storage mode (for installer CD image).  This is the title -->
+    <string name="usb_cd_installer_notification_title">Connected as an installer</string>
     <!-- See USB_PREFERENCES. This is the message. -->
-    <string name="usb_preferece_notification_message">Select to configure USB file transfer.</string>
+    <string name="usb_notification_message">Touch for other USB options</string>
 
     <!-- External media format dialog strings -->
     <!-- This is the label for the activity, and should never be visible to the user. -->
