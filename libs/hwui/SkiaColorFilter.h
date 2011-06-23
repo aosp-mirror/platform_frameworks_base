@@ -59,7 +59,7 @@ struct SkiaColorFilter {
         return mType;
     }
 
-    SkColorFilter *getSkColorFilter() {
+    SkColorFilter* getSkColorFilter() {
         return mSkFilter;
     }
 

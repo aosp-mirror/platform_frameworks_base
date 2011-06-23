@@ -101,8 +101,14 @@ void DisplayList::clearResources() {
     }
     mBitmapResources.clear();
 
+    for (size_t i = 0; i < mFilterResources.size(); i++) {
+        caches.resourceCache.decrementRefcount(mFilterResources.itemAt(i));
+    }
+    mFilterResources.clear();
+
     for (size_t i = 0; i < mShaders.size(); i++) {
         caches.resourceCache.decrementRefcount(mShaders.itemAt(i));
+        caches.resourceCache.destructor(mShaders.itemAt(i));
     }
     mShaders.clear();
 
@@ -151,11 +157,18 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
         caches.resourceCache.incrementRefcount(resource);
     }
 
+    const Vector<SkiaColorFilter*> &filterResources = recorder.getFilterResources();
+    for (size_t i = 0; i < filterResources.size(); i++) {
+        SkiaColorFilter* resource = filterResources.itemAt(i);
+        mFilterResources.add(resource);
+        caches.resourceCache.incrementRefcount(resource);
+    }
+
     const Vector<SkiaShader*> &shaders = recorder.getShaders();
     for (size_t i = 0; i < shaders.size(); i++) {
-        SkiaShader* shader = shaders.itemAt(i);
-        mShaders.add(shader);
-        caches.resourceCache.incrementRefcount(shader);
+        SkiaShader* resource = shaders.itemAt(i);
+        mShaders.add(resource);
+        caches.resourceCache.incrementRefcount(resource);
     }
 
     const Vector<SkPaint*> &paints = recorder.getPaints();
@@ -873,21 +886,27 @@ void DisplayListRenderer::reset() {
 
     Caches& caches = Caches::getInstance();
     for (size_t i = 0; i < mBitmapResources.size(); i++) {
-        SkBitmap* resource = mBitmapResources.itemAt(i);
-        caches.resourceCache.decrementRefcount(resource);
+        caches.resourceCache.decrementRefcount(mBitmapResources.itemAt(i));
     }
     mBitmapResources.clear();
 
+    for (size_t i = 0; i < mFilterResources.size(); i++) {
+        caches.resourceCache.decrementRefcount(mFilterResources.itemAt(i));
+    }
+    mFilterResources.clear();
+
     for (size_t i = 0; i < mShaders.size(); i++) {
-       caches.resourceCache.decrementRefcount(mShaders.itemAt(i));
+        caches.resourceCache.decrementRefcount(mShaders.itemAt(i));
     }
     mShaders.clear();
     mShaderMap.clear();
 
     mPaints.clear();
     mPaintMap.clear();
+
     mPaths.clear();
     mPathMap.clear();
+
     mMatrices.clear();
 }
 
