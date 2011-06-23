@@ -890,6 +890,12 @@ public final class SipService extends ISipService.Stub {
                 startPortMappingLifetimeMeasurement(mSession.getLocalProfile());
 
                 if (!mRunning || !portChanged) return;
+
+                // The keep alive process is stopped when port is changed;
+                // Nullify the session so that the process can be restarted
+                // again when the re-registration is done
+                mKeepAliveSession = null;
+
                 // Acquire wake lock for the registration process. The
                 // lock will be released when registration is complete.
                 mMyWakeLock.acquire(mSession);
