@@ -6,7 +6,7 @@ parent.link=manifest-intro.html
 <dl class="xml">
 <dt>syntax:</dt>
 <dd><pre class="stx">&lt;service android:<a href="#enabled">enabled</a>=["true" | "false"]
-         android:<a href="#exported">exported[</a>="true" | "false"]
+         android:<a href="#exported">exported</a>=["true" | "false"]
          android:<a href="#icon">icon</a>="<i>drawable resource</i>"
          android:<a href="#label">label</a>="<i>string resource</i>"
          android:<a href="#nm">name</a>="<i>string</i>"
@@ -120,6 +120,11 @@ the service.  This should be a fully qualified class name (such as,
 the first character of the name is a period (for example, "{@code .RoomService}"),
 it is appended to the package name specified in the 
 <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> element.  
+
+<p>Once you publish your application, you <a
+href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">should not
+change this name</a> (unless you've set <code><a
+href="#exported">android:exported</a>="false"</code>).</p>
 
 <p>
 There is no default.  The name must be specified.
