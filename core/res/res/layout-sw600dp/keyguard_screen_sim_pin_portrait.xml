@@ -93,7 +93,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dip"
         android:layout_marginTop="6dip"
-        android:layout_above="@id/emergencyCall"
+        android:layout_above="@id/emergencyCallButton"
         android:background="@android:drawable/divider_horizontal_dark"
     />
 
@@ -107,7 +107,7 @@
 
         <!-- emergency call button -->
         <Button
-            android:id="@+id/emergencyCall"
+            android:id="@+id/emergencyCallButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:drawableLeft="@android:drawable/ic_emergency"

@@ -30,27 +30,28 @@
 
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
         android:layout_marginBottom="18dip"
+        android:layout_marginRight="@dimen/keyguard_lockscreen_status_line_font_right_margin"
         android:layout_gravity="right">
 
         <!-- Because we can't have multi-tone fonts, we render two TextViews, one on
         top of the other. Hence the redundant layout... -->
-        <TextView android:id="@*android:id/timeDisplayBackground"
+        <TextView android:id="@+id/timeDisplayBackground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="none"
-            android:textSize="@*android:dimen/keyguard_pattern_unlock_clock_font_size"
+            android:textSize="@dimen/keyguard_lockscreen_clock_font_size"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginBottom="6dip"
-            android:textColor="@*android:color/lockscreen_clock_background"
+            android:textColor="@color/lockscreen_clock_background"
             />
 
-        <TextView android:id="@*android:id/timeDisplayForeground"
+        <TextView android:id="@+id/timeDisplayForeground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="none"
-            android:textSize="@*android:dimen/keyguard_pattern_unlock_clock_font_size"
+            android:textSize="@dimen/keyguard_lockscreen_clock_font_size"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginBottom="6dip"
             android:textColor="@color/lockscreen_clock_foreground"
@@ -60,14 +61,15 @@
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_gravity="right">
+        android:layout_gravity="right"
+        android:layout_marginRight="@dimen/keyguard_lockscreen_status_line_font_right_margin">
 
         <TextView
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="@*android:dimen/keyguard_pattern_unlock_status_line_font_size"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
             />
 
         <TextView
@@ -76,7 +78,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="@*android:dimen/keyguard_pattern_unlock_status_line_font_size"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
             android:drawablePadding="4dip"
             />
 
@@ -85,19 +87,24 @@
 
     <TextView
         android:id="@+id/status1"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="@*android:dimen/keyguard_pattern_unlock_status_line_font_size"
-        android:drawablePadding="4dip"
         android:layout_gravity="right"
+        android:layout_marginRight="@dimen/keyguard_lockscreen_status_line_font_right_margin"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+        android:drawablePadding="4dip"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         />
 
     <TextView
         android:id="@+id/status2"
-        android:layout_alignParentTop="true"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="@*android:dimen/keyguard_pattern_unlock_status_line_font_size"
-        android:drawablePadding="4dip"
         android:layout_gravity="right"
+        android:layout_marginRight="@dimen/keyguard_lockscreen_status_line_font_right_margin"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+        android:drawablePadding="4dip"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:visibility="gone"
         />
 
@@ -122,7 +129,7 @@
         android:layout_gravity="center_horizontal"
         android:singleLine="true"
         android:ellipsize="marquee"
-        android:textSize="@*android:dimen/keyguard_pattern_unlock_status_line_font_size"
+        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:textAppearance="?android:attr/textAppearanceMedium"
     />
 
@@ -136,10 +143,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             style="@style/Widget.Button.Transparent"
-            android:textSize="@dimen/keyguard_pattern_unlock_status_line_font_size"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
             android:text="@string/lockscreen_emergency_call"
             android:drawableLeft="@drawable/lockscreen_emergency_button"
             android:drawablePadding="0dip"
+            android:background="@null"
         />
 
         <Button android:id="@+id/forgotPatternButton"
@@ -147,10 +155,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             style="@style/Widget.Button.Transparent"
-            android:textSize="@dimen/keyguard_pattern_unlock_status_line_font_size"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
             android:text="@string/lockscreen_forgot_pattern_button_text"
             android:drawableLeft="@drawable/lockscreen_forgot_password_button"
             android:drawablePadding="0dip"
+            android:background="@null"
         />
 
     </LinearLayout>

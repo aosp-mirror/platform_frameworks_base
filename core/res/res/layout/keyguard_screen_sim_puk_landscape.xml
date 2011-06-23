@@ -164,7 +164,7 @@
             android:textSize="18sp"
             />
 
-        <Button android:id="@+id/emergencyCall"
+        <Button android:id="@+id/emergencyCallButton"
             android:text="@android:string/lockscreen_emergency_call"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"

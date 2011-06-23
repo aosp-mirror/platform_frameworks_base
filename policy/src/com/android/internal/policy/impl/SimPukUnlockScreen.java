@@ -109,7 +109,7 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
         mDelPinButton.setOnClickListener(this);
 
 
-        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCall);
+        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
         mOkButton = (TextView) findViewById(R.id.ok);
 
         mHeaderText.setText(R.string.keyguard_password_enter_puk_code);

@@ -129,7 +129,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
                     | InputType.TYPE_TEXT_VARIATION_PASSWORD);
         }
 
-        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCall);
+        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
         mEmergencyCallButton.setOnClickListener(this);
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
 

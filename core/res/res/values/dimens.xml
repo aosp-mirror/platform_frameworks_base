@@ -120,13 +120,13 @@
     <!-- Vertical padding around action bar icons. -->
     <dimen name="action_bar_icon_vertical_padding">4dip</dimen>
 
-    <!-- Size of clock font in LockScreen. -->
-    <dimen name="keyguard_pattern_unlock_clock_font_size">80sp</dimen>
+    <!-- Size of clock font in LockScreen on Unsecure unlock screen. -->
+    <dimen name="keyguard_lockscreen_clock_font_size">80sp</dimen>
 
-    <!-- Size of status line font in LockScreen. -->
-    <dimen name="keyguard_pattern_unlock_status_line_font_size">14sp</dimen>
+    <!-- Size of status line font on Unsecure unlock LockScreen. -->
+    <dimen name="keyguard_lockscreen_status_line_font_size">14sp</dimen>
 
-    <!-- Size of right margin in LockScreen -->
-    <dimen name="keyguard_pattern_unlock_status_line_font_right_margin">20dip</dimen>
+    <!-- Size of right margin on Unsecure unlock LockScreen -->
+    <dimen name="keyguard_lockscreen_status_line_font_right_margin">45dip</dimen>
 
 </resources>

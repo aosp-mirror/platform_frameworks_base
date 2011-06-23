@@ -26,17 +26,6 @@
         android:gravity="left"
         >
 
-    <TextView
-        android:id="@+id/carrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="17sp"
-        android:drawablePadding="4dip"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        />
-
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -52,7 +41,7 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="none"
-            android:textSize="40sp"
+            android:textSize="@dimen/keyguard_lockscreen_clock_font_size"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/lockscreen_clock_background"
             android:layout_marginBottom="6dip"
@@ -63,25 +52,12 @@
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:ellipsize="none"
-            android:textSize="40sp"
+            android:textSize="@dimen/keyguard_lockscreen_clock_font_size"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/lockscreen_clock_foreground"
             android:layout_alignLeft="@id/timeDisplayBackground"
             android:layout_alignTop="@id/timeDisplayBackground"
             android:layout_marginBottom="6dip"
-            />
-
-        <TextView android:id="@+id/am_pm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@id/timeDisplayBackground"
-            android:layout_alignBaseline="@id/timeDisplayBackground"
-            android:singleLine="true"
-            android:ellipsize="none"
-            android:textSize="18sp"
-            android:layout_marginLeft="8dip"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/lockscreen_clock_am_pm"
             />
 
     </com.android.internal.widget.DigitalClock>
@@ -98,7 +74,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="17sp"/>
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"/>
 
         <TextView
             android:id="@+id/alarm_status"
@@ -106,7 +82,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textSize="17sp"/>
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"/>
 
     </LinearLayout>
 
@@ -117,7 +93,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="17sp"
+        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:layout_marginTop="10dip"
         android:drawablePadding="4dip"
         android:visibility="gone"
@@ -129,7 +105,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dip"
-        android:textSize="17sp"
+        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:textAppearance="?android:attr/textAppearanceMedium"
         />
 
