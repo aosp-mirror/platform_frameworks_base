@@ -791,7 +791,8 @@ void update_gp_clipping(tonStabState *st, /* i/o : State struct            */
                        )
 {
     OSCL_UNUSED_ARG(pOverflow);
-    for (int i = 0; i < N_FRAME - 1; i++)
+    int i;
+    for (i = 0; i < N_FRAME - 1; i++)
     {
         st->gp[i] = st->gp[i+1];
     }
