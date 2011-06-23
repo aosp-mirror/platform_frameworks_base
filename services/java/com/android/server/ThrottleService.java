@@ -179,7 +179,7 @@ public class ThrottleService extends IThrottleManager.Stub {
             mIface = iface;
         }
 
-        public void interfaceLinkStatusChanged(String iface, boolean link) {
+        public void interfaceStatusChanged(String iface, boolean link) {
             if (link) {
                 if (TextUtils.equals(iface, mIface)) {
                     mHandler.obtainMessage(mMsg).sendToTarget();
@@ -194,6 +194,8 @@ public class ThrottleService extends IThrottleManager.Stub {
                 mHandler.obtainMessage(mMsg).sendToTarget();
             }
         }
+
+        public void interfaceLinkStateChanged(String iface, boolean linkState) {}
 
         public void interfaceRemoved(String iface) {}
     }
