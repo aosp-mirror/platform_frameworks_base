@@ -154,7 +154,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     /**
-     * Notify our observers of an interface link status change.
+     * Notify our observers of an interface link state change
      * (typically, an Ethernet cable has been plugged-in or unplugged).
      */
     private void notifyInterfaceLinkStateChanged(String iface, boolean up) {
@@ -236,7 +236,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 } else if (cooked[2].equals("changed") && cooked.length == 5) {
                     notifyInterfaceStatusChanged(cooked[3], cooked[4].equals("up"));
                     return true;
-                } else if (cooked[2].equals("linkstatus") && cooked.length == 5) {
+                } else if (cooked[2].equals("linkstate") && cooked.length == 5) {
                     notifyInterfaceLinkStateChanged(cooked[3], cooked[4].equals("up"));
                     return true;
                 }

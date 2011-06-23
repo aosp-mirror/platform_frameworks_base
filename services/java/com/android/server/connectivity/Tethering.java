@@ -189,9 +189,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         mDnsServers[1] = DNS_DEFAULT_SERVER2;
     }
 
-    public void interfaceLinkStateChanged(String iface, boolean up) {
-    }
-
     public void interfaceStatusChanged(String iface, boolean up) {
         if (DEBUG) Log.d(TAG, "interfaceStatusChanged " + iface + ", " + up);
         boolean found = false;
@@ -221,6 +218,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                 }
             }
         }
+    }
+
+    public void interfaceLinkStateChanged(String iface, boolean up) {
+        if (DEBUG) Log.d(TAG, "interfaceLinkStateChanged " + iface + ", " + up);
+        interfaceStatusChanged(iface, up);
     }
 
     private boolean isUsb(String iface) {

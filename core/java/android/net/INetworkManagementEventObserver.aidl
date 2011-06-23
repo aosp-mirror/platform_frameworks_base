@@ -31,13 +31,13 @@ interface INetworkManagementEventObserver {
     void interfaceStatusChanged(String iface, boolean up);
 
     /**
-     * Interface physical-layer link status has changed.  For Ethernet,
+     * Interface physical-layer link state has changed.  For Ethernet,
      * this method is invoked when the cable is plugged in or unplugged.
      *
      * @param iface The interface.
      * @param up  True if the physical link-layer connection signal is valid.
      */
-     void interfaceLinkStateChanged(String iface, boolean up);
+    void interfaceLinkStateChanged(String iface, boolean up);
 
     /**
      * An interface has been added to the system
