@@ -507,6 +507,10 @@ However, as a shorthand, if the first character of the name is a period
 package name specified in the 
 <code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code> 
 element.
+<p>Once you publish your application, you <a
+href="http://android-developers.blogspot.com/2011/06/things-that-cannot-change.html">should not
+change this name</a> (unless you've set <code><a
+href="#exported">android:exported</a>="false"</code>).</p>
 
 <p>
 There is no default.  The name must be specified.
