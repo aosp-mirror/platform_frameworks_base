@@ -1118,9 +1118,9 @@
 
     <style name="Widget.ActionButton">
         <item name="android:background">?android:attr/selectableItemBackground</item>
-        <item name="android:paddingLeft">16dip</item>
-        <item name="android:paddingRight">16dip</item>
-        <item name="android:minWidth">64dip</item>
+        <item name="android:paddingLeft">12dip</item>
+        <item name="android:paddingRight">12dip</item>
+        <item name="android:minWidth">56dip</item>
         <item name="android:minHeight">?android:attr/actionBarSize</item>
     </style>
 
@@ -1788,18 +1788,16 @@
     </style>
 
     <style name="Widget.Holo.ActionButton" parent="Widget.ActionButton">
-        <item name="android:minWidth">64dip</item>
+        <item name="android:minWidth">56dip</item>
         <item name="android:gravity">center</item>
-        <item name="android:paddingLeft">16dip</item>
-        <item name="android:paddingRight">16dip</item>
+        <item name="android:paddingLeft">12dip</item>
+        <item name="android:paddingRight">12dip</item>
         <item name="android:scaleType">center</item>
     </style>
 
     <style name="Widget.Holo.ActionButton.Overflow">
         <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_dark</item>
         <item name="android:background">?android:attr/selectableItemBackground</item>
-        <item name="android:paddingLeft">16dip</item>
-        <item name="android:paddingRight">16dip</item>
         <item name="android:contentDescription">@string/action_menu_overflow_description</item>
     </style>
 
@@ -2142,8 +2140,6 @@
 
     <style name="Widget.Holo.Light.ActionButton.Overflow">
         <item name="android:src">@android:drawable/ic_menu_moreoverflow_holo_light</item>
-        <item name="android:paddingLeft">16dip</item>
-        <item name="android:paddingRight">16dip</item>
         <item name="android:contentDescription">@string/action_menu_overflow_description</item>
     </style>
 
