@@ -1416,23 +1416,19 @@ public class Resources {
             }
             if (metrics != null) {
                 mMetrics.setTo(metrics);
-                // NOTE: We should re-arrange this code to create a Display
-                // with the CompatibilityInfo that is used everywhere we deal
-                // with the display in relation to this app, rather than
-                // doing the conversion here.  This impl should be okay because
-                // we make sure to return a compatible display in the places
-                // where there are public APIs to retrieve the display...  but
-                // it would be cleaner and more maintainble to just be
-                // consistently dealing with a compatible display everywhere in
-                // the framework.
-                if (mCompatibilityInfo != null) {
-                    mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
-                }
             }
+            // NOTE: We should re-arrange this code to create a Display
+            // with the CompatibilityInfo that is used everywhere we deal
+            // with the display in relation to this app, rather than
+            // doing the conversion here.  This impl should be okay because
+            // we make sure to return a compatible display in the places
+            // where there are public APIs to retrieve the display...  but
+            // it would be cleaner and more maintainble to just be
+            // consistently dealing with a compatible display everywhere in
+            // the framework.
             if (mCompatibilityInfo != null) {
                 mCompatibilityInfo.applyToDisplayMetrics(mMetrics);
             }
-            mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
             int configChanges = 0xfffffff;
             if (config != null) {
                 mTmpConfig.setTo(config);
@@ -1448,6 +1444,7 @@ public class Resources {
             if (mConfiguration.locale == null) {
                 mConfiguration.locale = Locale.getDefault();
             }
+            mMetrics.scaledDensity = mMetrics.density * mConfiguration.fontScale;
 
             String locale = null;
             if (mConfiguration.locale != null) {
