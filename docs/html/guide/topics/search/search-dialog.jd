@@ -17,29 +17,30 @@ access</li>
 
 <h2>In this document</h2>
 <ol>
-<li><a href="#TheBasics">The Basics</a></li>
-<li><a href="#SearchableConfiguration">Creating a Searchable Configuration</a></li>
-<li><a href="#SearchableActivity">Creating a Searchable Activity</a>
-  <ol>
-    <li><a href="#DeclaringSearchableActivity">Declaring a searchable activity</a></li>
-    <li><a href="#EnableSearch">Enabling the search dialog and search widget</a></li>
-    <li><a href="#PerformingSearch">Performing a search</a></li>
-  </ol>
-</li>
-<li><a href="#UsingTheSearchDialog">Using the Search Dialog</a>
-  <ol>
-    <li><a href="#LifeCycle">The impact of the search dialog on your activity lifecycle</a></li>
-    <li><a href="#SearchContextData">Passing search context data</a></li>
-  </ol>
-</li>
-<li><a href="#UsingSearchWidget">Using the Search Widget</a>
-  <ol>
-    <li><a href="#ConfiguringWidget">Configuring the search widget</a></li>
-    <li><a href="#WidgetFeatures">Other search widget features</a></li>
-  </ol>
-</li>
-<li><a href="#VoiceSearch">Adding Voice Search</a></li>
-<li><a href="#SearchSuggestions">Adding Search Suggestions</a></li>
+  <li><a href="#TheBasics">The Basics</a></li>
+  <li><a href="#SearchableConfiguration">Creating a Searchable Configuration</a></li>
+  <li><a href="#SearchableActivity">Creating a Searchable Activity</a>
+    <ol>
+      <li><a href="#DeclaringSearchableActivity">Declaring a searchable activity</a></li>
+      <li><a href="#PerformingSearch">Performing a search</a></li>
+    </ol>
+  </li>
+  <li><a href="#SearchDialog">Using the Search Dialog</a>
+    <ol>
+      <li><a href="#InvokingTheSearchDialog">Invoking the search dialog</a></li>
+      <li><a href="#LifeCycle">The impact of the search dialog on your activity lifecycle</a></li>
+      <li><a href="#SearchContextData">Passing search context data</a></li>
+    </ol>
+  </li>
+  <li><a href="#UsingSearchWidget">Using the Search Widget</a>
+    <ol>
+      <li><a href="#ConfiguringWidget">Configuring the search widget</a></li>
+      <li><a href="#WidgetFeatures">Other search widget features</a></li>
+      <li><a href="#UsingBoth">Using both the widget and the dialog</a></li>
+    </ol>
+  </li>
+  <li><a href="#VoiceSearch">Adding Voice Search</a></li>
+  <li><a href="#SearchSuggestions">Adding Search Suggestions</a></li>
 </ol>
 
 <h2>Key classes</h2>
@@ -494,13 +495,13 @@ searches.</p>
 
 <h3 id="InvokingTheSearchDialog">Invoking the search dialog</h3>
 
-<p>As mentioned above, the device SEARCH button and {@link android.app.Activity#onSearchRequested
-onSearchRequested()} method will open the search dialog, as long as the current activity
-has declared the searchable activity to use, as shown in the previous section.</p>
+<p>As mentioned above, the device SEARCH button will open the search dialog as long as the current
+activity has declared in the manifest the searchable activity to use.</p>
 
-<p>However, you should not assume that a SEARCH button is available on the user's device. You
-should always provide another search button in your UI that activates the search dialog by calling
-{@link android.app.Activity#onSearchRequested()}.</p>
+<p>However, some devices do not include a dedicated SEARCH button, so you should not assume that
+it's always available. When using the search dialog, you must <strong>always provide another search
+button in your UI</strong> that activates the search dialog by calling {@link
+android.app.Activity#onSearchRequested()}.</p>
 
 <p>For instance, you should either provide a menu item in your <a
 href="{@docRoot}guide/topics/ui/menus.html#options-menu">Options Menu</a> or a button in your
@@ -509,12 +510,6 @@ activates search by calling {@link android.app.Activity#onSearchRequested()}. Th
 href="{@docRoot}shareables/search_icons.zip">search_icons.zip</a> file includes icons for
 medium and high density screens, which you can use for your search menu item or button (low-density
 screens scale-down the hdpi image by one half). </p>
-
-<!-- ... maybe this should go into the Creating Menus document ....
-<p>If you chose to provide a shortcut key for the menu item,  using {@link
-android.view.MenuItem#setAlphabeticShortcut(char)}, then SearchManager.MENU_KEY is the recommended
-key character, representing the default search key.</p>
--->
 
 <p>You can also enable "type-to-search" functionality, which activates the search dialog when the
 user starts typing on the keyboard&mdash;the keystrokes are inserted into the search dialog. You can
