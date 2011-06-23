@@ -129,6 +129,12 @@ public class CDMALTEPhone extends CDMAPhone {
         super.setSystemLocale(language, country, false);
     }
 
+    // return IMSI from USIM as subscriber ID.
+    @Override
+    public String getSubscriberId() {
+        return mIccRecords.getIMSI();
+    }
+
     @Override
     protected void log(String s) {
         if (DBG)
