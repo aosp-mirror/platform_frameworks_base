@@ -94,6 +94,12 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
         }
     }
 
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        //Log.e(RenderScript.LOG_TAG, "onSurfaceTextureUpdated");
+        mSurfaceTexture = surface;
+    }
+
    /**
      * Inform the view that the activity is paused. The owner of this view must
      * call this method when the activity is paused. Calling this method will

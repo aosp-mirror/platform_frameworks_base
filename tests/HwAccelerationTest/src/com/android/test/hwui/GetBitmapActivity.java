@@ -100,4 +100,9 @@ public class GetBitmapActivity extends Activity implements TextureView.SurfaceTe
         mCamera.stopPreview();
         mCamera.release();
     }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        // Ignored
+    }
 }

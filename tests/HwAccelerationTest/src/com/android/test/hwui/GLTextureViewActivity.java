@@ -85,6 +85,10 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
         }
     }
 
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+    }
+
     private static class RenderThread extends Thread {
         private static final String LOG_TAG = "GLTextureView";
 

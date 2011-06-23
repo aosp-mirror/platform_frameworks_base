@@ -21643,6 +21643,7 @@ package android.view {
     method public abstract void onSurfaceTextureAvailable(android.graphics.SurfaceTexture, int, int);
     method public abstract void onSurfaceTextureDestroyed(android.graphics.SurfaceTexture);
     method public abstract void onSurfaceTextureSizeChanged(android.graphics.SurfaceTexture, int, int);
+    method public abstract void onSurfaceTextureUpdated(android.graphics.SurfaceTexture);
   }
 
   public class TouchDelegate {

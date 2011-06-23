@@ -67,14 +67,18 @@ import android.util.Log;
  *              // Something bad happened
  *          }
  *      }
- *      
+ *
  *      public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
  *          // Ignored, Camera does all the work for us
  *      }
- *      
+ *
  *      public void onSurfaceTextureDestroyed(SurfaceTexture surface) {
  *          mCamera.stopPreview();
  *          mCamera.release();
+ *      }
+ *
+ *      public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+ *          // Ignored
  *      }
  *  }
  * </pre>
@@ -315,6 +319,10 @@ public class TextureView extends View {
 
         mAttachInfo.mHardwareRenderer.updateTextureLayer(mLayer, getWidth(), getHeight(), mOpaque);
 
+        if (mListener != null) {
+            mListener.onSurfaceTextureUpdated(mSurface);
+        }
+
         invalidate();
     }
 
@@ -474,6 +482,14 @@ public class TextureView extends View {
          * @param surface The surface about to be destroyed
          */
         public void onSurfaceTextureDestroyed(SurfaceTexture surface);
+
+        /**
+         * Invoked when the specified {@link SurfaceTexture} is updated through
+         * {@link SurfaceTexture#updateTexImage()}.
+         * 
+         * @param surface The surface just updated
+         */
+        public void onSurfaceTextureUpdated(SurfaceTexture surface);
     }
 
     private static native void nSetDefaultBufferSize(SurfaceTexture surfaceTexture,

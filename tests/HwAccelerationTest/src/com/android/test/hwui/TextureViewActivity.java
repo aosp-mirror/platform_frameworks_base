@@ -109,4 +109,9 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
         mCamera.stopPreview();
         mCamera.release();
     }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        // Ignored
+    }
 }
