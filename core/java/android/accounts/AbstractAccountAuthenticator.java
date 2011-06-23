@@ -24,7 +24,6 @@ import android.content.pm.PackageManager;
 import android.content.Context;
 import android.content.Intent;
 import android.Manifest;
-import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.Arrays;
@@ -136,17 +135,8 @@ public abstract class AbstractAccountAuthenticator {
                 if (result != null) {
                     response.onResult(result);
                 }
-            } catch (NetworkErrorException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "addAccount", e);
-                }
-                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
-            } catch (UnsupportedOperationException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "addAccount", e);
-                }
-                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
-                        "addAccount not supported");
+            } catch (Exception e) {
+                handleException(response, "addAccount", accountType, e);
             }
         }
 
@@ -167,17 +157,8 @@ public abstract class AbstractAccountAuthenticator {
                 if (result != null) {
                     response.onResult(result);
                 }
-            } catch (NetworkErrorException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "confirmCredentials", e);
-                }
-                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
-            } catch (UnsupportedOperationException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "confirmCredentials", e);
-                }
-                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
-                        "confirmCredentials not supported");
+            } catch (Exception e) {
+                handleException(response, "confirmCredentials", account.toString(), e);
             }
         }
 
@@ -197,21 +178,9 @@ public abstract class AbstractAccountAuthenticator {
                     Log.v(TAG, "getAuthTokenLabel: result "
                             + AccountManager.sanitizeResult(result));
                 }
-                if (result != null) {
-                    response.onResult(result);
-                }
-            } catch (IllegalArgumentException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "getAuthTokenLabel", e);
-                }
-                response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS,
-                        "unknown authTokenType");
-            } catch (UnsupportedOperationException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "getAuthTokenLabel", e);
-                }
-                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
-                        "getAuthTokenTypeLabel not supported");
+                response.onResult(result);
+            } catch (Exception e) {
+                handleException(response, "getAuthTokenLabel", authTokenType, e);
             }
         }
 
@@ -234,17 +203,9 @@ public abstract class AbstractAccountAuthenticator {
                 if (result != null) {
                     response.onResult(result);
                 }
-            } catch (UnsupportedOperationException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "getAuthToken", e);
-                }
-                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
-                        "getAuthToken not supported");
-            } catch (NetworkErrorException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "getAuthToken", e);
-                }
-                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+            } catch (Exception e) {
+                handleException(response, "getAuthToken",
+                        account.toString() + "," + authTokenType, e);
             }
         }
 
@@ -267,17 +228,9 @@ public abstract class AbstractAccountAuthenticator {
                 if (result != null) {
                     response.onResult(result);
                 }
-            } catch (NetworkErrorException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "updateCredentials", e);
-                }
-                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
-            } catch (UnsupportedOperationException e) {
-                if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                    Log.v(TAG, "updateCredentials", e);
-                }
-                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
-                        "updateCredentials not supported");
+            } catch (Exception e) {
+                handleException(response, "updateCredentials",
+                        account.toString() + "," + authTokenType, e);
             }
         }
 
@@ -290,9 +243,8 @@ public abstract class AbstractAccountAuthenticator {
                 if (result != null) {
                     response.onResult(result);
                 }
-            } catch (UnsupportedOperationException e) {
-                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
-                        "editProperties not supported");
+            } catch (Exception e) {
+                handleException(response, "editProperties", accountType, e);
             }
         }
 
@@ -305,11 +257,8 @@ public abstract class AbstractAccountAuthenticator {
                 if (result != null) {
                     response.onResult(result);
                 }
-            } catch (UnsupportedOperationException e) {
-                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
-                        "hasFeatures not supported");
-            } catch (NetworkErrorException e) {
-                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+            } catch (Exception e) {
+                handleException(response, "hasFeatures", account.toString(), e);
             }
         }
 
@@ -322,12 +271,35 @@ public abstract class AbstractAccountAuthenticator {
                 if (result != null) {
                     response.onResult(result);
                 }
-            } catch (UnsupportedOperationException e) {
-                response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
-                        "getAccountRemovalAllowed not supported");
-            } catch (NetworkErrorException e) {
-                response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+            } catch (Exception e) {
+                handleException(response, "getAccountRemovalAllowed", account.toString(), e);
             }
+        }
+    }
+
+    private void handleException(IAccountAuthenticatorResponse response, String method,
+            String data, Exception e) throws RemoteException {
+        if (e instanceof NetworkErrorException) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, method + "(" + data + ")", e);
+            }
+            response.onError(AccountManager.ERROR_CODE_NETWORK_ERROR, e.getMessage());
+        } else if (e instanceof UnsupportedOperationException) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, method + "(" + data + ")", e);
+            }
+            response.onError(AccountManager.ERROR_CODE_UNSUPPORTED_OPERATION,
+                    method + " not supported");
+        } else if (e instanceof IllegalArgumentException) {
+            if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                Log.v(TAG, method + "(" + data + ")", e);
+            }
+            response.onError(AccountManager.ERROR_CODE_BAD_ARGUMENTS,
+                    method + " not supported");
+        } else {
+            Log.w(TAG, method + "(" + data + ")", e);
+            response.onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
+                    method + " failed");
         }
     }
 
