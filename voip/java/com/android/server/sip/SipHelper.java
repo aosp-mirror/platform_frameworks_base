@@ -314,7 +314,7 @@ class SipHelper {
         }
     }
 
-    private ServerTransaction getServerTransaction(RequestEvent event)
+    public ServerTransaction getServerTransaction(RequestEvent event)
             throws SipException {
         ServerTransaction transaction = event.getServerTransaction();
         if (transaction == null) {

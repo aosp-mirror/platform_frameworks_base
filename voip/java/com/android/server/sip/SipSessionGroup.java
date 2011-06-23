@@ -21,6 +21,8 @@ import gov.nist.javax.sip.clientauthutils.UserCredentials;
 import gov.nist.javax.sip.header.SIPHeaderNames;
 import gov.nist.javax.sip.header.ProxyAuthenticate;
 import gov.nist.javax.sip.header.WWWAuthenticate;
+import gov.nist.javax.sip.header.extensions.ReferredByHeader;
+import gov.nist.javax.sip.header.extensions.ReplacesHeader;
 import gov.nist.javax.sip.message.SIPMessage;
 
 import android.net.sip.ISipSession;
@@ -365,24 +367,85 @@ class SipSessionGroup implements SipListener {
             super(listener);
         }
 
+        private SipSessionImpl createNewSession(RequestEvent event,
+                ISipSessionListener listener, ServerTransaction transaction)
+                throws SipException {
+            SipSessionImpl newSession = new SipSessionImpl(listener);
+            newSession.mServerTransaction = transaction;
+            newSession.mState = SipSession.State.INCOMING_CALL;
+            newSession.mDialog = newSession.mServerTransaction.getDialog();
+            newSession.mInviteReceived = event;
+            newSession.mPeerProfile = createPeerProfile(event.getRequest());
+            newSession.mPeerSessionDescription =
+                    extractContent(event.getRequest());
+            return newSession;
+        }
+
+        private int processInviteWithReplaces(RequestEvent event,
+                ReplacesHeader replaces) {
+            String callId = replaces.getCallId();
+            SipSessionImpl session = mSessionMap.get(callId);
+            if (session == null) {
+                return Response.CALL_OR_TRANSACTION_DOES_NOT_EXIST;
+            }
+
+            Dialog dialog = session.mDialog;
+            if (dialog == null) return Response.DECLINE;
+
+            if (!dialog.getLocalTag().equals(replaces.getToTag()) ||
+                    !dialog.getRemoteTag().equals(replaces.getFromTag())) {
+                // No match is found, returns 481.
+                return Response.CALL_OR_TRANSACTION_DOES_NOT_EXIST;
+            }
+
+            ReferredByHeader referredBy = (ReferredByHeader) event.getRequest()
+                    .getHeader(ReferredByHeader.NAME);
+            if ((referredBy == null) ||
+                    !dialog.getRemoteParty().equals(referredBy.getAddress())) {
+                return Response.CALL_OR_TRANSACTION_DOES_NOT_EXIST;
+            }
+            return Response.OK;
+        }
+
+        private void processNewInviteRequest(RequestEvent event)
+                throws SipException {
+            ReplacesHeader replaces = (ReplacesHeader) event.getRequest()
+                    .getHeader(ReplacesHeader.NAME);
+            SipSessionImpl newSession = null;
+            if (replaces != null) {
+                int response = processInviteWithReplaces(event, replaces);
+                if (DEBUG) {
+                    Log.v(TAG, "ReplacesHeader: " + replaces
+                            + " response=" + response);
+                }
+                if (response == Response.OK) {
+                    SipSessionImpl replacedSession =
+                            mSessionMap.get(replaces.getCallId());
+                    // got INVITE w/ replaces request.
+                    newSession = createNewSession(event,
+                            replacedSession.mProxy.getListener(),
+                            mSipHelper.getServerTransaction(event));
+                    newSession.mProxy.onCallTransferring(newSession,
+                            newSession.mPeerSessionDescription);
+                } else {
+                    mSipHelper.sendResponse(event, response);
+                }
+            } else {
+                // New Incoming call.
+                newSession = createNewSession(event, mProxy,
+                        mSipHelper.sendRinging(event, generateTag()));
+                mProxy.onRinging(newSession, newSession.mPeerProfile,
+                        newSession.mPeerSessionDescription);
+            }
+            if (newSession != null) addSipSession(newSession);
+        }
+
         public boolean process(EventObject evt) throws SipException {
             if (isLoggable(this, evt)) Log.d(TAG, " ~~~~~   " + this + ": "
                     + SipSession.State.toString(mState) + ": processing "
                     + log(evt));
             if (isRequestEvent(Request.INVITE, evt)) {
-                RequestEvent event = (RequestEvent) evt;
-                SipSessionImpl newSession = new SipSessionImpl(mProxy);
-                newSession.mState = SipSession.State.INCOMING_CALL;
-                newSession.mServerTransaction = mSipHelper.sendRinging(event,
-                        generateTag());
-                newSession.mDialog = newSession.mServerTransaction.getDialog();
-                newSession.mInviteReceived = event;
-                newSession.mPeerProfile = createPeerProfile(event.getRequest());
-                newSession.mPeerSessionDescription =
-                        extractContent(event.getRequest());
-                addSipSession(newSession);
-                mProxy.onRinging(newSession, newSession.mPeerProfile,
-                        newSession.mPeerSessionDescription);
+                processNewInviteRequest((RequestEvent) evt);
                 return true;
             } else if (isRequestEvent(Request.OPTIONS, evt)) {
                 mSipHelper.sendResponse((RequestEvent) evt, Response.OK);

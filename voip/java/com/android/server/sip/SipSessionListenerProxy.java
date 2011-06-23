@@ -110,6 +110,20 @@ class SipSessionListenerProxy extends ISipSessionListener.Stub {
         });
     }
 
+    public void onCallTransferring(final ISipSession newSession,
+            final String sessionDescription) {
+        if (mListener == null) return;
+        proxy(new Runnable() {
+            public void run() {
+                try {
+                    mListener.onCallTransferring(newSession, sessionDescription);
+                } catch (Throwable t) {
+                    handle(t, "onCallTransferring()");
+                }
+            }
+        });
+    }
+
     public void onCallBusy(final ISipSession session) {
         if (mListener == null) return;
         proxy(new Runnable() {

@@ -160,6 +160,17 @@ public final class SipSession {
         }
 
         /**
+         * Called when the call is being transferred to a new one.
+         *
+         * @hide
+         * @param newSession the new session that the call will be transferred to
+         * @param sessionDescription the new peer's session description
+         */
+        public void onCallTransferring(SipSession newSession,
+                String sessionDescription) {
+        }
+
+        /**
          * Called when an error occurs during session initialization and
          * termination.
          *
@@ -486,6 +497,16 @@ public final class SipSession {
             public void onCallBusy(ISipSession session) {
                 if (mListener != null) {
                     mListener.onCallBusy(SipSession.this);
+                }
+            }
+
+            public void onCallTransferring(ISipSession session,
+                    String sessionDescription) {
+                if (mListener != null) {
+                    mListener.onCallTransferring(
+                            new SipSession(session, SipSession.this.mListener),
+                            sessionDescription);
+
                 }
             }
 

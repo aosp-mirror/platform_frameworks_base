@@ -170,6 +170,7 @@ public class SipAudioCall {
     private SipProfile mLocalProfile;
     private SipAudioCall.Listener mListener;
     private SipSession mSipSession;
+    private SipSession mTransferringSession;
 
     private long mSessionId = System.currentTimeMillis();
     private String mPeerSd;
@@ -347,6 +348,27 @@ public class SipAudioCall {
         }
     }
 
+    private synchronized void transferToNewSession() {
+        if (mTransferringSession == null) return;
+        SipSession origin = mSipSession;
+        mSipSession = mTransferringSession;
+        mTransferringSession = null;
+
+        // stop the replaced call.
+        if (mAudioStream != null) {
+            mAudioStream.join(null);
+        } else {
+            try {
+                mAudioStream = new AudioStream(InetAddress.getByName(
+                        getLocalIp()));
+            } catch (Throwable t) {
+                Log.i(TAG, "transferToNewSession(): " + t);
+            }
+        }
+        if (origin != null) origin.endCall();
+        startAudio();
+    }
+
     private SipSession.Listener createListener() {
         return new SipSession.Listener() {
             @Override
@@ -404,6 +426,13 @@ public class SipAudioCall {
                 mPeerSd = sessionDescription;
                 Log.v(TAG, "onCallEstablished()" + mPeerSd);
 
+                // TODO: how to notify the UI that the remote party is changed
+                if ((mTransferringSession != null)
+                        && (session == mTransferringSession)) {
+                    transferToNewSession();
+                    return;
+                }
+
                 Listener listener = mListener;
                 if (listener != null) {
                     try {
@@ -420,7 +449,17 @@ public class SipAudioCall {
 
             @Override
             public void onCallEnded(SipSession session) {
-                Log.d(TAG, "sip call ended: " + session);
+                Log.d(TAG, "sip call ended: " + session + " mSipSession:" + mSipSession);
+                // reset the trasnferring session if it is the one.
+                if (session == mTransferringSession) {
+                    mTransferringSession = null;
+                    return;
+                }
+                // or ignore the event if the original session is being
+                // transferred to the new one.
+                if ((mTransferringSession != null) ||
+                    (session != mSipSession)) return;
+
                 Listener listener = mListener;
                 if (listener != null) {
                     try {
@@ -488,6 +527,22 @@ public class SipAudioCall {
             @Override
             public void onRegistrationDone(SipSession session, int duration) {
                 // irrelevant
+            }
+
+            @Override
+            public void onCallTransferring(SipSession newSession,
+                    String sessionDescription) {
+                Log.v(TAG, "onCallTransferring mSipSession:"
+                        + mSipSession + " newSession:" + newSession);
+                mTransferringSession = newSession;
+                // session changing request
+                try {
+                    String answer = createAnswer(sessionDescription).encode();
+                    newSession.answerCall(answer, SESSION_TIMEOUT);
+                } catch (Throwable e) {
+                    Log.e(TAG, "onCallTransferring()", e);
+                    newSession.endCall();
+                }
             }
         };
     }

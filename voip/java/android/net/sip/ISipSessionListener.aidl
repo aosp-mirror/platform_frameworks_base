@@ -72,6 +72,14 @@ interface ISipSessionListener {
     void onCallBusy(in ISipSession session);
 
     /**
+     * Called when the call is being transferred to a new one.
+     *
+     * @param newSession the new session that the call will be transferred to
+     * @param sessionDescription the new peer's session description
+     */
+    void onCallTransferring(in ISipSession newSession, String sessionDescription);
+
+    /**
      * Called when an error occurs during session initialization and
      * termination.
      *
