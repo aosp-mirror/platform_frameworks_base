@@ -5121,12 +5121,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             mInputEventConsistencyVerifier.onTrackballEvent(event, 0);
         }
 
-        //Log.i("view", "view=" + this + ", " + event.toString());
-        if (onTrackballEvent(event)) {
-            return true;
-        }
-
-        return false;
+        return onTrackballEvent(event);
     }
 
     /**
@@ -5221,6 +5216,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                 break;
         }
 
+        //noinspection SimplifiableIfStatement
         if (mOnHoverListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
                 && mOnHoverListener.onHover(this, event)) {
             return true;
@@ -5893,6 +5889,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      */
     private boolean isHoverable() {
         final int viewFlags = mViewFlags;
+        //noinspection SimplifiableIfStatement
         if ((viewFlags & ENABLED_MASK) == DISABLED) {
             return false;
         }
@@ -12847,7 +12844,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * A Property wrapper around the <code>alpha</code> functionality handled by the
      * {@link View#setAlpha(float)} and {@link View#getAlpha()} methods.
      */
-    static Property<View, Float> ALPHA = new FloatProperty<View>("alpha") {
+    public static Property<View, Float> ALPHA = new FloatProperty<View>("alpha") {
         @Override
         public void setValue(View object, float value) {
             object.setAlpha(value);
@@ -13571,6 +13568,12 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
          * Indicates whether or not ignoring the DIRTY_MASK flags.
          */
         boolean mIgnoreDirtyState;
+
+        /**
+         * This flag tracks when the mIgnoreDirtyState flag is set during draw(),
+         * to avoid clearing that flag prematurely.
+         */
+        boolean mSetIgnoreDirtyState = false;
 
         /**
          * Indicates whether the view's window is currently in touch mode.

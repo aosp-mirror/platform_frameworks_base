@@ -70,7 +70,9 @@ class GLES20TextureLayer extends GLES20Layer {
         return mSurface;
     }
 
+    @Override
     void update(int width, int height, boolean isOpaque) {
+        super.update(width, height, isOpaque);
         GLES20Canvas.nUpdateTextureLayer(mLayer, width, height, isOpaque, mSurface);
     }
 }

@@ -17,12 +17,11 @@
 
 package android.view;
 
-import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
-import android.os.*;
-import android.util.EventLog;
+import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -199,26 +198,6 @@ public abstract class HardwareRenderer {
     abstract SurfaceTexture createSurfaceTexture(HardwareLayer layer);
 
     /**
-     * Updates the specified layer.
-     * 
-     * @param layer The hardware layer to update
-     * @param width The layer's width
-     * @param height The layer's height
-     * @param isOpaque Whether the layer is opaque
-     */
-    abstract void updateTextureLayer(HardwareLayer layer, int width, int height, boolean isOpaque);
-
-    /**
-     * Copies the content of the specified layer into the specified bitmap.
-     * 
-     * @param layer The hardware layer to copy
-     * @param bitmap The bitmap to copy the layer into
-     * 
-     * @return True if the copy was successful, false otherwise
-     */
-    abstract boolean copyLayer(HardwareLayer layer, Bitmap bitmap);    
-
-    /**
      * Initializes the hardware renderer for the specified surface and setup the
      * renderer for drawing, if needed. This is invoked when the ViewAncestor has
      * potentially lost the hardware renderer. The hardware renderer should be
@@ -339,6 +318,13 @@ public abstract class HardwareRenderer {
             //noinspection PointlessBooleanExpression,ConstantConditions
             mDirtyRegions = RENDER_DIRTY_REGIONS && "true".equalsIgnoreCase(dirtyProperty);
             mDirtyRegionsRequested = mDirtyRegions;
+        }
+
+        /**
+         * Indicates whether this renderer instance can track and update dirty regions.
+         */
+        boolean hasDirtyRegions() {
+            return mDirtyRegions;
         }
 
         /**
@@ -634,19 +620,14 @@ public abstract class HardwareRenderer {
         void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
                 Rect dirty) {
             if (canDraw()) {
-                if (!mDirtyRegions) {
+                if (!hasDirtyRegions()) {
                     dirty = null;
                 }
-
-                attachInfo.mDrawingTime = SystemClock.uptimeMillis();
                 attachInfo.mIgnoreDirtyState = true;
+                attachInfo.mDrawingTime = SystemClock.uptimeMillis();
+
                 view.mPrivateFlags |= View.DRAWN;
                 
-                long startTime;
-                if (ViewDebug.DEBUG_PROFILE_DRAWING) {
-                    startTime = SystemClock.elapsedRealtime();
-                }
-
                 final int surfaceState = checkCurrent();
                 if (surfaceState != SURFACE_STATE_ERROR) {
                     // We had to change the current surface and/or context, redraw everything
@@ -700,26 +681,9 @@ public abstract class HardwareRenderer {
 
                     onPostDraw();
 
-                    if (ViewDebug.DEBUG_PROFILE_DRAWING) {
-                        EventLog.writeEvent(60000, SystemClock.elapsedRealtime() - startTime);
-                    }
-    
                     attachInfo.mIgnoreDirtyState = false;
 
-                    final long swapBuffersStartTime;
-                    if (ViewDebug.DEBUG_LATENCY) {
-                        swapBuffersStartTime = System.nanoTime();
-                    }
-
                     sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
-
-                    if (ViewDebug.DEBUG_LATENCY) {
-                        long now = System.nanoTime();
-                        Log.d(LOG_TAG, "Latency: Spent "
-                                + ((now - swapBuffersStartTime) * 0.000001f)
-                                + "ms waiting for eglSwapBuffers()");
-                    }
-
                     checkEglErrors();
                 }
             }
@@ -818,16 +782,6 @@ public abstract class HardwareRenderer {
         @Override
         SurfaceTexture createSurfaceTexture(HardwareLayer layer) {
             return ((GLES20TextureLayer) layer).getSurfaceTexture();
-        }
-
-        @Override
-        void updateTextureLayer(HardwareLayer layer, int width, int height, boolean isOpaque) {
-            ((GLES20TextureLayer) layer).update(width, height, isOpaque);
-        }
-
-        @Override
-        boolean copyLayer(HardwareLayer layer, Bitmap bitmap) {
-            return ((GLES20Layer) layer).copyInto(bitmap);
         }
 
         static HardwareRenderer create(boolean translucent) {

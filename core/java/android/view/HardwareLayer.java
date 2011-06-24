@@ -16,6 +16,7 @@
 
 package android.view;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 
 /**
@@ -34,7 +35,7 @@ abstract class HardwareLayer {
     int mWidth;
     int mHeight;
 
-    final boolean mOpaque;
+    boolean mOpaque;
 
     /**
      * Creates a new hardware layer with undefined dimensions.
@@ -92,7 +93,7 @@ abstract class HardwareLayer {
     abstract boolean isValid();
 
     /**
-     * Resizes the layer, if necessary, to be at least as large
+     * Resize the layer, if necessary, to be at least as large
      * as the supplied dimensions.
      * 
      * @param width The new desired minimum width for this layer
@@ -124,4 +125,29 @@ abstract class HardwareLayer {
      * @param currentCanvas
      */
     abstract void end(Canvas currentCanvas);
+
+    /**
+     * Copies this layer into the specified bitmap.
+     * 
+     * @param bitmap The bitmap to copy they layer into
+     * 
+     * @return True if the copy was successful, false otherwise
+     */
+    abstract boolean copyInto(Bitmap bitmap);
+
+    /**
+     * Update the layer's properties. This method should be used
+     * when the underlying storage is modified by an external entity.
+     * To change the underlying storage, use the {@link #resize(int, int)}
+     * method instead.
+     * 
+     * @param width The new width of this layer
+     * @param height The new height of this layer
+     * @param isOpaque Whether this layer is opaque
+     */
+    void update(int width, int height, boolean isOpaque) {
+        mWidth = width;
+        mHeight = height;
+        mOpaque = isOpaque;
+    }
 }
