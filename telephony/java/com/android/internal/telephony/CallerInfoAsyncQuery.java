@@ -55,7 +55,7 @@ public class CallerInfoAsyncQuery {
     // PhoneNumberOfflineGeocoder to look up a "geo description"?
     // (TODO: This could become a flag in config.xml if it ever needs to be
     // configured on a per-product basis.)
-    private static final boolean ENABLE_UNKNOWN_NUMBER_GEO_DESCRIPTION = false;
+    private static final boolean ENABLE_UNKNOWN_NUMBER_GEO_DESCRIPTION = true;
 
     /**
      * Interface for a CallerInfoAsyncQueryHandler result return.
