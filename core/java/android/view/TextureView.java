@@ -78,7 +78,7 @@ import android.util.Log;
  *      }
  *
  *      public void onSurfaceTextureUpdated(SurfaceTexture surface) {
- *          // Ignored
+ *          // Invoked every time there's a new Camera preview frame
  *      }
  *  }
  * </pre>
@@ -102,12 +102,9 @@ public class TextureView extends View {
 
     private boolean mOpaque = true;
 
-    private final Runnable mUpdateLayerAction = new Runnable() {
-        @Override
-        public void run() {
-            updateLayer();
-        }
-    };
+    private final Object[] mLock = new Object[0];
+    private boolean mUpdateLayer;
+
     private SurfaceTexture.OnFrameAvailableListener mUpdateListener;
 
     /**
@@ -170,7 +167,7 @@ public class TextureView extends View {
     public void setOpaque(boolean opaque) {
         if (opaque != mOpaque) {
             mOpaque = opaque;
-            if (mLayer != null) updateLayer();
+            updateLayer();
         }
     }
 
@@ -243,6 +240,7 @@ public class TextureView extends View {
      */
     @Override
     public final void draw(Canvas canvas) {
+        applyUpdate();
     }
 
     /**
@@ -268,11 +266,11 @@ public class TextureView extends View {
 
     @Override
     HardwareLayer getHardwareLayer() {
-        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
-            return null;
-        }
-
         if (mLayer == null) {
+            if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
+                return null;
+            }
+
             mLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(mOpaque);
             mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
             nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
@@ -282,7 +280,10 @@ public class TextureView extends View {
                 public void onFrameAvailable(SurfaceTexture surfaceTexture) {
                     // Per SurfaceTexture's documentation, the callback may be invoked
                     // from an arbitrary thread
-                    post(mUpdateLayerAction);
+                    synchronized (mLock) {
+                        mUpdateLayer = true;
+                    }
+                    postInvalidateDelayed(0);
                 }
             };
             mSurface.setOnFrameAvailableListener(mUpdateListener);
@@ -291,6 +292,8 @@ public class TextureView extends View {
                 mListener.onSurfaceTextureAvailable(mSurface, getWidth(), getHeight());
             }
         }
+
+        applyUpdate();
 
         return mLayer;
     }
@@ -313,17 +316,28 @@ public class TextureView extends View {
     }
 
     private void updateLayer() {
-        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
+        mUpdateLayer = true;
+        invalidate();
+    }
+    
+    private void applyUpdate() {
+        if (mLayer == null) {
             return;
         }
 
+        synchronized (mLock) {
+            if (mUpdateLayer) {
+                mUpdateLayer = false;
+            } else {
+                return;
+            }
+        }
+        
         mLayer.update(getWidth(), getHeight(), mOpaque);
 
         if (mListener != null) {
             mListener.onSurfaceTextureUpdated(mSurface);
         }
-
-        invalidate();
     }
 
     /**
