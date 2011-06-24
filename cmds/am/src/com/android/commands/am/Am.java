@@ -33,6 +33,7 @@ import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.util.AndroidException;
 import android.view.IWindowManager;
 
@@ -199,6 +200,10 @@ public class Am {
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             } else if (opt.equals("--grant-write-uri-permission")) {
                 intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            } else if (opt.equals("--exclude-stopped-packages")) {
+                intent.addFlags(Intent.FLAG_EXCLUDE_STOPPED_PACKAGES);
+            } else if (opt.equals("--include-stopped-packages")) {
+                intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
             } else if (opt.equals("--debug-log-resolution")) {
                 intent.addFlags(Intent.FLAG_DEBUG_LOG_RESOLUTION);
             } else if (opt.equals("--activity-brought-to-front")) {
@@ -227,6 +232,10 @@ public class Am {
                 intent.addFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
             } else if (opt.equals("--activity-single-top")) {
                 intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            } else if (opt.equals("--activity-clear-task")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            } else if (opt.equals("--activity-task-on-home")) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_TASK_ON_HOME);
             } else if (opt.equals("--receiver-registered-only")) {
                 intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             } else if (opt.equals("--receiver-replace-pending")) {
@@ -400,7 +409,8 @@ public class Am {
                 argKey = nextArgRequired();
                 argValue = nextArgRequired();
                 args.putString(argKey, argValue);
-            } else if (opt.equals("--no_window_animation")) {
+            } else if (opt.equals("--no_window_animation")
+                    || opt.equals("--no-window-animation")) {
                 no_window_animation = true;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
@@ -440,15 +450,43 @@ public class Am {
         }
     }
 
+    static void removeWallOption() {
+        String props = SystemProperties.get("dalvik.vm.extra-opts");
+        if (props != null && props.contains("-Xprofile:wallclock")) {
+            props = props.replace("-Xprofile:wallclock", "");
+            props = props.trim();
+            SystemProperties.set("dalvik.vm.extra-opts", props);
+        }
+    }
+    
     private void runProfile() throws Exception {
         String profileFile = null;
         boolean start = false;
-        String process = nextArgRequired();
-        ParcelFileDescriptor fd = null;
-
+        boolean wall = false;
+        
+        String process = null;
+        
         String cmd = nextArgRequired();
         if ("start".equals(cmd)) {
             start = true;
+            wall = "--wall".equals(nextOption());
+            process = nextArgRequired();
+        } else if ("stop".equals(cmd)) {
+            process = nextArgRequired();
+        } else {
+            // Compatibility with old syntax: process is specified first.
+            process = cmd;
+            cmd = nextArgRequired();
+            if ("start".equals(cmd)) {
+                start = true;
+            } else if (!"stop".equals(cmd)) {
+                throw new IllegalArgumentException("Profile command " + process + " not valid");
+            }
+        }
+        
+        ParcelFileDescriptor fd = null;
+
+        if (start) {
             profileFile = nextArgRequired();
             try {
                 fd = ParcelFileDescriptor.open(
@@ -460,12 +498,27 @@ public class Am {
                 System.err.println("Error: Unable to open file: " + profileFile);
                 return;
             }
-        } else if (!"stop".equals(cmd)) {
-            throw new IllegalArgumentException("Profile command " + cmd + " not valid");
         }
 
-        if (!mAm.profileControl(process, start, profileFile, fd)) {
-            throw new AndroidException("PROFILE FAILED on process " + process);
+        try {
+            if (wall) {
+                // XXX doesn't work -- this needs to be set before booting.
+                String props = SystemProperties.get("dalvik.vm.extra-opts");
+                if (props == null || !props.contains("-Xprofile:wallclock")) {
+                    props = props + " -Xprofile:wallclock";
+                    //SystemProperties.set("dalvik.vm.extra-opts", props);
+                }
+            } else if (start) {
+                //removeWallOption();
+            }
+            if (!mAm.profileControl(process, start, profileFile, fd)) {
+                wall = false;
+                throw new AndroidException("PROFILE FAILED on process " + process);
+            }
+        } finally {
+            if (!wall) {
+                //removeWallOption();
+            }
         }
     }
 
@@ -1012,62 +1065,76 @@ public class Am {
     private static void showUsage() {
         System.err.println(
                 "usage: am [subcommand] [options]\n" +
+                "usage: am start [-D] [-W] <INTENT>\n" +
+                "       am startservice <INTENT>\n" +
+                "       am force-stop <PACKAGE>\n" +
+                "       am broadcast <INTENT>\n" +
+                "       am instrument [-r] [-e <NAME> <VALUE>] [-p] [-w]\n" +
+                "               [--no-window-animation] <COMPONENT>\n" +
+                "       am profile start <PROCESS> <FILE>\n" +
+                "       am profile stop <PROCESS>\n" +
+                "       am dumpheap [flags] <PROCESS> <FILE>\n" +
+                "       am monitor [--gdb <port>]\n" +
+                "       am screen-compat [on|off] <PACKAGE>\n" +
+                "       am display-size [reset|MxN]\n" +
                 "\n" +
-                "    start an Activity: am start [-D] [-W] <INTENT>\n" +
-                "        -D: enable debugging\n" +
-                "        -W: wait for launch to complete\n" +
+                "am start: start an Activity.  Options are:\n" +
+                "    -D: enable debugging\n" +
+                "    -W: wait for launch to complete\n" +
                 "\n" +
-                "    start a Service: am startservice <INTENT>\n" +
+                "am startservice: start a Service.\n" +
                 "\n" +
-                "    force stop everything associated with a package: force-stop <package>\n" +
+                "am force-stop: force stop everything associated with <PACKAGE>.\n" +
                 "\n" +
-                "    send a broadcast Intent: am broadcast <INTENT>\n" +
+                "am broadcast: send a broadcast Intent.\n" +
                 "\n" +
-                "    start an Instrumentation: am instrument [flags] <COMPONENT>\n" +
-                "        -r: print raw results (otherwise decode REPORT_KEY_STREAMRESULT)\n" +
-                "        -e <NAME> <VALUE>: set argument <NAME> to <VALUE>\n" +
-                "        -p <FILE>: write profiling data to <FILE>\n" +
-                "        -w: wait for instrumentation to finish before returning\n" +
+                "am instrument: start an Instrumentation.  Typically this target <COMPONENT>\n" +
+                "  is the form <TEST_PACKAGE>/<RUNNER_CLASS>.  Options are:\n" +
+                "    -r: print raw results (otherwise decode REPORT_KEY_STREAMRESULT).  Use with\n" +
+                "        [-e perf true] to generate raw output for performance measurements.\n" +
+                "    -e <NAME> <VALUE>: set argument <NAME> to <VALUE>.  For test runners a\n" +
+                "        common form is [-e <testrunner_flag> <value>[,<value>...]].\n" +
+                "    -p <FILE>: write profiling data to <FILE>\n" +
+                "    -w: wait for instrumentation to finish before returning.  Required for\n" +
+                "        test runners.\n" +
+                "    --no-window-animation: turn off window animations will running.\n" +
                 "\n" +
-                "    run a test package against an application: am instrument [flags] <TEST_PACKAGE>/<RUNNER_CLASS>\n" +
-                "        -e <testrunner_flag> <testrunner_value> [,<testrunner_value>]\n" +
-                "        -w wait for the test to finish (required)\n" +
-                "        -r use with -e perf true to generate raw output for performance measurements\n" +
+                "am profile: start and stop profiler on a process.\n" +
                 "\n" +
-                "    start profiling: am profile <PROCESS> start <FILE>\n" +
-                "    stop profiling: am profile <PROCESS> stop\n" +
-                "    dump heap: am dumpheap [flags] <PROCESS> <FILE>\n" +
-                "        -n: dump native heap instead of managed heap\n" +
+                "am dumpheap: dump the heap of a process.  Options are:\n" +
+                "    -n: dump native heap instead of managed heap\n" +
                 "\n" +
-                "    start monitoring: am monitor [--gdb <port>]\n" +
-                "        --gdb: start gdbserv on the given port at crash/ANR\n" +
+                "am monitor: start monitoring for crashes or ANRs.\n" +
+                "    --gdb: start gdbserv on the given port at crash/ANR\n" +
                 "\n" +
-                "    control screen compatibility: am screen-compat [on|off] [package]\n" +
+                "am screen-compat: control screen compatibility mode of <PACKAGE>.\n" +
                 "\n" +
-                "    override display size: am display-size [reset|MxN]\n" +
+                "am display-size: override display size.\n" +
                 "\n" +
-                "    <INTENT> specifications include these flags:\n" +
-                "        [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
-                "        [-c <CATEGORY> [-c <CATEGORY>] ...]\n" +
-                "        [-e|--es <EXTRA_KEY> <EXTRA_STRING_VALUE> ...]\n" +
-                "        [--esn <EXTRA_KEY> ...]\n" +
-                "        [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
-                "        [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
-                "        [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]\n" +
-                "        [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
-                "        [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
-                "        [-n <COMPONENT>] [-f <FLAGS>]\n" +
-                "        [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
-                "        [--debug-log-resolution]\n" +
-                "        [--activity-brought-to-front] [--activity-clear-top]\n" +
-                "        [--activity-clear-when-task-reset] [--activity-exclude-from-recents]\n" +
-                "        [--activity-launched-from-history] [--activity-multiple-task]\n" +
-                "        [--activity-no-animation] [--activity-no-history]\n" +
-                "        [--activity-no-user-action] [--activity-previous-is-top]\n" +
-                "        [--activity-reorder-to-front] [--activity-reset-task-if-needed]\n" +
-                "        [--activity-single-top]\n" +
-                "        [--receiver-registered-only] [--receiver-replace-pending]\n" +
-                "        [<URI>]\n"
+                "<INTENT> specifications include these flags and arguments:\n" +
+                "    [-a <ACTION>] [-d <DATA_URI>] [-t <MIME_TYPE>]\n" +
+                "    [-c <CATEGORY> [-c <CATEGORY>] ...]\n" +
+                "    [-e|--es <EXTRA_KEY> <EXTRA_STRING_VALUE> ...]\n" +
+                "    [--esn <EXTRA_KEY> ...]\n" +
+                "    [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
+                "    [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
+                "    [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]\n" +
+                "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
+                "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
+                "    [-n <COMPONENT>] [-f <FLAGS>]\n" +
+                "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
+                "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
+                "    [--include-stopped-packages]\n" +
+                "    [--activity-brought-to-front] [--activity-clear-top]\n" +
+                "    [--activity-clear-when-task-reset] [--activity-exclude-from-recents]\n" +
+                "    [--activity-launched-from-history] [--activity-multiple-task]\n" +
+                "    [--activity-no-animation] [--activity-no-history]\n" +
+                "    [--activity-no-user-action] [--activity-previous-is-top]\n" +
+                "    [--activity-reorder-to-front] [--activity-reset-task-if-needed]\n" +
+                "    [--activity-single-top] [--activity-clear-task]\n" +
+                "    [--activity-task-on-home]\n" +
+                "    [--receiver-registered-only] [--receiver-replace-pending]\n" +
+                "    [<URI>]\n"
                 );
     }
 }
