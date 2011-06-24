@@ -285,7 +285,8 @@ BackupDataReader::ReadNextHeader(bool* done, int* type)
             break;
         }
         default:
-            LOGD("Chunk header at %d has invalid type: 0x%08x", (int)m_pos, (int)m_header.type);
+            LOGD("Chunk header at %d has invalid type: 0x%08x",
+                    (int)(m_pos - sizeof(m_header)), (int)m_header.type);
             m_status = EINVAL;
     }
     
