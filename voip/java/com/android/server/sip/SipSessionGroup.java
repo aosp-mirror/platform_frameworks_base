@@ -1259,11 +1259,13 @@ class SipSessionGroup implements SipListener {
 
             private boolean mPortChanged = false;
             private int mRPort = 0;
+            private int mInterval; // just for debugging
 
             // @param interval in seconds
             void start(int interval, KeepAliveProcessCallback callback) {
                 if (mRunning) return;
                 mRunning = true;
+                mInterval = interval;
                 mCallback = new KeepAliveProcessCallbackProxy(callback);
                 mWakeupTimer.set(interval * 1000, this);
                 if (DEBUG) {
@@ -1311,7 +1313,7 @@ class SipSessionGroup implements SipListener {
 
                     if (DEBUG_PING) {
                         Log.d(TAG, "keepalive: " + mLocalProfile.getUriString()
-                                + " --> " + mPeerProfile);
+                                + " --> " + mPeerProfile + ", interval=" + mInterval);
                     }
                     try {
                         sendKeepAlive();
