@@ -28,6 +28,9 @@
 #define WIFI_PKG_NAME "android/net/wifi/WifiNative"
 #define BUF_SIZE 256
 
+//TODO: This file can be refactored to push a lot of the functionality to java
+//with just a few JNI calls - doBoolean/doInt/doString
+
 namespace android {
 
 static jboolean sScanModeActive = false;
@@ -537,6 +540,35 @@ static void android_net_wifi_setScanIntervalCommand(JNIEnv* env, jobject, jint s
 }
 
 
+static jboolean android_net_wifi_doBooleanCommand(JNIEnv* env, jobject, jstring javaCommand)
+{
+    ScopedUtfChars command(env, javaCommand);
+    if (command.c_str() == NULL) {
+        return JNI_FALSE;
+    }
+    return doBooleanCommand("OK", "%s", command.c_str());
+}
+
+static jint android_net_wifi_doIntCommand(JNIEnv* env, jobject, jstring javaCommand)
+{
+    ScopedUtfChars command(env, javaCommand);
+    if (command.c_str() == NULL) {
+        return -1;
+    }
+    return doIntCommand("%s", command.c_str());
+}
+
+static jstring android_net_wifi_doStringCommand(JNIEnv* env, jobject, jstring javaCommand)
+{
+    ScopedUtfChars command(env, javaCommand);
+    if (command.c_str() == NULL) {
+        return NULL;
+    }
+    return doStringCommand(env, "%s", command.c_str());
+}
+
+
+
 // ----------------------------------------------------------------------------
 
 /*
@@ -608,6 +640,9 @@ static JNINativeMethod gWifiMethods[] = {
         (void*) android_net_wifi_setCountryCodeCommand},
     { "enableBackgroundScanCommand", "(Z)V", (void*) android_net_wifi_enableBackgroundScanCommand},
     { "setScanIntervalCommand", "(I)V", (void*) android_net_wifi_setScanIntervalCommand},
+    { "doBooleanCommand", "(Ljava/lang/String;)Z", (void*) android_net_wifi_doBooleanCommand},
+    { "doIntCommand", "(Ljava/lang/String;)I", (void*) android_net_wifi_doIntCommand},
+    { "doStringCommand", "(Ljava/lang/String;)Ljava/lang/String;", (void*) android_net_wifi_doStringCommand},
 };
 
 int register_android_net_wifi_WifiManager(JNIEnv* env)

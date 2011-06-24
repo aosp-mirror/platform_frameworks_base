@@ -16,6 +16,16 @@
 
 package android.net.wifi;
 
+import android.net.wifi.p2p.WifiP2pConfig;
+import android.net.wifi.p2p.WifiP2pGroup;
+import android.net.wifi.p2p.WifiP2pDevice;
+import android.util.Log;
+
+import java.io.InputStream;
+import java.lang.Process;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Native calls for sending requests to the supplicant daemon, and for
  * receiving asynchronous events. All methods of the form "xxxxCommand()"
@@ -27,6 +37,10 @@ package android.net.wifi;
  * Also, note that all WifiNative calls should happen in the
  * WifiStateTracker class except for waitForEvent() call which is
  * on a separate monitor channel for WifiMonitor
+ *
+ * TODO: clean up the API and move the functionality from JNI to here. We should
+ * be able to get everything done with doBooleanCommand, doIntCommand and
+ * doStringCommand native commands
  *
  * {@hide}
  */
@@ -186,4 +200,141 @@ public class WifiNative {
     public native static void enableBackgroundScanCommand(boolean enable);
 
     public native static void setScanIntervalCommand(int scanInterval);
+
+    private native static boolean doBooleanCommand(String command);
+
+    //STOPSHIP: remove this after native interface works and replace all
+    //calls to doBooleanTempCommand() with doBooleanCommand()
+    private static boolean doBooleanTempCommand(String command) {
+        try {
+            String str = "/system/bin/wpa_cli " + command;
+            Log.e("WifiNative", "===> " + str);
+            Runtime.getRuntime()
+                .exec(str).waitFor();
+        } catch (Exception e) {
+            Log.e("WifiNative", "exception with doBooleanTempCommand");
+            return false;
+        }
+        return true;
+    }
+
+    private static String doStringTempCommand(String command) {
+        String lines[] = null;
+        try {
+            String str = "/system/bin/wpa_cli " + command;
+            Log.e("WifiNative", "===> " + str);
+            Process p = Runtime.getRuntime()
+                .exec(str);
+            InputStream in = p.getInputStream();
+            p.waitFor();
+            byte[] bytes=new byte[in.available()];
+            in.read(bytes);
+            String s = new String(bytes);
+            Log.e("WifiNative", "====> doString: " + s);
+            lines = s.split("\\r?\\n");
+        } catch (Exception e) {
+            Log.e("WifiNative", "exception with doBooleanTempCommand");
+            return null;
+        }
+        return lines[1];
+    }
+
+    private native static int doIntCommand(String command);
+
+    private native static String doStringCommand(String command);
+
+    public static boolean p2pFind() {
+        return doBooleanTempCommand("p2p_find");
+    }
+
+    public static boolean p2pFind(int timeout) {
+        if (timeout <= 0) {
+            return p2pFind();
+        }
+        return doBooleanTempCommand("p2p_find " + timeout);
+    }
+
+    public static boolean p2pListen() {
+        return doBooleanTempCommand("p2p_listen");
+    }
+
+    public static boolean p2pListen(int timeout) {
+        if (timeout <= 0) {
+            return p2pListen();
+        }
+        return doBooleanTempCommand("p2p_listen " + timeout);
+    }
+
+    public static boolean p2pFlush() {
+        return doBooleanTempCommand("p2p_flush");
+    }
+
+    /* p2p_connect <peer device address> <pbc|pin|PIN#> [label|display|keypad]
+        [persistent] [join|auth] [go_intent=<0..15>] [freq=<in MHz>] */
+    public static String p2pConnect(WifiP2pConfig config) {
+        if (config == null) return null;
+        List<String> args = new ArrayList<String>();
+        WpsConfiguration wpsConfig = config.wpsConfig;
+        args.add(config.deviceAddress);
+
+        switch (wpsConfig.setup) {
+            case PBC:
+                args.add("pbc");
+                break;
+            case DISPLAY:
+                //TODO: pass the pin back for display
+                args.add("pin");
+                args.add("display");
+                break;
+            case KEYPAD:
+                args.add(wpsConfig.pin);
+                args.add("keypad");
+                break;
+            case LABEL:
+                args.add(wpsConfig.pin);
+                args.add("label");
+            default:
+                break;
+        }
+
+        if (config.isPersistent) args.add("persistent");
+        if (config.joinExistingGroup) args.add("join");
+
+        args.add("go_intent=" + config.groupOwnerIntent);
+        if (config.channel > 0) args.add("freq=" + config.channel);
+
+        String command = "p2p_connect ";
+        for (String s : args) command += s + " ";
+
+        return doStringTempCommand(command);
+    }
+
+    public static boolean p2pGroupAdd() {
+        return doBooleanTempCommand("p2p_group_add");
+    }
+
+    public static boolean p2pGroupRemove(String iface) {
+        if (iface == null) return false;
+        return doBooleanTempCommand("p2p_group_remove " + iface);
+    }
+
+    public static boolean p2pReject(String deviceAddress) {
+        return doBooleanTempCommand("p2p_reject " + deviceAddress);
+    }
+
+    /* Invite a peer to a group */
+    public static boolean p2pInvite(WifiP2pGroup group, String deviceAddress) {
+        if (group == null || deviceAddress == null) return false;
+        return doBooleanTempCommand("p2p_invite group=" + group.getInterface()
+                + " peer=" + deviceAddress + " go_dev_addr=" + group.getOwner().deviceAddress);
+    }
+
+    public static boolean p2pWpsPbc() {
+        return doBooleanTempCommand("wps_pbc");
+    }
+
+    public static boolean p2pWpsPin(String pin) {
+        return doBooleanTempCommand("wps_pin any " + pin);
+    }
+
 }

@@ -41,6 +41,9 @@ public class Protocol {
     /** Non system protocols */
     public static final int BASE_WIFI                                               = 0x00020000;
     public static final int BASE_WIFI_WATCHDOG                                      = 0x00021000;
+    public static final int BASE_WIFI_P2P_MANAGER                                   = 0x00022000;
+    public static final int BASE_WIFI_P2P_SERVICE                                   = 0x00023000;
+    public static final int BASE_WIFI_MONITOR                                       = 0x00024000;
     public static final int BASE_DHCP                                               = 0x00030000;
     public static final int BASE_DATA_CONNECTION                                    = 0x00040000;
     public static final int BASE_DATA_CONNECTION_AC                                 = 0x00041000;

@@ -1,0 +1,161 @@
+/*
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package android.net.wifi.p2p;
+
+import android.net.wifi.WpsConfiguration;
+import android.net.wifi.WpsConfiguration.Setup;
+import android.os.Parcelable;
+import android.os.Parcel;
+
+/**
+ * A class representing a Wi-Fi P2p configuration
+ * @hide
+ */
+public class WifiP2pConfig implements Parcelable {
+
+    /**
+     * Device name
+     */
+    public String deviceName;
+
+    /**
+     * Device address
+     */
+    public String deviceAddress;
+
+    /**
+     * WPS configuration
+     */
+    public WpsConfiguration wpsConfig;
+
+    /**
+     * This is an integer value between 0 and 15 where 0 indicates the least
+     * inclination to be a group owner and 15 indicates the highest inclination
+     * to be a group owner.
+     */
+    public int groupOwnerIntent;
+
+    public boolean isPersistent;
+
+    public boolean joinExistingGroup;
+
+    /**
+     * Channel frequency in MHz
+     */
+    public int channel;
+
+    public WifiP2pConfig() {
+        //set defaults
+        wpsConfig = new WpsConfiguration();
+        wpsConfig.setup = Setup.PBC;
+    }
+
+    /* P2P-GO-NEG-REQUEST 42:fc:89:a8:96:09 dev_passwd_id=4 */
+    public WifiP2pConfig(String supplicantEvent) throws IllegalArgumentException {
+        String[] tokens = supplicantEvent.split(" ");
+
+        if (tokens.length < 2 || !tokens[0].equals("P2P-GO-NEG-REQUEST")) {
+            throw new IllegalArgumentException("Malformed supplicant event");
+        }
+
+        deviceAddress = tokens[1];
+        wpsConfig = new WpsConfiguration();
+
+        if (tokens.length > 2) {
+            String[] nameVal = tokens[2].split("=");
+            int devPasswdId;
+            try {
+                devPasswdId = Integer.parseInt(nameVal[1]);
+            } catch (NumberFormatException e) {
+                devPasswdId = 0;
+            }
+            //As defined in wps/wps_defs.h
+            switch (devPasswdId) {
+                case 0x00:
+                    wpsConfig.setup = Setup.LABEL;
+                    break;
+                case 0x01:
+                    wpsConfig.setup = Setup.KEYPAD;
+                    break;
+                case 0x04:
+                    wpsConfig.setup = Setup.PBC;
+                    break;
+                case 0x05:
+                    wpsConfig.setup = Setup.DISPLAY;
+                    break;
+                default:
+                    wpsConfig.setup = Setup.PBC;
+                    break;
+            }
+        }
+    }
+
+    public String toString() {
+        StringBuffer sbuf = new StringBuffer();
+        sbuf.append("Device: ").append(deviceName);
+        sbuf.append("\n address: ").append(deviceAddress);
+        sbuf.append("\n wps: ").append(wpsConfig);
+        sbuf.append("\n groupOwnerIntent: ").append(groupOwnerIntent);
+        sbuf.append("\n isPersistent: ").append(isPersistent);
+        sbuf.append("\n joinExistingGroup: ").append(joinExistingGroup);
+        sbuf.append("\n channel: ").append(channel);
+        return sbuf.toString();
+    }
+
+    /** Implement the Parcelable interface {@hide} */
+    public int describeContents() {
+        return 0;
+    }
+
+    /** copy constructor {@hide} */
+    public WifiP2pConfig(WifiP2pConfig source) {
+        if (source != null) {
+            //TODO: implement
+       }
+    }
+
+    /** Implement the Parcelable interface {@hide} */
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(deviceName);
+        dest.writeString(deviceAddress);
+        dest.writeParcelable(wpsConfig, flags);
+        dest.writeInt(groupOwnerIntent);
+        dest.writeInt(isPersistent ? 1 : 0);
+        dest.writeInt(joinExistingGroup ? 1 : 0);
+        dest.writeInt(channel);
+    }
+
+    /** Implement the Parcelable interface {@hide} */
+    public static final Creator<WifiP2pConfig> CREATOR =
+        new Creator<WifiP2pConfig>() {
+            public WifiP2pConfig createFromParcel(Parcel in) {
+                WifiP2pConfig config = new WifiP2pConfig();
+                config.deviceName = in.readString();
+                config.deviceAddress = in.readString();
+                config.wpsConfig = (WpsConfiguration) in.readParcelable(null);
+                config.groupOwnerIntent = in.readInt();
+                config.isPersistent = (in.readInt() == 1);
+                config.joinExistingGroup = (in.readInt() == 1);
+                config.channel = in.readInt();
+                return config;
+            }
+
+            public WifiP2pConfig[] newArray(int size) {
+                return new WifiP2pConfig[size];
+            }
+        };
+}

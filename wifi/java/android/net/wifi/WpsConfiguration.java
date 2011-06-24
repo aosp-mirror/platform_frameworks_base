@@ -30,13 +30,16 @@ import java.util.BitSet;
  */
 public class WpsConfiguration implements Parcelable {
 
+    /* Wi-Fi Protected Setup. www.wi-fi.org/wifi-protected-setup has details */
     public enum Setup {
-        /* Wi-Fi protected setup push button configuration */
+        /* Push button configuration */
         PBC,
-        /* Wi-Fi protected setup pin method configuration with pin obtained from access point */
-        PIN_FROM_ACCESS_POINT,
-        /* Wi-Fi protected setup pin method configuration with pin obtained from device */
-        PIN_FROM_DEVICE,
+        /* Display pin method configuration - pin is generated and displayed on device */
+        DISPLAY,
+        /* Keypad pin method configuration - pin is entered on device */
+        KEYPAD,
+        /* Label pin method configuration - pin is obtained from a printed label */
+        LABEL,
         /* Invalid config */
         INVALID
     }
