@@ -16007,6 +16007,7 @@ package android.provider {
 
   protected static abstract interface ContactsContract.GroupsColumns {
     field public static final java.lang.String AUTO_ADD = "auto_add";
+    field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String DELETED = "deleted";
     field public static final java.lang.String FAVORITES = "favorites";
     field public static final java.lang.String GROUP_IS_READ_ONLY = "group_is_read_only";
@@ -16134,6 +16135,7 @@ package android.provider {
   protected static abstract interface ContactsContract.RawContactsColumns {
     field public static final java.lang.String AGGREGATION_MODE = "aggregation_mode";
     field public static final java.lang.String CONTACT_ID = "contact_id";
+    field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String DELETED = "deleted";
     field public static final java.lang.String RAW_CONTACT_IS_READ_ONLY = "raw_contact_is_read_only";
     field public static final java.lang.String RAW_CONTACT_IS_USER_PROFILE = "raw_contact_is_user_profile";

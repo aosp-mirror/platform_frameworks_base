@@ -1871,6 +1871,18 @@ public final class ContactsContract {
         public static final String CONTACT_ID = "contact_id";
 
         /**
+         * The data set within the account that this row belongs to.  This allows
+         * multiple sync adapters for the same account type to distinguish between
+         * each others' data.
+         *
+         * This is empty by default, and is completely optional.  It only needs to
+         * be populated if multiple sync adapters are entering distinct data for
+         * the same account type and account name.
+         * <P>Type: TEXT</P>
+         */
+        public static final String DATA_SET = "data_set";
+
+        /**
          * The aggregation mode for this contact.
          * <P>Type: INTEGER</P>
          */
@@ -2192,8 +2204,8 @@ public final class ContactsContract {
      * <td>The name of the account instance to which this row belongs, which when paired with
      * {@link #ACCOUNT_TYPE} identifies a specific account.
      * For example, this will be the Gmail address if it is a Google account.
-     * It should be set at the time
-     * the raw contact is inserted and never changed afterwards.</td>
+     * It should be set at the time the raw contact is inserted and never
+     * changed afterwards.</td>
      * </tr>
      * <tr>
      * <td>String</td>
@@ -2203,12 +2215,35 @@ public final class ContactsContract {
      * <p>
      * The type of account to which this row belongs, which when paired with
      * {@link #ACCOUNT_NAME} identifies a specific account.
-     * It should be set at the time
-     * the raw contact is inserted and never changed afterwards.
+     * It should be set at the time the raw contact is inserted and never
+     * changed afterwards.
      * </p>
      * <p>
      * To ensure uniqueness, new account types should be chosen according to the
      * Java package naming convention.  Thus a Google account is of type "com.google".
+     * </p>
+     * </td>
+     * </tr>
+     * <tr>
+     * <td>String</td>
+     * <td>{@link #DATA_SET}</td>
+     * <td>read/write-once</td>
+     * <td>
+     * <p>
+     * The data set within the account that this row belongs to.  This allows
+     * multiple sync adapters for the same account type to distinguish between
+     * each others' data.  The combination of {@link #ACCOUNT_TYPE},
+     * {@link #ACCOUNT_NAME}, and {@link #DATA_SET} identifies a set of data
+     * that is associated with a single sync adapter.
+     * </p>
+     * <p>
+     * This is empty by default, and is completely optional.  It only needs to
+     * be populated if multiple sync adapters are entering distinct data for
+     * the same account type and account name.
+     * </p>
+     * <p>
+     * It should be set at the time the raw contact is inserted and never
+     * changed afterwards.
      * </p>
      * </td>
      * </tr>
@@ -2219,10 +2254,10 @@ public final class ContactsContract {
      * <td>String that uniquely identifies this row to its source account.
      * Typically it is set at the time the raw contact is inserted and never
      * changed afterwards. The one notable exception is a new raw contact: it
-     * will have an account name and type, but no source id. This
-     * indicates to the sync adapter that a new contact needs to be created
-     * server-side and its ID stored in the corresponding SOURCE_ID field on
-     * the phone.
+     * will have an account name and type (and possibly a data set), but no
+     * source id. This indicates to the sync adapter that a new contact needs
+     * to be created server-side and its ID stored in the corresponding
+     * SOURCE_ID field on the phone.
      * </td>
      * </tr>
      * <tr>
@@ -6172,6 +6207,18 @@ public final class ContactsContract {
      */
     protected interface GroupsColumns {
         /**
+         * The data set within the account that this group belongs to.  This allows
+         * multiple sync adapters for the same account type to distinguish between
+         * each others' group data.
+         *
+         * This is empty by default, and is completely optional.  It only needs to
+         * be populated if multiple sync adapters are entering distinct group data
+         * for the same account type and account name.
+         * <P>Type: TEXT</P>
+         */
+        public static final String DATA_SET = "data_set";
+
+        /**
          * The display title of this group.
          * <p>
          * Type: TEXT
@@ -6296,6 +6343,29 @@ public final class ContactsContract {
      * <td>Row ID. Sync adapter should try to preserve row IDs during updates.
      * In other words, it would be a really bad idea to delete and reinsert a
      * group. A sync adapter should always do an update instead.</td>
+     * </tr>
+     # <tr>
+     * <td>String</td>
+     * <td>{@link #DATA_SET}</td>
+     * <td>read/write-once</td>
+     * <td>
+     * <p>
+     * The data set within the account that this group belongs to.  This allows
+     * multiple sync adapters for the same account type to distinguish between
+     * each others' group data.  The combination of {@link #ACCOUNT_TYPE},
+     * {@link #ACCOUNT_NAME}, and {@link #DATA_SET} identifies a set of data
+     * that is associated with a single sync adapter.
+     * </p>
+     * <p>
+     * This is empty by default, and is completely optional.  It only needs to
+     * be populated if multiple sync adapters are entering distinct data for
+     * the same account type and account name.
+     * </p>
+     * <p>
+     * It should be set at the time the group is inserted and never changed
+     * afterwards.
+     * </p>
+     * </td>
      * </tr>
      * <tr>
      * <td>String</td>
