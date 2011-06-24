@@ -278,6 +278,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
     RadioAttributes[] mRadioAttributes;
 
+    // the set of network types that can only be enabled by system/sig apps
+    List mProtectedNetworks;
+
     public ConnectivityService(
             Context context, INetworkManagementService netd, INetworkPolicyManager policyManager) {
         if (DBG) log("ConnectivityService starting up");
@@ -378,6 +381,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mNetworksDefined++;
             } catch(Exception e) {
                 // ignore it - leave the entry null
+            }
+        }
+
+        mProtectedNetworks = new ArrayList<Integer>();
+        int[] protectedNetworks = context.getResources().getIntArray(
+                com.android.internal.R.array.config_protectedNetworks);
+        for (int p : protectedNetworks) {
+            if ((mNetConfigs[p] != null) && (mProtectedNetworks.contains(p) == false)) {
+                mProtectedNetworks.add(p);
+            } else {
+                if (DBG) loge("Ignoring protectedNetwork " + p);
             }
         }
 
@@ -802,6 +816,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 usedNetworkType = networkType;
             }
         }
+
+        if (mProtectedNetworks.contains(usedNetworkType)) {
+            enforceConnectivityInternalPermission();
+        }
+
         NetworkStateTracker network = mNetTrackers[usedNetworkType];
         if (network != null) {
             Integer currentPid = new Integer(getCallingPid());
@@ -1012,6 +1031,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     public boolean requestRouteToHostAddress(int networkType, byte[] hostAddress) {
         enforceChangePermission();
+        if (mProtectedNetworks.contains(networkType)) {
+            enforceConnectivityInternalPermission();
+        }
+
         if (!ConnectivityManager.isNetworkTypeValid(networkType)) {
             return false;
         }
@@ -1129,7 +1152,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     public void setDataDependency(int networkType, boolean met) {
-        enforceChangePermission();
+        enforceConnectivityInternalPermission();
+
         if (DBG) {
             log("setDataDependency(" + networkType + ", " + met + ")");
         }
