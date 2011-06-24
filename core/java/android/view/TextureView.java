@@ -317,7 +317,7 @@ public class TextureView extends View {
             return;
         }
 
-        mAttachInfo.mHardwareRenderer.updateTextureLayer(mLayer, getWidth(), getHeight(), mOpaque);
+        mLayer.update(getWidth(), getHeight(), mOpaque);
 
         if (mListener != null) {
             mListener.onSurfaceTextureUpdated(mSurface);
@@ -402,7 +402,7 @@ public class TextureView extends View {
      */
     public Bitmap getBitmap(Bitmap bitmap) {
         if (bitmap != null && isAvailable()) {
-            mAttachInfo.mHardwareRenderer.copyLayer(mLayer, bitmap);
+            mLayer.copyInto(bitmap);
         }
         return bitmap;
     }

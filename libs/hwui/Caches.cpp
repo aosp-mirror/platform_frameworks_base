@@ -57,7 +57,7 @@ Caches::Caches(): Singleton<Caches>(), blend(false), lastSrcMode(GL_ZERO),
     LOGD("Enabling debug mode %d", mDebugLevel);
 
 #if RENDER_LAYERS_AS_REGIONS
-    LOGD("Layers will be composited as regions");
+    INIT_LOGD("Layers will be composited as regions");
 #endif
 }
 

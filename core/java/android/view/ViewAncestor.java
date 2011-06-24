@@ -288,10 +288,6 @@ public final class ViewAncestor extends Handler implements ViewParent,
 
     private final int mDensity;
 
-    // This flag tracks when the mIgnoreDirtyState flag is set during draw(), to avoid
-    // clearing that flag prematurely
-    private boolean mSetIgnoreDirtyState = false;
-
     /**
      * Consistency verifier for debugging purposes.
      */
@@ -676,7 +672,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
             }
         }
         if (!mDirty.isEmpty() && !mDirty.contains(dirty)) {
-            mSetIgnoreDirtyState = true;
+            mAttachInfo.mSetIgnoreDirtyState = true;
             mAttachInfo.mIgnoreDirtyState = true;
         }
         mDirty.union(dirty);
@@ -1882,10 +1878,10 @@ public final class ViewAncestor extends Handler implements ViewParent,
                         }
                         canvas.setScreenDensity(scalingRequired
                                 ? DisplayMetrics.DENSITY_DEVICE : 0);
-                        mSetIgnoreDirtyState = false;
+                        mAttachInfo.mSetIgnoreDirtyState = false;
                         mView.draw(canvas);
                     } finally {
-                        if (!mSetIgnoreDirtyState) {
+                        if (!mAttachInfo.mSetIgnoreDirtyState) {
                             // Only clear the flag if it was not set during the mView.draw() call
                             mAttachInfo.mIgnoreDirtyState = false;
                         }

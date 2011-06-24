@@ -22055,6 +22055,7 @@ package android.view {
     method protected boolean verifyDrawable(android.graphics.drawable.Drawable);
     method public boolean willNotCacheDrawing();
     method public boolean willNotDraw();
+    field public static android.util.Property ALPHA;
     field public static final int DRAWING_CACHE_QUALITY_AUTO = 0; // 0x0
     field public static final int DRAWING_CACHE_QUALITY_HIGH = 1048576; // 0x100000
     field public static final int DRAWING_CACHE_QUALITY_LOW = 524288; // 0x80000
