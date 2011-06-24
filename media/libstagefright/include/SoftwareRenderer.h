@@ -47,6 +47,7 @@ private:
     sp<ANativeWindow> mNativeWindow;
     int32_t mWidth, mHeight;
     int32_t mCropLeft, mCropTop, mCropRight, mCropBottom;
+    int32_t mCropWidth, mCropHeight;
 
     SoftwareRenderer(const SoftwareRenderer &);
     SoftwareRenderer &operator=(const SoftwareRenderer &);
