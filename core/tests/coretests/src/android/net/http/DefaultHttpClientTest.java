@@ -28,9 +28,17 @@ import java.io.Reader;
 import java.io.StringWriter;
 import junit.framework.TestCase;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthenticationException;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 
+/**
+ * Tests for various regressions and problems with DefaultHttpClient. This is
+ * not a comprehensive test!
+ */
 public final class DefaultHttpClientTest extends TestCase {
 
     private MockWebServer server = new MockWebServer();
@@ -86,5 +94,41 @@ public final class DefaultHttpClientTest extends TestCase {
         }
         reader.close();
         return writer.toString();
+    }
+
+    // http://code.google.com/p/android/issues/detail?id=16051
+    public void testDigestSchemeAlgorithms() throws Exception {
+        authenticateDigestAlgorithm("MD5");
+        authenticateDigestAlgorithm("MD5-sess");
+        authenticateDigestAlgorithm("md5");
+        authenticateDigestAlgorithm("md5-sess");
+        authenticateDigestAlgorithm("md5-SESS");
+        authenticateDigestAlgorithm("MD5-SESS");
+        try {
+            authenticateDigestAlgorithm("MD5-");
+        } catch (AuthenticationException expected) {
+        }
+        try {
+            authenticateDigestAlgorithm("MD6");
+        } catch (AuthenticationException expected) {
+        }
+        try {
+            authenticateDigestAlgorithm("MD");
+        } catch (AuthenticationException expected) {
+        }
+        try {
+            authenticateDigestAlgorithm("");
+        } catch (AuthenticationException expected) {
+        }
+    }
+
+    private void authenticateDigestAlgorithm(String algorithm) throws Exception {
+        String challenge = "Digest realm=\"protected area\", "
+                + "nonce=\"dcd98b7102dd2f0e8b11d0f600bfb0c093\", "
+                + "algorithm=" + algorithm;
+        DigestScheme digestScheme = new DigestScheme();
+        digestScheme.processChallenge(new BasicHeader("WWW-Authenticate", challenge));
+        HttpGet get = new HttpGet();
+        digestScheme.authenticate(new UsernamePasswordCredentials("username", "password"), get);
     }
 }
