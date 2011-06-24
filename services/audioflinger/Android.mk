@@ -10,6 +10,9 @@ LOCAL_SRC_FILES:=               \
     AudioResamplerCubic.cpp.arm \
     AudioPolicyService.cpp
 
+LOCAL_C_INCLUDES := \
+    system/media/audio_effects/include
+
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \

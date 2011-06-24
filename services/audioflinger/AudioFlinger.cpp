@@ -50,7 +50,7 @@
 #include "AudioFlinger.h"
 
 #include <media/EffectsFactoryApi.h>
-#include <media/EffectVisualizerApi.h>
+#include <audio_effects/effect_visualizer.h>
 
 // ----------------------------------------------------------------------------
 

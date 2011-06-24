@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <new>
-#include <media/EffectVisualizerApi.h>
+#include <audio_effects/effect_visualizer.h>
 
 
 extern "C" {
@@ -375,7 +375,7 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
         p->status = 0;
         *replySize = sizeof(effect_param_t) + sizeof(uint32_t);
         if (p->psize != sizeof(uint32_t) ||
-            *(uint32_t *)p->data != VISU_PARAM_CAPTURE_SIZE) {
+            *(uint32_t *)p->data != VISUALIZER_PARAM_CAPTURE_SIZE) {
             p->status = -EINVAL;
             break;
         }
@@ -394,7 +394,7 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
         effect_param_t *p = (effect_param_t *)pCmdData;
         if (p->psize != sizeof(uint32_t) ||
             p->vsize != sizeof(uint32_t) ||
-            *(uint32_t *)p->data != VISU_PARAM_CAPTURE_SIZE) {
+            *(uint32_t *)p->data != VISUALIZER_PARAM_CAPTURE_SIZE) {
             *(int32_t *)pReplyData = -EINVAL;
             break;;
         }
@@ -407,9 +407,9 @@ int Visualizer_command(effect_handle_t self, uint32_t cmdCode, uint32_t cmdSize,
         break;
 
 
-    case VISU_CMD_CAPTURE:
+    case VISUALIZER_CMD_CAPTURE:
         if (pReplyData == NULL || *replySize != pContext->mCaptureSize) {
-            LOGV("VISU_CMD_CAPTURE() error *replySize %d pContext->mCaptureSize %d",
+            LOGV("VISUALIZER_CMD_CAPTURE() error *replySize %d pContext->mCaptureSize %d",
                     *replySize, pContext->mCaptureSize);
             return -EINVAL;
         }

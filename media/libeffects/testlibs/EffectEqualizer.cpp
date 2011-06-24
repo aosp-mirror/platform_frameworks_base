@@ -26,7 +26,8 @@
 #include "AudioEqualizer.h"
 #include "AudioBiquadFilter.h"
 #include "AudioFormatAdapter.h"
-#include <media/EffectEqualizerApi.h>
+#include <audio_effects/effect_equalizer.h>
+
 
 // effect_handle_t interface implementation for equalizer effect
 extern "C" const struct effect_interface_s gEqualizerInterface;
