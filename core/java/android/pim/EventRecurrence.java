@@ -456,12 +456,29 @@ public class EventRecurrence {
         return true;
     }
 
+    /**
+     * Determines whether this rule specifies a simple monthly rule by weekday, such as
+     * "FREQ=MONTHLY;BYDAY=3TU" (the 3rd Tuesday of every month).
+     * <p>
+     * Negative days, e.g. "FREQ=MONTHLY;BYDAY=-1TU" (the last Tuesday of every month),
+     * will cause "false" to be returned.
+     * <p>
+     * Rules that fire every week, such as "FREQ=MONTHLY;BYDAY=TU" (every Tuesday of every
+     * month) will cause "false" to be returned.  (Note these are usually expressed as
+     * WEEKLY rules, and hence are uncommon.)
+     *
+     * @return true if this rule is of the appropriate form
+     */
     public boolean repeatsMonthlyOnDayCount() {
         if (this.freq != MONTHLY) {
             return false;
         }
 
         if (bydayCount != 1 || bymonthdayCount != 0) {
+            return false;
+        }
+
+        if (bydayNum[0] <= 0) {
             return false;
         }
 
