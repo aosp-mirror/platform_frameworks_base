@@ -462,15 +462,28 @@ public final class SipService extends ISipService.Stub {
 
     private void startPortMappingLifetimeMeasurement(
             SipProfile localProfile) {
+        startPortMappingLifetimeMeasurement(localProfile, -1);
+    }
+
+    private void startPortMappingLifetimeMeasurement(
+            SipProfile localProfile, int maxInterval) {
         if ((mIntervalMeasurementProcess == null)
                 && (mKeepAliveInterval == -1)
                 && isBehindNAT(mLocalIp)) {
             Log.d(TAG, "start NAT port mapping timeout measurement on "
                     + localProfile.getUriString());
 
-            mIntervalMeasurementProcess = new IntervalMeasurementProcess(localProfile);
+            mIntervalMeasurementProcess =
+                    new IntervalMeasurementProcess(localProfile, maxInterval);
             mIntervalMeasurementProcess.start();
         }
+    }
+
+    private void restartPortMappingLifetimeMeasurement(
+            SipProfile localProfile, int maxInterval) {
+        stopPortMappingMeasurement();
+        mKeepAliveInterval = -1;
+        startPortMappingLifetimeMeasurement(localProfile, maxInterval);
     }
 
     private synchronized void addPendingSession(ISipSession session) {
@@ -746,18 +759,30 @@ public final class SipService extends ISipService.Stub {
     private class IntervalMeasurementProcess implements
             SipSessionGroup.KeepAliveProcessCallback {
         private static final String TAG = "SipKeepAliveInterval";
-        private static final int MAX_INTERVAL = 120; // seconds
-        private static final int MIN_INTERVAL = SHORT_EXPIRY_TIME;
+        private static final int MAX_INTERVAL = 120; // in seconds
+        private static final int MIN_INTERVAL = 10; // in seconds
         private static final int PASS_THRESHOLD = 10;
+        private static final int MAX_RETRY_COUNT = 5;
         private SipSessionGroupExt mGroup;
         private SipSessionGroup.SipSessionImpl mSession;
         private boolean mRunning;
         private int mMinInterval = 10; // in seconds
-        private int mMaxInterval = MAX_INTERVAL;
-        private int mInterval = MAX_INTERVAL / 2;
-        private int mPassCounter = 0;
+        private int mMaxInterval;
+        private int mInterval;
+        private int mPassCount = 0;
+        private int mErrorCount = 0;
 
-        public IntervalMeasurementProcess(SipProfile localProfile) {
+        public IntervalMeasurementProcess(SipProfile localProfile, int maxInterval) {
+            mMaxInterval = (maxInterval < 0) ? MAX_INTERVAL : maxInterval;
+            mInterval = (mMaxInterval + mMinInterval) / 2;
+
+            // Don't start measurement if the interval is too small
+            if (mInterval < MIN_INTERVAL) {
+                Log.w(TAG, "interval is too small; measurement aborted; "
+                        + "maxInterval=" + mMaxInterval);
+                return;
+            }
+
             try {
                 mGroup =  new SipSessionGroupExt(localProfile, null, null);
                 // TODO: remove this line once SipWakeupTimer can better handle
@@ -801,8 +826,10 @@ public final class SipService extends ISipService.Stub {
         @Override
         public void onResponse(boolean portChanged) {
             synchronized (SipService.this) {
+                mErrorCount = 0;
+
                 if (!portChanged) {
-                    if (++mPassCounter != PASS_THRESHOLD) return;
+                    if (++mPassCount != PASS_THRESHOLD) return;
                     // update the interval, since the current interval is good to
                     // keep the port mapping.
                     mKeepAliveInterval = mMinInterval = mInterval;
@@ -826,7 +853,7 @@ public final class SipService extends ISipService.Stub {
                 } else {
                     // calculate the new interval and continue.
                     mInterval = (mMaxInterval + mMinInterval) / 2;
-                    mPassCounter = 0;
+                    mPassCount = 0;
                     if (DEBUG) {
                         Log.d(TAG, "current interval: " + mKeepAliveInterval
                                 + ", test new interval: " + mInterval);
@@ -841,6 +868,13 @@ public final class SipService extends ISipService.Stub {
         public void onError(int errorCode, String description) {
             synchronized (SipService.this) {
                 Log.w(TAG, "interval measurement error: " + description);
+                if (++mErrorCount < MAX_RETRY_COUNT) {
+                    Log.w(TAG, "  retry count = " + mErrorCount);
+                    mPassCount = 0;
+                    restart();
+                } else {
+                    Log.w(TAG, "  max retry count reached; measurement aborted");
+                }
             }
         }
     }
@@ -885,9 +919,15 @@ public final class SipService extends ISipService.Stub {
         @Override
         public void onResponse(boolean portChanged) {
             synchronized (SipService.this) {
-                // Start keep-alive interval measurement on the first successfully
-                // kept-alive SipSessionGroup
-                startPortMappingLifetimeMeasurement(mSession.getLocalProfile());
+                if (portChanged) {
+                    restartPortMappingLifetimeMeasurement(
+                            mSession.getLocalProfile(), getKeepAliveInterval());
+                } else {
+                    // Start keep-alive interval measurement on the first
+                    // successfully kept-alive SipSessionGroup
+                    startPortMappingLifetimeMeasurement(
+                            mSession.getLocalProfile());
+                }
 
                 if (!mRunning || !portChanged) return;
 
@@ -907,6 +947,7 @@ public final class SipService extends ISipService.Stub {
         @Override
         public void onError(int errorCode, String description) {
             Log.e(TAG, "keepalive error: " + description);
+            onResponse(true); // re-register immediately
         }
 
         public void stop() {
