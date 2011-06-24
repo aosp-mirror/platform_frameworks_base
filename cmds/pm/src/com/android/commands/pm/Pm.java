@@ -125,12 +125,12 @@ public final class Pm {
             return;
         }
 
-        if ("setInstallLocation".equals(op)) {
+        if ("set-install-location".equals(op)) {
             runSetInstallLocation();
             return;
         }
 
-        if ("getInstallLocation".equals(op)) {
+        if ("get-install-location".equals(op)) {
             runGetInstallLocation();
             return;
         }
@@ -1094,8 +1094,7 @@ public final class Pm {
     }
 
     private static void showUsage() {
-        System.err.println("usage: pm [list|path|install|uninstall]");
-        System.err.println("       pm list packages [-f] [-d] [-e] [-s] [-e] [-u] [FILTER]");
+        System.err.println("usage: pm list packages [-f] [-d] [-e] [-s] [-e] [-u] [FILTER]");
         System.err.println("       pm list permission-groups");
         System.err.println("       pm list permissions [-g] [-f] [-d] [-u] [GROUP]");
         System.err.println("       pm list instrumentation [-f] [TARGET-PACKAGE]");
@@ -1107,66 +1106,66 @@ public final class Pm {
         System.err.println("       pm clear PACKAGE");
         System.err.println("       pm enable PACKAGE_OR_COMPONENT");
         System.err.println("       pm disable PACKAGE_OR_COMPONENT");
-        System.err.println("       pm setInstallLocation [0/auto] [1/internal] [2/external]");
+        System.err.println("       pm disable-user PACKAGE_OR_COMPONENT");
+        System.err.println("       pm set-install-location [0/auto] [1/internal] [2/external]");
+        System.err.println("       pm get-install-location");
         System.err.println("       pm createUser USER_NAME");
         System.err.println("       pm removeUser USER_ID");
         System.err.println("");
-        System.err.println("The list packages command prints all packages, optionally only");
-        System.err.println("those whose package name contains the text in FILTER.  Options:");
-        System.err.println("  -f: see their associated file.");
-        System.err.println("  -d: filter to only show disbled packages.");
-        System.err.println("  -e: filter to only show enabled packages.");
-        System.err.println("  -s: filter to only show system packages.");
-        System.err.println("  -3: filter to only show third party packages.");
-        System.err.println("  -u: also include uninstalled packages.");
+        System.err.println("pm list packages: prints all packages, optionally only");
+        System.err.println("  those whose package name contains the text in FILTER.  Options:");
+        System.err.println("    -f: see their associated file.");
+        System.err.println("    -d: filter to only show disbled packages.");
+        System.err.println("    -e: filter to only show enabled packages.");
+        System.err.println("    -s: filter to only show system packages.");
+        System.err.println("    -3: filter to only show third party packages.");
+        System.err.println("    -u: also include uninstalled packages.");
         System.err.println("");
-        System.err.println("The list permission-groups command prints all known");
-        System.err.println("permission groups.");
+        System.err.println("pm list permission-groups: prints all known permission groups.");
         System.err.println("");
-        System.err.println("The list permissions command prints all known");
-        System.err.println("permissions, optionally only those in GROUP.  Options:");
-        System.err.println("  -g: organize by group.");
-        System.err.println("  -f: print all information.");
-        System.err.println("  -s: short summary.");
-        System.err.println("  -d: only list dangerous permissions.");
-        System.err.println("  -u: list only the permissions users will see.");
+        System.err.println("pm list permissions: prints all known permissions, optionally only");
+        System.err.println("  those in GROUP.  Options:");
+        System.err.println("    -g: organize by group.");
+        System.err.println("    -f: print all information.");
+        System.err.println("    -s: short summary.");
+        System.err.println("    -d: only list dangerous permissions.");
+        System.err.println("    -u: list only the permissions users will see.");
         System.err.println("");
-        System.err.println("The list instrumentation command prints all instrumentations,");
-        System.err.println("or only those that target a specified package.  Options:");
-        System.err.println("  -f: see their associated file.");
-        System.err.println("(Use this command to list all test packages, or use <TARGET-PACKAGE> ");
-        System.err.println(" to list the test packages for a particular application. The -f ");
-        System.err.println(" option lists the .apk file for the test package.)");
+        System.err.println("pm list instrumentation: use to list all test packages; optionally");
+        System.err.println("  supply <TARGET-PACKAGE> to list the test packages for a particular");
+        System.err.println("  application.  Options:");
+        System.err.println("    -f: list the .apk file for the test package.");
         System.err.println("");
-        System.err.println("The list features command prints all features of the system.");
+        System.err.println("pm list features: prints all features of the system.");
         System.err.println("");
-        System.err.println("The path command prints the path to the .apk of a package.");
+        System.err.println("pm path: print the path to the .apk of the given PACKAGE.");
         System.err.println("");
-        System.err.println("The install command installs a package to the system.  Options:");
-        System.err.println("  -l: install the package with FORWARD_LOCK.");
-        System.err.println("  -r: reinstall an exisiting app, keeping its data.");
-        System.err.println("  -t: allow test .apks to be installed.");
-        System.err.println("  -i: specify the installer package name.");
-        System.err.println("  -s: install package on sdcard.");
-        System.err.println("  -f: install package on internal flash.");
+        System.err.println("pm install: installs a package to the system.  Options:");
+        System.err.println("    -l: install the package with FORWARD_LOCK.");
+        System.err.println("    -r: reinstall an exisiting app, keeping its data.");
+        System.err.println("    -t: allow test .apks to be installed.");
+        System.err.println("    -i: specify the installer package name.");
+        System.err.println("    -s: install package on sdcard.");
+        System.err.println("    -f: install package on internal flash.");
         System.err.println("");
-        System.err.println("The uninstall command removes a package from the system. Options:");
-        System.err.println("  -k: keep the data and cache directories around.");
-        System.err.println("after the package removal.");
+        System.err.println("pm uninstall: removes a package from the system. Options:");
+        System.err.println("    -k: keep the data and cache directories around after package removal.");
         System.err.println("");
-        System.err.println("The clear command deletes all data associated with a package.");
+        System.err.println("pm clear: deletes all data associated with a package.");
         System.err.println("");
-        System.err.println("The enable and disable commands change the enabled state of");
-        System.err.println("a given package or component (written as \"package/class\").");
+        System.err.println("pm enable, disable, disable-user: these commands change the enabled state");
+        System.err.println("  of a given package or component (written as \"package/class\").");
         System.err.println("");
-        System.err.println("The getInstallLocation command gets the current install location");
-        System.err.println("  0 [auto]: Let system decide the best location");
-        System.err.println("  1 [internal]: Install on internal device storage");
-        System.err.println("  2 [external]: Install on external media");
+        System.err.println("pm get-install-location: returns the current install location.");
+        System.err.println("    0 [auto]: Let system decide the best location");
+        System.err.println("    1 [internal]: Install on internal device storage");
+        System.err.println("    2 [external]: Install on external media");
         System.err.println("");
-        System.err.println("The setInstallLocation command changes the default install location");
-        System.err.println("  0 [auto]: Let system decide the best location");
-        System.err.println("  1 [internal]: Install on internal device storage");
-        System.err.println("  2 [external]: Install on external media");
+        System.err.println("pm set-install-location: changes the default install location.");
+        System.err.println("  NOTE: this is only intended for debugging; using this can cause");
+        System.err.println("  applications to break and other undersireable behavior.");
+        System.err.println("    0 [auto]: Let system decide the best location");
+        System.err.println("    1 [internal]: Install on internal device storage");
+        System.err.println("    2 [external]: Install on external media");
     }
 }
