@@ -72,6 +72,8 @@ static jmethodID method_onInputDevicePropertyChanged;
 static jmethodID method_onInputDeviceConnectionResult;
 static jmethodID method_onPanDevicePropertyChanged;
 static jmethodID method_onPanDeviceConnectionResult;
+static jmethodID method_onHealthDevicePropertyChanged;
+static jmethodID method_onHealthDeviceChannelChanged;
 
 typedef event_loop_native_data_t native_data_t;
 
@@ -139,6 +141,10 @@ static void classInitNative(JNIEnv* env, jclass clazz) {
                                                "(Ljava/lang/String;[Ljava/lang/String;)V");
     method_onPanDeviceConnectionResult = env->GetMethodID(clazz, "onPanDeviceConnectionResult",
                                                "(Ljava/lang/String;I)V");
+    method_onHealthDevicePropertyChanged = env->GetMethodID(clazz, "onHealthDevicePropertyChanged",
+                                               "(Ljava/lang/String;[Ljava/lang/String;)V");
+    method_onHealthDeviceChannelChanged = env->GetMethodID(clazz, "onHealthDeviceChannelChanged",
+                                               "(Ljava/lang/String;Ljava/lang/String;Z)V");
     method_onRequestOobData = env->GetMethodID(clazz, "onRequestOobData",
                                                "(Ljava/lang/String;I)V");
 
@@ -271,6 +277,15 @@ static jboolean setUpEventLoop(native_data_t *nat) {
             LOG_AND_FREE_DBUS_ERROR(&err);
             return JNI_FALSE;
         }
+
+        dbus_bus_add_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".HealthDevice'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+            return JNI_FALSE;
+        }
+
         dbus_bus_add_match(nat->conn,
                 "type='signal',interface='org.bluez.AudioSink'",
                 &err);
@@ -454,6 +469,12 @@ static void tearDownEventLoop(native_data_t *nat) {
         }
         dbus_bus_remove_match(nat->conn,
                 "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".NetworkServer'",
+                &err);
+        if (dbus_error_is_set(&err)) {
+            LOG_AND_FREE_DBUS_ERROR(&err);
+        }
+        dbus_bus_remove_match(nat->conn,
+                "type='signal',interface='"BLUEZ_DBUS_BASE_IFC".HealthDevice'",
                 &err);
         if (dbus_error_is_set(&err)) {
             LOG_AND_FREE_DBUS_ERROR(&err);
@@ -981,6 +1002,58 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
                                env->NewStringUTF(c_address),
                                env->NewStringUTF(c_iface),
                                uuid);
+       } else {
+           LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+       }
+       goto success;
+    } else if (dbus_message_is_signal(msg,
+                                     "org.bluez.HealthDevice",
+                                     "ChannelConnected")) {
+       const char *c_path = dbus_message_get_path(msg);
+       const char *c_channel_path;
+       jboolean exists = JNI_TRUE;
+       if (dbus_message_get_args(msg, &err,
+                                  DBUS_TYPE_OBJECT_PATH, &c_channel_path,
+                                  DBUS_TYPE_INVALID)) {
+           env->CallVoidMethod(nat->me,
+                               method_onHealthDeviceChannelChanged,
+                               env->NewStringUTF(c_path),
+                               env->NewStringUTF(c_channel_path),
+                               exists);
+       } else {
+           LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+       }
+       goto success;
+    } else if (dbus_message_is_signal(msg,
+                                     "org.bluez.NetworkServer",
+                                     "ChannelDeleted")) {
+
+       const char *c_path = dbus_message_get_path(msg);
+       const char *c_channel_path;
+       jboolean exists = JNI_FALSE;
+       if (dbus_message_get_args(msg, &err,
+                                  DBUS_TYPE_OBJECT_PATH, &c_channel_path,
+                                  DBUS_TYPE_INVALID)) {
+           env->CallVoidMethod(nat->me,
+                               method_onHealthDeviceChannelChanged,
+                               env->NewStringUTF(c_path),
+                               env->NewStringUTF(c_channel_path),
+                               exists);
+       } else {
+           LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
+       }
+       goto success;
+    } else if (dbus_message_is_signal(msg,
+                                     "org.bluez.HealthDevice",
+                                     "PropertyChanged")) {
+        jobjectArray str_array =
+                    parse_health_device_property_change(env, msg);
+        if (str_array != NULL) {
+            const char *c_path = dbus_message_get_path(msg);
+            env->CallVoidMethod(nat->me,
+                                method_onHealthDevicePropertyChanged,
+                                env->NewStringUTF(c_path),
+                                str_array);
        } else {
            LOG_AND_FREE_DBUS_ERROR_WITH_MSG(&err, msg);
        }

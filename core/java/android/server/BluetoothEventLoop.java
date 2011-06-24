@@ -989,6 +989,33 @@ class BluetoothEventLoop {
                                                       BluetoothPan.LOCAL_NAP_ROLE);
     }
 
+    /**
+     * Called by native code on a PropertyChanged signal from
+     * org.bluez.HealthDevice.
+     *
+     * @param devicePath the object path of the remote device
+     * @param propValues Properties (Name-Value) of the Health Device.
+     */
+    private void onHealthDevicePropertyChanged(String devicePath, String[] propValues) {
+        log("Health Device : Name of Property is: " + propValues[0] + " Value:" + propValues[1]);
+        mBluetoothService.onHealthDevicePropertyChanged(devicePath, propValues[1]);
+    }
+
+    /**
+     * Called by native code on a ChannelCreated/Deleted signal from
+     * org.bluez.HealthDevice.
+     *
+     * @param devicePath the object path of the remote device
+     * @param channelPath the path of the health channel.
+     * @param exists Boolean to indicate if the channel was created or deleted.
+     */
+    private void onHealthDeviceChannelChanged(String devicePath, String channelPath,
+            boolean exists) {
+        log("Health Device : devicePath: " + devicePath + ":channelPath:" + channelPath +
+                ":exists" + exists);
+        mBluetoothService.onHealthDeviceChannelChanged(devicePath, channelPath, exists);
+    }
+
     private void onRestartRequired() {
         if (mBluetoothService.isEnabled()) {
             Log.e(TAG, "*** A serious error occurred (did bluetoothd crash?) - " +

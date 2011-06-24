@@ -65,16 +65,22 @@ public interface BluetoothProfile {
     public static final int A2DP = 2;
 
     /**
+     * Health Profile
+     * @hide
+     */
+    public static final int HEALTH = 3;
+
+    /**
      * Input Device Profile
      * @hide
      */
-    public static final int INPUT_DEVICE = 3;
+    public static final int INPUT_DEVICE = 4;
 
     /**
      * PAN Profile
      * @hide
      */
-    public static final int PAN = 4;
+    public static final int PAN = 5;
 
     /**
      * Default priority for devices that we try to auto-connect to and
