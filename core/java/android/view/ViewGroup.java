@@ -4998,6 +4998,24 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * This method will be called when we need to reset the layout direction resolution flag
+     *
+     */
+    @Override
+    void resetLayoutDirectionResolution() {
+        super.resetLayoutDirectionResolution();
+
+        // Take care of resetting the children resolution too
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.getLayoutDirection() == LAYOUT_DIRECTION_INHERIT) {
+                child.resetLayoutDirectionResolution();
+            }
+        }
+    }
+
+    /**
      * Return true if the pressed state should be delayed for children or descendants of this
      * ViewGroup. Generally, this should be done for containers that can scroll, such as a List.
      * This prevents the pressed state from appearing when the user is actually trying to scroll

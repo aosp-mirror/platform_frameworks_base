@@ -4345,19 +4345,25 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * Set the layout direction for this view.
+     * Set the layout direction for this view. This will propagate a reset of layout direction
+     * resolution to the view's children and resolve layout direction for this view.
      *
      * @param layoutDirection One of {@link #LAYOUT_DIRECTION_LTR},
      *   {@link #LAYOUT_DIRECTION_RTL},
      *   {@link #LAYOUT_DIRECTION_INHERIT} or
      *   {@link #LAYOUT_DIRECTION_LOCALE}.
+     *
      * @attr ref android.R.styleable#View_layoutDirection
      *
      * @hide
      */
     @RemotableViewMethod
     public void setLayoutDirection(int layoutDirection) {
-        setFlags(layoutDirection, LAYOUT_DIRECTION_MASK);
+        if (getLayoutDirection() != layoutDirection) {
+            resetLayoutDirectionResolution();
+            // Setting the flag will also request a layout.
+            setFlags(layoutDirection, LAYOUT_DIRECTION_MASK);
+        }
     }
 
     /**
@@ -8988,7 +8994,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     /**
      * Reset the resolved layout direction by clearing the corresponding flag
      */
-    private void resetLayoutDirectionResolution() {
+    void resetLayoutDirectionResolution() {
+        // Reset the current View resolution
         mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED;
     }
 
