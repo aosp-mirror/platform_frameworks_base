@@ -649,9 +649,7 @@ static void android_view_GLES20Canvas_updateTextureLayer(JNIEnv* env, jobject cl
     float transform[16];
     sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, surface));
 
-    while (surfaceTexture->getQueuedCount() > 0) {
-        surfaceTexture->updateTexImage();
-    }
+    surfaceTexture->updateTexImage();
     surfaceTexture->getTransformMatrix(transform);
     GLenum renderTarget = surfaceTexture->getCurrentTextureTarget();
 
