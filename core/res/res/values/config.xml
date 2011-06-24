@@ -115,6 +115,14 @@
         <item>"mobile_cbs,12,0,2,60000,true"</item>
     </string-array>
 
+    <!-- Array of ConnectivityManager.TYPE_xxxx constants for networks that may only
+         be controlled by systemOrSignature apps.  -->
+    <integer-array translatable="false" name="config_protectedNetworks">
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+    </integer-array>
+
     <!-- This string array should be overridden by the device to present a list of radio
          attributes.  This is used by the connectivity manager to decide which networks can coexist
          based on the hardware -->
