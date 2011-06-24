@@ -1725,7 +1725,6 @@
 
   <public type="attr" name="layoutDirection" />
 
-  <public type="attr" name="fullBackupAgent" />
   <public type="attr" name="suggestionsEnabled" />
 
   <public type="attr" name="rowCount" />
@@ -1737,7 +1736,6 @@
 
   <public type="attr" name="layout_row" />
   <public type="attr" name="layout_rowSpan" />
-
   <public type="attr" name="layout_columnSpan" />
 
   <public type="attr" name="layout_widthSpec" />

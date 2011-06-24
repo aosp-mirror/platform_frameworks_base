@@ -51,7 +51,6 @@ oneway interface IBackupAgent {
     void doBackup(in ParcelFileDescriptor oldState,
             in ParcelFileDescriptor data,
             in ParcelFileDescriptor newState,
-            boolean storeApk,
             int token, IBackupManager callbackBinder);
 
     /**
@@ -79,6 +78,25 @@ oneway interface IBackupAgent {
      */
     void doRestore(in ParcelFileDescriptor data, int appVersionCode,
             in ParcelFileDescriptor newState, int token, IBackupManager callbackBinder);
+
+    /**
+     * Perform a "full" backup to the given file descriptor.  The output file is presumed
+     * to be a socket or other non-seekable, write-only data sink.  When this method is
+     * called, the app should write all of its files to the output.
+     *
+     * @param data Write-only file to receive the backed-up file content stream.
+     *        The data must be formatted correctly for the resulting archive to be
+     *        legitimate, so that will be tightly controlled by the available API.
+     *
+     * @param token Opaque token identifying this transaction.  This must
+     *        be echoed back to the backup service binder once the agent is
+     *        finished restoring the application based on the restore data
+     *        contents.
+     *
+     * @param callbackBinder Binder on which to indicate operation completion,
+     *        passed here as a convenience to the agent.
+     */
+    void doFullBackup(in ParcelFileDescriptor data, int token, IBackupManager callbackBinder);
 
     /**
      * Restore a single "file" to the application.  The file was typically obtained from

@@ -23,6 +23,7 @@ import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.app.IBackupAgent;
 import android.app.PendingIntent;
+import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.FullBackup;
 import android.app.backup.RestoreSet;
@@ -64,6 +65,7 @@ import android.os.SystemClock;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.EventLog;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
@@ -1587,8 +1589,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 // Initiate the target's backup pass
                 prepareOperationTimeout(token, TIMEOUT_BACKUP_INTERVAL);
-                agent.doBackup(savedState, backupData, newState, false,
-                        token, mBackupManagerBinder);
+                agent.doBackup(savedState, backupData, newState, token, mBackupManagerBinder);
                 boolean success = waitUntilOperationComplete(token);
 
                 if (!success) {
@@ -1764,30 +1765,31 @@ class BackupManagerService extends IBackupManager.Stub {
             if (agent != null) {
                 try {
                     ApplicationInfo app = pkg.applicationInfo;
-                    boolean sendApk = mIncludeApks
+                    final boolean sendApk = mIncludeApks
                             && ((app.flags & ApplicationInfo.FLAG_FORWARD_LOCK) == 0)
                             && ((app.flags & ApplicationInfo.FLAG_SYSTEM) == 0 ||
                                 (app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
 
                     sendOnBackupPackage(pkg.packageName);
 
-                    {
-                        BackupDataOutput output = new BackupDataOutput(
-                                mOutputFile.getFileDescriptor());
+                    BackupDataOutput output = new BackupDataOutput(
+                            mOutputFile.getFileDescriptor());
 
-                        if (DEBUG) Slog.d(TAG, "Writing manifest for " + pkg.packageName);
-                        writeAppManifest(pkg, mManifestFile, sendApk);
-                        FullBackup.backupToTar(pkg.packageName, null, null,
-                                mFilesDir.getAbsolutePath(),
-                                mManifestFile.getAbsolutePath(),
-                                output);
+                    if (DEBUG) Slog.d(TAG, "Writing manifest for " + pkg.packageName);
+                    writeAppManifest(pkg, mManifestFile, sendApk);
+                    FullBackup.backupToTar(pkg.packageName, null, null,
+                            mFilesDir.getAbsolutePath(),
+                            mManifestFile.getAbsolutePath(),
+                            output);
+
+                    if (sendApk) {
+                        writeApkToBackup(pkg, output);
                     }
 
-                    if (DEBUG) Slog.d(TAG, "Calling doBackup()");
+                    if (DEBUG) Slog.d(TAG, "Calling doFullBackup()");
                     final int token = generateToken();
                     prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL);
-                    agent.doBackup(null, mOutputFile, null, sendApk,
-                            token, mBackupManagerBinder);
+                    agent.doFullBackup(mOutputFile, token, mBackupManagerBinder);
                     if (!waitUntilOperationComplete(token)) {
                         Slog.e(TAG, "Full backup failed on package " + pkg.packageName);
                     } else {
@@ -1802,6 +1804,29 @@ class BackupManagerService extends IBackupManager.Stub {
             tearDown(pkg);
         }
 
+        private void writeApkToBackup(PackageInfo pkg, BackupDataOutput output) {
+            // Forward-locked apps, system-bundled .apks, etc are filtered out before we get here
+            final String appSourceDir = pkg.applicationInfo.sourceDir;
+            final String apkDir = new File(appSourceDir).getParent();
+            FullBackup.backupToTar(pkg.packageName, FullBackup.APK_TREE_TOKEN, null,
+                    apkDir, appSourceDir, output);
+
+            // Save associated .obb content if it exists and we did save the apk
+            // check for .obb and save those too
+            final File obbDir = Environment.getExternalStorageAppObbDirectory(pkg.packageName);
+            if (obbDir != null) {
+                if (DEBUG) Log.i(TAG, "obb dir: " + obbDir.getAbsolutePath());
+                File[] obbFiles = obbDir.listFiles();
+                if (obbFiles != null) {
+                    final String obbDirName = obbDir.getAbsolutePath();
+                    for (File obb : obbFiles) {
+                        FullBackup.backupToTar(pkg.packageName, FullBackup.OBB_TREE_TOKEN, null,
+                                obbDirName, obb.getAbsolutePath(), output);
+                    }
+                }
+            }
+        }
+
         private void backupSharedStorage() throws RemoteException {
             PackageInfo pkg = null;
             try {
@@ -1813,7 +1838,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
                     final int token = generateToken();
                     prepareOperationTimeout(token, TIMEOUT_SHARED_BACKUP_INTERVAL);
-                    agent.doBackup(null, mOutputFile, null, false, token, mBackupManagerBinder);
+                    agent.doFullBackup(mOutputFile, token, mBackupManagerBinder);
                     if (!waitUntilOperationComplete(token)) {
                         Slog.e(TAG, "Full backup failed on shared storage");
                     } else {
@@ -1933,7 +1958,7 @@ class BackupManagerService extends IBackupManager.Stub {
     static class FileMetadata {
         String packageName;             // name of the owning app
         String installerPackageName;    // name of the market-type app that installed the owner
-        int type;                       // e.g. FullBackup.TYPE_DIRECTORY
+        int type;                       // e.g. BackupAgent.TYPE_DIRECTORY
         String domain;                  // e.g. FullBackup.DATABASE_TREE_TOKEN
         String path;                    // subpath within the semantic domain
         long mode;                      // e.g. 0666 (actually int)
@@ -2182,15 +2207,15 @@ class BackupManagerService extends IBackupManager.Stub {
                                 // If we haven't sent any data to this app yet, we probably
                                 // need to clear it first.  Check that.
                                 if (!mClearedPackages.contains(pkg)) {
-                                    // apps with their own full backup agents are
+                                    // apps with their own backup agents are
                                     // responsible for coherently managing a full
                                     // restore.
-                                    if (mTargetApp.fullBackupAgentName == null) {
+                                    if (mTargetApp.backupAgentName == null) {
                                         if (DEBUG) Slog.d(TAG, "Clearing app data preparatory to full restore");
                                         clearApplicationDataSynchronous(pkg);
                                     } else {
-                                        if (DEBUG) Slog.d(TAG, "full backup agent ("
-                                                + mTargetApp.fullBackupAgentName + ") => no clear");
+                                        if (DEBUG) Slog.d(TAG, "backup agent ("
+                                                + mTargetApp.backupAgentName + ") => no clear");
                                     }
                                     mClearedPackages.add(pkg);
                                 } else {
@@ -2686,7 +2711,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 StringBuilder b = new StringBuilder(128);
 
                 // mode string
-                b.append((info.type == FullBackup.TYPE_DIRECTORY) ? 'd' : '-');
+                b.append((info.type == BackupAgent.TYPE_DIRECTORY) ? 'd' : '-');
                 b.append(((info.mode & 0400) != 0) ? 'r' : '-');
                 b.append(((info.mode & 0200) != 0) ? 'w' : '-');
                 b.append(((info.mode & 0100) != 0) ? 'x' : '-');
@@ -2746,9 +2771,9 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
 
                 switch (typeChar) {
-                    case '0': info.type = FullBackup.TYPE_FILE; break;
+                    case '0': info.type = BackupAgent.TYPE_FILE; break;
                     case '5': {
-                        info.type = FullBackup.TYPE_DIRECTORY;
+                        info.type = BackupAgent.TYPE_DIRECTORY;
                         if (info.size != 0) {
                             Slog.w(TAG, "Directory entry with nonzero size in header");
                             info.size = 0;

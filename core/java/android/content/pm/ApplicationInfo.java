@@ -91,15 +91,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String backupAgentName;
 
     /**
-     * Class implementing the package's *full* backup functionality.  This
-     * is not usable except by system-installed packages.  It can be the same
-     * as the backupAgent.
-     *
-     * @hide
-     */
-    public String fullBackupAgentName;
-
-    /**
      * Value for {@link #flags}: if set, this application is installed in the
      * device's system image.
      */
@@ -555,7 +546,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeInt(installLocation);
         dest.writeString(manageSpaceActivityName);
         dest.writeString(backupAgentName);
-        dest.writeString(fullBackupAgentName);
         dest.writeInt(descriptionRes);
     }
 
@@ -593,7 +583,6 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         installLocation = source.readInt();
         manageSpaceActivityName = source.readString();
         backupAgentName = source.readString();
-        fullBackupAgentName = source.readString();
         descriptionRes = source.readInt();
     }
 

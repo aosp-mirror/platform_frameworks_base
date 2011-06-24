@@ -16,210 +16,26 @@
 
 package android.app.backup;
 
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
-import android.util.Log;
-
-import libcore.io.Libcore;
-import libcore.io.ErrnoException;
-import libcore.io.OsConstants;
-import libcore.io.StructStat;
-
-import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.LinkedList;
 
 /**
- * Backs up an application's entire /data/data/&lt;package&gt;/... file system.  This
- * class is used by the desktop full backup mechanism and is not intended for direct
- * use by applications.
+ * Simple concrete class that merely provides the default BackupAgent full backup/restore
+ * implementations for applications that do not supply their own.
  * 
  * {@hide}
  */
 
 public class FullBackupAgent extends BackupAgent {
-    // !!! TODO: turn off debugging
-    private static final String TAG = "FullBackupAgent";
-    private static final boolean DEBUG = true;
-
-    PackageManager mPm;
-
-    private String mMainDir;
-    private String mFilesDir;
-    private String mDatabaseDir;
-    private String mSharedPrefsDir;
-    private String mCacheDir;
-    private String mLibDir;
-
-    private File NULL_FILE;
-
-    @Override
-    public void onCreate() {
-        NULL_FILE = new File("/dev/null");
-
-        mPm = getPackageManager();
-        try {
-            ApplicationInfo appInfo = mPm.getApplicationInfo(getPackageName(), 0);
-            mMainDir = new File(appInfo.dataDir).getAbsolutePath();
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Unable to find package " + getPackageName());
-            throw new RuntimeException(e);
-        }
-
-        mFilesDir = getFilesDir().getAbsolutePath();
-        mDatabaseDir = getDatabasePath("foo").getParentFile().getAbsolutePath();
-        mSharedPrefsDir = getSharedPrefsFile("foo").getParentFile().getAbsolutePath();
-        mCacheDir = getCacheDir().getAbsolutePath();
-
-        ApplicationInfo app = getApplicationInfo();
-        mLibDir = (app.nativeLibraryDir != null)
-                ? new File(app.nativeLibraryDir).getAbsolutePath()
-                : null;
-    }
-
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) throws IOException {
-        // Filters, the scan queue, and the set of resulting entities
-        HashSet<String> filterSet = new HashSet<String>();
-        String packageName = getPackageName();
-
-        // Okay, start with the app's root tree, but exclude all of the canonical subdirs
-        if (mLibDir != null) {
-            filterSet.add(mLibDir);
-        }
-        filterSet.add(mCacheDir);
-        filterSet.add(mDatabaseDir);
-        filterSet.add(mSharedPrefsDir);
-        filterSet.add(mFilesDir);
-        processTree(packageName, FullBackup.ROOT_TREE_TOKEN, mMainDir, filterSet, data);
-
-        // Now do the same for the files dir, db dir, and shared prefs dir
-        filterSet.add(mMainDir);
-        filterSet.remove(mFilesDir);
-        processTree(packageName, FullBackup.DATA_TREE_TOKEN, mFilesDir, filterSet, data);
-
-        filterSet.add(mFilesDir);
-        filterSet.remove(mDatabaseDir);
-        processTree(packageName, FullBackup.DATABASE_TREE_TOKEN, mDatabaseDir, filterSet, data);
-
-        filterSet.add(mDatabaseDir);
-        filterSet.remove(mSharedPrefsDir);
-        processTree(packageName, FullBackup.SHAREDPREFS_TREE_TOKEN, mSharedPrefsDir, filterSet, data);
+        // Doesn't do incremental backup/restore
     }
 
-    // Scan the dir tree (if it actually exists) and process each entry we find.  If the
-    // 'excludes' parameter is non-null, it is consulted each time a new file system entity
-    // is visited to see whether that entity (and its subtree, if appropriate) should be
-    // omitted from the backup process.
-    protected void processTree(String packageName, String domain, String rootPath,
-            HashSet<String> excludes, BackupDataOutput data) {
-        File rootFile = new File(rootPath);
-        if (rootFile.exists()) {
-            LinkedList<File> scanQueue = new LinkedList<File>();
-            scanQueue.add(rootFile);
-
-            while (scanQueue.size() > 0) {
-                File file = scanQueue.remove(0);
-                String filePath = file.getAbsolutePath();
-
-                // prune this subtree?
-                if (excludes != null && excludes.contains(filePath)) {
-                    continue;
-                }
-
-                // If it's a directory, enqueue its contents for scanning.
-                try {
-                    StructStat stat = Libcore.os.lstat(filePath);
-                    if (OsConstants.S_ISLNK(stat.st_mode)) {
-                        if (DEBUG) Log.i(TAG, "Symlink (skipping)!: " + file);
-                        continue;
-                    } else if (OsConstants.S_ISDIR(stat.st_mode)) {
-                        File[] contents = file.listFiles();
-                        if (contents != null) {
-                            for (File entry : contents) {
-                                scanQueue.add(0, entry);
-                            }
-                        }
-                    }
-                } catch (ErrnoException e) {
-                    if (DEBUG) Log.w(TAG, "Error scanning file " + file + " : " + e);
-                    continue;
-                }
-
-                // Finally, back this file up before proceeding
-                FullBackup.backupToTar(packageName, domain, null, rootPath, filePath, data);
-            }
-        }
-    }
-
-    @Override
-    void onSaveApk(BackupDataOutput data) {
-        ApplicationInfo app = getApplicationInfo();
-        if (DEBUG) Log.i(TAG, "APK flags: system=" + ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
-                + " updated=" + ((app.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)
-                + " locked=" + ((app.flags & ApplicationInfo.FLAG_FORWARD_LOCK) != 0) );
-        if (DEBUG) Log.i(TAG, "codepath: " + getPackageCodePath());
-
-        // Forward-locked apps, system-bundled .apks, etc are filtered out before we get here
-        final String pkgName = getPackageName();
-        final String apkDir = new File(getPackageCodePath()).getParent();
-        FullBackup.backupToTar(pkgName, FullBackup.APK_TREE_TOKEN, null,
-                apkDir, getPackageCodePath(), data);
-
-        // Save associated .obb content if it exists and we did save the apk
-        // check for .obb and save those too
-        final File obbDir = Environment.getExternalStorageAppObbDirectory(pkgName);
-        if (obbDir != null) {
-            if (DEBUG) Log.i(TAG, "obb dir: " + obbDir.getAbsolutePath());
-            File[] obbFiles = obbDir.listFiles();
-            if (obbFiles != null) {
-                final String obbDirName = obbDir.getAbsolutePath();
-                for (File obb : obbFiles) {
-                    FullBackup.backupToTar(pkgName, FullBackup.OBB_TREE_TOKEN, null,
-                            obbDirName, obb.getAbsolutePath(), data);
-                }
-            }
-        }
-    }
-
-    /**
-     * Dummy -- We're never used for restore of an incremental dataset
-     */
     @Override
     public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
             throws IOException {
-    }
-
-    /**
-     * Restore the described file from the given pipe.
-     */
-    @Override
-    public void onRestoreFile(ParcelFileDescriptor data, long size,
-            int type, String domain, String relpath, long mode, long mtime) 
-            throws IOException {
-        String basePath = null;
-        File outFile = null;
-
-        if (DEBUG) Log.d(TAG, "onRestoreFile() size=" + size + " type=" + type
-                + " domain=" + domain + " relpath=" + relpath + " mode=" + mode
-                + " mtime=" + mtime);
-
-        // Parse out the semantic domains into the correct physical location
-        if (domain.equals(FullBackup.DATA_TREE_TOKEN)) basePath = mFilesDir;
-        else if (domain.equals(FullBackup.DATABASE_TREE_TOKEN)) basePath = mDatabaseDir;
-        else if (domain.equals(FullBackup.ROOT_TREE_TOKEN)) basePath = mMainDir;
-        else if (domain.equals(FullBackup.SHAREDPREFS_TREE_TOKEN)) basePath = mSharedPrefsDir;
-
-        // Not a supported output location?  We need to consume the data
-        // anyway, so send it to /dev/null
-        outFile = (basePath != null) ? new File(basePath, relpath) : null;
-        if (DEBUG) Log.i(TAG, "[" + domain + " : " + relpath + "] mapped to " + outFile.getPath());
-
-        // Now that we've figured out where the data goes, send it on its way
-        FullBackup.restoreToFile(data, size, type, mode, mtime, outFile, true);
+        // Doesn't do incremental backup/restore
     }
 }
