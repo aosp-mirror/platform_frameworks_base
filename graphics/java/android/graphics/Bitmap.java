@@ -546,7 +546,8 @@ public final class Bitmap implements Parcelable {
      */
     public enum CompressFormat {
         JPEG    (0),
-        PNG     (1);
+        PNG     (1),
+        WEBP    (2);
 
         CompressFormat(int nativeInt) {
             this.nativeInt = nativeInt;
