@@ -17,7 +17,6 @@
 package com.android.rs.test;
 import android.content.Context;
 import android.renderscript.RenderScript.RSMessageHandler;
-import android.util.Log;
 
 public class UnitTest extends Thread {
     public String name;
@@ -67,7 +66,7 @@ public class UnitTest extends Thread {
                         result = -1;
                         break;
                     default:
-                        android.util.Log.v("RenderScript", "Unit test got unexpected message");
+                        RSTest.log("Unit test got unexpected message");
                         return;
                 }
             }

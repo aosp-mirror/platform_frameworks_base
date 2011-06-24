@@ -201,12 +201,14 @@ public class Font extends BaseObj {
 
     /**
      * Accepts one of the following family names as an argument
-     * and will attemp to produce the best match with a system font
+     * and will attempt to produce the best match with a system font:
+     *
      * "sans-serif" "arial" "helvetica" "tahoma" "verdana"
      * "serif" "times" "times new roman" "palatino" "georgia" "baskerville"
      * "goudy" "fantasy" "cursive" "ITC Stone Serif"
      * "monospace" "courier" "courier new" "monaco"
-     * Returns default font if no match could be found
+     *
+     * Returns default font if no match could be found.
      */
     static public Font create(RenderScript rs, Resources res, String familyName, Style fontStyle, float pointSize) {
         String fileName = getFontFileName(familyName, fontStyle);
