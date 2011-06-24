@@ -7668,7 +7668,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         String searchedLowerCase = searched.toString().toLowerCase();
         String thisTextLowerCase = thisText.toString().toLowerCase();
-        if (thisTextLowerCase.contains(searched)) {
+        if (thisTextLowerCase.contains(searchedLowerCase)) {
             outViews.add(this);
         }
     }
