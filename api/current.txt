@@ -15277,11 +15277,11 @@ package android.provider {
 
   public final class ContactsContract {
     ctor public ContactsContract();
+    field public static final java.lang.String ALLOW_PROFILE = "allow_profile";
     field public static final java.lang.String AUTHORITY = "com.android.contacts";
     field public static final android.net.Uri AUTHORITY_URI;
     field public static final java.lang.String CALLER_IS_SYNCADAPTER = "caller_is_syncadapter";
     field public static final java.lang.String DIRECTORY_PARAM_KEY = "directory";
-    field public static final java.lang.String INCLUDE_PROFILE = "include_profile";
     field public static final java.lang.String LIMIT_PARAM_KEY = "limit";
     field public static final java.lang.String PRIMARY_ACCOUNT_NAME = "name_for_primary_account";
     field public static final java.lang.String PRIMARY_ACCOUNT_TYPE = "type_for_primary_account";

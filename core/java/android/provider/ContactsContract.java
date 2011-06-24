@@ -123,14 +123,16 @@ public final class ContactsContract {
 
     /**
      * An optional URI parameter for selection queries that instructs the
-     * provider to include the user's personal profile contact entry (if any)
-     * in the contact results.  If present, the user's profile will always be
-     * the first entry returned.  The default value is false.
+     * provider to allow the user's personal profile contact entry (if any)
+     * to appear in a list of contact results.  It is only useful when issuing
+     * a query that may retrieve more than one contact.  If present, the user's
+     * profile will always be the first entry returned.  The default value is
+     * false.
      *
      * Specifying this parameter will result in a security error if the calling
      * application does not have android.permission.READ_PROFILE permission.
      */
-    public static final String INCLUDE_PROFILE = "include_profile";
+    public static final String ALLOW_PROFILE = "allow_profile";
 
     /**
      * A query parameter key used to specify the package that is requesting a query.
