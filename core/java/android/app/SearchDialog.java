@@ -80,6 +80,7 @@ public class SearchDialog extends Dialog {
     private View mSearchPlate;
     private SearchView mSearchView;
     private Drawable mWorkingSpinner;
+    private View mCloseSearch;
 
     // interaction with searchable application
     private SearchableInfo mSearchable;
@@ -167,10 +168,17 @@ public class SearchDialog extends Dialog {
         SearchBar searchBar = (SearchBar) findViewById(com.android.internal.R.id.search_bar);
         searchBar.setSearchDialog(this);
         mSearchView = (SearchView) findViewById(com.android.internal.R.id.search_view);
-        mSearchView.setSubmitButtonEnabled(true);
         mSearchView.setOnCloseListener(mOnCloseListener);
         mSearchView.setOnQueryTextListener(mOnQueryChangeListener);
         mSearchView.setOnSuggestionListener(mOnSuggestionSelectionListener);
+
+        mCloseSearch = findViewById(com.android.internal.R.id.closeButton);
+        mCloseSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dismiss();
+            }
+        });
 
         // TODO: Move the badge logic to SearchView or move the badge to search_bar.xml
         mBadgeLabel = (TextView) mSearchView.findViewById(com.android.internal.R.id.search_badge);

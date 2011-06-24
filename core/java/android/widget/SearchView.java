@@ -603,7 +603,7 @@ public class SearchView extends LinearLayout {
         final boolean hasText = !TextUtils.isEmpty(mQueryTextView.getText());
         // Should we show the close button? It is not shown if there's no focus,
         // field is not iconified by default and there is no text in it.
-        final boolean showClose = hasText || mIconifiedByDefault || mQueryTextView.hasFocus();
+        final boolean showClose = hasText || mIconifiedByDefault;
         mCloseButton.setVisibility(showClose ? VISIBLE : INVISIBLE);
         mCloseButton.getDrawable().setState(hasText ? ENABLED_STATE_SET : EMPTY_STATE_SET);
     }
@@ -919,17 +919,22 @@ public class SearchView extends LinearLayout {
     }
 
     private void onCloseClicked() {
-        if (mOnCloseListener == null || !mOnCloseListener.onClose()) {
-            CharSequence text = mQueryTextView.getText();
-            if (TextUtils.isEmpty(text)) {
+        CharSequence text = mQueryTextView.getText();
+        if (TextUtils.isEmpty(text)) {
+            if (mIconifiedByDefault) {
                 // query field already empty, hide the keyboard and remove focus
                 clearFocus();
                 setImeVisibility(false);
-            } else {
-                mQueryTextView.setText("");
             }
+        } else {
+            mQueryTextView.setText("");
+            mQueryTextView.requestFocus();
+            setImeVisibility(true);
+        }
+
+        if (mIconifiedByDefault && (mOnCloseListener == null || !mOnCloseListener.onClose())) {
             updateViewsVisibility(mIconifiedByDefault);
-            if (mIconifiedByDefault) setImeVisibility(false);
+            setImeVisibility(false);
         }
     }
 
