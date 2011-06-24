@@ -78,7 +78,7 @@ static float mtxRot270[16] = {
 
 static void mtxMul(float out[16], const float a[16], const float b[16]);
 
-SurfaceTexture::SurfaceTexture(GLuint tex) :
+SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode) :
     mDefaultWidth(1),
     mDefaultHeight(1),
     mPixelFormat(PIXEL_FORMAT_RGBA_8888),
@@ -91,7 +91,8 @@ SurfaceTexture::SurfaceTexture(GLuint tex) :
     mCurrentTimestamp(0),
     mNextTransform(0),
     mTexName(tex),
-    mSynchronousMode(false) {
+    mSynchronousMode(false),
+    mAllowSynchronousMode(allowSynchronousMode) {
     LOGV("SurfaceTexture::SurfaceTexture");
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
@@ -371,6 +372,9 @@ status_t SurfaceTexture::setSynchronousMode(bool enabled) {
     Mutex::Autolock lock(mMutex);
 
     status_t err = OK;
+    if (!mAllowSynchronousMode && enabled)
+        return err;
+
     if (!enabled) {
         // going to asynchronous mode, drain the queue
         while (mSynchronousMode != enabled && !mQueue.isEmpty()) {

@@ -8364,6 +8364,7 @@ package android.graphics {
 
   public class SurfaceTexture {
     ctor public SurfaceTexture(int);
+    ctor public SurfaceTexture(int, boolean);
     method public long getTimestamp();
     method public void getTransformMatrix(float[]);
     method public void setOnFrameAvailableListener(android.graphics.SurfaceTexture.OnFrameAvailableListener);
