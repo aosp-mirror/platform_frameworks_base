@@ -56,7 +56,7 @@ public:
 
     // tex indicates the name OpenGL texture to which images are to be streamed.
     // This texture name cannot be changed once the SurfaceTexture is created.
-    SurfaceTexture(GLuint tex);
+    SurfaceTexture(GLuint tex, bool allowSynchronousMode = true);
 
     virtual ~SurfaceTexture();
 
@@ -360,6 +360,9 @@ private:
 
     // mSynchronousMode whether we're in synchronous mode or not
     bool mSynchronousMode;
+
+    // mAllowSynchronousMode whether we allow synchronous mode or not
+    const bool mAllowSynchronousMode;
 
     // mDequeueCondition condition used for dequeueBuffer in synchronous mode
     mutable Condition mDequeueCondition;
