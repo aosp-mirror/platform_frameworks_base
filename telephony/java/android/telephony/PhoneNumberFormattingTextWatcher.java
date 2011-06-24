@@ -94,6 +94,9 @@ public class PhoneNumberFormattingTextWatcher implements TextWatcher {
      */
     public PhoneNumberFormattingTextWatcher(String countryCode) {
         if (countryCode == null) throw new IllegalArgumentException();
+        // TODO: remove this once CountryDetector.detectCountry().getCountryIso() is fixed to always
+        // return uppercase. Tracked at b/4941319.
+        countryCode = countryCode.toUpperCase(Locale.ENGLISH);
         mFormatter = PhoneNumberUtil.getInstance().getAsYouTypeFormatter(countryCode);
     }
 
