@@ -1573,7 +1573,7 @@ public class PackageParser {
 
         boolean hardwareAccelerated = sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_hardwareAccelerated,
-                false);
+                owner.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.ICE_CREAM_SANDWICH);
 
         if (sa.getBoolean(
                 com.android.internal.R.styleable.AndroidManifestApplication_hasCode,

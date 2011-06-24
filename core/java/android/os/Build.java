@@ -278,6 +278,16 @@ public class Build {
 
         /**
          * Current version under development.
+         *
+         * <p>Applications targeting this or a later release will get these
+         * new changes in behavior:</p>
+         * <ul>
+         * <li> 2d drawing hardware acceleration is now turned on by default.
+         * You can use
+         * {@link android.R.attr#hardwareAccelerated android:hardwareAccelerated}
+         * to turn it off if needed, although this is strongly discouraged since
+         * it will result in poor performance on larger screen devices.
+         * </ul>
          */
         public static final int ICE_CREAM_SANDWICH = CUR_DEVELOPMENT;
     }
