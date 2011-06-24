@@ -461,11 +461,29 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                         Vector<GlyphRun> glyphRuns;
                         jchar* runGlyphs;
                         size_t runGlyphsCount = 0;
-                        size_t runIndex = 0;
+                        int32_t end = start + count;
                         for (size_t i = 0; i < rc; ++i) {
                             int32_t startRun;
                             int32_t lengthRun;
                             UBiDiDirection runDir = ubidi_getVisualRun(bidi, i, &startRun, &lengthRun);
+
+                            if (startRun >= end) {
+                              break;
+                            }
+
+                            int32_t endRun = startRun + lengthRun;
+                            if (endRun <= start) {
+                              continue;
+                            }
+
+                            if (startRun < start) {
+                              startRun = start;
+                            }
+                            if (endRun > end) {
+                              endRun = end;
+                            }
+
+                            lengthRun = endRun - startRun;
 
                             int newFlags = (runDir == UBIDI_RTL) ? kDirection_RTL : kDirection_LTR;
                             jfloat runTotalAdvance = 0;
@@ -475,11 +493,10 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
 #endif
                             computeRunValuesWithHarfbuzz(paint, chars, startRun,
                                     lengthRun, contextCount, newFlags,
-                                    outAdvances + runIndex, &runTotalAdvance,
+                                    outAdvances, &runTotalAdvance,
                                     &runGlyphs, &runGlyphsCount);
 
-                            runIndex += lengthRun;
-
+                            outAdvances += lengthRun;
                             *outTotalAdvance += runTotalAdvance;
                             *outGlyphsCount += runGlyphsCount;
 #if DEBUG_GLYPHS
