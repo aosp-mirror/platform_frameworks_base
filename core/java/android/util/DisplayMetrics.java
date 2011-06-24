@@ -119,13 +119,37 @@ public class DisplayMetrics {
      * being applied.
      * @hide
      */
-    public int unscaledWidthPixels;
+    public int noncompatWidthPixels;
     /**
      * The reported display height prior to any compatibility mode scaling
      * being applied.
      * @hide
      */
-    public int unscaledHeightPixels;
+    public int noncompatHeightPixels;
+    /**
+     * The reported display density prior to any compatibility mode scaling
+     * being applied.
+     * @hide
+     */
+    public float noncompatDensity;
+    /**
+     * The reported scaled density prior to any compatibility mode scaling
+     * being applied.
+     * @hide
+     */
+    public float noncompatScaledDensity;
+    /**
+     * The reported display xdpi prior to any compatibility mode scaling
+     * being applied.
+     * @hide
+     */
+    public float noncompatXdpi;
+    /**
+     * The reported display ydpi prior to any compatibility mode scaling
+     * being applied.
+     * @hide
+     */
+    public float noncompatYdpi;
 
     public DisplayMetrics() {
     }
@@ -138,8 +162,12 @@ public class DisplayMetrics {
         scaledDensity = o.scaledDensity;
         xdpi = o.xdpi;
         ydpi = o.ydpi;
-        unscaledWidthPixels = o.unscaledWidthPixels;
-        unscaledHeightPixels = o.unscaledHeightPixels;
+        noncompatWidthPixels = o.noncompatWidthPixels;
+        noncompatHeightPixels = o.noncompatHeightPixels;
+        noncompatDensity = o.noncompatDensity;
+        noncompatScaledDensity = o.noncompatScaledDensity;
+        noncompatXdpi = o.noncompatXdpi;
+        noncompatYdpi = o.noncompatYdpi;
     }
     
     public void setToDefaults() {
@@ -150,8 +178,8 @@ public class DisplayMetrics {
         scaledDensity = density;
         xdpi = DENSITY_DEVICE;
         ydpi = DENSITY_DEVICE;
-        unscaledWidthPixels = 0;
-        unscaledHeightPixels = 0;
+        noncompatWidthPixels = 0;
+        noncompatHeightPixels = 0;
     }
 
     @Override

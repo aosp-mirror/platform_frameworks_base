@@ -432,17 +432,17 @@ public class CompatibilityInfo implements Parcelable {
             // compatible with large screens, so diddle it.
             CompatibilityInfo.computeCompatibleScaling(inoutDm, inoutDm);
         } else {
-            inoutDm.widthPixels = inoutDm.unscaledWidthPixels;
-            inoutDm.heightPixels = inoutDm.unscaledHeightPixels;
+            inoutDm.widthPixels = inoutDm.noncompatWidthPixels;
+            inoutDm.heightPixels = inoutDm.noncompatHeightPixels;
         }
 
         if (isScalingRequired()) {
             float invertedRatio = applicationInvertedScale;
-            inoutDm.density *= invertedRatio;
+            inoutDm.density = inoutDm.noncompatDensity * invertedRatio;
             inoutDm.densityDpi = (int)((inoutDm.density*DisplayMetrics.DENSITY_DEFAULT)+.5f);
-            inoutDm.scaledDensity *= invertedRatio;
-            inoutDm.xdpi *= invertedRatio;
-            inoutDm.ydpi *= invertedRatio;
+            inoutDm.scaledDensity = inoutDm.noncompatScaledDensity * invertedRatio;
+            inoutDm.xdpi = inoutDm.noncompatXdpi * invertedRatio;
+            inoutDm.ydpi = inoutDm.noncompatYdpi * invertedRatio;
             inoutDm.widthPixels = (int) (inoutDm.widthPixels * invertedRatio + 0.5f);
             inoutDm.heightPixels = (int) (inoutDm.heightPixels * invertedRatio + 0.5f);
         }
@@ -471,8 +471,8 @@ public class CompatibilityInfo implements Parcelable {
      * @return Returns the scaling factor for the window.
      */
     public static float computeCompatibleScaling(DisplayMetrics dm, DisplayMetrics outDm) {
-        final int width = dm.unscaledWidthPixels;
-        final int height = dm.unscaledHeightPixels;
+        final int width = dm.noncompatWidthPixels;
+        final int height = dm.noncompatHeightPixels;
         int shortSize, longSize;
         if (width < height) {
             shortSize = width;
@@ -532,7 +532,9 @@ public class CompatibilityInfo implements Parcelable {
         sb.append(applicationDensity);
         sb.append("dpi");
         if (isScalingRequired()) {
-            sb.append(" scaling");
+            sb.append(" ");
+            sb.append(applicationScale);
+            sb.append("x");
         }
         if (!supportsScreen()) {
             sb.append(" resizing");
