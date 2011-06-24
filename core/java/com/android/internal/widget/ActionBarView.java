@@ -50,7 +50,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.Window;
-import android.view.View.MeasureSpec;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -649,7 +648,7 @@ public class ActionBarView extends AbsActionBarView {
             }
         }
     }
-    
+
     private void initTitle() {
         if (mTitleLayout == null) {
             LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -1162,13 +1161,14 @@ public class ActionBarView extends AbsActionBarView {
         protected void onLayout(boolean changed, int l, int t, int r, int b) {
             final int vCenter = (b - t) / 2;
             int width = r - l;
+            int upOffset = 0;
             if (mUpView.getVisibility() != GONE) {
                 final LayoutParams upLp = (LayoutParams) mUpView.getLayoutParams();
                 final int upHeight = mUpView.getMeasuredHeight();
                 final int upWidth = mUpView.getMeasuredWidth();
-                final int upTop = t + vCenter - upHeight / 2;
-                mUpView.layout(l, upTop, l + upWidth, upTop + upHeight);
-                final int upOffset = upLp.leftMargin + upWidth + upLp.rightMargin;
+                final int upTop = vCenter - upHeight / 2;
+                mUpView.layout(0, upTop, upWidth, upTop + upHeight);
+                upOffset = upLp.leftMargin + upWidth + upLp.rightMargin;
                 width -= upOffset;
                 l += upOffset;
             }
@@ -1176,8 +1176,8 @@ public class ActionBarView extends AbsActionBarView {
             final int iconHeight = mIconView.getMeasuredHeight();
             final int iconWidth = mIconView.getMeasuredWidth();
             final int hCenter = (r - l) / 2;
-            final int iconLeft = l + iconLp.leftMargin + hCenter - iconWidth / 2;
-            final int iconTop = t + iconLp.topMargin + vCenter - iconHeight / 2;
+            final int iconLeft = upOffset + Math.max(iconLp.leftMargin, hCenter - iconWidth / 2);
+            final int iconTop = Math.max(iconLp.topMargin, vCenter - iconHeight / 2);
             mIconView.layout(iconLeft, iconTop, iconLeft + iconWidth, iconTop + iconHeight);
         }
     }
