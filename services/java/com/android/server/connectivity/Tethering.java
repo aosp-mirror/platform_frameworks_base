@@ -709,6 +709,14 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         return retVal;
     }
 
+    //TODO: Temporary handling upstream change triggered without
+    //      CONNECTIVITY_ACTION. Only to accomodate interface
+    //      switch during HO.
+    //      @see bug/4455071
+    public void handleTetherIfaceChange() {
+        mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED);
+    }
+
     class TetherInterfaceSM extends StateMachine {
         // notification from the master SM that it's not in tether mode
         static final int CMD_TETHER_MODE_DEAD            =  1;
