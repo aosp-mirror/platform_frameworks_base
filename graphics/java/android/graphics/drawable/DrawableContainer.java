@@ -167,6 +167,7 @@ public class DrawableContainer extends Drawable implements Drawable.Callback {
         }
         if (mCurrDrawable != null) {
             mCurrDrawable.jumpToCurrentState();
+            mCurrDrawable.setAlpha(mAlpha);
         }
         if (mExitAnimationEnd != 0) {
             mExitAnimationEnd = 0;
