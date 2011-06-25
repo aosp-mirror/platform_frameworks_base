@@ -131,8 +131,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private List mNetRequestersPids[];
 
-    private WifiWatchdogService mWifiWatchdogService;
-
     // priority order of the nettrackers
     // (excluding dynamically set mNetworkPreference)
     // TODO - move mNetworkTypePreference into this
@@ -446,10 +444,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 wifiService.checkAndStartWifi();
                 mNetTrackers[ConnectivityManager.TYPE_WIFI] = wst;
                 wst.startMonitoring(context, mHandler);
-
-                //TODO: as part of WWS refactor, create only when needed
-                mWifiWatchdogService = new WifiWatchdogService(context);
-
                 break;
             case ConnectivityManager.TYPE_MOBILE:
                 mNetTrackers[netType] = new MobileDataStateTracker(netType,
