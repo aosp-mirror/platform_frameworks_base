@@ -106,28 +106,33 @@ public class BiDiTestActivity extends Activity {
         addItem(result, "Linear LTR", BiDiTestLinearLayoutLtr.class, R.id.linear_layout_ltr);
         addItem(result, "Linear RTL", BiDiTestLinearLayoutRtl.class, R.id.linear_layout_rtl);
         addItem(result, "Linear LOC", BiDiTestLinearLayoutLocale.class, R.id.linear_layout_locale);
-        
+
         addItem(result, "Frame LTR", BiDiTestFrameLayoutLtr.class, R.id.frame_layout_ltr);
         addItem(result, "Frame RTL", BiDiTestFrameLayoutRtl.class, R.id.frame_layout_rtl);
         addItem(result, "Frame LOC", BiDiTestFrameLayoutLocale.class, R.id.frame_layout_locale);
-        
+
         addItem(result, "Relative LTR", BiDiTestRelativeLayoutLtr.class, R.id.relative_layout_ltr);
         addItem(result, "Relative RTL", BiDiTestRelativeLayoutRtl.class, R.id.relative_layout_rtl);
-        
+
         addItem(result, "Relative2 LTR", BiDiTestRelativeLayout2Ltr.class, R.id.relative_layout_2_ltr);
         addItem(result, "Relative2 RTL", BiDiTestRelativeLayout2Rtl.class, R.id.relative_layout_2_rtl);
         addItem(result, "Relative2 LOC", BiDiTestRelativeLayout2Locale.class, R.id.relative_layout_2_locale);
-        
+
         addItem(result, "Table LTR", BiDiTestTableLayoutLtr.class, R.id.table_layout_ltr);
         addItem(result, "Table RTL", BiDiTestTableLayoutRtl.class, R.id.table_layout_rtl);
         addItem(result, "Table LOC", BiDiTestTableLayoutLocale.class, R.id.table_layout_locale);
 
+        addItem(result, "ViewPadding", BiDiTestViewPadding.class, R.id.view_padding);
+        addItem(result, "ViewPadding MIXED", BiDiTestViewPaddingMixed.class, R.id.view_padding_mixed);
+
+        addItem(result, "Padding", BiDiTestViewPadding.class, R.id.view_padding);
+        addItem(result, "Padding MIXED", BiDiTestViewPaddingMixed.class, R.id.view_padding_mixed);
+
+        addItem(result, "Margin MIXED", BiDiTestViewGroupMarginMixed.class, R.id.view_group_margin_mixed);
+
         addItem(result, "TextView LTR", BiDiTestTextViewLtr.class, R.id.textview_ltr);
         addItem(result, "TextView RTL", BiDiTestTextViewRtl.class, R.id.textview_rtl);
         addItem(result, "TextView LOC", BiDiTestTextViewLocale.class, R.id.textview_locale);
-
-        addItem(result, "ViewPadding", BiDiTestViewPadding.class, R.id.view_padding);
-        addItem(result, "ViewPadding MIXED", BiDiTestViewPaddingMixed.class, R.id.view_padding_mixed);
 
         return result;
     }

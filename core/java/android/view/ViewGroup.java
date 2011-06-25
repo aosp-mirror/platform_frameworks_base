@@ -5175,6 +5175,21 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         /**
+         * Resolve layout parameters depending on the layout direction. Subclasses that care about
+         * layoutDirection changes should override this method. The default implementation does
+         * nothing.
+         *
+         * @param layoutDirection the direction of the layout
+         *
+         * {@link View#LAYOUT_DIRECTION_LTR}
+         * {@link View#LAYOUT_DIRECTION_RTL}
+         *
+         * @hide
+         */
+        protected void resolveWithDirection(int layoutDirection) {
+        }
+
+        /**
          * Returns a String representation of this set of layout parameters.
          *
          * @param output the String to prepend to the internal representation
@@ -5215,28 +5230,54 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public static class MarginLayoutParams extends ViewGroup.LayoutParams {
         /**
-         * The left margin in pixels of the child.
+         * The left margin in pixels of the child. Whenever this value is changed, a call to
+         * {@link android.view.View#requestLayout()} needs to be done.
          */
         @ViewDebug.ExportedProperty(category = "layout")
         public int leftMargin;
 
         /**
-         * The top margin in pixels of the child.
+         * The top margin in pixels of the child. Whenever this value is changed, a call to
+         * {@link android.view.View#requestLayout()} needs to be done.
          */
         @ViewDebug.ExportedProperty(category = "layout")
         public int topMargin;
 
         /**
-         * The right margin in pixels of the child.
+         * The right margin in pixels of the child. Whenever this value is changed, a call to
+         * {@link android.view.View#requestLayout()} needs to be done.
          */
         @ViewDebug.ExportedProperty(category = "layout")
         public int rightMargin;
 
         /**
-         * The bottom margin in pixels of the child.
+         * The bottom margin in pixels of the child. Whenever this value is changed, a call to
+         * {@link android.view.View#requestLayout()} needs to be done.
          */
         @ViewDebug.ExportedProperty(category = "layout")
         public int bottomMargin;
+
+        /**
+         * The start margin in pixels of the child.
+         *
+         * @hide
+         *
+         */
+        @ViewDebug.ExportedProperty(category = "layout")
+        protected int startMargin = DEFAULT_RELATIVE;
+
+        /**
+         * The end margin in pixels of the child.
+         *
+         * @hide
+         */
+        @ViewDebug.ExportedProperty(category = "layout")
+        protected int endMargin = DEFAULT_RELATIVE;
+
+        /**
+         * The default start and end margin.
+         */
+        static private final int DEFAULT_RELATIVE = Integer.MIN_VALUE;
 
         /**
          * Creates a new set of layout parameters. The values are extracted from
@@ -5270,6 +5311,10 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                         R.styleable.ViewGroup_MarginLayout_layout_marginRight, 0);
                 bottomMargin = a.getDimensionPixelSize(
                         R.styleable.ViewGroup_MarginLayout_layout_marginBottom, 0);
+                startMargin = a.getDimensionPixelSize(
+                        R.styleable.ViewGroup_MarginLayout_layout_marginStart, DEFAULT_RELATIVE);
+                endMargin = a.getDimensionPixelSize(
+                        R.styleable.ViewGroup_MarginLayout_layout_marginEnd, DEFAULT_RELATIVE);
             }
 
             a.recycle();
@@ -5295,6 +5340,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             this.topMargin = source.topMargin;
             this.rightMargin = source.rightMargin;
             this.bottomMargin = source.bottomMargin;
+            this.startMargin = source.startMargin;
+            this.endMargin = source.endMargin;
         }
 
         /**
@@ -5305,7 +5352,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         }
 
         /**
-         * Sets the margins, in pixels.
+         * Sets the margins, in pixels. A call to {@link android.view.View#requestLayout()} needs
+         * to be done so that the new margins are taken into account. Left and right margins may be
+         * overriden by {@link android.view.View#requestLayout()} depending on layout direction.
          *
          * @param left the left margin size
          * @param top the top margin size
@@ -5322,6 +5371,92 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             topMargin = top;
             rightMargin = right;
             bottomMargin = bottom;
+        }
+
+        /**
+         * Sets the relative margins, in pixels. A call to {@link android.view.View#requestLayout()}
+         * needs to be done so that the new relative margins are taken into account. Left and right
+         * margins may be overriden by {@link android.view.View#requestLayout()} depending on layout
+         * direction.
+         *
+         * @param start the start margin size
+         * @param top the top margin size
+         * @param end the right margin size
+         * @param bottom the bottom margin size
+         *
+         * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
+         * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginTop
+         * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
+         * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginBottom
+         *
+         * @hide
+         */
+        public void setMarginsRelative(int start, int top, int end, int bottom) {
+            startMargin = start;
+            topMargin = top;
+            endMargin = end;
+            bottomMargin = bottom;
+        }
+
+        /**
+         * Returns the start margin in pixels.
+         *
+         * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
+         *
+         * @return the start margin in pixels.
+         *
+         * @hide
+         */
+        public int getMarginStart() {
+            return startMargin;
+        }
+
+        /**
+         * Returns the end margin in pixels.
+         *
+         * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
+         *
+         * @return the end margin in pixels.
+         *
+         * @hide
+         */
+        public int getMarginEnd() {
+            return endMargin;
+        }
+
+        /**
+         * Check if margins are relative.
+         *
+         * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginStart
+         * @attr ref android.R.styleable#ViewGroup_MarginLayout_layout_marginEnd
+         *
+         * @return true if either marginStart or marginEnd has been set
+         *
+         * @hide
+         */
+        public boolean isMarginRelative() {
+            return (startMargin != DEFAULT_RELATIVE) || (endMargin != DEFAULT_RELATIVE);
+        }
+
+        /**
+         * This will be called by {@link android.view.View#requestLayout()}. Left and Right margins
+         * maybe overriden depending on layout direction.
+         *
+         * @hide
+         */
+        @Override
+        protected void resolveWithDirection(int layoutDirection) {
+            switch(layoutDirection) {
+                case View.LAYOUT_DIRECTION_RTL:
+                    leftMargin = (endMargin > DEFAULT_RELATIVE) ? endMargin : leftMargin;
+                    rightMargin = (startMargin > DEFAULT_RELATIVE) ? startMargin : rightMargin;
+                    break;
+                case View.LAYOUT_DIRECTION_LTR:
+                default:
+                    leftMargin = (startMargin > DEFAULT_RELATIVE) ? startMargin : leftMargin;
+                    rightMargin = (endMargin > DEFAULT_RELATIVE) ? endMargin : rightMargin;
+                    break;
+            }
         }
     }
 

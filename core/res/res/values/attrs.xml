@@ -2125,6 +2125,12 @@
         <!--  Specifies extra space on the bottom side of this view.
               This space is outside this view's bounds. -->
         <attr name="layout_marginBottom" format="dimension"  />
+        <!--  Specifies extra space on the start side of this view.
+              This space is outside this view's bounds. -->
+        <attr name="layout_marginStart" format="dimension"  />
+        <!--  Specifies extra space on the end side of this view.
+              This space is outside this view's bounds. -->
+        <attr name="layout_marginEnd" format="dimension"  />
     </declare-styleable>
 
     <!-- Use <code>input-method</code> as the root tag of the XML resource that
