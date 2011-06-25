@@ -988,8 +988,8 @@ public class ActionBarView extends AbsActionBarView {
             int ypos = 0;
             switch (gravity & Gravity.VERTICAL_GRAVITY_MASK) {
                 case Gravity.CENTER_VERTICAL:
-                    final int paddedTop = mTop + getPaddingTop();
-                    final int paddedBottom = mBottom - getPaddingBottom();
+                    final int paddedTop = getPaddingTop();
+                    final int paddedBottom = mBottom - mTop - getPaddingBottom();
                     ypos = ((paddedBottom - paddedTop) - customView.getMeasuredHeight()) / 2;
                     break;
                 case Gravity.TOP:
@@ -1000,7 +1000,10 @@ public class ActionBarView extends AbsActionBarView {
                             - bottomMargin;
                     break;
             }
-            x += positionChild(customView, xpos, ypos, contentHeight);
+            final int customWidth = customView.getMeasuredWidth();
+            customView.layout(xpos, ypos, xpos + customWidth,
+                    ypos + customView.getMeasuredHeight());
+            x += customWidth;
         }
 
         if (mProgressView != null) {
