@@ -17,7 +17,6 @@
 package com.android.test.hwui;
 
 import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -25,7 +24,6 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.TextureView;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 
