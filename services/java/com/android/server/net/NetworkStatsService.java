@@ -124,8 +124,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private PendingIntent mPollIntent;
 
     // TODO: listen for kernel push events through netd instead of polling
-    // TODO: watch for UID uninstall, and transfer stats into single bucket
-
     // TODO: trim empty history objects entirely
 
     private static final long KB_IN_BYTES = 1024;
@@ -506,8 +504,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         try {
             networkSnapshot = mNetworkManager.getNetworkStatsSummary();
             uidSnapshot = detailedPoll ? mNetworkManager.getNetworkStatsDetail() : null;
+        } catch (IllegalStateException e) {
+            Slog.w(TAG, "problem reading network stats: " + e);
+            return;
         } catch (RemoteException e) {
-            Slog.w(TAG, "problem reading network stats");
+            Slog.w(TAG, "problem reading network stats: " + e);
             return;
         }
 

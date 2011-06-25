@@ -41,7 +41,9 @@ import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.IProcessObserver;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
 import android.net.INetworkPolicyListener;
@@ -63,12 +65,17 @@ import android.text.format.Time;
 import android.util.TrustedTime;
 
 import com.android.server.net.NetworkPolicyManagerService;
+import com.google.common.util.concurrent.AbstractFuture;
 
 import org.easymock.Capture;
 import org.easymock.EasyMock;
+import org.easymock.IAnswer;
 
 import java.io.File;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Tests for {@link NetworkPolicyManagerService}.
@@ -118,11 +125,27 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
                     public String[] getPackagesForUid(int uid) {
                         return new String[] { "com.example" };
                     }
+
+                    @Override
+                    public PackageInfo getPackageInfo(String packageName, int flags) {
+                        final PackageInfo info = new PackageInfo();
+                        final Signature signature;
+                        if ("android".equals(packageName)) {
+                            signature = new Signature("F00D");
+                        } else {
+                            signature = new Signature("DEAD");
+                        }
+                        info.signatures = new Signature[] { signature };
+                        return info;
+                    }
                 };
             }
         };
 
         mPolicyDir = getContext().getFilesDir();
+        for (File file : mPolicyDir.listFiles()) {
+            file.delete();
+        }
 
         mActivityManager = createMock(IActivityManager.class);
         mPowerManager = createMock(IPowerManager.class);
@@ -228,81 +251,110 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     }
 
     public void testScreenChangesRules() throws Exception {
-        // push strict policy for foreground uid, verify ALLOW rule
-        expectRulesChanged(UID_A, RULE_ALLOW_ALL);
+        Future<Void> future;
+
+        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, true);
+        future.get();
+        verifyAndReset();
+
+        // push strict policy for foreground uid, verify ALLOW rule
+        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
+        replay();
         mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
+        future.get();
         verifyAndReset();
 
         // now turn screen off and verify REJECT rule
         expect(mPowerManager.isScreenOn()).andReturn(false).atLeastOnce();
-        expectRulesChanged(UID_A, RULE_REJECT_METERED);
+        future = expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mServiceContext.sendBroadcast(new Intent(Intent.ACTION_SCREEN_OFF));
+        future.get();
         verifyAndReset();
 
         // and turn screen back on, verify ALLOW rule restored
         expect(mPowerManager.isScreenOn()).andReturn(true).atLeastOnce();
-        expectRulesChanged(UID_A, RULE_ALLOW_ALL);
+        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mServiceContext.sendBroadcast(new Intent(Intent.ACTION_SCREEN_ON));
+        future.get();
         verifyAndReset();
     }
 
     public void testPolicyNone() throws Exception {
+        Future<Void> future;
+
+        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
+        replay();
+        mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, true);
+        future.get();
+        verifyAndReset();
+
         // POLICY_NONE should RULE_ALLOW in foreground
-        expectRulesChanged(UID_A, RULE_ALLOW_ALL);
+        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mService.setUidPolicy(UID_A, POLICY_NONE);
-        mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, true);
+        future.get();
         verifyAndReset();
 
         // POLICY_NONE should RULE_ALLOW in background
-        expectRulesChanged(UID_A, RULE_ALLOW_ALL);
+        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, false);
+        future.get();
         verifyAndReset();
     }
 
     public void testPolicyReject() throws Exception {
+        Future<Void> future;
+
         // POLICY_REJECT should RULE_ALLOW in background
-        expectRulesChanged(UID_A, RULE_REJECT_METERED);
+        future = expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
+        future.get();
         verifyAndReset();
 
         // POLICY_REJECT should RULE_ALLOW in foreground
-        expectRulesChanged(UID_A, RULE_ALLOW_ALL);
+        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, true);
+        future.get();
         verifyAndReset();
 
         // POLICY_REJECT should RULE_REJECT in background
-        expectRulesChanged(UID_A, RULE_REJECT_METERED);
+        future = expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, false);
+        future.get();
         verifyAndReset();
     }
 
     public void testPolicyRejectAddRemove() throws Exception {
+        Future<Void> future;
+
         // POLICY_NONE should have RULE_ALLOW in background
-        expectRulesChanged(UID_A, RULE_ALLOW_ALL);
+        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
-        mService.setUidPolicy(UID_A, POLICY_NONE);
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, false);
+        mService.setUidPolicy(UID_A, POLICY_NONE);
+        future.get();
         verifyAndReset();
 
         // adding POLICY_REJECT should cause RULE_REJECT
-        expectRulesChanged(UID_A, RULE_REJECT_METERED);
+        future = expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
+        future.get();
         verifyAndReset();
 
         // removing POLICY_REJECT should return us to RULE_ALLOW
-        expectRulesChanged(UID_A, RULE_ALLOW_ALL);
+        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mService.setUidPolicy(UID_A, POLICY_NONE);
+        future.get();
         verifyAndReset();
     }
 
@@ -350,6 +402,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         long elapsedRealtime = 0;
         NetworkState[] state = null;
         NetworkStats stats = null;
+        Future<Void> future;
 
         final long TIME_FEB_15 = 1171497600000L;
         final long TIME_MAR_10 = 1173484800000L;
@@ -360,10 +413,11 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         state = new NetworkState[] { buildWifi() };
         expect(mConnManager.getAllNetworkState()).andReturn(state).atLeastOnce();
         expectTime(TIME_MAR_10 + elapsedRealtime);
-        expectMeteredIfacesChanged();
+        future = expectMeteredIfacesChanged();
 
         replay();
         mServiceContext.sendBroadcast(new Intent(CONNECTIVITY_ACTION));
+        future.get();
         verifyAndReset();
 
         // now change cycle to be on 15th, and test in early march, to verify we
@@ -381,26 +435,31 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         // TODO: write up NetworkManagementService mock
 
         expectClearNotifications();
-        expectMeteredIfacesChanged(TEST_IFACE);
+        future = expectMeteredIfacesChanged(TEST_IFACE);
 
         replay();
         setNetworkPolicies(new NetworkPolicy(sTemplateWifi, CYCLE_DAY, 1024L, 2048L));
+        future.get();
         verifyAndReset();
     }
 
     public void testUidRemovedPolicyCleared() throws Exception {
+        Future<Void> future;
+
         // POLICY_REJECT should RULE_REJECT in background
-        expectRulesChanged(UID_A, RULE_REJECT_METERED);
+        future = expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
+        future.get();
         verifyAndReset();
 
         // uninstall should clear RULE_REJECT
-        expectRulesChanged(UID_A, RULE_ALLOW_ALL);
+        future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         final Intent intent = new Intent(ACTION_UID_REMOVED);
         intent.putExtra(EXTRA_UID, UID_A);
         mServiceContext.sendBroadcast(intent);
+        future.get();
         verifyAndReset();
     }
 
@@ -435,14 +494,35 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         expectLastCall().anyTimes();
     }
 
-    private void expectRulesChanged(int uid, int policy) throws Exception {
+    private Future<Void> expectRulesChanged(int uid, int policy) throws Exception {
+        final FutureAnswer future = new FutureAnswer();
         mPolicyListener.onUidRulesChanged(eq(uid), eq(policy));
-        expectLastCall().atLeastOnce();
+        expectLastCall().andAnswer(future);
+        return future;
     }
 
-    private void expectMeteredIfacesChanged(String... ifaces) throws Exception {
+    private Future<Void> expectMeteredIfacesChanged(String... ifaces) throws Exception {
+        final FutureAnswer future = new FutureAnswer();
         mPolicyListener.onMeteredIfacesChanged(aryEq(ifaces));
-        expectLastCall().atLeastOnce();
+        expectLastCall().andAnswer(future);
+        return future;
+    }
+
+    private static class FutureAnswer extends AbstractFuture<Void> implements IAnswer<Void> {
+        @Override
+        public Void get() throws InterruptedException, ExecutionException {
+            try {
+                return get(5, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public Void answer() {
+            set(null);
+            return null;
+        }
     }
 
     private void replay() {

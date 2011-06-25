@@ -72,6 +72,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IPowerManager;
+import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.TelephonyManager;
@@ -148,6 +149,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
 
+    private static final int MSG_RULES_CHANGED = 0x1;
+    private static final int MSG_METERED_IFACES_CHANGED = 0x2;
+
     private final Context mContext;
     private final IActivityManager mActivityManager;
     private final IPowerManager mPowerManager;
@@ -210,7 +214,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
+        mHandler = new Handler(mHandlerThread.getLooper(), mHandlerCallback);
 
         mPolicyFile = new AtomicFile(new File(systemDir, "netpolicy.xml"));
     }
@@ -269,9 +273,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // only someone like AMS should only be calling us
             mContext.enforceCallingOrSelfPermission(MANAGE_APP_TOKENS, TAG);
 
-            // skip when UID couldn't have any policy
-            if (!isUidValidForPolicy(mContext, uid)) return;
-
             synchronized (mRulesLock) {
                 // because a uid can have multiple pids running inside, we need to
                 // remember all pid states and summarize foreground at uid level.
@@ -291,9 +292,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         public void onProcessDied(int pid, int uid) {
             // only someone like AMS should only be calling us
             mContext.enforceCallingOrSelfPermission(MANAGE_APP_TOKENS, TAG);
-
-            // skip when UID couldn't have any policy
-            if (!isUidValidForPolicy(mContext, uid)) return;
 
             synchronized (mRulesLock) {
                 // clear records and recompute, when they exist
@@ -599,20 +597,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
 
-        // dispatch changed rule to existing listeners
-        // TODO: dispatch outside of holding lock
         final String[] meteredIfaces = mMeteredIfaces.toArray(new String[mMeteredIfaces.size()]);
-        final int length = mListeners.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-            if (listener != null) {
-                try {
-                    listener.onMeteredIfacesChanged(meteredIfaces);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-        mListeners.finishBroadcast();
+        mHandler.obtainMessage(MSG_METERED_IFACES_CHANGED, meteredIfaces).sendToTarget();
     }
 
     /**
@@ -804,32 +790,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         mListeners.register(listener);
 
-        synchronized (mRulesLock) {
-            // dispatch any existing rules to new listeners
-            // TODO: dispatch outside of holding lock
-            final int size = mUidRules.size();
-            for (int i = 0; i < size; i++) {
-                final int uid = mUidRules.keyAt(i);
-                final int uidRules = mUidRules.valueAt(i);
-                if (uidRules != RULE_ALLOW_ALL) {
-                    try {
-                        listener.onUidRulesChanged(uid, uidRules);
-                    } catch (RemoteException e) {
-                    }
-                }
-            }
-
-            // dispatch any metered ifaces to new listeners
-            // TODO: dispatch outside of holding lock
-            if (mMeteredIfaces.size() > 0) {
-                final String[] meteredIfaces = mMeteredIfaces.toArray(
-                        new String[mMeteredIfaces.size()]);
-                try {
-                    listener.onMeteredIfacesChanged(meteredIfaces);
-                } catch (RemoteException e) {
-                }
-            }
-        }
+        // TODO: consider dispatching existing rules to new listeners
     }
 
     @Override
@@ -978,8 +939,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     private void updateRulesForUidLocked(int uid) {
-        if (!isUidValidForPolicy(mContext, uid)) return;
-
         final int uidPolicy = getUidPolicy(uid);
         final boolean uidForeground = isUidForeground(uid);
 
@@ -999,19 +958,50 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         //kernelSetUidRejectPaid(uid, rejectPaid);
 
         // dispatch changed rule to existing listeners
-        // TODO: dispatch outside of holding lock
-        final int length = mListeners.beginBroadcast();
-        for (int i = 0; i < length; i++) {
-            final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
-            if (listener != null) {
-                try {
-                    listener.onUidRulesChanged(uid, uidRules);
-                } catch (RemoteException e) {
+        mHandler.obtainMessage(MSG_RULES_CHANGED, uid, uidRules).sendToTarget();
+    }
+
+    private Handler.Callback mHandlerCallback = new Handler.Callback() {
+        /** {@inheritDoc} */
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_RULES_CHANGED: {
+                    final int uid = msg.arg1;
+                    final int uidRules = msg.arg2;
+                    final int length = mListeners.beginBroadcast();
+                    for (int i = 0; i < length; i++) {
+                        final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
+                        if (listener != null) {
+                            try {
+                                listener.onUidRulesChanged(uid, uidRules);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                    }
+                    mListeners.finishBroadcast();
+                    return true;
+                }
+                case MSG_METERED_IFACES_CHANGED: {
+                    final String[] meteredIfaces = (String[]) msg.obj;
+                    final int length = mListeners.beginBroadcast();
+                    for (int i = 0; i < length; i++) {
+                        final INetworkPolicyListener listener = mListeners.getBroadcastItem(i);
+                        if (listener != null) {
+                            try {
+                                listener.onMeteredIfacesChanged(meteredIfaces);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                    }
+                    mListeners.finishBroadcast();
+                    return true;
+                }
+                default: {
+                    return false;
                 }
             }
         }
-        mListeners.finishBroadcast();
-    }
+    };
 
     private String getActiveSubscriberId() {
         final TelephonyManager telephony = (TelephonyManager) mContext.getSystemService(

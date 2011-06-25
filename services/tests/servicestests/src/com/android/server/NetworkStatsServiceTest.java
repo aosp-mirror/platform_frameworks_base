@@ -59,7 +59,6 @@ import android.os.INetworkManagementService;
 import android.telephony.TelephonyManager;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
-import android.util.Log;
 import android.util.TrustedTime;
 
 import com.android.server.net.NetworkStatsService;
@@ -611,6 +610,9 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mAlarmManager.setInexactRepeating(
                 eq(AlarmManager.ELAPSED_REALTIME), anyLong(), anyLong(), isA(PendingIntent.class));
         expectLastCall().atLeastOnce();
+
+        mNetManager.setBandwidthControlEnabled(true);
+        expectLastCall().atLeastOnce();
     }
 
     private void expectNetworkState(NetworkState... state) throws Exception {
@@ -631,6 +633,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     private void expectSettings(long persistThreshold, long bucketDuration, long maxHistory)
             throws Exception {
+        expect(mSettings.getEnabled()).andReturn(true).anyTimes();
         expect(mSettings.getPollInterval()).andReturn(HOUR_IN_MILLIS).anyTimes();
         expect(mSettings.getPersistThreshold()).andReturn(persistThreshold).anyTimes();
         expect(mSettings.getNetworkBucketDuration()).andReturn(bucketDuration).anyTimes();

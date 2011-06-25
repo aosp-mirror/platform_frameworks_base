@@ -38,6 +38,11 @@ import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
 
+import com.google.android.collect.Lists;
+import com.google.android.collect.Maps;
+
+import dalvik.system.BlockGuard;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -48,6 +53,7 @@ import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
@@ -65,9 +71,18 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     private static final int ADD = 1;
     private static final int REMOVE = 2;
 
+    /** Path to {@code /proc/uid_stat}. */
     @Deprecated
-    private static final File STATS_UIDSTAT = new File("/proc/uid_stat");
-    private static final File STATS_NETFILTER = new File("/proc/net/xt_qtaguid/stats");
+    private final File mProcStatsUidstat;
+    /** Path to {@code /proc/net/xt_qtaguid/stats}. */
+    private final File mProcStatsNetfilter;
+
+    /** {@link #mProcStatsNetfilter} headers. */
+    private static final String KEY_IFACE = "iface";
+    private static final String KEY_TAG_HEX = "acct_tag_hex";
+    private static final String KEY_UID = "uid_tag_int";
+    private static final String KEY_RX = "rx_bytes";
+    private static final String KEY_TX = "tx_bytes";
 
     class NetdResponseCode {
         public static final int InterfaceListResult       = 110;
@@ -107,9 +122,12 @@ class NetworkManagementService extends INetworkManagementService.Stub {
      *
      * @param context  Binder context for this service
      */
-    private NetworkManagementService(Context context) {
+    private NetworkManagementService(Context context, File procRoot) {
         mContext = context;
         mObservers = new ArrayList<INetworkManagementEventObserver>();
+
+        mProcStatsUidstat = new File(procRoot, "uid_stat");
+        mProcStatsNetfilter = new File(procRoot, "net/xt_qtaguid/stats");
 
         if ("simulator".equals(SystemProperties.get("ro.product.device"))) {
             return;
@@ -121,13 +139,20 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     public static NetworkManagementService create(Context context) throws InterruptedException {
-        NetworkManagementService service = new NetworkManagementService(context);
+        NetworkManagementService service = new NetworkManagementService(
+                context, new File("/proc/"));
         if (DBG) Slog.d(TAG, "Creating NetworkManagementService");
         service.mThread.start();
         if (DBG) Slog.d(TAG, "Awaiting socket connection");
         service.mConnectedSignal.await();
         if (DBG) Slog.d(TAG, "Connected");
         return service;
+    }
+
+    // @VisibleForTesting
+    public static NetworkManagementService createForTest(Context context, File procRoot) {
+        // TODO: eventually connect with mock netd
+        return new NetworkManagementService(context, procRoot);
     }
 
     public void registerObserver(INetworkManagementEventObserver obs) {
@@ -888,7 +913,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
-        if (STATS_NETFILTER.exists()) {
+        if (mProcStatsNetfilter.exists()) {
             return getNetworkStatsDetailNetfilter(UID_ALL);
         } else {
             return getNetworkStatsDetailUidstat(UID_ALL);
@@ -902,7 +927,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                     android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
         }
 
-        if (STATS_NETFILTER.exists()) {
+        if (mProcStatsNetfilter.exists()) {
             return getNetworkStatsDetailNetfilter(uid);
         } else {
             return getNetworkStatsDetailUidstat(uid);
@@ -914,35 +939,35 @@ class NetworkManagementService extends INetworkManagementService.Stub {
      */
     private NetworkStats getNetworkStatsDetailNetfilter(int limitUid) {
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 24);
+        final ArrayList<String> keys = Lists.newArrayList();
+        final ArrayList<String> values = Lists.newArrayList();
+        final HashMap<String, String> parsed = Maps.newHashMap();
 
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader(STATS_NETFILTER));
+            reader = new BufferedReader(new FileReader(mProcStatsNetfilter));
 
-            // assumes format from kernel:
-            // idx iface acct_tag_hex uid_tag_int rx_bytes tx_bytes
-
-            // skip first line, which is legend
+            // parse first line as header
             String line = reader.readLine();
-            while ((line = reader.readLine()) != null) {
-                final StringTokenizer t = new StringTokenizer(line);
+            splitLine(line, keys);
 
-                final String idx = t.nextToken();
-                final String iface = t.nextToken();
+            // parse remaining lines
+            while ((line = reader.readLine()) != null) {
+                splitLine(line, values);
+                parseLine(keys, values, parsed);
 
                 try {
-                    // TODO: kernel currently emits tag in upper half of long;
-                    // eventually switch to directly using int.
-                    final int tag = (int) (Long.parseLong(t.nextToken().substring(2), 16) >> 32);
-                    final int uid = Integer.parseInt(t.nextToken());
-                    final long rx = Long.parseLong(t.nextToken());
-                    final long tx = Long.parseLong(t.nextToken());
+                    final String iface = parsed.get(KEY_IFACE);
+                    final int tag = BlockGuard.kernelToTag(parsed.get(KEY_TAG_HEX));
+                    final int uid = Integer.parseInt(parsed.get(KEY_UID));
+                    final long rx = Long.parseLong(parsed.get(KEY_RX));
+                    final long tx = Long.parseLong(parsed.get(KEY_TX));
 
                     if (limitUid == UID_ALL || limitUid == uid) {
                         stats.addEntry(iface, uid, tag, rx, tx);
                     }
                 } catch (NumberFormatException e) {
-                    Slog.w(TAG, "problem parsing stats for idx " + idx + ": " + e);
+                    Slog.w(TAG, "problem parsing stats row '" + line + "': " + e);
                 }
             }
         } catch (IOException e) {
@@ -964,7 +989,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     private NetworkStats getNetworkStatsDetailUidstat(int limitUid) {
         final String[] knownUids;
         if (limitUid == UID_ALL) {
-            knownUids = STATS_UIDSTAT.list();
+            knownUids = mProcStatsUidstat.list();
         } else {
             knownUids = new String[] { String.valueOf(limitUid) };
         }
@@ -973,7 +998,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 SystemClock.elapsedRealtime(), knownUids.length);
         for (String uid : knownUids) {
             final int uidInt = Integer.parseInt(uid);
-            final File uidPath = new File(STATS_UIDSTAT, uid);
+            final File uidPath = new File(mProcStatsUidstat, uid);
             final long rx = readSingleLongFromFile(new File(uidPath, "tcp_rcv"));
             final long tx = readSingleLongFromFile(new File(uidPath, "tcp_snd"));
             stats.addEntry(IFACE_ALL, uidInt, TAG_NONE, rx, tx);
@@ -1045,6 +1070,32 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     public void setBandwidthControlEnabled(boolean enabled) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
         mConnector.doCommand(String.format("bandwidth %s", (enabled ? "enable" : "disable")));
+    }
+
+    /**
+     * Split given line into {@link ArrayList}.
+     */
+    private static void splitLine(String line, ArrayList<String> outSplit) {
+        outSplit.clear();
+
+        final StringTokenizer t = new StringTokenizer(line);
+        while (t.hasMoreTokens()) {
+            outSplit.add(t.nextToken());
+        }
+    }
+
+    /**
+     * Zip the two given {@link ArrayList} as key and value pairs into
+     * {@link HashMap}.
+     */
+    private static void parseLine(
+            ArrayList<String> keys, ArrayList<String> values, HashMap<String, String> outParsed) {
+        outParsed.clear();
+
+        final int size = Math.min(keys.size(), values.size());
+        for (int i = 0; i < size; i++) {
+            outParsed.put(keys.get(i), values.get(i));
+        }
     }
 
     /**

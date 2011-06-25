@@ -16,14 +16,21 @@
 
 package android.net;
 
+import static android.content.pm.PackageManager.GET_SIGNATURES;
 import static android.text.format.Time.MONTH_DAY;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.Signature;
 import android.os.RemoteException;
 import android.text.format.Time;
 
+import com.google.android.collect.Sets;
+
 import java.io.PrintWriter;
+import java.util.HashSet;
 
 /**
  * Manager for creating and modifying network policy rules.
@@ -210,8 +217,35 @@ public class NetworkPolicyManager {
      * usually to protect critical system services.
      */
     public static boolean isUidValidForPolicy(Context context, int uid) {
-        return (uid >= android.os.Process.FIRST_APPLICATION_UID
-                && uid <= android.os.Process.LAST_APPLICATION_UID);
+        // first, quick-reject non-applications
+        if (uid < android.os.Process.FIRST_APPLICATION_UID
+                || uid > android.os.Process.LAST_APPLICATION_UID) {
+            return false;
+        }
+
+        final PackageManager pm = context.getPackageManager();
+        final HashSet<Signature> systemSignature;
+        try {
+            systemSignature = Sets.newHashSet(
+                    pm.getPackageInfo("android", GET_SIGNATURES).signatures);
+        } catch (NameNotFoundException e) {
+            throw new RuntimeException("problem finding system signature", e);
+        }
+
+        try {
+            // reject apps signed with system cert
+            for (String packageName : pm.getPackagesForUid(uid)) {
+                final HashSet<Signature> packageSignature = Sets.newHashSet(
+                        pm.getPackageInfo(packageName, GET_SIGNATURES).signatures);
+                if (packageSignature.containsAll(systemSignature)) {
+                    return false;
+                }
+            }
+        } catch (NameNotFoundException e) {
+        }
+
+        // nothing found above; we can apply policy to UID
+        return true;
     }
 
     /** {@hide} */
