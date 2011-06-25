@@ -24,6 +24,8 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.provider.ContactsContract.CommonDataKinds.Phone;
+import android.provider.ContactsContract.DataUsageFeedback;
 import android.text.TextUtils;
 
 /**
@@ -204,7 +206,44 @@ public class CallLog {
             }
 
             if ((ci != null) && (ci.person_id > 0)) {
-                ContactsContract.Contacts.markAsContacted(resolver, ci.person_id);
+                // Update usage information for the number associated with the contact ID.
+                // We need to use both the number and the ID for obtaining a data ID since other
+                // contacts may have the same number.
+
+                final Cursor cursor;
+
+                // We should prefer normalized one (probably coming from
+                // Phone.NORMALIZED_NUMBER column) first. If it isn't available try others.
+                if (ci.normalizedNumber != null) {
+                    final String normalizedPhoneNumber = ci.normalizedNumber;
+                    cursor = resolver.query(Phone.CONTENT_URI,
+                            new String[] { Phone._ID },
+                            Phone.CONTACT_ID + " =? AND " + Phone.NORMALIZED_NUMBER + " =?",
+                            new String[] { String.valueOf(ci.person_id), normalizedPhoneNumber},
+                            null);
+                } else {
+                    final String phoneNumber = ci.phoneNumber != null ? ci.phoneNumber : number;
+                    cursor = resolver.query(Phone.CONTENT_URI,
+                            new String[] { Phone._ID },
+                            Phone.CONTACT_ID + " =? AND " + Phone.NUMBER + " =?",
+                            new String[] { String.valueOf(ci.person_id), phoneNumber},
+                            null);
+                }
+
+                if (cursor != null) {
+                    try {
+                        if (cursor.getCount() > 0 && cursor.moveToFirst()) {
+                            final Uri feedbackUri = DataUsageFeedback.FEEDBACK_URI.buildUpon()
+                                    .appendPath(cursor.getString(0))
+                                    .appendQueryParameter(DataUsageFeedback.USAGE_TYPE,
+                                                DataUsageFeedback.USAGE_TYPE_CALL)
+                                    .build();
+                            resolver.update(feedbackUri, new ContentValues(), null, null);
+                        }
+                    } finally {
+                        cursor.close();
+                    }
+                }
             }
 
             Uri result = resolver.insert(CONTENT_URI, values);

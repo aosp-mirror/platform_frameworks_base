@@ -174,6 +174,15 @@ public final class ContactsContract {
      */
     public static final String PRIMARY_ACCOUNT_TYPE = "type_for_primary_account";
 
+    /**
+     * A boolean parameter for {@link Contacts#CONTENT_STREQUENT_URI} and
+     * {@link Contacts#CONTENT_STREQUENT_FILTER_URI}, which requires the ContactsProvider to
+     * return only phone-related results. For example, frequently contacted person list should
+     * include persons contacted via phone (not email, sms, etc.)
+     *
+     * @hide
+     */
+    public static final String STREQUENT_PHONE_ONLY = "strequent_phone_only";
 
     /**
      * @hide
