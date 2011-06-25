@@ -183,8 +183,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
 
         mStatusView = new StatusView(this, mUpdateMonitor, mLockPatternUtils);
         // This shows up when no other information is required on status1
-        mStatusView.setHelpMessage(R.string.lockscreen_pattern_instructions,
-                StatusView.LOCK_ICON);
+        //mStatusView.setHelpMessage(R.string.lockscreen_pattern_instructions,StatusView.LOCK_ICON);
 
         mLockPatternView = (LockPatternView) findViewById(R.id.lockPattern);
 

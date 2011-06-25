@@ -73,6 +73,8 @@
             android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:ellipsize="marquee"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"/>
 
@@ -81,6 +83,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dip"
+            android:singleLine="true"
+            android:ellipsize="marquee"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"/>
 
@@ -92,6 +96,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:layout_marginTop="10dip"
@@ -106,6 +112,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dip"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         />
 
