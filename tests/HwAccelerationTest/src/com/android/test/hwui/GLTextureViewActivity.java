@@ -19,13 +19,17 @@ package com.android.test.hwui;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.SurfaceTexture;
-import android.opengl.GLES20;
+import android.opengl.GLUtils;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 import javax.microedition.khronos.egl.EGL10;
@@ -35,6 +39,12 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
+import static android.opengl.GLES20.*;
 
 @SuppressWarnings({"UnusedDeclaration"})
 public class GLTextureViewActivity extends Activity implements TextureView.SurfaceTextureListener {
@@ -48,12 +58,14 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
         mTextureView = new TextureView(this);
         mTextureView.setSurfaceTextureListener(this);
 
-        setContentView(mTextureView, new FrameLayout.LayoutParams(500, 400, Gravity.CENTER));
+        setContentView(mTextureView, new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
+                Gravity.CENTER));
     }
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        mRenderThread = new RenderThread(surface);
+        mRenderThread = new RenderThread(getResources(), surface);
         mRenderThread.start();
 
         mTextureView.setCameraDistance(5000);
@@ -97,7 +109,8 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
 
         private volatile boolean mFinished;
 
-        private SurfaceTexture mSurface;
+        private final Resources mResources;
+        private final SurfaceTexture mSurface;
         
         private EGL10 mEgl;
         private EGLDisplay mEglDisplay;
@@ -106,25 +119,95 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
         private EGLSurface mEglSurface;
         private GL mGL;
 
-        RenderThread(SurfaceTexture surface) {
+        RenderThread(Resources resources, SurfaceTexture surface) {
+            mResources = resources;
             mSurface = surface;
         }
+
+        private static final String sSimpleVS =
+                "attribute vec4 position;\n" +
+                "attribute vec2 texCoords;\n" +
+                "varying vec2 outTexCoords;\n" +
+                "\nvoid main(void) {\n" +
+                "    outTexCoords = texCoords;\n" +
+                "    gl_Position = position;\n" +
+                "}\n\n";
+        private static final String sSimpleFS =
+                "precision mediump float;\n\n" +
+                "varying vec2 outTexCoords;\n" +
+                "uniform sampler2D texture;\n" +
+                "\nvoid main(void) {\n" +
+                "    gl_FragColor = texture2D(texture, outTexCoords);\n" +
+                "}\n\n";
+
+        private static final int FLOAT_SIZE_BYTES = 4;
+        private static final int TRIANGLE_VERTICES_DATA_STRIDE_BYTES = 5 * FLOAT_SIZE_BYTES;
+        private static final int TRIANGLE_VERTICES_DATA_POS_OFFSET = 0;
+        private static final int TRIANGLE_VERTICES_DATA_UV_OFFSET = 3;
+        private final float[] mTriangleVerticesData = {
+                // X, Y, Z, U, V
+                -1.0f, -1.0f, 0, 0.f, 0.f,
+                1.0f, -1.0f, 0, 1.f, 0.f,
+                -1.0f,  1.0f, 0, 0.f, 1.f,
+                1.0f,   1.0f, 0, 1.f, 1.f,
+        };
 
         @Override
         public void run() {
             initGL();
+            
+            FloatBuffer triangleVertices = ByteBuffer.allocateDirect(mTriangleVerticesData.length
+                    * FLOAT_SIZE_BYTES).order(ByteOrder.nativeOrder()).asFloatBuffer();
+            triangleVertices.put(mTriangleVerticesData).position(0);
 
-            float red = 1.0f;
+            int texture = loadTexture(R.drawable.large_photo);
+            int program = buildProgram(sSimpleVS, sSimpleFS);
+
+            int attribPosition = glGetAttribLocation(program, "position");
+            checkGlError();
+
+            int attribTexCoords = glGetAttribLocation(program, "texCoords");
+            checkGlError();
+
+            int uniformTexture = glGetUniformLocation(program, "texture");
+            checkGlError();
+
+            glBindTexture(GL_TEXTURE_2D, texture);
+            checkGlError();
+
+            glUseProgram(program);
+            checkGlError();
+
+            glEnableVertexAttribArray(attribPosition);
+            checkGlError();
+
+            glEnableVertexAttribArray(attribTexCoords);
+            checkGlError();
+
+            glUniform1i(texture, 0);
+            checkGlError();
+            
             while (!mFinished) {
                 checkCurrent();
 
                 Log.d(LOG_TAG, "Rendering frame");
 
-                GLES20.glClearColor(red, 0.0f, 0.0f, 1.0f);
+                glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
                 checkGlError();
 
-                GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+                glClear(GL_COLOR_BUFFER_BIT);
                 checkGlError();
+
+                // drawQuad
+                triangleVertices.position(TRIANGLE_VERTICES_DATA_POS_OFFSET);
+                glVertexAttribPointer(attribPosition, 3, GL_FLOAT, false,
+                        TRIANGLE_VERTICES_DATA_STRIDE_BYTES, triangleVertices);
+
+                triangleVertices.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
+                glVertexAttribPointer(attribTexCoords, 3, GL_FLOAT, false,
+                        TRIANGLE_VERTICES_DATA_STRIDE_BYTES, triangleVertices);
+
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
                 if (!mEgl.eglSwapBuffers(mEglDisplay, mEglSurface)) {
                     throw new RuntimeException("Cannot swap buffers");
@@ -136,12 +219,88 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
                 } catch (InterruptedException e) {
                     // Ignore
                 }
-
-                red += 0.021f;
-                if (red > 1.0f) red = 0.0f;
             }
 
             finishGL();
+        }
+
+        private int loadTexture(int resource) {
+            int[] textures = new int[1];
+
+            glActiveTexture(GL_TEXTURE0);
+            glGenTextures(1, textures, 0);
+            checkGlError();
+
+            int texture = textures[0];
+            glBindTexture(GL_TEXTURE_2D, texture);
+            checkGlError();
+            
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+            Bitmap bitmap = BitmapFactory.decodeResource(mResources, resource);
+
+            GLUtils.texImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bitmap, GL_UNSIGNED_BYTE, 0);
+            checkGlError();
+
+            bitmap.recycle();
+
+            return texture;
+        }
+        
+        private int buildProgram(String vertex, String fragment) {
+            int vertexShader = buildShader(vertex, GL_VERTEX_SHADER);
+            if (vertexShader == 0) return 0;
+
+            int fragmentShader = buildShader(fragment, GL_FRAGMENT_SHADER);
+            if (fragmentShader == 0) return 0;
+
+            int program = glCreateProgram();
+            glAttachShader(program, vertexShader);
+            checkGlError();
+
+            glAttachShader(program, fragmentShader);
+            checkGlError();
+
+            glLinkProgram(program);
+            checkGlError();
+
+            int[] status = new int[1];
+            glGetProgramiv(program, GL_LINK_STATUS, status, 0);
+            if (status[0] != GL_TRUE) {
+                String error = glGetProgramInfoLog(program);
+                Log.d(LOG_TAG, "Error while linking program:\n" + error);
+                glDeleteShader(vertexShader);
+                glDeleteShader(fragmentShader);
+                glDeleteProgram(program);
+                return 0;
+            }
+
+            return program;
+        }
+        
+        private int buildShader(String source, int type) {
+            int shader = glCreateShader(type);
+
+            glShaderSource(shader, source);
+            checkGlError();
+
+            glCompileShader(shader);
+            checkGlError();
+
+            int[] status = new int[1];
+            glGetShaderiv(shader, GL_COMPILE_STATUS, status, 0);
+            if (status[0] != GL_TRUE) {
+                String error = glGetShaderInfoLog(shader);
+                Log.d(LOG_TAG, "Error while compiling shader:\n" + error);
+                glDeleteShader(shader);
+                return 0;
+            }
+            
+            return shader;
         }
 
         private void checkEglError() {
@@ -152,8 +311,8 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
         }
 
         private void checkGlError() {
-            int error = GLES20.glGetError();
-            if (error != GLES20.GL_NO_ERROR) {
+            int error = glGetError();
+            if (error != GL_NO_ERROR) {
                 Log.w(LOG_TAG, "GL error = 0x" + Integer.toHexString(error));
             }
         }
