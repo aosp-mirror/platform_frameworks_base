@@ -26,7 +26,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:rowCount="8">
+    android:rowCount="7">
 
     <!-- Column 0: Time, date and status -->
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
@@ -68,6 +68,8 @@
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:layout_gravity="right"
@@ -77,6 +79,8 @@
         android:id="@+id/alarm_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:layout_gravity="right"
@@ -87,6 +91,8 @@
         android:id="@+id/status1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:layout_gravity="right"
@@ -100,31 +106,43 @@
 
     <TextView android:id="@+id/carrier"
         android:layout_gravity="right"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:singleLine="true"
         android:ellipsize="marquee"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         />
 
-    <Button android:id="@+id/emergencyCallButton"
-        android:layout_gravity="right"
-        style="@style/Widget.Button.Transparent"
-        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
-        android:text="@string/lockscreen_emergency_call"
-        android:drawableLeft="@drawable/lockscreen_emergency_button"
-        android:drawablePadding="0dip"
-        android:background="@null"
-    />
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right">
 
-    <Button android:id="@+id/forgotPatternButton"
-        android:layout_gravity="right"
-        style="@style/Widget.Button.Transparent"
-        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
-        android:text="@string/lockscreen_forgot_pattern_button_text"
-        android:drawableLeft="@drawable/lockscreen_forgot_password_button"
-        android:drawablePadding="0dip"
-        android:background="@null"
-    />
+        <Button android:id="@+id/emergencyCallButton"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_gravity="right"
+            android:layout_width="wrap_content"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+            android:text="@string/lockscreen_emergency_call"
+            android:drawableLeft="@drawable/lockscreen_emergency_button"
+            android:drawablePadding="0dip"
+        />
+
+        <Button android:id="@+id/forgotPatternButton"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_gravity="right"
+            android:layout_width="wrap_content"
+            android:layout_height="0dip"
+            android:layout_weight="1"
+            android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
+            android:text="@string/lockscreen_forgot_pattern_button_text"
+            android:drawableLeft="@drawable/lockscreen_forgot_password_button"
+            android:drawablePadding="0dip"
+        />
+    </LinearLayout>
 
     <!-- Column 1: lock pattern -->
     <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
@@ -134,6 +152,6 @@
          android:layout_marginRight="8dip"
          android:layout_marginBottom="8dip"
          android:layout_marginLeft="8dip"
-         android:layout_rowSpan="8"/>
+         android:layout_rowSpan="7"/>
 
 </GridLayout>

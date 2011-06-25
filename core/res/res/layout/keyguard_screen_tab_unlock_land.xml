@@ -68,6 +68,8 @@
         android:id="@+id/date"
         android:layout_below="@id/time"
         android:layout_marginTop="6dip"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:layout_gravity="right"
@@ -75,6 +77,8 @@
 
     <TextView
         android:id="@+id/alarm_status"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:drawablePadding="4dip"
@@ -85,6 +89,8 @@
     <TextView
         android:id="@+id/status1"
         android:layout_marginTop="4dip"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:drawablePadding="4dip"
@@ -94,6 +100,8 @@
     <TextView
         android:id="@+id/status2"
         android:layout_marginTop="4dip"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:drawablePadding="4dip"
@@ -102,6 +110,8 @@
 
     <TextView
         android:id="@+id/screenLocked"
+        android:singleLine="true"
+        android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
         android:gravity="center"
@@ -113,7 +123,8 @@
     <Space android:height="20dip"/>
 
     <LinearLayout android:orientation="vertical"
-        android:gravity="fill">
+        android:layout_gravity="right"
+        android:gravity="fill_horizontal">
 
          <TextView
             android:id="@+id/carrier"
@@ -148,11 +159,10 @@
             android:id="@+id/emergencyCallButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_emergency"
+            android:drawableLeft="@drawable/lockscreen_emergency_button"
             android:text="@string/lockscreen_emergency_call"
-            style="@style/Widget.Button.Transparent"
+            style="?android:attr/buttonBarButtonStyle"
             android:drawablePadding="8dip"
-            android:layout_marginRight="80dip"
             android:visibility="visible"
             android:layout_gravity="right"
         />

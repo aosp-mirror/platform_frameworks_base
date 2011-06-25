@@ -39,6 +39,6 @@
     <dimen name="action_bar_subtitle_text_size">12dp</dimen>
 
     <!-- Size of clock font in LockScreen on Unsecure unlock screen. -->
-    <dimen name="keyguard_lockscreen_clock_font_size">80sp</dimen>
+    <dimen name="keyguard_lockscreen_clock_font_size">70sp</dimen>
 
 </resources>

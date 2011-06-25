@@ -40,7 +40,7 @@ class StatusView {
 
     private String mInstructions = null;
     private TextView mStatus1;
-    private TextView mPropertyOf;
+    private TextView mOwnerInfo;
 
     private boolean mHasCarrier;
     private boolean mHasDate;
@@ -105,7 +105,7 @@ class StatusView {
         mStatus1 = (TextView) findViewById(R.id.status1);
         mAlarmStatus = (TextView) findViewById(R.id.alarm_status);
         mAlarmStatus.setCompoundDrawablesWithIntrinsicBounds(ALARM_ICON, 0, 0, 0);
-        mPropertyOf = (TextView) findViewById(R.id.propertyOf);
+        mOwnerInfo = (TextView) findViewById(R.id.propertyOf);
 
         resetStatusInfo(updateMonitor, lockPatternUtils);
 
@@ -153,20 +153,22 @@ class StatusView {
     void updateStatusLines(boolean showStatusLines) {
         if (!showStatusLines) {
             mStatus1.setVisibility(showStatusLines ? View.VISIBLE : View.INVISIBLE);
-            mAlarmStatus.setVisibility(showStatusLines ? View.VISIBLE : View.INVISIBLE);
+            mAlarmStatus.setVisibility(showStatusLines ? View.VISIBLE : View.GONE);
             return;
         }
 
         // Update owner info
-        if (mPropertyOf != null) {
-            ContentResolver res = getContext().getContentResolver();
-            String info = Settings.Secure.getString(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO);
-            boolean enabled = Settings.Secure.getInt(res,
-                    Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED, 1) != 0;
-
-            mPropertyOf.setText(info);
-            mPropertyOf.setVisibility(enabled && !TextUtils.isEmpty(info) ?
-                    View.VISIBLE : View.INVISIBLE);
+        final ContentResolver res = getContext().getContentResolver();
+        final boolean ownerInfoEnabled = Settings.Secure.getInt(res,
+                Settings.Secure.LOCK_SCREEN_OWNER_INFO_ENABLED, 1) != 0;
+        String ownerInfo = null;
+        if (ownerInfoEnabled) {
+            ownerInfo = Settings.Secure.getString(res, Settings.Secure.LOCK_SCREEN_OWNER_INFO);
+            if (mOwnerInfo != null) {
+                mOwnerInfo.setText(ownerInfo);
+                mOwnerInfo.setVisibility(ownerInfoEnabled && !TextUtils.isEmpty(ownerInfo) ?
+                        View.VISIBLE : View.INVISIBLE);
+            }
         }
 
         // Update Alarm status
@@ -175,7 +177,7 @@ class StatusView {
             mAlarmStatus.setText(nextAlarm);
             mAlarmStatus.setVisibility(View.VISIBLE);
         } else {
-            mAlarmStatus.setVisibility(View.INVISIBLE);
+            mAlarmStatus.setVisibility(View.GONE);
         }
 
         // Update Status1
@@ -204,15 +206,16 @@ class StatusView {
             } else {
                 mStatus1.setVisibility(View.INVISIBLE);
             }
+        } else if (mHelpMessageId != 0) {
+            mStatus1.setText(mHelpMessageId);
+            mStatus1.setCompoundDrawablesWithIntrinsicBounds(mHelpIconId, 0,0, 0);
+            mStatus1.setVisibility(View.VISIBLE);
+        } else if (ownerInfoEnabled && mOwnerInfo == null && ownerInfo != null) {
+            mStatus1.setText(ownerInfo);
+            mStatus1.setCompoundDrawablesWithIntrinsicBounds(0, 0,0, 0);
+            mStatus1.setVisibility(View.VISIBLE);
         } else {
-            // nothing specific to show; show help message and icon, if provided
-            if (mHelpMessageId != 0) {
-                mStatus1.setText(mHelpMessageId);
-                mStatus1.setCompoundDrawablesWithIntrinsicBounds(mHelpIconId, 0,0, 0);
-                mStatus1.setVisibility(View.VISIBLE);
-            } else {
-                mStatus1.setVisibility(View.INVISIBLE);
-            }
+            mStatus1.setVisibility(View.INVISIBLE);
         }
     }
 
