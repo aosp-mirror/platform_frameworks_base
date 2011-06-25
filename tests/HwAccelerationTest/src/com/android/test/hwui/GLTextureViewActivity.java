@@ -93,8 +93,6 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
         private static final String LOG_TAG = "GLTextureView";
 
         static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
-        static final int EGL_SURFACE_TYPE = 0x3033;
-        static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;
         static final int EGL_OPENGL_ES2_BIT = 4;
 
         private volatile boolean mFinished;

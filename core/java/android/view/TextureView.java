@@ -185,7 +185,7 @@ public class TextureView extends View {
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
-        if (isHardwareAccelerated() && mLayer != null) {
+        if (mLayer != null) {
             if (mListener != null) {
                 mListener.onSurfaceTextureDestroyed(mSurface);
             }
