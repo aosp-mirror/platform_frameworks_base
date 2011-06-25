@@ -281,6 +281,7 @@ void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t he
         layer->texTransform.load(transform);
         layer->renderTarget = renderTarget;
 
+        // TODO: This should be done only when the render target has changed
         glBindTexture(layer->renderTarget, layer->texture);
 
         glTexParameteri(layer->renderTarget, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
