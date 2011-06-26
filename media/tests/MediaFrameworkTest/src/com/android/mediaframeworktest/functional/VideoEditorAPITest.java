@@ -1334,7 +1334,14 @@ public class VideoEditorAPITest extends
     // TODO : remove TC_API_035
     @LargeTest
     public void testEffectKenBurn() throws Exception {
-        final String imageItemFileName = INPUT_FILE_PATH + "IMG_640x480.jpg";
+        // Test ken burn effect using a JPEG file.
+        testEffectKenBurn(INPUT_FILE_PATH + "IMG_640x480.jpg");
+
+        // Test ken burn effect using a PNG file
+        testEffectKenBurn(INPUT_FILE_PATH + "IMG_640x480.png");
+    }
+
+    private void testEffectKenBurn(final String imageItemFileName) throws Exception {
         final int imageItemRenderingMode =MediaItem.RENDERING_MODE_BLACK_BORDER;
         final MediaImageItem mediaImageItem =
             mVideoEditorHelper.createMediaItem(mVideoEditor, "mediaImageItem1",
@@ -1350,11 +1357,14 @@ public class VideoEditorAPITest extends
         final EffectKenBurns kbEffectOnMediaItem = new EffectKenBurns(
             mediaImageItem, "KBOnM2", startRect, endRect, 500, 3000);
 
-        assertNotNull("EffectKenBurns", kbEffectOnMediaItem);
+        assertNotNull("EffectKenBurns: " + imageItemFileName,
+            kbEffectOnMediaItem);
+
         mediaImageItem.addEffect(kbEffectOnMediaItem);
-        assertEquals("KenBurn Start Rect", startRect,
+        assertEquals("KenBurn Start Rect: " + imageItemFileName, startRect,
             kbEffectOnMediaItem.getStartRect());
-        assertEquals("KenBurn End Rect", endRect,
+
+        assertEquals("KenBurn End Rect: " + imageItemFileName, endRect,
             kbEffectOnMediaItem.getEndRect());
     }
 
