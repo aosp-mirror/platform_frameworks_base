@@ -91,6 +91,7 @@ interface IBluetooth
     int getInputDeviceConnectionState(in BluetoothDevice device);
     boolean setInputDevicePriority(in BluetoothDevice device, int priority);
     int getInputDevicePriority(in BluetoothDevice device);
+    boolean allowIncomingHidConnect(in BluetoothDevice device, boolean value);
 
     boolean isTetheringOn();
     void setBluetoothTethering(boolean value);

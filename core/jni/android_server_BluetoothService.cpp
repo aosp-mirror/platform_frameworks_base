@@ -255,7 +255,7 @@ done:
 }
 
 static jboolean stopDiscoveryNative(JNIEnv *env, jobject object) {
-    LOGV(__FUNCTION__);
+    LOGV("%s", __FUNCTION__);
 #ifdef HAVE_BLUETOOTH
     DBusMessage *msg = NULL;
     DBusMessage *reply = NULL;
@@ -606,6 +606,35 @@ static jboolean setRemoteOutOfBandDataNative(JNIEnv *env, jobject object, jstrin
 
         env->ReleaseByteArrayElements(hash, h_ptr, 0);
         env->ReleaseByteArrayElements(randomizer, r_ptr, 0);
+
+        dbus_connection_send(nat->conn, reply, NULL);
+        dbus_message_unref(msg);
+        dbus_message_unref(reply);
+        return JNI_TRUE;
+    }
+#endif
+    return JNI_FALSE;
+}
+
+static jboolean setAuthorizationNative(JNIEnv *env, jobject object, jstring address,
+                         jboolean val, int nativeData) {
+#ifdef HAVE_BLUETOOTH
+  LOGV("%s", __FUNCTION__);
+    native_data_t *nat = get_native_data(env, object);
+    if (nat) {
+        DBusMessage *msg = (DBusMessage *)nativeData;
+        DBusMessage *reply;
+        if (val) {
+            reply = dbus_message_new_method_return(msg);
+        } else {
+            reply = dbus_message_new_error(msg,
+                    "org.bluez.Error.Rejected", "Authorization rejected");
+        }
+        if (!reply) {
+            LOGE("%s: Cannot create message reply D-Bus\n", __FUNCTION__);
+            dbus_message_unref(msg);
+            return JNI_FALSE;
+        }
 
         dbus_connection_send(nat->conn, reply, NULL);
         dbus_message_unref(msg);
@@ -1692,6 +1721,7 @@ static JNINativeMethod sMethods[] = {
             (void *)setPairingConfirmationNative},
     {"setPasskeyNative", "(Ljava/lang/String;II)Z", (void *)setPasskeyNative},
     {"setRemoteOutOfBandDataNative", "(Ljava/lang/String;[B[BI)Z", (void *)setRemoteOutOfBandDataNative},
+    {"setAuthorizationNative", "(Ljava/lang/String;ZI)Z", (void *)setAuthorizationNative},
     {"setPinNative", "(Ljava/lang/String;Ljava/lang/String;I)Z", (void *)setPinNative},
     {"cancelPairingUserInputNative", "(Ljava/lang/String;I)Z",
             (void *)cancelPairingUserInputNative},

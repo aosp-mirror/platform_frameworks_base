@@ -423,7 +423,24 @@ public final class BluetoothA2dp implements BluetoothProfile {
         return false;
     }
 
-     /**
+    /**
+     * Allow or disallow incoming connection
+     * @param device Sink
+     * @param value True / False
+     * @return Success or Failure of the binder call.
+     * @hide
+     */
+    public boolean allowIncomingConnect(BluetoothDevice device, boolean value) {
+        if (DBG) log("allowIncomingConnect(" + device + ":" + value + ")");
+        try {
+            return mService.allowIncomingConnect(device, value);
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return false;
+        }
+    }
+
+    /**
      * Helper for converting a state to a string.
      *
      * For debug use only - strings are not internationalized.

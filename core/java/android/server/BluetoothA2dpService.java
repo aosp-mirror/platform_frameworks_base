@@ -449,6 +449,22 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 Settings.Secure.getBluetoothA2dpSinkPriorityKey(device.getAddress()), priority);
     }
 
+    public synchronized boolean allowIncomingConnect(BluetoothDevice device, boolean value) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
+                                                "Need BLUETOOTH_ADMIN permission");
+        String address = device.getAddress();
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+            return false;
+        }
+        Integer data = mBluetoothService.getAuthorizationAgentRequestData(address);
+        if (data == null) {
+            Log.w(TAG, "allowIncomingConnect(" + device + ") called but no native data available");
+            return false;
+        }
+        log("allowIncomingConnect: A2DP: " + device + ":" + value);
+        return mBluetoothService.setAuthorizationNative(address, value, data.intValue());
+    }
+
     /**
      * Called by native code on a PropertyChanged signal from
      * org.bluez.AudioSink.

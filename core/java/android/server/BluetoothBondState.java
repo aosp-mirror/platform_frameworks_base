@@ -121,6 +121,8 @@ class BluetoothBondState {
 
     /** reason is ignored unless state == BOND_NOT_BONDED */
     public synchronized void setBondState(String address, int state, int reason) {
+        if (DBG) Log.d(TAG, "setBondState " + "address" + " " + state + "reason: " + reason);
+
         int oldState = getBondState(address);
         if (oldState == state) {
             return;
@@ -136,8 +138,10 @@ class BluetoothBondState {
 
         if (state == BluetoothDevice.BOND_BONDED) {
             mService.addProfileState(address);
-        } else if (state == BluetoothDevice.BOND_NONE) {
-            mService.removeProfileState(address);
+        } else if (state == BluetoothDevice.BOND_BONDING) {
+            if (mA2dpProxy == null || mHeadsetProxy == null) {
+                getProfileProxy();
+            }
         }
 
         setProfilePriorities(address, state);
@@ -240,6 +244,8 @@ class BluetoothBondState {
     }
 
     public synchronized void clearPinAttempts(String address) {
+        if (DBG) Log.d(TAG, "clearPinAttempts: " + address);
+
         mPinAttempt.remove(address);
     }
 
@@ -265,6 +271,8 @@ class BluetoothBondState {
         } else {
             newAttempt = attempt.intValue() + 1;
         }
+        if (DBG) Log.d(TAG, "attemp newAttempt: " + newAttempt);
+
         mPinAttempt.put(address, new Integer(newAttempt));
     }
 

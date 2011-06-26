@@ -42,6 +42,7 @@ interface IBluetoothHeadset {
     // Internal functions, not be made public
     boolean createIncomingConnect(in BluetoothDevice device);
     boolean acceptIncomingConnect(in BluetoothDevice device);
+    boolean rejectIncomingConnect(in BluetoothDevice device);
     boolean cancelConnectThread();
     boolean connectHeadsetInternal(in BluetoothDevice device);
     boolean disconnectHeadsetInternal(in BluetoothDevice device);

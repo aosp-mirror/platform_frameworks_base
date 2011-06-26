@@ -276,6 +276,70 @@ public final class BluetoothDevice implements Parcelable {
     public static final String ACTION_PAIRING_CANCEL =
             "android.bluetooth.device.action.PAIRING_CANCEL";
 
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CONNECTION_ACCESS_REQUEST =
+            "android.bluetooth.device.action.CONNECTION_ACCESS_REQUEST";
+
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CONNECTION_ACCESS_REPLY =
+            "android.bluetooth.device.action.CONNECTION_ACCESS_REPLY";
+
+    /** @hide */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_CONNECTION_ACCESS_CANCEL =
+            "android.bluetooth.device.action.CONNECTION_ACCESS_CANCEL";
+
+    /**
+     * Used as an extra field in {@link #ACTION_CONNECTION_ACCESS_REQUEST} intent.
+     * @hide
+     */
+    public static final String EXTRA_ACCESS_REQUEST_TYPE =
+        "android.bluetooth.device.extra.ACCESS_REQUEST_TYPE";
+
+    /**@hide*/
+    public static final int REQUEST_TYPE_PROFILE_CONNECTION = 1;
+
+    /**@hide*/
+    public static final int REQUEST_TYPE_PHONEBOOK_ACCESS = 2;
+
+    /**
+     * Used as an extra field in {@link #ACTION_CONNECTION_ACCESS_REQUEST} intents,
+     * Contains package name to return reply intent to.
+     * @hide
+     */
+    public static final String EXTRA_PACKAGE_NAME = "android.bluetooth.device.extra.PACKAGE_NAME";
+
+    /**
+     * Used as an extra field in {@link #ACTION_CONNECTION_ACCESS_REQUEST} intents,
+     * Contains class name to return reply intent to.
+     * @hide
+     */
+    public static final String EXTRA_CLASS_NAME = "android.bluetooth.device.extra.CLASS_NAME";
+
+    /**
+     * Used as an extra field in {@link #ACTION_CONNECTION_ACCESS_REPLY} intent.
+     * @hide
+     */
+    public static final String EXTRA_CONNECTION_ACCESS_RESULT =
+        "android.bluetooth.device.extra.CONNECTION_ACCESS_RESULT";
+
+    /**@hide*/
+    public static final int CONNECTION_ACCESS_YES = 1;
+
+    /**@hide*/
+    public static final int CONNECTION_ACCESS_NO = 2;
+
+    /**
+     * Used as an extra field in {@link #ACTION_CONNECTION_ACCESS_REPLY} intents,
+     * Contains boolean to indicate if the allowed response is once-for-all so that
+     * next request will be granted without asking user again.
+     * @hide
+     */
+    public static final String EXTRA_ALWAYS_ALLOWED =
+        "android.bluetooth.device.extra.ALWAYS_ALLOWED";
+
     /**
      * A bond attempt succeeded
      * @hide

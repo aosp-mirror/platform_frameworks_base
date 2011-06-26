@@ -39,4 +39,6 @@ interface IBluetoothA2dp {
     boolean resumeSink(in BluetoothDevice device);
     boolean connectSinkInternal(in BluetoothDevice device);
     boolean disconnectSinkInternal(in BluetoothDevice device);
+    boolean allowIncomingConnect(in BluetoothDevice device, boolean value);
+
 }

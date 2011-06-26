@@ -49,6 +49,7 @@ class BluetoothEventLoop {
     private boolean mInterrupted;
 
     private final HashMap<String, Integer> mPasskeyAgentRequestData;
+    private final HashMap<String, Integer> mAuthorizationAgentRequestData;
     private final BluetoothService mBluetoothService;
     private final BluetoothAdapter mAdapter;
     private BluetoothA2dp mA2dp;
@@ -110,6 +111,7 @@ class BluetoothEventLoop {
         mBluetoothService = bluetoothService;
         mContext = context;
         mPasskeyAgentRequestData = new HashMap<String, Integer>();
+        mAuthorizationAgentRequestData = new HashMap<String, Integer>();
         mAdapter = adapter;
         //WakeLock instantiation in BluetoothEventLoop class
         PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
@@ -153,6 +155,10 @@ class BluetoothEventLoop {
 
     /* package */ HashMap<String, Integer> getPasskeyAgentRequestData() {
         return mPasskeyAgentRequestData;
+    }
+
+    /* package */ HashMap<String, Integer> getAuthorizationAgentRequestData() {
+        return mAuthorizationAgentRequestData;
     }
 
     /* package */ void start() {
@@ -747,20 +753,22 @@ class BluetoothEventLoop {
      *
      * @param objectPath the path of the device requesting to be authorized
      * @param deviceUuid the UUID of the requesting device
-     * @return true if the authorization is allowed; false if not allowed
+     * @param nativeData reference for native data
      */
-    private boolean onAgentAuthorize(String objectPath, String deviceUuid) {
-        if (!mBluetoothService.isEnabled()) return false;
+    private void  onAgentAuthorize(String objectPath, String deviceUuid, int nativeData) {
+        if (!mBluetoothService.isEnabled()) return;
 
         String address = mBluetoothService.getAddressFromObjectPath(objectPath);
         if (address == null) {
             Log.e(TAG, "Unable to get device address in onAuthAgentAuthorize");
-            return false;
+            return;
         }
 
         boolean authorized = false;
         ParcelUuid uuid = ParcelUuid.fromString(deviceUuid);
+
         BluetoothDevice device = mAdapter.getRemoteDevice(address);
+        mAuthorizationAgentRequestData.put(address, new Integer(nativeData));
 
         // Bluez sends the UUID of the local service being accessed, _not_ the
         // remote service
@@ -769,26 +777,29 @@ class BluetoothEventLoop {
               || BluetoothUuid.isAdvAudioDist(uuid)) &&
               !isOtherSinkInNonDisconnectedState(address)) {
             authorized = mA2dp.getPriority(device) > BluetoothProfile.PRIORITY_OFF;
-            if (authorized) {
-                Log.i(TAG, "Allowing incoming A2DP / AVRCP connection from " + address);
+            if (authorized && !BluetoothUuid.isAvrcpTarget(uuid)) {
+                Log.i(TAG, "First check pass for incoming A2DP / AVRCP connection from " + address);
                 // Some headsets try to connect AVCTP before AVDTP - against the recommendation
                 // If AVCTP connection fails, we get stuck in IncomingA2DP state in the state
                 // machine.  We don't handle AVCTP signals currently. We only send
                 // intents for AVDTP state changes. We need to handle both of them in
                 // some cases. For now, just don't move to incoming state in this case.
-                if (!BluetoothUuid.isAvrcpTarget(uuid)) {
-                    mBluetoothService.notifyIncomingA2dpConnection(address);
-                }
+                mBluetoothService.notifyIncomingA2dpConnection(address);
             } else {
-                Log.i(TAG, "Rejecting incoming A2DP / AVRCP connection from " + address);
+                Log.i(TAG, "" + authorized +
+                      "Incoming A2DP / AVRCP connection from " + address);
+                mA2dp.allowIncomingConnect(device, authorized);
             }
         } else if (mInputDevice != null && BluetoothUuid.isInputDevice(uuid)) {
             // We can have more than 1 input device connected.
             authorized = mInputDevice.getPriority(device) > BluetoothInputDevice.PRIORITY_OFF;
              if (authorized) {
-                 Log.i(TAG, "Allowing incoming HID connection from " + address);
+                 Log.i(TAG, "First check pass for incoming HID connection from " + address);
+                 // notify profile state change
+                 mBluetoothService.notifyIncomingHidConnection(address);
              } else {
                  Log.i(TAG, "Rejecting incoming HID connection from " + address);
+                 mBluetoothService.allowIncomingHidConnect(device, authorized);
              }
         } else if (BluetoothUuid.isBnep(uuid) && mBluetoothService.allowIncomingTethering()){
             authorized = true;
@@ -796,7 +807,6 @@ class BluetoothEventLoop {
             Log.i(TAG, "Rejecting incoming " + deviceUuid + " connection from " + address);
         }
         log("onAgentAuthorize(" + objectPath + ", " + deviceUuid + ") = " + authorized);
-        return authorized;
     }
 
     private boolean onAgentOutOfBandDataAvailable(String objectPath) {
