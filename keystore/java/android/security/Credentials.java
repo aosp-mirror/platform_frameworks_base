@@ -71,6 +71,13 @@ public class Credentials {
     /** Data type for PKCS12. */
     public static final String PKCS12 = "PKCS12";
 
+    // historically used by Android
+    public static final String EXTENSION_CRT = ".crt";
+    public static final String EXTENSION_P12 = ".p12";
+    // commonly used on Windows
+    public static final String EXTENSION_CER = ".cer";
+    public static final String EXTENSION_PFX = ".pfx";
+
     /**
      * Convert objects to a PEM format, which is used for
      * CA_CERTIFICATE, USER_CERTIFICATE, and USER_PRIVATE_KEY
@@ -128,6 +135,15 @@ public class Credentials {
         intent.setClassName("com.android.certinstaller",
                 "com.android.certinstaller.CertInstallerMain");
         return intent;
+    }
+
+    public void install(Context context) {
+        try {
+            Intent intent = createInstallIntent();
+            context.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            Log.w(LOGTAG, e.toString());
+        }
     }
 
     public void install(Context context, KeyPair pair) {

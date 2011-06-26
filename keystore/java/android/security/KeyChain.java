@@ -22,6 +22,7 @@ import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -93,6 +94,26 @@ public final class KeyChain {
     public static final String EXTRA_RESPONSE = "response";
 
     /**
+     * @hide Also used by KeyChainActivity implementation
+     */
+    public static final String EXTRA_HOST = "host";
+
+    /**
+     * @hide Also used by KeyChainActivity implementation
+     */
+    public static final String EXTRA_PORT = "port";
+
+    /**
+     * @hide Also used by KeyChainActivity implementation
+     */
+    public static final String EXTRA_ALIAS = "alias";
+
+    /**
+     * @hide Also used by KeyChainActivity implementation
+     */
+    public static final String EXTRA_SENDER = "sender";
+
+    /**
      * Launches an {@code Activity} for the user to select the alias
      * for a private key and certificate pair for authentication. The
      * selected alias or null will be returned via the
@@ -105,6 +126,9 @@ public final class KeyChain {
      *
      * <p>{@code host} and {@code port} may be used to give the user
      * more context about the server requesting the credentials.
+     *
+     * <p>{@code alias} allows the chooser to preselect an existing
+     * alias which will still be subject to user confirmation.
      *
      * <p>This method requires the caller to hold the permission
      * {@link android.Manifest.permission#USE_CREDENTIALS}.
@@ -123,14 +147,17 @@ public final class KeyChain {
      *     certificate, or null if unavailable.
      * @param port The port number of the server requesting the
      *     certificate, or -1 if unavailable.
+     * @param alias The alias to preselect if available, or null if
+     *     unavailable.
      */
     public static void choosePrivateKeyAlias(Activity activity, KeyChainAliasCallback response,
                                              String[] keyTypes, Principal[] issuers,
-                                             String host, int port) {
+                                             String host, int port,
+                                             String alias) {
         /*
-         * TODO currently keyTypes, issuers, host, and port are
-         * unused. They are meant to follow the semantics and purpose
-         * of X509KeyManager method arguments.
+         * TODO currently keyTypes, issuers are unused. They are meant
+         * to follow the semantics and purpose of X509KeyManager
+         * method arguments.
          *
          * keyTypes would allow the list to be filtered and typically
          * will be set correctly by the server. In practice today,
@@ -142,11 +169,6 @@ public final class KeyChain {
          * server. Others will send none. If this is used, if there
          * are no matches after applying the constraint, it should be
          * ignored.
-         *
-         * host and port may be shown to the user if available, but it
-         * should be clear that they are not validated values, perhaps
-         * shown along with requesting application identity to clarify
-         * the source of the request.
          */
         if (activity == null) {
             throw new NullPointerException("activity == null");
@@ -156,6 +178,11 @@ public final class KeyChain {
         }
         Intent intent = new Intent("com.android.keychain.CHOOSER");
         intent.putExtra(EXTRA_RESPONSE, new AliasResponse(activity, response));
+        intent.putExtra(EXTRA_HOST, host);
+        intent.putExtra(EXTRA_PORT, port);
+        intent.putExtra(EXTRA_ALIAS, alias);
+        // the PendingIntent is used to get calling package name
+        intent.putExtra(EXTRA_SENDER, PendingIntent.getActivity(activity, 0, new Intent(), 0));
         activity.startActivity(intent);
     }
 
