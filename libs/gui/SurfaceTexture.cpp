@@ -488,24 +488,14 @@ status_t SurfaceTexture::setTransform(uint32_t transform) {
 
 status_t SurfaceTexture::updateTexImage() {
     LOGV("SurfaceTexture::updateTexImage");
-
     Mutex::Autolock lock(mMutex);
 
-    int buf = mCurrentTexture;
+    // In asynchronous mode the list is guaranteed to be one buffer
+    // deep, while in synchronous mode we use the oldest buffer.
     if (!mQueue.empty()) {
-        // in asynchronous mode the list is guaranteed to be one buffer deep,
-        // while in synchronous mode we use the oldest buffer
         Fifo::iterator front(mQueue.begin());
-        buf = *front;
-        mQueue.erase(front);
-        if (mQueue.isEmpty()) {
-            mDequeueCondition.signal();
-        }
-    }
+        int buf = *front;
 
-    // Initially both mCurrentTexture and buf are INVALID_BUFFER_SLOT,
-    // so this check will fail until a buffer gets queued.
-    if (mCurrentTexture != buf) {
         // Update the GL texture object.
         EGLImageKHR image = mSlots[buf].mEglImage;
         if (image == EGL_NO_IMAGE_KHR) {
@@ -543,7 +533,7 @@ status_t SurfaceTexture::updateTexImage() {
         }
 
         if (mCurrentTexture != INVALID_BUFFER_SLOT) {
-            // the current buffer becomes FREE if it was still in the queued
+            // The current buffer becomes FREE if it was still in the queued
             // state. If it has already been given to the client
             // (synchronous mode), then it stays in DEQUEUED state.
             if (mSlots[mCurrentTexture].mBufferState == BufferSlot::QUEUED)
@@ -558,11 +548,16 @@ status_t SurfaceTexture::updateTexImage() {
         mCurrentTransform = mSlots[buf].mTransform;
         mCurrentTimestamp = mSlots[buf].mTimestamp;
         computeCurrentTransformMatrix();
+
+        // Now that we've passed the point at which failures can happen,
+        // it's safe to remove the buffer from the front of the queue.
+        mQueue.erase(front);
         mDequeueCondition.signal();
     } else {
         // We always bind the texture even if we don't update its contents.
         glBindTexture(mCurrentTextureTarget, mTexName);
     }
+
     return OK;
 }
 
