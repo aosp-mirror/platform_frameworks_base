@@ -235,12 +235,13 @@
     <attr name="vmSafeMode" format="boolean" />
 
     <!-- <p>Flag indicating whether the application's rendering should be hardware
-         accelerated if possible. This flag is turned off by default, both for
-         applications and activities.</p>
+         accelerated if possible. This flag is turned on by default for applications
+         that are targeting {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}
+         or later.</p>
          <p>This flag can be set on the application and any activity declared
          in the manifest. When enabled for the application, each activity is
          automatically assumed to be hardware accelerated. This flag can be
-         overriden in the activity tags, either turning it off (if on for the
+         overridden in the activity tags, either turning it off (if on for the
          application) or on (if off for the application.)</p>
          <p>When this flag is turned on for an activity (either directly or via
          the application tag), every window created from the activity, including
