@@ -42,11 +42,11 @@ class HeapCache : public IBinder::DeathRecipient
 public:
     HeapCache();
     virtual ~HeapCache();
-    
+
     virtual void binderDied(const wp<IBinder>& who);
 
-    sp<IMemoryHeap> find_heap(const sp<IBinder>& binder); 
-    void free_heap(const sp<IBinder>& binder); 
+    sp<IMemoryHeap> find_heap(const sp<IBinder>& binder);
+    void free_heap(const sp<IBinder>& binder);
     sp<IMemoryHeap> get_heap(const sp<IBinder>& binder);
     void dump_heaps();
 
@@ -57,7 +57,7 @@ private:
         int32_t         count;
     };
 
-    void free_heap(const wp<IBinder>& binder); 
+    void free_heap(const wp<IBinder>& binder);
 
     Mutex mHeapCacheLock;
     KeyedVector< wp<IBinder>, heap_info_t > mHeapCache;
@@ -81,11 +81,12 @@ public:
     virtual void* getBase() const;
     virtual size_t getSize() const;
     virtual uint32_t getFlags() const;
+    virtual uint32_t getOffset() const;
 
 private:
     friend class IMemory;
     friend class HeapCache;
-    
+
     // for debugging in this module
     static inline sp<IMemoryHeap> find_heap(const sp<IBinder>& binder) {
         return gHeapCache->find_heap(binder);
@@ -97,7 +98,7 @@ private:
         return gHeapCache->get_heap(binder);
     }
     static inline void dump_heaps() {
-        gHeapCache->dump_heaps();       
+        gHeapCache->dump_heaps();
     }
 
     void assertMapped() const;
@@ -107,6 +108,7 @@ private:
     mutable void*       mBase;
     mutable size_t      mSize;
     mutable uint32_t    mFlags;
+    mutable uint32_t    mOffset;
     mutable bool        mRealHeap;
     mutable Mutex       mLock;
 };
@@ -123,7 +125,7 @@ public:
     BpMemory(const sp<IBinder>& impl);
     virtual ~BpMemory();
     virtual sp<IMemoryHeap> getMemory(ssize_t* offset=0, size_t* size=0) const;
-    
+
 private:
     mutable sp<IMemoryHeap> mHeap;
     mutable ssize_t mOffset;
@@ -203,7 +205,7 @@ IMPLEMENT_META_INTERFACE(Memory, "android.utils.IMemory");
 BnMemory::BnMemory() {
 }
 
-BnMemory::~BnMemory() { 
+BnMemory::~BnMemory() {
 }
 
 status_t BnMemory::onTransact(
@@ -229,7 +231,7 @@ status_t BnMemory::onTransact(
 
 BpMemoryHeap::BpMemoryHeap(const sp<IBinder>& impl)
     : BpInterface<IMemoryHeap>(impl),
-        mHeapId(-1), mBase(MAP_FAILED), mSize(0), mFlags(0), mRealHeap(false)
+        mHeapId(-1), mBase(MAP_FAILED), mSize(0), mFlags(0), mOffset(0), mRealHeap(false)
 {
 }
 
@@ -242,7 +244,7 @@ BpMemoryHeap::~BpMemoryHeap() {
                 sp<IBinder> binder = const_cast<BpMemoryHeap*>(this)->asBinder();
 
                 if (VERBOSE) {
-                    LOGD("UNMAPPING binder=%p, heap=%p, size=%d, fd=%d", 
+                    LOGD("UNMAPPING binder=%p, heap=%p, size=%d, fd=%d",
                             binder.get(), this, mSize, mHeapId);
                     CallStack stack;
                     stack.update();
@@ -270,6 +272,7 @@ void BpMemoryHeap::assertMapped() const
             if (mHeapId == -1) {
                 mBase   = heap->mBase;
                 mSize   = heap->mSize;
+                mOffset = heap->mOffset;
                 android_atomic_write( dup( heap->mHeapId ), &mHeapId );
             }
         } else {
@@ -286,13 +289,14 @@ void BpMemoryHeap::assertReallyMapped() const
         // remote call without mLock held, worse case scenario, we end up
         // calling transact() from multiple threads, but that's not a problem,
         // only mmap below must be in the critical section.
-        
+
         Parcel data, reply;
         data.writeInterfaceToken(IMemoryHeap::getInterfaceDescriptor());
         status_t err = remote()->transact(HEAP_ID, data, &reply);
         int parcel_fd = reply.readFileDescriptor();
         ssize_t size = reply.readInt32();
         uint32_t flags = reply.readInt32();
+        uint32_t offset = reply.readInt32();
 
         LOGE_IF(err, "binder=%p transaction failed fd=%d, size=%ld, err=%d (%s)",
                 asBinder().get(), parcel_fd, size, err, strerror(-err));
@@ -309,7 +313,7 @@ void BpMemoryHeap::assertReallyMapped() const
         Mutex::Autolock _l(mLock);
         if (mHeapId == -1) {
             mRealHeap = true;
-            mBase = mmap(0, size, access, MAP_SHARED, fd, 0);
+            mBase = mmap(0, size, access, MAP_SHARED, fd, offset);
             if (mBase == MAP_FAILED) {
                 LOGE("cannot map BpMemoryHeap (binder=%p), size=%ld, fd=%d (%s)",
                         asBinder().get(), size, fd, strerror(errno));
@@ -317,6 +321,7 @@ void BpMemoryHeap::assertReallyMapped() const
             } else {
                 mSize = size;
                 mFlags = flags;
+                mOffset = offset;
                 android_atomic_write(fd, &mHeapId);
             }
         }
@@ -343,14 +348,19 @@ uint32_t BpMemoryHeap::getFlags() const {
     return mFlags;
 }
 
+uint32_t BpMemoryHeap::getOffset() const {
+    assertMapped();
+    return mOffset;
+}
+
 // ---------------------------------------------------------------------------
 
 IMPLEMENT_META_INTERFACE(MemoryHeap, "android.utils.IMemoryHeap");
 
-BnMemoryHeap::BnMemoryHeap() { 
+BnMemoryHeap::BnMemoryHeap() {
 }
 
-BnMemoryHeap::~BnMemoryHeap() { 
+BnMemoryHeap::~BnMemoryHeap() {
 }
 
 status_t BnMemoryHeap::onTransact(
@@ -362,6 +372,7 @@ status_t BnMemoryHeap::onTransact(
             reply->writeFileDescriptor(getHeapID());
             reply->writeInt32(getSize());
             reply->writeInt32(getFlags());
+            reply->writeInt32(getOffset());
             return NO_ERROR;
         } break;
         default:
@@ -383,17 +394,17 @@ HeapCache::~HeapCache()
 void HeapCache::binderDied(const wp<IBinder>& binder)
 {
     //LOGD("binderDied binder=%p", binder.unsafe_get());
-    free_heap(binder); 
+    free_heap(binder);
 }
 
-sp<IMemoryHeap> HeapCache::find_heap(const sp<IBinder>& binder) 
+sp<IMemoryHeap> HeapCache::find_heap(const sp<IBinder>& binder)
 {
     Mutex::Autolock _l(mHeapCacheLock);
     ssize_t i = mHeapCache.indexOfKey(binder);
     if (i>=0) {
         heap_info_t& info = mHeapCache.editValueAt(i);
         LOGD_IF(VERBOSE,
-                "found binder=%p, heap=%p, size=%d, fd=%d, count=%d", 
+                "found binder=%p, heap=%p, size=%d, fd=%d, count=%d",
                 binder.get(), info.heap.get(),
                 static_cast<BpMemoryHeap*>(info.heap.get())->mSize,
                 static_cast<BpMemoryHeap*>(info.heap.get())->mHeapId,
@@ -415,7 +426,7 @@ void HeapCache::free_heap(const sp<IBinder>& binder)  {
     free_heap( wp<IBinder>(binder) );
 }
 
-void HeapCache::free_heap(const wp<IBinder>& binder) 
+void HeapCache::free_heap(const wp<IBinder>& binder)
 {
     sp<IMemoryHeap> rel;
     {
@@ -426,7 +437,7 @@ void HeapCache::free_heap(const wp<IBinder>& binder)
             int32_t c = android_atomic_dec(&info.count);
             if (c == 1) {
                 LOGD_IF(VERBOSE,
-                        "removing binder=%p, heap=%p, size=%d, fd=%d, count=%d", 
+                        "removing binder=%p, heap=%p, size=%d, fd=%d, count=%d",
                         binder.unsafe_get(), info.heap.get(),
                         static_cast<BpMemoryHeap*>(info.heap.get())->mSize,
                         static_cast<BpMemoryHeap*>(info.heap.get())->mHeapId,
@@ -450,7 +461,7 @@ sp<IMemoryHeap> HeapCache::get_heap(const sp<IBinder>& binder)
     return realHeap;
 }
 
-void HeapCache::dump_heaps() 
+void HeapCache::dump_heaps()
 {
     Mutex::Autolock _l(mHeapCacheLock);
     int c = mHeapCache.size();
@@ -459,7 +470,7 @@ void HeapCache::dump_heaps()
         BpMemoryHeap const* h(static_cast<BpMemoryHeap const *>(info.heap.get()));
         LOGD("hey=%p, heap=%p, count=%d, (fd=%d, base=%p, size=%d)",
                 mHeapCache.keyAt(i).unsafe_get(),
-                info.heap.get(), info.count, 
+                info.heap.get(), info.count,
                 h->mHeapId, h->mBase, h->mSize);
     }
 }
