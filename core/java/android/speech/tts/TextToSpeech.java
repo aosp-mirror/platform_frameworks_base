@@ -442,7 +442,7 @@ public class TextToSpeech {
     private final Map<String, Uri> mUtterances;
     private final Bundle mParams = new Bundle();
     private final TtsEngines mEnginesHelper;
-    private String mCurrentEngine = null;
+    private volatile String mCurrentEngine = null;
 
     /**
      * The constructor for the TextToSpeech class, using the default TTS engine.
@@ -573,6 +573,7 @@ public class TextToSpeech {
                 service.setCallback(getPackageName(), null);
                 service.stop(getPackageName());
                 mServiceConnection.disconnect();
+                mCurrentEngine = null;
                 return null;
             }
         }, null, "shutdown");
@@ -866,6 +867,14 @@ public class TextToSpeech {
             }
         }
         return ERROR;
+    }
+
+    /**
+     * @return the engine currently in use by this TextToSpeech instance.
+     * @hide
+     */
+    public String getCurrentEngine() {
+        return mCurrentEngine;
     }
 
     /**
