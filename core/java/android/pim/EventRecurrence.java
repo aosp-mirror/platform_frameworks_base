@@ -155,49 +155,6 @@ public class EventRecurrence {
         }
     }
 
-    /**
-     * Parse an iCalendar/RFC2445 recur type according to Section 4.3.10.  The string is
-     * parsed twice, by the old and new parsers, and the results are compared.
-     * <p>
-     * TODO: this will go away, and what is now parse2() will simply become parse().
-     */
-    public void parse(String recur) {
-        InvalidFormatException newExcep = null;
-        try {
-            parse2(recur);
-        } catch (InvalidFormatException ife) {
-            newExcep = ife;
-        }
-
-        boolean oldThrew = false;
-        try {
-            EventRecurrence check = new EventRecurrence();
-            check.parseNative(recur);
-            if (newExcep == null) {
-                // Neither threw, check to see if results match.
-                if (!equals(check)) {
-                    throw new InvalidFormatException("Recurrence rule parse does not match [" +
-                            recur + "]");
-                }
-            }
-        } catch (InvalidFormatException ife) {
-            oldThrew = true;
-            if (newExcep == null) {
-                // Old threw, but new didn't.  Log a warning, but don't throw.
-                Log.d(TAG, "NOTE: old parser rejected [" + recur + "]: " + ife.getMessage());
-            }
-        }
-
-        if (newExcep != null) {
-            if (!oldThrew) {
-                // New threw, but old didn't.  Log a warning and throw the exception.
-                Log.d(TAG, "NOTE: new parser rejected [" + recur + "]: " + newExcep.getMessage());
-            }
-            throw newExcep;
-        }
-    }
-
-    native void parseNative(String recur);
 
     public void setStartDate(Time date) {
         startDate = date;
@@ -566,7 +523,7 @@ public class EventRecurrence {
      *
      * @param recur The recurrence rule to parse (in un-folded form).
      */
-    void parse2(String recur) {
+    public void parse(String recur) {
         /*
          * From RFC 2445 section 4.3.10:
          *

@@ -131,7 +131,6 @@ extern int register_android_debug_JNITest(JNIEnv* env);
 extern int register_android_nio_utils(JNIEnv* env);
 extern int register_android_nfc_NdefMessage(JNIEnv *env);
 extern int register_android_nfc_NdefRecord(JNIEnv *env);
-extern int register_android_pim_EventRecurrence(JNIEnv* env);
 extern int register_android_text_format_Time(JNIEnv* env);
 extern int register_android_os_Debug(JNIEnv* env);
 extern int register_android_os_MessageQueue(JNIEnv* env);
@@ -1103,7 +1102,6 @@ static const RegJNIRec gRegJNI[] = {
     REG_JNI(register_android_util_Log),
     REG_JNI(register_android_util_FloatMath),
     REG_JNI(register_android_text_format_Time),
-    REG_JNI(register_android_pim_EventRecurrence),
     REG_JNI(register_android_content_AssetManager),
     REG_JNI(register_android_content_StringBlock),
     REG_JNI(register_android_content_XmlBlock),

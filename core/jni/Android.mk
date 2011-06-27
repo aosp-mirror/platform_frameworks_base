@@ -75,7 +75,6 @@ LOCAL_SRC_FILES:= \
 	android_nio_utils.cpp \
 	android_nfc_NdefMessage.cpp \
 	android_nfc_NdefRecord.cpp \
-	android_pim_EventRecurrence.cpp \
 	android_text_format_Time.cpp \
 	android_util_AssetManager.cpp \
 	android_util_Binder.cpp \
