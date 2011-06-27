@@ -128,6 +128,9 @@ struct AwesomeNativeWindowRenderer : public AwesomeRenderer {
     }
 
     virtual void render(MediaBuffer *buffer) {
+        int64_t timeUs;
+        CHECK(buffer->meta_data()->findInt64(kKeyTime, &timeUs));
+        native_window_set_buffers_timestamp(mNativeWindow.get(), timeUs * 1000);
         status_t err = mNativeWindow->queueBuffer(
                 mNativeWindow.get(), buffer->graphicBuffer().get());
         if (err != 0) {
