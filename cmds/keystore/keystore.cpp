@@ -708,7 +708,7 @@ static struct user {
     uid_t euid;
     uint32_t perms;
 } users[] = {
-    {AID_SYSTEM,   ~0,         ~GET},
+    {AID_SYSTEM,   ~0,         ~0},
     {AID_VPN,      AID_SYSTEM, GET},
     {AID_WIFI,     AID_SYSTEM, GET},
     {AID_ROOT,     AID_SYSTEM, GET},
