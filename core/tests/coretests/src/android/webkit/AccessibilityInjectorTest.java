@@ -95,7 +95,7 @@ public class AccessibilityInjectorTest
     private WebView mWebView;
 
     /** Used for caching the default bindings so they can be restored. */
-    private String mDefaultKeyBindings;
+    private static String sDefaultKeyBindings;
 
     /** The received selection string for assertion checking. */
     private static String sReceivedSelectionString = SELECTION_STRING_UNKNOWN;
@@ -1696,7 +1696,7 @@ public class AccessibilityInjectorTest
      */
     private void injectTestWebContentKeyBindings() {
         ContentResolver contentResolver = getActivity().getContentResolver();
-        mDefaultKeyBindings = Settings.Secure.getString(contentResolver,
+        sDefaultKeyBindings = Settings.Secure.getString(contentResolver,
                 Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS);
         Settings.Secure.putString(contentResolver,
                 Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS, TEST_KEY_DINDINGS);
@@ -1708,7 +1708,7 @@ public class AccessibilityInjectorTest
     private void restoreDefaultWebContentKeyBindings() {
         Settings.Secure.putString(getActivity().getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_WEB_CONTENT_KEY_BINDINGS,
-                mDefaultKeyBindings);
+                sDefaultKeyBindings);
     }
 
     /**
