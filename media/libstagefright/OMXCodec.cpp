@@ -4216,6 +4216,10 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                             mNode, OMX_IndexConfigCommonOutputCrop,
                             &rect, sizeof(rect));
 
+                CODEC_LOGI(
+                        "video dimensions are %ld x %ld",
+                        video_def->nFrameWidth, video_def->nFrameHeight);
+
                 if (err == OK) {
                     CHECK_GE(rect.nLeft, 0);
                     CHECK_GE(rect.nTop, 0);
@@ -4230,6 +4234,10 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                             rect.nTop,
                             rect.nLeft + rect.nWidth - 1,
                             rect.nTop + rect.nHeight - 1);
+
+                    CODEC_LOGI(
+                            "Crop rect is %ld x %ld @ (%ld, %ld)",
+                            rect.nWidth, rect.nHeight, rect.nLeft, rect.nTop);
                 } else {
                     mOutputFormat->setRect(
                             kKeyCropRect,
@@ -4238,7 +4246,6 @@ void OMXCodec::initOutputFormat(const sp<MetaData> &inputFormat) {
                             video_def->nFrameHeight - 1);
                 }
             }
-
             break;
         }
 
