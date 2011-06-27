@@ -165,4 +165,9 @@
     <string name="use_ptp_button_title">Mount as a camera (PTP)</string>
     <!-- Label for the installer CD image option in UsbPreferenceActivity. [CHAR LIMIT=50] -->
     <string name="installer_cd_button_title">Install Android File Transfer application for Mac</string>
+
+    <!-- toast message displayed when a screenshot is saved to the Gallery. -->
+    <string name="screenshot_saving_toast">Screenshot saved to Gallery</string>
+    <!-- toast message displayed when we fail to take a screenshot. -->
+    <string name="screenshot_failed_toast">Could not save screenshot</string>
 </resources>

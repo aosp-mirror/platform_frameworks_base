@@ -28,6 +28,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
@@ -371,6 +372,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     // What we do when the user long presses on home
     private int mLongPressOnHomeBehavior = -1;
+
+    // Screenshot trigger states
+    private boolean mVolumeDownTriggered;
+    private boolean mPowerDownTriggered;
 
     ShortcutManager mShortcutManager;
     PowerManager.WakeLock mBroadcastWakeLock;
@@ -2339,6 +2344,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void takeScreenshot() {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                ComponentName cn = new ComponentName("com.android.systemui",
+                        "com.android.systemui.screenshot.TakeScreenshotService");
+                Intent intent = new Intent();
+                intent.setComponent(cn);
+                ServiceConnection conn = new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {}
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {}
+                };
+                mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE);
+                mContext.unbindService(conn);
+            }
+        });
+    }
+
     /** {@inheritDoc} */
     @Override
     public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags, boolean isScreenOn) {
@@ -2398,6 +2423,24 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // Handle special keys.
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
+                if (down) {
+                    // If the power key down was already triggered, take the screenshot
+                    if (mPowerDownTriggered) {
+                        // Dismiss the power-key longpress
+                        mHandler.removeCallbacks(mPowerLongPress);
+                        mPowerKeyHandled = true;
+
+                        // Take the screenshot
+                        takeScreenshot();
+
+                        // Prevent the event from being passed through to the current activity
+                        result &= ~ACTION_PASS_TO_USER;
+                        break;
+                    }
+                    mVolumeDownTriggered = true;
+                } else {
+                    mVolumeDownTriggered = false;
+                }
             case KeyEvent.KEYCODE_VOLUME_UP:
             case KeyEvent.KEYCODE_VOLUME_MUTE: {
                 if (down) {
@@ -2478,6 +2521,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_POWER: {
                 result &= ~ACTION_PASS_TO_USER;
                 if (down) {
+                    // If the volume down key has been triggered, then just take the screenshot
+                    if (mVolumeDownTriggered) {
+                        // Take the screenshot
+                        takeScreenshot();
+                        mPowerKeyHandled = true;
+
+                        // Prevent the event from being passed through to the current activity
+                        break;
+                    }
+                    mPowerDownTriggered = true;
+
+
                     ITelephony telephonyService = getTelephonyService();
                     boolean hungUp = false;
                     if (telephonyService != null) {
@@ -2499,6 +2554,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                     interceptPowerKeyDown(!isScreenOn || hungUp);
                 } else {
+                    mPowerDownTriggered = false;
                     if (interceptPowerKeyUp(canceled)) {
                         result = (result & ~ACTION_POKE_USER_ACTIVITY) | ACTION_GO_TO_SLEEP;
                     }

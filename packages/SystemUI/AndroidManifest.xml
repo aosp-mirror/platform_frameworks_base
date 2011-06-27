@@ -25,6 +25,11 @@
             android:exported="true"
             />
 
+        <!-- started from PhoneWindowManager
+             TODO: Should have an android:permission attribute -->
+        <service android:name=".screenshot.TakeScreenshotService"
+            android:exported="false" />
+
         <activity android:name=".usb.UsbPreferenceActivity"
              android:theme="@*android:style/Theme.Holo.Dialog.Alert"
              android:excludeFromRecents="true">
