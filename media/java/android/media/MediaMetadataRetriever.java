@@ -453,5 +453,10 @@ public class MediaMetadataRetriever
      * @hide
      */
     public static final int METADATA_KEY_TIMED_TEXT_LANGUAGES      = 21;
+    /**
+     * If this key exists the media is drm-protected.
+     * @hide
+     */
+    public static final int METADATA_KEY_IS_DRM          = 22;
     // Add more here...
 }

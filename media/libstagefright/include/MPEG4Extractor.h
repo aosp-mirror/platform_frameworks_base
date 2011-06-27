@@ -40,7 +40,6 @@ public:
     virtual sp<MetaData> getMetaData();
 
     // for DRM
-    virtual void setDrmFlag(bool flag);
     virtual char* getDrmTrackInfo(size_t trackID, int *len);
 
 protected:

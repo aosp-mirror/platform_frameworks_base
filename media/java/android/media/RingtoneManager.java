@@ -487,7 +487,7 @@ public class RingtoneManager {
     private Cursor getInternalRingtones() {
         return query(
                 MediaStore.Audio.Media.INTERNAL_CONTENT_URI, INTERNAL_COLUMNS,
-                constructBooleanTrueWhereClause(mFilterColumns),
+                constructBooleanTrueWhereClause(mFilterColumns, mIncludeDrm),
                 null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
     }
     
@@ -506,7 +506,7 @@ public class RingtoneManager {
                     status.equals(Environment.MEDIA_MOUNTED_READ_ONLY))
                 ? query(
                     MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, MEDIA_COLUMNS,
-                    constructBooleanTrueWhereClause(mFilterColumns), null,
+                    constructBooleanTrueWhereClause(mFilterColumns, mIncludeDrm), null,
                     MediaStore.Audio.Media.DEFAULT_SORT_ORDER)
                 : null;
     }
@@ -536,11 +536,13 @@ public class RingtoneManager {
      * @param columns The columns that must be true.
      * @return The where clause.
      */
-    private static String constructBooleanTrueWhereClause(List<String> columns) {
+    private static String constructBooleanTrueWhereClause(List<String> columns, boolean includeDrm) {
         
         if (columns == null) return null;
         
         StringBuilder sb = new StringBuilder();
+        sb.append("(");
+
         for (int i = columns.size() - 1; i >= 0; i--) {
             sb.append(columns.get(i)).append("=1 or ");
         }
@@ -549,7 +551,18 @@ public class RingtoneManager {
             // Remove last ' or '
             sb.setLength(sb.length() - 4);
         }
-        
+
+        sb.append(")");
+
+        if (!includeDrm) {
+            // If not DRM files should be shown, the where clause
+            // will be something like "(is_notification=1) and is_drm=0"
+            sb.append(" and ");
+            sb.append(MediaStore.MediaColumns.IS_DRM);
+            sb.append("=0");
+        }
+
+
         return sb.toString();
     }
     

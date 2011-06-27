@@ -116,8 +116,13 @@ sp<MediaExtractor> MediaExtractor::Create(
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADTS)) {
         ret = new AACExtractor(source);
     }
-    if (ret != NULL && isDrm) {
-        ret->getMetaData()->setInt32(kKeyIsDRM, 1);
+
+    if (ret != NULL) {
+       if (isDrm) {
+           ret->setDrmFlag(true);
+       } else {
+           ret->setDrmFlag(false);
+       }
     }
 
     return ret;
