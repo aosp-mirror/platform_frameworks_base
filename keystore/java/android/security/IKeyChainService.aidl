@@ -30,5 +30,6 @@ interface IKeyChainService {
     void installCaCertificate(in byte[] caCertificate);
 
     // APIs used by Settings
+    boolean deleteCaCertificate(String alias);
     boolean reset();
 }

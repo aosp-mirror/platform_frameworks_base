@@ -2959,4 +2959,26 @@
     <!-- Notification body when data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
     <string name="data_usage_limit_body">tap to enable</string>
 
+    <!-- SSL Certificate dialogs -->
+    <!-- Title for an SSL Certificate dialog -->
+    <string name="ssl_certificate">Security certificate</string>
+    <!-- Message on an SSL Certificate dialog -->
+    <string name="ssl_certificate_is_valid">This certificate is valid.</string>
+    <!-- Label for an information field on an SSL Certificate Dialog -->
+    <string name="issued_to">Issued to:</string>
+    <!-- Label for an information field on an SSL Certificate Dialog -->
+    <string name="common_name">Common name:</string>
+    <!-- Label for an information field on an SSL Certificate Dialog -->
+    <string name="org_name">Organization:</string>
+    <!-- Label for an information field on an SSL Certificate Dialog -->
+    <string name="org_unit">Organizational unit:</string>
+    <!-- Label for an information field on an SSL Certificate Dialog -->
+    <string name="issued_by">Issued by:</string>
+    <!-- Label for an information field on an SSL Certificate Dialog -->
+    <string name="validity_period">Validity:</string>
+    <!-- Label for an information field on an SSL Certificate Dialog -->
+    <string name="issued_on">Issued on:</string>
+    <!-- Label for an information field on an SSL Certificate Dialog -->
+    <string name="expires_on">Expires on:</string>
+
 </resources>
