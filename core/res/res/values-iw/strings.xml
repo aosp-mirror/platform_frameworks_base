@@ -1106,4 +1106,14 @@
     <skip />
     <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
     <skip />
+    <string name="ssl_certificate" msgid="5226747157992111668">"אישור אבטחה"</string>
+    <string name="ssl_certificate_is_valid" msgid="7096160815933145579">"אישור זה תקף."</string>
+    <string name="issued_to" msgid="9032338008819841339">"הופק עבור:"</string>
+    <string name="common_name" msgid="5745530093500062357">"שם משותף:"</string>
+    <string name="org_name" msgid="8868889052889991293">"ארגון:"</string>
+    <string name="org_unit" msgid="4489056376307768196">"יחידה ארגונית:"</string>
+    <string name="issued_by" msgid="6959484326943152487">"הופק על ידי:"</string>
+    <string name="validity_period" msgid="57988851973181309">"חוקיות:"</string>
+    <string name="issued_on" msgid="2082890654801808368">"הונפק בתאריך:"</string>
+    <string name="expires_on" msgid="8061200430557020704">"פג תוקף ב:"</string>
 </resources>

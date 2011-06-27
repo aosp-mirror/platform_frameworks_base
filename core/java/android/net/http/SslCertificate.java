@@ -16,14 +16,18 @@
 
 package android.net.http;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.text.format.DateFormat;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Vector;
-
-import java.security.cert.X509Certificate;
 
 import com.android.org.bouncycastle.asn1.DERObjectIdentifier;
 import com.android.org.bouncycastle.asn1.x509.X509Name;
@@ -58,7 +62,7 @@ public class SslCertificate {
      */
     private Date mValidNotAfter;
 
-     /**
+    /**
      * Bundle key names
      */
     private static final String ISSUED_TO = "issued-to";
@@ -108,8 +112,10 @@ public class SslCertificate {
      * Creates a new SSL certificate object
      * @param issuedTo The entity this certificate is issued to
      * @param issuedBy The entity that issued this certificate
-     * @param validNotBefore The not-before date from the certificate validity period in ISO 8601 format
-     * @param validNotAfter The not-after date from the certificate validity period in ISO 8601 format
+     * @param validNotBefore The not-before date from the certificate
+     *     validity period in ISO 8601 format
+     * @param validNotAfter The not-after date from the certificate
+     *     validity period in ISO 8601 format
      * @deprecated Use {@link #SslCertificate(X509Certificate)}
      */
     @Deprecated
@@ -202,9 +208,8 @@ public class SslCertificate {
      * @return A string representation of this certificate for debugging
      */
     public String toString() {
-        return
-            "Issued to: " + mIssuedTo.getDName() + ";\n" +
-            "Issued by: " + mIssuedBy.getDName() + ";\n";
+        return ("Issued to: " + mIssuedTo.getDName() + ";\n"
+                + "Issued by: " + mIssuedBy.getDName() + ";\n");
     }
 
     /**
@@ -327,5 +332,66 @@ public class SslCertificate {
         public String getUName() {
             return mUName != null ? mUName : "";
         }
+    }
+
+    /**
+     * Inflates the SSL certificate view (helper method).
+     * @return The resultant certificate view with issued-to, issued-by,
+     * issued-on, expires-on, and possibly other fields set.
+     * If the input certificate is null, returns null.
+     *
+     * @hide Used by Browser and Settings
+     */
+    public View inflateCertificateView(Context context) {
+        LayoutInflater factory = LayoutInflater.from(context);
+
+        View certificateView = factory.inflate(
+            com.android.internal.R.layout.ssl_certificate, null);
+
+        // issued to:
+        SslCertificate.DName issuedTo = getIssuedTo();
+        if (issuedTo != null) {
+            ((TextView) certificateView.findViewById(com.android.internal.R.id.to_common))
+                .setText(issuedTo.getCName());
+            ((TextView) certificateView.findViewById(com.android.internal.R.id.to_org))
+                .setText(issuedTo.getOName());
+            ((TextView) certificateView.findViewById(com.android.internal.R.id.to_org_unit))
+                .setText(issuedTo.getUName());
+        }
+
+        // issued by:
+        SslCertificate.DName issuedBy = getIssuedBy();
+        if (issuedBy != null) {
+            ((TextView) certificateView.findViewById(com.android.internal.R.id.by_common))
+                .setText(issuedBy.getCName());
+            ((TextView) certificateView.findViewById(com.android.internal.R.id.by_org))
+                .setText(issuedBy.getOName());
+            ((TextView) certificateView.findViewById(com.android.internal.R.id.by_org_unit))
+                .setText(issuedBy.getUName());
+        }
+
+        // issued on:
+        String issuedOn = formatCertificateDate(context, getValidNotBeforeDate());
+        ((TextView) certificateView.findViewById(com.android.internal.R.id.issued_on))
+            .setText(issuedOn);
+
+        // expires on:
+        String expiresOn = formatCertificateDate(context, getValidNotAfterDate());
+        ((TextView) certificateView.findViewById(com.android.internal.R.id.expires_on))
+            .setText(expiresOn);
+
+        return certificateView;
+    }
+
+    /**
+     * Formats the certificate date to a properly localized date string.
+     * @return Properly localized version of the certificate date string and
+     * the "" if it fails to localize.
+     */
+    private String formatCertificateDate(Context context, Date certificateDate) {
+        if (certificateDate == null) {
+            return "";
+        }
+        return DateFormat.getDateFormat(context).format(certificateDate);
     }
 }

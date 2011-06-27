@@ -1223,4 +1223,14 @@
     <skip />
     <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
     <skip />
+    <string name="ssl_certificate" msgid="5226747157992111668">"Certificat da segirezza"</string>
+    <string name="ssl_certificate_is_valid" msgid="7096160815933145579">"Quest certificat è valid."</string>
+    <string name="issued_to" msgid="9032338008819841339">"Emess a:"</string>
+    <string name="common_name" msgid="5745530093500062357">"Num general:"</string>
+    <string name="org_name" msgid="8868889052889991293">"Organisaziun:"</string>
+    <string name="org_unit" msgid="4489056376307768196">"Unitad d\'organisaziun:"</string>
+    <string name="issued_by" msgid="6959484326943152487">"Emess da:"</string>
+    <string name="validity_period" msgid="57988851973181309">"Validitad:"</string>
+    <string name="issued_on" msgid="2082890654801808368">"Emess ils:"</string>
+    <string name="expires_on" msgid="8061200430557020704">"Scroda ils:"</string>
 </resources>
