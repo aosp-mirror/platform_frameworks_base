@@ -19,14 +19,14 @@ sdk.platform.apiLevel=12
 <h2>Reference</h2>
 <ol>
 <li><a
-href="{@docRoot}sdk/api_diff/11/changes.html">API
+href="{@docRoot}sdk/api_diff/12/changes.html">API
 Differences Report &raquo;</a> </li>
 </ol>
 
 <h2>See Also</h2>
 <ol>
   <li><a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing
-Apps for Android 3.0</a></li>
+Apps for Android 3.x</a></li>
 </ol>
 
 </div>
@@ -765,7 +765,7 @@ was upgraded while it was in started state (not in a stopped state).</p></li>
 
 </ul>
 
-<h3 if="other">Core utilities</h3>
+<h3 id="other">Core utilities</h3>
 
 <ul>
 <li>LRU cache

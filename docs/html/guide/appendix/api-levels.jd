@@ -82,20 +82,71 @@ API Level 1 and subsequent releases have incremented the API Level.</p>
 Android platform.</p>
 
 <table>
-  <tr><th>Platform Version</th><th>API Level</th></tr>
-  <tr><td>Android 3.1</td><td>12</td></tr>
-  <tr><td>Android 3.0</td><td>11</td></tr>
-  <tr><td>Android 2.3.4</td><td rowspan="2">10</td></tr>
-  <tr><td>Android 2.3.3</td></tr>
-  <tr><td>Android 2.3</td><td>9</td></tr>
-  <tr><td>Android 2.2</td><td>8</td></tr>
-  <tr><td>Android 2.1</td><td>7</td></tr>
-  <tr><td>Android 2.0.1</td><td>6</td></tr>
-  <tr><td>Android 2.0</td><td>5</td></tr>
-  <tr><td>Android 1.6</td><td>4</td></tr>
-  <tr><td>Android 1.5</td><td>3</td></tr>
-  <tr><td>Android 1.1</td><td>2</td></tr>
-  <tr><td>Android 1.0</td><td>1</td></tr>
+  <tr><th>Platform Version</th><th>API Level</th><th>VERSION_CODE</th><th>Notes</th></tr>
+  
+    <tr><td><a href="{@docRoot}sdk/android-3.2.html">Android 3.2</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/13/changes.html" title="Diff Report">13</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#HONEYCOMB_MR2}</td>
+    <td><!-- <a href="{@docRoot}sdk/android-3.2-highlights.html">Platform Highlights</a>--></td></tr>
+  
+  <tr><td><a href="{@docRoot}sdk/android-3.1.html">Android 3.1.x</a></td>
+    <td><a href="{@docRoot}sdk/api_diff/12/changes.html" title="Diff Report">12</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#HONEYCOMB_MR1}</td>
+    <td><a href="{@docRoot}sdk/android-3.1-highlights.html">Platform Highlights</a></td></tr>
+    
+  <tr><td><a href="{@docRoot}sdk/android-3.0.html">Android 3.0.x</td>
+    <td><a href="{@docRoot}sdk/api_diff/11/changes.html" title="Diff Report">11</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#HONEYCOMB}</td>
+    <td><a href="{@docRoot}sdk/android-3.0-highlights.html">Platform Highlights</a></td></tr>
+    
+  <tr><td><a href="{@docRoot}sdk/android-2.3.3.html">Android 2.3.4<br>Android 2.3.3</td>
+    <td><a href="{@docRoot}sdk/api_diff/10/changes.html" title="Diff Report">10</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#GINGERBREAD_MR1}</td>
+    <td rowspan="2"><a href="{@docRoot}sdk/android-2.3-highlights.html">Platform Highlights</a></td></tr>
+  
+  <tr><td><a href="{@docRoot}sdk/android-2.3.html">Android 2.3.2<br>Android 2.3.1<br>Android 2.3</td>
+    <td><a href="{@docRoot}sdk/api_diff/9/changes.html" title="Diff Report">9</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#GINGERBREAD}</td>
+    </tr>
+  
+  <tr><td><a href="{@docRoot}sdk/android-2.2.html">Android 2.2.x</td>
+    <td ><a href="{@docRoot}sdk/api_diff/8/changes.html" title="Diff Report">8</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#FROYO}</td>
+    <td><a href="{@docRoot}sdk/android-2.2-highlights.html">Platform Highlights</a></td></tr>
+  
+  <tr><td><a href="{@docRoot}sdk/android-2.1.html">Android 2.1.x</td>
+    <td><a href="{@docRoot}sdk/api_diff/7/changes.html" title="Diff Report">7</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#ECLAIR_MR1}</td>
+    <td rowspan="3" ><a href="{@docRoot}sdk/android-2.0-highlights.html">Platform Highlights</a></td></tr>
+    
+  <tr><td><a href="{@docRoot}sdk/android-2.0.1.html">Android 2.0.1</td>
+    <td><a href="{@docRoot}sdk/api_diff/6/changes.html" title="Diff Report">6</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#ECLAIR_0_1}</td>
+    </tr>
+    
+  <tr><td><a href="{@docRoot}sdk/android-2.0.html">Android 2.0</td>
+    <td><a href="{@docRoot}sdk/api_diff/5/changes.html" title="Diff Report">5</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#ECLAIR}</td>
+    </tr>
+    
+  <tr><td><a href="{@docRoot}sdk/android-1.6.html">Android 1.6</td>
+    <td><a href="{@docRoot}sdk/api_diff/4/changes.html" title="Diff Report">4</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#DONUT}</td>
+    <td><a href="{@docRoot}sdk/android-1.6-highlights.html">Platform Highlights</a></td></tr>
+    
+  <tr><td><a href="{@docRoot}sdk/android-1.5.html">Android 1.5</td>
+    <td><a href="{@docRoot}sdk/api_diff/3/changes.html" title="Diff Report">3</a></td>
+    <td>{@link android.os.Build.VERSION_CODES#CUPCAKE}</td>
+    <td><a href="{@docRoot}sdk/android-1.5-highlights.html">Platform Highlights</a></td></tr>
+    
+  <tr><td><a href="{@docRoot}sdk/android-1.1.html">Android 1.1</td>
+    <td>2</td>
+    <td>{@link android.os.Build.VERSION_CODES#BASE_1_1}</td><td></td></tr>
+    
+  <tr><td><a href="{@docRoot}sdk/android-1.0.html">Android 1.0</td>
+    <td>1</td>
+    <td>{@link android.os.Build.VERSION_CODES#BASE}</td>
+    <td></td></tr>
 </table>
 
 

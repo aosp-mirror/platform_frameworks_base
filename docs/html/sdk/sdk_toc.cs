@@ -76,6 +76,14 @@ class="new">new!</span></li>
     </ul>
     <ul>
       <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>sdk/android-3.2.html">
+        <span class="en">Android 3.2 Platform</span></a> <span class="new">new!</span></div>
+        <ul>
+          <!-- <li><a href="<?cs var:toroot ?>sdk/android-3.2-highlights.html">Platform Highlights</a></li> -->
+          <li><a href="<?cs var:toroot ?>sdk/api_diff/13/changes.html">API Differences Report &raquo;</a></li>
+        </ul>
+      </li>
+      <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>sdk/android-3.1.html">
         <span class="en">Android 3.1 Platform</span></a></div>
         <ul>

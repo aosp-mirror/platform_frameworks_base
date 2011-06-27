@@ -1,0 +1,737 @@
+page.title=Android 3.2 Platform
+sdk.platform.version=3.2
+sdk.platform.apiLevel=13
+@jd:body
+
+<div id="qv-wrapper">
+<div id="qv">
+
+<h2>In this document</h2>
+<ol>
+  <li><a href="#relnotes">Revisions</a></li>
+  <li><a href="#highlights">Highlights</a></li>
+  <li><a href="#api">API Overview</a></li>
+  <li><a href="#api-level">API Level</a></li>
+  <li><a href="#apps">Built-in Applications</a></li>
+  <li><a href="#locs">Locales</a></li>
+  <li><a href="#skins">Emulator Skins</a></li>
+</ol>
+
+<h2>Reference</h2>
+<ol>
+<li><a
+href="{@docRoot}sdk/api_diff/13/changes.html">API
+Differences Report &raquo;</a> </li>
+</ol>
+
+<h2>See Also</h2>
+<ol>
+  <li><a href="{@docRoot}guide/practices/screens_support.html">Supporting
+  Multiple Screens</a></li>
+  <li><a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing
+Apps for Android 3.x</a></li>
+</ol>
+
+</div>
+</div>
+
+
+<p><em>API Level:</em>&nbsp;<strong>{@sdkPlatformApiLevel}</strong></p>
+
+<p>Welcome to Android 3.2!</p>
+
+<p>Android 3.2 is an incremental platform release that adds new
+capabilities for users and developers. This sections below provide an overview
+of the new features and developer APIs.</p>
+
+<p>For developers, the Android {@sdkPlatformVersion} platform is available as a
+downloadable component for the Android SDK. The downloadable platform includes
+an Android library and system image, as well as a set of emulator skins and
+more. The downloadable platform includes no external libraries.</p>
+
+<p>To get started developing or testing against Android {@sdkPlatformVersion},
+use the Android SDK Manager to download the platform into your SDK. For more
+information, see <a href="{@docRoot}sdk/adding-components.html">Adding SDK
+Components</a>. If you are new to Android, <a
+href="{@docRoot}sdk/index.html">download the SDK Starter Package</a> first.</p>
+
+<p class="note"><strong>Reminder:</strong> If you've already published an
+Android application, please test and optimize your application on Android 3.2 as
+soon as possible. You should do so to be sure your application provides the best
+experience possible on the latest Android-powered devices. For information about
+what you can do, read <a
+href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for
+Android 3.x</a>.</p>
+
+
+<h2 id="relnotes">Revisions</h2>
+
+<p>To determine what revision of the Android {@sdkPlatformVersion} platform you
+have installed, refer to the "Installed Packages" listing in the Android SDK and
+AVD Manager.</p>
+
+
+<div class="toggle-content opened" style="padding-left:1em;">
+
+  <p><a href="#" onclick="return toggleContent(this)">
+    <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />
+    Android {@sdkPlatformVersion}, Revision 1</a> <em>(July 2011)</em>
+  </a></p>
+
+  <div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Initial release. SDK Tools r12 or higher is recommended.</dt>
+</dl>
+
+  </div>
+</div>
+
+<h2 id="highlights" style="margin-top:1.5em;">Platform Highlights</h2>
+
+<h3>New user features</h3>
+
+<ul>
+<li><strong>Optimizations for a wider range of tablets</strong>
+
+<p>Android 3.2 includes a variety of optimizations across the system
+to ensure a great user experience on a wider range of tablet devices.</p></li>
+
+<li><strong>Compatibility zoom for fixed-sized apps</strong>
+
+<p>Android 3.2 introduces a new <em>compatibility zoom</em> mode that gives
+users a new way to view fixed-sized apps on larger devices. The new mode provides a
+pixel-scaled alternative to the standard UI stretching for apps that are not
+designed to run on larger screen sizes, such as on tablets. The new mode is
+accessible to users from a menu icon in the system bar, for apps that need
+compatibility support.</p></li>
+
+<li><strong>Media sync from SD card</strong>
+<p>On devices that support an SD card, users can now load media files directly
+from the SD card to apps that use them. A system facility makes the files
+accessible to apps from the system media store.</p></li>
+</ul>
+
+
+<h3>New developer features</h3>
+
+<ul>
+<li><strong>Extended API for managing screens support</strong>
+
+<p>Android 3.2 introduces extensions to the platform's screen support API to
+give developers additional ways to manage application UI across the range of
+Android-powered devices. The API includes new resource qualifiers and new
+manifest attributes that give you more precise control over how your
+apps are displayed on different sizes, rather than relying on generalized
+size categories.</p>
+
+<p>To ensure the best possible display for fixed-sized apps and apps with limited
+support for various screen sizes, the platform also provides a new zoom
+compatibility mode that renders the UI on a smaller screen area, then scales it
+up to fill the space available on the display. For more information about the
+screen support API and the controls it provides, see the sections below. </p></li>
+</ul>
+
+
+<h2 id="api">API Overview</h2>
+
+<h3 id="usb">Screens Support APIs</h3>
+
+<p>Android 2.3 introduces new screens support APIs that give you more
+control over how their applications are displayed across different screen sizes.
+The API builds on the existing screens-support API, including the platform's
+generalized screen density model, but extends it with the ability to precisely
+target specific screen ranges by their dimensions, measured in
+density-independent pixel units (such as 600dp or 720dp wide), rather than
+by their generalized screen sizes (such as large or xlarge)</p>
+
+<p>When designing an application's UI, you can still rely on the platform to
+provide density abstraction, which means that applications do not need to
+compensate for the differences in actual pixel density across devices. You
+can design the application UI according to the amount of horizontal or vertical
+space available. The platform expresses the amount of space available using three new
+characteristics: <em>smallestWidth</em>, <em>width</em>, and
+<em>height</em>.</p>
+
+<ul>
+<li>A screen's <em>smallestWidth</em> is it's fundamental minimum size,
+measured in density-independent pixel ("dp") units. Of the screen's height or
+width, it is the shorter of the two. For a screen in portrait orientation, the
+smallestWidth is normally based on its width, while in landscape orientation it based
+on its height. In all cases, the smallestWidth is derived from a fixed characteristic of the
+screen and the value does not change, regardless of orientation. The smallestWidth
+is important for applications because it represents the shortest possible width
+in which the application UI will need to be drawn, not including screen areas
+reserved by the system.
+</li>
+
+<li>In constrast, a screen's <em>width</em> and <em>height</em> represent the
+current horizontal or vertical space available for application layout, measured
+in "dp" units, not including screen areas reserved by the system. The width and
+height of a screen change when the user switches orientation between landscape
+and portrait. </li>
+
+</ul>
+
+<p>The new screens support API is designed to let you manage application UI
+according to the smallestWidth of the current screen. You can also manage the
+UI according to current width or height, as needed. For those purposes, the API
+provides these tools:</p>
+
+<ul>
+<li>New resource qualifiers for targeting layouts and other resources to a
+minimum smallestWidth, width, or height, and</li> 
+<li>New manifest attributes, for specifying the app's maximum
+screen compatibility range</li>
+</ul>
+
+<p>Additionally, applications can still query the system and manage UI and
+resource loading at runtime, as in the previous versions of the platform.</p>
+
+<p>Since the new API lets you target screens more directly through smallestWidth,
+width, and height, it's helpful to understand the typical
+characteristics of the different screen types. The table below provides some
+examples, measured in "dp" units. </p>
+
+<p class="caption"><strong>Table 1.</strong> Typical devices, with density
+and size in dp.</p>
+
+<table>
+<tr>
+<th>Type</th>
+<th>Density (generalized)</th>
+<th>Dimensions (dp)</th>
+<th>smallestWidth (dp)</th>
+</tr>
+<tr>
+<td>Baseline phone</td>
+<td>mdpi</td>
+<td>320x480</td>
+<td>320</td>
+</td>
+<tr>
+<td>Small tablet/large phone</td>
+<td>mdpi</td>
+<td>480x800</td>
+<td>480</td>
+</tr>
+<tr>
+<td>7-inch tablet</td>
+<td>mdpi</td>
+<td>600x1024</td>
+<td>600</td>
+</tr>
+<tr>
+<td>10-inch tablet</td>
+<td>mdpi</td>
+<td>800x1280</td>
+<td>800</td>
+</tr>
+</table>
+
+<p>The sections below provide more information about the new screen qualifiers
+and manifest attributes. For complete information about how to use the screen
+support API, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>
+
+<h4>New resource qualifiers for screens support</h4>
+
+<p>The new resource qualifiers in Android 3.2 let you better target your layouts
+for ranges of screen sizes. Using the qualifiers, you can create resource
+configurations designed for a specific minimum smallestWidth, current width, or
+current height, measured in density-independent pixels.</p>
+
+<p>The new qualifiers are:</p>
+<ul>
+<li><code>swNNNdp</code> &mdash; Specifies the minimum smallestWidth on which
+the resource should be used, measured in "dp" units. As mentioned above, a
+screen's smallestWidth is constant, regardless of orientation. Examples:
+<code>sw320dp</code>, <code>sw720dp</code>, <code>sw720dp</code>.</li>
+
+<li><code>wNNNdp</code> and <code>hNNNdp</code> &mdash; Specifies the minimum 
+width or height on which the resource should be used, measured in "dp" units. As
+mentioned above, a screen's width and height are relative to the orientation of
+the screen and change whenever the orientation changes. Examples:
+<code>w320dp</code>, <code>w720dp</code>, <code>h1024dp</code>.</p></li>
+</ul>
+
+<p>You can also create multiple overlapping resource configurations if needed.
+For example, you could tag some resources for use on any screen wider than 480
+dp, others for wider than 600  dp, and others for wider than 720 dp. When
+multiple resource configurations are qualified for a given screen, the system
+selects the configuration that is the closest match. For precise control over
+which resources are loaded on a given screen, you can tag resources with one
+qualifier or combine several new or existing qualifiers. 
+
+<p>Based on the typical dimensions listed earlier, here are some examples of how
+you could use the new qualifiers:</p>
+
+<pre class="classic prettyprint">res/layout/main_activity.xml   # For phones
+res/layout-sw600dp/main_activity.xml   # For 7” tablets
+res/layout-sw720dp/main_activity.xml   # For 10” tablets
+res/layout-w600dp/main_activity.xml   # Multi-pane when enough width
+res/layout-sw600dp-w720dp/main_activity.xml   # For large width</pre>
+
+<p>Older versions of the platform will ignore the new qualifiers, so you can
+mix them as needed to ensure that your app looks great on any device. Here
+are some examples:</p>
+
+<pre class="classic prettyprint">res/layout/main_activity.xml   # For phones
+res/layout-xlarge/main_activity.xml   # For pre-3.2 tablets
+res/layout-sw600dp/main_activity.xml   # For 3.2 and up tablets</pre>
+
+<p>For complete information about how to use the new qualifiers, see <a href="{@docRoot}guide/practices/screens_support.html#NewQualifiers">Using new
+size qualifiers</a>.</p>
+
+<h4>New manifest attributes for screen-size compatibility</h4>
+
+<p>The framework offers a new set of <a
+href="{@docRoot}"><code>&lt;supports-screens&gt;</code></a> manifest attributes that let
+you manage your app's support for different screen sizess.
+Specifically, you can specify the largest and smallest screens on which your app
+is designed to run, as well as the largest screen on which it is designed run
+without needing the system's new <a href="{@docRoot}guide/practices/screen-compat-mode.html">screen
+compatibility mode</a>. Like the resource qualifiers described above, the new
+manifest attributes specify the range of screens that the application supports,
+as specified by the smallestWidth. </p>
+
+<p>The new manifest attributes for screen support are: </p>
+
+<ul>
+<li><code>android:compatibleWidthLimitDp="<em>numDp"</em></code> &mdash; This
+attribute lets you specify the maximum smallestWidth on which the application
+can run without needing compatibility mode. If the current screen is larger than
+the value specified, the system displays the application in normal mode but
+allows the user to optionally switch to compatibility mode through a setting in
+the system bar.</li>
+
+<li><code>android:largestWidthLimitDp="<em>numDp</em>"</code> &mdash; This
+attribute lets you specify the maximum smallestWidth on which the application
+is designed to run.  If the current screen is larger than the value specified,
+the system forces the application into screen compatibility mode, to ensure best
+display on the current screen.</li>
+
+<li><code>android:smallestWidthLimitDp="<em>numDp"</em></code> &mdash; This
+attribute lets you specify the minimum smallestWidth on which the application
+can run. If the current screen is smaller than the value specified, the system
+considers the application incompatible with the device, but does not prevent it
+from being installed and run.</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> Android Market does not currently filter
+apps based on any of the attributes above. Support for filtering will be
+added in a later platform release. Applications that require
+filtering based on screen size can use the existing <code>&lt;supports-screens&gt;</code>
+attributes.</p>
+
+<p>For complete information about how to use the new attributes, see <a href="{@docRoot}guide/practices/screens_support.html#DeclaringScreenSizeSupport">Declaring
+screen size support</a>.</p>
+
+<h4>Screen compatibility mode</h4>
+
+<p>Android 3.2 provides a new screen compatibility mode for applications
+explicitly declaring that they do not support screens as large as the one on
+which they are running. This new "zoom" mode is a pixel-scaled &mdash; it
+renders the application in a smaller screen area and then scales the pixels to
+fill the current screen.</p>
+
+<p>By default, the system offers screen compatibility mode as an user option, for apps
+that require it. Users can turn the zoom mode on and off using a control available
+in the system bar. </p>
+
+<p>Because the new screen compatibility mode may not be appropriate for all
+applications, the platform allows the application to disable it using manifest
+attributes. When disabled by the app, the system does not offer "zoom" compatibility
+mode as an option for users when the app is running.</p>
+
+<p class="note"><strong>Note:</strong> For important information about how
+to control compatibility mode in your applications, please review the <a
+href="http://android-developers.blogspot.com/2011/07/new-mode-for-apps-on-large-
+screens.html">New Mode for Apps on Large Screens</a> article on the Android
+Developers Blog. </p>
+
+<h4>New screen density for 720p televisions and similar devices</h4>
+
+<p>To meet the needs of applications running on 720p televisions or similar with
+moderate density screens, Android 3.2 introduces a new generalized density,
+<code>tvdpi</code>, with an approximate dpi of 213. Applications can query for
+the new density in {@link android.util.DisplayMetrics#densityDpi} and can use
+the new <code>tvdpi</code> qualifier to tag resources for televisions and
+similar devices. For example:</p>
+
+<pre class="classic prettyprint">res/drawable-tvdpi/my_icon.png   # Bitmap for tv density</pre>
+
+<p>In general, applications should not need to work with this density. For situations
+where output is needed for a 720p screen, the UI elements can be scaled
+automatically by the platform.</p>
+
+
+<h3 id="ui" style="margin-top:1.25em;">UI framework</h3>
+<ul>
+<li>Fragments
+  <ul>
+    <li>New {@link android.app.Fragment.SavedState} class holds the state
+    information retrieved from a fragment instance through
+    {@link android.app.FragmentManager#saveFragmentInstanceState(android.app.Fragment) saveFragmentInstanceState()}.</li>
+    <li>New method {@link android.app.FragmentManager#saveFragmentInstanceState(android.app.Fragment) saveFragmentInstanceState()}
+    saves the current instance state of
+    the given Fragment. The state can be used later when creating a new instance
+    of the Fragment that matches the current state.</li>
+    <li>New method {@link android.app.Fragment#setInitialSavedState(SavedState) setInitialSavedState()}
+    sets the initial saved state for a Fragment when first constructed.</li>
+    <li>New {@link android.app.Fragment#onViewCreated(android.view.View, android.os.Bundle)
+    onViewCreated()} callback method notifies the Fragment that
+    {@link android.app.Fragment#onCreateView(LayoutInflater, ViewGroup, Bundle)
+    has returned, but before any saved state has been restored in to the View.</li>
+    <li>{@link android.app.Fragment#isDetached()} method determines whether
+    the Fragment has been explicitly detached from the UI.</li>
+    <li>New {@link android.app.FragmentTransaction#attach(android.app.Fragment) attach()}
+    and {@link android.app.FragmentTransaction#detach(android.app.Fragment) detach()}
+    methods let an application re-attach or detach fragments in the UI.</li>
+    <li>A new {@link android.app.FragmentTransaction#setCustomAnimations(int, int, int, int)
+    setCustomAnimations()} overload method lets you set specific animation
+    resources to run during for enter/exit operations and specifically when
+    popping the back stack. The existing implementation does not account
+    for the different behavior of fragments when popping the back stack.</li>
+  </ul>
+</li>
+<li>Screen size information in ActivityInfo and ApplicationInfo
+  <ul>
+    <li>{@link android.content.pm.ActivityInfo} adds {android.content.pm.ActivityInfo#CONFIG_SCREEN_SIZE}
+    and {android.content.pm.ActivityInfo#CONFIG_SMALLEST_SCREEN_SIZE} as bit masks
+    in {@link android.R.attr#configChanges}. The bits indicate whether an Activity can
+    itself handle the screen size and smallest screen size.</li>
+    <li>{@link android.content.pm.ApplicationInfo} adds
+    {android.content.pm.ApplicationInfo#largestWidthLimitDp}, {android.content.pm.ApplicationInfo#compatibleWidthLimitDp},
+    and {android.content.pm.ApplicationInfo#requiresSmallestWidthLimitDp} fields,
+    derived from the corresponding <code>&lt;supports-screens&gt;</code> attributes
+    in the application manifest file.</li>
+  </ul>
+</li>
+<li>Helpers for getting display size from WindowManager
+  <ul>
+    <li>New methods {@link android.view.Display#getSize(android.graphics.Point)
+    getSize()} and {@link android.view.Display#getRectSize(android.graphics.Rect)
+    getRectSize()} let applications get the raw size of the display.</li>
+  </ul>
+</li>
+<li>New public "holographic" styles
+  <ul>
+    <li>The platform now exposes a variety of public "holographic" styles
+    for text, actionbar widgets and tabs, and more. See
+    {@link android.R.style} for a full list.</li>
+  </ul>
+</li>
+<li>{@link android.app.LocalActivityManager}, {@link android.app.ActivityGroup}, and
+    {@link android.app.LocalActivityManager} are now deprecated
+  <ul>
+    <li>New applications should use Fragments instead of these classes. To
+    continue to run on older versions of the platform, you can use the v4 Support
+    Library (compatibility library), available in the Android SDK. The v4 Support
+    Library provides a version of the Fragment API that is compatible down to
+    Android 1.6 (API level 4).
+    <li>For apps developing against Android 3.0 (API level
+    11) or higher, tabs are typically presented in the UI using the new
+    {@link android.app.ActionBar#newTab() ActionBar.newTab()} and related APIs
+    for placing tabs within their action bar area.</p></li>
+  </ul>
+</li>
+</ul>
+
+<h3 id="media" style="margin-top:1em;">Media framework</h3>
+<ul>
+    <li>Applications that use the platform's media provider ({@link
+    android.provider.MediaStore}) can now read media data directly from the
+    removeable SD card, where supported by the device. Applications can also
+    interact with the SD card files directly, using the MTP API. </li>
+
+</ul>
+<h3 id="graphics" style="margin-top:1.25em;">Graphics</h3>
+<ul>
+<li>Parcelable utilities in Point and PointF
+  <ul>
+    <li>{@link android.graphics.Point} and {@link android.graphics.PointF}
+    classes now include the {@link android.os.Parcelable} interface and utility methods {@link
+    android.graphics.Point#describeContents()}, {@link
+    android.graphics.Point#readFromParcel(android.os.Parcel) readFromParcel()}, and {@link
+    android.graphics.Point#writeToParcel(android.os.Parcel, int) writeToParcel()}.</li>
+  </ul>
+</li>
+</ul>
+
+
+<h3 id="ime" style="margin-top:1.25em;">IME framework</h3>
+<ul>
+    <li>New {@link android.view.KeyEvent#getModifiers()} method for
+    retrieving the current state of the modifier keys.</li>
+</ul>
+
+
+<h3 id="usb" style="margin-top:1.25em;">USB framework</h3>
+<ul>
+    <li>New {@link
+    android.hardware.usb.UsbDeviceConnection#getRawDescriptors()} method for
+    retrieving the raw USB descriptors for the device. You can use the
+    method to access descriptors not supported directly via the higher
+    level APIs.</li>
+</ul>
+
+
+<h3 id="network" style="margin-top:1.25em;">Network</h3>
+<ul>
+<li>Network type constants
+   <ul>
+     <li>{@link android.net.ConnectivityManager} adds the constants {@link
+     android.net.ConnectivityManager#TYPE_ETHERNET} and {@link
+     android.net.ConnectivityManager#TYPE_BLUETOOTH}.</li>
+  </ul>
+</li>
+</ul>
+
+
+<h3 id="telephony" style="margin-top:1.25em;">Telephony</h3>
+<ul>
+    <li>New {@link android.telephony.TelephonyManager#NETWORK_TYPE_HSPAP} network type constant.</li>
+</ul>
+
+<h3 id="other" style="margin-top:1.25em;">Core utilities</h3>
+<ul>
+<li>Parcelable utilities
+  <ul>
+    <li>New interface {@link android.os.Parcelable.ClassLoaderCreator} allows
+    the application to receive the ClassLoader in which the object is being created.</li>
+    <li>New {@link android.os.ParcelFileDescriptor#adoptFd(int) adoptFd}, {@link
+    android.os.ParcelFileDescriptor#dup(java.io.FileDescriptor) dup()}, and {@link
+    android.os.ParcelFileDescriptor#fromFd(int) fromFd()} for managing
+    {@link android.os.ParcelFileDescriptor} objects.</li>
+  </ul>
+</li>
+<li>Binder and IBinder
+  <ul>
+    <li>New method {@link android.os.Binder#dumpAsync(java.io.FileDescriptor, java.lang.String[]) dumpAsync()}
+    in {@link android.os.Binder} and {@link android.os.IBinder} let applications
+    dump to a specified file, ensuring that the target executes asynchronously.</li>
+    <li>New {@link android.os.IBinder} protocol transaction code {@link
+    android.os.IBinder#TWEET_TRANSACTION} lets applications send a tweet
+    to the target object.</li>
+  </ul>
+</li>
+</ul>
+
+
+
+
+<h3 id="features">New feature constants</h3>
+
+<p>The platform adds new hardware feature constants that you can declare
+in their application manifests, to inform external entities such as Android
+Market of required hardware and software capabilities. You declare these
+and other feature constants in <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
+&lt;uses-feature&gt;}</a> manifest elements.
+
+<p>Android Market filters applications based on their <code>&lt;uses-feature&gt;</code> attributes, to ensure that they are available only to devices on which their requirements are met. </p>
+
+<ul>
+<li>Feature constants for landscape or portrait requirements
+
+<p>Android 3.2 introduces new feature constants that let applications specify whether they require display in landscape orientation, portrait orientation, or both. Declaring these constants indicates that the application must not be installed on a device that doesn't offer the associated orientation. Conversely, if one or both of the constants are not declared, it indicates that the application does not have a preference for the undeclared orientations and may be installed on a device that doesn't offer them. </p>
+
+<ul>
+  <li>{@link android.content.pm.PackageManager#FEATURE_SCREEN_LANDSCAPE
+android.hardware.screen.landscape} &mdash; The application requires display in
+landscape orientation.</li>
+  <li>{@link android.content.pm.PackageManager#FEATURE_SCREEN_PORTRAIT
+android.hardware.screen.landscape} &mdash; The application requires display in
+portrait orientation.</li>
+</ul>
+
+<p>A typical application that functions properly in both landscape and portrait orientations would not normally need to declare an orientation requirement. Rather, an application designed primarily for one orientation, such as an app designed for a television, could declare one of the constants to ensure that it isn't available to devices that don't provide that orientation.</p>
+
+<p>If the application is targeting API level 12 or lower, the platform assumes that if app has not specified whether it requires portrait or landscape, both orientations are required.</p>
+</li>
+<li>Other feature constants
+
+<ul>
+  <li>{@link android.content.pm.PackageManager#FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT
+android.hardware.faketouch.multitouch.distinct} &mdash; The application requires support for emulated mulitouch input with distinct tracking of two or more points.</li>
+
+  <li>{@link android.content.pm.PackageManager#FEATURE_FAKETOUCH_MULTITOUCH_JAZZHAND
+android.hardware.faketouch.multitouch.jazzhand} &mdash; The application requires support for emulated mulitouch input with distinct tracking of five or more points.</li>
+</ul>
+
+</li>
+</ul>
+
+
+<h3 id="api-diff">API Differences Report</h3>
+
+<p>For a detailed view of all API changes in Android {@sdkPlatformVersion} (API
+Level
+{@sdkPlatformApiLevel}), see the <a
+href="{@docRoot}sdk/api_diff/{@sdkPlatformApiLevel}/changes.html">API
+Differences Report</a>.</p>
+
+
+
+
+
+<h2 id="api-level">API Level</h2>
+
+<p>The Android {@sdkPlatformVersion} platform delivers an updated version of
+the framework API. The Android {@sdkPlatformVersion} API
+is assigned an integer identifier &mdash;
+<strong>{@sdkPlatformApiLevel}</strong> &mdash; that is
+stored in the system itself. This identifier, called the "API Level", allows the
+system to correctly determine whether an application is compatible with
+the system, prior to installing the application. </p>
+
+<p>To use APIs introduced in Android {@sdkPlatformVersion} in your application,
+you need compile the application against the Android library that is provided in
+the Android {@sdkPlatformVersion} SDK platform. Depending on your needs, you
+might
+also need to add an <code>android:minSdkVersion="{@sdkPlatformApiLevel}"</code>
+attribute to the <code>&lt;uses-sdk&gt;</code> element in the application's
+manifest.</p>
+
+<p>For more information about how to use API Level, see the <a
+href="{@docRoot}guide/appendix/api-levels.html">API Levels</a> document. </p>
+
+
+<h2 id="apps">Built-in Applications</h2>
+
+<p>The system image included in the downloadable platform provides these
+built-in applications:</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>API Demos</li>
+<li>Browser</li>
+<li>Calculator</li>
+<li>Camera</li>
+<li>Clock</li>
+<li>Contacts</li>
+<li>Custom Locale</li>
+<li>Dev Tools</li>
+<li>Downloads</li>
+<li>Email</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<ul>
+<li>Gallery</li>
+<li>Gestures Builder</li>
+<li>Messaging</li>
+<li>Music</li>
+<li>Search</li>
+<li>Settings</li>
+<li>Spare Parts</li>
+<li>Speech Recorder</li>
+<li>Widget Preview</li>
+</ul>
+</td>
+</tr>
+</table>
+
+
+<h2 id="locs" style="margin-top:.75em;">Locales</h2>
+
+<p>The system image included in the downloadable SDK platform provides a variety
+of
+built-in locales. In some cases, region-specific strings are available for the
+locales. In other cases, a default version of the language is used. The
+languages that are available in the Android 3.0 system
+image are listed below (with <em>language</em>_<em>country/region</em> locale
+descriptor).</p>
+
+<table style="border:0;padding-bottom:0;margin-bottom:0;">
+<tr>
+<td style="border:0;padding-bottom:0;margin-bottom:0;">
+<ul>
+<li>Arabic, Egypt (ar_EG)</li>
+<li>Arabic, Israel (ar_IL)</li>
+<li>Bulgarian, Bulgaria (bg_BG)</li>
+<li>Catalan, Spain (ca_ES)</li>
+<li>Czech, Czech Republic (cs_CZ)</li>
+<li>Danish, Denmark(da_DK)</li>
+<li>German, Austria (de_AT)</li>
+<li>German, Switzerland (de_CH)</li>
+<li>German, Germany (de_DE)</li>
+<li>German, Liechtenstein (de_LI)</li>
+<li>Greek, Greece (el_GR)</li>
+<li>English, Australia (en_AU)</li>
+<li>English, Canada (en_CA)</li>
+<li>English, Britain (en_GB)</li>
+<li>English, Ireland (en_IE)</li>
+<li>English, India (en_IN)</li>
+<li>English, New Zealand (en_NZ)</li>
+<li>English, Singapore(en_SG)</li>
+<li>English, US (en_US)</li>
+<li>English, Zimbabwe (en_ZA)</li>
+<li>Spanish (es_ES)</li>
+<li>Spanish, US (es_US)</li>
+<li>Finnish, Finland (fi_FI)</li>
+<li>French, Belgium (fr_BE)</li>
+<li>French, Canada (fr_CA)</li>
+<li>French, Switzerland (fr_CH)</li>
+<li>French, France (fr_FR)</li>
+<li>Hebrew, Israel (he_IL)</li>
+<li>Hindi, India (hi_IN)</li>
+</ul>
+</td>
+<td style="border:0;padding-bottom:0;margin-bottom:0;padding-left:5em;">
+<li>Croatian, Croatia (hr_HR)</li>
+<li>Hungarian, Hungary (hu_HU)</li>
+<li>Indonesian, Indonesia (id_ID)</li>
+<li>Italian, Switzerland (it_CH)</li>
+<li>Italian, Italy (it_IT)</li>
+<li>Japanese (ja_JP)</li>
+<li>Korean (ko_KR)</li>
+<li>Lithuanian, Lithuania (lt_LT)</li>
+<li>Latvian, Latvia (lv_LV)</li>
+<li>Norwegian bokmål, Norway (nb_NO)</li>
+<li>Dutch, Belgium (nl_BE)</li>
+<li>Dutch, Netherlands (nl_NL)</li>
+<li>Polish (pl_PL)</li>
+<li>Portuguese, Brazil (pt_BR)</li>
+<li>Portuguese, Portugal (pt_PT)</li>
+<li>Romanian, Romania (ro_RO)</li>
+<li>Russian (ru_RU)</li></li>
+<li>Slovak, Slovakia (sk_SK)</li>
+<li>Slovenian, Slovenia (sl_SI)</li>
+<li>Serbian (sr_RS)</li>
+<li>Swedish, Sweden (sv_SE)</li>
+<li>Thai, Thailand (th_TH)</li>
+<li>Tagalog, Philippines (tl_PH)</li>
+<li>Turkish, Turkey (tr_TR)</li>
+<li>Ukrainian, Ukraine (uk_UA)</li>
+<li>Vietnamese, Vietnam (vi_VN)</li>
+<li>Chinese, PRC (zh_CN)</li>
+<li>Chinese, Taiwan (zh_TW)</li>
+</td>
+</tr>
+</table>
+
+<p class="note"><strong>Note:</strong> The Android platform may support more
+locales than are included in the SDK system image. All of the supported locales
+are available in the <a href="http://source.android.com/">Android Open Source
+Project</a>.</p>
+
+<h2 id="skins">Emulator Skins</h2>
+
+<p>The downloadable platform includes the following emulator skin:</p>
+
+<ul>
+  <li>
+    WXGA (1280x800, medium density, xlarge screen)
+  </li>
+</ul>
+
+<p>For more information about how to develop an application that displays
+and functions properly on all Android-powered devices, see <a
+href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple
+Screens</a>.</p>
