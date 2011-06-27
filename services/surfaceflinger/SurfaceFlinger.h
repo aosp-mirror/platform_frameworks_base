@@ -20,21 +20,20 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include <utils/SortedVector.h>
-#include <utils/KeyedVector.h>
-#include <utils/threads.h>
 #include <utils/Atomic.h>
 #include <utils/Errors.h>
+#include <utils/KeyedVector.h>
 #include <utils/RefBase.h>
+#include <utils/SortedVector.h>
+#include <utils/threads.h>
 
-#include <binder/IMemory.h>
-#include <binder/Permission.h>
 #include <binder/BinderService.h>
+#include <binder/IMemory.h>
 
 #include <ui/PixelFormat.h>
+#include <surfaceflinger/IGraphicBufferAlloc.h>
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/ISurfaceComposerClient.h>
-#include <surfaceflinger/IGraphicBufferAlloc.h>
 
 #include "Barrier.h"
 #include "Layer.h"
@@ -353,11 +352,7 @@ private:
                 surface_flinger_cblk_t*     mServerCblk;
                 GLuint                      mWormholeTexName;
                 nsecs_t                     mBootTime;
-                Permission                  mHardwareTest;
-                Permission                  mAccessSurfaceFlinger;
-                Permission                  mReadFramebuffer;
-                Permission                  mDump;
-                
+
                 // Can only accessed from the main thread, these members
                 // don't need synchronization
                 State                       mDrawingState;

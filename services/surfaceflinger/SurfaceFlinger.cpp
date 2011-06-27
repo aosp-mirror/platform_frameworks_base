@@ -32,6 +32,7 @@
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/MemoryHeapBase.h>
+#include <binder/PermissionCache.h>
 
 #include <utils/String8.h>
 #include <utils/String16.h>
@@ -67,6 +68,13 @@
 namespace android {
 // ---------------------------------------------------------------------------
 
+const String16 sHardwareTest("android.permission.HARDWARE_TEST");
+const String16 sAccessSurfaceFlinger("android.permission.ACCESS_SURFACE_FLINGER");
+const String16 sReadFramebuffer("android.permission.READ_FRAME_BUFFER");
+const String16 sDump("android.permission.DUMP");
+
+// ---------------------------------------------------------------------------
+
 SurfaceFlinger::SurfaceFlinger()
     :   BnSurfaceComposer(), Thread(false),
         mTransactionFlags(0),
@@ -74,10 +82,6 @@ SurfaceFlinger::SurfaceFlinger()
         mResizeTransationPending(false),
         mLayersRemoved(false),
         mBootTime(systemTime()),
-        mHardwareTest("android.permission.HARDWARE_TEST"),
-        mAccessSurfaceFlinger("android.permission.ACCESS_SURFACE_FLINGER"),
-        mReadFramebuffer("android.permission.READ_FRAME_BUFFER"),
-        mDump("android.permission.DUMP"),
         mVisibleRegionsDirty(false),
         mHwWorkListDirty(false),
         mDeferReleaseConsole(false),
@@ -1464,7 +1468,8 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
     const size_t SIZE = 4096;
     char buffer[SIZE];
     String8 result;
-    if (!mDump.checkCalling()) {
+
+    if (!PermissionCache::checkCallingPermission(sDump)) {
         snprintf(buffer, SIZE, "Permission Denial: "
                 "can't dump SurfaceFlinger from pid=%d, uid=%d\n",
                 IPCThreadState::self()->getCallingPid(),
@@ -1596,7 +1601,8 @@ status_t SurfaceFlinger::onTransact(
             IPCThreadState* ipc = IPCThreadState::self();
             const int pid = ipc->getCallingPid();
             const int uid = ipc->getCallingUid();
-            if ((uid != AID_GRAPHICS) && !mAccessSurfaceFlinger.check(pid, uid)) {
+            if ((uid != AID_GRAPHICS) &&
+                    !PermissionCache::checkPermission(sAccessSurfaceFlinger, pid, uid)) {
                 LOGE("Permission Denial: "
                         "can't access SurfaceFlinger pid=%d, uid=%d", pid, uid);
                 return PERMISSION_DENIED;
@@ -1609,7 +1615,8 @@ status_t SurfaceFlinger::onTransact(
             IPCThreadState* ipc = IPCThreadState::self();
             const int pid = ipc->getCallingPid();
             const int uid = ipc->getCallingUid();
-            if ((uid != AID_GRAPHICS) && !mReadFramebuffer.check(pid, uid)) {
+            if ((uid != AID_GRAPHICS) &&
+                    !PermissionCache::checkPermission(sReadFramebuffer, pid, uid)) {
                 LOGE("Permission Denial: "
                         "can't read framebuffer pid=%d, uid=%d", pid, uid);
                 return PERMISSION_DENIED;
@@ -1621,7 +1628,7 @@ status_t SurfaceFlinger::onTransact(
     status_t err = BnSurfaceComposer::onTransact(code, data, reply, flags);
     if (err == UNKNOWN_TRANSACTION || err == PERMISSION_DENIED) {
         CHECK_INTERFACE(ISurfaceComposer, data, reply);
-        if (UNLIKELY(!mHardwareTest.checkCalling())) {
+        if (UNLIKELY(!PermissionCache::checkCallingPermission(sHardwareTest))) {
             IPCThreadState* ipc = IPCThreadState::self();
             const int pid = ipc->getCallingPid();
             const int uid = ipc->getCallingUid();
@@ -2404,8 +2411,7 @@ status_t Client::onTransact(
      const int self_pid = getpid();
      if (UNLIKELY(pid != self_pid && uid != AID_GRAPHICS && uid != 0)) {
          // we're called from a different process, do the real check
-         if (!checkCallingPermission(
-                 String16("android.permission.ACCESS_SURFACE_FLINGER")))
+         if (!PermissionCache::checkCallingPermission(sAccessSurfaceFlinger))
          {
              LOGE("Permission Denial: "
                      "can't openGlobalTransaction pid=%d, uid=%d", pid, uid);

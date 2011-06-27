@@ -27,7 +27,6 @@
 #include <utils/RefBase.h>
 
 #include <binder/BinderService.h>
-#include <binder/Permission.h>
 
 #include <gui/Sensor.h>
 #include <gui/SensorChannel.h>
@@ -117,7 +116,6 @@ class SensorService :
     Vector<Sensor> mUserSensorList;
     DefaultKeyedVector<int, SensorInterface*> mSensorMap;
     Vector<SensorInterface *> mVirtualSensorList;
-    Permission mDump;
     status_t mInitCheck;
 
     // protected by mLock

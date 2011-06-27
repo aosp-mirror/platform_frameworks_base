@@ -31,6 +31,7 @@
 
 #include <binder/BinderService.h>
 #include <binder/IServiceManager.h>
+#include <binder/PermissionCache.h>
 
 #include <gui/ISensorServer.h>
 #include <gui/ISensorEventConnection.h>
@@ -58,8 +59,7 @@ namespace android {
  */
 
 SensorService::SensorService()
-    : mDump("android.permission.DUMP"),
-      mInitCheck(NO_INIT)
+    : mInitCheck(NO_INIT)
 {
 }
 
@@ -166,12 +166,14 @@ SensorService::~SensorService()
         delete mSensorMap.valueAt(i);
 }
 
+static const String16 sDump("android.permission.DUMP");
+
 status_t SensorService::dump(int fd, const Vector<String16>& args)
 {
     const size_t SIZE = 1024;
     char buffer[SIZE];
     String8 result;
-    if (!mDump.checkCalling()) {
+    if (!PermissionCache::checkCallingPermission(sDump)) {
         snprintf(buffer, SIZE, "Permission Denial: "
                 "can't dump SurfaceFlinger from pid=%d, uid=%d\n",
                 IPCThreadState::self()->getCallingPid(),
