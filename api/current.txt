@@ -7419,6 +7419,7 @@ package android.graphics {
     method public static final android.graphics.Bitmap.CompressFormat[] values();
     enum_constant public static final android.graphics.Bitmap.CompressFormat JPEG;
     enum_constant public static final android.graphics.Bitmap.CompressFormat PNG;
+    enum_constant public static final android.graphics.Bitmap.CompressFormat WEBP;
   }
 
   public static final class Bitmap.Config extends java.lang.Enum {
