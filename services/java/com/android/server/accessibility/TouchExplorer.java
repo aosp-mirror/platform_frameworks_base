@@ -26,7 +26,6 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.WindowManagerPolicy;
@@ -72,15 +71,6 @@ public class TouchExplorer implements Explorer {
     private static final int STATE_TOUCH_EXPLORING = 0x00000001;
     private static final int STATE_DRAGGING = 0x00000002;
     private static final int STATE_DELEGATING = 0x00000004;
-
-    // Human readable symbolic names for the states of the explorer.
-    private static final SparseArray<String> sStateSymbolicNames = new SparseArray<String>();
-    static {
-        SparseArray<String> symbolicNames = sStateSymbolicNames;
-        symbolicNames.append(STATE_TOUCH_EXPLORING, "STATE_TOUCH_EXPLORING");
-        symbolicNames.append(STATE_DRAGGING, "STATE_DRAGING");
-        symbolicNames.append(STATE_DELEGATING, "STATE_DELEGATING");
-    }
 
     // Invalid pointer ID.
     private static final int INVALID_POINTER_ID = -1;
@@ -189,7 +179,7 @@ public class TouchExplorer implements Explorer {
         if (DEBUG) {
             Slog.d(LOG_TAG_RECEIVED, "Received event: " + event + ", policyFlags=0x"
                     + Integer.toHexString(policyFlags));
-            Slog.d(LOG_TAG_STATE, sStateSymbolicNames.get(mCurrentState));
+            Slog.d(LOG_TAG_STATE, getStateSymbolicName(mCurrentState));
         }
 
         // Keep track of the pointers's state.
@@ -708,8 +698,7 @@ public class TouchExplorer implements Explorer {
     private void sendActionDownAndUp(MotionEvent prototype, int policyFlags) {
         final PointerProperties[] pointerProperties = mTempPointerProperties;
         final PointerCoords[] pointerCoords = mTempPointerCoords;
-        final int pointerId = mPointerTracker.getLastReceivedUpPointerId();
-        final int pointerIndex = prototype.findPointerIndex(pointerId);
+        final int pointerIndex = prototype.getActionIndex();
 
         // Send down.
         prototype.getPointerProperties(pointerIndex, pointerProperties[0]);
@@ -881,6 +870,25 @@ public class TouchExplorer implements Explorer {
         mCurrentState = STATE_TOUCH_EXPLORING;
         mTouchExploreGestureInProgress = false;
         mDraggingPointerId = INVALID_POINTER_ID;
+    }
+
+    /**
+     * Gets the symbolic name of a state.
+     *
+     * @param state A state.
+     * @return The state symbolic name.
+     */
+    private static String getStateSymbolicName(int state) {
+        switch (state) {
+            case STATE_TOUCH_EXPLORING:
+                return "STATE_TOUCH_EXPLORING";
+            case STATE_DRAGGING:
+                return "STATE_DRAGGING";
+            case STATE_DELEGATING:
+                return "STATE_DELEGATING";
+            default:
+                throw new IllegalArgumentException("Unknown state: " + state);
+        }
     }
 
     /**
