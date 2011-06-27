@@ -394,7 +394,7 @@ public class AccessibilityRecord {
     /**
      * Sets the scroll position of the source along the Y axis.
      *
-     * @param scrollX The scroll along the Y axis.
+     * @param scrollY The scroll along the Y axis.
      */
     public void setScrollY(int scrollY) {
         enforceNotSealed();

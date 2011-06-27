@@ -171,9 +171,9 @@ import java.util.List;
  *   <li>{@link #getEventTime()}  - The event time.</li>
  *   <li>{@link #getText()} - The text of the source.</li>
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
- *   <li>{@link #getScrollX())} - The horizontal offset of the source
+ *   <li>{@link #getScrollX()} - The horizontal offset of the source
  *                                (without descendants of AdapterView)).</li>
- *   <li>{@link #getScrollY())} - The vertical offset of the source
+ *   <li>{@link #getScrollY()} - The vertical offset of the source
  *                                (without descendants of AdapterView)).</li>
  *   <li>{@link #getFromIndex()} - The index of the first visible item of the source
  *                                 (for descendants of AdapterView).</li>
