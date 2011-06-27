@@ -172,6 +172,16 @@ status_t writeAPK(Bundle* bundle, const sp<AaptAssets>& assets,
         }
     }
 
+    if (bundle->getGenDependencies()) {
+        // Add this file to the dependency file
+        String8 dependencyFile = outputFile.getBasePath();
+        dependencyFile.append(".d");
+
+        FILE* fp = fopen(dependencyFile.string(), "a");
+        fprintf(fp, "%s \\\n", outputFile.string());
+        fclose(fp);
+    }
+
     assert(result == NO_ERROR);
 
 bail:

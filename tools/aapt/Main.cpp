@@ -148,7 +148,7 @@ void usage(void)
         "   --extra-packages\n"
         "       generate R.java for libraries. Separate libraries with ':'.\n"
         "   --generate-dependencies\n"
-        "       generate a dependency file for R.java.\n"
+        "       generate dependency files in the same directories for R.java and resource package\n"
         "   --auto-add-overlay\n"
         "       Automatically add resources that are only in overlays.\n"
         "   --rename-manifest-package\n"
