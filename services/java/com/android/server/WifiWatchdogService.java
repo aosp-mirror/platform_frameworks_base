@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
+import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.ScanResult;
@@ -162,7 +163,8 @@ public class WifiWatchdogService {
         mContext = context;
         mContentResolver = context.getContentResolver();
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        mDnsPinger = new DnsPinger("WifiWatchdogServer.DnsPinger", context);
+        mDnsPinger = new DnsPinger("WifiWatchdogServer.DnsPinger", context,
+                ConnectivityManager.TYPE_WIFI);
 
         HandlerThread handlerThread = new HandlerThread("WifiWatchdogServiceThread");
         handlerThread.start();
@@ -523,7 +525,7 @@ public class WifiWatchdogService {
 
         if (DBG) {
             mDNSCheckLogStr = String.format("Dns Check %d.  Pinging %s on ssid [%s]: ",
-                    mStatus.numFullDNSchecks, mDnsPinger.getDns().getHostAddress(),
+                    mStatus.numFullDNSchecks, mDnsPinger.getDns(),
                     mStatus.ssid);
         }
     }
@@ -717,11 +719,13 @@ public class WifiWatchdogService {
         pw.print("State " + mStatus.state);
         pw.println(", network [" + mStatus.ssid + ", " + mStatus.bssid + "]");
         pw.print("checkCount " + mStatus.numFullDNSchecks);
-        pw.print(", bssids: " + mStatus.allBssids.size());
+        pw.println(", bssids: " + mStatus.allBssids);
         pw.print(", hasCheckMessages? " +
                 mHandler.hasMessages(WifiWatchdogHandler.CHECK_SEQUENCE_STEP));
         pw.println(" hasSingleCheckMessages? " +
                 mHandler.hasMessages(WifiWatchdogHandler.SINGLE_DNS_CHECK));
+        pw.println("DNS check log str: " + mDNSCheckLogStr);
+        pw.println("lastSingleCheck: " + mStatus.lastSingleCheckTime);
     }
 
     /**

@@ -38,7 +38,7 @@ import java.util.Random;
  * API may not differentiate between a time out and a failure lookup (which we
  * really care about).
  * <p>
- * TODO : More general API.  Wifi is currently hard coded
+ * TODO : More general API.  Socket does not bind to specified connection type
  * TODO : Choice of DNS query location - current looks up www.android.com
  *
  * @hide
@@ -58,27 +58,26 @@ public final class DnsPinger {
     private ConnectivityManager mConnectivityManager = null;
     private ContentResolver mContentResolver;
     private Context mContext;
+    private int mConnectionType;
 
     private String TAG;
 
-    public DnsPinger(String TAG, Context context) {
+
+    /**
+     * @param connectionType The connection type from @link {@link ConnectivityManager}
+     */
+    public DnsPinger(String TAG, Context context, int connectionType) {
         mContext = context;
         mContentResolver = context.getContentResolver();
+        mConnectionType = connectionType;
         this.TAG = TAG;
     }
 
     /**
-     * Gets the first DNS of the current Wifi AP.
-     * @return The first DNS of the current AP.
+     * @return The first DNS in the link properties of the specified connection type
      */
     public InetAddress getDns() {
-        if (mConnectivityManager == null) {
-            mConnectivityManager = (ConnectivityManager) mContext.getSystemService(
-                    Context.CONNECTIVITY_SERVICE);
-        }
-
-        LinkProperties linkProperties = mConnectivityManager.getLinkProperties(
-                ConnectivityManager.TYPE_WIFI);
+        LinkProperties linkProperties = getCurLinkProperties();
         if (linkProperties == null)
             return null;
 
@@ -87,6 +86,14 @@ public final class DnsPinger {
             return null;
 
         return dnses.iterator().next();
+    }
+
+    private LinkProperties getCurLinkProperties() {
+        if (mConnectivityManager == null) {
+            mConnectivityManager = (ConnectivityManager) mContext.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+        }
+        return mConnectivityManager.getLinkProperties(mConnectionType);
     }
 
     /**
