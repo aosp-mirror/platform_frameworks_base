@@ -69,8 +69,15 @@ public class VoicemailContract {
      * that caused the change in content provider.
      * <p>Receivers of the broadcast can use this field to determine if this is
      * a self change.
+     * @deprecated {@link #EXTRA_SELF_CHANGE} is now populated instead.
      */
     public static final String EXTRA_CHANGED_BY = "com.android.voicemail.extra.CHANGED_BY";
+    /**
+     * Extra included in {@value Intent#ACTION_PROVIDER_CHANGED} and
+     * {@value #ACTION_NEW_VOICEMAIL} broadcast intents to indicate if the receiving
+     * package made this change.
+     */
+    public static final String EXTRA_SELF_CHANGE = "com.android.voicemail.extra.SELF_CHANGE";
 
     /** The mime type for a collection of voicemails. */
     public static final String DIR_TYPE =
