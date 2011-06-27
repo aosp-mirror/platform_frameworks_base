@@ -466,6 +466,8 @@ bool MPEG2TSWriter::SourceInfo::eosReceived() const {
 
 MPEG2TSWriter::MPEG2TSWriter(int fd)
     : mFile(fdopen(dup(fd), "wb")),
+      mWriteCookie(NULL),
+      mWriteFunc(NULL),
       mStarted(false),
       mNumSourcesDone(0),
       mNumTSPacketsWritten(0),
@@ -475,6 +477,21 @@ MPEG2TSWriter::MPEG2TSWriter(int fd)
 
 MPEG2TSWriter::MPEG2TSWriter(const char *filename)
     : mFile(fopen(filename, "wb")),
+      mWriteCookie(NULL),
+      mWriteFunc(NULL),
+      mStarted(false),
+      mNumSourcesDone(0),
+      mNumTSPacketsWritten(0),
+      mNumTSPacketsBeforeMeta(0) {
+    init();
+}
+
+MPEG2TSWriter::MPEG2TSWriter(
+        void *cookie,
+        ssize_t (*write)(void *cookie, const void *data, size_t size))
+    : mFile(NULL),
+      mWriteCookie(cookie),
+      mWriteFunc(write),
       mStarted(false),
       mNumSourcesDone(0),
       mNumTSPacketsWritten(0),
@@ -483,7 +500,7 @@ MPEG2TSWriter::MPEG2TSWriter(const char *filename)
 }
 
 void MPEG2TSWriter::init() {
-    CHECK(mFile != NULL);
+    CHECK(mFile != NULL || mWriteFunc != NULL);
 
     mLooper = new ALooper;
     mLooper->setName("MPEG2TSWriter");
@@ -502,8 +519,10 @@ MPEG2TSWriter::~MPEG2TSWriter() {
     mLooper->unregisterHandler(mReflector->id());
     mLooper->stop();
 
-    fclose(mFile);
-    mFile = NULL;
+    if (mFile != NULL) {
+        fclose(mFile);
+        mFile = NULL;
+    }
 }
 
 status_t MPEG2TSWriter::addSource(const sp<MediaSource> &source) {
@@ -718,7 +737,7 @@ void MPEG2TSWriter::writeProgramAssociationTable() {
     static const unsigned kContinuityCounter = 5;
     buffer->data()[3] |= kContinuityCounter;
 
-    CHECK_EQ(fwrite(buffer->data(), 1, buffer->size(), mFile), buffer->size());
+    CHECK_EQ(internalWrite(buffer->data(), buffer->size()), buffer->size());
 }
 
 void MPEG2TSWriter::writeProgramMap() {
@@ -794,7 +813,7 @@ void MPEG2TSWriter::writeProgramMap() {
     *ptr++ = 0x00;
     *ptr++ = 0x00;
 
-    CHECK_EQ(fwrite(buffer->data(), 1, buffer->size(), mFile), buffer->size());
+    CHECK_EQ(internalWrite(buffer->data(), buffer->size()), buffer->size());
 }
 
 void MPEG2TSWriter::writeAccessUnit(
@@ -890,7 +909,7 @@ void MPEG2TSWriter::writeAccessUnit(
 
     memcpy(ptr, accessUnit->data(), copy);
 
-    CHECK_EQ(fwrite(buffer->data(), 1, buffer->size(), mFile), buffer->size());
+    CHECK_EQ(internalWrite(buffer->data(), buffer->size()), buffer->size());
 
     size_t offset = copy;
     while (offset < accessUnit->size()) {
@@ -923,7 +942,7 @@ void MPEG2TSWriter::writeAccessUnit(
         }
 
         memcpy(ptr, accessUnit->data() + offset, copy);
-        CHECK_EQ(fwrite(buffer->data(), 1, buffer->size(), mFile),
+        CHECK_EQ(internalWrite(buffer->data(), buffer->size()),
                  buffer->size());
 
         offset += copy;
@@ -937,6 +956,14 @@ void MPEG2TSWriter::writeTS() {
 
         mNumTSPacketsBeforeMeta = mNumTSPacketsWritten + 2500;
     }
+}
+
+ssize_t MPEG2TSWriter::internalWrite(const void *data, size_t size) {
+    if (mFile != NULL) {
+        return fwrite(data, 1, size, mFile);
+    }
+
+    return (*mWriteFunc)(mWriteCookie, data, size);
 }
 
 }  // namespace android
