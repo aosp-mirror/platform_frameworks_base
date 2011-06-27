@@ -40,6 +40,12 @@ public class PackageStats implements Parcelable {
     public long cacheSize;
 
     /**
+     * Size of the secure container on external storage holding the
+     * application's code.
+     */
+    public long externalCodeSize;
+
+    /**
      * Size of the external data used by the application (e.g.,
      * <sdcard>/Android/data/<app>)
      */
@@ -80,6 +86,8 @@ public class PackageStats implements Parcelable {
         sb.append(dataSize);
         sb.append(",cacheSize=");
         sb.append(cacheSize);
+        sb.append(",externalCodeSize=");
+        sb.append(externalCodeSize);
         sb.append(",externalDataSize=");
         sb.append(externalDataSize);
         sb.append(",externalCacheSize=");
@@ -100,6 +108,7 @@ public class PackageStats implements Parcelable {
         codeSize = source.readLong();
         dataSize = source.readLong();
         cacheSize = source.readLong();
+        externalCodeSize = source.readLong();
         externalDataSize = source.readLong();
         externalCacheSize = source.readLong();
         externalMediaSize = source.readLong();
@@ -111,6 +120,7 @@ public class PackageStats implements Parcelable {
         codeSize = pStats.codeSize;
         dataSize = pStats.dataSize;
         cacheSize = pStats.cacheSize;
+        externalCodeSize = pStats.externalCodeSize;
         externalDataSize = pStats.externalDataSize;
         externalCacheSize = pStats.externalCacheSize;
         externalMediaSize = pStats.externalMediaSize;
@@ -126,6 +136,7 @@ public class PackageStats implements Parcelable {
         dest.writeLong(codeSize);
         dest.writeLong(dataSize);
         dest.writeLong(cacheSize);
+        dest.writeLong(externalCodeSize);
         dest.writeLong(externalDataSize);
         dest.writeLong(externalCacheSize);
         dest.writeLong(externalMediaSize);

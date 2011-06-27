@@ -5896,6 +5896,7 @@ package android.content.pm {
     field public long codeSize;
     field public long dataSize;
     field public long externalCacheSize;
+    field public long externalCodeSize;
     field public long externalDataSize;
     field public long externalMediaSize;
     field public long externalObbSize;

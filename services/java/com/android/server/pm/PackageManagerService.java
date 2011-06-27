@@ -75,6 +75,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
+import android.os.FileUtils.FileStatus;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -4887,8 +4888,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         private final IPackageStatsObserver mObserver;
 
-        public MeasureParams(PackageStats stats, boolean success,
-                IPackageStatsObserver observer) {
+        public MeasureParams(PackageStats stats, boolean success, IPackageStatsObserver observer) {
             mObserver = observer;
             mStats = stats;
             mSuccess = success;
@@ -5478,6 +5478,17 @@ public class PackageManagerService extends IPackageManager.Stub {
         private boolean isFwdLocked() {
             return (flags & PackageManager.INSTALL_FORWARD_LOCK) != 0;
         }
+    }
+
+    /**
+     * Extract the MountService "container ID" from the full code path of an
+     * .apk.
+     */
+    static String cidFromCodePath(String fullCodePath) {
+        int eidx = fullCodePath.lastIndexOf("/");
+        String subStr1 = fullCodePath.substring(0, eidx);
+        int sidx = subStr1.lastIndexOf("/");
+        return subStr1.substring(sidx+1, eidx);
     }
 
     class SdInstallArgs extends InstallArgs {
@@ -6831,6 +6842,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         PackageParser.Package p;
         boolean dataOnly = false;
+        String asecPath = null;
         synchronized (mPackages) {
             p = mPackages.get(packageName);
             if(p == null) {
@@ -6842,6 +6854,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
                 p = ps.pkg;
             }
+            if (p != null && isExternal(p)) {
+                String secureContainerId = cidFromCodePath(p.applicationInfo.sourceDir);
+                if (secureContainerId != null) {
+                    asecPath = PackageHelper.getSdFilesystem(secureContainerId);
+                }
+            }
         }
         String publicSrcDir = null;
         if(!dataOnly) {
@@ -6850,10 +6868,13 @@ public class PackageManagerService extends IPackageManager.Stub {
                 Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
                 return false;
             }
-            publicSrcDir = isForwardLocked(p) ? applicationInfo.publicSourceDir : null;
+            if (isForwardLocked(p)) {
+                publicSrcDir = applicationInfo.publicSourceDir;
+            }
         }
         if (mInstaller != null) {
-            int res = mInstaller.getSizeInfo(packageName, p.mPath, publicSrcDir, pStats);
+            int res = mInstaller.getSizeInfo(packageName, p.mPath, publicSrcDir,
+                    asecPath, pStats);
             if (res < 0) {
                 return false;
             } else {

@@ -1626,6 +1626,30 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         }
     }
 
+    public String getSecureContainerFilesystemPath(String id) {
+        validatePermission(android.Manifest.permission.ASEC_ACCESS);
+        waitForReady();
+        warnOnNotMounted();
+
+        try {
+            ArrayList<String> rsp = mConnector.doCommand(String.format("asec fspath %s", id));
+            String []tok = rsp.get(0).split(" ");
+            int code = Integer.parseInt(tok[0]);
+            if (code != VoldResponseCode.AsecPathResult) {
+                throw new IllegalStateException(String.format("Unexpected response code %d", code));
+            }
+            return tok[1];
+        } catch (NativeDaemonConnectorException e) {
+            int code = e.getCode();
+            if (code == VoldResponseCode.OpFailedStorageNotFound) {
+                Slog.i(TAG, String.format("Container '%s' not found", id));
+                return null;
+            } else {
+                throw new IllegalStateException(String.format("Unexpected response code %d", code));
+            }
+        }
+    }
+
     public void finishMediaUpdate() {
         mHandler.sendEmptyMessage(H_UNMOUNT_PM_DONE);
     }
