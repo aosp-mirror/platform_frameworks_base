@@ -18,7 +18,7 @@ package android.provider;
 
 /**
  * Columns for tables that are synced to a server.
- * @deprecated
+ * @deprecated Do not use.
  * @hide
  */
 public interface SyncConstValue
