@@ -83,6 +83,8 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final int PROPERTY_PASSWORD = 0x00000100;
 
+    private static final int PROPERTY_SCROLLABLE = 0x00000200;
+
     // Readable representations - lazily initialized.
     private static SparseArray<String> sActionSymbolicNames;
 
@@ -570,6 +572,27 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Gets if the node is scrollable.
+     *
+     * @return True if the node is scrollable, false otherwise.
+     */
+    public boolean isScrollable() {
+        return getBooleanProperty(PROPERTY_SCROLLABLE);
+    }
+
+    /**
+     * Sets if the node is scrollable.
+     *
+     * @param scrollable True if the node is scrollable, false otherwise.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setScrollable(boolean scrollable) {
+        enforceNotSealed();
+        setBooleanProperty(PROPERTY_SCROLLABLE, scrollable);
+    }
+
+    /**
      * Gets the package this node comes from.
      *
      * @return The package name.
@@ -1017,6 +1040,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; longClickable: ").append(isLongClickable());
         builder.append("; enabled: ").append(isEnabled());
         builder.append("; password: ").append(isPassword());
+        builder.append("; scrollable: " + isScrollable());
 
         builder.append("; [");
 

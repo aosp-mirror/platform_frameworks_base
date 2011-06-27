@@ -34,6 +34,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.SoundEffectConstants;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.Transformation;
 
 /**
@@ -344,7 +346,34 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
     int getChildHeight(View child) {
         return child.getMeasuredHeight();
     }
-    
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setScrollable(true);
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setScrollable(true);
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+            event.setFromIndex(mFirstPosition);
+            event.setToIndex(mFirstPosition +  getChildCount());
+            event.setItemCount(mItemCount);
+        }
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        // Do not append text content to scroll events they are fired frequently
+        // and the client has already received another event type with the text.
+        if (event.getEventType() != AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+            super.dispatchPopulateAccessibilityEvent(event);
+        }
+        return false;
+    }
+
     /**
      * Tracks a motion scroll. In reality, this is used to do just about any
      * movement to items (touch scroll, arrow-key scroll, set an item as selected).
@@ -382,7 +411,9 @@ public class Gallery extends AbsSpinner implements GestureDetector.OnGestureList
         mRecycler.clear();
         
         setSelectionToCenterChild();
-        
+
+        onScrollChanged(0, 0, 0, 0); // dummy values, View's implementation does not use these.
+
         invalidate();
     }
 

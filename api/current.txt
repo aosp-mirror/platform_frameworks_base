@@ -22847,8 +22847,10 @@ package android.view.accessibility {
     field public static final int TYPE_VIEW_HOVER_ENTER = 128; // 0x80
     field public static final int TYPE_VIEW_HOVER_EXIT = 256; // 0x100
     field public static final int TYPE_VIEW_LONG_CLICKED = 2; // 0x2
+    field public static final int TYPE_VIEW_SCROLLED = 4096; // 0x1000
     field public static final int TYPE_VIEW_SELECTED = 4; // 0x4
     field public static final int TYPE_VIEW_TEXT_CHANGED = 16; // 0x10
+    field public static final int TYPE_VIEW_TEXT_SELECTION_CHANGED = 8192; // 0x2000
     field public static final int TYPE_WINDOW_CONTENT_CHANGED = 2048; // 0x800
     field public static final int TYPE_WINDOW_STATE_CHANGED = 32; // 0x20
   }
@@ -22897,6 +22899,7 @@ package android.view.accessibility {
     method public boolean isFocused();
     method public boolean isLongClickable();
     method public boolean isPassword();
+    method public boolean isScrollable();
     method public boolean isSelected();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
     method public static android.view.accessibility.AccessibilityNodeInfo obtain();
@@ -22916,6 +22919,7 @@ package android.view.accessibility {
     method public void setPackageName(java.lang.CharSequence);
     method public void setParent(android.view.View);
     method public void setPassword(boolean);
+    method public void setScrollable(boolean);
     method public void setSelected(boolean);
     method public void setSource(android.view.View);
     method public void setText(java.lang.CharSequence);
@@ -22937,13 +22941,17 @@ package android.view.accessibility {
     method public int getItemCount();
     method public android.os.Parcelable getParcelableData();
     method public int getRemovedCount();
+    method public int getScrollX();
+    method public int getScrollY();
     method public android.view.accessibility.AccessibilityNodeInfo getSource();
     method public java.util.List<java.lang.CharSequence> getText();
+    method public int getToIndex();
     method public int getWindowId();
     method public boolean isChecked();
     method public boolean isEnabled();
     method public boolean isFullScreen();
     method public boolean isPassword();
+    method public boolean isScrollable();
     method public static android.view.accessibility.AccessibilityRecord obtain(android.view.accessibility.AccessibilityRecord);
     method public static android.view.accessibility.AccessibilityRecord obtain();
     method public void recycle();
@@ -22960,7 +22968,11 @@ package android.view.accessibility {
     method public void setParcelableData(android.os.Parcelable);
     method public void setPassword(boolean);
     method public void setRemovedCount(int);
+    method public void setScrollX(int);
+    method public void setScrollY(int);
+    method public void setScrollable(boolean);
     method public void setSource(android.view.View);
+    method public void setToIndex(int);
   }
 
 }

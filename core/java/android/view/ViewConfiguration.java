@@ -176,6 +176,14 @@ public class ViewConfiguration {
     private static final int TOUCH_EXPLORATION_TAP_SLOP = 80;
 
     /**
+     * Delay before dispatching a recurring accessibility event in milliseconds.
+     * This delay guarantees that a recurring event will be send at most once
+     * during the {@link #SEND_RECURRING_ACCESSIBILITY_EVENTS_INTERVAL_MILLIS} time
+     * frame.
+     */
+    private static final long SEND_RECURRING_ACCESSIBILITY_EVENTS_INTERVAL_MILLIS = 400;
+
+    /**
      * The maximum size of View's drawing cache, expressed in bytes. This size
      * should be at least equal to the size of the screen in ARGB888 format.
      */
@@ -495,6 +503,19 @@ public class ViewConfiguration {
      */
     public int getScaledTouchExplorationTapSlop() {
         return mScaledTouchExplorationTapSlop;
+    }
+
+    /**
+     * Interval for dispatching a recurring accessibility event in milliseconds.
+     * This interval guarantees that a recurring event will be send at most once
+     * during the {@link #getSendRecurringAccessibilityEventsInterval()} time frame.
+     *
+     * @return The delay in milliseconds.
+     *
+     * @hide
+     */
+    public static long getSendRecurringAccessibilityEventsInterval() {
+        return SEND_RECURRING_ACCESSIBILITY_EVENTS_INTERVAL_MILLIS;
     }
 
     /**

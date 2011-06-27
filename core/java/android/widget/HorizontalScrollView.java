@@ -35,6 +35,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.AnimationUtils;
 
 import java.util.List;
@@ -690,6 +692,28 @@ public class HorizontalScrollView extends FrameLayout {
             super.scrollTo(scrollX, scrollY);
         }
         awakenScrollBars();
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setScrollable(true);
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setScrollable(true);
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        // Do not append text content to scroll events they are fired frequently
+        // and the client has already received another event type with the text.
+        if (event.getEventType() != AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+            super.dispatchPopulateAccessibilityEvent(event);
+        }
+        return false;
     }
 
     private int getScrollRange() {

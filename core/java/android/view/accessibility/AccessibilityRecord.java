@@ -40,6 +40,7 @@ public class AccessibilityRecord {
     private static final int PROPERTY_ENABLED = 0x00000002;
     private static final int PROPERTY_PASSWORD = 0x00000004;
     private static final int PROPERTY_FULL_SCREEN = 0x00000080;
+    private static final int PROPERTY_SCROLLABLE = 0x00000100;
 
     // Housekeeping
     private static final int MAX_POOL_SIZE = 10;
@@ -54,6 +55,10 @@ public class AccessibilityRecord {
     int mCurrentItemIndex;
     int mItemCount;
     int mFromIndex;
+    int mToIndex;
+    int mScrollX;
+    int mScrollY;
+
     int mAddedCount;
     int mRemovedCount;
     int mSourceViewId = View.NO_ID;
@@ -71,7 +76,6 @@ public class AccessibilityRecord {
      * Hide constructor.
      */
     AccessibilityRecord() {
-
     }
 
     /**
@@ -85,6 +89,9 @@ public class AccessibilityRecord {
         mCurrentItemIndex = record.mCurrentItemIndex;
         mItemCount = record.mItemCount;
         mFromIndex = record.mFromIndex;
+        mToIndex = record.mToIndex;
+        mScrollX = record.mScrollX;
+        mScrollY = record.mScrollY;
         mAddedCount = record.mAddedCount;
         mRemovedCount = record.mRemovedCount;
         mClassName = record.mClassName;
@@ -246,6 +253,27 @@ public class AccessibilityRecord {
     }
 
     /**
+     * Gets if the source is scrollable.
+     *
+     * @return True if the source is scrollable, false otherwise.
+     */
+    public boolean isScrollable() {
+        return getBooleanProperty(PROPERTY_SCROLLABLE);
+    }
+
+    /**
+     * Sets if the source is scrollable.
+     *
+     * @param scrollable True if the source is scrollable, false otherwise.
+     *
+     * @throws IllegalStateException If called from an AccessibilityService.
+     */
+    public void setScrollable(boolean scrollable) {
+        enforceNotSealed();
+        setBooleanProperty(PROPERTY_SCROLLABLE, scrollable);
+    }
+
+    /**
      * Gets the number of items that can be visited.
      *
      * @return The number of items.
@@ -288,24 +316,89 @@ public class AccessibilityRecord {
     }
 
     /**
-     * Gets the index of the first character of the changed sequence.
+     * Gets the index of the first character of the changed sequence,
+     * or the beginning of a text selection or the index of the first
+     * visible item when scrolling.
      *
-     * @return The index of the first character.
+     * @return The index of the first character or selection
+     *        start or the first visible item.
      */
     public int getFromIndex() {
         return mFromIndex;
     }
 
     /**
-     * Sets the index of the first character of the changed sequence.
+     * Sets the index of the first character of the changed sequence
+     * or the beginning of a text selection or the index of the first
+     * visible item when scrolling.
      *
-     * @param fromIndex The index of the first character.
+     * @param fromIndex The index of the first character or selection
+     *        start or the first visible item.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
      */
     public void setFromIndex(int fromIndex) {
         enforceNotSealed();
         mFromIndex = fromIndex;
+    }
+
+    /**
+     * Gets the index of text selection end or the index of the last
+     * visible item when scrolling.
+     *
+     * @return The index of selection end or last item index.
+     */
+    public int getToIndex() {
+        return mToIndex;
+    }
+
+    /**
+     * Sets the index of text selection end or the index of the last
+     * visible item when scrolling.
+     *
+     * @param toIndex The index of selection end or last item index.
+     */
+    public void setToIndex(int toIndex) {
+        enforceNotSealed();
+        mToIndex = toIndex;
+    }
+
+    /**
+     * Gets the scroll position of the source along the X axis.
+     *
+     * @return The scroll along the X axis.
+     */
+    public int getScrollX() {
+        return mScrollX;
+    }
+
+    /**
+     * Sets the scroll position of the source along the X axis.
+     *
+     * @param scrollX The scroll along the X axis.
+     */
+    public void setScrollX(int scrollX) {
+        enforceNotSealed();
+        mScrollX = scrollX;
+    }
+
+    /**
+     * Gets the scroll position of the source along the Y axis.
+     *
+     * @return The scroll along the Y axis.
+     */
+    public int getScrollY() {
+        return mScrollY;
+    }
+
+    /**
+     * Sets the scroll position of the source along the Y axis.
+     *
+     * @param scrollX The scroll along the Y axis.
+     */
+    public void setScrollY(int scrollY) {
+        enforceNotSealed();
+        mScrollY = scrollY;
     }
 
     /**
@@ -576,6 +669,9 @@ public class AccessibilityRecord {
         mCurrentItemIndex = INVALID_POSITION;
         mItemCount = 0;
         mFromIndex = 0;
+        mToIndex = 0;
+        mScrollX = 0;
+        mScrollY = 0;
         mAddedCount = 0;
         mRemovedCount = 0;
         mClassName = null;
@@ -599,8 +695,12 @@ public class AccessibilityRecord {
         builder.append("; IsPassword: " + getBooleanProperty(PROPERTY_PASSWORD));
         builder.append("; IsChecked: " + getBooleanProperty(PROPERTY_CHECKED));
         builder.append("; IsFullScreen: " + getBooleanProperty(PROPERTY_FULL_SCREEN));
+        builder.append("; Scrollable: " + getBooleanProperty(PROPERTY_SCROLLABLE));
         builder.append("; BeforeText: " + mBeforeText);
         builder.append("; FromIndex: " + mFromIndex);
+        builder.append("; ToIndex: " + mToIndex);
+        builder.append("; ScrollX: " + mScrollX);
+        builder.append("; ScrollY: " + mScrollY);
         builder.append("; AddedCount: " + mAddedCount);
         builder.append("; RemovedCount: " + mRemovedCount);
         builder.append("; ParcelableData: " + mParcelableData);

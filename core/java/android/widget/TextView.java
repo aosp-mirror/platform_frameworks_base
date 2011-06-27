@@ -6834,9 +6834,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @param selEnd The new selection end location.
      */
     protected void onSelectionChanged(int selStart, int selEnd) {
-        // intentionally empty
+        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED);
     }
-    
+
     /**
      * Adds a TextWatcher to the list of those whose methods are called
      * whenever this TextView's text changes.
@@ -7922,6 +7922,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         final boolean isPassword = hasPasswordTransformationMethod();
         event.setPassword(isPassword);
+
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED) {
+            event.setFromIndex(Selection.getSelectionStart(mText));
+            event.setToIndex(Selection.getSelectionEnd(mText));
+            event.setItemCount(mText.length());
+        }
     }
 
     @Override
