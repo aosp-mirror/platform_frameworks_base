@@ -173,7 +173,11 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     }
 
     // INetworkManagementEventObserver.Stub
-    public void interfaceLinkStatusChanged(String name, boolean up) {
+    public void interfaceStatusChanged(String name, boolean up) {
+    }
+
+    // INetworkManagementEventObserver.Stub
+    public void interfaceLinkStateChanged(String name, boolean up) {
     }
 
     // INetworkManagementEventObserver.Stub

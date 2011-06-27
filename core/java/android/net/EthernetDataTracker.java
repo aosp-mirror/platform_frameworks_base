@@ -53,6 +53,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
     private AtomicInteger mDefaultGatewayAddr = new AtomicInteger(0);
     private AtomicBoolean mDefaultRouteSet = new AtomicBoolean(false);
 
+    private static boolean mLinkUp;
     private LinkProperties mLinkProperties;
     private LinkCapabilities mLinkCapabilities;
     private NetworkInfo mNetworkInfo;
@@ -74,8 +75,25 @@ public class EthernetDataTracker implements NetworkStateTracker {
             mTracker = tracker;
         }
 
-        public void interfaceLinkStatusChanged(String iface, boolean up) {
-            Log.d(TAG, "Interface " + iface + " link " + (up ? "up" : "down"));
+        public void interfaceStatusChanged(String iface, boolean up) {
+            Log.d(TAG, "Interface status changed: " + iface + (up ? "up" : "down"));
+        }
+
+        public void interfaceLinkStateChanged(String iface, boolean up) {
+            if (mIface.equals(iface) && mLinkUp != up) {
+                Log.d(TAG, "Interface " + iface + " link " + (up ? "up" : "down"));
+                mLinkUp = up;
+
+                // use DHCP
+                if (up) {
+                    mTracker.reconnect();
+                } else {
+                    NetworkUtils.stopDhcp(mIface);
+                    mTracker.mNetworkInfo.setIsAvailable(false);
+                    mTracker.mNetworkInfo.setDetailedState(DetailedState.DISCONNECTED,
+                                                           null, null);
+                }
+            }
         }
 
         public void interfaceAdded(String iface) {
@@ -91,6 +109,7 @@ public class EthernetDataTracker implements NetworkStateTracker {
         mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_ETHERNET, 0, NETWORKTYPE, "");
         mLinkProperties = new LinkProperties();
         mLinkCapabilities = new LinkCapabilities();
+        mLinkUp = false;
 
         mNetworkInfo.setIsAvailable(false);
         setTeardownRequested(false);
@@ -182,14 +201,11 @@ public class EthernetDataTracker implements NetworkStateTracker {
         // register for notifications from NetworkManagement Service
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
         INetworkManagementService service = INetworkManagementService.Stub.asInterface(b);
-        mInterfaceObserver = new InterfaceObserver(this);
-        try {
-            service.registerObserver(mInterfaceObserver);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Could not register InterfaceObserver " + e);
-        }
 
-        // connect to an ethernet interface that already exists
+        mInterfaceObserver = new InterfaceObserver(this);
+
+        // enable and try to connect to an ethernet interface that
+        // already exists
         sIfaceMatch = context.getResources().getString(
             com.android.internal.R.string.config_ethernet_iface_regex);
         try {
@@ -197,12 +213,20 @@ public class EthernetDataTracker implements NetworkStateTracker {
             for (String iface : ifaces) {
                 if (iface.matches(sIfaceMatch)) {
                     mIface = iface;
+                    InterfaceConfiguration config = service.getInterfaceConfig(iface);
+                    mLinkUp = config.isActive();
                     reconnect();
                     break;
                 }
             }
         } catch (RemoteException e) {
             Log.e(TAG, "Could not get list of interfaces " + e);
+        }
+
+        try {
+            service.registerObserver(mInterfaceObserver);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Could not register InterfaceObserver " + e);
         }
     }
 
