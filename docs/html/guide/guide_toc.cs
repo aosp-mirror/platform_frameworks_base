@@ -257,7 +257,7 @@
 	        <div><a href="<?cs var:toroot ?>guide/topics/renderscript/index.html">
 	            <span class="en">RenderScript</span>
 	          </a>
-	          <span class="new-child">new!</span></div>
+	          <span class="new">new!</span></div>
 	        <ul>
 	          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/graphics.html">
 	                <span class="en">3D Graphics</span>
