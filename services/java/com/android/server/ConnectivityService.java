@@ -1610,6 +1610,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
             }
         }
+
+        // TODO: Temporary notifying upstread change to Tethering.
+        //       @see bug/4455071
+        /** Notify TetheringService if interface name has been changed. */
+        if (TextUtils.equals(mNetTrackers[netType].getNetworkInfo().getReason(),
+                             Phone.REASON_LINK_PROPERTIES_CHANGED)) {
+            if (isTetheringSupported()) {
+                mTethering.handleTetherIfaceChange();
+            }
+        }
     }
 
     private void addPrivateDnsRoutes(NetworkStateTracker nt) {
@@ -2035,7 +2045,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     break;
                 case NetworkStateTracker.EVENT_CONFIGURATION_CHANGED:
                     info = (NetworkInfo) msg.obj;
-                    handleConnectivityChange(info.getType(), true);
+                    // TODO: Temporary allowing network configuration
+                    //       change not resetting sockets.
+                    //       @see bug/4455071
+                    handleConnectivityChange(info.getType(), false);
                     break;
                 case EVENT_CLEAR_NET_TRANSITION_WAKELOCK:
                     String causedBy = null;
