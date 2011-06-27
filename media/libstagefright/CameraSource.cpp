@@ -115,19 +115,20 @@ CameraSource *CameraSource::Create() {
     size.height = -1;
 
     sp<ICamera> camera;
-    return new CameraSource(camera, 0, size, -1, NULL, false);
+    return new CameraSource(camera, NULL, 0, size, -1, NULL, false);
 }
 
 // static
 CameraSource *CameraSource::CreateFromCamera(
     const sp<ICamera>& camera,
+    const sp<ICameraRecordingProxy>& proxy,
     int32_t cameraId,
     Size videoSize,
     int32_t frameRate,
     const sp<Surface>& surface,
     bool storeMetaDataInVideoBuffers) {
 
-    CameraSource *source = new CameraSource(camera, cameraId,
+    CameraSource *source = new CameraSource(camera, proxy, cameraId,
                     videoSize, frameRate, surface,
                     storeMetaDataInVideoBuffers);
     return source;
@@ -135,6 +136,7 @@ CameraSource *CameraSource::CreateFromCamera(
 
 CameraSource::CameraSource(
     const sp<ICamera>& camera,
+    const sp<ICameraRecordingProxy>& proxy,
     int32_t cameraId,
     Size videoSize,
     int32_t frameRate,
@@ -153,11 +155,10 @@ CameraSource::CameraSource(
       mNumGlitches(0),
       mGlitchDurationThresholdUs(200000),
       mCollectStats(false) {
-
     mVideoSize.width  = -1;
     mVideoSize.height = -1;
 
-    mInitCheck = init(camera, cameraId,
+    mInitCheck = init(camera, proxy, cameraId,
                     videoSize, frameRate,
                     storeMetaDataInVideoBuffers);
 }
@@ -167,24 +168,32 @@ status_t CameraSource::initCheck() const {
 }
 
 status_t CameraSource::isCameraAvailable(
-    const sp<ICamera>& camera, int32_t cameraId) {
+    const sp<ICamera>& camera, const sp<ICameraRecordingProxy>& proxy,
+    int32_t cameraId) {
 
     if (camera == 0) {
         mCamera = Camera::connect(cameraId);
+        if (mCamera == 0) return -EBUSY;
+        // If proxy is not passed in by applications, still use the proxy of
+        // our own Camera to simplify the code.
+        mCameraRecordingProxy = mCamera->getRecordingProxy();
         mCameraFlags &= ~FLAGS_HOT_CAMERA;
     } else {
+        // We get the proxy from Camera, not ICamera. We need to get the proxy
+        // to the remote Camera owned by the application. Here mCamera is a
+        // local Camera object created by us. We cannot use the proxy from
+        // mCamera here.
         mCamera = Camera::create(camera);
+        if (mCamera == 0) return -EBUSY;
+        mCameraRecordingProxy = proxy;
         mCameraFlags |= FLAGS_HOT_CAMERA;
     }
 
-    // Is camera available?
-    if (mCamera == 0) {
-        LOGE("Camera connection could not be established.");
-        return -EBUSY;
-    }
-    if (!(mCameraFlags & FLAGS_HOT_CAMERA)) {
-        mCamera->lock();
-    }
+    mCamera->lock();
+    mDeathNotifier = new DeathNotifier();
+    // isBinderAlive needs linkToDeath to work.
+    mCameraRecordingProxy->asBinder()->linkToDeath(mDeathNotifier);
+
     return OK;
 }
 
@@ -447,6 +456,7 @@ status_t CameraSource::checkFrameRate(
  */
 status_t CameraSource::init(
         const sp<ICamera>& camera,
+        const sp<ICameraRecordingProxy>& proxy,
         int32_t cameraId,
         Size videoSize,
         int32_t frameRate,
@@ -455,7 +465,8 @@ status_t CameraSource::init(
     status_t err = OK;
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
 
-    if ((err  = isCameraAvailable(camera, cameraId)) != OK) {
+    if ((err = isCameraAvailable(camera, proxy, cameraId)) != OK) {
+        LOGE("Camera connection could not be established.");
         return err;
     }
     CameraParameters params(mCamera->getParameters());
@@ -521,8 +532,14 @@ CameraSource::~CameraSource() {
 }
 
 void CameraSource::startCameraRecording() {
-    CHECK_EQ(OK, mCamera->startRecording());
-    CHECK(mCamera->recordingEnabled());
+    // Reset the identity to the current thread because media server owns the
+    // camera and recording is started by the applications. The applications
+    // will connect to the camera in ICameraRecordingProxy::startRecording.
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
+    mCamera->unlock();
+    mCamera.clear();
+    IPCThreadState::self()->restoreCallingIdentity(token);
+    CHECK_EQ(OK, mCameraRecordingProxy->startRecording(new ProxyListener(this)));
 }
 
 status_t CameraSource::start(MetaData *meta) {
@@ -544,20 +561,14 @@ status_t CameraSource::start(MetaData *meta) {
         mStartTimeUs = startTimeUs;
     }
 
-    // Call setListener first before calling startCameraRecording()
-    // to avoid recording frames being dropped.
-    int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    mCamera->setListener(new CameraSourceListener(this));
     startCameraRecording();
-    IPCThreadState::self()->restoreCallingIdentity(token);
 
     mStarted = true;
     return OK;
 }
 
 void CameraSource::stopCameraRecording() {
-    mCamera->setListener(NULL);
-    mCamera->stopRecording();
+    mCameraRecordingProxy->stopRecording();
 }
 
 void CameraSource::releaseCamera() {
@@ -566,9 +577,9 @@ void CameraSource::releaseCamera() {
         LOGV("Camera was cold when we started, stopping preview");
         mCamera->stopPreview();
     }
-    mCamera->unlock();
     mCamera.clear();
-    mCamera = 0;
+    mCameraRecordingProxy->asBinder()->unlinkToDeath(mDeathNotifier);
+    mCameraRecordingProxy.clear();
     mCameraFlags = 0;
 }
 
@@ -578,7 +589,6 @@ status_t CameraSource::stop() {
     mStarted = false;
     mFrameAvailableCondition.signal();
 
-    int64_t token = IPCThreadState::self()->clearCallingIdentity();
     releaseQueuedFrames();
     while (!mFramesBeingEncoded.empty()) {
         if (NO_ERROR !=
@@ -589,7 +599,6 @@ status_t CameraSource::stop() {
     }
     stopCameraRecording();
     releaseCamera();
-    IPCThreadState::self()->restoreCallingIdentity(token);
 
     if (mCollectStats) {
         LOGI("Frames received/encoded/dropped: %d/%d/%d in %lld us",
@@ -607,8 +616,8 @@ status_t CameraSource::stop() {
 }
 
 void CameraSource::releaseRecordingFrame(const sp<IMemory>& frame) {
-    if (mCamera != NULL) {
-        mCamera->releaseRecordingFrame(frame);
+    if (mCameraRecordingProxy != NULL) {
+        mCameraRecordingProxy->releaseRecordingFrame(frame);
     }
 }
 
@@ -627,9 +636,7 @@ sp<MetaData> CameraSource::getFormat() {
 }
 
 void CameraSource::releaseOneRecordingFrame(const sp<IMemory>& frame) {
-    int64_t token = IPCThreadState::self()->clearCallingIdentity();
     releaseRecordingFrame(frame);
-    IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
 void CameraSource::signalBufferReturned(MediaBuffer *buffer) {
@@ -669,7 +676,11 @@ status_t CameraSource::read(
         Mutex::Autolock autoLock(mLock);
         while (mStarted && mFramesReceived.empty()) {
             if (NO_ERROR !=
-                mFrameAvailableCondition.waitRelative(mLock, 3000000000LL)) {
+                mFrameAvailableCondition.waitRelative(mLock, 1000000000LL)) {
+                if (!mCameraRecordingProxy->asBinder()->isBinderAlive()) {
+                    LOGW("camera recording proxy is gone");
+                    return ERROR_END_OF_STREAM;
+                }
                 LOGW("Timed out waiting for incoming camera video frames: %lld us",
                     mLastFrameTimestampUs);
             }
@@ -743,6 +754,19 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
 bool CameraSource::isMetaDataStoredInVideoBuffers() const {
     LOGV("isMetaDataStoredInVideoBuffers");
     return mIsMetaDataStoredInVideoBuffers;
+}
+
+CameraSource::ProxyListener::ProxyListener(const sp<CameraSource>& source) {
+    mSource = source;
+}
+
+void CameraSource::ProxyListener::dataCallbackTimestamp(
+        nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr) {
+    mSource->dataCallbackTimestamp(timestamp / 1000, msgType, dataPtr);
+}
+
+void CameraSource::DeathNotifier::binderDied(const wp<IBinder>& who) {
+    LOGI("Camera recording proxy died");
 }
 
 }  // namespace android

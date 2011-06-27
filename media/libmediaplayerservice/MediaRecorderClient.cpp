@@ -57,7 +57,8 @@ static bool checkPermission(const char* permissionString) {
     return ok;
 }
 
-status_t MediaRecorderClient::setCamera(const sp<ICamera>& camera)
+status_t MediaRecorderClient::setCamera(const sp<ICamera>& camera,
+                                        const sp<ICameraRecordingProxy>& proxy)
 {
     LOGV("setCamera");
     Mutex::Autolock lock(mLock);
@@ -65,7 +66,7 @@ status_t MediaRecorderClient::setCamera(const sp<ICamera>& camera)
         LOGE("recorder is not initialized");
         return NO_INIT;
     }
-    return mRecorder->setCamera(camera);
+    return mRecorder->setCamera(camera, proxy);
 }
 
 status_t MediaRecorderClient::setPreviewSurface(const sp<Surface>& surface)

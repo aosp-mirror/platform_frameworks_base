@@ -288,7 +288,8 @@ public class Camera {
      * you can call {@link #reconnect()} to reclaim the camera.
      *
      * <p>This must be done before calling
-     * {@link android.media.MediaRecorder#setCamera(Camera)}.
+     * {@link android.media.MediaRecorder#setCamera(Camera)}. This cannot be
+     * called after recording starts.
      *
      * <p>If you are not recording video, you probably do not need this method.
      *
@@ -300,6 +301,11 @@ public class Camera {
      * Re-locks the camera to prevent other processes from accessing it.
      * Camera objects are locked by default unless {@link #unlock()} is
      * called.  Normally {@link #reconnect()} is used instead.
+     *
+     * <p>Since API level 13, camera is automatically locked for applications in
+     * {@link android.media.MediaRecorder#start()}. Applications can use the
+     * camera (ex: zoom) after recording starts. There is no need to call this
+     * after recording starts or stops.
      *
      * <p>If you are not recording video, you probably do not need this method.
      *
@@ -315,9 +321,10 @@ public class Camera {
      * which will re-acquire the lock and allow you to continue using the
      * camera.
      *
-     * <p>This must be done after {@link android.media.MediaRecorder} is
-     * done recording if {@link android.media.MediaRecorder#setCamera(Camera)}
-     * was used.
+     * <p>Since API level 13, camera is automatically locked for applications in
+     * {@link android.media.MediaRecorder#start()}. Applications can use the
+     * camera (ex: zoom) after recording starts. There is no need to call this
+     * after recording starts or stops.
      *
      * <p>If you are not recording video, you probably do not need this method.
      *
@@ -827,7 +834,9 @@ public class Camera {
      * <p>This method is only valid when preview is active (after
      * {@link #startPreview()}).  Preview will be stopped after the image is
      * taken; callers must call {@link #startPreview()} again if they want to
-     * re-start preview or take more pictures.
+     * re-start preview or take more pictures. This should not be called between
+     * {@link android.media.MediaRecorder#start()} and
+     * {@link android.media.MediaRecorder#stop()}.
      *
      * <p>After calling this method, you must not call {@link #startPreview()}
      * or take another picture until the JPEG callback has returned.

@@ -6,7 +6,9 @@ LOCAL_SRC_FILES:= \
 	CameraParameters.cpp \
 	ICamera.cpp \
 	ICameraClient.cpp \
-	ICameraService.cpp
+	ICameraService.cpp \
+	ICameraRecordingProxy.cpp \
+	ICameraRecordingProxyListener.cpp
 
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \

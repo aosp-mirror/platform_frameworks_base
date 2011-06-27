@@ -33,6 +33,7 @@ class CameraSourceTimeLapse : public CameraSource {
 public:
     static CameraSourceTimeLapse *CreateFromCamera(
         const sp<ICamera> &camera,
+        const sp<ICameraRecordingProxy> &proxy,
         int32_t cameraId,
         Size videoSize,
         int32_t videoFrameRate,
@@ -132,6 +133,7 @@ private:
 
     CameraSourceTimeLapse(
         const sp<ICamera> &camera,
+        const sp<ICameraRecordingProxy> &proxy,
         int32_t cameraId,
         Size videoSize,
         int32_t videoFrameRate,

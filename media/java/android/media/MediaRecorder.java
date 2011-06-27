@@ -16,17 +16,16 @@
 
 package android.media;
 
-import android.media.CamcorderProfile;
 import android.hardware.Camera;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.Surface;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+
 import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 
 /**
@@ -112,7 +111,8 @@ public class MediaRecorder
     /**
      * Sets a Camera to use for recording. Use this function to switch
      * quickly between preview and capture mode without a teardown of
-     * the camera object. Must call before prepare().
+     * the camera object. {@link android.hardware.Camera#unlock()} should be
+     * called before this. Must call before prepare().
      *
      * @param c the Camera to use for recording
      */
@@ -717,6 +717,11 @@ public class MediaRecorder
     /**
      * Begins capturing and encoding data to the file specified with
      * setOutputFile(). Call this after prepare().
+     *
+     * <p>Since API level 13, if applications set a camera via
+     * {@link #setCamera(Camera)}, the apps can use the camera after this method
+     * call. The apps do not need to lock the camera again. The apps should not
+     * start another recording session during recording.
      *
      * @throws IllegalStateException if it is called before
      * prepare().

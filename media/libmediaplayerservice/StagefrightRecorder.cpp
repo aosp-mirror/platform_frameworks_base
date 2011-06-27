@@ -198,14 +198,20 @@ status_t StagefrightRecorder::setVideoFrameRate(int frames_per_second) {
     return OK;
 }
 
-status_t StagefrightRecorder::setCamera(const sp<ICamera> &camera) {
+status_t StagefrightRecorder::setCamera(const sp<ICamera> &camera,
+                                        const sp<ICameraRecordingProxy> &proxy) {
     LOGV("setCamera");
     if (camera == 0) {
         LOGE("camera is NULL");
         return BAD_VALUE;
     }
+    if (proxy == 0) {
+        LOGE("camera proxy is NULL");
+        return BAD_VALUE;
+    }
 
     mCamera = camera;
+    mCameraProxy = proxy;
     return OK;
 }
 
@@ -1235,15 +1241,17 @@ status_t StagefrightRecorder::setupCameraSource(
     videoSize.height = mVideoHeight;
     if (mCaptureTimeLapse) {
         mCameraSourceTimeLapse = CameraSourceTimeLapse::CreateFromCamera(
-                mCamera, mCameraId,
+                mCamera, mCameraProxy, mCameraId,
                 videoSize, mFrameRate, mPreviewSurface,
                 mTimeBetweenTimeLapseFrameCaptureUs);
         *cameraSource = mCameraSourceTimeLapse;
     } else {
         *cameraSource = CameraSource::CreateFromCamera(
-                mCamera, mCameraId, videoSize, mFrameRate,
+                mCamera, mCameraProxy, mCameraId, videoSize, mFrameRate,
                 mPreviewSurface, true /*storeMetaDataInVideoBuffers*/);
     }
+    mCamera.clear();
+    mCameraProxy.clear();
     if (*cameraSource == NULL) {
         return UNKNOWN_ERROR;
     }

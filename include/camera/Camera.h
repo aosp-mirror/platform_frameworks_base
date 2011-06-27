@@ -18,9 +18,11 @@
 #define ANDROID_HARDWARE_CAMERA_H
 
 #include <utils/Timers.h>
-#include <camera/ICameraClient.h>
 #include <gui/ISurfaceTexture.h>
 #include <system/camera.h>
+#include <camera/ICameraClient.h>
+#include <camera/ICameraRecordingProxy.h>
+#include <camera/ICameraRecordingProxyListener.h>
 
 namespace android {
 
@@ -70,7 +72,7 @@ public:
     static  status_t    getCameraInfo(int cameraId,
                                       struct CameraInfo* cameraInfo);
     static  sp<Camera>  connect(int cameraId);
-                        ~Camera();
+            virtual     ~Camera();
             void        init();
 
             status_t    reconnect();
@@ -129,7 +131,10 @@ public:
             status_t    storeMetaDataInBuffers(bool enabled);
 
             void        setListener(const sp<CameraListener>& listener);
+            void        setRecordingProxyListener(const sp<ICameraRecordingProxyListener>& listener);
             void        setPreviewCallbackFlags(int preview_callback_flag);
+
+            sp<ICameraRecordingProxy> getRecordingProxy();
 
     // ICameraClient interface
     virtual void        notifyCallback(int32_t msgType, int32_t ext, int32_t ext2);
@@ -137,6 +142,20 @@ public:
     virtual void        dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
 
     sp<ICamera>         remote();
+
+    class RecordingProxy : public BnCameraRecordingProxy
+    {
+    public:
+        RecordingProxy(const sp<Camera>& camera);
+
+        // ICameraRecordingProxy interface
+        virtual status_t startRecording(const sp<ICameraRecordingProxyListener>& listener);
+        virtual void stopRecording();
+        virtual void releaseRecordingFrame(const sp<IMemory>& mem);
+
+    private:
+        sp<Camera>         mCamera;
+    };
 
 private:
                         Camera();
@@ -162,12 +181,12 @@ private:
             status_t            mStatus;
 
             sp<CameraListener>  mListener;
+            sp<ICameraRecordingProxyListener>  mRecordingProxyListener;
 
             friend class DeathNotifier;
 
             static  Mutex               mLock;
             static  sp<ICameraService>  mCameraService;
-
 };
 
 }; // namespace android

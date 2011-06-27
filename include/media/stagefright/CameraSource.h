@@ -21,6 +21,7 @@
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaSource.h>
 #include <camera/ICamera.h>
+#include <camera/ICameraRecordingProxyListener.h>
 #include <camera/CameraParameters.h>
 #include <utils/List.h>
 #include <utils/RefBase.h>
@@ -68,6 +69,7 @@ public:
      * @return NULL on error.
      */
     static CameraSource *CreateFromCamera(const sp<ICamera> &camera,
+                                          const sp<ICameraRecordingProxy> &proxy,
                                           int32_t cameraId,
                                           Size videoSize,
                                           int32_t frameRate,
@@ -111,6 +113,23 @@ public:
     virtual void signalBufferReturned(MediaBuffer* buffer);
 
 protected:
+    class ProxyListener: public BnCameraRecordingProxyListener {
+    public:
+        ProxyListener(const sp<CameraSource>& source);
+        virtual void dataCallbackTimestamp(int64_t timestampUs, int32_t msgType,
+                const sp<IMemory> &data);
+
+    private:
+        sp<CameraSource> mSource;
+    };
+
+    // isBinderAlive needs linkToDeath to work.
+    class DeathNotifier: public IBinder::DeathRecipient {
+    public:
+        DeathNotifier() {}
+        virtual void binderDied(const wp<IBinder>& who);
+    };
+
     enum CameraFlags {
         FLAGS_SET_CAMERA = 1L << 0,
         FLAGS_HOT_CAMERA = 1L << 1,
@@ -123,6 +142,8 @@ protected:
     status_t mInitCheck;
 
     sp<Camera>   mCamera;
+    sp<ICameraRecordingProxy>   mCameraRecordingProxy;
+    sp<DeathNotifier> mDeathNotifier;
     sp<Surface>  mSurface;
     sp<MetaData> mMeta;
 
@@ -132,7 +153,8 @@ protected:
     bool mStarted;
     int32_t mNumFramesEncoded;
 
-    CameraSource(const sp<ICamera>& camera, int32_t cameraId,
+    CameraSource(const sp<ICamera>& camera, const sp<ICameraRecordingProxy>& proxy,
+                 int32_t cameraId,
                  Size videoSize, int32_t frameRate,
                  const sp<Surface>& surface,
                  bool storeMetaDataInVideoBuffers);
@@ -172,10 +194,12 @@ private:
     void releaseOneRecordingFrame(const sp<IMemory>& frame);
 
 
-    status_t init(const sp<ICamera>& camera, int32_t cameraId,
-                Size videoSize, int32_t frameRate,
-                bool storeMetaDataInVideoBuffers);
-    status_t isCameraAvailable(const sp<ICamera>& camera, int32_t cameraId);
+    status_t init(const sp<ICamera>& camera, const sp<ICameraRecordingProxy>& proxy,
+                  int32_t cameraId, Size videoSize, int32_t frameRate,
+                  bool storeMetaDataInVideoBuffers);
+    status_t isCameraAvailable(const sp<ICamera>& camera,
+                               const sp<ICameraRecordingProxy>& proxy,
+                               int32_t cameraId);
     status_t isCameraColorFormatSupported(const CameraParameters& params);
     status_t configureCamera(CameraParameters* params,
                     int32_t width, int32_t height,
