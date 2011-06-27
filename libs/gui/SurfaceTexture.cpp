@@ -417,17 +417,22 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
             return -EINVAL;
         }
 
-        if (mQueue.empty()) {
-            listener = mFrameAvailableListener;
-        }
-
         if (mSynchronousMode) {
-            // in synchronous mode we queue all buffers in a FIFO
+            // In synchronous mode we queue all buffers in a FIFO.
             mQueue.push_back(buf);
+
+            // Synchronous mode always signals that an additional frame should
+            // be consumed.
+            listener = mFrameAvailableListener;
         } else {
-            // in asynchronous mode we only keep the most recent buffer
+            // In asynchronous mode we only keep the most recent buffer.
             if (mQueue.empty()) {
                 mQueue.push_back(buf);
+
+                // Asynchronous mode only signals that a frame should be
+                // consumed if no previous frame was pending. If a frame were
+                // pending then the consumer would have already been notified.
+                listener = mFrameAvailableListener;
             } else {
                 Fifo::iterator front(mQueue.begin());
                 // buffer currently queued is freed
@@ -559,11 +564,6 @@ status_t SurfaceTexture::updateTexImage() {
         glBindTexture(mCurrentTextureTarget, mTexName);
     }
     return OK;
-}
-
-size_t SurfaceTexture::getQueuedCount() const {
-    Mutex::Autolock lock(mMutex);
-    return mQueue.size();
 }
 
 bool SurfaceTexture::isExternalFormat(uint32_t format)
