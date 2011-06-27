@@ -559,13 +559,8 @@ private:
         ANativeWindowBuffer* anb;
         rc = a->dequeueBuffer(a, &anb);
         if (!rc) {
-            rc = a->lockBuffer(a, anb);
-            if (!rc) {
-                *buffer = &anb->handle;
-                *stride = anb->stride;
-            }
-            else
-                a->cancelBuffer(a, anb);
+            *buffer = &anb->handle;
+            *stride = anb->stride;
         }
         return rc;
     }
@@ -575,6 +570,14 @@ private:
         const typeof(((type *) 0)->member) *__mptr = (ptr);     \
         (type *) ((char *) __mptr - (char *)(&((type *)0)->member)); })
 #endif
+
+    static int __lock_buffer(struct preview_stream_ops* w,
+                      buffer_handle_t* buffer)
+    {
+        ANativeWindow *a = anw(w);
+        return a->lockBuffer(a,
+                  container_of(buffer, ANativeWindowBuffer, handle));
+    }
 
     static int __enqueue_buffer(struct preview_stream_ops* w,
                       buffer_handle_t* buffer)
@@ -641,6 +644,7 @@ private:
     void initHalPreviewWindow()
     {
         mHalPreviewWindow.nw.cancel_buffer = __cancel_buffer;
+        mHalPreviewWindow.nw.lock_buffer = __lock_buffer;
         mHalPreviewWindow.nw.dequeue_buffer = __dequeue_buffer;
         mHalPreviewWindow.nw.enqueue_buffer = __enqueue_buffer;
         mHalPreviewWindow.nw.set_buffer_count = __set_buffer_count;
