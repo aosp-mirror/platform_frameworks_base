@@ -2326,6 +2326,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     private CheckForLongPress mPendingCheckForLongPress;
     private CheckForTap mPendingCheckForTap = null;
     private PerformClick mPerformClick;
+    private SendViewScrolledAccessibilityEvent mSendViewScrolledAccessibilityEvent;
 
     private UnsetPressedState mUnsetPressedState;
 
@@ -3699,7 +3700,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @see #dispatchPopulateAccessibilityEvent(AccessibilityEvent)
      */
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
-
     }
 
     /**
@@ -3728,12 +3728,23 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         event.setEnabled(isEnabled());
         event.setContentDescription(mContentDescription);
 
-        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_FOCUSED && mAttachInfo != null) {
-            ArrayList<View> focusablesTempList = mAttachInfo.mFocusablesTempList;
-            getRootView().addFocusables(focusablesTempList, View.FOCUS_FORWARD, FOCUSABLES_ALL);
-            event.setItemCount(focusablesTempList.size());
-            event.setCurrentItemIndex(focusablesTempList.indexOf(this));
-            focusablesTempList.clear();
+        final int eventType = event.getEventType();
+        switch (eventType) {
+            case AccessibilityEvent.TYPE_VIEW_FOCUSED: {
+                if (mAttachInfo != null) {
+                    ArrayList<View> focusablesTempList = mAttachInfo.mFocusablesTempList;
+                    getRootView().addFocusables(focusablesTempList, View.FOCUS_FORWARD,
+                            FOCUSABLES_ALL);
+                    event.setItemCount(focusablesTempList.size());
+                    event.setCurrentItemIndex(focusablesTempList.indexOf(this));
+                    focusablesTempList.clear();
+                }
+            } break;
+            case AccessibilityEvent.TYPE_VIEW_SCROLLED: {
+                event.setScrollX(mScrollX);
+                event.setScrollY(mScrollY);
+                event.setItemCount(getHeight());
+            } break;
         }
     }
 
@@ -6165,6 +6176,16 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
+     * Remove the pending callback for sending a
+     * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} accessibility event.
+     */
+    private void removeSendViewScrolledAccessibilityEventCallback() {
+        if (mSendViewScrolledAccessibilityEvent != null) {
+            removeCallbacks(mSendViewScrolledAccessibilityEvent);
+        }
+    }
+
+    /**
      * Sets the TouchDelegate for this View.
      */
     public void setTouchDelegate(TouchDelegate delegate) {
@@ -6337,6 +6358,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @param oldt Previous vertical scroll origin.
      */
     protected void onScrollChanged(int l, int t, int oldl, int oldt) {
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            postSendViewScrolledAccessibilityEventCallback();
+        }
+
         mBackgroundSizeChanged = true;
 
         final AttachInfo ai = mAttachInfo;
@@ -8263,6 +8288,22 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
+     * Post a callback to send a {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} event.
+     * This event is sent at most once every
+     * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}.
+     */
+    private void postSendViewScrolledAccessibilityEventCallback() {
+        if (mSendViewScrolledAccessibilityEvent == null) {
+            mSendViewScrolledAccessibilityEvent = new SendViewScrolledAccessibilityEvent();
+        }
+        if (!mSendViewScrolledAccessibilityEvent.mIsPending) {
+            mSendViewScrolledAccessibilityEvent.mIsPending = true;
+            postDelayed(mSendViewScrolledAccessibilityEvent,
+                    ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
+        }
+    }
+
+    /**
      * Called by a parent to request that a child update its values for mScrollX
      * and mScrollY if necessary. This will typically be done if the child is
      * animating a scroll using a {@link android.widget.Scroller Scroller}
@@ -9019,6 +9060,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         removeUnsetPressCallback();
         removeLongPressCallback();
         removePerformClickCallback();
+        removeSendViewScrolledAccessibilityEventCallback();
 
         destroyDrawingCache();
 
@@ -13820,6 +13862,18 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                 host.invalidate(true);
             }
         }
+    }
 
+    /**
+     * Resuable callback for sending
+     * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED} accessibility event.
+     */
+    private class SendViewScrolledAccessibilityEvent implements Runnable {
+        public volatile boolean mIsPending;
+
+        public void run() {
+            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_SCROLLED);
+            mIsPending = false;
+        }
     }
 }

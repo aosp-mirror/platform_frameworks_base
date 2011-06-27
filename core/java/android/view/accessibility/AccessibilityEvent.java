@@ -56,76 +56,132 @@ import java.util.List;
  * <b>View clicked</b> - represents the event of clicking on a {@link android.view.View}
  * like {@link android.widget.Button}, {@link android.widget.CompoundButton}, etc. <br>
  * Type:{@link #TYPE_VIEW_CLICKED} <br>
- * Properties:
- * {@link #getClassName()},
- * {@link #getPackageName()},
- * {@link #getEventTime()},
- * {@link #getText()},
- * {@link #isChecked()},
- * {@link #isEnabled()},
- * {@link #isPassword()},
- * {@link #getItemCount()},
- * {@link #getCurrentItemIndex()}
+ * Properties:</br>
+ * <ul>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ *   <li>{@link #isPassword()} - Whether the source is password.</li>
+ *   <li>{@link #isChecked()} - Whether the source is checked.</li>
+ * </ul>
  * <p>
  * <b>View long clicked</b> - represents the event of long clicking on a {@link android.view.View}
  * like {@link android.widget.Button}, {@link android.widget.CompoundButton}, etc. <br>
  * Type:{@link #TYPE_VIEW_LONG_CLICKED} <br>
- * Properties:
- * {@link #getClassName()},
- * {@link #getPackageName()},
- * {@link #getEventTime()},
- * {@link #getText()},
- * {@link #isChecked()},
- * {@link #isEnabled()},
- * {@link #isPassword()},
- * {@link #getItemCount()},
- * {@link #getCurrentItemIndex()}
+ * Properties:</br>
+ * <ul>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ *   <li>{@link #isPassword()} - Whether the source is password.</li>
+ *   <li>{@link #isChecked()} - Whether the source is checked.</li>
+ * </ul>
  * <p>
  * <b>View selected</b> - represents the event of selecting an item usually in
  * the context of an {@link android.widget.AdapterView}. <br>
  * Type: {@link #TYPE_VIEW_SELECTED} <br>
- * Properties:
- * {@link #getClassName()},
- * {@link #getPackageName()},
- * {@link #getEventTime()},
- * {@link #getText()},
- * {@link #isChecked()},
- * {@link #isEnabled()},
- * {@link #isPassword()},
- * {@link #getItemCount()},
- * {@link #getCurrentItemIndex()}
+ * Properties:</br>
+ * <ul>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ *   <li>{@link #isPassword()} - Whether the source is password.</li>
+ *   <li>{@link #isChecked()} - Whether the source is checked.</li>
+ *   <li>{@link #getItemCount()} -The number of selectable items of the source.</li>
+ *   <li>{@link #getCurrentItemIndex()} - The currently selected item index.</li>
+ * </ul>
+ * <p>
  * <p>
  * <b>View focused</b> - represents the event of focusing a
  * {@link android.view.View}. <br>
  * Type: {@link #TYPE_VIEW_FOCUSED} <br>
- * Properties:
- * {@link #getClassName()},
- * {@link #getPackageName()},
- * {@link #getEventTime()},
- * {@link #getText()},
- * {@link #isChecked()},
- * {@link #isEnabled()},
- * {@link #isPassword()},
- * {@link #getItemCount()},
- * {@link #getCurrentItemIndex()}
+ * Properties:</br>
+ * <ul>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ *   <li>{@link #isPassword()} - Whether the source is password.</li>
+ *   <li>{@link #isChecked()} - Whether the source is checked.</li>
+ *   <li>{@link #getItemCount()} -The number of focusable items on the screen.</li>
+ *   <li>{@link #getCurrentItemIndex()} - The currently focused item index.</li>
+ * </ul>
  * <p>
  * <b>View text changed</b> - represents the event of changing the text of an
  * {@link android.widget.EditText}. <br>
  * Type: {@link #TYPE_VIEW_TEXT_CHANGED} <br>
- * Properties:
- * {@link #getClassName()},
- * {@link #getPackageName()},
- * {@link #getEventTime()},
- * {@link #getText()},
- * {@link #isChecked()},
- * {@link #isEnabled()},
- * {@link #isPassword()},
- * {@link #getItemCount()},
- * {@link #getCurrentItemIndex()},
- * {@link #getFromIndex()},
- * {@link #getAddedCount()},
- * {@link #getRemovedCount()},
- * {@link #getBeforeText()}
+ * Properties:</br>
+ * <ul>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ *   <li>{@link #isPassword()} - Whether the source is password.</li>
+ *   <li>{@link #isChecked()} - Whether the source is checked.</li>
+ *   <li>{@link #getFromIndex()} - The text change start index.</li>
+ *   <li>{@link #getAddedCount()} - The number of added characters.</li>
+ *   <li>{@link #getRemovedCount()} - The number of removed characters.</li>
+ *   <li>{@link #getBeforeText()} - The text of the source before the change.</li>
+ * </ul>
+ * <p>
+ * <b>View text selection changed</b> - represents the event of changing the text
+ * selection of an {@link android.widget.EditText}.<br>
+ * Type: {@link #TYPE_VIEW_TEXT_SELECTION_CHANGED} <br>
+ * Properties:</br>
+ * <ul>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ *   <li>{@link #isPassword()} - Whether the source is password.</li>
+ *   <li>{@link #getFromIndex()} - The selection start index.</li>
+ *   <li>{@link #getToIndex()} - The selection end index.</li>
+ *   <li>{@link #getItemCount()} - The length of the source text.</li>
+ * <ul>
+ * <p>
+ * <b>View scrolled</b> - represents the event of scrolling a view. If
+ * the source is a descendant of {@link android.widget.AdapterView} the
+ * scroll is reported in terms of visible items - the first visible item,
+ * the last visible item, and the total items - because the the source
+ * is unaware if its pixel size since its adapter is responsible for
+ * creating views. In all other cases the scroll is reported as the current
+ * scroll on the X and Y axis respectively plus the height of the source in
+ * pixels.<br>
+ * Type: {@link #TYPE_VIEW_SCROLLED} <br>
+ * Properties:</br>
+ * <ul>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
+ *   <li>{@link #getScrollX())} - The horizontal offset of the source
+ *                                (without descendants of AdapterView)).</li>
+ *   <li>{@link #getScrollY())} - The vertical offset of the source
+ *                                (without descendants of AdapterView)).</li>
+ *   <li>{@link #getFromIndex()} - The index of the first visible item of the source
+ *                                 (for descendants of AdapterView).</li>
+ *   <li>{@link #getToIndex()} - The index of the last visible item of the source
+ *                               (for descendants of AdapterView).</li>
+ *   <li>{@link #getItemCount()} - The total items of the source (for descendants of AdapterView)
+ *                                 or the height of the source in pixels (all other cases).</li>
+ * <ul>
  * <p>
  * <b>TRANSITION TYPES</b> <br>
  * <p>
@@ -133,33 +189,40 @@ import java.util.List;
  * {@link android.widget.PopupWindow}, {@link android.view.Menu},
  * {@link android.app.Dialog}, etc. <br>
  * Type: {@link #TYPE_WINDOW_STATE_CHANGED} <br>
- * Properties:
- * {@link #getClassName()},
- * {@link #getPackageName()},
- * {@link #getEventTime()},
- * {@link #getText()}
+ * Properties:</br>
+ * <ul>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the source.</li>
+ * </ul>
  * <p>
  * <b>Window content changed</b> - represents the event of change in the
  * content of a window. This change can be adding/removing view, changing
  * a view size, etc.<br>
  * Type: {@link #TYPE_WINDOW_CONTENT_CHANGED} <br>
- * Properties:
- * {@link #getClassName()},
- * {@link #getPackageName()},
- * {@link #getEventTime()},
- * {@link #getText()}
+ * Properties:</br>
+ * <ul>
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ * <ul>
  * <p>
  * <b>NOTIFICATION TYPES</b> <br>
  * <p>
  * <b>Notification state changed</b> - represents the event showing/hiding
  * {@link android.app.Notification}.
  * Type: {@link #TYPE_NOTIFICATION_STATE_CHANGED} <br>
- * Properties:
- * {@link #getClassName()},
- * {@link #getPackageName()},
- * {@link #getEventTime()},
- * {@link #getText()}
- * {@link #getParcelableData()}
+ * Properties:</br>
+ * <ul>
+ *   <li>{@link #getClassName()} - The class name of the source.</li>
+ *   <li>{@link #getPackageName()} - The package name of the source.</li>
+ *   <li>{@link #getEventTime()}  - The event time.</li>
+ *   <li>{@link #getText()} - The text of the source.</li>
+ *   <li>{@link #getParcelableData()} - The posted {@link android.app.Notification}.</li>
+ * </ul>
  * <p>
  * <b>Security note</b>
  * <p>
@@ -256,6 +319,16 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * Represents the event of changing the content of a window.
      */
     public static final int TYPE_WINDOW_CONTENT_CHANGED = 0x00000800;
+
+    /**
+     * Represents the event of scrolling a view.
+     */
+    public static final int TYPE_VIEW_SCROLLED = 0x00001000;
+
+    /**
+     * Represents the event of changing the selection in an {@link android.widget.EditText}.
+     */
+    public static final int TYPE_VIEW_TEXT_SELECTION_CHANGED = 0x00002000;
 
     /**
      * Mask for {@link AccessibilityEvent} all types.
@@ -564,6 +637,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         record.mCurrentItemIndex = parcel.readInt();
         record.mItemCount = parcel.readInt();
         record.mFromIndex = parcel.readInt();
+        record.mToIndex = parcel.readInt();
+        record.mScrollX = parcel.readInt();
+        record.mScrollY =  parcel.readInt();
         record.mAddedCount = parcel.readInt();
         record.mRemovedCount = parcel.readInt();
         record.mClassName = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(parcel);
@@ -613,6 +689,9 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
         parcel.writeInt(record.mCurrentItemIndex);
         parcel.writeInt(record.mItemCount);
         parcel.writeInt(record.mFromIndex);
+        parcel.writeInt(record.mToIndex);
+        parcel.writeInt(record.mScrollX);
+        parcel.writeInt(record.mScrollY);
         parcel.writeInt(record.mAddedCount);
         parcel.writeInt(record.mRemovedCount);
         TextUtils.writeToParcel(record.mClassName, parcel, flags);
@@ -657,8 +736,12 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 builder.append("; IsPassword: " + record.isPassword());
                 builder.append("; IsChecked: " + record.isChecked());
                 builder.append("; IsFullScreen: " + record.isFullScreen());
+                builder.append("; Scrollable: " + record.isScrollable());
                 builder.append("; BeforeText: " + record.mBeforeText);
                 builder.append("; FromIndex: " + record.mFromIndex);
+                builder.append("; ToIndex: " + record.mToIndex);
+                builder.append("; ScrollX: " + record.mScrollX);
+                builder.append("; ScrollY: " + record.mScrollY);
                 builder.append("; AddedCount: " + record.mAddedCount);
                 builder.append("; RemovedCount: " + record.mRemovedCount);
                 builder.append("; ParcelableData: " + record.mParcelableData);
@@ -704,6 +787,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 return "TYPE_TOUCH_EXPLORATION_GESTURE_END";
             case TYPE_WINDOW_CONTENT_CHANGED:
                 return "TYPE_WINDOW_CONTENT_CHANGED";
+            case TYPE_VIEW_TEXT_SELECTION_CHANGED:
+                return "TYPE_VIEW_TEXT_SELECTION_CHANGED";
+            case TYPE_VIEW_SCROLLED:
+                return "TYPE_VIEW_SCROLLED";
             default:
                 return null;
         }

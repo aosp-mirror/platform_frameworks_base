@@ -136,13 +136,6 @@ public final class ViewAncestor extends Handler implements ViewParent,
     static final ArrayList<ComponentCallbacks> sConfigCallbacks
             = new ArrayList<ComponentCallbacks>();
 
-    /**
-     * Delay before dispatching an accessibility event that the window
-     * content has changed. The window content is considered changed
-     * after a layout pass.
-     */
-    private static final long SEND_WINDOW_CONTENT_CHANGED_DELAY_MILLIS = 500;
-
     long mLastTrackballTime = 0;
     final TrackballAxis mTrackballAxisX = new TrackballAxis();
     final TrackballAxis mTrackballAxisY = new TrackballAxis();
@@ -284,7 +277,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
 
     AccessibilityInteractionConnectionManager mAccessibilityInteractionConnectionManager;
 
-    SendWindowContentChanged mSendWindowContentChanged;
+    SendWindowContentChangedAccessibilityEvent mSendWindowContentChangedAccessibilityEvent;
 
     private final int mDensity;
 
@@ -3692,14 +3685,19 @@ public final class ViewAncestor extends Handler implements ViewParent,
     /**
      * Post a callback to send a
      * {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} event.
+     * This event is send at most once every
+     * {@link ViewConfiguration#getSendRecurringAccessibilityEventsInterval()}.
      */
     private void postSendWindowContentChangedCallback() {
-        if (mSendWindowContentChanged == null) {
-            mSendWindowContentChanged = new SendWindowContentChanged();
-        } else {
-            removeCallbacks(mSendWindowContentChanged);
+        if (mSendWindowContentChangedAccessibilityEvent == null) {
+            mSendWindowContentChangedAccessibilityEvent =
+                new SendWindowContentChangedAccessibilityEvent();
         }
-        postDelayed(mSendWindowContentChanged, SEND_WINDOW_CONTENT_CHANGED_DELAY_MILLIS);
+        if (!mSendWindowContentChangedAccessibilityEvent.mIsPending) {
+            mSendWindowContentChangedAccessibilityEvent.mIsPending = true;
+            postDelayed(mSendWindowContentChangedAccessibilityEvent,
+                    ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
+        }
     }
 
     /**
@@ -3707,8 +3705,8 @@ public final class ViewAncestor extends Handler implements ViewParent,
      * {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} event.
      */
     private void removeSendWindowContentChangedCallback() {
-        if (mSendWindowContentChanged != null) {
-            removeCallbacks(mSendWindowContentChanged);
+        if (mSendWindowContentChangedAccessibilityEvent != null) {
+            removeCallbacks(mSendWindowContentChangedAccessibilityEvent);
         }
     }
 
@@ -4634,10 +4632,19 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
     }
 
-    private class SendWindowContentChanged implements Runnable {
+    private class SendWindowContentChangedAccessibilityEvent implements Runnable {
+        public volatile boolean mIsPending;
+
         public void run() {
             if (mView != null) {
-                mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+                // Send the event directly since we do not want to append the
+                // source text because this is the text for the entire window
+                // and we just want to notify that the content has changed.
+                AccessibilityEvent event = AccessibilityEvent.obtain(
+                        AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED);
+                mView.onInitializeAccessibilityEvent(event);
+                AccessibilityManager.getInstance(mView.mContext).sendAccessibilityEvent(event);
+                mIsPending = false;
             }
         }
     }

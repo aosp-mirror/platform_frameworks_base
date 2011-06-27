@@ -55,6 +55,8 @@ import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
@@ -1255,6 +1257,33 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mOnScrollListener.onScroll(this, mFirstPosition, getChildCount(), mItemCount);
         }
         onScrollChanged(0, 0, 0, 0); // dummy values, View's implementation does not use these.
+    }
+
+    @Override
+    public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
+        super.onInitializeAccessibilityNodeInfo(info);
+        info.setScrollable(true);
+    }
+
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        event.setScrollable(true);
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+            event.setFromIndex(mFirstPosition);
+            event.setToIndex(mFirstPosition +  getChildCount());
+            event.setItemCount(mItemCount);
+        }
+    }
+
+    @Override
+    public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+        // Do not append text content to scroll events they are fired frequently
+        // and the client has already received another event type with the text.
+        if (event.getEventType() != AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+            super.dispatchPopulateAccessibilityEvent(event);
+        }
+        return false;
     }
 
     /**
