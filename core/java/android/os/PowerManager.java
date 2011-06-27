@@ -313,8 +313,8 @@ public class PowerManager
          */
         public void release(int flags) {
             synchronized (mToken) {
-                mHandler.removeCallbacks(mReleaser);
                 if (!mRefCounted || --mCount == 0) {
+                    mHandler.removeCallbacks(mReleaser);
                     try {
                         mService.releaseWakeLock(mToken, flags);
                     } catch (RemoteException e) {
