@@ -682,8 +682,9 @@ public class LockPatternKeyguardView extends KeyguardViewBase {
             final boolean usingLockPattern = mLockPatternUtils.getKeyguardStoredPasswordQuality()
                     == DevicePolicyManager.PASSWORD_QUALITY_SOMETHING;
 
-            boolean showSlidingTab = getResources().getBoolean(R.bool.config_enableSlidingTabFirst);
-            if (isSecure() && (usingLockPattern || !showSlidingTab)) {
+            boolean showLockBeforeUnlock = getResources()
+                    .getBoolean(R.bool.config_enableLockBeforeUnlockScreen);
+            if (isSecure() && (usingLockPattern || !showLockBeforeUnlock)) {
                 return Mode.UnlockScreen;
             } else {
                 return Mode.LockScreen;

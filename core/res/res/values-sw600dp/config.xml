@@ -23,9 +23,6 @@
     <!-- see comment in values/config.xml -->
     <integer name="config_longPressOnPowerBehavior">2</integer>
 
-    <!-- Show sliding tab before lockscreen -->
-    <bool name="config_enableSlidingTabFirst">false</bool>
-
     <!-- Enable lockscreen rotation -->
     <bool name="config_enableLockScreenRotation">true</bool>
 
