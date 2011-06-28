@@ -224,8 +224,8 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
 
     /**
      * Animation used to attract user's attention to the target button.
-     * Assumes mChevronDrawables is an a list with an even number of chevrons filled with left
-     * followed by right chevrons.
+     * Assumes mChevronDrawables is an a list with an even number of chevrons filled with
+     * mFeedbackCount items in the order: left, right, top, bottom.
      */
     private void startChevronAnimation() {
         final float r = mHandleDrawable.getWidth() / 2;
@@ -442,6 +442,7 @@ public class MultiWaveView extends View implements AnimatorUpdateListener {
         mHandleDrawable.setX(mWaveCenterX);
         mHandleDrawable.setY(mWaveCenterY);
         mHandleDrawable.setState(TargetDrawable.STATE_INACTIVE);
+        Tweener.reset();
     }
 
     @Override
