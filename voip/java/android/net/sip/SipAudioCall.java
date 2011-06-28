@@ -26,6 +26,7 @@ import android.net.sip.SimpleSessionDescription.Media;
 import android.net.wifi.WifiManager;
 import android.os.Message;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.IOException;
@@ -400,6 +401,7 @@ public class SipAudioCall {
             @Override
             public void onRinging(SipSession session,
                     SipProfile peerProfile, String sessionDescription) {
+                // this callback is triggered only for reinvite.
                 synchronized (SipAudioCall.this) {
                     if ((mSipSession == null) || !mInCall
                             || !session.getCallId().equals(
@@ -730,6 +732,7 @@ public class SipAudioCall {
     }
 
     private SimpleSessionDescription createAnswer(String offerSd) {
+        if (TextUtils.isEmpty(offerSd)) return createOffer();
         SimpleSessionDescription offer =
                 new SimpleSessionDescription(offerSd);
         SimpleSessionDescription answer =
