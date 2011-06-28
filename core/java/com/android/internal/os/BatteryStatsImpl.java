@@ -41,6 +41,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.TimeUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -4870,8 +4871,8 @@ public final class BatteryStatsImpl extends BatteryStats {
         return 0;
     }
 
-    void readHistory(Parcel in) {
-        mHistoryBaseTime = in.readLong();
+    void readHistory(Parcel in, boolean andOldHistory) {
+        final long historyBaseTime = in.readLong();
 
         mHistoryBuffer.setDataSize(0);
         mHistoryBuffer.setDataPosition(0);
@@ -4889,15 +4890,35 @@ public final class BatteryStatsImpl extends BatteryStats {
             in.setDataPosition(curPos + bufSize);
         }
 
-        long oldnow = SystemClock.elapsedRealtime() - (5*60*1000);
-        if (oldnow > 0) {
-            // If the system process has restarted, but not the entire
-            // system, then the mHistoryBaseTime already accounts for
-            // much of the elapsed time.  We thus want to adjust it back,
-            // to avoid large gaps in the data.  We determine we are
-            // in this case by arbitrarily saying it is so if at this
-            // point in boot the elapsed time is already more than 5 minutes.
-            mHistoryBaseTime -= oldnow;
+        if (andOldHistory) {
+            readOldHistory(in);
+        }
+
+        if (DEBUG_HISTORY) {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("****************** OLD mHistoryBaseTime: ");
+            TimeUtils.formatDuration(mHistoryBaseTime, sb);
+            Slog.i(TAG, sb.toString());
+        }
+        mHistoryBaseTime = historyBaseTime;
+        if (DEBUG_HISTORY) {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("****************** NEW mHistoryBaseTime: ");
+            TimeUtils.formatDuration(mHistoryBaseTime, sb);
+            Slog.i(TAG, sb.toString());
+        }
+
+        // We are just arbitrarily going to insert 1 minute from the sample of
+        // the last run until samples in this run.
+        if (mHistoryBaseTime > 0) {
+            long oldnow = SystemClock.elapsedRealtime();
+            mHistoryBaseTime = (mHistoryBaseTime - oldnow) + 60*1000;
+            if (DEBUG_HISTORY) {
+                StringBuilder sb = new StringBuilder(128);
+                sb.append("****************** ADJUSTED mHistoryBaseTime: ");
+                TimeUtils.formatDuration(mHistoryBaseTime, sb);
+                Slog.i(TAG, sb.toString());
+            }
         }
     }
 
@@ -4910,12 +4931,24 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
     }
 
-    void writeHistory(Parcel out) {
-        out.writeLong(mLastHistoryTime);
+    void writeHistory(Parcel out, boolean andOldHistory) {
+        if (DEBUG_HISTORY) {
+            StringBuilder sb = new StringBuilder(128);
+            sb.append("****************** WRITING mHistoryBaseTime: ");
+            TimeUtils.formatDuration(mHistoryBaseTime, sb);
+            sb.append(" mLastHistoryTime: ");
+            TimeUtils.formatDuration(mLastHistoryTime, sb);
+            Slog.i(TAG, sb.toString());
+        }
+        out.writeLong(mHistoryBaseTime + mLastHistoryTime);
         out.writeInt(mHistoryBuffer.dataSize());
         if (DEBUG_HISTORY) Slog.i(TAG, "***************** WRITING HISTORY: "
                 + mHistoryBuffer.dataSize() + " bytes at " + out.dataPosition());
         out.appendFrom(mHistoryBuffer, 0, mHistoryBuffer.dataSize());
+
+        if (andOldHistory) {
+            writeOldHistory(out);
+        }
     }
 
     void writeOldHistory(Parcel out) {
@@ -4935,8 +4968,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        readHistory(in);
-        readOldHistory(in);
+        readHistory(in, true);
 
         mStartCount = in.readInt();
         mBatteryUptime = in.readLong();
@@ -5136,8 +5168,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         out.writeInt(VERSION);
 
-        writeHistory(out);
-        writeOldHistory(out);
+        writeHistory(out, true);
 
         out.writeInt(mStartCount);
         out.writeLong(computeBatteryUptime(NOW_SYS, STATS_SINCE_CHARGED));
@@ -5340,7 +5371,7 @@ public final class BatteryStatsImpl extends BatteryStats {
             throw new ParcelFormatException("Bad magic number");
         }
 
-        readHistory(in);
+        readHistory(in, false);
 
         mStartCount = in.readInt();
         mBatteryUptime = in.readLong();
@@ -5461,7 +5492,7 @@ public final class BatteryStatsImpl extends BatteryStats {
 
         out.writeInt(MAGIC);
 
-        writeHistory(out);
+        writeHistory(out, false);
 
         out.writeInt(mStartCount);
         out.writeLong(mBatteryUptime);

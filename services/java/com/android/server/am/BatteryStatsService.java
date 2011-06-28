@@ -446,6 +446,15 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
     }
     
+    private void dumpHelp(PrintWriter pw) {
+        pw.println("Battery stats (batteryinfo) dump options:");
+        pw.println("  [--checkin] [--reset] [--write] [-h]");
+        pw.println("  --checkin: format output for a checkin report.");
+        pw.println("  --reset: reset the stats, clearing all current data.");
+        pw.println("  --write: force write current collected stats to disk.");
+        pw.println("  -h: print this help text.");
+    }
+
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         boolean isCheckin = false;
@@ -466,8 +475,12 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                         pw.println("Battery stats written.");
                         noOutput = true;
                     }
+                } else if ("-h".equals(arg)) {
+                    dumpHelp(pw);
+                    return;
                 } else {
                     pw.println("Unknown option: " + arg);
+                    dumpHelp(pw);
                 }
             }
         }
