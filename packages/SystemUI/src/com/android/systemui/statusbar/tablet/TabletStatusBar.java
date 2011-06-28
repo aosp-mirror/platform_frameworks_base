@@ -1001,14 +1001,14 @@ public class TabletStatusBar extends StatusBar implements
         mHandler.sendEmptyMessage(on ? MSG_SHOW_CHROME : MSG_HIDE_CHROME);
     }
 
-    public void topAppWindowChanged(boolean windowVisible) {
+    public void topAppWindowChanged(boolean showMenu) {
         if (DEBUG) {
-            Slog.d(TAG, (windowVisible?"showing":"hiding") + " the MENU button");
+            Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
         }
-        mMenuButton.setVisibility(windowVisible ? View.VISIBLE : View.GONE);
+        mMenuButton.setVisibility(showMenu ? View.VISIBLE : View.GONE);
 
         // See above re: lights-out policy for legacy apps.
-        if (windowVisible) setLightsOn(true);
+        if (showMenu) setLightsOn(true);
 
         mCompatModeButton.refresh();
         if (mCompatModeButton.getVisibility() == View.VISIBLE) {

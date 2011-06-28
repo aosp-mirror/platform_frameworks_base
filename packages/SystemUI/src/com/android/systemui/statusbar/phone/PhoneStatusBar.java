@@ -372,11 +372,20 @@ public class PhoneStatusBar extends StatusBar {
         return res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
     }
 
+    private View.OnClickListener mRecentsClickListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            toggleRecentApps();
+        }
+    };
+
     // For small-screen devices (read: phones) that lack hardware navigation buttons
     private void addNavigationBar() {
         if (mNavigationBarView == null) return;
         
         mNavigationBarView.reorient();
+ 
+        mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
+
         WindowManagerImpl.getDefault().addView(
                 mNavigationBarView, getNavigationBarLayoutParams());
     }
@@ -385,6 +394,9 @@ public class PhoneStatusBar extends StatusBar {
         if (mNavigationBarView == null) return;
         
         mNavigationBarView.reorient();
+
+        mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
+
         WindowManagerImpl.getDefault().updateViewLayout(
                 mNavigationBarView, getNavigationBarLayoutParams());
     }
@@ -1230,8 +1242,20 @@ public class PhoneStatusBar extends StatusBar {
         }
     }
 
+    public void topAppWindowChanged(boolean showMenu) {
+        if (DEBUG) {
+            Slog.d(TAG, (showMenu?"showing":"hiding") + " the MENU button");
+        }
+        if (mNavigationBarView != null) {
+            mNavigationBarView.getMenuButton().setVisibility(showMenu
+                ? View.VISIBLE : View.INVISIBLE);
+        }
+
+        // See above re: lights-out policy for legacy apps.
+        if (showMenu) setLightsOn(true);
+    }
+
     // Not supported
-    public void topAppWindowChanged(boolean visible) { }
     public void setImeWindowStatus(IBinder token, int vis, int backDisposition) { }
     @Override
     public void setHardKeyboardStatus(boolean available, boolean enabled) { }
