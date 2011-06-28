@@ -119,6 +119,10 @@ class SipSessionGroup implements SipListener {
     private Map<String, SipSessionImpl> mSessionMap =
             new HashMap<String, SipSessionImpl>();
 
+    // external address observed from any response
+    private String mExternalIp;
+    private int mExternalPort;
+
     /**
      * @param myself the local profile with password crossed out
      * @param password the password of the profile
@@ -175,6 +179,8 @@ class SipSessionGroup implements SipListener {
 
         mCallReceiverSession = null;
         mSessionMap.clear();
+
+        resetExternalAddress();
     }
 
     synchronized void onConnectivityChanged() {
@@ -188,6 +194,12 @@ class SipSessionGroup implements SipListener {
             s.onError(SipErrorCode.DATA_CONNECTION_LOST,
                     "data connection lost");
         }
+    }
+
+    synchronized void resetExternalAddress() {
+        Log.d(TAG, " reset external addr on " + mSipStack);
+        mExternalIp = null;
+        mExternalPort = 0;
     }
 
     public SipProfile getLocalProfile() {
@@ -361,6 +373,21 @@ class SipSessionGroup implements SipListener {
             }
         }
         return null;
+    }
+
+    private void extractExternalAddress(ResponseEvent evt) {
+        Response response = evt.getResponse();
+        ViaHeader viaHeader = (ViaHeader)(response.getHeader(
+                SIPHeaderNames.VIA));
+        if (viaHeader == null) return;
+        int rport = viaHeader.getRPort();
+        String externalIp = viaHeader.getReceived();
+        if ((rport > 0) && (externalIp != null)) {
+            mExternalIp = externalIp;
+            mExternalPort = rport;
+            Log.d(TAG, " got external addr " + externalIp + ":" + rport
+                    + " on " + mSipStack);
+        }
     }
 
     private class SipSessionCallReceiverImpl extends SipSessionImpl {
@@ -682,6 +709,7 @@ class SipSessionGroup implements SipListener {
                     dialog = ((RequestEvent) evt).getDialog();
                 } else if (evt instanceof ResponseEvent) {
                     dialog = ((ResponseEvent) evt).getDialog();
+                    extractExternalAddress((ResponseEvent) evt);
                 }
                 if (dialog != null) mDialog = dialog;
 
@@ -984,7 +1012,8 @@ class SipSessionGroup implements SipListener {
                 mServerTransaction = mSipHelper.sendInviteOk(mInviteReceived,
                         mLocalProfile,
                         ((MakeCallCommand) evt).getSessionDescription(),
-                        mServerTransaction);
+                        mServerTransaction,
+                        mExternalIp, mExternalPort);
                 startSessionTimer(((MakeCallCommand) evt).getTimeout());
                 return true;
             } else if (END_CALL == evt) {
@@ -1376,6 +1405,7 @@ class SipSessionGroup implements SipListener {
                     if (evt instanceof ResponseEvent) {
                         if (parseOptionsResult(evt)) {
                             if (mPortChanged) {
+                                resetExternalAddress();
                                 stop();
                             } else {
                                 cancelSessionTimer();
@@ -1405,8 +1435,11 @@ class SipSessionGroup implements SipListener {
                     if (!mRunning) return;
 
                     if (DEBUG_PING) {
+                        String peerUri = (mPeerProfile == null)
+                                ? "null"
+                                : mPeerProfile.getUriString();
                         Log.d(TAG, "keepalive: " + mLocalProfile.getUriString()
-                                + " --> " + mPeerProfile + ", interval=" + mInterval);
+                                + " --> " + peerUri + ", interval=" + mInterval);
                     }
                     try {
                         sendKeepAlive();
