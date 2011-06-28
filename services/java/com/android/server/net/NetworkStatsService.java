@@ -1062,7 +1062,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 Slog.w(TAG, "kernel does not support bandwidth control");
                 return false;
             }
-            return Settings.Secure.getInt(mResolver, NETSTATS_ENABLED, 1) != 0;
+            // TODO: once things stabilize, enable by default.
+            // For now: ./vendor/google/tools/override-gservices secure:netstats_enabled=1
+            return Settings.Secure.getInt(mResolver, NETSTATS_ENABLED, 0) != 0;
         }
         public long getPollInterval() {
             return getSecureLong(NETSTATS_POLL_INTERVAL, 15 * MINUTE_IN_MILLIS);
