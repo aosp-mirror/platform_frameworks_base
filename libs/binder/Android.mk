@@ -27,7 +27,7 @@ sources := \
     MemoryHeapBase.cpp \
     MemoryHeapPmem.cpp \
     Parcel.cpp \
-    Permission.cpp \
+    PermissionCache.cpp \
     ProcessState.cpp \
     Static.cpp
 
