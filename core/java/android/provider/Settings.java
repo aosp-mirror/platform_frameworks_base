@@ -20,6 +20,7 @@ package android.provider;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.app.SearchManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -3488,6 +3489,18 @@ public final class Settings {
          */
         public static final String SMS_OUTGOING_CHECK_MAX_COUNT =
                 "sms_outgoing_check_max_count";
+
+        /**
+         * The global search provider chosen by the user (if multiple global
+         * search providers are installed). This will be the provider returned
+         * by {@link SearchManager#getGlobalSearchActivity()} if it's still
+         * installed. This setting is stored as a flattened component name as
+         * per {@link ComponentName#flattenToString()}.
+         *
+         * @hide
+         */
+        public static final String SEARCH_GLOBAL_SEARCH_ACTIVITY =
+                "search_global_search_activity";
 
         /**
          * The number of promoted sources in GlobalSearch.

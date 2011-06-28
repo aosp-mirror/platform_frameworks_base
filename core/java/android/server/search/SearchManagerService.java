@@ -23,10 +23,14 @@ import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ResolveInfo;
+import android.database.ContentObserver;
 import android.os.Process;
+import android.provider.Settings;
 import android.util.Log;
 
 import java.util.List;
@@ -46,6 +50,8 @@ public class SearchManagerService extends ISearchManager.Stub {
     // This field is initialized lazily in getSearchables(), and then never modified.
     private Searchables mSearchables;
 
+    private ContentObserver mGlobalSearchObserver;
+
     /**
      * Initializes the Search Manager service in the provided system context.
      * Only one instance of this object should be created!
@@ -56,6 +62,8 @@ public class SearchManagerService extends ISearchManager.Stub {
         mContext = context;
         mContext.registerReceiver(new BootCompletedReceiver(),
                 new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
+        mGlobalSearchObserver = new GlobalSearchProviderObserver(
+                mContext.getContentResolver());
     }
 
     private synchronized Searchables getSearchables() {
@@ -100,6 +108,28 @@ public class SearchManagerService extends ISearchManager.Stub {
         }
     }
 
+    class GlobalSearchProviderObserver extends ContentObserver {
+        private final ContentResolver mResolver;
+
+        public GlobalSearchProviderObserver(ContentResolver resolver) {
+            super(null);
+            mResolver = resolver;
+            mResolver.registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.SEARCH_GLOBAL_SEARCH_ACTIVITY),
+                    false /* notifyDescendants */,
+                    this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            getSearchables().buildSearchableList();
+            Intent intent = new Intent(SearchManager.INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+            mContext.sendBroadcast(intent);
+        }
+
+    }
+
     //
     // Searchable activities API
     //
@@ -124,6 +154,10 @@ public class SearchManagerService extends ISearchManager.Stub {
      */
     public List<SearchableInfo> getSearchablesInGlobalSearch() {
         return getSearchables().getSearchablesInGlobalSearchList();
+    }
+
+    public List<ResolveInfo> getGlobalSearchActivities() {
+        return getSearchables().getGlobalSearchActivities();
     }
 
     /**

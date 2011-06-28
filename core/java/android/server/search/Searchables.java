@@ -16,19 +16,23 @@
 
 package android.server.search;
 
-import android.Manifest;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -50,7 +54,10 @@ public class Searchables {
     private HashMap<ComponentName, SearchableInfo> mSearchablesMap = null;
     private ArrayList<SearchableInfo> mSearchablesList = null;
     private ArrayList<SearchableInfo> mSearchablesInGlobalSearchList = null;
-    private ComponentName mGlobalSearchActivity = null;
+    // Contains all installed activities that handle the global search
+    // intent.
+    private List<ResolveInfo> mGlobalSearchActivities;
+    private ComponentName mCurrentGlobalSearchActivity = null;
     private ComponentName mWebSearchActivity = null;
 
     public static String GOOGLE_SEARCH_COMPONENT_NAME =
@@ -224,8 +231,11 @@ public class Searchables {
             }
         }
 
+        List<ResolveInfo> newGlobalSearchActivities = findGlobalSearchActivities();
+
         // Find the global search activity
-        ComponentName newGlobalSearchActivity = findGlobalSearchActivity();
+        ComponentName newGlobalSearchActivity = findGlobalSearchActivity(
+                newGlobalSearchActivities);
 
         // Find the web search activity
         ComponentName newWebSearchActivity = findWebSearchActivity(newGlobalSearchActivity);
@@ -235,36 +245,122 @@ public class Searchables {
             mSearchablesMap = newSearchablesMap;
             mSearchablesList = newSearchablesList;
             mSearchablesInGlobalSearchList = newSearchablesInGlobalSearchList;
-            mGlobalSearchActivity = newGlobalSearchActivity;
+            mGlobalSearchActivities = newGlobalSearchActivities;
+            mCurrentGlobalSearchActivity = newGlobalSearchActivity;
             mWebSearchActivity = newWebSearchActivity;
         }
     }
-
     /**
-     * Finds the global search activity.
+     * Returns a sorted list of installed search providers as per
+     * the following heuristics:
      *
-     * This is currently implemented by returning the first activity that handles
-     * the GLOBAL_SEARCH intent and has the GLOBAL_SEARCH permission. If we allow
-     * more than one global search activity to be installed, this code must be changed.
+     * (a) System apps are given priority over non system apps.
+     * (b) Among system apps and non system apps, the relative ordering
+     * is defined by their declared priority.
      */
-    private ComponentName findGlobalSearchActivity() {
+    private List<ResolveInfo> findGlobalSearchActivities() {
+        // Step 1 : Query the package manager for a list
+        // of activities that can handle the GLOBAL_SEARCH intent.
         Intent intent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> activities =
                 pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        int count = activities == null ? 0 : activities.size();
-        for (int i = 0; i < count; i++) {
-            ActivityInfo ai = activities.get(i).activityInfo;
-            if (pm.checkPermission(Manifest.permission.GLOBAL_SEARCH,
-                    ai.packageName) == PackageManager.PERMISSION_GRANTED) {
-                return new ComponentName(ai.packageName, ai.name);
-            } else {
-                Log.w(LOG_TAG, "Package " + ai.packageName + " wants to handle GLOBAL_SEARCH, "
-                        + "but does not have the GLOBAL_SEARCH permission.");
+
+        if (activities != null && !activities.isEmpty()) {
+            // Step 2: Rank matching activities according to our heuristics.
+            Collections.sort(activities, GLOBAL_SEARCH_RANKER);
+        }
+
+        return activities;
+    }
+
+    /**
+     * Finds the global search activity.
+     */
+    private ComponentName findGlobalSearchActivity(List<ResolveInfo> installed) {
+        // Fetch the global search provider from the system settings,
+        // and if it's still installed, return it.
+        final String searchProviderSetting = getGlobalSearchProviderSetting();
+        if (!TextUtils.isEmpty(searchProviderSetting)) {
+            final ComponentName globalSearchComponent = ComponentName.unflattenFromString(
+                    searchProviderSetting);
+            if (globalSearchComponent != null && isInstalled(globalSearchComponent)) {
+                return globalSearchComponent;
             }
         }
+
+        return getDefaultGlobalSearchProvider(installed);
+    }
+
+    /**
+     * Checks whether the global search provider with a given
+     * component name is installed on the system or not. This deals with
+     * cases such as the removal of an installed provider.
+     */
+    private boolean isInstalled(ComponentName globalSearch) {
+        Intent intent = new Intent(SearchManager.INTENT_ACTION_GLOBAL_SEARCH);
+        intent.setComponent(globalSearch);
+
+        PackageManager pm = mContext.getPackageManager();
+        List<ResolveInfo> activities =
+                pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+
+        if (activities != null && !activities.isEmpty()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private static final Comparator<ResolveInfo> GLOBAL_SEARCH_RANKER =
+            new Comparator<ResolveInfo>() {
+        @Override
+        public int compare(ResolveInfo lhs, ResolveInfo rhs) {
+            if (lhs == rhs) {
+                return 0;
+            }
+            boolean lhsSystem = isSystemApp(lhs);
+            boolean rhsSystem = isSystemApp(rhs);
+
+            if (lhsSystem && !rhsSystem) {
+                return -1;
+            } else if (rhsSystem && !lhsSystem) {
+                return 1;
+            } else {
+                // Either both system engines, or both non system
+                // engines.
+                //
+                // Note, this isn't a typo. Higher priority numbers imply
+                // higher priority, but are "lower" in the sort order.
+                return rhs.priority - lhs.priority;
+            }
+        }
+    };
+
+    /**
+     * @return true iff. the resolve info corresponds to a system application.
+     */
+    private static final boolean isSystemApp(ResolveInfo res) {
+        return (res.activityInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+    }
+
+    /**
+     * Returns the highest ranked search provider as per the
+     * ranking defined in {@link #getGlobalSearchActivities()}.
+     */
+    private ComponentName getDefaultGlobalSearchProvider(List<ResolveInfo> providerList) {
+        if (providerList != null && !providerList.isEmpty()) {
+            ActivityInfo ai = providerList.get(0).activityInfo;
+            return new ComponentName(ai.packageName, ai.name);
+        }
+
         Log.w(LOG_TAG, "No global search activity found");
         return null;
+    }
+
+    private String getGlobalSearchProviderSetting() {
+        return Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.SEARCH_GLOBAL_SEARCH_ACTIVITY);
     }
 
     /**
@@ -281,9 +377,9 @@ public class Searchables {
         PackageManager pm = mContext.getPackageManager();
         List<ResolveInfo> activities =
                 pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-        int count = activities == null ? 0 : activities.size();
-        for (int i = 0; i < count; i++) {
-            ActivityInfo ai = activities.get(i).activityInfo;
+
+        if (activities != null && !activities.isEmpty()) {
+            ActivityInfo ai = activities.get(0).activityInfo;
             // TODO: do some sanity checks here?
             return new ComponentName(ai.packageName, ai.name);
         }
@@ -307,10 +403,17 @@ public class Searchables {
     }
 
     /**
+     * Returns a list of activities that handle the global search intent.
+     */
+    public synchronized ArrayList<ResolveInfo> getGlobalSearchActivities() {
+        return new ArrayList<ResolveInfo>(mGlobalSearchActivities);
+    }
+
+    /**
      * Gets the name of the global search activity.
      */
     public synchronized ComponentName getGlobalSearchActivity() {
-        return mGlobalSearchActivity;
+        return mCurrentGlobalSearchActivity;
     }
 
     /**
