@@ -89,7 +89,12 @@ class BluetoothBondState {
         return mPendingOutgoingBonding;
     }
 
-    public synchronized void loadBondState() {
+    public synchronized void initBondState() {
+        getProfileProxy();
+        loadBondState();
+    }
+
+    private void loadBondState() {
         if (mService.getBluetoothStateInternal() !=
                 BluetoothAdapter.STATE_TURNING_ON) {
             return;
@@ -108,7 +113,6 @@ class BluetoothBondState {
             mState.put(mService.getAddressFromObjectPath(device).toUpperCase(),
                     BluetoothDevice.BOND_BONDED);
         }
-        getProfileProxy();
     }
 
     public synchronized void setBondState(String address, int state) {
