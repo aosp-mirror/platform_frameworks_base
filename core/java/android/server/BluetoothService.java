@@ -570,7 +570,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
                 mIsDiscovering = false;
                 mBondState.readAutoPairingData();
-                mBondState.loadBondState();
+                mBondState.initBondState();
                 initProfileState();
 
                 // This should be the last step of the the enable thread.
