@@ -18,23 +18,40 @@ package com.android.internal.widget.multiwaveview;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 import android.animation.Animator.AnimatorListener;
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.util.Log;
 
 class Tweener {
     private static final String TAG = "Tweener";
+    private static final boolean DEBUG = false;
 
-    private Object object;
     ObjectAnimator animator;
     private static HashMap<Object, Tweener> sTweens = new HashMap<Object, Tweener>();
 
-    public Tweener(Object obj, ObjectAnimator anim) {
-        object = obj;
+    public Tweener(ObjectAnimator anim) {
         animator = anim;
+    }
+
+    private static void remove(Animator animator) {
+        Iterator<Entry<Object, Tweener>> iter = sTweens.entrySet().iterator();
+        while (iter.hasNext()) {
+            Entry<Object, Tweener> entry = iter.next();
+            if (entry.getValue().animator == animator) {
+                if (DEBUG) Log.v(TAG, "Removing tweener " + sTweens.get(entry.getKey())
+                        + " sTweens.size() = " + sTweens.size());
+                iter.remove();
+                break; // an animator can only be attached to one object
+            }
+        }
     }
 
     public static Tweener to(Object object, long duration, Object... vars) {
@@ -77,32 +94,35 @@ class Tweener {
 
         // Re-use existing tween, if present
         Tweener tween = sTweens.get(object);
+        ObjectAnimator anim = null;
         if (tween == null) {
-            ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(object,
+            anim = ObjectAnimator.ofPropertyValuesHolder(object,
                     props.toArray(new PropertyValuesHolder[props.size()]));
-            tween = new Tweener(object, anim);
+            tween = new Tweener(anim);
             sTweens.put(object, tween);
+            if (DEBUG) Log.v(TAG, "Added new Tweener " + tween);
         } else {
-            tween.animator.cancel();
-            replace(props, object);
+            anim = sTweens.get(object).animator;
+            replace(props, object); // Cancel all animators for given object
         }
 
         if (interpolator != null) {
-            tween.animator.setInterpolator(interpolator);
+            anim.setInterpolator(interpolator);
         }
 
         // Update animation with properties discovered in loop above
-        tween.animator.setStartDelay(delay);
-        tween.animator.setDuration(duration);
+        anim.setStartDelay(delay);
+        anim.setDuration(duration);
         if (updateListener != null) {
-            tween.animator.removeAllUpdateListeners(); // There should be only one
-            tween.animator.addUpdateListener(updateListener);
+            anim.removeAllUpdateListeners(); // There should be only one
+            anim.addUpdateListener(updateListener);
         }
         if (listener != null) {
-            tween.animator.removeAllListeners(); // There should be only one.
-            tween.animator.addListener(listener);
+            anim.removeAllListeners(); // There should be only one.
+            anim.addListener(listener);
         }
-        tween.animator.start();
+        anim.addListener(mCleanupListener);
+        anim.start();
 
         return tween;
     }
@@ -114,18 +134,40 @@ class Tweener {
         return Tweener.to(object, duration, vars);
     }
 
-    static void replace(ArrayList<PropertyValuesHolder> props, Object... args) {
+    // Listener to watch for completed animations and remove them.
+    private static AnimatorListener mCleanupListener = new AnimatorListenerAdapter() {
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            remove(animation);
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            remove(animation);
+        }
+    };
+
+    public static void reset() {
+        if (DEBUG) {
+            Log.v(TAG, "Reset()");
+            if (sTweens.size() > 0) {
+                Log.v(TAG, "Cleaning up " + sTweens.size() + " animations");
+            }
+        }
+        sTweens.clear();
+    }
+
+    private static void replace(ArrayList<PropertyValuesHolder> props, Object... args) {
         for (final Object killobject : args) {
             Tweener tween = sTweens.get(killobject);
             if (tween != null) {
-                if (killobject == tween.object) {
-                    tween.animator.cancel();
-                    if (props != null) {
-                        tween.animator.setValues(
-                                props.toArray(new PropertyValuesHolder[props.size()]));
-                    } else {
-                        sTweens.remove(tween);
-                    }
+                tween.animator.cancel();
+                if (props != null) {
+                    tween.animator.setValues(
+                            props.toArray(new PropertyValuesHolder[props.size()]));
+                } else {
+                    sTweens.remove(tween);
                 }
             }
         }
