@@ -137,6 +137,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final String NOT_A_SUBTYPE_ID_STR = String.valueOf(NOT_A_SUBTYPE_ID);
     private static final String SUBTYPE_MODE_KEYBOARD = "keyboard";
     private static final String SUBTYPE_MODE_VOICE = "voice";
+    private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
 
     final Context mContext;
     final Resources mRes;
@@ -1057,25 +1058,44 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             List<InputMethodInfo> imis = mSettings.getEnabledInputMethodListLocked();
             final int N = imis.size();
-            int count = 0;
+            if (N > 2) return true;
+            if (N < 1) return false;
+            int nonAuxCount = 0;
+            int auxCount = 0;
+            InputMethodSubtype nonAuxSubtype = null;
+            InputMethodSubtype auxSubtype = null;
             for(int i = 0; i < N; ++i) {
                 final InputMethodInfo imi = imis.get(i);
                 final List<InputMethodSubtype> subtypes = getEnabledInputMethodSubtypeListLocked(
                         imi, true);
                 final int subtypeCount = subtypes.size();
                 if (subtypeCount == 0) {
-                    ++count;
+                    ++nonAuxCount;
                 } else {
                     for (int j = 0; j < subtypeCount; ++j) {
-                        if (!subtypes.get(j).isAuxiliary()) {
-                            ++count;
+                        final InputMethodSubtype subtype = subtypes.get(j);
+                        if (!subtype.isAuxiliary()) {
+                            ++nonAuxCount;
+                            nonAuxSubtype = subtype;
+                        } else {
+                            ++auxCount;
+                            auxSubtype = subtype;
                         }
                     }
                 }
-                if (count > 1) return true;
             }
+            if (nonAuxCount > 1 || auxCount > 1) {
+                return true;
+            } else if (nonAuxCount == 1 && auxCount == 1) {
+                if (nonAuxSubtype != null && auxSubtype != null
+                        && nonAuxSubtype.getLocale().equals(auxSubtype.getLocale())
+                        && nonAuxSubtype.containsExtraValueKey(TAG_TRY_SUPPRESSING_IME_SWITCHER)) {
+                    return false;
+                }
+                return true;
+            }
+            return false;
         }
-        return false;
     }
 
     @Override
