@@ -1130,14 +1130,14 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int BUTTON_PRIMARY = 1 << 0;
 
     /**
-     * Button constant: Secondary button (right mouse button, stylus barrel).
+     * Button constant: Secondary button (right mouse button, stylus first button).
      *
      * @see #getButtonState
      */
     public static final int BUTTON_SECONDARY = 1 << 1;
 
     /**
-     * Button constant: Tertiary button (middle mouse button).
+     * Button constant: Tertiary button (middle mouse button, stylus second button).
      *
      * @see #getButtonState
      */
@@ -1165,13 +1165,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      */
     public static final int BUTTON_FORWARD = 1 << 4;
 
-    /**
-     * Button constant: Eraser button pressed (stylus end).
-     *
-     * @see #getButtonState
-     */
-    public static final int BUTTON_ERASER = 1 << 5;
-
     // NOTE: If you add a new axis here you must also add it to:
     //  native/include/android/input.h
 
@@ -1183,7 +1176,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         "BUTTON_TERTIARY",
         "BUTTON_BACK",
         "BUTTON_FORWARD",
-        "BUTTON_ERASER",
+        "0x00000020",
         "0x00000040",
         "0x00000080",
         "0x00000100",
@@ -2176,7 +2169,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see #BUTTON_TERTIARY
      * @see #BUTTON_FORWARD
      * @see #BUTTON_BACK
-     * @see #BUTTON_ERASER
      */
     public final int getButtonState() {
         return nativeGetButtonState(mNativePtr);
