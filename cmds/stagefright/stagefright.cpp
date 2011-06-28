@@ -74,8 +74,6 @@ static String8 gWriteMP4Filename;
 
 static sp<ANativeWindow> gSurface;
 
-#define USE_SURFACE_COMPOSER 0
-
 static int64_t getNowUs() {
     struct timeval tv;
     gettimeofday(&tv, NULL);
@@ -579,6 +577,7 @@ static void usage(const char *me) {
     fprintf(stderr, "       -x display a histogram of decoding times/fps "
                     "(video only)\n");
     fprintf(stderr, "       -S allocate buffers from a surface\n");
+    fprintf(stderr, "       -T allocate buffers from a surface texture\n");
 }
 
 int main(int argc, char **argv) {
@@ -590,6 +589,7 @@ int main(int argc, char **argv) {
     bool extractThumbnail = false;
     bool seekTest = false;
     bool useSurfaceAlloc = false;
+    bool useSurfaceTexAlloc = false;
     gNumRepetitions = 1;
     gMaxNumFrames = 0;
     gReproduceBug = -1;
@@ -604,7 +604,7 @@ int main(int argc, char **argv) {
     sp<LiveSession> liveSession;
 
     int res;
-    while ((res = getopt(argc, argv, "han:lm:b:ptsrow:kxS")) >= 0) {
+    while ((res = getopt(argc, argv, "han:lm:b:ptsrow:kxST")) >= 0) {
         switch (res) {
             case 'a':
             {
@@ -692,6 +692,12 @@ int main(int argc, char **argv) {
             case 'S':
             {
                 useSurfaceAlloc = true;
+                break;
+            }
+
+            case 'T':
+            {
+                useSurfaceTexAlloc = true;
                 break;
             }
 
@@ -843,34 +849,35 @@ int main(int argc, char **argv) {
     sp<SurfaceComposerClient> composerClient;
     sp<SurfaceControl> control;
 
-    if (useSurfaceAlloc && !audioOnly) {
-#if USE_SURFACE_COMPOSER
-        composerClient = new SurfaceComposerClient;
-        CHECK_EQ(composerClient->initCheck(), (status_t)OK);
+    if ((useSurfaceAlloc || useSurfaceTexAlloc) && !audioOnly) {
+        if (useSurfaceAlloc) {
+            composerClient = new SurfaceComposerClient;
+            CHECK_EQ(composerClient->initCheck(), (status_t)OK);
 
-        control = composerClient->createSurface(
-                getpid(),
-                String8("A Surface"),
-                0,
-                1280,
-                800,
-                PIXEL_FORMAT_RGB_565,
-                0);
+            control = composerClient->createSurface(
+                    String8("A Surface"),
+                    0,
+                    1280,
+                    800,
+                    PIXEL_FORMAT_RGB_565,
+                    0);
 
-        CHECK(control != NULL);
-        CHECK(control->isValid());
+            CHECK(control != NULL);
+            CHECK(control->isValid());
 
-        CHECK_EQ(composerClient->openTransaction(), (status_t)OK);
-        CHECK_EQ(control->setLayer(30000), (status_t)OK);
-        CHECK_EQ(control->show(), (status_t)OK);
-        CHECK_EQ(composerClient->closeTransaction(), (status_t)OK);
+            CHECK_EQ(composerClient->openTransaction(), (status_t)OK);
+            CHECK_EQ(control->setLayer(30000), (status_t)OK);
+            CHECK_EQ(control->show(), (status_t)OK);
+            CHECK_EQ(composerClient->closeTransaction(), (status_t)OK);
 
-        gSurface = control->getSurface();
-        CHECK(gSurface != NULL);
-#else
-        sp<SurfaceTexture> texture = new SurfaceTexture(0 /* tex */);
-        gSurface = new SurfaceTextureClient(texture);
-#endif
+            gSurface = control->getSurface();
+            CHECK(gSurface != NULL);
+        } else {
+            CHECK(useSurfaceTexAlloc);
+
+            sp<SurfaceTexture> texture = new SurfaceTexture(0 /* tex */);
+            gSurface = new SurfaceTextureClient(texture);
+        }
     }
 
     DataSource::RegisterDefaultSniffers();
@@ -1061,12 +1068,12 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (useSurfaceAlloc && !audioOnly) {
+    if ((useSurfaceAlloc || useSurfaceTexAlloc) && !audioOnly) {
         gSurface.clear();
 
-#if USE_SURFACE_COMPOSER
-        composerClient->dispose();
-#endif
+        if (useSurfaceAlloc) {
+            composerClient->dispose();
+        }
     }
 
     client.disconnect();
