@@ -22,6 +22,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -374,6 +375,17 @@ public class SearchManager
             = "android.search.action.SEARCHABLES_CHANGED";
 
     /**
+     * Intent action to be broadcast to inform that the global search provider
+     * has changed. Normal components will have no need to handle this intent since
+     * they should be using API methods from this class to access the global search
+     * activity
+     *
+     * @hide
+     */
+    public final static String INTENT_GLOBAL_SEARCH_ACTIVITY_CHANGED
+            = "android.search.action.GLOBAL_SEARCH_ACTIVITY_CHANGED";
+
+    /**
      * Intent action broadcasted to inform that the search settings have changed in some way.
      * Either searchables have been enabled or disabled, or a different web search provider
      * has been chosen.
@@ -522,6 +534,21 @@ public class SearchManager
             mContext.startActivity(intent);
         } catch (ActivityNotFoundException ex) {
             Log.e(TAG, "Global search activity not found: " + globalSearchActivity);
+        }
+    }
+
+    /**
+     * Returns a list of installed apps that handle the global search
+     * intent.
+     *
+     * @hide
+     */
+    public List<ResolveInfo> getGlobalSearchActivities() {
+        try {
+            return mService.getGlobalSearchActivities();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getGlobalSearchActivities() failed: " + ex);
+            return null;
         }
     }
 
