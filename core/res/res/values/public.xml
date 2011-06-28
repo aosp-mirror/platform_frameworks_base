@@ -1782,4 +1782,5 @@
   <public type="integer" name="status_bar_notification_info_maxnum" />
   <public type="string" name="status_bar_notification_info_overflow" />
 
+  <public type="attr" name="textDirection"/>
 </resources>

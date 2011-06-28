@@ -122,9 +122,6 @@ public class BiDiTestActivity extends Activity {
         addItem(result, "Table RTL", BiDiTestTableLayoutRtl.class, R.id.table_layout_rtl);
         addItem(result, "Table LOC", BiDiTestTableLayoutLocale.class, R.id.table_layout_locale);
 
-        addItem(result, "ViewPadding", BiDiTestViewPadding.class, R.id.view_padding);
-        addItem(result, "ViewPadding MIXED", BiDiTestViewPaddingMixed.class, R.id.view_padding_mixed);
-
         addItem(result, "Padding", BiDiTestViewPadding.class, R.id.view_padding);
         addItem(result, "Padding MIXED", BiDiTestViewPaddingMixed.class, R.id.view_padding_mixed);
 
@@ -133,6 +130,9 @@ public class BiDiTestActivity extends Activity {
         addItem(result, "TextView LTR", BiDiTestTextViewLtr.class, R.id.textview_ltr);
         addItem(result, "TextView RTL", BiDiTestTextViewRtl.class, R.id.textview_rtl);
         addItem(result, "TextView LOC", BiDiTestTextViewLocale.class, R.id.textview_locale);
+
+        addItem(result, "TextDirection LTR", BiDiTestTextViewDirectionLtr.class, R.id.textview_direction_ltr);
+        addItem(result, "TextDirection RTL", BiDiTestTextViewDirectionRtl.class, R.id.textview_direction_rtl);
 
         return result;
     }

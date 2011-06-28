@@ -46,6 +46,7 @@ import com.android.internal.util.Predicate;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Locale;
 
 /**
  * <p>
@@ -5011,6 +5012,51 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             final View child = getChildAt(i);
             if (child.getLayoutDirection() == LAYOUT_DIRECTION_INHERIT) {
                 child.resetLayoutDirectionResolution();
+            }
+        }
+    }
+
+    /**
+     * This method will be called during text direction resolution (text direction resolution
+     * inheritance)
+     */
+    @Override
+    protected void resolveTextDirection() {
+        int resolvedTextDirection = TEXT_DIRECTION_UNDEFINED;
+        switch(mTextDirection) {
+            default:
+            case TEXT_DIRECTION_INHERIT:
+                // Try to the text direction from the parent layout
+                if (mParent != null && mParent instanceof ViewGroup) {
+                    resolvedTextDirection = ((ViewGroup) mParent).getResolvedTextDirection();
+                } else {
+                    // We reached the top of the View hierarchy, so get the direction from
+                    // the Locale
+                    resolvedTextDirection = isLayoutDirectionRtl(Locale.getDefault()) ?
+                            TEXT_DIRECTION_RTL : TEXT_DIRECTION_LTR;
+                }
+                break;
+            // Pass down the hierarchy the following text direction values
+            case TEXT_DIRECTION_FIRST_STRONG:
+            case TEXT_DIRECTION_ANY_RTL:
+            case TEXT_DIRECTION_LTR:
+            case TEXT_DIRECTION_RTL:
+                resolvedTextDirection = mTextDirection;
+                break;
+        }
+        mResolvedTextDirection = resolvedTextDirection;
+    }
+
+    @Override
+    protected void resetResolvedTextDirection() {
+        super.resetResolvedTextDirection();
+
+        // Take care of resetting the children resolution too
+        final int count = getChildCount();
+        for (int i = 0; i < count; i++) {
+            final View child = getChildAt(i);
+            if (child.getTextDirection() == TEXT_DIRECTION_INHERIT) {
+                child.resetResolvedTextDirection();
             }
         }
     }

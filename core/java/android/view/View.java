@@ -2493,6 +2493,84 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     private boolean mSendingHoverAccessibilityEvents;
 
     /**
+     * Undefined text direction (used by resolution algorithm).
+     * @hide
+     */
+    public static final int TEXT_DIRECTION_UNDEFINED = -1;
+
+    /**
+     * Text direction is inherited thru {@link ViewGroup}
+     * @hide
+     */
+    public static final int TEXT_DIRECTION_INHERIT = 0;
+
+    /**
+     * Text direction is using "first strong algorithm". The first strong directional character
+     * determines the paragraph direction. If there is no strong directional character, the
+     * paragraph direction is the view’s resolved ayout direction.
+     *
+     * @hide
+     */
+    public static final int TEXT_DIRECTION_FIRST_STRONG = 1;
+
+    /**
+     * Text direction is using "any-RTL" algorithm. The paragraph direction is RTL if it contains
+     * any strong RTL character, otherwise it is LTR if it contains any strong LTR characters.
+     * If there are neither, the paragraph direction is the view’s resolved layout direction.
+     *
+     * @hide
+     */
+    public static final int TEXT_DIRECTION_ANY_RTL = 2;
+
+    /**
+     * Text direction is forced to LTR.
+     *
+     * @hide
+     */
+    public static final int TEXT_DIRECTION_LTR = 3;
+
+    /**
+     * Text direction is forced to RTL.
+     *
+     * @hide
+     */
+    public static final int TEXT_DIRECTION_RTL = 4;
+
+    /**
+     * Default text direction is inherited
+     */
+    protected static int DEFAULT_TEXT_DIRECTION = TEXT_DIRECTION_INHERIT;
+
+    /**
+     * The text direction that has been defined by {@link #setTextDirection(int)}.
+     *
+     * {@hide}
+     */
+    @ViewDebug.ExportedProperty(category = "text", mapping = {
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_UNDEFINED, to = "UNDEFINED"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG, to = "FIRST_STRONG"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_ANY_RTL, to = "ANY_RTL"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL")
+    })
+    protected int mTextDirection = DEFAULT_TEXT_DIRECTION;
+
+    /**
+     * The resolved text direction. If resolution has not yet been done or has been reset, it will
+     * be equal to {@link #TEXT_DIRECTION_UNDEFINED}. Otherwise it will be either {@link #TEXT_DIRECTION_LTR}
+     * or {@link #TEXT_DIRECTION_RTL}.
+     *
+     * {@hide}
+     */
+    @ViewDebug.ExportedProperty(category = "text", mapping = {
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_UNDEFINED, to = "UNDEFINED"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL")
+    })
+    protected int mResolvedTextDirection = TEXT_DIRECTION_UNDEFINED;
+
+    /**
      * Consistency verifier for debugging purposes.
      * @hide
      */
@@ -2864,6 +2942,9 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                     break;
                 case R.styleable.View_layerType:
                     setLayerType(a.getInt(attr, LAYER_TYPE_NONE), null);
+                    break;
+                case R.styleable.View_textDirection:
+                    mTextDirection = a.getInt(attr, DEFAULT_TEXT_DIRECTION);
                     break;
             }
         }
@@ -8951,6 +9032,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         resetLayoutDirectionResolution();
         resolveLayoutDirectionIfNeeded();
         resolvePadding();
+        resetResolvedTextDirection();
+        resolveTextDirection();
         if (isFocused()) {
             InputMethodManager imm = InputMethodManager.peekInstance();
             imm.focusIn(this);
@@ -9051,7 +9134,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @param locale Locale to check
      * @return true if a Locale is corresponding to a RTL script.
      */
-    private static boolean isLayoutDirectionRtl(Locale locale) {
+    protected static boolean isLayoutDirectionRtl(Locale locale) {
         return (LocaleUtil.TEXT_LAYOUT_DIRECTION_RTL_DO_NOT_USE ==
                 LocaleUtil.getLayoutDirectionFromLocale(locale));
     }
@@ -12896,6 +12979,89 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     protected float getHorizontalScrollFactor() {
         // TODO: Should use something else.
         return getVerticalScrollFactor();
+    }
+
+    /**
+     * Return the value specifying the text direction or policy that was set with
+     * {@link #setTextDirection(int)}.
+     *
+     * @return the defined text direction. It can be one of:
+     *
+     * {@link #TEXT_DIRECTION_INHERIT},
+     * {@link #TEXT_DIRECTION_FIRST_STRONG}
+     * {@link #TEXT_DIRECTION_ANY_RTL},
+     * {@link #TEXT_DIRECTION_LTR},
+     * {@link #TEXT_DIRECTION_RTL},
+     *
+     * @hide
+     */
+    public int getTextDirection() {
+        return mTextDirection;
+    }
+
+    /**
+     * Set the text direction.
+     *
+     * @param textDirection the direction to set. Should be one of:
+     *
+     * {@link #TEXT_DIRECTION_INHERIT},
+     * {@link #TEXT_DIRECTION_FIRST_STRONG}
+     * {@link #TEXT_DIRECTION_ANY_RTL},
+     * {@link #TEXT_DIRECTION_LTR},
+     * {@link #TEXT_DIRECTION_RTL},
+     *
+     * @hide
+     */
+    public void setTextDirection(int textDirection) {
+        if (textDirection != mTextDirection) {
+            mTextDirection = textDirection;
+            resetResolvedTextDirection();
+            requestLayout();
+        }
+    }
+
+    /**
+     * Return the resolved text direction.
+     *
+     * @return the resolved text direction. Return one of:
+     *
+     * {@link #TEXT_DIRECTION_LTR},
+     * {@link #TEXT_DIRECTION_RTL},
+     *
+     * @hide
+     */
+    public int getResolvedTextDirection() {
+        if (!isResolvedTextDirection()) {
+            resolveTextDirection();
+        }
+        return mResolvedTextDirection;
+    }
+
+    /**
+     * Resolve the text direction. Classes that extend View and want to do a specific text direction
+     * resolution will need to implement this method and set the mResolvedTextDirection to
+     * either TEXT_DIRECTION_LTR if direction is LTR or TEXT_DIRECTION_RTL if
+     * direction is RTL.
+     */
+    protected void resolveTextDirection() {
+    }
+
+    /**
+     * Return if the text direction has been resolved or not.
+     *
+     * @return true, if resolved and false if not resolved
+     *
+     * @hide
+     */
+    public boolean isResolvedTextDirection() {
+        return (mResolvedTextDirection != TEXT_DIRECTION_UNDEFINED);
+    }
+
+    /**
+     * Reset resolved text direction. Will be resolved during a call to getResolvedLayoutDirection().
+     */
+    protected void resetResolvedTextDirection() {
+        mResolvedTextDirection = TEXT_DIRECTION_UNDEFINED;
     }
 
     //
