@@ -63,15 +63,7 @@ public class VoicemailContract {
     // TODO: Move ACTION_NEW_VOICEMAIL to the Intent class.
     /** Broadcast intent when a new voicemail record is inserted. */
     public static final String ACTION_NEW_VOICEMAIL = "android.intent.action.NEW_VOICEMAIL";
-    /**
-     * Extra included in {@value Intent#ACTION_PROVIDER_CHANGED} and
-     * {@value #ACTION_NEW_VOICEMAIL} broadcast intents to indicate the package
-     * that caused the change in content provider.
-     * <p>Receivers of the broadcast can use this field to determine if this is
-     * a self change.
-     * @deprecated {@link #EXTRA_SELF_CHANGE} is now populated instead.
-     */
-    public static final String EXTRA_CHANGED_BY = "com.android.voicemail.extra.CHANGED_BY";
+
     /**
      * Extra included in {@value Intent#ACTION_PROVIDER_CHANGED} and
      * {@value #ACTION_NEW_VOICEMAIL} broadcast intents to indicate if the receiving
