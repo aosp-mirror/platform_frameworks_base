@@ -144,10 +144,6 @@ public class SurfaceTexture {
      */
     public void updateTexImage() {
         nativeUpdateTexImage();
-        if (nativeGetQueuedCount() > 0) {
-            Message m = mEventHandler.obtainMessage();
-            mEventHandler.sendMessage(m);
-        }
     }
 
     /**

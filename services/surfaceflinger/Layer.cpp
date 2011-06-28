@@ -101,9 +101,8 @@ Layer::~Layer()
 }
 
 void Layer::onFrameQueued() {
-    if (android_atomic_or(1, &mQueuedFrames) == 0) {
-        mFlinger->signalEvent();
-    }
+    android_atomic_inc(&mQueuedFrames);
+    mFlinger->signalEvent();
 }
 
 // called with SurfaceFlinger::mStateLock as soon as the layer is entered
@@ -406,18 +405,16 @@ bool Layer::isCropped() const {
 
 void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 {
-    if (android_atomic_and(0, &mQueuedFrames)) {
+    if (mQueuedFrames > 0) {
+        // signal another event if we have more frames pending
+        if (android_atomic_dec(&mQueuedFrames) > 1) {
+            mFlinger->signalEvent();
+        }
+
         if (mSurfaceTexture->updateTexImage() < NO_ERROR) {
             // something happened!
             recomputeVisibleRegions = true;
             return;
-        }
-
-        // signal another event if we have more frames waiting
-        if (mSurfaceTexture->getQueuedCount()) {
-            if (android_atomic_or(1, &mQueuedFrames) == 0) {
-                mFlinger->signalEvent();
-            }
         }
 
         mActiveBuffer = mSurfaceTexture->getCurrentBuffer();
