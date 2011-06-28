@@ -21426,7 +21426,6 @@ package android.view {
     field public static final int AXIS_Y = 1; // 0x1
     field public static final int AXIS_Z = 11; // 0xb
     field public static final int BUTTON_BACK = 8; // 0x8
-    field public static final int BUTTON_ERASER = 32; // 0x20
     field public static final int BUTTON_FORWARD = 16; // 0x10
     field public static final int BUTTON_PRIMARY = 1; // 0x1
     field public static final int BUTTON_SECONDARY = 2; // 0x2
@@ -22011,6 +22010,7 @@ package android.view {
     method public void setOnDragListener(android.view.View.OnDragListener);
     method public void setOnFocusChangeListener(android.view.View.OnFocusChangeListener);
     method public void setOnGenericMotionListener(android.view.View.OnGenericMotionListener);
+    method public void setOnHoverListener(android.view.View.OnHoverListener);
     method public void setOnKeyListener(android.view.View.OnKeyListener);
     method public void setOnLongClickListener(android.view.View.OnLongClickListener);
     method public void setOnSystemUiVisibilityChangeListener(android.view.View.OnSystemUiVisibilityChangeListener);

@@ -154,14 +154,15 @@ static uint32_t getButtonStateForScanCode(int32_t scanCode) {
     case BTN_LEFT:
         return AMOTION_EVENT_BUTTON_PRIMARY;
     case BTN_RIGHT:
+    case BTN_STYLUS:
         return AMOTION_EVENT_BUTTON_SECONDARY;
     case BTN_MIDDLE:
+    case BTN_STYLUS2:
         return AMOTION_EVENT_BUTTON_TERTIARY;
     case BTN_SIDE:
         return AMOTION_EVENT_BUTTON_BACK;
-    case BTN_EXTRA:
-        return AMOTION_EVENT_BUTTON_FORWARD;
     case BTN_FORWARD:
+    case BTN_EXTRA:
         return AMOTION_EVENT_BUTTON_FORWARD;
     case BTN_BACK:
         return AMOTION_EVENT_BUTTON_BACK;
@@ -176,8 +177,7 @@ static uint32_t getButtonStateForScanCode(int32_t scanCode) {
 static bool isPointerDown(int32_t buttonState) {
     return buttonState &
             (AMOTION_EVENT_BUTTON_PRIMARY | AMOTION_EVENT_BUTTON_SECONDARY
-                    | AMOTION_EVENT_BUTTON_TERTIARY
-                    | AMOTION_EVENT_BUTTON_ERASER);
+                    | AMOTION_EVENT_BUTTON_TERTIARY);
 }
 
 static int32_t calculateEdgeFlagsUsingPointerBounds(

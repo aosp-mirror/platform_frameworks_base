@@ -3390,6 +3390,14 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
+     * Register a callback to be invoked when a hover event is sent to this view.
+     * @param l the hover listener to attach to this view
+     */
+    public void setOnHoverListener(OnHoverListener l) {
+        mOnHoverListener = l;
+    }
+
+    /**
      * Register a drag event listener callback object for this View. The parameter is
      * an implementation of {@link android.view.View.OnDragListener}. To send a drag event to a
      * View, the system calls the
