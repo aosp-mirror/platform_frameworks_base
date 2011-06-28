@@ -699,9 +699,10 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 float* vertices = getFloats(verticesCount);
                 bool hasColors = getInt();
                 int* colors = hasColors ? getInts(colorsCount) : NULL;
+                SkPaint* paint = getPaint();
 
                 DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
-                renderer.drawBitmapMesh(bitmap, meshWidth, meshHeight, vertices, colors, getPaint());
+                renderer.drawBitmapMesh(bitmap, meshWidth, meshHeight, vertices, colors, paint);
             }
             break;
             case DrawPatch: {
@@ -718,9 +719,15 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
                 yDivs = getInts(yDivsCount);
                 colors = getUInts(numColors);
 
+                float left = getFloat();
+                float top = getFloat();
+                float right = getFloat();
+                float bottom = getFloat();
+                SkPaint* paint = getPaint();
+
                 DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
                 renderer.drawPatch(bitmap, xDivs, yDivs, colors, xDivsCount, yDivsCount,
-                        numColors, getFloat(), getFloat(), getFloat(), getFloat(), getPaint());
+                        numColors, left, top, right, bottom, paint);
             }
             break;
             case DrawColor: {
@@ -799,15 +806,17 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
             case DrawLines: {
                 int count = 0;
                 float* points = getFloats(count);
+                SkPaint* paint = getPaint();
                 DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
-                renderer.drawLines(points, count, getPaint());
+                renderer.drawLines(points, count, paint);
             }
             break;
             case DrawPoints: {
                 int count = 0;
                 float* points = getFloats(count);
+                SkPaint* paint = getPaint();
                 DISPLAY_LIST_LOGD("%s%s", (char*) indent, OP_NAMES[op]);
-                renderer.drawPoints(points, count, getPaint());
+                renderer.drawPoints(points, count, paint);
             }
             break;
             case DrawText: {
