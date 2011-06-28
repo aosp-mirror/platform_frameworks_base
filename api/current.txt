@@ -11446,11 +11446,14 @@ package android.net.http {
   }
 
   public class SslError {
-    ctor public SslError(int, android.net.http.SslCertificate);
-    ctor public SslError(int, java.security.cert.X509Certificate);
+    ctor public deprecated SslError(int, android.net.http.SslCertificate);
+    ctor public deprecated SslError(int, java.security.cert.X509Certificate);
+    ctor public SslError(int, android.net.http.SslCertificate, java.lang.String);
+    ctor public SslError(int, java.security.cert.X509Certificate, java.lang.String);
     method public boolean addError(int);
     method public android.net.http.SslCertificate getCertificate();
     method public int getPrimaryError();
+    method public java.lang.String getUrl();
     method public boolean hasError(int);
     field public static final int SSL_EXPIRED = 1; // 0x1
     field public static final int SSL_IDMISMATCH = 2; // 0x2
