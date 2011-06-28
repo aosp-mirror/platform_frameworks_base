@@ -22,6 +22,7 @@ import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
+import android.app.PendingIntent;
 import android.net.LinkAddress;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
@@ -35,8 +36,10 @@ import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -68,6 +71,8 @@ public abstract class DataConnection extends StateMachine {
     protected static int mCount;
     protected AsyncChannel mAc;
 
+    private List<ApnContext> mApnList = null;
+    PendingIntent mReconnectIntent = null;
 
     /**
      * Used internally for saving connecting parameters.
@@ -250,6 +255,8 @@ public abstract class DataConnection extends StateMachine {
             addState(mDisconnectingState, mDefaultState);
             addState(mDisconnectingErrorCreatingConnection, mDefaultState);
         setInitialState(mInactiveState);
+
+        mApnList = new ArrayList<ApnContext>();
         if (DBG) log("DataConnection constructor X");
     }
 
@@ -662,7 +669,41 @@ public abstract class DataConnection extends StateMachine {
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_REFCOUNT, mRefCount);
                     break;
                 }
-
+                case DataConnectionAc.REQ_ADD_APNCONTEXT: {
+                    ApnContext apnContext = (ApnContext) msg.obj;
+                    if (VDBG) log("REQ_ADD_APNCONTEXT apn=" + apnContext.getApnType());
+                    if (!mApnList.contains(apnContext)) {
+                        mApnList.add(apnContext);
+                    }
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_ADD_APNCONTEXT);
+                    break;
+                }
+                case DataConnectionAc.REQ_REMOVE_APNCONTEXT: {
+                    ApnContext apnContext = (ApnContext) msg.obj;
+                    if (VDBG) log("REQ_REMOVE_APNCONTEXT apn=" + apnContext.getApnType());
+                    mApnList.remove(apnContext);
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_REMOVE_APNCONTEXT);
+                    break;
+                }
+                case DataConnectionAc.REQ_GET_APNCONTEXT_LIST: {
+                    if (VDBG) log("REQ_GET_APNCONTEXT_LIST num in list=" + mApnList.size());
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_APNCONTEXT_LIST,
+                                       new ArrayList(mApnList));
+                    break;
+                }
+                case DataConnectionAc.REQ_SET_RECONNECT_INTENT: {
+                    PendingIntent intent = (PendingIntent) msg.obj;
+                    if (VDBG) log("REQ_SET_RECONNECT_INTENT");
+                    mReconnectIntent = intent;
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_SET_RECONNECT_INTENT);
+                    break;
+                }
+                case DataConnectionAc.REQ_GET_RECONNECT_INTENT: {
+                    if (VDBG) log("REQ_GET_RECONNECT_INTENT");
+                    mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_RECONNECT_INTENT,
+                                       mReconnectIntent);
+                    break;
+                }
                 case EVENT_CONNECT:
                     if (DBG) log("DcDefaultState: msg.what=EVENT_CONNECT, fail not expected");
                     ConnectionParams cp = (ConnectionParams) msg.obj;
