@@ -531,7 +531,12 @@ public class SettingsBackupAgent extends BackupAgentHelper {
     private void restoreFileData(String filename, BackupDataInput data) {
         byte[] bytes = new byte[data.getDataSize()];
         if (bytes.length <= 0) return;
-        restoreFileData(filename, bytes, bytes.length);
+        try {
+            data.readEntityData(bytes, 0, data.getDataSize());
+            restoreFileData(filename, bytes, bytes.length);
+        } catch (IOException e) {
+            Log.w(TAG, "Unable to read file data for " + filename);
+        }
     }
 
     private void restoreFileData(String filename, byte[] bytes, int size) {
