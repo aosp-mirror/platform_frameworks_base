@@ -75,11 +75,21 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertEquals(KeyStore.State.UNLOCKED, mKeyStore.state());
     }
 
+    public void testGet() throws Exception {
+        assertNull(mKeyStore.get(TEST_KEYNAME));
+        mKeyStore.password(TEST_PASSWD);
+        assertNull(mKeyStore.get(TEST_KEYNAME));
+        assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE));
+        assertTrue(Arrays.equals(TEST_KEYVALUE, mKeyStore.get(TEST_KEYNAME)));
+    }
+
     public void testPut() throws Exception {
+        assertNull(mKeyStore.get(TEST_KEYNAME));
         assertFalse(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE));
         assertFalse(mKeyStore.contains(TEST_KEYNAME));
         mKeyStore.password(TEST_PASSWD);
         assertTrue(mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE));
+        assertTrue(Arrays.equals(TEST_KEYVALUE, mKeyStore.get(TEST_KEYNAME)));
     }
 
     public void testI18n() throws Exception {
@@ -96,7 +106,9 @@ public class KeyStoreTest extends ActivityUnitTestCase<Activity> {
         assertTrue(mKeyStore.delete(TEST_KEYNAME));
 
         mKeyStore.put(TEST_KEYNAME, TEST_KEYVALUE);
+        assertTrue(Arrays.equals(TEST_KEYVALUE, mKeyStore.get(TEST_KEYNAME)));
         assertTrue(mKeyStore.delete(TEST_KEYNAME));
+        assertNull(mKeyStore.get(TEST_KEYNAME));
     }
 
     public void testContains() throws Exception {
