@@ -40,9 +40,18 @@ public class NavigationBarView extends LinearLayout {
 
     protected IStatusBarService mBarService;
     final Display mDisplay;
+    View mCurrentView = null;
     View[] mRotatedViews = new View[4];
     View mBackground;
     Animator mLastAnimator = null;
+
+    public View getRecentsButton() {
+        return mCurrentView.findViewById(R.id.recent_apps);
+    }
+
+    public View getMenuButton() {
+        return mCurrentView.findViewById(R.id.menu);
+    }
 
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -93,6 +102,8 @@ public class NavigationBarView extends LinearLayout {
         mRotatedViews[Surface.ROTATION_270] = NAVBAR_ALWAYS_AT_RIGHT
                                                 ? findViewById(R.id.rot90)
                                                 : findViewById(R.id.rot270);
+
+        mCurrentView = mRotatedViews[Surface.ROTATION_0];
     }
 
     @Override
@@ -107,7 +118,8 @@ public class NavigationBarView extends LinearLayout {
         for (int i=0; i<4; i++) {
             mRotatedViews[i].setVisibility(View.GONE);
         }
-        mRotatedViews[rot].setVisibility(View.VISIBLE);
+        mCurrentView = mRotatedViews[rot];
+        mCurrentView.setVisibility(View.VISIBLE);
 
         android.util.Log.d("NavigationBarView", "reorient(): rot=" + mDisplay.getRotation());
     }
