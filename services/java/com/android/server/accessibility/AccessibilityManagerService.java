@@ -550,6 +550,26 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private void notifyEventListenerLocked(Service service, int eventType) {
         IEventListener listener = service.mServiceInterface;
         AccessibilityEvent event = service.mPendingEvents.get(eventType);
+
+        // Check for null here because there is a concurrent scenario in which this
+        // happens: 1) A binder thread calls notifyAccessibilityServiceDelayedLocked
+        // which posts a message for dispatching an event. 2) The message is pulled
+        // from the queue by the handler on the service thread and the latter is
+        // just about to acquire the lock and call this method. 3) Now another binder
+        // thread acquires the lock calling notifyAccessibilityServiceDelayedLocked
+        // so the service thread waits for the lock; 4) The binder thread replaces
+        // the event with a more recent one (assume the same event type) and posts a
+        // dispatch request releasing the lock. 5) Now the main thread is unblocked and
+        // dispatches the event which is removed from the pending ones. 6) And ... now
+        // the service thread handles the last message posted by the last binder call
+        // but the event is already dispatched and hence looking it up in the pending
+        // ones yields null. This check is much simpler that keeping count for each
+        // event type of each service to catch such a scenario since only one message
+        // is processed at a time.
+        if (event == null) {
+            return;
+        }
+
         service.mPendingEvents.remove(eventType);
         try {
             if (mSecurityPolicy.canRetrieveWindowContent(service)) {
