@@ -1150,11 +1150,12 @@ class BrowserFrame extends Handler {
      * {@link #nativeSslCertErrorProceed(int)} or
      * {@link #nativeSslCertErrorCancel(int, int)}.
      */
-    private void reportSslCertError(final int handle, final int cert_error, byte cert_der[]) {
+    private void reportSslCertError(
+            final int handle, final int cert_error, byte cert_der[], String url) {
         final SslError ssl_error;
         try {
             X509Certificate cert = new X509CertImpl(cert_der);
-            ssl_error = new SslError(cert_error, cert);
+            ssl_error = new SslError(cert_error, cert, url);
         } catch (IOException e) {
             // Can't get the certificate, not much to do.
             Log.e(LOGTAG, "Can't get the certificate from WebKit, canceling");

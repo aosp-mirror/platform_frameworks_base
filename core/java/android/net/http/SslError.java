@@ -59,33 +59,94 @@ public class SslError {
     /**
      * The SSL certificate associated with the error set
      */
-    SslCertificate mCertificate;
+    final SslCertificate mCertificate;
+
+    /**
+     * The URL associated with the error set.
+     */
+    final String mUrl;
 
     /**
      * Creates a new SSL error set object
      * @param error The SSL error
      * @param certificate The associated SSL certificate
+     * @deprecated Use {@link #SslError(int, SslCertificate, String)}
      */
+    @Deprecated
     public SslError(int error, SslCertificate certificate) {
         addError(error);
+        if (certificate == null) {
+            throw new NullPointerException("certificate is null.");
+        }
         mCertificate = certificate;
+        mUrl = "";
     }
 
     /**
      * Creates a new SSL error set object
      * @param error The SSL error
      * @param certificate The associated SSL certificate
+     * @deprecated Use {@link #SslError(int, X509Certificate, String)}
      */
+    @Deprecated
     public SslError(int error, X509Certificate certificate) {
         addError(error);
+        if (certificate == null) {
+            throw new NullPointerException("certificate is null.");
+        }
         mCertificate = new SslCertificate(certificate);
+        mUrl = "";
     }
 
     /**
-     * @return The SSL certificate associated with the error set
+     * Creates a new SSL error set object
+     * @param error The SSL error
+     * @param certificate The associated SSL certificate
+     * @param url The associated URL.
+     */
+    public SslError(int error, SslCertificate certificate, String url) {
+        addError(error);
+        if (certificate == null) {
+            throw new NullPointerException("certificate is null.");
+        }
+        mCertificate = certificate;
+        if (url == null) {
+            throw new NullPointerException("url is null.");
+        }
+        mUrl = url;
+    }
+
+    /**
+     * Creates a new SSL error set object
+     * @param error The SSL error
+     * @param certificate The associated SSL certificate
+     * @param url The associated URL.
+     */
+    public SslError(int error, X509Certificate certificate, String url) {
+        addError(error);
+        if (certificate == null) {
+            throw new NullPointerException("certificate is null.");
+        }
+        mCertificate = new SslCertificate(certificate);
+        if (url == null) {
+            throw new NullPointerException("url is null.");
+        }
+        mUrl = url;
+    }
+
+    /**
+     * @return The SSL certificate associated with the error set, non-null.
      */
     public SslCertificate getCertificate() {
         return mCertificate;
+    }
+
+    /**
+     * @return The URL associated with the error set, non-null.
+     * "" if one of the deprecated constructors is used.
+     */
+    public String getUrl() {
+        return mUrl;
     }
 
     /**
@@ -137,6 +198,7 @@ public class SslError {
      */
     public String toString() {
         return "primary error: " + getPrimaryError() +
-            " certificate: " + getCertificate();
+            " certificate: " + getCertificate() +
+            "  on URL: " + getUrl();
     }
 }
