@@ -284,7 +284,7 @@ public class TabletTicker
         } else if (n.tickerText != null) {
             group = (ViewGroup)inflater.inflate(R.layout.status_bar_ticker_compat, mWindow, false);
             final Drawable icon = StatusBarIconView.getIcon(mContext,
-                    new StatusBarIcon(notification.pkg, n.icon, n.iconLevel, 0));
+                    new StatusBarIcon(notification.pkg, n.icon, n.iconLevel, 0, n.tickerText));
             ImageView iv = (ImageView)group.findViewById(iconId);
             iv.setImageDrawable(icon);
             iv.setVisibility(View.VISIBLE);

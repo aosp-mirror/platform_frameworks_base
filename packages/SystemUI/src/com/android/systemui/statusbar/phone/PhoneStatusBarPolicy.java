@@ -18,25 +18,17 @@ package com.android.systemui.statusbar.phone;
 
 import android.app.StatusBarManager;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothProfile;
-import android.bluetooth.BluetoothPbap;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.TypedArray;
-import android.graphics.PixelFormat;
-import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.location.LocationManager;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.Message;
 import android.os.RemoteException;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
@@ -44,18 +36,7 @@ import android.telephony.PhoneStateListener;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
-import android.text.format.DateFormat;
-import android.text.style.CharacterStyle;
-import android.text.style.RelativeSizeSpan;
-import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
-import android.text.Spannable;
-import android.text.SpannableStringBuilder;
 import android.util.Slog;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.telephony.IccCard;
@@ -63,7 +44,6 @@ import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.cdma.EriInfo;
 import com.android.internal.telephony.cdma.TtyIntent;
 import com.android.server.am.BatteryStatsService;
-
 import com.android.systemui.R;
 
 /**
@@ -447,6 +427,32 @@ public class PhoneStatusBarPolicy {
               R.drawable.stat_sys_data_fully_inandout_1x }
             };
 
+    // Accessibility;
+
+    private static final int[] sPhoneSignalStrength = {
+        R.string.accessibility_no_phone,
+        R.string.accessibility_phone_one_bar,
+        R.string.accessibility_phone_two_bars,
+        R.string.accessibility_phone_three_bars,
+        R.string.accessibility_phone_signal_full
+    };
+
+    private static final int[] sDataConnectionStrength = {
+        R.string.accessibility_no_data,
+        R.string.accessibility_data_one_bar,
+        R.string.accessibility_data_two_bars,
+        R.string.accessibility_data_three_bars,
+        R.string.accessibility_data_signal_full
+    };
+
+    private static final int[] sWifiConnectionStrength = {
+        R.string.accessibility_no_wifi,
+        R.string.accessibility_wifi_one_bar,
+        R.string.accessibility_wifi_two_bars,
+        R.string.accessibility_wifi_three_bars,
+        R.string.accessibility_wifi_signal_full
+    };
+
     // Assume it's all good unless we hear otherwise.  We don't always seem
     // to get broadcasts that it *is* there.
     IccCard.State mSimState = IccCard.State.READY;
@@ -546,12 +552,13 @@ public class PhoneStatusBarPolicy {
                 new com.android.systemui.usb.StorageNotification(context));
 
         // battery
-        mService.setIcon("battery", com.android.internal.R.drawable.stat_sys_battery_unknown, 0);
+        mService.setIcon("battery", com.android.internal.R.drawable.stat_sys_battery_unknown, 0,
+                null);
 
         // phone_signal
         mPhone = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
         mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
-        mService.setIcon("phone_signal", mPhoneSignalIconId, 0);
+        mService.setIcon("phone_signal", mPhoneSignalIconId, 0, null);
 
         // register for phone state notifications.
         ((TelephonyManager)mContext.getSystemService(Context.TELEPHONY_SERVICE))
@@ -563,24 +570,24 @@ public class PhoneStatusBarPolicy {
                         | PhoneStateListener.LISTEN_DATA_ACTIVITY);
 
         // data_connection
-        mService.setIcon("data_connection", R.drawable.stat_sys_data_connected_g, 0);
+        mService.setIcon("data_connection", R.drawable.stat_sys_data_connected_g, 0, null);
         mService.setIconVisibility("data_connection", false);
 
         // wifi
-        mService.setIcon("wifi", sWifiSignalImages[0][0], 0);
+        mService.setIcon("wifi", sWifiSignalImages[0][0], 0, null);
         mService.setIconVisibility("wifi", false);
         // wifi will get updated by the sticky intents
 
         // TTY status
-        mService.setIcon("tty",  R.drawable.stat_sys_tty_mode, 0);
+        mService.setIcon("tty",  R.drawable.stat_sys_tty_mode, 0, null);
         mService.setIconVisibility("tty", false);
 
         // Cdma Roaming Indicator, ERI
-        mService.setIcon("cdma_eri", R.drawable.stat_sys_roaming_cdma_0, 0);
+        mService.setIcon("cdma_eri", R.drawable.stat_sys_roaming_cdma_0, 0, null);
         mService.setIconVisibility("cdma_eri", false);
 
         // bluetooth status
-        mService.setIcon("bluetooth", R.drawable.stat_sys_data_bluetooth, 0);
+        mService.setIcon("bluetooth", R.drawable.stat_sys_data_bluetooth, 0, null);
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter != null) {
             mBluetoothEnabled = adapter.isEnabled();
@@ -590,21 +597,23 @@ public class PhoneStatusBarPolicy {
         mService.setIconVisibility("bluetooth", mBluetoothEnabled);
 
         // Gps status
-        mService.setIcon("gps", R.drawable.stat_sys_gps_acquiring_anim, 0);
+        mService.setIcon("gps", R.drawable.stat_sys_gps_acquiring_anim, 0, null);
         mService.setIconVisibility("gps", false);
 
         // Alarm clock
-        mService.setIcon("alarm_clock", R.drawable.stat_notify_alarm, 0);
+        mService.setIcon("alarm_clock", R.drawable.stat_notify_alarm, 0, null);
         mService.setIconVisibility("alarm_clock", false);
 
         // Sync state
-        mService.setIcon("sync_active", com.android.internal.R.drawable.stat_notify_sync_anim0, 0);
-        mService.setIcon("sync_failing", com.android.internal.R.drawable.stat_notify_sync_error, 0);
+        mService.setIcon("sync_active", com.android.internal.R.drawable.stat_notify_sync_anim0,
+                0, null);
+        mService.setIcon("sync_failing", com.android.internal.R.drawable.stat_notify_sync_error,
+                0, null);
         mService.setIconVisibility("sync_active", false);
         mService.setIconVisibility("sync_failing", false);
 
         // volume
-        mService.setIcon("volume", R.drawable.stat_sys_ringer_silent, 0);
+        mService.setIcon("volume", R.drawable.stat_sys_ringer_silent, 0, null);
         mService.setIconVisibility("volume", false);
         updateVolume();
 
@@ -655,7 +664,8 @@ public class PhoneStatusBarPolicy {
     private final void updateBattery(Intent intent) {
         final int id = intent.getIntExtra("icon-small", 0);
         int level = intent.getIntExtra("level", 0);
-        mService.setIcon("battery", id, level);
+        String contentDescription = mContext.getString(R.string.accessibility_battery_level, level);
+        mService.setIcon("battery", id, level, contentDescription);
     }
 
     private void updateConnectivity(Intent intent) {
@@ -677,12 +687,16 @@ public class PhoneStatusBarPolicy {
             if (info.isConnected()) {
                 mIsWifiConnected = true;
                 int iconId;
+                String contentDescription = null;
                 if (mLastWifiSignalLevel == -1) {
                     iconId = sWifiSignalImages[mInetCondition][0];
+                    contentDescription = mContext.getString(sWifiConnectionStrength[0]);
                 } else {
                     iconId = sWifiSignalImages[mInetCondition][mLastWifiSignalLevel];
-                }
-                mService.setIcon("wifi", iconId, 0);
+                    contentDescription = mContext.getString(
+                            sWifiConnectionStrength[mLastWifiSignalLevel]);
+                } 
+                mService.setIcon("wifi", iconId, 0, contentDescription);
                 // Show the icon since wi-fi is connected
                 mService.setIconVisibility("wifi", true);
             } else {
@@ -690,7 +704,8 @@ public class PhoneStatusBarPolicy {
                 mIsWifiConnected = false;
                 int iconId = sWifiSignalImages[0][0];
 
-                mService.setIcon("wifi", iconId, 0);
+                String contentDescription = mContext.getString(R.string.accessibility_no_wifi);
+                mService.setIcon("wifi", iconId, 0, contentDescription);
                 // Hide the icon since we're not connected
                 mService.setIconVisibility("wifi", false);
             }
@@ -781,6 +796,7 @@ public class PhoneStatusBarPolicy {
 
     private final void updateSignalStrength() {
         int[] iconList;
+        String contentDescription = null;
 
         // Display signal strength while in "emergency calls only" mode
         if (mServiceState == null || (!hasService() && !mServiceState.isEmergencyOnly())) {
@@ -788,10 +804,12 @@ public class PhoneStatusBarPolicy {
             if (Settings.System.getInt(mContext.getContentResolver(),
                     Settings.System.AIRPLANE_MODE_ON, 0) == 1) {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_flightmode;
+                contentDescription = mContext.getString(R.string.accessibility_airplane_mode);
             } else {
                 mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
+                contentDescription = mContext.getString(R.string.accessibility_no_phone);
             }
-            mService.setIcon("phone_signal", mPhoneSignalIconId, 0);
+            mService.setIcon("phone_signal", mPhoneSignalIconId, 0, contentDescription);
             return;
         }
 
@@ -805,8 +823,11 @@ public class PhoneStatusBarPolicy {
         } else {
             iconList = sSignalImages[mInetCondition];
         }
-        mPhoneSignalIconId = iconList[mSignalStrength.getLevel()];
-        mService.setIcon("phone_signal", mPhoneSignalIconId, 0);
+
+        final int signalLevel = mSignalStrength.getLevel();
+        mPhoneSignalIconId = iconList[signalLevel];
+        contentDescription = mContext.getString(sPhoneSignalStrength[signalLevel]);
+        mService.setIcon("phone_signal", mPhoneSignalIconId, 0, contentDescription);
     }
 
     private final void updateDataNetType(int net) {
@@ -850,6 +871,7 @@ public class PhoneStatusBarPolicy {
 
     private final void updateDataIcon() {
         int iconId;
+        String contentDescription = null;
         boolean visible = true;
 
         if (!isCdma()) {
@@ -870,13 +892,15 @@ public class PhoneStatusBarPolicy {
                             iconId = mDataIconList[0];
                             break;
                     }
-                    mService.setIcon("data_connection", iconId, 0);
+                    contentDescription = mContext.getString(sDataConnectionStrength[mDataActivity]);
+                    mService.setIcon("data_connection", iconId, 0, contentDescription);
                 } else {
                     visible = false;
                 }
             } else {
                 iconId = R.drawable.stat_sys_no_sim;
-                mService.setIcon("data_connection", iconId, 0);
+                contentDescription = mContext.getString(R.string.accessibility_no_sim);
+                mService.setIcon("data_connection", iconId, 0, contentDescription);
             }
         } else {
             // CDMA case, mDataActivity can be also DATA_ACTIVITY_DORMANT
@@ -896,7 +920,7 @@ public class PhoneStatusBarPolicy {
                         iconId = mDataIconList[0];
                         break;
                 }
-                mService.setIcon("data_connection", iconId, 0);
+                mService.setIcon("data_connection", iconId, 0, null);
             } else {
                 visible = false;
             }
@@ -921,12 +945,19 @@ public class PhoneStatusBarPolicy {
         final int ringerMode = audioManager.getRingerMode();
         final boolean visible = ringerMode == AudioManager.RINGER_MODE_SILENT ||
                 ringerMode == AudioManager.RINGER_MODE_VIBRATE;
-        final int iconId = audioManager.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)
-                ? R.drawable.stat_sys_ringer_vibrate
-                : R.drawable.stat_sys_ringer_silent;
+
+        final int iconId;
+        String contentDescription = null;
+        if (audioManager.shouldVibrate(AudioManager.VIBRATE_TYPE_RINGER)) {
+            iconId = R.drawable.stat_sys_ringer_vibrate;
+            contentDescription = mContext.getString(R.string.accessibility_ringer_vibrate);
+        } else {
+            iconId =  R.drawable.stat_sys_ringer_silent;
+            contentDescription = mContext.getString(R.string.accessibility_ringer_silent);
+        }
 
         if (visible) {
-            mService.setIcon("volume", iconId, 0);
+            mService.setIcon("volume", iconId, 0, contentDescription);
         }
         if (visible != mVolumeVisible) {
             mService.setIconVisibility("volume", visible);
@@ -936,6 +967,7 @@ public class PhoneStatusBarPolicy {
 
     private final void updateBluetooth(Intent intent) {
         int iconId = R.drawable.stat_sys_data_bluetooth;
+        String contentDescription = null;
         String action = intent.getAction();
         if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
@@ -945,12 +977,16 @@ public class PhoneStatusBarPolicy {
                 BluetoothAdapter.STATE_DISCONNECTED);
             if (state == BluetoothAdapter.STATE_CONNECTED) {
                 iconId = R.drawable.stat_sys_data_bluetooth_connected;
+                contentDescription = mContext.getString(R.string.accessibility_bluetooth_connected);
+            } else {
+                contentDescription = mContext.getString(
+                        R.string.accessibility_bluetooth_disconnected);
             }
         } else {
             return;
         }
 
-        mService.setIcon("bluetooth", iconId, 0);
+        mService.setIcon("bluetooth", iconId, 0, contentDescription);
         mService.setIconVisibility("bluetooth", mBluetoothEnabled);
     }
 
@@ -974,6 +1010,7 @@ public class PhoneStatusBarPolicy {
             }
         } else if (action.equals(WifiManager.RSSI_CHANGED_ACTION)) {
             int iconId;
+            String contentDescription = null;
             final int newRssi = intent.getIntExtra(WifiManager.EXTRA_NEW_RSSI, -200);
             int newSignalLevel = WifiManager.calculateSignalLevel(newRssi,
                                                                   sWifiSignalImages[0].length);
@@ -981,10 +1018,13 @@ public class PhoneStatusBarPolicy {
                 mLastWifiSignalLevel = newSignalLevel;
                 if (mIsWifiConnected) {
                     iconId = sWifiSignalImages[mInetCondition][newSignalLevel];
+                    contentDescription = mContext.getString(
+                            sWifiConnectionStrength[newSignalLevel]);
                 } else {
                     iconId = sWifiTemporarilyNotConnectedImage;
+                    contentDescription = mContext.getString(R.string.accessibility_no_wifi);
                 }
-                mService.setIcon("wifi", iconId, 0);
+                mService.setIcon("wifi", iconId, 0, contentDescription);
             }
         }
     }
@@ -995,14 +1035,16 @@ public class PhoneStatusBarPolicy {
 
         if (action.equals(LocationManager.GPS_FIX_CHANGE_ACTION) && enabled) {
             // GPS is getting fixes
-            mService.setIcon("gps", com.android.internal.R.drawable.stat_sys_gps_on, 0);
+            mService.setIcon("gps", com.android.internal.R.drawable.stat_sys_gps_on, 0,
+                    mContext.getString(R.string.accessibility_gps_enabled));
             mService.setIconVisibility("gps", true);
         } else if (action.equals(LocationManager.GPS_ENABLED_CHANGE_ACTION) && !enabled) {
             // GPS is off
             mService.setIconVisibility("gps", false);
         } else {
             // GPS is on, but not receiving fixes
-            mService.setIcon("gps", R.drawable.stat_sys_gps_acquiring_anim, 0);
+            mService.setIcon("gps", R.drawable.stat_sys_gps_acquiring_anim, 0,
+                    mContext.getString(R.string.accessibility_gps_acquiring));
             mService.setIconVisibility("gps", true);
         }
     }
@@ -1016,7 +1058,8 @@ public class PhoneStatusBarPolicy {
         if (enabled) {
             // TTY is on
             if (false) Slog.v(TAG, "updateTTY: set TTY on");
-            mService.setIcon("tty", R.drawable.stat_sys_tty_mode, 0);
+            mService.setIcon("tty", R.drawable.stat_sys_tty_mode, 0,
+                    mContext.getString(R.string.accessibility_tty_enabled));
             mService.setIconVisibility("tty", true);
         } else {
             // TTY is off
@@ -1058,15 +1101,15 @@ public class PhoneStatusBarPolicy {
 
         switch (iconMode) {
             case EriInfo.ROAMING_ICON_MODE_NORMAL:
-                mService.setIcon("cdma_eri", iconList[iconIndex], 0);
+                mService.setIcon("cdma_eri", iconList[iconIndex], 0, null);
                 mService.setIconVisibility("cdma_eri", true);
                 break;
             case EriInfo.ROAMING_ICON_MODE_FLASH:
-                mService.setIcon("cdma_eri", R.drawable.stat_sys_roaming_cdma_flash, 0);
+                mService.setIcon("cdma_eri", R.drawable.stat_sys_roaming_cdma_flash, 0, null);
                 mService.setIconVisibility("cdma_eri", true);
                 break;
 
         }
-        mService.setIcon("phone_signal", mPhoneSignalIconId, 0);
+        mService.setIcon("phone_signal", mPhoneSignalIconId, 0, null);
     }
 }

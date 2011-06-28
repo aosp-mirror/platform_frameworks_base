@@ -183,7 +183,8 @@ public abstract class Ticker {
         }
 
         final Drawable icon = StatusBarIconView.getIcon(mContext,
-                new StatusBarIcon(n.pkg, n.notification.icon, n.notification.iconLevel, 0));
+                new StatusBarIcon(n.pkg, n.notification.icon, n.notification.iconLevel, 0,
+                        n.notification.tickerText));
         final Segment newSegment = new Segment(n, icon, n.notification.tickerText);
 
         // If there's already a notification schedule for this package and id, remove it.

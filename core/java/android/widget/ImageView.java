@@ -30,13 +30,14 @@ import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewDebug;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.RemoteViews.RemoteView;
-
 
 /**
  * Displays an arbitrary image, such as an icon.  The ImageView class
@@ -208,7 +209,15 @@ public class ImageView extends View {
         }
         return false;
     }
-    
+
+    @Override
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        CharSequence contentDescription = getContentDescription();
+        if (!TextUtils.isEmpty(contentDescription)) {
+            event.getText().add(contentDescription);
+        }
+    }
+
     /**
      * Set this to true if you want the ImageView to adjust its bounds
      * to preserve the aspect ratio of its drawable.

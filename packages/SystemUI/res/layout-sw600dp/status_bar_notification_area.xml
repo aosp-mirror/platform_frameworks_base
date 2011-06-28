@@ -16,7 +16,7 @@
 -->
 
 <!-- notification icons & panel access -->
-<LinearLayout
+<com.android.systemui.statusbar.tablet.NotificationArea
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/notificationArea"
@@ -40,6 +40,7 @@
             android:layout_marginLeft="8dip"
             android:src="@drawable/ic_sysbar_ime_default"
             android:visibility="gone"
+            android:contentDescription="@string/accessibility_ime_switch_button"
             />
 
         <com.android.systemui.statusbar.policy.CompatModeButton
@@ -49,6 +50,7 @@
             android:layout_marginLeft="8dip"
             android:src="@drawable/ic_sysbar_zoom"
             android:visibility="gone"
+            android:contentDescription="@string/accessibility_compatibility_zoom_button"
             />
 
         <com.android.systemui.statusbar.tablet.NotificationIconArea
@@ -152,4 +154,4 @@
                 />
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</com.android.systemui.statusbar.tablet.NotificationArea>

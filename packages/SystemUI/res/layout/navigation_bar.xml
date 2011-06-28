@@ -54,6 +54,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:contentDescription="@string/accessibility_back"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
                 android:layout_width="80dp"
@@ -66,6 +67,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
+                android:contentDescription="@string/accessibility_home"
                 />
             <ImageView android:id="@+id/recent_apps"
                 android:layout_width="80dp"
@@ -80,6 +82,7 @@
                 systemui:keyCode="82"
                 android:layout_weight="0"
                 android:visibility="invisible"
+                android:contentDescription="@string/accessibility_menu"
                 />
         </LinearLayout>
 
@@ -124,6 +127,7 @@
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:layout_weight="1"
+                android:contentDescription="@string/accessibility_menu"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
                 android:layout_height="80dp"
@@ -131,11 +135,13 @@
                 android:src="@drawable/ic_sysbar_home_default_land"
                 systemui:keyCode="3"
                 android:layout_weight="0"
+                android:contentDescription="@string/accessibility_home"
                 />
             <View 
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
                 android:layout_weight="1"
+                android:contentDescription="@string/accessibility_back"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
                 android:layout_height="80dp"
@@ -148,6 +154,7 @@
                 android:layout_height="40dp"
                 android:layout_width="match_parent"
                 android:layout_weight="0"
+                android:contentDescription="@string/accessibility_menu"
                 />
         </LinearLayout>
 

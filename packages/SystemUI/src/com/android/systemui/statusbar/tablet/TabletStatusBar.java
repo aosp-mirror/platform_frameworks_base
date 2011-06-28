@@ -808,7 +808,8 @@ public class TabletStatusBar extends StatusBar implements
                 // Update the icon.
                 final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
                         notification.notification.icon, notification.notification.iconLevel,
-                        notification.notification.number);
+                        notification.notification.number,
+                        notification.notification.tickerText);
                 if (!oldEntry.icon.set(ic)) {
                     handleNotificationError(key, notification, "Couldn't update icon: " + ic);
                     return;
@@ -1012,10 +1013,7 @@ public class TabletStatusBar extends StatusBar implements
 
         mCompatModeButton.refresh();
         if (mCompatModeButton.getVisibility() == View.VISIBLE) {
-            if (DEBUG_COMPAT_HELP
-                    || ! Prefs.read(mContext).getBoolean(Prefs.SHOWN_COMPAT_MODE_HELP, false)) {
                 showCompatibilityHelp();
-            }
         } else {
             hideCompatibilityHelp();
             mCompatModePanel.closePanel();
@@ -1451,13 +1449,15 @@ public class TabletStatusBar extends StatusBar implements
         }
         // Construct the icon.
         final StatusBarIconView iconView = new StatusBarIconView(mContext,
-                notification.pkg + "/0x" + Integer.toHexString(notification.id));
+                notification.pkg + "/0x" + Integer.toHexString(notification.id),
+                notification.notification);
         iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
         final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
                     notification.notification.icon,
                     notification.notification.iconLevel,
-                    notification.notification.number);
+                    notification.notification.number,
+                    notification.notification.tickerText);
         if (!iconView.set(ic)) {
             handleNotificationError(key, notification, "Couldn't attach StatusBarIcon: " + ic);
             return null;
@@ -1501,17 +1501,18 @@ public class TabletStatusBar extends StatusBar implements
         // alternate behavior in DND mode
         if (mNotificationDNDMode) {
             if (mIconLayout.getChildCount() == 0) {
-                final StatusBarIconView iconView = new StatusBarIconView(mContext, "_dnd");
-                iconView.setImageResource(R.drawable.ic_notification_dnd);
-                iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-                iconView.setPadding(mIconHPadding, 0, mIconHPadding, 0);
-
                 final Notification dndNotification = new Notification.Builder(mContext)
                     .setContentTitle(mContext.getText(R.string.notifications_off_title))
                     .setContentText(mContext.getText(R.string.notifications_off_text))
                     .setSmallIcon(R.drawable.ic_notification_dnd)
                     .setOngoing(true)
                     .getNotification();
+
+                final StatusBarIconView iconView = new StatusBarIconView(mContext, "_dnd",
+                        dndNotification);
+                iconView.setImageResource(R.drawable.ic_notification_dnd);
+                iconView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+                iconView.setPadding(mIconHPadding, 0, mIconHPadding, 0);
 
                 mNotificationDNDDummyEntry = new NotificationData.Entry(
                         null,
@@ -1634,19 +1635,24 @@ public class TabletStatusBar extends StatusBar implements
         } else {
             if ((sbn.notification.flags & Notification.FLAG_ONGOING_EVENT) == 0) {
                 vetoButton.setVisibility(View.INVISIBLE);
+                vetoButton.setContentDescription("VETO");
             } else {
                 vetoButton.setVisibility(View.GONE);
             }
         }
+        vetoButton.setContentDescription(mContext.getString(
+                R.string.accessibility_remove_notification));
 
         // the large icon
         ImageView largeIcon = (ImageView)row.findViewById(R.id.large_icon);
         if (sbn.notification.largeIcon != null) {
             largeIcon.setImageBitmap(sbn.notification.largeIcon);
+            largeIcon.setContentDescription(sbn.notification.tickerText);
         } else {
             largeIcon.getLayoutParams().width = 0;
             largeIcon.setVisibility(View.INVISIBLE);
         }
+        largeIcon.setContentDescription(sbn.notification.tickerText);
 
         // bind the click event to the content area
         ViewGroup content = (ViewGroup)row.findViewById(R.id.content);

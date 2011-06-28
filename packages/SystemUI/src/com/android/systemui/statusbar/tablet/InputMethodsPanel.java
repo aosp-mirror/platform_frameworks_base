@@ -30,6 +30,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -160,6 +161,19 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
         }
     }
 
+    @Override
+    public boolean dispatchHoverEvent(MotionEvent event) {
+        // Ignore hover events outside of this panel bounds since such events
+        // generate spurious accessibility events with the panel content when
+        // tapping outside of it, thus confusing the user.
+        final int x = (int) event.getX();
+        final int y = (int) event.getY();
+        if (x >= 0 && x < getWidth() && y >= 0 && y < getHeight()) {
+            return super.dispatchHoverEvent(event);
+        }
+        return true;
+    }
+
     private void updateHardKeyboardEnabled() {
         if (mHardKeyboardAvailable) {
             final boolean checked = mHardKeyboardSwitch.isChecked();
@@ -222,6 +236,7 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
             itemSubtitle.setText(imiName);
         }
         subtypeIcon.setImageDrawable(icon);
+        subtypeIcon.setContentDescription(itemTitle.getText());
         final String settingsActivity = imi.getSettingsActivity();
         if (!TextUtils.isEmpty(settingsActivity)) {
             settingsIcon.setOnClickListener(new View.OnClickListener() {
@@ -463,4 +478,5 @@ public class InputMethodsPanel extends LinearLayout implements StatusBarPanel,
     public interface OnHardKeyboardEnabledChangeListener {
         public void onHardKeyboardEnabledChange(boolean enabled);
     }
+
 }

@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar;
 
+import android.app.Notification;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -23,11 +24,11 @@ import android.graphics.drawable.Drawable;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.util.Log;
-import android.view.View;
 import android.view.ViewDebug;
-import android.widget.FrameLayout;
+import android.view.accessibility.AccessibilityEvent;
 
 import java.text.NumberFormat;
 
@@ -45,8 +46,9 @@ public class StatusBarIconView extends AnimatedImageView {
     private int mNumberX;
     private int mNumberY;
     private String mNumberText;
+    private Notification mNotification;
 
-    public StatusBarIconView(Context context, String slot) {
+    public StatusBarIconView(Context context, String slot, Notification notification) {
         super(context);
         final Resources res = context.getResources();
         mSlot = slot;
@@ -54,6 +56,8 @@ public class StatusBarIconView extends AnimatedImageView {
         mNumberPain.setTextAlign(Paint.Align.CENTER);
         mNumberPain.setColor(res.getColor(R.drawable.notification_number_text_color));
         mNumberPain.setAntiAlias(true);
+        mNotification = notification;
+        setContentDescription(notification);
     }
 
     private static boolean streq(String a, String b) {
@@ -83,6 +87,7 @@ public class StatusBarIconView extends AnimatedImageView {
         final boolean numberEquals = mIcon != null
                 && mIcon.number == icon.number;
         mIcon = icon.clone();
+        setContentDescription(icon.contentDescription);
         if (!iconEquals) {
             Drawable drawable = getIcon(icon);
             if (drawable == null) {
@@ -159,6 +164,15 @@ public class StatusBarIconView extends AnimatedImageView {
         return mIcon;
     }
 
+    @Override
+    public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
+        super.onInitializeAccessibilityEvent(event);
+        if (mNotification != null) {
+            event.setParcelableData(mNotification);
+        }
+    }
+
+    @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         if (mNumberBackground != null) {
@@ -166,6 +180,7 @@ public class StatusBarIconView extends AnimatedImageView {
         }
     }
 
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
@@ -175,6 +190,7 @@ public class StatusBarIconView extends AnimatedImageView {
         }
     }
 
+    @Override
     protected void debug(int depth) {
         super.debug(depth);
         Log.d("View", debugIndent(depth) + "slot=" + mSlot);
@@ -212,5 +228,14 @@ public class StatusBarIconView extends AnimatedImageView {
         }
         mNumberY = h-r.bottom-((dh-r.top-th-r.bottom)/2);
         mNumberBackground.setBounds(w-dw, h-dh, w, h);
+    }
+
+    private void setContentDescription(Notification notification) {
+        if (notification != null) {
+            CharSequence tickerText = notification.tickerText;
+            if (!TextUtils.isEmpty(tickerText)) {
+                setContentDescription(tickerText);
+            }
+        }
     }
 }

@@ -43,6 +43,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:src="@drawable/compat_mode_help_diagram"
+        android:contentDescription="@string/accessibility_compatibility_zoom_example"
         />
     <RelativeLayout
         android:orientation="horizontal"
@@ -61,6 +62,7 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:src="@drawable/compat_mode_help_icon"
+            android:contentDescription="@string/accessibility_compatibility_zoom_button"
             />
         <TextView
             android:id="@+id/explanation"

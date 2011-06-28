@@ -472,7 +472,7 @@ public class PhoneStatusBar extends StatusBar {
     public void addIcon(String slot, int index, int viewIndex, StatusBarIcon icon) {
         if (SPEW) Slog.d(TAG, "addIcon slot=" + slot + " index=" + index + " viewIndex=" + viewIndex
                 + " icon=" + icon);
-        StatusBarIconView view = new StatusBarIconView(mContext, slot);
+        StatusBarIconView view = new StatusBarIconView(mContext, slot, null);
         view.set(icon);
         mStatusIcons.addView(view, viewIndex, new LinearLayout.LayoutParams(mIconSize, mIconSize));
     }
@@ -607,7 +607,7 @@ public class PhoneStatusBar extends StatusBar {
                 // Update the icon.
                 final StatusBarIcon ic = new StatusBarIcon(notification.pkg,
                         notification.notification.icon, notification.notification.iconLevel,
-                        notification.notification.number);
+                        notification.notification.number, notification.notification.tickerText);
                 if (!oldEntry.icon.set(ic)) {
                     handleNotificationError(key, notification, "Couldn't update icon: " + ic);
                     return;
@@ -765,9 +765,11 @@ public class PhoneStatusBar extends StatusBar {
         final View expanded = views[2];
         // Construct the icon.
         final StatusBarIconView iconView = new StatusBarIconView(mContext,
-                notification.pkg + "/0x" + Integer.toHexString(notification.id));
+                notification.pkg + "/0x" + Integer.toHexString(notification.id),
+                notification.notification);
         final StatusBarIcon ic = new StatusBarIcon(notification.pkg, notification.notification.icon,
-                    notification.notification.iconLevel, notification.notification.number);
+                    notification.notification.iconLevel, notification.notification.number,
+                    notification.notification.tickerText);
         if (!iconView.set(ic)) {
             handleNotificationError(key, notification, "Coulding create icon: " + ic);
             return null;

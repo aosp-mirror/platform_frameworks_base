@@ -22,10 +22,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Slog;
 import android.view.View;
 
@@ -175,7 +175,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
     }
 
-    public void setIcon(String slot, String iconPackage, int iconId, int iconLevel) {
+    public void setIcon(String slot, String iconPackage, int iconId, int iconLevel,
+            String contentDescription) {
         enforceStatusBar();
 
         synchronized (mIcons) {
@@ -184,7 +185,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
                 throw new SecurityException("invalid status bar icon slot: " + slot);
             }
 
-            StatusBarIcon icon = new StatusBarIcon(iconPackage, iconId, iconLevel);
+            StatusBarIcon icon = new StatusBarIcon(iconPackage, iconId, iconLevel, 0,
+                    contentDescription);
             //Slog.d(TAG, "setIcon slot=" + slot + " index=" + index + " icon=" + icon);
             mIcons.setIcon(index, icon);
 

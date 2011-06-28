@@ -35,7 +35,6 @@ import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.LocalPowerManager;
 import android.os.Message;
 import android.os.PowerManager;
@@ -43,7 +42,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.provider.Settings.SettingNotFoundException;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Log;
@@ -1117,8 +1115,11 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 // Give feedback to user when secure keyguard is active and engaged
                 if (mShowing && isSecure()) {
                     if (!mShowingLockIcon) {
+                        String contentDescription = mContext.getString(
+                                com.android.internal.R.string.status_bar_device_locked);
                         mStatusBarManager.setIcon("secure",
-                                com.android.internal.R.drawable.stat_sys_secure, 0);
+                                com.android.internal.R.drawable.stat_sys_secure, 0,
+                                contentDescription);
                         mShowingLockIcon = true;
                     }
                 } else {
