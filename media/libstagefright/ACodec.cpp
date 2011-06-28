@@ -29,6 +29,7 @@
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/NativeWindowWrapper.h>
 #include <media/stagefright/OMXClient.h>
+#include <media/stagefright/OMXCodec.h>
 
 #include <surfaceflinger/Surface.h>
 #include <gui/SurfaceTextureClient.h>
@@ -401,11 +402,22 @@ status_t ACodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         CHECK(mem.get() != NULL);
 
         IOMX::buffer_id buffer;
-#if 0
-        err = mOMX->allocateBufferWithBackup(mNode, portIndex, mem, &buffer);
-#else
-        err = mOMX->useBuffer(mNode, portIndex, mem, &buffer);
-#endif
+
+        if (!strcasecmp(
+                    mComponentName.c_str(), "OMX.TI.DUCATI1.VIDEO.DECODER")) {
+            if (portIndex == kPortIndexInput && i == 0) {
+                // Only log this warning once per allocation round.
+
+                LOGW("OMX.TI.DUCATI1.VIDEO.DECODER requires the use of "
+                     "OMX_AllocateBuffer instead of the preferred "
+                     "OMX_UseBuffer. Vendor must fix this.");
+            }
+
+            err = mOMX->allocateBufferWithBackup(
+                    mNode, portIndex, mem, &buffer);
+        } else {
+            err = mOMX->useBuffer(mNode, portIndex, mem, &buffer);
+        }
 
         if (err != OK) {
             return err;
@@ -891,6 +903,7 @@ status_t ACodec::setSupportedOutputFormat() {
     CHECK(format.eColorFormat == OMX_COLOR_FormatYUV420Planar
            || format.eColorFormat == OMX_COLOR_FormatYUV420SemiPlanar
            || format.eColorFormat == OMX_COLOR_FormatCbYCrY
+           || format.eColorFormat == OMX_TI_COLOR_FormatYUV420PackedSemiPlanar
            || format.eColorFormat == OMX_QCOM_COLOR_FormatYVU420SemiPlanar);
 
     return mOMX->setParameter(
@@ -1639,27 +1652,33 @@ void ACodec::UninitializedState::onSetup(
     AString mime;
     CHECK(msg->findString("mime", &mime));
 
-    AString componentName;
-
-    if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_VIDEO_AVC)) {
-        componentName = "OMX.Nvidia.h264.decode";
-    } else if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_AUDIO_AAC)) {
-        componentName = "OMX.google.aac.decoder";
-    } else if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_AUDIO_MPEG)) {
-        componentName = "OMX.Nvidia.mp3.decoder";
-    } else if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_VIDEO_MPEG2)) {
-        componentName = "OMX.Nvidia.mpeg2v.decode";
-    } else if (!strcasecmp(mime.c_str(), MEDIA_MIMETYPE_VIDEO_MPEG4)) {
-        componentName = "OMX.google.mpeg4.decoder";
-    } else {
-        TRESPASS();
-    }
+    Vector<String8> matchingCodecs;
+    OMXCodec::findMatchingCodecs(
+            mime.c_str(),
+            false, // createEncoder
+            NULL,  // matchComponentName
+            0,     // flags
+            &matchingCodecs);
 
     sp<CodecObserver> observer = new CodecObserver;
+    IOMX::node_id node = NULL;
 
-    IOMX::node_id node;
-    CHECK_EQ(omx->allocateNode(componentName.c_str(), observer, &node),
-             (status_t)OK);
+    AString componentName;
+
+    for (size_t matchIndex = 0; matchIndex < matchingCodecs.size();
+            ++matchIndex) {
+        componentName = matchingCodecs.itemAt(matchIndex).string();
+
+        status_t err = omx->allocateNode(componentName.c_str(), observer, &node);
+
+        if (err == OK) {
+            break;
+        }
+
+        node = NULL;
+    }
+
+    CHECK(node != NULL);
 
     sp<AMessage> notify = new AMessage(kWhatOMXMessage, mCodec->id());
     observer->setNotificationMessage(notify);

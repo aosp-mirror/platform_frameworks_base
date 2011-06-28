@@ -29,6 +29,7 @@
 #include <media/stagefright/MediaExtractor.h>
 #include <media/stagefright/MediaSource.h>
 #include <media/stagefright/MetaData.h>
+#include <media/stagefright/NativeWindowWrapper.h>
 #include <media/stagefright/Utils.h>
 
 #include <surfaceflinger/ISurfaceComposer.h>
@@ -39,10 +40,12 @@
 using namespace android;
 
 struct Controller : public AHandler {
-    Controller(const char *uri, bool decodeAudio, const sp<Surface> &surface)
+    Controller(const char *uri, bool decodeAudio,
+               const sp<Surface> &surface, bool renderToSurface)
         : mURI(uri),
           mDecodeAudio(decodeAudio),
           mSurface(surface),
+          mRenderToSurface(renderToSurface),
           mCodec(new ACodec) {
         CHECK(!mDecodeAudio || mSurface == NULL);
     }
@@ -97,7 +100,8 @@ protected:
                 sp<AMessage> format = makeFormat(mSource->getFormat());
 
                 if (mSurface != NULL) {
-                    format->setObject("surface", mSurface);
+                    format->setObject(
+                            "native-window", new NativeWindowWrapper(mSurface));
                 }
 
                 mCodec->initiateSetup(format);
@@ -220,6 +224,7 @@ private:
     AString mURI;
     bool mDecodeAudio;
     sp<Surface> mSurface;
+    bool mRenderToSurface;
     sp<ACodec> mCodec;
     sp<MediaSource> mSource;
 
@@ -451,7 +456,7 @@ private:
                 inBuffer->release();
                 inBuffer = NULL;
 
-                // break;  // Don't coalesce
+                break;  // Don't coalesce
             }
 
             LOGV("coalesced %d input buffers", n);
@@ -479,6 +484,10 @@ private:
         sp<AMessage> reply;
         CHECK(msg->findMessage("reply", &reply));
 
+        if (mRenderToSurface) {
+            reply->setInt32("render", 1);
+        }
+
         reply->post();
     }
 
@@ -491,7 +500,8 @@ static void usage(const char *me) {
     fprintf(stderr, "       -a(udio)\n");
 
     fprintf(stderr,
-            "       -s(surface) Allocate output buffers on a surface.\n");
+            "       -S(urface) Allocate output buffers on a surface.\n"
+            "       -R(ender)  Render surface-allocated buffers.\n");
 }
 
 int main(int argc, char **argv) {
@@ -499,16 +509,21 @@ int main(int argc, char **argv) {
 
     bool decodeAudio = false;
     bool useSurface = false;
+    bool renderToSurface = false;
 
     int res;
-    while ((res = getopt(argc, argv, "has")) >= 0) {
+    while ((res = getopt(argc, argv, "haSR")) >= 0) {
         switch (res) {
             case 'a':
                 decodeAudio = true;
                 break;
 
-            case 's':
+            case 'S':
                 useSurface = true;
+                break;
+
+            case 'R':
+                renderToSurface = true;
                 break;
 
             case '?':
@@ -562,7 +577,9 @@ int main(int argc, char **argv) {
         CHECK(surface != NULL);
     }
 
-    sp<Controller> controller = new Controller(argv[0], decodeAudio, surface);
+    sp<Controller> controller =
+        new Controller(argv[0], decodeAudio, surface, renderToSurface);
+
     looper->registerHandler(controller);
 
     controller->startAsync();

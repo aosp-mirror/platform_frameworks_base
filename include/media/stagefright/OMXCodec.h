@@ -79,6 +79,13 @@ struct OMXCodec : public MediaSource,
     // from MediaBufferObserver
     virtual void signalBufferReturned(MediaBuffer *buffer);
 
+    // for use by ACodec
+    static void findMatchingCodecs(
+            const char *mime,
+            bool createEncoder, const char *matchComponentName,
+            uint32_t flags,
+            Vector<String8> *matchingCodecs);
+
 protected:
     virtual ~OMXCodec();
 
@@ -310,12 +317,6 @@ private:
 
     static uint32_t getComponentQuirks(
             const char *componentName, bool isEncoder);
-
-    static void findMatchingCodecs(
-            const char *mime,
-            bool createEncoder, const char *matchComponentName,
-            uint32_t flags,
-            Vector<String8> *matchingCodecs);
 
     void restorePatchedDataPointer(BufferInfo *info);
 
