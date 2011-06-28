@@ -93,6 +93,7 @@ class SipSessionGroup implements SipListener {
     private static final int EXPIRY_TIME = 3600; // in seconds
     private static final int CANCEL_CALL_TIMER = 3; // in seconds
     private static final int KEEPALIVE_TIMEOUT = 3; // in seconds
+    private static final int INCALL_KEEPALIVE_INTERVAL = 10; // in seconds
     private static final long WAKE_LOCK_HOLDING_TIME = 500; // in milliseconds
 
     private static final EventObject DEREGISTER = new EventObject("Deregister");
@@ -477,6 +478,8 @@ class SipSessionGroup implements SipListener {
 
         private KeepAliveProcess mKeepAliveProcess;
 
+        private SipSessionImpl mKeepAliveSession;
+
         // lightweight timer
         class SessionTimer {
             private boolean mRunning = true;
@@ -545,6 +548,11 @@ class SipSessionGroup implements SipListener {
             mClientTransaction = null;
 
             cancelSessionTimer();
+
+            if (mKeepAliveSession != null) {
+                mKeepAliveSession.stopKeepAliveProcess();
+                mKeepAliveSession = null;
+            }
         }
 
         public boolean isInCall() {
@@ -999,7 +1007,7 @@ class SipSessionGroup implements SipListener {
                 throws SipException {
             // expect ACK, CANCEL request
             if (isRequestEvent(Request.ACK, evt)) {
-                establishCall();
+                establishCall(false);
                 return true;
             } else if (isRequestEvent(Request.CANCEL, evt)) {
                 // http://tools.ietf.org/html/rfc3261#section-9.2
@@ -1031,7 +1039,7 @@ class SipSessionGroup implements SipListener {
                 case Response.OK:
                     mSipHelper.sendInviteAck(event, mDialog);
                     mPeerSessionDescription = extractContent(response);
-                    establishCall();
+                    establishCall(true);
                     return true;
                 case Response.UNAUTHORIZED:
                 case Response.PROXY_AUTHENTICATION_REQUIRED:
@@ -1163,10 +1171,26 @@ class SipSessionGroup implements SipListener {
                     response.getStatusCode());
         }
 
-        private void establishCall() {
+        private void enableKeepAlive() {
+            if (mKeepAliveSession != null) {
+                mKeepAliveSession.stopKeepAliveProcess();
+            } else {
+                mKeepAliveSession = duplicate();
+            }
+            try {
+                mKeepAliveSession.startKeepAliveProcess(
+                        INCALL_KEEPALIVE_INTERVAL, mPeerProfile, null);
+            } catch (SipException e) {
+                Log.w(TAG, "keepalive cannot be enabled; ignored", e);
+                mKeepAliveSession.stopKeepAliveProcess();
+            }
+        }
+
+        private void establishCall(boolean enableKeepAlive) {
             mState = SipSession.State.IN_CALL;
             mInCall = true;
             cancelSessionTimer();
+            if (enableKeepAlive) enableKeepAlive();
             mProxy.onCallEstablished(this, mPeerSessionDescription);
         }
 
