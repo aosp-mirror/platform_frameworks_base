@@ -1007,7 +1007,13 @@ class SipSessionGroup implements SipListener {
                 throws SipException {
             // expect ACK, CANCEL request
             if (isRequestEvent(Request.ACK, evt)) {
-                establishCall(false);
+                String sdp = extractContent(((RequestEvent) evt).getRequest());
+                if (sdp != null) mPeerSessionDescription = sdp;
+                if (mPeerSessionDescription == null) {
+                    onError(SipErrorCode.CLIENT_ERROR, "peer sdp is empty");
+                } else {
+                    establishCall(false);
+                }
                 return true;
             } else if (isRequestEvent(Request.CANCEL, evt)) {
                 // http://tools.ietf.org/html/rfc3261#section-9.2
