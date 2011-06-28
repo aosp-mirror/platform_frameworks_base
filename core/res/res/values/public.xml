@@ -1769,16 +1769,17 @@
   <public type="attr" name="listPreferredItemHeightLarge" />
   <public type="attr" name="listPreferredItemHeightSmall" />
 
+  <public type="attr" name="paddingStart"/>
+  <public type="attr" name="paddingEnd"/>
+  <public type="attr" name="layout_marginStart"/>
+  <public type="attr" name="layout_marginEnd"/>
+
+  <public type="attr" name="actionBarSplitStyle" />
+
   <public type="style" name="Widget.Holo.Button.Borderless.Small" />
   <public type="style" name="Widget.Holo.Light.Button.Borderless.Small" />
 
   <public type="integer" name="status_bar_notification_info_maxnum" />
   <public type="string" name="status_bar_notification_info_overflow" />
-
-  <public type="attr" name="paddingStart"/>
-  <public type="attr" name="paddingEnd"/>
-
-  <public type="attr" name="layout_marginStart"/>
-  <public type="attr" name="layout_marginEnd"/>
 
 </resources>

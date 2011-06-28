@@ -50,7 +50,7 @@ the Action Bar enabled overlaying application content.
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
                   android:layout_alignParentBottom="true"
-                  style="?android:attr/actionBarStyle"
+                  style="?android:attr/actionBarSplitStyle"
                   android:visibility="gone"
                   android:gravity="center"/>
 </RelativeLayout>

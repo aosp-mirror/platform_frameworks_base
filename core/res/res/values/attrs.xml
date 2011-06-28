@@ -596,6 +596,11 @@
         <attr name="actionOverflowButtonStyle" format="reference" />
         <!-- Reference to a style for the Action Bar -->
         <attr name="actionBarStyle" format="reference" />
+        <!-- Reference to a style for the split Action Bar. This style
+             controls the split component that holds the menu/action
+             buttons. actionBarStyle is still used for the primary
+             bar. -->
+        <attr name="actionBarSplitStyle" format="reference" />
         <!-- Size of the Action Bar, including the contextual
              bar used to present Action Modes. -->
         <attr name="actionBarSize" format="dimension" >
