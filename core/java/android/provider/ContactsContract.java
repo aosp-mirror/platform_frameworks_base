@@ -749,11 +749,25 @@ public final class ContactsContract {
         public static final String PHOTO_ID = "photo_id";
 
         /**
+         * Photo file ID of the full-size photo.  If present, this will be used to populate
+         * {@link #PHOTO_URI}.  The ID can also be used with
+         * {@link ContactsContract.DisplayPhoto#CONTENT_URI} to create a URI to the photo.
+         * If this is present, {@link #PHOTO_ID} is also guaranteed to be populated.
+         *
+         * <P>Type: INTEGER</P>
+         */
+        public static final String PHOTO_FILE_ID = "photo_file_id";
+
+        /**
          * A URI that can be used to retrieve the contact's full-size photo.
+         * If PHOTO_FILE_ID is not null, this will be populated with a URI based off
+         * {@link ContactsContract.DisplayPhoto#CONTENT_URI}.  Otherwise, this will
+         * be populated with the same value as {@link #PHOTO_THUMBNAIL_URI}.
          * A photo can be referred to either by a URI (this field) or by ID
-         * (see {@link #PHOTO_ID}). If PHOTO_ID is not null, PHOTO_URI and
-         * PHOTO_THUMBNAIL_URI shall not be null (but not necessarily vice versa).
-         * Thus using PHOTO_URI is a more robust method of retrieving contact photos.
+         * (see {@link #PHOTO_ID}). If either PHOTO_FILE_ID or PHOTO_ID is not null,
+         * PHOTO_URI and PHOTO_THUMBNAIL_URI shall not be null (but not necessarily
+         * vice versa).  Thus using PHOTO_URI is a more robust method of retrieving
+         * contact photos.
          *
          * <P>Type: TEXT</P>
          */
@@ -766,7 +780,7 @@ public final class ContactsContract {
          * PHOTO_THUMBNAIL_URI shall not be null (but not necessarily vice versa).
          * If the content provider does not differentiate between full-size photos
          * and thumbnail photos, PHOTO_THUMBNAIL_URI and {@link #PHOTO_URI} can contain
-         * the same value, but either both shell be null or both not null.
+         * the same value, but either both shall be null or both not null.
          *
          * <P>Type: TEXT</P>
          */
@@ -1690,10 +1704,15 @@ public final class ContactsContract {
 
         /**
          * A <i>read-only</i> sub-directory of a single contact that contains
-         * the contact's primary photo.
+         * the contact's primary photo.  The photo may be stored in up to two ways -
+         * the default "photo" is a thumbnail-sized image stored directly in the data
+         * row, while the "display photo", if present, is a larger version stored as
+         * a file.
          * <p>
          * Usage example:
-         *
+         * <dl>
+         * <dt>Retrieving the thumbnail-sized photo</dt>
+         * <dd>
          * <pre>
          * public InputStream openPhoto(long contactId) {
          *     Uri contactUri = ContentUris.withAppendedId(Contacts.CONTENT_URI, contactId);
@@ -1716,10 +1735,29 @@ public final class ContactsContract {
          *     return null;
          * }
          * </pre>
+         * </dd>
+         * <dt>Retrieving the larger photo version</dt>
+         * <dd>
+         * <pre>
+         * public InputStream openDisplayPhoto(long contactId) {
+         *     Uri contactUri = ContentUris.withAppendedId(Contacts.CONTENT_URI, contactId);
+         *     Uri displayPhotoUri = Uri.withAppendedPath(contactUri, Contacts.Photo.DISPLAY_PHOTO);
+         *     try {
+         *         AssetFileDescriptor fd =
+         *             getContentResolver().openAssetFile(displayPhotoUri, "r");
+         *         return fd.createInputStream();
+         *     } catch (FileNotFoundException e) {
+         *         return null;
+         *     }
+         * }
+         * </pre>
+         * </dd>
+         * </dl>
          *
          * </p>
-         * <p>You should also consider using the convenience method
+         * <p>You may also consider using the convenience method
          * {@link ContactsContract.Contacts#openContactPhotoInputStream(ContentResolver, Uri)}
+         * to retrieve the raw photo contents of the thumbnail-sized photo.
          * </p>
          * <p>
          * This directory can be used either with a {@link #CONTENT_URI} or
@@ -1736,6 +1774,19 @@ public final class ContactsContract {
              * The directory twig for this sub-table
              */
             public static final String CONTENT_DIRECTORY = "photo";
+
+            /**
+             * The directory twig for retrieving the full-size display photo.
+             */
+            public static final String DISPLAY_PHOTO = "display_photo";
+
+            /**
+             * Full-size photo file ID of the raw contact.
+             * See {@link ContactsContract.DisplayPhoto}.
+             * <p>
+             * Type: NUMBER
+             */
+            public static final String PHOTO_FILE_ID = DATA14;
 
             /**
              * Thumbnail photo of the raw contact. This is the raw bytes of an image
@@ -2498,6 +2549,56 @@ public final class ContactsContract {
         }
 
         /**
+         * <p>
+         * A sub-directory of a single raw contact that represents its primary
+         * display photo.  To access this directory append
+         * {@link RawContacts.DisplayPhoto#CONTENT_DIRECTORY} to the raw contact URI.
+         * The resulting URI represents an image file, and should be interacted with
+         * using ContentProvider.openAssetFile.
+         * <p>
+         * <p>
+         * Note that this sub-directory also supports opening the photo as an asset file
+         * in write mode.  Callers can create or replace the primary photo associated
+         * with this raw contact by opening the asset file and writing the full-size
+         * photo contents into it.  When the file is closed, the image will be parsed,
+         * sized down if necessary for the full-size display photo and thumbnail
+         * dimensions, and stored.
+         * </p>
+         * <p>
+         * Usage example:
+         * <pre>
+         * public void writeDisplayPhoto(long rawContactId, byte[] photo) {
+         *     Uri rawContactPhotoUri = Uri.withAppendedPath(
+         *             ContentUris.withAppendedId(RawContacts.CONTENT_URI, rawContactId),
+         *             RawContacts.DisplayPhoto.CONTENT_DIRECTORY);
+         *     try {
+         *         AssetFileDescriptor fd =
+         *             getContentResolver().openAssetFile(rawContactPhotoUri, "rw");
+         *         OutputStream os = fd.createOutputStream();
+         *         os.write(photo);
+         *         os.close();
+         *         fd.close();
+         *     } catch (IOException e) {
+         *         // Handle error cases.
+         *     }
+         * }
+         * </pre>
+         * </p>
+         */
+        public static final class DisplayPhoto {
+            /**
+             * No public constructor since this is a utility class
+             */
+            private DisplayPhoto() {
+            }
+
+            /**
+             * The directory twig for this sub-table
+             */
+            public static final String CONTENT_DIRECTORY = "display_photo";
+        }
+
+        /**
          * TODO: javadoc
          * @param cursor
          * @return
@@ -3189,6 +3290,50 @@ public final class ContactsContract {
          * <P>Type: TEXT</P>
          */
         public static final String ACTION_URI = "action_uri";
+    }
+
+    /**
+     * <p>
+     * Constants for the photo files table, which tracks metadata for hi-res photos
+     * stored in the file system.
+     * </p>
+     *
+     * @hide
+     */
+    public static final class PhotoFiles implements BaseColumns, PhotoFilesColumns {
+        /**
+         * No public constructor since this is a utility class
+         */
+        private PhotoFiles() {
+        }
+    }
+
+    /**
+     * Columns in the PhotoFiles table.
+     *
+     * @see ContactsContract.PhotoFiles
+     *
+     * @hide
+     */
+    protected interface PhotoFilesColumns {
+
+        /**
+         * The height, in pixels, of the photo this entry is associated with.
+         * <P>Type: NUMBER</P>
+         */
+        public static final String HEIGHT = "height";
+
+        /**
+         * The width, in pixels, of the photo this entry is associated with.
+         * <P>Type: NUMBER</P>
+         */
+        public static final String WIDTH = "width";
+
+        /**
+         * The size, in bytes, of the photo stored on disk.
+         * <P>Type: NUMBER</P>
+         */
+        public static final String FILESIZE = "filesize";
     }
 
     /**
@@ -5891,7 +6036,7 @@ public final class ContactsContract {
 
         /**
          * <p>
-         * A data kind representing an photo for the contact.
+         * A data kind representing a photo for the contact.
          * </p>
          * <p>
          * Some sync adapters will choose to download photos in a separate
@@ -5911,10 +6056,17 @@ public final class ContactsContract {
          * <th>Alias</th><th colspan='2'>Data column</th>
          * </tr>
          * <tr>
+         * <td>NUMBER</td>
+         * <td>{@link #PHOTO_FILE_ID}</td>
+         * <td>{@link #DATA14}</td>
+         * <td>ID of the hi-res photo file.</td>
+         * </tr>
+         * <tr>
          * <td>BLOB</td>
          * <td>{@link #PHOTO}</td>
          * <td>{@link #DATA15}</td>
-         * <td>By convention, binary data is stored in DATA15.</td>
+         * <td>By convention, binary data is stored in DATA15.  The thumbnail of the
+         * photo is stored in this column.</td>
          * </tr>
          * </table>
          */
@@ -5926,6 +6078,14 @@ public final class ContactsContract {
 
             /** MIME type used when storing this in data table. */
             public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/photo";
+
+            /**
+             * Photo file ID for the display photo of the raw contact.
+             * See {@link ContactsContract.DisplayPhoto}.
+             * <p>
+             * Type: NUMBER
+             */
+            public static final String PHOTO_FILE_ID = DATA14;
 
             /**
              * Thumbnail photo of the raw contact. This is the raw bytes of an image
@@ -7044,6 +7204,66 @@ public final class ContactsContract {
             intent.putExtra(EXTRA_EXCLUDE_MIMES, excludeMimes);
             context.startActivity(intent);
         }
+    }
+
+    /**
+     * Helper class for accessing full-size photos by photo file ID.
+     * <p>
+     * Usage example:
+     * <dl>
+     * <dt>Retrieving a full-size photo by photo file ID (see
+     * {@link ContactsContract.ContactsColumns#PHOTO_FILE_ID})
+     * </dt>
+     * <dd>
+     * <pre>
+     * public InputStream openDisplayPhoto(long photoFileId) {
+     *     Uri displayPhotoUri = ContentUris.withAppendedId(DisplayPhoto.CONTENT_URI, photoKey);
+     *     try {
+     *         AssetFileDescriptor fd = getContentResolver().openAssetFile(displayPhotoUri, "r");
+     *         return fd.createInputStream();
+     *     } catch (FileNotFoundException e) {
+     *         return null;
+     *     }
+     * }
+     * </pre>
+     * </dd>
+     * </dl>
+     * </p>
+     */
+    public static final class DisplayPhoto {
+        /**
+         * no public constructor since this is a utility class
+         */
+        private DisplayPhoto() {}
+
+        /**
+         * The content:// style URI for this class, which allows access to full-size photos,
+         * given a key.
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "display_photo");
+
+        /**
+         * This URI allows the caller to query for the maximum dimensions of a display photo
+         * or thumbnail.  Requests to this URI can be performed on the UI thread because
+         * they are always unblocking.
+         */
+        public static final Uri CONTENT_MAX_DIMENSIONS_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, "photo_dimensions");
+
+        /**
+         * Queries to {@link ContactsContract.DisplayPhoto#CONTENT_MAX_DIMENSIONS_URI} will
+         * contain this column, populated with the maximum height and width (in pixels)
+         * that will be stored for a display photo.  Larger photos will be down-sized to
+         * fit within a square of this many pixels.
+         */
+        public static final String DISPLAY_MAX_DIM = "display_max_dim";
+
+        /**
+         * Queries to {@link ContactsContract.DisplayPhoto#CONTENT_MAX_DIMENSIONS_URI} will
+         * contain this column, populated with the height and width (in pixels) for photo
+         * thumbnails.
+         */
+        public static final String THUMBNAIL_MAX_DIM = "thumbnail_max_dim";
     }
 
     /**
