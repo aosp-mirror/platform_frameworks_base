@@ -1201,16 +1201,15 @@ public class NumberPicker extends LinearLayout {
     private void initializeScrollWheel() {
         if (mInitialScrollOffset != Integer.MIN_VALUE) {
             return;
-
         }
         int[] selectorIndices = getSelectorIndices();
         int totalTextHeight = selectorIndices.length * mTextSize;
         float totalTextGapHeight = (mBottom - mTop) - totalTextHeight;
         float textGapCount = selectorIndices.length - 1;
         int selectorTextGapHeight = (int) (totalTextGapHeight / textGapCount + 0.5f);
-        // Compensate if text size is odd since every time we get its middle a pixel is lost.
-        mInitialScrollOffset = mCurrentScrollOffset = mTextSize - (3 * (mTextSize % 2));
         mSelectorElementHeight = mTextSize + selectorTextGapHeight;
+        mInitialScrollOffset = mTextSize - 3 * (mSelectorElementHeight % 2);
+        mCurrentScrollOffset = mInitialScrollOffset;
         updateInputTextView();
     }
 
