@@ -55,6 +55,64 @@ public class NfcExecutionEnvironment {
      */
     public static final String EXTRA_AID = "com.android.nfc_extras.extra.AID";
 
+    /**
+     * Broadcast action: A filtered APDU was received.
+     *
+     * <p>This happens when an APDU of interest was matched by the Nfc adapter,
+     * for instance as the result of matching an externally-configured filter.
+     *
+     * <p>The filter configuration mechanism is not currently defined.
+     *
+     * <p>Always contains the extra field {@link EXTRA_APDU_BYTES}.
+     *
+     * @hide
+     */
+    public static final String ACTION_APDU_RECEIVED =
+        "com.android.nfc_extras.action.APDU_RECEIVED";
+
+    /**
+     * Mandatory byte array extra field in {@link #ACTION_APDU_RECEIVED}.
+     *
+     * <p>Contains the bytes of the received APDU.
+     *
+     * @hide
+     */
+    public static final String EXTRA_APDU_BYTES =
+        "com.android.nfc_extras.extra.APDU_BYTES";
+
+    /**
+     * Broadcast action: An EMV card removal event was detected.
+     *
+     * @hide
+     */
+    public static final String ACTION_EMV_CARD_REMOVAL =
+        "com.android.nfc_extras.action.EMV_CARD_REMOVAL";
+
+    /**
+     * Broadcast action: An adapter implementing MIFARE Classic via card
+     * emulation detected that a block has been accessed.
+     *
+     * <p>This may only be issued for the first block that the reader
+     * authenticates to.
+     *
+     * <p>May contain the extra field {@link #EXTRA_MIFARE_BLOCK}.
+     *
+     * @hide
+     */
+    public static final String ACTION_MIFARE_ACCESS_DETECTED =
+        "com.android.nfc_extras.action.MIFARE_ACCESS_DETECTED";
+
+    /**
+     * Optional integer extra field in {@link #ACTION_MIFARE_ACCESS_DETECTED}.
+     *
+     * <p>Provides the block number being accessed.  If not set, the block
+     * number being accessed is unknown.
+     *
+     * @hide
+     */
+    public static final String EXTRA_MIFARE_BLOCK =
+        "com.android.nfc_extras.extra.MIFARE_BLOCK";
+
     NfcExecutionEnvironment(NfcAdapterExtras extras) {
         mExtras = extras;
     }
