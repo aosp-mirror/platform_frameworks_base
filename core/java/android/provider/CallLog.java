@@ -57,6 +57,29 @@ public class CallLog {
                 Uri.parse("content://call_log/calls/filter");
 
         /**
+         * An optional URI parameter which instructs the provider to allow the operation to be
+         * applied to voicemail records as well.
+         * <p>
+         * TYPE: Boolean
+         * <p>
+         * Using this parameter with a value of {@code true} will result in a security error if the
+         * calling package does not have appropriate permissions to access voicemails.
+         *
+         * @hide
+         */
+        public static final String ALLOW_VOICEMAILS_PARAM_KEY = "allow_voicemails";
+
+        /**
+         * Content uri with {@link #ALLOW_VOICEMAILS_PARAM_KEY} set. This can directly be used to
+         * access call log entries that includes voicemail records.
+         *
+         * @hide
+         */
+        public static final Uri CONTENT_URI_WITH_VOICEMAIL = CONTENT_URI.buildUpon()
+                .appendQueryParameter(ALLOW_VOICEMAILS_PARAM_KEY, "true")
+                .build();
+
+        /**
          * The default sort order for this table
          */
         public static final String DEFAULT_SORT_ORDER = "date DESC";
