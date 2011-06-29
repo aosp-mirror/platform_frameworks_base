@@ -143,8 +143,8 @@ point, select, drag, scroll, hover, and other standard actions.</p>
 <p>To make the platform even better for gaming, Android 3.1 adds support for
 most PC joysticks and gamepads that are connected over USB or Bluetooth HID.</p>
 
-<p>For example, users can connect Sony Playstation&trade; 3 and XBox 360&trade; game
-controllers over USB (but not Bluetooth), Logitech Dual Action&trade; gamepads and
+<p>For example, users can connect PlayStation<sup>&reg;</sup>3 and Xbox 360<sup>&reg;</sup>
+game controllers over USB (but not Bluetooth), Logitech Dual Action&trade; gamepads and
 flight sticks, or a car racing controller. Game controllers that use proprietary
 networking or pairing are not supported by default, but in general, the platform
 supports most PC-connectible joysticks and gamepads.</p>
