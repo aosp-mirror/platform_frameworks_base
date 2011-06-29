@@ -135,6 +135,16 @@ public class PackageHelper {
         return null;
    }
 
+   public static String getSdFilesystem(String cid) {
+       try {
+            return getMountService().getSecureContainerFilesystemPath(cid);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to get container path for " + cid +
+                " with exception " + e);
+        }
+        return null;
+   }
+
     public static boolean finalizeSdDir(String cid) {
         try {
             int rc = getMountService().finalizeSecureContainer(cid);
