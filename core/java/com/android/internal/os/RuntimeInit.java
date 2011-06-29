@@ -25,16 +25,13 @@ import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
-
 import com.android.internal.logging.AndroidConfig;
-
+import com.android.server.NetworkManagementSocketTagger;
 import dalvik.system.VMRuntime;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.logging.LogManager;
 import java.util.TimeZone;
-
+import java.util.logging.LogManager;
 import org.apache.harmony.luni.internal.util.TimezoneGetter;
 
 /**
@@ -127,6 +124,11 @@ public class RuntimeInit {
          */
         String userAgent = getDefaultUserAgent();
         System.setProperty("http.agent", userAgent);
+
+        /*
+         * Wire socket tagging to traffic stats.
+         */
+        NetworkManagementSocketTagger.install();
 
         /*
          * If we're running in an emulator launched with "-trace", put the

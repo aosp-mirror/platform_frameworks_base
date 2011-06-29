@@ -25,8 +25,9 @@ import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
-import dalvik.system.BlockGuard;
+import com.android.server.NetworkManagementSocketTagger;
 
+import dalvik.system.SocketTagger;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -92,7 +93,7 @@ public class TrafficStats {
      * {@link #tagSocket(Socket)}.
      */
     public static void setThreadStatsTag(int tag) {
-        BlockGuard.setThreadSocketStatsTag(tag);
+        NetworkManagementSocketTagger.setThreadSocketStatsTag(tag);
     }
 
     /**
@@ -104,7 +105,7 @@ public class TrafficStats {
     }
 
     public static void clearThreadStatsTag() {
-        BlockGuard.setThreadSocketStatsTag(-1);
+        NetworkManagementSocketTagger.setThreadSocketStatsTag(-1);
     }
 
     /**
@@ -121,12 +122,12 @@ public class TrafficStats {
      * {@hide}
      */
     public static void setThreadStatsUid(int uid) {
-        BlockGuard.setThreadSocketStatsUid(uid);
+        NetworkManagementSocketTagger.setThreadSocketStatsUid(uid);
     }
 
     /** {@hide} */
     public static void clearThreadStatsUid() {
-        BlockGuard.setThreadSocketStatsUid(-1);
+        NetworkManagementSocketTagger.setThreadSocketStatsUid(-1);
     }
 
     /**
@@ -139,14 +140,14 @@ public class TrafficStats {
      * @see #setThreadStatsUid(int)
      */
     public static void tagSocket(Socket socket) throws SocketException {
-        BlockGuard.tagSocketFd(socket.getFileDescriptor$());
+        SocketTagger.get().tag(socket);
     }
 
     /**
      * Remove any statistics parameters from the given {@link Socket}.
      */
     public static void untagSocket(Socket socket) throws SocketException {
-        BlockGuard.untagSocketFd(socket.getFileDescriptor$());
+        SocketTagger.get().untag(socket);
     }
 
     /**

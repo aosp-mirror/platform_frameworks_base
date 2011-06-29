@@ -16,8 +16,8 @@
 
 package com.android.server;
 
-import static dalvik.system.BlockGuard.kernelToTag;
-import static dalvik.system.BlockGuard.tagToKernel;
+import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
+import static com.android.server.NetworkManagementSocketTagger.tagToKernel;
 
 import android.content.res.Resources;
 import android.net.NetworkStats;

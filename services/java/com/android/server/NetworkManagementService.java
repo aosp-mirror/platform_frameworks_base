@@ -41,8 +41,6 @@ import android.util.Slog;
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 
-import dalvik.system.BlockGuard;
-
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
@@ -958,7 +956,8 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
                 try {
                     final String iface = parsed.get(KEY_IFACE);
-                    final int tag = BlockGuard.kernelToTag(parsed.get(KEY_TAG_HEX));
+                    final int tag = NetworkManagementSocketTagger.kernelToTag(
+                            parsed.get(KEY_TAG_HEX));
                     final int uid = Integer.parseInt(parsed.get(KEY_UID));
                     final long rx = Long.parseLong(parsed.get(KEY_RX));
                     final long tx = Long.parseLong(parsed.get(KEY_TX));
