@@ -41,6 +41,7 @@ namespace android {
 static Mutex gNetworkThreadLock;
 static base::Thread *gNetworkThread = NULL;
 static scoped_refptr<net::URLRequestContext> gReqContext;
+static scoped_ptr<net::NetworkChangeNotifier> gNetworkChangeNotifier;
 
 static void InitializeNetworkThreadIfNecessary() {
     Mutex::Autolock autoLock(gNetworkThreadLock);
@@ -51,6 +52,8 @@ static void InitializeNetworkThreadIfNecessary() {
         CHECK(gNetworkThread->StartWithOptions(options));
 
         gReqContext = new SfRequestContext;
+
+        gNetworkChangeNotifier.reset(net::NetworkChangeNotifier::Create());
 
         net::AndroidNetworkLibrary::RegisterSharedInstance(
                 new SfNetworkLibrary);
