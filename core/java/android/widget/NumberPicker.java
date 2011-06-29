@@ -549,13 +549,11 @@ public class NumberPicker extends LinearLayout {
         final ValueAnimator fadeScroller = ObjectAnimator.ofInt(this, "selectorPaintAlpha", 255, 0);
         final ObjectAnimator showIncrementButton = ObjectAnimator.ofFloat(mIncrementButton,
                 "alpha", 0, 1);
-        final ObjectAnimator showInputText = ObjectAnimator.ofFloat(mInputText,
-                "alpha", 0, 1);
         final ObjectAnimator showDecrementButton = ObjectAnimator.ofFloat(mDecrementButton,
                 "alpha", 0, 1);
         mShowInputControlsAnimator = new AnimatorSet();
         mShowInputControlsAnimator.playTogether(fadeScroller, showIncrementButton,
-                showInputText, showDecrementButton);
+                showDecrementButton);
         mShowInputControlsAnimator.addListener(new AnimatorListenerAdapter() {
             private boolean mCanceled = false;
 
