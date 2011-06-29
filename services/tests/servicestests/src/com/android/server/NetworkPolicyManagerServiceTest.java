@@ -56,6 +56,7 @@ import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.os.Binder;
+import android.os.INetworkManagementService;
 import android.os.IPowerManager;
 import android.test.AndroidTestCase;
 import android.test.mock.MockPackageManager;
@@ -95,6 +96,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     private IActivityManager mActivityManager;
     private IPowerManager mPowerManager;
     private INetworkStatsService mStatsService;
+    private INetworkManagementService mNetworkManagement;
     private INetworkPolicyListener mPolicyListener;
     private TrustedTime mTime;
     private IConnectivityManager mConnManager;
@@ -150,13 +152,15 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         mActivityManager = createMock(IActivityManager.class);
         mPowerManager = createMock(IPowerManager.class);
         mStatsService = createMock(INetworkStatsService.class);
+        mNetworkManagement = createMock(INetworkManagementService.class);
         mPolicyListener = createMock(INetworkPolicyListener.class);
         mTime = createMock(TrustedTime.class);
         mConnManager = createMock(IConnectivityManager.class);
         mNotifManager = createMock(INotificationManager.class);
 
         mService = new NetworkPolicyManagerService(
-                mServiceContext, mActivityManager, mPowerManager, mStatsService, mTime, mPolicyDir);
+                mServiceContext, mActivityManager, mPowerManager, mStatsService,
+                mNetworkManagement, mTime, mPolicyDir);
         mService.bindConnectivityManager(mConnManager);
         mService.bindNotificationManager(mNotifManager);
 
@@ -526,14 +530,14 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     }
 
     private void replay() {
-        EasyMock.replay(mActivityManager, mPowerManager, mStatsService, mPolicyListener, mTime,
-                mConnManager, mNotifManager);
+        EasyMock.replay(mActivityManager, mPowerManager, mStatsService, mPolicyListener,
+                mNetworkManagement, mTime, mConnManager, mNotifManager);
     }
 
     private void verifyAndReset() {
-        EasyMock.verify(mActivityManager, mPowerManager, mStatsService, mPolicyListener, mTime,
-                mConnManager, mNotifManager);
-        EasyMock.reset(mActivityManager, mPowerManager, mStatsService, mPolicyListener, mTime,
-                mConnManager, mNotifManager);
+        EasyMock.verify(mActivityManager, mPowerManager, mStatsService, mPolicyListener,
+                mNetworkManagement, mTime, mConnManager, mNotifManager);
+        EasyMock.reset(mActivityManager, mPowerManager, mStatsService, mPolicyListener,
+                mNetworkManagement, mTime, mConnManager, mNotifManager);
     }
 }

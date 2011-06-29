@@ -71,6 +71,7 @@ import android.net.NetworkTemplate;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.INetworkManagementService;
 import android.os.IPowerManager;
 import android.os.Message;
 import android.os.RemoteCallbackList;
@@ -156,6 +157,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final IActivityManager mActivityManager;
     private final IPowerManager mPowerManager;
     private final INetworkStatsService mNetworkStats;
+    private final INetworkManagementService mNetworkManagement;
     private final TrustedTime mTime;
 
     private IConnectivityManager mConnManager;
@@ -193,9 +195,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // rules enforced, such as system, phone, and radio UIDs.
 
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
-            IPowerManager powerManager, INetworkStatsService networkStats) {
+            IPowerManager powerManager, INetworkStatsService networkStats,
+            INetworkManagementService networkManagement) {
         // TODO: move to using cached NtpTrustedTime
-        this(context, activityManager, powerManager, networkStats, new NtpTrustedTime(),
+        this(context, activityManager, powerManager, networkStats,
+                networkManagement, new NtpTrustedTime(),
                 getSystemDir());
     }
 
@@ -204,12 +208,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
-            IPowerManager powerManager, INetworkStatsService networkStats, TrustedTime time,
-            File systemDir) {
+            IPowerManager powerManager, INetworkStatsService networkStats,
+            INetworkManagementService networkManagement,
+            TrustedTime time, File systemDir) {
         mContext = checkNotNull(context, "missing context");
         mActivityManager = checkNotNull(activityManager, "missing activityManager");
         mPowerManager = checkNotNull(powerManager, "missing powerManager");
         mNetworkStats = checkNotNull(networkStats, "missing networkStats");
+        mNetworkManagement = checkNotNull(networkManagement, "missing networkManagementService");
         mTime = checkNotNull(time, "missing TrustedTime");
 
         mHandlerThread = new HandlerThread(TAG);
@@ -589,7 +595,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (policy.limitBytes != NetworkPolicy.LIMIT_DISABLED) {
                 // remaining "quota" is based on usage in current cycle
                 final long quota = Math.max(0, policy.limitBytes - total);
-                //kernelSetIfacesQuota(ifaces, quota);
+                if (LOGD) {
+                    Slog.d(TAG, "Applying quota rules for ifaces=" + Arrays.toString(ifaces)
+                            + " LIMIT=" + policy.limitBytes + "  TOTAL="
+                            + total + "  QUOTA=" + quota);
+                }
+
+                setQuotaOnIfaceList(ifaces, quota);
 
                 for (String iface : ifaces) {
                     mMeteredIfaces.add(iface);
@@ -599,6 +611,32 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         final String[] meteredIfaces = mMeteredIfaces.toArray(new String[mMeteredIfaces.size()]);
         mHandler.obtainMessage(MSG_METERED_IFACES_CHANGED, meteredIfaces).sendToTarget();
+    }
+
+    private void setQuotaOnIfaceList(String[] ifaces, long quota) {
+        try {
+            mNetworkManagement.setInterfaceQuota(ifaces, quota);
+        } catch (IllegalStateException e) {
+            Slog.e(TAG, "IllegalStateException in setQuotaOnIfaceList " + e);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote Exception in setQuotaOnIfaceList " + e);
+        }
+    }
+
+    private void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces) {
+        // TODO: connect over to NMS
+        // ndc bandwidth app <uid> naughty
+        try {
+            if (LOGD) {
+                Slog.d(TAG, "setUidNetworkRules() with uid=" + uid
+                        + ", rejectOnQuotaInterfaces=" + rejectOnQuotaInterfaces);
+            }
+            mNetworkManagement.setUidNetworkRules(uid, rejectOnQuotaInterfaces);
+        } catch (IllegalStateException e) {
+            Slog.e(TAG, "IllegalStateException in setUidNetworkRules " + e);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote Exception in setUidNetworkRules " + e);
+        }
     }
 
     /**
@@ -955,7 +993,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mUidRules.put(uid, uidRules);
 
         final boolean rejectMetered = (uidRules & RULE_REJECT_METERED) != 0;
-        //kernelSetUidRejectPaid(uid, rejectPaid);
+        setUidNetworkRules(uid, rejectMetered);
 
         // dispatch changed rule to existing listeners
         mHandler.obtainMessage(MSG_RULES_CHANGED, uid, uidRules).sendToTarget();

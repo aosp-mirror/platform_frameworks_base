@@ -919,6 +919,38 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
+    public void setInterfaceQuota(String[] iface, long quota)
+            throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_NETWORK_POLICY, "NetworkManagementService");
+        try {
+            // TODO: Add support for clubbing together multiple interfaces under
+            // one quota. Will need support from the kernel and
+            // BandwidthController to do this.
+            mConnector.doCommand(
+                    String.format("bandwidth setquota %s %d", iface[0], quota));
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Error communicating to native daemon to set Interface quota",
+                    e);
+        }
+    }
+
+    @Override
+    public void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces)
+            throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.MANAGE_NETWORK_POLICY, "NetworkManagementService");
+        try {
+            // TODO: Connect with BandwidthController
+            // mConnector.doCommand("");
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Error communicating to native daemon to set Interface quota",
+                    e);
+        }
+    }
+
     public NetworkStats getNetworkStatsUidDetail(int uid) {
         if (Binder.getCallingUid() != uid) {
             mContext.enforceCallingOrSelfPermission(

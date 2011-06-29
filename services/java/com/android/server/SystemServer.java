@@ -283,7 +283,8 @@ class ServerThread extends Thread {
             try {
                 Slog.i(TAG, "NetworkPolicy Service");
                 networkPolicy = new NetworkPolicyManagerService(
-                        context, ActivityManagerService.self(), power, networkStats);
+                        context, ActivityManagerService.self(), power,
+                        networkStats, networkManagement);
                 ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting NetworkPolicy Service", e);
