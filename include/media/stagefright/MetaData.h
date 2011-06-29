@@ -121,6 +121,8 @@ enum {
 
     // To store the timed text format data
     kKeyTextFormatData    = 'text',  // raw data
+
+    kKeyRequiresSecureBuffers = 'secu',  // bool (int32_t)
 };
 
 enum {

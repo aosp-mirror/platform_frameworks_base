@@ -53,6 +53,9 @@ struct OMXCodec : public MediaSource,
 
         // Enable GRALLOC_USAGE_PROTECTED for output buffers from native window
         kEnableGrallocUsageProtected = 128,
+
+        // Secure decoding mode
+        kUseSecureInputBuffers = 256,
     };
     static sp<MediaSource> Create(
             const sp<IOMX> &omx,
@@ -164,6 +167,10 @@ private:
     bool mOMXLivesLocally;
     IOMX::node_id mNode;
     uint32_t mQuirks;
+
+    // Flags specified in the creation of the codec.
+    uint32_t mFlags;
+
     bool mIsEncoder;
     char *mMIME;
     char *mComponentName;
@@ -205,15 +212,12 @@ private:
     List<size_t> mFilledBuffers;
     Condition mBufferFilled;
 
-    bool mIsMetaDataStoredInVideoBuffers;
-    bool mOnlySubmitOneBufferAtOneTime;
-    bool mEnableGrallocUsageProtected;
-
     // Used to record the decoding time for an output picture from
     // a video encoder.
     List<int64_t> mDecodingTimeList;
 
-    OMXCodec(const sp<IOMX> &omx, IOMX::node_id node, uint32_t quirks,
+    OMXCodec(const sp<IOMX> &omx, IOMX::node_id node,
+             uint32_t quirks, uint32_t flags,
              bool isEncoder, const char *mime, const char *componentName,
              const sp<MediaSource> &source,
              const sp<ANativeWindow> &nativeWindow);
@@ -287,6 +291,10 @@ private:
     void drainInputBuffers();
     void fillOutputBuffers();
 
+    bool drainAnyInputBuffer();
+    BufferInfo *findInputBufferByDataPointer(void *ptr);
+    BufferInfo *findEmptyInputBuffer();
+
     // Returns true iff a flush was initiated and a completion event is
     // upcoming, false otherwise (A flush was not necessary as we own all
     // the buffers on that port).
@@ -313,7 +321,7 @@ private:
 
     void dumpPortStatus(OMX_U32 portIndex);
 
-    status_t configureCodec(const sp<MetaData> &meta, uint32_t flags);
+    status_t configureCodec(const sp<MetaData> &meta);
 
     static uint32_t getComponentQuirks(
             const char *componentName, bool isEncoder);

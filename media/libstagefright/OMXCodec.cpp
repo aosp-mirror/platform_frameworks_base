@@ -477,6 +477,15 @@ sp<MediaSource> OMXCodec::Create(
         const char *matchComponentName,
         uint32_t flags,
         const sp<ANativeWindow> &nativeWindow) {
+    int32_t requiresSecureBuffers;
+    if (source->getFormat()->findInt32(
+                kKeyRequiresSecureBuffers,
+                &requiresSecureBuffers)
+            && requiresSecureBuffers) {
+        flags |= kIgnoreCodecSpecificData;
+        flags |= kUseSecureInputBuffers;
+    }
+
     const char *mime;
     bool success = meta->findCString(kKeyMIMEType, &mime);
     CHECK(success);
@@ -530,17 +539,17 @@ sp<MediaSource> OMXCodec::Create(
             LOGV("Successfully allocated OMX node '%s'", componentName);
 
             sp<OMXCodec> codec = new OMXCodec(
-                    omx, node, quirks,
+                    omx, node, quirks, flags,
                     createEncoder, mime, componentName,
                     source, nativeWindow);
 
             observer->setCodec(codec);
 
-            err = codec->configureCodec(meta, flags);
+            err = codec->configureCodec(meta);
 
             if (err == OK) {
                 if (!strcmp("OMX.Nvidia.mpeg2v.decode", componentName)) {
-                    codec->mOnlySubmitOneBufferAtOneTime = true;
+                    codec->mFlags |= kOnlySubmitOneInputBufferAtOneTime;
                 }
 
                 return codec;
@@ -553,24 +562,11 @@ sp<MediaSource> OMXCodec::Create(
     return NULL;
 }
 
-status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
-    mIsMetaDataStoredInVideoBuffers = false;
-    if (flags & kStoreMetaDataInVideoBuffers) {
-        mIsMetaDataStoredInVideoBuffers = true;
-    }
+status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
+    LOGV("configureCodec protected=%d",
+         (mFlags & kEnableGrallocUsageProtected) ? 1 : 0);
 
-    mOnlySubmitOneBufferAtOneTime = false;
-    if (flags & kOnlySubmitOneInputBufferAtOneTime) {
-        mOnlySubmitOneBufferAtOneTime = true;
-    }
-
-    mEnableGrallocUsageProtected = false;
-    if (flags & kEnableGrallocUsageProtected) {
-        mEnableGrallocUsageProtected = true;
-    }
-    LOGV("configureCodec protected=%d", mEnableGrallocUsageProtected);
-
-    if (!(flags & kIgnoreCodecSpecificData)) {
+    if (!(mFlags & kIgnoreCodecSpecificData)) {
         uint32_t type;
         const void *data;
         size_t size;
@@ -745,7 +741,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta, uint32_t flags) {
 
     initOutputFormat(meta);
 
-    if ((flags & kClientNeedsFramebuffer)
+    if ((mFlags & kClientNeedsFramebuffer)
             && !strncmp(mComponentName, "OMX.SEC.", 8)) {
         OMX_INDEXTYPE index;
 
@@ -1468,7 +1464,8 @@ status_t OMXCodec::setVideoOutputFormat(
 }
 
 OMXCodec::OMXCodec(
-        const sp<IOMX> &omx, IOMX::node_id node, uint32_t quirks,
+        const sp<IOMX> &omx, IOMX::node_id node,
+        uint32_t quirks, uint32_t flags,
         bool isEncoder,
         const char *mime,
         const char *componentName,
@@ -1478,6 +1475,7 @@ OMXCodec::OMXCodec(
       mOMXLivesLocally(omx->livesLocally(getpid())),
       mNode(node),
       mQuirks(quirks),
+      mFlags(flags),
       mIsEncoder(isEncoder),
       mMIME(strdup(mime)),
       mComponentName(strdup(componentName)),
@@ -1645,13 +1643,14 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
         return allocateOutputBuffersFromNativeWindow();
     }
 
-    if (mEnableGrallocUsageProtected && portIndex == kPortIndexOutput) {
+    if ((mFlags & kEnableGrallocUsageProtected) && portIndex == kPortIndexOutput) {
         LOGE("protected output buffers must be stent to an ANativeWindow");
         return PERMISSION_DENIED;
     }
 
     status_t err = OK;
-    if (mIsMetaDataStoredInVideoBuffers && portIndex == kPortIndexInput) {
+    if ((mFlags & kStoreMetaDataInVideoBuffers)
+            && portIndex == kPortIndexInput) {
         err = mOMX->storeMetaDataInBuffers(mNode, kPortIndexInput, OMX_TRUE);
         if (err != OK) {
             LOGE("Storing meta data in video buffers is not supported");
@@ -1687,7 +1686,8 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
 
         IOMX::buffer_id buffer;
         if (portIndex == kPortIndexInput
-                && (mQuirks & kRequiresAllocateBufferOnInputPorts)) {
+                && ((mQuirks & kRequiresAllocateBufferOnInputPorts)
+                    || (mFlags & kUseSecureInputBuffers))) {
             if (mOMXLivesLocally) {
                 mem.clear();
 
@@ -1747,6 +1747,31 @@ status_t OMXCodec::allocateBuffersOnPort(OMX_U32 portIndex) {
     }
 
     // dumpPortStatus(portIndex);
+
+    if (portIndex == kPortIndexInput && (mFlags & kUseSecureInputBuffers)) {
+        Vector<MediaBuffer *> buffers;
+        for (size_t i = 0; i < def.nBufferCountActual; ++i) {
+            const BufferInfo &info = mPortBuffers[kPortIndexInput].itemAt(i);
+
+            MediaBuffer *mbuf = new MediaBuffer(info.mData, info.mSize);
+            buffers.push(mbuf);
+        }
+
+        status_t err = mSource->setBuffers(buffers);
+
+        if (err != OK) {
+            for (size_t i = 0; i < def.nBufferCountActual; ++i) {
+                buffers.editItemAt(i)->release();
+            }
+            buffers.clear();
+
+            CODEC_LOGE(
+                    "Codec requested to use secure input buffers but "
+                    "upstream source didn't support that.");
+
+            return err;
+        }
+    }
 
     return OK;
 }
@@ -1815,7 +1840,7 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
         // XXX: Currently this error is logged, but not fatal.
         usage = 0;
     }
-    if (mEnableGrallocUsageProtected) {
+    if (mFlags & kEnableGrallocUsageProtected) {
         usage |= GRALLOC_USAGE_PROTECTED;
     }
 
@@ -2067,7 +2092,12 @@ void OMXCodec::on_message(const omx_message &msg) {
             } else if (mState != ERROR
                     && mPortStatus[kPortIndexInput] != SHUTTING_DOWN) {
                 CHECK_EQ((int)mPortStatus[kPortIndexInput], (int)ENABLED);
-                drainInputBuffer(&buffers->editItemAt(i));
+
+                if (mFlags & kUseSecureInputBuffers) {
+                    drainAnyInputBuffer();
+                } else {
+                    drainInputBuffer(&buffers->editItemAt(i));
+                }
             }
             break;
         }
@@ -2804,32 +2834,81 @@ void OMXCodec::fillOutputBuffers() {
 void OMXCodec::drainInputBuffers() {
     CHECK(mState == EXECUTING || mState == RECONFIGURING);
 
-    Vector<BufferInfo> *buffers = &mPortBuffers[kPortIndexInput];
-    for (size_t i = 0; i < buffers->size(); ++i) {
-        BufferInfo *info = &buffers->editItemAt(i);
-
-        if (info->mStatus != OWNED_BY_US) {
-            continue;
+    if (mFlags & kUseSecureInputBuffers) {
+        Vector<BufferInfo> *buffers = &mPortBuffers[kPortIndexInput];
+        for (size_t i = 0; i < buffers->size(); ++i) {
+            if (!drainAnyInputBuffer()
+                    || (mFlags & kOnlySubmitOneInputBufferAtOneTime)) {
+                break;
+            }
         }
+    } else {
+        Vector<BufferInfo> *buffers = &mPortBuffers[kPortIndexInput];
+        for (size_t i = 0; i < buffers->size(); ++i) {
+            BufferInfo *info = &buffers->editItemAt(i);
 
-        if (!drainInputBuffer(info)) {
-            break;
-        }
+            if (info->mStatus != OWNED_BY_US) {
+                continue;
+            }
 
-        if (mOnlySubmitOneBufferAtOneTime) {
-            break;
+            if (!drainInputBuffer(info)) {
+                break;
+            }
+
+            if (mFlags & kOnlySubmitOneInputBufferAtOneTime) {
+                break;
+            }
         }
     }
 }
 
+bool OMXCodec::drainAnyInputBuffer() {
+    return drainInputBuffer((BufferInfo *)NULL);
+}
+
+OMXCodec::BufferInfo *OMXCodec::findInputBufferByDataPointer(void *ptr) {
+    Vector<BufferInfo> *infos = &mPortBuffers[kPortIndexInput];
+    for (size_t i = 0; i < infos->size(); ++i) {
+        BufferInfo *info = &infos->editItemAt(i);
+
+        if (info->mData == ptr) {
+            CODEC_LOGV(
+                    "input buffer data ptr = %p, buffer_id = %p",
+                    ptr,
+                    info->mBuffer);
+
+            return info;
+        }
+    }
+
+    TRESPASS();
+}
+
+OMXCodec::BufferInfo *OMXCodec::findEmptyInputBuffer() {
+    Vector<BufferInfo> *infos = &mPortBuffers[kPortIndexInput];
+    for (size_t i = 0; i < infos->size(); ++i) {
+        BufferInfo *info = &infos->editItemAt(i);
+
+        if (info->mStatus == OWNED_BY_US) {
+            return info;
+        }
+    }
+
+    TRESPASS();
+}
+
 bool OMXCodec::drainInputBuffer(BufferInfo *info) {
-    CHECK_EQ((int)info->mStatus, (int)OWNED_BY_US);
+    if (info != NULL) {
+        CHECK_EQ((int)info->mStatus, (int)OWNED_BY_US);
+    }
 
     if (mSignalledEOS) {
         return false;
     }
 
     if (mCodecSpecificDataIndex < mCodecSpecificData.size()) {
+        CHECK(!(mFlags & kUseSecureInputBuffers));
+
         const CodecSpecificData *specific =
             mCodecSpecificData[mCodecSpecificDataIndex];
 
@@ -2925,6 +3004,11 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
             break;
         }
 
+        if (mFlags & kUseSecureInputBuffers) {
+            info = findInputBufferByDataPointer(srcBuffer->data());
+            CHECK(info != NULL);
+        }
+
         size_t remainingBytes = info->mSize - offset;
 
         if (srcBuffer->range_length() > remainingBytes) {
@@ -2960,14 +3044,24 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
             releaseBuffer = false;
             info->mMediaBuffer = srcBuffer;
         } else {
-            if (mIsMetaDataStoredInVideoBuffers) {
+            if (mFlags & kStoreMetaDataInVideoBuffers) {
                 releaseBuffer = false;
                 info->mMediaBuffer = srcBuffer;
             }
-            memcpy((uint8_t *)info->mData + offset,
-                    (const uint8_t *)srcBuffer->data()
-                        + srcBuffer->range_offset(),
-                    srcBuffer->range_length());
+
+            if (mFlags & kUseSecureInputBuffers) {
+                // Data in "info" is already provided at this time.
+
+                releaseBuffer = false;
+
+                CHECK(info->mMediaBuffer == NULL);
+                info->mMediaBuffer = srcBuffer;
+            } else {
+                memcpy((uint8_t *)info->mData + offset,
+                        (const uint8_t *)srcBuffer->data()
+                            + srcBuffer->range_offset(),
+                        srcBuffer->range_length());
+            }
         }
 
         int64_t lastBufferTimeUs;
@@ -3035,6 +3129,16 @@ bool OMXCodec::drainInputBuffer(BufferInfo *info) {
                "timestamp %lld us (%.2f secs)",
                info->mBuffer, offset,
                timestampUs, timestampUs / 1E6);
+
+    if (info == NULL) {
+        CHECK(mFlags & kUseSecureInputBuffers);
+        CHECK(signalEOS);
+
+        // This is fishy, there's still a MediaBuffer corresponding to this
+        // info available to the source at this point even though we're going
+        // to use it to signal EOS to the codec.
+        info = findEmptyInputBuffer();
+    }
 
     err = mOMX->emptyBuffer(
             mNode, info->mBuffer, 0, offset,
