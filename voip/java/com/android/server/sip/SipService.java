@@ -756,21 +756,20 @@ public final class SipService extends ISipService.Stub {
         }
     }
 
-    private class IntervalMeasurementProcess implements
+    private class IntervalMeasurementProcess implements Runnable,
             SipSessionGroup.KeepAliveProcessCallback {
         private static final String TAG = "SipKeepAliveInterval";
         private static final int MAX_INTERVAL = 120; // in seconds
-        private static final int MIN_INTERVAL = 10; // in seconds
+        private static final int MIN_INTERVAL = 5; // in seconds
         private static final int PASS_THRESHOLD = 10;
         private static final int MAX_RETRY_COUNT = 5;
+        private static final int NAT_MEASUREMENT_RETRY_INTERVAL = 120; // in seconds
         private SipSessionGroupExt mGroup;
         private SipSessionGroup.SipSessionImpl mSession;
-        private boolean mRunning;
-        private int mMinInterval = 10; // in seconds
+        private int mMinInterval = DEFAULT_KEEPALIVE_INTERVAL; // in seconds
         private int mMaxInterval;
         private int mInterval;
         private int mPassCount = 0;
-        private int mErrorCount = 0;
 
         public IntervalMeasurementProcess(SipProfile localProfile, int maxInterval) {
             mMaxInterval = (maxInterval < 0) ? MAX_INTERVAL : maxInterval;
@@ -788,8 +787,6 @@ public final class SipService extends ISipService.Stub {
                 // TODO: remove this line once SipWakeupTimer can better handle
                 // variety of timeout values
                 mGroup.setWakeupTimer(new SipWakeupTimer(mContext, mExecutor));
-                mSession = (SipSessionGroup.SipSessionImpl)
-                        mGroup.createSession(null);
             } catch (Exception e) {
                 Log.w(TAG, "start interval measurement error: " + e);
             }
@@ -797,6 +794,11 @@ public final class SipService extends ISipService.Stub {
 
         public void start() {
             synchronized (SipService.this) {
+                Log.d(TAG, "start measurement w interval=" + mInterval);
+                if (mSession == null) {
+                    mSession = (SipSessionGroup.SipSessionImpl)
+                            mGroup.createSession(null);
+                }
                 try {
                     mSession.startKeepAliveProcess(mInterval, this);
                 } catch (SipException e) {
@@ -807,14 +809,23 @@ public final class SipService extends ISipService.Stub {
 
         public void stop() {
             synchronized (SipService.this) {
-                mSession.stopKeepAliveProcess();
+                if (mSession != null) {
+                    mSession.stopKeepAliveProcess();
+                    mSession = null;
+                }
+                mTimer.cancel(this);
             }
         }
 
         private void restart() {
             synchronized (SipService.this) {
+                // Return immediately if the measurement process is stopped
+                if (mSession == null) return;
+
+                Log.d(TAG, "restart measurement w interval=" + mInterval);
                 try {
                     mSession.stopKeepAliveProcess();
+                    mPassCount = 0;
                     mSession.startKeepAliveProcess(mInterval, this);
                 } catch (SipException e) {
                     Log.e(TAG, "restart()", e);
@@ -826,8 +837,6 @@ public final class SipService extends ISipService.Stub {
         @Override
         public void onResponse(boolean portChanged) {
             synchronized (SipService.this) {
-                mErrorCount = 0;
-
                 if (!portChanged) {
                     if (++mPassCount != PASS_THRESHOLD) return;
                     // update the interval, since the current interval is good to
@@ -853,7 +862,6 @@ public final class SipService extends ISipService.Stub {
                 } else {
                     // calculate the new interval and continue.
                     mInterval = (mMaxInterval + mMinInterval) / 2;
-                    mPassCount = 0;
                     if (DEBUG) {
                         Log.d(TAG, "current interval: " + mKeepAliveInterval
                                 + ", test new interval: " + mInterval);
@@ -866,22 +874,32 @@ public final class SipService extends ISipService.Stub {
         // SipSessionGroup.KeepAliveProcessCallback
         @Override
         public void onError(int errorCode, String description) {
+            Log.w(TAG, "interval measurement error: " + description);
+            restartLater();
+        }
+
+        // timeout handler
+        @Override
+        public void run() {
+            mTimer.cancel(this);
+            restart();
+        }
+
+        private void restartLater() {
             synchronized (SipService.this) {
-                Log.w(TAG, "interval measurement error: " + description);
-                if (++mErrorCount < MAX_RETRY_COUNT) {
-                    Log.w(TAG, "  retry count = " + mErrorCount);
-                    mPassCount = 0;
-                    restart();
-                } else {
-                    Log.w(TAG, "  max retry count reached; measurement aborted");
-                }
+                int interval = NAT_MEASUREMENT_RETRY_INTERVAL;
+                Log.d(TAG, "Retry measurement " + interval + "s later.");
+                mTimer.cancel(this);
+                mTimer.set(interval * 1000, this);
             }
         }
     }
 
     private class AutoRegistrationProcess extends SipSessionAdapter
             implements Runnable, SipSessionGroup.KeepAliveProcessCallback {
+        private static final int MIN_KEEPALIVE_SUCCESS_COUNT = 10;
         private String TAG = "SipAudoReg";
+
         private SipSessionGroup.SipSessionImpl mSession;
         private SipSessionGroup.SipSessionImpl mKeepAliveSession;
         private SipSessionListenerProxy mProxy = new SipSessionListenerProxy();
@@ -891,6 +909,8 @@ public final class SipService extends ISipService.Stub {
         private int mErrorCode;
         private String mErrorMessage;
         private boolean mRunning = false;
+
+        private int mKeepAliveSuccessCount = 0;
 
         private String getAction() {
             return toString();
@@ -915,18 +935,56 @@ public final class SipService extends ISipService.Stub {
             }
         }
 
+        private void startKeepAliveProcess(int interval) {
+            Log.d(TAG, "start keepalive w interval=" + interval);
+            if (mKeepAliveSession == null) {
+                mKeepAliveSession = mSession.duplicate();
+            } else {
+                mKeepAliveSession.stopKeepAliveProcess();
+            }
+            try {
+                mKeepAliveSession.startKeepAliveProcess(interval, this);
+            } catch (SipException e) {
+                Log.e(TAG, "failed to start keepalive w interval=" + interval,
+                        e);
+            }
+        }
+
+        private void stopKeepAliveProcess() {
+            if (mKeepAliveSession != null) {
+                mKeepAliveSession.stopKeepAliveProcess();
+                mKeepAliveSession = null;
+            }
+            mKeepAliveSuccessCount = 0;
+        }
+
         // SipSessionGroup.KeepAliveProcessCallback
         @Override
         public void onResponse(boolean portChanged) {
             synchronized (SipService.this) {
                 if (portChanged) {
-                    restartPortMappingLifetimeMeasurement(
-                            mSession.getLocalProfile(), getKeepAliveInterval());
+                    int interval = getKeepAliveInterval();
+                    if (mKeepAliveSuccessCount < MIN_KEEPALIVE_SUCCESS_COUNT) {
+                        Log.i(TAG, "keepalive doesn't work with interval "
+                                + interval + ", past success count="
+                                + mKeepAliveSuccessCount);
+                        if (interval > DEFAULT_KEEPALIVE_INTERVAL) {
+                            restartPortMappingLifetimeMeasurement(
+                                    mSession.getLocalProfile(), interval);
+                            mKeepAliveSuccessCount = 0;
+                        }
+                    } else {
+                        Log.i(TAG, "keep keepalive going with interval "
+                                + interval + ", past success count="
+                                + mKeepAliveSuccessCount);
+                        mKeepAliveSuccessCount /= 2;
+                    }
                 } else {
                     // Start keep-alive interval measurement on the first
                     // successfully kept-alive SipSessionGroup
                     startPortMappingLifetimeMeasurement(
                             mSession.getLocalProfile());
+                    mKeepAliveSuccessCount++;
                 }
 
                 if (!mRunning || !portChanged) return;
@@ -960,10 +1018,7 @@ public final class SipService extends ISipService.Stub {
             }
 
             mTimer.cancel(this);
-            if (mKeepAliveSession != null) {
-                mKeepAliveSession.stopKeepAliveProcess();
-                mKeepAliveSession = null;
-            }
+            stopKeepAliveProcess();
 
             mRegistered = false;
             setListener(mProxy.getListener());
@@ -975,12 +1030,8 @@ public final class SipService extends ISipService.Stub {
                 if (DEBUGV) {
                     Log.v(TAG, "restart keepalive w interval=" + newInterval);
                 }
-                mKeepAliveSession.stopKeepAliveProcess();
-                try {
-                    mKeepAliveSession.startKeepAliveProcess(newInterval, this);
-                } catch (SipException e) {
-                    Log.e(TAG, "onKeepAliveIntervalChanged()", e);
-                }
+                mKeepAliveSuccessCount = 0;
+                startKeepAliveProcess(newInterval);
             }
         }
 
@@ -1105,14 +1156,7 @@ public final class SipService extends ISipService.Stub {
                         SipProfile localProfile = mSession.getLocalProfile();
                         if ((mKeepAliveSession == null) && (isBehindNAT(mLocalIp)
                                 || localProfile.getSendKeepAlive())) {
-                            mKeepAliveSession = mSession.duplicate();
-                            Log.d(TAG, "start keepalive");
-                            try {
-                                mKeepAliveSession.startKeepAliveProcess(
-                                        getKeepAliveInterval(), this);
-                            } catch (SipException e) {
-                                Log.e(TAG, "AutoRegistrationProcess", e);
-                            }
+                            startKeepAliveProcess(getKeepAliveInterval());
                         }
                     }
                     mMyWakeLock.release(session);
