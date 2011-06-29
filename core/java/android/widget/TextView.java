@@ -4948,7 +4948,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         if (mMovement != null && mText instanceof Editable
                                 && mLayout != null && onCheckIsTextEditor()) {
                             InputMethodManager imm = InputMethodManager.peekInstance();
-                            if (imm != null) imm.showSoftInput(this, 0);
+                            if (imm != null) {
+                                imm.viewClicked(this);
+                                imm.showSoftInput(this, 0);
+                            }
                         }
                     }
                 }
@@ -7398,8 +7401,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if ((isTextEditable() || mTextIsSelectable) && touchIsFinished) {
                 // Show the IME, except when selecting in read-only text.
+                final InputMethodManager imm = InputMethodManager.peekInstance();
+                if (imm != null) {
+                    imm.viewClicked(this);
+                }
                 if (!mTextIsSelectable) {
-                    final InputMethodManager imm = InputMethodManager.peekInstance();
                     handled |= imm != null && imm.showSoftInput(this, 0);
                 }
 

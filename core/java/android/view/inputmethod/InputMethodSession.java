@@ -63,6 +63,15 @@ public interface InputMethodSession {
             int candidatesStart, int candidatesEnd);
 
     /**
+     * This method is called when the user tapped a text view.
+     * IMEs can't rely on this method being called because this was not part of the original IME
+     * protocol, so applications with custom text editing written before this method appeared will
+     * not call to inform the IME of this interaction.
+     * @param focusChanged true if the user changed the focused view by this click.
+     */
+    public void viewClicked(boolean focusChanged);
+
+    /**
      * This method is called when cursor location of the target input field
      * has changed within its window.  This is not normally called, but will
      * only be reported if requested by the input method.

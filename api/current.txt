@@ -9397,6 +9397,7 @@ package android.inputmethodservice {
     method public void onUpdateExtractingViews(android.view.inputmethod.EditorInfo);
     method public void onUpdateExtractingVisibility(android.view.inputmethod.EditorInfo);
     method public void onUpdateSelection(int, int, int, int, int, int);
+    method public void onViewClicked(boolean);
     method public void onWindowHidden();
     method public void onWindowShown();
     method public void requestHideSelf(int);
@@ -9440,6 +9441,7 @@ package android.inputmethodservice {
     method public void updateCursor(android.graphics.Rect);
     method public void updateExtractedText(int, android.view.inputmethod.ExtractedText);
     method public void updateSelection(int, int, int, int, int, int);
+    method public void viewClicked(boolean);
   }
 
   public static final class InputMethodService.Insets {
@@ -23511,6 +23513,7 @@ package android.view.inputmethod {
     method public void updateCursor(android.view.View, int, int, int, int);
     method public void updateExtractedText(android.view.View, int, android.view.inputmethod.ExtractedText);
     method public void updateSelection(android.view.View, int, int, int, int);
+    method public void viewClicked(android.view.View);
     field public static final int HIDE_IMPLICIT_ONLY = 1; // 0x1
     field public static final int HIDE_NOT_ALWAYS = 2; // 0x2
     field public static final int RESULT_HIDDEN = 3; // 0x3
@@ -23531,6 +23534,7 @@ package android.view.inputmethod {
     method public abstract void updateCursor(android.graphics.Rect);
     method public abstract void updateExtractedText(int, android.view.inputmethod.ExtractedText);
     method public abstract void updateSelection(int, int, int, int, int, int);
+    method public abstract void viewClicked(boolean);
   }
 
   public static abstract interface InputMethodSession.EventCallback {

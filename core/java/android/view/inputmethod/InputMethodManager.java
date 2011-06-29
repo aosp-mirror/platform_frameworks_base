@@ -1126,7 +1126,7 @@ public final class InputMethodManager {
         if (mServedView == mNextServedView && !mNextServedNeedsStart) {
             return;
         }
-        
+
         InputConnection ic = null;
         synchronized (mH) {
             if (mServedView == mNextServedView && !mNextServedNeedsStart) {
@@ -1237,6 +1237,27 @@ public final class InputMethodManager {
                 } catch (RemoteException e) {
                     Log.w(TAG, "IME died: " + mCurId, e);
                 }
+            }
+        }
+    }
+
+    /**
+     * Notify the event when the user tapped or clicked the text view.
+     */
+    public void viewClicked(View view) {
+        final boolean focusChanged = mServedView != mNextServedView;
+        checkFocus();
+        synchronized (mH) {
+            if ((mServedView != view && (mServedView == null
+                    || !mServedView.checkInputConnectionProxy(view)))
+                    || mCurrentTextBoxAttribute == null || mCurMethod == null) {
+                return;
+            }
+            try {
+                if (DEBUG) Log.v(TAG, "onViewClicked: " + focusChanged);
+                mCurMethod.viewClicked(focusChanged);
+            } catch (RemoteException e) {
+                Log.w(TAG, "IME died: " + mCurId, e);
             }
         }
     }
