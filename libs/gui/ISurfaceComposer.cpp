@@ -25,6 +25,8 @@
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 
+#include <private/surfaceflinger/LayerState.h>
+
 #include <surfaceflinger/ISurfaceComposer.h>
 
 #include <ui/DisplayInfo.h>
@@ -74,18 +76,17 @@ public:
         return interface_cast<IMemoryHeap>(reply.readStrongBinder());
     }
 
-    virtual void openGlobalTransaction()
+    virtual void setTransactionState(const Vector<ComposerState>& state)
     {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
-        remote()->transact(BnSurfaceComposer::OPEN_GLOBAL_TRANSACTION, data, &reply);
-    }
-
-    virtual void closeGlobalTransaction()
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposer::getInterfaceDescriptor());
-        remote()->transact(BnSurfaceComposer::CLOSE_GLOBAL_TRANSACTION, data, &reply);
+        Vector<ComposerState>::const_iterator b(state.begin());
+        Vector<ComposerState>::const_iterator e(state.end());
+        data.writeInt32(state.size());
+        for ( ; b != e ; ++b ) {
+            b->write(data);
+        }
+        remote()->transact(BnSurfaceComposer::SET_TRANSACTION_STATE, data, &reply);
     }
 
     virtual status_t freezeDisplay(DisplayID dpy, uint32_t flags)
@@ -218,13 +219,17 @@ status_t BnSurfaceComposer::onTransact(
             sp<IBinder> b = createGraphicBufferAlloc()->asBinder();
             reply->writeStrongBinder(b);
         } break;
-        case OPEN_GLOBAL_TRANSACTION: {
+        case SET_TRANSACTION_STATE: {
             CHECK_INTERFACE(ISurfaceComposer, data, reply);
-            openGlobalTransaction();
-        } break;
-        case CLOSE_GLOBAL_TRANSACTION: {
-            CHECK_INTERFACE(ISurfaceComposer, data, reply);
-            closeGlobalTransaction();
+            size_t count = data.readInt32();
+            ComposerState s;
+            Vector<ComposerState> state;
+            state.setCapacity(count);
+            for (size_t i=0 ; i<count ; i++) {
+                s.read(data);
+                state.add(s);
+            }
+            setTransactionState(state);
         } break;
         case SET_ORIENTATION: {
             CHECK_INTERFACE(ISurfaceComposer, data, reply);

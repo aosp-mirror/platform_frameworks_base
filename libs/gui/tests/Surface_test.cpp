@@ -36,10 +36,10 @@ protected:
         ASSERT_TRUE(mSurfaceControl != NULL);
         ASSERT_TRUE(mSurfaceControl->isValid());
 
-        ASSERT_EQ(NO_ERROR, mComposerClient->openTransaction());
+        SurfaceComposerClient::openGlobalTransaction();
         ASSERT_EQ(NO_ERROR, mSurfaceControl->setLayer(30000));
         ASSERT_EQ(NO_ERROR, mSurfaceControl->show());
-        ASSERT_EQ(NO_ERROR, mComposerClient->closeTransaction());
+        SurfaceComposerClient::closeGlobalTransaction();
 
         mSurface = mSurfaceControl->getSurface();
         ASSERT_TRUE(mSurface != NULL);

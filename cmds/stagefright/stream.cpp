@@ -159,10 +159,10 @@ int main(int argc, char **argv) {
     CHECK(control != NULL);
     CHECK(control->isValid());
 
-    CHECK_EQ(composerClient->openTransaction(), (status_t)OK);
+    SurfaceComposerClient::openGlobalTransaction();
     CHECK_EQ(control->setLayer(30000), (status_t)OK);
     CHECK_EQ(control->show(), (status_t)OK);
-    CHECK_EQ(composerClient->closeTransaction(), (status_t)OK);
+    SurfaceComposerClient::closeGlobalTransaction();
 
     sp<Surface> surface = control->getSurface();
     CHECK(surface != NULL);

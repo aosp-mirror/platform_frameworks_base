@@ -78,7 +78,6 @@ const String16 sDump("android.permission.DUMP");
 SurfaceFlinger::SurfaceFlinger()
     :   BnSurfaceComposer(), Thread(false),
         mTransactionFlags(0),
-        mTransactionCount(0),
         mResizeTransationPending(false),
         mLayersRemoved(false),
         mBootTime(systemTime()),
@@ -385,13 +384,11 @@ bool SurfaceFlinger::threadLoop()
         handleConsoleEvents();
     }
 
-    if (LIKELY(mTransactionCount == 0)) {
-        // if we're in a global transaction, don't do anything.
-        const uint32_t mask = eTransactionNeeded | eTraversalNeeded;
-        uint32_t transactionFlags = peekTransactionFlags(mask);
-        if (LIKELY(transactionFlags)) {
-            handleTransaction(transactionFlags);
-        }
+    // if we're in a global transaction, don't do anything.
+    const uint32_t mask = eTransactionNeeded | eTraversalNeeded;
+    uint32_t transactionFlags = peekTransactionFlags(mask);
+    if (UNLIKELY(transactionFlags)) {
+        handleTransaction(transactionFlags);
     }
 
     // post surfaces (if needed)
@@ -1176,28 +1173,33 @@ uint32_t SurfaceFlinger::setTransactionFlags(uint32_t flags)
     return old;
 }
 
-void SurfaceFlinger::openGlobalTransaction()
-{
-    android_atomic_inc(&mTransactionCount);
-}
 
-void SurfaceFlinger::closeGlobalTransaction()
-{
-    if (android_atomic_dec(&mTransactionCount) == 1) {
-        signalEvent();
+void SurfaceFlinger::setTransactionState(const Vector<ComposerState>& state) {
+    Mutex::Autolock _l(mStateLock);
 
-        // if there is a transaction with a resize, wait for it to
-        // take effect before returning.
-        Mutex::Autolock _l(mStateLock);
-        while (mResizeTransationPending) {
-            status_t err = mTransactionCV.waitRelative(mStateLock, s2ns(5));
-            if (CC_UNLIKELY(err != NO_ERROR)) {
-                // just in case something goes wrong in SF, return to the
-                // called after a few seconds.
-                LOGW_IF(err == TIMED_OUT, "closeGlobalTransaction timed out!");
-                mResizeTransationPending = false;
-                break;
-            }
+    uint32_t flags = 0;
+    const size_t count = state.size();
+    for (size_t i=0 ; i<count ; i++) {
+        const ComposerState& s(state[i]);
+        sp<Client> client( static_cast<Client *>(s.client.get()) );
+        flags |= setClientStateLocked(client, s.state);
+    }
+    if (flags) {
+        setTransactionFlags(flags);
+    }
+
+    signalEvent();
+
+    // if there is a transaction with a resize, wait for it to
+    // take effect before returning.
+    while (mResizeTransationPending) {
+        status_t err = mTransactionCV.waitRelative(mStateLock, s2ns(5));
+        if (CC_UNLIKELY(err != NO_ERROR)) {
+            // just in case something goes wrong in SF, return to the
+            // called after a few seconds.
+            LOGW_IF(err == TIMED_OUT, "closeGlobalTransaction timed out!");
+            mResizeTransationPending = false;
+            break;
         }
     }
 }
@@ -1393,60 +1395,52 @@ status_t SurfaceFlinger::destroySurface(const wp<LayerBaseClient>& layer)
     return err;
 }
 
-status_t SurfaceFlinger::setClientState(
+uint32_t SurfaceFlinger::setClientStateLocked(
         const sp<Client>& client,
-        int32_t count,
-        const layer_state_t* states)
+        const layer_state_t& s)
 {
-    Mutex::Autolock _l(mStateLock);
     uint32_t flags = 0;
-    for (int i=0 ; i<count ; i++) {
-        const layer_state_t& s(states[i]);
-        sp<LayerBaseClient> layer(client->getLayerUser(s.surface));
-        if (layer != 0) {
-            const uint32_t what = s.what;
-            if (what & ePositionChanged) {
-                if (layer->setPosition(s.x, s.y))
-                    flags |= eTraversalNeeded;
-            }
-            if (what & eLayerChanged) {
-                ssize_t idx = mCurrentState.layersSortedByZ.indexOf(layer);
-                if (layer->setLayer(s.z)) {
-                    mCurrentState.layersSortedByZ.removeAt(idx);
-                    mCurrentState.layersSortedByZ.add(layer);
-                    // we need traversal (state changed)
-                    // AND transaction (list changed)
-                    flags |= eTransactionNeeded|eTraversalNeeded;
-                }
-            }
-            if (what & eSizeChanged) {
-                if (layer->setSize(s.w, s.h)) {
-                    flags |= eTraversalNeeded;
-                    mResizeTransationPending = true;
-                }
-            }
-            if (what & eAlphaChanged) {
-                if (layer->setAlpha(uint8_t(255.0f*s.alpha+0.5f)))
-                    flags |= eTraversalNeeded;
-            }
-            if (what & eMatrixChanged) {
-                if (layer->setMatrix(s.matrix))
-                    flags |= eTraversalNeeded;
-            }
-            if (what & eTransparentRegionChanged) {
-                if (layer->setTransparentRegionHint(s.transparentRegion))
-                    flags |= eTraversalNeeded;
-            }
-            if (what & eVisibilityChanged) {
-                if (layer->setFlags(s.flags, s.mask))
-                    flags |= eTraversalNeeded;
+    sp<LayerBaseClient> layer(client->getLayerUser(s.surface));
+    if (layer != 0) {
+        const uint32_t what = s.what;
+        if (what & ePositionChanged) {
+            if (layer->setPosition(s.x, s.y))
+                flags |= eTraversalNeeded;
+        }
+        if (what & eLayerChanged) {
+            ssize_t idx = mCurrentState.layersSortedByZ.indexOf(layer);
+            if (layer->setLayer(s.z)) {
+                mCurrentState.layersSortedByZ.removeAt(idx);
+                mCurrentState.layersSortedByZ.add(layer);
+                // we need traversal (state changed)
+                // AND transaction (list changed)
+                flags |= eTransactionNeeded|eTraversalNeeded;
             }
         }
+        if (what & eSizeChanged) {
+            if (layer->setSize(s.w, s.h)) {
+                flags |= eTraversalNeeded;
+                mResizeTransationPending = true;
+            }
+        }
+        if (what & eAlphaChanged) {
+            if (layer->setAlpha(uint8_t(255.0f*s.alpha+0.5f)))
+                flags |= eTraversalNeeded;
+        }
+        if (what & eMatrixChanged) {
+            if (layer->setMatrix(s.matrix))
+                flags |= eTraversalNeeded;
+        }
+        if (what & eTransparentRegionChanged) {
+            if (layer->setTransparentRegionHint(s.transparentRegion))
+                flags |= eTraversalNeeded;
+        }
+        if (what & eVisibilityChanged) {
+            if (layer->setFlags(s.flags, s.mask))
+                flags |= eTraversalNeeded;
+        }
     }
-    if (flags) {
-        setTransactionFlags(flags);
-    }
-    return NO_ERROR;
+    return flags;
 }
 
 void SurfaceFlinger::screenReleased(int dpy)
@@ -1588,8 +1582,7 @@ status_t SurfaceFlinger::onTransact(
 {
     switch (code) {
         case CREATE_CONNECTION:
-        case OPEN_GLOBAL_TRANSACTION:
-        case CLOSE_GLOBAL_TRANSACTION:
+        case SET_TRANSACTION_STATE:
         case SET_ORIENTATION:
         case FREEZE_DISPLAY:
         case UNFREEZE_DISPLAY:
@@ -2468,9 +2461,6 @@ sp<ISurface> Client::createSurface(
 }
 status_t Client::destroySurface(SurfaceID sid) {
     return mFlinger->removeSurface(this, sid);
-}
-status_t Client::setState(int32_t count, const layer_state_t* states) {
-    return mFlinger->setClientState(this, count, states);
 }
 
 // ---------------------------------------------------------------------------

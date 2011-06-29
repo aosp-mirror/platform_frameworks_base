@@ -29,6 +29,9 @@
 
 namespace android {
 
+template <typename TYPE>
+class SortedVector;
+
 /*!
  * The main templated vector class ensuring type safety
  * while making use of VectorImpl.
@@ -47,13 +50,17 @@ public:
     
                             Vector();
                             Vector(const Vector<TYPE>& rhs);
+    explicit                Vector(const SortedVector<TYPE>& rhs);
     virtual                 ~Vector();
 
     /*! copy operator */
             const Vector<TYPE>&     operator = (const Vector<TYPE>& rhs) const;
             Vector<TYPE>&           operator = (const Vector<TYPE>& rhs);    
 
-    /*
+            const Vector<TYPE>&     operator = (const SortedVector<TYPE>& rhs) const;
+            Vector<TYPE>&           operator = (const SortedVector<TYPE>& rhs);
+
+            /*
      * empty the vector
      */
 
@@ -215,6 +222,11 @@ Vector<TYPE>::Vector(const Vector<TYPE>& rhs)
 }
 
 template<class TYPE> inline
+Vector<TYPE>::Vector(const SortedVector<TYPE>& rhs)
+    : VectorImpl(static_cast<const VectorImpl&>(rhs)) {
+}
+
+template<class TYPE> inline
 Vector<TYPE>::~Vector() {
     finish_vector();
 }
@@ -227,6 +239,18 @@ Vector<TYPE>& Vector<TYPE>::operator = (const Vector<TYPE>& rhs) {
 
 template<class TYPE> inline
 const Vector<TYPE>& Vector<TYPE>::operator = (const Vector<TYPE>& rhs) const {
+    VectorImpl::operator = (static_cast<const VectorImpl&>(rhs));
+    return *this;
+}
+
+template<class TYPE> inline
+Vector<TYPE>& Vector<TYPE>::operator = (const SortedVector<TYPE>& rhs) {
+    VectorImpl::operator = (static_cast<const VectorImpl&>(rhs));
+    return *this;
+}
+
+template<class TYPE> inline
+const Vector<TYPE>& Vector<TYPE>::operator = (const SortedVector<TYPE>& rhs) const {
     VectorImpl::operator = (rhs);
     return *this; 
 }

@@ -51,8 +51,7 @@ namespace android {
 
 enum {
     CREATE_SURFACE = IBinder::FIRST_CALL_TRANSACTION,
-    DESTROY_SURFACE,
-    SET_STATE
+    DESTROY_SURFACE
 };
 
 class BpSurfaceComposerClient : public BpInterface<ISurfaceComposerClient>
@@ -92,17 +91,6 @@ public:
         remote()->transact(DESTROY_SURFACE, data, &reply);
         return reply.readInt32();
     }
-
-    virtual status_t setState(int32_t count, const layer_state_t* states)
-    {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceComposerClient::getInterfaceDescriptor());
-        data.writeInt32(count);
-        for (int i=0 ; i<count ; i++)
-            states[i].write(data);
-        remote()->transact(SET_STATE, data, &reply);
-        return reply.readInt32();
-    }
 };
 
 IMPLEMENT_META_INTERFACE(SurfaceComposerClient, "android.ui.ISurfaceComposerClient");
@@ -131,17 +119,6 @@ status_t BnSurfaceComposerClient::onTransact(
         case DESTROY_SURFACE: {
             CHECK_INTERFACE(ISurfaceComposerClient, data, reply);
             reply->writeInt32( destroySurface( data.readInt32() ) );
-            return NO_ERROR;
-        } break;
-        case SET_STATE: {
-            CHECK_INTERFACE(ISurfaceComposerClient, data, reply);
-            int32_t count = data.readInt32();
-            layer_state_t* states = new layer_state_t[count];
-            for (int i=0 ; i<count ; i++)
-                states[i].read(data);
-            status_t err = setState(count, states);
-            delete [] states;
-            reply->writeInt32(err);
             return NO_ERROR;
         } break;
         default:

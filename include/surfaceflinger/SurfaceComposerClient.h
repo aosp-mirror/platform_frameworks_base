@@ -37,10 +37,12 @@ namespace android {
 // ---------------------------------------------------------------------------
 
 class DisplayInfo;
+class Composer;
 class IMemoryHeap;
 class ISurfaceComposer;
 class Region;
 class surface_flinger_cblk_t;
+struct layer_state_t;
 
 // ---------------------------------------------------------------------------
 
@@ -59,8 +61,11 @@ public:
 
 // ---------------------------------------------------------------------------
 
+class Composer;
+
 class SurfaceComposerClient : public RefBase
 {
+    friend class Composer;
 public:    
                 SurfaceComposerClient();
     virtual     ~SurfaceComposerClient();
@@ -101,13 +106,7 @@ public:
     // All composer parameters must be changed within a transaction
     // several surfaces can be updated in one transaction, all changes are
     // committed at once when the transaction is closed.
-    // CloseTransaction() usually requires an IPC with the server.
-    
-    //! Open a composer transaction
-    status_t    openTransaction();
-
-    //! commit the transaction
-    status_t    closeTransaction();
+    // closeGlobalTransaction() usually requires an IPC with the server.
 
     //! Open a composer transaction on all active SurfaceComposerClients.
     static void openGlobalTransaction();
@@ -152,19 +151,12 @@ public:
 
 private:
     virtual void onFirstRef();
-    inline layer_state_t*   get_state_l(SurfaceID id);
-    layer_state_t*          lockLayerState(SurfaceID id);
-    inline void             unlockLayerState();
+    Composer& getComposer();
 
-    mutable     Mutex                               mLock;
-                SortedVector<layer_state_t>         mStates;
-                int32_t                             mTransactionOpen;
-                layer_state_t*                      mPrebuiltLayerState;
-
-                // these don't need to be protected because they never change
-                // after assignment
+    mutable     Mutex                       mLock;
                 status_t                    mStatus;
                 sp<ISurfaceComposerClient>  mClient;
+                Composer&                   mComposer;
 };
 
 // ---------------------------------------------------------------------------

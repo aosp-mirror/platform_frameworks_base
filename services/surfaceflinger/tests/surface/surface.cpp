@@ -39,9 +39,9 @@ int main(int argc, char** argv)
     
     sp<SurfaceControl> surfaceControl = client->createSurface(
             getpid(), 0, 160, 240, PIXEL_FORMAT_RGB_565);
-    client->openTransaction();
+    SurfaceComposerClient::openGlobalTransaction();
     surfaceControl->setLayer(100000);
-    client->closeTransaction();
+    SurfaceComposerClient::closeGlobalTransaction();
 
     // pretend it went cross-process
     Parcel parcel;

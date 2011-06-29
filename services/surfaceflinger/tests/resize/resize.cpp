@@ -43,9 +43,9 @@ int main(int argc, char** argv)
             PIXEL_FORMAT_RGB_565);
 
 
-    client->openTransaction();
+    SurfaceComposerClient::openGlobalTransaction();
     surface->setLayer(100000);
-    client->closeTransaction();
+    SurfaceComposerClient::closeGlobalTransaction();
 
     Surface::SurfaceInfo info;
     surface->lock(&info);
@@ -57,9 +57,9 @@ int main(int argc, char** argv)
     android_memset16((uint16_t*)info.bits, 0x07E0, bpr*info.h);
     surface->unlockAndPost();
 
-    client->openTransaction();
+    SurfaceComposerClient::openGlobalTransaction();
     surface->setSize(320, 240);
-    client->closeTransaction();
+    SurfaceComposerClient::closeGlobalTransaction();
 
     
     IPCThreadState::self()->joinThreadPool();
