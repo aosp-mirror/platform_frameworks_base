@@ -20,6 +20,11 @@
 #include <media/mediaplayer.h>
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/AMessage.h>
+#include <media/stagefright/DataSource.h>
+#include <media/stagefright/MPEG2TSWriter.h>
+#include <media/stagefright/MediaExtractor.h>
+#include <media/stagefright/MediaSource.h>
+#include <media/stagefright/MetaData.h>
 
 #include <binder/IServiceManager.h>
 #include <media/IMediaPlayerService.h>
@@ -31,7 +36,7 @@
 using namespace android;
 
 struct MyStreamSource : public BnStreamSource {
-    // Caller retains ownership of fd.
+    // Object assumes ownership of fd.
     MyStreamSource(int fd);
 
     virtual void setListener(const sp<IStreamListener> &listener);
@@ -64,6 +69,8 @@ MyStreamSource::MyStreamSource(int fd)
 }
 
 MyStreamSource::~MyStreamSource() {
+    close(mFd);
+    mFd = -1;
 }
 
 void MyStreamSource::setListener(const sp<IStreamListener> &listener) {
@@ -97,6 +104,143 @@ void MyStreamSource::onBufferAvailable(size_t index) {
         mListener->issueCommand(IStreamListener::EOS, false /* synchronous */);
     } else {
         mListener->queueBuffer(index, n);
+    }
+}
+////////////////////////////////////////////////////////////////////////////////
+
+struct MyConvertingStreamSource : public BnStreamSource {
+    MyConvertingStreamSource(const char *filename);
+
+    virtual void setListener(const sp<IStreamListener> &listener);
+    virtual void setBuffers(const Vector<sp<IMemory> > &buffers);
+
+    virtual void onBufferAvailable(size_t index);
+
+protected:
+    virtual ~MyConvertingStreamSource();
+
+private:
+    Mutex mLock;
+    Condition mCondition;
+
+    sp<IStreamListener> mListener;
+    Vector<sp<IMemory> > mBuffers;
+
+    sp<MPEG2TSWriter> mWriter;
+
+    ssize_t mCurrentBufferIndex;
+    size_t mCurrentBufferOffset;
+
+    List<size_t> mBufferQueue;
+
+    static ssize_t WriteDataWrapper(void *me, const void *data, size_t size);
+    ssize_t writeData(const void *data, size_t size);
+
+    DISALLOW_EVIL_CONSTRUCTORS(MyConvertingStreamSource);
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+MyConvertingStreamSource::MyConvertingStreamSource(const char *filename)
+    : mCurrentBufferIndex(-1),
+      mCurrentBufferOffset(0) {
+    sp<DataSource> dataSource = DataSource::CreateFromURI(filename);
+    CHECK(dataSource != NULL);
+
+    sp<MediaExtractor> extractor = MediaExtractor::Create(dataSource);
+    CHECK(extractor != NULL);
+
+    mWriter = new MPEG2TSWriter(
+            this, &MyConvertingStreamSource::WriteDataWrapper);
+
+    for (size_t i = 0; i < extractor->countTracks(); ++i) {
+        const sp<MetaData> &meta = extractor->getTrackMetaData(i);
+
+        const char *mime;
+        CHECK(meta->findCString(kKeyMIMEType, &mime));
+
+        if (strncasecmp("video/", mime, 6) && strncasecmp("audio/", mime, 6)) {
+            continue;
+        }
+
+        CHECK_EQ(mWriter->addSource(extractor->getTrack(i)), (status_t)OK);
+    }
+
+    CHECK_EQ(mWriter->start(), (status_t)OK);
+}
+
+MyConvertingStreamSource::~MyConvertingStreamSource() {
+}
+
+void MyConvertingStreamSource::setListener(
+        const sp<IStreamListener> &listener) {
+    mListener = listener;
+}
+
+void MyConvertingStreamSource::setBuffers(
+        const Vector<sp<IMemory> > &buffers) {
+    mBuffers = buffers;
+}
+
+ssize_t MyConvertingStreamSource::WriteDataWrapper(
+        void *me, const void *data, size_t size) {
+    return static_cast<MyConvertingStreamSource *>(me)->writeData(data, size);
+}
+
+ssize_t MyConvertingStreamSource::writeData(const void *data, size_t size) {
+    size_t totalWritten = 0;
+
+    while (size > 0) {
+        Mutex::Autolock autoLock(mLock);
+
+        if (mCurrentBufferIndex < 0) {
+            while (mBufferQueue.empty()) {
+                mCondition.wait(mLock);
+            }
+
+            mCurrentBufferIndex = *mBufferQueue.begin();
+            mCurrentBufferOffset = 0;
+
+            mBufferQueue.erase(mBufferQueue.begin());
+        }
+
+        sp<IMemory> mem = mBuffers.itemAt(mCurrentBufferIndex);
+
+        size_t copy = size;
+        if (copy + mCurrentBufferOffset > mem->size()) {
+            copy = mem->size() - mCurrentBufferOffset;
+        }
+
+        memcpy((uint8_t *)mem->pointer() + mCurrentBufferOffset, data, copy);
+        mCurrentBufferOffset += copy;
+
+        if (mCurrentBufferOffset == mem->size()) {
+            mListener->queueBuffer(mCurrentBufferIndex, mCurrentBufferOffset);
+            mCurrentBufferIndex = -1;
+        }
+
+        data = (const uint8_t *)data + copy;
+        size -= copy;
+
+        totalWritten += copy;
+    }
+
+    return (ssize_t)totalWritten;
+}
+
+void MyConvertingStreamSource::onBufferAvailable(size_t index) {
+    Mutex::Autolock autoLock(mLock);
+
+    mBufferQueue.push_back(index);
+    mCondition.signal();
+
+    if (mWriter->reachedEOS()) {
+        if (mCurrentBufferIndex >= 0) {
+            mListener->queueBuffer(mCurrentBufferIndex, mCurrentBufferOffset);
+            mCurrentBufferIndex = -1;
+        }
+
+        mListener->issueCommand(IStreamListener::EOS, false /* synchronous */);
     }
 }
 
@@ -139,6 +283,8 @@ private:
 int main(int argc, char **argv) {
     android::ProcessState::self()->startThreadPool();
 
+    DataSource::RegisterDefaultSniffers();
+
     if (argc != 2) {
         fprintf(stderr, "Usage: %s filename\n", argv[0]);
         return 1;
@@ -173,17 +319,28 @@ int main(int argc, char **argv) {
 
     CHECK(service.get() != NULL);
 
-    int fd = open(argv[1], O_RDONLY);
-
-    if (fd < 0) {
-        fprintf(stderr, "Failed to open file '%s'.", argv[1]);
-        return 1;
-    }
-
     sp<MyClient> client = new MyClient;
 
+    sp<IStreamSource> source;
+
+    size_t len = strlen(argv[1]);
+    if (len >= 3 && !strcasecmp(".ts", &argv[1][len - 3])) {
+        int fd = open(argv[1], O_RDONLY);
+
+        if (fd < 0) {
+            fprintf(stderr, "Failed to open file '%s'.", argv[1]);
+            return 1;
+        }
+
+        source = new MyStreamSource(fd);
+    } else {
+        printf("Converting file to transport stream for streaming...\n");
+
+        source = new MyConvertingStreamSource(argv[1]);
+    }
+
     sp<IMediaPlayer> player =
-        service->create(getpid(), client, new MyStreamSource(fd), 0);
+        service->create(getpid(), client, source, 0);
 
     if (player != NULL) {
         player->setVideoSurface(surface);
@@ -195,9 +352,6 @@ int main(int argc, char **argv) {
     } else {
         fprintf(stderr, "failed to instantiate player.\n");
     }
-
-    close(fd);
-    fd = -1;
 
     composerClient->dispose();
 
