@@ -105,24 +105,19 @@ public class ActionBarContainer extends FrameLayout {
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        int nonTabHeight = 0;
-        final int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            final View child = getChildAt(i);
+        if (mActionBarView == null) return;
 
-            if (child == mTabContainer) continue;
-
-            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            nonTabHeight = Math.max(nonTabHeight,
-                    child.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
-        }
+        final LayoutParams lp = (LayoutParams) mActionBarView.getLayoutParams();
+        final int actionBarViewHeight = mActionBarView.isCollapsed() ? 0 :
+                mActionBarView.getMeasuredHeight() + lp.topMargin + lp.bottomMargin;
 
         if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
             final int mode = MeasureSpec.getMode(heightMeasureSpec);
             if (mode == MeasureSpec.AT_MOST) {
                 final int maxHeight = MeasureSpec.getSize(heightMeasureSpec);
                 setMeasuredDimension(getMeasuredWidth(),
-                        Math.min(nonTabHeight + mTabContainer.getMeasuredHeight(), maxHeight));
+                        Math.min(actionBarViewHeight + mTabContainer.getMeasuredHeight(),
+                                maxHeight));
             }
         }
     }
@@ -137,12 +132,14 @@ public class ActionBarContainer extends FrameLayout {
             if ((mActionBarView.getDisplayOptions() & ActionBar.DISPLAY_SHOW_HOME) == 0) {
                 // Not showing home, put tabs on top.
                 final int count = getChildCount();
-                for (int i = 0; i < count; i++){
+                for (int i = 0; i < count; i++) {
                     final View child = getChildAt(i);
 
                     if (child == mTabContainer) continue;
 
-                    child.offsetTopAndBottom(tabHeight);
+                    if (!mActionBarView.isCollapsed()) {
+                        child.offsetTopAndBottom(tabHeight);
+                    }
                 }
                 mTabContainer.layout(l, 0, r, tabHeight);
             } else {

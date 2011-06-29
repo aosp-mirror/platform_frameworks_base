@@ -117,6 +117,7 @@ public class ActionBarView extends AbsActionBarView {
     private boolean mUserTitle;
     private boolean mIncludeTabs;
     private boolean mIsCollapsable;
+    private boolean mIsCollapsed;
 
     private MenuBuilder mOptionsMenu;
     
@@ -692,6 +693,10 @@ public class ActionBarView extends AbsActionBarView {
         mIsCollapsable = collapsable;
     }
 
+    public boolean isCollapsed() {
+        return mIsCollapsed;
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         final int childCount = getChildCount();
@@ -708,9 +713,11 @@ public class ActionBarView extends AbsActionBarView {
             if (visibleChildren == 0) {
                 // No size for an empty action bar when collapsable.
                 setMeasuredDimension(0, 0);
+                mIsCollapsed = true;
                 return;
             }
         }
+        mIsCollapsed = false;
 
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         if (widthMode != MeasureSpec.EXACTLY) {

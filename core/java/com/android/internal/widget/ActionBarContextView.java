@@ -287,7 +287,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
             availableWidth = measureChildView(mClose, availableWidth, childSpecHeight, 0);
         }
 
-        if (mMenuView != null) {
+        if (mMenuView != null && mMenuView.getParent() == this) {
             availableWidth = measureChildView(mMenuView, availableWidth,
                     childSpecHeight, 0);
         }
