@@ -104,9 +104,13 @@ public class HTML5VideoFullScreen extends HTML5VideoView
 
         public void surfaceDestroyed(SurfaceHolder holder)
         {
-            // after we return from this we can't use the surface any more
-            mSurfaceHolder = null;
+            // After we return from this we can't use the surface any more.
             // The current Video View will be destroy when we play a new video.
+            pauseAndDispatch(mProxy);
+            mSurfaceHolder = null;
+            if (mMediaController != null) {
+                mMediaController.hide();
+            }
         }
     };
 
@@ -210,7 +214,6 @@ public class HTML5VideoFullScreen extends HTML5VideoView
                 // which happens when the video view is detached from its parent
                 // view. This happens in the WebChromeClient before this method
                 // is invoked.
-                pauseAndDispatch(mProxy);
                 mProxy.dispatchOnStopFullScreen();
                 mLayout.removeView(getSurfaceView());
 
