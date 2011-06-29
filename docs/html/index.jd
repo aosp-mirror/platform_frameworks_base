@@ -148,18 +148,17 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
 
     'tv': {
       'layout':"imgLeft",
-      'icon':"tv_s.png",
+      'icon':"GTV_icon_small.png",
       'name':"Google TV",
-      'img':"tv_l.png",
-      'title':"Announcing Google TV!",
-      'desc': "<p><a href='http://www.google.com/tv/'>Google TV</a> is a new platform "
-               + "for television built on Android. Google "
-               + "has partnered with Sony and Logitech to integrate "
-               + "this platform into TVs, blu-ray players, and companion "
-               + "boxes. </p>"
-               + "<p><a href='http://www.google.com/tv/'>Learn more about "
-               + "Google TV &raquo;</a></p>"
+      'img':"GTV_icon_large.png",
+      'title':"Google TV!",
+      'desc': "<p>Build something big. By big, we mean <em>worthy-of-the-living-room</em> big.</p>"
+	        +  " <p>Use <a href='http://code.google.com/tv'>Google TV</a> to bring the power of Android" 
+	        +  " and Google Chrome to television."
+			+  " The average American watches five hours of TV per day. Give them the web and apps"
+			+  " to update their status, listen to music, watch web videos, and much more...</p>"
     },
+
 
     'devphone': {
       'layout':"imgLeft",
