@@ -239,7 +239,7 @@ public final class InputEventConsistencyVerifier {
                     break;
             }
         } finally {
-            finishEvent(false);
+            finishEvent();
         }
     }
 
@@ -302,7 +302,7 @@ public final class InputEventConsistencyVerifier {
                 problem("Source was not SOURCE_CLASS_TRACKBALL.");
             }
         } finally {
-            finishEvent(false);
+            finishEvent();
         }
     }
 
@@ -328,7 +328,9 @@ public final class InputEventConsistencyVerifier {
             mTouchEventStreamUnhandled = false;
             mTouchEventStreamPointers = 0;
         }
-        final boolean wasTainted = mTouchEventStreamIsTainted;
+        if (mTouchEventStreamIsTainted) {
+            event.setTainted(true);
+        }
 
         try {
             ensureMetaStateIsNormalized(event.getMetaState());
@@ -441,7 +443,7 @@ public final class InputEventConsistencyVerifier {
                 problem("Source was not SOURCE_CLASS_POINTER.");
             }
         } finally {
-            finishEvent(wasTainted);
+            finishEvent();
         }
     }
 
@@ -499,7 +501,7 @@ public final class InputEventConsistencyVerifier {
                 }
             }
         } finally {
-            finishEvent(false);
+            finishEvent();
         }
     }
 
@@ -591,9 +593,9 @@ public final class InputEventConsistencyVerifier {
         return true;
     }
 
-    private void finishEvent(boolean tainted) {
+    private void finishEvent() {
         if (mViolationMessage != null && mViolationMessage.length() != 0) {
-            if (!tainted) {
+            if (!mCurrentEvent.isTainted()) {
                 // Write a log message only if the event was not already tainted.
                 mViolationMessage.append("\n  in ").append(mCaller);
                 mViolationMessage.append("\n  ");
@@ -614,15 +616,12 @@ public final class InputEventConsistencyVerifier {
                 }
 
                 Log.d(mLogTag, mViolationMessage.toString());
-                tainted = true;
+
+                // Taint the event so that we do not generate additional violations from it
+                // further downstream.
+                mCurrentEvent.setTainted(true);
             }
             mViolationMessage.setLength(0);
-        }
-
-        if (tainted) {
-            // Taint the event so that we do not generate additional violations from it
-            // further downstream.
-            mCurrentEvent.setTainted(true);
         }
 
         if (RECENT_EVENTS_TO_LOG != 0) {
