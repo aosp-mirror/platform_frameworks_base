@@ -1641,7 +1641,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
             if (imi == null) return false;
             final int N = subtypes.length;
-            mFileManager.addInputMethodSubtypes(mCurMethodId, subtypes);
+            mFileManager.addInputMethodSubtypes(imi, subtypes);
             buildInputMethodListLocked(mMethodList, mMethodMap);
             return true;
         }
@@ -2023,26 +2023,26 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 final CharSequence label = imi.loadLabel(pm);
                 if (showSubtypes && enabledSubtypeSet.size() > 0) {
                     final int subtypeCount = imi.getSubtypeCount();
+                    if (DEBUG) {
+                        Slog.v(TAG, "Add subtypes: " + subtypeCount + ", " + imi.getId());
+                    }
                     for (int j = 0; j < subtypeCount; ++j) {
-                        InputMethodSubtype subtype = imi.getSubtypeAt(j);
-                        // We show all possible IMEs and subtypes when an IME is shown.
-                        if (enabledSubtypeSet.contains(String.valueOf(subtype.hashCode()))
+                        final InputMethodSubtype subtype = imi.getSubtypeAt(j);
+                        final String subtypeHashCode = String.valueOf(subtype.hashCode());
+                        // We show all enabled IMEs and subtypes when an IME is shown.
+                        if (enabledSubtypeSet.contains(subtypeHashCode)
                                 && (mInputShown || !subtype.isAuxiliary())) {
                             final CharSequence title;
-                            int nameResId = subtype.getNameResId();
-                            String mode = subtype.getMode();
-                            if (nameResId != 0) {
-                                title = TextUtils.concat(subtype.getDisplayName(context,
-                                        imi.getPackageName(), imi.getServiceInfo().applicationInfo),
-                                        (TextUtils.isEmpty(label) ? "" : " (" + label + ")"));
-                            } else {
-                                CharSequence language = subtype.getLocale();
-                                // TODO: Use more friendly Title and UI
-                                title = label + "," + (mode == null ? "" : mode) + ","
-                                        + (language == null ? "" : language);
-                            }
+                            final String mode = subtype.getMode();
+                            title = TextUtils.concat(subtype.getDisplayName(context,
+                                    imi.getPackageName(), imi.getServiceInfo().applicationInfo),
+                                    (TextUtils.isEmpty(label) ? "" : " (" + label + ")"));
                             imList.add(new Pair<CharSequence, Pair<InputMethodInfo, Integer>>(
                                     title, new Pair<InputMethodInfo, Integer>(imi, j)));
+                            // Removing this subtype from enabledSubtypeSet because we no longer
+                            // need to add an entry of this subtype to imList to avoid duplicated
+                            // entries.
+                            enabledSubtypeSet.remove(subtypeHashCode);
                         }
                     }
                 } else {
@@ -2339,7 +2339,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 }
             }
         }
-        ArrayList<InputMethodSubtype> applicableSubtypes = new ArrayList<InputMethodSubtype>(
+        final ArrayList<InputMethodSubtype> applicableSubtypes = new ArrayList<InputMethodSubtype>(
                 applicableModeAndSubtypesMap.values());
         if (!containsKeyboardSubtype) {
             InputMethodSubtype lastResortKeyboardSubtype = findLastResortApplicableSubtypeLocked(
@@ -3017,17 +3017,23 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
 
         public void addInputMethodSubtypes(
-                String imiId, InputMethodSubtype[] additionalSubtypes) {
+                InputMethodInfo imi, InputMethodSubtype[] additionalSubtypes) {
             synchronized (mMethodMap) {
+                final HashSet<InputMethodSubtype> existingSubtypes =
+                        new HashSet<InputMethodSubtype>();
+                for (int i = 0; i < imi.getSubtypeCount(); ++i) {
+                    existingSubtypes.add(imi.getSubtypeAt(i));
+                }
+
                 final ArrayList<InputMethodSubtype> subtypes = new ArrayList<InputMethodSubtype>();
                 final int N = additionalSubtypes.length;
                 for (int i = 0; i < N; ++i) {
                     final InputMethodSubtype subtype = additionalSubtypes[i];
-                    if (!subtypes.contains(subtype)) {
+                    if (!subtypes.contains(subtype) && !existingSubtypes.contains(subtype)) {
                         subtypes.add(subtype);
                     }
                 }
-                mSubtypesMap.put(imiId, subtypes);
+                mSubtypesMap.put(imi.getId(), subtypes);
                 writeAdditionalInputMethodSubtypes(mSubtypesMap, mAdditionalInputMethodSubtypeFile,
                         mMethodMap);
             }
@@ -3134,8 +3140,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 parser.getAttributeValue(null, ATTR_IME_SUBTYPE_MODE);
                         final String imeSubtypeExtraValue =
                                 parser.getAttributeValue(null, ATTR_IME_SUBTYPE_EXTRA_VALUE);
-                        final boolean isAuxiliary =
-                                Boolean.valueOf(parser.getAttributeValue(null, ATTR_IS_AUXILIARY));
+                        final boolean isAuxiliary = "1".equals(String.valueOf(
+                                parser.getAttributeValue(null, ATTR_IS_AUXILIARY)));
                         final InputMethodSubtype subtype =
                                 new InputMethodSubtype(label, icon, imeSubtypeLocale,
                                         imeSubtypeMode, imeSubtypeExtraValue, isAuxiliary);
