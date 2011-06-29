@@ -103,7 +103,7 @@ public interface IActivityManager extends IInterface {
             throws RemoteException;
     public void finishSubActivity(IBinder token, String resultWho, int requestCode) throws RemoteException;
     public boolean willActivityBeVisible(IBinder token) throws RemoteException;
-    public Intent registerReceiver(IApplicationThread caller,
+    public Intent registerReceiver(IApplicationThread caller, String callerPackage,
             IIntentReceiver receiver, IntentFilter filter,
             String requiredPermission) throws RemoteException;
     public void unregisterReceiver(IIntentReceiver receiver) throws RemoteException;
@@ -361,6 +361,8 @@ public interface IActivityManager extends IInterface {
     public void registerProcessObserver(IProcessObserver observer) throws RemoteException;
     public void unregisterProcessObserver(IProcessObserver observer) throws RemoteException;
 
+    public boolean isIntentSenderTargetedToPackage(IIntentSender sender) throws RemoteException;
+
     /*
      * Private non-Binder interfaces
      */
@@ -587,4 +589,5 @@ public interface IActivityManager extends IInterface {
     int REMOVE_TASK_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+131;
     int REGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+132;
     int UNREGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+133;
+    int IS_INTENT_SENDER_TARGETED_TO_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+134;
 }

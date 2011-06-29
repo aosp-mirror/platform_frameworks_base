@@ -1029,6 +1029,12 @@ public abstract class Context {
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
      *
+     * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
+     * registered with this method will correctly respect the
+     * {@link Intent#setPackage(String)} specified for an Intent being broadcast.
+     * Prior to that, it would be ignored and delivered to all matching registered
+     * receivers.  Be careful if using this for security.</p>
+     *
      * <p class="note">Note: this method <em>cannot be called from a
      * {@link BroadcastReceiver} component;</em> that is, from a BroadcastReceiver
      * that is declared in an application's manifest.  It is okay, however, to call
@@ -1058,6 +1064,12 @@ public abstract class Context {
      * a different thread than the main application thread.
      *
      * <p>See {@link BroadcastReceiver} for more information on Intent broadcasts.
+     *
+     * <p>As of {@link android.os.Build.VERSION_CODES#ICE_CREAM_SANDWICH}, receivers
+     * registered with this method will correctly respect the
+     * {@link Intent#setPackage(String)} specified for an Intent being broadcast.
+     * Prior to that, it would be ignored and delivered to all matching registered
+     * receivers.  Be careful if using this for security.</p>
      *
      * @param receiver The BroadcastReceiver to handle the broadcast.
      * @param filter Selects the Intent broadcasts to be received.

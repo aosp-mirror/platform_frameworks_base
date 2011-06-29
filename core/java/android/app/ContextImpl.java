@@ -61,7 +61,6 @@ import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiManager;
 import android.nfc.NfcManager;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.DropBoxManager;
 import android.os.Environment;
@@ -81,7 +80,6 @@ import android.content.ClipboardManager;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
-import android.view.Display;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
@@ -142,6 +140,7 @@ class ContextImpl extends Context {
             new HashMap<String, SharedPreferencesImpl>();
 
     /*package*/ LoadedApk mPackageInfo;
+    private String mBasePackageName;
     private Resources mResources;
     /*package*/ ActivityThread mMainThread;
     private Context mOuterContext;
@@ -1030,7 +1029,7 @@ class ContextImpl extends Context {
         }
         try {
             return ActivityManagerNative.getDefault().registerReceiver(
-                    mMainThread.getApplicationThread(),
+                    mMainThread.getApplicationThread(), mBasePackageName,
                     rd, filter, broadcastPermission);
         } catch (RemoteException e) {
             return null;
@@ -1397,7 +1396,7 @@ class ContextImpl extends Context {
         if (pi != null) {
             ContextImpl c = new ContextImpl();
             c.mRestricted = (flags & CONTEXT_RESTRICTED) == CONTEXT_RESTRICTED;
-            c.init(pi, null, mMainThread, mResources);
+            c.init(pi, null, mMainThread, mResources, mBasePackageName);
             if (c.mResources != null) {
                 return c;
             }
@@ -1450,6 +1449,7 @@ class ContextImpl extends Context {
      */
     public ContextImpl(ContextImpl context) {
         mPackageInfo = context.mPackageInfo;
+        mBasePackageName = context.mBasePackageName;
         mResources = context.mResources;
         mMainThread = context.mMainThread;
         mContentResolver = context.mContentResolver;
@@ -1458,13 +1458,14 @@ class ContextImpl extends Context {
 
     final void init(LoadedApk packageInfo,
             IBinder activityToken, ActivityThread mainThread) {
-        init(packageInfo, activityToken, mainThread, null);
+        init(packageInfo, activityToken, mainThread, null, null);
     }
 
     final void init(LoadedApk packageInfo,
                 IBinder activityToken, ActivityThread mainThread,
-                Resources container) {
+                Resources container, String basePackageName) {
         mPackageInfo = packageInfo;
+        mBasePackageName = basePackageName != null ? basePackageName : packageInfo.mPackageName;
         mResources = mPackageInfo.getResources(mainThread);
 
         if (mResources != null && container != null
@@ -1485,6 +1486,7 @@ class ContextImpl extends Context {
 
     final void init(Resources resources, ActivityThread mainThread) {
         mPackageInfo = null;
+        mBasePackageName = null;
         mResources = resources;
         mMainThread = mainThread;
         mContentResolver = new ApplicationContentResolver(this, mainThread);

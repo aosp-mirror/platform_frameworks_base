@@ -177,13 +177,13 @@ class PendingIntentRecord extends IIntentSender.Stub {
     }
 
     public int send(int code, Intent intent, String resolvedType,
-            IIntentReceiver finishedReceiver) {
+            IIntentReceiver finishedReceiver, String requiredPermission) {
         return sendInner(code, intent, resolvedType, finishedReceiver,
-                null, null, 0, 0, 0);
+                requiredPermission, null, null, 0, 0, 0);
     }
     
     int sendInner(int code, Intent intent, String resolvedType,
-            IIntentReceiver finishedReceiver,
+            IIntentReceiver finishedReceiver, String requiredPermission,
             IBinder resultTo, String resultWho, int requestCode,
             int flagsMask, int flagsValues) {
         synchronized(owner) {
@@ -246,8 +246,8 @@ class PendingIntentRecord extends IIntentSender.Stub {
                             // that the broadcast be delivered synchronously
                             owner.broadcastIntentInPackage(key.packageName, uid,
                                     finalIntent, resolvedType,
-                                    finishedReceiver, code, null, null, null,
-                                    (finishedReceiver != null), false);
+                                    finishedReceiver, code, null, null,
+                                    requiredPermission, (finishedReceiver != null), false);
                             sendFinish = false;
                         } catch (RuntimeException e) {
                             Slog.w(ActivityManagerService.TAG,
