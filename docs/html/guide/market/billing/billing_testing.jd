@@ -211,7 +211,8 @@ experience, including the actual responses from Android Market and the actual ch
 users will experience in your application.</p>
 
 <p class="note"><strong>Note</strong>: You do not need to publish your application to do end-to-end
-testing. You only need to upload your draft application to perform end-to-end testing.</p>
+testing. You only need to upload your application as a draft application to perform end-to-end
+testing.</p>
 
 <p>To test your in-app billing implementation with actual in-app purchases, you will need to
 register at least one test account on the Android Market publisher site. You cannot use your
@@ -233,8 +234,11 @@ actual payouts to your merchant account.</p>
 <ol>
   <li><strong>Upload your application as a draft application to the publisher site.</strong>
     <p>You do not need to publish your application to perform end-to-end testing with real product
-    IDs. To learn how to upload an application to Android Market, see <a
-    href="http://market.android.com/support/bin/answer.py?answer=113469">Uploading
+    IDs; you only need to upload your application as a draft application. However, you must sign
+    your application with your release key before you upload it as a draft application. Also, the
+    version number of the uploaded application must match the version number of the application you
+    load to your device for testing. To learn how to upload an application to Android Market, see
+    <a href="http://market.android.com/support/bin/answer.py?answer=113469">Uploading
     applications</a>.</p>
   </li>
   <li><strong>Add items to the application's product list.</strong>

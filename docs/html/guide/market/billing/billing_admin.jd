@@ -202,6 +202,11 @@ IN_APP_NOTIFY messages</a> and <a
 href="http://www.google.com/support/androidmarket/bin/answer.py?answer=1153485">In-app Billing
 Pricing</a>.</p>
 
+<p class="caution"><strong>Important:</strong> You cannot use the Google Checkout API to issue
+refunds or cancel in-app billing transactions. You must do this manually through your Google
+Checkout merchant account. However, you can use the Google Checkout API to retrieve order
+information.</p>
+
 <h2 id="billing-testing-setup">Setting Up Test Accounts</h2>
 
 <p>The Android Market publisher site lets you set up one or more test accounts. A test account is a
