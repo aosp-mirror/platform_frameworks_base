@@ -720,8 +720,9 @@ public class MediaRecorder
      *
      * <p>Since API level 13, if applications set a camera via
      * {@link #setCamera(Camera)}, the apps can use the camera after this method
-     * call. The apps do not need to lock the camera again. The apps should not
-     * start another recording session during recording.
+     * call. The apps do not need to lock the camera again. However, if this
+     * method fails, the apps should still lock the camera back. The apps should
+     * not start another recording session during recording.
      *
      * @throws IllegalStateException if it is called before
      * prepare().

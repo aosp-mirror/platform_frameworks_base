@@ -158,9 +158,12 @@ CameraSource::CameraSource(
     mVideoSize.width  = -1;
     mVideoSize.height = -1;
 
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
     mInitCheck = init(camera, proxy, cameraId,
                     videoSize, frameRate,
                     storeMetaDataInVideoBuffers);
+    if (mInitCheck != OK) releaseCamera();
+    IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
 status_t CameraSource::initCheck() const {
@@ -295,7 +298,6 @@ status_t CameraSource::configureCamera(
     if (width != -1 && height != -1) {
         if (!isVideoSizeSupported(width, height, sizes)) {
             LOGE("Video dimension (%dx%d) is unsupported", width, height);
-            releaseCamera();
             return BAD_VALUE;
         }
         if (isSetVideoSizeSupportedByCamera) {
@@ -309,7 +311,6 @@ status_t CameraSource::configureCamera(
         // If one and only one of the width and height is -1
         // we reject such a request.
         LOGE("Requested video size (%dx%d) is not supported", width, height);
-        releaseCamera();
         return BAD_VALUE;
     } else {  // width == -1 && height == -1
         // Do not configure the camera.
@@ -327,7 +328,6 @@ status_t CameraSource::configureCamera(
         if (strstr(supportedFrameRates, buf) == NULL) {
             LOGE("Requested frame rate (%d) is not supported: %s",
                 frameRate, supportedFrameRates);
-            releaseCamera();
             return BAD_VALUE;
         }
 
@@ -463,7 +463,6 @@ status_t CameraSource::init(
         bool storeMetaDataInVideoBuffers) {
 
     status_t err = OK;
-    int64_t token = IPCThreadState::self()->clearCallingIdentity();
 
     if ((err = isCameraAvailable(camera, proxy, cameraId)) != OK) {
         LOGE("Camera connection could not be established.");
@@ -504,8 +503,6 @@ status_t CameraSource::init(
             mIsMetaDataStoredInVideoBuffers = true;
         }
     }
-
-    IPCThreadState::self()->restoreCallingIdentity(token);
 
     int64_t glitchDurationUs = (1000000LL / mVideoFrameRate);
     if (glitchDurationUs > mGlitchDurationThresholdUs) {
@@ -573,13 +570,21 @@ void CameraSource::stopCameraRecording() {
 
 void CameraSource::releaseCamera() {
     LOGV("releaseCamera");
-    if ((mCameraFlags & FLAGS_HOT_CAMERA) == 0) {
-        LOGV("Camera was cold when we started, stopping preview");
-        mCamera->stopPreview();
+    if (mCamera != 0) {
+        if ((mCameraFlags & FLAGS_HOT_CAMERA) == 0) {
+            LOGV("Camera was cold when we started, stopping preview");
+            mCamera->stopPreview();
+            mCamera->disconnect();
+        } else {
+            // Unlock the camera so the application can lock it back.
+            mCamera->unlock();
+        }
+        mCamera.clear();
     }
-    mCamera.clear();
-    mCameraRecordingProxy->asBinder()->unlinkToDeath(mDeathNotifier);
-    mCameraRecordingProxy.clear();
+    if (mCameraRecordingProxy != 0) {
+        mCameraRecordingProxy->asBinder()->unlinkToDeath(mDeathNotifier);
+        mCameraRecordingProxy.clear();
+    }
     mCameraFlags = 0;
 }
 
