@@ -2025,8 +2025,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     final int subtypeCount = imi.getSubtypeCount();
                     for (int j = 0; j < subtypeCount; ++j) {
                         InputMethodSubtype subtype = imi.getSubtypeAt(j);
+                        // We show all possible IMEs and subtypes when an IME is shown.
                         if (enabledSubtypeSet.contains(String.valueOf(subtype.hashCode()))
-                                && !subtype.isAuxiliary()) {
+                                && (mInputShown || !subtype.isAuxiliary())) {
                             final CharSequence title;
                             int nameResId = subtype.getNameResId();
                             String mode = subtype.getMode();
