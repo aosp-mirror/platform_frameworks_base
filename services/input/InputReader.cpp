@@ -53,6 +53,7 @@
 #define INDENT2 "    "
 #define INDENT3 "      "
 #define INDENT4 "        "
+#define INDENT5 "          "
 
 namespace android {
 
@@ -1921,8 +1922,17 @@ void TouchInputMapper::dump(String8& dump) {
         dump.appendFormat(INDENT4 "DistanceScale: %0.3f\n", mLocked.distanceScale);
 
         dump.appendFormat(INDENT3 "Last Touch:\n");
-        dump.appendFormat(INDENT4 "Pointer Count: %d\n", mLastTouch.pointerCount);
         dump.appendFormat(INDENT4 "Button State: 0x%08x\n", mLastTouch.buttonState);
+        dump.appendFormat(INDENT4 "Pointer Count: %d\n", mLastTouch.pointerCount);
+        for (uint32_t i = 0; i < mLastTouch.pointerCount; i++) {
+            const PointerData& pointer = mLastTouch.pointers[i];
+            dump.appendFormat(INDENT5 "[%d]: id=%d, x=%d, y=%d, pressure=%d, "
+                    "touchMajor=%d, touchMinor=%d, toolMajor=%d, toolMinor=%d, "
+                    "orientation=%d, distance=%d, isStylus=%s\n", i,
+                    pointer.id, pointer.x, pointer.y, pointer.pressure,
+                    pointer.touchMajor, pointer.touchMinor, pointer.toolMajor, pointer.toolMinor,
+                    pointer.orientation, pointer.distance, toString(pointer.isStylus));
+        }
 
         if (mParameters.deviceType == Parameters::DEVICE_TYPE_POINTER) {
             dump.appendFormat(INDENT3 "Pointer Gesture Detector:\n");
