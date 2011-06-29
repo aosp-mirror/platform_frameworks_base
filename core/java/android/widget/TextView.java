@@ -10016,6 +10016,127 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mInBatchEditControllers;
     }
 
+    /**
+     * Resolve the text direction.
+     *
+     * Text direction of paragraphs in a TextView is determined using a heuristic. If the correct
+     * text direction cannot be determined by the heuristic, the view’s resolved layout direction
+     * determines the direction.
+     *
+     * This heuristic and result is applied individually to each paragraph in a TextView, based on
+     * the text and style content of that paragraph. Paragraph text styles can also be used to force
+     * a particular direction.
+     */
+    @Override
+    protected void resolveTextDirection() {
+        int resolvedTextDirection = TEXT_DIRECTION_UNDEFINED;
+        switch(mTextDirection) {
+            default:
+            case TEXT_DIRECTION_INHERIT:
+                // Try to the text direction from the parent layout. If not possible, then we will
+                // use the default layout direction to decide later
+                if (mParent != null && mParent instanceof ViewGroup) {
+                    resolvedTextDirection = ((ViewGroup) mParent).getResolvedTextDirection();
+                }
+                break;
+            case TEXT_DIRECTION_FIRST_STRONG:
+                resolvedTextDirection = getTextDirectionFromFirstStrong(mText);
+                break;
+            case TEXT_DIRECTION_ANY_RTL:
+                resolvedTextDirection = getTextDirectionFromAnyRtl(mText);
+                break;
+            case TEXT_DIRECTION_LTR:
+                resolvedTextDirection = TEXT_DIRECTION_LTR;
+                break;
+            case TEXT_DIRECTION_RTL:
+                resolvedTextDirection = TEXT_DIRECTION_RTL;
+                break;
+        }
+        // if we have been so far unable to get the text direction from the heuristics, then we are
+        // falling back using the layout direction
+        if (resolvedTextDirection == TEXT_DIRECTION_UNDEFINED) {
+            switch(getResolvedLayoutDirection()) {
+                default:
+                case LAYOUT_DIRECTION_LTR:
+                    resolvedTextDirection = TEXT_DIRECTION_LTR;
+                    break;
+                case LAYOUT_DIRECTION_RTL:
+                    resolvedTextDirection = TEXT_DIRECTION_RTL;
+                    break;
+            }
+        }
+        mResolvedTextDirection = resolvedTextDirection;
+    }
+
+    /**
+     * Get text direction following the "first strong" heuristic.
+     *
+     * @param cs the CharSequence used to get the text direction.
+     *
+     * @return {@link #TEXT_DIRECTION_RTL} if direction it RTL, {@link #TEXT_DIRECTION_LTR} if
+     * direction it LTR or {@link #TEXT_DIRECTION_UNDEFINED} if direction cannot be found.
+     */
+    private static int getTextDirectionFromFirstStrong(final CharSequence cs) {
+        final int length = cs.length();
+        for(int i = 0; i < length; i++) {
+            final char c = cs.charAt(i);
+            final byte dir = Character.getDirectionality(c);
+            if (isStrongLtrChar(dir)) {
+                return TEXT_DIRECTION_LTR;
+            } else if (isStrongRtlChar(dir)) {
+                return TEXT_DIRECTION_RTL;
+            }
+        }
+        return TEXT_DIRECTION_UNDEFINED;
+    }
+
+    /**
+     * Get text direction following the "any RTL" heuristic.
+     *
+     * @param cs the CharSequence used to get the text direction.
+     *
+     * @return {@link #TEXT_DIRECTION_RTL} if direction it RTL, {@link #TEXT_DIRECTION_LTR} if
+     * direction it LTR or {@link #TEXT_DIRECTION_UNDEFINED} if direction cannot be found.
+     */
+    private static int getTextDirectionFromAnyRtl(final CharSequence cs) {
+        final int length = cs.length();
+        boolean foundStrongLtr = false;
+        boolean foundStrongRtl = false;
+        for(int i = 0; i < length; i++) {
+            final char c = cs.charAt(i);
+            final byte dir = Character.getDirectionality(c);
+            if (isStrongLtrChar(dir)) {
+                foundStrongLtr = true;
+            } else if (isStrongRtlChar(dir)) {
+                foundStrongRtl = true;
+            }
+        }
+        if (foundStrongRtl) {
+            return TEXT_DIRECTION_RTL;
+        }
+        if (foundStrongLtr) {
+            return TEXT_DIRECTION_LTR;
+        }
+        return TEXT_DIRECTION_UNDEFINED;
+    }
+
+    /**
+     * Return true if the char direction is corresponding to a "strong RTL char" following the
+     * Unicode Bidirectional Algorithm (UBA).
+     */
+    private static boolean isStrongRtlChar(final byte dir) {
+        return (dir == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
+                dir == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC);
+    }
+
+    /**
+     * Return true if the char direction is corresponding to a "strong LTR char" following the
+     * Unicode Bidirectional Algorithm (UBA).
+     */
+    private static boolean isStrongLtrChar(final byte dir) {
+        return (dir == Character.DIRECTIONALITY_LEFT_TO_RIGHT);
+    }
+
     @ViewDebug.ExportedProperty(category = "text")
     private CharSequence            mText;
     private CharSequence            mTransformed;

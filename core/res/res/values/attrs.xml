@@ -1972,6 +1972,24 @@
             <!-- Locale -->
             <enum name="locale" value="3" />
         </attr>
+        <!-- Direction of the text. A heuristic is used to determine the resolved text direction
+             of paragraphs. -->
+        <attr name="textDirection" format="integer">
+            <!-- Default -->
+            <enum name="inherit" value="0" />
+            <!-- Default for the root view. The first strong directional character determines the
+                 paragraph direction.  If there is o strong directional character, the paragraph
+                 direction is the view’s resolved layout direction. -->
+            <enum name="firstStrong" value="1" />
+            <!-- The paragraph direction is RTL if it contains any strong RTL character, otherwise
+                 it is LTR if it contains any strong LTR characters.  If there are neither, the
+                 paragraph direction is the view’s resolved layout direction. -->
+            <enum name="anyRtl" value="2" />
+            <!-- The text direction is left to right. -->
+            <enum name="ltr" value="3" />
+            <!-- The text direction is right to left. -->
+            <enum name="rtl" value="4" />
+        </attr>
     </declare-styleable>
 
     <!-- Attributes that can be used with a {@link android.view.ViewGroup} or any
