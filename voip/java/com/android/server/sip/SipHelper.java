@@ -150,9 +150,17 @@ class SipHelper {
 
     private ContactHeader createContactHeader(SipProfile profile)
             throws ParseException, SipException {
-        ListeningPoint lp = getListeningPoint();
-        SipURI contactURI =
-                createSipUri(profile.getUserName(), profile.getProtocol(), lp);
+        return createContactHeader(profile, null, 0);
+    }
+
+    private ContactHeader createContactHeader(SipProfile profile,
+            String ip, int port) throws ParseException,
+            SipException {
+        SipURI contactURI = (ip == null)
+                ? createSipUri(profile.getUserName(), profile.getProtocol(),
+                        getListeningPoint())
+                : createSipUri(profile.getUserName(), profile.getProtocol(),
+                        ip, port);
 
         Address contactAddress = mAddressFactory.createAddress(contactURI);
         contactAddress.setDisplayName(profile.getDisplayName());
@@ -168,9 +176,14 @@ class SipHelper {
 
     private SipURI createSipUri(String username, String transport,
             ListeningPoint lp) throws ParseException {
-        SipURI uri = mAddressFactory.createSipURI(username, lp.getIPAddress());
+        return createSipUri(username, transport, lp.getIPAddress(), lp.getPort());
+    }
+
+    private SipURI createSipUri(String username, String transport,
+            String ip, int port) throws ParseException {
+        SipURI uri = mAddressFactory.createSipURI(username, ip);
         try {
-            uri.setPort(lp.getPort());
+            uri.setPort(port);
             uri.setTransportParam(transport);
         } catch (InvalidArgumentException e) {
             throw new RuntimeException(e);
@@ -353,13 +366,14 @@ class SipHelper {
      */
     public ServerTransaction sendInviteOk(RequestEvent event,
             SipProfile localProfile, String sessionDescription,
-            ServerTransaction inviteTransaction)
-            throws SipException {
+            ServerTransaction inviteTransaction, String externalIp,
+            int externalPort) throws SipException {
         try {
             Request request = event.getRequest();
             Response response = mMessageFactory.createResponse(Response.OK,
                     request);
-            response.addHeader(createContactHeader(localProfile));
+            response.addHeader(createContactHeader(localProfile, externalIp,
+                    externalPort));
             response.setContent(sessionDescription,
                     mHeaderFactory.createContentTypeHeader(
                             "application", "sdp"));
