@@ -19,6 +19,8 @@ package android.location;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.Locale;
+
 /**
  * This class wraps the country information.
  *
@@ -74,7 +76,7 @@ public class Country implements Parcelable {
                 || source > COUNTRY_SOURCE_LOCALE) {
             throw new IllegalArgumentException();
         }
-        mCountryIso = countryIso.toLowerCase();
+        mCountryIso = countryIso.toUpperCase(Locale.US);
         mSource = source;
     }
 
