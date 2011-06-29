@@ -34,7 +34,7 @@
     <skip />
     <!-- no translation found for usb_accessory_confirm_prompt (3947430407252730383) -->
     <skip />
-    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"Ingen inst. programmer virker med USB-ekstraudstyret. Få oplysninger om ekstraudstyret på <xliff:g id="URL">%1$s</xliff:g>"</string>
+    <string name="usb_accessory_uri_prompt" msgid="6332150684964235705">"Ingen inst. applikationer virker med USB-ekstraudstyret. Få oplysninger om ekstraudstyret på <xliff:g id="URL">%1$s</xliff:g>"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB-ekstraudstyr"</string>
     <string name="label_view" msgid="6304565553218192990">"Vis"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Brug som standard til dette USB-tilbehør"</string>

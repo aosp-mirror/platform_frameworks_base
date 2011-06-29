@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"מאפשר ליישום לקבל ולעבד הודעות SMS. יישומים זדוניים עלולים לעקוב אחר ההודעות או למחוק אותן מבלי להציג אותם לך."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"קבל MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"מאפשר ליישום לקבל ולעבד הודעות MMS. יישומים זדוניים עלולים לעקוב אחר ההודעות או למחוק אותן מבלי להציג אותן לך."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"קבלת שידורי חירום"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"מאפשר ליישום לקבל ולעבד הודעות של שידורי חירום. הרשאה זו זמינה רק ליישומי מערכת."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"שלח הודעות SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"מאפשר ליישום לשלוח הודעות SMS. יישומים זדוניים עלולים לגרום לחיובים על ידי שליחת הודעות ללא אישורך."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"קריאת SMS או MMS"</string>
@@ -597,7 +599,7 @@
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload" msgid="1901675448179653089">"לנווט מחוץ לדף זה?"\n\n"<xliff:g id="MESSAGE">%s</xliff:g>"\n\n"בחר \'אישור\' כדי להמשיך או \'ביטול\' כדי להישאר בדף הנוכחי."</string>
     <string name="save_password_label" msgid="6860261758665825069">"אשר"</string>
-    <string name="double_tap_toast" msgid="1068216937244567247">"טיפש: הקש פעמיים כדי להתקרב ולהתרחק."</string>
+    <string name="double_tap_toast" msgid="1068216937244567247">"טיפ: הקש פעמיים כדי להתקרב ולהתרחק."</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"קרא היסטוריה וסימניות של דפדפן"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"מאפשר ליישום לקרוא את כל כתובות האתרים שבהן ביקר הדפדפן, ואת כל הסימניות של הדפדפן."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"כתיבת היסטוריה וסימניות של דפדפן"</string>

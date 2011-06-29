@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"애플리케이션이 SMS 메시지를 받고 처리할 수 있도록 합니다. 이 경우 악성 애플리케이션이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"MMS 수신"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"애플리케이션이 MMS 메시지를 받고 처리할 수 있도록 합니다. 이 경우 악성 애플리케이션이 메시지를 모니터링하거나 사용자가 보기 전에 삭제할 수 있습니다."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"긴급 방송 수신"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"애플리케이션이 긴급 방송 메시지를 수신하고 처리할 수 있도록 합니다. 이 권한은 시스템 애플리케이션에만 사용할 수 있습니다."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS 메시지 보내기"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"애플리케이션이 SMS 메시지를 보낼 수 있도록 합니다. 이 경우 악성 애플리케이션이 사용자의 확인 없이 메시지를 전송하여 요금을 부과할 수 있습니다."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS 또는 MMS 읽기"</string>

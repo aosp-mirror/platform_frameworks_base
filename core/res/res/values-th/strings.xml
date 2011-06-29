@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ SMS แอปพลิเคชันที่เป็นอันตรายอาจตรวจสอบหรือลบข้อความของคุณโดยไม่แสดงให้คุณเห็น"</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"รับ MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความ MMS แอปพลิเคชันที่เป็นอันตรายอาจตรวจดูหรือลบข้อความของคุณโดยไม่แสดงให้คุณเห็น"</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"ได้รับการกระจายข้อความฉุกเฉิน"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"อนุญาตให้แอปพลิเคชันรับและประมวลผลข้อความการกระจายฉุกเฉิน การอนุญาตนี้จะใช้ได้เฉพาะกับแอปพลิเคชันระบบ"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"ส่งข้อความ SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"อนุญาตให้แอปพลิเคชันส่งข้อความ SMS แอปพลิเคชันที่เป็นอันตรายอาจทำให้คุณเสียค่าใช้จ่ายโดยการส่งข้อความโดยไม่ขอการยืนยันจากคุณ"</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"อ่าน SMS หรือ MMS"</string>

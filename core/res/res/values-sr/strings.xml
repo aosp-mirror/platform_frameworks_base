@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Омогућава да апликација прима и обрађује SMS поруке. Злонамерне апликације могу да надгледају поруке или да их бришу, а да вам их не прикажу."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"пријем MMS порука"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Омогућава да апликација прима и обрађује MMS поруке. Злонамерне апликације могу да надгледају поруке или да их бришу, а да вам их не прикажу."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"пријем хитних преноса"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Дозвољава апликацији да прима и обрађује поруке хитног преноса. Ова дозвола је доступна само за системске апликације."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"слање SMS порука"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Омогућава да апликација шаље SMS поруке. Злонамерне апликације могу да шаљу поруке без ваше потврде, што ће вам створити трошкове."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"читање SMS или MMS порука"</string>

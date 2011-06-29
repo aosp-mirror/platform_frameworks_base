@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Antaa sovelluksen vastaanottaa ja käsitellä tekstiviestejä. Haitalliset sovellukset saattavat valvoa viestejäsi tai poistaa niitä näyttämättä niitä sinulle."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"vastaanota multimediaviestejä"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Antaa sovelluksen vastaanottaa ja käsitellä multimediaviestejä. Haitalliset sovellukset saattavat valvoa viestejäsi tai poistaa niitä näyttämättä niitä sinulle."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"vastaanota hätätilalähetyksiä"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Antaa sovelluksen vastaanottaa ja käsitellä hätätilalähetysten viestejä. Tämä lupa on vain järjestelmäsovelluksien käytettävissä."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"lähetä tekstiviestejä"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Antaa sovelluksen lähettää tekstiviestejä. Haitalliset sovellukset saattavat lähettää viestejä ilman lupaasi ja näin kasvattaa puhelinlaskuasi."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"lue multimedia- tai tekstiviestejä"</string>

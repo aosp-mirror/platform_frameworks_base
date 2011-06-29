@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Lehetővé teszi az alkalmazás számára az SMS-ek fogadását és feldolgozását. A rosszindulatú alkalmazások megfigyelhetik vagy törölhetik az üzeneteket anélkül, hogy Ön látná."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"MMS fogadása"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Lehetővé teszi az alkalmazás számára, hogy fogadjon és feldolgozzon MMS-eket. A rosszindulatú alkalmazások megfigyelhetik vagy törölhetik az üzeneteket anélkül, hogy Ön látná."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"vészhelyzeti közlemények fogadása"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Lehetővé teszi, hogy az alkalmazás fogadja és feldolgozza a vészhelyzeti közleményeket. Ez az engedély csak a rendszeralkalmazások számára érhető el."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS-ek küldése"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Lehetővé teszi az alkalmazás számára SMS küldését. A rosszindulatú alkalmazások az Ön engedélye nélkül küldhetnek üzenetet, ami megnövelheti a kiadásait."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS vagy MMS olvasása"</string>

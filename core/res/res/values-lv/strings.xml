@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Ļauj lietojumprogrammai saņemt un apstrādāt īsziņas. Ļaunprātīgas lietojumprogrammas var pārraudzīt jūsu ziņojumus vai dzēst tos, neparādot tos jums."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"saņemt multiziņu"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Ļauj lietojumprogrammai saņemt un apstrādāt multiziņas. Ļaunprātīgas lietojumprogrammas var pārraudzīt jūsu ziņojumus vai dzēst tos, neparādot tos jums."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"Ārkārtas apraižu saņemšana"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Ļauj lietojumprogrammai saņemt un apstrādāt ārkārtas apraides ziņojumus. Šī atļauja attiecas tikai uz sistēmas lietojumprogrammām."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"sūtīt īsziņas"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Ļauj lietojumprogrammai sūtīt īsziņas. Ļaunprātīgas lietojumprogrammas var radīt jums izmaksas, bez apstiprinājuma sūtot īsziņas."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"lasīt īsziņu vai multiziņu"</string>

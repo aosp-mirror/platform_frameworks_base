@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Programu dovoljuje prejemanje in obdelavo sporočil SMS. Zlonamerni programi lahko nadzorujejo sporočila ali jih izbrišejo, ne da bi vam jih pokazali."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"prejemanje sporočil MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Programu dovoljuje sprejem in obdelavo sporočila MMS. Zlonamerni programi lahko nadzorujejo sporočila ali jih izbrišejo, ne da bi vam jih pokazali."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"prejemanje oddaj v sili"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Dovoli programu, da sprejme in obdela sporočila oddaj v sili. To dovoljenje je na voljo samo za sistemske programe."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"pošiljanje sporočil SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Programom dovoljuje pošiljanje sporočil SMS. Zlonamerni programi lahko pošiljajo sporočila brez vaše potrditve, kar vas lahko drago stane."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"branje sporočil SMS ali MMS"</string>
