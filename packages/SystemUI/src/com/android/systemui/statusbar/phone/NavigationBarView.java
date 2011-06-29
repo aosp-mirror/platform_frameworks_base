@@ -36,13 +36,14 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 
 public class NavigationBarView extends LinearLayout {
+    final static boolean DEBUG_DEADZONE = false;
+
     final static boolean NAVBAR_ALWAYS_AT_RIGHT = true;
 
     protected IStatusBarService mBarService;
     final Display mDisplay;
     View mCurrentView = null;
     View[] mRotatedViews = new View[4];
-    View mBackground;
     Animator mLastAnimator = null;
 
     public View getRecentsButton() {
@@ -74,13 +75,13 @@ public class NavigationBarView extends LinearLayout {
     }
 
     private void setLights(final boolean on) {
-        float oldAlpha = mBackground.getAlpha();
+        float oldAlpha = mCurrentView.getAlpha();
         android.util.Log.d("NavigationBarView", "animating alpha: " + oldAlpha + " -> "
             + (on ? 1f : 0f));
 
         if (mLastAnimator != null && mLastAnimator.isRunning()) mLastAnimator.cancel();
 
-        mLastAnimator = ObjectAnimator.ofFloat(mBackground, "alpha", oldAlpha, on ? 1f : 0f)
+        mLastAnimator = ObjectAnimator.ofFloat(mCurrentView, "alpha", oldAlpha, on ? 1f : 0f)
             .setDuration(on ? 250 : 1500);
         mLastAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -92,8 +93,6 @@ public class NavigationBarView extends LinearLayout {
     }
 
     public void onFinishInflate() {
-        mBackground = findViewById(R.id.background);
-
         mRotatedViews[Surface.ROTATION_0] = 
         mRotatedViews[Surface.ROTATION_180] = findViewById(R.id.rot0);
 
@@ -120,6 +119,10 @@ public class NavigationBarView extends LinearLayout {
         }
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
+
+        if (DEBUG_DEADZONE) {
+            mCurrentView.findViewById(R.id.deadzone).setBackgroundColor(0x808080FF);
+        }
 
         android.util.Log.d("NavigationBarView", "reorient(): rot=" + mDisplay.getRotation());
     }
