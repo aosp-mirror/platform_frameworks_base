@@ -17,6 +17,7 @@
 #include <utils/Errors.h>
 #include <binder/Parcel.h>
 #include <private/surfaceflinger/LayerState.h>
+#include <surfaceflinger/ISurfaceComposerClient.h>
 
 namespace android {
 
@@ -56,6 +57,16 @@ status_t layer_state_t::read(const Parcel& input)
     size -= sizeof(transparentRegion);
     input.read(this, size);
     return NO_ERROR;
+}
+
+status_t ComposerState::write(Parcel& output) const {
+    output.writeStrongBinder(client->asBinder());
+    return state.write(output);
+}
+
+status_t ComposerState::read(const Parcel& input) {
+    client = interface_cast<ISurfaceComposerClient>(input.readStrongBinder());
+    return state.read(input);
 }
 
 }; // namespace android

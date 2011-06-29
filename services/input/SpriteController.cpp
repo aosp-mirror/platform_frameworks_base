@@ -252,11 +252,7 @@ void SpriteController::doUpdateSprites() {
                         | DIRTY_VISIBILITY | DIRTY_HOTSPOT))))) {
             status_t status;
             if (!haveTransaction) {
-                status = mSurfaceComposerClient->openTransaction();
-                if (status) {
-                    LOGE("Error %d opening transation to update sprite surface.", status);
-                    break;
-                }
+                SurfaceComposerClient::openGlobalTransaction();
                 haveTransaction = true;
             }
 
@@ -322,10 +318,7 @@ void SpriteController::doUpdateSprites() {
     }
 
     if (haveTransaction) {
-        status_t status = mSurfaceComposerClient->closeTransaction();
-        if (status) {
-            LOGE("Error %d closing transaction to update sprite surface.", status);
-        }
+        SurfaceComposerClient::closeGlobalTransaction();
     }
 
     // If any surfaces were changed, write back the new surface properties to the sprites.

@@ -37,8 +37,6 @@ typedef int32_t    DisplayID;
 
 // ----------------------------------------------------------------------------
 
-class layer_state_t;
-
 class ISurfaceComposerClient : public IInterface
 {
 public:
@@ -69,11 +67,6 @@ public:
      * Requires ACCESS_SURFACE_FLINGER permission
      */
     virtual status_t    destroySurface(SurfaceID sid) = 0;
-
-    /*
-     * Requires ACCESS_SURFACE_FLINGER permission
-     */
-    virtual status_t    setState(int32_t count, const layer_state_t* states) = 0;
 };
 
 // ----------------------------------------------------------------------------

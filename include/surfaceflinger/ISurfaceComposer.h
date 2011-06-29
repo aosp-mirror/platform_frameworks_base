@@ -34,6 +34,7 @@ namespace android {
 // ----------------------------------------------------------------------------
 
 class IMemoryHeap;
+class ComposerState;
 
 class ISurfaceComposer : public IInterface
 {
@@ -105,8 +106,7 @@ public:
     virtual sp<IMemoryHeap> getCblk() const = 0;
 
     /* open/close transactions. requires ACCESS_SURFACE_FLINGER permission */
-    virtual void openGlobalTransaction() = 0;
-    virtual void closeGlobalTransaction() = 0;
+    virtual void setTransactionState(const Vector<ComposerState>& state) = 0;
 
     /* [un]freeze display. requires ACCESS_SURFACE_FLINGER permission */
     virtual status_t freezeDisplay(DisplayID dpy, uint32_t flags) = 0;
@@ -149,8 +149,7 @@ public:
         CREATE_CONNECTION,
         CREATE_GRAPHIC_BUFFER_ALLOC,
         GET_CBLK,
-        OPEN_GLOBAL_TRANSACTION,
-        CLOSE_GLOBAL_TRANSACTION,
+        SET_TRANSACTION_STATE,
         SET_ORIENTATION,
         FREEZE_DISPLAY,
         UNFREEZE_DISPLAY,

@@ -70,14 +70,12 @@ public:
     sp<LayerBaseClient> getLayerUser(int32_t i) const;
 
 private:
-
     // ISurfaceComposerClient interface
     virtual sp<ISurface> createSurface(
             surface_data_t* params, const String8& name,
             DisplayID display, uint32_t w, uint32_t h,PixelFormat format,
             uint32_t flags);
     virtual status_t destroySurface(SurfaceID surfaceId);
-    virtual status_t setState(int32_t count, const layer_state_t* states);
     virtual status_t onTransact(
         uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
 
@@ -168,8 +166,7 @@ public:
     virtual sp<IGraphicBufferAlloc>     createGraphicBufferAlloc();
     virtual sp<IMemoryHeap>             getCblk() const;
     virtual void                        bootFinished();
-    virtual void                        openGlobalTransaction();
-    virtual void                        closeGlobalTransaction();
+    virtual void                        setTransactionState(const Vector<ComposerState>& state);
     virtual status_t                    freezeDisplay(DisplayID dpy, uint32_t flags);
     virtual status_t                    unfreezeDisplay(DisplayID dpy, uint32_t flags);
     virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
@@ -220,8 +217,7 @@ private:
 
     status_t removeSurface(const sp<Client>& client, SurfaceID sid);
     status_t destroySurface(const wp<LayerBaseClient>& layer);
-    status_t setClientState(const sp<Client>& client,
-            int32_t count, const layer_state_t* states);
+    uint32_t setClientStateLocked(const sp<Client>& client, const layer_state_t& s);
 
     class LayerVector : public SortedVector< sp<LayerBase> > {
     public:
@@ -337,7 +333,6 @@ private:
     mutable     Mutex                   mStateLock;
                 State                   mCurrentState;
     volatile    int32_t                 mTransactionFlags;
-    volatile    int32_t                 mTransactionCount;
                 Condition               mTransactionCV;
                 SortedVector< sp<LayerBase> > mLayerPurgatory;
                 bool                    mResizeTransationPending;
