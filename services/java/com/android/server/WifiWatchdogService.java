@@ -95,14 +95,14 @@ public class WifiWatchdogService {
     private static final long MIN_SINGLE_DNS_CHECK_INTERVAL = 10 * 60 * 1000;
     private static final long MIN_WALLED_GARDEN_INTERVAL = 15 * 60 * 1000;
 
-    private static final int MAX_CHECKS_PER_SSID = 7;
-    private static final int NUM_DNS_PINGS = 5;
+    private static final int MAX_CHECKS_PER_SSID = 9;
+    private static final int NUM_DNS_PINGS = 7;
     private static double MIN_RESPONSE_RATE = 0.50;
 
     // TODO : Adjust multiple DNS downward to 250 on repeated failure
     // private static final int MULTI_DNS_PING_TIMEOUT_MS = 250;
 
-    private static final int DNS_PING_TIMEOUT_MS = 1000;
+    private static final int DNS_PING_TIMEOUT_MS = 800;
     private static final long DNS_PING_INTERVAL = 250;
 
     private static final long BLACKLIST_FOLLOWUP_INTERVAL = 15 * 1000;

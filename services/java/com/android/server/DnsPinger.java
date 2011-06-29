@@ -20,7 +20,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
+import android.net.NetworkUtils;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Slog;
 
 import java.net.DatagramPacket;
@@ -38,7 +40,7 @@ import java.util.Random;
  * API may not differentiate between a time out and a failure lookup (which we
  * really care about).
  * <p>
- * TODO : More general API.  Socket does not bind to specified connection type
+ * TODO : More general API. Socket does not bind to specified connection type
  * TODO : Choice of DNS query location - current looks up www.android.com
  *
  * @hide
@@ -56,44 +58,65 @@ public final class DnsPinger {
     private static Random sRandom = new Random();
 
     private ConnectivityManager mConnectivityManager = null;
-    private ContentResolver mContentResolver;
     private Context mContext;
     private int mConnectionType;
+    private InetAddress mDefaultDns;
 
     private String TAG;
 
-
     /**
-     * @param connectionType The connection type from @link {@link ConnectivityManager}
+     * @param connectionType The connection type from {@link ConnectivityManager}
      */
     public DnsPinger(String TAG, Context context, int connectionType) {
         mContext = context;
-        mContentResolver = context.getContentResolver();
         mConnectionType = connectionType;
+        if (!ConnectivityManager.isNetworkTypeValid(connectionType)) {
+            Slog.e(TAG, "Invalid connectionType in constructor: " + connectionType);
+        }
         this.TAG = TAG;
+
+        mDefaultDns = getDefaultDns();
     }
 
     /**
-     * @return The first DNS in the link properties of the specified connection type
+     * @return The first DNS in the link properties of the specified connection
+     *         type or the default system DNS if the link properties has null
+     *         dns set. Should not be null.
      */
     public InetAddress getDns() {
-        LinkProperties linkProperties = getCurLinkProperties();
-        if (linkProperties == null)
-            return null;
-
-        Collection<InetAddress> dnses = linkProperties.getDnses();
-        if (dnses == null || dnses.size() == 0)
-            return null;
-
-        return dnses.iterator().next();
-    }
-
-    private LinkProperties getCurLinkProperties() {
         if (mConnectivityManager == null) {
             mConnectivityManager = (ConnectivityManager) mContext.getSystemService(
                     Context.CONNECTIVITY_SERVICE);
         }
-        return mConnectivityManager.getLinkProperties(mConnectionType);
+
+        LinkProperties curLinkProps = mConnectivityManager.getLinkProperties(mConnectionType);
+        if (curLinkProps == null) {
+            Slog.e(TAG, "getCurLinkProperties:: LP for type" + mConnectionType + " is null!");
+            return mDefaultDns;
+        }
+
+        Collection<InetAddress> dnses = curLinkProps.getDnses();
+        if (dnses == null || dnses.size() == 0) {
+            Slog.v(TAG, "getDns::LinkProps has null dns - returning default");
+            return mDefaultDns;
+        }
+
+        return dnses.iterator().next();
+    }
+
+    private InetAddress getDefaultDns() {
+        String dns = Settings.Secure.getString(mContext.getContentResolver(),
+                Settings.Secure.DEFAULT_DNS_SERVER);
+        if (dns == null || dns.length() == 0) {
+            dns = mContext.getResources().getString(
+                    com.android.internal.R.string.config_default_dns_server);
+        }
+        try {
+            return NetworkUtils.numericToInetAddress(dns);
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, "getDefaultDns::malformed default dns address");
+            return null;
+        }
     }
 
     /**
