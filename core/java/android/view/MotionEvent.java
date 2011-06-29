@@ -2885,7 +2885,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
                     toolTypeToString(getToolType(i)));
         }
 
-        msg.append(", buttonState=").append(KeyEvent.metaStateToString(getButtonState()));
+        msg.append(", buttonState=").append(MotionEvent.buttonStateToString(getButtonState()));
         msg.append(", metaState=").append(KeyEvent.metaStateToString(getMetaState()));
         msg.append(", flags=0x").append(Integer.toHexString(getFlags()));
         msg.append(", edgeFlags=0x").append(Integer.toHexString(getEdgeFlags()));

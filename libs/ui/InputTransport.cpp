@@ -443,7 +443,8 @@ status_t InputPublisher::appendMotionSample(
 
     if (! mPinned || ! mMotionEventSampleDataTail) {
         LOGE("channel '%s' publisher ~ Cannot append motion sample because there is no current "
-                "AMOTION_EVENT_ACTION_MOVE event.", mChannel->getName().string());
+                "AMOTION_EVENT_ACTION_MOVE or AMOTION_EVENT_ACTION_HOVER_MOVE event.",
+                mChannel->getName().string());
         return INVALID_OPERATION;
     }
 

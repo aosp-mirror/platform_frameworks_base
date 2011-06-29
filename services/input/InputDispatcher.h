@@ -522,6 +522,10 @@ private:
         // True if dispatch has started.
         bool inProgress;
 
+        // Set to the resolved action and flags when the event is enqueued.
+        int32_t resolvedAction;
+        int32_t resolvedFlags;
+
         // For motion events:
         //   Pointer to the first motion sample to dispatch in this cycle.
         //   Usually NULL to indicate that the list of motion samples begins at
@@ -709,14 +713,19 @@ private:
         // Returns true if there is no state to be canceled.
         bool isNeutral() const;
 
-        // Records tracking information for an event that has just been published.
-        void trackEvent(const EventEntry* entry, int32_t action);
+        // Returns true if the specified source is known to have received a hover enter
+        // motion event.
+        bool isHovering(int32_t deviceId, uint32_t source) const;
 
         // Records tracking information for a key event that has just been published.
-        void trackKey(const KeyEntry* entry, int32_t action);
+        // Returns true if the event should be delivered, false if it is inconsistent
+        // and should be skipped.
+        bool trackKey(const KeyEntry* entry, int32_t action, int32_t flags);
 
         // Records tracking information for a motion event that has just been published.
-        void trackMotion(const MotionEntry* entry, int32_t action);
+        // Returns true if the event should be delivered, false if it is inconsistent
+        // and should be skipped.
+        bool trackMotion(const MotionEntry* entry, int32_t action, int32_t flags);
 
         // Synthesizes cancelation events for the current state and resets the tracked state.
         void synthesizeCancelationEvents(nsecs_t currentTime, Allocator* allocator,
@@ -756,6 +765,7 @@ private:
         struct MotionMemento {
             int32_t deviceId;
             uint32_t source;
+            int32_t flags;
             float xPrecision;
             float yPrecision;
             nsecs_t downTime;
@@ -770,6 +780,12 @@ private:
         Vector<KeyMemento> mKeyMementos;
         Vector<MotionMemento> mMotionMementos;
         KeyedVector<int32_t, int32_t> mFallbackKeys;
+
+        ssize_t findKeyMemento(const KeyEntry* entry) const;
+        ssize_t findMotionMemento(const MotionEntry* entry, bool hovering) const;
+
+        void addKeyMemento(const KeyEntry* entry, int32_t flags);
+        void addMotionMemento(const MotionEntry* entry, int32_t flags, bool hovering);
 
         static bool shouldCancelKey(const KeyMemento& memento,
                 const CancelationOptions& options);

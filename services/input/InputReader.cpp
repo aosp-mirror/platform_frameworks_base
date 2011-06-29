@@ -3704,6 +3704,29 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
                 mPointerGesture.currentGestureCoords, mPointerGesture.currentGestureIdToIndex,
                 mPointerGesture.currentGestureIdBits, -1,
                 0, 0, mPointerGesture.downTime);
+    } else if (dispatchedGestureIdBits.isEmpty()
+            && !mPointerGesture.lastGestureIdBits.isEmpty()) {
+        // Synthesize a hover move event after all pointers go up to indicate that
+        // the pointer is hovering again even if the user is not currently touching
+        // the touch pad.  This ensures that a view will receive a fresh hover enter
+        // event after a tap.
+        float x, y;
+        mPointerController->getPosition(&x, &y);
+
+        PointerProperties pointerProperties;
+        pointerProperties.clear();
+        pointerProperties.id = 0;
+        pointerProperties.toolType = AMOTION_EVENT_TOOL_TYPE_INDIRECT_FINGER;
+
+        PointerCoords pointerCoords;
+        pointerCoords.clear();
+        pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_X, x);
+        pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_Y, y);
+
+        getDispatcher()->notifyMotion(when, getDeviceId(), mPointerSource, policyFlags,
+                AMOTION_EVENT_ACTION_HOVER_MOVE, 0,
+                metaState, buttonState, AMOTION_EVENT_EDGE_FLAG_NONE,
+                1, &pointerProperties, &pointerCoords, 0, 0, mPointerGesture.downTime);
     }
 
     // Update state.

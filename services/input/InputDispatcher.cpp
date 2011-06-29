@@ -569,9 +569,9 @@ void InputDispatcher::dropInboundEventLocked(EventEntry* entry, DropReason dropR
         break;
     case DROP_REASON_BLOCKED:
         LOGI("Dropped event because the current application is not responding and the user "
-                "has started interating with a different application.");
+                "has started interacting with a different application.");
         reason = "inbound event was dropped because the current application is not responding "
-                "and the user has started interating with a different application";
+                "and the user has started interacting with a different application";
         break;
     case DROP_REASON_STALE:
         LOGI("Dropped event because it is stale.");
@@ -1239,36 +1239,34 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     const InputWindow* newHoverWindow = NULL;
 
     bool isSplit = mTouchState.split;
-    bool wrongDevice = mTouchState.down
-            && (mTouchState.deviceId != entry->deviceId
-                    || mTouchState.source != entry->source);
+    bool switchedDevice = mTouchState.deviceId != entry->deviceId
+            || mTouchState.source != entry->source;
     bool isHoverAction = (maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE
             || maskedAction == AMOTION_EVENT_ACTION_HOVER_ENTER
             || maskedAction == AMOTION_EVENT_ACTION_HOVER_EXIT);
     bool newGesture = (maskedAction == AMOTION_EVENT_ACTION_DOWN
             || maskedAction == AMOTION_EVENT_ACTION_SCROLL
             || isHoverAction);
+    bool wrongDevice = false;
     if (newGesture) {
         bool down = maskedAction == AMOTION_EVENT_ACTION_DOWN;
-        if (wrongDevice && !down) {
+        if (switchedDevice && mTouchState.down && !down) {
+#if DEBUG_FOCUS
+            LOGD("Dropping event because a pointer for a different device is already down.");
+#endif
             mTempTouchState.copyFrom(mTouchState);
-        } else {
-            mTempTouchState.reset();
-            mTempTouchState.down = down;
-            mTempTouchState.deviceId = entry->deviceId;
-            mTempTouchState.source = entry->source;
-            isSplit = false;
-            wrongDevice = false;
+            injectionResult = INPUT_EVENT_INJECTION_FAILED;
+            switchedDevice = false;
+            wrongDevice = true;
+            goto Failed;
         }
+        mTempTouchState.reset();
+        mTempTouchState.down = down;
+        mTempTouchState.deviceId = entry->deviceId;
+        mTempTouchState.source = entry->source;
+        isSplit = false;
     } else {
         mTempTouchState.copyFrom(mTouchState);
-    }
-    if (wrongDevice) {
-#if DEBUG_FOCUS
-        LOGD("Dropping event because a pointer for a different device is already down.");
-#endif
-        injectionResult = INPUT_EVENT_INJECTION_FAILED;
-        goto Failed;
     }
 
     if (newGesture || (isSplit && maskedAction == AMOTION_EVENT_ACTION_POINTER_DOWN)) {
@@ -1598,18 +1596,38 @@ Failed:
     // Update final pieces of touch state if the injector had permission.
     if (injectionPermission == INJECTION_PERMISSION_GRANTED) {
         if (!wrongDevice) {
-            if (maskedAction == AMOTION_EVENT_ACTION_UP
-                    || maskedAction == AMOTION_EVENT_ACTION_CANCEL
-                    || isHoverAction) {
+            if (switchedDevice) {
+#if DEBUG_FOCUS
+                LOGD("Conflicting pointer actions: Switched to a different device.");
+#endif
+                *outConflictingPointerActions = true;
+            }
+
+            if (isHoverAction) {
+                // Started hovering, therefore no longer down.
+                if (mTouchState.down) {
+#if DEBUG_FOCUS
+                    LOGD("Conflicting pointer actions: Hover received while pointer was down.");
+#endif
+                    *outConflictingPointerActions = true;
+                }
+                mTouchState.reset();
+                if (maskedAction == AMOTION_EVENT_ACTION_HOVER_ENTER
+                        || maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+                    mTouchState.deviceId = entry->deviceId;
+                    mTouchState.source = entry->source;
+                }
+            } else if (maskedAction == AMOTION_EVENT_ACTION_UP
+                    || maskedAction == AMOTION_EVENT_ACTION_CANCEL) {
                 // All pointers up or canceled.
                 mTouchState.reset();
             } else if (maskedAction == AMOTION_EVENT_ACTION_DOWN) {
                 // First pointer went down.
                 if (mTouchState.down) {
-                    *outConflictingPointerActions = true;
 #if DEBUG_FOCUS
-                    LOGD("Pointer down received while already down.");
+                    LOGD("Conflicting pointer actions: Down received while already down.");
 #endif
+                    *outConflictingPointerActions = true;
                 }
                 mTouchState.copyFrom(mTempTouchState);
             } else if (maskedAction == AMOTION_EVENT_ACTION_POINTER_UP) {
@@ -1868,6 +1886,18 @@ void InputDispatcher::prepareDispatchCycleLocked(nsecs_t currentTime,
                 return;
             }
 
+            // If the motion event was modified in flight, then we cannot stream the sample.
+            if ((motionEventDispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_MASK)
+                    != InputTarget::FLAG_DISPATCH_AS_IS) {
+#if DEBUG_BATCHING
+                LOGD("channel '%s' ~ Not streaming because the motion event was not "
+                        "being dispatched as-is.  "
+                        "(Waiting for next dispatch cycle to start.)",
+                        connection->getInputChannelName());
+#endif
+                return;
+            }
+
             // The dispatch entry is in progress and is still potentially open for streaming.
             // Try to stream the new motion sample.  This might fail if the consumer has already
             // consumed the motion event (or if the channel is broken).
@@ -1972,6 +2002,66 @@ void InputDispatcher::enqueueDispatchEntryLocked(
         dispatchEntry->headMotionSample = appendedMotionSample;
     }
 
+    // Apply target flags and update the connection's input state.
+    switch (eventEntry->type) {
+    case EventEntry::TYPE_KEY: {
+        KeyEntry* keyEntry = static_cast<KeyEntry*>(eventEntry);
+        dispatchEntry->resolvedAction = keyEntry->action;
+        dispatchEntry->resolvedFlags = keyEntry->flags;
+
+        if (!connection->inputState.trackKey(keyEntry,
+                dispatchEntry->resolvedAction, dispatchEntry->resolvedFlags)) {
+#if DEBUG_DISPATCH_CYCLE
+            LOGD("channel '%s' ~ enqueueDispatchEntryLocked: skipping inconsistent key event",
+                    connection->getInputChannelName());
+#endif
+            return; // skip the inconsistent event
+        }
+        break;
+    }
+
+    case EventEntry::TYPE_MOTION: {
+        MotionEntry* motionEntry = static_cast<MotionEntry*>(eventEntry);
+        if (dispatchMode & InputTarget::FLAG_DISPATCH_AS_OUTSIDE) {
+            dispatchEntry->resolvedAction = AMOTION_EVENT_ACTION_OUTSIDE;
+        } else if (dispatchMode & InputTarget::FLAG_DISPATCH_AS_HOVER_EXIT) {
+            dispatchEntry->resolvedAction = AMOTION_EVENT_ACTION_HOVER_EXIT;
+        } else if (dispatchMode & InputTarget::FLAG_DISPATCH_AS_HOVER_ENTER) {
+            dispatchEntry->resolvedAction = AMOTION_EVENT_ACTION_HOVER_ENTER;
+        } else if (dispatchMode & InputTarget::FLAG_DISPATCH_AS_SLIPPERY_EXIT) {
+            dispatchEntry->resolvedAction = AMOTION_EVENT_ACTION_CANCEL;
+        } else if (dispatchMode & InputTarget::FLAG_DISPATCH_AS_SLIPPERY_ENTER) {
+            dispatchEntry->resolvedAction = AMOTION_EVENT_ACTION_DOWN;
+        } else {
+            dispatchEntry->resolvedAction = motionEntry->action;
+        }
+        if (dispatchEntry->resolvedAction == AMOTION_EVENT_ACTION_HOVER_MOVE
+                && !connection->inputState.isHovering(
+                        motionEntry->deviceId, motionEntry->source)) {
+#if DEBUG_DISPATCH_CYCLE
+        LOGD("channel '%s' ~ enqueueDispatchEntryLocked: filling in missing hover enter event",
+                connection->getInputChannelName());
+#endif
+            dispatchEntry->resolvedAction = AMOTION_EVENT_ACTION_HOVER_ENTER;
+        }
+
+        dispatchEntry->resolvedFlags = motionEntry->flags;
+        if (dispatchEntry->targetFlags & InputTarget::FLAG_WINDOW_IS_OBSCURED) {
+            dispatchEntry->resolvedFlags |= AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED;
+        }
+
+        if (!connection->inputState.trackMotion(motionEntry,
+                dispatchEntry->resolvedAction, dispatchEntry->resolvedFlags)) {
+#if DEBUG_DISPATCH_CYCLE
+            LOGD("channel '%s' ~ enqueueDispatchEntryLocked: skipping inconsistent motion event",
+                    connection->getInputChannelName());
+#endif
+            return; // skip the inconsistent event
+        }
+        break;
+    }
+    }
+
     // Enqueue the dispatch entry.
     connection->outboundQueue.enqueueAtTail(dispatchEntry);
 }
@@ -1999,16 +2089,11 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
     case EventEntry::TYPE_KEY: {
         KeyEntry* keyEntry = static_cast<KeyEntry*>(eventEntry);
 
-        // Apply target flags.
-        int32_t action = keyEntry->action;
-        int32_t flags = keyEntry->flags;
-
-        // Update the connection's input state.
-        connection->inputState.trackKey(keyEntry, action);
-
         // Publish the key event.
-        status = connection->inputPublisher.publishKeyEvent(keyEntry->deviceId, keyEntry->source,
-                action, flags, keyEntry->keyCode, keyEntry->scanCode,
+        status = connection->inputPublisher.publishKeyEvent(
+                keyEntry->deviceId, keyEntry->source,
+                dispatchEntry->resolvedAction, dispatchEntry->resolvedFlags,
+                keyEntry->keyCode, keyEntry->scanCode,
                 keyEntry->metaState, keyEntry->repeatCount, keyEntry->downTime,
                 keyEntry->eventTime);
 
@@ -2023,24 +2108,6 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
 
     case EventEntry::TYPE_MOTION: {
         MotionEntry* motionEntry = static_cast<MotionEntry*>(eventEntry);
-
-        // Apply target flags.
-        int32_t action = motionEntry->action;
-        int32_t flags = motionEntry->flags;
-        if (dispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_AS_OUTSIDE) {
-            action = AMOTION_EVENT_ACTION_OUTSIDE;
-        } else if (dispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_AS_HOVER_EXIT) {
-            action = AMOTION_EVENT_ACTION_HOVER_EXIT;
-        } else if (dispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_AS_HOVER_ENTER) {
-            action = AMOTION_EVENT_ACTION_HOVER_ENTER;
-        } else if (dispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_AS_SLIPPERY_EXIT) {
-            action = AMOTION_EVENT_ACTION_CANCEL;
-        } else if (dispatchEntry->targetFlags & InputTarget::FLAG_DISPATCH_AS_SLIPPERY_ENTER) {
-            action = AMOTION_EVENT_ACTION_DOWN;
-        }
-        if (dispatchEntry->targetFlags & InputTarget::FLAG_WINDOW_IS_OBSCURED) {
-            flags |= AMOTION_EVENT_FLAG_WINDOW_IS_OBSCURED;
-        }
 
         // If headMotionSample is non-NULL, then it points to the first new sample that we
         // were unable to dispatch during the previous cycle so we resume dispatching from
@@ -2082,13 +2149,11 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             }
         }
 
-        // Update the connection's input state.
-        connection->inputState.trackMotion(motionEntry, action);
-
         // Publish the motion event and the first motion sample.
-        status = connection->inputPublisher.publishMotionEvent(motionEntry->deviceId,
-                motionEntry->source, action, flags, motionEntry->edgeFlags,
-                motionEntry->metaState, motionEntry->buttonState,
+        status = connection->inputPublisher.publishMotionEvent(
+                motionEntry->deviceId, motionEntry->source,
+                dispatchEntry->resolvedAction, dispatchEntry->resolvedFlags,
+                motionEntry->edgeFlags, motionEntry->metaState, motionEntry->buttonState,
                 xOffset, yOffset,
                 motionEntry->xPrecision, motionEntry->yPrecision,
                 motionEntry->downTime, firstMotionSample->eventTime,
@@ -2102,8 +2167,8 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
             return;
         }
 
-        if (action == AMOTION_EVENT_ACTION_MOVE
-                || action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+        if (dispatchEntry->resolvedAction == AMOTION_EVENT_ACTION_MOVE
+                || dispatchEntry->resolvedAction == AMOTION_EVENT_ACTION_HOVER_MOVE) {
             // Append additional motion samples.
             MotionSample* nextMotionSample = firstMotionSample->next;
             for (; nextMotionSample != NULL; nextMotionSample = nextMotionSample->next) {
@@ -2355,23 +2420,22 @@ void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
                 break;
             }
 
-            int32_t xOffset, yOffset;
-            float scaleFactor;
+            InputTarget target;
             const InputWindow* window = getWindowLocked(connection->inputChannel);
             if (window) {
-                xOffset = -window->frameLeft;
-                yOffset = -window->frameTop;
-                scaleFactor = window->scaleFactor;
+                target.xOffset = -window->frameLeft;
+                target.yOffset = -window->frameTop;
+                target.scaleFactor = window->scaleFactor;
             } else {
-                xOffset = 0;
-                yOffset = 0;
-                scaleFactor = 1.0f;
+                target.xOffset = 0;
+                target.yOffset = 0;
+                target.scaleFactor = 1.0f;
             }
+            target.inputChannel = connection->inputChannel;
+            target.flags = InputTarget::FLAG_DISPATCH_AS_IS;
 
-            DispatchEntry* cancelationDispatchEntry =
-                    mAllocator.obtainDispatchEntry(cancelationEventEntry, // increments ref
-                    0, xOffset, yOffset, scaleFactor);
-            connection->outboundQueue.enqueueAtTail(cancelationDispatchEntry);
+            enqueueDispatchEntryLocked(connection, cancelationEventEntry, // increments ref
+                    &target, false, InputTarget::FLAG_DISPATCH_AS_IS);
 
             mAllocator.releaseEventEntry(cancelationEventEntry);
         }
@@ -3327,6 +3391,7 @@ void InputDispatcher::resetAndDropEverythingLocked(const char* reason) {
     resetTargetsLocked();
 
     mTouchState.reset();
+    mLastHoverWindow = NULL;
 }
 
 void InputDispatcher::logDispatchStateLocked() {
@@ -4125,111 +4190,180 @@ bool InputDispatcher::InputState::isNeutral() const {
     return mKeyMementos.isEmpty() && mMotionMementos.isEmpty();
 }
 
-void InputDispatcher::InputState::trackEvent(const EventEntry* entry, int32_t action) {
-    switch (entry->type) {
-    case EventEntry::TYPE_KEY:
-        trackKey(static_cast<const KeyEntry*>(entry), action);
-        break;
+bool InputDispatcher::InputState::isHovering(int32_t deviceId, uint32_t source) const {
+    for (size_t i = 0; i < mMotionMementos.size(); i++) {
+        const MotionMemento& memento = mMotionMementos.itemAt(i);
+        if (memento.deviceId == deviceId
+                && memento.source == source
+                && memento.hovering) {
+            return true;
+        }
+    }
+    return false;
+}
 
-    case EventEntry::TYPE_MOTION:
-        trackMotion(static_cast<const MotionEntry*>(entry), action);
-        break;
+bool InputDispatcher::InputState::trackKey(const KeyEntry* entry,
+        int32_t action, int32_t flags) {
+    switch (action) {
+    case AKEY_EVENT_ACTION_UP: {
+        if (entry->flags & AKEY_EVENT_FLAG_FALLBACK) {
+            for (size_t i = 0; i < mFallbackKeys.size(); ) {
+                if (mFallbackKeys.valueAt(i) == entry->keyCode) {
+                    mFallbackKeys.removeItemsAt(i);
+                } else {
+                    i += 1;
+                }
+            }
+        }
+        ssize_t index = findKeyMemento(entry);
+        if (index >= 0) {
+            mKeyMementos.removeAt(index);
+            return true;
+        }
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+        LOGD("Dropping inconsistent key up event: deviceId=%d, source=%08x, "
+                "keyCode=%d, scanCode=%d",
+                entry->deviceId, entry->source, entry->keyCode, entry->scanCode);
+#endif
+        return false;
+    }
+
+    case AKEY_EVENT_ACTION_DOWN: {
+        ssize_t index = findKeyMemento(entry);
+        if (index >= 0) {
+            mKeyMementos.removeAt(index);
+        }
+        addKeyMemento(entry, flags);
+        return true;
+    }
+
+    default:
+        return true;
     }
 }
 
-void InputDispatcher::InputState::trackKey(const KeyEntry* entry, int32_t action) {
-    if (action == AKEY_EVENT_ACTION_UP
-            && (entry->flags & AKEY_EVENT_FLAG_FALLBACK)) {
-        for (size_t i = 0; i < mFallbackKeys.size(); ) {
-            if (mFallbackKeys.valueAt(i) == entry->keyCode) {
-                mFallbackKeys.removeItemsAt(i);
-            } else {
-                i += 1;
-            }
+bool InputDispatcher::InputState::trackMotion(const MotionEntry* entry,
+        int32_t action, int32_t flags) {
+    int32_t actionMasked = action & AMOTION_EVENT_ACTION_MASK;
+    switch (actionMasked) {
+    case AMOTION_EVENT_ACTION_UP:
+    case AMOTION_EVENT_ACTION_CANCEL: {
+        ssize_t index = findMotionMemento(entry, false /*hovering*/);
+        if (index >= 0) {
+            mMotionMementos.removeAt(index);
+            return true;
         }
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+        LOGD("Dropping inconsistent motion up or cancel event: deviceId=%d, source=%08x, "
+                "actionMasked=%d",
+                entry->deviceId, entry->source, actionMasked);
+#endif
+        return false;
     }
 
+    case AMOTION_EVENT_ACTION_DOWN: {
+        ssize_t index = findMotionMemento(entry, false /*hovering*/);
+        if (index >= 0) {
+            mMotionMementos.removeAt(index);
+        }
+        addMotionMemento(entry, flags, false /*hovering*/);
+        return true;
+    }
+
+    case AMOTION_EVENT_ACTION_POINTER_UP:
+    case AMOTION_EVENT_ACTION_POINTER_DOWN:
+    case AMOTION_EVENT_ACTION_MOVE: {
+        ssize_t index = findMotionMemento(entry, false /*hovering*/);
+        if (index >= 0) {
+            MotionMemento& memento = mMotionMementos.editItemAt(index);
+            memento.setPointers(entry);
+            return true;
+        }
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+        LOGD("Dropping inconsistent motion pointer up/down or move event: "
+                "deviceId=%d, source=%08x, actionMasked=%d",
+                entry->deviceId, entry->source, actionMasked);
+#endif
+        return false;
+    }
+
+    case AMOTION_EVENT_ACTION_HOVER_EXIT: {
+        ssize_t index = findMotionMemento(entry, true /*hovering*/);
+        if (index >= 0) {
+            mMotionMementos.removeAt(index);
+            return true;
+        }
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+        LOGD("Dropping inconsistent motion hover exit event: deviceId=%d, source=%08x",
+                entry->deviceId, entry->source);
+#endif
+        return false;
+    }
+
+    case AMOTION_EVENT_ACTION_HOVER_ENTER:
+    case AMOTION_EVENT_ACTION_HOVER_MOVE: {
+        ssize_t index = findMotionMemento(entry, true /*hovering*/);
+        if (index >= 0) {
+            mMotionMementos.removeAt(index);
+        }
+        addMotionMemento(entry, flags, true /*hovering*/);
+        return true;
+    }
+
+    default:
+        return true;
+    }
+}
+
+ssize_t InputDispatcher::InputState::findKeyMemento(const KeyEntry* entry) const {
     for (size_t i = 0; i < mKeyMementos.size(); i++) {
-        KeyMemento& memento = mKeyMementos.editItemAt(i);
+        const KeyMemento& memento = mKeyMementos.itemAt(i);
         if (memento.deviceId == entry->deviceId
                 && memento.source == entry->source
                 && memento.keyCode == entry->keyCode
                 && memento.scanCode == entry->scanCode) {
-            switch (action) {
-            case AKEY_EVENT_ACTION_UP:
-                mKeyMementos.removeAt(i);
-                return;
-
-            case AKEY_EVENT_ACTION_DOWN:
-                mKeyMementos.removeAt(i);
-                goto Found;
-
-            default:
-                return;
-            }
+            return i;
         }
     }
-
-Found:
-    if (action == AKEY_EVENT_ACTION_DOWN) {
-        mKeyMementos.push();
-        KeyMemento& memento = mKeyMementos.editTop();
-        memento.deviceId = entry->deviceId;
-        memento.source = entry->source;
-        memento.keyCode = entry->keyCode;
-        memento.scanCode = entry->scanCode;
-        memento.flags = entry->flags;
-        memento.downTime = entry->downTime;
-    }
+    return -1;
 }
 
-void InputDispatcher::InputState::trackMotion(const MotionEntry* entry, int32_t action) {
-    int32_t actionMasked = action & AMOTION_EVENT_ACTION_MASK;
+ssize_t InputDispatcher::InputState::findMotionMemento(const MotionEntry* entry,
+        bool hovering) const {
     for (size_t i = 0; i < mMotionMementos.size(); i++) {
-        MotionMemento& memento = mMotionMementos.editItemAt(i);
+        const MotionMemento& memento = mMotionMementos.itemAt(i);
         if (memento.deviceId == entry->deviceId
-                && memento.source == entry->source) {
-            switch (actionMasked) {
-            case AMOTION_EVENT_ACTION_UP:
-            case AMOTION_EVENT_ACTION_CANCEL:
-            case AMOTION_EVENT_ACTION_HOVER_ENTER:
-            case AMOTION_EVENT_ACTION_HOVER_MOVE:
-            case AMOTION_EVENT_ACTION_HOVER_EXIT:
-                mMotionMementos.removeAt(i);
-                return;
-
-            case AMOTION_EVENT_ACTION_DOWN:
-                mMotionMementos.removeAt(i);
-                goto Found;
-
-            case AMOTION_EVENT_ACTION_POINTER_UP:
-            case AMOTION_EVENT_ACTION_POINTER_DOWN:
-            case AMOTION_EVENT_ACTION_MOVE:
-                memento.setPointers(entry);
-                return;
-
-            default:
-                return;
-            }
+                && memento.source == entry->source
+                && memento.hovering == hovering) {
+            return i;
         }
     }
+    return -1;
+}
 
-Found:
-    switch (actionMasked) {
-    case AMOTION_EVENT_ACTION_DOWN:
-    case AMOTION_EVENT_ACTION_HOVER_ENTER:
-    case AMOTION_EVENT_ACTION_HOVER_MOVE:
-    case AMOTION_EVENT_ACTION_HOVER_EXIT:
-        mMotionMementos.push();
-        MotionMemento& memento = mMotionMementos.editTop();
-        memento.deviceId = entry->deviceId;
-        memento.source = entry->source;
-        memento.xPrecision = entry->xPrecision;
-        memento.yPrecision = entry->yPrecision;
-        memento.downTime = entry->downTime;
-        memento.setPointers(entry);
-        memento.hovering = actionMasked != AMOTION_EVENT_ACTION_DOWN;
-    }
+void InputDispatcher::InputState::addKeyMemento(const KeyEntry* entry, int32_t flags) {
+    mKeyMementos.push();
+    KeyMemento& memento = mKeyMementos.editTop();
+    memento.deviceId = entry->deviceId;
+    memento.source = entry->source;
+    memento.keyCode = entry->keyCode;
+    memento.scanCode = entry->scanCode;
+    memento.flags = flags;
+    memento.downTime = entry->downTime;
+}
+
+void InputDispatcher::InputState::addMotionMemento(const MotionEntry* entry,
+        int32_t flags, bool hovering) {
+    mMotionMementos.push();
+    MotionMemento& memento = mMotionMementos.editTop();
+    memento.deviceId = entry->deviceId;
+    memento.source = entry->source;
+    memento.flags = flags;
+    memento.xPrecision = entry->xPrecision;
+    memento.yPrecision = entry->yPrecision;
+    memento.downTime = entry->downTime;
+    memento.setPointers(entry);
+    memento.hovering = hovering;
 }
 
 void InputDispatcher::InputState::MotionMemento::setPointers(const MotionEntry* entry) {
@@ -4243,20 +4377,17 @@ void InputDispatcher::InputState::MotionMemento::setPointers(const MotionEntry* 
 void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTime,
         Allocator* allocator, Vector<EventEntry*>& outEvents,
         const CancelationOptions& options) {
-    for (size_t i = 0; i < mKeyMementos.size(); ) {
+    for (size_t i = 0; i < mKeyMementos.size(); i++) {
         const KeyMemento& memento = mKeyMementos.itemAt(i);
         if (shouldCancelKey(memento, options)) {
             outEvents.push(allocator->obtainKeyEntry(currentTime,
                     memento.deviceId, memento.source, 0,
                     AKEY_EVENT_ACTION_UP, memento.flags | AKEY_EVENT_FLAG_CANCELED,
                     memento.keyCode, memento.scanCode, 0, 0, memento.downTime));
-            mKeyMementos.removeAt(i);
-        } else {
-            i += 1;
         }
     }
 
-    for (size_t i = 0; i < mMotionMementos.size(); ) {
+    for (size_t i = 0; i < mMotionMementos.size(); i++) {
         const MotionMemento& memento = mMotionMementos.itemAt(i);
         if (shouldCancelMotion(memento, options)) {
             outEvents.push(allocator->obtainMotionEntry(currentTime,
@@ -4264,12 +4395,9 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
                     memento.hovering
                             ? AMOTION_EVENT_ACTION_HOVER_EXIT
                             : AMOTION_EVENT_ACTION_CANCEL,
-                    0, 0, 0, 0,
+                    memento.flags, 0, 0, 0,
                     memento.xPrecision, memento.yPrecision, memento.downTime,
                     memento.pointerCount, memento.pointerProperties, memento.pointerCoords));
-            mMotionMementos.removeAt(i);
-        } else {
-            i += 1;
         }
     }
 }
