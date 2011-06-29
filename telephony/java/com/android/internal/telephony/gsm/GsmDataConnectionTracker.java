@@ -556,6 +556,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             if (DBG) log("onDataConnectionAttached: start polling notify attached");
             startNetStatPoll();
             notifyDataConnection(Phone.REASON_DATA_ATTACHED);
+        } else {
+            // update APN availability so that APN can be enabled.
+            notifyDataAvailability(Phone.REASON_DATA_ATTACHED);
         }
 
         setupDataOnReadyApns(Phone.REASON_DATA_ATTACHED);
@@ -1528,7 +1531,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         createAllApnList();
         if (mRadioAvailable) {
             if (DBG) log("onRecordsLoaded: notifying data availability");
-            notifyDataAvailability(null);
+            notifyDataAvailability(Phone.REASON_SIM_LOADED);
         }
         setupDataOnReadyApns(Phone.REASON_SIM_LOADED);
     }
@@ -1635,11 +1638,17 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
     @Override
     protected void onRoamingOff() {
         if (DBG) log("onRoamingOff");
+        // Notify data availability so APN can be enabled.
+        notifyDataAvailability(Phone.REASON_ROAMING_OFF);
+
         setupDataOnReadyApns(Phone.REASON_ROAMING_OFF);
     }
 
     @Override
     protected void onRoamingOn() {
+        // Notify data availability so APN can be enabled.
+        notifyDataAvailability(Phone.REASON_ROAMING_ON);
+
         if (getDataOnRoamingEnabled()) {
             if (DBG) log("onRoamingOn: setup data on roaming");
             setupDataOnReadyApns(Phone.REASON_ROAMING_ON);
