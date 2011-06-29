@@ -16,7 +16,10 @@
 
 package android.net;
 
+import android.app.DownloadManager;
+import android.app.backup.BackupManager;
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
 import android.os.RemoteException;
@@ -50,6 +53,27 @@ public class TrafficStats {
     public static final int UID_REMOVED = -4;
 
     /**
+     * Default tag value for {@link DownloadManager} traffic.
+     *
+     * @hide
+     */
+    public static final int TAG_SYSTEM_DOWNLOAD = 0xFFFF0001;
+
+    /**
+     * Default tag value for {@link MediaPlayer} traffic.
+     *
+     * @hide
+     */
+    public static final int TAG_SYSTEM_MEDIA = 0xFFFF0002;
+
+    /**
+     * Default tag value for {@link BackupManager} traffic.
+     *
+     * @hide
+     */
+    public static final int TAG_SYSTEM_BACKUP = 0xFFFF0003;
+
+    /**
      * Snapshot of {@link NetworkStats} when the currently active profiling
      * session started, or {@code null} if no session active.
      *
@@ -67,12 +91,20 @@ public class TrafficStats {
      * Changes only take effect during subsequent calls to
      * {@link #tagSocket(Socket)}.
      */
-    public static void setThreadStatsTag(String tag) {
+    public static void setThreadStatsTag(int tag) {
         BlockGuard.setThreadSocketStatsTag(tag);
     }
 
+    /**
+     * @deprecated unsupported, will eventually be removed
+     */
+    @Deprecated
+    public static void setThreadStatsTag(String tag) {
+        setThreadStatsTag(tag.hashCode());
+    }
+
     public static void clearThreadStatsTag() {
-        BlockGuard.setThreadSocketStatsTag(null);
+        BlockGuard.setThreadSocketStatsTag(-1);
     }
 
     /**
@@ -103,7 +135,7 @@ public class TrafficStats {
      * parameters. When finished, call {@link #untagSocket(Socket)} to remove
      * statistics parameters.
      *
-     * @see #setThreadStatsTag(String)
+     * @see #setThreadStatsTag(int)
      * @see #setThreadStatsUid(int)
      */
     public static void tagSocket(Socket socket) throws SocketException {
