@@ -42,6 +42,7 @@ static jmethodID method_xtraDownloadRequest;
 static jmethodID method_reportNiNotification;
 static jmethodID method_requestRefLocation;
 static jmethodID method_requestSetID;
+static jmethodID method_requestUtcTime;
 
 static const GpsInterface* sGpsInterface = NULL;
 static const GpsXtraInterface* sGpsXtraInterface = NULL;
@@ -122,6 +123,13 @@ static void release_wakelock_callback()
     release_wake_lock(WAKE_LOCK_NAME);
 }
 
+static void request_utc_time_callback()
+{
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    env->CallVoidMethod(mCallbacksObj, method_requestUtcTime);
+    checkAndClearExceptionFromCallback(env, __FUNCTION__);
+}
+
 static pthread_t create_thread_callback(const char* name, void (*start)(void *), void* arg)
 {
     return (pthread_t)AndroidRuntime::createJavaThread(name, start, arg);
@@ -137,6 +145,7 @@ GpsCallbacks sGpsCallbacks = {
     acquire_wakelock_callback,
     release_wakelock_callback,
     create_thread_callback,
+    request_utc_time_callback,
 };
 
 static void xtra_download_request_callback()
@@ -232,6 +241,7 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
             "(IIIIILjava/lang/String;Ljava/lang/String;IILjava/lang/String;)V");
     method_requestRefLocation = env->GetMethodID(clazz,"requestRefLocation","(I)V");
     method_requestSetID = env->GetMethodID(clazz,"requestSetID","(I)V");
+    method_requestUtcTime = env->GetMethodID(clazz,"requestUtcTime","()V");
 
     err = hw_get_module(GPS_HARDWARE_MODULE_ID, (hw_module_t const**)&module);
     if (err == 0) {
