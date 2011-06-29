@@ -3015,6 +3015,10 @@
         <attr name="drawableLeft" format="reference|color" />
         <!-- The drawable to be drawn to the right of the text. -->
         <attr name="drawableRight" format="reference|color" />
+        <!-- The drawable to be drawn to the start of the text. -->
+        <attr name="drawableStart" format="reference|color" />
+        <!-- The drawable to be drawn to the end of the text. -->
+        <attr name="drawableEnd" format="reference|color" />
         <!-- The padding between the drawables and the text. -->
         <attr name="drawablePadding" format="dimension" />
         <!-- Extra spacing between lines of text. -->

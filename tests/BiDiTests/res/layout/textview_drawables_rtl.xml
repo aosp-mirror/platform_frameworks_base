@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/textview_drawables_rtl"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layoutDirection="rtl">
+
+    <LinearLayout android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent">
+
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="24dip"
+                  android:text="@string/textview_text"
+                  android:drawableLeft="@drawable/end"
+                  android:drawableRight="@drawable/start"
+                  android:drawablePadding="3dip"
+                />
+
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="24dip"
+                  android:text="@string/textview_text"
+                  android:drawableStart="@drawable/start"
+                  android:drawableEnd="@drawable/end"
+                  android:drawablePadding="3dip"
+                />
+
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="24dip"
+                  android:text="@string/textview_text"
+                  android:drawableLeft="@drawable/start"
+                  android:drawableStart="@drawable/start"
+                  android:drawableEnd="@drawable/end"
+                  android:drawablePadding="3dip"
+                />
+
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="24dip"
+                  android:text="@string/textview_text"
+                  android:drawableRight="@drawable/end"
+                  android:drawableStart="@drawable/start"
+                  android:drawableEnd="@drawable/end"
+                  android:drawablePadding="3dip"
+                />
+
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="24dip"
+                  android:text="@string/textview_text"
+                  android:drawableLeft="@drawable/start"
+                  android:drawableRight="@drawable/end"
+                  android:drawableStart="@drawable/start"
+                  android:drawableEnd="@drawable/end"
+                  android:drawablePadding="3dip"
+                />
+
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="24dip"
+                  android:text="@string/textview_text"
+                  android:drawableLeft="@drawable/end"
+                  android:drawableStart="@drawable/start"
+                  android:drawablePadding="3dip"
+                />
+
+        <TextView android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="24dip"
+                  android:text="@string/textview_text"
+                  android:drawableRight="@drawable/start"
+                  android:drawableEnd="@drawable/end"
+                  android:drawablePadding="3dip"
+                />
+
+        <TextView android:id="@+id/textview_error"
+                  android:layout_height="wrap_content"
+                  android:layout_width="wrap_content"
+                  android:textSize="24dip"
+                  android:text="@string/textview_text"
+                  android:drawablePadding="3dip"
+                />
+
+    </LinearLayout>
+
+</FrameLayout>
