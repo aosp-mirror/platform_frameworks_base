@@ -132,7 +132,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private static final int GPS_CAPABILITY_MSB = 0x0000002;
     private static final int GPS_CAPABILITY_MSA = 0x0000004;
     private static final int GPS_CAPABILITY_SINGLE_SHOT = 0x0000008;
-
+    private static final int GPS_CAPABILITY_ON_DEMAND_TIME = 0x0000010;
 
     // these need to match AGpsType enum in gps.h
     private static final int AGPS_TYPE_SUPL = 1;
@@ -199,6 +199,9 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // initialized to true so we do NTP and XTRA when the network comes up after booting
     private boolean mInjectNtpTimePending = true;
     private boolean mDownloadXtraDataPending = true;
+
+    // set to true if the GPS engine does not do on-demand NTP time requests
+    private boolean mPeriodicTimeInjection;
 
     // true if GPS is navigating
     private boolean mNavigating;
@@ -549,10 +552,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
             delay = RETRY_INTERVAL;
         }
 
-        // send delayed message for next NTP injection
-        // since this is delayed and not urgent we do not hold a wake lock here
-        mHandler.removeMessages(INJECT_NTP_TIME);
-        mHandler.sendMessageDelayed(Message.obtain(mHandler, INJECT_NTP_TIME), delay);
+        if (mPeriodicTimeInjection) {
+            // send delayed message for next NTP injection
+            // since this is delayed and not urgent we do not hold a wake lock here
+            mHandler.removeMessages(INJECT_NTP_TIME);
+            mHandler.sendMessageDelayed(Message.obtain(mHandler, INJECT_NTP_TIME), delay);
+        }
     }
 
     private void handleDownloadXtraData() {
@@ -1305,6 +1310,11 @@ public class GpsLocationProvider implements LocationProviderInterface {
      */
     private void setEngineCapabilities(int capabilities) {
         mEngineCapabilities = capabilities;
+
+        if (!hasCapability(GPS_CAPABILITY_ON_DEMAND_TIME) && !mPeriodicTimeInjection) {
+            mPeriodicTimeInjection = true;
+            requestUtcTime();
+        }
     }
 
     /**
@@ -1435,6 +1445,14 @@ public class GpsLocationProvider implements LocationProviderInterface {
             }
         }
         native_agps_set_id(type, data);
+    }
+
+    /**
+     * Called from native code to request utc time info
+     */
+
+    private void requestUtcTime() {
+        sendMessage(INJECT_NTP_TIME, 0, null);
     }
 
     /**
