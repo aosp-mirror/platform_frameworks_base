@@ -27,6 +27,7 @@ commonSources:= \
 	Debug.cpp \
 	FileMap.cpp \
 	Flattenable.cpp \
+	LinearTransform.cpp \
 	ObbFile.cpp \
 	Pool.cpp \
 	PropertyMap.cpp \
