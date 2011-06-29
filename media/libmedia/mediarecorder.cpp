@@ -322,32 +322,6 @@ status_t MediaRecorder::setOutputFile(int fd, int64_t offset, int64_t length)
     return ret;
 }
 
-status_t MediaRecorder::setOutputFileAuxiliary(int fd)
-{
-    LOGV("setOutputFileAuxiliary(%d)", fd);
-    if(mMediaRecorder == NULL) {
-        LOGE("media recorder is not initialized yet");
-        return INVALID_OPERATION;
-    }
-    if (mIsAuxiliaryOutputFileSet) {
-        LOGE("output file has already been set");
-        return INVALID_OPERATION;
-    }
-    if (!(mCurrentState & MEDIA_RECORDER_DATASOURCE_CONFIGURED)) {
-        LOGE("setOutputFile called in an invalid state(%d)", mCurrentState);
-        return INVALID_OPERATION;
-    }
-
-    status_t ret = mMediaRecorder->setOutputFileAuxiliary(fd);
-    if (OK != ret) {
-        LOGV("setOutputFileAuxiliary failed: %d", ret);
-        mCurrentState = MEDIA_RECORDER_ERROR;
-        return ret;
-    }
-    mIsAuxiliaryOutputFileSet = true;
-    return ret;
-}
-
 status_t MediaRecorder::setVideoSize(int width, int height)
 {
     LOGV("setVideoSize(%d, %d)", width, height);
@@ -629,7 +603,6 @@ void MediaRecorder::doCleanUp()
     mIsAudioEncoderSet = false;
     mIsVideoEncoderSet = false;
     mIsOutputFileSet   = false;
-    mIsAuxiliaryOutputFileSet = false;
 }
 
 // Release should be OK in any state

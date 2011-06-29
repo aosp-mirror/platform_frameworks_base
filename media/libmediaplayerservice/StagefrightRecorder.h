@@ -30,7 +30,6 @@ class Camera;
 class ICameraRecordingProxy;
 class CameraSource;
 class CameraSourceTimeLapse;
-class MediaSourceSplitter;
 struct MediaSource;
 struct MediaWriter;
 class MetaData;
@@ -55,7 +54,6 @@ struct StagefrightRecorder : public MediaRecorderBase {
     virtual status_t setPreviewSurface(const sp<Surface>& surface);
     virtual status_t setOutputFile(const char *path);
     virtual status_t setOutputFile(int fd, int64_t offset, int64_t length);
-    virtual status_t setOutputFileAuxiliary(int fd);
     virtual status_t setParameters(const String8& params);
     virtual status_t setListener(const sp<IMediaRecorderClient>& listener);
     virtual status_t prepare();
@@ -74,8 +72,8 @@ private:
     sp<ICameraRecordingProxy> mCameraProxy;
     sp<Surface> mPreviewSurface;
     sp<IMediaRecorderClient> mListener;
-    sp<MediaWriter> mWriter, mWriterAux;
-    int mOutputFd, mOutputFdAux;
+    sp<MediaWriter> mWriter;
+    int mOutputFd;
     sp<AudioSource> mAudioSourceNode;
 
     audio_source_t mAudioSource;
@@ -85,9 +83,8 @@ private:
     video_encoder mVideoEncoder;
     bool mUse64BitFileOffset;
     int32_t mVideoWidth, mVideoHeight;
-    int32_t mAuxVideoWidth, mAuxVideoHeight;
     int32_t mFrameRate;
-    int32_t mVideoBitRate, mAuxVideoBitRate;
+    int32_t mVideoBitRate;
     int32_t mAudioBitRate;
     int32_t mAudioChannels;
     int32_t mSampleRate;
@@ -109,8 +106,6 @@ private:
 
     bool mCaptureTimeLapse;
     int64_t mTimeBetweenTimeLapseFrameCaptureUs;
-    bool mCaptureAuxVideo;
-    sp<MediaSourceSplitter> mCameraSourceSplitter;
     sp<CameraSourceTimeLapse> mCameraSourceTimeLapse;
 
 
@@ -127,7 +122,6 @@ private:
     sp<SurfaceMediaSource> mSurfaceMediaSource;
 
     status_t setupMPEG4Recording(
-        bool useSplitCameraSource,
         int outputFd,
         int32_t videoWidth, int32_t videoHeight,
         int32_t videoBitRate,
@@ -166,9 +160,6 @@ private:
     status_t setParamAudioTimeScale(int32_t timeScale);
     status_t setParamTimeLapseEnable(int32_t timeLapseEnable);
     status_t setParamTimeBetweenTimeLapseFrameCapture(int64_t timeUs);
-    status_t setParamAuxVideoHeight(int32_t height);
-    status_t setParamAuxVideoWidth(int32_t width);
-    status_t setParamAuxVideoEncodingBitRate(int32_t bitRate);
     status_t setParamVideoEncodingBitRate(int32_t bitRate);
     status_t setParamVideoIFramesInterval(int32_t seconds);
     status_t setParamVideoEncoderProfile(int32_t profile);

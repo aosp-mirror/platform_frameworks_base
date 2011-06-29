@@ -46,7 +46,6 @@ enum {
     SET_AUDIO_ENCODER,
     SET_OUTPUT_FILE_PATH,
     SET_OUTPUT_FILE_FD,
-    SET_OUTPUT_FILE_AUXILIARY_FD,
     SET_VIDEO_SIZE,
     SET_VIDEO_FRAMERATE,
     SET_PARAMETERS,
@@ -174,15 +173,6 @@ public:
         data.writeInt64(offset);
         data.writeInt64(length);
         remote()->transact(SET_OUTPUT_FILE_FD, data, &reply);
-        return reply.readInt32();
-    }
-
-    status_t setOutputFileAuxiliary(int fd) {
-        LOGV("setOutputFileAuxiliary(%d)", fd);
-        Parcel data, reply;
-        data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
-        data.writeFileDescriptor(fd);
-        remote()->transact(SET_OUTPUT_FILE_AUXILIARY_FD, data, &reply);
         return reply.readInt32();
     }
 
@@ -402,13 +392,6 @@ status_t BnMediaRecorder::onTransact(
             int64_t length = data.readInt64();
             reply->writeInt32(setOutputFile(fd, offset, length));
             ::close(fd);
-            return NO_ERROR;
-        } break;
-        case SET_OUTPUT_FILE_AUXILIARY_FD: {
-            LOGV("SET_OUTPUT_FILE_AUXILIARY_FD");
-            CHECK_INTERFACE(IMediaRecorder, data, reply);
-            int fd = dup(data.readFileDescriptor());
-            reply->writeInt32(setOutputFileAuxiliary(fd));
             return NO_ERROR;
         } break;
         case SET_VIDEO_SIZE: {
