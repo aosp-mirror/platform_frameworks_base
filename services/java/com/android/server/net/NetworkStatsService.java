@@ -134,7 +134,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Settings that can be changed externally.
      */
     public interface NetworkStatsSettings {
-        public boolean getEnabled();
         public long getPollInterval();
         public long getPersistThreshold();
         public long getNetworkBucketDuration();
@@ -207,20 +206,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     public void systemReady() {
-        if (mSettings.getEnabled()) {
-            try {
-                // enable low-level bandwidth stats and control
-                // TODO: consider shipping with this enabled by default
-                mNetworkManager.setBandwidthControlEnabled(true);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "problem talking to netd while enabling bandwidth controls", e);
-            } catch (NativeDaemonConnectorException ndce) {
-                Slog.e(TAG, "problem enabling bandwidth controls", ndce);
-            }
-        } else {
-            Slog.w(TAG, "detailed network stats disabled");
-        }
-
         synchronized (mStatsLock) {
             // read historical network stats from disk, since policy service
             // might need them right away. we delay loading detailed UID stats
@@ -386,6 +371,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
 
             return stats;
+        }
+    }
+
+    @Override
+    public void forceUpdate() {
+        mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
+
+        synchronized (mStatsLock) {
+            performPollLocked(true, false);
         }
     }
 
@@ -905,6 +899,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             argSet.add(arg);
         }
 
+        final boolean fullHistory = argSet.contains("full");
+
         synchronized (mStatsLock) {
             // TODO: remove this testing code, since it corrupts stats
             if (argSet.contains("generate")) {
@@ -930,7 +926,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             for (NetworkIdentitySet ident : mNetworkStats.keySet()) {
                 final NetworkStatsHistory history = mNetworkStats.get(ident);
                 pw.print("  ident="); pw.println(ident.toString());
-                history.dump("  ", pw);
+                history.dump("  ", pw, fullHistory);
             }
 
             if (argSet.contains("detail")) {
@@ -950,7 +946,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                         final NetworkStatsHistory history = uidStats.valueAt(i);
                         pw.print("    UID="); pw.print(uid);
                         pw.print(" tag="); pw.println(tag);
-                        history.dump("    ", pw);
+                        history.dump("    ", pw, fullHistory);
                     }
                 }
             }
@@ -1058,15 +1054,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return Settings.Secure.getLong(mResolver, name, def);
         }
 
-        public boolean getEnabled() {
-            if (!new File("/proc/net/xt_qtaguid/ctrl").exists()) {
-                Slog.w(TAG, "kernel does not support bandwidth control");
-                return false;
-            }
-            // TODO: once things stabilize, enable by default.
-            // For now: ./vendor/google/tools/override-gservices secure:netstats_enabled=1
-            return Settings.Secure.getInt(mResolver, NETSTATS_ENABLED, 0) != 0;
-        }
         public long getPollInterval() {
             return getSecureLong(NETSTATS_POLL_INTERVAL, 15 * MINUTE_IN_MILLIS);
         }

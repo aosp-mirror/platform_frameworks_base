@@ -16,10 +16,11 @@
 
 package com.android.server;
 
+import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
-import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
+import static android.provider.Settings.Secure.NETSTATS_ENABLED;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -35,6 +36,7 @@ import android.os.Binder;
 import android.os.INetworkManagementService;
 import android.os.SystemClock;
 import android.os.SystemProperties;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseBooleanArray;
@@ -123,6 +125,8 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     /** Set of UIDs with active reject rules. */
     private SparseBooleanArray mUidRejectOnQuota = new SparseBooleanArray();
 
+    private boolean mBandwidthControlEnabled;
+
     /**
      * Constructs a new NetworkManagementService instance
      *
@@ -159,6 +163,29 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     public static NetworkManagementService createForTest(Context context, File procRoot) {
         // TODO: eventually connect with mock netd
         return new NetworkManagementService(context, procRoot);
+    }
+
+    public void systemReady() {
+
+        // only enable bandwidth control when support exists, and requested by
+        // system setting.
+        // TODO: eventually migrate to be always enabled
+        final boolean hasKernelSupport = new File("/proc/net/xt_qtaguid/ctrl").exists();
+        final boolean shouldEnable =
+                Settings.Secure.getInt(mContext.getContentResolver(), NETSTATS_ENABLED, 0) != 0;
+
+        mBandwidthControlEnabled = false;
+        if (hasKernelSupport && shouldEnable) {
+            Slog.d(TAG, "enabling bandwidth control");
+            try {
+                mConnector.doCommand("bandwidth enable");
+                mBandwidthControlEnabled = true;
+            } catch (NativeDaemonConnectorException e) {
+                Slog.e(TAG, "problem enabling bandwidth controls", e);
+            }
+        } else {
+            Slog.d(TAG, "not enabling bandwidth control");
+        }
     }
 
     public void registerObserver(INetworkManagementEventObserver obs) {
@@ -919,7 +946,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
 
-        if (mProcStatsNetfilter.exists()) {
+        if (mBandwidthControlEnabled) {
             return getNetworkStatsDetailNetfilter(UID_ALL);
         } else {
             return getNetworkStatsDetailUidstat(UID_ALL);
@@ -929,6 +956,10 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void setInterfaceQuota(String iface, long quota) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        // silently discard when control disabled
+        // TODO: eventually migrate to be always enabled
+        if (!mBandwidthControlEnabled) return;
 
         synchronized (mInterfaceQuota) {
             if (mInterfaceQuota.contains(iface)) {
@@ -953,6 +984,10 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     public void removeInterfaceQuota(String iface) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
+        // silently discard when control disabled
+        // TODO: eventually migrate to be always enabled
+        if (!mBandwidthControlEnabled) return;
+
         synchronized (mInterfaceQuota) {
             if (!mInterfaceQuota.contains(iface)) {
                 // TODO: eventually consider throwing
@@ -975,6 +1010,10 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     @Override
     public void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        // silently discard when control disabled
+        // TODO: eventually migrate to be always enabled
+        if (!mBandwidthControlEnabled) return;
 
         synchronized (mUidRejectOnQuota) {
             final boolean oldRejectOnQuota = mUidRejectOnQuota.get(uid, false);
@@ -1011,7 +1050,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                     android.Manifest.permission.ACCESS_NETWORK_STATE, "NetworkManagementService");
         }
 
-        if (mProcStatsNetfilter.exists()) {
+        if (mBandwidthControlEnabled) {
             return getNetworkStatsDetailNetfilter(uid);
         } else {
             return getNetworkStatsDetailUidstat(uid);
@@ -1149,12 +1188,6 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
     public int getInterfaceTxThrottle(String iface) {
         return getInterfaceThrottle(iface, false);
-    }
-
-    @Override
-    public void setBandwidthControlEnabled(boolean enabled) {
-        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
-        mConnector.doCommand(String.format("bandwidth %s", (enabled ? "enable" : "disable")));
     }
 
     /**

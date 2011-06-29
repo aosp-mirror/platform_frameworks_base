@@ -279,10 +279,17 @@ public class NetworkStatsHistory implements Parcelable {
         return (long) (start + (r.nextFloat() * (end - start)));
     }
 
-    public void dump(String prefix, PrintWriter pw) {
+    public void dump(String prefix, PrintWriter pw, boolean fullHistory) {
         pw.print(prefix);
         pw.print("NetworkStatsHistory: bucketDuration="); pw.println(bucketDuration);
-        for (int i = 0; i < bucketCount; i++) {
+
+        final int start = fullHistory ? 0 : Math.max(0, bucketCount - 32);
+        if (start > 0) {
+            pw.print(prefix);
+            pw.print("  (omitting "); pw.print(start); pw.println(" buckets)");
+        }
+
+        for (int i = start; i < bucketCount; i++) {
             pw.print(prefix);
             pw.print("  bucketStart="); pw.print(bucketStart[i]);
             pw.print(" rx="); pw.print(rx[i]);
@@ -293,7 +300,7 @@ public class NetworkStatsHistory implements Parcelable {
     @Override
     public String toString() {
         final CharArrayWriter writer = new CharArrayWriter();
-        dump("", new PrintWriter(writer));
+        dump("", new PrintWriter(writer), false);
         return writer.toString();
     }
 

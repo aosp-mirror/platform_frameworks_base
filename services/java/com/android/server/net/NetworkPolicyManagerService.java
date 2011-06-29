@@ -1044,8 +1044,11 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // TODO: only dispatch when rules actually change
 
-        // record rule locally to dispatch to new listeners
-        mUidRules.put(uid, uidRules);
+        if (uidRules == RULE_ALLOW_ALL) {
+            mUidRules.delete(uid);
+        } else {
+            mUidRules.put(uid, uidRules);
+        }
 
         final boolean rejectMetered = (uidRules & RULE_REJECT_METERED) != 0;
         setUidNetworkRules(uid, rejectMetered);
