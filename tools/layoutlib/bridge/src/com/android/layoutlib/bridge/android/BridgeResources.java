@@ -21,12 +21,12 @@ import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.ninepatch.NinePatch;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;
 
-import org.kxml2.io.KXmlParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -131,14 +131,16 @@ public final class BridgeResources extends Resources {
                 platformStyleable, styleableName);
     }
 
-    private ResourceValue getResourceValue(int id, boolean[] platformResFlag_out) {
+    private Pair<String, ResourceValue> getResourceValue(int id, boolean[] platformResFlag_out) {
         // first get the String related to this id in the framework
         Pair<ResourceType, String> resourceInfo = Bridge.resolveResourceId(id);
 
         if (resourceInfo != null) {
             platformResFlag_out[0] = true;
-            return mContext.getRenderResources().getFrameworkResource(
-                    resourceInfo.getFirst(), resourceInfo.getSecond());
+            String attributeName = resourceInfo.getSecond();
+
+            return Pair.of(attributeName, mContext.getRenderResources().getFrameworkResource(
+                    resourceInfo.getFirst(), attributeName));
         }
 
         // didn't find a match in the framework? look in the project.
@@ -147,8 +149,10 @@ public final class BridgeResources extends Resources {
 
             if (resourceInfo != null) {
                 platformResFlag_out[0] = false;
-                return mContext.getRenderResources().getProjectResource(
-                        resourceInfo.getFirst(), resourceInfo.getSecond());
+                String attributeName = resourceInfo.getSecond();
+
+                return Pair.of(attributeName, mContext.getRenderResources().getProjectResource(
+                        resourceInfo.getFirst(), attributeName));
             }
         }
 
@@ -157,10 +161,10 @@ public final class BridgeResources extends Resources {
 
     @Override
     public Drawable getDrawable(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            return ResourceHelper.getDrawable(value, mContext);
+            return ResourceHelper.getDrawable(value.getSecond(), mContext);
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
@@ -172,11 +176,11 @@ public final class BridgeResources extends Resources {
 
     @Override
     public int getColor(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
             try {
-                return ResourceHelper.getColor(value.getValue());
+                return ResourceHelper.getColor(value.getSecond().getValue());
             } catch (NumberFormatException e) {
                 Bridge.getLog().error(LayoutLog.TAG_RESOURCES_FORMAT, e.getMessage(), e,
                         null /*data*/);
@@ -193,10 +197,11 @@ public final class BridgeResources extends Resources {
 
     @Override
     public ColorStateList getColorStateList(int id) throws NotFoundException {
-        ResourceValue resValue = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> resValue = getResourceValue(id, mPlatformResourceFlag);
 
         if (resValue != null) {
-            ColorStateList stateList = ResourceHelper.getColorStateList(resValue, mContext);
+            ColorStateList stateList = ResourceHelper.getColorStateList(resValue.getSecond(),
+                    mContext);
             if (stateList != null) {
                 return stateList;
             }
@@ -211,10 +216,10 @@ public final class BridgeResources extends Resources {
 
     @Override
     public CharSequence getText(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            return value.getValue();
+            return value.getSecond().getValue();
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
@@ -226,9 +231,10 @@ public final class BridgeResources extends Resources {
 
     @Override
     public XmlResourceParser getLayout(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> v = getResourceValue(id, mPlatformResourceFlag);
 
-        if (value != null) {
+        if (v != null) {
+            ResourceValue value = v.getSecond();
             XmlPullParser parser = null;
 
             try {
@@ -243,9 +249,7 @@ public final class BridgeResources extends Resources {
                     if (xml.isFile()) {
                         // we need to create a pull parser around the layout XML file, and then
                         // give that to our XmlBlockParser
-                        parser = new KXmlParser();
-                        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                        parser.setInput(new FileInputStream(xml), "UTF-8"); //$NON-NLS-1$);
+                        parser = ParserFactory.create(xml);
                     }
                 }
 
@@ -271,9 +275,10 @@ public final class BridgeResources extends Resources {
 
     @Override
     public XmlResourceParser getAnimation(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> v = getResourceValue(id, mPlatformResourceFlag);
 
-        if (value != null) {
+        if (v != null) {
+            ResourceValue value = v.getSecond();
             XmlPullParser parser = null;
 
             try {
@@ -281,9 +286,7 @@ public final class BridgeResources extends Resources {
                 if (xml.isFile()) {
                     // we need to create a pull parser around the layout XML file, and then
                     // give that to our XmlBlockParser
-                    parser = new KXmlParser();
-                    parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                    parser.setInput(new FileInputStream(xml), "UTF-8"); //$NON-NLS-1$);
+                    parser = ParserFactory.create(xml);
 
                     return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                 }
@@ -317,10 +320,10 @@ public final class BridgeResources extends Resources {
 
     @Override
     public float getDimension(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            String v = value.getValue();
+            String v = value.getSecond().getValue();
 
             if (v != null) {
                 if (v.equals(BridgeConstants.MATCH_PARENT) ||
@@ -330,7 +333,8 @@ public final class BridgeResources extends Resources {
                     return LayoutParams.WRAP_CONTENT;
                 }
 
-                if (ResourceHelper.stringToFloat(v, mTmpValue) &&
+                if (ResourceHelper.parseFloatAttribute(
+                        value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
                         mTmpValue.type == TypedValue.TYPE_DIMENSION) {
                     return mTmpValue.getDimension(mMetrics);
                 }
@@ -346,13 +350,14 @@ public final class BridgeResources extends Resources {
 
     @Override
     public int getDimensionPixelOffset(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            String v = value.getValue();
+            String v = value.getSecond().getValue();
 
             if (v != null) {
-                if (ResourceHelper.stringToFloat(v, mTmpValue) &&
+                if (ResourceHelper.parseFloatAttribute(
+                        value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
                         mTmpValue.type == TypedValue.TYPE_DIMENSION) {
                     return TypedValue.complexToDimensionPixelOffset(mTmpValue.data, mMetrics);
                 }
@@ -368,13 +373,14 @@ public final class BridgeResources extends Resources {
 
     @Override
     public int getDimensionPixelSize(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            String v = value.getValue();
+            String v = value.getSecond().getValue();
 
             if (v != null) {
-                if (ResourceHelper.stringToFloat(v, mTmpValue) &&
+                if (ResourceHelper.parseFloatAttribute(
+                        value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
                         mTmpValue.type == TypedValue.TYPE_DIMENSION) {
                     return TypedValue.complexToDimensionPixelSize(mTmpValue.data, mMetrics);
                 }
@@ -390,10 +396,10 @@ public final class BridgeResources extends Resources {
 
     @Override
     public int getInteger(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
-        if (value != null && value.getValue() != null) {
-            String v = value.getValue();
+        if (value != null && value.getSecond().getValue() != null) {
+            String v = value.getSecond().getValue();
             int radix = 10;
             if (v.startsWith("0x")) {
                 v = v.substring(2);
@@ -445,10 +451,10 @@ public final class BridgeResources extends Resources {
 
     @Override
     public String getString(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
-        if (value != null && value.getValue() != null) {
-            return value.getValue();
+        if (value != null && value.getSecond().getValue() != null) {
+            return value.getSecond().getValue();
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
@@ -461,13 +467,14 @@ public final class BridgeResources extends Resources {
     @Override
     public void getValue(int id, TypedValue outValue, boolean resolveRefs)
             throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            String v = value.getValue();
+            String v = value.getSecond().getValue();
 
             if (v != null) {
-                if (ResourceHelper.stringToFloat(v, outValue)) {
+                if (ResourceHelper.parseFloatAttribute(value.getFirst(), v, outValue,
+                        false /*requireUnit*/)) {
                     return;
                 }
 
@@ -490,19 +497,17 @@ public final class BridgeResources extends Resources {
 
     @Override
     public XmlResourceParser getXml(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            String v = value.getValue();
+            String v = value.getSecond().getValue();
 
             if (v != null) {
                 // check this is a file
-                File f = new File(value.getValue());
+                File f = new File(v);
                 if (f.isFile()) {
                     try {
-                        KXmlParser parser = new KXmlParser();
-                        parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-                        parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$);
+                        XmlPullParser parser = ParserFactory.create(f);
 
                         return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
                     } catch (XmlPullParserException e) {
@@ -535,9 +540,7 @@ public final class BridgeResources extends Resources {
 
         File f = new File(file);
         try {
-            KXmlParser parser = new KXmlParser();
-            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-            parser.setInput(new FileInputStream(f), "UTF-8"); //$NON-NLS-1$);
+            XmlPullParser parser = ParserFactory.create(f);
 
             return new BridgeXmlBlockParser(parser, mContext, mPlatformResourceFlag[0]);
         } catch (XmlPullParserException e) {
@@ -554,10 +557,10 @@ public final class BridgeResources extends Resources {
 
     @Override
     public InputStream openRawResource(int id) throws NotFoundException {
-        ResourceValue value = getResourceValue(id, mPlatformResourceFlag);
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            String path = value.getValue();
+            String path = value.getSecond().getValue();
 
             if (path != null) {
                 // check this is a file

@@ -30,7 +30,7 @@ import android.widget.TextView;
 public class PhoneSystemBar extends CustomBar {
 
     public PhoneSystemBar(Context context, Density density) throws XmlPullParserException {
-        super(context, density, "/bars/phone_system_bar.xml");
+        super(context, density, "/bars/phone_system_bar.xml", "phone_system_bar.xml");
 
         setGravity(mGravity | Gravity.RIGHT);
         setBackgroundColor(0xFF000000);

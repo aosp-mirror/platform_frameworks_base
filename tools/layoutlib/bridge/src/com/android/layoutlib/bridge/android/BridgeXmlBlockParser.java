@@ -18,6 +18,7 @@ package com.android.layoutlib.bridge.android;
 
 
 import com.android.ide.common.rendering.api.ILayoutPullParser;
+import com.android.layoutlib.bridge.impl.ParserFactory;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -54,6 +55,10 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
      * @param platformFile Indicates whether the the file is a platform file or not.
      */
     public BridgeXmlBlockParser(XmlPullParser parser, BridgeContext context, boolean platformFile) {
+        if (ParserFactory.LOG_PARSER) {
+            System.out.println("CRTE " + parser.toString());
+        }
+
         mParser = parser;
         mContext = context;
         mPlatformFile = platformFile;
@@ -63,6 +68,10 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
             mContext.pushParser(this);
             mPopped = false;
         }
+    }
+
+    public XmlPullParser getParser() {
+        return mParser;
     }
 
     public boolean isPlatformFile() {
@@ -247,16 +256,61 @@ public class BridgeXmlBlockParser implements XmlResourceParser {
     public int next() throws XmlPullParserException, IOException {
         if (!mStarted) {
             mStarted = true;
+
+            if (ParserFactory.LOG_PARSER) {
+                System.out.println("STRT " + mParser.toString());
+            }
+
             return START_DOCUMENT;
         }
+
         int ev = mParser.next();
+
+        if (ParserFactory.LOG_PARSER) {
+            System.out.println("NEXT " + mParser.toString() + " " +
+                    eventTypeToString(mEventType) + " -> " + eventTypeToString(ev));
+        }
 
         if (ev == END_TAG && mParser.getDepth() == 1) {
             // done with parser remove it from the context stack.
             ensurePopped();
+
+            if (ParserFactory.LOG_PARSER) {
+                System.out.println("");
+            }
         }
+
         mEventType = ev;
         return ev;
+    }
+
+    public static String eventTypeToString(int eventType) {
+        switch (eventType) {
+            case START_DOCUMENT:
+                return "START_DOC";
+            case END_DOCUMENT:
+                return "END_DOC";
+            case START_TAG:
+                return "START_TAG";
+            case END_TAG:
+                return "END_TAG";
+            case TEXT:
+                return "TEXT";
+            case CDSECT:
+                return "CDSECT";
+            case ENTITY_REF:
+                return "ENTITY_REF";
+            case IGNORABLE_WHITESPACE:
+                return "IGNORABLE_WHITESPACE";
+            case PROCESSING_INSTRUCTION:
+                return "PROCESSING_INSTRUCTION";
+            case COMMENT:
+                return "COMMENT";
+            case DOCDECL:
+                return "DOCDECL";
+        }
+
+        return "????";
     }
 
     public void require(int type, String namespace, String name)
