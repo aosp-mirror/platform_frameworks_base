@@ -549,11 +549,13 @@ public class NumberPicker extends LinearLayout {
         final ValueAnimator fadeScroller = ObjectAnimator.ofInt(this, "selectorPaintAlpha", 255, 0);
         final ObjectAnimator showIncrementButton = ObjectAnimator.ofFloat(mIncrementButton,
                 "alpha", 0, 1);
+        final ObjectAnimator showInputText = ObjectAnimator.ofFloat(mInputText,
+                "alpha", 0, 1);
         final ObjectAnimator showDecrementButton = ObjectAnimator.ofFloat(mDecrementButton,
                 "alpha", 0, 1);
         mShowInputControlsAnimator = new AnimatorSet();
         mShowInputControlsAnimator.playTogether(fadeScroller, showIncrementButton,
-                showDecrementButton);
+                showInputText, showDecrementButton);
         mShowInputControlsAnimator.addListener(new AnimatorListenerAdapter() {
             private boolean mCanceled = false;
 
@@ -1205,13 +1207,11 @@ public class NumberPicker extends LinearLayout {
         }
         int[] selectorIndices = getSelectorIndices();
         int totalTextHeight = selectorIndices.length * mTextSize;
-        int totalTextGapHeight = (mBottom - mTop) - totalTextHeight;
-        int textGapCount = selectorIndices.length - 1;
-        int selectorTextGapHeight = totalTextGapHeight / textGapCount;
-        // compensate for integer division loss of the components used to
-        // calculate the text gap
-        int integerDivisionLoss = (mTextSize + mBottom - mTop) % textGapCount;
-        mInitialScrollOffset = mCurrentScrollOffset = mTextSize - integerDivisionLoss / 2;
+        float totalTextGapHeight = (mBottom - mTop) - totalTextHeight;
+        float textGapCount = selectorIndices.length - 1;
+        int selectorTextGapHeight = (int) (totalTextGapHeight / textGapCount + 0.5f);
+        // Compensate if text size is odd since every time we get its middle a pixel is lost.
+        mInitialScrollOffset = mCurrentScrollOffset = mTextSize - (3 * (mTextSize % 2));
         mSelectorElementHeight = mTextSize + selectorTextGapHeight;
         updateInputTextView();
     }

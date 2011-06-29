@@ -23,8 +23,6 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         style="?android:attr/numberPickerUpButtonStyle"
-        android:paddingTop="22dip"
-        android:paddingBottom="22dip"
         android:contentDescription="@string/number_picker_increment_button" />
 
     <EditText android:id="@+id/numberpicker_input"
@@ -36,8 +34,6 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         style="?android:attr/numberPickerDownButtonStyle"
-        android:paddingTop="22dip"
-        android:paddingBottom="22dip"
         android:contentDescription="@string/number_picker_decrement_button" />
 
 </merge>
