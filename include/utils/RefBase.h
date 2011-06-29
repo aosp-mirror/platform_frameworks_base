@@ -115,6 +115,7 @@ public:
     // used to override the RefBase destruction.
     class Destroyer {
         friend class RefBase;
+        friend class weakref_type;
     public:
         virtual ~Destroyer();
     private:
