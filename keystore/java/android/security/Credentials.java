@@ -60,16 +60,10 @@ public class Credentials {
     public static final String WIFI = "WIFI_";
 
     /** Data type for public keys. */
-    public static final String PUBLIC_KEY = "KEY";
+    public static final String EXTRA_PUBLIC_KEY = "KEY";
 
     /** Data type for private keys. */
-    public static final String PRIVATE_KEY = "PKEY";
-
-    /** Data type for certificates. */
-    public static final String CERTIFICATE = "CERT";
-
-    /** Data type for PKCS12. */
-    public static final String PKCS12 = "PKCS12";
+    public static final String EXTRA_PRIVATE_KEY = "PKEY";
 
     // historically used by Android
     public static final String EXTENSION_CRT = ".crt";
@@ -130,16 +124,9 @@ public class Credentials {
         }
     }
 
-    private Intent createInstallIntent() {
-        Intent intent = new Intent(INSTALL_ACTION);
-        intent.setClassName("com.android.certinstaller",
-                "com.android.certinstaller.CertInstallerMain");
-        return intent;
-    }
-
     public void install(Context context) {
         try {
-            Intent intent = createInstallIntent();
+            Intent intent = KeyChain.createInstallIntent();
             context.startActivity(intent);
         } catch (ActivityNotFoundException e) {
             Log.w(LOGTAG, e.toString());
@@ -148,9 +135,9 @@ public class Credentials {
 
     public void install(Context context, KeyPair pair) {
         try {
-            Intent intent = createInstallIntent();
-            intent.putExtra(PRIVATE_KEY, pair.getPrivate().getEncoded());
-            intent.putExtra(PUBLIC_KEY, pair.getPublic().getEncoded());
+            Intent intent = KeyChain.createInstallIntent();
+            intent.putExtra(EXTRA_PRIVATE_KEY, pair.getPrivate().getEncoded());
+            intent.putExtra(EXTRA_PUBLIC_KEY, pair.getPublic().getEncoded());
             context.startActivity(intent);
         } catch (ActivityNotFoundException e) {
             Log.w(LOGTAG, e.toString());
@@ -159,7 +146,7 @@ public class Credentials {
 
     public void install(Context context, String type, byte[] value) {
         try {
-            Intent intent = createInstallIntent();
+            Intent intent = KeyChain.createInstallIntent();
             intent.putExtra(type, value);
             context.startActivity(intent);
         } catch (ActivityNotFoundException e) {
