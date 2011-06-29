@@ -66,8 +66,8 @@
     <Space
             android:layout_row="4"
             android:layout_column="2"
-            android:layout_rowWeight="1"
-            android:layout_columnWeight="1"
+            android:layout_heightSpec="canStretch"
+            android:layout_widthSpec="canStretch"
             />
 
     <Button

@@ -169,7 +169,10 @@
     </LinearLayout>
 
     <!-- Column 1 -->
-    <Space android:width="20dip" android:layout_columnWeight="1" android:layout_rowSpan="10" />
+    <Space
+        android:width="20dip"
+        android:layout_heightSpec="canStretch"
+        android:layout_rowSpan="10" />
 
     <!-- Column 2 -->
     <com.android.internal.widget.multiwaveview.MultiWaveView

@@ -100,9 +100,11 @@
 
     <!-- TODO: remove hard coded height since layout_rowWeight doesn't seem to be working -->
     <Space
-    android:layout_height="43dip"
-    android:layout_gravity="fill"
-    android:layout_rowWeight="1" android:layout_columnWeight="1" />
+        android:layout_height="43dip"
+        android:layout_gravity="fill"
+        android:layout_heightSpec="canStretch"
+        android:layout_widthSpec="canStretch"
+        />
 
     <TextView android:id="@+id/carrier"
         android:layout_gravity="right"
