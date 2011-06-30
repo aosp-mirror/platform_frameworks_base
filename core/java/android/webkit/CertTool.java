@@ -21,31 +21,27 @@ import com.android.org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import com.android.org.bouncycastle.jce.netscape.NetscapeCertRequest;
 import com.android.org.bouncycastle.util.encoders.Base64;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
 import android.security.Credentials;
+import android.security.KeyChain;
 import android.util.Log;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.HashMap;
 
-class CertTool {
+final class CertTool {
     private static final String LOGTAG = "CertTool";
 
     private static final AlgorithmIdentifier MD5_WITH_RSA =
             new AlgorithmIdentifier(PKCSObjectIdentifiers.md5WithRSAEncryption);
 
-    static final String CERT = Credentials.CERTIFICATE;
-    static final String PKCS12 = Credentials.PKCS12;
-
     private static HashMap<String, String> sCertificateTypeMap;
     static {
         sCertificateTypeMap = new HashMap<String, String>();
-        sCertificateTypeMap.put("application/x-x509-ca-cert", CertTool.CERT);
-        sCertificateTypeMap.put("application/x-x509-user-cert", CertTool.CERT);
-        sCertificateTypeMap.put("application/x-pkcs12", CertTool.PKCS12);
+        sCertificateTypeMap.put("application/x-x509-ca-cert", KeyChain.EXTRA_CERTIFICATE);
+        sCertificateTypeMap.put("application/x-x509-user-cert", KeyChain.EXTRA_CERTIFICATE);
+        sCertificateTypeMap.put("application/x-pkcs12", KeyChain.EXTRA_PKCS12);
     }
 
     static String[] getKeyStrengthList() {
@@ -77,7 +73,7 @@ class CertTool {
 
     static String getCertType(String mimeType) {
         return sCertificateTypeMap.get(mimeType);
-  }
+    }
 
     private CertTool() {}
 }

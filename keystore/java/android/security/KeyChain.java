@@ -89,29 +89,115 @@ public final class KeyChain {
     public static final String ACCOUNT_TYPE = "com.android.keychain";
 
     /**
+     * Action to bring up the KeyChainActivity
+     */
+    private static final String ACTION_CHOOSER = "com.android.keychain.CHOOSER";
+
+    /**
+     * Extra for use with {@link #ACTION_CHOOSER}
      * @hide Also used by KeyChainActivity implementation
      */
     public static final String EXTRA_RESPONSE = "response";
 
     /**
+     * Extra for use with {@link #ACTION_CHOOSER}
      * @hide Also used by KeyChainActivity implementation
      */
     public static final String EXTRA_HOST = "host";
 
     /**
+     * Extra for use with {@link #ACTION_CHOOSER}
      * @hide Also used by KeyChainActivity implementation
      */
     public static final String EXTRA_PORT = "port";
 
     /**
+     * Extra for use with {@link #ACTION_CHOOSER}
      * @hide Also used by KeyChainActivity implementation
      */
     public static final String EXTRA_ALIAS = "alias";
 
     /**
+     * Extra for use with {@link #ACTION_CHOOSER}
      * @hide Also used by KeyChainActivity implementation
      */
     public static final String EXTRA_SENDER = "sender";
+
+    /**
+     * Action to bring up the CertInstaller
+     */
+    private static final String ACTION_INSTALL = "android.credentials.INSTALL";
+
+    /**
+     * Optional extra to specify a {@code String} credential name on
+     * the {@code Intent} returned by {@link #createInstallIntent}.
+     *
+     * @hide TODO make public
+     */
+    // Compatible with old com.android.certinstaller.CredentialHelper.CERT_NAME_KEY
+    public static final String EXTRA_NAME = "name";
+
+    /**
+     * Optional extra to specify an X.509 certificate to install on
+     * the {@code Intent} returned by {@link #createInstallIntent}.
+     * The extra value should be a PEM or ASN.1 DER encoded {@code
+     * byte[]}. An {@link X509Certificate} can be converted to DER
+     * encoded bytes with {@link X509Certificate#getEncoded}.
+     *
+     * <p>{@link #EXTRA_NAME} may be used to provide a default alias
+     * name for the installed certificate.
+     *
+     * @hide TODO make public
+     */
+    // Compatible with old android.security.Credentials.CERTIFICATE
+    public static final String EXTRA_CERTIFICATE = "CERT";
+
+    /**
+     * Optional extra for use with the {@code Intent} returned by
+     * {@link #createInstallIntent} to specify a PKCS#12 key store to
+     * install. The extra value should be a {@code byte[]}. The bytes
+     * may come from an external source or be generated with {@link
+     * KeyStore#store} on a "PKCS12" instance.
+     *
+     * <p>The user will be prompted for the password to load the key store.
+     *
+     * <p>The key store will be scanned for {@link
+     * java.security.KeyStore.PrivateKeyEntry} entries and both the
+     * private key and associated certificate chain will be installed.
+     *
+     * <p>{@link #EXTRA_NAME} may be used to provide a default alias
+     * name for the installed credentials.
+     *
+     * @hide TODO make public
+     */
+    // Compatible with old android.security.Credentials.PKCS12
+    public static final String EXTRA_PKCS12 = "PKCS12";
+
+    /**
+     * Returns an {@code Intent} that can be used for credential
+     * installation. The intent may be used without any extras, in
+     * which case the user will be able to install credentials from
+     * their own source.
+     *
+     * <p>Alternatively, {@link #EXTRA_CERTIFICATE} or {@link
+     * #EXTRA_PKCS12} maybe used to specify the bytes of an X.509
+     * certificate or a PKCS#12 key store for installation. These
+     * extras may be combined with {@link EXTRA_NAME} to provide a
+     * default alias name for credentials being installed.
+     *
+     * <p>When used with {@link Activity#startActivityForResult},
+     * {@link Activity#RESULT_OK} will be returned if a credential was
+     * successfully installed, otherwise {@link
+     * Activity#RESULT_CANCELED} will be returned.
+     *
+     * @hide TODO make public with createInstallIntent, EXTRA_NAME, EXTRA_CERTIFICATE, EXTRA_PKCS12
+     */
+    public static Intent createInstallIntent() {
+        Intent intent = new Intent(ACTION_INSTALL);
+        intent.setClassName("com.android.certinstaller",
+                            "com.android.certinstaller.CertInstallerMain");
+        return intent;
+    }
 
     /**
      * Launches an {@code Activity} for the user to select the alias
@@ -176,7 +262,7 @@ public final class KeyChain {
         if (response == null) {
             throw new NullPointerException("response == null");
         }
-        Intent intent = new Intent("com.android.keychain.CHOOSER");
+        Intent intent = new Intent(ACTION_CHOOSER);
         intent.putExtra(EXTRA_RESPONSE, new AliasResponse(activity, response));
         intent.putExtra(EXTRA_HOST, host);
         intent.putExtra(EXTRA_PORT, port);
