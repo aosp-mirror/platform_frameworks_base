@@ -1393,6 +1393,14 @@
         android:description="@string/permdesc_manageNetworkPolicy"
         android:protectionLevel="signature" />
 
+    <!-- Allows an application to account its network traffic against other UIDs. Used
+         by system services like download manager and media server. Not for use by
+         third party apps. @hide -->
+    <permission android:name="android.permission.MODIFY_NETWORK_ACCOUNTING"
+        android:label="@string/permlab_modifyNetworkAccounting"
+        android:description="@string/permdesc_modifyNetworkAccounting"
+        android:protectionLevel="signatureOrSystem" />
+
     <!-- C2DM permission. 
          @hide Used internally.
      -->

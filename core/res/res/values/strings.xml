@@ -1443,6 +1443,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_manageNetworkPolicy">Allows an application to manage network policies and define application-specific rules.</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_modifyNetworkAccounting">modify network usage accounting</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_modifyNetworkAccounting">Allows modification of how network usage is accounted against applications. Not for use by normal applications.</string>
+
     <!-- Policy administration -->
 
     <!-- Title of policy access to limiting the user's password choices -->
