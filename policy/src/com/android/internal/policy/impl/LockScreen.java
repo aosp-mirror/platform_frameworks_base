@@ -64,7 +64,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
     private KeyguardUpdateMonitor mUpdateMonitor;
     private KeyguardScreenCallback mCallback;
 
-    private SlidingTab mSlidingTab;
     private TextView mScreenLocked;
     private TextView mEmergencyCallText;
     private Button mEmergencyCallButton;
@@ -89,11 +88,9 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
     private boolean mEnableMenuKeyInLockScreen;
 
     private StatusView mStatusView;
-    private WaveView mEnergyWave;
-    private SlidingTabMethods mSlidingTabMethods;
-    private WaveViewMethods mWaveViewMethods;
-    private MultiWaveView mMultiWaveView;
-    private MultiWaveViewMethods mMultiWaveViewMethods;
+    private UnlockWidgetCommonMethods mUnlockWidgetMethods;
+    private View mUnlockWidget;
+
 
     /**
      * The status of this lock screen.
@@ -151,9 +148,28 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
         }
     }
 
-    class SlidingTabMethods implements SlidingTab.OnTriggerListener {
+    private interface UnlockWidgetCommonMethods {
+        // Update resources based on phone state
+        public void updateResources();
 
-        private void updateRightTabResources() {
+        // Get the view associated with this widget
+        public View getView();
+
+        // Reset the view
+        public void reset(boolean animate);
+
+        // Animate the widget if it supports ping()
+        public void ping();
+    }
+
+    class SlidingTabMethods implements SlidingTab.OnTriggerListener, UnlockWidgetCommonMethods {
+        private final SlidingTab mSlidingTab;
+
+        SlidingTabMethods(SlidingTab slidingTab) {
+            mSlidingTab = slidingTab;
+        }
+
+        public void updateResources() {
             boolean vibe = mSilentMode
                 && (mAudioManager.getRingerMode() == AudioManager.RINGER_MODE_VIBRATE);
 
@@ -175,7 +191,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
                 mCallback.goToUnlockScreen();
             } else if (whichHandle == SlidingTab.OnTriggerListener.RIGHT_HANDLE) {
                 toggleRingMode();
-                updateRightTabResources();
                 doSilenceRingToast();
                 mCallback.pokeWakelock();
             }
@@ -195,12 +210,29 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
                 mCallback.pokeWakelock();
             }
         }
+
+        public View getView() {
+            return mSlidingTab;
+        }
+
+        public void reset(boolean animate) {
+            mSlidingTab.reset(animate);
+        }
+
+        public void ping() {
+        }
     }
 
     private static final int WAIT_FOR_ANIMATION_TIMEOUT = 0;
     private static final int STAY_ON_WHILE_GRABBED_TIMEOUT = 30000;
 
-    class WaveViewMethods implements WaveView.OnTriggerListener {
+    class WaveViewMethods implements WaveView.OnTriggerListener, UnlockWidgetCommonMethods {
+
+        private final WaveView mWaveView;
+
+        WaveViewMethods(WaveView waveView) {
+            mWaveView = waveView;
+        }
         /** {@inheritDoc} */
         public void onTrigger(View v, int whichHandle) {
             if (whichHandle == WaveView.OnTriggerListener.CENTER_HANDLE) {
@@ -210,8 +242,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
 
         /** {@inheritDoc} */
         public void onGrabbedStateChange(View v, int grabbedState) {
-            if (DBG) Log.v(TAG, "*** LockScreen accel is "
-                    + (mEnergyWave.isHardwareAccelerated() ? "on":"off"));
             // Don't poke the wake lock when returning to a state where the handle is
             // not grabbed since that can happen when the system (instead of the user)
             // cancels the grab.
@@ -219,30 +249,51 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
                 mCallback.pokeWakelock(STAY_ON_WHILE_GRABBED_TIMEOUT);
             }
         }
+
+        public void updateResources() {
+        }
+
+        public View getView() {
+            return mWaveView;
+        }
+        public void reset(boolean animate) {
+            mWaveView.reset();
+        }
+        public void ping() {
+        }
     }
 
-    class MultiWaveViewMethods implements MultiWaveView.OnTriggerListener {
+    class MultiWaveViewMethods implements MultiWaveView.OnTriggerListener,
+            UnlockWidgetCommonMethods {
+
+        private final MultiWaveView mMultiWaveView;
+
+        MultiWaveViewMethods(MultiWaveView multiWaveView) {
+            mMultiWaveView = multiWaveView;
+        }
+
+        public void updateResources() {
+            mMultiWaveView.setTargetResources(mSilentMode ? R.array.lockscreen_targets_when_silent
+                    : R.array.lockscreen_targets_when_soundon);
+        }
+
         public void onGrabbed(View v, int handle) {
 
         }
+
         public void onReleased(View v, int handle) {
 
         }
+
         public void onTrigger(View v, int target) {
             if (target == 0) { // TODO: Use resources to determine which handle was used
                 mCallback.goToUnlockScreen();
             } else if (target == 2) {
                 toggleRingMode();
-                updateResources();
                 doSilenceRingToast();
+                mUnlockWidgetMethods.updateResources();
                 mCallback.pokeWakelock();
             }
-
-        }
-
-        private void updateResources() {
-            mMultiWaveView.setTargetResources(mSilentMode ? R.array.lockscreen_targets_when_silent
-                    : R.array.lockscreen_targets_when_soundon);
         }
 
         public void onGrabbedStateChange(View v, int handle) {
@@ -252,6 +303,18 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
             if (handle != MultiWaveView.OnTriggerListener.NO_HANDLE) {
                 mCallback.pokeWakelock();
             }
+        }
+
+        public View getView() {
+            return mMultiWaveView;
+        }
+
+        public void reset(boolean animate) {
+            mMultiWaveView.reset(animate);
+        }
+
+        public void ping() {
+            mMultiWaveView.ping();
         }
     }
 
@@ -371,31 +434,38 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
         mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
         mSilentMode = isSilentMode();
 
-        View unlockWidget = findViewById(R.id.unlock_widget);
-        if (unlockWidget instanceof SlidingTab) {
-            mSlidingTab = (SlidingTab) unlockWidget;
-            mSlidingTab.setHoldAfterTrigger(true, false);
-            mSlidingTab.setLeftHintText(R.string.lockscreen_unlock_label);
-            mSlidingTab.setLeftTabResources(
+        mUnlockWidget = findViewById(R.id.unlock_widget);
+        if (mUnlockWidget instanceof SlidingTab) {
+            SlidingTab slidingTabView = (SlidingTab) mUnlockWidget;
+            slidingTabView.setHoldAfterTrigger(true, false);
+            slidingTabView.setLeftHintText(R.string.lockscreen_unlock_label);
+            slidingTabView.setLeftTabResources(
                     R.drawable.ic_jog_dial_unlock,
                     R.drawable.jog_tab_target_green,
                     R.drawable.jog_tab_bar_left_unlock,
                     R.drawable.jog_tab_left_unlock);
-            mSlidingTabMethods = new SlidingTabMethods();
-            mSlidingTab.setOnTriggerListener(mSlidingTabMethods);
-            mSlidingTabMethods.updateRightTabResources();
-        } else if (unlockWidget instanceof WaveView) {
-            mEnergyWave = (WaveView) unlockWidget;
-            mWaveViewMethods = new WaveViewMethods();
-            mEnergyWave.setOnTriggerListener(mWaveViewMethods);
-        } else if (unlockWidget instanceof MultiWaveView) {
-            mMultiWaveView = (MultiWaveView) unlockWidget;
-            mMultiWaveViewMethods = new MultiWaveViewMethods();
-            mMultiWaveViewMethods.updateResources(); // update silence/ring resources
-            mMultiWaveView.setOnTriggerListener(mMultiWaveViewMethods);
+            SlidingTabMethods slidingTabMethods = new SlidingTabMethods(slidingTabView);
+            slidingTabView.setOnTriggerListener(slidingTabMethods);
+            mUnlockWidgetMethods = slidingTabMethods;
+        } else if (mUnlockWidget instanceof WaveView) {
+            WaveView waveView = (WaveView) mUnlockWidget;
+            WaveViewMethods waveViewMethods = new WaveViewMethods(waveView);
+            waveView.setOnTriggerListener(waveViewMethods);
+            mUnlockWidgetMethods = waveViewMethods;
+        } else if (mUnlockWidget instanceof MultiWaveView) {
+            MultiWaveView multiWaveView = (MultiWaveView) mUnlockWidget;
+            MultiWaveViewMethods multiWaveViewMethods = new MultiWaveViewMethods(multiWaveView);
+            multiWaveView.setOnTriggerListener(multiWaveViewMethods);
+            mUnlockWidgetMethods = multiWaveViewMethods;
         } else {
-            throw new IllegalStateException("Unrecognized unlock widget: " + unlockWidget);
+            throw new IllegalStateException("Unrecognized unlock widget: " + mUnlockWidget);
         }
+
+        // Update widget with initial ring state
+        mUnlockWidgetMethods.updateResources();
+
+        if (DBG) Log.v(TAG, "*** LockScreen accel is "
+                + (mUnlockWidget.isHardwareAccelerated() ? "on":"off"));
 
         resetStatusInfo(updateMonitor);
     }
@@ -540,16 +610,14 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
      * Enables unlocking of this screen. Typically just shows the unlock widget.
      */
     private void enableUnlock() {
-        if (mEnergyWave != null) mEnergyWave.setVisibility(View.VISIBLE);
-        if (mSlidingTab != null) mSlidingTab.setVisibility(View.VISIBLE);
+        mUnlockWidgetMethods.getView().setVisibility(View.VISIBLE);
     }
 
     /**
      * Disable unlocking of this screen. Typically just hides the unlock widget.
      */
     private void disableUnlock() {
-        if (mEnergyWave != null) mEnergyWave.setVisibility(View.GONE);
-        if (mSlidingTab != null) mSlidingTab.setVisibility(View.GONE);
+        mUnlockWidgetMethods.getView().setVisibility(View.GONE);
     }
 
     /**
@@ -728,20 +796,13 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
 
     /** {@inheritDoc} */
     public void onPause() {
-        if (mEnergyWave != null) {
-            mEnergyWave.reset();
-        }
-        if (mMultiWaveView != null) {
-            mMultiWaveView.reset(false);
-        }
+        mUnlockWidgetMethods.reset(false);
     }
 
     /** {@inheritDoc} */
     public void onResume() {
         resetStatusInfo(mUpdateMonitor);
-        if (mMultiWaveView != null) {
-            mMultiWaveView.ping();
-        }
+        mUnlockWidgetMethods.ping();
     }
 
     /** {@inheritDoc} */
@@ -757,7 +818,7 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
         boolean silent = AudioManager.RINGER_MODE_NORMAL != state;
         if (silent != mSilentMode) {
             mSilentMode = silent;
-            if (mSlidingTabMethods != null) mSlidingTabMethods.updateRightTabResources();
+            mUnlockWidgetMethods.updateResources();
         }
     }
 
