@@ -37,13 +37,13 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 
 /**
- * This class describes an {@link AccessibilityService}. The system
- * notifies an {@link AccessibilityService} for
- * {@link android.view.accessibility.AccessibilityEvent}s
+ * This class describes an {@link AccessibilityService}. The system notifies an
+ * {@link AccessibilityService} for {@link android.view.accessibility.AccessibilityEvent}s
  * according to the information encapsulated in this class.
  *
  * @see AccessibilityService
  * @see android.view.accessibility.AccessibilityEvent
+ * @see android.view.accessibility.AccessibilityManager
  */
 public class AccessibilityServiceInfo implements Parcelable {
 
@@ -93,12 +93,19 @@ public class AccessibilityServiceInfo implements Parcelable {
      * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED
      * @see android.view.accessibility.AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED
      * @see android.view.accessibility.AccessibilityEvent#TYPE_NOTIFICATION_STATE_CHANGED
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_START
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_HOVER_ENTER
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_HOVER_EXIT
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_SCROLLED
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_SELECTION_CHANGED
+     * @see android.view.accessibility.AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED
      */
     public int eventTypes;
 
     /**
      * The package names an {@link AccessibilityService} is interested in. Setting
-     * to null is equivalent to all packages.
+     * to <code>null</code> is equivalent to all packages.
      * <p>
      *   <strong>Can be dynamically set at runtime.</strong>
      * </p>
@@ -125,10 +132,10 @@ public class AccessibilityServiceInfo implements Parcelable {
      *   <strong>Can be dynamically set at runtime.</strong>.
      * </p>
      * <p>
-     * Note: The event notification timeout is useful to avoid propagating events to the client
-     *       too frequently since this is accomplished via an expensive interprocess call.
-     *       One can think of the timeout as a criteria to determine when event generation has
-     *       settled down
+     * <strong>Note:</strong> The event notification timeout is useful to avoid propagating
+     *       events to the client too frequently since this is accomplished via an expensive
+     *       interprocess call. One can think of the timeout as a criteria to determine when
+     *       event generation has settled down.
      */
     public long notificationTimeout;
 
@@ -159,7 +166,7 @@ public class AccessibilityServiceInfo implements Parcelable {
     private String mSettingsActivityName;
 
     /**
-     * Flag whether this accessibility service can retrieve screen content.
+     * Flag whether this accessibility service can retrieve window content.
      */
     private boolean mCanRetrieveWindowContent;
 
@@ -296,12 +303,12 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
-     * Whether this service can retrieve the currently focused window content.
+     * Whether this service can retrieve the current window's content.
      * <p>
      *    <strong>Statically set from
      *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
      * </p>
-     * @return True screen content is retrieved.
+     * @return True window content can be retrieved.
      */
     public boolean getCanRetrieveWindowContent() {
         return mCanRetrieveWindowContent;

@@ -22,7 +22,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.text.TextUtils;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.View;
 
@@ -30,12 +29,26 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This class represents a node of the screen content. From the point of
- * view of an accessibility service the screen content is presented as tree
- * of accessibility nodes.
+ * This class represents a node of the window content as well as actions that
+ * can be requested from its source. From the point of view of an
+ * {@link android.accessibilityservice.AccessibilityService} a window content is
+ * presented as tree of accessibility node info which may or may not map one-to-one
+ * to the view hierarchy. In other words, a custom view is free to report itself as
+ * a tree of accessibility node info.
+ * </p>
+ * <p>
+ * Once an accessibility node info is delivered to an accessibility service it is
+ * made immutable and calling a state mutation method generates an error.
+ * </p>
+ * <p>
+ * Please refer to {@link android.accessibilityservice.AccessibilityService} for
+ * details about how to obtain a handle to window content as a tree of accessibility
+ * node info as well as familiarizing with the security model.
+ * </p>
  *
- * TODO(svertoslavganov): Update the documentation, add sample, and describe
- *                        the security policy.
+ * @see android.accessibilityservice.AccessibilityService
+ * @see AccessibilityEvent
+ * @see AccessibilityManager
  */
 public class AccessibilityNodeInfo implements Parcelable {
 
@@ -84,9 +97,6 @@ public class AccessibilityNodeInfo implements Parcelable {
     private static final int PROPERTY_PASSWORD = 0x00000100;
 
     private static final int PROPERTY_SCROLLABLE = 0x00000200;
-
-    // Readable representations - lazily initialized.
-    private static SparseArray<String> sActionSymbolicNames;
 
     // Housekeeping.
     private static final int MAX_POOL_SIZE = 50;
@@ -154,12 +164,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Get the child at given index.
      * <p>
-     *   <strong>
-     *     It is a client responsibility to recycle the received info by
-     *     calling {@link AccessibilityNodeInfo#recycle()} to avoid creating
-     *     of multiple instances.
-     *   </strong>
+     *   <strong>Note:</strong> It is a client responsibility to recycle the
+     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
+     *     to avoid creating of multiple instances.
      * </p>
+     *
      * @param index The child index.
      * @return The child node.
      *
@@ -184,9 +193,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Adds a child.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param child The child.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -215,9 +226,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Adds an action that can be performed on the node.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param action The action.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -230,9 +243,10 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Performs an action on the node.
      * <p>
-     *   Note: An action can be performed only if the request is made
+     *   <strong>Note:</strong> An action can be performed only if the request is made
      *   from an {@link android.accessibilityservice.AccessibilityService}.
      * </p>
+     *
      * @param action The action to perform.
      * @return True if the action was performed.
      *
@@ -256,6 +270,11 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Finds {@link AccessibilityNodeInfo}s by text. The match is case
      * insensitive containment. The search is relative to this info i.e.
      * this info is the root of the traversed tree.
+     * <p>
+     *   <strong>Note:</strong> It is a client responsibility to recycle the
+     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
+     *     to avoid creating of multiple instances.
+     * </p>
      *
      * @param text The searched text.
      * @return A list of node info.
@@ -277,12 +296,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Gets the unique id identifying this node's parent.
      * <p>
-     *   <strong>
-     *     It is a client responsibility to recycle the received info by
-     *     calling {@link AccessibilityNodeInfo#recycle()} to avoid creating
-     *     of multiple instances.
-     *   </strong>
+     *   <strong>Note:</strong> It is a client responsibility to recycle the
+     *     received info by calling {@link AccessibilityNodeInfo#recycle()}
+     *     to avoid creating of multiple instances.
      * </p>
+     *
      * @return The node's patent id.
      */
     public AccessibilityNodeInfo getParent() {
@@ -302,9 +320,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets the parent.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param parent The parent.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -327,9 +347,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets the node bounds in parent coordinates.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param bounds The node bounds.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -352,9 +374,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets the node bounds in screen coordinates.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param bounds The node bounds.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -376,9 +400,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets whether this node is checkable.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param checkable True if the node is checkable.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -399,9 +425,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets whether this node is checked.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param checked True if the node is checked.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -422,9 +450,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets whether this node is focusable.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param focusable True if the node is focusable.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -445,9 +475,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets whether this node is focused.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param focused True if the node is focused.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -468,9 +500,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets whether this node is selected.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param selected True if the node is selected.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -491,9 +525,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets whether this node is clickable.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param clickable True if the node is clickable.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -514,9 +550,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets whether this node is long clickable.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param longClickable True if the node is long clickable.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -537,9 +575,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets whether this node is enabled.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param enabled True if the node is enabled.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -560,9 +600,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets whether this node is a password.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param password True if the node is a password.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -582,6 +624,11 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     /**
      * Sets if the node is scrollable.
+     * <p>
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
+     *   This class is made immutable before being delivered to an AccessibilityService.
+     * </p>
      *
      * @param scrollable True if the node is scrollable, false otherwise.
      *
@@ -604,9 +651,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets the package this node comes from.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param packageName The package name.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -628,9 +677,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets the class this node comes from.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param className The class name.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -652,9 +703,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets the text of this node.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param text The text.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -676,9 +729,11 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Sets the content description of this node.
      * <p>
-     *   Note: Cannot be called from an {@link android.accessibilityservice.AccessibilityService}.
+     *   <strong>Note:</strong> Cannot be called from an
+     *   {@link android.accessibilityservice.AccessibilityService}.
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
+     *
      * @param contentDescription The content description.
      *
      * @throws IllegalStateException If called from an AccessibilityService.
@@ -820,7 +875,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * Return an instance back to be reused.
      * <p>
-     * <b>Note: You must not touch the object after calling this function.</b>
+     * <strong>Note:</strong> You must not touch the object after calling this function.
      *
      * @throws IllegalStateException If the info is already recycled.
      */
@@ -842,8 +897,8 @@ public class AccessibilityNodeInfo implements Parcelable {
     /**
      * {@inheritDoc}
      * <p>
-     *   <b>Note: After the instance is written to a parcel it is recycled.
-     *      You must not touch the object after calling this function.</b>
+     *   <strong>Note:</strong> After the instance is written to a parcel it
+     *      is recycled. You must not touch the object after calling this function.
      * </p>
      */
     public void writeToParcel(Parcel parcel, int flags) {
@@ -885,7 +940,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         TextUtils.writeToParcel(mContentDescription, parcel, flags);
 
         // Since instances of this class are fetched via synchronous i.e. blocking
-        // calls in IPCs and we always recycle as soon as the instance is marshaled.
+        // calls in IPCs we always recycle as soon as the instance is marshaled.
         recycle();
     }
 
@@ -957,15 +1012,18 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @return The symbolic name.
      */
     private static String getActionSymbolicName(int action) {
-        SparseArray<String> actionSymbolicNames = sActionSymbolicNames;
-        if (actionSymbolicNames == null) {
-            actionSymbolicNames = sActionSymbolicNames = new SparseArray<String>();
-            actionSymbolicNames.put(ACTION_FOCUS, "ACTION_FOCUS");
-            actionSymbolicNames.put(ACTION_CLEAR_FOCUS, "ACTION_UNFOCUS");
-            actionSymbolicNames.put(ACTION_SELECT, "ACTION_SELECT");
-            actionSymbolicNames.put(ACTION_CLEAR_SELECTION, "ACTION_UNSELECT");
+        switch (action) {
+            case ACTION_FOCUS:
+                return "ACTION_FOCUS";
+            case ACTION_CLEAR_FOCUS:
+                return "ACTION_CLEAR_FOCUS";
+            case ACTION_SELECT:
+                return "ACTION_SELECT";
+            case ACTION_CLEAR_SELECTION:
+                return "ACTION_CLEAR_SELECTION";
+            default:
+                throw new IllegalArgumentException("Unknown action: " + action);
         }
-        return actionSymbolicNames.get(action);
     }
 
     private boolean canPerformRequestOverConnection(int accessibilityViewId) {
