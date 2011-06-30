@@ -1745,6 +1745,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final long now = SystemClock.uptimeMillis();
                 event = MotionEvent.obtain(now, now,
                         MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
+                event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
                 syntheticEvent = true;
             }
 
