@@ -306,7 +306,8 @@ private:
                                         pid_t pid,
                                         int32_t connId,
                                         const sp<IMediaPlayerClient>& client,
-                                        int audioSessionId);
+                                        int audioSessionId,
+                                        uid_t uid);
                                 Client();
         virtual                 ~Client();
 
@@ -336,6 +337,7 @@ private:
                     bool                        mLoop;
                     int32_t                     mConnId;
                     int                         mAudioSessionId;
+                    uid_t                       mUID;
 
         // Metadata filters.
         media::Metadata::Filter mMetadataAllow;  // protected by mLock

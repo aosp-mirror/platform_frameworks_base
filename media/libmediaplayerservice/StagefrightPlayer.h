@@ -31,6 +31,8 @@ public:
 
     virtual status_t initCheck();
 
+    virtual status_t setUID(uid_t uid);
+
     virtual status_t setDataSource(
             const char *url, const KeyedVector<String8, String8> *headers);
 

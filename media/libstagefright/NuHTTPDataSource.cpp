@@ -140,6 +140,11 @@ status_t NuHTTPDataSource::connect(
         return ERROR_MALFORMED;
     }
 
+    uid_t uid;
+    if (getUID(&uid)) {
+        mHTTP.setUID(uid);
+    }
+
     return connect(host, port, path, https, headers, offset);
 }
 

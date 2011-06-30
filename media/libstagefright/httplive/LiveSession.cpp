@@ -41,8 +41,10 @@ namespace android {
 
 const int64_t LiveSession::kMaxPlaylistAgeUs = 15000000ll;
 
-LiveSession::LiveSession(uint32_t flags)
+LiveSession::LiveSession(uint32_t flags, bool uidValid, uid_t uid)
     : mFlags(flags),
+      mUIDValid(uidValid),
+      mUID(uid),
       mDataSource(new LiveDataSource),
       mHTTPDataSource(
               HTTPBase::Create(
@@ -58,6 +60,9 @@ LiveSession::LiveSession(uint32_t flags)
       mSeekDone(false),
       mDisconnectPending(false),
       mMonitorQueueGeneration(0) {
+    if (mUIDValid) {
+        mHTTPDataSource->setUID(mUID);
+    }
 }
 
 LiveSession::~LiveSession() {
@@ -670,6 +675,10 @@ status_t LiveSession::decryptBuffer(
                   (mFlags & kFlagIncognito)
                     ? HTTPBase::kFlagIncognito
                     : 0);
+
+        if (mUIDValid) {
+            keySource->setUID(mUID);
+        }
 
         status_t err = keySource->connect(keyURI.c_str());
 

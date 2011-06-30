@@ -28,6 +28,7 @@ namespace android {
 ARTSPController::ARTSPController(const sp<ALooper> &looper)
     : mState(DISCONNECTED),
       mLooper(looper),
+      mUIDValid(false),
       mSeekDoneCb(NULL),
       mSeekDoneCookie(NULL),
       mLastSeekCompletedTimeUs(-1) {
@@ -40,6 +41,11 @@ ARTSPController::~ARTSPController() {
     mLooper->unregisterHandler(mReflector->id());
 }
 
+void ARTSPController::setUID(uid_t uid) {
+    mUIDValid = true;
+    mUID = uid;
+}
+
 status_t ARTSPController::connect(const char *url) {
     Mutex::Autolock autoLock(mLock);
 
@@ -49,7 +55,7 @@ status_t ARTSPController::connect(const char *url) {
 
     sp<AMessage> msg = new AMessage(kWhatConnectDone, mReflector->id());
 
-    mHandler = new MyHandler(url, mLooper);
+    mHandler = new MyHandler(url, mLooper, mUIDValid, mUID);
 
     mState = CONNECTING;
 

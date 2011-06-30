@@ -37,7 +37,8 @@ HTTPBase::HTTPBase()
       mTotalTransferBytes(0),
       mPrevBandwidthMeasureTimeUs(0),
       mPrevEstimatedBandWidthKbps(0),
-      mBandWidthCollectFreqMs(5000) {
+      mBandWidthCollectFreqMs(5000),
+      mUIDValid(false) {
 }
 
 // static
@@ -117,6 +118,21 @@ status_t HTTPBase::setBandwidthStatCollectFreq(int32_t freqMs) {
     LOGI("frequency set to %d ms", freqMs);
     mBandWidthCollectFreqMs = freqMs;
     return OK;
+}
+
+void HTTPBase::setUID(uid_t uid) {
+    mUIDValid = true;
+    mUID = uid;
+}
+
+bool HTTPBase::getUID(uid_t *uid) const {
+    if (!mUIDValid) {
+        return false;
+    }
+
+    *uid = mUID;
+
+    return true;
 }
 
 }  // namespace android

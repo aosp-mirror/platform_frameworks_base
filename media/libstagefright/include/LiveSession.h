@@ -35,7 +35,7 @@ struct LiveSession : public AHandler {
         // Don't log any URLs.
         kFlagIncognito = 1,
     };
-    LiveSession(uint32_t flags = 0);
+    LiveSession(uint32_t flags = 0, bool uidValid = false, uid_t uid = 0);
 
     sp<DataSource> getDataSource();
 
@@ -77,6 +77,8 @@ private:
     };
 
     uint32_t mFlags;
+    bool mUIDValid;
+    uid_t mUID;
 
     sp<LiveDataSource> mDataSource;
 

@@ -62,6 +62,7 @@ struct AwesomePlayer {
     ~AwesomePlayer();
 
     void setListener(const wp<MediaPlayerBase> &listener);
+    void setUID(uid_t uid);
 
     status_t setDataSource(
             const char *uri,
@@ -150,6 +151,8 @@ private:
     TimedEventQueue mQueue;
     bool mQueueStarted;
     wp<MediaPlayerBase> mListener;
+    bool mUIDValid;
+    uid_t mUID;
 
     sp<Surface> mSurface;
     sp<ANativeWindow> mNativeWindow;

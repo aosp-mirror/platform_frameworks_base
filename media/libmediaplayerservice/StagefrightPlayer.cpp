@@ -47,6 +47,12 @@ status_t StagefrightPlayer::initCheck() {
     return OK;
 }
 
+status_t StagefrightPlayer::setUID(uid_t uid) {
+    mPlayer->setUID(uid);
+
+    return OK;
+}
+
 status_t StagefrightPlayer::setDataSource(
         const char *url, const KeyedVector<String8, String8> *headers) {
     return mPlayer->setDataSource(url, headers);

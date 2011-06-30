@@ -44,7 +44,8 @@ namespace android {
 ////////////////////////////////////////////////////////////////////////////////
 
 NuPlayer::NuPlayer()
-    : mAudioEOS(false),
+    : mUIDValid(false),
+      mAudioEOS(false),
       mVideoEOS(false),
       mScanSourcesPending(false),
       mScanSourcesGeneration(0),
@@ -55,6 +56,11 @@ NuPlayer::NuPlayer()
 }
 
 NuPlayer::~NuPlayer() {
+}
+
+void NuPlayer::setUID(uid_t uid) {
+    mUIDValid = true;
+    mUID = uid;
 }
 
 void NuPlayer::setDriver(const wp<NuPlayerDriver> &driver) {
@@ -72,7 +78,7 @@ void NuPlayer::setDataSource(
         const char *url, const KeyedVector<String8, String8> *headers) {
     sp<AMessage> msg = new AMessage(kWhatSetDataSource, id());
 
-    msg->setObject("source", new HTTPLiveSource(url, headers));
+    msg->setObject("source", new HTTPLiveSource(url, headers, mUIDValid, mUID));
     msg->post();
 }
 

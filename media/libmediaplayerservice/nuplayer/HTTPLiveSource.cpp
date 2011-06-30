@@ -35,8 +35,11 @@ namespace android {
 
 NuPlayer::HTTPLiveSource::HTTPLiveSource(
         const char *url,
-        const KeyedVector<String8, String8> *headers)
+        const KeyedVector<String8, String8> *headers,
+        bool uidValid, uid_t uid)
     : mURL(url),
+      mUIDValid(uidValid),
+      mUID(uid),
       mFlags(0),
       mEOS(false),
       mOffset(0) {
@@ -65,7 +68,8 @@ void NuPlayer::HTTPLiveSource::start() {
     mLiveLooper->start();
 
     mLiveSession = new LiveSession(
-            (mFlags & kFlagIncognito) ? LiveSession::kFlagIncognito : 0);
+            (mFlags & kFlagIncognito) ? LiveSession::kFlagIncognito : 0,
+            mUIDValid, mUID);
 
     mLiveLooper->registerHandler(mLiveSession);
 

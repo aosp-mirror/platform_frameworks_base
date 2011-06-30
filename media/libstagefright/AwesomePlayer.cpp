@@ -180,6 +180,7 @@ void addBatteryData(uint32_t params) {
 ////////////////////////////////////////////////////////////////////////////////
 AwesomePlayer::AwesomePlayer()
     : mQueueStarted(false),
+      mUIDValid(false),
       mTimeSource(NULL),
       mVideoRendererIsPreview(false),
       mAudioPlayer(NULL),
@@ -241,6 +242,13 @@ void AwesomePlayer::cancelPlayerEvents(bool keepBufferingGoing) {
 void AwesomePlayer::setListener(const wp<MediaPlayerBase> &listener) {
     Mutex::Autolock autoLock(mLock);
     mListener = listener;
+}
+
+void AwesomePlayer::setUID(uid_t uid) {
+    LOGI("AwesomePlayer running on behalf of uid %d", uid);
+
+    mUID = uid;
+    mUIDValid = true;
 }
 
 status_t AwesomePlayer::setDataSource(
@@ -1928,6 +1936,10 @@ status_t AwesomePlayer::finishSetDataSource_l() {
                     ? HTTPBase::kFlagIncognito
                     : 0);
 
+        if (mUIDValid) {
+            mConnectingDataSource->setUID(mUID);
+        }
+
         mLock.unlock();
         status_t err = mConnectingDataSource->connect(mUri, &mUriHeaders);
         mLock.lock();
@@ -2008,6 +2020,10 @@ status_t AwesomePlayer::finishSetDataSource_l() {
         }
         mRTSPController = new ARTSPController(mLooper);
         mConnectingRTSPController = mRTSPController;
+
+        if (mUIDValid) {
+            mConnectingRTSPController->setUID(mUID);
+        }
 
         mLock.unlock();
         status_t err = mRTSPController->connect(mUri.string());

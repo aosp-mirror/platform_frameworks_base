@@ -33,6 +33,8 @@ struct NuPlayerDriver;
 struct NuPlayer : public AHandler {
     NuPlayer();
 
+    void setUID(uid_t uid);
+
     void setDriver(const wp<NuPlayerDriver> &driver);
 
     void setDataSource(const sp<IStreamSource> &source);
@@ -84,6 +86,8 @@ private:
     };
 
     wp<NuPlayerDriver> mDriver;
+    bool mUIDValid;
+    uid_t mUID;
     sp<Source> mSource;
     sp<NativeWindowWrapper> mNativeWindow;
     sp<MediaPlayerBase::AudioSink> mAudioSink;

@@ -40,6 +40,8 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
+#include "HTTPStream.h"
+
 // If no access units are received within 5 secs, assume that the rtp
 // stream has ended and signal end of stream.
 static int64_t kAccessUnitTimeoutUs = 5000000ll;
@@ -92,10 +94,14 @@ static bool GetAttribute(const char *s, const char *key, AString *value) {
 }
 
 struct MyHandler : public AHandler {
-    MyHandler(const char *url, const sp<ALooper> &looper)
-        : mLooper(looper),
+    MyHandler(
+            const char *url, const sp<ALooper> &looper,
+            bool uidValid = false, uid_t uid = 0)
+        : mUIDValid(uidValid),
+          mUID(uid),
+          mLooper(looper),
           mNetLooper(new ALooper),
-          mConn(new ARTSPConnection),
+          mConn(new ARTSPConnection(mUIDValid, mUID)),
           mRTPConn(new ARTPConnection),
           mOriginalSessionURL(url),
           mSessionURL(url),
@@ -1078,6 +1084,8 @@ private:
         List<sp<ABuffer> > mPackets;
     };
 
+    bool mUIDValid;
+    uid_t mUID;
     sp<ALooper> mLooper;
     sp<ALooper> mNetLooper;
     sp<ARTSPConnection> mConn;
@@ -1171,6 +1179,11 @@ private:
             unsigned rtpPort;
             ARTPConnection::MakePortPair(
                     &info->mRTPSocket, &info->mRTCPSocket, &rtpPort);
+
+            if (mUIDValid) {
+                HTTPStream::RegisterSocketUser(info->mRTPSocket, mUID);
+                HTTPStream::RegisterSocketUser(info->mRTCPSocket, mUID);
+            }
 
             request.append("Transport: RTP/AVP/UDP;unicast;client_port=");
             request.append(rtpPort);

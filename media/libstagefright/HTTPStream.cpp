@@ -43,6 +43,7 @@ const char *HTTPStream::kStatusKey = ":status:";  // MUST be lowercase.
 
 HTTPStream::HTTPStream()
     : mState(READY),
+      mUIDValid(false),
       mSocket(-1),
       mSSLContext(NULL),
       mSSL(NULL) {
@@ -55,6 +56,11 @@ HTTPStream::~HTTPStream() {
         SSL_CTX_free((SSL_CTX *)mSSLContext);
         mSSLContext = NULL;
     }
+}
+
+void HTTPStream::setUID(uid_t uid) {
+    mUIDValid = true;
+    mUID = uid;
 }
 
 static bool MakeSocketBlocking(int s, bool blocking) {
@@ -248,6 +254,10 @@ status_t HTTPStream::connect(const char *server, int port, bool https) {
         mSocket = socket(tmp->ai_family, tmp->ai_socktype, tmp->ai_protocol);
         if (mSocket < 0) {
             continue;
+        }
+
+        if (mUIDValid) {
+            RegisterSocketUser(mSocket, mUID);
         }
 
         setReceiveTimeout(30);  // Time out reads after 30 secs by default.
@@ -594,6 +604,19 @@ void HTTPStream::setReceiveTimeout(int seconds) {
     tv.tv_usec = 0;
     tv.tv_sec = seconds;
     CHECK_EQ(0, setsockopt(mSocket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)));
+}
+
+// static
+void HTTPStream::RegisterSocketUser(int s, uid_t uid) {
+    // Lower bits MUST be 0.
+    static const uint64_t kTag = 0xdeadbeef00000000ll;
+
+    AString line = StringPrintf("t %d %llu %d", s, kTag, uid);
+
+    int fd = open("/proc/net/xt_qtaguid/ctrl", O_WRONLY);
+    write(fd, line.c_str(), line.size());
+    close(fd);
+    fd = -1;
 }
 
 }  // namespace android
