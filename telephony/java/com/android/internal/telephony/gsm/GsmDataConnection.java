@@ -76,8 +76,6 @@ public class GsmDataConnection extends DataConnection {
                 + "' APN: '" + mApn.apn
                 + "' proxy: '" + mApn.proxy + "' port: '" + mApn.port);
 
-        setHttpProxy (mApn.proxy, mApn.port);
-
         createTime = -1;
         lastFailTime = -1;
         lastFailCause = FailCause.NONE;
@@ -150,38 +148,6 @@ public class GsmDataConnection extends DataConnection {
     @Override
     protected void log(String s) {
         Log.d(LOG_TAG, "[" + getName() + "] " + s);
-    }
-
-    private void setHttpProxy(String httpProxy, String httpPort) {
-
-        if (DBG) log("set http proxy for"
-                + "' APN: '" + mActiveApnType
-                + "' proxy: '" + mApn.proxy + "' port: '" + mApn.port);
-        if(TextUtils.equals(mActiveApnType, Phone.APN_TYPE_DEFAULT)) {
-            if (httpProxy == null || httpProxy.length() == 0) {
-                phone.setSystemProperty("net.gprs.http-proxy", null);
-                return;
-            }
-
-            if (httpPort == null || httpPort.length() == 0) {
-                httpPort = "8080";     // Default to port 8080
-            }
-
-            phone.setSystemProperty("net.gprs.http-proxy",
-                    "http://" + httpProxy + ":" + httpPort + "/");
-        } else {
-            if (httpProxy == null || httpProxy.length() == 0) {
-                phone.setSystemProperty("net.gprs.http-proxy." + mActiveApnType, null);
-                return;
-            }
-
-            if (httpPort == null || httpPort.length() == 0) {
-                httpPort = "8080";  // Default to port 8080
-            }
-
-            phone.setSystemProperty("net.gprs.http-proxy." + mActiveApnType,
-                    "http://" + httpProxy + ":" + httpPort + "/");
-        }
     }
 
     private boolean isIpAddress(String address) {
