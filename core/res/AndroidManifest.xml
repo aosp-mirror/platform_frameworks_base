@@ -1384,7 +1384,7 @@
     <permission android:name="android.permission.READ_NETWORK_USAGE_HISTORY"
         android:label="@string/permlab_readNetworkUsageHistory"
         android:description="@string/permdesc_readNetworkUsageHistory"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signatureOrSystem" />
 
     <!-- Allows an application to manage network policies (such as warning and disable
          limits) and to define application-specific rules. @hide -->
