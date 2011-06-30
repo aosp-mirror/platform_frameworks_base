@@ -313,14 +313,16 @@ public final class Tag implements Parcelable {
      */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("TAG ")
-            .append("uid = ")
-            .append(mId)
-            .append(" Tech [");
-        for (int i : mTechList) {
-            sb.append(i)
-            .append(", ");
+        StringBuilder sb = new StringBuilder("TAG: Tech [");
+        String[] techList = getTechList();
+        int length = techList.length;
+        for (int i = 0; i < length; i++) {
+            sb.append(techList[i]);
+            if (i < length - 1) {
+                sb.append(", ");
+            }
         }
+        sb.append("]");
         return sb.toString();
     }
 
