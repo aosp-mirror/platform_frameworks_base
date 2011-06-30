@@ -83,7 +83,7 @@ class SipWakeupTimer extends BroadcastReceiver {
         mEventQueue = null;
     }
 
-    private synchronized boolean stopped() {
+    private boolean stopped() {
         if (mEventQueue == null) {
             Log.w(TAG, "Timer stopped");
             return true;
@@ -233,7 +233,7 @@ class SipWakeupTimer extends BroadcastReceiver {
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public synchronized void onReceive(Context context, Intent intent) {
         // This callback is already protected by AlarmManager's wake lock.
         String action = intent.getAction();
         if (getAction().equals(action)
@@ -261,7 +261,7 @@ class SipWakeupTimer extends BroadcastReceiver {
         }
     }
 
-    private synchronized void execute(long triggerTime) {
+    private void execute(long triggerTime) {
         if (DEBUG_TIMER) Log.d(TAG, "time's up, triggerTime = "
                 + showTime(triggerTime) + ": " + mEventQueue.size());
         if (stopped() || mEventQueue.isEmpty()) return;
