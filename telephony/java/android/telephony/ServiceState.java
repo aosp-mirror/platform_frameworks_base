@@ -473,8 +473,8 @@ public class ServiceState implements Parcelable {
                 + " EmergOnly=" + mIsEmergencyOnly);
     }
 
-    public void setStateOutOfService() {
-        mState = STATE_OUT_OF_SERVICE;
+    private void setNullState(int state) {
+        mState = state;
         mRoaming = false;
         mOperatorAlphaLong = null;
         mOperatorAlphaShort = null;
@@ -491,23 +491,12 @@ public class ServiceState implements Parcelable {
         mIsEmergencyOnly = false;
     }
 
-    // TODO - can't this be combined with the above method?
+    public void setStateOutOfService() {
+        setNullState(STATE_OUT_OF_SERVICE);
+    }
+
     public void setStateOff() {
-        mState = STATE_POWER_OFF;
-        mRoaming = false;
-        mOperatorAlphaLong = null;
-        mOperatorAlphaShort = null;
-        mOperatorNumeric = null;
-        mIsManualNetworkSelection = false;
-        mRadioTechnology = 0;
-        mCssIndicator = false;
-        mNetworkId = -1;
-        mSystemId = -1;
-        mCdmaRoamingIndicator = -1;
-        mCdmaDefaultRoamingIndicator = -1;
-        mCdmaEriIconIndex = -1;
-        mCdmaEriIconMode = -1;
-        mIsEmergencyOnly = false;
+        setNullState(STATE_POWER_OFF);
     }
 
     public void setState(int state) {
