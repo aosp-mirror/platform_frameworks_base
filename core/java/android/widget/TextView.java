@@ -10039,6 +10039,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case TEXT_DIRECTION_ANY_RTL:
                 resolvedTextDirection = getTextDirectionFromAnyRtl(mText);
                 break;
+            case TEXT_DIRECTION_CHAR_COUNT:
+                resolvedTextDirection = getTextDirectionFromCharCount(mText);
+                break;
             case TEXT_DIRECTION_LTR:
                 resolvedTextDirection = TEXT_DIRECTION_LTR;
                 break;
@@ -10072,6 +10075,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     private static int getTextDirectionFromFirstStrong(final CharSequence cs) {
         final int length = cs.length();
+        if (length == 0) {
+            return TEXT_DIRECTION_UNDEFINED;
+        }
         for(int i = 0; i < length; i++) {
             final char c = cs.charAt(i);
             final byte dir = Character.getDirectionality(c);
@@ -10094,6 +10100,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     private static int getTextDirectionFromAnyRtl(final CharSequence cs) {
         final int length = cs.length();
+        if (length == 0) {
+            return TEXT_DIRECTION_UNDEFINED;
+        }
         boolean foundStrongLtr = false;
         boolean foundStrongRtl = false;
         for(int i = 0; i < length; i++) {
@@ -10110,6 +10119,41 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         if (foundStrongLtr) {
             return TEXT_DIRECTION_LTR;
+        }
+        return TEXT_DIRECTION_UNDEFINED;
+    }
+
+    /**
+     * Get text direction following the "char count" heuristic.
+     *
+     * @param cs the CharSequence used to get the text direction.
+     *
+     * @return {@link #TEXT_DIRECTION_RTL} if direction it RTL, {@link #TEXT_DIRECTION_LTR} if
+     * direction it LTR or {@link #TEXT_DIRECTION_UNDEFINED} if direction cannot be found.
+     */
+    private int getTextDirectionFromCharCount(CharSequence cs) {
+        final int length = cs.length();
+        if (length == 0) {
+            return TEXT_DIRECTION_UNDEFINED;
+        }
+        int countLtr = 0;
+        int countRtl = 0;
+        for(int i = 0; i < length; i++) {
+            final char c = cs.charAt(i);
+            final byte dir = Character.getDirectionality(c);
+            if (isStrongLtrChar(dir)) {
+                countLtr++;
+            } else if (isStrongRtlChar(dir)) {
+                countRtl++;
+            }
+        }
+        final float percentLtr = ((float) countLtr) / (countLtr + countRtl);
+        if (percentLtr > DEFAULT_TEXT_DIRECTION_CHAR_COUNT_THRESHOLD) {
+            return TEXT_DIRECTION_LTR;
+        }
+        final float percentRtl = ((float) countRtl) / (countLtr + countRtl);
+        if (percentRtl > DEFAULT_TEXT_DIRECTION_CHAR_COUNT_THRESHOLD) {
+            return TEXT_DIRECTION_RTL;
         }
         return TEXT_DIRECTION_UNDEFINED;
     }

@@ -5039,6 +5039,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // Pass down the hierarchy the following text direction values
             case TEXT_DIRECTION_FIRST_STRONG:
             case TEXT_DIRECTION_ANY_RTL:
+            case TEXT_DIRECTION_CHAR_COUNT:
             case TEXT_DIRECTION_LTR:
             case TEXT_DIRECTION_RTL:
                 resolvedTextDirection = mTextDirection;

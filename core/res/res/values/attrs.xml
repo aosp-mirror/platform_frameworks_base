@@ -1985,10 +1985,14 @@
                  it is LTR if it contains any strong LTR characters.  If there are neither, the
                  paragraph direction is the view’s resolved layout direction. -->
             <enum name="anyRtl" value="2" />
-            <!-- The text direction is left to right. -->
-            <enum name="ltr" value="3" />
-            <!-- The text direction is right to left. -->
-            <enum name="rtl" value="4" />
+            <!-- The paragraph direction is the same as the one held by a 60% majority of the
+                 characters. If there is no majority then the paragraph direction is the resolved
+                 layout direction of the View. -->
+            <enum name="charCount" value="3" />
+            <!-- The paragraph direction is left to right. -->
+            <enum name="ltr" value="4" />
+            <!-- The paragraph direction is right to left. -->
+            <enum name="rtl" value="5" />
         </attr>
     </declare-styleable>
 
