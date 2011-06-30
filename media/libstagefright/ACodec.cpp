@@ -2282,6 +2282,11 @@ bool ACodec::FlushingState::onOMXEvent(
             if (data2 == kPortIndexInput || data2 == kPortIndexOutput) {
                 CHECK(!mFlushComplete[data2]);
                 mFlushComplete[data2] = true;
+
+                if (mFlushComplete[kPortIndexInput]
+                        && mFlushComplete[kPortIndexOutput]) {
+                    changeStateIfWeOwnAllBuffers();
+                }
             } else {
                 CHECK_EQ(data2, OMX_ALL);
                 CHECK(mFlushComplete[kPortIndexInput]);
