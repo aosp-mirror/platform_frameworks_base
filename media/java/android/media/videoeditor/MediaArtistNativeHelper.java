@@ -957,11 +957,7 @@ class MediaArtistNativeHelper {
 
         public static final int FADE_FROM_BLACK = 8;
 
-        public static final int CURTAIN_OPENING = 9;
-
         public static final int FADE_TO_BLACK = 16;
-
-        public static final int CURTAIN_CLOSING = 17;
 
         public static final int EXTERNAL = 256;
 
