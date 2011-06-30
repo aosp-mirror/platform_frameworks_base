@@ -16,7 +16,6 @@
 
 package com.android.server;
 
-import android.content.ContentResolver;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
@@ -28,6 +27,7 @@ import android.util.Slog;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.NetworkInterface;
 import java.net.SocketTimeoutException;
 import java.util.Collection;
 import java.util.Random;
@@ -49,7 +49,7 @@ public final class DnsPinger {
     private static final boolean V = true;
 
     /** Number of bytes for the query */
-    private static final int DNS_QUERY_BASE_SIZE = 33;
+    private static final int DNS_QUERY_BASE_SIZE = 32;
 
     /** The DNS port */
     private static final int DNS_PORT = 53;
@@ -84,12 +84,7 @@ public final class DnsPinger {
      *         dns set. Should not be null.
      */
     public InetAddress getDns() {
-        if (mConnectivityManager == null) {
-            mConnectivityManager = (ConnectivityManager) mContext.getSystemService(
-                    Context.CONNECTIVITY_SERVICE);
-        }
-
-        LinkProperties curLinkProps = mConnectivityManager.getLinkProperties(mConnectionType);
+        LinkProperties curLinkProps = getCurrentLinkProperties();
         if (curLinkProps == null) {
             Slog.e(TAG, "getCurLinkProperties:: LP for type" + mConnectionType + " is null!");
             return mDefaultDns;
@@ -102,6 +97,15 @@ public final class DnsPinger {
         }
 
         return dnses.iterator().next();
+    }
+
+    private LinkProperties getCurrentLinkProperties() {
+        if (mConnectivityManager == null) {
+            mConnectivityManager = (ConnectivityManager) mContext.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+        }
+
+        return mConnectivityManager.getLinkProperties(mConnectionType);
     }
 
     private InetAddress getDefaultDns() {
@@ -130,8 +134,15 @@ public final class DnsPinger {
             // Set some socket properties
             socket.setSoTimeout(timeout);
 
-            byte[] buf = new byte[DNS_QUERY_BASE_SIZE];
-            fillQuery(buf);
+            // Try to bind but continue ping if bind fails
+            try {
+                socket.setNetworkInterface(NetworkInterface.getByName(
+                        getCurrentLinkProperties().getInterfaceName()));
+            } catch (Exception e) {
+                Slog.d(TAG,"pingDns::Error binding to socket", e);
+            }
+
+            byte[] buf = constructQuery();
 
             // Send the DNS query
 
@@ -164,48 +175,47 @@ public final class DnsPinger {
 
     }
 
-    private static void fillQuery(byte[] buf) {
-
-        /*
-         * See RFC2929 (though the bit tables in there are misleading for us.
-         * For example, the recursion desired bit is the 0th bit for us, but
-         * looking there it would appear as the 7th bit of the byte
-         */
-
-        // Make sure it's all zeroed out
-        for (int i = 0; i < buf.length; i++)
-            buf[i] = 0;
-
-        // Form a query for www.android.com
+    /**
+     * @return google.com DNS query packet
+     */
+    private static byte[] constructQuery() {
+        byte[] buf = new byte[DNS_QUERY_BASE_SIZE];
 
         // [0-1] bytes are an ID, generate random ID for this query
         buf[0] = (byte) sRandom.nextInt(256);
         buf[1] = (byte) sRandom.nextInt(256);
 
         // [2-3] bytes are for flags.
-        buf[2] = 1; // Recursion desired
+        buf[2] = 0x01; // Recursion desired
 
-        // [4-5] bytes are for the query count
-        buf[5] = 1; // One query
+        // [4-5] bytes are for number of queries (QCOUNT)
+        buf[5] = 0x01;
 
         // [6-7] [8-9] [10-11] are all counts of other fields we don't use
 
         // [12-15] for www
         writeString(buf, 12, "www");
 
-        // [16-23] for android
-        writeString(buf, 16, "android");
+        // [16-22] for google
+        writeString(buf, 16, "google");
 
-        // [24-27] for com
-        writeString(buf, 24, "com");
+        // [23-26] for com
+        writeString(buf, 23, "com");
 
-        // [29-30] bytes are for QTYPE, set to 1
-        buf[30] = 1;
+        // [27] is a null byte terminator byte for the url
 
-        // [31-32] bytes are for QCLASS, set to 1
-        buf[32] = 1;
+        // [28-29] bytes are for QTYPE, set to 1 = A (host address)
+        buf[29] = 0x01;
+
+        // [30-31] bytes are for QCLASS, set to 1 = IN (internet)
+        buf[31] = 0x01;
+
+        return buf;
     }
 
+    /**
+     * Writes the string's length and its contents to the buffer
+     */
     private static void writeString(byte[] buf, int startPos, String string) {
         int pos = startPos;
 
