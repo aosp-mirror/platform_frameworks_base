@@ -4279,6 +4279,12 @@ bool InputDispatcher::InputState::trackMotion(const MotionEntry* entry,
             memento.setPointers(entry);
             return true;
         }
+        if (actionMasked == AMOTION_EVENT_ACTION_MOVE
+                && (entry->source & (AINPUT_SOURCE_CLASS_JOYSTICK
+                        | AINPUT_SOURCE_CLASS_NAVIGATION))) {
+            // Joysticks and trackballs can send MOVE events without corresponding DOWN or UP.
+            return true;
+        }
 #if DEBUG_OUTBOUND_EVENT_DETAILS
         LOGD("Dropping inconsistent motion pointer up/down or move event: "
                 "deviceId=%d, source=%08x, actionMasked=%d",
