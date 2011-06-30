@@ -64,14 +64,21 @@ size_t M3UParser::size() {
 }
 
 bool M3UParser::itemAt(size_t index, AString *uri, sp<AMessage> *meta) {
-    uri->clear();
-    if (meta) { *meta = NULL; }
+    if (uri) {
+        uri->clear();
+    }
+
+    if (meta) {
+        *meta = NULL;
+    }
 
     if (index >= mItems.size()) {
         return false;
     }
 
-    *uri = mItems.itemAt(index).mURI;
+    if (uri) {
+        *uri = mItems.itemAt(index).mURI;
+    }
 
     if (meta) {
         *meta = mItems.itemAt(index).mMeta;

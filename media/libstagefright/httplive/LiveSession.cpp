@@ -408,13 +408,20 @@ rinse_repeat:
         if (firstTime) {
             Mutex::Autolock autoLock(mLock);
 
-            int32_t targetDuration;
-            if (!mPlaylist->isComplete()
-                    || !mPlaylist->meta()->findInt32(
-                    "target-duration", &targetDuration)) {
+            if (!mPlaylist->isComplete()) {
                 mDurationUs = -1;
             } else {
-                mDurationUs = 1000000ll * targetDuration * mPlaylist->size();
+                mDurationUs = 0;
+                for (size_t i = 0; i < mPlaylist->size(); ++i) {
+                    sp<AMessage> itemMeta;
+                    CHECK(mPlaylist->itemAt(
+                                i, NULL /* uri */, &itemMeta));
+
+                    int64_t itemDurationUs;
+                    CHECK(itemMeta->findInt64("durationUs", &itemDurationUs));
+
+                    mDurationUs += itemDurationUs;
+                }
             }
         }
 
@@ -431,14 +438,26 @@ rinse_repeat:
     bool bandwidthChanged = false;
 
     if (mSeekTimeUs >= 0) {
-        int32_t targetDuration;
-        if (mPlaylist->isComplete() &&
-                mPlaylist->meta()->findInt32(
-                    "target-duration", &targetDuration)) {
-            int64_t seekTimeSecs = (mSeekTimeUs + 500000ll) / 1000000ll;
-            int64_t index = seekTimeSecs / targetDuration;
+        if (mPlaylist->isComplete()) {
+            size_t index = 0;
+            int64_t segmentStartUs = 0;
+            while (index < mPlaylist->size()) {
+                sp<AMessage> itemMeta;
+                CHECK(mPlaylist->itemAt(
+                            index, NULL /* uri */, &itemMeta));
 
-            if (index >= 0 && index < mPlaylist->size()) {
+                int64_t itemDurationUs;
+                CHECK(itemMeta->findInt64("durationUs", &itemDurationUs));
+
+                if (mSeekTimeUs < segmentStartUs + itemDurationUs) {
+                    break;
+                }
+
+                segmentStartUs += itemDurationUs;
+                ++index;
+            }
+
+            if (index < mPlaylist->size()) {
                 int32_t newSeqNumber = firstSeqNumberInPlaylist + index;
 
                 if (newSeqNumber != mSeqNumber) {
