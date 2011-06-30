@@ -25,12 +25,14 @@ import java.io.PrintWriter;
 class BroadcastFilter extends IntentFilter {
     // Back-pointer to the list this filter is in.
     final ReceiverList receiverList;
+    final String packageName;
     final String requiredPermission;
 
     BroadcastFilter(IntentFilter _filter, ReceiverList _receiverList,
-            String _requiredPermission) {
+            String _packageName, String _requiredPermission) {
         super(_filter);
         receiverList = _receiverList;
+        packageName = _packageName;
         requiredPermission = _requiredPermission;
     }
     

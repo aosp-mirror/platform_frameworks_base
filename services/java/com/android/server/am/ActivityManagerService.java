@@ -622,6 +622,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             return true;
         }
+
+        @Override
+        protected String packageForFilter(BroadcastFilter filter) {
+            return filter.packageName;
+        }
     };
 
     /**
@@ -1825,6 +1830,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // We already have the app running, or are waiting for it to
                 // come up (we have a pid but not yet its thread), so keep it.
                 if (DEBUG_PROCESSES) Slog.v(TAG, "App already running: " + app);
+                // If this is a new package in the process, add the package to the list
+                app.addPackage(info.packageName);
                 return app;
             } else {
                 // An application record is attached to a previous process,
@@ -2278,7 +2285,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
         
-        return pir.sendInner(0, fillInIntent, resolvedType,
+        return pir.sendInner(0, fillInIntent, resolvedType, null,
                 null, resultTo, resultWho, requestCode, flagsMask, flagsValues);
     }
     
@@ -4160,6 +4167,27 @@ public final class ActivityManagerService extends ActivityManagerNative
         } catch (ClassCastException e) {
         }
         return null;
+    }
+
+    public boolean isIntentSenderTargetedToPackage(IIntentSender pendingResult) {
+        if (!(pendingResult instanceof PendingIntentRecord)) {
+            return false;
+        }
+        try {
+            PendingIntentRecord res = (PendingIntentRecord)pendingResult;
+            if (res.key.allIntents == null) {
+                return false;
+            }
+            for (int i=0; i<res.key.allIntents.length; i++) {
+                Intent intent = res.key.allIntents[i];
+                if (intent.getPackage() != null && intent.getComponent() != null) {
+                    return false;
+                }
+            }
+            return true;
+        } catch (ClassCastException e) {
+        }
+        return false;
     }
 
     public void setProcessLimit(int max) {
@@ -9895,6 +9923,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         ProcessRecord app = getProcessRecordLocked(appName, r.appInfo.uid);
         if (app != null && app.thread != null) {
             try {
+                app.addPackage(r.appInfo.packageName);
                 realStartServiceLocked(r, app);
                 return true;
             } catch (RemoteException e) {
@@ -10945,7 +10974,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         mBroadcastsScheduled = true;
     }
 
-    public Intent registerReceiver(IApplicationThread caller,
+    public Intent registerReceiver(IApplicationThread caller, String callerPackage,
             IIntentReceiver receiver, IntentFilter filter, String permission) {
         synchronized(this) {
             ProcessRecord callerApp = null;
@@ -10957,6 +10986,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                             + " (pid=" + Binder.getCallingPid()
                             + ") when registering receiver " + receiver);
                 }
+                if (callerApp.info.uid != Process.SYSTEM_UID &&
+                        !callerApp.pkgList.contains(callerPackage)) {
+                    throw new SecurityException("Given caller package " + callerPackage
+                            + " is not running in process " + callerApp);
+                }
+            } else {
+                callerPackage = null;
             }
 
             List allSticky = null;
@@ -11001,7 +11037,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 mRegisteredReceivers.put(receiver.asBinder(), rl);
             }
-            BroadcastFilter bf = new BroadcastFilter(filter, rl, permission);
+            BroadcastFilter bf = new BroadcastFilter(filter, rl, callerPackage, permission);
             rl.add(bf);
             if (!bf.debugCheck()) {
                 Slog.w(TAG, "==> For Dynamic broadast");
@@ -12155,6 +12191,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     info.activityInfo.applicationInfo.uid);
             if (app != null && app.thread != null) {
                 try {
+                    app.addPackage(info.activityInfo.packageName);
                     processCurBroadcastLocked(r, app);
                     return;
                 } catch (RemoteException e) {

@@ -652,6 +652,7 @@ final class ActivityStack {
         
         if (app != null && app.thread != null) {
             try {
+                app.addPackage(r.info.packageName);
                 realStartActivityLocked(r, app, andResume, checkConfig);
                 return;
             } catch (RemoteException e) {
