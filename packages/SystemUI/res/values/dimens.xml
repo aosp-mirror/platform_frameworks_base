@@ -40,7 +40,11 @@
     <dimen name="peek_window_y_offset">-12dp</dimen>
 
     <!-- thickness (height) of the navigation bar on phones that require it -->
-    <dimen name="navigation_bar_size">32dp</dimen>
+    <dimen name="navigation_bar_size">48dp</dimen>
+
+    <!-- thickness (height) of the dead zone at the top of the navigation bar,
+         reducing false presses on navbar buttons; approx 2mm -->
+    <dimen name="navigation_bar_deadzone_size">12dp</dimen>
 
     <!-- thickness (height) of each notification row, including any separators or padding -->
     <dimen name="notification_height">65dp</dimen>

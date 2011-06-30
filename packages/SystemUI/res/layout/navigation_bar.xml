@@ -25,14 +25,13 @@
     android:layout_width="match_parent"
     >
 
-    <FrameLayout
-        android:id="@+id/background"
+    <FrameLayout android:id="@+id/rot0"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:background="#FF000000"
         >
 
-        <LinearLayout android:id="@+id/rot0"
+        <LinearLayout
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:orientation="horizontal"
@@ -40,12 +39,12 @@
 
             <!-- navigation controls -->
             <View
-                android:layout_width="32dp"
+                android:layout_width="40dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-                android:layout_width="54dp"
+                android:layout_width="80dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_back_default"
                 systemui:keyCode="4"
@@ -57,7 +56,7 @@
                 android:layout_weight="1"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
-                android:layout_width="54dp"
+                android:layout_width="80dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_home_default"
                 systemui:keyCode="3"
@@ -69,13 +68,13 @@
                 android:layout_weight="1"
                 />
             <ImageView android:id="@+id/recent_apps"
-                android:layout_width="54dp"
+                android:layout_width="80dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_recent_default"
                 android:layout_weight="0"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
-                android:layout_width="32dp"
+                android:layout_width="40dp"
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_sysbar_menu_default"
                 systemui:keyCode="82"
@@ -84,17 +83,31 @@
                 />
         </LinearLayout>
 
-        <LinearLayout android:id="@+id/rot90"
+        <View android:id="@+id/deadzone"
+            android:layout_height="@dimen/navigation_bar_deadzone_size"
+            android:layout_width="match_parent"
+            android:layout_gravity="top"
+            android:clickable="true"
+            />
+    </FrameLayout>
+
+    <FrameLayout android:id="@+id/rot90"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:background="#FF000000"
+        android:visibility="gone"
+        android:paddingTop="24dp"
+        >
+
+        <LinearLayout 
             android:layout_height="match_parent"
             android:layout_width="match_parent"
             android:orientation="vertical"
-            android:visibility="gone"
-            android:paddingTop="24dp"
             >
             
             <!-- navigation controls -->
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
-                android:layout_height="32dp"
+                android:layout_height="40dp"
                 android:layout_width="match_parent"
                 android:src="@drawable/ic_sysbar_menu_default_land"
                 systemui:keyCode="82"
@@ -102,7 +115,7 @@
                 android:visibility="invisible"
                 />
             <ImageView android:id="@+id/recent_apps"
-                android:layout_height="54dp"
+                android:layout_height="80dp"
                 android:layout_width="match_parent"
                 android:src="@drawable/ic_sysbar_recent_default_land"
                 android:layout_weight="0"
@@ -113,7 +126,7 @@
                 android:layout_weight="1"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
-                android:layout_height="54dp"
+                android:layout_height="80dp"
                 android:layout_width="match_parent"
                 android:src="@drawable/ic_sysbar_home_default_land"
                 systemui:keyCode="3"
@@ -125,28 +138,32 @@
                 android:layout_weight="1"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-                android:layout_height="54dp"
+                android:layout_height="80dp"
                 android:layout_width="match_parent"
                 android:src="@drawable/ic_sysbar_back_default_land"
                 systemui:keyCode="4"
                 android:layout_weight="0"
                 />
             <View
-                android:layout_height="32dp"
+                android:layout_height="40dp"
                 android:layout_width="match_parent"
                 android:layout_weight="0"
                 />
         </LinearLayout>
 
-        <LinearLayout android:id="@+id/rot270"
+        <View android:id="@+id/deadzone"
+            android:layout_width="@dimen/navigation_bar_deadzone_size"
             android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:orientation="vertical"
-            android:visibility="gone"
-            >
-
-            <!-- not used -->
-        </LinearLayout>
-    
+            android:layout_gravity="left"
+            android:clickable="true"
+            />
     </FrameLayout>
+
+    <!-- not used -->
+    <View android:id="@+id/rot270"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        />
+
 </com.android.systemui.statusbar.phone.NavigationBarView>
