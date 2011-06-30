@@ -30,6 +30,7 @@ import android.webkit.WebView;
  */
 public class WebViewFragment extends Fragment {
     private WebView mWebView;
+    private boolean mIsWebViewAvailable;
 
     public WebViewFragment() {
     }
@@ -40,7 +41,11 @@ public class WebViewFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
+        if (mWebView != null) {
+            mWebView.destroy();
+        }
         mWebView = new WebView(getActivity());
+        mIsWebViewAvailable = true;
         return mWebView;
     }
 
@@ -63,19 +68,31 @@ public class WebViewFragment extends Fragment {
     }
 
     /**
-     * Called when the view has been detached from the fragment. Destroys the WebView.
+     * Called when the WebView has been detached from the fragment.
+     * The WebView is no longer available after this time.
      */
     @Override
     public void onDestroyView() {
-        mWebView.destroy();
-        mWebView = null;
+        mIsWebViewAvailable = false;
         super.onDestroyView();
+    }
+
+    /**
+     * Called when the fragment is no longer in use. Destroys the internal state of the WebView.
+     */
+    @Override
+    public void onDestroy() {
+        if (mWebView != null) {
+            mWebView.destroy();
+            mWebView = null;
+        }
+        super.onDestroy();
     }
 
     /**
      * Gets the WebView.
      */
     public WebView getWebView() {
-        return mWebView;
+        return mIsWebViewAvailable ? mWebView : null;
     }
 }
