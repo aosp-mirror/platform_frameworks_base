@@ -17,9 +17,6 @@
 package android.provider;
 
 
-import com.android.internal.util.ArrayUtils;
-
-import android.accounts.Account;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.ContentProviderClient;
@@ -35,12 +32,9 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.format.Time;
 import android.util.Log;
-
-import java.util.Arrays;
 
 /**
  * <p>
@@ -97,6 +91,8 @@ public final class CalendarContract {
     /**
      * Broadcast Action: This is the intent that gets fired when an alarm
      * notification needs to be posted for a reminder.
+     *
+     * @SdkConstant
      */
     public static final String ACTION_EVENT_REMINDER = "android.intent.action.EVENT_REMINDER";
 
@@ -122,8 +118,7 @@ public final class CalendarContract {
     /**
      * The content:// style URL for the top-level calendar authority
      */
-    public static final Uri CONTENT_URI =
-        Uri.parse("content://" + AUTHORITY);
+    public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY);
 
     /**
      * An optional insert, update or delete URI parameter that allows the caller
@@ -572,29 +567,6 @@ public final class CalendarContract {
      * </ul>
      */
     public static class Calendars implements BaseColumns, SyncColumns, CalendarColumns {
-        private static final String WHERE_DELETE_FOR_ACCOUNT = Calendars.ACCOUNT_NAME + "=?"
-                + " AND "
-                + Calendars.ACCOUNT_TYPE + "=?";
-
-        /**
-         * Helper function for generating a calendars query. This is blocking
-         * and should not be used on the UI thread. See
-         * {@link ContentResolver#query(Uri, String[], String, String[], String)}
-         * for more details about using the parameters.
-         *
-         * @param cr The ContentResolver to query with
-         * @param projection A list of columns to return
-         * @param selection A formatted selection string
-         * @param selectionArgs arguments to the selection string
-         * @param orderBy How to order the returned rows
-         * @return
-         */
-        public static final Cursor query(ContentResolver cr, String[] projection, String selection,
-                String[] selectionArgs, String orderBy) {
-            return cr.query(CONTENT_URI, projection, selection, selectionArgs,
-                    orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
-        }
-
         /**
          * The content:// style URL for accessing Calendars
          */
@@ -622,7 +594,9 @@ public final class CalendarContract {
          * These fields are only writable by a sync adapter. To modify them the
          * caller must include {@link #CALLER_IS_SYNCADAPTER},
          * {@link #ACCOUNT_NAME}, and {@link #ACCOUNT_TYPE} in the Uri's query
-         * parameters.
+         * parameters. TODO move to provider
+         *
+         * @hide
          */
         public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
             ACCOUNT_NAME,
@@ -737,7 +711,7 @@ public final class CalendarContract {
         /**
          * the projection used by the attendees query
          */
-        private static final String[] PROJECTION = new String[] {
+        public static final String[] PROJECTION = new String[] {
                 _ID, ATTENDEE_NAME, ATTENDEE_EMAIL, ATTENDEE_RELATIONSHIP, ATTENDEE_STATUS,};
         private static final String ATTENDEES_WHERE = Attendees.EVENT_ID + "=?";
 
@@ -1420,37 +1394,6 @@ public final class CalendarContract {
             CalendarColumns {
 
         /**
-         * Queries all events with the given projection. This is a blocking call
-         * and should not be done on the UI thread.
-         *
-         * @param cr The content resolver to use for the query
-         * @param projection The columns to return
-         * @return A Cursor containing all events in the db
-         */
-        public static final Cursor query(ContentResolver cr, String[] projection) {
-            return cr.query(CONTENT_URI, projection, null, null, DEFAULT_SORT_ORDER);
-        }
-
-        /**
-         * Queries events using the given projection, selection filter, and
-         * ordering. This is a blocking call and should not be done on the UI
-         * thread. For selection and selectionArgs usage see
-         * {@link ContentResolver#query(Uri, String[], String, String[], String)}
-         *
-         * @param cr The content resolver to use for the query
-         * @param projection The columns to return
-         * @param selection Filter on the query as an SQL WHERE statement
-         * @param selectionArgs Args to replace any '?'s in the selection
-         * @param orderBy How to order the rows as an SQL ORDER BY statement
-         * @return A Cursor containing the matching events
-         */
-        public static final Cursor query(ContentResolver cr, String[] projection, String selection,
-                String[] selectionArgs, String orderBy) {
-            return cr.query(CONTENT_URI, projection, selection, null,
-                    orderBy == null ? DEFAULT_SORT_ORDER : orderBy);
-        }
-
-        /**
          * The content:// style URL for interacting with events. Appending an
          * event id using {@link ContentUris#withAppendedId(Uri, long)} will
          * specify a single event.
@@ -1464,7 +1407,7 @@ public final class CalendarContract {
          * appended event ID.  Deletion of exceptions requires both the original event ID and
          * the exception event ID (see {@link Uri.Builder#appendPath}).
          */
-        public static final Uri EXCEPTION_CONTENT_URI =
+        public static final Uri CONTENT_EXCEPTION_URI =
                 Uri.parse("content://" + AUTHORITY + "/exception");
 
         /**
@@ -1475,7 +1418,9 @@ public final class CalendarContract {
         /**
          * These are columns that should only ever be updated by the provider,
          * either because they are views mapped to another table or because they
-         * are used for provider only functionality.
+         * are used for provider only functionality. TODO move to provider
+         *
+         * @hide
          */
         public static String[] PROVIDER_WRITABLE_COLUMNS = new String[] {
                 ACCOUNT_NAME,
@@ -1505,7 +1450,9 @@ public final class CalendarContract {
         /**
          * These fields are only writable by a sync adapter. To modify them the
          * caller must include CALLER_IS_SYNCADAPTER, _SYNC_ACCOUNT, and
-         * _SYNC_ACCOUNT_TYPE in the query parameters.
+         * _SYNC_ACCOUNT_TYPE in the query parameters. TODO move to provider.
+         *
+         * @hide
          */
         public static final String[] SYNC_WRITABLE_COLUMNS = new String[] {
             _SYNC_ID,
@@ -1672,11 +1619,6 @@ public final class CalendarContract {
         public static final String END_MINUTE = "endMinute";
     }
 
-    /**
-     * CalendarCache stores some settings for calendar including the current
-     * time zone for the instaces. These settings are stored using a key/value
-     * scheme.
-     */
     protected interface CalendarCacheColumns {
         /**
          * The key for the setting. Keys are defined in {@link CalendarCache}.
@@ -1689,6 +1631,11 @@ public final class CalendarContract {
         public static final String VALUE = "value";
     }
 
+    /**
+     * CalendarCache stores some settings for calendar including the current
+     * time zone for the instances. These settings are stored using a key/value
+     * scheme. A {@link #KEY} must be specified when updating these values.
+     */
     public static class CalendarCache implements CalendarCacheColumns {
         /**
          * The URI to use for retrieving the properties from the Calendar db.
@@ -1697,22 +1644,11 @@ public final class CalendarContract {
                 Uri.parse("content://" + AUTHORITY + "/properties");
 
         /**
-         * If updating a property, this must be provided as the selection. All
-         * other selections will fail. For queries this field can be omitted to
-         * retrieve all properties or used to query a single property. Valid
-         * keys include {@link #TIMEZONE_KEY_TYPE},
-         * {@link #TIMEZONE_KEY_INSTANCES}, and
-         * {@link #TIMEZONE_KEY_INSTANCES_PREVIOUS}, though the last one can
-         * only be read, not written.
-         */
-        public static final String WHERE = "key=?";
-
-        /**
          * They key for updating the use of auto/home time zones in Calendar.
          * Valid values are {@link #TIMEZONE_TYPE_AUTO} or
          * {@link #TIMEZONE_TYPE_HOME}.
          */
-        public static final String TIMEZONE_KEY_TYPE = "timezoneType";
+        public static final String KEY_TIMEZONE_TYPE = "timezoneType";
 
         /**
          * The key for updating the time zone used by the provider when it
@@ -1720,24 +1656,24 @@ public final class CalendarContract {
          * type is set to {@link #TIMEZONE_TYPE_HOME}. A valid time zone id
          * should be written to this field.
          */
-        public static final String TIMEZONE_KEY_INSTANCES = "timezoneInstances";
+        public static final String KEY_TIMEZONE_INSTANCES = "timezoneInstances";
 
         /**
          * The key for reading the last time zone set by the user. This should
          * only be read by apps and it will be automatically updated whenever
-         * {@link #TIMEZONE_KEY_INSTANCES} is updated with
+         * {@link #KEY_TIMEZONE_INSTANCES} is updated with
          * {@link #TIMEZONE_TYPE_HOME} set.
          */
-        public static final String TIMEZONE_KEY_INSTANCES_PREVIOUS = "timezoneInstancesPrevious";
+        public static final String KEY_TIMEZONE_INSTANCES_PREVIOUS = "timezoneInstancesPrevious";
 
         /**
-         * The value to write to {@link #TIMEZONE_KEY_TYPE} if the provider
+         * The value to write to {@link #KEY_TIMEZONE_TYPE} if the provider
          * should stay in sync with the device's time zone.
          */
         public static final String TIMEZONE_TYPE_AUTO = "auto";
 
         /**
-         * The value to write to {@link #TIMEZONE_KEY_TYPE} if the provider
+         * The value to write to {@link #KEY_TIMEZONE_TYPE} if the provider
          * should use a fixed time zone set by the user.
          */
         public static final String TIMEZONE_TYPE_HOME = "home";
@@ -1814,7 +1750,7 @@ public final class CalendarContract {
         /**
          * The projection used by the EventDays query.
          */
-        private static final String[] PROJECTION = {
+        public static final String[] PROJECTION = {
                 STARTDAY, ENDDAY
         };
         private static final String SELECTION = "selected=1";
@@ -1900,7 +1836,7 @@ public final class CalendarContract {
         /**
          * The projection used by the reminders query.
          */
-        private static final String[] PROJECTION = new String[] {
+        public static final String[] PROJECTION = new String[] {
                 _ID, MINUTES, METHOD,};
         @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/reminders");
@@ -1967,17 +1903,28 @@ public final class CalendarContract {
         public static final String NOTIFY_TIME = "notifyTime";
 
         /**
-         * The state of this alert. It starts out as {@link #SCHEDULED}, then
-         * when the alarm goes off, it changes to {@link #FIRED}, and then when
-         * the user dismisses the alarm it changes to {@link #DISMISSED}. Column
+         * The state of this alert. It starts out as {@link #STATE_SCHEDULED}, then
+         * when the alarm goes off, it changes to {@link #STATE_FIRED}, and then when
+         * the user dismisses the alarm it changes to {@link #STATE_DISMISSED}. Column
          * name.
          * <P>Type: INTEGER</P>
          */
         public static final String STATE = "state";
 
-        public static final int SCHEDULED = 0;
-        public static final int FIRED = 1;
-        public static final int DISMISSED = 2;
+        /**
+         * An alert begins in this state when it is first created.
+         */
+        public static final int STATE_SCHEDULED = 0;
+        /**
+         * After a notification for an alert has been created it should be
+         * updated to fired.
+         */
+        public static final int STATE_FIRED = 1;
+        /**
+         * Once the user has dismissed the notification the alert's state should
+         * be set to dismissed so it is not fired again.
+         */
+        public static final int STATE_DISMISSED = 2;
 
         /**
          * The number of minutes that this alarm precedes the start time. Column
@@ -2024,7 +1971,7 @@ public final class CalendarContract {
         private static final String WHERE_FINDNEXTALARMTIME = ALARM_TIME + ">=?";
         private static final String SORT_ORDER_ALARMTIME_ASC = ALARM_TIME + " ASC";
 
-        private static final String WHERE_RESCHEDULE_MISSED_ALARMS = STATE + "=" + SCHEDULED
+        private static final String WHERE_RESCHEDULE_MISSED_ALARMS = STATE + "=" + STATE_SCHEDULED
                 + " AND " + ALARM_TIME + "<?"
                 + " AND " + ALARM_TIME + ">?"
                 + " AND " + END + ">=?";
@@ -2038,10 +1985,11 @@ public final class CalendarContract {
         public static final Uri CONTENT_URI_BY_INSTANCE =
             Uri.parse("content://" + AUTHORITY + "/calendar_alerts/by_instance");
 
-        private static final boolean DEBUG = true;
+        private static final boolean DEBUG = false;
 
         /**
-         * Helper for inserting an alarm time associated with an event
+         * Helper for inserting an alarm time associated with an event TODO move
+         * to Provider
          *
          * @hide
          */
@@ -2056,51 +2004,32 @@ public final class CalendarContract {
             values.put(CalendarAlerts.CREATION_TIME, currentTime);
             values.put(CalendarAlerts.RECEIVED_TIME, 0);
             values.put(CalendarAlerts.NOTIFY_TIME, 0);
-            values.put(CalendarAlerts.STATE, SCHEDULED);
+            values.put(CalendarAlerts.STATE, STATE_SCHEDULED);
             values.put(CalendarAlerts.MINUTES, minutes);
             return cr.insert(CONTENT_URI, values);
         }
 
         /**
-         * Queries alerts info using the given projection, selection filter, and
-         * ordering. This is a blocking call and should not be done on the UI
-         * thread. For selection and selectionArgs usage see
-         * {@link ContentResolver#query(Uri, String[], String, String[], String)}
-         *
-         * @param cr The content resolver to use for the query
-         * @param projection The columns to return
-         * @param selection Filter on the query as an SQL WHERE statement
-         * @param selectionArgs Args to replace any '?'s in the selection
-         * @param sortOrder How to order the rows as an SQL ORDER BY statement
-         * @return A Cursor containing the matching alerts
-         */
-        public static final Cursor query(ContentResolver cr, String[] projection,
-                String selection, String[] selectionArgs, String sortOrder) {
-            return cr.query(CONTENT_URI, projection, selection, selectionArgs,
-                    sortOrder);
-        }
-
-        /**
          * Finds the next alarm after (or equal to) the given time and returns
          * the time of that alarm or -1 if no such alarm exists. This is a
-         * blocking call and should not be done on the UI thread.
+         * blocking call and should not be done on the UI thread. TODO move to
+         * provider
          *
          * @param cr the ContentResolver
          * @param millis the time in UTC milliseconds
          * @return the next alarm time greater than or equal to "millis", or -1
          *         if no such alarm exists.
+         * @hide
          */
         public static final long findNextAlarmTime(ContentResolver cr, long millis) {
             String selection = ALARM_TIME + ">=" + millis;
             // TODO: construct an explicit SQL query so that we can add
             // "LIMIT 1" to the end and get just one result.
             String[] projection = new String[] { ALARM_TIME };
-            Cursor cursor = query(cr, projection,
-                    WHERE_FINDNEXTALARMTIME,
-                    new String[] {
+            Cursor cursor = cr.query(CONTENT_URI, projection, WHERE_FINDNEXTALARMTIME,
+                    (new String[] {
                         Long.toString(millis)
-                    },
-                    SORT_ORDER_ALARMTIME_ASC);
+                    }), SORT_ORDER_ALARMTIME_ASC);
             long alarmTime = -1;
             try {
                 if (cursor != null && cursor.moveToFirst()) {
@@ -2116,13 +2045,14 @@ public final class CalendarContract {
 
         /**
          * Searches the CalendarAlerts table for alarms that should have fired
-         * but have not and then reschedules them.  This method can be called
-         * at boot time to restore alarms that may have been lost due to a
-         * phone reboot.
+         * but have not and then reschedules them. This method can be called at
+         * boot time to restore alarms that may have been lost due to a phone
+         * reboot. TODO move to provider
          *
          * @param cr the ContentResolver
          * @param context the Context
          * @param manager the AlarmManager
+         * @hide
          */
         public static final void rescheduleMissedAlarms(ContentResolver cr,
                 Context context, AlarmManager manager) {
@@ -2136,15 +2066,10 @@ public final class CalendarContract {
 
             // TODO: construct an explicit SQL query so that we can add
             // "GROUPBY" instead of doing a sort and de-dup
-            Cursor cursor = CalendarAlerts.query(cr,
-                    projection,
-                    WHERE_RESCHEDULE_MISSED_ALARMS,
-                    new String[] {
-                        Long.toString(now),
-                        Long.toString(ancient),
-                        Long.toString(now)
-                    },
-                    SORT_ORDER_ALARMTIME_ASC);
+            Cursor cursor = cr.query(CalendarAlerts.CONTENT_URI, projection,
+                    WHERE_RESCHEDULE_MISSED_ALARMS, (new String[] {
+                            Long.toString(now), Long.toString(ancient), Long.toString(now)
+                    }), SORT_ORDER_ALARMTIME_ASC);
             if (cursor == null) {
                 return;
             }
@@ -2177,12 +2102,13 @@ public final class CalendarContract {
          * keep scheduled reminders up to date but apps may use this to
          * implement snooze functionality without modifying the reminders table.
          * Scheduled alarms will generate an intent using
-         * {@link #ACTION_EVENT_REMINDER}.
+         * {@link #ACTION_EVENT_REMINDER}. TODO Move to provider
          *
          * @param context A context for referencing system resources
          * @param manager The AlarmManager to use or null
          * @param alarmTime The time to fire the intent in UTC millis since
          *            epoch
+         * @hide
          */
         public static void scheduleAlarm(Context context, AlarmManager manager, long alarmTime) {
             if (DEBUG) {
@@ -2204,31 +2130,28 @@ public final class CalendarContract {
         }
 
         /**
-         * Searches for an entry in the CalendarAlerts table that matches
-         * the given event id, begin time and alarm time.  If one is found
-         * then this alarm already exists and this method returns true.
-         *
+         * Searches for an entry in the CalendarAlerts table that matches the
+         * given event id, begin time and alarm time. If one is found then this
+         * alarm already exists and this method returns true. TODO Move to
+         * provider
+         * 
          * @param cr the ContentResolver
          * @param eventId the event id to match
          * @param begin the start time of the event in UTC millis
          * @param alarmTime the alarm time of the event in UTC millis
-         * @return true if there is already an alarm for the given event
-         *   with the same start time and alarm time.
+         * @return true if there is already an alarm for the given event with
+         *         the same start time and alarm time.
+         * @hide
          */
         public static final boolean alarmExists(ContentResolver cr, long eventId,
                 long begin, long alarmTime) {
             // TODO: construct an explicit SQL query so that we can add
             // "LIMIT 1" to the end and get just one result.
             String[] projection = new String[] { ALARM_TIME };
-            Cursor cursor = query(cr,
-                    projection,
-                    WHERE_ALARM_EXISTS,
-                    new String[] {
-                        Long.toString(eventId),
-                        Long.toString(begin),
-                        Long.toString(alarmTime)
-                    },
-                    null);
+            Cursor cursor = cr.query(CONTENT_URI, projection, WHERE_ALARM_EXISTS,
+                    (new String[] {
+                            Long.toString(eventId), Long.toString(begin), Long.toString(alarmTime)
+                    }), null);
             boolean found = false;
             try {
                 if (cursor != null && cursor.getCount() > 0) {
