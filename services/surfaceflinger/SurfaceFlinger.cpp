@@ -1799,10 +1799,10 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
             const GLfloat h = hw_h - (hw_h * v);
             const GLfloat x = (hw_w - w) * 0.5f;
             const GLfloat y = (hw_h - h) * 0.5f;
-            vtx[0] = x;         vtx[1] = y;
-            vtx[2] = x;         vtx[3] = y + h;
-            vtx[4] = x + w;     vtx[5] = y + h;
-            vtx[6] = x + w;     vtx[7] = y;
+            vtx[0] = x;         vtx[1] = y + h;
+            vtx[2] = x;         vtx[3] = y;
+            vtx[4] = x + w;     vtx[5] = y;
+            vtx[6] = x + w;     vtx[7] = y + h;
         }
     };
 
@@ -1817,10 +1817,10 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
             const GLfloat h = 1.0f;
             const GLfloat x = (hw_w - w) * 0.5f;
             const GLfloat y = (hw_h - h) * 0.5f;
-            vtx[0] = x;         vtx[1] = y;
-            vtx[2] = x;         vtx[3] = y + h;
-            vtx[4] = x + w;     vtx[5] = y + h;
-            vtx[6] = x + w;     vtx[7] = y;
+            vtx[0] = x;         vtx[1] = y + h;
+            vtx[2] = x;         vtx[3] = y;
+            vtx[4] = x + w;     vtx[5] = y;
+            vtx[6] = x + w;     vtx[7] = y + h;
         }
     };
 
