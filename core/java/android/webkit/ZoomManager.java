@@ -1107,7 +1107,8 @@ class ZoomManager {
                 }
                 reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
             }
-            mInitialZoomOverview = !exceedsMinScaleIncrement(scale, overviewScale);
+            mInitialZoomOverview = settings.getLoadWithOverviewMode() &&
+                    !exceedsMinScaleIncrement(scale, overviewScale);
             setZoomScale(scale, reflowText);
 
             // update the zoom buttons as the scale can be changed
