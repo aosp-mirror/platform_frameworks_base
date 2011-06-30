@@ -16,7 +16,6 @@
 
 package com.android.internal.app;
 
-import com.android.internal.R;
 import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuPopupHelper;
 import com.android.internal.view.menu.SubMenuBuilder;
@@ -36,7 +35,6 @@ import android.app.Dialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.view.ActionMode;
@@ -580,6 +578,9 @@ public class ActionBarImpl extends ActionBar {
 
         mActionView.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
         mContextView.animateToVisibility(toActionMode ? View.VISIBLE : View.GONE);
+        if (mTabScrollView != null && !mActionView.hasEmbeddedTabs() && mActionView.isCollapsed()) {
+            mTabScrollView.animateToVisibility(toActionMode ? View.GONE : View.VISIBLE);
+        }
     }
 
     /**
@@ -620,6 +621,7 @@ public class ActionBarImpl extends ActionBar {
 
             // Clear out the context mode views after the animation finishes
             mContextView.closeMode();
+
             mActionMode = null;
 
             if (mWasHiddenBeforeMode) {

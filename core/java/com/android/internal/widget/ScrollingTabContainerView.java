@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.animation.TimeInterpolator;
 import android.app.ActionBar;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -22,6 +25,7 @@ import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -34,6 +38,13 @@ public class ScrollingTabContainerView extends HorizontalScrollView {
     private LinearLayout mTabLayout;
 
     int mMaxTabWidth;
+
+    protected Animator mVisibilityAnim;
+    protected final VisibilityAnimListener mVisAnimListener = new VisibilityAnimListener();
+
+    private static final TimeInterpolator sAlphaInterpolator = new DecelerateInterpolator();
+
+    private static final int FADE_DURATION = 200;
 
     public ScrollingTabContainerView(Context context) {
         super(context);
@@ -73,6 +84,30 @@ public class ScrollingTabContainerView extends HorizontalScrollView {
             if (isSelected) {
                 animateToTab(position);
             }
+        }
+    }
+
+    public void animateToVisibility(int visibility) {
+        if (mVisibilityAnim != null) {
+            mVisibilityAnim.cancel();
+        }
+        if (visibility == VISIBLE) {
+            if (getVisibility() != VISIBLE) {
+                setAlpha(0);
+            }
+            ObjectAnimator anim = ObjectAnimator.ofFloat(this, "alpha", 1);
+            anim.setDuration(FADE_DURATION);
+            anim.setInterpolator(sAlphaInterpolator);
+
+            anim.addListener(mVisAnimListener.withFinalVisibility(visibility));
+            anim.start();
+        } else {
+            ObjectAnimator anim = ObjectAnimator.ofFloat(this, "alpha", 0);
+            anim.setDuration(FADE_DURATION);
+            anim.setInterpolator(sAlphaInterpolator);
+
+            anim.addListener(mVisAnimListener.withFinalVisibility(visibility));
+            anim.start();
         }
     }
 
@@ -257,6 +292,40 @@ public class ScrollingTabContainerView extends HorizontalScrollView {
                 final View child = mTabLayout.getChildAt(i);
                 child.setSelected(child == view);
             }
+        }
+    }
+
+    protected class VisibilityAnimListener implements Animator.AnimatorListener {
+        private boolean mCanceled = false;
+        private int mFinalVisibility;
+
+        public VisibilityAnimListener withFinalVisibility(int visibility) {
+            mFinalVisibility = visibility;
+            return this;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+            setVisibility(VISIBLE);
+            mVisibilityAnim = animation;
+            mCanceled = false;
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            if (mCanceled) return;
+
+            mVisibilityAnim = null;
+            setVisibility(mFinalVisibility);
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            mCanceled = true;
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
         }
     }
 }
