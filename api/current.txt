@@ -3371,6 +3371,7 @@ package android.app {
     method public void send(android.content.Context, int, android.content.Intent) throws android.app.PendingIntent.CanceledException;
     method public void send(int, android.app.PendingIntent.OnFinished, android.os.Handler) throws android.app.PendingIntent.CanceledException;
     method public void send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler) throws android.app.PendingIntent.CanceledException;
+    method public void send(android.content.Context, int, android.content.Intent, android.app.PendingIntent.OnFinished, android.os.Handler, java.lang.String) throws android.app.PendingIntent.CanceledException;
     method public static void writePendingIntentOrNullToParcel(android.app.PendingIntent, android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
@@ -5297,6 +5298,7 @@ package android.content {
     method public java.lang.String getTargetPackage();
     method public static android.content.IntentSender readIntentSenderOrNullFromParcel(android.os.Parcel);
     method public void sendIntent(android.content.Context, int, android.content.Intent, android.content.IntentSender.OnFinished, android.os.Handler) throws android.content.IntentSender.SendIntentException;
+    method public void sendIntent(android.content.Context, int, android.content.Intent, android.content.IntentSender.OnFinished, android.os.Handler, java.lang.String) throws android.content.IntentSender.SendIntentException;
     method public static void writeIntentSenderOrNullToParcel(android.content.IntentSender, android.os.Parcel);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
