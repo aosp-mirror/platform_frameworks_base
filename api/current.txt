@@ -22395,6 +22395,7 @@ package android.view {
     method public void requestDisallowInterceptTouchEvent(boolean);
     method public boolean requestSendAccessibilityEvent(android.view.View, android.view.accessibility.AccessibilityEvent);
     method public void requestTransparentRegion(android.view.View);
+    method protected void resetLayoutDirectionResolution();
     method public void scheduleLayoutAnimation();
     method public void setAddStatesFromChildren(boolean);
     method public void setAlwaysDrawnWithCacheEnabled(boolean);
@@ -26063,6 +26064,7 @@ package android.widget {
     method protected void onTextChanged(java.lang.CharSequence, int, int, int);
     method public boolean onTextContextMenuItem(int);
     method public void removeTextChangedListener(android.text.TextWatcher);
+    method protected void resetLayoutDirectionResolution();
     method public final void setAutoLinkMask(int);
     method public void setCompoundDrawablePadding(int);
     method public void setCompoundDrawables(android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable, android.graphics.drawable.Drawable);

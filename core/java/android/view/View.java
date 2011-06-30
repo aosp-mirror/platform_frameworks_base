@@ -9121,9 +9121,15 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * Reset the resolved layout direction by clearing the corresponding flag
+     * Reset the resolved layout direction.
+     *
+     * Subclasses need to override this method to clear cached information that depends on the
+     * resolved layout direction, or to inform child views that inherit their layout direction.
+     * Overrides must also call the superclass implementation at the start of their implementation.
+     *
+     * @hide
      */
-    void resetLayoutDirectionResolution() {
+    protected void resetLayoutDirectionResolution() {
         // Reset the current View resolution
         mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED;
     }
