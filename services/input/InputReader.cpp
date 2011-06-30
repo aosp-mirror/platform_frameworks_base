@@ -922,7 +922,7 @@ void InputDevice::process(const RawEvent* rawEvents, size_t count) {
     for (const RawEvent* rawEvent = rawEvents; count--; rawEvent++) {
 #if DEBUG_RAW_EVENTS
         LOGD("Input event: device=%d type=0x%04x scancode=0x%04x "
-                "keycode=0x%04x value=0x%04x flags=0x%08x",
+                "keycode=0x%04x value=0x%08x flags=0x%08x",
                 rawEvent->deviceId, rawEvent->type, rawEvent->scanCode, rawEvent->keyCode,
                 rawEvent->value, rawEvent->flags);
 #endif
