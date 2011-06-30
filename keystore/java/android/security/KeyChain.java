@@ -77,6 +77,13 @@ import java.util.concurrent.LinkedBlockingQueue;
  * avoid prompting the user with {@link #choosePrivateKeyAlias
  * choosePrivateKeyAlias} on subsequent connections. If the alias is
  * no longer valid, null will be returned on lookups using that value
+ *
+ * <p>An application can request the installation of private keys and
+ * certificates via the {@code Intent} provided by {@link
+ * #createInstallIntent}. Private keys installed via this {@code
+ * Intent} will be accessible via {@link #choosePrivateKeyAlias} while
+ * Certificate Authority (CA) certificates will be trusted by all
+ * applications through the default {@code X509TrustManager}.
  */
 // TODO reference intent for credential installation when public
 public final class KeyChain {
@@ -131,8 +138,6 @@ public final class KeyChain {
     /**
      * Optional extra to specify a {@code String} credential name on
      * the {@code Intent} returned by {@link #createInstallIntent}.
-     *
-     * @hide TODO make public
      */
     // Compatible with old com.android.certinstaller.CredentialHelper.CERT_NAME_KEY
     public static final String EXTRA_NAME = "name";
@@ -146,8 +151,6 @@ public final class KeyChain {
      *
      * <p>{@link #EXTRA_NAME} may be used to provide a default alias
      * name for the installed certificate.
-     *
-     * @hide TODO make public
      */
     // Compatible with old android.security.Credentials.CERTIFICATE
     public static final String EXTRA_CERTIFICATE = "CERT";
@@ -157,7 +160,7 @@ public final class KeyChain {
      * {@link #createInstallIntent} to specify a PKCS#12 key store to
      * install. The extra value should be a {@code byte[]}. The bytes
      * may come from an external source or be generated with {@link
-     * KeyStore#store} on a "PKCS12" instance.
+     * java.security.KeyStore#store} on a "PKCS12" instance.
      *
      * <p>The user will be prompted for the password to load the key store.
      *
@@ -167,8 +170,6 @@ public final class KeyChain {
      *
      * <p>{@link #EXTRA_NAME} may be used to provide a default alias
      * name for the installed credentials.
-     *
-     * @hide TODO make public
      */
     // Compatible with old android.security.Credentials.PKCS12
     public static final String EXTRA_PKCS12 = "PKCS12";
@@ -182,15 +183,13 @@ public final class KeyChain {
      * <p>Alternatively, {@link #EXTRA_CERTIFICATE} or {@link
      * #EXTRA_PKCS12} maybe used to specify the bytes of an X.509
      * certificate or a PKCS#12 key store for installation. These
-     * extras may be combined with {@link EXTRA_NAME} to provide a
+     * extras may be combined with {@link #EXTRA_NAME} to provide a
      * default alias name for credentials being installed.
      *
      * <p>When used with {@link Activity#startActivityForResult},
      * {@link Activity#RESULT_OK} will be returned if a credential was
      * successfully installed, otherwise {@link
      * Activity#RESULT_CANCELED} will be returned.
-     *
-     * @hide TODO make public with createInstallIntent, EXTRA_NAME, EXTRA_CERTIFICATE, EXTRA_PKCS12
      */
     public static Intent createInstallIntent() {
         Intent intent = new Intent(ACTION_INSTALL);
