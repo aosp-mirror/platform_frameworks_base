@@ -107,6 +107,7 @@ public class HTML5VideoFullScreen extends HTML5VideoView
             // After we return from this we can't use the surface any more.
             // The current Video View will be destroy when we play a new video.
             pauseAndDispatch(mProxy);
+            mPlayer.release();
             mSurfaceHolder = null;
             if (mMediaController != null) {
                 mMediaController.hide();
@@ -226,6 +227,10 @@ public class HTML5VideoFullScreen extends HTML5VideoView
                 mProxy.getWebView().getViewManager().showAll();
 
                 mProxy = null;
+
+                // Don't show the controller after exiting the full screen.
+                mMediaController = null;
+                mCurrentState = STATE_RELEASED;
             }
         };
 
