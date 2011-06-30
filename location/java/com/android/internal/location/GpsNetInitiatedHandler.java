@@ -205,7 +205,7 @@ public class GpsNetInitiatedHandler {
             mNiNotification.defaults &= ~Notification.DEFAULT_SOUND;
         }        
 
-        mNiNotification.flags = Notification.FLAG_ONGOING_EVENT;
+        mNiNotification.flags = Notification.FLAG_ONGOING_EVENT | Notification.FLAG_AUTO_CANCEL;
         mNiNotification.tickerText = getNotifTicker(notif, mContext);
 
         // if not to popup dialog immediately, pending intent will open the dialog
