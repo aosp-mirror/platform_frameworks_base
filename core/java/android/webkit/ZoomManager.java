@@ -1024,6 +1024,11 @@ class ZoomManager {
         } else {
             mInZoomOverview = !scaleHasDiff;
         }
+        if (drawData.mFirstLayoutForNonStandardLoad && settings.getLoadWithOverviewMode()) {
+            // Set mInitialZoomOverview in case this is the first picture for non standard load,
+            // so next new picture could be forced into overview mode if it's true.
+            mInitialZoomOverview = mInZoomOverview;
+        }
     }
 
     /**

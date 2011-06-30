@@ -1950,6 +1950,7 @@ public final class WebViewCore {
     // mInitialViewState is set by didFirstLayout() and then reset in the
     // next webkitDraw after passing the state to the UI thread.
     private ViewState mInitialViewState = null;
+    private boolean mFirstLayoutForNonStandardLoad;
 
     static class ViewState {
         float mMinScale;
@@ -1977,6 +1978,7 @@ public final class WebViewCore {
         int mMinPrefWidth;
         // only non-null if it is for the first picture set after the first layout
         ViewState mViewState;
+        boolean mFirstLayoutForNonStandardLoad;
         boolean mFocusSizeChanged;
     }
 
@@ -2025,6 +2027,10 @@ public final class WebViewCore {
             if (mInitialViewState != null) {
                 draw.mViewState = mInitialViewState;
                 mInitialViewState = null;
+            }
+            if (mFirstLayoutForNonStandardLoad) {
+                draw.mFirstLayoutForNonStandardLoad = true;
+                mFirstLayoutForNonStandardLoad = false;
             }
             if (DebugFlags.WEB_VIEW_CORE) Log.v(LOGTAG, "webkitDraw NEW_PICTURE_MSG_ID");
             Message.obtain(mWebView.mPrivateHandler,
@@ -2312,6 +2318,8 @@ public final class WebViewCore {
 
         // if mViewportWidth is 0, it means device-width, always update.
         if (mViewportWidth != 0 && !updateViewState) {
+            // For non standard load, since updateViewState will be false.
+            mFirstLayoutForNonStandardLoad = true;
             ViewState viewState = new ViewState();
             viewState.mMinScale = mViewportMinimumScale / 100.0f;
             viewState.mMaxScale = mViewportMaximumScale / 100.0f;
