@@ -37,9 +37,11 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseBooleanArray;
 
 import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
+import com.google.android.collect.Sets;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -52,6 +54,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.concurrent.CountDownLatch;
@@ -114,6 +117,11 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     private final CountDownLatch mConnectedSignal = new CountDownLatch(1);
 
     private ArrayList<INetworkManagementEventObserver> mObservers;
+
+    /** Set of interfaces with active quotas. */
+    private HashSet<String> mInterfaceQuota = Sets.newHashSet();
+    /** Set of UIDs with active reject rules. */
+    private SparseBooleanArray mUidRejectOnQuota = new SparseBooleanArray();
 
     /**
      * Constructs a new NetworkManagementService instance
@@ -919,35 +927,81 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void setInterfaceQuota(String[] iface, long quota)
-            throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_NETWORK_POLICY, "NetworkManagementService");
-        try {
-            // TODO: Add support for clubbing together multiple interfaces under
-            // one quota. Will need support from the kernel and
-            // BandwidthController to do this.
-            mConnector.doCommand(
-                    String.format("bandwidth setquota %s %d", iface[0], quota));
-        } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Error communicating to native daemon to set Interface quota",
-                    e);
+    public void setInterfaceQuota(String iface, long quota) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        synchronized (mInterfaceQuota) {
+            if (mInterfaceQuota.contains(iface)) {
+                // TODO: eventually consider throwing
+                return;
+            }
+
+            final StringBuilder command = new StringBuilder();
+            command.append("bandwidth setiquota ").append(iface).append(" ").append(quota);
+
+            try {
+                // TODO: add support for quota shared across interfaces
+                mConnector.doCommand(command.toString());
+                mInterfaceQuota.add(iface);
+            } catch (NativeDaemonConnectorException e) {
+                throw new IllegalStateException("Error communicating to native daemon", e);
+            }
         }
     }
 
     @Override
-    public void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces)
-            throws IllegalStateException {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.MANAGE_NETWORK_POLICY, "NetworkManagementService");
-        try {
-            // TODO: Connect with BandwidthController
-            // mConnector.doCommand("");
-        } catch (NativeDaemonConnectorException e) {
-            throw new IllegalStateException(
-                    "Error communicating to native daemon to set Interface quota",
-                    e);
+    public void removeInterfaceQuota(String iface) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        synchronized (mInterfaceQuota) {
+            if (!mInterfaceQuota.contains(iface)) {
+                // TODO: eventually consider throwing
+                return;
+            }
+
+            final StringBuilder command = new StringBuilder();
+            command.append("bandwidth removeiquota ").append(iface);
+
+            try {
+                // TODO: add support for quota shared across interfaces
+                mConnector.doCommand(command.toString());
+                mInterfaceQuota.remove(iface);
+            } catch (NativeDaemonConnectorException e) {
+                throw new IllegalStateException("Error communicating to native daemon", e);
+            }
+        }
+    }
+
+    @Override
+    public void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        synchronized (mUidRejectOnQuota) {
+            final boolean oldRejectOnQuota = mUidRejectOnQuota.get(uid, false);
+            if (oldRejectOnQuota == rejectOnQuotaInterfaces) {
+                // TODO: eventually consider throwing
+                return;
+            }
+
+            final StringBuilder command = new StringBuilder();
+            command.append("bandwidth");
+            if (rejectOnQuotaInterfaces) {
+                command.append(" addnaughtyapps");
+            } else {
+                command.append(" removenaughtyapps");
+            }
+            command.append(" ").append(uid);
+
+            try {
+                mConnector.doCommand(command.toString());
+                if (rejectOnQuotaInterfaces) {
+                    mUidRejectOnQuota.put(uid, true);
+                } else {
+                    mUidRejectOnQuota.delete(uid);
+                }
+            } catch (NativeDaemonConnectorException e) {
+                throw new IllegalStateException("Error communicating to native daemon", e);
+            }
         }
     }
 

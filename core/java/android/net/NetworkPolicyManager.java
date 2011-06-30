@@ -49,6 +49,8 @@ public class NetworkPolicyManager {
     /** Reject traffic on metered networks. */
     public static final int RULE_REJECT_METERED = 0x1;
 
+    private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
+
     /**
      * {@link Intent} action launched when user selects {@link NetworkPolicy}
      * warning notification.
@@ -223,25 +225,27 @@ public class NetworkPolicyManager {
             return false;
         }
 
-        final PackageManager pm = context.getPackageManager();
-        final HashSet<Signature> systemSignature;
-        try {
-            systemSignature = Sets.newHashSet(
-                    pm.getPackageInfo("android", GET_SIGNATURES).signatures);
-        } catch (NameNotFoundException e) {
-            throw new RuntimeException("problem finding system signature", e);
-        }
-
-        try {
-            // reject apps signed with system cert
-            for (String packageName : pm.getPackagesForUid(uid)) {
-                final HashSet<Signature> packageSignature = Sets.newHashSet(
-                        pm.getPackageInfo(packageName, GET_SIGNATURES).signatures);
-                if (packageSignature.containsAll(systemSignature)) {
-                    return false;
-                }
+        if (!ALLOW_PLATFORM_APP_POLICY) {
+            final PackageManager pm = context.getPackageManager();
+            final HashSet<Signature> systemSignature;
+            try {
+                systemSignature = Sets.newHashSet(
+                        pm.getPackageInfo("android", GET_SIGNATURES).signatures);
+            } catch (NameNotFoundException e) {
+                throw new RuntimeException("problem finding system signature", e);
             }
-        } catch (NameNotFoundException e) {
+
+            try {
+                // reject apps signed with platform cert
+                for (String packageName : pm.getPackagesForUid(uid)) {
+                    final HashSet<Signature> packageSignature = Sets.newHashSet(
+                            pm.getPackageInfo(packageName, GET_SIGNATURES).signatures);
+                    if (packageSignature.containsAll(systemSignature)) {
+                        return false;
+                    }
+                }
+            } catch (NameNotFoundException e) {
+            }
         }
 
         // nothing found above; we can apply policy to UID

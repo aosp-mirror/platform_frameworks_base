@@ -25,6 +25,7 @@ import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
+import static android.net.ConnectivityManager.*;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -57,6 +58,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.IConnectivityManager;
@@ -110,6 +113,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import libcore.io.IoUtils;
 
@@ -166,6 +170,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final Object mRulesLock = new Object();
 
     private boolean mScreenOn;
+    private boolean mBackgroundData;
 
     /** Current policy for network templates. */
     private ArrayList<NetworkPolicy> mNetworkPolicy = Lists.newArrayList();
@@ -194,13 +199,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     // TODO: keep whitelist of system-critical services that should never have
     // rules enforced, such as system, phone, and radio UIDs.
 
+    // TODO: watch for package added broadcast to catch new UIDs.
+
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             IPowerManager powerManager, INetworkStatsService networkStats,
             INetworkManagementService networkManagement) {
         // TODO: move to using cached NtpTrustedTime
-        this(context, activityManager, powerManager, networkStats,
-                networkManagement, new NtpTrustedTime(),
-                getSystemDir());
+        this(context, activityManager, powerManager, networkStats, networkManagement,
+                new NtpTrustedTime(), getSystemDir());
     }
 
     private static File getSystemDir() {
@@ -215,7 +221,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mActivityManager = checkNotNull(activityManager, "missing activityManager");
         mPowerManager = checkNotNull(powerManager, "missing powerManager");
         mNetworkStats = checkNotNull(networkStats, "missing networkStats");
-        mNetworkManagement = checkNotNull(networkManagement, "missing networkManagementService");
+        mNetworkManagement = checkNotNull(networkManagement, "missing networkManagement");
         mTime = checkNotNull(time, "missing TrustedTime");
 
         mHandlerThread = new HandlerThread(TAG);
@@ -241,6 +247,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         updateScreenOn();
+        updateBackgroundData(true);
 
         try {
             mActivityManager.registerProcessObserver(mProcessObserver);
@@ -266,10 +273,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final IntentFilter removedFilter = new IntentFilter(ACTION_UID_REMOVED);
         mContext.registerReceiver(mRemovedReceiver, removedFilter, null, mHandler);
 
-        // listen for warning polling events; currently dispatched by
+        // listen for stats update events
         final IntentFilter statsFilter = new IntentFilter(ACTION_NETWORK_STATS_UPDATED);
         mContext.registerReceiver(
                 mStatsReceiver, statsFilter, READ_NETWORK_USAGE_HISTORY, mHandler);
+
+        // listen for changes to background data flag
+        final IntentFilter bgFilter = new IntentFilter(ACTION_BACKGROUND_DATA_SETTING_CHANGED);
+        mContext.registerReceiver(mBgReceiver, bgFilter, CONNECTIVITY_INTERNAL, mHandler);
 
     }
 
@@ -348,6 +359,22 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             synchronized (mRulesLock) {
                 updateNotificationsLocked();
+            }
+        }
+    };
+
+    /**
+     * Receiver that watches for
+     * {@link #ACTION_BACKGROUND_DATA_SETTING_CHANGED}.
+     */
+    private BroadcastReceiver mBgReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // on background handler thread, and verified CONNECTIVITY_INTERNAL
+            // permission above.
+
+            synchronized (mRulesLock) {
+                updateBackgroundData(false);
             }
         }
     };
@@ -565,7 +592,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
                 : System.currentTimeMillis();
 
-        mMeteredIfaces.clear();
+        final HashSet<String> newMeteredIfaces = Sets.newHashSet();
 
         // apply each policy that we found ifaces for; compute remaining data
         // based on current cycle and historical stats, and push to kernel.
@@ -595,48 +622,30 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (policy.limitBytes != NetworkPolicy.LIMIT_DISABLED) {
                 // remaining "quota" is based on usage in current cycle
                 final long quota = Math.max(0, policy.limitBytes - total);
-                if (LOGD) {
-                    Slog.d(TAG, "Applying quota rules for ifaces=" + Arrays.toString(ifaces)
-                            + " LIMIT=" + policy.limitBytes + "  TOTAL="
-                            + total + "  QUOTA=" + quota);
+
+                if (ifaces.length > 1) {
+                    // TODO: switch to shared quota once NMS supports
+                    Slog.w(TAG, "shared quota unsupported; generating rule for each iface");
                 }
 
-                setQuotaOnIfaceList(ifaces, quota);
-
                 for (String iface : ifaces) {
-                    mMeteredIfaces.add(iface);
+                    removeInterfaceQuota(iface);
+                    setInterfaceQuota(iface, quota);
+                    newMeteredIfaces.add(iface);
                 }
             }
         }
+
+        // remove quota on any trailing interfaces
+        for (String iface : mMeteredIfaces) {
+            if (!newMeteredIfaces.contains(iface)) {
+                removeInterfaceQuota(iface);
+            }
+        }
+        mMeteredIfaces = newMeteredIfaces;
 
         final String[] meteredIfaces = mMeteredIfaces.toArray(new String[mMeteredIfaces.size()]);
         mHandler.obtainMessage(MSG_METERED_IFACES_CHANGED, meteredIfaces).sendToTarget();
-    }
-
-    private void setQuotaOnIfaceList(String[] ifaces, long quota) {
-        try {
-            mNetworkManagement.setInterfaceQuota(ifaces, quota);
-        } catch (IllegalStateException e) {
-            Slog.e(TAG, "IllegalStateException in setQuotaOnIfaceList " + e);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote Exception in setQuotaOnIfaceList " + e);
-        }
-    }
-
-    private void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces) {
-        // TODO: connect over to NMS
-        // ndc bandwidth app <uid> naughty
-        try {
-            if (LOGD) {
-                Slog.d(TAG, "setUidNetworkRules() with uid=" + uid
-                        + ", rejectOnQuotaInterfaces=" + rejectOnQuotaInterfaces);
-            }
-            mNetworkManagement.setUidNetworkRules(uid, rejectOnQuotaInterfaces);
-        } catch (IllegalStateException e) {
-            Slog.e(TAG, "IllegalStateException in setUidNetworkRules " + e);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Remote Exception in setUidNetworkRules " + e);
-        }
     }
 
     /**
@@ -962,6 +971,21 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    private void updateBackgroundData(boolean systemReady) {
+        synchronized (mRulesLock) {
+            try {
+                mBackgroundData = mConnManager.getBackgroundDataSetting();
+            } catch (RemoteException e) {
+            }
+            if (systemReady && mBackgroundData) {
+                // typical behavior of background enabled during systemReady;
+                // no need to clear rules for all UIDs.
+            } else {
+                updateRulesForBackgroundDataLocked();
+            }
+        }
+    }
+
     /**
      * Update rules that might be changed by {@link #mScreenOn} value.
      */
@@ -976,6 +1000,33 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
+    /**
+     * Update rules that might be changed by {@link #mBackgroundData} value.
+     */
+    private void updateRulesForBackgroundDataLocked() {
+        // update rules for all installed applications
+        final PackageManager pm = mContext.getPackageManager();
+        final List<ApplicationInfo> apps = pm.getInstalledApplications(0);
+        for (ApplicationInfo app : apps) {
+            updateRulesForUidLocked(app.uid);
+        }
+
+        // and catch system UIDs
+        // TODO: keep in sync with android_filesystem_config.h
+        for (int uid = 1000; uid <= 1025; uid++) {
+            updateRulesForUidLocked(uid);
+        }
+        for (int uid = 2000; uid <= 2002; uid++) {
+            updateRulesForUidLocked(uid);
+        }
+        for (int uid = 3000; uid <= 3007; uid++) {
+            updateRulesForUidLocked(uid);
+        }
+        for (int uid = 9998; uid <= 9999; uid++) {
+            updateRulesForUidLocked(uid);
+        }
+    }
+
     private void updateRulesForUidLocked(int uid) {
         final int uidPolicy = getUidPolicy(uid);
         final boolean uidForeground = isUidForeground(uid);
@@ -984,6 +1035,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         int uidRules = RULE_ALLOW_ALL;
         if (!uidForeground && (uidPolicy & POLICY_REJECT_METERED_BACKGROUND) != 0) {
             // uid in background, and policy says to block metered data
+            uidRules = RULE_REJECT_METERED;
+        }
+        if (!uidForeground && !mBackgroundData) {
+            // uid in background, and global background disabled
             uidRules = RULE_REJECT_METERED;
         }
 
@@ -1040,6 +1095,36 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             }
         }
     };
+
+    private void setInterfaceQuota(String iface, long quota) {
+        try {
+            mNetworkManagement.setInterfaceQuota(iface, quota);
+        } catch (IllegalStateException e) {
+            Slog.e(TAG, "problem setting interface quota", e);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "problem setting interface quota", e);
+        }
+    }
+
+    private void removeInterfaceQuota(String iface) {
+        try {
+            mNetworkManagement.removeInterfaceQuota(iface);
+        } catch (IllegalStateException e) {
+            Slog.e(TAG, "problem removing interface quota", e);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "problem removing interface quota", e);
+        }
+    }
+
+    private void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces) {
+        try {
+            mNetworkManagement.setUidNetworkRules(uid, rejectOnQuotaInterfaces);
+        } catch (IllegalStateException e) {
+            Slog.e(TAG, "problem setting uid rules", e);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "problem setting uid rules", e);
+        }
+    }
 
     private String getActiveSubscriberId() {
         final TelephonyManager telephony = (TelephonyManager) mContext.getSystemService(

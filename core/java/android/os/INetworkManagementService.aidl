@@ -210,9 +210,14 @@ interface INetworkManagementService
     NetworkStats getNetworkStatsUidDetail(int uid);
 
     /**
-     * Set an overall quota for a group of interfaces.
+     * Set quota for an interface.
      */
-    void setInterfaceQuota(in String[] iface, long quota);
+    void setInterfaceQuota(String iface, long quota);
+
+    /**
+     * Remove quota for an interface.
+     */
+    void removeInterfaceQuota(String iface);
 
     /**
      * Control network activity of a UID over interfaces with a quota limit.
