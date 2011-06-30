@@ -1,0 +1,39 @@
+<html>
+<body>
+<p>
+  The classes in this package are used to represent screen content and changes to it
+  as well as APIs for querying the global accessibility state of the system.
+</p>
+<p>
+  {@link android.view.accessibility.AccessibilityEvent}s are sent by the system when
+  something notable happens in the user interface. For example, when a
+  {@link android.widget.Button} is clicked, a {@link android.view.View} is focused, etc.
+</p>
+<p>
+  {@link android.view.accessibility.AccessibilityRecord} contains information
+  about state change of its source {@link android.view.View}. When a view fires
+  an accessibility event it requests from its parent to dispatch the
+  constructed event. The parent may optionally append a record for itself for
+  providing more context to {@link android.accessibilityservice.AccessibilityService}s.
+  Hence, accessibility services can facilitate additional accessibility records
+  to enhance feedback.
+</p>
+<p>
+  {@link android.view.accessibility.AccessibilityNodeInfo} represents a node of the
+  window content as well as actions that can be requested from its source. From the point
+  of view of an {@link android.accessibilityservice.AccessibilityService} a window content is
+  presented as tree of accessibility node info which may or may not map one-to-one
+  to the view hierarchy. In other words, a custom view is free to report itself as
+  a tree of accessibility node info.
+</p>
+<p>
+  {@link android.view.accessibility.AccessibilityManager} is a system level service that
+  serves as an event dispatch for  {@link android.view.accessibility.AccessibilityEvent}s,
+  and provides facilities for querying the accessibility state of the system. Accessibility
+  events are generated when something notable happens in the user interface, for example an
+  {@link android.app.Activity} starts, the focus or selection of a {@link android.view.View}
+  changes etc. Parties interested in handling accessibility events implement and register an
+  accessibility service which extends {@link android.accessibilityservice.AccessibilityService}.
+</p>
+</body>
+</html>

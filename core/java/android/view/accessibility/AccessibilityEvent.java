@@ -25,40 +25,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * <p>
  * This class represents accessibility events that are sent by the system when
  * something notable happens in the user interface. For example, when a
  * {@link android.widget.Button} is clicked, a {@link android.view.View} is focused, etc.
+ * </p>
  * <p>
  * An accessibility event is fired by an individual view which populates the event with
- * a record for its state and requests from its parent to send the event to interested
- * parties. The parent can optionally add a record for itself before dispatching a similar
- * request to its parent. A parent can also choose not to respect the request for sending
- * an event. The accessibility event is sent by the topmost view in the view tree.
- * Therefore, an {@link android.accessibilityservice.AccessibilityService} can explore
- * all records in an accessibility event to obtain more information about the context
- * in which the event was fired.
+ * data for its state and requests from its parent to send the event to interested
+ * parties. The parent can optionally add an {@link AccessibilityRecord} for itself before
+ * dispatching a similar request to its parent. A parent can also choose not to respect the
+ * request for sending an event. The accessibility event is sent by the topmost view in the
+ * view tree. Therefore, an {@link android.accessibilityservice.AccessibilityService} can
+ * explore all records in an accessibility event to obtain more information about the
+ * context in which the event was fired.
+ * </p>
  * <p>
- * A client can add, remove, and modify records. The getters and setters for individual
- * properties operate on the current record which can be explicitly set by the client. By
- * default current is the first record. Thus, querying a record would require setting
- * it as the current one and interacting with the property getters and setters.
+ * The main purpose of an accessibility event is to expose enough information for an
+ * {@link android.accessibilityservice.AccessibilityService} to provide meaningful feedback
+ * to the user. Sometimes however, an accessibility service may need more contextual
+ * information then the one in the event pay-load. In such cases the service can obtain
+ * the event source which is an {@link AccessibilityNodeInfo} (snapshot of a View state)
+ * which can be used for exploring the window content. Note that the privilege for accessing
+ * an event's source, thus the window content, has to be explicitly requested. For more
+ * details refer to {@link android.accessibilityservice.AccessibilityService}. If an
+ * accessibility service has not requested to retrieve the window content the event will
+ * not contain reference to its source. Also for events of type
+ * {@link #TYPE_NOTIFICATION_STATE_CHANGED} the source is never available.
+ * </p>
  * <p>
  * This class represents various semantically different accessibility event
- * types. Each event type has associated a set of related properties. In other
+ * types. Each event type has an associated set of related properties. In other
  * words, each event type is characterized via a subset of the properties exposed
  * by this class. For each event type there is a corresponding constant defined
- * in this class. Since some event types are semantically close there are mask
- * constants that group them together. Follows a specification of the event
- * types and their associated properties:
+ * in this class. Follows a specification of the event types and their associated properties:
+ * </p>
  * <p>
- * <b>VIEW TYPES</b> <br>
+ * <b>VIEW TYPES</b></br>
+ * </p>
  * <p>
  * <b>View clicked</b> - represents the event of clicking on a {@link android.view.View}
- * like {@link android.widget.Button}, {@link android.widget.CompoundButton}, etc. <br>
- * Type:{@link #TYPE_VIEW_CLICKED} <br>
- * Properties:</br>
+ * like {@link android.widget.Button}, {@link android.widget.CompoundButton}, etc.</br>
+ * <em>Type:</em>{@link #TYPE_VIEW_CLICKED}</br>
+ * <em>Properties:</em></br>
  * <ul>
- *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
@@ -67,13 +78,14 @@ import java.util.List;
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isChecked()} - Whether the source is checked.</li>
  * </ul>
+ * </p>
  * <p>
  * <b>View long clicked</b> - represents the event of long clicking on a {@link android.view.View}
- * like {@link android.widget.Button}, {@link android.widget.CompoundButton}, etc. <br>
- * Type:{@link #TYPE_VIEW_LONG_CLICKED} <br>
- * Properties:</br>
+ * like {@link android.widget.Button}, {@link android.widget.CompoundButton}, etc </br>
+ * <em>Type:</em>{@link #TYPE_VIEW_LONG_CLICKED}</br>
+ * <em>Properties:</em></br>
  * <ul>
- *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
@@ -82,13 +94,14 @@ import java.util.List;
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isChecked()} - Whether the source is checked.</li>
  * </ul>
+ * </p>
  * <p>
  * <b>View selected</b> - represents the event of selecting an item usually in
- * the context of an {@link android.widget.AdapterView}. <br>
- * Type: {@link #TYPE_VIEW_SELECTED} <br>
- * Properties:</br>
+ * the context of an {@link android.widget.AdapterView}.</br>
+ * <em>Type:</em> {@link #TYPE_VIEW_SELECTED}</br>
+ * <em>Properties:</em></br>
  * <ul>
- *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
@@ -96,17 +109,17 @@ import java.util.List;
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isChecked()} - Whether the source is checked.</li>
- *   <li>{@link #getItemCount()} -The number of selectable items of the source.</li>
+ *   <li>{@link #getItemCount()} - The number of selectable items of the source.</li>
  *   <li>{@link #getCurrentItemIndex()} - The currently selected item index.</li>
  * </ul>
- * <p>
+ * </p>
  * <p>
  * <b>View focused</b> - represents the event of focusing a
- * {@link android.view.View}. <br>
- * Type: {@link #TYPE_VIEW_FOCUSED} <br>
- * Properties:</br>
+ * {@link android.view.View}.</br>
+ * <em>Type:</em> {@link #TYPE_VIEW_FOCUSED}</br>
+ * <em>Properties:</em></br>
  * <ul>
- *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
@@ -114,16 +127,17 @@ import java.util.List;
  *   <li>{@link #isEnabled()} - Whether the source is enabled.</li>
  *   <li>{@link #isPassword()} - Whether the source is password.</li>
  *   <li>{@link #isChecked()} - Whether the source is checked.</li>
- *   <li>{@link #getItemCount()} -The number of focusable items on the screen.</li>
+ *   <li>{@link #getItemCount()} - The number of focusable items on the screen.</li>
  *   <li>{@link #getCurrentItemIndex()} - The currently focused item index.</li>
  * </ul>
+ * </p>
  * <p>
  * <b>View text changed</b> - represents the event of changing the text of an
- * {@link android.widget.EditText}. <br>
- * Type: {@link #TYPE_VIEW_TEXT_CHANGED} <br>
- * Properties:</br>
+ * {@link android.widget.EditText}.</br>
+ * <em>Type:</em> {@link #TYPE_VIEW_TEXT_CHANGED}</br>
+ * <em>Properties:</em></br>
  * <ul>
- *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
@@ -136,13 +150,14 @@ import java.util.List;
  *   <li>{@link #getRemovedCount()} - The number of removed characters.</li>
  *   <li>{@link #getBeforeText()} - The text of the source before the change.</li>
  * </ul>
+ * </p>
  * <p>
  * <b>View text selection changed</b> - represents the event of changing the text
- * selection of an {@link android.widget.EditText}.<br>
- * Type: {@link #TYPE_VIEW_TEXT_SELECTION_CHANGED} <br>
- * Properties:</br>
+ * selection of an {@link android.widget.EditText}.</br>
+ * <em>Type:</em> {@link #TYPE_VIEW_TEXT_SELECTION_CHANGED} </br>
+ * <em>Properties:</em></br>
  * <ul>
- *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
@@ -152,7 +167,8 @@ import java.util.List;
  *   <li>{@link #getFromIndex()} - The selection start index.</li>
  *   <li>{@link #getToIndex()} - The selection end index.</li>
  *   <li>{@link #getItemCount()} - The length of the source text.</li>
- * <ul>
+ * </ul>
+ * </p>
  * <p>
  * <b>View scrolled</b> - represents the event of scrolling a view. If
  * the source is a descendant of {@link android.widget.AdapterView} the
@@ -161,11 +177,11 @@ import java.util.List;
  * is unaware if its pixel size since its adapter is responsible for
  * creating views. In all other cases the scroll is reported as the current
  * scroll on the X and Y axis respectively plus the height of the source in
- * pixels.<br>
- * Type: {@link #TYPE_VIEW_SCROLLED} <br>
- * Properties:</br>
+ * pixels.</br>
+ * <em>Type:</em> {@link #TYPE_VIEW_SCROLLED}</br>
+ * <em>Properties:</em></br>
  * <ul>
- *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
@@ -181,41 +197,49 @@ import java.util.List;
  *                               (for descendants of AdapterView).</li>
  *   <li>{@link #getItemCount()} - The total items of the source (for descendants of AdapterView)
  *                                 or the height of the source in pixels (all other cases).</li>
- * <ul>
+ * </ul>
+ * </p>
  * <p>
- * <b>TRANSITION TYPES</b> <br>
- * <p>
+ * <b>TRANSITION TYPES</b></br>
+ * </p>
  * <b>Window state changed</b> - represents the event of opening a
  * {@link android.widget.PopupWindow}, {@link android.view.Menu},
- * {@link android.app.Dialog}, etc. <br>
- * Type: {@link #TYPE_WINDOW_STATE_CHANGED} <br>
- * Properties:</br>
+ * {@link android.app.Dialog}, etc.</br>
+ * <em>Type:</em> {@link #TYPE_WINDOW_STATE_CHANGED}</br>
+ * <em>Properties:</em></br>
  * <ul>
- *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
  *   <li>{@link #getText()} - The text of the source.</li>
  * </ul>
+ * </p>
  * <p>
  * <b>Window content changed</b> - represents the event of change in the
  * content of a window. This change can be adding/removing view, changing
- * a view size, etc.<br>
- * Type: {@link #TYPE_WINDOW_CONTENT_CHANGED} <br>
- * Properties:</br>
+ * a view size, etc.</br>
+ * <p>
+ * <strong>Note:</strong> This event is fired only for the window source of the
+ * last accessibility event different from {@link #TYPE_NOTIFICATION_STATE_CHANGED})
+ * and its purpose is to notify clients that the content of the user interaction
+ * window has changed.
+ * </p>
+ * <em>Type:</em> {@link #TYPE_WINDOW_CONTENT_CHANGED}</br>
+ * <em>Properties:</em></br>
  * <ul>
- *   <li>{@link #getSource()} - The source info (for registered clients).</li> *
+ *   <li>{@link #getSource()} - The source info (for registered clients).</li>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
  *   <li>{@link #getEventTime()}  - The event time.</li>
- * <ul>
+ * </ul>
  * <p>
- * <b>NOTIFICATION TYPES</b> <br>
+ * <b>NOTIFICATION TYPES</b></br>
  * <p>
- * <b>Notification state changed</b> - represents the event showing/hiding
+ * <b>Notification state changed</b> - represents the event showing
  * {@link android.app.Notification}.
- * Type: {@link #TYPE_NOTIFICATION_STATE_CHANGED} <br>
- * Properties:</br>
+ * <em>Type:</em> {@link #TYPE_NOTIFICATION_STATE_CHANGED}</br>
+ * <em>Properties:</em></br>
  * <ul>
  *   <li>{@link #getClassName()} - The class name of the source.</li>
  *   <li>{@link #getPackageName()} - The package name of the source.</li>
@@ -223,15 +247,17 @@ import java.util.List;
  *   <li>{@link #getText()} - The text of the source.</li>
  *   <li>{@link #getParcelableData()} - The posted {@link android.app.Notification}.</li>
  * </ul>
+ * </p>
  * <p>
  * <b>Security note</b>
  * <p>
- * Since an event contains the text of its source privacy can be compromised by leaking of
+ * Since an event contains the text of its source privacy can be compromised by leaking
  * sensitive information such as passwords. To address this issue any event fired in response
  * to manipulation of a PASSWORD field does NOT CONTAIN the text of the password.
  *
  * @see android.view.accessibility.AccessibilityManager
  * @see android.accessibilityservice.AccessibilityService
+ * @see AccessibilityNodeInfo
  */
 public final class AccessibilityEvent extends AccessibilityRecord implements Parcelable {
     private static final boolean DEBUG = false;
@@ -285,13 +311,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     public static final int TYPE_VIEW_TEXT_CHANGED = 0x00000010;
 
     /**
-     * Represents the event of opening/closing a {@link android.widget.PopupWindow},
+     * Represents the event of opening a {@link android.widget.PopupWindow},
      * {@link android.view.Menu}, {@link android.app.Dialog}, etc.
      */
     public static final int TYPE_WINDOW_STATE_CHANGED = 0x00000020;
 
     /**
-     * Represents the event showing/hiding a {@link android.app.Notification}.
+     * Represents the event showing a {@link android.app.Notification}.
      */
     public static final int TYPE_NOTIFICATION_STATE_CHANGED = 0x00000040;
 
@@ -340,6 +366,13 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * @see #TYPE_VIEW_TEXT_CHANGED
      * @see #TYPE_WINDOW_STATE_CHANGED
      * @see #TYPE_NOTIFICATION_STATE_CHANGED
+     * @see #TYPE_VIEW_HOVER_ENTER
+     * @see #TYPE_VIEW_HOVER_EXIT
+     * @see #TYPE_TOUCH_EXPLORATION_GESTURE_START
+     * @see #TYPE_TOUCH_EXPLORATION_GESTURE_END
+     * @see #TYPE_WINDOW_CONTENT_CHANGED
+     * @see #TYPE_VIEW_SCROLLED
+     * @see #TYPE_VIEW_TEXT_SELECTION_CHANGED
      */
     public static final int TYPES_ALL_MASK = 0xFFFFFFFF;
 
@@ -432,10 +465,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
-     * Gets the records at a given index.
+     * Gets the record at a given index.
      *
      * @param index The index.
-     * @return The records at the specified index.
+     * @return The record at the specified index.
      */
     public AccessibilityRecord getRecord(int index) {
         return mRecords.get(index);
@@ -506,7 +539,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Returns a cached instance if such is available or a new one is
-     * instantiated with type property set.
+     * instantiated with its type property set.
      *
      * @param eventType The event type.
      * @return An instance.
@@ -519,7 +552,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Returns a cached instance if such is available or a new one is
-     * instantiated with type property set.
+     * initialized with from the given <code>event</code>.
      *
      * @param event The other event.
      * @return An instance.
@@ -559,9 +592,10 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     }
 
     /**
-     * Return an instance back to be reused.
+     * Recycles an instance back to be reused.
      * <p>
-     * <b>Note: You must not touch the object after calling this function.</b>
+     *   <b>Note: You must not touch the object after calling this function.</b>
+     * </p>
      *
      * @throws IllegalStateException If the event is already recycled.
      */
@@ -714,7 +748,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("; EventType: ").append(eventTypeToString(mEventType));
+        builder.append("EventType: ").append(eventTypeToString(mEventType));
         builder.append("; EventTime: ").append(mEventTime);
         builder.append("; PackageName: ").append(mPackageName);
         builder.append(super.toString());
@@ -758,11 +792,11 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
      * Returns the string representation of an event type. For example,
      * {@link #TYPE_VIEW_CLICKED} is represented by the string TYPE_VIEW_CLICKED.
      *
-     * @param feedbackType The event type
+     * @param eventType The event type
      * @return The string representation.
      */
-    public static String eventTypeToString(int feedbackType) {
-        switch (feedbackType) {
+    public static String eventTypeToString(int eventType) {
+        switch (eventType) {
             case TYPE_VIEW_CLICKED:
                 return "TYPE_VIEW_CLICKED";
             case TYPE_VIEW_LONG_CLICKED:

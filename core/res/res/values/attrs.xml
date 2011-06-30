@@ -2190,7 +2190,8 @@
         <!-- The event types this serivce would like to receive as specified in
              {@link android.view.accessibility.AccessibilityEvent}. This setting
              can be changed at runtime by calling
-             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
+             android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
         <attr name="accessibilityEventTypes">
             <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_CLICKED} events.-->
             <flag name="typeViewClicked" value="0x00000001" />
@@ -2214,17 +2215,24 @@
             <flag name="typeTouchExplorationGestureStart" value="0x00000200" />
             <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END} events. -->
             <flag name="typeTouchExplorationGestureEnd" value="0x00000400" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED} events. -->
+            <flag name="typeWindowContentChanged" value="0x00000800" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_SCROLLED} events. -->
+            <flag name="typeViewScrolled" value="0x000001000" />
+            <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPE_VIEW_TEXT_SELECTION_CHANGED} events. -->
+            <flag name="typeViewTextSelectionChanged" value="0x000002000" />
             <!-- Receives {@link android.view.accessibility.AccessibilityEvent#TYPES_ALL_MASK} i.e. all events. -->
             <flag name="typeAllMask" value="0xffffffff" />
         </attr>
         <!-- Comma separated package names from which this serivce would like to receive events (leave out for all packages).
-             This setting can be changed at runtime by calling
-             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
+             android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
         <attr name="packageNames" format="string" />
         <!-- The feedback types this serivce provides as specified in
              {@link android.accessibilityservice.AccessibilityServiceInfo}. This setting
              can be changed at runtime by calling
-             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
+             android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
         <attr name="accessibilityFeedbackType">
             <!-- Provides {@link android.accessibilityservice.AccessibilityServiceInfo#FEEDBACK_SPOKEN} feedback. -->
             <flag name="feedbackSpoken" value="0x00000001" />
@@ -2237,14 +2245,16 @@
             <!-- Provides {@link android.accessibilityservice.AccessibilityServiceInfo#FEEDBACK_GENERIC} feedback. -->
             <flag name="feedbackGeneric" value="0x00000010" />
         </attr>
-        <!-- The minimal period in milliseconds between two accessibility events are sent
-             to this serivce. This setting can be changed at runtime by calling
-             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+        <!-- The minimal period in milliseconds between two accessibility events of the same type
+             are sent to this serivce. This setting can be changed at runtime by calling
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
+             android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->>
         <attr name="notificationTimeout" format="integer" />
         <!-- Additional flags as specified in
              {@link android.accessibilityservice.AccessibilityServiceInfo}.
              This setting can be changed at runtime by calling
-             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
+             {@link android.accessibilityservice.AccessibilityService#setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)
+             android.accessibilityservice.AccessibilityService.setServiceInfo(android.accessibilityservice.AccessibilityServiceInfo)}. -->
         <attr name="accessibilityFlags">
             <!-- Has flag {@link android.accessibilityservice.AccessibilityServiceInfo#DEFAULT} -->
             <flag name="flagDefault" value="0x00000001" />
@@ -2253,7 +2263,7 @@
              the settings for this service. This setting cannot be changed at runtime. -->
         <attr name="settingsActivity" />
         <!-- Flag whether the accessibility service wants to be able to retrieve the
-             focused window content. This setting cannot be changed at runtime. -->
+             active window content. This setting cannot be changed at runtime. -->
         <attr name="canRetrieveWindowContent" format="boolean" />
     </declare-styleable>
 

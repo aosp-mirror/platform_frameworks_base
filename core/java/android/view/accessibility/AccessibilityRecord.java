@@ -25,12 +25,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Represents a record in an accessibility event. This class encapsulates
- * the information for a {@link android.view.View}. Note that not all properties
- * are applicable to all view types. For detailed information please refer to
- * {@link AccessibilityEvent}.
+ * Represents a record in an {@link AccessibilityEvent} and contains information
+ * about state change of its source {@link android.view.View}. When a view fires
+ * an accessibility event it requests from its parent to dispatch the
+ * constructed event. The parent may optionally append a record for itself
+ * for providing more context to
+ * {@link android.accessibilityservice.AccessibilityService}s. Hence,
+ * accessibility services can facilitate additional accessibility records
+ * to enhance feedback.
+ * </p>
+ * <p>
+ * Once the accessibility event containing a record is dispatched the record is
+ * made immutable and calling a state mutation method generates an error.
+ * </p>
+ * <p>
+ * <strong>Note:</strong> Not all properties are applicable to all accessibility
+ * event types. For detailed information please refer to {@link AccessibilityEvent}.
+ * </p>
  *
  * @see AccessibilityEvent
+ * @see AccessibilityManager
+ * @see android.accessibilityservice.AccessibilityService
+ * @see AccessibilityNodeInfo
  */
 public class AccessibilityRecord {
 
@@ -79,32 +95,6 @@ public class AccessibilityRecord {
     }
 
     /**
-     * Initialize this record from another one.
-     *
-     * @param record The to initialize from.
-     */
-    void init(AccessibilityRecord record) {
-        mSealed = record.mSealed;
-        mBooleanProperties = record.mBooleanProperties;
-        mCurrentItemIndex = record.mCurrentItemIndex;
-        mItemCount = record.mItemCount;
-        mFromIndex = record.mFromIndex;
-        mToIndex = record.mToIndex;
-        mScrollX = record.mScrollX;
-        mScrollY = record.mScrollY;
-        mAddedCount = record.mAddedCount;
-        mRemovedCount = record.mRemovedCount;
-        mClassName = record.mClassName;
-        mContentDescription = record.mContentDescription;
-        mBeforeText = record.mBeforeText;
-        mParcelableData = record.mParcelableData;
-        mText.addAll(record.mText);
-        mSourceWindowId = record.mSourceWindowId;
-        mSourceViewId = record.mSourceViewId;
-        mConnection = record.mConnection;
-    }
-
-    /**
      * Sets the event source.
      *
      * @param source The source.
@@ -125,13 +115,12 @@ public class AccessibilityRecord {
     /**
      * Gets the {@link AccessibilityNodeInfo} of the event source.
      * <p>
-     *   <strong>
-     *     It is a client responsibility to recycle the received info by
-     *     calling {@link AccessibilityNodeInfo#recycle()} to avoid creating
-     *     of multiple instances.
-     *   </strong>
+     *   <strong>Note:</strong> It is a client responsibility to recycle the received info
+     *   by calling {@link AccessibilityNodeInfo#recycle() AccessibilityNodeInfo#recycle()}
+     *   to avoid creating of multiple instances.
+     *
      * </p>
-     * @return The info.
+     * @return The info of the source.
      */
     public AccessibilityNodeInfo getSource() {
         enforceSealed();
@@ -641,7 +630,7 @@ public class AccessibilityRecord {
     /**
      * Return an instance back to be reused.
      * <p>
-     * <b>Note: You must not touch the object after calling this function.</b>
+     * <strong>Note:</strong> You must not touch the object after calling this function.
      *
      * @throws IllegalStateException If the record is already recycled.
      */
@@ -658,6 +647,32 @@ public class AccessibilityRecord {
                 sPoolSize++;
             }
         }
+    }
+
+    /**
+     * Initialize this record from another one.
+     *
+     * @param record The to initialize from.
+     */
+    void init(AccessibilityRecord record) {
+        mSealed = record.mSealed;
+        mBooleanProperties = record.mBooleanProperties;
+        mCurrentItemIndex = record.mCurrentItemIndex;
+        mItemCount = record.mItemCount;
+        mFromIndex = record.mFromIndex;
+        mToIndex = record.mToIndex;
+        mScrollX = record.mScrollX;
+        mScrollY = record.mScrollY;
+        mAddedCount = record.mAddedCount;
+        mRemovedCount = record.mRemovedCount;
+        mClassName = record.mClassName;
+        mContentDescription = record.mContentDescription;
+        mBeforeText = record.mBeforeText;
+        mParcelableData = record.mParcelableData;
+        mText.addAll(record.mText);
+        mSourceWindowId = record.mSourceWindowId;
+        mSourceViewId = record.mSourceViewId;
+        mConnection = record.mConnection;
     }
 
     /**

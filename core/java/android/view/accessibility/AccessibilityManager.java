@@ -37,16 +37,30 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * System level service that serves as an event dispatch for {@link AccessibilityEvent}s.
- * Such events are generated when something notable happens in the user interface,
+ * System level service that serves as an event dispatch for {@link AccessibilityEvent}s,
+ * and provides facilities for querying the accessibility state of the system.
+ * Accessibility events are generated when something notable happens in the user interface,
  * for example an {@link android.app.Activity} starts, the focus or selection of a
  * {@link android.view.View} changes etc. Parties interested in handling accessibility
  * events implement and register an accessibility service which extends
  * {@link android.accessibilityservice.AccessibilityService}.
+ * <p>
+ * To obtain a handle to the accessibility manager do the following:
+ * </p>
+ * <p>
+ * <code>
+ * <pre>
+ *   AccessibilityManager accessibilityManager =
+ *           (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
+ * </pre>
+ * </code>
+ * </p>
  *
  * @see AccessibilityEvent
+ * @see AccessibilityNodeInfo
  * @see android.accessibilityservice.AccessibilityService
- * @see android.content.Context#getSystemService
+ * @see Context#getSystemService
+ * @see Context#ACCESSIBILITY_SERVICE
  */
 public final class AccessibilityManager {
     private static final boolean DEBUG = false;
@@ -72,10 +86,11 @@ public final class AccessibilityManager {
      * Listener for the accessibility state.
      */
     public interface AccessibilityStateChangeListener {
+
         /**
          * Called back on change in the accessibility state.
          *
-         * @param enabled
+         * @param enabled Whether accessibility is enabled.
          */
         public void onAccessibilityStateChanged(boolean enabled);
     }
@@ -118,6 +133,9 @@ public final class AccessibilityManager {
                 sInstance = new AccessibilityManager(context, service);
             }
         }
+
+        AccessibilityManager accessibilityManager =
+            (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
         return sInstance;
     }
 
@@ -142,9 +160,9 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Returns if the {@link AccessibilityManager} is enabled.
+     * Returns if the accessibility in the system is enabled.
      *
-     * @return True if this {@link AccessibilityManager} is enabled, false otherwise.
+     * @return True if accessibility is enabled, false otherwise.
      */
     public boolean isEnabled() {
         synchronized (mHandler) {
@@ -165,13 +183,11 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Sends an {@link AccessibilityEvent}. If this {@link AccessibilityManager} is not
-     * enabled the call is a NOOP.
+     * Sends an {@link AccessibilityEvent}.
      *
-     * @param event The {@link AccessibilityEvent}.
+     * @param event The event to send.
      *
-     * @throws IllegalStateException if a client tries to send an {@link AccessibilityEvent}
-     *         while accessibility is not enabled.
+     * @throws IllegalStateException if accessibility is not enabled.
      */
     public void sendAccessibilityEvent(AccessibilityEvent event) {
         if (!mIsEnabled) {
@@ -199,7 +215,7 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Requests interruption of the accessibility feedback from all accessibility services.
+     * Requests feedback interruption from all accessibility services.
      */
     public void interrupt() {
         if (!mIsEnabled) {
@@ -256,13 +272,20 @@ public final class AccessibilityManager {
      * Returns the {@link AccessibilityServiceInfo}s of the enabled accessibility services
      * for a given feedback type.
      *
-     * @param feedbackType The feedback type (can be bitwise or of multiple types).
+     * @param feedbackTypeFlags The feedback type flags.
      * @return An unmodifiable list with {@link AccessibilityServiceInfo}s.
+     *
+     * @see AccessibilityServiceInfo#FEEDBACK_AUDIBLE
+     * @see AccessibilityServiceInfo#FEEDBACK_GENERIC
+     * @see AccessibilityServiceInfo#FEEDBACK_HAPTIC
+     * @see AccessibilityServiceInfo#FEEDBACK_SPOKEN
+     * @see AccessibilityServiceInfo#FEEDBACK_VISUAL
      */
-    public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType) {
+    public List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(
+            int feedbackTypeFlags) {
         List<AccessibilityServiceInfo> services = null;
         try {
-            services = mService.getEnabledAccessibilityServiceList(feedbackType);
+            services = mService.getEnabledAccessibilityServiceList(feedbackTypeFlags);
             if (DEBUG) {
                 Log.i(LOG_TAG, "Installed AccessibilityServices " + services);
             }
@@ -273,7 +296,8 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Registers an {@link AccessibilityStateChangeListener}.
+     * Registers an {@link AccessibilityStateChangeListener} for changes in
+     * the global accessibility state of the system.
      *
      * @param listener The listener.
      * @return True if successfully registered.
