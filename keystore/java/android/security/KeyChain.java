@@ -45,8 +45,12 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import libcore.util.Objects;
+import org.apache.harmony.xnet.provider.jsse.TrustedCertificateStore;
 
 /**
  * The {@code KeyChain} class provides access to private keys and
@@ -385,7 +389,21 @@ public final class KeyChain {
             }
             IKeyChainService keyChainService = keyChainConnection.getService();
             byte[] certificateBytes = keyChainService.getCertificate(alias, authToken);
-            return new X509Certificate[] { toCertificate(certificateBytes) };
+            List<X509Certificate> chain = new ArrayList<X509Certificate>();
+            chain.add(toCertificate(certificateBytes));
+            TrustedCertificateStore store = new TrustedCertificateStore();
+            for (int i = 0; true; i++) {
+                X509Certificate cert = chain.get(i);
+                if (Objects.equal(cert.getSubjectX500Principal(), cert.getIssuerX500Principal())) {
+                    break;
+                }
+                X509Certificate issuer = store.findIssuer(cert);
+                if (issuer == null) {
+                    break;
+                }
+                chain.add(issuer);
+            }
+            return chain.toArray(new X509Certificate[chain.size()]);
         } catch (RemoteException e) {
             throw new KeyChainException(e);
         } catch (RuntimeException e) {
