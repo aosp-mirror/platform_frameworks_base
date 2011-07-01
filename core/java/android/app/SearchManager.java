@@ -329,6 +329,15 @@ public class SearchManager
     public final static String SUGGEST_COLUMN_FLAGS = "suggest_flags";
 
     /**
+     * Column name for suggestions cursor. <i>Optional.</i> This column may be
+     * used to specify the time in (@link System#currentTimeMillis
+     * System.currentTImeMillis()} (wall time in UTC) when an item was last
+     * accessed within the results-providing application. If set, this may be
+     * used to show more-recently-used items first.
+     */
+    public final static String SUGGEST_COLUMN_LAST_ACCESS_HINT = "suggest_last_access_hint";
+
+    /**
      * Column value for suggestion column {@link #SUGGEST_COLUMN_SHORTCUT_ID} when a suggestion
      * should not be stored as a shortcut in global search.
      */
