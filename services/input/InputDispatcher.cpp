@@ -1239,8 +1239,9 @@ int32_t InputDispatcher::findTouchedWindowTargetsLocked(nsecs_t currentTime,
     const InputWindow* newHoverWindow = NULL;
 
     bool isSplit = mTouchState.split;
-    bool switchedDevice = mTouchState.deviceId != entry->deviceId
-            || mTouchState.source != entry->source;
+    bool switchedDevice = mTouchState.deviceId >= 0
+            && (mTouchState.deviceId != entry->deviceId
+                    || mTouchState.source != entry->source);
     bool isHoverAction = (maskedAction == AMOTION_EVENT_ACTION_HOVER_MOVE
             || maskedAction == AMOTION_EVENT_ACTION_HOVER_ENTER
             || maskedAction == AMOTION_EVENT_ACTION_HOVER_EXIT);
