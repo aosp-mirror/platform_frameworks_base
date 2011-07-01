@@ -63,7 +63,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
     private static final String TAG = "UsageStats";
     
     // Current on-disk Parcel version
-    private static final int VERSION = 1005;
+    private static final int VERSION = 1006;
 
     private static final int CHECKIN_VERSION = 4;
     
@@ -145,6 +145,8 @@ public final class UsageStatsService extends IUsageStats.Stub {
         final HashMap<String, TimeStats> mLaunchTimes
                 = new HashMap<String, TimeStats>();
         int mLaunchCount;
+        final HashMap<String, Long> mLastResumeTimes
+                = new HashMap<String, Long>();
         long mUsageTime;
         long mPausedTime;
         long mResumedTime;
@@ -160,20 +162,28 @@ public final class UsageStatsService extends IUsageStats.Stub {
             if (localLOGV) Slog.v(TAG, "Launch count: " + mLaunchCount
                     + ", Usage time:" + mUsageTime);
             
-            final int N = in.readInt();
-            if (localLOGV) Slog.v(TAG, "Reading comps: " + N);
-            for (int i=0; i<N; i++) {
+            final int numTimeStats = in.readInt();
+            if (localLOGV) Slog.v(TAG, "Reading comps: " + numTimeStats);
+            for (int i=0; i<numTimeStats; i++) {
                 String comp = in.readString();
                 if (localLOGV) Slog.v(TAG, "Component: " + comp);
                 TimeStats times = new TimeStats(in);
                 mLaunchTimes.put(comp, times);
             }
+            final int numResumeTimes = in.readInt();
+            if (localLOGV) Slog.v(TAG, "Reading last resume times: " + numResumeTimes);
+            for (int i=0; i<numResumeTimes; i++) {
+                String comp = in.readString();
+                if (localLOGV) Slog.v(TAG, "Component: " + comp);
+                mLastResumeTimes.put(comp, in.readLong());
+            }
         }
-        
-        void updateResume(boolean launched) {
+
+        void updateResume(String comp, boolean launched) {
             if (launched) {
                 mLaunchCount ++;
             }
+            mLastResumeTimes.put(comp, System.currentTimeMillis());
             mResumedTime = SystemClock.elapsedRealtime();
         }
         
@@ -203,13 +213,21 @@ public final class UsageStatsService extends IUsageStats.Stub {
         void writeToParcel(Parcel out) {
             out.writeInt(mLaunchCount);
             out.writeLong(mUsageTime);
-            final int N = mLaunchTimes.size();
-            out.writeInt(N);
-            if (N > 0) {
+            final int numTimeStats = mLaunchTimes.size();
+            out.writeInt(numTimeStats);
+            if (numTimeStats > 0) {
                 for (Map.Entry<String, TimeStats> ent : mLaunchTimes.entrySet()) {
                     out.writeString(ent.getKey());
                     TimeStats times = ent.getValue();
                     times.writeToParcel(out);
+                }
+            }
+            final int numResumeTimes = mLastResumeTimes.size();
+            out.writeInt(numResumeTimes);
+            if (numResumeTimes > 0) {
+                for (Map.Entry<String, Long> ent : mLastResumeTimes.entrySet()) {
+                    out.writeString(ent.getKey());
+                    out.writeLong(ent.getValue());
                 }
             }
         }
@@ -217,6 +235,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
         void clear() {
             mLaunchTimes.clear();
             mLaunchCount = 0;
+            mLastResumeTimes.clear();
             mUsageTime = 0;
         }
     }
@@ -546,7 +565,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 pus = new PkgUsageStatsExtended();
                 mStats.put(pkgName, pus);
             }
-            pus.updateResume(!samePackage);
+            pus.updateResume(mLastResumedComp, !samePackage);
             if (!sameComp) {
                 pus.addLaunchCount(mLastResumedComp);
             }
@@ -624,7 +643,8 @@ public final class UsageStatsService extends IUsageStats.Stub {
             if (pus == null) {
                return null;
             }
-            return new PkgUsageStats(pkgName, pus.mLaunchCount, pus.mUsageTime);
+            return new PkgUsageStats(pkgName, pus.mLaunchCount, pus.mUsageTime,
+                    pus.mLastResumeTimes);
         }
     }
     
@@ -641,7 +661,8 @@ public final class UsageStatsService extends IUsageStats.Stub {
             int i = 0;
             for (String key: keys) {
                 PkgUsageStatsExtended pus = mStats.get(key);
-                retArr[i] = new PkgUsageStats(key, pus.mLaunchCount, pus.mUsageTime);
+                retArr[i] = new PkgUsageStats(key, pus.mLaunchCount, pus.mUsageTime,
+                        pus.mLastResumeTimes);
                 i++;
             }
             return retArr;
