@@ -5394,7 +5394,6 @@ void SingleTouchInputMapper::configureRawAxes() {
 
 MultiTouchInputMapper::MultiTouchInputMapper(InputDevice* device) :
         TouchInputMapper(device), mSlotCount(0), mUsingSlotsProtocol(false) {
-    clearState();
 }
 
 MultiTouchInputMapper::~MultiTouchInputMapper() {
@@ -5404,6 +5403,24 @@ void MultiTouchInputMapper::clearState() {
     mAccumulator.clearSlots(mSlotCount);
     mAccumulator.clearButtons();
     mButtonState = 0;
+
+    if (mUsingSlotsProtocol) {
+        // Query the driver for the current slot index and use it as the initial slot
+        // before we start reading events from the device.  It is possible that the
+        // current slot index will not be the same as it was when the first event was
+        // written into the evdev buffer, which means the input mapper could start
+        // out of sync with the initial state of the events in the evdev buffer.
+        // In the extremely unlikely case that this happens, the data from
+        // two slots will be confused until the next ABS_MT_SLOT event is received.
+        // This can cause the touch point to "jump", but at least there will be
+        // no stuck touches.
+        status_t status = getEventHub()->getAbsoluteAxisValue(getDeviceId(), ABS_MT_SLOT,
+                &mAccumulator.currentSlot);
+        if (status) {
+            LOGW("Could not retrieve current multitouch slot index.  status=%d", status);
+            mAccumulator.currentSlot = -1;
+        }
+    }
 }
 
 void MultiTouchInputMapper::reset() {
@@ -5682,6 +5699,8 @@ void MultiTouchInputMapper::configureRawAxes() {
     }
 
     mAccumulator.allocateSlots(mSlotCount);
+
+    clearState();
 }
 
 

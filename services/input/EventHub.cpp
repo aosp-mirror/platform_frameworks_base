@@ -212,8 +212,8 @@ status_t EventHub::getAbsoluteAxisInfo(int32_t deviceId, int axis,
     struct input_absinfo info;
 
     if(ioctl(device->fd, EVIOCGABS(axis), &info)) {
-        LOGW("Error reading absolute controller %d for device %s fd %d\n",
-             axis, device->identifier.name.string(), device->fd);
+        LOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
+             axis, device->identifier.name.string(), device->fd, errno);
         return -errno;
     }
 
@@ -333,6 +333,33 @@ int32_t EventHub::getSwitchStateLocked(Device* device, int32_t sw) const {
         return test_bit(sw, sw_bitmask) ? AKEY_STATE_DOWN : AKEY_STATE_UP;
     }
     return AKEY_STATE_UNKNOWN;
+}
+
+status_t EventHub::getAbsoluteAxisValue(int32_t deviceId, int32_t axis, int32_t* outValue) const {
+    if (axis >= 0 && axis <= ABS_MAX) {
+        AutoMutex _l(mLock);
+
+        Device* device = getDeviceLocked(deviceId);
+        if (device != NULL) {
+            return getAbsoluteAxisValueLocked(device, axis, outValue);
+        }
+    }
+    *outValue = 0;
+    return -1;
+}
+
+status_t EventHub::getAbsoluteAxisValueLocked(Device* device, int32_t axis,
+        int32_t* outValue) const {
+    struct input_absinfo info;
+
+     if(ioctl(device->fd, EVIOCGABS(axis), &info)) {
+         LOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
+              axis, device->identifier.name.string(), device->fd, errno);
+         return -errno;
+     }
+
+     *outValue = info.value;
+     return OK;
 }
 
 bool EventHub::markSupportedKeyCodes(int32_t deviceId, size_t numCodes,

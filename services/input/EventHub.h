@@ -186,6 +186,8 @@ public:
     virtual int32_t getScanCodeState(int32_t deviceId, int32_t scanCode) const = 0;
     virtual int32_t getKeyCodeState(int32_t deviceId, int32_t keyCode) const = 0;
     virtual int32_t getSwitchState(int32_t deviceId, int32_t sw) const = 0;
+    virtual status_t getAbsoluteAxisValue(int32_t deviceId, int32_t axis,
+            int32_t* outValue) const = 0;
 
     /*
      * Examine key input devices for specific framework keycode support
@@ -237,6 +239,7 @@ public:
     virtual int32_t getScanCodeState(int32_t deviceId, int32_t scanCode) const;
     virtual int32_t getKeyCodeState(int32_t deviceId, int32_t keyCode) const;
     virtual int32_t getSwitchState(int32_t deviceId, int32_t sw) const;
+    virtual status_t getAbsoluteAxisValue(int32_t deviceId, int32_t axis, int32_t* outValue) const;
 
     virtual bool markSupportedKeyCodes(int32_t deviceId, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags) const;
@@ -305,6 +308,7 @@ private:
     int32_t getScanCodeStateLocked(Device* device, int32_t scanCode) const;
     int32_t getKeyCodeStateLocked(Device* device, int32_t keyCode) const;
     int32_t getSwitchStateLocked(Device* device, int32_t sw) const;
+    int32_t getAbsoluteAxisValueLocked(Device* device, int32_t axis, int32_t* outValue) const;
     bool markSupportedKeyCodesLocked(Device* device, size_t numCodes,
             const int32_t* keyCodes, uint8_t* outFlags) const;
 
