@@ -1535,6 +1535,9 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
     @Override
     protected void onSetDependencyMet(String apnType, boolean met) {
+        // don't allow users to tweak hipri to work around default dependency not met
+        if (Phone.APN_TYPE_HIPRI.equals(apnType)) return;
+
         ApnContext apnContext = mApnContexts.get(apnType);
         if (apnContext == null) {
             loge("onSetDependencyMet: ApnContext not found in onSetDependencyMet(" +
@@ -1542,6 +1545,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
             return;
         }
         applyNewState(apnContext, apnContext.isEnabled(), met);
+        if (Phone.APN_TYPE_DEFAULT.equals(apnType)) {
+            // tie actions on default to similar actions on HIPRI regarding dependencyMet
+            apnContext = mApnContexts.get(Phone.APN_TYPE_HIPRI);
+            if (apnContext != null) applyNewState(apnContext, apnContext.isEnabled(), met);
+        }
     }
 
     private void applyNewState(ApnContext apnContext, boolean enabled, boolean met) {
