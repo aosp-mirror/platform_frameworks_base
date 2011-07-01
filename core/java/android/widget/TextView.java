@@ -10177,6 +10177,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 foundStrongLtr = true;
             } else if (isStrongRtlChar(dir)) {
                 foundStrongRtl = true;
+                break;
             }
         }
         if (foundStrongRtl) {

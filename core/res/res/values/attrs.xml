@@ -1978,7 +1978,7 @@
             <!-- Default -->
             <enum name="inherit" value="0" />
             <!-- Default for the root view. The first strong directional character determines the
-                 paragraph direction.  If there is o strong directional character, the paragraph
+                 paragraph direction.  If there is no strong directional character, the paragraph
                  direction is the view’s resolved layout direction. -->
             <enum name="firstStrong" value="1" />
             <!-- The paragraph direction is RTL if it contains any strong RTL character, otherwise

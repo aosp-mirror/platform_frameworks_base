@@ -5027,10 +5027,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 if (mParent != null && mParent instanceof ViewGroup) {
                     resolvedTextDirection = ((ViewGroup) mParent).getResolvedTextDirection();
                 } else {
-                    // We reached the top of the View hierarchy, so get the direction from
-                    // the Locale
-                    resolvedTextDirection = isLayoutDirectionRtl(Locale.getDefault()) ?
-                            TEXT_DIRECTION_RTL : TEXT_DIRECTION_LTR;
+                    // We reached the top of the View hierarchy, so set the text direction
+                    // heuristic to "first strong"
+                    resolvedTextDirection = TEXT_DIRECTION_FIRST_STRONG;
                 }
                 break;
             // Pass down the hierarchy the following text direction values
