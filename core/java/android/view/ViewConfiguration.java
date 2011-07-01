@@ -19,6 +19,8 @@ package android.view;
 import android.app.AppGlobals;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.SparseArray;
@@ -219,6 +221,9 @@ public class ViewConfiguration {
     private final int mOverscrollDistance;
     private final int mOverflingDistance;
 
+    private boolean sHasPermanentMenuKey;
+    private boolean sHasPermanentMenuKeySet;
+
     private static final SparseArray<ViewConfiguration> sConfigurations =
             new SparseArray<ViewConfiguration>(2);
 
@@ -254,11 +259,12 @@ public class ViewConfiguration {
      * @see android.util.DisplayMetrics
      */
     private ViewConfiguration(Context context) {
-        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        final Resources res = context.getResources();
+        final DisplayMetrics metrics = res.getDisplayMetrics();
+        final Configuration config = res.getConfiguration();
         final float density = metrics.density;
         final float sizeAndDensity;
-        if (context.getResources().getConfiguration().isLayoutSizeAtLeast(
-                Configuration.SCREENLAYOUT_SIZE_XLARGE)) {
+        if (config.isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_XLARGE)) {
             sizeAndDensity = density * 1.5f;
         } else {
             sizeAndDensity = density;
@@ -280,6 +286,17 @@ public class ViewConfiguration {
 
         mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
         mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
+
+        if (!sHasPermanentMenuKeySet) {
+            IWindowManager wm = Display.getWindowManager();
+            try {
+                sHasPermanentMenuKey = wm.canStatusBarHide() && !res.getBoolean(
+                        com.android.internal.R.bool.config_showNavigationBar);
+                sHasPermanentMenuKeySet = true;
+            } catch (RemoteException ex) {
+                sHasPermanentMenuKey = false;
+            }
+        }
     }
 
     /**
@@ -639,5 +656,21 @@ public class ViewConfiguration {
      */
     public static float getScrollFriction() {
         return SCROLL_FRICTION;
+    }
+
+    /**
+     * Report if the device has a permanent menu key available to the user.
+     *
+     * <p>As of Android 3.0, devices may not have a permanent menu key available.
+     * Apps should use the action bar to present menu options to users.
+     * However, there are some apps where the action bar is inappropriate
+     * or undesirable. This method may be used to detect if a menu key is present.
+     * If not, applications should provide another on-screen affordance to access
+     * functionality.
+     *
+     * @return true if a permanent menu key is present, false otherwise.
+     */
+    public boolean hasPermanentMenuKey() {
+        return sHasPermanentMenuKey;
     }
 }
