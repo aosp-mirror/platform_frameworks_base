@@ -429,6 +429,7 @@ class FakeEventHub : public EventHubInterface {
         KeyedVector<int32_t, int32_t> keyCodeStates;
         KeyedVector<int32_t, int32_t> scanCodeStates;
         KeyedVector<int32_t, int32_t> switchStates;
+        KeyedVector<int32_t, int32_t> absoluteAxisValue;
         KeyedVector<int32_t, KeyInfo> keys;
         KeyedVector<int32_t, bool> leds;
         Vector<VirtualKeyDefinition> virtualKeys;
@@ -512,6 +513,11 @@ public:
     void setSwitchState(int32_t deviceId, int32_t switchCode, int32_t state) {
         Device* device = getDevice(deviceId);
         device->switchStates.replaceValueFor(switchCode, state);
+    }
+
+    void setAbsoluteAxisValue(int32_t deviceId, int32_t axis, int32_t value) {
+        Device* device = getDevice(deviceId);
+        device->absoluteAxisValue.replaceValueFor(axis, value);
     }
 
     void addKey(int32_t deviceId, int32_t scanCode, int32_t keyCode, uint32_t flags) {
@@ -675,6 +681,20 @@ private:
             }
         }
         return AKEY_STATE_UNKNOWN;
+    }
+
+    virtual status_t getAbsoluteAxisValue(int32_t deviceId, int32_t axis,
+            int32_t* outValue) const {
+        Device* device = getDevice(deviceId);
+        if (device) {
+            ssize_t index = device->absoluteAxisValue.indexOfKey(axis);
+            if (index >= 0) {
+                *outValue = device->absoluteAxisValue.valueAt(index);
+                return OK;
+            }
+        }
+        *outValue = 0;
+        return -1;
     }
 
     virtual bool markSupportedKeyCodes(int32_t deviceId, size_t numCodes, const int32_t* keyCodes,
