@@ -83,6 +83,8 @@ public final class SipService extends ISipService.Stub {
     private WifiScanProcess mWifiScanProcess;
     private WifiManager.WifiLock mWifiLock;
     private boolean mWifiOnly;
+    private BroadcastReceiver mWifiStateReceiver = null;
+
     private IntervalMeasurementProcess mIntervalMeasurementProcess;
 
     private MyExecutor mExecutor = new MyExecutor();
@@ -123,40 +125,47 @@ public final class SipService extends ISipService.Stub {
         mWifiOnly = SipManager.isSipWifiOnly(context);
     }
 
-    private BroadcastReceiver mWifiStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(action)) {
-                int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
-                        WifiManager.WIFI_STATE_UNKNOWN);
-                synchronized (SipService.this) {
-                    switch (state) {
-                        case WifiManager.WIFI_STATE_ENABLED:
-                            mWifiEnabled = true;
-                            if (anyOpenedToReceiveCalls()) grabWifiLock();
-                            break;
-                        case WifiManager.WIFI_STATE_DISABLED:
-                            mWifiEnabled = false;
-                            releaseWifiLock();
-                            break;
+    private BroadcastReceiver createWifiBroadcastReceiver() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (WifiManager.WIFI_STATE_CHANGED_ACTION.equals(action)) {
+                    int state = intent.getIntExtra(WifiManager.EXTRA_WIFI_STATE,
+                            WifiManager.WIFI_STATE_UNKNOWN);
+                    synchronized (SipService.this) {
+                        switch (state) {
+                            case WifiManager.WIFI_STATE_ENABLED:
+                                mWifiEnabled = true;
+                                if (anyOpenedToReceiveCalls()) grabWifiLock();
+                                break;
+                            case WifiManager.WIFI_STATE_DISABLED:
+                                mWifiEnabled = false;
+                                releaseWifiLock();
+                                break;
+                        }
                     }
                 }
             }
-        }
+        };
     };
 
     private void registerReceivers() {
         mContext.registerReceiver(mConnectivityReceiver,
                 new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        mContext.registerReceiver(mWifiStateReceiver,
-                new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
+        if (SipManager.isSipWifiOnly(mContext)) {
+            mWifiStateReceiver = createWifiBroadcastReceiver();
+            mContext.registerReceiver(mWifiStateReceiver,
+                    new IntentFilter(WifiManager.WIFI_STATE_CHANGED_ACTION));
+        }
         if (DEBUG) Log.d(TAG, " +++ register receivers");
     }
 
     private void unregisterReceivers() {
         mContext.unregisterReceiver(mConnectivityReceiver);
-        mContext.unregisterReceiver(mWifiStateReceiver);
+        if (SipManager.isSipWifiOnly(mContext)) {
+            mContext.unregisterReceiver(mWifiStateReceiver);
+        }
         if (DEBUG) Log.d(TAG, " --- unregister receivers");
     }
 
