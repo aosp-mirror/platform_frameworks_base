@@ -55,6 +55,12 @@ status_t NuPlayerDriver::initCheck() {
     return OK;
 }
 
+status_t NuPlayerDriver::setUID(uid_t uid) {
+    mPlayer->setUID(uid);
+
+    return OK;
+}
+
 status_t NuPlayerDriver::setDataSource(
         const char *url, const KeyedVector<String8, String8> *headers) {
     CHECK_EQ((int)mState, (int)UNINITIALIZED);

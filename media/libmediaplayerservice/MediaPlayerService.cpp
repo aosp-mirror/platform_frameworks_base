@@ -250,7 +250,11 @@ sp<IMediaPlayer> MediaPlayerService::create(
         const KeyedVector<String8, String8> *headers, int audioSessionId)
 {
     int32_t connId = android_atomic_inc(&mNextConnId);
-    sp<Client> c = new Client(this, pid, connId, client, audioSessionId);
+
+    sp<Client> c = new Client(
+            this, pid, connId, client, audioSessionId,
+            IPCThreadState::self()->getCallingUid());
+
     LOGV("Create new client(%d) from pid %d, url=%s, connId=%d, audioSessionId=%d",
             connId, pid, url, connId, audioSessionId);
     if (NO_ERROR != c->setDataSource(url, headers))
@@ -268,7 +272,11 @@ sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClie
         int fd, int64_t offset, int64_t length, int audioSessionId)
 {
     int32_t connId = android_atomic_inc(&mNextConnId);
-    sp<Client> c = new Client(this, pid, connId, client, audioSessionId);
+
+    sp<Client> c = new Client(
+            this, pid, connId, client, audioSessionId,
+            IPCThreadState::self()->getCallingUid());
+
     LOGV("Create new client(%d) from pid %d, fd=%d, offset=%lld, length=%lld, audioSessionId=%d",
             connId, pid, fd, offset, length, audioSessionId);
     if (NO_ERROR != c->setDataSource(fd, offset, length)) {
@@ -286,7 +294,10 @@ sp<IMediaPlayer> MediaPlayerService::create(
         pid_t pid, const sp<IMediaPlayerClient> &client,
         const sp<IStreamSource> &source, int audioSessionId) {
     int32_t connId = android_atomic_inc(&mNextConnId);
-    sp<Client> c = new Client(this, pid, connId, client, audioSessionId);
+
+    sp<Client> c = new Client(
+            this, pid, connId, client, audioSessionId,
+            IPCThreadState::self()->getCallingUid());
 
     LOGV("Create new client(%d) from pid %d, audioSessionId=%d",
          connId, pid, audioSessionId);
@@ -496,8 +507,10 @@ void MediaPlayerService::removeClient(wp<Client> client)
     mClients.remove(client);
 }
 
-MediaPlayerService::Client::Client(const sp<MediaPlayerService>& service, pid_t pid,
-        int32_t connId, const sp<IMediaPlayerClient>& client, int audioSessionId)
+MediaPlayerService::Client::Client(
+        const sp<MediaPlayerService>& service, pid_t pid,
+        int32_t connId, const sp<IMediaPlayerClient>& client,
+        int audioSessionId, uid_t uid)
 {
     LOGV("Client(%d) constructor", connId);
     mPid = pid;
@@ -507,6 +520,7 @@ MediaPlayerService::Client::Client(const sp<MediaPlayerService>& service, pid_t 
     mLoop = false;
     mStatus = NO_INIT;
     mAudioSessionId = audioSessionId;
+    mUID = uid;
 
 #if CALLBACK_ANTAGONIZER
     LOGD("create Antagonizer");
@@ -671,6 +685,9 @@ sp<MediaPlayerBase> MediaPlayerService::Client::createPlayer(player_type playerT
     if (p == NULL) {
         p = android::createPlayer(playerType, this, notify);
     }
+
+    p->setUID(mUID);
+
     return p;
 }
 

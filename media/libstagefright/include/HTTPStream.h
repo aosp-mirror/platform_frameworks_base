@@ -32,6 +32,8 @@ public:
     HTTPStream();
     ~HTTPStream();
 
+    void setUID(uid_t uid);
+
     status_t connect(const char *server, int port = -1, bool https = false);
     status_t disconnect();
 
@@ -58,6 +60,8 @@ public:
     // _excluding_ the termianting CRLF.
     status_t receive_line(char *line, size_t size);
 
+    static void RegisterSocketUser(int s, uid_t uid);
+
 private:
     enum State {
         READY,
@@ -67,6 +71,10 @@ private:
 
     State mState;
     Mutex mLock;
+
+    bool mUIDValid;
+    uid_t mUID;
+
     int mSocket;
 
     KeyedVector<AString, AString> mHeaders;

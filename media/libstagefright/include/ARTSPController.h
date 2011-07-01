@@ -30,6 +30,8 @@ struct MyHandler;
 struct ARTSPController : public MediaExtractor {
     ARTSPController(const sp<ALooper> &looper);
 
+    void setUID(uid_t uid);
+
     status_t connect(const char *url);
     void disconnect();
 
@@ -79,6 +81,9 @@ private:
     sp<ALooper> mLooper;
     sp<MyHandler> mHandler;
     sp<AHandlerReflector<ARTSPController> > mReflector;
+
+    bool mUIDValid;
+    uid_t mUID;
 
     void (*mSeekDoneCb)(void *);
     void *mSeekDoneCookie;

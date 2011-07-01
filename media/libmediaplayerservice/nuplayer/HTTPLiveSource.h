@@ -29,7 +29,9 @@ struct LiveSession;
 struct NuPlayer::HTTPLiveSource : public NuPlayer::Source {
     HTTPLiveSource(
             const char *url,
-            const KeyedVector<String8, String8> *headers);
+            const KeyedVector<String8, String8> *headers,
+            bool uidValid = false,
+            uid_t uid = 0);
 
     virtual void start();
 
@@ -54,6 +56,8 @@ private:
 
     AString mURL;
     KeyedVector<String8, String8> mExtraHeaders;
+    bool mUIDValid;
+    uid_t mUID;
     uint32_t mFlags;
     bool mEOS;
     off64_t mOffset;

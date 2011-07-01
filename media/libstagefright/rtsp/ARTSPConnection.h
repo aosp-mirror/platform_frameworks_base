@@ -33,7 +33,7 @@ struct ARTSPResponse : public RefBase {
 };
 
 struct ARTSPConnection : public AHandler {
-    ARTSPConnection();
+    ARTSPConnection(bool uidValid = false, uid_t uid = 0);
 
     void connect(const char *url, const sp<AMessage> &reply);
     void disconnect(const sp<AMessage> &reply);
@@ -74,6 +74,8 @@ private:
 
     static const int64_t kSelectTimeoutUs;
 
+    bool mUIDValid;
+    uid_t mUID;
     State mState;
     AString mUser, mPass;
     AuthType mAuthType;

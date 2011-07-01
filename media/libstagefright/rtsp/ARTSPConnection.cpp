@@ -34,13 +34,17 @@
 #include <openssl/md5.h>
 #include <sys/socket.h>
 
+#include "HTTPStream.h"
+
 namespace android {
 
 // static
 const int64_t ARTSPConnection::kSelectTimeoutUs = 1000ll;
 
-ARTSPConnection::ARTSPConnection()
-    : mState(DISCONNECTED),
+ARTSPConnection::ARTSPConnection(bool uidValid, uid_t uid)
+    : mUIDValid(uidValid),
+      mUID(uid),
+      mState(DISCONNECTED),
       mAuthType(NONE),
       mSocket(-1),
       mConnectionID(0),
@@ -245,6 +249,10 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
     }
 
     mSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (mUIDValid) {
+        HTTPStream::RegisterSocketUser(mSocket, mUID);
+    }
 
     MakeSocketBlocking(mSocket, false);
 

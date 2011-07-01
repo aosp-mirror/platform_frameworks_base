@@ -48,13 +48,15 @@ struct HTTPBase : public DataSource {
 
     virtual status_t setBandwidthStatCollectFreq(int32_t freqMs);
 
+    void setUID(uid_t uid);
+    bool getUID(uid_t *uid) const;
+
     static sp<HTTPBase> Create(uint32_t flags = 0);
 
 protected:
     void addBandwidthMeasurement(size_t numBytes, int64_t delayUs);
 
 private:
-
     struct BandwidthEntry {
         int64_t mDelayUs;
         size_t mNumBytes;
@@ -76,6 +78,8 @@ private:
     int32_t mPrevEstimatedBandWidthKbps;
     int32_t mBandWidthCollectFreqMs;
 
+    bool mUIDValid;
+    uid_t mUID;
 
     DISALLOW_EVIL_CONSTRUCTORS(HTTPBase);
 };

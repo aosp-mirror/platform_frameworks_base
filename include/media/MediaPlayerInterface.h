@@ -103,6 +103,10 @@ public:
     virtual status_t    initCheck() = 0;
     virtual bool        hardwareOutput() = 0;
 
+    virtual status_t    setUID(uid_t uid) {
+        return INVALID_OPERATION;
+    }
+
     virtual status_t    setDataSource(
             const char *url,
             const KeyedVector<String8, String8> *headers = NULL) = 0;
