@@ -29,6 +29,7 @@
 
     <string name="accept">I trust this application.</string>
 
+    <string name="legacy_title">VPN is connected</string>
     <string name="configure">Configure</string>
     <string name="disconnect">Disconnect</string>
 

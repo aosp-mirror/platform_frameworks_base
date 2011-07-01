@@ -58,7 +58,7 @@ public class VpnConfig implements Parcelable {
     public String packageName;
     public String sessionName;
     public String interfaceName;
-    public String configureActivity;
+    public PendingIntent configureIntent;
     public int mtu = -1;
     public String addresses;
     public String routes;
@@ -75,7 +75,7 @@ public class VpnConfig implements Parcelable {
         out.writeString(packageName);
         out.writeString(sessionName);
         out.writeString(interfaceName);
-        out.writeString(configureActivity);
+        out.writeParcelable(configureIntent, flags);
         out.writeInt(mtu);
         out.writeString(addresses);
         out.writeString(routes);
@@ -91,7 +91,7 @@ public class VpnConfig implements Parcelable {
             config.packageName = in.readString();
             config.sessionName = in.readString();
             config.interfaceName = in.readString();
-            config.configureActivity = in.readString();
+            config.configureIntent = in.readParcelable(null);
             config.mtu = in.readInt();
             config.addresses = in.readString();
             config.routes = in.readString();

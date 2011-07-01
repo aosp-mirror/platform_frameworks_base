@@ -64,9 +64,6 @@ public class ManageDialog extends Activity implements Handler.Callback,
             mService = IConnectivityManager.Stub.asInterface(
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
 
-            PackageManager pm = getPackageManager();
-            ApplicationInfo app = pm.getApplicationInfo(mConfig.packageName, 0);
-
             View view = View.inflate(this, R.layout.manage, null);
             if (mConfig.sessionName != null) {
                 ((TextView) view.findViewById(R.id.session)).setText(mConfig.sessionName);
@@ -75,15 +72,29 @@ public class ManageDialog extends Activity implements Handler.Callback,
             mDataTransmitted = (TextView) view.findViewById(R.id.data_transmitted);
             mDataReceived = (TextView) view.findViewById(R.id.data_received);
 
-            mDialog = new AlertDialog.Builder(this)
-                    .setIcon(app.loadIcon(pm))
-                    .setTitle(app.loadLabel(pm))
-                    .setView(view)
-                    .setNeutralButton(R.string.disconnect, this)
-                    .setNegativeButton(android.R.string.cancel, this)
-                    .create();
+            if (mConfig.packageName == null) {
+                // Legacy VPN does not have a package name.
+                mDialog = new AlertDialog.Builder(this)
+                        .setIcon(android.R.drawable.ic_dialog_info)
+                        .setTitle(R.string.legacy_title)
+                        .setView(view)
+                        .setNeutralButton(R.string.disconnect, this)
+                        .setNegativeButton(android.R.string.cancel, this)
+                        .create();
+            } else {
+                PackageManager pm = getPackageManager();
+                ApplicationInfo app = pm.getApplicationInfo(mConfig.packageName, 0);
 
-            if (mConfig.configureActivity != null) {
+                mDialog = new AlertDialog.Builder(this)
+                        .setIcon(app.loadIcon(pm))
+                        .setTitle(app.loadLabel(pm))
+                        .setView(view)
+                        .setNeutralButton(R.string.disconnect, this)
+                        .setNegativeButton(android.R.string.cancel, this)
+                        .create();
+            }
+
+            if (mConfig.configureIntent != null) {
                 mDialog.setButton(DialogInterface.BUTTON_POSITIVE,
                         getText(R.string.configure), this);
             }
@@ -113,9 +124,7 @@ public class ManageDialog extends Activity implements Handler.Callback,
     public void onClick(DialogInterface dialog, int which) {
         try {
             if (which == AlertDialog.BUTTON_POSITIVE) {
-                Intent intent = new Intent();
-                intent.setClassName(mConfig.packageName, mConfig.configureActivity);
-                startActivity(intent);
+                mConfig.configureIntent.send();
             } else if (which == AlertDialog.BUTTON_NEUTRAL) {
                 mService.prepareVpn("");
             }
