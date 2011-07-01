@@ -2013,13 +2013,18 @@ public class WebView extends AbsoluteLayout
      * Note that content specified in this way can access local device files
      * (via 'file' scheme URLs) only if baseUrl specifies a scheme other than
      * 'http', 'https', 'ftp', 'ftps', 'about' or 'javascript'.
+     * <p>
+     * If the base URL uses the data scheme, this method is equivalent to
+     * calling {@link #loadData(String,String,String) loadData()} and the
+     * historyUrl is ignored.
      * @param baseUrl URL to use as the page's base URL. If null defaults to
-     *            "about:blank"
+     *            'about:blank'
      * @param data A String of data in the given encoding.
-     * @param mimeType The MIMEType of the data. i.e. text/html. If null,
-     *            defaults to "text/html"
-     * @param encoding The encoding of the data. i.e. utf-8, us-ascii
-     * @param historyUrl URL to use as the history entry.  Can be null.
+     * @param mimeType The MIMEType of the data, e.g. 'text/html'. If null,
+     *            defaults to 'text/html'.
+     * @param encoding The encoding of the data.
+     * @param historyUrl URL to use as the history entry, if null defaults to
+     *            'about:blank'.
      */
     public void loadDataWithBaseURL(String baseUrl, String data,
             String mimeType, String encoding, String historyUrl) {
