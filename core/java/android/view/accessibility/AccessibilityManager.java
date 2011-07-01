@@ -133,9 +133,6 @@ public final class AccessibilityManager {
                 sInstance = new AccessibilityManager(context, service);
             }
         }
-
-        AccessibilityManager accessibilityManager =
-            (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
         return sInstance;
     }
 
