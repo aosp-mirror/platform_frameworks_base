@@ -74,6 +74,7 @@ public final class SipService extends ISipService.Stub {
     private static final int SHORT_EXPIRY_TIME = 10;
     private static final int MIN_EXPIRY_TIME = 60;
     private static final int DEFAULT_KEEPALIVE_INTERVAL = 10; // in seconds
+    private static final int DEFAULT_MAX_KEEPALIVE_INTERVAL = 120; // in seconds
 
     private Context mContext;
     private String mLocalIp;
@@ -101,6 +102,7 @@ public final class SipService extends ISipService.Stub {
     private boolean mWifiEnabled;
     private SipWakeLock mMyWakeLock;
     private int mKeepAliveInterval;
+    private int mLastGoodKeepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
 
     /**
      * Starts the SIP service. Do nothing if the SIP API is not supported on the
@@ -448,6 +450,7 @@ public final class SipService extends ISipService.Stub {
             if (connected) {
                 mLocalIp = determineLocalIp();
                 mKeepAliveInterval = -1;
+                mLastGoodKeepAliveInterval = DEFAULT_KEEPALIVE_INTERVAL;
                 for (SipSessionGroupExt group : mSipGroups.values()) {
                     group.onConnectivityChanged(true);
                 }
@@ -471,7 +474,8 @@ public final class SipService extends ISipService.Stub {
 
     private void startPortMappingLifetimeMeasurement(
             SipProfile localProfile) {
-        startPortMappingLifetimeMeasurement(localProfile, -1);
+        startPortMappingLifetimeMeasurement(localProfile,
+                DEFAULT_MAX_KEEPALIVE_INTERVAL);
     }
 
     private void startPortMappingLifetimeMeasurement(
@@ -482,8 +486,16 @@ public final class SipService extends ISipService.Stub {
             Log.d(TAG, "start NAT port mapping timeout measurement on "
                     + localProfile.getUriString());
 
-            mIntervalMeasurementProcess =
-                    new IntervalMeasurementProcess(localProfile, maxInterval);
+            int minInterval = mLastGoodKeepAliveInterval;
+            if (minInterval >= maxInterval) {
+                // If mLastGoodKeepAliveInterval also does not work, reset it
+                // to the default min
+                minInterval = mLastGoodKeepAliveInterval
+                        = DEFAULT_KEEPALIVE_INTERVAL;
+                Log.d(TAG, "  reset min interval to " + minInterval);
+            }
+            mIntervalMeasurementProcess = new IntervalMeasurementProcess(
+                    localProfile, minInterval, maxInterval);
             mIntervalMeasurementProcess.start();
         }
     }
@@ -539,7 +551,7 @@ public final class SipService extends ISipService.Stub {
 
     private int getKeepAliveInterval() {
         return (mKeepAliveInterval < 0)
-                ? DEFAULT_KEEPALIVE_INTERVAL
+                ? mLastGoodKeepAliveInterval
                 : mKeepAliveInterval;
     }
 
@@ -768,26 +780,32 @@ public final class SipService extends ISipService.Stub {
     private class IntervalMeasurementProcess implements Runnable,
             SipSessionGroup.KeepAliveProcessCallback {
         private static final String TAG = "SipKeepAliveInterval";
-        private static final int MAX_INTERVAL = 120; // in seconds
         private static final int MIN_INTERVAL = 5; // in seconds
         private static final int PASS_THRESHOLD = 10;
         private static final int MAX_RETRY_COUNT = 5;
         private static final int NAT_MEASUREMENT_RETRY_INTERVAL = 120; // in seconds
         private SipSessionGroupExt mGroup;
         private SipSessionGroup.SipSessionImpl mSession;
-        private int mMinInterval = DEFAULT_KEEPALIVE_INTERVAL; // in seconds
+        private int mMinInterval;
         private int mMaxInterval;
         private int mInterval;
         private int mPassCount = 0;
 
-        public IntervalMeasurementProcess(SipProfile localProfile, int maxInterval) {
-            mMaxInterval = (maxInterval < 0) ? MAX_INTERVAL : maxInterval;
-            mInterval = (mMaxInterval + mMinInterval) / 2;
+        public IntervalMeasurementProcess(SipProfile localProfile,
+                int minInterval, int maxInterval) {
+            mMaxInterval = maxInterval;
+            mMinInterval = minInterval;
+            mInterval = (maxInterval + minInterval) / 2;
 
             // Don't start measurement if the interval is too small
-            if (mInterval < MIN_INTERVAL) {
+            if (mInterval < DEFAULT_KEEPALIVE_INTERVAL) {
                 Log.w(TAG, "interval is too small; measurement aborted; "
                         + "maxInterval=" + mMaxInterval);
+                return;
+            } else if (checkTermination()) {
+                Log.w(TAG, "interval is too small; measurement aborted; "
+                        + "interval=[" + mMinInterval + "," + mMaxInterval
+                        + "]");
                 return;
             }
 
@@ -842,6 +860,10 @@ public final class SipService extends ISipService.Stub {
             }
         }
 
+        private boolean checkTermination() {
+            return ((mMaxInterval - mMinInterval) < MIN_INTERVAL);
+        }
+
         // SipSessionGroup.KeepAliveProcessCallback
         @Override
         public void onResponse(boolean portChanged) {
@@ -850,6 +872,9 @@ public final class SipService extends ISipService.Stub {
                     if (++mPassCount != PASS_THRESHOLD) return;
                     // update the interval, since the current interval is good to
                     // keep the port mapping.
+                    if (mKeepAliveInterval > 0) {
+                        mLastGoodKeepAliveInterval = mKeepAliveInterval;
+                    }
                     mKeepAliveInterval = mMinInterval = mInterval;
                     if (DEBUG) {
                         Log.d(TAG, "measured good keepalive interval: "
@@ -860,9 +885,13 @@ public final class SipService extends ISipService.Stub {
                     // Since the rport is changed, shorten the interval.
                     mMaxInterval = mInterval;
                 }
-                if ((mMaxInterval - mMinInterval) < MIN_INTERVAL) {
+                if (checkTermination()) {
                     // update mKeepAliveInterval and stop measurement.
                     stop();
+                    // If all the measurements failed, we still set it to
+                    // mMinInterval; If mMinInterval still doesn't work, a new
+                    // measurement with min interval=DEFAULT_KEEPALIVE_INTERVAL
+                    // will be conducted.
                     mKeepAliveInterval = mMinInterval;
                     if (DEBUG) {
                         Log.d(TAG, "measured keepalive interval: "
