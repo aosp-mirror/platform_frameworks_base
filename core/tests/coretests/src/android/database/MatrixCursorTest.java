@@ -16,6 +16,8 @@
 
 package android.database;
 
+import android.test.MoreAsserts;
+
 import junit.framework.TestCase;
 
 import java.util.*;
@@ -33,6 +35,7 @@ public class MatrixCursorTest extends TestCase {
         cursor.moveToNext();
         assertTrue(cursor.isNull(0));
         assertNull(cursor.getString(0));
+        assertNull(cursor.getBlob(0));
         assertEquals(0, cursor.getShort(0));
         assertEquals(0, cursor.getInt(0));
         assertEquals(0L, cursor.getLong(0));
@@ -49,7 +52,8 @@ public class MatrixCursorTest extends TestCase {
                 .add(2)
                 .add(3)
                 .add(4)
-                .add(5);
+                .add(5)
+                .add(new byte[] {(byte) 0xaa, (byte) 0x55});
 
         cursor.moveToNext();
 
@@ -61,7 +65,8 @@ public class MatrixCursorTest extends TestCase {
                 .add("2")
                 .add("3")
                 .add("4")
-                .add("5");
+                .add("5")
+                .add(new byte[] {(byte) 0xaa, (byte) 0x55});
 
         cursor.moveToNext();
         checkValues(cursor);
@@ -73,7 +78,7 @@ public class MatrixCursorTest extends TestCase {
     public void testAddArray() {
         MatrixCursor cursor = newMatrixCursor();
 
-        cursor.addRow(new Object[] { "a", 1, 2, 3, 4, 5 });
+        cursor.addRow(new Object[] { "a", 1, 2, 3, 4, 5, new byte[] {(byte) 0xaa, (byte) 0x55} });
         cursor.moveToNext();
         checkValues(cursor);
 
@@ -86,7 +91,7 @@ public class MatrixCursorTest extends TestCase {
     public void testAddIterable() {
         MatrixCursor cursor = newMatrixCursor();
 
-        cursor.addRow(Arrays.asList("a", 1, 2, 3, 4, 5));
+        cursor.addRow(Arrays.asList("a", 1, 2, 3, 4, 5, new byte[] {(byte) 0xaa, (byte) 0x55}));
         cursor.moveToNext();
         checkValues(cursor);
 
@@ -96,7 +101,8 @@ public class MatrixCursorTest extends TestCase {
         } catch (IllegalArgumentException e) { /* expected */ }
 
         try {
-            cursor.addRow(Arrays.asList("a", 1, 2, 3, 4, 5, "Too many!"));
+            cursor.addRow(Arrays.asList("a", 1, 2, 3, 4, 5,
+                    new byte[] {(byte) 0xaa, (byte) 0x55}, "Too many!"));
             fail();
         } catch (IllegalArgumentException e) { /* expected */ }
     }
@@ -105,7 +111,7 @@ public class MatrixCursorTest extends TestCase {
         MatrixCursor cursor = newMatrixCursor();
 
         cursor.addRow(new NonIterableArrayList<Object>(
-                Arrays.asList("a", 1, 2, 3, 4, 5)));
+                Arrays.asList("a", 1, 2, 3, 4, 5, new byte[] {(byte) 0xaa, (byte) 0x55})));
         cursor.moveToNext();
         checkValues(cursor);
 
@@ -116,7 +122,8 @@ public class MatrixCursorTest extends TestCase {
 
         try {
             cursor.addRow(new NonIterableArrayList<Object>(
-                    Arrays.asList("a", 1, 2, 3, 4, 5, "Too many!")));
+                    Arrays.asList("a", 1, 2, 3, 4, 5,
+                    new byte[] {(byte) 0xaa, (byte) 0x55}, "Too many!")));
             fail();
         } catch (IllegalArgumentException e) { /* expected */ }
     }
@@ -137,7 +144,7 @@ public class MatrixCursorTest extends TestCase {
 
     private MatrixCursor newMatrixCursor() {
         return new MatrixCursor(new String[] {
-                "string", "short", "int", "long", "float", "double" });
+                "string", "short", "int", "long", "float", "double", "blob" });
     }
 
     private void checkValues(MatrixCursor cursor) {
@@ -147,6 +154,7 @@ public class MatrixCursorTest extends TestCase {
         assertEquals(3, cursor.getLong(3));
         assertEquals(4.0f, cursor.getFloat(4));
         assertEquals(5.0D, cursor.getDouble(5));
+        MoreAsserts.assertEquals(new byte[] {(byte) 0xaa, (byte) 0x55}, cursor.getBlob(6));
     }
 
 }
