@@ -658,4 +658,8 @@
          This is intended to allow packaging drivers or tools for installation on a PC. -->
     <string translatable="false" name="config_isoImagePath"></string>
 
+    <!-- Whether a software navigation bar should be shown. NOTE: in the future this may be
+         autodetected from the Configuration. -->
+    <bool name="config_showNavigationBar">false</bool>
+
 </resources>

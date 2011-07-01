@@ -22261,6 +22261,7 @@ package android.view {
     method public static deprecated int getTouchSlop();
     method public static deprecated int getWindowTouchSlop();
     method public static long getZoomControlsTimeout();
+    method public boolean hasPermanentMenuKey();
   }
 
   public class ViewDebug {

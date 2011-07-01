@@ -246,7 +246,7 @@ public class PhoneStatusBar extends StatusBar {
         mIntruderAlertView.setClickable(true);
 
         try {
-            boolean showNav = res.getBoolean(R.bool.config_showNavigationBar);
+            boolean showNav = res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
             if (showNav) {
                 mNavigationBarView = 
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
