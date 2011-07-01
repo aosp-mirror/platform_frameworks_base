@@ -4999,15 +4999,15 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     @Override
-    protected void resetLayoutDirectionResolution() {
-        super.resetLayoutDirectionResolution();
+    protected void resetResolvedLayoutDirection() {
+        super.resetResolvedLayoutDirection();
 
         // Take care of resetting the children resolution too
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.getLayoutDirection() == LAYOUT_DIRECTION_INHERIT) {
-                child.resetLayoutDirectionResolution();
+                child.resetResolvedLayoutDirection();
             }
         }
     }

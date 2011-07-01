@@ -4474,7 +4474,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     @RemotableViewMethod
     public void setLayoutDirection(int layoutDirection) {
         if (getLayoutDirection() != layoutDirection) {
-            resetLayoutDirectionResolution();
+            resetResolvedLayoutDirection();
             // Setting the flag will also request a layout.
             setFlags(layoutDirection, LAYOUT_DIRECTION_MASK);
         }
@@ -9043,10 +9043,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             mPrivateFlags &= ~AWAKEN_SCROLL_BARS_ON_ATTACH;
         }
         jumpDrawablesToCurrentState();
-        resetLayoutDirectionResolution();
         resolveLayoutDirectionIfNeeded();
         resolvePadding();
-        resetResolvedTextDirection();
         resolveTextDirection();
         if (isFocused()) {
             InputMethodManager imm = InputMethodManager.peekInstance();
@@ -9143,7 +9141,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      *
      * @hide
      */
-    protected void resetLayoutDirectionResolution() {
+    protected void resetResolvedLayoutDirection() {
         // Reset the current View resolution
         mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED;
     }
@@ -9190,6 +9188,9 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         }
 
         mCurrentAnimation = null;
+
+        resetResolvedLayoutDirection();
+        resetResolvedTextDirection();
     }
 
     /**

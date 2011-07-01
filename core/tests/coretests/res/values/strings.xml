@@ -129,4 +129,6 @@
     <string name="button8">Button8</string>
     <string name="button9">Button9</string>
 
+    <string name="textview_hebrew_text">&#x05DD;&#x05DE;ab?!</string>
+
 </resources>
