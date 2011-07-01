@@ -19,8 +19,8 @@ package com.android.internal.view.menu;
 import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.MenuItem;
 import android.view.SoundEffectConstants;
@@ -47,6 +47,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
     private boolean mMaxItemsSet;
     private boolean mStrictWidthLimit;
     private boolean mWidthLimitSet;
+
+    private int mMinCellSize;
 
     // Group IDs that have been added as actions - used temporarily, allocated here for reuse.
     private final SparseBooleanArray mActionButtonGroups = new SparseBooleanArray();
@@ -96,6 +98,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
 
         mActionItemWidthLimit = width;
 
+        mMinCellSize = (int) (ActionMenuView.MIN_CELL_SIZE * res.getDisplayMetrics().density);
+
         // Drop a scrap view as it may no longer reflect the proper context/config.
         mScrapActionButtonView = null;
     }
@@ -126,16 +130,30 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
     @Override
     public View getItemView(MenuItemImpl item, View convertView, ViewGroup parent) {
         View actionView = item.getActionView();
-        actionView = actionView != null && !item.hasCollapsibleActionView() ?
-                actionView : super.getItemView(item, convertView, parent);
+        if (actionView == null || item.hasCollapsibleActionView()) {
+            if (!(convertView instanceof ActionMenuItemView)) {
+                convertView = null;
+            }
+            actionView = super.getItemView(item, convertView, parent);
+        }
         actionView.setVisibility(item.isActionViewExpanded() ? View.GONE : View.VISIBLE);
+
+        final ActionMenuView menuParent = (ActionMenuView) parent;
+        final ViewGroup.LayoutParams lp = actionView.getLayoutParams();
+        if (!menuParent.checkLayoutParams(lp)) {
+            actionView.setLayoutParams(menuParent.generateLayoutParams(lp));
+        }
         return actionView;
     }
 
     @Override
     public void bindItemView(MenuItemImpl item, MenuView.ItemView itemView) {
         itemView.initialize(item, 0);
-        ((ActionMenuItemView) itemView).setItemInvoker((ActionMenuView) mMenuView);
+
+        final ActionMenuView menuView = (ActionMenuView) mMenuView;
+        ActionMenuItemView actionItemView = (ActionMenuItemView) itemView;
+        actionItemView.setItemInvoker(menuView);
+        if (false) actionItemView.setExpandedFormat(menuView.isExpandedFormat());
     }
 
     @Override
@@ -150,15 +168,14 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         if (mReserveOverflow && mMenu.getNonActionItems().size() > 0) {
             if (mOverflowButton == null) {
                 mOverflowButton = new OverflowMenuButton(mContext);
-                mOverflowButton.setLayoutParams(
-                        ((ActionMenuView) mMenuView).generateOverflowButtonLayoutParams());
             }
             ViewGroup parent = (ViewGroup) mOverflowButton.getParent();
             if (parent != mMenuView) {
                 if (parent != null) {
                     parent.removeView(mOverflowButton);
                 }
-                ((ViewGroup) mMenuView).addView(mOverflowButton);
+                ActionMenuView menuView = (ActionMenuView) mMenuView;
+                menuView.addView(mOverflowButton, menuView.generateOverflowButtonLayoutParams());
             }
         } else if (mOverflowButton != null && mOverflowButton.getParent() == mMenuView) {
             ((ViewGroup) mMenuView).removeView(mOverflowButton);
@@ -313,19 +330,29 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         final SparseBooleanArray seenGroups = mActionButtonGroups;
         seenGroups.clear();
 
+        int cellSize = 0;
+        int cellsRemaining = 0;
+        if (mStrictWidthLimit) {
+            cellsRemaining = widthLimit / mMinCellSize;
+            final int cellSizeRemaining = widthLimit % mMinCellSize;
+            cellSize = mMinCellSize + cellSizeRemaining / cellsRemaining;
+        }
+
         // Flag as many more requested items as will fit.
         for (int i = 0; i < itemsSize; i++) {
             MenuItemImpl item = visibleItems.get(i);
 
             if (item.requiresActionButton()) {
-                View v = item.getActionView();
-                if (v == null || item.hasCollapsibleActionView()) {
-                    v = getItemView(item, mScrapActionButtonView, parent);
-                    if (mScrapActionButtonView == null) {
-                        mScrapActionButtonView = v;
-                    }
+                View v = getItemView(item, mScrapActionButtonView, parent);
+                if (mScrapActionButtonView == null) {
+                    mScrapActionButtonView = v;
                 }
-                v.measure(querySpec, querySpec);
+                if (mStrictWidthLimit) {
+                    cellsRemaining -= ActionMenuView.measureChildForCells(v,
+                            cellSize, cellsRemaining, querySpec, 0);
+                } else {
+                    v.measure(querySpec, querySpec);
+                }
                 final int measuredWidth = v.getMeasuredWidth();
                 widthLimit -= measuredWidth;
                 if (firstActionWidth == 0) {
@@ -341,18 +368,25 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
                 // can break the max actions rule, but not the width limit.
                 final int groupId = item.getGroupId();
                 final boolean inGroup = seenGroups.get(groupId);
-                boolean isAction = (maxActions > 0 || inGroup) && widthLimit > 0;
+                boolean isAction = (maxActions > 0 || inGroup) && widthLimit > 0 &&
+                        (!mStrictWidthLimit || cellsRemaining > 0);
                 maxActions--;
 
                 if (isAction) {
-                    View v = item.getActionView();
-                    if (v == null || item.hasCollapsibleActionView()) {
-                        v = getItemView(item, mScrapActionButtonView, parent);
-                        if (mScrapActionButtonView == null) {
-                            mScrapActionButtonView = v;
-                        }
+                    View v = getItemView(item, mScrapActionButtonView, parent);
+                    if (mScrapActionButtonView == null) {
+                        mScrapActionButtonView = v;
                     }
-                    v.measure(querySpec, querySpec);
+                    if (mStrictWidthLimit) {
+                        final int cells = ActionMenuView.measureChildForCells(v,
+                                cellSize, cellsRemaining, querySpec, 0);
+                        cellsRemaining -= cells;
+                        if (cells == 0) {
+                            isAction = false;
+                        }
+                    } else {
+                        v.measure(querySpec, querySpec);
+                    }
                     final int measuredWidth = v.getMeasuredWidth();
                     widthLimit -= measuredWidth;
                     if (firstActionWidth == 0) {
@@ -360,10 +394,10 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
                     }
 
                     if (mStrictWidthLimit) {
-                        isAction = widthLimit >= 0;
+                        isAction &= widthLimit >= 0;
                     } else {
                         // Did this push the entire first item past the limit?
-                        isAction = widthLimit + firstActionWidth > 0;
+                        isAction &= widthLimit + firstActionWidth > 0;
                     }
                 }
 
@@ -414,7 +448,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         }
 
         public boolean needsDividerBefore() {
-            return true;
+            return false;
         }
 
         public boolean needsDividerAfter() {

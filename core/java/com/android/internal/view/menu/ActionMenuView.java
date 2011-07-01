@@ -30,12 +30,16 @@ import android.widget.LinearLayout;
 public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvoker, MenuView {
     private static final String TAG = "ActionMenuView";
     
+    static final int MIN_CELL_SIZE = 56; // dips
+
     private MenuBuilder mMenu;
 
     private boolean mReserveOverflow;
     private ActionMenuPresenter mPresenter;
     private boolean mUpdateContentsBeforeMeasure;
     private boolean mFormatItems;
+    private int mMinCellSize;
+    private int mMeasuredExtraWidth;
 
     public ActionMenuView(Context context) {
         this(context, null);
@@ -44,10 +48,15 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     public ActionMenuView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setBaselineAligned(false);
+        mMinCellSize = (int) (MIN_CELL_SIZE * context.getResources().getDisplayMetrics().density);
     }
 
     public void setPresenter(ActionMenuPresenter presenter) {
         mPresenter = presenter;
+    }
+
+    public boolean isExpandedFormat() {
+        return mFormatItems;
     }
 
     @Override
@@ -70,13 +79,196 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // If we've been given an exact size to match, apply special formatting during layout.
+        mFormatItems = MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY;
         if (mUpdateContentsBeforeMeasure && mMenu != null) {
             mMenu.onItemsChanged(true);
             mUpdateContentsBeforeMeasure = false;
         }
-        // If we've been given an exact size to match, apply special formatting during layout.
-        mFormatItems = MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY;
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        if (mFormatItems) {
+            onMeasureExactFormat(widthMeasureSpec, heightMeasureSpec);
+        } else {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
+    }
+
+    private void onMeasureExactFormat(int widthMeasureSpec, int heightMeasureSpec) {
+        // We already know the width mode is EXACTLY if we're here.
+        final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        final int widthPadding = getPaddingLeft() + getPaddingRight();
+        final int heightPadding = getPaddingTop() + getPaddingBottom();
+
+        widthSize -= widthPadding;
+
+        // Divide the view into cells.
+        final int cellCount = widthSize / mMinCellSize;
+        final int cellSizeRemaining = widthSize % mMinCellSize;
+        final int cellSize = mMinCellSize + cellSizeRemaining / cellCount;
+
+        int cellsRemaining = cellCount;
+        int maxChildHeight = 0;
+        int maxCellsUsed = 0;
+        int multiCellItemCount = 0;
+
+        if (mReserveOverflow) cellsRemaining--;
+
+        final int childCount = getChildCount();
+        for (int i = 0; i < childCount; i++) {
+            final View child = getChildAt(i);
+            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+            lp.expanded = false;
+            lp.extraPixels = 0;
+            lp.cellsUsed = 0;
+            lp.multiCell = false;
+
+            // Overflow always gets 1 cell. No more, no less.
+            final int cellsAvailable = lp.isOverflowButton ? 1 : cellsRemaining;
+
+            final int cellsUsed = measureChildForCells(child, cellSize, cellsAvailable,
+                    heightMeasureSpec, heightPadding);
+
+            maxCellsUsed = Math.max(maxCellsUsed, cellsUsed);
+            if (lp.multiCell) multiCellItemCount++;
+
+            cellsRemaining -= cellsUsed;
+            maxChildHeight = Math.max(maxChildHeight, child.getMeasuredHeight());
+        }
+
+        // Divide space for remaining cells if we have items that can expand.
+        // Try distributing whole leftover cells to smaller items first.
+
+        boolean needsExpansion = false;
+        long smallestMultiCellItemsAt = 0;
+        while (multiCellItemCount > 0 && cellsRemaining > 0) {
+            int minCells = Integer.MAX_VALUE;
+            long minCellsAt = 0; // Bit locations are indices of relevant child views
+            int minCellsItemCount = 0;
+            for (int i = 0; i < childCount; i++) {
+                final View child = getChildAt(i);
+                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+
+                // Don't try to expand items that shouldn't.
+                if (!lp.multiCell) continue;
+
+                // Mark indices of children that can receive an extra cell.
+                if (lp.cellsUsed < minCells) {
+                    minCells = lp.cellsUsed;
+                    minCellsAt = 1 << i;
+                    minCellsItemCount = 1;
+                } else if (lp.cellsUsed == minCells) {
+                    minCellsAt |= 1 << i;
+                    minCellsItemCount++;
+                }
+            }
+
+            if (minCellsItemCount < cellsRemaining) break; // Couldn't expand anything evenly. Stop.
+
+            // Items that get expanded will always be in the set of smallest items when we're done.
+            smallestMultiCellItemsAt |= minCellsAt;
+
+            for (int i = 0; i < childCount; i++) {
+                if ((minCellsAt & (1 << i)) == 0) continue;
+
+                final View child = getChildAt(i);
+                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                lp.cellsUsed++;
+                lp.expanded = true;
+                cellsRemaining--;
+            }
+
+            needsExpansion = true;
+        }
+
+        // Divide any space left that wouldn't divide along cell boundaries
+        // evenly among the smallest multi-cell (expandable) items.
+
+        if (cellsRemaining > 0 && smallestMultiCellItemsAt != 0) {
+            final int expandCount = Long.bitCount(smallestMultiCellItemsAt);
+            final int extraPixels = cellsRemaining * cellSize / expandCount;
+
+            for (int i = 0; i < childCount; i++) {
+                if ((smallestMultiCellItemsAt & (1 << i)) == 0) continue;
+
+                final View child = getChildAt(i);
+                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                lp.extraPixels = extraPixels;
+                lp.expanded = true;
+            }
+
+            needsExpansion = true;
+            cellsRemaining = 0;
+        }
+
+        // Remeasure any items that have had extra space allocated to them.
+        if (needsExpansion) {
+            int heightSpec = MeasureSpec.makeMeasureSpec(heightSize - heightPadding, heightMode);
+            for (int i = 0; i < childCount; i++) {
+                final View child = getChildAt(i);
+                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+
+                if (!lp.expanded) continue;
+
+                final int width = lp.cellsUsed * cellSize + lp.extraPixels;
+                child.measure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY), heightSpec);
+            }
+        }
+
+        if (heightMode != MeasureSpec.EXACTLY) {
+            heightSize = maxChildHeight;
+        }
+
+        setMeasuredDimension(widthSize, heightSize);
+        mMeasuredExtraWidth = cellsRemaining * cellSize;
+    }
+
+    /**
+     * Measure a child view to fit within cell-based formatting. The child's width
+     * will be measured to a whole multiple of cellSize.
+     *
+     * <p>Sets the multiCell and cellsUsed fields of LayoutParams.
+     *
+     * @param child Child to measure
+     * @param cellSize Size of one cell
+     * @param cellsRemaining Number of cells remaining that this view can expand to fill
+     * @param parentHeightMeasureSpec MeasureSpec used by the parent view
+     * @param parentHeightPadding Padding present in the parent view
+     * @return Number of cells this child was measured to occupy
+     */
+    static int measureChildForCells(View child, int cellSize, int cellsRemaining,
+            int parentHeightMeasureSpec, int parentHeightPadding) {
+        final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+        final ActionMenuItemView itemView = child instanceof ActionMenuItemView ?
+                (ActionMenuItemView) child : null;
+
+        final int childHeightSize = MeasureSpec.getSize(parentHeightMeasureSpec) -
+                parentHeightPadding;
+        final int childHeightMode = MeasureSpec.getMode(parentHeightMeasureSpec);
+        final int childHeightSpec = MeasureSpec.makeMeasureSpec(childHeightSize, childHeightMode);
+
+        int cellsUsed = cellsRemaining > 0 ? 1 : 0;
+        final boolean multiCell = !lp.isOverflowButton &&
+                (itemView == null || itemView.hasText());
+
+        lp.multiCell = multiCell;
+
+        if (multiCell && cellsRemaining > 0) {
+            final int childWidthSpec = MeasureSpec.makeMeasureSpec(
+                    cellSize * cellsRemaining, MeasureSpec.AT_MOST);
+            child.measure(childWidthSpec, childHeightSpec);
+
+            final int measuredWidth = child.getMeasuredWidth();
+            cellsUsed = measuredWidth / cellSize;
+            if (measuredWidth % cellSize != 0) cellsUsed++;
+        }
+        lp.cellsUsed = cellsUsed;
+        final int targetWidth = cellsUsed * cellSize;
+        child.measure(MeasureSpec.makeMeasureSpec(targetWidth, MeasureSpec.EXACTLY),
+                childHeightSpec);
+        return cellsUsed;
     }
 
     @Override
@@ -93,6 +285,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         int nonOverflowWidth = 0;
         int nonOverflowCount = 0;
         int widthRemaining = right - left - getPaddingRight() - getPaddingLeft();
+        boolean hasOverflow = false;
         for (int i = 0; i < childCount; i++) {
             final View v = getChildAt(i);
             if (v.getVisibility() == GONE) {
@@ -107,15 +300,18 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 }
 
                 int height = v.getMeasuredHeight();
-                int r = getPaddingRight();
+                int r = getWidth() - getPaddingRight();
                 int l = r - overflowWidth;
                 int t = midVertical - (height / 2);
                 int b = t + height;
                 v.layout(l, t, r, b);
 
                 widthRemaining -= overflowWidth;
+                hasOverflow = true;
             } else {
-                nonOverflowWidth += v.getMeasuredWidth() + p.leftMargin + p.rightMargin;
+                final int size = v.getMeasuredWidth() + p.leftMargin + p.rightMargin;
+                nonOverflowWidth += size;
+                widthRemaining -= size;
                 if (hasDividerBeforeChildAt(i)) {
                     nonOverflowWidth += dividerWidth;
                 }
@@ -123,10 +319,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             }
         }
 
-        // Fill action items from the left. Overflow will always pin to the right edge.
-        if (nonOverflowWidth <= widthRemaining - overflowWidth) {
-            widthRemaining -= overflowWidth;
-        }
+        final int spacerCount = nonOverflowCount - (hasOverflow ? 0 : 1);
+        final int spacerSize = spacerCount > 0 ? widthRemaining / spacerCount : 0;
 
         int startLeft = getPaddingLeft();
         for (int i = 0; i < childCount; i++) {
@@ -141,7 +335,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             int height = v.getMeasuredHeight();
             int t = midVertical - (height / 2);
             v.layout(startLeft, t, startLeft + width, t + height);
-            startLeft += width + lp.rightMargin;
+            startLeft += width + lp.rightMargin + spacerSize;
         }
     }
 
@@ -168,6 +362,11 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     }
     
     @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new LayoutParams(getContext(), attrs);
+    }
+
+    @Override
     protected LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
         if (p instanceof LayoutParams) {
             LayoutParams result = new LayoutParams((LayoutParams) p);
@@ -181,7 +380,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
-        return p instanceof LayoutParams;
+        return p != null && p instanceof LayoutParams;
     }
 
     public LayoutParams generateOverflowButtonLayoutParams() {
@@ -224,6 +423,13 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     public static class LayoutParams extends LinearLayout.LayoutParams {
         @ViewDebug.ExportedProperty(category = "layout")
         public boolean isOverflowButton;
+        @ViewDebug.ExportedProperty(category = "layout")
+        public int cellsUsed;
+        @ViewDebug.ExportedProperty(category = "layout")
+        public boolean multiCell;
+        @ViewDebug.ExportedProperty(category = "layout")
+        public int extraPixels;
+        public boolean expanded;
 
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);

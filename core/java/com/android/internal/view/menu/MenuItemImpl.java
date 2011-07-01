@@ -506,6 +506,10 @@ public final class MenuItemImpl implements MenuItem {
         return mMenuInfo;
     }
 
+    public void actionFormatChanged() {
+        mMenu.onItemActionRequestChanged(this);
+    }
+
     /**
      * @return Whether the menu should show icons for menu items.
      */
@@ -534,9 +538,7 @@ public final class MenuItemImpl implements MenuItem {
     }
 
     public boolean showsTextAsAction() {
-        return (mShowAsAction & SHOW_AS_ACTION_WITH_TEXT) == SHOW_AS_ACTION_WITH_TEXT &&
-                mMenu.getContext().getResources().getBoolean(
-                        com.android.internal.R.bool.allow_action_menu_item_text_with_icon);
+        return (mShowAsAction & SHOW_AS_ACTION_WITH_TEXT) == SHOW_AS_ACTION_WITH_TEXT;
     }
 
     public void setShowAsAction(int actionEnum) {

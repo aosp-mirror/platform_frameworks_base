@@ -650,4 +650,14 @@
          autodetected from the Configuration. -->
     <bool name="config_showNavigationBar">false</bool>
 
+    <!-- Whether action menu items should be displayed in ALLCAPS or not.
+         Defaults to true. If this is not appropriate for specific locales
+         it should be disabled in that locale's resources. -->
+    <bool name="config_actionMenuItemAllCaps">true</bool>
+
+    <!-- Whether action menu items should obey the "withText" showAsAction
+         flag. This may be set to false for situations where space is
+         extremely limited. -->
+    <bool name="config_allowActionMenuItemTextWithIcon">false</bool>
+
 </resources>

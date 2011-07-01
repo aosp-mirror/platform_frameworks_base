@@ -8901,7 +8901,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             TypedArray styledAttributes = mContext.obtainStyledAttributes(R.styleable.Theme);
 
             boolean allowText = getContext().getResources().getBoolean(
-                    com.android.internal.R.bool.allow_action_menu_item_text_with_icon);
+                    com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
 
             mode.setTitle(allowText ? 
                     mContext.getString(com.android.internal.R.string.textSelectionCABTitle) : null);

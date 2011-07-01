@@ -17,6 +17,7 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -38,17 +39,24 @@ public class ActionMenuItemView extends LinearLayout
 
     private ImageButton mImageButton;
     private Button mTextButton;
+    private boolean mAllowTextWithIcon;
+    private boolean mShowTextAllCaps;
+    private boolean mExpandedFormat;
 
     public ActionMenuItemView(Context context) {
         this(context, null);
     }
 
     public ActionMenuItemView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public ActionMenuItemView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+        final Resources res = context.getResources();
+        mAllowTextWithIcon = res.getBoolean(
+                com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
+        mShowTextAllCaps = res.getBoolean(com.android.internal.R.bool.config_actionMenuItemAllCaps);
     }
 
     @Override
@@ -104,9 +112,20 @@ public class ActionMenuItemView extends LinearLayout
         // TODO Support checkable action items
     }
 
+    public void setExpandedFormat(boolean expandedFormat) {
+        if (mExpandedFormat != expandedFormat) {
+            mExpandedFormat = expandedFormat;
+            if (mItemData != null) {
+                mItemData.actionFormatChanged();
+            }
+        }
+    }
+
     private void updateTextButtonVisibility() {
         boolean visible = !TextUtils.isEmpty(mTextButton.getText());
-        visible = visible && (mImageButton.getDrawable() == null || mItemData.showsTextAsAction());
+        visible &= mImageButton.getDrawable() == null ||
+                (mItemData.showsTextAsAction() && (mAllowTextWithIcon || mExpandedFormat));
+
         mTextButton.setVisibility(visible ? VISIBLE : GONE);
     }
 
@@ -135,7 +154,12 @@ public class ActionMenuItemView extends LinearLayout
         // populate accessibility description with title
         setContentDescription(title);
 
-        mTextButton.setText(mTitle);
+        if (mShowTextAllCaps) {
+            mTextButton.setText(title.toString().toUpperCase(
+                    getContext().getResources().getConfiguration().locale));
+        } else {
+            mTextButton.setText(mTitle);
+        }
 
         updateTextButtonVisibility();
     }

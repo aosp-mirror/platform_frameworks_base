@@ -301,49 +301,55 @@ public class LinearLayout extends ViewGroup {
 
     void drawDividersVertical(Canvas canvas) {
         final int count = getVirtualChildCount();
-        int top = getPaddingTop();
         for (int i = 0; i < count; i++) {
             final View child = getVirtualChildAt(i);
 
-            if (child == null) {
-                top += measureNullChild(i);
-            } else if (child.getVisibility() != GONE) {
+            if (child != null && child.getVisibility() != GONE) {
                 if (hasDividerBeforeChildAt(i)) {
+                    final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                    final int top = child.getTop() - lp.topMargin;
                     drawHorizontalDivider(canvas, top);
-                    top += mDividerHeight;
                 }
-
-                LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                top += lp.topMargin + child.getHeight() + lp.bottomMargin;
             }
         }
 
         if (hasDividerBeforeChildAt(count)) {
-            drawHorizontalDivider(canvas, top);
+            final View child = getVirtualChildAt(count - 1);
+            int bottom = 0;
+            if (child == null) {
+                bottom = getHeight() - getPaddingBottom() - mDividerHeight;
+            } else {
+                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                bottom = child.getBottom() + lp.bottomMargin;
+            }
+            drawHorizontalDivider(canvas, bottom);
         }
     }
 
     void drawDividersHorizontal(Canvas canvas) {
         final int count = getVirtualChildCount();
-        int left = getPaddingLeft();
         for (int i = 0; i < count; i++) {
             final View child = getVirtualChildAt(i);
 
-            if (child == null) {
-                left += measureNullChild(i);
-            } else if (child.getVisibility() != GONE) {
+            if (child != null && child.getVisibility() != GONE) {
                 if (hasDividerBeforeChildAt(i)) {
+                    final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                    final int left = child.getLeft() - lp.leftMargin;
                     drawVerticalDivider(canvas, left);
-                    left += mDividerWidth;
                 }
-
-                LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                left += lp.leftMargin + child.getWidth() + lp.rightMargin;
             }
         }
 
         if (hasDividerBeforeChildAt(count)) {
-            drawVerticalDivider(canvas, left);
+            final View child = getVirtualChildAt(count - 1);
+            int right = 0;
+            if (child == null) {
+                right = getWidth() - getPaddingRight() - mDividerWidth;
+            } else {
+                final LayoutParams lp = (LayoutParams) child.getLayoutParams();
+                right = child.getRight() + lp.rightMargin;
+            }
+            drawVerticalDivider(canvas, right);
         }
     }
 
