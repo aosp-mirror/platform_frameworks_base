@@ -1223,9 +1223,9 @@ class SipSessionGroup implements SipListener {
 
         private void establishCall(boolean enableKeepAlive) {
             mState = SipSession.State.IN_CALL;
-            mInCall = true;
             cancelSessionTimer();
-            if (enableKeepAlive) enableKeepAlive();
+            if (!mInCall && enableKeepAlive) enableKeepAlive();
+            mInCall = true;
             mProxy.onCallEstablished(this, mPeerSessionDescription);
         }
 
