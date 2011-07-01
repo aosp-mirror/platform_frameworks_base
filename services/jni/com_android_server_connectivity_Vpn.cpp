@@ -244,7 +244,7 @@ static int set_routes(const char *name, const char *routes)
                 break;
             }
 
-            in_addr_t mask = prefix ? (~0 << (32 - prefix)) : 1;
+            in_addr_t mask = prefix ? (~0 << (32 - prefix)) : 0x80000000;
             *as_in_addr(&rt4.rt_genmask) = htonl(mask);
             if (ioctl(inet4, SIOCADDRT, &rt4) && errno != EEXIST) {
                 count = (errno == EINVAL) ? BAD_ARGUMENT : SYSTEM_ERROR;
@@ -394,7 +394,7 @@ static jint setRoutes(JNIEnv *env, jobject thiz, jstring jName,
     }
     count = set_routes(name, routes);
     if (count < 0) {
-        throwException(env, count, "Cannot set address");
+        throwException(env, count, "Cannot set route");
         count = -1;
     }
 
