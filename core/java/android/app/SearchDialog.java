@@ -188,8 +188,9 @@ public class SearchDialog extends Dialog {
         mSearchPlate = mSearchView.findViewById(com.android.internal.R.id.search_plate);
         mWorkingSpinner = getContext().getResources().
                 getDrawable(com.android.internal.R.drawable.search_spinner);
-        mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
-                null, null, mWorkingSpinner, null);
+        // TODO: Restore the spinner for slow suggestion lookups
+        // mSearchAutoComplete.setCompoundDrawablesWithIntrinsicBounds(
+        //        null, null, mWorkingSpinner, null);
         setWorking(false);
 
         // pre-hide all the extraneous elements
