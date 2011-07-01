@@ -23,6 +23,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 
+import java.util.List;
+
 /**
  * A simple container used to carry information in VpnBuilder, VpnDialogs,
  * and com.android.server.connectivity.Vpn. Internal use only.
@@ -62,7 +64,8 @@ public class VpnConfig implements Parcelable {
     public int mtu = -1;
     public String addresses;
     public String routes;
-    public String dnsServers;
+    public List<String> dnsServers;
+    public List<String> searchDomains;
     public long startTime = -1;
 
     @Override
@@ -79,7 +82,8 @@ public class VpnConfig implements Parcelable {
         out.writeInt(mtu);
         out.writeString(addresses);
         out.writeString(routes);
-        out.writeString(dnsServers);
+        out.writeStringList(dnsServers);
+        out.writeStringList(searchDomains);
         out.writeLong(startTime);
     }
 
@@ -95,7 +99,8 @@ public class VpnConfig implements Parcelable {
             config.mtu = in.readInt();
             config.addresses = in.readString();
             config.routes = in.readString();
-            config.dnsServers = in.readString();
+            config.dnsServers = in.createStringArrayList();
+            config.searchDomains = in.createStringArrayList();
             config.startTime = in.readLong();
             return config;
         }

@@ -2533,7 +2533,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         private VpnCallback() {
         }
 
-        public synchronized void override(String[] dnsServers) {
+        public synchronized void override(List<String> dnsServers, List<String> searchDomains) {
             // TODO: override DNS servers and http proxy.
         }
 

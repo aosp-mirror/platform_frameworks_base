@@ -190,11 +190,14 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             throw e;
         }
 
-        String dnsServers = (config.dnsServers == null) ? "" : config.dnsServers.trim();
-        mCallback.override(dnsServers.isEmpty() ? null : dnsServers.split(" "));
+        // Override DNS servers and search domains.
+        mCallback.override(config.dnsServers, config.searchDomains);
 
+        // Fill more values.
         config.packageName = mPackageName;
         config.interfaceName = mInterfaceName;
+
+        // Show the notification!
         showNotification(config, label, bitmap);
         return descriptor;
     }
