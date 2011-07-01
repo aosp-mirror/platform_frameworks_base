@@ -37,7 +37,6 @@ import android.os.Parcelable;
 import android.os.ParcelFileDescriptor;
 import android.os.UEventObserver;
 import android.provider.Settings;
-import android.util.Log;
 import android.util.Slog;
 
 import java.io.File;
@@ -112,7 +111,7 @@ public class UsbHostManager {
 
         synchronized (mLock) {
             if (mDevices.get(deviceName) != null) {
-                Log.w(TAG, "device already on mDevices list: " + deviceName);
+                Slog.w(TAG, "device already on mDevices list: " + deviceName);
                 return;
             }
 
@@ -148,7 +147,7 @@ public class UsbHostManager {
             } catch (Exception e) {
                 // beware of index out of bound exceptions, which might happen if
                 // a device does not set bNumEndpoints correctly
-                Log.e(TAG, "error parsing USB descriptors", e);
+                Slog.e(TAG, "error parsing USB descriptors", e);
                 return;
             }
 
