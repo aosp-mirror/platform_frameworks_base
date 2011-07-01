@@ -398,10 +398,13 @@ status_t M4vH263Encoder::read(
     }
 
     // Ready for accepting an input video frame
-    if (OK != mSource->read(&mInputBuffer, options)) {
-        LOGE("Failed to read from data source");
+    status_t err = mSource->read(&mInputBuffer, options);
+    if (OK != err) {
+        if (err != ERROR_END_OF_STREAM) {
+            LOGE("Failed to read from data source");
+        }
         outputBuffer->release();
-        return UNKNOWN_ERROR;
+        return err;
     }
 
     if (mInputBuffer->size() - ((mVideoWidth * mVideoHeight * 3) >> 1) != 0) {
