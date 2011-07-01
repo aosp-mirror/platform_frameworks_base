@@ -265,7 +265,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     private native void jniProtectSocket(int fd, String name);
 
     /**
-     * Handle legacy VPN requests. This method stops the services and restart
+     * Handle legacy VPN requests. This method stops the daemons and restart
      * them if their arguments are not null. Heavy things are offloaded to
      * another thread, so callers will not be blocked too long.
      *
@@ -301,13 +301,13 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
 
         private static final String NONE = "--";
 
-        private final String[] mServices;
+        private final String[] mDaemons;
         private final String[][] mArguments;
         private long mTimer = -1;
 
-        public LegacyVpnRunner(String[] services, String[]... arguments) {
+        public LegacyVpnRunner(String[] daemons, String[]... arguments) {
             super(TAG);
-            mServices = services;
+            mDaemons = daemons;
             mArguments = arguments;
         }
 
@@ -340,14 +340,14 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                 // Initialize the timer.
                 checkpoint(false);
 
-                // First stop the services.
-                for (String service : mServices) {
-                    SystemProperties.set("ctl.stop", service);
+                // First stop the daemons.
+                for (String daemon : mDaemons) {
+                    SystemProperties.set("ctl.stop", daemon);
                 }
 
-                // Wait for the services to stop.
-                for (String service : mServices) {
-                    String key = "init.svc." + service;
+                // Wait for the daemons to stop.
+                for (String daemon : mDaemons) {
+                    String key = "init.svc." + daemon;
                     while (!"stopped".equals(SystemProperties.get(key))) {
                         checkpoint(true);
                     }
@@ -361,7 +361,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     checkpoint(true);
                 }
 
-                // Check if we need to restart some services.
+                // Check if we need to restart some daemons.
                 boolean restart = false;
                 for (String[] arguments : mArguments) {
                     restart = restart || (arguments != null);
@@ -370,19 +370,19 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     return;
                 }
 
-                // Start the service with arguments.
-                for (int i = 0; i < mServices.length; ++i) {
+                // Start the daemon with arguments.
+                for (int i = 0; i < mDaemons.length; ++i) {
                     String[] arguments = mArguments[i];
                     if (arguments == null) {
                         continue;
                     }
 
-                    // Start the service.
-                    String service = mServices[i];
-                    SystemProperties.set("ctl.start", service);
+                    // Start the daemon.
+                    String daemon = mDaemons[i];
+                    SystemProperties.set("ctl.start", daemon);
 
-                    // Wait for the service to start.
-                    String key = "init.svc." + service;
+                    // Wait for the daemon to start.
+                    String key = "init.svc." + daemon;
                     while (!"running".equals(SystemProperties.get(key))) {
                         checkpoint(true);
                     }
@@ -390,7 +390,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     // Create the control socket.
                     LocalSocket socket = new LocalSocket();
                     LocalSocketAddress address = new LocalSocketAddress(
-                            service, LocalSocketAddress.Namespace.RESERVED);
+                            daemon, LocalSocketAddress.Namespace.RESERVED);
 
                     // Wait for the socket to connect.
                     while (true) {
@@ -405,22 +405,22 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     socket.setSoTimeout(500);
 
                     // Send over the arguments.
-                    OutputStream output = socket.getOutputStream();
+                    OutputStream out = socket.getOutputStream();
                     for (String argument : arguments) {
                         byte[] bytes = argument.getBytes(Charsets.UTF_8);
                         if (bytes.length >= 0xFFFF) {
                             throw new IllegalArgumentException("argument too large");
                         }
-                        output.write(bytes.length >> 8);
-                        output.write(bytes.length);
-                        output.write(bytes);
+                        out.write(bytes.length >> 8);
+                        out.write(bytes.length);
+                        out.write(bytes);
                         checkpoint(false);
                     }
 
                     // Send End-Of-Arguments.
-                    output.write(0xFF);
-                    output.write(0xFF);
-                    output.flush();
+                    out.write(0xFF);
+                    out.write(0xFF);
+                    out.flush();
                     socket.close();
                 }
 
@@ -431,12 +431,12 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                 while (NONE.equals(SystemProperties.get("vpn.dns")) ||
                         NONE.equals(SystemProperties.get("vpn.via"))) {
 
-                    // Check if a running service is dead.
-                    for (int i = 0; i < mServices.length; ++i) {
-                        String service = mServices[i];
+                    // Check if a running daemon is dead.
+                    for (int i = 0; i < mDaemons.length; ++i) {
+                        String daemon = mDaemons[i];
                         if (mArguments[i] != null && !"running".equals(
-                                SystemProperties.get("init.svc." + service))) {
-                            throw new IllegalArgumentException(service + " is dead");
+                                SystemProperties.get("init.svc." + daemon))) {
+                            throw new IllegalArgumentException(daemon + " is dead");
                         }
                     }
                     checkpoint(true);
@@ -448,8 +448,8 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
 
             } catch (Exception e) {
                 Log.i(TAG, e.getMessage());
-                for (String service : mServices) {
-                    SystemProperties.set("ctl.stop", service);
+                for (String daemon : mDaemons) {
+                    SystemProperties.set("ctl.stop", daemon);
                 }
             }
         }
