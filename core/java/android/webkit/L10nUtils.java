@@ -70,7 +70,11 @@ public class L10nUtils {
         com.android.internal.R.string.autofill_expiration_month_re,         // IDS_AUTOFILL_EXPIRATION_MONTH_RE
         com.android.internal.R.string.autofill_expiration_date_re,          // IDS_AUTOFILL_EXPIRATION_DATE_RE
         com.android.internal.R.string.autofill_card_ignored_re,             // IDS_AUTOFILL_CARD_IGNORED_RE
-        com.android.internal.R.string.autofill_fax_re                       // IDS_AUTOFILL_FAX_RE
+        com.android.internal.R.string.autofill_fax_re,                      // IDS_AUTOFILL_FAX_RE
+        com.android.internal.R.string.autofill_country_code_re,             // IDS_AUTOFILL_COUNTRY_CODE_RE
+        com.android.internal.R.string.autofill_area_code_notext_re,         // IDS_AUTOFILL_AREA_CODE_NOTEXT_RE
+        com.android.internal.R.string.autofill_phone_prefix_separator_re,   // IDS_AUTOFILL_PHONE_PREFIX_SEPARATOR_RE
+        com.android.internal.R.string.autofill_phone_suffix_separator_re    // IDS_AUTOFILL_PHONE_SUFFIX_SEPARATOR_RE
     };
 
     private static Context mApplicationContext;

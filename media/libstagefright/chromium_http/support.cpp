@@ -115,31 +115,31 @@ SfRequestContext::SfRequestContext() {
 
     mUserAgent = ua.c_str();
 
-    net_log_ = new SfNetLog;
+    set_net_log(new SfNetLog());
 
-    host_resolver_ =
+    set_host_resolver(
         net::CreateSystemHostResolver(
                 net::HostResolver::kDefaultParallelism,
                 NULL /* resolver_proc */,
-                net_log_);
+                net_log()));
 
-    ssl_config_service_ =
-        net::SSLConfigService::CreateSystemSSLConfigService();
+    set_ssl_config_service(
+        net::SSLConfigService::CreateSystemSSLConfigService());
 
-    proxy_service_ = net::ProxyService::CreateWithoutProxyResolver(
-            new net::ProxyConfigServiceAndroid, net_log_);
+    set_proxy_service(net::ProxyService::CreateWithoutProxyResolver(
+        new net::ProxyConfigServiceAndroid, net_log()));
 
-    http_transaction_factory_ = new net::HttpCache(
-            host_resolver_,
+    set_http_transaction_factory(new net::HttpCache(
+            host_resolver(),
             new net::CertVerifier(),
-            dnsrr_resolver_,
-            dns_cert_checker_.get(),
-            proxy_service_.get(),
-            ssl_config_service_.get(),
-            net::HttpAuthHandlerFactory::CreateDefault(host_resolver_),
-            network_delegate_,
-            net_log_,
-            NULL);  // backend_factory
+            dnsrr_resolver(),
+            dns_cert_checker(),
+            proxy_service(),
+            ssl_config_service(),
+            net::HttpAuthHandlerFactory::CreateDefault(host_resolver()),
+            network_delegate(),
+            net_log(),
+            NULL));  // backend_factory
 }
 
 const std::string &SfRequestContext::GetUserAgent(const GURL &url) const {
