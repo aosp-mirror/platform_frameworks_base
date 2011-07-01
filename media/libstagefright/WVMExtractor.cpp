@@ -33,25 +33,26 @@
 
 #include <utils/Errors.h>
 
+/* The extractor lifetime is short - just long enough to get
+ * the media sources constructed - so the shared lib needs to remain open
+ * beyond the lifetime of the extractor.  So keep the handle as a global
+ * rather than a member of the extractor
+ */
+void *gVendorLibHandle = NULL;
+
 namespace android {
 
-Mutex WVMExtractor::sMutex;
-uint32_t WVMExtractor::sActiveExtractors = 0;
-void *WVMExtractor::sVendorLibHandle = NULL;
+static Mutex gWVMutex;
 
 WVMExtractor::WVMExtractor(const sp<DataSource> &source)
     : mDataSource(source) {
     {
-        Mutex::Autolock autoLock(sMutex);
-
-        if (sVendorLibHandle == NULL) {
-            CHECK(sActiveExtractors == 0);
-            sVendorLibHandle = dlopen("libwvm.so", RTLD_NOW);
+        Mutex::Autolock autoLock(gWVMutex);
+        if (gVendorLibHandle == NULL) {
+            gVendorLibHandle = dlopen("libwvm.so", RTLD_NOW);
         }
 
-        sActiveExtractors++;
-
-        if (sVendorLibHandle == NULL) {
+        if (gVendorLibHandle == NULL) {
             LOGE("Failed to open libwvm.so");
             return;
         }
@@ -59,7 +60,7 @@ WVMExtractor::WVMExtractor(const sp<DataSource> &source)
 
     typedef WVMLoadableExtractor *(*GetInstanceFunc)(sp<DataSource>);
     GetInstanceFunc getInstanceFunc =
-        (GetInstanceFunc) dlsym(sVendorLibHandle,
+        (GetInstanceFunc) dlsym(gVendorLibHandle,
                 "_ZN7android11GetInstanceENS_2spINS_10DataSourceEEE");
 
     if (getInstanceFunc) {
@@ -71,17 +72,6 @@ WVMExtractor::WVMExtractor(const sp<DataSource> &source)
 }
 
 WVMExtractor::~WVMExtractor() {
-    Mutex::Autolock autoLock(sMutex);
-
-    CHECK(sActiveExtractors > 0);
-    sActiveExtractors--;
-
-    // Close lib after last use
-    if (sActiveExtractors == 0) {
-        if (sVendorLibHandle != NULL)
-            dlclose(sVendorLibHandle);
-        sVendorLibHandle = NULL;
-    }
 }
 
 size_t WVMExtractor::countTracks() {
