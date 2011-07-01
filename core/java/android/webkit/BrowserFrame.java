@@ -50,8 +50,10 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.harmony.security.provider.cert.X509CertImpl;
 
@@ -86,7 +88,8 @@ class BrowserFrame extends Handler {
     private boolean mIsMainFrame;
 
     // Attached Javascript interfaces
-    private Map<String, Object> mJSInterfaceMap;
+    private Map<String, Object> mJavaScriptObjects;
+    private Set<Object> mRemovedJavaScriptObjects;
 
     // Key store handler when Chromium HTTP stack is used.
     private KeyStoreHandler mKeyStoreHandler = null;
@@ -229,10 +232,11 @@ class BrowserFrame extends Handler {
         }
         sConfigCallback.addHandler(this);
 
-        mJSInterfaceMap = javascriptInterfaces;
-        if (mJSInterfaceMap == null) {
-            mJSInterfaceMap = new HashMap<String, Object>();
+        mJavaScriptObjects = javascriptInterfaces;
+        if (mJavaScriptObjects == null) {
+            mJavaScriptObjects = new HashMap<String, Object>();
         }
+        mRemovedJavaScriptObjects = new HashSet<Object>();
 
         mSettings = settings;
         mContext = context;
@@ -241,7 +245,7 @@ class BrowserFrame extends Handler {
         mWebViewCore = w;
 
         mSearchBox = new SearchBoxImpl(mWebViewCore, mCallbackProxy);
-        mJSInterfaceMap.put(SearchBoxImpl.JS_INTERFACE_NAME, mSearchBox);
+        mJavaScriptObjects.put(SearchBoxImpl.JS_INTERFACE_NAME, mSearchBox);
 
         AssetManager am = context.getAssets();
         nativeCreateFrame(w, am, proxy.getBackForwardList());
@@ -598,15 +602,16 @@ class BrowserFrame extends Handler {
      * We should re-attach any attached js interfaces.
      */
     private void windowObjectCleared(int nativeFramePointer) {
-        Iterator<String> iter = mJSInterfaceMap.keySet().iterator();
+        Iterator<String> iter = mJavaScriptObjects.keySet().iterator();
         while (iter.hasNext())  {
             String interfaceName = iter.next();
-            Object object = mJSInterfaceMap.get(interfaceName);
+            Object object = mJavaScriptObjects.get(interfaceName);
             if (object != null) {
                 nativeAddJavascriptInterface(nativeFramePointer,
-                        mJSInterfaceMap.get(interfaceName), interfaceName);
+                        mJavaScriptObjects.get(interfaceName), interfaceName);
             }
         }
+        mRemovedJavaScriptObjects.clear();
 
         stringByEvaluatingJavaScriptFromString(SearchBoxImpl.JS_BRIDGE);
     }
@@ -632,12 +637,15 @@ class BrowserFrame extends Handler {
         assert obj != null;
         removeJavascriptInterface(interfaceName);
 
-        mJSInterfaceMap.put(interfaceName, obj);
+        mJavaScriptObjects.put(interfaceName, obj);
     }
 
     public void removeJavascriptInterface(String interfaceName) {
-        if (mJSInterfaceMap.containsKey(interfaceName)) {
-            mJSInterfaceMap.remove(interfaceName);
+        // We keep a reference to the removed object because the native side holds only a weak
+        // reference and we need to allow the object to continue to be used until the page has been
+        // navigated.
+        if (mJavaScriptObjects.containsKey(interfaceName)) {
+            mRemovedJavaScriptObjects.add(mJavaScriptObjects.remove(interfaceName));
         }
     }
 
