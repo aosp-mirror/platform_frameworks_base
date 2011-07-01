@@ -224,14 +224,22 @@ public class UsbDeviceManager {
         private static final int NOTIFICATION_ADB = 4;
 
         public UsbHandler() {
-            // Read initial USB state
             try {
+                // sanity check the sys.usb.config system property
+                // this may be necessary if we crashed while switching USB configurations
+                String config = SystemProperties.get("sys.usb.config", "none");
+                if (config.equals("none")) {
+                    String persistConfig = SystemProperties.get("persist.sys.usb.config", "none");
+                    Slog.w(TAG, "resetting config to persistent property: " + persistConfig);
+                    SystemProperties.set("sys.usb.config", persistConfig);
+                }
+
+                // Read initial USB state
                 mCurrentFunctions = FileUtils.readTextFile(
                         new File(FUNCTIONS_PATH), 0, null).trim();
                 mDefaultFunctions = mCurrentFunctions;
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
-
                 mAdbEnabled = containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ADB);
 
                 // Upgrade step for previous versions that used persist.service.adb.enable
@@ -341,6 +349,7 @@ public class UsbDeviceManager {
         }
 
         private void setAdbEnabled(boolean enable) {
+            if (DEBUG) Slog.d(TAG, "setAdbEnabled: " + enable);
             if (enable != mAdbEnabled) {
                 mAdbEnabled = enable;
                 String functions;
