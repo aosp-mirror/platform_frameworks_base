@@ -1190,6 +1190,17 @@ bool ACodec::BaseState::onOMXMessage(const sp<AMessage> &msg) {
             CHECK(msg->findInt32("data1", &data1));
             CHECK(msg->findInt32("data2", &data2));
 
+            if (event == OMX_EventCmdComplete
+                    && data1 == OMX_CommandFlush
+                    && data2 == (int32_t)OMX_ALL) {
+                // Use of this notification is not consistent across
+                // implementations. We'll drop this notification and rely
+                // on flush-complete notifications on the individual port
+                // indices instead.
+
+                return true;
+            }
+
             return onOMXEvent(
                     static_cast<OMX_EVENTTYPE>(event),
                     static_cast<OMX_U32>(data1),
@@ -2119,6 +2130,7 @@ bool ACodec::ExecutingToIdleState::onOMXEvent(
             return BaseState::onOMXEvent(event, data1, data2);
     }
 }
+
 void ACodec::ExecutingToIdleState::changeStateIfWeOwnAllBuffers() {
     if (mCodec->allYourBuffersAreBelongToUs()) {
         CHECK_EQ(mCodec->mOMX->sendCommand(
