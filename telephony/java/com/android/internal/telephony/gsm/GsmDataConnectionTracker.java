@@ -788,13 +788,13 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         Message msg = obtainMessage(EVENT_DISCONNECT_DONE, apnContext);
                         apnContext.getDataConnection().tearDown(apnContext.getReason(), msg);
                         apnContext.setState(State.DISCONNECTING);
-                    } else {
-                        // apn is connected but no reference to dcac.
-                        // Should not be happen, but reset the state in case.
-                        apnContext.setState(State.IDLE);
-                        mPhone.notifyDataConnection(apnContext.getReason(),
-                                                    apnContext.getApnType());
                     }
+                } else {
+                    // apn is connected but no reference to dcac.
+                    // Should not be happen, but reset the state in case.
+                    apnContext.setState(State.IDLE);
+                    mPhone.notifyDataConnection(apnContext.getReason(),
+                                                apnContext.getApnType());
                 }
             }
         } else {
