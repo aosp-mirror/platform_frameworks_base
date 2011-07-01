@@ -18,7 +18,6 @@
 
 #define WVM_EXTRACTOR_H_
 
-#include <media/stagefright/DataSource.h>
 #include <media/stagefright/MediaExtractor.h>
 #include <utils/Errors.h>
 
@@ -68,10 +67,6 @@ private:
 
     WVMExtractor(const WVMExtractor &);
     WVMExtractor &operator=(const WVMExtractor &);
-
-    static Mutex sMutex;
-    static uint32_t sActiveExtractors;
-    static void *sVendorLibHandle;
 };
 
 }  // namespace android
