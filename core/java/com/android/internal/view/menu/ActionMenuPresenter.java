@@ -26,6 +26,7 @@ import android.view.MenuItem;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.View.MeasureSpec;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 
@@ -69,9 +70,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         final Resources res = context.getResources();
 
         if (!mReserveOverflowSet) {
-            // TODO Use the no-buttons specifier instead here
-            mReserveOverflow = res.getConfiguration()
-                    .isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_LARGE);
+            mReserveOverflow = !ViewConfiguration.get(context).hasPermanentMenuKey();
         }
 
         if (!mWidthLimitSet) {
