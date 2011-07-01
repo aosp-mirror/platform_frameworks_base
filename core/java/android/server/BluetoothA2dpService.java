@@ -517,6 +517,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
             intent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, prevState);
             intent.putExtra(BluetoothProfile.EXTRA_STATE, state);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
             if (DBG) log("A2DP state : device: " + device + " State:" + prevState + "->" + state);
@@ -530,6 +531,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         intent.putExtra(BluetoothDevice.EXTRA_DEVICE, device);
         intent.putExtra(BluetoothProfile.EXTRA_PREVIOUS_STATE, prevState);
         intent.putExtra(BluetoothProfile.EXTRA_STATE, state);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
         if (DBG) log("A2DP Playing state : device: " + device + " State:" + prevState + "->" + state);
