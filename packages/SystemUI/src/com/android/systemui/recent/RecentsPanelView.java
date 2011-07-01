@@ -496,7 +496,7 @@ public class RecentsPanelView extends RelativeLayout
         // the task.
         final ActivityManager am = (ActivityManager)
                 mContext.getSystemService(Context.ACTIVITY_SERVICE);
-        am.removeTask(ad.taskId, 0);
+        am.removeTask(ad.taskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
     }
 
     public void handleLongPress(View selectedView) {
