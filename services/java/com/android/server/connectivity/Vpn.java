@@ -40,7 +40,6 @@ import com.android.internal.R;
 import com.android.internal.net.VpnConfig;
 import com.android.server.ConnectivityService.VpnCallback;
 
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charsets;
 
@@ -132,7 +131,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     /**
      * Configure a TUN interface and return its file descriptor.
      *
-     * @param configuration The parameters to configure the interface.
+     * @param config The parameters to configure the interface.
      * @return The file descriptor of the interface.
      */
     public synchronized ParcelFileDescriptor establish(VpnConfig config) {
@@ -151,11 +150,25 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             return null;
         }
 
-        // Create and configure the interface.
+        // Load the label.
+        String label = app.loadLabel(pm).toString();
+
+        // Load the icon and convert it into a bitmap.
+        Drawable icon = app.loadIcon(pm);
+        Bitmap bitmap = null;
+        if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
+            int width = mContext.getResources().getDimensionPixelSize(
+                    android.R.dimen.notification_large_icon_width);
+            int height = mContext.getResources().getDimensionPixelSize(
+                    android.R.dimen.notification_large_icon_height);
+            icon.setBounds(0, 0, width, height);
+            bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+            icon.draw(new Canvas(bitmap));
+        }
+
+        // Create the interface and abort if any of the following steps fails.
         ParcelFileDescriptor descriptor =
                 ParcelFileDescriptor.adoptFd(jniCreateInterface(config.mtu));
-
-        // Abort if any of the following steps fails.
         try {
             String name = jniGetInterfaceName(descriptor.getFd());
             if (jniSetAddresses(name, config.addresses) < 1) {
@@ -202,41 +215,26 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     public synchronized void interfaceRemoved(String name) {
         if (name.equals(mInterfaceName) && jniCheckInterface(name) == 0) {
             hideNotification();
-            mInterfaceName = null;
             mCallback.restore();
+            mInterfaceName = null;
         }
     }
 
-    private void showNotification(PackageManager pm, ApplicationInfo app, VpnConfig config) {
+    private void showNotification(VpnConfig config, String label, Bitmap icon) {
         NotificationManager nm = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (nm != null) {
-            // Load the icon and convert it into a bitmap.
-            Drawable icon = app.loadIcon(pm);
-            Bitmap bitmap = null;
-            if (icon.getIntrinsicWidth() > 0 && icon.getIntrinsicHeight() > 0) {
-                int width = mContext.getResources().getDimensionPixelSize(
-                        android.R.dimen.notification_large_icon_width);
-                int height = mContext.getResources().getDimensionPixelSize(
-                        android.R.dimen.notification_large_icon_height);
-                icon.setBounds(0, 0, width, height);
-                bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-                icon.draw(new Canvas(bitmap));
-            }
-
-            // Load the label.
-            String label = app.loadLabel(pm).toString();
-
-            // Build the notification.
+            String title = (label == null) ? mContext.getString(R.string.vpn_title) :
+                    mContext.getString(R.string.vpn_title_long, label);
             String text = (config.sessionName == null) ? mContext.getString(R.string.vpn_text) :
                     mContext.getString(R.string.vpn_text_long, config.sessionName);
+
             long identity = Binder.clearCallingIdentity();
             Notification notification = new Notification.Builder(mContext)
                     .setSmallIcon(R.drawable.vpn_connected)
-                    .setLargeIcon(bitmap)
-                    .setTicker(mContext.getString(R.string.vpn_ticker, label))
-                    .setContentTitle(mContext.getString(R.string.vpn_title, label))
+                    .setLargeIcon(icon)
+                    .setContentTitle(title)
                     .setContentText(text)
                     .setContentIntent(VpnConfig.getIntentForNotification(mContext, config))
                     .setDefaults(Notification.DEFAULT_ALL)
