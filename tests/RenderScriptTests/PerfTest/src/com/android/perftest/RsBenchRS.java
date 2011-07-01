@@ -84,12 +84,6 @@ public class RsBenchRS {
     private Resources mRes;
     private RenderScriptGL mRS;
 
-    private Sampler mLinearClamp;
-    private Sampler mLinearWrap;
-    private Sampler mMipLinearWrap;
-    private Sampler mNearestClamp;
-    private Sampler mNearesWrap;
-
     private ProgramStore mProgStoreBlendNoneDepth;
     private ProgramStore mProgStoreBlendNone;
     private ProgramStore mProgStoreBlendAlpha;
@@ -115,10 +109,6 @@ public class RsBenchRS {
     private ScriptField_FragentShaderConstants3_s mFSConstPixel;
 
 
-    private ProgramRaster mCullBack;
-    private ProgramRaster mCullFront;
-    private ProgramRaster mCullNone;
-
     private Allocation mTexTorus;
     private Allocation mTexOpaque;
     private Allocation mTexTransparent;
@@ -143,6 +133,8 @@ public class RsBenchRS {
 
 
     private ScriptC_rsbench mScript;
+    private ScriptC_text_test mTextScript;
+    private ScriptC_torus_test mTorusScript;
 
     private final BitmapFactory.Options mOptionsARGB = new BitmapFactory.Options();
 
@@ -310,6 +302,7 @@ public class RsBenchRS {
         mProgStoreBlendAdd = BLEND_ADD_DEPTH_NONE(mRS);
 
         mScript.set_gProgStoreBlendNoneDepth(mProgStoreBlendNoneDepth);
+
         mScript.set_gProgStoreBlendNone(mProgStoreBlendNone);
         mScript.set_gProgStoreBlendAlpha(mProgStoreBlendAlpha);
         mScript.set_gProgStoreBlendAdd(mProgStoreBlendAdd);
@@ -330,14 +323,16 @@ public class RsBenchRS {
         texBuilder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.REPLACE,
                               ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
         mProgFragmentTexture = texBuilder.create();
-        mProgFragmentTexture.bindSampler(mLinearClamp, 0);
+        mProgFragmentTexture.bindSampler(Sampler.CLAMP_LINEAR(mRS), 0);
 
         ProgramFragmentFixedFunction.Builder colBuilder = new ProgramFragmentFixedFunction.Builder(mRS);
         colBuilder.setVaryingColor(false);
         mProgFragmentColor = colBuilder.create();
 
         mScript.set_gProgFragmentColor(mProgFragmentColor);
+
         mScript.set_gProgFragmentTexture(mProgFragmentTexture);
+
 
 
         // For Galaxy live wallpaper drawing
@@ -345,7 +340,7 @@ public class RsBenchRS {
         builder.setTexture(ProgramFragmentFixedFunction.Builder.EnvMode.REPLACE,
                            ProgramFragmentFixedFunction.Builder.Format.RGB, 0);
         ProgramFragment pfb = builder.create();
-        pfb.bindSampler(mNearesWrap, 0);
+        pfb.bindSampler(Sampler.WRAP_NEAREST(mRS), 0);
         mScript.set_gPFBackground(pfb);
 
         builder = new ProgramFragmentFixedFunction.Builder(mRS);
@@ -354,7 +349,7 @@ public class RsBenchRS {
                            ProgramFragmentFixedFunction.Builder.Format.RGBA, 0);
         builder.setVaryingColor(true);
         ProgramFragment pfs = builder.create();
-        pfs.bindSampler(mMipLinearWrap, 0);
+        pfs.bindSampler(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS), 0);
         mScript.set_gPFStars(pfs);
 
     }
@@ -404,6 +399,7 @@ public class RsBenchRS {
 
         mScript.set_gProgVertex(mProgVertex);
 
+
         // For galaxy live wallpaper
         mPvStarAlloc = new ScriptField_VpConsts(mRS, 1);
         mScript.bind_vpConstants(mPvStarAlloc);
@@ -447,13 +443,11 @@ public class RsBenchRS {
     private void initCustomShaders() {
         mVSConst = new ScriptField_VertexShaderConstants_s(mRS, 1);
         mFSConst = new ScriptField_FragentShaderConstants_s(mRS, 1);
-        mScript.bind_gVSConstants(mVSConst);
-        mScript.bind_gFSConstants(mFSConst);
+
 
         mVSConstPixel = new ScriptField_VertexShaderConstants3_s(mRS, 1);
         mFSConstPixel = new ScriptField_FragentShaderConstants3_s(mRS, 1);
-        mScript.bind_gVSConstPixel(mVSConstPixel);
-        mScript.bind_gFSConstPixel(mFSConstPixel);
+
 
         // Initialize the shader builder
         ProgramVertex.Builder pvbCustom = new ProgramVertex.Builder(mRS);
@@ -506,11 +500,7 @@ public class RsBenchRS {
         }
         mProgFragmentMultitex = pfbCustom.create();
 
-        mScript.set_gProgVertexCustom(mProgVertexCustom);
-        mScript.set_gProgFragmentCustom(mProgFragmentCustom);
-        mScript.set_gProgVertexPixelLight(mProgVertexPixelLight);
-        mScript.set_gProgVertexPixelLightMove(mProgVertexPixelLightMove);
-        mScript.set_gProgFragmentPixelLight(mProgFragmentPixelLight);
+
         mScript.set_gProgFragmentMultitex(mProgFragmentMultitex);
     }
 
@@ -587,39 +577,22 @@ public class RsBenchRS {
             Log.e("rs", "could not load model");
         } else {
             mTorus = (Mesh)entry.getObject();
-            mScript.set_gTorusMesh(mTorus);
         }
 
         createParticlesMesh();
     }
 
     private void initSamplers() {
-        Sampler.Builder bs = new Sampler.Builder(mRS);
-        bs.setMinification(Sampler.Value.LINEAR);
-        bs.setMagnification(Sampler.Value.LINEAR);
-        bs.setWrapS(Sampler.Value.WRAP);
-        bs.setWrapT(Sampler.Value.WRAP);
-        mLinearWrap = bs.create();
-
-        mLinearClamp = Sampler.CLAMP_LINEAR(mRS);
-        mNearestClamp = Sampler.CLAMP_NEAREST(mRS);
-        mMipLinearWrap = Sampler.WRAP_LINEAR_MIP_LINEAR(mRS);
-        mNearesWrap = Sampler.WRAP_NEAREST(mRS);
-
-        mScript.set_gLinearClamp(mLinearClamp);
-        mScript.set_gLinearWrap(mLinearWrap);
-        mScript.set_gMipLinearWrap(mMipLinearWrap);
-        mScript.set_gNearestClamp(mNearestClamp);
+        mScript.set_gLinearClamp(Sampler.CLAMP_LINEAR(mRS));
+        mScript.set_gLinearWrap(Sampler.WRAP_LINEAR(mRS));
+        mScript.set_gMipLinearWrap(Sampler.WRAP_LINEAR_MIP_LINEAR(mRS));
+        mScript.set_gNearestClamp(Sampler.CLAMP_NEAREST(mRS));
     }
 
     private void initProgramRaster() {
-        mCullBack = ProgramRaster.CULL_BACK(mRS);
-        mCullFront = ProgramRaster.CULL_FRONT(mRS);
-        mCullNone = ProgramRaster.CULL_NONE(mRS);
-
-        mScript.set_gCullBack(mCullBack);
-        mScript.set_gCullFront(mCullFront);
-        mScript.set_gCullNone(mCullNone);
+        mScript.set_gCullBack(ProgramRaster.CULL_BACK(mRS));
+        mScript.set_gCullFront(ProgramRaster.CULL_FRONT(mRS));
+        mScript.set_gCullNone(ProgramRaster.CULL_NONE(mRS));
     }
 
     private int strlen(byte[] array) {
@@ -645,9 +618,47 @@ public class RsBenchRS {
         }
     }
 
+    public void setDebugMode(int num) {
+        mScript.invoke_setDebugMode(num);
+    }
+
+    public void setBenchmarkMode() {
+        mScript.invoke_setBenchmarkMode();
+    }
+
+    void initTextScript() {
+        mTextScript = new ScriptC_text_test(mRS, mRes, R.raw.text_test);
+        mTextScript.set_gFontSans(mFontSans);
+        mTextScript.set_gFontSerif(mFontSerif);
+    }
+
+    void initTorusScript() {
+        mTorusScript = new ScriptC_torus_test(mRS, mRes, R.raw.torus_test);
+        mTorusScript.set_gCullFront(ProgramRaster.CULL_FRONT(mRS));
+        mTorusScript.set_gCullBack(ProgramRaster.CULL_BACK(mRS));
+        mTorusScript.set_gLinearClamp(Sampler.CLAMP_LINEAR(mRS));
+        mTorusScript.set_gTorusMesh(mTorus);
+        mTorusScript.set_gTexTorus(mTexTorus);
+        mTorusScript.set_gProgVertexCustom(mProgVertexCustom);
+        mTorusScript.set_gProgFragmentCustom(mProgFragmentCustom);
+        mTorusScript.set_gProgVertexPixelLight(mProgVertexPixelLight);
+        mTorusScript.set_gProgVertexPixelLightMove(mProgVertexPixelLightMove);
+        mTorusScript.set_gProgFragmentPixelLight(mProgFragmentPixelLight);
+        mTorusScript.bind_gVSConstPixel(mVSConstPixel);
+        mTorusScript.bind_gFSConstPixel(mFSConstPixel);
+        mTorusScript.bind_gVSConstants(mVSConst);
+        mTorusScript.bind_gFSConstants(mFSConst);
+        mTorusScript.set_gProgVertex(mProgVertex);
+        mTorusScript.set_gProgFragmentTexture(mProgFragmentTexture);
+        mTorusScript.set_gProgFragmentColor(mProgFragmentColor);
+        mTorusScript.set_gProgStoreBlendNoneDepth(mProgStoreBlendNoneDepth);
+    }
+
     private void initRS() {
 
         mScript = new ScriptC_rsbench(mRS, mRes, R.raw.rsbench);
+
+
         mRS.setMessageHandler(mRsMessage);
 
         mMaxModes = mScript.get_gMaxModes();
@@ -708,6 +719,13 @@ public class RsBenchRS {
         }
         mSampleListViewAllocs.copyAll();
         mScript.bind_gListViewText(mSampleListViewAllocs);
+
+        initTextScript();
+        initTorusScript();
+
+        mScript.set_gFontScript(mTextScript);
+        mScript.set_gTorusScript(mTorusScript);
+        mScript.set_gDummyAlloc(Allocation.createSized(mRS, Element.I32(mRS), 1));
 
         mRS.bindRootScript(mScript);
     }

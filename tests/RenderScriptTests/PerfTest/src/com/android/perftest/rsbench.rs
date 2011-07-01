@@ -18,6 +18,7 @@
 
 #include "rs_graphics.rsh"
 #include "shader_def.rsh"
+#include "subtest_def.rsh"
 
 /* Message sent from script to renderscript */
 const int RS_MSG_TEST_DONE = 100;
@@ -98,7 +99,6 @@ ListAllocs *gListViewText;
 rs_mesh g10by10Mesh;
 rs_mesh g100by100Mesh;
 rs_mesh gWbyHMesh;
-rs_mesh gTorusMesh;
 rs_mesh gSingleMesh;
 
 rs_font gFontSans;
@@ -115,41 +115,21 @@ rs_program_raster gCullBack;
 rs_program_raster gCullFront;
 rs_program_raster gCullNone;
 
-// Custom vertex shader compunents
-VertexShaderConstants *gVSConstants;
-FragentShaderConstants *gFSConstants;
-VertexShaderConstants3 *gVSConstPixel;
-FragentShaderConstants3 *gFSConstPixel;
 // Export these out to easily set the inputs to shader
 VertexShaderInputs *gVSInputs;
-// Custom shaders we use for lighting
-rs_program_vertex gProgVertexCustom;
-rs_program_fragment gProgFragmentCustom;
-rs_program_vertex gProgVertexPixelLight;
-rs_program_vertex gProgVertexPixelLightMove;
-rs_program_fragment gProgFragmentPixelLight;
+
 rs_program_fragment gProgFragmentMultitex;
 
 rs_allocation gRenderBufferColor;
 rs_allocation gRenderBufferDepth;
 
-float gDt = 0;
+static float gDt = 0;
 
 void init() {
 }
 
 static int gRenderSurfaceW;
 static int gRenderSurfaceH;
-
-static const char *sampleText = "This is a sample of small text for performace";
-// Offsets for multiple layer of text
-static int textOffsets[] = { 0,  0, -5, -5, 5,  5, -8, -8, 8,  8};
-static float textColors[] = {1.0f, 1.0f, 1.0f, 1.0f,
-                             0.5f, 0.7f, 0.5f, 1.0f,
-                             0.7f, 0.5f, 0.5f, 1.0f,
-                             0.5f, 0.5f, 0.7f, 1.0f,
-                             0.5f, 0.6f, 0.7f, 1.0f,
-};
 
 /**
   * Methods to draw the galaxy live wall paper
@@ -291,40 +271,16 @@ static void setupOffscreenTarget() {
     rsgBindDepthTarget(gRenderBufferDepth);
 }
 
+rs_script gFontScript;
+rs_script gTorusScript;
+rs_allocation gDummyAlloc;
+
 static void displayFontSamples(int fillNum) {
-
-    rs_font fonts[5];
-    fonts[0] = gFontSans;
-    fonts[1] = gFontSerif;
-    fonts[2] = gFontSans;
-    fonts[3] = gFontSerif;
-    fonts[4] = gFontSans;
-
-    uint width = gRenderSurfaceW;
-    uint height = gRenderSurfaceH;
-    int left = 0, right = 0, top = 0, bottom = 0;
-    rsgMeasureText(sampleText, &left, &right, &top, &bottom);
-
-    int textHeight = top - bottom;
-    int textWidth = right - left;
-    int numVerticalLines = height / textHeight;
-    int yPos = top;
-
-    int xOffset = 0, yOffset = 0;
-    for(int fillI = 0; fillI < fillNum; fillI ++) {
-        rsgBindFont(fonts[fillI]);
-        xOffset = textOffsets[fillI * 2];
-        yOffset = textOffsets[fillI * 2 + 1];
-        float *colPtr = textColors + fillI * 4;
-        rsgFontColor(colPtr[0], colPtr[1], colPtr[2], colPtr[3]);
-        for (int h = 0; h < 4; h ++) {
-            yPos = top + yOffset;
-            for (int v = 0; v < numVerticalLines; v ++) {
-                rsgDrawText(sampleText, xOffset + textWidth * h, yPos);
-                yPos += textHeight;
-            }
-        }
-    }
+    TestData testData;
+    testData.renderSurfaceW = gRenderSurfaceW;
+    testData.renderSurfaceH = gRenderSurfaceH;
+    testData.user = fillNum;
+    rsForEach(gFontScript, gDummyAlloc, gDummyAlloc, &testData);
 }
 
 static void bindProgramVertexOrtho() {
@@ -555,212 +511,37 @@ static void displayLiveWallPaper(int wResolution, int hResolution) {
     drawMeshInPage(2.0f*gRenderSurfaceW, 0, wResolution, hResolution);
 }
 
-static float gTorusRotation = 0;
-static void updateModelMatrix(rs_matrix4x4 *matrix, void *buffer) {
-    if (buffer == 0) {
-        rsgProgramVertexLoadModelMatrix(matrix);
-    } else {
-        rsgAllocationSyncAll(rsGetAllocation(buffer));
-    }
-}
-
-static void drawToruses(int numMeshes, rs_matrix4x4 *matrix, void *buffer) {
-
-    if (numMeshes == 1) {
-        rsMatrixLoadTranslate(matrix, 0.0f, 0.0f, -7.5f);
-        rsMatrixRotate(matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        updateModelMatrix(matrix, buffer);
-        rsgDrawMesh(gTorusMesh);
-        return;
-    }
-
-    if (numMeshes == 2) {
-        rsMatrixLoadTranslate(matrix, -1.6f, 0.0f, -7.5f);
-        rsMatrixRotate(matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        updateModelMatrix(matrix, buffer);
-        rsgDrawMesh(gTorusMesh);
-
-        rsMatrixLoadTranslate(matrix, 1.6f, 0.0f, -7.5f);
-        rsMatrixRotate(matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
-        updateModelMatrix(matrix, buffer);
-        rsgDrawMesh(gTorusMesh);
-        return;
-    }
-
-    float startX = -5.0f;
-    float startY = -1.5f;
-    float startZ = -15.0f;
-    float dist = 3.2f;
-
-    for (int h = 0; h < 4; h ++) {
-        for (int v = 0; v < 2; v ++) {
-            // Position our model on the screen
-            rsMatrixLoadTranslate(matrix, startX + dist * h, startY + dist * v, startZ);
-            rsMatrixRotate(matrix, gTorusRotation, 1.0f, 0.0f, 0.0f);
-            updateModelMatrix(matrix, buffer);
-            rsgDrawMesh(gTorusMesh);
-        }
-    }
-}
-
 // Quick hack to get some geometry numbers
 static void displaySimpleGeoSamples(bool useTexture, int numMeshes) {
-    rsgBindProgramVertex(gProgVertex);
-    rsgBindProgramRaster(gCullBack);
-    // Setup the projection matrix with 30 degree field of view
-    rs_matrix4x4 proj;
-    float aspect = (float)gRenderSurfaceW / (float)gRenderSurfaceH;
-    rsMatrixLoadPerspective(&proj, 30.0f, aspect, 0.1f, 100.0f);
-    rsgProgramVertexLoadProjectionMatrix(&proj);
-
-    // Fragment shader with texture
-    rsgBindProgramStore(gProgStoreBlendNoneDepth);
-    if (useTexture) {
-        rsgBindProgramFragment(gProgFragmentTexture);
-    } else {
-        rsgBindProgramFragment(gProgFragmentColor);
-        rsgProgramFragmentConstantColor(gProgFragmentColor, 0.1, 0.7, 0.1, 1);
-    }
-    rsgBindSampler(gProgFragmentTexture, 0, gLinearClamp);
-    rsgBindTexture(gProgFragmentTexture, 0, gTexTorus);
-
-    // Apply a rotation to our mesh
-    gTorusRotation += 50.0f * gDt;
-    if (gTorusRotation > 360.0f) {
-        gTorusRotation -= 360.0f;
-    }
-
-    rs_matrix4x4 matrix;
-    drawToruses(numMeshes, &matrix, 0);
-}
-
-float gLight0Rotation = 0;
-float gLight1Rotation = 0;
-
-static void setupCustomShaderLights() {
-    float4 light0Pos = {-5.0f, 5.0f, -10.0f, 1.0f};
-    float4 light1Pos = {2.0f, 5.0f, 15.0f, 1.0f};
-    float4 light0DiffCol = {0.9f, 0.7f, 0.7f, 1.0f};
-    float4 light0SpecCol = {0.9f, 0.6f, 0.6f, 1.0f};
-    float4 light1DiffCol = {0.5f, 0.5f, 0.9f, 1.0f};
-    float4 light1SpecCol = {0.5f, 0.5f, 0.9f, 1.0f};
-
-    gLight0Rotation += 50.0f * gDt;
-    if (gLight0Rotation > 360.0f) {
-        gLight0Rotation -= 360.0f;
-    }
-    gLight1Rotation -= 50.0f * gDt;
-    if (gLight1Rotation > 360.0f) {
-        gLight1Rotation -= 360.0f;
-    }
-
-    rs_matrix4x4 l0Mat;
-    rsMatrixLoadRotate(&l0Mat, gLight0Rotation, 1.0f, 0.0f, 0.0f);
-    light0Pos = rsMatrixMultiply(&l0Mat, light0Pos);
-    rs_matrix4x4 l1Mat;
-    rsMatrixLoadRotate(&l1Mat, gLight1Rotation, 0.0f, 0.0f, 1.0f);
-    light1Pos = rsMatrixMultiply(&l1Mat, light1Pos);
-
-    // Set light 0 properties
-    gVSConstants->light0_Posision = light0Pos;
-    gVSConstants->light0_Diffuse = 1.0f;
-    gVSConstants->light0_Specular = 0.5f;
-    gVSConstants->light0_CosinePower = 10.0f;
-    // Set light 1 properties
-    gVSConstants->light1_Posision = light1Pos;
-    gVSConstants->light1_Diffuse = 1.0f;
-    gVSConstants->light1_Specular = 0.7f;
-    gVSConstants->light1_CosinePower = 25.0f;
-    rsgAllocationSyncAll(rsGetAllocation(gVSConstants));
-
-    // Update fragment shader constants
-    // Set light 0 colors
-    gFSConstants->light0_DiffuseColor = light0DiffCol;
-    gFSConstants->light0_SpecularColor = light0SpecCol;
-    // Set light 1 colors
-    gFSConstants->light1_DiffuseColor = light1DiffCol;
-    gFSConstants->light1_SpecularColor = light1SpecCol;
-    rsgAllocationSyncAll(rsGetAllocation(gFSConstants));
-
-    // Set light 0 properties for per pixel lighting
-    gFSConstPixel->light0_Posision = light0Pos;
-    gFSConstPixel->light0_Diffuse = 1.0f;
-    gFSConstPixel->light0_Specular = 0.5f;
-    gFSConstPixel->light0_CosinePower = 10.0f;
-    gFSConstPixel->light0_DiffuseColor = light0DiffCol;
-    gFSConstPixel->light0_SpecularColor = light0SpecCol;
-    // Set light 1 properties
-    gFSConstPixel->light1_Posision = light1Pos;
-    gFSConstPixel->light1_Diffuse = 1.0f;
-    gFSConstPixel->light1_Specular = 0.7f;
-    gFSConstPixel->light1_CosinePower = 25.0f;
-    gFSConstPixel->light1_DiffuseColor = light1DiffCol;
-    gFSConstPixel->light1_SpecularColor = light1SpecCol;
-    rsgAllocationSyncAll(rsGetAllocation(gFSConstPixel));
+    TestData testData;
+    testData.renderSurfaceW = gRenderSurfaceW;
+    testData.renderSurfaceH = gRenderSurfaceH;
+    testData.dt = gDt;
+    testData.user = 0;
+    testData.user1 = useTexture ? 1 : 0;
+    testData.user2 = numMeshes;
+    rsForEach(gTorusScript, gDummyAlloc, gDummyAlloc, &testData);
 }
 
 static void displayCustomShaderSamples(int numMeshes) {
-
-    // Update vertex shader constants
-    // Load model matrix
-    // Apply a rotation to our mesh
-    gTorusRotation += 50.0f * gDt;
-    if (gTorusRotation > 360.0f) {
-        gTorusRotation -= 360.0f;
-    }
-
-    // Setup the projection matrix
-    float aspect = (float)gRenderSurfaceW / (float)gRenderSurfaceH;
-    rsMatrixLoadPerspective(&gVSConstants->proj, 30.0f, aspect, 0.1f, 100.0f);
-    setupCustomShaderLights();
-
-    rsgBindProgramVertex(gProgVertexCustom);
-
-    // Fragment shader with texture
-    rsgBindProgramStore(gProgStoreBlendNoneDepth);
-    rsgBindProgramFragment(gProgFragmentCustom);
-    rsgBindSampler(gProgFragmentCustom, 0, gLinearClamp);
-    rsgBindTexture(gProgFragmentCustom, 0, gTexTorus);
-
-    // Use back face culling
-    rsgBindProgramRaster(gCullBack);
-
-    drawToruses(numMeshes, &gVSConstants->model, gVSConstants);
+    TestData testData;
+    testData.renderSurfaceW = gRenderSurfaceW;
+    testData.renderSurfaceH = gRenderSurfaceH;
+    testData.dt = gDt;
+    testData.user = 1;
+    testData.user1 = numMeshes;
+    rsForEach(gTorusScript, gDummyAlloc, gDummyAlloc, &testData);
 }
 
 static void displayPixelLightSamples(int numMeshes, bool heavyVertex) {
-
-    // Update vertex shader constants
-    // Load model matrix
-    // Apply a rotation to our mesh
-    gTorusRotation += 30.0f * gDt;
-    if (gTorusRotation > 360.0f) {
-        gTorusRotation -= 360.0f;
-    }
-
-    gVSConstPixel->time = rsUptimeMillis()*0.005;
-
-    // Setup the projection matrix
-    float aspect = (float)gRenderSurfaceW / (float)gRenderSurfaceH;
-    rsMatrixLoadPerspective(&gVSConstPixel->proj, 30.0f, aspect, 0.1f, 100.0f);
-    setupCustomShaderLights();
-
-    if (heavyVertex) {
-        rsgBindProgramVertex(gProgVertexPixelLightMove);
-    } else {
-        rsgBindProgramVertex(gProgVertexPixelLight);
-    }
-
-    // Fragment shader with texture
-    rsgBindProgramStore(gProgStoreBlendNoneDepth);
-    rsgBindProgramFragment(gProgFragmentPixelLight);
-    rsgBindSampler(gProgFragmentPixelLight, 0, gLinearClamp);
-    rsgBindTexture(gProgFragmentPixelLight, 0, gTexTorus);
-
-    // Use back face culling
-    rsgBindProgramRaster(gCullBack);
-
-    drawToruses(numMeshes, &gVSConstPixel->model, gVSConstPixel);
+    TestData testData;
+    testData.renderSurfaceW = gRenderSurfaceW;
+    testData.renderSurfaceH = gRenderSurfaceH;
+    testData.dt = gDt;
+    testData.user = 2;
+    testData.user1 = numMeshes;
+    testData.user2 = heavyVertex ? 1 : 0;
+    rsForEach(gTorusScript, gDummyAlloc, gDummyAlloc, &testData);
 }
 
 static void displayMultitextureSample(bool blend, int quadCount) {
@@ -862,6 +643,20 @@ static const char *testNames[] = {
     "UI test with live wallpaper",
 };
 
+static bool gIsDebugMode = false;
+void setDebugMode(int testNumber) {
+    gIsDebugMode = true;
+    benchMode = testNumber;
+    rsgClearAllRenderTargets();
+}
+
+void setBenchmarkMode() {
+    gIsDebugMode = false;
+    benchMode = 0;
+    runningLoops = 0;
+}
+
+
 void getTestName(int testIndex) {
     int bufferLen = rsAllocationGetDimX(rsGetAllocation(gStringBuffer));
     if (testIndex >= gMaxModes) {
@@ -932,7 +727,7 @@ static void runTest(int index) {
         displaySingletexFill(true, 10);
         break;
     case 18:
-        displayMultitextureSample(true, 8);
+        displayMultitextureSample(true, 10);
         break;
     case 19:
         displayPixelLightSamples(1, false);
@@ -992,14 +787,7 @@ static void drawOffscreenResult(int posX, int posY, int width, int height) {
                          startX + width, startY, 0, 1, 1);
 }
 
-int root(void) {
-    gRenderSurfaceW = rsgGetWidth();
-    gRenderSurfaceH = rsgGetHeight();
-    rsgClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    rsgClearDepth(1.0f);
-    if(!checkInit()) {
-        return 1;
-    }
+static void benchmark() {
 
     gDt = 1.0f / 60.0f;
 
@@ -1045,8 +833,6 @@ int root(void) {
 
     benchMode ++;
 
-    gTorusRotation = 0;
-
     if (benchMode == gMaxModes) {
         rsSendToClientBlocking(RS_MSG_RESULTS_READY, gResultBuffer, gMaxModes*sizeof(float));
         benchMode = 0;
@@ -1058,5 +844,30 @@ int root(void) {
             sendMsgFlag = true;
         }
     }
+
+}
+
+static void debug() {
+    gDt = rsGetDt();
+
+    rsgFinish();
+    runTest(benchMode);
+}
+
+int root(void) {
+    gRenderSurfaceW = rsgGetWidth();
+    gRenderSurfaceH = rsgGetHeight();
+    rsgClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    rsgClearDepth(1.0f);
+    if(!checkInit()) {
+        return 1;
+    }
+
+    if (gIsDebugMode) {
+        debug();
+    } else {
+        benchmark();
+    }
+
     return 1;
 }

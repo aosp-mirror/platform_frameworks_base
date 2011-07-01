@@ -31,10 +31,14 @@ import android.provider.Settings.System;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ListView;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.widget.Toast;
 
 import java.lang.Runtime;
 
@@ -76,5 +80,38 @@ public class RsBench extends Activity {
         // to take appropriate action when the activity loses focus
         super.onPause();
         mView.pause();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.loader_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.benchmark_mode:
+                mView.setBenchmarkMode();
+                return true;
+            case R.id.debug_mode:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Pick a Test");
+                builder.setItems(mView.getTestNames(),
+                                 new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int item) {
+                        Toast.makeText(getApplicationContext(),
+                                       "Switching to: " + mView.getTestNames()[item],
+                                       Toast.LENGTH_SHORT).show();
+                        mView.setDebugMode(item);
+                    }
+                });
+                builder.show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }
