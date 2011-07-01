@@ -148,6 +148,11 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
     LOGV("SurfaceTexture::setBufferCount");
     Mutex::Autolock lock(mMutex);
 
+    if (bufferCount > NUM_BUFFER_SLOTS) {
+        LOGE("setBufferCount: bufferCount larger than slots available");
+        return BAD_VALUE;
+    }
+
     // Error out if the user has dequeued buffers
     for (int i=0 ; i<mBufferCount ; i++) {
         if (mSlots[i].mBufferState == BufferSlot::DEQUEUED) {
@@ -208,7 +213,7 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         uint32_t format, uint32_t usage) {
     LOGV("SurfaceTexture::dequeueBuffer");
 
-    if ((w && !h) || (!w & h)) {
+    if ((w && !h) || (!w && h)) {
         LOGE("dequeueBuffer: invalid size: w=%u, h=%u", w, h);
         return BAD_VALUE;
     }
@@ -699,10 +704,10 @@ nsecs_t SurfaceTexture::getTimestamp() {
 }
 
 void SurfaceTexture::setFrameAvailableListener(
-        const sp<FrameAvailableListener>& l) {
+        const sp<FrameAvailableListener>& listener) {
     LOGV("SurfaceTexture::setFrameAvailableListener");
     Mutex::Autolock lock(mMutex);
-    mFrameAvailableListener = l;
+    mFrameAvailableListener = listener;
 }
 
 sp<IBinder> SurfaceTexture::getAllocator() {

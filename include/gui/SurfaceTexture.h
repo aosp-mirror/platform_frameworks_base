@@ -139,7 +139,7 @@ public:
 
     // setFrameAvailableListener sets the listener object that will be notified
     // when a new frame becomes available.
-    void setFrameAvailableListener(const sp<FrameAvailableListener>& l);
+    void setFrameAvailableListener(const sp<FrameAvailableListener>& listener);
 
     // getAllocator retrieves the binder object that must be referenced as long
     // as the GraphicBuffers dequeued from this SurfaceTexture are referenced.
@@ -343,7 +343,7 @@ private:
     uint32_t mNextTransform;
 
     // mTexName is the name of the OpenGL texture to which streamed images will
-    // be bound when updateTexImage is called. It is set at construction time 
+    // be bound when updateTexImage is called. It is set at construction time
     // changed with a call to setTexName.
     const GLuint mTexName;
 
