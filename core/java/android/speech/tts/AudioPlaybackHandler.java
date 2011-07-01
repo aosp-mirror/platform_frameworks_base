@@ -31,8 +31,7 @@ class AudioPlaybackHandler {
 
     private static final int SYNTHESIS_START = 1;
     private static final int SYNTHESIS_DATA_AVAILABLE = 2;
-    private static final int SYNTHESIS_COMPLETE_DATA_AVAILABLE = 3;
-    private static final int SYNTHESIS_DONE = 4;
+    private static final int SYNTHESIS_DONE = 3;
 
     private static final int PLAY_AUDIO = 5;
     private static final int PLAY_SILENCE = 6;
@@ -118,10 +117,6 @@ class AudioPlaybackHandler {
 
     void enqueueSynthesisDataAvailable(SynthesisMessageParams token) {
         mQueue.add(new ListEntry(SYNTHESIS_DATA_AVAILABLE, token));
-    }
-
-    void enqueueSynthesisCompleteDataAvailable(SynthesisMessageParams token) {
-        mQueue.add(new ListEntry(SYNTHESIS_COMPLETE_DATA_AVAILABLE, token));
     }
 
     void enqueueSynthesisDone(SynthesisMessageParams token) {
@@ -280,8 +275,6 @@ class AudioPlaybackHandler {
             handleSynthesisDataAvailable(msg);
         } else if (entry.mWhat == SYNTHESIS_DONE) {
             handleSynthesisDone(msg);
-        } else if (entry.mWhat == SYNTHESIS_COMPLETE_DATA_AVAILABLE) {
-            handleSynthesisCompleteDataAvailable(msg);
         } else if (entry.mWhat == PLAY_AUDIO) {
             handleAudio(msg);
         } else if (entry.mWhat == PLAY_SILENCE) {
@@ -424,54 +417,11 @@ class AudioPlaybackHandler {
             return;
         }
 
-        final AudioTrack track = params.mAudioTrack;
+        final AudioTrack audioTrack = params.mAudioTrack;
         final int bytesPerFrame = getBytesPerFrame(params.mAudioFormat);
         final int lengthInBytes = params.mBytesWritten;
+        final int lengthInFrames = lengthInBytes / bytesPerFrame;
 
-        blockUntilDone(track, bytesPerFrame, lengthInBytes);
-    }
-
-    private void handleSynthesisCompleteDataAvailable(MessageParams msg) {
-        final SynthesisMessageParams params = (SynthesisMessageParams) msg;
-        if (DBG) Log.d(TAG, "completeAudioAvailable(" + params + ")");
-
-        params.mLogger.onPlaybackStart();
-
-        // Channel config and bytes per frame are checked before
-        // this message is sent.
-        int channelConfig = AudioPlaybackHandler.getChannelConfig(params.mChannelCount);
-        int bytesPerFrame = AudioPlaybackHandler.getBytesPerFrame(params.mAudioFormat);
-
-        SynthesisMessageParams.ListEntry entry = params.getNextBuffer();
-
-        if (entry == null) {
-            Log.w(TAG, "completeDataAvailable : No buffers available to play.");
-            return;
-        }
-
-        final AudioTrack audioTrack = new AudioTrack(params.mStreamType, params.mSampleRateInHz,
-                channelConfig, params.mAudioFormat, entry.mLength, AudioTrack.MODE_STATIC);
-
-        // So that handleDone can access this correctly.
-        params.mAudioTrack = audioTrack;
-
-        try {
-            audioTrack.write(entry.mBytes, entry.mOffset, entry.mLength);
-            setupVolume(audioTrack, params.mVolume, params.mPan);
-            audioTrack.play();
-            blockUntilDone(audioTrack, bytesPerFrame, entry.mLength);
-            if (DBG) Log.d(TAG, "Wrote data to audio track successfully : " + entry.mLength);
-        } catch (IllegalStateException ex) {
-            Log.e(TAG, "Playback error", ex);
-        } finally {
-            handleSynthesisDone(msg);
-        }
-    }
-
-
-    private static void blockUntilDone(AudioTrack audioTrack, int bytesPerFrame,
-            int lengthInBytes) {
-        int lengthInFrames = lengthInBytes / bytesPerFrame;
         int currentPosition = 0;
         while ((currentPosition = audioTrack.getPlaybackHeadPosition()) < lengthInFrames) {
             if (audioTrack.getPlayState() != AudioTrack.PLAYSTATE_PLAYING) {

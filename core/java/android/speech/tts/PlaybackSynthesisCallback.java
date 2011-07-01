@@ -53,8 +53,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
 
     // Handler associated with a thread that plays back audio requests.
     private final AudioPlaybackHandler mAudioTrackHandler;
-    // A request "token", which will be non null after start() or
-    // completeAudioAvailable() have been called.
+    // A request "token", which will be non null after start() has been called.
     private SynthesisMessageParams mToken = null;
     // Whether this request has been stopped. This is useful for keeping
     // track whether stop() has been called before start(). In all other cases,
@@ -204,37 +203,6 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
         // before start.
         mLogger.onError();
         stop();
-    }
-
-    @Override
-    public int completeAudioAvailable(int sampleRateInHz, int audioFormat, int channelCount,
-            byte[] buffer, int offset, int length) {
-        int channelConfig = AudioPlaybackHandler.getChannelConfig(channelCount);
-        if (channelConfig == 0) {
-            Log.e(TAG, "Unsupported number of channels :" + channelCount);
-            return TextToSpeech.ERROR;
-        }
-
-        int bytesPerFrame = AudioPlaybackHandler.getBytesPerFrame(audioFormat);
-        if (bytesPerFrame < 0) {
-            Log.e(TAG, "Unsupported audio format :" + audioFormat);
-            return TextToSpeech.ERROR;
-        }
-
-        synchronized (mStateLock) {
-            if (mStopped) {
-                return TextToSpeech.ERROR;
-            }
-            SynthesisMessageParams params = new SynthesisMessageParams(
-                    mStreamType, sampleRateInHz, audioFormat, channelCount, mVolume, mPan,
-                    mDispatcher, mCallingApp, mLogger);
-            params.addBuffer(buffer, offset, length);
-
-            mAudioTrackHandler.enqueueSynthesisCompleteDataAvailable(params);
-            mToken = params;
-        }
-
-        return TextToSpeech.SUCCESS;
     }
 
 }
