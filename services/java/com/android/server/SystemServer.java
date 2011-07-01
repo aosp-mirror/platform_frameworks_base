@@ -523,6 +523,7 @@ class ServerThread extends Thread {
         // These are needed to propagate to the runnable below.
         final Context contextF = context;
         final BatteryService batteryF = battery;
+        final NetworkManagementService networkManagementF = networkManagement;
         final NetworkStatsService networkStatsF = networkStats;
         final NetworkPolicyManagerService networkPolicyF = networkPolicy;
         final ConnectivityService connectivityF = connectivity;
@@ -550,6 +551,7 @@ class ServerThread extends Thread {
 
                 startSystemUi(contextF);
                 if (batteryF != null) batteryF.systemReady();
+                if (networkManagementF != null) networkManagementF.systemReady();
                 if (networkStatsF != null) networkStatsF.systemReady();
                 if (networkPolicyF != null) networkPolicyF.systemReady();
                 if (connectivityF != null) connectivityF.systemReady();

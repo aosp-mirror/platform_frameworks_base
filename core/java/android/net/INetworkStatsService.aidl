@@ -33,4 +33,7 @@ interface INetworkStatsService {
     /** Return usage summary per UID for traffic that matches template. */
     NetworkStats getSummaryForAllUid(in NetworkTemplate template, long start, long end, boolean includeTags);
 
+    /** Force update of statistics. */
+    void forceUpdate();
+
 }
