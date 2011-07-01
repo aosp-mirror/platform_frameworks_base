@@ -299,6 +299,7 @@ int FramebufferNativeWindow::perform(ANativeWindow* window,
 {
     switch (operation) {
         case NATIVE_WINDOW_SET_USAGE:
+        case NATIVE_WINDOW_SET_BUFFERS_FORMAT:
         case NATIVE_WINDOW_CONNECT:
         case NATIVE_WINDOW_DISCONNECT:
             break;

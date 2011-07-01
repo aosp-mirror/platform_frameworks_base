@@ -367,7 +367,12 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
         if (cnx->egl.eglGetConfigAttrib(iDpy,
                 iConfig, EGL_NATIVE_VISUAL_ID, &format)) {
             if (format != 0) {
-                native_window_set_buffers_geometry(window, 0, 0, format);
+                int err = native_window_set_buffers_format(window, format);
+                if (err != 0) {
+                    LOGE("error setting native window pixel format: %s (%d)",
+                            strerror(-err), err);
+                    return setError(EGL_BAD_NATIVE_WINDOW, EGL_NO_SURFACE);
+                }
             }
         }
 
