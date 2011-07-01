@@ -526,16 +526,6 @@ public class CallerInfo {
                   + countryIso);
         }
 
-        // Temp workaround: The current libphonenumber library requires
-        // the countryIso to be uppercase (e.g. "US") but the
-        // detector.detectCountry().getCountryIso() call currently returns
-        // "us".  Passing "us" to util.parse() will just result in a
-        // NumberParseException.
-        // So force the countryIso to uppercase for now.
-        // TODO: remove this once getCountryIso() is fixed to always
-        // return uppercase.
-        countryIso = countryIso.toUpperCase();
-
         PhoneNumber pn = null;
         try {
             if (VDBG) Log.v(TAG, "parsing '" + number
