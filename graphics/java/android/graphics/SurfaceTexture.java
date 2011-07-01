@@ -174,12 +174,15 @@ public class SurfaceTexture {
      * Retrieve the timestamp associated with the texture image set by the most recent call to
      * updateTexImage.
      *
-     * This timestamp is in nanoseconds, and is guaranteed to be monotonically increasing. The
+     * This timestamp is in nanoseconds, and is normally monotonically increasing. The timestamp
+     * should be unaffected by time-of-day adjustments, and for a camera should be strictly
+     * monotonic but for a MediaPlayer may be reset when the position is set.  The
      * specific meaning and zero point of the timestamp depends on the source providing images to
      * the SurfaceTexture. Unless otherwise specified by the image source, timestamps cannot
      * generally be compared across SurfaceTexture instances, or across multiple program
      * invocations. It is mostly useful for determining time offsets between subsequent frames.
      */
+
     public long getTimestamp() {
         return nativeGetTimestamp();
     }

@@ -611,15 +611,11 @@ public class MediaPlayer
      * needed.  Not calling this method when playing back a video will
      * result in only the audio track being played.
      *
-     * @param sh the SurfaceHolder to use for video display
-     */
-    /*
-     * This portion of comment has a non-Javadoc prefix so as not to refer to a
-     * hidden method. When unhidden, merge it with the previous javadoc comment.
-     *
      * Either a surface or surface texture must be set if a display or video sink
      * is needed.  Not calling this method or {@link #setTexture(SurfaceTexture)}
      * when playing back a video will result in only the audio track being played.
+     *
+     * @param sh the SurfaceHolder to use for video display
      */
     public void setDisplay(SurfaceHolder sh) {
         mSurfaceHolder = sh;
@@ -648,7 +644,8 @@ public class MediaPlayer
      * SurfaceTexture set as the video sink have an unspecified zero point,
      * and cannot be directly compared between different media sources or different
      * instances of the same media source, or across multiple runs of the same
-     * program.
+     * program.  The timestamp is normally monotonically increasing and unaffected
+     * by time-of-day adjustments, but is reset when the position is set.
      */
     public void setTexture(SurfaceTexture st) {
         ParcelSurfaceTexture pst = null;
