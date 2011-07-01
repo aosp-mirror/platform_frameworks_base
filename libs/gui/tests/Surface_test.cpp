@@ -31,13 +31,13 @@ protected:
         ASSERT_EQ(NO_ERROR, mComposerClient->initCheck());
 
         mSurfaceControl = mComposerClient->createSurface(
-                String8("Test Surface"), 0, 32, 32, PIXEL_FORMAT_RGB_888, 0);
+                String8("Test Surface"), 0, 32, 32, PIXEL_FORMAT_RGBA_8888, 0);
 
         ASSERT_TRUE(mSurfaceControl != NULL);
         ASSERT_TRUE(mSurfaceControl->isValid());
 
         SurfaceComposerClient::openGlobalTransaction();
-        ASSERT_EQ(NO_ERROR, mSurfaceControl->setLayer(30000));
+        ASSERT_EQ(NO_ERROR, mSurfaceControl->setLayer(0x7fffffff));
         ASSERT_EQ(NO_ERROR, mSurfaceControl->show());
         SurfaceComposerClient::closeGlobalTransaction();
 
@@ -84,7 +84,7 @@ TEST_F(SurfaceTest, ScreenshotsOfProtectedBuffersFail) {
     PixelFormat fmt=0;
     sp<ISurfaceComposer> sf(ComposerService::getComposerService());
     ASSERT_EQ(NO_ERROR, sf->captureScreen(0, &heap, &w, &h, &fmt, 64, 64, 0,
-            40000));
+            0x7fffffff));
     ASSERT_TRUE(heap != NULL);
 
     // Set the PROTECTED usage bit and verify that the screenshot fails.  Note
@@ -94,6 +94,18 @@ TEST_F(SurfaceTest, ScreenshotsOfProtectedBuffersFail) {
             GRALLOC_USAGE_PROTECTED));
     ASSERT_EQ(NO_ERROR, native_window_set_buffer_count(anw.get(), 3));
     ANativeWindowBuffer* buf = 0;
+
+    status_t err = anw->dequeueBuffer(anw.get(), &buf);
+    if (err) {
+        // we could fail if GRALLOC_USAGE_PROTECTED is not supported.
+        // that's okay as long as this is the reason for the failure.
+        // try again without the GRALLOC_USAGE_PROTECTED bit.
+        ASSERT_EQ(NO_ERROR, native_window_set_usage(anw.get(), 0));
+        ASSERT_EQ(NO_ERROR, anw->dequeueBuffer(anw.get(), &buf));
+        return;
+    }
+    ASSERT_EQ(NO_ERROR, anw->cancelBuffer(anw.get(), buf));
+
     for (int i = 0; i < 4; i++) {
         // Loop to make sure SurfaceFlinger has retired a protected buffer.
         ASSERT_EQ(NO_ERROR, anw->dequeueBuffer(anw.get(), &buf));
@@ -103,7 +115,7 @@ TEST_F(SurfaceTest, ScreenshotsOfProtectedBuffersFail) {
     heap = 0;
     w = h = fmt = 0;
     ASSERT_EQ(INVALID_OPERATION, sf->captureScreen(0, &heap, &w, &h, &fmt,
-            64, 64, 0, 40000));
+            64, 64, 0, 0x7fffffff));
     ASSERT_TRUE(heap == NULL);
 
     // XXX: This should not be needed, but it seems that the new buffers don't
@@ -126,7 +138,7 @@ TEST_F(SurfaceTest, ScreenshotsOfProtectedBuffersFail) {
     heap = 0;
     w = h = fmt = 0;
     ASSERT_EQ(NO_ERROR, sf->captureScreen(0, &heap, &w, &h, &fmt, 64, 64, 0,
-            40000));
+            0x7fffffff));
     ASSERT_TRUE(heap != NULL);
 }
 
