@@ -9,8 +9,7 @@
       android:icon="@drawable/test_pattern">
         <uses-library android:name="android.test.runner" />
         <activity android:name="RsBench"
-                  android:label="RsBenchmark"
-                  android:theme="@android:style/Theme.Black.NoTitleBar">
+                  android:label="RsBenchmark">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

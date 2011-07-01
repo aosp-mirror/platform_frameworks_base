@@ -105,4 +105,16 @@ public class RsBenchView extends RSSurfaceView {
     public boolean testIsFinished() {
         return mRender.testIsFinished();
     }
+
+    void setBenchmarkMode() {
+        mRender.setBenchmarkMode();
+    }
+
+    void setDebugMode(int num) {
+        mRender.setDebugMode(num);
+    }
+
+    String[] getTestNames() {
+        return mRender.mTestNames;
+    }
 }
