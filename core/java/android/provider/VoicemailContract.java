@@ -52,15 +52,18 @@ public class VoicemailContract {
 
     /** The authority used by the voicemail provider. */
     public static final String AUTHORITY = "com.android.voicemail";
-    /** URI to insert/retrieve all voicemails. */
+    /**
+     * URI to insert/retrieve all voicemails.
+     * @deprecated
+     */
     public static final Uri CONTENT_URI =
             Uri.parse("content://" + AUTHORITY + "/voicemail");
-    /** URI to insert/retrieve voicemails by a given voicemail source. */
+    /**
+     * URI to insert/retrieve voicemails by a given voicemail source.
+     * @deprecated
+     */
     public static final Uri CONTENT_URI_SOURCE =
             Uri.parse("content://" + AUTHORITY + "/voicemail/source/");
-    /** URI to insert/retrieve status of voicemail source. */
-    public static final Uri STATUS_CONTENT_URI =
-            Uri.parse("content://" + AUTHORITY + "/status");
     /**
      * Parameter key used in the URI to specify the voicemail source package name.
      * <p> This field must be set in all requests that originate from a voicemail source.
@@ -77,32 +80,26 @@ public class VoicemailContract {
      */
     public static final String EXTRA_SELF_CHANGE = "com.android.voicemail.extra.SELF_CHANGE";
 
-    /** The mime type for a collection of voicemails. */
+    /**
+     * The mime type for a collection of voicemails.
+     * @deprecated */
     public static final String DIR_TYPE = "vnd.android.cursor.dir/voicemails";
-
-    /**
-     * A convenience method to build voicemail URI specific to a source package. Appends URI param
-     * {@link #PARAM_KEY_SOURCE_PACKAGE} to the base voicemail content URI.
-     */
-    public static Uri buildSourceVoicemailUri(String packageName) {
-        return CONTENT_URI.buildUpon()
-                .appendQueryParameter(PARAM_KEY_SOURCE_PACKAGE, packageName).build();
-    }
-
-    /**
-     * A convenience method to build status URI specific to a source package. Appends URI param
-     * {@link #PARAM_KEY_SOURCE_PACKAGE} to the base status content URI.
-     */
-    public static Uri buildSourceStatusUri(String packageName) {
-        return STATUS_CONTENT_URI.buildUpon()
-                .appendQueryParameter(PARAM_KEY_SOURCE_PACKAGE, packageName).build();
-    }
 
     /** Defines fields exposed through the /voicemail path of this content provider. */
     public static final class Voicemails implements BaseColumns {
         /** Not instantiable. */
         private Voicemails() {
         }
+
+        /** URI to insert/retrieve voicemails by a given voicemail source. */
+        public static final Uri CONTENT_URI =
+            Uri.parse("content://" + AUTHORITY + "/voicemail");
+        /** URI to insert/retrieve voicemails by a given voicemail source. */
+        public static final Uri CONTENT_URI_SOURCE =
+                Uri.parse("content://" + AUTHORITY + "/voicemail/source/");
+
+        /** The mime type for a collection of voicemails. */
+        public static final String DIR_TYPE = "vnd.android.cursor.dir/voicemails";
 
         /**
          * Phone number of the voicemail sender.
@@ -167,10 +164,26 @@ public class VoicemailContract {
          * @hide
          */
         public static final String _DATA = "_data";
+
+        /**
+         * A convenience method to build voicemail URI specific to a source package by appending
+         * {@link VoicemailContract#PARAM_KEY_SOURCE_PACKAGE} param to the base URI.
+         */
+        public static Uri buildSourceUri(String packageName) {
+            return Voicemails.CONTENT_URI.buildUpon()
+                    .appendQueryParameter(PARAM_KEY_SOURCE_PACKAGE, packageName).build();
+        }
     }
 
     /** Defines fields exposed through the /status path of this content provider. */
     public static final class Status implements BaseColumns {
+        /** URI to insert/retrieve status of voicemail source. */
+        public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/status");
+        /** The mime type for a collection of voicemail source statuses. */
+        public static final String DIR_TYPE = "vnd.android.cursor.dir/voicemail.source.status";
+        /** The mime type for a collection of voicemails. */
+        public static final String ITEM_TYPE = "vnd.android.cursor.item/voicemail.source.status";
+
         /** Not instantiable. */
         private Status() {
         }
@@ -239,5 +252,13 @@ public class VoicemailContract {
          */
         public static final int NOTIFICATION_CHANNEL_STATE_MESSAGE_WAITING = 2;
 
+        /**
+         * A convenience method to build status URI specific to a source package by appending
+         * {@link VoicemailContract#PARAM_KEY_SOURCE_PACKAGE} param to the base URI.
+         */
+        public static Uri buildSourceUri(String packageName) {
+            return Status.CONTENT_URI.buildUpon()
+                    .appendQueryParameter(PARAM_KEY_SOURCE_PACKAGE, packageName).build();
+        }
     }
 }
