@@ -54,8 +54,8 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="16dip"
-        android:layout_marginRight="16dip"
+        android:layout_marginLeft="8dip"
+        android:layout_marginRight="8dip"
         android:layout_marginTop="4dip"
         android:layout_marginBottom="4dip"
         android:orientation="horizontal">
@@ -87,7 +87,6 @@
                 android:layout_gravity="bottom"
                 android:paddingLeft="8dip"
                 android:paddingRight="6dip"
-                android:drawablePadding="2dip"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:background="@null"
