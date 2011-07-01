@@ -35,7 +35,7 @@ import android.hardware.usb.UsbManager;
 import android.os.Binder;
 import android.os.FileUtils;
 import android.os.Process;
-import android.util.Log;
+import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.Xml;
 
@@ -62,6 +62,7 @@ import java.util.List;
 class UsbSettingsManager {
 
     private static final String TAG = "UsbSettingsManager";
+    private static final boolean DEBUG = false;
     private static final File sSettingsFile = new File("/data/system/usb_device_manager.xml");
 
     private final Context mContext;
@@ -410,9 +411,9 @@ class UsbSettingsManager {
                 }
             }
         } catch (FileNotFoundException e) {
-            Log.w(TAG, "settings file not found");
+            if (DEBUG) Slog.d(TAG, "settings file not found");
         } catch (Exception e) {
-            Log.e(TAG, "error reading settings file, deleting to start fresh", e);
+            Slog.e(TAG, "error reading settings file, deleting to start fresh", e);
             sSettingsFile.delete();
         } finally {
             if (stream != null) {
@@ -428,7 +429,7 @@ class UsbSettingsManager {
         FileOutputStream fos = null;
         try {
             FileOutputStream fstr = new FileOutputStream(sSettingsFile);
-            Log.d(TAG, "writing settings to " + fstr);
+            if (DEBUG) Slog.d(TAG, "writing settings to " + fstr);
             BufferedOutputStream str = new BufferedOutputStream(fstr);
             FastXmlSerializer serializer = new FastXmlSerializer();
             serializer.setOutput(str, "utf-8");
@@ -457,7 +458,7 @@ class UsbSettingsManager {
             FileUtils.sync(fstr);
             str.close();
         } catch (Exception e) {
-            Log.e(TAG, "error writing settings file, deleting to start fresh", e);
+            Slog.e(TAG, "error writing settings file, deleting to start fresh", e);
             sSettingsFile.delete();
         }
     }
@@ -472,7 +473,7 @@ class UsbSettingsManager {
         try {
             parser = ai.loadXmlMetaData(mPackageManager, metaDataName);
             if (parser == null) {
-                Log.w(TAG, "no meta-data for " + info);
+                Slog.w(TAG, "no meta-data for " + info);
                 return false;
             }
 
@@ -494,7 +495,7 @@ class UsbSettingsManager {
                 XmlUtils.nextElement(parser);
             }
         } catch (Exception e) {
-            Log.w(TAG, "Unable to load component info " + info.toString(), e);
+            Slog.w(TAG, "Unable to load component info " + info.toString(), e);
         } finally {
             if (parser != null) parser.close();
         }
@@ -553,7 +554,7 @@ class UsbSettingsManager {
 
         Intent intent = new Intent(UsbManager.ACTION_USB_DEVICE_DETACHED);
         intent.putExtra(UsbManager.EXTRA_DEVICE, device);
-        Log.d(TAG, "usbDeviceRemoved, sending " + intent);
+        if (DEBUG) Slog.d(TAG, "usbDeviceRemoved, sending " + intent);
         mContext.sendBroadcast(intent);
     }
 
@@ -604,7 +605,7 @@ class UsbSettingsManager {
                     try {
                         mContext.startActivity(dialogIntent);
                     } catch (ActivityNotFoundException e) {
-                        Log.e(TAG, "unable to start UsbAccessoryUriActivity");
+                        Slog.e(TAG, "unable to start UsbAccessoryUriActivity");
                     }
                 }
             }
@@ -652,7 +653,7 @@ class UsbSettingsManager {
                                 defaultRI.activityInfo.name));
                 mContext.startActivity(intent);
             } catch (ActivityNotFoundException e) {
-                Log.e(TAG, "startActivity failed", e);
+                Slog.e(TAG, "startActivity failed", e);
             }
         } else {
             Intent resolverIntent = new Intent();
@@ -679,7 +680,7 @@ class UsbSettingsManager {
             try {
                 mContext.startActivity(resolverIntent);
             } catch (ActivityNotFoundException e) {
-                Log.e(TAG, "unable to start activity " + resolverIntent);
+                Slog.e(TAG, "unable to start activity " + resolverIntent);
             }
         }
     }
@@ -733,7 +734,7 @@ class UsbSettingsManager {
                 XmlUtils.nextElement(parser);
             }
         } catch (Exception e) {
-            Log.w(TAG, "Unable to load component info " + aInfo.toString(), e);
+            Slog.w(TAG, "Unable to load component info " + aInfo.toString(), e);
         } finally {
             if (parser != null) parser.close();
         }
@@ -751,7 +752,7 @@ class UsbSettingsManager {
                 info = mPackageManager.getPackageInfo(packageName,
                         PackageManager.GET_ACTIVITIES | PackageManager.GET_META_DATA);
             } catch (NameNotFoundException e) {
-                Log.e(TAG, "handlePackageUpdate could not find package " + packageName, e);
+                Slog.e(TAG, "handlePackageUpdate could not find package " + packageName, e);
                 return;
             }
 
@@ -831,7 +832,7 @@ class UsbSettingsManager {
         try {
             mContext.startActivity(intent);
         } catch (ActivityNotFoundException e) {
-            Log.e(TAG, "unable to start UsbPermissionActivity");
+            Slog.e(TAG, "unable to start UsbPermissionActivity");
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -847,7 +848,7 @@ class UsbSettingsManager {
             try {
                 pi.send(mContext, 0, intent);
             } catch (PendingIntent.CanceledException e) {
-                Log.w(TAG, "requestPermission PendingIntent was cancelled");
+                if (DEBUG) Slog.d(TAG, "requestPermission PendingIntent was cancelled");
             }
             return;
         }
@@ -867,7 +868,7 @@ class UsbSettingsManager {
            try {
                 pi.send(mContext, 0, intent);
             } catch (PendingIntent.CanceledException e) {
-                Log.w(TAG, "requestPermission PendingIntent was cancelled");
+                if (DEBUG) Slog.d(TAG, "requestPermission PendingIntent was cancelled");
             }
             return;
         }

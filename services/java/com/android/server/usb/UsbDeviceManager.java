@@ -45,7 +45,6 @@ import android.os.storage.StorageVolume;
 import android.os.SystemProperties;
 import android.os.UEventObserver;
 import android.provider.Settings;
-import android.util.Log;
 import android.util.Slog;
 
 import java.io.File;
@@ -62,7 +61,7 @@ import java.util.List;
 public class UsbDeviceManager {
 
     private static final String TAG = UsbDeviceManager.class.getSimpleName();
-    private static final boolean LOG = false;
+    private static final boolean DEBUG = false;
 
     private static final String USB_STATE_MATCH =
             "DEVPATH=/devices/virtual/android_usb/android0";
@@ -114,16 +113,14 @@ public class UsbDeviceManager {
     private final UEventObserver mUEventObserver = new UEventObserver() {
         @Override
         public void onUEvent(UEventObserver.UEvent event) {
-            if (Log.isLoggable(TAG, Log.VERBOSE)) {
-                Slog.v(TAG, "USB UEVENT: " + event.toString());
-            }
+            if (DEBUG) Slog.v(TAG, "USB UEVENT: " + event.toString());
 
             String state = event.get("USB_STATE");
             String accessory = event.get("ACCESSORY");
             if (state != null) {
                 mHandler.updateState(state);
             } else if ("START".equals(accessory)) {
-                Slog.d(TAG, "got accessory start");
+                if (DEBUG) Slog.d(TAG, "got accessory start");
                 setCurrentFunction(UsbManager.USB_FUNCTION_ACCESSORY, false);
             }
         }
@@ -320,12 +317,12 @@ public class UsbDeviceManager {
                 } catch (InterruptedException e) {
                 }
             }
-            Log.e(TAG, "waitForState(" + state + ") FAILED");
+            Slog.e(TAG, "waitForState(" + state + ") FAILED");
             return false;
         }
 
         private boolean setUsbConfig(String config) {
-            Log.d(TAG, "setUsbConfig(" + config + ")");
+            if (DEBUG) Slog.d(TAG, "setUsbConfig(" + config + ")");
             // set the new configuration
             SystemProperties.set("sys.usb.config", config);
             return waitForState(config);
@@ -334,7 +331,7 @@ public class UsbDeviceManager {
         private void doSetCurrentFunctions(String functions) {
             if (!mCurrentFunctions.equals(functions)) {
                 if (!setUsbConfig("none") || !setUsbConfig(functions)) {
-                    Log.e(TAG, "Failed to switch USB configuration to " + functions);
+                    Slog.e(TAG, "Failed to switch USB configuration to " + functions);
                     // revert to previous configuration if we fail
                     setUsbConfig(mCurrentFunctions);
                 } else {
@@ -375,7 +372,7 @@ public class UsbDeviceManager {
                 String[] strings = nativeGetAccessoryStrings();
                 if (strings != null) {
                     mCurrentAccessory = new UsbAccessory(strings);
-                    Log.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
+                    Slog.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
                     // defer accessoryAttached if system is not ready
                     if (mSystemReady) {
                         mSettingsManager.accessoryAttached(mCurrentAccessory);
@@ -383,12 +380,12 @@ public class UsbDeviceManager {
                         mDeferAccessoryAttached = true;
                     }
                 } else {
-                    Log.e(TAG, "nativeGetAccessoryStrings failed");
+                    Slog.e(TAG, "nativeGetAccessoryStrings failed");
                 }
             } else if (!mConnected) {
                 // make sure accessory mode is off
                 // and restore default functions
-                Log.d(TAG, "exited USB accessory mode");
+                Slog.d(TAG, "exited USB accessory mode");
                 setEnabledFunctions(mDefaultFunctions);
 
                 if (mCurrentAccessory != null) {
@@ -502,7 +499,7 @@ public class UsbDeviceManager {
                         com.android.internal.R.string.usb_cd_installer_notification_title);
                     id = NOTIFICATION_INSTALLER;
                 } else {
-                    Log.e(TAG, "No known USB function in updateUsbNotification");
+                    Slog.e(TAG, "No known USB function in updateUsbNotification");
                 }
                 if (id != mUsbNotificationId) {
                     // clear notification if title needs changing
@@ -613,6 +610,7 @@ public class UsbDeviceManager {
         }
 
     public void setCurrentFunction(String function, boolean makeDefault) {
+        if (DEBUG) Slog.d(TAG, "setCurrentFunction(" + function + ") default: " + makeDefault);
         mHandler.sendMessage(MSG_SET_CURRENT_FUNCTION, function, makeDefault);
     }
 
