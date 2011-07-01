@@ -177,4 +177,38 @@ public class TextViewTest extends AndroidTestCase {
         tv.setTextDirection(View.TEXT_DIRECTION_RTL);
         assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
     }
+
+    @SmallTest
+    public void testCharCountHeuristic() {
+        LinearLayout ll = new LinearLayout(mContext);
+        ll.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+
+        TextView tv = new TextView(mContext);
+        ll.addView(tv);
+
+        tv.setTextDirection(View.TEXT_DIRECTION_CHAR_COUNT);
+        tv.setText("this is a test");
+        assertEquals(View.TEXT_DIRECTION_LTR, tv.getResolvedTextDirection());
+
+         // resetResolvedTextDirection is not part of the public API so simply use setTextDirection
+        tv.setTextDirection(View.TEXT_DIRECTION_LTR);
+        tv.setTextDirection(View.TEXT_DIRECTION_CHAR_COUNT);
+        tv.setText("\u05DD\u05DE"); // hebrew
+        assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
+
+        tv.setTextDirection(View.TEXT_DIRECTION_LTR);
+        tv.setTextDirection(View.TEXT_DIRECTION_CHAR_COUNT);
+        tv.setText("this is a test \u05DD\u05DE"); // latin more than 60% + hebrew
+        assertEquals(View.TEXT_DIRECTION_LTR, tv.getResolvedTextDirection());
+
+        tv.setTextDirection(View.TEXT_DIRECTION_LTR);
+        tv.setTextDirection(View.TEXT_DIRECTION_CHAR_COUNT);
+        tv.setText("t \u05DD\u05DE"); // latin + hebrew more than 60%
+        assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
+
+        tv.setTextDirection(View.TEXT_DIRECTION_LTR);
+        tv.setTextDirection(View.TEXT_DIRECTION_CHAR_COUNT);
+        tv.setText("ab \u05DD\u05DE"); // latin + hebrew at 50% each
+        assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
+    }
 }

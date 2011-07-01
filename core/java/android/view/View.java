@@ -2523,23 +2523,36 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     public static final int TEXT_DIRECTION_ANY_RTL = 2;
 
     /**
+     * Text direction is the same as the one held by a 60% majority of the characters. If there is
+     * no majority then the paragraph direction is the resolved layout direction of the View.
+     *
+     * @hide
+     */
+    public static final int TEXT_DIRECTION_CHAR_COUNT = 3;
+
+    /**
      * Text direction is forced to LTR.
      *
      * @hide
      */
-    public static final int TEXT_DIRECTION_LTR = 3;
+    public static final int TEXT_DIRECTION_LTR = 4;
 
     /**
      * Text direction is forced to RTL.
      *
      * @hide
      */
-    public static final int TEXT_DIRECTION_RTL = 4;
+    public static final int TEXT_DIRECTION_RTL = 5;
 
     /**
      * Default text direction is inherited
      */
     protected static int DEFAULT_TEXT_DIRECTION = TEXT_DIRECTION_INHERIT;
+
+    /**
+     * Default threshold for "char count" heuristic.
+     */
+    protected static float DEFAULT_TEXT_DIRECTION_CHAR_COUNT_THRESHOLD = 0.6f;
 
     /**
      * The text direction that has been defined by {@link #setTextDirection(int)}.
@@ -2551,6 +2564,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             @ViewDebug.IntToString(from = TEXT_DIRECTION_INHERIT, to = "INHERIT"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_FIRST_STRONG, to = "FIRST_STRONG"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_ANY_RTL, to = "ANY_RTL"),
+            @ViewDebug.IntToString(from = TEXT_DIRECTION_CHAR_COUNT, to = "CHAR_COUNT"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_LTR, to = "LTR"),
             @ViewDebug.IntToString(from = TEXT_DIRECTION_RTL, to = "RTL")
     })
@@ -11969,7 +11983,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         mPrivateFlags |= FORCE_LAYOUT;
         mPrivateFlags |= INVALIDATED;
 
-        if (mLayoutParams != null) {
+        if (mLayoutParams != null && mParent != null) {
             mLayoutParams.resolveWithDirection(getResolvedLayoutDirection());
         }
 
@@ -12996,6 +13010,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * {@link #TEXT_DIRECTION_INHERIT},
      * {@link #TEXT_DIRECTION_FIRST_STRONG}
      * {@link #TEXT_DIRECTION_ANY_RTL},
+     * {@link #TEXT_DIRECTION_CHAR_COUNT},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      *
@@ -13013,6 +13028,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * {@link #TEXT_DIRECTION_INHERIT},
      * {@link #TEXT_DIRECTION_FIRST_STRONG}
      * {@link #TEXT_DIRECTION_ANY_RTL},
+     * {@link #TEXT_DIRECTION_CHAR_COUNT},
      * {@link #TEXT_DIRECTION_LTR},
      * {@link #TEXT_DIRECTION_RTL},
      *
