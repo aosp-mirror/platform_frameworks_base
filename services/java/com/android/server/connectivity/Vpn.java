@@ -42,6 +42,7 @@ import com.android.server.ConnectivityService.VpnCallback;
 
 import java.io.OutputStream;
 import java.nio.charset.Charsets;
+import java.util.Arrays;
 
 /**
  * @hide
@@ -76,11 +77,13 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             return mPackageName;
         }
 
-        // Check the permission of the caller.
-        PackageManager pm = mContext.getPackageManager();
-        VpnConfig.enforceCallingPackage(pm.getNameForUid(Binder.getCallingUid()));
+        // Only system user can call this method.
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Unauthorized Caller");
+        }
 
         // Check the permission of the given package.
+        PackageManager pm = mContext.getPackageManager();
         if (packageName.isEmpty()) {
             packageName = null;
         } else if (pm.checkPermission(VPN, packageName) != PackageManager.PERMISSION_GRANTED) {
@@ -101,6 +104,12 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             intent.setPackage(mPackageName);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             mContext.sendBroadcast(intent);
+        }
+
+        // Stop legacy VPN if it has been started.
+        if (mLegacyVpnRunner != null) {
+            mLegacyVpnRunner.exit();
+            mLegacyVpnRunner = null;
         }
 
         Log.i(TAG, "Switched from " + mPackageName + " to " + packageName);
@@ -275,20 +284,15 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
      * @param raoocn The arguments to be passed to racoon.
      * @param mtpd The arguments to be passed to mtpd.
      */
-    public synchronized void doLegacyVpn(String[] racoon, String[] mtpd) {
-        // Currently only system user is allowed.
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Unauthorized Caller");
-        }
+    public synchronized void startLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
+        // Stop the current VPN just like a normal VPN application.
+        prepare("");
 
-        // If the previous runner is still alive, interrupt it.
-        if (mLegacyVpnRunner != null && mLegacyVpnRunner.isAlive()) {
-            mLegacyVpnRunner.interrupt();
-        }
+        // Legacy VPN does not have a package name.
+        config.packageName = null;
 
         // Start a new runner and we are done!
-        mLegacyVpnRunner = new LegacyVpnRunner(
-                new String[] {"racoon", "mtpd"}, racoon, mtpd);
+        mLegacyVpnRunner = new LegacyVpnRunner(config, racoon, mtpd);
         mLegacyVpnRunner.start();
     }
 
@@ -301,17 +305,25 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
      */
     private class LegacyVpnRunner extends Thread {
         private static final String TAG = "LegacyVpnRunner";
-
         private static final String NONE = "--";
 
+        private final VpnConfig mConfig;
         private final String[] mDaemons;
         private final String[][] mArguments;
         private long mTimer = -1;
 
-        public LegacyVpnRunner(String[] daemons, String[]... arguments) {
+        public LegacyVpnRunner(VpnConfig config, String[] racoon, String[] mtpd) {
             super(TAG);
-            mDaemons = daemons;
-            mArguments = arguments;
+            mConfig = config;
+            mDaemons = new String[] {"racoon", "mtpd"};
+            mArguments = new String[][] {racoon, mtpd};
+        }
+
+        public void exit() {
+            for (String daemon : mDaemons) {
+                SystemProperties.set("ctl.stop", daemon);
+            }
+            interrupt();
         }
 
         @Override
@@ -319,9 +331,9 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             // Wait for the previous thread since it has been interrupted.
             Log.v(TAG, "wait");
             synchronized (TAG) {
-                Log.v(TAG, "run");
+                Log.v(TAG, "begin");
                 execute();
-                Log.v(TAG, "exit");
+                Log.v(TAG, "end");
             }
         }
 
@@ -445,12 +457,34 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     checkpoint(true);
                 }
 
-                // Great! Now we are connected!
-                Log.i(TAG, "connected!");
-                // TODO:
+                // Now we are connected. Get the interface.
+                mConfig.interfaceName = SystemProperties.get("vpn.via");
 
+                // Get the DNS servers if they are not set in config.
+                if (mConfig.dnsServers == null || mConfig.dnsServers.size() == 0) {
+                    String dnsServers = SystemProperties.get("vpn.dns").trim();
+                    if (!dnsServers.isEmpty()) {
+                        mConfig.dnsServers = Arrays.asList(dnsServers.split(" "));
+                    }
+                }
+
+                // TODO: support routes and search domains for IPSec Mode-CFG.
+
+                // This is it! Here is the end of our journey!
+                synchronized (Vpn.this) {
+                    // Check if the thread is interrupted while we are waiting.
+                    checkpoint(false);
+
+                    if (mConfig.routes != null) {
+                        jniSetRoutes(mConfig.interfaceName, mConfig.routes);
+                    }
+                    mInterfaceName = mConfig.interfaceName;
+                    mCallback.override(mConfig.dnsServers, mConfig.searchDomains);
+                    showNotification(mConfig, null, null);
+                }
+                Log.i(TAG, "Connected!");
             } catch (Exception e) {
-                Log.i(TAG, e.getMessage());
+                Log.i(TAG, "Abort due to " + e.getMessage());
                 for (String daemon : mDaemons) {
                     SystemProperties.set("ctl.stop", daemon);
                 }

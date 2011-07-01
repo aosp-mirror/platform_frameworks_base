@@ -35,12 +35,6 @@ public class VpnConfig implements Parcelable {
 
     public static final String ACTION_VPN_REVOKED = "android.net.vpn.action.REVOKED";
 
-    public static void enforceCallingPackage(String packageName) {
-        if (!"com.android.vpndialogs".equals(packageName)) {
-            throw new SecurityException("Unauthorized Caller");
-        }
-    }
-
     public static Intent getIntentForConfirmation() {
         Intent intent = new Intent();
         intent.setClassName("com.android.vpndialogs", "com.android.vpndialogs.ConfirmDialog");
