@@ -2788,10 +2788,10 @@
     <string name="l2tp_ipsec_psk_vpn_description">Pre-shared key based L2TP/IPSec VPN</string>
     <string name="l2tp_ipsec_crt_vpn_description">Certificate based L2TP/IPSec VPN</string>
 
-    <!-- Ticker text to show when VPN is active. -->
-    <string name="vpn_ticker"><xliff:g id="app" example="FooVPN client">%s</xliff:g> is activating VPN...</string>
     <!-- The title of the notification when VPN is active. -->
-    <string name="vpn_title">VPN is activated by <xliff:g id="app" example="FooVPN client">%s</xliff:g></string>
+    <string name="vpn_title">VPN is activated.</string>
+    <!-- The title of the notification when VPN is active with an application name. -->
+    <string name="vpn_title_long">VPN is activated by <xliff:g id="app" example="FooVPN client">%s</xliff:g></string>
     <!-- The text of the notification when VPN is active. -->
     <string name="vpn_text">Tap to manage the network.</string>
     <!-- The text of the notification when VPN is active with a session name. -->
