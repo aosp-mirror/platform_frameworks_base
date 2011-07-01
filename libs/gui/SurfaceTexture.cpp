@@ -352,11 +352,13 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         ((uint32_t(buffer->usage) & usage) != usage))
     {
         usage |= GraphicBuffer::USAGE_HW_TEXTURE;
+        status_t error;
         sp<GraphicBuffer> graphicBuffer(
-                mGraphicBufferAlloc->createGraphicBuffer(w, h, format, usage));
+                mGraphicBufferAlloc->createGraphicBuffer(
+                        w, h, format, usage, &error));
         if (graphicBuffer == 0) {
             LOGE("dequeueBuffer: SurfaceComposer::createGraphicBuffer failed");
-            return NO_MEMORY;
+            return error;
         }
         if (updateFormat) {
             mPixelFormat = format;

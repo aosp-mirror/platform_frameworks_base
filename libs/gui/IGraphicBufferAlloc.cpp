@@ -43,7 +43,7 @@ public:
     }
 
     virtual sp<GraphicBuffer> createGraphicBuffer(uint32_t w, uint32_t h,
-            PixelFormat format, uint32_t usage) {
+            PixelFormat format, uint32_t usage, status_t* error) {
         Parcel data, reply;
         data.writeInterfaceToken(IGraphicBufferAlloc::getInterfaceDescriptor());
         data.writeInt32(w);
@@ -52,14 +52,15 @@ public:
         data.writeInt32(usage);
         remote()->transact(CREATE_GRAPHIC_BUFFER, data, &reply);
         sp<GraphicBuffer> graphicBuffer;
-        bool nonNull = (bool)reply.readInt32();
-        if (nonNull) {
+        status_t result = reply.readInt32();
+        if (result == NO_ERROR) {
             graphicBuffer = new GraphicBuffer();
             reply.read(*graphicBuffer);
             // reply.readStrongBinder();
             // here we don't even have to read the BufferReference from
             // the parcel, it'll die with the parcel.
         }
+        *error = result;
         return graphicBuffer;
     }
 };
@@ -91,8 +92,10 @@ status_t BnGraphicBufferAlloc::onTransact(
             uint32_t h = data.readInt32();
             PixelFormat format = data.readInt32();
             uint32_t usage = data.readInt32();
-            sp<GraphicBuffer> result(createGraphicBuffer(w, h, format, usage));
-            reply->writeInt32(result != 0);
+            status_t error;
+            sp<GraphicBuffer> result =
+                    createGraphicBuffer(w, h, format, usage, &error);
+            reply->writeInt32(error);
             if (result != 0) {
                 reply->write(*result);
                 // We add a BufferReference to this parcel to make sure the

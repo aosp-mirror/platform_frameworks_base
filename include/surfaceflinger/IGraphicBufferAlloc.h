@@ -37,7 +37,7 @@ public:
     /* Create a new GraphicBuffer for the client to use.
      */
     virtual sp<GraphicBuffer> createGraphicBuffer(uint32_t w, uint32_t h,
-            PixelFormat format, uint32_t usage) = 0;
+            PixelFormat format, uint32_t usage, status_t* error) = 0;
 };
 
 // ----------------------------------------------------------------------------

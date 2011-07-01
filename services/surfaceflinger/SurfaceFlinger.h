@@ -96,7 +96,7 @@ public:
     GraphicBufferAlloc();
     virtual ~GraphicBufferAlloc();
     virtual sp<GraphicBuffer> createGraphicBuffer(uint32_t w, uint32_t h,
-        PixelFormat format, uint32_t usage);
+        PixelFormat format, uint32_t usage, status_t* error);
 };
 
 // ---------------------------------------------------------------------------
