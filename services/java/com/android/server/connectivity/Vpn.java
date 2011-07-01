@@ -195,7 +195,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
 
         config.packageName = mPackageName;
         config.interfaceName = mInterfaceName;
-        showNotification(pm, app, config);
+        showNotification(config, label, bitmap);
         return descriptor;
     }
 
