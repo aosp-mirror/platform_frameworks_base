@@ -707,6 +707,15 @@ private:
         return result;
     }
 
+    virtual bool hasScanCode(int32_t deviceId, int32_t scanCode) const {
+        Device* device = getDevice(deviceId);
+        if (device) {
+            ssize_t index = device->keys.indexOfKey(scanCode);
+            return index >= 0;
+        }
+        return false;
+    }
+
     virtual bool hasLed(int32_t deviceId, int32_t led) const {
         Device* device = getDevice(deviceId);
         return device && device->leds.indexOfKey(led) >= 0;
@@ -2116,6 +2125,7 @@ TEST_F(CursorInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaStat
     // Button press.
     // Mostly testing non x/y behavior here so we don't need to check again elsewhere.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(ARBITRARY_TIME, args.eventTime);
     ASSERT_EQ(DEVICE_ID, args.deviceId);
@@ -2137,6 +2147,7 @@ TEST_F(CursorInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaStat
 
     // Button release.  Should have same down time.
     process(mapper, ARBITRARY_TIME + 1, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 0, 0);
+    process(mapper, ARBITRARY_TIME + 1, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(ARBITRARY_TIME + 1, args.eventTime);
     ASSERT_EQ(DEVICE_ID, args.deviceId);
@@ -2190,6 +2201,7 @@ TEST_F(CursorInputMapperTest, Process_ShouldHandleIndependentButtonUpdates) {
 
     // Button press without following sync.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
@@ -2197,6 +2209,7 @@ TEST_F(CursorInputMapperTest, Process_ShouldHandleIndependentButtonUpdates) {
 
     // Button release without following sync.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 0, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
@@ -2233,6 +2246,7 @@ TEST_F(CursorInputMapperTest, Process_ShouldHandleCombinedXYAndButtonUpdates) {
 
     // Release Button.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 0, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
@@ -2248,10 +2262,12 @@ TEST_F(CursorInputMapperTest, Reset_WhenButtonIsNotDown_ShouldNotSynthesizeButto
 
     // Button press.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
 
     // Button release.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 0, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
 
     // Reset.  Should not synthesize button up since button is not pressed.
@@ -2269,6 +2285,7 @@ TEST_F(CursorInputMapperTest, Reset_WhenButtonIsDown_ShouldSynthesizeButtonUp) {
 
     // Button press.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
 
     // Reset.  Should synthesize button up.
@@ -2445,6 +2462,7 @@ float TouchInputMapperTest::toDisplayY(int32_t rawY) {
 
 class SingleTouchInputMapperTest : public TouchInputMapperTest {
 protected:
+    void prepareButtons();
     void prepareAxes(int axes);
 
     void processDown(SingleTouchInputMapper* mapper, int32_t x, int32_t y);
@@ -2454,6 +2472,10 @@ protected:
     void processToolMajor(SingleTouchInputMapper* mapper, int32_t toolMajor);
     void processSync(SingleTouchInputMapper* mapper);
 };
+
+void SingleTouchInputMapperTest::prepareButtons() {
+    mFakeEventHub->addKey(DEVICE_ID, BTN_TOUCH, AKEYCODE_UNKNOWN, 0);
+}
 
 void SingleTouchInputMapperTest::prepareAxes(int axes) {
     if (axes & POSITION) {
@@ -2504,6 +2526,7 @@ void SingleTouchInputMapperTest::processSync(SingleTouchInputMapper* mapper) {
 
 TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsNotSpecifiedAndNotACursor_ReturnsPointer) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    prepareButtons();
     prepareAxes(POSITION);
     addMapperAndConfigure(mapper);
 
@@ -2514,6 +2537,7 @@ TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsNotSpecifiedAndIsA
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     mFakeEventHub->addRelativeAxis(DEVICE_ID, REL_X);
     mFakeEventHub->addRelativeAxis(DEVICE_ID, REL_Y);
+    prepareButtons();
     prepareAxes(POSITION);
     addMapperAndConfigure(mapper);
 
@@ -2522,6 +2546,7 @@ TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsNotSpecifiedAndIsA
 
 TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsTouchPad_ReturnsTouchPad) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    prepareButtons();
     prepareAxes(POSITION);
     addConfigurationProperty("touch.deviceType", "touchPad");
     addMapperAndConfigure(mapper);
@@ -2531,6 +2556,7 @@ TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsTouchPad_ReturnsTo
 
 TEST_F(SingleTouchInputMapperTest, GetSources_WhenDeviceTypeIsTouchScreen_ReturnsTouchScreen) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    prepareButtons();
     prepareAxes(POSITION);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     addMapperAndConfigure(mapper);
@@ -2542,6 +2568,7 @@ TEST_F(SingleTouchInputMapperTest, GetKeyCodeState) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2570,6 +2597,7 @@ TEST_F(SingleTouchInputMapperTest, GetScanCodeState) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2598,6 +2626,7 @@ TEST_F(SingleTouchInputMapperTest, MarkSupportedKeyCodes) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2615,6 +2644,7 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenVirtualKeysAreDown_SendsUp) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2649,6 +2679,7 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenNothingIsPressed_NothingMuchHappens
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2676,6 +2707,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNor
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2726,6 +2758,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2847,6 +2880,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -2920,6 +2954,7 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
     prepareAxes(POSITION);
     prepareVirtualKeys();
     addMapperAndConfigure(mapper);
@@ -3009,6 +3044,7 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
 TEST_F(SingleTouchInputMapperTest, Process_WhenNotOrientationAware_DoesNotRotateMotions) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareButtons();
     prepareAxes(POSITION);
     addConfigurationProperty("touch.orientationAware", "0");
     addMapperAndConfigure(mapper);
@@ -3032,6 +3068,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenNotOrientationAware_DoesNotRotate
 TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareButtons();
     prepareAxes(POSITION);
     addMapperAndConfigure(mapper);
 
@@ -3094,6 +3131,7 @@ TEST_F(SingleTouchInputMapperTest, Process_AllAxes_DefaultCalibration) {
     SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
     prepareAxes(POSITION | PRESSURE | TOOL);
     addMapperAndConfigure(mapper);
 
@@ -3815,6 +3853,7 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinear
     FakeInputDispatcher::NotifyMotionArgs args;
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, args.action);
+
     ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_DOWN | (1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
             args.action);

@@ -21919,9 +21919,8 @@ package android.view {
     field public static final int EDGE_TOP = 1; // 0x1
     field public static final int FLAG_WINDOW_IS_OBSCURED = 1; // 0x1
     field public static final int INVALID_POINTER_ID = -1; // 0xffffffff
+    field public static final int TOOL_TYPE_ERASER = 4; // 0x4
     field public static final int TOOL_TYPE_FINGER = 1; // 0x1
-    field public static final int TOOL_TYPE_INDIRECT_FINGER = 4; // 0x4
-    field public static final int TOOL_TYPE_INDIRECT_STYLUS = 5; // 0x5
     field public static final int TOOL_TYPE_MOUSE = 3; // 0x3
     field public static final int TOOL_TYPE_STYLUS = 2; // 0x2
     field public static final int TOOL_TYPE_UNKNOWN = 0; // 0x0
