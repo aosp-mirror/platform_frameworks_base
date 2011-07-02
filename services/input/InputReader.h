@@ -57,14 +57,6 @@ struct InputReaderConfiguration {
         CHANGE_MUST_REOPEN = 1 << 31,
     };
 
-    // Determines whether to turn on some hacks we have to improve the touch interaction with a
-    // certain device whose screen currently is not all that good.
-    bool filterTouchEvents;
-
-    // Determines whether to turn on some hacks to improve touch interaction with another device
-    // where touch coordinate data can get corrupted.
-    bool filterJumpyTouchEvents;
-
     // Gets the amount of time to disable virtual keys after the screen is touched
     // in order to filter out accidental virtual key presses due to swiping gestures
     // or taps near the edge of the display.  May be 0 to disable the feature.
@@ -146,8 +138,6 @@ struct InputReaderConfiguration {
     float pointerGestureZoomSpeedRatio;
 
     InputReaderConfiguration() :
-            filterTouchEvents(false),
-            filterJumpyTouchEvents(false),
             virtualKeyQuietTime(0),
             pointerVelocityControlParameters(1.0f, 500.0f, 3000.0f, 3.0f),
             wheelVelocityControlParameters(1.0f, 15.0f, 50.0f, 4.0f),
@@ -812,10 +802,6 @@ protected:
         int32_t associatedDisplayId;
         bool orientationAware;
 
-        bool useBadTouchFilter;
-        bool useJumpyTouchFilter;
-        bool useAveragingTouchFilter;
-
         enum GestureMode {
             GESTURE_MODE_POINTER,
             GESTURE_MODE_SPOTS,
@@ -1042,38 +1028,6 @@ protected:
     void syncTouch(nsecs_t when, bool havePointerIds);
 
 private:
-    /* Maximum number of historical samples to average. */
-    static const uint32_t AVERAGING_HISTORY_SIZE = 5;
-
-    /* Slop distance for jumpy pointer detection.
-     * The vertical range of the screen divided by this is our epsilon value. */
-    static const uint32_t JUMPY_EPSILON_DIVISOR = 212;
-
-    /* Number of jumpy points to drop for touchscreens that need it. */
-    static const uint32_t JUMPY_TRANSITION_DROPS = 3;
-    static const uint32_t JUMPY_DROP_LIMIT = 3;
-
-    /* Maximum squared distance for averaging.
-     * If moving farther than this, turn of averaging to avoid lag in response. */
-    static const uint64_t AVERAGING_DISTANCE_LIMIT = 75 * 75;
-
-    struct AveragingTouchFilterState {
-        // Individual history tracks are stored by pointer id
-        uint32_t historyStart[MAX_POINTERS];
-        uint32_t historyEnd[MAX_POINTERS];
-        struct {
-            struct {
-                int32_t x;
-                int32_t y;
-                int32_t pressure;
-            } pointers[MAX_POINTERS];
-        } historyData[AVERAGING_HISTORY_SIZE];
-    } mAveragingTouchFilter;
-
-    struct JumpyTouchFilterState {
-        uint32_t jumpyPointsDropped;
-    } mJumpyTouchFilter;
-
     struct PointerDistanceHeapElement {
         uint32_t currentPointerIndex : 8;
         uint32_t lastPointerIndex : 8;
@@ -1251,9 +1205,6 @@ private:
     bool isPointInsideSurfaceLocked(int32_t x, int32_t y);
     const VirtualKey* findVirtualKeyHitLocked(int32_t x, int32_t y);
 
-    bool applyBadTouchFilter();
-    bool applyJumpyTouchFilter();
-    void applyAveragingTouchFilter();
     void calculatePointerIds();
 };
 

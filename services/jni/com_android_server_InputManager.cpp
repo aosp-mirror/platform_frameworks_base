@@ -69,8 +69,6 @@ static struct {
     jmethodID interceptKeyBeforeDispatching;
     jmethodID dispatchUnhandledKey;
     jmethodID checkInjectEventsPermission;
-    jmethodID filterTouchEvents;
-    jmethodID filterJumpyTouchEvents;
     jmethodID getVirtualKeyQuietTimeMillis;
     jmethodID getExcludedDeviceNames;
     jmethodID getKeyRepeatTimeout;
@@ -380,18 +378,6 @@ bool NativeInputManager::getDisplayInfo(int32_t displayId,
 
 void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outConfig) {
     JNIEnv* env = jniEnv();
-
-    jboolean filterTouchEvents = env->CallBooleanMethod(mCallbacksObj,
-            gCallbacksClassInfo.filterTouchEvents);
-    if (!checkAndClearExceptionFromCallback(env, "filterTouchEvents")) {
-        outConfig->filterTouchEvents = filterTouchEvents;
-    }
-
-    jboolean filterJumpyTouchEvents = env->CallBooleanMethod(mCallbacksObj,
-            gCallbacksClassInfo.filterJumpyTouchEvents);
-    if (!checkAndClearExceptionFromCallback(env, "filterJumpyTouchEvents")) {
-        outConfig->filterJumpyTouchEvents = filterJumpyTouchEvents;
-    }
 
     jint virtualKeyQuietTime = env->CallIntMethod(mCallbacksObj,
             gCallbacksClassInfo.getVirtualKeyQuietTimeMillis);
@@ -1404,12 +1390,6 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     GET_METHOD_ID(gCallbacksClassInfo.checkInjectEventsPermission, clazz,
             "checkInjectEventsPermission", "(II)Z");
-
-    GET_METHOD_ID(gCallbacksClassInfo.filterTouchEvents, clazz,
-            "filterTouchEvents", "()Z");
-
-    GET_METHOD_ID(gCallbacksClassInfo.filterJumpyTouchEvents, clazz,
-            "filterJumpyTouchEvents", "()Z");
 
     GET_METHOD_ID(gCallbacksClassInfo.getVirtualKeyQuietTimeMillis, clazz,
             "getVirtualKeyQuietTimeMillis", "()I");
