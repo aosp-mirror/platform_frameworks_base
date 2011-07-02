@@ -72,8 +72,7 @@ public class ManageDialog extends Activity implements Handler.Callback,
             mDataTransmitted = (TextView) view.findViewById(R.id.data_transmitted);
             mDataReceived = (TextView) view.findViewById(R.id.data_received);
 
-            if (mConfig.packageName == null) {
-                // Legacy VPN does not have a package name.
+            if (mConfig.packageName.equals(VpnConfig.LEGACY_VPN)) {
                 mDialog = new AlertDialog.Builder(this)
                         .setIcon(android.R.drawable.ic_dialog_info)
                         .setTitle(R.string.legacy_title)
@@ -126,7 +125,7 @@ public class ManageDialog extends Activity implements Handler.Callback,
             if (which == AlertDialog.BUTTON_POSITIVE) {
                 mConfig.configureIntent.send();
             } else if (which == AlertDialog.BUTTON_NEUTRAL) {
-                mService.prepareVpn("");
+                mService.prepareVpn(VpnConfig.LEGACY_VPN);
             }
         } catch (Exception e) {
             Log.e(TAG, "onClick", e);

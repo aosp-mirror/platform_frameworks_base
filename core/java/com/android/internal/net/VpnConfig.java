@@ -35,6 +35,8 @@ public class VpnConfig implements Parcelable {
 
     public static final String ACTION_VPN_REVOKED = "android.net.vpn.action.REVOKED";
 
+    public static final String LEGACY_VPN = "[Legacy VPN]";
+
     public static Intent getIntentForConfirmation() {
         Intent intent = new Intent();
         intent.setClassName("com.android.vpndialogs", "com.android.vpndialogs.ConfirmDialog");

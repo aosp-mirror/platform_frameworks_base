@@ -55,66 +55,13 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     private final Context mContext;
     private final VpnCallback mCallback;
 
-    private String mPackageName;
+    private String mPackageName = VpnConfig.LEGACY_VPN;
     private String mInterfaceName;
-
     private LegacyVpnRunner mLegacyVpnRunner;
 
     public Vpn(Context context, VpnCallback callback) {
         mContext = context;
         mCallback = callback;
-    }
-
-    /**
-     * Prepare for a VPN application.
-     *
-     * @param packageName The package name of the new VPN application.
-     * @return The name of the current prepared package.
-     */
-    public synchronized String prepare(String packageName) {
-        // Return the current prepared package if the new one is null.
-        if (packageName == null) {
-            return mPackageName;
-        }
-
-        // Only system user can call this method.
-        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
-            throw new SecurityException("Unauthorized Caller");
-        }
-
-        // Check the permission of the given package.
-        PackageManager pm = mContext.getPackageManager();
-        if (packageName.isEmpty()) {
-            packageName = null;
-        } else if (pm.checkPermission(VPN, packageName) != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(packageName + " does not have " + VPN);
-        }
-
-        // Reset the interface and hide the notification.
-        if (mInterfaceName != null) {
-            jniResetInterface(mInterfaceName);
-            mCallback.restore();
-            hideNotification();
-            mInterfaceName = null;
-        }
-
-        // Notify the package being revoked.
-        if (mPackageName != null) {
-            Intent intent = new Intent(VpnConfig.ACTION_VPN_REVOKED);
-            intent.setPackage(mPackageName);
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            mContext.sendBroadcast(intent);
-        }
-
-        // Stop legacy VPN if it has been started.
-        if (mLegacyVpnRunner != null) {
-            mLegacyVpnRunner.exit();
-            mLegacyVpnRunner = null;
-        }
-
-        Log.i(TAG, "Switched from " + mPackageName + " to " + packageName);
-        mPackageName = packageName;
-        return mPackageName;
     }
 
     /**
@@ -138,10 +85,64 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     }
 
     /**
-     * Configure a TUN interface and return its file descriptor.
+     * Prepare for a VPN application. If the new application is valid,
+     * the previous prepared application is revoked. Since legacy VPN
+     * is not a real application, it uses {@link VpnConfig#LEGACY_VPN}
+     * as its package name. Note that this method does not check if
+     * the applications are the same.
      *
-     * @param config The parameters to configure the interface.
-     * @return The file descriptor of the interface.
+     * @param packageName The package name of the VPN application.
+     * @return The package name of the current prepared application.
+     */
+    public synchronized String prepare(String packageName) {
+        // Return the current prepared application if the new one is null.
+        if (packageName == null) {
+            return mPackageName;
+        }
+
+        // Only system user can call this method.
+        if (Binder.getCallingUid() != Process.SYSTEM_UID) {
+            throw new SecurityException("Unauthorized Caller");
+        }
+
+        // Check the permission of the given package.
+        PackageManager pm = mContext.getPackageManager();
+        if (!packageName.equals(VpnConfig.LEGACY_VPN) &&
+                pm.checkPermission(VPN, packageName) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(packageName + " does not have " + VPN);
+        }
+
+        // Reset the interface and hide the notification.
+        if (mInterfaceName != null) {
+            jniResetInterface(mInterfaceName);
+            mCallback.restore();
+            hideNotification();
+            mInterfaceName = null;
+        }
+
+        // Send out the broadcast or stop LegacyVpnRunner.
+        if (!mPackageName.equals(VpnConfig.LEGACY_VPN)) {
+            Intent intent = new Intent(VpnConfig.ACTION_VPN_REVOKED);
+            intent.setPackage(mPackageName);
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+            mContext.sendBroadcast(intent);
+        } else if (mLegacyVpnRunner != null) {
+            mLegacyVpnRunner.exit();
+            mLegacyVpnRunner = null;
+        }
+
+        Log.i(TAG, "Switched from " + mPackageName + " to " + packageName);
+        mPackageName = packageName;
+        return mPackageName;
+    }
+
+    /**
+     * Establish a VPN network and return the file descriptor of the VPN
+     * interface. This methods returns {@code null} if the application is
+     * not prepared or revoked.
+     *
+     * @param config The parameters to configure the network.
+     * @return The file descriptor of the VPN interface.
      */
     public synchronized ParcelFileDescriptor establish(VpnConfig config) {
         // Check the permission of the caller.
@@ -175,7 +176,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             icon.draw(new Canvas(bitmap));
         }
 
-        // Create the interface and abort if any of the following steps fails.
+        // Configure the interface. Abort if any of these steps fails.
         ParcelFileDescriptor descriptor =
                 ParcelFileDescriptor.adoptFd(jniCreateInterface(config.mtu));
         try {
@@ -226,8 +227,8 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     // INetworkManagementEventObserver.Stub
     public synchronized void interfaceRemoved(String name) {
         if (name.equals(mInterfaceName) && jniCheckInterface(name) == 0) {
-            hideNotification();
             mCallback.restore();
+            hideNotification();
             mInterfaceName = null;
         }
     }
@@ -277,23 +278,28 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     private native void jniProtectSocket(int fd, String name);
 
     /**
-     * Handle legacy VPN requests. This method stops the daemons and restart
-     * them if their arguments are not null. Heavy things are offloaded to
-     * another thread, so callers will not be blocked too long.
+     * Handle a legacy VPN request. This method stops the daemons and restart
+     * them if arguments are not null. Heavy things are offloaded to another
+     * thread, so callers will not be blocked for a long time.
      *
+     * @param config The parameters to configure the network.
      * @param raoocn The arguments to be passed to racoon.
      * @param mtpd The arguments to be passed to mtpd.
      */
-    public synchronized void startLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
-        // Stop the current VPN just like a normal VPN application.
-        prepare("");
+    public synchronized void doLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
+        // There is nothing to stop if another VPN application is prepared.
+        if (config == null && !mPackageName.equals(VpnConfig.LEGACY_VPN)) {
+            return;
+        }
 
-        // Legacy VPN does not have a package name.
-        config.packageName = null;
+        // Reset everything. This also checks the caller.
+        prepare(VpnConfig.LEGACY_VPN);
 
         // Start a new runner and we are done!
-        mLegacyVpnRunner = new LegacyVpnRunner(config, racoon, mtpd);
-        mLegacyVpnRunner.start();
+        if (config != null) {
+            mLegacyVpnRunner = new LegacyVpnRunner(config, racoon, mtpd);
+            mLegacyVpnRunner.start();
+        }
     }
 
     /**
@@ -317,9 +323,12 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             mConfig = config;
             mDaemons = new String[] {"racoon", "mtpd"};
             mArguments = new String[][] {racoon, mtpd};
+
+            mConfig.packageName = VpnConfig.LEGACY_VPN;
         }
 
         public void exit() {
+            // We assume that everything is reset after the daemons die.
             for (String daemon : mDaemons) {
                 SystemProperties.set("ctl.stop", daemon);
             }
@@ -376,7 +385,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     checkpoint(true);
                 }
 
-                // Check if we need to restart some daemons.
+                // Check if we need to restart any of the daemons.
                 boolean restart = false;
                 for (String[] arguments : mArguments) {
                     restart = restart || (arguments != null);
@@ -468,16 +477,24 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     }
                 }
 
-                // TODO: support routes and search domains for IPSec Mode-CFG.
+                // TODO: support routes and search domains from IPSec Mode-CFG.
 
-                // This is it! Here is the end of our journey!
+                // Set the routes as requested.
+                if (mConfig.routes != null) {
+                    jniSetRoutes(mConfig.interfaceName, mConfig.routes);
+                }
+
+                // The final step must be synchronized.
                 synchronized (Vpn.this) {
                     // Check if the thread is interrupted while we are waiting.
                     checkpoint(false);
 
-                    if (mConfig.routes != null) {
-                        jniSetRoutes(mConfig.interfaceName, mConfig.routes);
+                    // Check if the interface is gone while we are waiting.
+                    if (jniCheckInterface(mConfig.interfaceName) == 0) {
+                        throw new IllegalStateException(mConfig.interfaceName + " is gone");
                     }
+
+                    // Now INetworkManagementEventObserver is watching our back.
                     mInterfaceName = mConfig.interfaceName;
                     mCallback.override(mConfig.dnsServers, mConfig.searchDomains);
                     showNotification(mConfig, null, null);
@@ -485,9 +502,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                 Log.i(TAG, "Connected!");
             } catch (Exception e) {
                 Log.i(TAG, "Abort due to " + e.getMessage());
-                for (String daemon : mDaemons) {
-                    SystemProperties.set("ctl.stop", daemon);
-                }
+                exit();
             }
         }
     }
