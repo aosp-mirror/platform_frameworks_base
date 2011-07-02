@@ -31,12 +31,15 @@ class Surface;
 class IMediaRecorder;
 class ICamera;
 class ICameraRecordingProxy;
+class ISurfaceTexture;
+class SurfaceTextureClient;
 
 typedef void (*media_completion_f)(status_t status, void *cookie);
 
 enum video_source {
     VIDEO_SOURCE_DEFAULT = 0,
     VIDEO_SOURCE_CAMERA = 1,
+    VIDEO_SOURCE_GRALLOC_BUFFER = 2,
 
     VIDEO_SOURCE_LIST_END  // must be last - used to validate audio source type
 };
@@ -226,6 +229,7 @@ public:
     status_t    close();
     status_t    release();
     void        notify(int msg, int ext1, int ext2);
+    sp<ISurfaceTexture>     querySurfaceMediaSourceFromMediaServer();
 
 private:
     void                    doCleanUp();
@@ -233,6 +237,12 @@ private:
 
     sp<IMediaRecorder>          mMediaRecorder;
     sp<MediaRecorderListener>   mListener;
+
+    // Reference toISurfaceTexture
+    // for encoding GL Frames. That is useful only when the
+    // video source is set to VIDEO_SOURCE_GRALLOC_BUFFER
+    sp<ISurfaceTexture>         mSurfaceMediaSource;
+
     media_recorder_states       mCurrentState;
     bool                        mIsAudioSourceSet;
     bool                        mIsVideoSourceSet;

@@ -36,6 +36,8 @@ struct MediaWriter;
 class MetaData;
 struct AudioSource;
 class MediaProfiles;
+class ISurfaceTexture;
+class SurfaceMediaSource;
 
 struct StagefrightRecorder : public MediaRecorderBase {
     StagefrightRecorder();
@@ -64,6 +66,8 @@ struct StagefrightRecorder : public MediaRecorderBase {
     virtual status_t reset();
     virtual status_t getMaxAmplitude(int *max);
     virtual status_t dump(int fd, const Vector<String16>& args) const;
+    // Querying a SurfaceMediaSourcer
+    virtual sp<ISurfaceTexture> querySurfaceMediaSource() const;
 
 private:
     sp<ICamera> mCamera;
@@ -109,12 +113,18 @@ private:
     sp<MediaSourceSplitter> mCameraSourceSplitter;
     sp<CameraSourceTimeLapse> mCameraSourceTimeLapse;
 
+
     String8 mParams;
 
     bool mIsMetaDataStoredInVideoBuffers;
     MediaProfiles *mEncoderProfiles;
 
     bool mStarted;
+    // Needed when GLFrames are encoded.
+    // An <ISurfaceTexture> pointer
+    // will be sent to the client side using which the
+    // frame buffers will be queued and dequeued
+    sp<SurfaceMediaSource> mSurfaceMediaSource;
 
     status_t setupMPEG4Recording(
         bool useSplitCameraSource,
@@ -134,7 +144,14 @@ private:
     sp<MediaSource> createAudioSource();
     status_t checkVideoEncoderCapabilities();
     status_t checkAudioEncoderCapabilities();
+    // Generic MediaSource set-up. Returns the appropriate
+    // source (CameraSource or SurfaceMediaSource)
+    // depending on the videosource type
+    status_t setupMediaSource(sp<MediaSource> *mediaSource);
     status_t setupCameraSource(sp<CameraSource> *cameraSource);
+    // setup the surfacemediasource for the encoder
+    status_t setupSurfaceMediaSource();
+
     status_t setupAudioEncoder(const sp<MediaWriter>& writer);
     status_t setupVideoEncoder(
             sp<MediaSource> cameraSource,
@@ -175,6 +192,7 @@ private:
     void clipAudioSampleRate();
     void clipNumberOfAudioChannels();
     void setDefaultProfileIfNecessary();
+
 
     StagefrightRecorder(const StagefrightRecorder &);
     StagefrightRecorder &operator=(const StagefrightRecorder &);

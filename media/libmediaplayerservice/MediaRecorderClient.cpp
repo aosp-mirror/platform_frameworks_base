@@ -41,6 +41,7 @@
 #include "MediaPlayerService.h"
 
 #include "StagefrightRecorder.h"
+#include <gui/ISurfaceTexture.h>
 
 namespace android {
 
@@ -56,6 +57,20 @@ static bool checkPermission(const char* permissionString) {
     if (!ok) LOGE("Request requires %s", permissionString);
     return ok;
 }
+
+
+sp<ISurfaceTexture> MediaRecorderClient::querySurfaceMediaSource()
+{
+    LOGV("Query SurfaceMediaSource");
+    Mutex::Autolock lock(mLock);
+    if (mRecorder == NULL) {
+        LOGE("recorder is not initialized");
+        return NULL;
+    }
+    return mRecorder->querySurfaceMediaSource();
+}
+
+
 
 status_t MediaRecorderClient::setCamera(const sp<ICamera>& camera,
                                         const sp<ICameraRecordingProxy>& proxy)

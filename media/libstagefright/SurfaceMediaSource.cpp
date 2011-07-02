@@ -35,18 +35,18 @@
 namespace android {
 
 SurfaceMediaSource::SurfaceMediaSource(uint32_t bufW, uint32_t bufH) :
-    mDefaultWidth(bufW),
-    mDefaultHeight(bufH),
-    mPixelFormat(0),
-    mBufferCount(MIN_ASYNC_BUFFER_SLOTS),
-    mClientBufferCount(0),
-    mServerBufferCount(MIN_ASYNC_BUFFER_SLOTS),
-    mCurrentSlot(INVALID_BUFFER_SLOT),
-    mCurrentTimestamp(0),
-    mSynchronousMode(true),
-    mConnectedApi(NO_CONNECTED_API),
-    mFrameRate(30),
-    mStarted(false)     {
+                mDefaultWidth(bufW),
+                mDefaultHeight(bufH),
+                mPixelFormat(0),
+                mBufferCount(MIN_ASYNC_BUFFER_SLOTS),
+                mClientBufferCount(0),
+                mServerBufferCount(MIN_ASYNC_BUFFER_SLOTS),
+                mCurrentSlot(INVALID_BUFFER_SLOT),
+                mCurrentTimestamp(0),
+                mSynchronousMode(true),
+                mConnectedApi(NO_CONNECTED_API),
+                mFrameRate(30),
+                mStarted(false)   {
     LOGV("SurfaceMediaSource::SurfaceMediaSource");
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
@@ -372,7 +372,7 @@ status_t SurfaceMediaSource::setSynchronousMode(bool enabled) {
 status_t SurfaceMediaSource::connect(int api) {
     LOGV("SurfaceMediaSource::connect");
     Mutex::Autolock lock(mMutex);
-    int err = NO_ERROR;
+    status_t err = NO_ERROR;
     switch (api) {
         case NATIVE_WINDOW_API_EGL:
         case NATIVE_WINDOW_API_CPU:
@@ -394,7 +394,7 @@ status_t SurfaceMediaSource::connect(int api) {
 status_t SurfaceMediaSource::disconnect(int api) {
     LOGV("SurfaceMediaSource::disconnect");
     Mutex::Autolock lock(mMutex);
-    int err = NO_ERROR;
+    status_t err = NO_ERROR;
     switch (api) {
         case NATIVE_WINDOW_API_EGL:
         case NATIVE_WINDOW_API_CPU:
@@ -625,13 +625,23 @@ void SurfaceMediaSource::dump(String8& result, const char* prefix,
     }
 }
 
-void SurfaceMediaSource::setFrameRate(uint32_t fps)
+status_t SurfaceMediaSource::setFrameRate(int32_t fps)
 {
     Mutex::Autolock lock(mMutex);
+    const int MAX_FRAME_RATE = 60;
+    if (fps < 0 || fps > MAX_FRAME_RATE) {
+        return BAD_VALUE;
+    }
     mFrameRate = fps;
+    return OK;
 }
 
-uint32_t SurfaceMediaSource::getFrameRate( ) const {
+bool SurfaceMediaSource::isMetaDataStoredInVideoBuffers() const {
+    LOGV("isMetaDataStoredInVideoBuffers");
+    return true;
+}
+
+int32_t SurfaceMediaSource::getFrameRate( ) const {
     Mutex::Autolock lock(mMutex);
     return mFrameRate;
 }
@@ -663,8 +673,7 @@ sp<MetaData> SurfaceMediaSource::getFormat()
     LOGV("getFormat");
     Mutex::Autolock autoLock(mMutex);
     sp<MetaData> meta = new MetaData;
-    // XXX: Check if this is right. or should we wait on some
-    // condition?
+
     meta->setInt32(kKeyWidth, mDefaultWidth);
     meta->setInt32(kKeyHeight, mDefaultHeight);
     // The encoder format is set as an opaque colorformat

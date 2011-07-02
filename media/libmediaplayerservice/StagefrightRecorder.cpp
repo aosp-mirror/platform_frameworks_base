@@ -38,10 +38,12 @@
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/OMXClient.h>
 #include <media/stagefright/OMXCodec.h>
+#include <media/stagefright/SurfaceMediaSource.h>
 #include <media/MediaProfiles.h>
 #include <camera/ICamera.h>
 #include <camera/CameraParameters.h>
 #include <surfaceflinger/Surface.h>
+
 #include <utils/Errors.h>
 #include <sys/types.h>
 #include <ctype.h>
@@ -69,7 +71,7 @@ StagefrightRecorder::StagefrightRecorder()
       mOutputFd(-1), mOutputFdAux(-1),
       mAudioSource(AUDIO_SOURCE_CNT),
       mVideoSource(VIDEO_SOURCE_LIST_END),
-      mStarted(false) {
+      mStarted(false), mSurfaceMediaSource(NULL) {
 
     LOGV("Constructor");
     reset();
@@ -83,6 +85,14 @@ StagefrightRecorder::~StagefrightRecorder() {
 status_t StagefrightRecorder::init() {
     LOGV("init");
     return OK;
+}
+
+// The client side of mediaserver asks it to creat a SurfaceMediaSource
+// and return a interface reference. The client side will use that
+// while encoding GL Frames
+sp<ISurfaceTexture> StagefrightRecorder::querySurfaceMediaSource() const {
+    LOGV("Get SurfaceMediaSource");
+    return mSurfaceMediaSource;
 }
 
 status_t StagefrightRecorder::setAudioSource(audio_source_t as) {
@@ -1006,13 +1016,13 @@ status_t StagefrightRecorder::startRTPRecording() {
         source = createAudioSource();
     } else {
 
-        sp<CameraSource> cameraSource;
-        status_t err = setupCameraSource(&cameraSource);
+        sp<MediaSource> mediaSource;
+        status_t err = setupMediaSource(&mediaSource);
         if (err != OK) {
             return err;
         }
 
-        err = setupVideoEncoder(cameraSource, mVideoBitRate, &source);
+        err = setupVideoEncoder(mediaSource, mVideoBitRate, &source);
         if (err != OK) {
             return err;
         }
@@ -1042,20 +1052,19 @@ status_t StagefrightRecorder::startMPEG2TSRecording() {
         }
     }
 
-    if (mVideoSource == VIDEO_SOURCE_DEFAULT
-            || mVideoSource == VIDEO_SOURCE_CAMERA) {
+    if (mVideoSource < VIDEO_SOURCE_LIST_END) {
         if (mVideoEncoder != VIDEO_ENCODER_H264) {
             return ERROR_UNSUPPORTED;
         }
 
-        sp<CameraSource> cameraSource;
-        status_t err = setupCameraSource(&cameraSource);
+        sp<MediaSource> mediaSource;
+        status_t err = setupMediaSource(&mediaSource);
         if (err != OK) {
             return err;
         }
 
         sp<MediaSource> encoder;
-        err = setupVideoEncoder(cameraSource, mVideoBitRate, &encoder);
+        err = setupVideoEncoder(mediaSource, mVideoBitRate, &encoder);
 
         if (err != OK) {
             return err;
@@ -1289,6 +1298,60 @@ void StagefrightRecorder::clipVideoFrameHeight() {
     }
 }
 
+// Set up the appropriate MediaSource depending on the chosen option
+status_t StagefrightRecorder::setupMediaSource(
+                      sp<MediaSource> *mediaSource) {
+    if (mVideoSource == VIDEO_SOURCE_DEFAULT
+            || mVideoSource == VIDEO_SOURCE_CAMERA) {
+        sp<CameraSource> cameraSource;
+        status_t err = setupCameraSource(&cameraSource);
+        if (err != OK) {
+            return err;
+        }
+        *mediaSource = cameraSource;
+    } else if (mVideoSource == VIDEO_SOURCE_GRALLOC_BUFFER) {
+        // If using GRAlloc buffers, setup surfacemediasource.
+        // Later a handle to that will be passed
+        // to the client side when queried
+        status_t err = setupSurfaceMediaSource();
+        if (err != OK) {
+            return err;
+        }
+        *mediaSource = mSurfaceMediaSource;
+    } else {
+        return INVALID_OPERATION;
+    }
+    return OK;
+}
+
+// setupSurfaceMediaSource creates a source with the given
+// width and height and framerate.
+// TODO: This could go in a static function inside SurfaceMediaSource
+// similar to that in CameraSource
+status_t StagefrightRecorder::setupSurfaceMediaSource() {
+    status_t err = OK;
+    mSurfaceMediaSource = new SurfaceMediaSource(mVideoWidth, mVideoHeight);
+    if (mSurfaceMediaSource == NULL) {
+        return NO_INIT;
+    }
+
+    if (mFrameRate == -1) {
+        int32_t frameRate = 0;
+        CHECK (mSurfaceMediaSource->getFormat()->findInt32(
+                                        kKeyFrameRate, &frameRate));
+        LOGI("Frame rate is not explicitly set. Use the current frame "
+             "rate (%d fps)", frameRate);
+        mFrameRate = frameRate;
+    } else {
+        err = mSurfaceMediaSource->setFrameRate(mFrameRate);
+    }
+    CHECK(mFrameRate != -1);
+
+    mIsMetaDataStoredInVideoBuffers =
+        mSurfaceMediaSource->isMetaDataStoredInVideoBuffers();
+    return err;
+}
+
 status_t StagefrightRecorder::setupCameraSource(
         sp<CameraSource> *cameraSource) {
     status_t err = OK;
@@ -1465,29 +1528,37 @@ status_t StagefrightRecorder::setupMPEG4Recording(
     status_t err = OK;
     sp<MediaWriter> writer = new MPEG4Writer(outputFd);
 
-    if (mVideoSource == VIDEO_SOURCE_DEFAULT
-            || mVideoSource == VIDEO_SOURCE_CAMERA) {
+    if (mVideoSource < VIDEO_SOURCE_LIST_END) {
 
-        sp<MediaSource> cameraMediaSource;
+        sp<MediaSource> mediaSource;
         if (useSplitCameraSource) {
+            // TODO: Check if there is a better way to handle this
+            if (mVideoSource == VIDEO_SOURCE_GRALLOC_BUFFER) {
+                LOGE("Cannot use split camera when encoding frames");
+                return INVALID_OPERATION;
+            }
             LOGV("Using Split camera source");
-            cameraMediaSource = mCameraSourceSplitter->createClient();
+            mediaSource = mCameraSourceSplitter->createClient();
         } else {
-            sp<CameraSource> cameraSource;
-            err = setupCameraSource(&cameraSource);
-            cameraMediaSource = cameraSource;
+           err = setupMediaSource(&mediaSource);
         }
+
         if ((videoWidth != mVideoWidth) || (videoHeight != mVideoHeight)) {
+            // TODO: Might be able to handle downsampling even if using GRAlloc
+            if (mVideoSource == VIDEO_SOURCE_GRALLOC_BUFFER) {
+                LOGE("Cannot change size or Downsample when encoding frames");
+                return INVALID_OPERATION;
+            }
             // Use downsampling from the original source.
-            cameraMediaSource =
-                new VideoSourceDownSampler(cameraMediaSource, videoWidth, videoHeight);
+            mediaSource =
+                new VideoSourceDownSampler(mediaSource, videoWidth, videoHeight);
         }
         if (err != OK) {
             return err;
         }
 
         sp<MediaSource> encoder;
-        err = setupVideoEncoder(cameraMediaSource, videoBitRate, &encoder);
+        err = setupVideoEncoder(mediaSource, videoBitRate, &encoder);
         if (err != OK) {
             return err;
         }

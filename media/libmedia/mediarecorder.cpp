@@ -25,6 +25,7 @@
 #include <media/IMediaPlayerService.h>
 #include <media/IMediaRecorder.h>
 #include <media/mediaplayer.h>  // for MEDIA_ERROR_SERVER_DIED
+#include <gui/ISurfaceTexture.h>
 
 namespace android {
 
@@ -127,7 +128,9 @@ status_t MediaRecorder::setVideoSource(int vs)
         return INVALID_OPERATION;
     }
 
+    // following call is made over the Binder Interface
     status_t ret = mMediaRecorder->setVideoSource(vs);
+
     if (OK != ret) {
         LOGV("setVideoSource failed: %d", ret);
         mCurrentState = MEDIA_RECORDER_ERROR;
@@ -357,7 +360,7 @@ status_t MediaRecorder::setVideoSize(int width, int height)
         return INVALID_OPERATION;
     }
     if (!mIsVideoSourceSet) {
-        LOGE("try to set video size without setting video source first");
+        LOGE("Cannot set video size without setting video source first");
         return INVALID_OPERATION;
     }
 
@@ -367,8 +370,26 @@ status_t MediaRecorder::setVideoSize(int width, int height)
         mCurrentState = MEDIA_RECORDER_ERROR;
         return ret;
     }
+
     return ret;
 }
+
+// Query a SurfaceMediaSurface through the Mediaserver, over the
+// binder interface. This is used by the Filter Framework (MeidaEncoder)
+// to get an <ISurfaceTexture> object to hook up to ANativeWindow.
+sp<ISurfaceTexture> MediaRecorder::
+        querySurfaceMediaSourceFromMediaServer()
+{
+    Mutex::Autolock _l(mLock);
+    mSurfaceMediaSource =
+            mMediaRecorder->querySurfaceMediaSource();
+    if (mSurfaceMediaSource == NULL) {
+        LOGE("SurfaceMediaSource could not be initialized!");
+    }
+    return mSurfaceMediaSource;
+}
+
+
 
 status_t MediaRecorder::setVideoFrameRate(int frames_per_second)
 {
@@ -382,7 +403,7 @@ status_t MediaRecorder::setVideoFrameRate(int frames_per_second)
         return INVALID_OPERATION;
     }
     if (!mIsVideoSourceSet) {
-        LOGE("try to set video frame rate without setting video source first");
+        LOGE("Cannot set video frame rate without setting video source first");
         return INVALID_OPERATION;
     }
 
@@ -621,7 +642,7 @@ status_t MediaRecorder::release()
     return INVALID_OPERATION;
 }
 
-MediaRecorder::MediaRecorder()
+MediaRecorder::MediaRecorder() : mSurfaceMediaSource(NULL)
 {
     LOGV("constructor");
 
@@ -632,6 +653,8 @@ MediaRecorder::MediaRecorder()
     if (mMediaRecorder != NULL) {
         mCurrentState = MEDIA_RECORDER_IDLE;
     }
+
+
     doCleanUp();
 }
 
@@ -645,6 +668,10 @@ MediaRecorder::~MediaRecorder()
     LOGV("destructor");
     if (mMediaRecorder != NULL) {
         mMediaRecorder.clear();
+    }
+
+    if (mSurfaceMediaSource != NULL) {
+        mSurfaceMediaSource.clear();
     }
 }
 
