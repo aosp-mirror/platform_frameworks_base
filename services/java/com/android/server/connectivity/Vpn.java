@@ -177,16 +177,10 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
 
         // Configure the interface. Abort if any of these steps fails.
-        ParcelFileDescriptor descriptor =
-                ParcelFileDescriptor.adoptFd(jniCreateInterface(config.mtu));
+        ParcelFileDescriptor descriptor = ParcelFileDescriptor.adoptFd(
+                jniConfigure(config.mtu, config.addresses, config.routes));
         try {
             String name = jniGetInterfaceName(descriptor.getFd());
-            if (jniSetAddresses(name, config.addresses) < 1) {
-                throw new IllegalArgumentException("At least one address must be specified");
-            }
-            if (config.routes != null) {
-                jniSetRoutes(name, config.routes);
-            }
             if (mInterfaceName != null && !mInterfaceName.equals(name)) {
                 jniResetInterface(mInterfaceName);
             }
@@ -269,10 +263,8 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
     }
 
-    private native int jniCreateInterface(int mtu);
+    private native int jniConfigure(int mtu, String addresses, String routes);
     private native String jniGetInterfaceName(int fd);
-    private native int jniSetAddresses(String name, String addresses);
-    private native int jniSetRoutes(String name, String routes);
     private native void jniResetInterface(String name);
     private native int jniCheckInterface(String name);
     private native void jniProtectSocket(int fd, String name);
@@ -354,7 +346,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             } else if (now - mTimer <= 30000) {
                 Thread.sleep(yield ? 200 : 1);
             } else {
-                throw new InterruptedException("timeout");
+                throw new InterruptedException("time is up");
             }
         }
 
@@ -433,7 +425,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     for (String argument : arguments) {
                         byte[] bytes = argument.getBytes(Charsets.UTF_8);
                         if (bytes.length >= 0xFFFF) {
-                            throw new IllegalArgumentException("argument too large");
+                            throw new IllegalArgumentException("argument is too large");
                         }
                         out.write(bytes.length >> 8);
                         out.write(bytes.length);
@@ -477,12 +469,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     }
                 }
 
-                // TODO: support routes and search domains from IPSec Mode-CFG.
-
-                // Set the routes as requested.
-                if (mConfig.routes != null) {
-                    jniSetRoutes(mConfig.interfaceName, mConfig.routes);
-                }
+                // TODO: support search domains from ISAKMP mode config.
 
                 // The final step must be synchronized.
                 synchronized (Vpn.this) {
@@ -501,7 +488,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                 }
                 Log.i(TAG, "Connected!");
             } catch (Exception e) {
-                Log.i(TAG, "Abort due to " + e.getMessage());
+                Log.i(TAG, "Abort because " + e.getMessage());
                 exit();
             }
         }
