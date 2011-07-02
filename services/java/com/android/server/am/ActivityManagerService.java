@@ -5171,7 +5171,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    private void removeTaskProcessesLocked(ActivityRecord root) {
+    private void cleanUpRemovedTaskLocked(ActivityRecord root, boolean killProcesses) {
         TaskRecord tr = root.task;
         Intent baseIntent = new Intent(
                 tr.intent != null ? tr.intent : tr.affinityIntent);
@@ -5194,6 +5194,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             ServiceRecord sr = services.get(i);
             if (sr.startRequested) {
                 if ((sr.serviceInfo.flags&ServiceInfo.FLAG_STOP_WITH_TASK) != 0) {
+                    Slog.i(TAG, "Stopping service " + sr.shortName + ": remove task");
                     stopServiceLocked(sr);
                 } else {
                     sr.pendingStarts.add(new ServiceRecord.StartItem(sr, true,
@@ -5205,26 +5206,28 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
         }
 
-        // Find any running processes associated with this app.
-        ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
-        SparseArray<ProcessRecord> appProcs
-                = mProcessNames.getMap().get(component.getPackageName());
-        if (appProcs != null) {
-            for (int i=0; i<appProcs.size(); i++) {
-                procs.add(appProcs.valueAt(i));
+        if (killProcesses) {
+            // Find any running processes associated with this app.
+            ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
+            SparseArray<ProcessRecord> appProcs
+                    = mProcessNames.getMap().get(component.getPackageName());
+            if (appProcs != null) {
+                for (int i=0; i<appProcs.size(); i++) {
+                    procs.add(appProcs.valueAt(i));
+                }
             }
-        }
 
-        // Kill the running processes.
-        for (int i=0; i<procs.size(); i++) {
-            ProcessRecord pr = procs.get(i);
-            if (pr.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
-                Slog.i(TAG, "Killing " + pr + ": remove task");
-                EventLog.writeEvent(EventLogTags.AM_KILL, pr.pid,
-                        pr.processName, pr.setAdj, "remove task");
-                Process.killProcessQuiet(pr.pid);
-            } else {
-                pr.waitingToKill = "remove task";
+            // Kill the running processes.
+            for (int i=0; i<procs.size(); i++) {
+                ProcessRecord pr = procs.get(i);
+                if (pr.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
+                    Slog.i(TAG, "Killing " + pr.toShortString() + ": remove task");
+                    EventLog.writeEvent(EventLogTags.AM_KILL, pr.pid,
+                            pr.processName, pr.setAdj, "remove task");
+                    Process.killProcessQuiet(pr.pid);
+                } else {
+                    pr.waitingToKill = "remove task";
+                }
             }
         }
     }
@@ -5238,11 +5241,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 ActivityRecord r = mMainStack.removeTaskActivitiesLocked(taskId, -1);
                 if (r != null) {
                     mRecentTasks.remove(r.task);
-
-                    if ((flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0) {
-                        removeTaskProcessesLocked(r);
-                    }
-
+                    cleanUpRemovedTaskLocked(r,
+                            (flags&ActivityManager.REMOVE_TASK_KILL_PROCESS) != 0);
                     return true;
                 }
             } finally {
@@ -13169,7 +13169,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         + " to " + app.curSchedGroup);
                 if (app.waitingToKill != null &&
                         app.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
-                    Slog.i(TAG, "Killing " + app + ": " + app.waitingToKill);
+                    Slog.i(TAG, "Killing " + app.toShortString() + ": " + app.waitingToKill);
                     EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
                             app.processName, app.setAdj, app.waitingToKill);
                     Process.killProcessQuiet(app.pid);
