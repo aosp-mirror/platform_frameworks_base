@@ -278,14 +278,14 @@ public class LoadAverageService extends Service {
             PixelFormat.TRANSLUCENT);
         params.gravity = Gravity.RIGHT | Gravity.TOP;
         params.setTitle("Load Average");
-        WindowManagerImpl wm = (WindowManagerImpl)getSystemService(WINDOW_SERVICE);
+        WindowManager wm = (WindowManager)getSystemService(WINDOW_SERVICE);
         wm.addView(mView, params);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        ((WindowManagerImpl)getSystemService(WINDOW_SERVICE)).removeView(mView);
+        ((WindowManager)getSystemService(WINDOW_SERVICE)).removeView(mView);
         mView = null;
     }
 
