@@ -768,10 +768,6 @@ void InputReader::dump(String8& dump) {
         dump.append(mConfig.excludedDeviceNames.itemAt(i).string());
     }
     dump.append("]\n");
-    dump.appendFormat(INDENT2 "FilterTouchEvents: %s\n",
-            toString(mConfig.filterTouchEvents));
-    dump.appendFormat(INDENT2 "FilterJumpyTouchEvents: %s\n",
-            toString(mConfig.filterJumpyTouchEvents));
     dump.appendFormat(INDENT2 "VirtualKeyQuietTime: %0.1fms\n",
             mConfig.virtualKeyQuietTime * 0.000001f);
 
@@ -1955,13 +1951,6 @@ void TouchInputMapper::initializeLocked() {
     mLastTouch.clear();
     mDownTime = 0;
 
-    for (uint32_t i = 0; i < MAX_POINTERS; i++) {
-        mAveragingTouchFilter.historyStart[i] = 0;
-        mAveragingTouchFilter.historyEnd[i] = 0;
-    }
-
-    mJumpyTouchFilter.jumpyPointsDropped = 0;
-
     mLocked.currentVirtualKey.down = false;
 
     mLocked.orientedRanges.havePressure = false;
@@ -2028,10 +2017,6 @@ void TouchInputMapper::configure(const InputReaderConfiguration* config, uint32_
 }
 
 void TouchInputMapper::configureParameters() {
-    mParameters.useBadTouchFilter = mConfig.filterTouchEvents;
-    mParameters.useAveragingTouchFilter = mConfig.filterTouchEvents;
-    mParameters.useJumpyTouchFilter = mConfig.filterJumpyTouchEvents;
-
     // Use the pointer presentation mode for devices that do not support distinct
     // multitouch.  The spot-based presentation relies on being able to accurately
     // locate two or more fingers on the touch pad.
@@ -2122,13 +2107,6 @@ void TouchInputMapper::dumpParameters(String8& dump) {
             mParameters.associatedDisplayId);
     dump.appendFormat(INDENT4 "OrientationAware: %s\n",
             toString(mParameters.orientationAware));
-
-    dump.appendFormat(INDENT4 "UseBadTouchFilter: %s\n",
-            toString(mParameters.useBadTouchFilter));
-    dump.appendFormat(INDENT4 "UseAveragingTouchFilter: %s\n",
-            toString(mParameters.useAveragingTouchFilter));
-    dump.appendFormat(INDENT4 "UseJumpyTouchFilter: %s\n",
-            toString(mParameters.useJumpyTouchFilter));
 }
 
 void TouchInputMapper::configureRawAxes() {
@@ -2985,31 +2963,8 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
 #endif
 
     // Preprocess pointer data.
-    if (mParameters.useBadTouchFilter) {
-        if (applyBadTouchFilter()) {
-            havePointerIds = false;
-        }
-    }
-
-    if (mParameters.useJumpyTouchFilter) {
-        if (applyJumpyTouchFilter()) {
-            havePointerIds = false;
-        }
-    }
-
     if (!havePointerIds) {
         calculatePointerIds();
-    }
-
-    TouchData temp;
-    TouchData* savedTouch;
-    if (mParameters.useAveragingTouchFilter) {
-        temp.copyFrom(mCurrentTouch);
-        savedTouch = & temp;
-
-        applyAveragingTouchFilter();
-    } else {
-        savedTouch = & mCurrentTouch;
     }
 
     uint32_t policyFlags = 0;
@@ -3058,9 +3013,9 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
     // Keep the button state so we can track edge-triggered button state changes.
     if (touchResult == DROP_STROKE) {
         mLastTouch.clear();
-        mLastTouch.buttonState = savedTouch->buttonState;
+        mLastTouch.buttonState = mCurrentTouch.buttonState;
     } else {
-        mLastTouch.copyFrom(*savedTouch);
+        mLastTouch.copyFrom(mCurrentTouch);
     }
 }
 
@@ -4823,359 +4778,6 @@ void TouchInputMapper::calculatePointerIds() {
 
         // Fix id bits.
         mCurrentTouch.idBits = usedIdBits;
-    }
-}
-
-/* Special hack for devices that have bad screen data: if one of the
- * points has moved more than a screen height from the last position,
- * then drop it. */
-bool TouchInputMapper::applyBadTouchFilter() {
-    uint32_t pointerCount = mCurrentTouch.pointerCount;
-
-    // Nothing to do if there are no points.
-    if (pointerCount == 0) {
-        return false;
-    }
-
-    // Don't do anything if a finger is going down or up.  We run
-    // here before assigning pointer IDs, so there isn't a good
-    // way to do per-finger matching.
-    if (pointerCount != mLastTouch.pointerCount) {
-        return false;
-    }
-
-    // We consider a single movement across more than a 7/16 of
-    // the long size of the screen to be bad.  This was a magic value
-    // determined by looking at the maximum distance it is feasible
-    // to actually move in one sample.
-    int32_t maxDeltaY = (mRawAxes.y.maxValue - mRawAxes.y.minValue + 1) * 7 / 16;
-
-    // XXX The original code in InputDevice.java included commented out
-    //     code for testing the X axis.  Note that when we drop a point
-    //     we don't actually restore the old X either.  Strange.
-    //     The old code also tries to track when bad points were previously
-    //     detected but it turns out that due to the placement of a "break"
-    //     at the end of the loop, we never set mDroppedBadPoint to true
-    //     so it is effectively dead code.
-    // Need to figure out if the old code is busted or just overcomplicated
-    // but working as intended.
-
-    // Look through all new points and see if any are farther than
-    // acceptable from all previous points.
-    for (uint32_t i = pointerCount; i-- > 0; ) {
-        int32_t y = mCurrentTouch.pointers[i].y;
-        int32_t closestY = INT_MAX;
-        int32_t closestDeltaY = 0;
-
-#if DEBUG_HACKS
-        LOGD("BadTouchFilter: Looking at next point #%d: y=%d", i, y);
-#endif
-
-        for (uint32_t j = pointerCount; j-- > 0; ) {
-            int32_t lastY = mLastTouch.pointers[j].y;
-            int32_t deltaY = abs(y - lastY);
-
-#if DEBUG_HACKS
-            LOGD("BadTouchFilter: Comparing with last point #%d: y=%d deltaY=%d",
-                    j, lastY, deltaY);
-#endif
-
-            if (deltaY < maxDeltaY) {
-                goto SkipSufficientlyClosePoint;
-            }
-            if (deltaY < closestDeltaY) {
-                closestDeltaY = deltaY;
-                closestY = lastY;
-            }
-        }
-
-        // Must not have found a close enough match.
-#if DEBUG_HACKS
-        LOGD("BadTouchFilter: Dropping bad point #%d: newY=%d oldY=%d deltaY=%d maxDeltaY=%d",
-                i, y, closestY, closestDeltaY, maxDeltaY);
-#endif
-
-        mCurrentTouch.pointers[i].y = closestY;
-        return true; // XXX original code only corrects one point
-
-    SkipSufficientlyClosePoint: ;
-    }
-
-    // No change.
-    return false;
-}
-
-/* Special hack for devices that have bad screen data: drop points where
- * the coordinate value for one axis has jumped to the other pointer's location.
- */
-bool TouchInputMapper::applyJumpyTouchFilter() {
-    uint32_t pointerCount = mCurrentTouch.pointerCount;
-    if (mLastTouch.pointerCount != pointerCount) {
-#if DEBUG_HACKS
-        LOGD("JumpyTouchFilter: Different pointer count %d -> %d",
-                mLastTouch.pointerCount, pointerCount);
-        for (uint32_t i = 0; i < pointerCount; i++) {
-            LOGD("  Pointer %d (%d, %d)", i,
-                    mCurrentTouch.pointers[i].x, mCurrentTouch.pointers[i].y);
-        }
-#endif
-
-        if (mJumpyTouchFilter.jumpyPointsDropped < JUMPY_TRANSITION_DROPS) {
-            if (mLastTouch.pointerCount == 1 && pointerCount == 2) {
-                // Just drop the first few events going from 1 to 2 pointers.
-                // They're bad often enough that they're not worth considering.
-                mCurrentTouch.pointerCount = 1;
-                mJumpyTouchFilter.jumpyPointsDropped += 1;
-
-#if DEBUG_HACKS
-                LOGD("JumpyTouchFilter: Pointer 2 dropped");
-#endif
-                return true;
-            } else if (mLastTouch.pointerCount == 2 && pointerCount == 1) {
-                // The event when we go from 2 -> 1 tends to be messed up too
-                mCurrentTouch.pointerCount = 2;
-                mCurrentTouch.pointers[0] = mLastTouch.pointers[0];
-                mCurrentTouch.pointers[1] = mLastTouch.pointers[1];
-                mJumpyTouchFilter.jumpyPointsDropped += 1;
-
-#if DEBUG_HACKS
-                for (int32_t i = 0; i < 2; i++) {
-                    LOGD("JumpyTouchFilter: Pointer %d replaced (%d, %d)", i,
-                            mCurrentTouch.pointers[i].x, mCurrentTouch.pointers[i].y);
-                }
-#endif
-                return true;
-            }
-        }
-        // Reset jumpy points dropped on other transitions or if limit exceeded.
-        mJumpyTouchFilter.jumpyPointsDropped = 0;
-
-#if DEBUG_HACKS
-        LOGD("JumpyTouchFilter: Transition - drop limit reset");
-#endif
-        return false;
-    }
-
-    // We have the same number of pointers as last time.
-    // A 'jumpy' point is one where the coordinate value for one axis
-    // has jumped to the other pointer's location. No need to do anything
-    // else if we only have one pointer.
-    if (pointerCount < 2) {
-        return false;
-    }
-
-    if (mJumpyTouchFilter.jumpyPointsDropped < JUMPY_DROP_LIMIT) {
-        int jumpyEpsilon = (mRawAxes.y.maxValue - mRawAxes.y.minValue + 1) / JUMPY_EPSILON_DIVISOR;
-
-        // We only replace the single worst jumpy point as characterized by pointer distance
-        // in a single axis.
-        int32_t badPointerIndex = -1;
-        int32_t badPointerReplacementIndex = -1;
-        int32_t badPointerDistance = INT_MIN; // distance to be corrected
-
-        for (uint32_t i = pointerCount; i-- > 0; ) {
-            int32_t x = mCurrentTouch.pointers[i].x;
-            int32_t y = mCurrentTouch.pointers[i].y;
-
-#if DEBUG_HACKS
-            LOGD("JumpyTouchFilter: Point %d (%d, %d)", i, x, y);
-#endif
-
-            // Check if a touch point is too close to another's coordinates
-            bool dropX = false, dropY = false;
-            for (uint32_t j = 0; j < pointerCount; j++) {
-                if (i == j) {
-                    continue;
-                }
-
-                if (abs(x - mCurrentTouch.pointers[j].x) <= jumpyEpsilon) {
-                    dropX = true;
-                    break;
-                }
-
-                if (abs(y - mCurrentTouch.pointers[j].y) <= jumpyEpsilon) {
-                    dropY = true;
-                    break;
-                }
-            }
-            if (! dropX && ! dropY) {
-                continue; // not jumpy
-            }
-
-            // Find a replacement candidate by comparing with older points on the
-            // complementary (non-jumpy) axis.
-            int32_t distance = INT_MIN; // distance to be corrected
-            int32_t replacementIndex = -1;
-
-            if (dropX) {
-                // X looks too close.  Find an older replacement point with a close Y.
-                int32_t smallestDeltaY = INT_MAX;
-                for (uint32_t j = 0; j < pointerCount; j++) {
-                    int32_t deltaY = abs(y - mLastTouch.pointers[j].y);
-                    if (deltaY < smallestDeltaY) {
-                        smallestDeltaY = deltaY;
-                        replacementIndex = j;
-                    }
-                }
-                distance = abs(x - mLastTouch.pointers[replacementIndex].x);
-            } else {
-                // Y looks too close.  Find an older replacement point with a close X.
-                int32_t smallestDeltaX = INT_MAX;
-                for (uint32_t j = 0; j < pointerCount; j++) {
-                    int32_t deltaX = abs(x - mLastTouch.pointers[j].x);
-                    if (deltaX < smallestDeltaX) {
-                        smallestDeltaX = deltaX;
-                        replacementIndex = j;
-                    }
-                }
-                distance = abs(y - mLastTouch.pointers[replacementIndex].y);
-            }
-
-            // If replacing this pointer would correct a worse error than the previous ones
-            // considered, then use this replacement instead.
-            if (distance > badPointerDistance) {
-                badPointerIndex = i;
-                badPointerReplacementIndex = replacementIndex;
-                badPointerDistance = distance;
-            }
-        }
-
-        // Correct the jumpy pointer if one was found.
-        if (badPointerIndex >= 0) {
-#if DEBUG_HACKS
-            LOGD("JumpyTouchFilter: Replacing bad pointer %d with (%d, %d)",
-                    badPointerIndex,
-                    mLastTouch.pointers[badPointerReplacementIndex].x,
-                    mLastTouch.pointers[badPointerReplacementIndex].y);
-#endif
-
-            mCurrentTouch.pointers[badPointerIndex].x =
-                    mLastTouch.pointers[badPointerReplacementIndex].x;
-            mCurrentTouch.pointers[badPointerIndex].y =
-                    mLastTouch.pointers[badPointerReplacementIndex].y;
-            mJumpyTouchFilter.jumpyPointsDropped += 1;
-            return true;
-        }
-    }
-
-    mJumpyTouchFilter.jumpyPointsDropped = 0;
-    return false;
-}
-
-/* Special hack for devices that have bad screen data: aggregate and
- * compute averages of the coordinate data, to reduce the amount of
- * jitter seen by applications. */
-void TouchInputMapper::applyAveragingTouchFilter() {
-    for (uint32_t currentIndex = 0; currentIndex < mCurrentTouch.pointerCount; currentIndex++) {
-        uint32_t id = mCurrentTouch.pointers[currentIndex].id;
-        int32_t x = mCurrentTouch.pointers[currentIndex].x;
-        int32_t y = mCurrentTouch.pointers[currentIndex].y;
-        int32_t pressure;
-        switch (mCalibration.pressureSource) {
-        case Calibration::PRESSURE_SOURCE_PRESSURE:
-            pressure = mCurrentTouch.pointers[currentIndex].pressure;
-            break;
-        case Calibration::PRESSURE_SOURCE_TOUCH:
-            pressure = mCurrentTouch.pointers[currentIndex].touchMajor;
-            break;
-        default:
-            pressure = 1;
-            break;
-        }
-
-        if (mLastTouch.idBits.hasBit(id)) {
-            // Pointer was down before and is still down now.
-            // Compute average over history trace.
-            uint32_t start = mAveragingTouchFilter.historyStart[id];
-            uint32_t end = mAveragingTouchFilter.historyEnd[id];
-
-            int64_t deltaX = x - mAveragingTouchFilter.historyData[end].pointers[id].x;
-            int64_t deltaY = y - mAveragingTouchFilter.historyData[end].pointers[id].y;
-            uint64_t distance = uint64_t(deltaX * deltaX + deltaY * deltaY);
-
-#if DEBUG_HACKS
-            LOGD("AveragingTouchFilter: Pointer id %d - Distance from last sample: %lld",
-                    id, distance);
-#endif
-
-            if (distance < AVERAGING_DISTANCE_LIMIT) {
-                // Increment end index in preparation for recording new historical data.
-                end += 1;
-                if (end > AVERAGING_HISTORY_SIZE) {
-                    end = 0;
-                }
-
-                // If the end index has looped back to the start index then we have filled
-                // the historical trace up to the desired size so we drop the historical
-                // data at the start of the trace.
-                if (end == start) {
-                    start += 1;
-                    if (start > AVERAGING_HISTORY_SIZE) {
-                        start = 0;
-                    }
-                }
-
-                // Add the raw data to the historical trace.
-                mAveragingTouchFilter.historyStart[id] = start;
-                mAveragingTouchFilter.historyEnd[id] = end;
-                mAveragingTouchFilter.historyData[end].pointers[id].x = x;
-                mAveragingTouchFilter.historyData[end].pointers[id].y = y;
-                mAveragingTouchFilter.historyData[end].pointers[id].pressure = pressure;
-
-                // Average over all historical positions in the trace by total pressure.
-                int32_t averagedX = 0;
-                int32_t averagedY = 0;
-                int32_t totalPressure = 0;
-                for (;;) {
-                    int32_t historicalX = mAveragingTouchFilter.historyData[start].pointers[id].x;
-                    int32_t historicalY = mAveragingTouchFilter.historyData[start].pointers[id].y;
-                    int32_t historicalPressure = mAveragingTouchFilter.historyData[start]
-                            .pointers[id].pressure;
-
-                    averagedX += historicalX * historicalPressure;
-                    averagedY += historicalY * historicalPressure;
-                    totalPressure += historicalPressure;
-
-                    if (start == end) {
-                        break;
-                    }
-
-                    start += 1;
-                    if (start > AVERAGING_HISTORY_SIZE) {
-                        start = 0;
-                    }
-                }
-
-                if (totalPressure != 0) {
-                    averagedX /= totalPressure;
-                    averagedY /= totalPressure;
-
-#if DEBUG_HACKS
-                    LOGD("AveragingTouchFilter: Pointer id %d - "
-                            "totalPressure=%d, averagedX=%d, averagedY=%d", id, totalPressure,
-                            averagedX, averagedY);
-#endif
-
-                    mCurrentTouch.pointers[currentIndex].x = averagedX;
-                    mCurrentTouch.pointers[currentIndex].y = averagedY;
-                }
-            } else {
-#if DEBUG_HACKS
-                LOGD("AveragingTouchFilter: Pointer id %d - Exceeded max distance", id);
-#endif
-            }
-        } else {
-#if DEBUG_HACKS
-            LOGD("AveragingTouchFilter: Pointer id %d - Pointer went up", id);
-#endif
-        }
-
-        // Reset pointer history.
-        mAveragingTouchFilter.historyStart[id] = 0;
-        mAveragingTouchFilter.historyEnd[id] = 0;
-        mAveragingTouchFilter.historyData[0].pointers[id].x = x;
-        mAveragingTouchFilter.historyData[0].pointers[id].y = y;
-        mAveragingTouchFilter.historyData[0].pointers[id].pressure = pressure;
     }
 }
 

@@ -144,14 +144,6 @@ public:
         mDisplayInfos.add(displayId, info);
     }
 
-    void setFilterTouchEvents(bool enabled) {
-        mConfig.filterTouchEvents = enabled;
-    }
-
-    void setFilterJumpyTouchEvents(bool enabled) {
-        mConfig.filterJumpyTouchEvents = enabled;
-    }
-
     virtual nsecs_t getVirtualKeyQuietTime() {
         return 0;
     }

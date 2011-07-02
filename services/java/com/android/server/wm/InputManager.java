@@ -551,18 +551,6 @@ public class InputManager {
                     android.Manifest.permission.INJECT_EVENTS, injectorPid, injectorUid)
                     == PackageManager.PERMISSION_GRANTED;
         }
-        
-        @SuppressWarnings("unused")
-        public boolean filterTouchEvents() {
-            return mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_filterTouchEvents);
-        }
-        
-        @SuppressWarnings("unused")
-        public boolean filterJumpyTouchEvents() {
-            return mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_filterJumpyTouchEvents);
-        }
 
         @SuppressWarnings("unused")
         public int getVirtualKeyQuietTimeMillis() {

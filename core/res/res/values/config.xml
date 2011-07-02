@@ -441,18 +441,6 @@
     <!-- Enables swipe versus poly-finger touch disambiguation in the KeyboardView -->
     <bool name="config_swipeDisambiguation">true</bool>
 
-    <!-- Enables special filtering code in the framework for raw touch events
-         from the touch driver.  This code exists for one particular device,
-         and should not be enabled for any others.  Hopefully in the future
-         it will be removed when the lower-level touch driver generates better
-         data. -->
-    <bool name="config_filterTouchEvents">false</bool>
-
-    <!-- Enables special filtering code in the framework for raw touch events
-         from the touch driver. This code exists for one particular device,
-         and should not be enabled for any others. -->
-    <bool name="config_filterJumpyTouchEvents">false</bool>
-
     <!-- Specifies the amount of time to disable virtual keys after the screen is touched
          in order to filter out accidental virtual key presses due to swiping gestures
          or taps near the edge of the display.  May be 0 to disable the feature.
