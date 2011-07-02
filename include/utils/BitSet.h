@@ -44,6 +44,9 @@ struct BitSet32 {
     // Returns true if the bit set does not contain any marked bits.
     inline bool isEmpty() const { return ! value; }
 
+    // Returns true if the bit set does not contain any unmarked bits.
+    inline bool isFull() const { return value == 0xffffffff; }
+
     // Returns true if the specified bit is marked.
     inline bool hasBit(uint32_t n) const { return value & valueForBit(n); }
 

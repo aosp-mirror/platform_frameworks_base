@@ -5403,6 +5403,7 @@ void MultiTouchInputMapper::clearState() {
     mAccumulator.clearSlots(mSlotCount);
     mAccumulator.clearButtons();
     mButtonState = 0;
+    mPointerIdBits.clear();
 
     if (mUsingSlotsProtocol) {
         // Query the driver for the current slot index and use it as the initial slot
@@ -5627,28 +5628,32 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
 
         // Assign pointer id using tracking id if available.
         if (havePointerIds) {
-            int32_t id;
-            if (mUsingSlotsProtocol) {
-                id = inIndex;
-            } else if (fields & Accumulator::FIELD_ABS_MT_TRACKING_ID) {
-                id = inSlot.absMTTrackingId;
-            } else {
-                id = -1;
-            }
+            int32_t id = -1;
+            if (fields & Accumulator::FIELD_ABS_MT_TRACKING_ID) {
+                int32_t trackingId = inSlot.absMTTrackingId;
 
-            if (id >= 0 && id <= MAX_POINTER_ID) {
+                for (BitSet32 idBits(mPointerIdBits); !idBits.isEmpty(); ) {
+                    uint32_t n = idBits.firstMarkedBit();
+                    idBits.clearBit(n);
+
+                    if (mPointerTrackingIdMap[n] == trackingId) {
+                        id = n;
+                    }
+                }
+
+                if (id < 0 && !mPointerIdBits.isFull()) {
+                    id = mPointerIdBits.firstUnmarkedBit();
+                    mPointerIdBits.markBit(id);
+                    mPointerTrackingIdMap[id] = trackingId;
+                }
+            }
+            if (id < 0) {
+                havePointerIds = false;
+                mCurrentTouch.idBits.clear();
+            } else {
                 outPointer.id = id;
                 mCurrentTouch.idToIndex[id] = outCount;
                 mCurrentTouch.idBits.markBit(id);
-            } else {
-                if (id >= 0) {
-#if DEBUG_POINTERS
-                    LOGD("Pointers: Ignoring driver provided slot index or tracking id %d because "
-                            "it is larger than the maximum supported pointer id %d",
-                            id, MAX_POINTER_ID);
-#endif
-                }
-                havePointerIds = false;
             }
         }
 
@@ -5659,6 +5664,8 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
 
     mButtonState = (mButtonState | mAccumulator.buttonDown) & ~mAccumulator.buttonUp;
     mCurrentTouch.buttonState = mButtonState;
+
+    mPointerIdBits = mCurrentTouch.idBits;
 
     syncTouch(when, havePointerIds);
 

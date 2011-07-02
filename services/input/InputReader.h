@@ -1401,6 +1401,10 @@ private:
 
     int32_t mButtonState;
 
+    // Specifies the pointer id bits that are in use, and their associated tracking id.
+    BitSet32 mPointerIdBits;
+    int32_t mPointerTrackingIdMap[MAX_POINTER_ID + 1];
+
     void clearState();
 
     void sync(nsecs_t when);
