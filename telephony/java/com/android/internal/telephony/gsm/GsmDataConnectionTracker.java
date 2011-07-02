@@ -608,16 +608,18 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 if (dcac.dataConnection != null) {
                     dcac.dataConnection.resetRetryCount();
                 }
-
-                Collection<ApnContext> apnList = dcac.getApnListSync();
-                for (ApnContext apnContext : apnList) {
-                    apnContext.setState(State.IDLE);
-                }
             }
         }
 
         // Only check for default APN state
         for (ApnContext apnContext : mApnContexts.values()) {
+            if (apnContext.getState() == State.FAILED) {
+                // By this time, alarms for all failed Apns
+                // should be stopped if any.
+                // Make sure to set the state back to IDLE
+                // so that setup data can happen.
+                apnContext.setState(State.IDLE);
+            }
             if (apnContext.isReady()) {
                 if (apnContext.getState() == State.IDLE) {
                     apnContext.setReason(reason);
