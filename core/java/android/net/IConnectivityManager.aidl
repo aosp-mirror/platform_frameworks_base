@@ -101,7 +101,7 @@ interface IConnectivityManager
 
     void protectVpn(in ParcelFileDescriptor socket);
 
-    String prepareVpn(String packageName);
+    boolean prepareVpn(String oldPackage, String newPackage);
 
     ParcelFileDescriptor establishVpn(in VpnConfig config);
 

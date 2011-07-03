@@ -85,31 +85,45 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     }
 
     /**
-     * Prepare for a VPN application. If the new application is valid,
-     * the previous prepared application is revoked. Since legacy VPN
-     * is not a real application, it uses {@link VpnConfig#LEGACY_VPN}
-     * as its package name. Note that this method does not check if
-     * the applications are the same.
+     * Prepare for a VPN application. This method is designed to solve
+     * race conditions. It first compares the current prepared package
+     * with {@code oldPackage}. If they are the same, the prepared
+     * package is revoked and replaced with {@code newPackage}. If
+     * {@code oldPackage} is {@code null}, the comparison is omitted.
+     * If {@code newPackage} is the same package or {@code null}, the
+     * revocation is omitted. This method returns {@code true} if the
+     * operation is succeeded.
      *
-     * @param packageName The package name of the VPN application.
-     * @return The package name of the current prepared application.
+     * Legacy VPN is handled specially since it is not a real package.
+     * It uses {@link VpnConfig#LEGACY_VPN} as its package name, and
+     * it can be revoked by itself.
+     *
+     * @param oldPackage The package name of the old VPN application.
+     * @param newPackage The package name of the new VPN application.
+     * @return true if the operation is succeeded.
      */
-    public synchronized String prepare(String packageName) {
-        // Return the current prepared application if the new one is null.
-        if (packageName == null) {
-            return mPackageName;
+    public synchronized boolean prepare(String oldPackage, String newPackage) {
+        // Return false if the package does not match.
+        if (oldPackage != null && !oldPackage.equals(mPackageName)) {
+            return false;
         }
 
-        // Only system user can call this method.
+        // Return true if we do not need to revoke.
+        if (newPackage == null ||
+                (newPackage.equals(mPackageName) && !newPackage.equals(VpnConfig.LEGACY_VPN))) {
+            return true;
+        }
+
+        // Only system user can revoke a package.
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("Unauthorized Caller");
         }
 
         // Check the permission of the given package.
         PackageManager pm = mContext.getPackageManager();
-        if (!packageName.equals(VpnConfig.LEGACY_VPN) &&
-                pm.checkPermission(VPN, packageName) != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(packageName + " does not have " + VPN);
+        if (!newPackage.equals(VpnConfig.LEGACY_VPN) &&
+                pm.checkPermission(VPN, newPackage) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(newPackage + " does not have " + VPN);
         }
 
         // Reset the interface and hide the notification.
@@ -131,15 +145,15 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             mLegacyVpnRunner = null;
         }
 
-        Log.i(TAG, "Switched from " + mPackageName + " to " + packageName);
-        mPackageName = packageName;
-        return mPackageName;
+        Log.i(TAG, "Switched from " + mPackageName + " to " + newPackage);
+        mPackageName = newPackage;
+        return true;
     }
 
     /**
      * Establish a VPN network and return the file descriptor of the VPN
      * interface. This methods returns {@code null} if the application is
-     * not prepared or revoked.
+     * revoked or not prepared.
      *
      * @param config The parameters to configure the network.
      * @return The file descriptor of the VPN interface.
@@ -279,19 +293,12 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
      * @param mtpd The arguments to be passed to mtpd.
      */
     public synchronized void doLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
-        // There is nothing to stop if another VPN application is prepared.
-        if (config == null && !mPackageName.equals(VpnConfig.LEGACY_VPN)) {
-            return;
-        }
-
-        // Reset everything. This also checks the caller.
-        prepare(VpnConfig.LEGACY_VPN);
+        // Prepare for the new request. This also checks the caller.
+        prepare(null, VpnConfig.LEGACY_VPN);
 
         // Start a new runner and we are done!
-        if (config != null) {
-            mLegacyVpnRunner = new LegacyVpnRunner(config, racoon, mtpd);
-            mLegacyVpnRunner.start();
-        }
+        mLegacyVpnRunner = new LegacyVpnRunner(config, racoon, mtpd);
+        mLegacyVpnRunner.start();
     }
 
     /**

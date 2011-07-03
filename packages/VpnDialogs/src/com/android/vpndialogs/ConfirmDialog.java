@@ -36,7 +36,7 @@ public class ConfirmDialog extends Activity implements CompoundButton.OnCheckedC
         DialogInterface.OnClickListener, DialogInterface.OnDismissListener {
     private static final String TAG = "VpnConfirm";
 
-    private String mPackageName;
+    private String mPackage;
 
     private IConnectivityManager mService;
 
@@ -47,19 +47,19 @@ public class ConfirmDialog extends Activity implements CompoundButton.OnCheckedC
     protected void onResume() {
         super.onResume();
         try {
-            mPackageName = getCallingPackage();
+            mPackage = getCallingPackage();
 
             mService = IConnectivityManager.Stub.asInterface(
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
 
-            if (mPackageName.equals(mService.prepareVpn(null))) {
+            if (mService.prepareVpn(mPackage, null)) {
                 setResult(RESULT_OK);
                 finish();
                 return;
             }
 
             PackageManager pm = getPackageManager();
-            ApplicationInfo app = pm.getApplicationInfo(mPackageName, 0);
+            ApplicationInfo app = pm.getApplicationInfo(mPackage, 0);
 
             View view = View.inflate(this, R.layout.confirm, null);
             ((ImageView) view.findViewById(R.id.icon)).setImageDrawable(app.loadIcon(pm));
@@ -103,8 +103,7 @@ public class ConfirmDialog extends Activity implements CompoundButton.OnCheckedC
     @Override
     public void onClick(DialogInterface dialog, int which) {
         try {
-            if (which == AlertDialog.BUTTON_POSITIVE &&
-                    mPackageName.equals(mService.prepareVpn(mPackageName))) {
+            if (which == AlertDialog.BUTTON_POSITIVE && mService.prepareVpn(null, mPackage)) {
                 setResult(RESULT_OK);
             }
         } catch (Exception e) {

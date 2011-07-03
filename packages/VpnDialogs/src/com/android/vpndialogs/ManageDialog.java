@@ -125,7 +125,7 @@ public class ManageDialog extends Activity implements Handler.Callback,
             if (which == AlertDialog.BUTTON_POSITIVE) {
                 mConfig.configureIntent.send();
             } else if (which == AlertDialog.BUTTON_NEUTRAL) {
-                mService.prepareVpn(VpnConfig.LEGACY_VPN);
+                mService.prepareVpn(mConfig.packagz, VpnConfig.LEGACY_VPN);
             }
         } catch (Exception e) {
             Log.e(TAG, "onClick", e);

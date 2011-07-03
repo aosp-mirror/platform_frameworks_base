@@ -2485,8 +2485,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * @hide
      */
     @Override
-    public String prepareVpn(String packageName) {
-        return mVpn.prepare(packageName);
+    public boolean prepareVpn(String oldPackage, String newPackage) {
+        return mVpn.prepare(oldPackage, newPackage);
     }
 
     /**
