@@ -2505,6 +2505,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         return mVpn.establish(config);
     }
 
+    /**
+     * Handle a legacy VPN request.
+     * @hide
+     */
+    @Override
+    public void doLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
+        mVpn.doLegacyVpn(config, racoon, mtpd);
+    }
+
     private String getDefaultInterface() {
         if (ConnectivityManager.isNetworkTypeValid(mActiveDefaultNetwork)) {
             NetworkStateTracker tracker = mNetTrackers[mActiveDefaultNetwork];
