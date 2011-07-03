@@ -17,7 +17,8 @@
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="5mm">
 
     <ImageView android:id="@+id/icon"
             android:layout_width="@android:dimen/app_icon_size"
@@ -32,7 +33,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentRight="true"
             android:layout_below="@id/icon"
-            android:padding="2mm"
+            android:padding="3mm"
             android:text="@string/warning"
             android:textSize="18sp"/>
 
@@ -53,9 +54,7 @@
             android:layout_alignParentRight="true"
             android:layout_below="@id/warning"
             android:text="@string/accept"
-
-
-            android:textSize="18sp"
+            android:textSize="20sp"
             android:checked="false"/>
 
 </RelativeLayout>

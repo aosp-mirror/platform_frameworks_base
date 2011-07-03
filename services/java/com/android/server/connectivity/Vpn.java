@@ -198,8 +198,8 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         mCallback.override(config.dnsServers, config.searchDomains);
 
         // Fill more values.
-        config.packageName = mPackageName;
-        config.interfaceName = mInterfaceName;
+        config.packagz = mPackageName;
+        config.interfaze = mInterfaceName;
 
         // Show the notification!
         showNotification(config, label, bitmap);
@@ -234,8 +234,8 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         if (nm != null) {
             String title = (label == null) ? mContext.getString(R.string.vpn_title) :
                     mContext.getString(R.string.vpn_title_long, label);
-            String text = (config.sessionName == null) ? mContext.getString(R.string.vpn_text) :
-                    mContext.getString(R.string.vpn_text_long, config.sessionName);
+            String text = (config.session == null) ? mContext.getString(R.string.vpn_text) :
+                    mContext.getString(R.string.vpn_text_long, config.session);
 
             long identity = Binder.clearCallingIdentity();
             Notification notification = new Notification.Builder(mContext)
@@ -316,7 +316,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             mDaemons = new String[] {"racoon", "mtpd"};
             mArguments = new String[][] {racoon, mtpd};
 
-            mConfig.packageName = VpnConfig.LEGACY_VPN;
+            mConfig.packagz = VpnConfig.LEGACY_VPN;
         }
 
         public void exit() {
@@ -459,7 +459,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                 }
 
                 // Now we are connected. Get the interface.
-                mConfig.interfaceName = SystemProperties.get("vpn.via");
+                mConfig.interfaze = SystemProperties.get("vpn.via");
 
                 // Get the DNS servers if they are not set in config.
                 if (mConfig.dnsServers == null || mConfig.dnsServers.size() == 0) {
@@ -477,12 +477,12 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     checkpoint(false);
 
                     // Check if the interface is gone while we are waiting.
-                    if (jniCheckInterface(mConfig.interfaceName) == 0) {
-                        throw new IllegalStateException(mConfig.interfaceName + " is gone");
+                    if (jniCheckInterface(mConfig.interfaze) == 0) {
+                        throw new IllegalStateException(mConfig.interfaze + " is gone");
                     }
 
                     // Now INetworkManagementEventObserver is watching our back.
-                    mInterfaceName = mConfig.interfaceName;
+                    mInterfaceName = mConfig.interfaze;
                     mCallback.override(mConfig.dnsServers, mConfig.searchDomains);
                     showNotification(mConfig, null, null);
                 }

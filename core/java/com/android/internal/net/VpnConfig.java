@@ -53,15 +53,15 @@ public class VpnConfig implements Parcelable {
         return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
-    public String packageName;
-    public String sessionName;
-    public String interfaceName;
-    public PendingIntent configureIntent;
+    public String packagz;
+    public String interfaze;
+    public String session;
     public int mtu = -1;
     public String addresses;
     public String routes;
     public List<String> dnsServers;
     public List<String> searchDomains;
+    public PendingIntent configureIntent;
     public long startTime = -1;
 
     @Override
@@ -71,15 +71,15 @@ public class VpnConfig implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(packageName);
-        out.writeString(sessionName);
-        out.writeString(interfaceName);
-        out.writeParcelable(configureIntent, flags);
+        out.writeString(packagz);
+        out.writeString(interfaze);
+        out.writeString(session);
         out.writeInt(mtu);
         out.writeString(addresses);
         out.writeString(routes);
         out.writeStringList(dnsServers);
         out.writeStringList(searchDomains);
+        out.writeParcelable(configureIntent, flags);
         out.writeLong(startTime);
     }
 
@@ -88,15 +88,15 @@ public class VpnConfig implements Parcelable {
         @Override
         public VpnConfig createFromParcel(Parcel in) {
             VpnConfig config = new VpnConfig();
-            config.packageName = in.readString();
-            config.sessionName = in.readString();
-            config.interfaceName = in.readString();
-            config.configureIntent = in.readParcelable(null);
+            config.packagz = in.readString();
+            config.interfaze = in.readString();
+            config.session = in.readString();
             config.mtu = in.readInt();
             config.addresses = in.readString();
             config.routes = in.readString();
             config.dnsServers = in.createStringArrayList();
             config.searchDomains = in.createStringArrayList();
+            config.configureIntent = in.readParcelable(null);
             config.startTime = in.readLong();
             return config;
         }

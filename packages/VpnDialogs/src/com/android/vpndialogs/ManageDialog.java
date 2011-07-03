@@ -65,14 +65,14 @@ public class ManageDialog extends Activity implements Handler.Callback,
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
 
             View view = View.inflate(this, R.layout.manage, null);
-            if (mConfig.sessionName != null) {
-                ((TextView) view.findViewById(R.id.session)).setText(mConfig.sessionName);
+            if (mConfig.session != null) {
+                ((TextView) view.findViewById(R.id.session)).setText(mConfig.session);
             }
             mDuration = (TextView) view.findViewById(R.id.duration);
             mDataTransmitted = (TextView) view.findViewById(R.id.data_transmitted);
             mDataReceived = (TextView) view.findViewById(R.id.data_received);
 
-            if (mConfig.packageName.equals(VpnConfig.LEGACY_VPN)) {
+            if (mConfig.packagz.equals(VpnConfig.LEGACY_VPN)) {
                 mDialog = new AlertDialog.Builder(this)
                         .setIcon(android.R.drawable.ic_dialog_info)
                         .setTitle(R.string.legacy_title)
@@ -82,7 +82,7 @@ public class ManageDialog extends Activity implements Handler.Callback,
                         .create();
             } else {
                 PackageManager pm = getPackageManager();
-                ApplicationInfo app = pm.getApplicationInfo(mConfig.packageName, 0);
+                ApplicationInfo app = pm.getApplicationInfo(mConfig.packagz, 0);
 
                 mDialog = new AlertDialog.Builder(this)
                         .setIcon(app.loadIcon(pm))
@@ -169,7 +169,7 @@ public class ManageDialog extends Activity implements Handler.Callback,
         try {
             // See dev_seq_printf_stats() in net/core/dev.c.
             in = new DataInputStream(new FileInputStream("/proc/net/dev"));
-            String prefix = mConfig.interfaceName + ':';
+            String prefix = mConfig.interfaze + ':';
 
             while (true) {
                 String line = in.readLine().trim();
