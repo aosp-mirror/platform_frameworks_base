@@ -104,4 +104,6 @@ interface IConnectivityManager
     String prepareVpn(String packageName);
 
     ParcelFileDescriptor establishVpn(in VpnConfig config);
+
+    void doLegacyVpn(in VpnConfig config, in String[] racoon, in String[] mtpd);
 }
