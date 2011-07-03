@@ -44,7 +44,6 @@ import android.net.NetworkUtils;
 import android.net.Proxy;
 import android.net.ProxyProperties;
 import android.net.RouteInfo;
-import android.net.vpn.VpnManager;
 import android.net.wifi.WifiStateTracker;
 import android.os.Binder;
 import android.os.FileUtils;
@@ -496,10 +495,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mSettingsObserver.observe(mContext);
 
         loadGlobalProxy();
-
-        VpnManager.startVpnService(context);
     }
-
 
     /**
      * Sets the preferred network.
