@@ -1971,9 +1971,14 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Load the given data into the WebView using a 'data' scheme URL. Content
-     * loaded in this way does not have the ability to load content from the
-     * network.
+     * Load the given data into the WebView using a 'data' scheme URL.
+     * <p>
+     * Note that JavaScript's same origin policy means that script running in a
+     * page loaded using this method will be unable to access content loaded
+     * using any scheme other than 'data', including 'http(s)'. To avoid this
+     * restriction, use {@link
+     * #loadDataWithBaseURL(String,String,String,String,String)
+     * loadDataWithBaseURL()} with an appropriate base URL.
      * <p>
      * If the value of the encoding parameter is 'base64', then the data must
      * be encoded as base64. Otherwise, the data must use ASCII encoding for
@@ -2000,15 +2005,15 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Load the given data into the WebView, use the provided URL as the base
-     * URL for the content. The base URL is the URL that represents the page
-     * that is loaded through this interface. As such, it is used to resolve any
-     * relative URLs. The historyUrl is used for the history entry.
+     * Load the given data into the WebView, using baseUrl as the base URL for
+     * the content. The base URL is used both to resolve relative URLs and when
+     * applying JavaScript's same origin policy. The historyUrl is used for the
+     * history entry.
      * <p>
      * Note that content specified in this way can access local device files
      * (via 'file' scheme URLs) only if baseUrl specifies a scheme other than
      * 'http', 'https', 'ftp', 'ftps', 'about' or 'javascript'.
-     * @param baseUrl Url to resolve relative paths with, if null defaults to
+     * @param baseUrl URL to use as the page's base URL. If null defaults to
      *            "about:blank"
      * @param data A String of data in the given encoding.
      * @param mimeType The MIMEType of the data. i.e. text/html. If null,
