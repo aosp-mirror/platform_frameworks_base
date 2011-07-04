@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.SystemClock;
 
 import java.util.List;
 
@@ -43,14 +42,14 @@ public class VpnConfig implements Parcelable {
         return intent;
     }
 
-    public static PendingIntent getIntentForNotification(Context context, VpnConfig config) {
-        config.startTime = SystemClock.elapsedRealtime();
+    public static PendingIntent getIntentForStatusPanel(Context context, VpnConfig config) {
         Intent intent = new Intent();
         intent.setClassName("com.android.vpndialogs", "com.android.vpndialogs.ManageDialog");
         intent.putExtra("config", config);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY |
                 Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        return PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        return PendingIntent.getActivity(context, 0, intent, (config == null) ?
+                PendingIntent.FLAG_NO_CREATE : PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
     public String packagz;

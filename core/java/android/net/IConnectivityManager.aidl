@@ -23,6 +23,7 @@ import android.net.ProxyProperties;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 
+import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 
 /**
@@ -105,5 +106,7 @@ interface IConnectivityManager
 
     ParcelFileDescriptor establishVpn(in VpnConfig config);
 
-    void doLegacyVpn(in VpnConfig config, in String[] racoon, in String[] mtpd);
+    void startLegacyVpn(in VpnConfig config, in String[] racoon, in String[] mtpd);
+
+    LegacyVpnInfo getLegacyVpnInfo();
 }
