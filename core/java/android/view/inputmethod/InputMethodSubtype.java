@@ -160,10 +160,10 @@ public final class InputMethodSubtype implements Parcelable {
         if (mSubtypeNameResId == 0) {
             return localeStr;
         }
-        final String subtypeName = context.getPackageManager().getText(
-                packageName, mSubtypeNameResId, appInfo).toString();
+        final CharSequence subtypeName = context.getPackageManager().getText(
+                packageName, mSubtypeNameResId, appInfo);
         if (!TextUtils.isEmpty(subtypeName)) {
-            return String.format(subtypeName, localeStr);
+            return String.format(subtypeName.toString(), localeStr);
         } else {
             return localeStr;
         }
