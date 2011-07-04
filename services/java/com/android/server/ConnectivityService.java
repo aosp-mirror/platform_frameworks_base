@@ -64,6 +64,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseIntArray;
 
+import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.internal.telephony.Phone;
 import com.android.server.connectivity.Tethering;
@@ -2469,8 +2470,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     /**
      * Protect a socket from VPN routing rules. This method is used by
-     * VpnBuilder and not available in ConnectivityManager. Permission
-     * checks are done in Vpn class.
+     * VpnBuilder and not available in ConnectivityManager. Permissions
+     * are checked in Vpn class.
      * @hide
      */
     @Override
@@ -2480,8 +2481,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     /**
      * Prepare for a VPN application. This method is used by VpnDialogs
-     * and not available in ConnectivityManager. Permission checks are
-     * done in Vpn class.
+     * and not available in ConnectivityManager. Permissions are checked
+     * in Vpn class.
      * @hide
      */
     @Override
@@ -2492,8 +2493,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     /**
      * Configure a TUN interface and return its file descriptor. Parameters
      * are encoded and opaque to this class. This method is used by VpnBuilder
-     * and not available in ConnectivityManager. Permission checks are done
-     * in Vpn class.
+     * and not available in ConnectivityManager. Permissions are checked in
+     * Vpn class.
      * @hide
      */
     @Override
@@ -2502,12 +2503,25 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     /**
-     * Handle a legacy VPN request.
+     * Start legacy VPN and return an intent to VpnDialogs. This method is
+     * used by VpnSettings and not available in ConnectivityManager.
+     * Permissions are checked in Vpn class.
      * @hide
      */
     @Override
-    public void doLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
-        mVpn.doLegacyVpn(config, racoon, mtpd);
+    public void startLegacyVpn(VpnConfig config, String[] racoon, String[] mtpd) {
+        mVpn.startLegacyVpn(config, racoon, mtpd);
+    }
+
+    /**
+     * Return the information of the ongoing legacy VPN. This method is used
+     * by VpnSettings and not available in ConnectivityManager. Permissions
+     * are checked in Vpn class.
+     * @hide
+     */
+    @Override
+    public LegacyVpnInfo getLegacyVpnInfo() {
+        return mVpn.getLegacyVpnInfo();
     }
 
     private String getDefaultInterface() {
