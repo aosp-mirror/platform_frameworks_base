@@ -92,9 +92,19 @@ final class SearchBoxImpl implements SearchBox {
             = "if (window.chrome && window.chrome.searchBox &&"
             + "  window.chrome.searchBox.on%1$s) { window.chrome.searchBox.on%1$s(); }";
 
+    private static final String IS_SUPPORTED_SCRIPT
+            = "if (window.searchBoxJavaBridge_) {"
+            + "  if (window.chrome && window.chrome.searchBox && "
+            + "  window.chrome.searchBox.onsubmit) {"
+            + "    window.searchBoxJavaBridge_.isSupportedCallback(true);"
+            + "  } else {"
+            + "    window.searchBoxJavaBridge_.isSupportedCallback(false);"
+            + "  }}";
+
     private final List<SearchBoxListener> mListeners;
     private final WebViewCore mWebViewCore;
     private final CallbackProxy mCallbackProxy;
+    private IsSupportedCallback mSupportedCallback;
 
     SearchBoxImpl(WebViewCore webViewCore, CallbackProxy callbackProxy) {
         mListeners = new ArrayList<SearchBoxListener>();
@@ -170,6 +180,25 @@ final class SearchBoxImpl implements SearchBox {
     public void removeSearchBoxListener(SearchBoxListener l) {
         synchronized (mListeners) {
             mListeners.remove(l);
+        }
+    }
+
+    @Override
+    public void isSupported(IsSupportedCallback callback) {
+        mSupportedCallback = callback;
+        dispatchJs(IS_SUPPORTED_SCRIPT);
+    }
+
+    // Called by Javascript through the Java bridge.
+    public void isSupportedCallback(boolean isSupported) {
+        mCallbackProxy.onIsSupportedCallback(isSupported);
+    }
+
+    public void handleIsSupportedCallback(boolean isSupported) {
+        IsSupportedCallback callback = mSupportedCallback;
+        mSupportedCallback = null;
+        if (callback != null) {
+            callback.searchBoxIsSupported(isSupported);
         }
     }
 

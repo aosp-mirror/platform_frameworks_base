@@ -83,10 +83,19 @@ public interface SearchBox {
     void removeSearchBoxListener(SearchBoxListener l);
 
     /**
+     * Indicates if the searchbox API is supported in the current page.
+     */
+    void isSupported(IsSupportedCallback callback);
+
+    /**
      * Listeners (if any) will be called on the thread that created the
      * webview.
      */
     interface SearchBoxListener {
         void onSuggestionsReceived(String query, List<String> suggestions);
+    }
+
+    interface IsSupportedCallback {
+        void searchBoxIsSupported(boolean supported);
     }
 }

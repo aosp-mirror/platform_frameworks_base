@@ -119,6 +119,7 @@ class CallbackProxy extends Handler {
     private static final int NOTIFY_SEARCHBOX_LISTENERS          = 139;
     private static final int AUTO_LOGIN                          = 140;
     private static final int CLIENT_CERT_REQUEST                 = 141;
+    private static final int SEARCHBOX_IS_SUPPORTED_CALLBACK     = 142;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -796,13 +797,14 @@ class CallbackProxy extends Handler {
                     mWebChromeClient.setInstallableWebApp();
                 }
                 break;
-            case NOTIFY_SEARCHBOX_LISTENERS:
+            case NOTIFY_SEARCHBOX_LISTENERS: {
                 SearchBoxImpl searchBox = (SearchBoxImpl) mWebView.getSearchBox();
 
                 @SuppressWarnings("unchecked")
                 List<String> suggestions = (List<String>) msg.obj;
                 searchBox.handleSuggestions(msg.getData().getString("query"), suggestions);
                 break;
+            }
             case AUTO_LOGIN: {
                 if (mWebViewClient != null) {
                     String realm = msg.getData().getString("realm");
@@ -811,6 +813,12 @@ class CallbackProxy extends Handler {
                     mWebViewClient.onReceivedLoginRequest(mWebView, realm,
                             account, args);
                 }
+                break;
+            }
+            case SEARCHBOX_IS_SUPPORTED_CALLBACK: {
+                SearchBoxImpl searchBox = (SearchBoxImpl) mWebView.getSearchBox();
+                Boolean supported = (Boolean) msg.obj;
+                searchBox.handleIsSupportedCallback(supported);
                 break;
             }
         }
@@ -1625,6 +1633,12 @@ class CallbackProxy extends Handler {
         msg.obj = suggestions;
         msg.getData().putString("query", query);
 
+        sendMessage(msg);
+    }
+
+    void onIsSupportedCallback(boolean isSupported) {
+        Message msg = obtainMessage(SEARCHBOX_IS_SUPPORTED_CALLBACK);
+        msg.obj = new Boolean(isSupported);
         sendMessage(msg);
     }
 }
