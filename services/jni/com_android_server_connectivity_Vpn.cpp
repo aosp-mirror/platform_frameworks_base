@@ -289,9 +289,9 @@ static int check_interface(const char *name)
     return ifr4.ifr_flags;
 }
 
-static int bind_to_interface(int fd, const char *name)
+static int bind_to_interface(int socket, const char *name)
 {
-    if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, name, strlen(name))) {
+    if (setsockopt(socket, SOL_SOCKET, SO_BINDTODEVICE, name, strlen(name))) {
         LOGE("Cannot bind socket to %s: %s", name, strerror(errno));
         return SYSTEM_ERROR;
     }
@@ -358,7 +358,7 @@ error:
     return -1;
 }
 
-static jstring getInterfaceName(JNIEnv *env, jobject thiz, jint tun)
+static jstring getName(JNIEnv *env, jobject thiz, jint tun)
 {
     char name[IFNAMSIZ];
     if (get_interface_name(name, tun) < 0) {
@@ -368,7 +368,7 @@ static jstring getInterfaceName(JNIEnv *env, jobject thiz, jint tun)
     return env->NewStringUTF(name);
 }
 
-static void resetInterface(JNIEnv *env, jobject thiz, jstring jName)
+static void reset(JNIEnv *env, jobject thiz, jstring jName)
 {
     const char *name = jName ? env->GetStringUTFChars(jName, NULL) : NULL;
     if (!name) {
@@ -381,7 +381,7 @@ static void resetInterface(JNIEnv *env, jobject thiz, jstring jName)
     env->ReleaseStringUTFChars(jName, name);
 }
 
-static jint checkInterface(JNIEnv *env, jobject thiz, jstring jName)
+static jint check(JNIEnv *env, jobject thiz, jstring jName)
 {
     const char *name = jName ? env->GetStringUTFChars(jName, NULL) : NULL;
     if (!name) {
@@ -393,14 +393,14 @@ static jint checkInterface(JNIEnv *env, jobject thiz, jstring jName)
     return flags;
 }
 
-static void protectSocket(JNIEnv *env, jobject thiz, jint fd, jstring jName)
+static void protect(JNIEnv *env, jobject thiz, jint socket, jstring jName)
 {
     const char *name = jName ? env->GetStringUTFChars(jName, NULL) : NULL;
     if (!name) {
         jniThrowNullPointerException(env, "name");
         return;
     }
-    if (bind_to_interface(fd, name) < 0) {
+    if (bind_to_interface(socket, name) < 0) {
         throwException(env, SYSTEM_ERROR, "Cannot protect socket");
     }
     env->ReleaseStringUTFChars(jName, name);
@@ -410,10 +410,10 @@ static void protectSocket(JNIEnv *env, jobject thiz, jint fd, jstring jName)
 
 static JNINativeMethod gMethods[] = {
     {"jniConfigure", "(ILjava/lang/String;Ljava/lang/String;)I", (void *)configure},
-    {"jniGetInterfaceName", "(I)Ljava/lang/String;", (void *)getInterfaceName},
-    {"jniResetInterface", "(Ljava/lang/String;)V", (void *)resetInterface},
-    {"jniCheckInterface", "(Ljava/lang/String;)I", (void *)checkInterface},
-    {"jniProtectSocket", "(ILjava/lang/String;)V", (void *)protectSocket},
+    {"jniGetName", "(I)Ljava/lang/String;", (void *)getName},
+    {"jniReset", "(Ljava/lang/String;)V", (void *)reset},
+    {"jniCheck", "(Ljava/lang/String;)I", (void *)check},
+    {"jniProtect", "(ILjava/lang/String;)V", (void *)protect},
 };
 
 int register_android_server_connectivity_Vpn(JNIEnv *env)

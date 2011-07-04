@@ -55,8 +55,8 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     private final Context mContext;
     private final VpnCallback mCallback;
 
-    private String mPackageName = VpnConfig.LEGACY_VPN;
-    private String mInterfaceName;
+    private String mPackage = VpnConfig.LEGACY_VPN;
+    private String mInterface;
     private LegacyVpnRunner mLegacyVpnRunner;
 
     public Vpn(Context context, VpnCallback callback) {
@@ -71,10 +71,10 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
      * @param socket The socket to be bound.
      * @param name The name of the interface.
      */
-    public void protect(ParcelFileDescriptor socket, String name) {
+    public void protect(ParcelFileDescriptor socket, String interfaze) {
         try {
             mContext.enforceCallingPermission(VPN, "protect");
-            jniProtectSocket(socket.getFd(), name);
+            jniProtect(socket.getFd(), interfaze);
         } finally {
             try {
                 socket.close();
@@ -104,13 +104,13 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
      */
     public synchronized boolean prepare(String oldPackage, String newPackage) {
         // Return false if the package does not match.
-        if (oldPackage != null && !oldPackage.equals(mPackageName)) {
+        if (oldPackage != null && !oldPackage.equals(mPackage)) {
             return false;
         }
 
         // Return true if we do not need to revoke.
         if (newPackage == null ||
-                (newPackage.equals(mPackageName) && !newPackage.equals(VpnConfig.LEGACY_VPN))) {
+                (newPackage.equals(mPackage) && !newPackage.equals(VpnConfig.LEGACY_VPN))) {
             return true;
         }
 
@@ -127,17 +127,17 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
 
         // Reset the interface and hide the notification.
-        if (mInterfaceName != null) {
-            jniResetInterface(mInterfaceName);
+        if (mInterface != null) {
+            jniReset(mInterface);
             mCallback.restore();
             hideNotification();
-            mInterfaceName = null;
+            mInterface = null;
         }
 
         // Send out the broadcast or stop LegacyVpnRunner.
-        if (!mPackageName.equals(VpnConfig.LEGACY_VPN)) {
+        if (!mPackage.equals(VpnConfig.LEGACY_VPN)) {
             Intent intent = new Intent(VpnConfig.ACTION_VPN_REVOKED);
-            intent.setPackage(mPackageName);
+            intent.setPackage(mPackage);
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
             mContext.sendBroadcast(intent);
         } else if (mLegacyVpnRunner != null) {
@@ -145,8 +145,8 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             mLegacyVpnRunner = null;
         }
 
-        Log.i(TAG, "Switched from " + mPackageName + " to " + newPackage);
-        mPackageName = newPackage;
+        Log.i(TAG, "Switched from " + mPackage + " to " + newPackage);
+        mPackage = newPackage;
         return true;
     }
 
@@ -166,7 +166,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         PackageManager pm = mContext.getPackageManager();
         ApplicationInfo app = null;
         try {
-            app = pm.getApplicationInfo(mPackageName, 0);
+            app = pm.getApplicationInfo(mPackage, 0);
         } catch (Exception e) {
             return null;
         }
@@ -191,17 +191,17 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
 
         // Configure the interface. Abort if any of these steps fails.
-        ParcelFileDescriptor descriptor = ParcelFileDescriptor.adoptFd(
+        ParcelFileDescriptor tun = ParcelFileDescriptor.adoptFd(
                 jniConfigure(config.mtu, config.addresses, config.routes));
         try {
-            String name = jniGetInterfaceName(descriptor.getFd());
-            if (mInterfaceName != null && !mInterfaceName.equals(name)) {
-                jniResetInterface(mInterfaceName);
+            String interfaze = jniGetName(tun.getFd());
+            if (mInterface != null && !mInterface.equals(interfaze)) {
+                jniReset(mInterface);
             }
-            mInterfaceName = name;
+            mInterface = interfaze;
         } catch (RuntimeException e) {
             try {
-                descriptor.close();
+                tun.close();
             } catch (Exception ex) {
                 // ignore
             }
@@ -212,32 +212,32 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         mCallback.override(config.dnsServers, config.searchDomains);
 
         // Fill more values.
-        config.packagz = mPackageName;
-        config.interfaze = mInterfaceName;
+        config.packagz = mPackage;
+        config.interfaze = mInterface;
 
         // Show the notification!
         showNotification(config, label, bitmap);
-        return descriptor;
+        return tun;
     }
 
     // INetworkManagementEventObserver.Stub
-    public void interfaceStatusChanged(String name, boolean up) {
+    public void interfaceStatusChanged(String interfaze, boolean up) {
     }
 
     // INetworkManagementEventObserver.Stub
-    public void interfaceLinkStateChanged(String name, boolean up) {
+    public void interfaceLinkStateChanged(String interfaze, boolean up) {
     }
 
     // INetworkManagementEventObserver.Stub
-    public void interfaceAdded(String name) {
+    public void interfaceAdded(String interfaze) {
     }
 
     // INetworkManagementEventObserver.Stub
-    public synchronized void interfaceRemoved(String name) {
-        if (name.equals(mInterfaceName) && jniCheckInterface(name) == 0) {
+    public synchronized void interfaceRemoved(String interfaze) {
+        if (interfaze.equals(mInterface) && jniCheck(interfaze) == 0) {
             mCallback.restore();
             hideNotification();
-            mInterfaceName = null;
+            mInterface = null;
         }
     }
 
@@ -278,10 +278,10 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     }
 
     private native int jniConfigure(int mtu, String addresses, String routes);
-    private native String jniGetInterfaceName(int fd);
-    private native void jniResetInterface(String name);
-    private native int jniCheckInterface(String name);
-    private native void jniProtectSocket(int fd, String name);
+    private native String jniGetName(int tun);
+    private native void jniReset(String interfaze);
+    private native int jniCheck(String interfaze);
+    private native void jniProtect(int socket, String interfaze);
 
     /**
      * Handle a legacy VPN request. This method stops the daemons and restart
@@ -484,12 +484,12 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     checkpoint(false);
 
                     // Check if the interface is gone while we are waiting.
-                    if (jniCheckInterface(mConfig.interfaze) == 0) {
+                    if (jniCheck(mConfig.interfaze) == 0) {
                         throw new IllegalStateException(mConfig.interfaze + " is gone");
                     }
 
                     // Now INetworkManagementEventObserver is watching our back.
-                    mInterfaceName = mConfig.interfaze;
+                    mInterface = mConfig.interfaze;
                     mCallback.override(mConfig.dnsServers, mConfig.searchDomains);
                     showNotification(mConfig, null, null);
                 }
