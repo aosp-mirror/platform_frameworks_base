@@ -53,18 +53,6 @@ public class VoicemailContract {
     /** The authority used by the voicemail provider. */
     public static final String AUTHORITY = "com.android.voicemail";
     /**
-     * URI to insert/retrieve all voicemails.
-     * @deprecated
-     */
-    public static final Uri CONTENT_URI =
-            Uri.parse("content://" + AUTHORITY + "/voicemail");
-    /**
-     * URI to insert/retrieve voicemails by a given voicemail source.
-     * @deprecated
-     */
-    public static final Uri CONTENT_URI_SOURCE =
-            Uri.parse("content://" + AUTHORITY + "/voicemail/source/");
-    /**
      * Parameter key used in the URI to specify the voicemail source package name.
      * <p> This field must be set in all requests that originate from a voicemail source.
      */
@@ -80,23 +68,15 @@ public class VoicemailContract {
      */
     public static final String EXTRA_SELF_CHANGE = "com.android.voicemail.extra.SELF_CHANGE";
 
-    /**
-     * The mime type for a collection of voicemails.
-     * @deprecated */
-    public static final String DIR_TYPE = "vnd.android.cursor.dir/voicemails";
-
     /** Defines fields exposed through the /voicemail path of this content provider. */
     public static final class Voicemails implements BaseColumns {
         /** Not instantiable. */
         private Voicemails() {
         }
 
-        /** URI to insert/retrieve voicemails by a given voicemail source. */
+        /** URI to insert/retrieve voicemails. */
         public static final Uri CONTENT_URI =
             Uri.parse("content://" + AUTHORITY + "/voicemail");
-        /** URI to insert/retrieve voicemails by a given voicemail source. */
-        public static final Uri CONTENT_URI_SOURCE =
-                Uri.parse("content://" + AUTHORITY + "/voicemail/source/");
 
         /** The mime type for a collection of voicemails. */
         public static final String DIR_TYPE = "vnd.android.cursor.dir/voicemails";
