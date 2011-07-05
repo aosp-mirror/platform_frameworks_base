@@ -68,6 +68,12 @@ public class VoicemailContract {
      */
     public static final String EXTRA_SELF_CHANGE = "com.android.voicemail.extra.SELF_CHANGE";
 
+    /**
+     * Name of the source package field, which must be same across all voicemail related tables.
+     * @hide
+     */
+    public static final String SOURCE_PACKAGE_FIELD = "source_package";
+
     /** Defines fields exposed through the /voicemail path of this content provider. */
     public static final class Voicemails implements BaseColumns {
         /** Not instantiable. */
@@ -118,7 +124,7 @@ public class VoicemailContract {
          * Package name of the source application that inserted the voicemail.
          * <P>Type: TEXT</P>
          */
-        public static final String SOURCE_PACKAGE = "source_package";
+        public static final String SOURCE_PACKAGE = SOURCE_PACKAGE_FIELD;
         /**
          * Application-specific data available to the source application that
          * inserted the voicemail. This is typically used to store the source
@@ -171,7 +177,7 @@ public class VoicemailContract {
          * The package name of the voicemail source. There can only be a one entry per source.
          * <P>Type: TEXT</P>
          */
-        public static final String SOURCE_PACKAGE = "source_package";
+        public static final String SOURCE_PACKAGE = SOURCE_PACKAGE_FIELD;
         /**
          * The URI to call to invoke source specific voicemail settings screen. On a user request
          * to setup voicemail an intent with action VIEW with this URI will be fired by the system.
