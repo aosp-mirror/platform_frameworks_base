@@ -316,6 +316,10 @@ int androidSetThreadSchedulingGroup(pid_t tid, int grp)
 #if defined(HAVE_PTHREADS)
     pthread_once(&gDoSchedulingGroupOnce, checkDoSchedulingGroup);
     if (gDoSchedulingGroup) {
+        // set_sched_policy does not support tid == 0
+        if (tid == 0) {
+            tid = androidGetTid();
+        }
         if (set_sched_policy(tid, (grp == ANDROID_TGROUP_BG_NONINTERACT) ?
                                           SP_BACKGROUND : SP_FOREGROUND)) {
             return PERMISSION_DENIED;
