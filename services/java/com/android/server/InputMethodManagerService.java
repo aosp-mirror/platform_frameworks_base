@@ -1623,8 +1623,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (lastImi == null) return null;
             try {
                 final int lastSubtypeHash = Integer.valueOf(lastIme.second);
-                return lastImi.getSubtypeAt(getSubtypeIdFromHashCode(
-                        lastImi, lastSubtypeHash));
+                final int lastSubtypeId = getSubtypeIdFromHashCode(lastImi, lastSubtypeHash);
+                if (lastSubtypeId < 0 || lastSubtypeId >= lastImi.getSubtypeCount()) {
+                    return null;
+                }
+                return lastImi.getSubtypeAt(lastSubtypeId);
             } catch (NumberFormatException e) {
                 return null;
             }
