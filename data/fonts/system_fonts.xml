@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    System Fonts
+
+    This file lists the font families that will be used by default for all supported glyphs.
+    Each entry consists of a family, various names that are supported by that family, and
+    up to four font files. The font files are listed in the order of the styles which they
+    support: regular, bold, italic and bold-italic. If less than four styles are listed, then
+    the styles with no associated font file will be supported by the other font files listed.
+
+    The first family is also the default font, which handles font request that have not specified
+    specific font names.
+
+    Any glyph that is not handled by the system fonts will cause a search of the fallback fonts.
+    The default fallback fonts are specified in the file /system/etc/fallback_fonts.xml, and there
+    is an optional file which may be supplied by vendors to specify other fallback fonts to use
+    in /vendor/etc/fallback_fonts.xml.
+-->
+<familyset>
+
+    <family>
+        <nameset>
+            <name>sans-serif</name>
+            <name>arial</name>
+            <name>helvetica</name>
+            <name>tahoma</name>
+            <name>verdana</name>
+        </nameset>
+        <fileset>
+            <file>DroidSans.ttf</file>
+            <file>DroidSans-Bold.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
+            <name>serif</name>
+            <name>times</name>
+            <name>times new roman</name>
+            <name>palatino</name>
+            <name>georgia</name>
+            <name>baskerville</name>
+            <name>goudy</name>
+            <name>fantasy</name>
+            <name>cursive</name>
+            <name>ITC Stone Serif</name>
+        </nameset>
+        <fileset>
+            <file>DroidSerif-Regular.ttf</file>
+            <file>DroidSerif-Bold.ttf</file>
+            <file>DroidSerif-Italic.ttf</file>
+            <file>DroidSerif-BoldItalic.ttf</file>
+        </fileset>
+    </family>
+
+    <family>
+        <nameset>
+            <name>monospace</name>
+            <name>courier</name>
+            <name>courier new</name>
+            <name>monaco</name>
+        </nameset>
+        <fileset>
+            <file>DroidSansMono.ttf</file>
+        </fileset>
+    </family>
+
+</familyset>
