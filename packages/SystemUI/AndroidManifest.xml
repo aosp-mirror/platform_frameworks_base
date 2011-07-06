@@ -30,10 +30,6 @@
         <service android:name=".screenshot.TakeScreenshotService"
             android:exported="false" />
 
-        <activity android:name=".usb.UsbPreferenceActivity"
-             android:theme="@*android:style/Theme.Holo.Dialog.Alert"
-             android:excludeFromRecents="true">
-        </activity>
         <activity android:name=".usb.UsbStorageActivity"
                 android:excludeFromRecents="true">
         </activity>
