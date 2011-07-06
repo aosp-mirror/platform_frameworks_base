@@ -326,7 +326,7 @@ page.title=Android Open Accessory Development Kit
     <li>To open the firmware code (a sketch), click <strong>File &gt; Open</strong> and select
     <code>firmware/demokit/demokit.pde</code>.</li>
 
-    <li>Click <strong>Sketch &gt; Compile/Verify</strong> to ensure that the sketch has no
+    <li>Click <strong>Sketch &gt; Verify/Compile</strong> to ensure that the sketch has no
     errors.</li>
 
     <li>Select <strong>File &gt; Upload to I/O Board</strong>. When Arduino outputs <strong>Done
@@ -356,7 +356,8 @@ page.title=Android Open Accessory Development Kit
     <li>In the <strong>Project name:</strong> field, type DemoKit.</li>
 
     <li>Choose <strong>Create project from existing source</strong>, click <strong>Browse</strong>,
-    select the <code>app</code> directory, and click <strong>Finish</strong>.</li>
+    select the <code>app</code> directory, click <strong>Open</strong> to close that dialog and then
+    click <strong>Finish</strong>.</li>
 
     <li>For Build Target, select <strong>Google APIs</strong> (Platform 2.3.3, API Level 10).
 
