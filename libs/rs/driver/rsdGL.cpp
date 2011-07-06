@@ -99,9 +99,8 @@ static void printEGLConfiguration(EGLDisplay dpy, EGLConfig config) {
 
     for (size_t j = 0; j < sizeof(names) / sizeof(names[0]); j++) {
         EGLint value = -1;
-        EGLint returnVal = eglGetConfigAttrib(dpy, config, names[j].attribute, &value);
-        EGLint error = eglGetError();
-        if (returnVal && error == EGL_SUCCESS) {
+        EGLBoolean returnVal = eglGetConfigAttrib(dpy, config, names[j].attribute, &value);
+        if (returnVal) {
             LOGV(" %s: %d (0x%x)", names[j].name, value, value);
         }
     }
@@ -169,6 +168,24 @@ bool rsdGLInit(const Context *rsc) {
     configAttribsPtr[1] = EGL_OPENGL_ES2_BIT;
     configAttribsPtr += 2;
 
+    configAttribsPtr[0] = EGL_RED_SIZE;
+    configAttribsPtr[1] = 8;
+    configAttribsPtr += 2;
+
+    configAttribsPtr[0] = EGL_GREEN_SIZE;
+    configAttribsPtr[1] = 8;
+    configAttribsPtr += 2;
+
+    configAttribsPtr[0] = EGL_BLUE_SIZE;
+    configAttribsPtr[1] = 8;
+    configAttribsPtr += 2;
+
+    if (rsc->mUserSurfaceConfig.alphaMin > 0) {
+        configAttribsPtr[0] = EGL_ALPHA_SIZE;
+        configAttribsPtr[1] = rsc->mUserSurfaceConfig.alphaMin;
+        configAttribsPtr += 2;
+    }
+
     if (rsc->mUserSurfaceConfig.depthMin > 0) {
         configAttribsPtr[0] = EGL_DEPTH_SIZE;
         configAttribsPtr[1] = rsc->mUserSurfaceConfig.depthMin;
@@ -191,16 +208,53 @@ bool rsdGLInit(const Context *rsc) {
     eglInitialize(dc->gl.egl.display, &dc->gl.egl.majorVersion, &dc->gl.egl.minorVersion);
     checkEglError("eglInitialize");
 
-    PixelFormat pf = PIXEL_FORMAT_RGBA_8888;
-    if (rsc->mUserSurfaceConfig.alphaMin == 0) {
-        pf = PIXEL_FORMAT_RGBX_8888;
+    EGLBoolean ret;
+
+    EGLint numConfigs = -1, n = 0;
+    ret = eglChooseConfig(dc->gl.egl.display, configAttribs, 0, 0, &numConfigs);
+    checkEglError("eglGetConfigs", ret);
+
+    if (numConfigs) {
+        EGLConfig* const configs = new EGLConfig[numConfigs];
+
+        ret = eglChooseConfig(dc->gl.egl.display,
+                configAttribs, configs, numConfigs, &n);
+        if (!ret || !n) {
+            checkEglError("eglChooseConfig", ret);
+            LOGE("%p, couldn't find an EGLConfig matching the screen format\n", rsc);
+        }
+
+        // The first config is guaranteed to over-satisfy the constraints
+        dc->gl.egl.config = configs[0];
+
+        // go through the list and skip configs that over-satisfy our needs
+        for (int i=0 ; i<n ; i++) {
+            if (rsc->mUserSurfaceConfig.alphaMin <= 0) {
+                EGLint alphaSize;
+                eglGetConfigAttrib(dc->gl.egl.display,
+                        configs[i], EGL_ALPHA_SIZE, &alphaSize);
+                if (alphaSize > 0) {
+                    continue;
+                }
+            }
+
+            if (rsc->mUserSurfaceConfig.depthMin <= 0) {
+                EGLint depthSize;
+                eglGetConfigAttrib(dc->gl.egl.display,
+                        configs[i], EGL_DEPTH_SIZE, &depthSize);
+                if (depthSize > 0) {
+                    continue;
+                }
+            }
+
+            // Found one!
+            dc->gl.egl.config = configs[i];
+            break;
+        }
+
+        delete [] configs;
     }
 
-    status_t err = EGLUtils::selectConfigForPixelFormat(dc->gl.egl.display, configAttribs,
-                                                        pf, &dc->gl.egl.config);
-    if (err) {
-       LOGE("%p, couldn't find an EGLConfig matching the screen format\n", rsc);
-    }
     //if (props.mLogVisual) {
     if (0) {
         printEGLConfiguration(dc->gl.egl.display, dc->gl.egl.config);
@@ -227,8 +281,8 @@ bool rsdGLInit(const Context *rsc) {
         return false;
     }
 
-    EGLBoolean ret = eglMakeCurrent(dc->gl.egl.display, dc->gl.egl.surfaceDefault,
-                                    dc->gl.egl.surfaceDefault, dc->gl.egl.context);
+    ret = eglMakeCurrent(dc->gl.egl.display, dc->gl.egl.surfaceDefault,
+                         dc->gl.egl.surfaceDefault, dc->gl.egl.context);
     if (ret == EGL_FALSE) {
         LOGE("eglMakeCurrent returned EGL_FALSE");
         checkEglError("eglMakeCurrent", ret);
