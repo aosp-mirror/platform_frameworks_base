@@ -23,6 +23,7 @@
         android:id="@+id/body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="left"
         android:orientation="vertical" >
 
         <!-- Placeholder for the success message or one or more warnings -->
@@ -43,200 +44,242 @@
             android:layout_weight="1"
             android:gravity="fill_horizontal"
             android:layout_marginRight="20dip"
-            android:layout_marginLeft="20dip"
-            android:layout_marginBottom="12dip" />
+            android:layout_marginLeft="20dip"/>
 
-        <TableLayout
+        <!-- Issued to: -->
+        <TextView
+            android:id="@+id/issued_to_header"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/issued_to"
+            android:textStyle="bold"
+            android:layout_marginTop="12dip"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
+
+        <!-- Common name: -->
+        <TextView
+            android:id="@+id/to_common_header"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/common_name"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
+
+        <TextView
+            android:id="@+id/to_common"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
+
+        <!-- Organization: -->
+        <TextView
+            android:id="@+id/to_org_header"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/org_name"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
+
+        <TextView
+            android:id="@+id/to_org"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
+
+        <!-- Organizational unit: -->
+        <TextView
+            android:id="@+id/to_org_unit_header"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/org_unit"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
+
+        <TextView
+            android:id="@+id/to_org_unit"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
+
+        <!-- Serial number: -->
+        <TextView
+            android:id="@+id/serial_number_header"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/serial_number"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
+
+        <TextView
+            android:id="@+id/serial_number"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
+
+        <!-- Issued by: -->
+        <TextView
+            android:id="@+id/issued_to_header"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/issued_by"
+            android:textStyle="bold"
+            android:layout_marginTop="12dip"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
+
+        <!-- Common name: -->
+        <TextView
+            android:id="@+id/by_common_header"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:text="@string/common_name"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
 
-            <!-- Issued to: -->
-            <TextView
-                android:id="@+id/issued_to_header"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="@string/issued_to"
-                android:textStyle="bold"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="10dip" />
+        <TextView
+            android:id="@+id/by_common"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
 
-            <!-- Common name: -->
-            <TextView
-                android:id="@+id/to_common_header"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="@string/common_name"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip" />
+        <!-- Organization: -->
+        <TextView
+            android:id="@+id/by_org_header"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/org_name"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
 
-            <TextView
-                android:id="@+id/to_common"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="10dip" />
+        <TextView
+            android:id="@+id/by_org"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
 
-            <!-- Organization: -->
-            <TextView
-                android:id="@+id/to_org_header"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="@string/org_name"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip" />
+        <!-- Organizational unit: -->
+        <TextView
+            android:id="@+id/by_org_unit_header"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/org_unit"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
 
-            <TextView
-                android:id="@+id/to_org"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="10dip" />
+        <TextView
+            android:id="@+id/by_org_unit"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
 
-            <!-- Organizational unit: -->
-            <TextView
-                android:id="@+id/to_org_unit_header"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="@string/org_unit"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip" />
+        <!-- Validity Dates: -->
+        <TextView
+            android:id="@+id/validity_header"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/validity_period"
+            android:textStyle="bold"
+            android:layout_marginTop="12dip"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
 
-            <TextView
-                android:id="@+id/to_org_unit"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="12dip" />
+        <!-- Issued On: -->
+        <TextView
+            android:id="@+id/issued_on_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/issued_on"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
 
-            <!-- Issued by: -->
-            <TextView
-                android:id="@+id/issued_to_header"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="@string/issued_by"
-                android:textStyle="bold"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="10dip" />
+        <TextView
+            android:id="@+id/issued_on"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
 
-            <!-- Common name: -->
-            <TextView
-                android:id="@+id/by_common_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/common_name"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip" />
+        <!-- Expires On: -->
+        <TextView
+            android:id="@+id/expires_on_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/expires_on"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
 
-            <TextView
-                android:id="@+id/by_common"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="10dip" />
+        <TextView
+            android:id="@+id/expires_on"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
 
-            <!-- Organization: -->
-            <TextView
-                android:id="@+id/by_org_header"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="@string/org_name"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip" />
+        <!-- Fingerprints: -->
+        <TextView
+            android:id="@+id/fingerprints"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/fingerprints"
+            android:textStyle="bold"
+            android:layout_marginTop="12dip"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
 
-            <TextView
-                android:id="@+id/by_org"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="10dip" />
+        <!-- SHA-256 fingerprint: -->
+        <TextView
+            android:id="@+id/sha256_fingerprint_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/sha256_fingerprint"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
 
-            <!-- Organizational unit: -->
-            <TextView
-                android:id="@+id/by_org_unit_header"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="@string/org_unit"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip" />
+        <TextView
+            android:id="@+id/sha256_fingerprint"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
 
-            <TextView
-                android:id="@+id/by_org_unit"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="12dip" />
+        <!-- SHA-1 fingerprint: -->
+        <TextView
+            android:id="@+id/sha1_fingerprint_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/sha1_fingerprint"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip" />
 
-            <!-- Validity Dates: -->
-            <TextView
-                android:id="@+id/validity_header"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:text="@string/validity_period"
-                android:textStyle="bold"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="10dip" />
-
-            <!-- Issued On: -->
-            <TextView
-                android:id="@+id/issued_on_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/issued_on"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip" />
-
-            <TextView
-                android:id="@+id/issued_on"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="10dip" />
-
-            <!-- Expires On: -->
-            <TextView
-                android:id="@+id/expires_on_header"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/expires_on"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip" />
-
-            <TextView
-                android:id="@+id/expires_on"
-                android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:gravity="left"
-                android:layout_marginLeft="20dip"
-                android:layout_marginRight="20dip"
-                android:layout_marginBottom="12dip" />
-
-        </TableLayout>
+        <TextView
+            android:id="@+id/sha1_fingerprint"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="20dip"
+            android:layout_marginBottom="7dip" />
 
     </LinearLayout>
 
