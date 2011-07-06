@@ -36,6 +36,7 @@ import android.net.wifi.WifiManager;
 import android.net.wifi.WifiStateMachine;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
+import android.net.wifi.WifiWatchdogService;
 import android.net.wifi.WpsConfiguration;
 import android.net.wifi.WpsResult;
 import android.net.ConnectivityManager;
