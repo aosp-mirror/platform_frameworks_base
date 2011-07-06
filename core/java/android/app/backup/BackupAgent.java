@@ -523,7 +523,6 @@ public abstract class BackupAgent extends ContextWrapper {
             long ident = Binder.clearCallingIdentity();
 
             if (DEBUG) Log.v(TAG, "doFullBackup() invoked");
-            BackupDataOutput output = new BackupDataOutput(data.getFileDescriptor());
 
             try {
                 BackupAgent.this.onFullBackup(new FullBackupDataOutput(data));
