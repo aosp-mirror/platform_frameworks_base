@@ -163,7 +163,32 @@ void SurfaceFlinger::bootFinished()
     const nsecs_t duration = now - mBootTime;
     LOGI("Boot is finished (%ld ms)", long(ns2ms(duration)) );
     mBootFinished = true;
+
+    // wait patiently for the window manager death
+    const String16 name("window");
+    sp<IBinder> window(defaultServiceManager()->getService(name));
+    if (window != 0) {
+        window->linkToDeath(this);
+    }
+
+    // stop boot animation
     property_set("ctl.stop", "bootanim");
+}
+
+void SurfaceFlinger::binderDied(const wp<IBinder>& who)
+{
+    // the window manager died on us. prepare its eulogy.
+
+    // unfreeze the screen in case it was... frozen
+    mFreezeDisplayTime = 0;
+    mFreezeCount = 0;
+    mFreezeDisplay = false;
+
+    // reset screen orientation
+    setOrientation(0, eOrientationDefault, 0);
+
+    // restart the boot-animation
+    property_set("ctl.start", "bootanim");
 }
 
 void SurfaceFlinger::onFirstRef()

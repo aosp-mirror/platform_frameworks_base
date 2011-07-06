@@ -103,6 +103,11 @@ void DisplayHardware::init(uint32_t dpy)
 {
     mNativeWindow = new FramebufferNativeWindow();
     framebuffer_device_t const * fbDev = mNativeWindow->getDevice();
+    if (!fbDev) {
+        LOGE("Display subsystem failed to initialize. check logs. exiting...");
+        exit(0);
+    }
+
     mDpiX = mNativeWindow->xdpi;
     mDpiY = mNativeWindow->ydpi;
     mRefreshRate = fbDev->fps;

@@ -147,6 +147,7 @@ enum {
 class SurfaceFlinger :
         public BinderService<SurfaceFlinger>,
         public BnSurfaceComposer,
+        public IBinder::DeathRecipient,
         protected Thread
 {
 public:
@@ -191,6 +192,10 @@ public:
     void destroyLayer(LayerBase const* layer);
 
     sp<Layer> getLayer(const sp<ISurface>& sur) const;
+
+private:
+    // DeathRecipient interface
+    virtual void binderDied(const wp<IBinder>& who);
 
 private:
     friend class Client;
