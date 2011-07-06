@@ -214,7 +214,7 @@ public class MediaFile {
         addFileType("PNG", FILE_TYPE_PNG, "image/png", MtpConstants.FORMAT_PNG);
         addFileType("BMP", FILE_TYPE_BMP, "image/x-ms-bmp", MtpConstants.FORMAT_BMP);
         addFileType("WBMP", FILE_TYPE_WBMP, "image/vnd.wap.wbmp");
-        addFileType("WEBP", FILE_TYPE_WBMP, "image/webp");
+        addFileType("WEBP", FILE_TYPE_WEBP, "image/webp");
  
         addFileType("M3U", FILE_TYPE_M3U, "audio/x-mpegurl", MtpConstants.FORMAT_M3U_PLAYLIST);
         addFileType("M3U", FILE_TYPE_M3U, "application/x-mpegurl", MtpConstants.FORMAT_M3U_PLAYLIST);
