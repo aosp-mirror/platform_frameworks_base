@@ -846,6 +846,25 @@ status_t Thread::requestExitAndWait()
     return mStatus;
 }
 
+status_t Thread::join()
+{
+    Mutex::Autolock _l(mLock);
+    if (mThread == getThreadId()) {
+        LOGW(
+        "Thread (this=%p): don't call join() from this "
+        "Thread object's thread. It's a guaranteed deadlock!",
+        this);
+
+        return WOULD_BLOCK;
+    }
+
+    while (mRunning == true) {
+        mThreadExitedCondition.wait(mLock);
+    }
+
+    return mStatus;
+}
+
 bool Thread::exitPending() const
 {
     Mutex::Autolock _l(mLock);

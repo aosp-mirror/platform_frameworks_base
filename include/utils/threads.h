@@ -510,6 +510,10 @@ public:
     // that case.
             status_t    requestExitAndWait();
 
+    // Wait until this object's thread exits. Returns immediately if not yet running.
+    // Do not call from this object's thread; will return WOULD_BLOCK in that case.
+            status_t    join();
+
 protected:
     // exitPending() returns true if requestExit() has been called.
             bool        exitPending() const;
