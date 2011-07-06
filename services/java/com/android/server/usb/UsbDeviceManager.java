@@ -72,7 +72,9 @@ public class UsbDeviceManager {
     private static final String STATE_PATH =
             "/sys/class/android_usb/android0/state";
     private static final String MASS_STORAGE_FILE_PATH =
-            "/sys/class/android_usb/f_mass_storage/lun/file";
+            "/sys/class/android_usb/android0/f_mass_storage/lun/file";
+    private static final String RNDIS_ETH_ADDR_PATH =
+            "/sys/class/android_usb/android0/f_rndis/ethaddr";
 
     private static final int MSG_UPDATE_STATE = 0;
     private static final int MSG_ENABLE_ADB = 1;
@@ -132,6 +134,7 @@ public class UsbDeviceManager {
         mSettingsManager = settingsManager;
         PackageManager pm = mContext.getPackageManager();
         mHasUsbAccessory = pm.hasSystemFeature(PackageManager.FEATURE_USB_ACCESSORY);
+        initRndisAddress();
 
         // create a thread for our Handler
         HandlerThread thread = new HandlerThread("UsbDeviceManager",
@@ -164,6 +167,29 @@ public class UsbDeviceManager {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ADB_ENABLED, mAdbEnabled ? 1 : 0);
 
         mHandler.sendEmptyMessage(MSG_SYSTEM_READY);
+    }
+
+    private static void initRndisAddress() {
+        // configure RNDIS ethernet address based on our serial number using the same algorithm
+        // we had been previously using in kernel board files
+        final int ETH_ALEN = 6;
+        int address[] = new int[ETH_ALEN];
+        // first byte is 0x02 to signify a locally administered address
+        address[0] = 0x02;
+
+        String serial = SystemProperties.get("ro.serialno", "1234567890ABCDEF");
+        int serialLength = serial.length();
+        // XOR the USB serial across the remaining 5 bytes
+        for (int i = 0; i < serialLength; i++) {
+            address[i % (ETH_ALEN - 1) + 1] ^= (int)serial.charAt(i);
+        }
+        String addrString = String.format("%02X:%02X:%02X:%02X:%02X:%02X",
+            address[0], address[1], address[2], address[3], address[4], address[5]);
+        try {
+            FileUtils.stringToFile(RNDIS_ETH_ADDR_PATH, addrString);
+        } catch (IOException e) {
+           Slog.e(TAG, "failed to write to " + RNDIS_ETH_ADDR_PATH);
+        }
     }
 
      private static String addFunction(String functions, String function) {
