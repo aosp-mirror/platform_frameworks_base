@@ -1111,6 +1111,12 @@ class ZoomManager {
                     mTextWrapScale = Math.max(mTextWrapScale, overviewScale);
                 }
                 reflowText = exceedsMinScaleIncrement(mTextWrapScale, scale);
+            } else {
+                // In case of restored scale, treat defaultScale as overview since
+                // it usually means the previous scale is not saved.
+                if (scale == mDefaultScale && settings.getLoadWithOverviewMode()) {
+                    scale = overviewScale;
+                }
             }
             mInitialZoomOverview = settings.getLoadWithOverviewMode() &&
                     !exceedsMinScaleIncrement(scale, overviewScale);
