@@ -2085,9 +2085,9 @@ public class WifiStateMachine extends StateMachine {
                         transitionTo(mDriverLoadedState);
                         sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     } else {
-                        mSupplicantRestartCount = 0;
                         Log.e(TAG, "Failed " + mSupplicantRestartCount +
                                 " times to start supplicant, unload driver");
+                        mSupplicantRestartCount = 0;
                         transitionTo(mDriverLoadedState);
                         sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_STATE_UNKNOWN, 0));
                     }
