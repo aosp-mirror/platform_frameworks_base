@@ -36,7 +36,7 @@ import java.util.zip.CRC32;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupAgentHelper;
-import android.app.backup.FullBackup;
+import android.app.backup.FullBackupDataOutput;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -132,58 +132,22 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
         byte[] wifiConfigData = getFileData(mWifiConfigFile);
 
-        // This same agent class is used for both full and incremental backups.  A full
-        // backup is flagged by a 'null' oldState argument.  In the case of a full backup,
-        // the output is structured as tarfile contents.
-        if (oldState != null) {
-            long[] stateChecksums = readOldChecksums(oldState);
+        long[] stateChecksums = readOldChecksums(oldState);
 
-            stateChecksums[STATE_SYSTEM] =
-                writeIfChanged(stateChecksums[STATE_SYSTEM], KEY_SYSTEM, systemSettingsData, data);
-            stateChecksums[STATE_SECURE] =
-                writeIfChanged(stateChecksums[STATE_SECURE], KEY_SECURE, secureSettingsData, data);
-            stateChecksums[STATE_LOCALE] =
-                writeIfChanged(stateChecksums[STATE_LOCALE], KEY_LOCALE, locale, data);
-            stateChecksums[STATE_WIFI_SUPPLICANT] =
-                writeIfChanged(stateChecksums[STATE_WIFI_SUPPLICANT], KEY_WIFI_SUPPLICANT,
-                        wifiSupplicantData, data);
-            stateChecksums[STATE_WIFI_CONFIG] =
-                writeIfChanged(stateChecksums[STATE_WIFI_CONFIG], KEY_WIFI_CONFIG, wifiConfigData,
-                        data);
+        stateChecksums[STATE_SYSTEM] =
+            writeIfChanged(stateChecksums[STATE_SYSTEM], KEY_SYSTEM, systemSettingsData, data);
+        stateChecksums[STATE_SECURE] =
+            writeIfChanged(stateChecksums[STATE_SECURE], KEY_SECURE, secureSettingsData, data);
+        stateChecksums[STATE_LOCALE] =
+            writeIfChanged(stateChecksums[STATE_LOCALE], KEY_LOCALE, locale, data);
+        stateChecksums[STATE_WIFI_SUPPLICANT] =
+            writeIfChanged(stateChecksums[STATE_WIFI_SUPPLICANT], KEY_WIFI_SUPPLICANT,
+                    wifiSupplicantData, data);
+        stateChecksums[STATE_WIFI_CONFIG] =
+            writeIfChanged(stateChecksums[STATE_WIFI_CONFIG], KEY_WIFI_CONFIG, wifiConfigData,
+                    data);
 
-            writeNewChecksums(stateChecksums, newState);
-        } else {
-            // Write the data to the staging file, then emit that as our tarfile
-            // representation of the backed-up settings.
-            String root = getFilesDir().getAbsolutePath();
-            File stage = new File(root, STAGE_FILE);
-            try {
-                FileOutputStream filestream = new FileOutputStream(stage);
-                BufferedOutputStream bufstream = new BufferedOutputStream(filestream);
-                DataOutputStream out = new DataOutputStream(bufstream);
-
-                out.writeInt(FULL_BACKUP_VERSION);
-
-                out.writeInt(systemSettingsData.length);
-                out.write(systemSettingsData);
-                out.writeInt(secureSettingsData.length);
-                out.write(secureSettingsData);
-                out.writeInt(locale.length);
-                out.write(locale);
-                out.writeInt(wifiSupplicantData.length);
-                out.write(wifiSupplicantData);
-                out.writeInt(wifiConfigData.length);
-                out.write(wifiConfigData);
-
-                out.flush();    // also flushes downstream
-
-                // now we're set to emit the tar stream
-                FullBackup.backupToTar(getPackageName(), FullBackup.DATA_TREE_TOKEN, null,
-                        root, stage.getAbsolutePath(), data);
-            } finally {
-                stage.delete();
-            }
-        }
+        writeNewChecksums(stateChecksums, newState);
     }
 
     @Override
@@ -217,6 +181,45 @@ public class SettingsBackupAgent extends BackupAgentHelper {
              } else {
                 data.skipEntityData();
             }
+        }
+    }
+
+    @Override
+    public void onFullBackup(FullBackupDataOutput data)  throws IOException {
+        byte[] systemSettingsData = getSystemSettings();
+        byte[] secureSettingsData = getSecureSettings();
+        byte[] locale = mSettingsHelper.getLocaleData();
+        byte[] wifiSupplicantData = getWifiSupplicant(FILE_WIFI_SUPPLICANT);
+        byte[] wifiConfigData = getFileData(mWifiConfigFile);
+
+        // Write the data to the staging file, then emit that as our tarfile
+        // representation of the backed-up settings.
+        String root = getFilesDir().getAbsolutePath();
+        File stage = new File(root, STAGE_FILE);
+        try {
+            FileOutputStream filestream = new FileOutputStream(stage);
+            BufferedOutputStream bufstream = new BufferedOutputStream(filestream);
+            DataOutputStream out = new DataOutputStream(bufstream);
+
+            out.writeInt(FULL_BACKUP_VERSION);
+
+            out.writeInt(systemSettingsData.length);
+            out.write(systemSettingsData);
+            out.writeInt(secureSettingsData.length);
+            out.write(secureSettingsData);
+            out.writeInt(locale.length);
+            out.write(locale);
+            out.writeInt(wifiSupplicantData.length);
+            out.write(wifiSupplicantData);
+            out.writeInt(wifiConfigData.length);
+            out.write(wifiConfigData);
+
+            out.flush();    // also flushes downstream
+
+            // now we're set to emit the tar stream
+            fullBackupFile(stage, data);
+        } finally {
+            stage.delete();
         }
     }
 

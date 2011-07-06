@@ -1,9 +1,10 @@
 package com.android.sharedstoragebackup;
 
-import android.app.backup.FullBackup;
 import android.app.backup.FullBackupAgent;
+import android.app.backup.FullBackup;
 import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
+import android.app.backup.FullBackupDataOutput;
 import android.content.Context;
 import android.os.Environment;
 import android.os.ParcelFileDescriptor;
@@ -30,9 +31,11 @@ public class SharedStorageAgent extends FullBackupAgent {
         }
     }
 
+    /**
+     * Full backup of the shared-storage filesystem
+     */
     @Override
-    public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
-            ParcelFileDescriptor newState) throws IOException {
+    public void onFullBackup(FullBackupDataOutput output) throws IOException {
         // If there are shared-storage volumes available, run the inherited directory-
         // hierarchy backup process on them.  By convention in the Storage Manager, the
         // "primary" shared storage volume is first in the list.
@@ -43,17 +46,9 @@ public class SharedStorageAgent extends FullBackupAgent {
                 //     shared/N/path/to/file
                 // The restore will then extract to the given volume
                 String domain = FullBackup.SHARED_PREFIX + i;
-                processTree(null, domain, v.getPath(), null, data);
+                fullBackupFileTree(null, domain, v.getPath(), null, output);
             }
         }
-    }
-
-    /**
-     * Incremental onRestore() implementation is not used.
-     */
-    @Override
-    public void onRestore(BackupDataInput data, int appVersionCode, ParcelFileDescriptor newState)
-            throws IOException {
     }
 
     /**
@@ -88,6 +83,6 @@ public class SharedStorageAgent extends FullBackupAgent {
             Slog.e(TAG, "Skipping data with malformed path " + relpath);
         }
 
-        FullBackup.restoreToFile(data, size, type, mode, mtime, outFile, false);
+        FullBackup.restoreFile(data, size, type, -1, mtime, outFile);
     }
 }

@@ -16,6 +16,9 @@
 
 package android.app.backup;
 
+import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
@@ -29,7 +32,8 @@ import libcore.io.Libcore;
 
 /**
  * Global constant definitions et cetera related to the full-backup-to-fd
- * binary format.
+ * binary format.  Nothing in this namespace is part of any API; it's all
+ * hidden details of the current implementation gathered into one location.
  *
  * @hide
  */
@@ -52,18 +56,41 @@ public class FullBackup {
     public static final String FULL_RESTORE_INTENT_ACTION = "fullrest";
     public static final String CONF_TOKEN_INTENT_EXTRA = "conftoken";
 
-    public static final int TYPE_EOF = 0;
-    public static final int TYPE_FILE = 1;
-    public static final int TYPE_DIRECTORY = 2;
-    public static final int TYPE_SYMLINK = 3;
-
+    /**
+     * @hide
+     */
     static public native int backupToTar(String packageName, String domain,
             String linkdomain, String rootpath, String path, BackupDataOutput output);
 
-    static public void restoreToFile(ParcelFileDescriptor data,
-            long size, int type, long mode, long mtime, File outFile,
-            boolean doChmod) throws IOException {
-        if (type == FullBackup.TYPE_DIRECTORY) {
+    /**
+     * Copy data from a socket to the given File location on permanent storage.  The
+     * modification time and access mode of the resulting file will be set if desired.
+     * If the {@code type} parameter indicates that the result should be a directory,
+     * the socket parameter may be {@code null}; even if it is valid, no data will be
+     * read from it in this case.
+     * <p>
+     * If the {@code mode} argument is negative, then the resulting output file will not
+     * have its access mode or last modification time reset as part of this operation.
+     *
+     * @param data Socket supplying the data to be copied to the output file.  If the
+     *    output is a directory, this may be {@code null}.
+     * @param size Number of bytes of data to copy from the socket to the file.  At least
+     *    this much data must be available through the {@code data} parameter.
+     * @param type Must be either {@link BackupAgent#TYPE_FILE} for ordinary file data
+     *    or {@link BackupAgent#TYPE_DIRECTORY} for a directory.
+     * @param mode Unix-style file mode (as used by the chmod(2) syscall) to be set on
+     *    the output file or directory.  If this parameter is negative then neither
+     *    the mode nor the mtime parameters will be used.
+     * @param mtime A timestamp in the standard Unix epoch that will be imposed as the
+     *    last modification time of the output file.  if the {@code mode} parameter is
+     *    negative then this parameter will be ignored.
+     * @param outFile Location within the filesystem to place the data.  This must point
+     *    to a location that is writeable by the caller, prefereably using an absolute path.
+     * @throws IOException
+     */
+    static public void restoreFile(ParcelFileDescriptor data,
+            long size, int type, long mode, long mtime, File outFile) throws IOException {
+        if (type == BackupAgent.TYPE_DIRECTORY) {
             // Canonically a directory has no associated content, so we don't need to read
             // anything from the pipe in this case.  Just create the directory here and
             // drop down to the final metadata adjustment.
@@ -117,7 +144,7 @@ public class FullBackup {
         }
 
         // Now twiddle the state to match the backup, assuming all went well
-        if (doChmod && outFile != null) {
+        if (mode >= 0 && outFile != null) {
             try {
                 Libcore.os.chmod(outFile.getPath(), (int)mode);
             } catch (ErrnoException e) {

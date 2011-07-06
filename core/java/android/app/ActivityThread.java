@@ -2013,15 +2013,10 @@ public final class ActivityThread {
         BackupAgent agent = null;
         String classname = data.appInfo.backupAgentName;
 
-        if (data.backupMode == IApplicationThread.BACKUP_MODE_FULL
-                || data.backupMode == IApplicationThread.BACKUP_MODE_RESTORE_FULL) {
+        // full backup operation but no app-supplied agent?  use the default implementation
+        if (classname == null && (data.backupMode == IApplicationThread.BACKUP_MODE_FULL
+                || data.backupMode == IApplicationThread.BACKUP_MODE_RESTORE_FULL)) {
             classname = "android.app.backup.FullBackupAgent";
-            if ((data.appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-                // system packages can supply their own full-backup agent
-                if (data.appInfo.fullBackupAgentName != null) {
-                    classname = data.appInfo.fullBackupAgentName;
-                }
-            }
         }
 
         try {
