@@ -74,6 +74,12 @@ class AudioPlaybackHandler {
         removeMessages(token);
 
         if (token.getType() == MessageParams.TYPE_SYNTHESIS) {
+            AudioTrack current = ((SynthesisMessageParams) token).getAudioTrack();
+            if (current != null) {
+                // Stop the current audio track if it's still playing.
+                // The audio track is thread safe in this regard.
+                current.stop();
+            }
             mQueue.add(new ListEntry(SYNTHESIS_DONE, token, HIGH_PRIORITY));
         } else  {
             final MessageParams current = getCurrentParams();
@@ -393,9 +399,10 @@ class AudioPlaybackHandler {
 
         try {
             if (audioTrack != null) {
-                audioTrack.flush();
-                audioTrack.stop();
                 if (DBG) Log.d(TAG, "Releasing audio track [" + audioTrack.hashCode() + "]");
+                // The last call to AudioTrack.write( ) will return only after
+                // all data from the audioTrack has been sent to the mixer, so
+                // it's safe to release at this point.
                 audioTrack.release();
             }
         } finally {
