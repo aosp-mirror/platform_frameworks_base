@@ -422,6 +422,7 @@ public class MediaScanner
         private long mFileSize;
         private String mWriter;
         private int mCompilation;
+        private boolean mIsDrm;
         private boolean mNoMedia;   // flag to suppress file from appearing in media tables
 
         public FileCacheEntry beginFile(String path, String mimeType, long lastModified,
@@ -497,6 +498,7 @@ public class MediaScanner
             mLastModified = lastModified;
             mWriter = null;
             mCompilation = 0;
+            mIsDrm = false;
 
             return entry;
         }
@@ -599,6 +601,8 @@ public class MediaScanner
                 mWriter = value.trim();
             } else if (name.equalsIgnoreCase("compilation")) {
                 mCompilation = parseSubstring(value, 0, 0);
+            } else if (name.equalsIgnoreCase("isdrm")) {
+                mIsDrm = (parseSubstring(value, 0, 0) == 1);
             }
         }
 
@@ -671,6 +675,7 @@ public class MediaScanner
             map.put(MediaStore.MediaColumns.DATE_MODIFIED, mLastModified);
             map.put(MediaStore.MediaColumns.SIZE, mFileSize);
             map.put(MediaStore.MediaColumns.MIME_TYPE, mMimeType);
+            map.put(MediaStore.MediaColumns.IS_DRM, mIsDrm);
 
             if (!mNoMedia) {
                 if (MediaFile.isVideoFileType(mFileType)) {

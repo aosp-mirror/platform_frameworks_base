@@ -275,6 +275,14 @@ public final class MediaStore {
          * @hide
          */
         public static final String MEDIA_SCANNER_NEW_OBJECT_ID = "media_scanner_new_object_id";
+
+        /**
+         * Non-zero if the media file is drm-protected
+         * <P>Type: INTEGER (boolean)</P>
+         * @hide
+         */
+        public static final String IS_DRM = "is_drm";
+
      }
 
     /**
@@ -1124,19 +1132,19 @@ public final class MediaStore {
             public static final String IS_PODCAST = "is_podcast";
 
             /**
-             * Non-zero id the audio file may be a ringtone
+             * Non-zero if the audio file may be a ringtone
              * <P>Type: INTEGER (boolean)</P>
              */
             public static final String IS_RINGTONE = "is_ringtone";
 
             /**
-             * Non-zero id the audio file may be an alarm
+             * Non-zero if the audio file may be an alarm
              * <P>Type: INTEGER (boolean)</P>
              */
             public static final String IS_ALARM = "is_alarm";
 
             /**
-             * Non-zero id the audio file may be a notification sound
+             * Non-zero if the audio file may be a notification sound
              * <P>Type: INTEGER (boolean)</P>
              */
             public static final String IS_NOTIFICATION = "is_notification";

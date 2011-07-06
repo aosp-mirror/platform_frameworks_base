@@ -158,6 +158,7 @@ status_t StagefrightMediaScanner::processFile(
                 { "duration", METADATA_KEY_DURATION },
                 { "writer", METADATA_KEY_WRITER },
                 { "compilation", METADATA_KEY_COMPILATION },
+                { "isdrm", METADATA_KEY_IS_DRM },
             };
             static const size_t kNumEntries = sizeof(kKeyMap) / sizeof(kKeyMap[0]);
 

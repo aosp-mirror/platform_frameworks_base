@@ -387,10 +387,6 @@ status_t MPEG4Extractor::readMetaData() {
     return mInitCheck;
 }
 
-void MPEG4Extractor::setDrmFlag(bool flag) {
-    mIsDrm = flag;
-}
-
 char* MPEG4Extractor::getDrmTrackInfo(size_t trackID, int *len) {
     if (mFirstSINF == NULL) {
         return NULL;
