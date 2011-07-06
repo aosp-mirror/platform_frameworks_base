@@ -530,11 +530,12 @@ public class UsbDeviceManager {
                     notification.sound = null;
                     notification.vibrate = null;
 
-                    Intent intent = new Intent();
+                    Intent intent = new Intent(
+                            Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK |
                             Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-                    intent.setClassName("com.android.systemui",
-                            "com.android.systemui.usb.UsbPreferenceActivity");
+                    intent.setComponent(new ComponentName("com.android.settings",
+                            "com.android.settings.UsbSettings"));
                     PendingIntent pi = PendingIntent.getActivity(mContext, 0,
                             intent, 0);
                     notification.setLatestEventInfo(mContext, title, message, pi);
