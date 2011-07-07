@@ -30,8 +30,6 @@
 
     <!-- Column 0: Time, date and status -->
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_marginTop="8dip"
         android:layout_marginBottom="12dip"
         android:layout_gravity="right">
@@ -66,8 +64,6 @@
 
     <TextView
         android:id="@+id/date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -77,8 +73,6 @@
 
     <TextView
         android:id="@+id/alarm_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -89,8 +83,6 @@
 
     <TextView
         android:id="@+id/status1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -100,10 +92,8 @@
 
     <!-- TODO: remove hard coded height since layout_rowWeight doesn't seem to be working -->
     <Space
-        android:layout_height="43dip"
-        android:layout_gravity="fill"
-        android:layout_heightSpec="canStretch"
-        android:layout_widthSpec="canStretch"
+        android:layout_rowFlexibility="canStretch"
+        android:layout_columnFlexibility="canStretch"
         />
 
     <TextView android:id="@+id/carrier"
@@ -117,8 +107,6 @@
     <LinearLayout
         style="?android:attr/buttonBarStyle"
         android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:layout_gravity="right">
 
         <Button android:id="@+id/emergencyCallButton"

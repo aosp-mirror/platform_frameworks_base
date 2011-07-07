@@ -3342,28 +3342,16 @@
         <attr name="layout_gravity" />
         <!-- A value specifying how much deficit or excess width this component can accomodate.
         The default is FIXED.
-        See {@link android.widget.GridLayout.LayoutParams#widthSpec}.-->
-        <attr name="layout_widthSpec" >
-            <!-- If possible, width should be exactly as specified.
-            See {@link android.widget.GridLayout#FIXED}. -->
-            <enum name="fixed" value="0" />
-            <!-- If possible, width should be less than or equal to the specified width.
-            See {@link android.widget.GridLayout#CAN_SHRINK}. -->
-            <enum name="canShrink" value="1" />
+        See {@link android.widget.GridLayout.Group#flexibility}.-->
+        <attr name="layout_columnFlexibility" >
             <!-- If possible, width should be greater than or equal to the specified width.
             See {@link android.widget.GridLayout#CAN_STRETCH}. -->
             <enum name="canStretch" value="2" />
         </attr>
         <!-- A value specifying how much deficit or excess height this component can accomodate.
         The default is FIXED.
-        See {@link android.widget.GridLayout.LayoutParams#heightSpec}.-->
-        <attr name="layout_heightSpec" >
-            <!-- If possible, height should be exactly as specified.
-            See {@link android.widget.GridLayout#FIXED}. -->
-            <enum name="fixed" value="0" />
-            <!-- If possible, height should be less than or equal to the specified height.
-            See {@link android.widget.GridLayout#CAN_SHRINK}. -->
-            <enum name="canShrink" value="1" />
+        See {@link android.widget.GridLayout.Group#flexibility}.-->
+        <attr name="layout_rowFlexibility" >
             <!-- If possible, height should be greater than or equal to the specified height.
             See {@link android.widget.GridLayout#CAN_STRETCH}. -->
             <enum name="canStretch" value="2" />
