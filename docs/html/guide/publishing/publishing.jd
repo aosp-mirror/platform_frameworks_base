@@ -23,6 +23,7 @@ page.title=Publishing on Android Market
   <ol>
     <li><a href="#OpeningDetails">Opening an app's details page</a></li>
     <li><a href="#PerformingSearch">Performing a search</a></li>
+    <li><a href="#BuildaButton">Build an Android Market button</a></li>
     <li><a href="#UriSummary">Summary of URI formats</a></li>
   </ol>  
 </li>
@@ -314,6 +315,205 @@ publisher name:</p>
 </pre>
 
 <p>The search result shows all applications published by the publisher.</p>
+
+
+
+<h3 id="BuildaButton">Build an Android Market button</h3>
+
+<p>Use the following form to input either your application's package name or your publisher name
+and generate a button that you can use on your web site. The button will take users to Android
+Market to view your application details or view a list of all applications you've published.</p>
+
+<p>This form offers four versions of the official "Available in Android Market" badge at
+recommended sizes. If you would like to create a different size, you can download an EPS file for
+the badges from the <a href="http://www.android.com/branding.html">Android Brand Guidelines</a>.</p>
+
+<style type="text/css">
+  
+form.button-form {
+  margin-top:2em;
+}
+
+/* the label and input elements are blocks that float left in order to
+   keep the left edgets of the input aligned, and IE 6/7 do not fully support "inline-block" */
+label.block {
+  display: block;
+  float: left;
+  width: 100px;
+  padding-right: 10px;
+}
+
+input.text {
+  display: block;
+  float: left;
+  width: 250px;
+}
+
+div.button-row {
+  white-space:nowrap;
+  min-height:80px;
+}
+
+div.button-row input {
+  vertical-align:120%;
+}
+
+#jd-content div.button-row img {
+  margin: 0;
+}
+
+</style>
+
+<script type="text/javascript">
+
+// variables for creating 'try it out' demo button
+var imagePath = "http://www.android.com/images/brand/"
+var linkStart = "<a href=\"http://market.android.com/";
+var imageStart = "\">\n"
+        + "  <img src=\"" + imagePath;
+var imageEnd = ".png\"\n"
+        + "       alt=\"Available in Android Market\" />\n</a>";
+
+// variables for creating code snippet
+var linkStartCode = "&lt;a href=\"http://market.android.com/";
+var imageStartCode = "\"&gt;\n"
+        + "  &lt;img src=\"" + imagePath;
+var imageEndCode = ".png\"\n"
+        + "       alt=\"Available in Android Market\" />\n&lt;/a>";
+
+/** Generate the HTML snippet and demo based on form values */
+function buildButton(form) {
+  if (form["package"].value != "com.android.example") {
+    $("#preview").show();
+    $("#snippet").show().html(linkStartCode + "details?id=" + form["package"].value
+            + imageStartCode + $('form input[type=radio]:checked').val() + imageEndCode);
+    $("#button-preview").html(linkStart + "details?id=" + form["package"].value
+            + imageStart + $('form input[type=radio]:checked').val() + imageEnd);
+  } else if (form["publisher"].value != "Example, Inc.") {
+    $("#preview").show();
+    $("#snippet").show().html(linkStartCode + "search?q=pub:" + form["publisher"].value
+            + imageStartCode + $('form input[type=radio]:checked').val() + imageEndCode);
+    $("#button-preview").html(linkStart + "search?q=pub:" + form["publisher"].value + imageStart +
+    $('form input[type=radio]:checked').val() + imageEnd);
+  } else {
+    alert("Please enter your package name or publisher name");
+  }
+  return false;
+}
+
+/** Listen for Enter key */
+function onTextEntered(event, form, me) {
+  // 13 = enter
+  if (event.keyCode == 13) {
+    buildButton(form);
+  }
+}
+
+/** When input is focused, remove example text and disable other input */
+function onInputFocus(object, example) {
+  if (object.value == example) {
+    $(object).val('').css({'color' : '#000'});
+  }
+  $('input[type="text"]:not(input[name='+object.name+'])',
+          object.parentNode).attr('disabled','true');
+  $('#'+object.name+'-clear').show();
+}
+
+/** When input is blured, restore example text if appropriate and enable other input */
+function onInputBlur(object, example) {
+  if (object.value.length < 1) {
+    $(object).attr('value',example).css({'color':'#ccc'});
+    $('input[type="text"]', object.parentNode).removeAttr('disabled');
+    $('#'+object.name+'-clear').hide();
+  }
+}
+
+/** Clear the form to start over */
+function clearLabel(id, example) {
+  $("#preview").hide();
+  $('#'+id+'').html('').attr('value',example).css({'color':'#ccc'});
+  $('input[type="text"]', $('#'+id+'').parent()).removeAttr('disabled');
+  $('#'+id+'-clear').hide();
+  return false;
+}
+
+/** When the doc is ready, find the inputs and color the input grey if the value is the example
+    text. This is necessary to handle back-navigation, which can auto-fill the form with previous
+    values (and text should not be grey) */
+$(document).ready(function() {
+  $(".button-form input.text").each(function(index) {
+    if ($(this).val() == $(this).attr("default")) {
+      $(this).css("color","#ccc");
+    } else {
+      /* This is necessary to handle back-navigation to the page after form was filled */
+      $('input[type="text"]:not(input[name='+this.name+'])',
+              this.parentNode).attr('disabled','true');
+      $('#'+this.name+'-clear').show();
+    }
+  });
+});
+
+</script>
+
+<form class="button-form">
+  <label class="block" for="package">Package name:</label>
+  <input class="text" type="text" id="package" name="package"
+         value="com.android.example"
+         default="com.android.example"
+         onfocus="onInputFocus(this, 'com.android.example')"
+         onblur="onInputBlur(this, 'com.android.example')"
+         onkeyup="return onTextEntered(event, this.parentNode, this)"/>&nbsp;
+         <a id="package-clear" style="display:none" href="#"
+            onclick="return clearLabel('package','com.android.example');">clear</a>
+  <p style="clear:both;margin:0">&nbsp;<em>or</em></p>
+  <label class="block" style="margin-top:5px" for="publisher">Publisher name:</label>
+  <input class="text" type="text" id="publisher" name="publisher"
+         value="Example, Inc."
+         default="Example, Inc."
+         onfocus="onInputFocus(this, 'Example, Inc.')"
+         onblur="onInputBlur(this, 'Example, Inc.')"
+         onkeyup="return onTextEntered(event, this.parentNode, this)"/>&nbsp;
+         <a id="publisher-clear" style="display:none" href="#"
+            onclick="return clearLabel('publisher','Example, Inc.');">clear</a>
+         <br/><br/>
+
+<div class="button-row">
+  <input type="radio" name="buttonStyle" value="45_avail_market_logo1" id="ns" checked="checked" />
+    <label for="ns"><img src="http://www.android.com/images/brand/45_avail_market_logo1.png"
+alt="narrow and small logo" /></label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="radio" name="buttonStyle" value="60_avail_market_logo1" id="nm" />
+    <label for="nm"><img src="http://www.android.com/images/brand/60_avail_market_logo1.png"
+alt="narrow and large logo" /></label>
+</div>
+
+<div class="button-row">
+  <input type="radio" name="buttonStyle" value="45_avail_market_logo2" id="ws" />
+    <label for="ws"><img src="http://www.android.com/images/brand/45_avail_market_logo2.png"
+alt="wide and small logo" /></label>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+  <input type="radio" name="buttonStyle" value="60_avail_market_logo2" id="wm" />
+    <label for="wm"><img src="http://www.android.com/images/brand/60_avail_market_logo2.png"
+alt="wide and large logo" /></label>
+</div>
+
+  <input type="button" onclick="return buildButton(this.parentNode)" value="Build my button"
+style="padding:5px" />
+  <br/>
+</form>
+
+<div id="preview" style="display:none">
+  <p>Copy and paste this HTML into your web site:</p>
+  <textarea id="snippet" cols="80" rows="4" onclick="this.select()"
+style="font-family:monospace;background-color:#efefef;padding:5px;display:none;margin-bottom:1em">
+  </textarea >
+
+<p>Try it out:</p>
+<div id="button-preview" style="margin-top:1em"></div>
+</div>
+
+
+
 
 
 
