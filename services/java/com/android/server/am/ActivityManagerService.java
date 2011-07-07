@@ -1953,6 +1953,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             if ("1".equals(SystemProperties.get("debug.checkjni"))) {
                 debugFlags |= Zygote.DEBUG_ENABLE_CHECKJNI;
             }
+            if ("1".equals(SystemProperties.get("debug.jni.logging"))) {
+                debugFlags |= Zygote.DEBUG_ENABLE_JNI_LOGGING;
+            }
             if ("1".equals(SystemProperties.get("debug.assert"))) {
                 debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
