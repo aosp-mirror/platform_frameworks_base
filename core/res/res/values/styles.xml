@@ -1314,6 +1314,13 @@
         <item name="android:textSize">@android:dimen/action_bar_subtitle_text_size</item>
     </style>
 
+    <style name="TextAppearance.Holo.Widget.ActionBar.Menu"
+           parent="TextAppearance.Holo.Small">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">?android:attr/actionMenuTextColor</item>
+    </style>
+
     <style name="TextAppearance.Holo.Widget.ActionMode">
     </style>
 
@@ -1848,7 +1855,8 @@
     <style name="Widget.Holo.ActionBar.TabText" parent="Widget.ActionBar.TabText">
         <item name="android:textAppearance">@style/TextAppearance.Holo.Medium</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="Widget.Holo.ActionMode" parent="Widget.ActionMode">
@@ -2203,9 +2211,7 @@
     </style>
 
     <style name="Widget.Holo.Light.ActionBar.TabText.Inverse">
-        <item name="android:textAppearance">@style/TextAppearance.Holo.Medium</item>
         <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
-        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="Widget.Holo.Light.ActionMode" parent="Widget.Holo.ActionMode">

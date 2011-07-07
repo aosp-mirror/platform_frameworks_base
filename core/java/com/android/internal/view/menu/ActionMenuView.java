@@ -112,7 +112,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         int cellsRemaining = cellCount;
         int maxChildHeight = 0;
         int maxCellsUsed = 0;
-        int multiCellItemCount = 0;
+        int expandableItemCount = 0;
 
         if (mReserveOverflow) cellsRemaining--;
 
@@ -123,7 +123,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             lp.expanded = false;
             lp.extraPixels = 0;
             lp.cellsUsed = 0;
-            lp.multiCell = false;
+            lp.expandable = false;
 
             // Overflow always gets 1 cell. No more, no less.
             final int cellsAvailable = lp.isOverflowButton ? 1 : cellsRemaining;
@@ -132,7 +132,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                     heightMeasureSpec, heightPadding);
 
             maxCellsUsed = Math.max(maxCellsUsed, cellsUsed);
-            if (lp.multiCell) multiCellItemCount++;
+            if (lp.expandable) expandableItemCount++;
 
             cellsRemaining -= cellsUsed;
             maxChildHeight = Math.max(maxChildHeight, child.getMeasuredHeight());
@@ -142,8 +142,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         // Try distributing whole leftover cells to smaller items first.
 
         boolean needsExpansion = false;
-        long smallestMultiCellItemsAt = 0;
-        while (multiCellItemCount > 0 && cellsRemaining > 0) {
+        long smallestExpandableItemsAt = 0;
+        while (expandableItemCount > 0 && cellsRemaining > 0) {
             int minCells = Integer.MAX_VALUE;
             long minCellsAt = 0; // Bit locations are indices of relevant child views
             int minCellsItemCount = 0;
@@ -152,7 +152,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
                 // Don't try to expand items that shouldn't.
-                if (!lp.multiCell) continue;
+                if (!lp.expandable) continue;
 
                 // Mark indices of children that can receive an extra cell.
                 if (lp.cellsUsed < minCells) {
@@ -165,10 +165,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 }
             }
 
-            if (minCellsItemCount < cellsRemaining) break; // Couldn't expand anything evenly. Stop.
+            if (minCellsItemCount > cellsRemaining) break; // Couldn't expand anything evenly. Stop.
 
             // Items that get expanded will always be in the set of smallest items when we're done.
-            smallestMultiCellItemsAt |= minCellsAt;
+            smallestExpandableItemsAt |= minCellsAt;
 
             for (int i = 0; i < childCount; i++) {
                 if ((minCellsAt & (1 << i)) == 0) continue;
@@ -186,12 +186,12 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         // Divide any space left that wouldn't divide along cell boundaries
         // evenly among the smallest multi-cell (expandable) items.
 
-        if (cellsRemaining > 0 && smallestMultiCellItemsAt != 0) {
-            final int expandCount = Long.bitCount(smallestMultiCellItemsAt);
+        if (cellsRemaining > 0 && smallestExpandableItemsAt != 0) {
+            final int expandCount = Long.bitCount(smallestExpandableItemsAt);
             final int extraPixels = cellsRemaining * cellSize / expandCount;
 
             for (int i = 0; i < childCount; i++) {
-                if ((smallestMultiCellItemsAt & (1 << i)) == 0) continue;
+                if ((smallestExpandableItemsAt & (1 << i)) == 0) continue;
 
                 final View child = getChildAt(i);
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
@@ -229,7 +229,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
      * Measure a child view to fit within cell-based formatting. The child's width
      * will be measured to a whole multiple of cellSize.
      *
-     * <p>Sets the multiCell and cellsUsed fields of LayoutParams.
+     * <p>Sets the expandable and cellsUsed fields of LayoutParams.
      *
      * @param child Child to measure
      * @param cellSize Size of one cell
@@ -241,21 +241,14 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     static int measureChildForCells(View child, int cellSize, int cellsRemaining,
             int parentHeightMeasureSpec, int parentHeightPadding) {
         final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-        final ActionMenuItemView itemView = child instanceof ActionMenuItemView ?
-                (ActionMenuItemView) child : null;
 
         final int childHeightSize = MeasureSpec.getSize(parentHeightMeasureSpec) -
                 parentHeightPadding;
         final int childHeightMode = MeasureSpec.getMode(parentHeightMeasureSpec);
         final int childHeightSpec = MeasureSpec.makeMeasureSpec(childHeightSize, childHeightMode);
 
-        int cellsUsed = cellsRemaining > 0 ? 1 : 0;
-        final boolean multiCell = !lp.isOverflowButton &&
-                (itemView == null || itemView.hasText());
-
-        lp.multiCell = multiCell;
-
-        if (multiCell && cellsRemaining > 0) {
+        int cellsUsed = 0;
+        if (cellsRemaining > 0) {
             final int childWidthSpec = MeasureSpec.makeMeasureSpec(
                     cellSize * cellsRemaining, MeasureSpec.AT_MOST);
             child.measure(childWidthSpec, childHeightSpec);
@@ -264,6 +257,12 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             cellsUsed = measuredWidth / cellSize;
             if (measuredWidth % cellSize != 0) cellsUsed++;
         }
+
+        final ActionMenuItemView itemView = child instanceof ActionMenuItemView ?
+                (ActionMenuItemView) child : null;
+        final boolean expandable = !lp.isOverflowButton && itemView != null && itemView.hasText();
+        lp.expandable = expandable;
+
         lp.cellsUsed = cellsUsed;
         final int targetWidth = cellsUsed * cellSize;
         child.measure(MeasureSpec.makeMeasureSpec(targetWidth, MeasureSpec.EXACTLY),
@@ -426,9 +425,10 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         @ViewDebug.ExportedProperty(category = "layout")
         public int cellsUsed;
         @ViewDebug.ExportedProperty(category = "layout")
-        public boolean multiCell;
-        @ViewDebug.ExportedProperty(category = "layout")
         public int extraPixels;
+        @ViewDebug.ExportedProperty(category = "layout")
+        public boolean expandable;
+
         public boolean expanded;
 
         public LayoutParams(Context c, AttributeSet attrs) {

@@ -231,7 +231,8 @@ public class Spinner extends AbsSpinner implements OnClickListener {
         }
 
         if (child != null) {
-            return child.getTop() + child.getBaseline();
+            final int childBaseline = child.getBaseline();
+            return childBaseline >= 0 ? child.getTop() + childBaseline : -1;
         } else {
             return -1;
         }

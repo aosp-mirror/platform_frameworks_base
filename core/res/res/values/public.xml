@@ -1789,6 +1789,7 @@
   <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Subtitle.Inverse" />
   <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Title.Inverse" />
   <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Subtitle.Inverse" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Menu" />
   <public type="style" name="Widget.Holo.ActionBar.Solid" />
   <public type="style" name="Widget.Holo.Light.ActionBar.Solid" />
   <public type="style" name="Widget.Holo.Light.ActionBar.Solid.Inverse" />
