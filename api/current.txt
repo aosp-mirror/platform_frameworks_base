@@ -16608,23 +16608,12 @@ package android.renderscript {
   }
 
   public class AllocationAdapter extends android.renderscript.Allocation {
+    method public static android.renderscript.AllocationAdapter create1D(android.renderscript.RenderScript, android.renderscript.Allocation);
     method public static android.renderscript.AllocationAdapter create2D(android.renderscript.RenderScript, android.renderscript.Allocation);
-    method public void readData(int[]);
-    method public void readData(float[]);
     method public void setFace(android.renderscript.Type.CubemapFace);
     method public void setLOD(int);
     method public void setY(int);
     method public void setZ(int);
-    method public void subData(int, android.renderscript.FieldPacker);
-    method public void subData1D(int, int, int[]);
-    method public void subData1D(int, int, short[]);
-    method public void subData1D(int, int, byte[]);
-    method public void subData1D(int, int, float[]);
-    method public void subData1D(int, int, android.renderscript.AllocationAdapter, int);
-    method public void subData2D(int, int, int, int, int[]);
-    method public void subData2D(int, int, int, int, float[]);
-    method public void subData2D(int, int, int, int, android.renderscript.AllocationAdapter, int, int);
-    method public void subElementData(int, int, android.renderscript.FieldPacker);
   }
 
   public class BaseObj {

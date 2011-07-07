@@ -17,228 +17,92 @@
 package android.renderscript;
 
 import android.content.res.Resources;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.util.Log;
 import android.util.TypedValue;
 
 /**
  *
  **/
 public class AllocationAdapter extends Allocation {
-    private boolean mConstrainedLOD;
-    private boolean mConstrainedFace;
-    private boolean mConstrainedY;
-    private boolean mConstrainedZ;
-
-    private int mSelectedDimX;
-    private int mSelectedDimY;
-    private int mSelectedDimZ;
-    private int mSelectedCount;
-    private Allocation mAlloc;
-
-    private int mSelectedLOD = 0;
-    private Type.CubemapFace mSelectedFace = Type.CubemapFace.POSITIVE_X;
-
     AllocationAdapter(int id, RenderScript rs, Allocation alloc) {
-        super(id, rs, null, alloc.mUsage);
-        mAlloc = alloc;
+        super(id, rs, alloc.mType, alloc.mUsage);
+        mAdaptedAllocation = alloc;
     }
-
 
     int getID() {
-        return mAlloc.getID();
+        return mAdaptedAllocation.getID();
     }
 
-    public void copyFrom(BaseObj[] d) {
-        mRS.validate();
-        if (d.length != mSelectedCount) {
-            throw new RSIllegalArgumentException("Array size mismatch, allocation size = " +
-                                                 mSelectedCount + ", array length = " + d.length);
-        }
-        int i[] = new int[d.length];
-        for (int ct=0; ct < d.length; ct++) {
-            i[ct] = d[ct].getID();
-        }
-        subData1D(0, mAlloc.mType.getCount(), i);
-    }
-
-    void validateBitmap(Bitmap b) {
-        mRS.validate();
-        if(mSelectedDimX != b.getWidth() ||
-           mSelectedDimY != b.getHeight()) {
-            throw new RSIllegalArgumentException("Cannot update allocation from bitmap, sizes mismatch");
-        }
-    }
-
-    public void copyFrom(int[] d) {
-        mRS.validate();
-        subData1D(0, mSelectedCount, d);
-    }
-    public void copyFrom(short[] d) {
-        mRS.validate();
-        subData1D(0, mSelectedCount, d);
-    }
-    public void copyFrom(byte[] d) {
-        mRS.validate();
-        subData1D(0, mSelectedCount, d);
-    }
-    public void copyFrom(float[] d) {
-        mRS.validate();
-        subData1D(0, mSelectedCount, d);
-    }
-    public void copyFrom(Bitmap b) {
-        validateBitmap(b);
-        mRS.nAllocationCopyFromBitmap(getID(), b);
-    }
-
-    public void copyTo(Bitmap b) {
-        validateBitmap(b);
-        mRS.nAllocationCopyToBitmap(getID(), b);
-    }
-
-
+    /**
+     * @hide
+     */
     public void subData(int xoff, FieldPacker fp) {
-        int eSize = mAlloc.mType.mElement.getSizeBytes();
-        final byte[] data = fp.getData();
-
-        int count = data.length / eSize;
-        if ((eSize * count) != data.length) {
-            throw new RSIllegalArgumentException("Field packer length " + data.length +
-                                               " not divisible by element size " + eSize + ".");
-        }
-        data1DChecks(xoff, count, data.length, data.length);
-        mRS.nAllocationData1D(getID(), xoff, mSelectedLOD, count, data, data.length);
+        super.setFromFieldPacker(xoff, fp);
     }
-
-
+    /**
+     * @hide
+     */
     public void subElementData(int xoff, int component_number, FieldPacker fp) {
-        if (component_number >= mAlloc.mType.mElement.mElements.length) {
-            throw new RSIllegalArgumentException("Component_number " + component_number + " out of range.");
-        }
-        if(xoff < 0) {
-            throw new RSIllegalArgumentException("Offset must be >= 0.");
-        }
-
-        final byte[] data = fp.getData();
-        int eSize = mAlloc.mType.mElement.mElements[component_number].getSizeBytes();
-
-        if (data.length != eSize) {
-            throw new RSIllegalArgumentException("Field packer sizelength " + data.length +
-                                               " does not match component size " + eSize + ".");
-        }
-
-        mRS.nAllocationElementData1D(getID(), xoff, mSelectedLOD, component_number, data, data.length);
+        super.setFromFieldPacker(xoff, component_number, fp);
     }
-
-    void data1DChecks(int off, int count, int len, int dataSize) {
-        mRS.validate();
-        if(off < 0) {
-            throw new RSIllegalArgumentException("Offset must be >= 0.");
-        }
-        if(count < 1) {
-            throw new RSIllegalArgumentException("Count must be >= 1.");
-        }
-        if((off + count) > mSelectedCount) {
-            throw new RSIllegalArgumentException("Overflow, Available count " + mAlloc.mType.getCount() +
-                                               ", got " + count + " at offset " + off + ".");
-        }
-        if((len) < dataSize) {
-            throw new RSIllegalArgumentException("Array too small for allocation type.  len = " +
-                                                 len + ", dataSize = " + dataSize);
-        }
-    }
-
+    /**
+     * @hide
+     */
     public void subData1D(int off, int count, int[] d) {
-        int dataSize = mAlloc.mType.mElement.getSizeBytes() * count;
-        data1DChecks(off, count, d.length * 4, dataSize);
-        mRS.nAllocationData1D(getID(), off, mSelectedLOD, count, d, dataSize);
+        super.copy1DRangeFrom(off, count, d);
     }
+    /**
+     * @hide
+     */
     public void subData1D(int off, int count, short[] d) {
-        int dataSize = mAlloc.mType.mElement.getSizeBytes() * count;
-        data1DChecks(off, count, d.length * 2, dataSize);
-        mRS.nAllocationData1D(getID(), off, mSelectedLOD, count, d, dataSize);
+        super.copy1DRangeFrom(off, count, d);
     }
+    /**
+     * @hide
+     */
     public void subData1D(int off, int count, byte[] d) {
-        int dataSize = mAlloc.mType.mElement.getSizeBytes() * count;
-        data1DChecks(off, count, d.length, dataSize);
-        mRS.nAllocationData1D(getID(), off, mSelectedLOD, count, d, dataSize);
+        super.copy1DRangeFrom(off, count, d);
     }
+    /**
+     * @hide
+     */
     public void subData1D(int off, int count, float[] d) {
-        int dataSize = mAlloc.mType.mElement.getSizeBytes() * count;
-        data1DChecks(off, count, d.length * 4, dataSize);
-        mRS.nAllocationData1D(getID(), off, mSelectedLOD, count, d, dataSize);
+        super.copy1DRangeFrom(off, count, d);
     }
-
     /**
-     * Copy part of an allocation from another allocation.
-     *
-     * @param off The offset of the first element to be copied.
-     * @param count The number of elements to be copied.
-     * @param data the source data allocation.
-     * @param dataOff off The offset of the first element in data to
-     *          be copied.
+     * @hide
      */
-    public void subData1D(int off, int count, AllocationAdapter data, int dataOff) {
-        mRS.nAllocationData2D(getID(), off, 0,
-                              mSelectedLOD, mSelectedFace.mID,
-                              count, 1, data.getID(), dataOff, 0,
-                              data.mSelectedLOD, data.mSelectedFace.mID);
-    }
-
-
     public void subData2D(int xoff, int yoff, int w, int h, int[] d) {
-        mRS.validate();
-        mRS.nAllocationData2D(getID(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
-                              w, h, d, d.length * 4);
+        super.copy2DRangeFrom(xoff, yoff, w, h, d);
     }
-
-    public void subData2D(int xoff, int yoff, int w, int h, float[] d) {
-        mRS.validate();
-        mRS.nAllocationData2D(getID(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
-                              w, h, d, d.length * 4);
-    }
-
     /**
-     * Copy a rectangular region into the allocation from another
-     * allocation.
-     *
-     * @param xoff X offset of the region to update.
-     * @param yoff Y offset of the region to update.
-     * @param w Width of the incoming region to update.
-     * @param h Height of the incoming region to update.
-     * @param data source allocation.
-     * @param dataXoff X offset in data of the region to update.
-     * @param dataYoff Y offset in data of the region to update.
+     * @hide
      */
-    public void subData2D(int xoff, int yoff, int w, int h,
-                          AllocationAdapter data, int dataXoff, int dataYoff) {
-        mRS.validate();
-        mRS.nAllocationData2D(getID(), xoff, yoff,
-                              mSelectedLOD, mSelectedFace.mID,
-                              w, h, data.getID(), dataXoff, dataYoff,
-                              data.mSelectedLOD, data.mSelectedFace.mID);
+    public void subData2D(int xoff, int yoff, int w, int h, float[] d) {
+        super.copy2DRangeFrom(xoff, yoff, w, h, d);
     }
-
+    /**
+     * @hide
+     */
     public void readData(int[] d) {
-        mRS.validate();
-        mRS.nAllocationRead(getID(), d);
+        super.copyTo(d);
     }
-
+    /**
+     * @hide
+     */
     public void readData(float[] d) {
-        mRS.validate();
-        mRS.nAllocationRead(getID(), d);
+        super.copyTo(d);
     }
 
-    private void initLOD(int lod) {
+    void initLOD(int lod) {
         if (lod < 0) {
             throw new RSIllegalArgumentException("Attempting to set negative lod (" + lod + ").");
         }
 
-        int tx = mAlloc.mType.getX();
-        int ty = mAlloc.mType.getY();
-        int tz = mAlloc.mType.getZ();
+        int tx = mAdaptedAllocation.mType.getX();
+        int ty = mAdaptedAllocation.mType.getY();
+        int tz = mAdaptedAllocation.mType.getZ();
 
         for (int ct=0; ct < lod; ct++) {
             if ((tx==1) && (ty == 1) && (tz == 1)) {
@@ -250,25 +114,31 @@ public class AllocationAdapter extends Allocation {
             if (tz > 1) tz >>= 1;
         }
 
-        mSelectedDimX = tx;
-        mSelectedDimY = ty;
-        mSelectedCount = tx;
-        if (ty > 1) {
-            mSelectedCount *= ty;
+        mCurrentDimX = tx;
+        mCurrentDimY = ty;
+        mCurrentDimZ = tz;
+        mCurrentCount = mCurrentDimX;
+        if (mCurrentDimY > 1) {
+            mCurrentCount *= mCurrentDimY;
         }
-        if (tz > 1) {
-            mSelectedCount *= tz;
+        if (mCurrentDimZ > 1) {
+            mCurrentCount *= mCurrentDimZ;
         }
+        mSelectedY = 0;
+        mSelectedZ = 0;
     }
 
     /**
      * Set the active LOD.  The LOD must be within the range for the
-     * type being adapted.
+     * type being adapted.  The base allocation must have mipmaps.
+     *
+     * Because this changes the dimensions of the adapter the
+     * current Y and Z will be reset.
      *
      * @param lod The LOD to make active.
      */
     public void setLOD(int lod) {
-        if (!mAlloc.getType().hasMipmaps()) {
+        if (!mAdaptedAllocation.getType().hasMipmaps()) {
             throw new RSInvalidStateException("Cannot set LOD when the allocation type does not include mipmaps.");
         }
         if (!mConstrainedLOD) {
@@ -278,22 +148,81 @@ public class AllocationAdapter extends Allocation {
         initLOD(lod);
     }
 
+    /**
+     * Set the active Face.  The base allocation must be of a type
+     * that includes faces.
+     *
+     * @param cf The face to make active.
+     */
     public void setFace(Type.CubemapFace cf) {
+        if (!mAdaptedAllocation.getType().hasFaces()) {
+            throw new RSInvalidStateException("Cannot set Face when the allocation type does not include faces.");
+        }
+        if (!mConstrainedFace) {
+            throw new RSInvalidStateException("Cannot set LOD when the adapter includes mipmaps.");
+        }
+        if (cf == null) {
+            throw new RSIllegalArgumentException("Cannot set null face.");
+        }
+
         mSelectedFace = cf;
     }
 
+    /**
+     * Set the active Y.  The y value must be within the range for
+     * the allocation being adapted.  The base allocation must
+     * contain the Y dimension.
+     *
+     * @param y The y to make active.
+     */
     public void setY(int y) {
-        mSelectedDimY = y;
+        if (mAdaptedAllocation.getType().getY() == 0) {
+            throw new RSInvalidStateException("Cannot set Y when the allocation type does not include Y dim.");
+        }
+        if (mAdaptedAllocation.getType().getY() <= y) {
+            throw new RSInvalidStateException("Cannot set Y greater than dimension of allocation.");
+        }
+        if (!mConstrainedY) {
+            throw new RSInvalidStateException("Cannot set Y when the adapter includes Y.");
+        }
+
+        mSelectedY = y;
     }
 
+    /**
+     * Set the active Z.  The z value must be within the range for
+     * the allocation being adapted.  The base allocation must
+     * contain the Z dimension.
+     *
+     * @param z The z to make active.
+     */
     public void setZ(int z) {
+        if (mAdaptedAllocation.getType().getZ() == 0) {
+            throw new RSInvalidStateException("Cannot set Z when the allocation type does not include Z dim.");
+        }
+        if (mAdaptedAllocation.getType().getZ() <= z) {
+            throw new RSInvalidStateException("Cannot set Z greater than dimension of allocation.");
+        }
+        if (!mConstrainedZ) {
+            throw new RSInvalidStateException("Cannot set Z when the adapter includes Z.");
+        }
+
+        mSelectedZ = z;
     }
 
-    // creation
-    //static public AllocationAdapter create1D(RenderScript rs, Allocation a) {
-    //}
+    static public AllocationAdapter create1D(RenderScript rs, Allocation a) {
+        rs.validate();
+        AllocationAdapter aa = new AllocationAdapter(0, rs, a);
+        aa.mConstrainedLOD = true;
+        aa.mConstrainedFace = true;
+        aa.mConstrainedY = true;
+        aa.mConstrainedZ = true;
+        aa.initLOD(0);
+        return aa;
+    }
 
     static public AllocationAdapter create2D(RenderScript rs, Allocation a) {
+        android.util.Log.e("rs", "create2d " + a);
         rs.validate();
         AllocationAdapter aa = new AllocationAdapter(0, rs, a);
         aa.mConstrainedLOD = true;
@@ -304,6 +233,16 @@ public class AllocationAdapter extends Allocation {
         return aa;
     }
 
+
+    /**
+     * Override the Allocation resize.  Resizing adapters is not
+     * allowed and will throw a RSInvalidStateException.
+     *
+     * @param dimX ignored.
+     */
+    public synchronized void resize(int dimX) {
+        throw new RSInvalidStateException("Resize not allowed for Adapters.");
+    }
 
 }
 
