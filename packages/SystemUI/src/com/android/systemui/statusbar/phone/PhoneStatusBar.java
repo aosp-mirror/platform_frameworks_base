@@ -53,6 +53,7 @@ import android.view.Surface;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -318,11 +319,11 @@ public class PhoneStatusBar extends StatusBar {
         return sb;
     }
 
-    protected WindowManager.LayoutParams getRecentsLayoutParams() {
+    protected WindowManager.LayoutParams getRecentsLayoutParams(LayoutParams layoutParams) {
         boolean translucent = false;
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
+                layoutParams.width,
+                layoutParams.height,
                 WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL,
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                 | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
@@ -344,13 +345,16 @@ public class PhoneStatusBar extends StatusBar {
             visible = mRecentsPanel.getVisibility() == View.VISIBLE;
             WindowManagerImpl.getDefault().removeView(mRecentsPanel);
         }
-        mRecentsPanel = (RecentsPanelView) View.inflate(mContext,
-                R.layout.status_bar_recent_panel, null);
+
+        // Provide RecentsPanelView with a temporary parent to allow layout params to work.
+        LinearLayout tmpRoot = new LinearLayout(mContext);
+        mRecentsPanel = (RecentsPanelView) LayoutInflater.from(mContext).inflate(
+                R.layout.status_bar_recent_panel, tmpRoot, false);
 
         mRecentsPanel.setOnTouchListener(new TouchOutsideListener(MSG_CLOSE_RECENTS_PANEL,
                 mRecentsPanel));
         mRecentsPanel.setVisibility(View.GONE);
-        WindowManager.LayoutParams lp = getRecentsLayoutParams();
+        WindowManager.LayoutParams lp = getRecentsLayoutParams(mRecentsPanel.getLayoutParams());
 
         WindowManagerImpl.getDefault().addView(mRecentsPanel, lp);
         mRecentsPanel.setBar(this);

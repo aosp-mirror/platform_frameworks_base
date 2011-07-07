@@ -26,7 +26,7 @@
 
     <FrameLayout
         android:id="@+id/recents_bg_protect"
-        android:background="@drawable/recents_bg_protect_tile"
+        android:background="@drawable/status_bar_recents_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
@@ -39,7 +39,6 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="0dp"
             android:layout_gravity="bottom"
-            android:background="@drawable/recents_blue_glow"
             android:orientation="horizontal"
             android:clipToPadding="false"
             android:clipChildren="false"
@@ -79,6 +78,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:background="@drawable/ic_sysbar_back_ime"
+        android:visibility="gone"
     />
 
 </com.android.systemui.recent.RecentsPanelView>

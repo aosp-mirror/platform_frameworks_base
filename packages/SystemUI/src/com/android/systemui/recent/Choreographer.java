@@ -18,7 +18,9 @@ package com.android.systemui.recent;
 
 import android.animation.Animator;
 import android.animation.AnimatorSet;
+import android.animation.AnimatorSet.Builder;
 import android.animation.ObjectAnimator;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.util.Slog;
 import android.view.View;
@@ -78,14 +80,14 @@ import android.view.View;
                 ? new android.view.animation.AccelerateInterpolator(1.0f)
                 : new android.view.animation.DecelerateInterpolator(1.0f));
 
-        Animator bgAnim = ObjectAnimator.ofInt(mScrimView.getBackground(),
-                "alpha", appearing ? 0 : 255, appearing ? 255 : 0);
-
         mContentAnim = new AnimatorSet();
-        mContentAnim
-                .play(bgAnim)
-                .with(glowAnim)
-                .with(posAnim);
+        final Builder builder = mContentAnim.play(glowAnim).with(posAnim);
+        Drawable background = mScrimView.getBackground();
+        if (background != null) {
+            Animator bgAnim = ObjectAnimator.ofInt(background,
+                "alpha", appearing ? 0 : 255, appearing ? 255 : 0);
+            builder.with(bgAnim);
+        }
         mContentAnim.setDuration(appearing ? OPEN_DURATION : CLOSE_DURATION);
         mContentAnim.addListener(this);
         if (mListener != null) {
