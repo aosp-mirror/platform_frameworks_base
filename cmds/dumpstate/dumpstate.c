@@ -47,9 +47,11 @@ static void dumpstate() {
     char build[PROPERTY_VALUE_MAX], fingerprint[PROPERTY_VALUE_MAX];
     char radio[PROPERTY_VALUE_MAX], bootloader[PROPERTY_VALUE_MAX];
     char network[PROPERTY_VALUE_MAX], date[80];
+    char build_type[PROPERTY_VALUE_MAX];
 
     property_get("ro.build.display.id", build, "(unknown)");
     property_get("ro.build.fingerprint", fingerprint, "(unknown)");
+    property_get("ro.build.type", build_type, "(unknown)");
     property_get("ro.baseband", radio, "(unknown)");
     property_get("ro.bootloader", bootloader, "(unknown)");
     property_get("gsm.operator.alpha", network, "(unknown)");
@@ -136,9 +138,17 @@ static void dumpstate() {
 #ifdef BROKEN_VRIL_IS_FIXED_B_4442803
    char ril_dumpstate_timeout[PROPERTY_VALUE_MAX] = {0};
     property_get("ril.dumpstate.timeout", ril_dumpstate_timeout, "30");
-    if (strlen(ril_dumpstate_timeout) > 0) {
-        run_command("DUMP VENDOR RIL LOGS", atoi(ril_dumpstate_timeout),
-                "su", "root", "vril-dump", NULL);
+    if (strnlen(ril_dumpstate_timeout, PROPERTY_VALUE_MAX - 1) > 0) {
+        if (0 == strncmp(build_type, "user", PROPERTY_VALUE_MAX - 1)) {
+            // su does not exist on user builds, so try running without it.
+            // This way any implementations of vril-dump that do not require
+            // root can run on user builds.
+            run_command("DUMP VENDOR RIL LOGS", atoi(ril_dumpstate_timeout),
+                    "vril-dump", NULL);
+        } else {
+            run_command("DUMP VENDOR RIL LOGS", atoi(ril_dumpstate_timeout),
+                    "su", "root", "vril-dump", NULL);
+        }
     }
 #endif
 
@@ -275,7 +285,7 @@ int main(int argc, char *argv[]) {
 
     if (getuid() == 0) {
         /* switch to non-root user and group */
-        gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT };
+        gid_t groups[] = { AID_LOG, AID_SDCARD_RW, AID_MOUNT, AID_INET };
         if (setgroups(sizeof(groups)/sizeof(groups[0]), groups) != 0) {
             LOGE("Unable to setgroups, aborting: %s\n", strerror(errno));
             return -1;
