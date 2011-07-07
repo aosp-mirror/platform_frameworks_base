@@ -2881,10 +2881,6 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             msg.append(", id[").append(i).append("]=").append(getPointerId(i));
             msg.append(", x[").append(i).append("]=").append(getX(i));
             msg.append(", y[").append(i).append("]=").append(getY(i));
-            msg.append(", pressure[").append(i).append("]=").append(getPressure(i));
-            msg.append(", touchMajor[").append(i).append("]=").append(getTouchMajor(i));
-            msg.append(", touchMinor[").append(i).append("]=").append(getTouchMinor(i));
-            msg.append(", orientation[").append(i).append("]=").append(getOrientation(i));
             msg.append(", toolType[").append(i).append("]=").append(
                     toolTypeToString(getToolType(i)));
         }

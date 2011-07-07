@@ -577,10 +577,8 @@ public final class WebViewCore {
     private native void nativeTouchUp(int touchGeneration,
             int framePtr, int nodePtr, int x, int y);
 
-    private native boolean nativeHandleTouchEvent(int action, long eventTime,
-            int[] idArray, int[] xArray, int[] yArray, float[] pressureArray,
-            int[] touchMajorArray, int[] touchMinorArray, float[] orientationArray,
-            int count, int actionIndex, int metaState);
+    private native boolean nativeHandleTouchEvent(int action, int[] idArray,
+            int[] xArray, int[] yArray, int count, int actionIndex, int metaState);
 
     private native void nativeUpdateFrameCache();
 
@@ -835,21 +833,16 @@ public final class WebViewCore {
 
     static class TouchEventData {
         int mAction;
-        long mEventTime;  // Time (in ms) this event was generated.
-        int[] mIds;  // Ids of the touch points.
+        int[] mIds;  // Ids of the touch points
         Point[] mPoints;
-        Point[] mPointsInView;  // Point coordinates in view axis.
-        float[] mPressures;  // Pressures of the touch points.
-        int[] mTouchMajor;  // Length of the major axis of the touch area.
-        int[] mTouchMinor;  // Length of the minor axis of the touch area.
-        float[] mOrientation;  // The orientation of the touch area.
-        int mActionIndex;  // Associated pointer index for ACTION_POINTER_DOWN/UP.
+        Point[] mPointsInView;  // the point coordinates in view axis.
+        int mActionIndex;  // Associated pointer index for ACTION_POINTER_DOWN/UP
         int mMetaState;
         boolean mReprocess;
-        MotionEvent mMotionEvent;  // Only used for multi-touch.
+        MotionEvent mMotionEvent;
         int mNativeLayer;
         Rect mNativeLayerRect = new Rect();
-        long mSequence;  // For queuing the events.
+        long mSequence;
         boolean mNativeResult;
     }
 
@@ -1358,11 +1351,8 @@ public final class WebViewCore {
                                 nativeScrollLayer(ted.mNativeLayer,
                                         ted.mNativeLayerRect);
                             }
-                            ted.mNativeResult = nativeHandleTouchEvent(
-                                    ted.mAction, ted.mEventTime, ted.mIds,
-                                    xArray, yArray, ted.mPressures,
-                                    ted.mTouchMajor, ted.mTouchMinor, ted.mOrientation,
-                                    count, ted.mActionIndex, ted.mMetaState);
+                            ted.mNativeResult = nativeHandleTouchEvent(ted.mAction, ted.mIds,
+                                    xArray, yArray, count, ted.mActionIndex, ted.mMetaState);
                             Message.obtain(
                                     mWebView.mPrivateHandler,
                                     WebView.PREVENT_TOUCH_ID,
