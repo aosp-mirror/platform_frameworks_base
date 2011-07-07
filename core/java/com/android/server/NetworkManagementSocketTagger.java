@@ -30,6 +30,7 @@ import java.nio.charset.Charsets;
 public final class NetworkManagementSocketTagger extends SocketTagger {
 
     private static final boolean LOGI = false;
+    private static final boolean ENABLE_TAGGING = false;
 
     private static ThreadLocal<SocketTags> threadSocketTags = new ThreadLocal<SocketTags>() {
         @Override protected SocketTags initialValue() {
@@ -124,6 +125,8 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
      *
      */
     private void internalModuleCtrl(String cmd) throws IOException {
+        if (!ENABLE_TAGGING) return;
+
         final FileOutputStream procOut;
         // TODO: Use something like
         //  android.os.SystemProperties.getInt("persist.bandwidth.enable", 0)
