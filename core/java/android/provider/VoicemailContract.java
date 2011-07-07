@@ -16,6 +16,9 @@
 
 package android.provider;
 
+import android.Manifest;
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.net.Uri;
@@ -25,11 +28,26 @@ import android.provider.CallLog.Calls;
  * The contract between the voicemail provider and applications. Contains
  * definitions for the supported URIs and columns.
  *
+ * <P>The content providers exposes two tables through this interface:
+ * <ul>
+ *   <li> Voicemails table: This stores the actual voicemail records. The
+ *   columns and URIs for accessing this table are defined by the
+ *   {@link Voicemails} class.
+ *   </li>
+ *   <li> Status table: This provides a way for the voicemail source application
+ *   to convey its current state to the system. The columns and URIS for
+ *   accessing this table are defined by the {@link Status} class.
+ *   </li>
+ * </ul>
+ *
+ * <P> The minimum permission needed to access this content provider is
+ * {@link Manifest.permission#READ_WRITE_OWN_VOICEMAIL}
+ *
  * <P>Voicemails are inserted by what is called as a "voicemail source"
  * application, which is responsible for syncing voicemail data between a remote
  * server and the local voicemail content provider. "voicemail source"
- * application should use the source specific {@link #CONTENT_URI_SOURCE} URI
- * to insert and retrieve voicemails.
+ * application should always set the {@link #PARAM_KEY_SOURCE_PACKAGE} in the
+ * URI to identify its package.
  *
  * <P>In addition to the {@link ContentObserver} notifications the voicemail
  * provider also generates broadcast intents to notify change for applications
@@ -43,9 +61,7 @@ import android.provider.CallLog.Calls;
  *    made into the database, including new voicemail.
  *   </li>
  * </ul>
- * @hide
  */
-// TODO: unhide when the API is approved by android-api-council
 public class VoicemailContract {
     /** Not instantiable. */
     private VoicemailContract() {
@@ -59,18 +75,18 @@ public class VoicemailContract {
      */
     public static final String PARAM_KEY_SOURCE_PACKAGE = "source_package";
 
-    // TODO: Move ACTION_NEW_VOICEMAIL to the Intent class.
     /** Broadcast intent when a new voicemail record is inserted. */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NEW_VOICEMAIL = "android.intent.action.NEW_VOICEMAIL";
     /**
-     * Extra included in {@value Intent#ACTION_PROVIDER_CHANGED} and
-     * {@value #ACTION_NEW_VOICEMAIL} broadcast intents to indicate if the receiving
-     * package made this change.
+     * Extra included in {@link Intent#ACTION_PROVIDER_CHANGED} broadcast intents to indicate if the
+     * receiving package made this change.
      */
     public static final String EXTRA_SELF_CHANGE = "com.android.voicemail.extra.SELF_CHANGE";
 
     /**
      * Name of the source package field, which must be same across all voicemail related tables.
+     * This is an internal field.
      * @hide
      */
     public static final String SOURCE_PACKAGE_FIELD = "source_package";
@@ -85,8 +101,11 @@ public class VoicemailContract {
         public static final Uri CONTENT_URI =
             Uri.parse("content://" + AUTHORITY + "/voicemail");
 
-        /** The mime type for a collection of voicemails. */
+        /** The MIME type for a collection of voicemails. */
         public static final String DIR_TYPE = "vnd.android.cursor.dir/voicemails";
+
+        /** The MIME type for a single voicemail. */
+        public static final String ITEM_TYPE = "vnd.android.cursor.item/voicemail";
 
         /**
          * Phone number of the voicemail sender.
@@ -109,17 +128,27 @@ public class VoicemailContract {
          */
         public static final String NEW = Calls.NEW;
         /**
-         * The mail box state of the voicemail.
+         * The mail box state of the voicemail. This field is currently not used by the system.
          * <P> Possible values: {@link #STATE_INBOX}, {@link #STATE_DELETED},
          * {@link #STATE_UNDELETED}.
          * <P>Type: INTEGER</P>
+         * @hide
          */
         public static final String STATE = "state";
-        /** Value of {@link #STATE} when the voicemail is in inbox. */
+        /**
+         * Value of {@link #STATE} when the voicemail is in inbox.
+         * @hide
+         */
         public static int STATE_INBOX = 0;
-        /** Value of {@link #STATE} when the voicemail has been marked as deleted. */
+        /**
+         * Value of {@link #STATE} when the voicemail has been marked as deleted.
+         * @hide
+         */
         public static int STATE_DELETED = 1;
-        /** Value of {@link #STATE} when the voicemail has marked as undeleted. */
+        /**
+         * Value of {@link #STATE} when the voicemail has marked as undeleted.
+         * @hide
+         */
         public static int STATE_UNDELETED = 2;
         /**
          * Package name of the source application that inserted the voicemail.
@@ -166,9 +195,9 @@ public class VoicemailContract {
     public static final class Status implements BaseColumns {
         /** URI to insert/retrieve status of voicemail source. */
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/status");
-        /** The mime type for a collection of voicemail source statuses. */
+        /** The MIME type for a collection of voicemail source statuses. */
         public static final String DIR_TYPE = "vnd.android.cursor.dir/voicemail.source.status";
-        /** The mime type for a collection of voicemails. */
+        /** The MIME type for a single voicemail source status entry. */
         public static final String ITEM_TYPE = "vnd.android.cursor.item/voicemail.source.status";
 
         /** Not instantiable. */
@@ -201,10 +230,17 @@ public class VoicemailContract {
          * <P>Type: INTEGER</P>
          */
         public static final String CONFIGURATION_STATE = "configuration_state";
+        /** Value of {@link #CONFIGURATION_STATE} to indicate an all OK configuration status. */
         public static final int CONFIGURATION_STATE_OK = 0;
+        /**
+         * Value of {@link #CONFIGURATION_STATE} to indicate the visual voicemail is not
+         * yet configured on this device.
+         */
         public static final int CONFIGURATION_STATE_NOT_CONFIGURED = 1;
         /**
-         * This state must be used when the source has verified that the current user can be
+         * Value of {@link #CONFIGURATION_STATE} to indicate the visual voicemail is not
+         * yet configured on this device but can be configured by the user.
+         * <p> This state must be used when the source has verified that the current user can be
          * upgraded to visual voicemail and would like to show a set up invitation message.
          */
         public static final int CONFIGURATION_STATE_CAN_BE_CONFIGURED = 2;
@@ -218,7 +254,14 @@ public class VoicemailContract {
          * <P>Type: INTEGER</P>
          */
         public static final String DATA_CHANNEL_STATE = "data_channel_state";
+        /**
+         *  Value of {@link #DATA_CHANNEL_STATE} to indicate that data channel is working fine.
+         */
         public static final int DATA_CHANNEL_STATE_OK = 0;
+        /**
+         * Value of {@link #DATA_CHANNEL_STATE} to indicate that data channel connection is not
+         * working.
+         */
         public static final int DATA_CHANNEL_STATE_NO_CONNECTION = 1;
         /**
          * The notification channel state of the voicemail source. This is the channel through which
@@ -231,10 +274,20 @@ public class VoicemailContract {
          * <P>Type: INTEGER</P>
          */
         public static final String NOTIFICATION_CHANNEL_STATE = "notification_channel_state";
+        /**
+         * Value of {@link #NOTIFICATION_CHANNEL_STATE} to indicate that the notification channel is
+         * working fine.
+         */
         public static final int NOTIFICATION_CHANNEL_STATE_OK = 0;
+        /**
+         * Value of {@link #NOTIFICATION_CHANNEL_STATE} to indicate that the notification channel
+         * connection is not working.
+         */
         public static final int NOTIFICATION_CHANNEL_STATE_NO_CONNECTION = 1;
         /**
-         * Use this state when the notification can only tell that there are pending messages on
+         * Value of {@link #NOTIFICATION_CHANNEL_STATE} to indicate that there are messages waiting
+         * on the server but the details are not known.
+         * <p> Use this state when the notification can only tell that there are pending messages on
          * the server but no details of the sender/time etc are known.
          */
         public static final int NOTIFICATION_CHANNEL_STATE_MESSAGE_WAITING = 2;
