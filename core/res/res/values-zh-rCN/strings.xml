@@ -152,7 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"飞行模式"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"已开启飞行模式"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"已关闭飞行模式"</string>
-    <!-- outdated translation 5833510281787786290 -->     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"100+"</string>
+    <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"安全模式"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android 系统"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"需要您付费的服务"</string>
@@ -319,14 +319,10 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"写入联系数据"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"允许应用程序修改您平板电脑上存储的联系人（地址）数据。恶意应用程序可借此清除或修改您的联系人数据。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"允许应用程序修改您手机上存储的联系人（地址）数据。恶意应用程序可借此清除或修改您的联系人数据。"</string>
-    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
-    <skip />
+    <string name="permlab_readProfile" msgid="2211941946684590103">"读取个人资料数据"</string>
+    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"允许应用程序读取您的所有个人资料信息。恶意应用程序可能会利用此权限识别您的身份，并向他人发送您的个人信息。"</string>
+    <string name="permlab_writeProfile" msgid="6561668046361989220">"写入个人资料数据"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"允许应用程序修改您的个人资料信息。恶意应用程序可能会利用此权限清除或修改您的个人资料数据。"</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"读取日历活动"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"允许应用程序读取您平板电脑上存储的所有日历活动。恶意应用程序可借此将您的日历活动发送给其他人。"</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"允许应用程序读取您手机上存储的所有日历活动。恶意应用程序可借此将您的日历活动发送给其他人。"</string>
@@ -491,14 +487,12 @@
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"允许应用程序读取和写入缓存文件系统。"</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"拨打/接听互联网通话"</string>
     <string name="permdesc_use_sip" msgid="6320376185606661843">"允许应用程序使用 SIP 服务拨打/接听互联网通话。"</string>
-    <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
-    <skip />
-    <!-- no translation found for permdesc_readNetworkUsageHistory (6040738474779135653) -->
-    <skip />
-    <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
-    <skip />
-    <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
-    <skip />
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"读取网络使用情况历史记录"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="6040738474779135653">"允许应用程序读取特定网络和应用程序的网络使用情况历史记录。"</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"管理网络政策"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="3723795285132803958">"允许应用程序管理网络政策和定义专门针对应用程序的规则。"</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"修改网络使用情况记录方式"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="8702285686629184404">"允许针对应用程序修改网络使用情况的记录方式。不适用于普通应用程序。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"设置密码规则"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"控制屏幕解锁密码允许的长度和字符数"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"监视屏幕解锁尝试次数"</string>
@@ -517,10 +511,8 @@
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"控制锁定屏幕密码的更改频率"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"设置存储设备加密"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"需要对存储的应用程序数据进行加密"</string>
-    <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
-    <skip />
-    <!-- no translation found for policydesc_disableCamera (5680054212889413366) -->
-    <skip />
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"停用相机"</string>
+    <string name="policydesc_disableCamera" msgid="5680054212889413366">"禁止使用所有设备相机"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"住宅"</item>
     <item msgid="869923650527136615">"手机"</item>
@@ -662,10 +654,8 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"平板电脑中没有 SIM 卡。"</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"手机中无 SIM 卡"</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"请插入 SIM 卡"</string>
-    <!-- no translation found for lockscreen_missing_sim_instructions_long (7138450788301444298) -->
-    <skip />
-    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (1631853574702335453) -->
-    <skip />
+    <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"SIM 卡丢失或无法读取。请插入 SIM 卡。"</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"您的 SIM 卡已永久停用。"\n"请与您的无线服务提供商联系，以便重新获取一张 SIM 卡。"</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"只能使用紧急呼叫"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"网络已锁定"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM 卡已用 PUK 码锁定"</string>
@@ -954,9 +944,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"如果您打开了 USB 存储设备，则您当前使用的某些应用程序会停止，而且在您关闭 USB 存储设备前可能都无法使用。"</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB 操作失败"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"确定"</string>
-    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
     <skip />
-    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
+    <skip />
+    <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
+    <skip />
+    <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"格式化 USB 存储设备"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"格式化 SD 卡"</string>
@@ -1021,18 +1015,12 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"辅助功能"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"壁纸"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"更改壁纸"</string>
-    <string name="pptp_vpn_description" msgid="2688045385181439401">"点对点隧道协议"</string>
-    <string name="l2tp_vpn_description" msgid="3750692169378923304">"第 2 层隧道协议"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"基于预共享密钥的 L2TP/IPSec VPN"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"基于证书的 L2TP/IPSec VPN"</string>
-    <!-- no translation found for vpn_ticker (285642105845608311) -->
+    <!-- no translation found for vpn_title (8219003246858087489) -->
     <skip />
-    <!-- no translation found for vpn_title (5434034606697234123) -->
+    <!-- no translation found for vpn_title_long (6400714798049252294) -->
     <skip />
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"点按即可管理网络。"</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"已连接到<xliff:g id="SESSION">%s</xliff:g>。点按即可管理网络。"</string>
     <string name="upload_file" msgid="2897957172366730416">"选择文件"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"未选定任何文件"</string>
     <string name="reset" msgid="2448168080964209908">"重置"</string>
@@ -1081,9 +1069,6 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"删除这些项。"</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"撤消删除。"</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"目前不进行任何操作。"</string>
-    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"VPN“<xliff:g id="PROFILENAME">%s</xliff:g>”已连接"</string>
-    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN“<xliff:g id="PROFILENAME">%s</xliff:g>”已断开连接"</string>
-    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"触摸可重新连接到 VPN。"</string>
     <string name="choose_account_label" msgid="4191313562041125787">"选择帐户"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"增加"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"减少"</string>
@@ -1094,16 +1079,34 @@
     <string name="storage_sd_card" msgid="8921771478629812343">"SD 卡"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB 存储器"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"编辑..."</string>
-    <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"数据使用情况警告"</string>
+    <string name="data_usage_warning_body" msgid="3354394590936526648">"使用量超过 <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G 数据已停用"</string>
+    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G 数据已停用"</string>
+    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"移动数据已停用"</string>
+    <string name="data_usage_limit_body" msgid="2182247539226163759">"点按即可启用"</string>
+    <string name="ssl_certificate" msgid="6510040486049237639">"安全证书"</string>
+    <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"该证书有效。"</string>
+    <string name="issued_to" msgid="454239480274921032">"颁发给："</string>
+    <string name="common_name" msgid="2233209299434172646">"常用名称："</string>
+    <string name="org_name" msgid="6973561190762085236">"组织："</string>
+    <string name="org_unit" msgid="7265981890422070383">"组织单位："</string>
+    <string name="issued_by" msgid="2647584988057481566">"颁发者："</string>
+    <string name="validity_period" msgid="8818886137545983110">"有效期："</string>
+    <string name="issued_on" msgid="5895017404361397232">"颁发时间："</string>
+    <string name="expires_on" msgid="3676242949915959821">"有效期至："</string>
+    <!-- no translation found for serial_number (758814067660862493) -->
     <skip />
-    <!-- no translation found for data_usage_warning_body (3354394590936526648) -->
+    <!-- no translation found for fingerprints (4516019619850763049) -->
     <skip />
-    <!-- no translation found for data_usage_3g_limit_title (7093334419518706686) -->
+    <!-- no translation found for sha256_fingerprint (4391271286477279263) -->
     <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7636489436819470761) -->
+    <!-- no translation found for sha1_fingerprint (7930330235269404581) -->
     <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
+    <!-- no translation found for activity_chooser_view_see_all (180268188117163072) -->
     <skip />
-    <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
+    <!-- no translation found for activity_chooser_view_no_activities (1306964627596326933) -->
+    <skip />
+    <!-- no translation found for activity_chooser_view_select_default (5450262016073956587) -->
     <skip />
 </resources>

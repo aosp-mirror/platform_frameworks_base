@@ -152,7 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Mode d\'avió"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Mode d\'avió activat"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Mode d\'avió desactivat"</string>
-    <!-- outdated translation 5833510281787786290 -->     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"+100"</string>
+    <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"+999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Mode segur"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Serveis de pagament"</string>
@@ -319,14 +319,10 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"escriure dades de contacte"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Permet que una aplicació modifiqui les dades de contactes (adreces) emmagatzemades a la tauleta. Les aplicacions malicioses poden utilitzar aquesta funció per esborrar o per modificar les teves dades de contactes."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Permet a una aplicació modificar les dades de contacte (adreça) emmagatzemades al telèfon. Les aplicacions malicioses poden utilitzar-ho per esborrar o modificar les dades de contacte."</string>
-    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
-    <skip />
+    <string name="permlab_readProfile" msgid="2211941946684590103">"lectura de dades del perfil"</string>
+    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"Permet que una aplicació llegeixi tota la informació del teu perfil personal. Les aplicacions malicioses poden utilitzar-ho per identificar-te i enviar la teva informació personal a altres persones."</string>
+    <string name="permlab_writeProfile" msgid="6561668046361989220">"escriptura de dades del perfil"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"Permet a una aplicació modificar la informació del teu perfil personal. Les aplicacions malicioses poden utilitzar-ho per esborrar o modificar les dades del teu perfil."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"llegir els esdeveniments del calendari"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Permet que una aplicació llegeixi tots els esdeveniments del calendari emmagatzemats a la tauleta. Les aplicacions malicioses poden utilitzar aquesta funció per enviar els teus esdeveniments del calendari a altres persones."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Permet a una aplicació llegir tots els esdeveniments del calendari emmagatzemats al telèfon. Les aplicacions malicioses poden utilitzar-ho per enviar els vostres esdeveniments del calendari a altres persones."</string>
@@ -491,14 +487,12 @@
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permet a una aplicació llegir el sistema de fitxers de la memòria cau i escriure-hi."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"fes/rep trucades per Internet"</string>
     <string name="permdesc_use_sip" msgid="6320376185606661843">"Permet que una aplicació utilitzi el servei SIP per fer i rebre trucades per Internet."</string>
-    <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
-    <skip />
-    <!-- no translation found for permdesc_readNetworkUsageHistory (6040738474779135653) -->
-    <skip />
-    <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
-    <skip />
-    <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
-    <skip />
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"lectura de l\'ús històric de la xarxa"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="6040738474779135653">"Permet que una aplicació llegeixi l\'ús històric de la xarxa per a xarxes i aplicacions específiques."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"gestió de la política de xarxa"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="3723795285132803958">"Permet que una aplicació gestioni les polítiques de la xarxa i defineixi les regles específiques d\'aplicació."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"modificació del càlcul d\'ús de la xarxa"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="8702285686629184404">"Permet modificar la manera com es calcula l\'ús de la xarxa per part de les aplicacions. No es pot fer servir amb aplicacions normals."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Defineix les normes de contrasenya"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Controla la longitud i els caràcters permesos a les contrasenyes de desbloqueig de pantalla"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Supervisa els intents de desbloqueig de la pantalla"</string>
@@ -517,10 +511,8 @@
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Controla la freqüència amb què cal canviar la contrasenya de bloqueig de pantalla"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Encriptació d’emmagatzematge"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Requereix que les dades de l\'aplicació emmagatzemades estiguin encriptades"</string>
-    <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
-    <skip />
-    <!-- no translation found for policydesc_disableCamera (5680054212889413366) -->
-    <skip />
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Desactiva les càmeres"</string>
+    <string name="policydesc_disableCamera" msgid="5680054212889413366">"Impedeix l\'ús de totes les càmeres del dispositiu"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Casa"</item>
     <item msgid="869923650527136615">"Mòbil"</item>
@@ -662,10 +654,8 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"No hi ha cap targeta SIM a la tauleta."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"No hi ha cap targeta SIM al telèfon."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Inseriu una targeta SIM."</string>
-    <!-- no translation found for lockscreen_missing_sim_instructions_long (7138450788301444298) -->
-    <skip />
-    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (1631853574702335453) -->
-    <skip />
+    <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Falta la targeta SIM o no es pot llegir. Insereix-ne una."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"La targeta SIM està desactivada permanentment. "\n" Contacta amb el teu proveïdor de serveis sense fil per obtenir-ne una altra."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Només trucades d\'emergència"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Xarxa bloquejada"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"La targeta SIM està bloquejada pel PUK."</string>
@@ -954,9 +944,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Si activeu l\'emmagatzematge USB, algunes de les aplicacions que utilitzeu s\'aturaran i pot ser que no estiguin disponibles fins que desactiveu l\'emmagatzematge USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Error de l\'operació d\'USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"D\'acord"</string>
-    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
     <skip />
-    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
+    <skip />
+    <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
+    <skip />
+    <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formata l\'emmag. USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formata la targeta SD"</string>
@@ -1021,18 +1015,12 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilitat"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Empaperat"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Canvi de l\'empaperat"</string>
-    <string name="pptp_vpn_description" msgid="2688045385181439401">"Protocol de tunelització punt a punt"</string>
-    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocol de tunelització de capa 2"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"VPN L2TP/IPSec basada en clau compartida prèviament"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"VPN L2TP/IPSec basada en certificats"</string>
-    <!-- no translation found for vpn_ticker (285642105845608311) -->
+    <!-- no translation found for vpn_title (8219003246858087489) -->
     <skip />
-    <!-- no translation found for vpn_title (5434034606697234123) -->
+    <!-- no translation found for vpn_title_long (6400714798049252294) -->
     <skip />
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"Pica per gestionar la xarxa."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"Connectat a <xliff:g id="SESSION">%s</xliff:g>. Pica per gestionar la xarxa."</string>
     <string name="upload_file" msgid="2897957172366730416">"Trieu un fitxer"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"No s\'ha escollit cap fitxer"</string>
     <string name="reset" msgid="2448168080964209908">"Reinicia"</string>
@@ -1081,9 +1069,6 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Suprimeix els elements."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Desfés les supressions."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"No facis res de moment."</string>
-    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> connectada"</string>
-    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> desconnectada"</string>
-    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Toca per tornar-te a connectar a una VPN."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Selecciona un compte"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Incrementa"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Disminueix"</string>
@@ -1094,26 +1079,34 @@
     <string name="storage_sd_card" msgid="8921771478629812343">"Targeta SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Emmagatzematge USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Edita..."</string>
-    <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"Advertiment d\'ús de dades"</string>
+    <string name="data_usage_warning_body" msgid="3354394590936526648">"l\'ús supera <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Dades 2G-3G desactivades"</string>
+    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Dades 4G desactivades"</string>
+    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Dades mòbils desactivades"</string>
+    <string name="data_usage_limit_body" msgid="2182247539226163759">"pica per activar-lo"</string>
+    <string name="ssl_certificate" msgid="6510040486049237639">"Certificat de seguretat"</string>
+    <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Aquest certificat és vàlid."</string>
+    <string name="issued_to" msgid="454239480274921032">"Emès per a:"</string>
+    <string name="common_name" msgid="2233209299434172646">"Nom comú:"</string>
+    <string name="org_name" msgid="6973561190762085236">"Organització:"</string>
+    <string name="org_unit" msgid="7265981890422070383">"Unitat organitzativa:"</string>
+    <string name="issued_by" msgid="2647584988057481566">"Emès per:"</string>
+    <string name="validity_period" msgid="8818886137545983110">"Validesa:"</string>
+    <string name="issued_on" msgid="5895017404361397232">"Emès el:"</string>
+    <string name="expires_on" msgid="3676242949915959821">"Caduca el:"</string>
+    <!-- no translation found for serial_number (758814067660862493) -->
     <skip />
-    <!-- no translation found for data_usage_warning_body (3354394590936526648) -->
+    <!-- no translation found for fingerprints (4516019619850763049) -->
     <skip />
-    <!-- no translation found for data_usage_3g_limit_title (7093334419518706686) -->
+    <!-- no translation found for sha256_fingerprint (4391271286477279263) -->
     <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7636489436819470761) -->
+    <!-- no translation found for sha1_fingerprint (7930330235269404581) -->
     <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
+    <!-- no translation found for activity_chooser_view_see_all (180268188117163072) -->
     <skip />
-    <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
+    <!-- no translation found for activity_chooser_view_no_activities (1306964627596326933) -->
     <skip />
-    <string name="ssl_certificate" msgid="5226747157992111668">"Certificat de seguretat"</string>
-    <string name="ssl_certificate_is_valid" msgid="7096160815933145579">"Aquest certificat és vàlid."</string>
-    <string name="issued_to" msgid="9032338008819841339">"Emès per a:"</string>
-    <string name="common_name" msgid="5745530093500062357">"Nom comú:"</string>
-    <string name="org_name" msgid="8868889052889991293">"Organització:"</string>
-    <string name="org_unit" msgid="4489056376307768196">"Unitat organitzativa:"</string>
-    <string name="issued_by" msgid="6959484326943152487">"Publicat per:"</string>
-    <string name="validity_period" msgid="57988851973181309">"Validesa:"</string>
-    <string name="issued_on" msgid="2082890654801808368">"Publicat el:"</string>
-    <string name="expires_on" msgid="8061200430557020704">"Caduca el:"</string>
+    <!-- no translation found for activity_chooser_view_select_default (5450262016073956587) -->
+    <skip />
 </resources>

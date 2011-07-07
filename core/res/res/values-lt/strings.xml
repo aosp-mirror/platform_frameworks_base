@@ -152,7 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Lėktuvo režimas"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"ĮJUNGTAS lėktuvo režimas"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"lėktuvo režimas IŠJUNGTAS"</string>
-    <!-- outdated translation 5833510281787786290 -->     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"100+"</string>
+    <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Saugos režimas"</string>
     <string name="android_system_label" msgid="6577375335728551336">"„Android“ sistema"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Paslaugos, už kurias mokėjote"</string>
@@ -319,14 +319,10 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"rašyti adresatų duomenis"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Leidžiama programai keisti kontaktų (adreso) duomenis, išsaugotus planšetiniame kompiuteryje. Kenkėjiškos programos gali tai naudoti, kad ištrintų ar keistų kontaktų duomenis."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Leidžia programai keisti adresatų (adresų) duomenis, išsaugotus jūsų telefone. Kenkėjiškos programos gali tai naudoti, kad ištrintų ar pakeistų jūsų adresatų duomenis."</string>
-    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
-    <skip />
+    <string name="permlab_readProfile" msgid="2211941946684590103">"skaityti profilio duomenis"</string>
+    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"Leidžiama programai skaityti visą asmeninę profilio informaciją. Piktybinės programos gali tai naudoti, kad jus identifikuotų ir siųstų asmeninę informaciją kitiems žmonėms."</string>
+    <string name="permlab_writeProfile" msgid="6561668046361989220">"įrašyti profilio duomenis"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"Leidžiama programai keisti asmeninę profilio informaciją. Piktybinės programos gali tai naudoti profilio duomenims ištrinti arba keisti."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"skaityti kalendoriaus įvykius"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Leidžiama programai skaityti visus kalendoriaus įvykius, išsaugotus jūsų planšetiniame kompiuteryje. Kenkėjiškos programos gali tai naudoti, kad siųstų jūsų kalendoriaus įvykius kitiems žmonėms."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Leidžia programai skaityti visus kalendoriaus įvykius, išsaugotus jūsų telefone. Kenkėjiškos programos tai gali naudoti, kad siųstų kalendoriaus įvykius kitiems žmonėms."</string>
@@ -491,14 +487,12 @@
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Leidžia programai skaityti ir rašyti į talpyklos failų sistemą."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"skambinti / priimti skambučius internetu"</string>
     <string name="permdesc_use_sip" msgid="6320376185606661843">"Leidžiama programai naudoti SIP paslaugą norint skambinti / priimti skambučius internetu."</string>
-    <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
-    <skip />
-    <!-- no translation found for permdesc_readNetworkUsageHistory (6040738474779135653) -->
-    <skip />
-    <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
-    <skip />
-    <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
-    <skip />
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"skaityti tinklo naudojimo istoriją"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="6040738474779135653">"Leidžiama programai skaityti konkrečių tinklų ir programų tinklo naudojimo istoriją."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"valdyti tinklo politiką"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="3723795285132803958">"Leidžiama programai valdyti tinklo politiką ir apibrėžti konkrečios programos taisykles."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"keisti tinklo naudojimo apskaitą"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="8702285686629184404">"Leidžiama keisti, kaip tinklo naudojimas apskaičiuojamas programose. Neskirta naudoti įprastoms programoms."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Nustatyti slaptažodžio taisykles"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Valdyti leidžiamą ekrano atrakinimo slaptažodžių ilgį ir juose leidžiamus naudoti simbolius"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Stebėti bandymus atrakinti ekraną"</string>
@@ -517,10 +511,8 @@
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Valdykite, kaip dažnai reikia keisti ekrano užrakto slaptažodį"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nustatyti atmintinės šifruotę"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Saugomos programos duomenys turi būti šifruoti"</string>
-    <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
-    <skip />
-    <!-- no translation found for policydesc_disableCamera (5680054212889413366) -->
-    <skip />
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Neleisti fotoaparatų"</string>
+    <string name="policydesc_disableCamera" msgid="5680054212889413366">"Neleisti naudoti visų įrenginio fotoaparatų"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Pagrindinis"</item>
     <item msgid="869923650527136615">"Mobilusis"</item>
@@ -662,10 +654,8 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Planšetiniame kompiuteryje nėra SIM kortelės."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Telefone nėra SIM kortelės."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Įdėkite SIM kortelę."</string>
-    <!-- no translation found for lockscreen_missing_sim_instructions_long (7138450788301444298) -->
-    <skip />
-    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (1631853574702335453) -->
-    <skip />
+    <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Trūksta SIM kortelės arba ji neskaitoma. Įdėkite SIM kortelę."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"SIM kortelė visam laikui neleidžiama."\n" Jei norite gauti kitą SIM kortelę, susisiekite su belaidžio ryšio paslaugos teikėju."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Tik pagalbos skambučiai"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Tinklas užrakintas"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"SIM kortelė užrakinta PUK kodu."</string>
@@ -954,9 +944,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Jei įjungiate USB saugyklą, kai kurios naudojamos programos sustos ir gali būti negalimos, kol išjungsite USB saugyklą."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB operacija nepavyko"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Gerai"</string>
-    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
     <skip />
-    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
+    <skip />
+    <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
+    <skip />
+    <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Format. USB atmint."</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatuoti SD kortelę"</string>
@@ -1021,18 +1015,12 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Pasiekiamumas"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Darbalaukio fonas"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Keisti darbalaukio foną"</string>
-    <string name="pptp_vpn_description" msgid="2688045385181439401">"Tiesioginio tunelinio ryšio protokolas"</string>
-    <string name="l2tp_vpn_description" msgid="3750692169378923304">"2 sluoksnio tunelinis protokolas"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Iš anksto bendrinamas raktas, pagrįstas L2TP/IPSec VPT"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Sertifikatas pagrįstas L2TP/IPSec VPT"</string>
-    <!-- no translation found for vpn_ticker (285642105845608311) -->
+    <!-- no translation found for vpn_title (8219003246858087489) -->
     <skip />
-    <!-- no translation found for vpn_title (5434034606697234123) -->
+    <!-- no translation found for vpn_title_long (6400714798049252294) -->
     <skip />
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"Jei norite valdyti tinklą, palieskite."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"Prisijungta prie <xliff:g id="SESSION">%s</xliff:g>. Jei norite valdyti tinklą, palieskite."</string>
     <string name="upload_file" msgid="2897957172366730416">"Pasirinkti failą"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nepasirinktas joks failas"</string>
     <string name="reset" msgid="2448168080964209908">"Atstatyti"</string>
@@ -1081,9 +1069,6 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Ištrinti elementus."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Anuliuoti ištrynimus."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Kol kas nieko nedaryti."</string>
-    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPT prijungtas"</string>
-    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPT atjungtas"</string>
-    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Jei norite iš naujo prisijungti prie VPT, palieskite."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Pasirinkti paskyrą"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Padidinti"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Sumažinti"</string>
@@ -1094,26 +1079,34 @@
     <string name="storage_sd_card" msgid="8921771478629812343">"SD kortelė"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB atmintis"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Redaguoti..."</string>
-    <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"Įspėjimas dėl duomenų naudojimo"</string>
+    <string name="data_usage_warning_body" msgid="3354394590936526648">"naudojimas viršija <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G–3G duomenys neleidžiami"</string>
+    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G duomenys neleidžiami"</string>
+    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilieji duomenys neleidžiami"</string>
+    <string name="data_usage_limit_body" msgid="2182247539226163759">"jei norite įgalinti, palieskite"</string>
+    <string name="ssl_certificate" msgid="6510040486049237639">"Saugos sertifikatas"</string>
+    <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Šis sertifikatas galioja."</string>
+    <string name="issued_to" msgid="454239480274921032">"Išduota:"</string>
+    <string name="common_name" msgid="2233209299434172646">"Bendras pavadinimas:"</string>
+    <string name="org_name" msgid="6973561190762085236">"Organizacija:"</string>
+    <string name="org_unit" msgid="7265981890422070383">"Organizacinis vienetas:"</string>
+    <string name="issued_by" msgid="2647584988057481566">"Išdavė:"</string>
+    <string name="validity_period" msgid="8818886137545983110">"Galiojimas:"</string>
+    <string name="issued_on" msgid="5895017404361397232">"Išduota:"</string>
+    <string name="expires_on" msgid="3676242949915959821">"Galiojimas baigiasi:"</string>
+    <!-- no translation found for serial_number (758814067660862493) -->
     <skip />
-    <!-- no translation found for data_usage_warning_body (3354394590936526648) -->
+    <!-- no translation found for fingerprints (4516019619850763049) -->
     <skip />
-    <!-- no translation found for data_usage_3g_limit_title (7093334419518706686) -->
+    <!-- no translation found for sha256_fingerprint (4391271286477279263) -->
     <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7636489436819470761) -->
+    <!-- no translation found for sha1_fingerprint (7930330235269404581) -->
     <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
+    <!-- no translation found for activity_chooser_view_see_all (180268188117163072) -->
     <skip />
-    <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
+    <!-- no translation found for activity_chooser_view_no_activities (1306964627596326933) -->
     <skip />
-    <string name="ssl_certificate" msgid="5226747157992111668">"Saugos sertifikatas"</string>
-    <string name="ssl_certificate_is_valid" msgid="7096160815933145579">"Šis sertifikatas galioja."</string>
-    <string name="issued_to" msgid="9032338008819841339">"Išduota:"</string>
-    <string name="common_name" msgid="5745530093500062357">"Bendras pavadinimas:"</string>
-    <string name="org_name" msgid="8868889052889991293">"Organizacija:"</string>
-    <string name="org_unit" msgid="4489056376307768196">"Organizacinis vienetas:"</string>
-    <string name="issued_by" msgid="6959484326943152487">"Išdavė:"</string>
-    <string name="validity_period" msgid="57988851973181309">"Galiojimas:"</string>
-    <string name="issued_on" msgid="2082890654801808368">"Išduota:"</string>
-    <string name="expires_on" msgid="8061200430557020704">"Galiojimas baigiasi:"</string>
+    <!-- no translation found for activity_chooser_view_select_default (5450262016073956587) -->
+    <skip />
 </resources>

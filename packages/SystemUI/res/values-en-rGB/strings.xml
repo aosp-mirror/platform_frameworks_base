@@ -57,12 +57,8 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Stretch to fill screen"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Compatibility Zoom"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"When an app was designed for a smaller screen, a zoom control will appear by the clock."</string>
-    <!-- no translation found for usb_preference_title (6551050377388882787) -->
+    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
     <skip />
-    <!-- no translation found for use_mtp_button_title (4333504413563023626) -->
-    <skip />
-    <!-- no translation found for use_ptp_button_title (7517127540301625751) -->
-    <skip />
-    <!-- no translation found for installer_cd_button_title (8485631662288445893) -->
+    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
     <skip />
 </resources>
