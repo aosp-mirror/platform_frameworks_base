@@ -1180,8 +1180,7 @@ protected:
     sp<FrameCondition> mFC;
 };
 
-// XXX: This test is disabled because it causes hangs on some devices.
-TEST_F(SurfaceTextureGLToGLTest, DISABLED_UpdateTexImageBeforeFrameFinishedWorks) {
+TEST_F(SurfaceTextureGLToGLTest, UpdateTexImageBeforeFrameFinishedWorks) {
     class PT : public ProducerThread {
         virtual void render() {
             glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
@@ -1199,8 +1198,7 @@ TEST_F(SurfaceTextureGLToGLTest, DISABLED_UpdateTexImageBeforeFrameFinishedWorks
     // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
 }
 
-// XXX: This test is disabled because it causes hangs on some devices.
-TEST_F(SurfaceTextureGLToGLTest, DISABLED_UpdateTexImageAfterFrameFinishedWorks) {
+TEST_F(SurfaceTextureGLToGLTest, UpdateTexImageAfterFrameFinishedWorks) {
     class PT : public ProducerThread {
         virtual void render() {
             glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
@@ -1218,8 +1216,7 @@ TEST_F(SurfaceTextureGLToGLTest, DISABLED_UpdateTexImageAfterFrameFinishedWorks)
     // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
 }
 
-// XXX: This test is disabled because it causes hangs on some devices.
-TEST_F(SurfaceTextureGLToGLTest, DISABLED_RepeatedUpdateTexImageBeforeFrameFinishedWorks) {
+TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageBeforeFrameFinishedWorks) {
     enum { NUM_ITERATIONS = 1024 };
 
     class PT : public ProducerThread {
@@ -1247,8 +1244,7 @@ TEST_F(SurfaceTextureGLToGLTest, DISABLED_RepeatedUpdateTexImageBeforeFrameFinis
     }
 }
 
-// XXX: This test is disabled because it causes hangs on some devices.
-TEST_F(SurfaceTextureGLToGLTest, DISABLED_RepeatedUpdateTexImageAfterFrameFinishedWorks) {
+TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageAfterFrameFinishedWorks) {
     enum { NUM_ITERATIONS = 1024 };
 
     class PT : public ProducerThread {
