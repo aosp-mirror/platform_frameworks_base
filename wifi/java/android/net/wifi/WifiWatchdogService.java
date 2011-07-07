@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package android.net.wifi;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -23,12 +23,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
+import android.net.DnsPinger;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.net.wifi.ScanResult;
-import android.net.wifi.SupplicantState;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -159,7 +156,7 @@ public class WifiWatchdogService {
         BLACKLISTED_AP
     }
 
-    WifiWatchdogService(Context context) {
+    public WifiWatchdogService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
