@@ -19,6 +19,8 @@ package com.android.internal.widget;
 import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.MotionEvent;
@@ -35,6 +37,12 @@ public class ActionBarContainer extends FrameLayout {
     private View mTabContainer;
     private ActionBarView mActionBarView;
 
+    private Drawable mBackground;
+    private Drawable mStackedBackground;
+    private Drawable mSplitBackground;
+    private boolean mIsSplit;
+    private boolean mIsStacked;
+
     public ActionBarContainer(Context context) {
         this(context, null);
     }
@@ -42,10 +50,23 @@ public class ActionBarContainer extends FrameLayout {
     public ActionBarContainer(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        setBackgroundDrawable(null);
+
         TypedArray a = context.obtainStyledAttributes(attrs,
                 com.android.internal.R.styleable.ActionBar);
-        setBackgroundDrawable(a.getDrawable(com.android.internal.R.styleable.ActionBar_background));
+        mBackground = a.getDrawable(com.android.internal.R.styleable.ActionBar_background);
+        mStackedBackground = a.getDrawable(
+                com.android.internal.R.styleable.ActionBar_backgroundStacked);
+
+        if (getId() == com.android.internal.R.id.split_action_bar) {
+            mIsSplit = true;
+            mSplitBackground = a.getDrawable(
+                    com.android.internal.R.styleable.ActionBar_backgroundSplit);
+        }
         a.recycle();
+
+        setWillNotDraw(mIsSplit ? mSplitBackground == null :
+                mBackground == null && mStackedBackground == null);
     }
 
     @Override
@@ -96,6 +117,24 @@ public class ActionBarContainer extends FrameLayout {
     }
 
     @Override
+    public void onDraw(Canvas canvas) {
+        if (getWidth() == 0 || getHeight() == 0) {
+            return;
+        }
+
+        if (mIsSplit) {
+            if (mSplitBackground != null) mSplitBackground.draw(canvas);
+        } else {
+            if (mBackground != null) {
+                mBackground.draw(canvas);
+            }
+            if (mStackedBackground != null && mIsStacked) {
+                mStackedBackground.draw(canvas);
+            }
+        }
+    }
+
+    @Override
     public ActionMode startActionModeForChild(View child, ActionMode.Callback callback) {
         // No starting an action mode for an action bar child! (Where would it go?)
         return null;
@@ -125,6 +164,9 @@ public class ActionBarContainer extends FrameLayout {
     @Override
     public void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+
+        final boolean hasTabs = mTabContainer != null && mTabContainer.getVisibility() != GONE;
+
         if (mTabContainer != null && mTabContainer.getVisibility() != GONE) {
             final int containerHeight = getMeasuredHeight();
             final int tabHeight = mTabContainer.getMeasuredHeight();
@@ -145,6 +187,29 @@ public class ActionBarContainer extends FrameLayout {
             } else {
                 mTabContainer.layout(l, containerHeight - tabHeight, r, containerHeight);
             }
+        }
+
+        boolean needsInvalidate = false;
+        if (mIsSplit) {
+            if (mSplitBackground != null) {
+                mSplitBackground.setBounds(0, 0, getMeasuredWidth(), getMeasuredHeight());
+                needsInvalidate = true;
+            }
+        } else {
+            if (mBackground != null) {
+                mBackground.setBounds(mActionBarView.getLeft(), mActionBarView.getTop(),
+                        mActionBarView.getRight(), mActionBarView.getBottom());
+                needsInvalidate = true;
+            }
+            if ((mIsStacked = hasTabs && mStackedBackground != null)) {
+                mStackedBackground.setBounds(mTabContainer.getLeft(), mTabContainer.getTop(),
+                        mTabContainer.getRight(), mTabContainer.getBottom());
+                needsInvalidate = true;
+            }
+        }
+
+        if (needsInvalidate) {
+            invalidate();
         }
     }
 }

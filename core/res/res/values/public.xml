@@ -1714,10 +1714,6 @@
   <public type="attr" name="switchTextOff" />
   <public type="attr" name="switchPreferenceStyle" />
 
-  <public type="style" name="TextAppearance.SuggestionHighlight" />
-  <public type="style" name="Theme.Holo.SplitActionBarWhenNarrow" />
-  <public type="style" name="Theme.Holo.Light.SplitActionBarWhenNarrow" />
-
   <public type="attr" name="textSuggestionsWindowStyle" />
   <public type="attr" name="textEditSuggestionsBottomWindowLayout" />
   <public type="attr" name="textEditSuggestionsTopWindowLayout" />
@@ -1776,14 +1772,38 @@
 
   <public type="attr" name="actionBarSplitStyle" />
 
-  <public type="style" name="Widget.Holo.Button.Borderless.Small" />
-  <public type="style" name="Widget.Holo.Light.Button.Borderless.Small" />
-
-  <public type="integer" name="status_bar_notification_info_maxnum" />
-  <public type="string" name="status_bar_notification_info_overflow" />
-
   <public type="attr" name="textDirection"/>
 
   <public type="attr" name="actionProviderClass" />
+
+  <public type="attr" name="backgroundStacked" />
+  <public type="attr" name="backgroundSplit" />
+
+  <public type="style" name="TextAppearance.SuggestionHighlight" />
+  <public type="style" name="Theme.Holo.SplitActionBarWhenNarrow" />
+  <public type="style" name="Theme.Holo.Light.SplitActionBarWhenNarrow" />
+
+  <public type="style" name="Widget.Holo.Button.Borderless.Small" />
+  <public type="style" name="Widget.Holo.Light.Button.Borderless.Small" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Title.Inverse" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Subtitle.Inverse" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Title.Inverse" />
+  <public type="style" name="TextAppearance.Holo.Widget.ActionMode.Subtitle.Inverse" />
+  <public type="style" name="Widget.Holo.ActionBar.Solid" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.Solid" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.Solid.Inverse" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabBar.Inverse" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabView.Inverse" />
+  <public type="style" name="Widget.Holo.Light.ActionBar.TabText.Inverse" />
+  <public type="style" name="Widget.Holo.Light.ActionMode.Inverse" />
+  <public type="style" name="Theme.Holo.SolidActionBar" />
+  <public type="style" name="Theme.Holo.Light.SolidActionBar" />
+  <public type="style" name="Theme.Holo.Light.SolidActionBar.Inverse" />
+  <public type="style" name="Theme.Holo.SolidActionBar.SplitActionBarWhenNarrow" />
+  <public type="style" name="Theme.Holo.Light.SolidActionBar.SplitActionBarWhenNarrow" />
+  <public type="style" name="Theme.Holo.Light.SolidActionBar.Inverse.SplitActionBarWhenNarrow" />
+
+  <public type="integer" name="status_bar_notification_info_maxnum" />
+  <public type="string" name="status_bar_notification_info_overflow" />
 
 </resources>

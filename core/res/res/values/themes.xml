@@ -1365,6 +1365,71 @@
 
     </style>
 
+    <!-- Variant of the holographic (dark) theme that has a solid (opaque) action bar. -->
+    <style name="Theme.Holo.SolidActionBar">
+        <item name="android:actionBarStyle">@android:style/Widget.Holo.ActionBar.Solid</item>
+        <item name="android:windowContentOverlay">@android:drawable/ab_solid_shadow_holo</item>
+    </style>
+
+    <!-- Variant of the holographic (light) theme that has a solid (opaque) action bar. -->
+    <style name="Theme.Holo.Light.SolidActionBar">
+        <item name="android:actionBarStyle">@android:style/Widget.Holo.Light.ActionBar.Solid</item>
+        <item name="android:windowContentOverlay">@android:drawable/ab_solid_shadow_holo</item>
+    </style>
+
+    <!-- Variant of the holographic (light) theme that has a solid (opaque) action bar
+         with an inverse color profile. The dark action bar sharply stands out against
+         the light content. -->
+    <style name="Theme.Holo.Light.SolidActionBar.Inverse">
+        <item name="android:windowContentOverlay">@android:drawable/title_bar_shadow</item>
+        <item name="android:actionBarStyle">@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse</item>
+
+        <item name="actionDropDownStyle">@android:style/Widget.Holo.Spinner.DropDown.ActionBar</item>
+        <item name="actionButtonStyle">@android:style/Widget.Holo.ActionButton</item>
+        <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_holo_dark</item>
+        <item name="actionModeCloseDrawable">@android:drawable/cab_ic_close_holo</item>
+        <item name="actionBarTabStyle">@style/Widget.Holo.Light.ActionBar.TabView.Inverse</item>
+        <item name="actionBarTabBarStyle">@style/Widget.Holo.Light.ActionBar.TabBar.Inverse</item>
+        <item name="actionBarTabTextStyle">@style/Widget.Holo.Light.ActionBar.TabText.Inverse</item>
+        <item name="actionMenuTextColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="actionModeStyle">@style/Widget.Holo.Light.ActionMode.Inverse</item>
+        <item name="actionModeCloseButtonStyle">@style/Widget.Holo.ActionButton.CloseMode</item>
+        <item name="actionModePopupWindowStyle">@android:style/Widget.Holo.PopupWindow.ActionMode</item>
+
+        <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_holo_dark</item>
+        <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_holo_dark</item>
+        <item name="actionModePasteDrawable">@android:drawable/ic_menu_paste_holo_dark</item>
+        <item name="actionModeSelectAllDrawable">@android:drawable/ic_menu_selectall_holo_dark</item>
+        <item name="actionModeShareDrawable">@android:drawable/ic_menu_share_holo_dark</item>
+        <item name="actionModeFindDrawable">@android:drawable/ic_menu_find_holo_dark</item>
+        <item name="actionModeWebSearchDrawable">@android:drawable/ic_menu_search_holo_dark</item>
+    </style>
+
+    <!-- Variant of the holographic (dark) theme that has a solid
+         (opaque) action bar. The action bar will split across both
+         the top and bottom of the screen when the screen is
+         especially constrained for horizontal space. -->
+    <style name="Theme.Holo.SolidActionBar.SplitActionBarWhenNarrow">
+        <item name="android:windowSplitActionBar">@android:bool/split_action_bar_is_narrow</item>
+    </style>
+
+    <!-- Variant of the holographic (light) theme that has a solid
+         (opaque) action bar. The action bar will split across both
+         the top and bottom of the screen when the screen is
+         especially constrained for horizontal space. -->
+    <style name="Theme.Holo.Light.SolidActionBar.SplitActionBarWhenNarrow">
+        <item name="android:windowSplitActionBar">@android:bool/split_action_bar_is_narrow</item>
+    </style>
+
+    <!-- Variant of the holographic (light) theme that has a solid (opaque) action bar
+         with an inverse color profile. The dark action bar sharply stands out against
+         the light content. The action bar will split across both the top and bottom of
+         the screen when the screen is especially constrained for horizontal space. -->
+    <style name="Theme.Holo.Light.SolidActionBar.Inverse.SplitActionBarWhenNarrow">
+        <item name="android:windowSplitActionBar">@android:bool/split_action_bar_is_narrow</item>
+    </style>
+
     <!-- Variant of the holographic (dark) theme with no action bar. -->
     <style name="Theme.Holo.NoActionBar">
         <item name="android:windowActionBar">false</item>

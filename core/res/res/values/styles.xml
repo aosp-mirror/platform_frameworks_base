@@ -1304,13 +1304,37 @@
         <item name="android:textSize">@android:dimen/action_bar_subtitle_text_size</item>
     </style>
 
+    <style name="TextAppearance.Holo.Widget.ActionBar.Title.Inverse"
+           parent="TextAppearance.Holo.Medium.Inverse">
+        <item name="android:textSize">@android:dimen/action_bar_title_text_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.ActionBar.Subtitle.Inverse"
+           parent="TextAppearance.Holo.Small.Inverse">
+        <item name="android:textSize">@android:dimen/action_bar_subtitle_text_size</item>
+    </style>
+
     <style name="TextAppearance.Holo.Widget.ActionMode">
     </style>
 
-    <style name="TextAppearance.Holo.Widget.ActionMode.Title" parent="TextAppearance.Widget.ActionMode.Title">
+    <style name="TextAppearance.Holo.Widget.ActionMode.Title"
+           parent="TextAppearance.Holo.Medium">
+        <item name="android:textSize">@android:dimen/action_bar_title_text_size</item>
     </style>
 
-    <style name="TextAppearance.Holo.Widget.ActionMode.Subtitle" parent="TextAppearance.Widget.ActionMode.Subtitle">
+    <style name="TextAppearance.Holo.Widget.ActionMode.Subtitle"
+           parent="TextAppearance.Holo.Small">
+        <item name="android:textSize">@android:dimen/action_bar_subtitle_text_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.ActionMode.Title.Inverse"
+           parent="TextAppearance.Holo.Medium.Inverse">
+        <item name="android:textSize">@android:dimen/action_bar_title_text_size</item>
+    </style>
+
+    <style name="TextAppearance.Holo.Widget.ActionMode.Subtitle.Inverse"
+           parent="TextAppearance.Holo.Small.Inverse">
+        <item name="android:textSize">@android:dimen/action_bar_subtitle_text_size</item>
     </style>
 
     <style name="TextAppearance.Holo.Widget.Switch" parent="TextAppearance.Holo.Small">
@@ -1839,7 +1863,22 @@
     <style name="Widget.Holo.ActionBar" parent="Widget.ActionBar">
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
-        <item name="android:background">@null</item>
+        <item name="android:background">@android:drawable/ab_transparent_dark_holo</item>
+        <item name="android:backgroundStacked">@android:drawable/ab_stacked_transparent_dark_holo</item>
+        <item name="android:backgroundSplit">@android:drawable/ab_bottom_transparent_dark_holo</item>
+        <item name="android:divider">?android:attr/dividerVertical</item>
+        <item name="android:progressBarStyle">@android:style/Widget.Holo.ProgressBar.Horizontal</item>
+        <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.ProgressBar</item>
+        <item name="android:progressBarPadding">32dip</item>
+        <item name="android:itemPadding">8dip</item>
+    </style>
+
+    <style name="Widget.Holo.ActionBar.Solid">
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
+        <item name="android:background">@android:drawable/ab_solid_dark_holo</item>
+        <item name="android:backgroundStacked">@android:drawable/ab_stacked_solid_dark_holo</item>
+        <item name="android:backgroundSplit">@android:drawable/ab_bottom_solid_dark_holo</item>
         <item name="android:divider">?android:attr/dividerVertical</item>
         <item name="android:progressBarStyle">@android:style/Widget.Holo.ProgressBar.Horizontal</item>
         <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.ProgressBar</item>
@@ -2157,9 +2196,26 @@
     <style name="Widget.Holo.Light.ActionBar.TabText" parent="Widget.Holo.ActionBar.TabText">
     </style>
 
+    <style name="Widget.Holo.Light.ActionBar.TabView.Inverse">
+    </style>
+
+    <style name="Widget.Holo.Light.ActionBar.TabBar.Inverse">
+    </style>
+
+    <style name="Widget.Holo.Light.ActionBar.TabText.Inverse">
+        <item name="android:textAppearance">@style/TextAppearance.Holo.Medium</item>
+        <item name="android:textColor">?android:attr/textColorPrimaryInverse</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
     <style name="Widget.Holo.Light.ActionMode" parent="Widget.Holo.ActionMode">
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Subtitle</item>
+    </style>
+
+    <style name="Widget.Holo.Light.ActionMode.Inverse" parent="Widget.ActionMode">
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Title.Inverse</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionMode.Subtitle.Inverse</item>
     </style>
 
     <style name="Widget.Holo.Light.ActionButton.CloseMode">
@@ -2168,10 +2224,38 @@
     <style name="Widget.Holo.Light.ActionBar" parent="Widget.Holo.ActionBar">
         <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
-        <item name="android:background">@null</item>
+        <item name="android:background">@android:drawable/ab_transparent_light_holo</item>
+        <item name="android:backgroundStacked">@android:drawable/ab_stacked_transparent_light_holo</item>
+        <item name="android:backgroundSplit">@android:drawable/ab_bottom_transparent_light_holo</item>
         <item name="android:homeAsUpIndicator">@android:drawable/ic_ab_back_holo_light</item>
         <item name="android:progressBarStyle">@android:style/Widget.Holo.Light.ProgressBar.Horizontal</item>
         <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.Light.ProgressBar</item>
+    </style>
+
+    <style name="Widget.Holo.Light.ActionBar.Solid">
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle</item>
+        <item name="android:background">@android:drawable/ab_solid_light_holo</item>
+        <item name="android:backgroundStacked">@android:drawable/ab_stacked_solid_light_holo</item>
+        <item name="android:backgroundSplit">@android:drawable/ab_bottom_solid_light_holo</item>
+        <item name="android:divider">?android:attr/dividerVertical</item>
+        <item name="android:progressBarStyle">@android:style/Widget.Holo.Light.ProgressBar.Horizontal</item>
+        <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.Light.ProgressBar</item>
+        <item name="android:progressBarPadding">32dip</item>
+        <item name="android:itemPadding">8dip</item>
+    </style>
+
+    <style name="Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:titleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Title.Inverse</item>
+        <item name="android:subtitleTextStyle">@android:style/TextAppearance.Holo.Widget.ActionBar.Subtitle.Inverse</item>
+        <item name="android:background">@android:drawable/ab_solid_dark_holo</item>
+        <item name="android:backgroundStacked">@android:drawable/ab_stacked_solid_dark_holo</item>
+        <item name="android:backgroundSplit">@android:drawable/ab_bottom_solid_inverse_holo</item>
+        <item name="android:divider">@android:drawable/list_divider_holo_dark</item>
+        <item name="android:progressBarStyle">@android:style/Widget.Holo.ProgressBar.Horizontal</item>
+        <item name="android:indeterminateProgressStyle">@android:style/Widget.Holo.ProgressBar</item>
+        <item name="android:progressBarPadding">32dip</item>
+        <item name="android:itemPadding">8dip</item>
     </style>
 
     <!-- Animation Styles -->
