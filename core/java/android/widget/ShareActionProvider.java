@@ -16,21 +16,25 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.ActionProvider;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MenuItem.OnMenuItemClickListener;
 import android.view.SubMenu;
 import android.view.View;
 
+import com.android.internal.R;
+
 /**
  * This is a provider for a share action. It is responsible for creating views
- * that enable data sharing and also to perform a default action for showing
- * a share dialog.
+ * that enable data sharing and also to show a sub menu with sharing activities
+ * if the hosting item is placed on the overflow menu.
  * <p>
  * Here is how to use the action provider with custom backing file in a {@link MenuItem}:
  * </p>
@@ -48,15 +52,13 @@ import android.view.View;
  *      // {@link ActionProvider#onCreateActionView()} which uses the backing file name. Omit this
  *      // line if using the default share history file is desired.
  *      mShareActionProvider.setShareHistoryFileName("custom_share_history.xml");
- *      // Get the action view and hold onto it to set the share intent.
- *      mActionView = menuItem.getActionView();
  *      . . .
  *  }
  *
  *  // Somewhere in the application.
  *  public void doShare(Intent shareIntent) {
  *      // When you want to share set the share intent.
- *      mShareActionProvider.setShareIntent(mActionView, shareIntent);
+ *      mShareActionProvider.setShareIntent(shareIntent);
  *  }
  * </pre>
  * </code>
@@ -71,11 +73,34 @@ import android.view.View;
 public class ShareActionProvider extends ActionProvider {
 
     /**
+     * The default for the maximal number of activities shown in the sub-menu.
+     */
+    private static final int DEFAULT_INITIAL_ACTIVITY_COUNT = 4;
+
+    /**
+     * The the maximum number activities shown in the sub-menu.
+     */
+    private int mMaxShownActivityCount = DEFAULT_INITIAL_ACTIVITY_COUNT;
+
+    /**
+     * Listener for handling menu item clicks.
+     */
+    private final ShareMenuItemOnMenuItemClickListener mOnMenuItemClickListener =
+        new ShareMenuItemOnMenuItemClickListener();
+
+    /**
      * The default name for storing share history.
      */
     public static final String DEFAULT_SHARE_HISTORY_FILE_NAME = "share_history.xml";
 
+    /**
+     * Context for accessing resources.
+     */
     private final Context mContext;
+
+    /**
+     * The name of the file with share history data.
+     */
     private String mShareHistoryFileName = DEFAULT_SHARE_HISTORY_FILE_NAME;
 
     /**
@@ -93,24 +118,59 @@ public class ShareActionProvider extends ActionProvider {
      */
     @Override
     public View onCreateActionView() {
+        // Create the view and set its data model.
         ActivityChooserModel dataModel = ActivityChooserModel.get(mContext, mShareHistoryFileName);
         ActivityChooserView activityChooserView = new ActivityChooserView(mContext);
         activityChooserView.setActivityChooserModel(dataModel);
+
+        // Lookup and set the expand action icon.
         TypedValue outTypedValue = new TypedValue();
         mContext.getTheme().resolveAttribute(R.attr.actionModeShareDrawable, outTypedValue, true);
         Drawable drawable = mContext.getResources().getDrawable(outTypedValue.resourceId);
         activityChooserView.setExpandActivityOverflowButtonDrawable(drawable);
+
         return activityChooserView;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean hasSubMenu() {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onPrepareSubMenu(SubMenu subMenu) {
-        // TODO Implement me
+        // Clear since the order of items may change.
+        subMenu.clear();
+
+        ActivityChooserModel dataModel = ActivityChooserModel.get(mContext, mShareHistoryFileName);
+        PackageManager packageManager = mContext.getPackageManager();
+
+        final int expandedActivityCount = dataModel.getActivityCount();
+        final int collapsedActivityCount = Math.min(expandedActivityCount, mMaxShownActivityCount);
+
+        // Populate the sub-menu with a sub set of the activities.
+        for (int i = 0; i < collapsedActivityCount; i++) {
+            ResolveInfo activity = dataModel.getActivity(i);
+            subMenu.add(0, i, i, activity.loadLabel(packageManager))
+                .setIcon(activity.loadIcon(packageManager))
+                .setOnMenuItemClickListener(mOnMenuItemClickListener);
+        }
+
+        // Add a sub-menu for showing all activities as a list item.
+        SubMenu expandedSubMenu = subMenu.addSubMenu(Menu.NONE, collapsedActivityCount,
+                collapsedActivityCount, mContext.getString(R.string.activity_chooser_view_see_all));
+        for (int i = 0; i < expandedActivityCount; i++) {
+            ResolveInfo activity = dataModel.getActivity(i);
+            expandedSubMenu.add(0, i, i, activity.loadLabel(packageManager))
+                .setIcon(activity.loadIcon(packageManager))
+                .setOnMenuItemClickListener(mOnMenuItemClickListener);
+        }
     }
 
     /**
@@ -145,18 +205,29 @@ public class ShareActionProvider extends ActionProvider {
      * </code>
      * </p>
      *
-     * @param actionView An action view created by {@link #onCreateActionView()}.
      * @param shareIntent The share intent.
      *
      * @see Intent#ACTION_SEND
      * @see Intent#ACTION_SEND_MULTIPLE
      */
-    public void setShareIntent(View actionView, Intent shareIntent) {
-        if (actionView instanceof ActivityChooserView) {
-            ActivityChooserView activityChooserView = (ActivityChooserView) actionView;
-            activityChooserView.getDataModel().setIntent(shareIntent);
-        } else {
-            throw new IllegalArgumentException("actionView not instance of ActivityChooserView");
+    public void setShareIntent(Intent shareIntent) {
+        ActivityChooserModel dataModel = ActivityChooserModel.get(mContext,
+            mShareHistoryFileName);
+        dataModel.setIntent(shareIntent);
+    }
+
+    /**
+     * Reusable listener for handling share item clicks.
+     */
+    private class ShareMenuItemOnMenuItemClickListener implements OnMenuItemClickListener {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            ActivityChooserModel dataModel = ActivityChooserModel.get(mContext,
+                    mShareHistoryFileName);
+            final int itemId = item.getItemId();
+            Intent launchIntent = dataModel.chooseActivity(itemId);
+            mContext.startActivity(launchIntent);
+            return true;
         }
     }
 }

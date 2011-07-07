@@ -799,7 +799,7 @@ public class MenuBuilder implements Menu {
         if (itemImpl == null || !itemImpl.isEnabled()) {
             return false;
         }
-        
+
         boolean invoked = itemImpl.invoke();
 
         if (itemImpl.hasCollapsibleActionView()) {
