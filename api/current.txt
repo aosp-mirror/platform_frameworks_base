@@ -7605,6 +7605,8 @@ package android.graphics {
     method public int getHeight();
     method public void getMatrix(android.graphics.Matrix);
     method public final android.graphics.Matrix getMatrix();
+    method public int getMaximumBitmapHeight();
+    method public int getMaximumBitmapWidth();
     method public int getSaveCount();
     method public int getWidth();
     method public boolean isHardwareAccelerated();

@@ -73,7 +73,11 @@ public class Canvas {
      * @hide
      */
     public static final int DIRECTION_RTL = 1;
-    
+
+    // Maximum bitmap size as defined in Skia's native code
+    // (see SkCanvas.cpp, SkDraw.cpp)
+    private static final int MAXMIMUM_BITMAP_SIZE = 32766;
+
     // This field is used to finalize the native Canvas properly
     @SuppressWarnings({"UnusedDeclaration"})
     private final CanvasFinalizer mFinalizer;
@@ -259,7 +263,29 @@ public class Canvas {
     public void setScreenDensity(int density) {
         mScreenDensity = density;
     }
+
+    /**
+     * Returns the maximum allowed width for bitmaps drawn with this canvas.
+     * Attempting to draw with a bitmap wider than this value will result
+     * in an error.
+     * 
+     * @see #getMaximumBitmapHeight() 
+     */
+    public int getMaximumBitmapWidth() {
+        return MAXMIMUM_BITMAP_SIZE;
+    }
     
+    /**
+     * Returns the maximum allowed height for bitmaps drawn with this canvas.
+     * Attempting to draw with a bitmap taller than this value will result
+     * in an error.
+     * 
+     * @see #getMaximumBitmapWidth() 
+     */
+    public int getMaximumBitmapHeight() {
+        return MAXMIMUM_BITMAP_SIZE;
+    }
+
     // the SAVE_FLAG constants must match their native equivalents
 
     /** restore the current matrix when restore() is called */

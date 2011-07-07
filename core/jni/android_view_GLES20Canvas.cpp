@@ -161,6 +161,14 @@ static bool android_view_GLES20Canvas_callDrawGLFunction(JNIEnv* env, jobject cl
     return renderer->callDrawGLFunction(functor, dirty);
 }
 
+static jint android_view_GLES20Canvas_getMaxTextureWidth(JNIEnv* env, jobject clazz) {
+    return Caches::getInstance().maxTextureSize;
+}
+
+static jint android_view_GLES20Canvas_getMaxTextureHeight(JNIEnv* env, jobject clazz) {
+    return Caches::getInstance().maxTextureSize;
+}
+
 // ----------------------------------------------------------------------------
 // State
 // ----------------------------------------------------------------------------
@@ -802,6 +810,9 @@ static JNINativeMethod gMethods[] = {
     { "nDestroyLayerDeferred",   "(I)V",       (void*) android_view_GLES20Canvas_destroyLayerDeferred },
     { "nDrawLayer",              "(IIFFI)V",   (void*) android_view_GLES20Canvas_drawLayer },
     { "nCopyLayer",              "(II)Z",      (void*) android_view_GLES20Canvas_copyLayer },
+
+    { "nGetMaximumTextureWidth",  "()I",       (void*) android_view_GLES20Canvas_getMaxTextureWidth },
+    { "nGetMaximumTextureHeight", "()I",       (void*) android_view_GLES20Canvas_getMaxTextureHeight },
 
 #endif
 };
