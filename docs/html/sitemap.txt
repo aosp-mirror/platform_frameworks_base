@@ -108,7 +108,7 @@ http://developer.android.com/guide/topics/testing/activity_testing.html
 http://developer.android.com/guide/topics/testing/contentprovider_testing.html
 http://developer.android.com/guide/topics/testing/service_testing.html
 http://developer.android.com/guide/topics/testing/what_to_test.html
-http://developer.android.com/guide/publishing/licensing.html
+http://developer.android.com/guide/market/licensing/index.html
 http://developer.android.com/guide/market/billing/index.html
 http://developer.android.com/guide/market/billing/billing_about.html
 http://developer.android.com/guide/market/billing/billing_overview.html
