@@ -318,7 +318,11 @@ public class RecentsPanelView extends RelativeLayout
     }
 
     private Drawable getFullResIcon(Resources resources, int iconId) {
-        return resources.getDrawableForDensity(iconId, mIconDpi);
+        try {
+            return resources.getDrawableForDensity(iconId, mIconDpi);
+        } catch (Resources.NotFoundException e) {
+            return getFullResDefaultActivityIcon();
+        }
     }
 
     private Drawable getFullResIcon(ResolveInfo info, PackageManager packageManager) {
