@@ -34,7 +34,7 @@ static void usage(const char *me) {
     fprintf(stderr, "usage: %s\n", me);
     fprintf(stderr, "       -h(elp)\n");
     fprintf(stderr, "       -b bit rate in bits per second (default: 300000)\n");
-    fprintf(stderr, "       -c YUV420 color format: [0] semi planar or [1] planar (default: 1)\n");
+    fprintf(stderr, "       -c YUV420 color format: [0] semi planar or [1] planar or other omx YUV420 color format (default: 1)\n");
     fprintf(stderr, "       -f frame rate in frames per second (default: 30)\n");
     fprintf(stderr, "       -i I frame interval in seconds (default: 1)\n");
     fprintf(stderr, "       -n number of frames to be recorded (default: 300)\n");
@@ -59,11 +59,6 @@ public:
           mSize((width * height * 3) / 2) {
 
         mGroup.add_buffer(new MediaBuffer(mSize));
-
-        // Check the color format to make sure
-        // that the buffer size mSize it set correctly above.
-        CHECK(colorFormat == OMX_COLOR_FormatYUV420SemiPlanar ||
-              colorFormat == OMX_COLOR_FormatYUV420Planar);
     }
 
     virtual sp<MetaData> getFormat() {
@@ -144,9 +139,13 @@ static int translateColorToOmxEnumValue(int color) {
         case kYUV420P:
             return OMX_COLOR_FormatYUV420Planar;
         default:
-            fprintf(stderr, "Unsupported color: %d\n", color);
-            return -1;
+            fprintf(stderr, "Custom OMX color format: %d\n", color);
+            if (color == OMX_TI_COLOR_FormatYUV420PackedSemiPlanar ||
+                color == OMX_QCOM_COLOR_FormatYVU420SemiPlanar) {
+                return color;
+            }
     }
+    return -1;
 }
 
 int main(int argc, char **argv) {
