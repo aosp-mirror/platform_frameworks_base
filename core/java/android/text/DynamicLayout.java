@@ -75,12 +75,31 @@ extends Layout
                          float spacingmult, float spacingadd,
                          boolean includepad,
                          TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
-        super((ellipsize == null) 
-                ? display 
-                : (display instanceof Spanned) 
-                    ? new SpannedEllipsizer(display) 
+        this(base, display, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
+                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth);
+    }
+
+    /**
+     * Make a layout for the transformed text (password transformation
+     * being the primary example of a transformation)
+     * that will be updated as the base text is changed.
+     * If ellipsize is non-null, the Layout will ellipsize the text
+     * down to ellipsizedWidth.
+     * *
+     * *@hide
+     */
+    public DynamicLayout(CharSequence base, CharSequence display,
+                         TextPaint paint,
+                         int width, Alignment align, TextDirectionHeuristic textDir,
+                         float spacingmult, float spacingadd,
+                         boolean includepad,
+                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
+        super((ellipsize == null)
+                ? display
+                : (display instanceof Spanned)
+                    ? new SpannedEllipsizer(display)
                     : new Ellipsizer(display),
-              paint, width, align, spacingmult, spacingadd);
+              paint, width, align, textDir, spacingmult, spacingadd);
 
         mBase = base;
         mDisplay = display;
@@ -259,7 +278,7 @@ extends Layout
             reflowed = new StaticLayout(true);
 
         reflowed.generate(text, where, where + after,
-                getPaint(), getWidth(), getAlignment(),
+                getPaint(), getWidth(), getAlignment(), getTextDirectionHeuristic(),
                 getSpacingMultiplier(), getSpacingAdd(),
                 false, true, mEllipsizedWidth, mEllipsizeAt);
         int n = reflowed.getLineCount();

@@ -16,8 +16,6 @@
 
 package android.text;
 
-import com.android.internal.util.ArrayUtils;
-
 import android.graphics.Bitmap;
 import android.graphics.Paint;
 import android.text.style.LeadingMarginSpan;
@@ -25,6 +23,8 @@ import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 import android.text.style.LineHeightSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.TabStopSpan;
+
+import com.android.internal.util.ArrayUtils;
 
 /**
  * StaticLayout is a Layout for text that will not be edited after it
@@ -46,6 +46,17 @@ public class StaticLayout extends Layout {
              spacingmult, spacingadd, includepad);
     }
 
+    /**
+     * @hide
+     */
+    public StaticLayout(CharSequence source, TextPaint paint,
+            int width, Alignment align, TextDirectionHeuristic textDir,
+            float spacingmult, float spacingadd,
+            boolean includepad) {
+        this(source, 0, source.length(), paint, width, align, textDir,
+                spacingmult, spacingadd, includepad);
+    }
+
     public StaticLayout(CharSequence source, int bufstart, int bufend,
                         TextPaint paint, int outerwidth,
                         Alignment align,
@@ -55,9 +66,35 @@ public class StaticLayout extends Layout {
              spacingmult, spacingadd, includepad, null, 0);
     }
 
+    /**
+     * @hide
+     */
+    public StaticLayout(CharSequence source, int bufstart, int bufend,
+            TextPaint paint, int outerwidth,
+            Alignment align, TextDirectionHeuristic textDir,
+            float spacingmult, float spacingadd,
+            boolean includepad) {
+        this(source, bufstart, bufend, paint, outerwidth, align, textDir,
+                spacingmult, spacingadd, includepad, null, 0);
+}
+
+    public StaticLayout(CharSequence source, int bufstart, int bufend,
+            TextPaint paint, int outerwidth,
+            Alignment align,
+            float spacingmult, float spacingadd,
+            boolean includepad,
+            TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
+        this(source, bufstart, bufend, paint, outerwidth, align,
+                TextDirectionHeuristics.FIRSTSTRONG_LTR,
+                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth);
+    }
+
+    /**
+     * @hide
+     */
     public StaticLayout(CharSequence source, int bufstart, int bufend,
                         TextPaint paint, int outerwidth,
-                        Alignment align,
+                        Alignment align, TextDirectionHeuristic textDir,
                         float spacingmult, float spacingadd,
                         boolean includepad,
                         TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
@@ -66,7 +103,7 @@ public class StaticLayout extends Layout {
                 : (source instanceof Spanned)
                     ? new SpannedEllipsizer(source)
                     : new Ellipsizer(source),
-              paint, outerwidth, align, spacingmult, spacingadd);
+              paint, outerwidth, align, textDir, spacingmult, spacingadd);
 
         /*
          * This is annoying, but we can't refer to the layout until
@@ -96,7 +133,7 @@ public class StaticLayout extends Layout {
 
         mMeasured = MeasuredText.obtain();
 
-        generate(source, bufstart, bufend, paint, outerwidth, align,
+        generate(source, bufstart, bufend, paint, outerwidth, align, textDir,
                  spacingmult, spacingadd, includepad, includepad,
                  ellipsizedWidth, ellipsize);
 
@@ -116,7 +153,7 @@ public class StaticLayout extends Layout {
 
     /* package */ void generate(CharSequence source, int bufStart, int bufEnd,
                         TextPaint paint, int outerWidth,
-                        Alignment align,
+                        Alignment align, TextDirectionHeuristic textDir,
                         float spacingmult, float spacingadd,
                         boolean includepad, boolean trackpad,
                         float ellipsizedWidth, TextUtils.TruncateAt ellipsize) {
@@ -157,7 +194,7 @@ public class StaticLayout extends Layout {
                     LeadingMarginSpan lms = sp[i];
                     firstWidth -= sp[i].getLeadingMargin(true);
                     restWidth -= sp[i].getLeadingMargin(false);
-                    
+
                     // LeadingMarginSpan2 is odd.  The count affects all
                     // leading margin spans, not just this particular one,
                     // and start from the top of the span, not the top of the
@@ -195,7 +232,7 @@ public class StaticLayout extends Layout {
                 }
             }
 
-            measured.setPara(source, paraStart, paraEnd, DIR_REQUEST_DEFAULT_LTR);
+            measured.setPara(source, paraStart, paraEnd, textDir);
             char[] chs = measured.mChars;
             float[] widths = measured.mWidths;
             byte[] chdirs = measured.mLevels;

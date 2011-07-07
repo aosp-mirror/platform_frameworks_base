@@ -16,11 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.util.FastMath;
-import com.android.internal.widget.EditableInputConnection;
-
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.R;
 import android.content.ClipData;
 import android.content.ClipData.Item;
@@ -64,6 +59,13 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.SpannedString;
 import android.text.StaticLayout;
+import android.text.TextDirectionHeuristic;
+import android.text.TextDirectionHeuristics;
+import android.text.TextDirectionHeuristics.AnyStrong;
+import android.text.TextDirectionHeuristics.CharCount;
+import android.text.TextDirectionHeuristics.FirstStrong;
+import android.text.TextDirectionHeuristics.TextDirectionAlgorithm;
+import android.text.TextDirectionHeuristics.TextDirectionHeuristicImpl;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -131,6 +133,11 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RemoteViews.RemoteView;
+
+import com.android.internal.util.FastMath;
+import com.android.internal.widget.EditableInputConnection;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -5660,14 +5667,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Layout.Alignment alignment = getLayoutAlignment();
         boolean shouldEllipsize = mEllipsize != null && mInput == null;
 
+        if (mTextDir == null) {
+            resolveTextDirection();
+        }
         if (mText instanceof Spannable) {
             mLayout = new DynamicLayout(mText, mTransformed, mTextPaint, w,
-                    alignment, mSpacingMult,
+                    alignment, mTextDir, mSpacingMult,
                     mSpacingAdd, mIncludePad, mInput == null ? mEllipsize : null,
                     ellipsisWidth);
         } else {
             if (boring == UNKNOWN_BORING) {
-                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mBoring);
+                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);
                 if (boring != null) {
                     mBoring = boring;
                 }
@@ -5704,23 +5714,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } else if (shouldEllipsize) {
                     mLayout = new StaticLayout(mTransformed,
                                 0, mTransformed.length(),
-                                mTextPaint, w, alignment, mSpacingMult,
+                                mTextPaint, w, alignment, mTextDir, mSpacingMult,
                                 mSpacingAdd, mIncludePad, mEllipsize,
                                 ellipsisWidth);
                 } else {
                     mLayout = new StaticLayout(mTransformed, mTextPaint,
-                            w, alignment, mSpacingMult, mSpacingAdd,
+                            w, alignment, mTextDir, mSpacingMult, mSpacingAdd,
                             mIncludePad);
                 }
             } else if (shouldEllipsize) {
                 mLayout = new StaticLayout(mTransformed,
                             0, mTransformed.length(),
-                            mTextPaint, w, alignment, mSpacingMult,
+                            mTextPaint, w, alignment, mTextDir, mSpacingMult,
                             mSpacingAdd, mIncludePad, mEllipsize,
                             ellipsisWidth);
             } else {
                 mLayout = new StaticLayout(mTransformed, mTextPaint,
-                        w, alignment, mSpacingMult, mSpacingAdd,
+                        w, alignment, mTextDir, mSpacingMult, mSpacingAdd,
                         mIncludePad);
             }
         }
@@ -5732,7 +5742,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (shouldEllipsize) hintWidth = w;
 
             if (hintBoring == UNKNOWN_BORING) {
-                hintBoring = BoringLayout.isBoring(mHint, mTextPaint,
+                hintBoring = BoringLayout.isBoring(mHint, mTextPaint, mTextDir,
                                                    mHintBoring);
                 if (hintBoring != null) {
                     mHintBoring = hintBoring;
@@ -5770,23 +5780,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 } else if (shouldEllipsize) {
                     mHintLayout = new StaticLayout(mHint,
                                 0, mHint.length(),
-                                mTextPaint, hintWidth, alignment, mSpacingMult,
+                                mTextPaint, hintWidth, alignment, mTextDir, mSpacingMult,
                                 mSpacingAdd, mIncludePad, mEllipsize,
                                 ellipsisWidth);
                 } else {
                     mHintLayout = new StaticLayout(mHint, mTextPaint,
-                            hintWidth, alignment, mSpacingMult, mSpacingAdd,
+                            hintWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
                             mIncludePad);
                 }
             } else if (shouldEllipsize) {
                 mHintLayout = new StaticLayout(mHint,
                             0, mHint.length(),
-                            mTextPaint, hintWidth, alignment, mSpacingMult,
+                            mTextPaint, hintWidth, alignment, mTextDir, mSpacingMult,
                             mSpacingAdd, mIncludePad, mEllipsize,
                             ellipsisWidth);
             } else {
                 mHintLayout = new StaticLayout(mHint, mTextPaint,
-                        hintWidth, alignment, mSpacingMult, mSpacingAdd,
+                        hintWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
                         mIncludePad);
             }
         }
@@ -5887,6 +5897,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         BoringLayout.Metrics boring = UNKNOWN_BORING;
         BoringLayout.Metrics hintBoring = UNKNOWN_BORING;
 
+        if (mTextDir == null) {
+            resolveTextDirection();
+        }
+
         int des = -1;
         boolean fromexisting = false;
 
@@ -5899,7 +5913,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             if (des < 0) {
-                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mBoring);
+                boring = BoringLayout.isBoring(mTransformed, mTextPaint, mTextDir, mBoring);
                 if (boring != null) {
                     mBoring = boring;
                 }
@@ -10119,11 +10133,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mInBatchEditControllers;
     }
 
+    private class TextViewDirectionHeuristic extends TextDirectionHeuristicImpl {
+        private TextViewDirectionHeuristic(TextDirectionAlgorithm algorithm) {
+            super(algorithm);
+        }
+        @Override
+        protected boolean defaultIsRtl() {
+            return getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL;
+        }
+    }
+
     /**
      * Resolve the text direction.
      *
      * Text direction of paragraphs in a TextView is determined using a heuristic. If the correct
-     * text direction cannot be determined by the heuristic, the view’s resolved layout direction
+     * text direction cannot be determined by the heuristic, the view's resolved layout direction
      * determines the direction.
      *
      * This heuristic and result is applied individually to each paragraph in a TextView, based on
@@ -10132,157 +10156,27 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Override
     protected void resolveTextDirection() {
-        int resolvedTextDirection = TEXT_DIRECTION_UNDEFINED;
-        switch(mTextDirection) {
+        super.resolveTextDirection();
+
+        int textDir = getResolvedTextDirection();
+        switch (textDir) {
             default:
-            case TEXT_DIRECTION_INHERIT:
-                // Try to the text direction from the parent layout. If not possible, then we will
-                // use the default layout direction to decide later
-                if (mParent != null && mParent instanceof ViewGroup) {
-                    resolvedTextDirection = ((ViewGroup) mParent).getResolvedTextDirection();
-                }
-                break;
             case TEXT_DIRECTION_FIRST_STRONG:
-                resolvedTextDirection = getTextDirectionFromFirstStrong(mText);
+                mTextDir = new TextViewDirectionHeuristic(FirstStrong.INSTANCE);
                 break;
             case TEXT_DIRECTION_ANY_RTL:
-                resolvedTextDirection = getTextDirectionFromAnyRtl(mText);
+                mTextDir = new TextViewDirectionHeuristic(AnyStrong.INSTANCE_RTL);
                 break;
             case TEXT_DIRECTION_CHAR_COUNT:
-                resolvedTextDirection = getTextDirectionFromCharCount(mText);
+                mTextDir = new TextViewDirectionHeuristic(CharCount.INSTANCE_DEFAULT);
                 break;
             case TEXT_DIRECTION_LTR:
-                resolvedTextDirection = TEXT_DIRECTION_LTR;
+                mTextDir = TextDirectionHeuristics.LTR;
                 break;
             case TEXT_DIRECTION_RTL:
-                resolvedTextDirection = TEXT_DIRECTION_RTL;
+                mTextDir = TextDirectionHeuristics.RTL;
                 break;
         }
-        // if we have been so far unable to get the text direction from the heuristics, then we are
-        // falling back using the layout direction
-        if (resolvedTextDirection == TEXT_DIRECTION_UNDEFINED) {
-            switch(getResolvedLayoutDirection()) {
-                default:
-                case LAYOUT_DIRECTION_LTR:
-                    resolvedTextDirection = TEXT_DIRECTION_LTR;
-                    break;
-                case LAYOUT_DIRECTION_RTL:
-                    resolvedTextDirection = TEXT_DIRECTION_RTL;
-                    break;
-            }
-        }
-        mResolvedTextDirection = resolvedTextDirection;
-    }
-
-    /**
-     * Get text direction following the "first strong" heuristic.
-     *
-     * @param cs the CharSequence used to get the text direction.
-     *
-     * @return {@link #TEXT_DIRECTION_RTL} if direction it RTL, {@link #TEXT_DIRECTION_LTR} if
-     * direction it LTR or {@link #TEXT_DIRECTION_UNDEFINED} if direction cannot be found.
-     */
-    private static int getTextDirectionFromFirstStrong(final CharSequence cs) {
-        final int length = cs.length();
-        if (length == 0) {
-            return TEXT_DIRECTION_UNDEFINED;
-        }
-        for(int i = 0; i < length; i++) {
-            final char c = cs.charAt(i);
-            final byte dir = Character.getDirectionality(c);
-            if (isStrongLtrChar(dir)) {
-                return TEXT_DIRECTION_LTR;
-            } else if (isStrongRtlChar(dir)) {
-                return TEXT_DIRECTION_RTL;
-            }
-        }
-        return TEXT_DIRECTION_UNDEFINED;
-    }
-
-    /**
-     * Get text direction following the "any RTL" heuristic.
-     *
-     * @param cs the CharSequence used to get the text direction.
-     *
-     * @return {@link #TEXT_DIRECTION_RTL} if direction it RTL, {@link #TEXT_DIRECTION_LTR} if
-     * direction it LTR or {@link #TEXT_DIRECTION_UNDEFINED} if direction cannot be found.
-     */
-    private static int getTextDirectionFromAnyRtl(final CharSequence cs) {
-        final int length = cs.length();
-        if (length == 0) {
-            return TEXT_DIRECTION_UNDEFINED;
-        }
-        boolean foundStrongLtr = false;
-        boolean foundStrongRtl = false;
-        for(int i = 0; i < length; i++) {
-            final char c = cs.charAt(i);
-            final byte dir = Character.getDirectionality(c);
-            if (isStrongLtrChar(dir)) {
-                foundStrongLtr = true;
-            } else if (isStrongRtlChar(dir)) {
-                foundStrongRtl = true;
-                break;
-            }
-        }
-        if (foundStrongRtl) {
-            return TEXT_DIRECTION_RTL;
-        }
-        if (foundStrongLtr) {
-            return TEXT_DIRECTION_LTR;
-        }
-        return TEXT_DIRECTION_UNDEFINED;
-    }
-
-    /**
-     * Get text direction following the "char count" heuristic.
-     *
-     * @param cs the CharSequence used to get the text direction.
-     *
-     * @return {@link #TEXT_DIRECTION_RTL} if direction it RTL, {@link #TEXT_DIRECTION_LTR} if
-     * direction it LTR or {@link #TEXT_DIRECTION_UNDEFINED} if direction cannot be found.
-     */
-    private int getTextDirectionFromCharCount(CharSequence cs) {
-        final int length = cs.length();
-        if (length == 0) {
-            return TEXT_DIRECTION_UNDEFINED;
-        }
-        int countLtr = 0;
-        int countRtl = 0;
-        for(int i = 0; i < length; i++) {
-            final char c = cs.charAt(i);
-            final byte dir = Character.getDirectionality(c);
-            if (isStrongLtrChar(dir)) {
-                countLtr++;
-            } else if (isStrongRtlChar(dir)) {
-                countRtl++;
-            }
-        }
-        final float percentLtr = ((float) countLtr) / (countLtr + countRtl);
-        if (percentLtr > DEFAULT_TEXT_DIRECTION_CHAR_COUNT_THRESHOLD) {
-            return TEXT_DIRECTION_LTR;
-        }
-        final float percentRtl = ((float) countRtl) / (countLtr + countRtl);
-        if (percentRtl > DEFAULT_TEXT_DIRECTION_CHAR_COUNT_THRESHOLD) {
-            return TEXT_DIRECTION_RTL;
-        }
-        return TEXT_DIRECTION_UNDEFINED;
-    }
-
-    /**
-     * Return true if the char direction is corresponding to a "strong RTL char" following the
-     * Unicode Bidirectional Algorithm (UBA).
-     */
-    private static boolean isStrongRtlChar(final byte dir) {
-        return (dir == Character.DIRECTIONALITY_RIGHT_TO_LEFT ||
-                dir == Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC);
-    }
-
-    /**
-     * Return true if the char direction is corresponding to a "strong LTR char" following the
-     * Unicode Bidirectional Algorithm (UBA).
-     */
-    private static boolean isStrongLtrChar(final byte dir) {
-        return (dir == Character.DIRECTIONALITY_LEFT_TO_RIGHT);
     }
 
     @ViewDebug.ExportedProperty(category = "text")
@@ -10385,6 +10279,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private BoringLayout.Metrics mHintBoring;
 
     private BoringLayout mSavedLayout, mSavedHintLayout;
+
+    private TextDirectionHeuristic mTextDir = null;
 
     private static final InputFilter[] NO_FILTERS = new InputFilter[0];
     private InputFilter[] mFilters = NO_FILTERS;

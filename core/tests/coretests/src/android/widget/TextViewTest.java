@@ -16,12 +16,12 @@
 
 package android.widget;
 
-import com.android.frameworks.coretests.R;
-
 import android.test.ActivityInstrumentationTestCase2;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.text.GetChars;
 import android.view.View;
+
+import com.android.frameworks.coretests.R;
 
 /**
  * TextViewTest tests {@link TextView}.
@@ -240,12 +240,12 @@ public class TextViewTest extends ActivityInstrumentationTestCase2<TextViewTestA
 
         getActivity().runOnUiThread(new Runnable() {
             public void run() {
-                tv.setTextDirection(View.TEXT_DIRECTION_FIRST_STRONG);
+                ll.setTextDirection(View.TEXT_DIRECTION_RTL);
+                tv.setTextDirection(View.TEXT_DIRECTION_INHERIT);
                 assertEquals(View.TEXT_DIRECTION_RTL, tv.getResolvedTextDirection());
-                assertEquals(true, tv.isResolvedTextDirection());
 
                 ll.removeView(tv);
-                assertEquals(false, tv.isResolvedTextDirection());
+                assertEquals(View.TEXT_DIRECTION_FIRST_STRONG, tv.getResolvedTextDirection());
             }
         });
     }

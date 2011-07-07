@@ -18,95 +18,232 @@
         android:id="@+id/textview_direction_rtl"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layoutDirection="rtl">
+        android:layoutDirection="rtl"
+        android:textDirection="rtl">
 
-    <LinearLayout android:orientation="vertical"
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:textDirection="rtl">
-
-        <LinearLayout android:orientation="vertical"
+        <TableLayout android:orientation="vertical"
                       android:layout_width="wrap_content"
                       android:layout_height="wrap_content">
 
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_text"
-                    />
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_text"
-                      android:textDirection="inherit"
-                    />
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_text"
-                      android:textDirection="firstStrong"
-                    />
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_text"
-                      android:textDirection="anyRtl"
-                    />
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_text"
-                      android:textDirection="ltr"
-                    />
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_text"
-                      android:textDirection="rtl"
-                    />
-        </LinearLayout>
+            <TableRow>
+                <TextView android:text="(unspecified)"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:typeface="serif"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_hebrew_text"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_latin_text"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_multiline_text"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+            </TableRow>
 
-        <LinearLayout android:orientation="vertical"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content">
+            <TableRow>
+                <TextView android:text="inherit"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:typeface="serif"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_hebrew_text"
+                          android:textDirection="inherit"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_latin_text"
+                          android:textDirection="inherit"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_multiline_text"
+                          android:textDirection="inherit"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+            </TableRow>
 
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_hebrew_text"
-                    />
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_hebrew_text"
-                      android:textDirection="inherit"
-                    />
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_hebrew_text"
-                      android:textDirection="firstStrong"
-                    />
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_hebrew_text"
-                      android:textDirection="anyRtl"
-                    />
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_hebrew_text"
-                      android:textDirection="ltr"
-                    />
-            <TextView android:layout_height="wrap_content"
-                      android:layout_width="wrap_content"
-                      android:textSize="24dip"
-                      android:text="@string/textview_hebrew_text"
-                      android:textDirection="rtl"
-                    />
-        </LinearLayout>
+            <TableRow>
+                <TextView android:text="firstStrong"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:typeface="serif"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_hebrew_text"
+                          android:textDirection="firstStrong"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_latin_text"
+                          android:textDirection="firstStrong"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_multiline_text"
+                          android:textDirection="firstStrong"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+            </TableRow>
 
-    </LinearLayout>
+            <TableRow>
+                <TextView android:text="anyRtl"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:typeface="serif"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_hebrew_text"
+                          android:textDirection="anyRtl"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_latin_text"
+                          android:textDirection="anyRtl"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_multiline_text"
+                          android:textDirection="anyRtl"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+            </TableRow>
+
+            <TableRow>
+                <TextView android:text="ltr"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:typeface="serif"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_hebrew_text"
+                          android:textDirection="ltr"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_latin_text"
+                          android:textDirection="ltr"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_multiline_text"
+                          android:textDirection="ltr"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+            </TableRow>
+
+            <TableRow>
+                <TextView android:text="rtl"
+                          android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:typeface="serif"
+                          android:layout_marginRight="7dip"
+                          android:layout_marginLeft="7dip"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_hebrew_text"
+                          android:textDirection="rtl"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_latin_text"
+                          android:textDirection="rtl"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+                <TextView android:layout_height="wrap_content"
+                          android:layout_width="wrap_content"
+                          android:textSize="24dip"
+                          android:text="@string/textview_multiline_text"
+                          android:textDirection="rtl"
+                          android:layout_marginLeft="7dip"
+                          android:layout_marginRight="7dip"
+                          android:background="#444444"
+                          />
+            </TableRow>
+
+        </TableLayout>
 
 </FrameLayout>

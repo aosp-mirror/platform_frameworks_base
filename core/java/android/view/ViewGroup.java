@@ -41,6 +41,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.animation.Transformation;
+
 import com.android.internal.R;
 import com.android.internal.util.Predicate;
 
@@ -5010,37 +5011,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 child.resetResolvedLayoutDirection();
             }
         }
-    }
-
-    /**
-     * This method will be called during text direction resolution (text direction resolution
-     * inheritance)
-     */
-    @Override
-    protected void resolveTextDirection() {
-        int resolvedTextDirection;
-        switch(mTextDirection) {
-            default:
-            case TEXT_DIRECTION_INHERIT:
-                // Try to the text direction from the parent layout
-                if (mParent != null && mParent instanceof ViewGroup) {
-                    resolvedTextDirection = ((ViewGroup) mParent).getResolvedTextDirection();
-                } else {
-                    // We reached the top of the View hierarchy, so set the text direction
-                    // heuristic to "first strong"
-                    resolvedTextDirection = TEXT_DIRECTION_FIRST_STRONG;
-                }
-                break;
-            // Pass down the hierarchy the following text direction values
-            case TEXT_DIRECTION_FIRST_STRONG:
-            case TEXT_DIRECTION_ANY_RTL:
-            case TEXT_DIRECTION_CHAR_COUNT:
-            case TEXT_DIRECTION_LTR:
-            case TEXT_DIRECTION_RTL:
-                resolvedTextDirection = mTextDirection;
-                break;
-        }
-        mResolvedTextDirection = resolvedTextDirection;
     }
 
     @Override
