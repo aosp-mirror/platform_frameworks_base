@@ -60,7 +60,7 @@ ending on the data collection date noted below.</p>
 <div class="dashboard-panel">
 
 <img alt="" width="400" height="250"
-src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=xlarge%20/%20mdpi|large%20/%20mdpi|normal%20/%20hdpi|normal%20/%20ldpi|normal%20/%20mdpi|small%20/%20hdpi&chd=t%3A0.5,2.6,75.5,1.2,17.1,3.2" />
+src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=Xlarge%20/%20mdpi|Large%20/%20mdpi|Normal%20/%20hdpi|Normal%20/%20ldpi|Normal%20/%20mdpi|Small%20/%20hdpi&chd=t%3A0.9,2.8,75,1.0,17,3.3" />
 
 <table>
 <tr>
@@ -71,31 +71,31 @@ src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=
 <th scope="col">xhdpi</th>
 </tr>
 <tr><th scope="row">small</th> 
-<td></td> <!-- ldpi -->
-<td></td> <!-- mdpi -->
-<td>3.2%</td> <!-- hdpi -->
-<td></td> <!-- xhdpi -->
+<td></td>     <!-- small/ldpi -->
+<td></td>     <!-- small/mdpi -->
+<td>3.3%</td> <!-- small/hdpi -->
+<td></td>     <!-- small/xhdpi -->
 </tr> 
 <tr><th scope="row">normal</th> 
-<td>1.2%</td> <!-- ldpi -->
-<td>17.1%</td> <!-- mdpi -->
-<td>75.5%</td> <!-- hdpi -->
-<td></td> <!-- xhdpi -->
+<td>1%</td>  <!-- normal/ldpi -->
+<td>17%</td> <!-- normal/mdpi -->
+<td>75%</td> <!-- normal/hdpi -->
+<td></td>      <!-- normal/xhdpi -->
 </tr> 
 <tr><th scope="row">large</th> 
-<td></td> <!-- ldpi -->
-<td>2.6%</td> <!-- mdpi -->
-<td></td> <!-- hdpi -->
-<td></td> <!-- xhdpi -->
+<td></td>     <!-- large/ldpi -->
+<td>2.8%</td> <!-- large/mdpi -->
+<td></td>     <!-- large/hdpi -->
+<td></td>     <!-- large/xhdpi -->
 </tr> 
 <tr><th scope="row">xlarge</th> 
-<td></td> <!-- ldpi -->
-<td>0.5%</td> <!-- mdpi -->
-<td></td> <!-- hdpi -->
-<td></td> <!-- xhdpi -->
+<td></td>     <!-- xlarge/ldpi -->
+<td>0.9%</td> <!-- xlarge/mdpi -->
+<td></td>     <!-- xlarge/hdpi -->
+<td></td>     <!-- xlarge/xhdpi -->
 </tr> 
 </table>
 
-<p><em>Data collected during a 7-day period ending on May 6, 2011</em></p>
+<p><em>Data collected during a 7-day period ending on July 1, 2011</em></p>
 </div>
 
