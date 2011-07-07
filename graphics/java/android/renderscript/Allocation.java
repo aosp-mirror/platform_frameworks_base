@@ -243,6 +243,7 @@ public class Allocation extends BaseObj {
         if(typeID != 0) {
             mType = new Type(typeID, mRS);
             mType.updateFromNative();
+            updateCacheInfo(mType);
         }
     }
 
