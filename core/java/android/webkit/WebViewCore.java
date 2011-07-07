@@ -2235,13 +2235,8 @@ public final class WebViewCore {
 
     // called by JNI
     private void updateViewport() {
-        // if updateViewport is called before first layout, wait until first
-        // layout to update the viewport. In the rare case, this is called after
-        // first layout, force an update as we have just parsed the viewport
-        // meta tag.
-        if (mBrowserFrame.firstLayoutDone()) {
-            setupViewport(true);
-        }
+        // Update viewport asap to make sure we get correct one.
+        setupViewport(true);
     }
 
     private void setupViewport(boolean updateViewState) {
@@ -2375,8 +2370,12 @@ public final class WebViewCore {
                         (float) webViewWidth / mViewportWidth;
             } else {
                 mInitialViewState.mTextWrapScale = adjust;
-                // 0 will trigger WebView to turn on zoom overview mode
-                mInitialViewState.mViewScale = 0;
+                if (mSettings.getUseWideViewPort()) {
+                    // 0 will trigger WebView to turn on zoom overview mode
+                    mInitialViewState.mViewScale = 0;
+                } else {
+                    mInitialViewState.mViewScale = adjust;
+                }
             }
         }
 
@@ -2407,7 +2406,7 @@ public final class WebViewCore {
             mEventHub.removeMessages(EventHub.VIEW_SIZE_CHANGED);
             mEventHub.sendMessageAtFrontOfQueue(Message.obtain(null,
                     EventHub.VIEW_SIZE_CHANGED, data));
-        } else if (mSettings.getUseWideViewPort()) {
+        } else {
             if (viewportWidth == 0) {
                 // Trick to ensure VIEW_SIZE_CHANGED will be sent from WebView
                 // to WebViewCore
