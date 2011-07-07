@@ -57,7 +57,7 @@ ending on the data collection date noted below.</p>
 <div class="dashboard-panel">
 
 <img alt="" width="400" height="250"
-src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=GL%20ES%201.1|GL%20ES%202.0&chd=t%3A8.9,91.1" />
+src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=GL%201.1|GL%202.0%20%26%201.1&chd=t%3A8.9,91" />
 
 <table>
 <tr>
@@ -66,11 +66,11 @@ src="http://chart.googleapis.com/chart?cht=p&chs=400x250&chco=c4df9b,6fad0c&chl=
 </tr>
 <tr>
 <td>1.1</th>
-<td>8.9%</td>
+<td>9%</td>
 </tr>
 <tr>
 <td>2.0</th>
-<td>91.1%</td>
+<td>91%</td>
 </tr>
 </table>
 
