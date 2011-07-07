@@ -81,6 +81,24 @@ public class WifiInfo implements Parcelable {
         mHiddenSSID = false;
     }
 
+    /**
+     * Copy constructor
+     * @hide
+     */
+    public WifiInfo(WifiInfo source) {
+        if (source != null) {
+            mSupplicantState = source.mSupplicantState;
+            mBSSID = source.mBSSID;
+            mSSID = source.mSSID;
+            mNetworkId = source.mNetworkId;
+            mHiddenSSID = source.mHiddenSSID;
+            mRssi = source.mRssi;
+            mLinkSpeed = source.mLinkSpeed;
+            mIpAddress = source.mIpAddress;
+            mMacAddress = source.mMacAddress;
+        }
+    }
+
     void setSSID(String SSID) {
         mSSID = SSID;
         // network is considered not hidden by default

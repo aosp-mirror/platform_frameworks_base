@@ -1374,6 +1374,8 @@ public class WifiStateMachine extends StateMachine {
         intent.putExtra(WifiManager.EXTRA_LINK_PROPERTIES, new LinkProperties (mLinkProperties));
         if (bssid != null)
             intent.putExtra(WifiManager.EXTRA_BSSID, bssid);
+        if (mNetworkInfo.getState() == NetworkInfo.State.CONNECTED)
+            intent.putExtra(WifiManager.EXTRA_WIFI_INFO, new WifiInfo(mWifiInfo));
         mContext.sendStickyBroadcast(intent);
     }
 
