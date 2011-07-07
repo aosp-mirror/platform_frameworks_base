@@ -152,7 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Airplane mode"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Naka-ON ang airplane mode"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Naka-OFF ang airplane mode"</string>
-    <!-- outdated translation 5833510281787786290 -->     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"100+"</string>
+    <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"999+"</string>
     <string name="safeMode" msgid="2788228061547930246">"Safe mode"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android System"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Mga serbisyong ginagastusan mo"</string>
@@ -319,14 +319,10 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"sumulat ng data ng pakikipag-ugnay"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Pinapayagan ang application na baguhin ang data ng contact (address) na nakaimbak sa iyong tablet. Maaari itong gamitin ng mga nakapanghahamak na application upang burahin o baguhin ang data ng iyong contact."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Pinapayagan ang isang application na baguhin ang data ng pakikipag-ugny (address) na nakaimbak sa iyong telepono. Magagamit ito ng mga nakakahamak na application upang burahin o baguhin ang iyong data ng pakikipag-ugnay."</string>
-    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
-    <skip />
+    <string name="permlab_readProfile" msgid="2211941946684590103">"basahin ang data ng profile"</string>
+    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"Pinapayagan ang isang application upang basahin ang lahat ng iyong mga personal na impormasyon sa profile. Magagamit ito ng mga kahina-hinalang application upang makilala ka at ipadala ang iyong personal na impormasyon sa iba pang tao."</string>
+    <string name="permlab_writeProfile" msgid="6561668046361989220">"magsulat ng data ng profile"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"Pinapayagan ang isang application upang baguhin ang iyong personal na impormasyon sa profile. Magagamit ito ng mga kahina-hinalang application upang burahin o baguhin ang iyong data ng profile."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"basahin ang mga kaganapan sa kalendaryo"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Pinapayagan ang application na basahin ang lahat ng mga kaganapan sa kalendaryo na nakaimbak sa iyong tablet. Maaari itong gamitin ng mga nakapanghahamak na application upang ipadala ang iyong mga kaganapan sa kalendaryo sa mga ibang tao."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Pinapayagan ang isang application na basahin ang lahat ng mga kaganapan sa kalendaryong nakaimbak sa iyong telepono. Magagamit ito ng mga nakakahamak na application upang ipadala ang iyong mga kaganapan sa kalendaryo sa ibang tao."</string>
@@ -491,14 +487,12 @@
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Pinapayagan ang isang application na basahin at isulat ang cache filesystem."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"gumawa/tumanggap ng mga tawag sa Internet"</string>
     <string name="permdesc_use_sip" msgid="6320376185606661843">"Pinapayagan ang application upang gamitin ang serbisyong SIP upang gumawa/tumanggap ng mga tawag sa Internet."</string>
-    <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
-    <skip />
-    <!-- no translation found for permdesc_readNetworkUsageHistory (6040738474779135653) -->
-    <skip />
-    <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
-    <skip />
-    <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
-    <skip />
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"basahin ang makasaysayang paggamit ng network"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="6040738474779135653">"Pinapayagan ang isang application na basahin ang makasaysayang paggamit network para sa mga tukoy na network at application."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"pamahalaan ang patakaran ng network"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="3723795285132803958">"Pinapayagan ang application upang pamahalaan ang mga patakaran ng network at alamin ang mga patakaran sa mga tukoy na application."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"baguhin ang pagkukuwenta sa paggamit ng network"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="8702285686629184404">"Pinapayagan ang pagbabago kung paano kinukuwenta ang paggamit ng network kumpara sa mga application. Hindi para sa paggamit ng mga karaniwang application."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Magtakda ng mga panuntunan sa password"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Kontrolin ang haba at mga character na pinapayagan sa mga password sa pag-unlock ng screen"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Subaybayan ang mga pagsubok sa pag-unlock ng screen"</string>
@@ -517,10 +511,8 @@
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Kontrolin kung gaano kadalas dapat na mapalitan ang password sa pag-lock ng screen"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Itakda pag-encrypt ng imbakan"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Hinging naka-encrypt ang nakaimbak na data ng application"</string>
-    <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
-    <skip />
-    <!-- no translation found for policydesc_disableCamera (5680054212889413366) -->
-    <skip />
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Huwag paganahin mga camera"</string>
+    <string name="policydesc_disableCamera" msgid="5680054212889413366">"Pigilan ang paggamit ng lahat ng camera ng device"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Home"</item>
     <item msgid="869923650527136615">"Mobile"</item>
@@ -662,10 +654,8 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Walang SIM card sa tablet."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Walang SIM card sa telepono."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Mangyaring magpasok ng SIM card."</string>
-    <!-- no translation found for lockscreen_missing_sim_instructions_long (7138450788301444298) -->
-    <skip />
-    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (1631853574702335453) -->
-    <skip />
+    <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"Nawawala o hindi nababasa ang SIM card. Mangyaring magpasok ng isang SIM card."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Ang iyong SIM card ay permanenteng hindi pinagana."\n" Mangyaring makipag-ugnay sa iyong wireless service provider upang makakuha ng isa pang SIM card."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Mga pang-emergency na tawag lang"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Naka-lock ang network"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Naka-PUK-lock ang SIM card."</string>
@@ -954,9 +944,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Kung io-on mo ang USB storage, titigil ang ilang application na ginagamit mo at maaaring maging hindi available hanggang sa i-off mo ang USB storage."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Nabigo ang pagpapatakbo ng USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
     <skip />
-    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
+    <skip />
+    <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
+    <skip />
+    <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"I-format USB storage"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"I-format ang SD card"</string>
@@ -1021,18 +1015,12 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kakayahang Ma-access"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Baguhin ang wallpaper"</string>
-    <string name="pptp_vpn_description" msgid="2688045385181439401">"Point-to-Point Tunneling Protocol"</string>
-    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Layer 2 Tunneling Protocol"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Unang ibinahaging key na batay sa L2TP/IPSec VPN"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Batay sa certificate na L2TP/IPSec VPN"</string>
-    <!-- no translation found for vpn_ticker (285642105845608311) -->
+    <!-- no translation found for vpn_title (8219003246858087489) -->
     <skip />
-    <!-- no translation found for vpn_title (5434034606697234123) -->
+    <!-- no translation found for vpn_title_long (6400714798049252294) -->
     <skip />
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"Tapikin upang pamahalaan ang network."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"Nakakonekta sa <xliff:g id="SESSION">%s</xliff:g>. Tapikin upang pamahalaan ang network."</string>
     <string name="upload_file" msgid="2897957172366730416">"Pumili ng file"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Walang napiling file"</string>
     <string name="reset" msgid="2448168080964209908">"I-reset"</string>
@@ -1081,9 +1069,6 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Tanggalin ang mga item."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"I-undo ang mga pagtanggal."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Walang gawin sa ngayon."</string>
-    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"Nakakonekta ang <xliff:g id="PROFILENAME">%s</xliff:g> sa VPN"</string>
-    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"Hindi nakakonekta ang <xliff:g id="PROFILENAME">%s</xliff:g> VPN"</string>
-    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Pindutin upang muling kumonekta sa VPN."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Pumili ng account"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Taasan"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Babaan"</string>
@@ -1094,26 +1079,34 @@
     <string name="storage_sd_card" msgid="8921771478629812343">"SD Card"</string>
     <string name="storage_usb" msgid="3017954059538517278">"USB storage"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"I-edit..."</string>
-    <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"Babala sa paggamit ng data"</string>
+    <string name="data_usage_warning_body" msgid="3354394590936526648">"lumampas sa paggamit ng <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Di pinagana ang data ng 2G-3G"</string>
+    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Di pinagana ang data ng 4G"</string>
+    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Di pinagana ang data ng mobile"</string>
+    <string name="data_usage_limit_body" msgid="2182247539226163759">"tapikin upang paganahin"</string>
+    <string name="ssl_certificate" msgid="6510040486049237639">"Certificate ng seguridad"</string>
+    <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"May-bisa ang certificate na ito."</string>
+    <string name="issued_to" msgid="454239480274921032">"Ibinigay kay:"</string>
+    <string name="common_name" msgid="2233209299434172646">"Karaniwang pangalan:"</string>
+    <string name="org_name" msgid="6973561190762085236">"Samahan:"</string>
+    <string name="org_unit" msgid="7265981890422070383">"Yunit na pangsamahan:"</string>
+    <string name="issued_by" msgid="2647584988057481566">"Ibinigay ng/ni:"</string>
+    <string name="validity_period" msgid="8818886137545983110">"Pagkabisa:"</string>
+    <string name="issued_on" msgid="5895017404361397232">"Ibinigay noong:"</string>
+    <string name="expires_on" msgid="3676242949915959821">"Mag-e-expire sa:"</string>
+    <!-- no translation found for serial_number (758814067660862493) -->
     <skip />
-    <!-- no translation found for data_usage_warning_body (3354394590936526648) -->
+    <!-- no translation found for fingerprints (4516019619850763049) -->
     <skip />
-    <!-- no translation found for data_usage_3g_limit_title (7093334419518706686) -->
+    <!-- no translation found for sha256_fingerprint (4391271286477279263) -->
     <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7636489436819470761) -->
+    <!-- no translation found for sha1_fingerprint (7930330235269404581) -->
     <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
+    <!-- no translation found for activity_chooser_view_see_all (180268188117163072) -->
     <skip />
-    <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
+    <!-- no translation found for activity_chooser_view_no_activities (1306964627596326933) -->
     <skip />
-    <string name="ssl_certificate" msgid="5226747157992111668">"Certificate na pangseguridad"</string>
-    <string name="ssl_certificate_is_valid" msgid="7096160815933145579">"Wasto ang certificate na ito."</string>
-    <string name="issued_to" msgid="9032338008819841339">"Ibinigay kay:"</string>
-    <string name="common_name" msgid="5745530093500062357">"Karaniwang pangalan:"</string>
-    <string name="org_name" msgid="8868889052889991293">"Samahan:"</string>
-    <string name="org_unit" msgid="4489056376307768196">"Unit na pangsamahan:"</string>
-    <string name="issued_by" msgid="6959484326943152487">"Ibinigay ni:"</string>
-    <string name="validity_period" msgid="57988851973181309">"Pagpapatunay:"</string>
-    <string name="issued_on" msgid="2082890654801808368">"Ibinigay noong:"</string>
-    <string name="expires_on" msgid="8061200430557020704">"Mag-e-expire sa:"</string>
+    <!-- no translation found for activity_chooser_view_select_default (5450262016073956587) -->
+    <skip />
 </resources>

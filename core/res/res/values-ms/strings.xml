@@ -510,6 +510,10 @@
     <skip />
     <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
     <skip />
+    <!-- no translation found for permlab_modifyNetworkAccounting (5088217309088729650) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyNetworkAccounting (8702285686629184404) -->
+    <skip />
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Tetapkan peraturan kata laluan"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan buka kunci skrin"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Memantau percubaan buka kunci skrin"</string>
@@ -642,7 +646,7 @@
     <string name="relationTypeSister" msgid="1735983554479076481">"Kakak/Adik"</string>
     <string name="relationTypeSpouse" msgid="394136939428698117">"Pasangan"</string>
     <string name="sipAddressTypeCustom" msgid="2473580593111590945">"Peribadi"</string>
-    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Laman Utama"</string>
+    <string name="sipAddressTypeHome" msgid="6093598181069359295">"Rumah"</string>
     <string name="sipAddressTypeWork" msgid="6920725730797099047">"Kerja"</string>
     <string name="sipAddressTypeOther" msgid="4408436162950119849">"Lain-lain"</string>
     <string name="keyguard_password_enter_pin_code" msgid="3731488827218876115">"Masukkan kod PIN"</string>
@@ -730,7 +734,7 @@
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"tulis sejarah dan penanda halaman Penyemak Imbas"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="7193514090469945307">"Membenarkan aplikasi mengubah suai sejarah atau penanda halaman Penyemak Imbas yang disimpan pada tablet anda. Aplikasi berniat jahat boleh menggunakannya untuk memadamkan atau mengubah suai data Penyemak Imbas anda."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Membenarkan aplikasi mengubah suai sejarah atau penanda halaman Penyemak Imbas yang disimpan pada telefon anda. Aplikasi berniat jahat boleh menggunakannya untuk memadamkan atau mengubah data Penyemak Imbas anda."</string>
-    <string name="permlab_setAlarm" msgid="5924401328803615165">"menetapkan penggera dalam jam penggera"</string>
+    <string name="permlab_setAlarm" msgid="5924401328803615165">"menetapkan penggera pada jam penggera"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Membenarkan aplikasi menetapkan penggera dalam aplikasi jam penggera yang dipasang. Sesetengah aplikasi jam penggera mungkin tidak melaksanakan ciri ini."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Ubah suai kebenaran geolokasi Penyemak Imbas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Membenarkan aplikasi mengubah suai kebenaran geolokasi Penyemak Imbas. Aplikasi berniat jahat boleh menggunakannya untuk membenarkan penghantaran maklumat lokasi ke sembarangan tapak web."</string>
@@ -968,9 +972,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Jika anda menghidupkan storan USB, sesetengah aplikasi yang anda sedang gunakan akan terhenti dan mungkin tidak akan tersedia sehingga anda memadamkan storan USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Pengendalian USB gagal"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
     <skip />
-    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
+    <skip />
+    <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
+    <skip />
+    <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Format storan USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Format kad SD"</string>
@@ -1035,13 +1043,9 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Kebolehaksesan"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Kertas dinding"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Tukar kertas dinding"</string>
-    <string name="pptp_vpn_description" msgid="2688045385181439401">"Protokol Penerowongan Titik Ke Titik"</string>
-    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protokol Penerowongan Lapisan ke-2"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"VPN L2TP/IPSec berasaskan kunci prakongsi"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"VPN L2TP/IPSec berasaskan sijil"</string>
-    <!-- no translation found for vpn_ticker (285642105845608311) -->
+    <!-- no translation found for vpn_title (8219003246858087489) -->
     <skip />
-    <!-- no translation found for vpn_title (5434034606697234123) -->
+    <!-- no translation found for vpn_title_long (6400714798049252294) -->
     <skip />
     <!-- no translation found for vpn_text (1610714069627824309) -->
     <skip />
@@ -1066,14 +1070,14 @@
     <string name="find_on_page" msgid="1946799233822820384">"Cari di halaman"</string>
   <plurals name="matches_found">
     <item quantity="one" msgid="8167147081136579439">"1 padanan"</item>
-    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> dari <xliff:g id="TOTAL">%d</xliff:g>"</item>
+    <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> daripada <xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Selesai"</string>
     <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Menyahlekap storan USB..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Menyahlekap kad SD..."</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Memadam storan USB..."</string>
-    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Memadam kad SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Gagal memadam storan USB."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Memadamkan storan USB..."</string>
+    <string name="progress_erasing" product="default" msgid="2115214724367534095">"Memadamkan kad SD..."</string>
+    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Gagal memadamkan storan USB."</string>
     <string name="format_error" product="default" msgid="1343380371925238343">"Gagal memadamkan kad SD."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"Kad SD telah dikeluarkan sebelum dinyahlekap."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Storan USB sedang disemak buat masa ini."</string>
@@ -1083,7 +1087,7 @@
     <string name="media_shared" product="default" msgid="5706130568133540435">"Kad SD sedang digunakan oleh komputer buat masa ini."</string>
     <string name="media_unknown_state" msgid="729192782197290385">"Media luaran dalam keadaan yang tidak diketahui."</string>
     <string name="share" msgid="1778686618230011964">"Kongsi"</string>
-    <string name="find" msgid="4808270900322985960">"Cari"</string>
+    <string name="find" msgid="4808270900322985960">"Dapatkan"</string>
     <string name="websearch" msgid="4337157977400211589">"Carian Web"</string>
     <string name="gpsNotifTicker" msgid="5622683912616496172">"Permintaan lokasi daripada <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="gpsNotifTitle" msgid="5446858717157416839">"Permintaan lokasi"</string>
@@ -1095,9 +1099,6 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Padam item."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Buat asal pemadaman."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Jangan lakukan apa-apa sekarang."</string>
-    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> disambungkan"</string>
-    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN <xliff:g id="PROFILENAME">%s</xliff:g> diputuskan sambungannya"</string>
-    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Sentuh untuk menyambung semula ke VPN."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Pilih akaun"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Kenaikan"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Penyusutan"</string>
@@ -1127,14 +1128,28 @@
     <skip />
     <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
     <skip />
-    <string name="ssl_certificate" msgid="5226747157992111668">"Sijil keselamatan"</string>
-    <string name="ssl_certificate_is_valid" msgid="7096160815933145579">"Sijil ini sah."</string>
-    <string name="issued_to" msgid="9032338008819841339">"Dikeluarkan kepada:"</string>
-    <string name="common_name" msgid="5745530093500062357">"Nama biasa:"</string>
-    <string name="org_name" msgid="8868889052889991293">"Organisasi:"</string>
-    <string name="org_unit" msgid="4489056376307768196">"Unit Organisasi:"</string>
-    <string name="issued_by" msgid="6959484326943152487">"Dikeluarkan oleh:"</string>
-    <string name="validity_period" msgid="57988851973181309">"Kesahan:"</string>
-    <string name="issued_on" msgid="2082890654801808368">"Dikeluarkan pada:"</string>
-    <string name="expires_on" msgid="8061200430557020704">"Tamat tempoh pada:"</string>
+    <string name="ssl_certificate" msgid="6510040486049237639">"Sijil keselamatan"</string>
+    <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Sijil ini sah."</string>
+    <string name="issued_to" msgid="454239480274921032">"Dikeluarkan kepada:"</string>
+    <string name="common_name" msgid="2233209299434172646">"Nama biasa:"</string>
+    <string name="org_name" msgid="6973561190762085236">"Organisasi:"</string>
+    <string name="org_unit" msgid="7265981890422070383">"Unit organisasi:"</string>
+    <string name="issued_by" msgid="2647584988057481566">"Dikeluarkan oleh:"</string>
+    <string name="validity_period" msgid="8818886137545983110">"Kesahan:"</string>
+    <string name="issued_on" msgid="5895017404361397232">"Dikeluarkan pada:"</string>
+    <string name="expires_on" msgid="3676242949915959821">"Tamat tempoh pada:"</string>
+    <!-- no translation found for serial_number (758814067660862493) -->
+    <skip />
+    <!-- no translation found for fingerprints (4516019619850763049) -->
+    <skip />
+    <!-- no translation found for sha256_fingerprint (4391271286477279263) -->
+    <skip />
+    <!-- no translation found for sha1_fingerprint (7930330235269404581) -->
+    <skip />
+    <!-- no translation found for activity_chooser_view_see_all (180268188117163072) -->
+    <skip />
+    <!-- no translation found for activity_chooser_view_no_activities (1306964627596326933) -->
+    <skip />
+    <!-- no translation found for activity_chooser_view_select_default (5450262016073956587) -->
+    <skip />
 </resources>

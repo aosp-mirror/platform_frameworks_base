@@ -528,6 +528,10 @@
     <skip />
     <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
     <skip />
+    <!-- no translation found for permlab_modifyNetworkAccounting (5088217309088729650) -->
+    <skip />
+    <!-- no translation found for permdesc_modifyNetworkAccounting (8702285686629184404) -->
+    <skip />
     <!-- outdated translation 4307861496302850201 -->     <string name="policylab_limitPassword" msgid="4497420728857585791">"Limitar il pled-clav"</string>
     <!-- outdated translation 1719877245692318299 -->     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Restrenscher ils tips da pleds-clav che Vus pudais utilisar."</string>
     <!-- outdated translation 7374780712664285321 -->     <string name="policylab_watchLogin" msgid="914130646942199503">"Survegliar las emprovas da s\'annunziar"</string>
@@ -1029,9 +1033,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Sche Vus activais l\'apparat periferic da memoria USB sa ferman tschertas applicaziuns che Vus utilisais. Ellas n\'èn probablamain betg disponiblas enfin che l\'apparat periferic vegn puspè deactivà."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Operaziun USB betg reussida"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
     <skip />
-    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
+    <skip />
+    <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
+    <skip />
+    <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
     <!-- outdated translation 8663247929551095854 -->     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formatar la carta SD"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatar la carta SD"</string>
@@ -1098,13 +1106,9 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Agids d\'access"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Fund davos"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Midar il fund davos"</string>
-    <string name="pptp_vpn_description" msgid="2688045385181439401">"Point-to-Point Tunneling Protocol"</string>
-    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocol Layer 2 Tunneling"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"VPN L2TP/IPSec basà sin ina clav precundividida"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"VPN L2TP/IPSec basà sin in certificat"</string>
-    <!-- no translation found for vpn_ticker (285642105845608311) -->
+    <!-- no translation found for vpn_title (8219003246858087489) -->
     <skip />
-    <!-- no translation found for vpn_title (5434034606697234123) -->
+    <!-- no translation found for vpn_title_long (6400714798049252294) -->
     <skip />
     <!-- no translation found for vpn_text (1610714069627824309) -->
     <skip />
@@ -1185,12 +1189,6 @@
     <skip />
     <!-- no translation found for sync_do_nothing (8717589462945226869) -->
     <skip />
-    <!-- no translation found for vpn_notification_title_connected (3197819122581348515) -->
-    <skip />
-    <!-- no translation found for vpn_notification_title_disconnected (4614192702448522822) -->
-    <skip />
-    <!-- no translation found for vpn_notification_hint_disconnected (4689796928510104200) -->
-    <skip />
     <!-- no translation found for choose_account_label (4191313562041125787) -->
     <skip />
     <!-- no translation found for number_picker_increment_button (4830170763103463443) -->
@@ -1223,14 +1221,38 @@
     <skip />
     <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
     <skip />
-    <string name="ssl_certificate" msgid="5226747157992111668">"Certificat da segirezza"</string>
-    <string name="ssl_certificate_is_valid" msgid="7096160815933145579">"Quest certificat è valid."</string>
-    <string name="issued_to" msgid="9032338008819841339">"Emess a:"</string>
-    <string name="common_name" msgid="5745530093500062357">"Num general:"</string>
-    <string name="org_name" msgid="8868889052889991293">"Organisaziun:"</string>
-    <string name="org_unit" msgid="4489056376307768196">"Unitad d\'organisaziun:"</string>
-    <string name="issued_by" msgid="6959484326943152487">"Emess da:"</string>
-    <string name="validity_period" msgid="57988851973181309">"Validitad:"</string>
-    <string name="issued_on" msgid="2082890654801808368">"Emess ils:"</string>
-    <string name="expires_on" msgid="8061200430557020704">"Scroda ils:"</string>
+    <!-- no translation found for ssl_certificate (6510040486049237639) -->
+    <skip />
+    <!-- no translation found for ssl_certificate_is_valid (6825263250774569373) -->
+    <skip />
+    <!-- no translation found for issued_to (454239480274921032) -->
+    <skip />
+    <!-- no translation found for common_name (2233209299434172646) -->
+    <skip />
+    <!-- no translation found for org_name (6973561190762085236) -->
+    <skip />
+    <!-- no translation found for org_unit (7265981890422070383) -->
+    <skip />
+    <!-- no translation found for issued_by (2647584988057481566) -->
+    <skip />
+    <!-- no translation found for validity_period (8818886137545983110) -->
+    <skip />
+    <!-- no translation found for issued_on (5895017404361397232) -->
+    <skip />
+    <!-- no translation found for expires_on (3676242949915959821) -->
+    <skip />
+    <!-- no translation found for serial_number (758814067660862493) -->
+    <skip />
+    <!-- no translation found for fingerprints (4516019619850763049) -->
+    <skip />
+    <!-- no translation found for sha256_fingerprint (4391271286477279263) -->
+    <skip />
+    <!-- no translation found for sha1_fingerprint (7930330235269404581) -->
+    <skip />
+    <!-- no translation found for activity_chooser_view_see_all (180268188117163072) -->
+    <skip />
+    <!-- no translation found for activity_chooser_view_no_activities (1306964627596326933) -->
+    <skip />
+    <!-- no translation found for activity_chooser_view_select_default (5450262016073956587) -->
+    <skip />
 </resources>

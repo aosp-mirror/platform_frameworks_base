@@ -152,7 +152,7 @@
     <string name="global_actions_toggle_airplane_mode" msgid="5884330306926307456">"Modo de avião"</string>
     <string name="global_actions_airplane_mode_on_status" msgid="2719557982608919750">"Modo de avião ATIVADO"</string>
     <string name="global_actions_airplane_mode_off_status" msgid="5075070442854490296">"Modo de avião DESATIVADO"</string>
-    <!-- outdated translation 5833510281787786290 -->     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"Mais de cem"</string>
+    <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"&gt;999"</string>
     <string name="safeMode" msgid="2788228061547930246">"Modo de segurança"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Sistema Android"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Serviços que geram gastos"</string>
@@ -319,14 +319,10 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"gravar dados de contato"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Permite que um aplicativo modifique os dados de contato (endereço) armazenados em seu tablet. Aplicativos maliciosos podem usar isso para apagar ou modificar seus dados de contato."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Permite que um aplicativo modifique os dados de contato (endereço) armazenados no seu telefone. Aplicativos maliciosos podem usar isso para apagar ou modificar os seus dados de contato."</string>
-    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
-    <skip />
+    <string name="permlab_readProfile" msgid="2211941946684590103">"ler dados do perfil"</string>
+    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"Permite que um aplicativo leia todas as informações pessoais do seu perfil. Aplicativos suspeitos podem usar isso para identificá-lo e enviar suas informações pessoais para outras pessoas."</string>
+    <string name="permlab_writeProfile" msgid="6561668046361989220">"gravar dados do perfil"</string>
+    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"Permite que um aplicativo modifique as informações pessoais do seu perfil. Aplicativos suspeitos podem usar isso para apagar ou alterar dados do seu perfil."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"ler eventos da agenda"</string>
     <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Permite que um aplicativo leia todos os eventos da agenda armazenados em seu tablet. Aplicativos maliciosos podem usar isso para enviar eventos de sua agenda para outras pessoas."</string>
     <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Permite que um aplicativo leia todos os eventos da agenda armazenados no seu telefone. Aplicativos maliciosos podem usar isso para enviar eventos da sua agenda para outras pessoas."</string>
@@ -491,14 +487,12 @@
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Permite que um aplicativo leia e grave no sistema de arquivos de cache."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"fazer/receber chamadas pela internet"</string>
     <string name="permdesc_use_sip" msgid="6320376185606661843">"Permite que um aplicativo use o serviço SIP para fazer/receber chamadas pela internet."</string>
-    <!-- no translation found for permlab_readNetworkUsageHistory (7862593283611493232) -->
-    <skip />
-    <!-- no translation found for permdesc_readNetworkUsageHistory (6040738474779135653) -->
-    <skip />
-    <!-- no translation found for permlab_manageNetworkPolicy (2562053592339859990) -->
-    <skip />
-    <!-- no translation found for permdesc_manageNetworkPolicy (3723795285132803958) -->
-    <skip />
+    <string name="permlab_readNetworkUsageHistory" msgid="7862593283611493232">"ler histórico de uso da rede"</string>
+    <string name="permdesc_readNetworkUsageHistory" msgid="6040738474779135653">"Permite que um aplicativo leia o histórico de uso da rede em redes e aplicativos específicos."</string>
+    <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"gerenciar a política de rede"</string>
+    <string name="permdesc_manageNetworkPolicy" msgid="3723795285132803958">"Permite que um aplicativo gerencie as políticas de rede e defina regras específicas aos aplicativos."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"modificar contagem de uso da rede"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="8702285686629184404">"Permite modificar como o uso da rede é registrado em comparação aos aplicativos. Não deve ser usado em aplicativos normais."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Definir regras para senha"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Controla o tamanho e os caracteres permitidos nas senhas de desbloqueio de tela"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitorar tentativas de desbloqueio da tela"</string>
@@ -517,10 +511,8 @@
     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Controlar a frequência com que a senha da tela de bloqueio deve ser alterada"</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Definir criptografia de armazenamento"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Exigir que os dados do aplicativo armazenado sejam criptografados"</string>
-    <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
-    <skip />
-    <!-- no translation found for policydesc_disableCamera (5680054212889413366) -->
-    <skip />
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Desativar câmeras"</string>
+    <string name="policydesc_disableCamera" msgid="5680054212889413366">"Impedir o uso de todas as câmeras do dispositivo"</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Residencial"</item>
     <item msgid="869923650527136615">"Celular"</item>
@@ -662,10 +654,8 @@
     <string name="lockscreen_missing_sim_message" product="tablet" msgid="151659196095791474">"Não há um cartão SIM no tablet."</string>
     <string name="lockscreen_missing_sim_message" product="default" msgid="2186920585695169078">"Não há um cartão SIM no telefone."</string>
     <string name="lockscreen_missing_sim_instructions" msgid="8874620818937719067">"Insira um cartão SIM."</string>
-    <!-- no translation found for lockscreen_missing_sim_instructions_long (7138450788301444298) -->
-    <skip />
-    <!-- no translation found for lockscreen_permanent_disabled_sim_instructions (1631853574702335453) -->
-    <skip />
+    <string name="lockscreen_missing_sim_instructions_long" msgid="7138450788301444298">"O cartão SIM não foi inserido ou não está legível. Insira um cartão SIM."</string>
+    <string name="lockscreen_permanent_disabled_sim_instructions" msgid="1631853574702335453">"Seu cartão SIM está permanentemente desativado."\n" Entre em contato com seu provedor de serviços de rede sem fio para obter outro cartão SIM."</string>
     <string name="emergency_calls_only" msgid="6733978304386365407">"Apenas chamadas de emergência"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Rede bloqueada"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"O cartão SIM está bloqueado pelo PUK."</string>
@@ -954,9 +944,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Se você ativar o armazenamento USB, alguns aplicativos que estão em uso serão interrompidos e poderão não estar disponíveis até você desativar o armazenamento USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Falha de operação de USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
     <skip />
-    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
+    <skip />
+    <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
+    <skip />
+    <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formatar armaz. USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatar cartão SD"</string>
@@ -1021,18 +1015,12 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Acessibilidade"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Plano de fundo"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Alterar plano de fundo"</string>
-    <string name="pptp_vpn_description" msgid="2688045385181439401">"Protocolo de encapsulamento ponto a ponto"</string>
-    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Protocolo de encapsulamento de camada 2"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"VPN L2TP/IPSec com base em chave pré-compartilhada"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"VPN L2TP/IPSec com base em certificado"</string>
-    <!-- no translation found for vpn_ticker (285642105845608311) -->
+    <!-- no translation found for vpn_title (8219003246858087489) -->
     <skip />
-    <!-- no translation found for vpn_title (5434034606697234123) -->
+    <!-- no translation found for vpn_title_long (6400714798049252294) -->
     <skip />
-    <!-- no translation found for vpn_text (1610714069627824309) -->
-    <skip />
-    <!-- no translation found for vpn_text_long (4907843483284977618) -->
-    <skip />
+    <string name="vpn_text" msgid="1610714069627824309">"Toque para gerenciar a rede."</string>
+    <string name="vpn_text_long" msgid="4907843483284977618">"Conectado a <xliff:g id="SESSION">%s</xliff:g>. Toque para gerenciar a rede."</string>
     <string name="upload_file" msgid="2897957172366730416">"Escolher arquivo"</string>
     <string name="no_file_chosen" msgid="6363648562170759465">"Nenhum arquivo escolhido"</string>
     <string name="reset" msgid="2448168080964209908">"Redefinir"</string>
@@ -1081,9 +1069,6 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Excluir os itens."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Desfazer as exclusões."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Não fazer nada por enquanto."</string>
-    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"VPN de <xliff:g id="PROFILENAME">%s</xliff:g> conectada"</string>
-    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"VPN de <xliff:g id="PROFILENAME">%s</xliff:g> desconectada"</string>
-    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Toque para reconectar-se a uma VPN."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Selecione uma conta"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Incremento"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Redução"</string>
@@ -1094,26 +1079,34 @@
     <string name="storage_sd_card" msgid="8921771478629812343">"Cartão SD"</string>
     <string name="storage_usb" msgid="3017954059538517278">"Armazenamento USB"</string>
     <string name="extract_edit_menu_button" msgid="302060189057163906">"Editar..."</string>
-    <!-- no translation found for data_usage_warning_title (1955638862122232342) -->
+    <string name="data_usage_warning_title" msgid="1955638862122232342">"Aviso sobre uso de dados"</string>
+    <string name="data_usage_warning_body" msgid="3354394590936526648">"o uso excede <xliff:g id="SIZE">%s</xliff:g>"</string>
+    <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Dados 2G e 3G desativados"</string>
+    <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Dados 4G desativados"</string>
+    <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Dados móveis desativados"</string>
+    <string name="data_usage_limit_body" msgid="2182247539226163759">"toque para ativar"</string>
+    <string name="ssl_certificate" msgid="6510040486049237639">"Certificado de segurança"</string>
+    <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Este certificado é válido."</string>
+    <string name="issued_to" msgid="454239480274921032">"Emitido para:"</string>
+    <string name="common_name" msgid="2233209299434172646">"Nome comum:"</string>
+    <string name="org_name" msgid="6973561190762085236">"Organização:"</string>
+    <string name="org_unit" msgid="7265981890422070383">"Unidade organizacional:"</string>
+    <string name="issued_by" msgid="2647584988057481566">"Emitido por:"</string>
+    <string name="validity_period" msgid="8818886137545983110">"Validade:"</string>
+    <string name="issued_on" msgid="5895017404361397232">"Emitido em:"</string>
+    <string name="expires_on" msgid="3676242949915959821">"Expira em:"</string>
+    <!-- no translation found for serial_number (758814067660862493) -->
     <skip />
-    <!-- no translation found for data_usage_warning_body (3354394590936526648) -->
+    <!-- no translation found for fingerprints (4516019619850763049) -->
     <skip />
-    <!-- no translation found for data_usage_3g_limit_title (7093334419518706686) -->
+    <!-- no translation found for sha256_fingerprint (4391271286477279263) -->
     <skip />
-    <!-- no translation found for data_usage_4g_limit_title (7636489436819470761) -->
+    <!-- no translation found for sha1_fingerprint (7930330235269404581) -->
     <skip />
-    <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
+    <!-- no translation found for activity_chooser_view_see_all (180268188117163072) -->
     <skip />
-    <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
+    <!-- no translation found for activity_chooser_view_no_activities (1306964627596326933) -->
     <skip />
-    <string name="ssl_certificate" msgid="5226747157992111668">"Certificado de segurança"</string>
-    <string name="ssl_certificate_is_valid" msgid="7096160815933145579">"Este certificado é válido."</string>
-    <string name="issued_to" msgid="9032338008819841339">"Emitido para:"</string>
-    <string name="common_name" msgid="5745530093500062357">"Nome comum:"</string>
-    <string name="org_name" msgid="8868889052889991293">"Organização:"</string>
-    <string name="org_unit" msgid="4489056376307768196">"Unidade organizacional:"</string>
-    <string name="issued_by" msgid="6959484326943152487">"Emitido por:"</string>
-    <string name="validity_period" msgid="57988851973181309">"Validade:"</string>
-    <string name="issued_on" msgid="2082890654801808368">"Emitido em:"</string>
-    <string name="expires_on" msgid="8061200430557020704">"Expira em:"</string>
+    <!-- no translation found for activity_chooser_view_select_default (5450262016073956587) -->
+    <skip />
 </resources>

@@ -77,12 +77,8 @@
     <skip />
     <!-- no translation found for compat_mode_help_body (4946726776359270040) -->
     <skip />
-    <!-- no translation found for usb_preference_title (6551050377388882787) -->
+    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
     <skip />
-    <!-- no translation found for use_mtp_button_title (4333504413563023626) -->
-    <skip />
-    <!-- no translation found for use_ptp_button_title (7517127540301625751) -->
-    <skip />
-    <!-- no translation found for installer_cd_button_title (8485631662288445893) -->
+    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
     <skip />
 </resources>

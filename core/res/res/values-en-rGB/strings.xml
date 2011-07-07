@@ -491,6 +491,8 @@
     <string name="permdesc_readNetworkUsageHistory" msgid="6040738474779135653">"Allows an application to read historical network usage for specific networks and applications."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"manage network policy"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="3723795285132803958">"Allows an application to manage network policies and define application-specific rules."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"modify network usage accounting"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="8702285686629184404">"Allows modification of how network usage is accounted against applications. Not for use by normal applications."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Set password rules"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Control the length and the characters allowed in screen-unlock passwords"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitor screen-unlock attempts"</string>
@@ -942,9 +944,13 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"If you turn on USB storage, some applications that you are using will stop and may be unavailable until you turn off USB storage."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB operation failed"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_preferences_notification_title (2540843093508208861) -->
+    <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
     <skip />
-    <!-- no translation found for usb_preferece_notification_message (4715212563869699564) -->
+    <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
+    <skip />
+    <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
+    <skip />
+    <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Format USB storage"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Format SD card"</string>
@@ -1009,12 +1015,10 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibility"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Change wallpaper"</string>
-    <string name="pptp_vpn_description" msgid="2688045385181439401">"Point-to-Point Tunnelling Protocol"</string>
-    <string name="l2tp_vpn_description" msgid="3750692169378923304">"Layer 2 Tunnelling Protocol"</string>
-    <string name="l2tp_ipsec_psk_vpn_description" msgid="3945043564008303239">"Pre-shared key-based L2TP/IPSec VPN"</string>
-    <string name="l2tp_ipsec_crt_vpn_description" msgid="5382714073103653577">"Certificate-based L2TP/IPSec VPN"</string>
-    <string name="vpn_ticker" msgid="285642105845608311">"<xliff:g id="APP">%s</xliff:g> is activating VPN..."</string>
-    <string name="vpn_title" msgid="5434034606697234123">"VPN is activated by <xliff:g id="APP">%s</xliff:g>"</string>
+    <!-- no translation found for vpn_title (8219003246858087489) -->
+    <skip />
+    <!-- no translation found for vpn_title_long (6400714798049252294) -->
+    <skip />
     <string name="vpn_text" msgid="1610714069627824309">"Tap to manage the network."</string>
     <string name="vpn_text_long" msgid="4907843483284977618">"Connected to <xliff:g id="SESSION">%s</xliff:g>. Tap to manage the network."</string>
     <string name="upload_file" msgid="2897957172366730416">"Choose file"</string>
@@ -1065,9 +1069,6 @@
     <string name="sync_really_delete" msgid="8933566316059338692">"Delete the items."</string>
     <string name="sync_undo_deletes" msgid="8610996708225006328">"Undo the deletions."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"Do nothing for now."</string>
-    <string name="vpn_notification_title_connected" msgid="3197819122581348515">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN connected"</string>
-    <string name="vpn_notification_title_disconnected" msgid="4614192702448522822">"<xliff:g id="PROFILENAME">%s</xliff:g> VPN disconnected"</string>
-    <string name="vpn_notification_hint_disconnected" msgid="4689796928510104200">"Touch to reconnect to a VPN."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"Select an account"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Increment"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Decrement"</string>
@@ -1084,4 +1085,28 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G data disabled"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobile data disabled"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"Tap to enable"</string>
+    <string name="ssl_certificate" msgid="6510040486049237639">"Security certificate"</string>
+    <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"This certificate is valid."</string>
+    <string name="issued_to" msgid="454239480274921032">"Issued to:"</string>
+    <string name="common_name" msgid="2233209299434172646">"Common name:"</string>
+    <string name="org_name" msgid="6973561190762085236">"Organisation:"</string>
+    <string name="org_unit" msgid="7265981890422070383">"Organisational unit:"</string>
+    <string name="issued_by" msgid="2647584988057481566">"Issued by:"</string>
+    <string name="validity_period" msgid="8818886137545983110">"Validity:"</string>
+    <string name="issued_on" msgid="5895017404361397232">"Issued on:"</string>
+    <string name="expires_on" msgid="3676242949915959821">"Expires on:"</string>
+    <!-- no translation found for serial_number (758814067660862493) -->
+    <skip />
+    <!-- no translation found for fingerprints (4516019619850763049) -->
+    <skip />
+    <!-- no translation found for sha256_fingerprint (4391271286477279263) -->
+    <skip />
+    <!-- no translation found for sha1_fingerprint (7930330235269404581) -->
+    <skip />
+    <!-- no translation found for activity_chooser_view_see_all (180268188117163072) -->
+    <skip />
+    <!-- no translation found for activity_chooser_view_no_activities (1306964627596326933) -->
+    <skip />
+    <!-- no translation found for activity_chooser_view_select_default (5450262016073956587) -->
+    <skip />
 </resources>
