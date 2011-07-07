@@ -283,7 +283,7 @@
         <item name="actionBarSplitStyle">?android:attr/actionBarStyle</item>
         <item name="actionBarSize">@dimen/action_bar_default_height</item>
         <item name="actionModePopupWindowStyle">?android:attr/popupWindowStyle</item>
-        <item name="actionMenuTextAppearance">?android:attr/textAppearanceSmall</item>
+        <item name="actionMenuTextAppearance">@android:style/TextAppearance.Holo.Widget.ActionBar.Menu</item>
         <item name="actionMenuTextColor">?android:attr/textColorPrimary</item>
 
         <item name="dividerVertical">@drawable/divider_vertical_dark</item>
@@ -1389,6 +1389,7 @@
         <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
         <item name="actionModeBackground">@android:drawable/cab_background_holo_dark</item>
         <item name="actionModeCloseDrawable">@android:drawable/cab_ic_close_holo</item>
+        <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
         <item name="actionBarTabStyle">@style/Widget.Holo.Light.ActionBar.TabView.Inverse</item>
         <item name="actionBarTabBarStyle">@style/Widget.Holo.Light.ActionBar.TabBar.Inverse</item>
         <item name="actionBarTabTextStyle">@style/Widget.Holo.Light.ActionBar.TabText.Inverse</item>
