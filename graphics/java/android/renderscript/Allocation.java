@@ -155,6 +155,18 @@ public class Allocation extends BaseObj {
         }
     }
 
+    private void updateCacheInfo(Type t) {
+        mCurrentDimX = t.getX();
+        mCurrentDimY = t.getY();
+        mCurrentDimZ = t.getZ();
+        mCurrentCount = mCurrentDimX;
+        if (mCurrentDimY > 1) {
+            mCurrentCount *= mCurrentDimY;
+        }
+        if (mCurrentDimZ > 1) {
+            mCurrentCount *= mCurrentDimZ;
+        }
+    }
 
     Allocation(int id, RenderScript rs, Type t, int usage) {
         super(id, rs);
@@ -167,15 +179,8 @@ public class Allocation extends BaseObj {
         }
         mType = t;
 
-        mCurrentDimX = t.getX();
-        mCurrentDimY = t.getY();
-        mCurrentDimZ = t.getZ();
-        mCurrentCount = mCurrentDimX;
-        if (mCurrentDimY > 1) {
-            mCurrentCount *= mCurrentDimY;
-        }
-        if (mCurrentDimZ > 1) {
-            mCurrentCount *= mCurrentDimZ;
+        if (t != null) {
+            updateCacheInfo(t);
         }
     }
 
@@ -785,6 +790,7 @@ public class Allocation extends BaseObj {
         int typeID = mRS.nAllocationGetType(getID());
         mType = new Type(typeID, mRS);
         mType.updateFromNative();
+        updateCacheInfo(mType);
     }
 
     /*
