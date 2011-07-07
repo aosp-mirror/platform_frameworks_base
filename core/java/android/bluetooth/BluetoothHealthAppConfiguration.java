@@ -17,7 +17,6 @@
 
 package android.bluetooth;
 
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,21 +33,18 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
     private final int mDataType;
     private final int mRole;
     private final int mChannelType;
-    private final IBluetoothHealthCallback mCallback;
 
     /**
      * Constructor to register the SINK role
      *
      * @param name Friendly name associated with the application configuration
      * @param dataType Data Type of the remote Bluetooth Health device
-     * @param callback Callback associated with the application configuration.
      */
-    BluetoothHealthAppConfiguration(String name, int dataType, IBluetoothHealthCallback callback) {
+    BluetoothHealthAppConfiguration(String name, int dataType) {
         mName = name;
         mDataType = dataType;
         mRole = BluetoothHealth.SINK_ROLE;
         mChannelType = BluetoothHealth.CHANNEL_TYPE_ANY;
-        mCallback = callback;
     }
 
     /**
@@ -56,17 +52,15 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
      *
      * @param name Friendly name associated with the application configuration
      * @param dataType Data Type of the remote Bluetooth Health device
-     * @param role {@link BluetoothHealth.SOURCE_ROLE} or
-     *                     {@link BluetoothHealth.SINK_ROLE}
-     * @param callback Callback associated with the application configuration.
+     * @param role {@link BluetoothHealth#SOURCE_ROLE} or
+     *                     {@link BluetoothHealth#SINK_ROLE}
      */
-    BluetoothHealthAppConfiguration(String name, int dataType, int role, int channelType,
-            IBluetoothHealthCallback callback) {
+    BluetoothHealthAppConfiguration(String name, int dataType, int role, int
+        channelType) {
         mName = name;
         mDataType = dataType;
         mRole = role;
         mChannelType = channelType;
-        mCallback = callback;
     }
 
     @Override
@@ -77,8 +71,7 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
             return mName.equals(config.getName()) &&
                     mDataType == config.getDataType() &&
                     mRole == config.getRole() &&
-                    mChannelType == config.getChannelType() &&
-                    mCallback.equals(config.getCallback());
+                    mChannelType == config.getChannelType();
         }
         return false;
     }
@@ -90,7 +83,6 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
         result = 31 * result + mDataType;
         result = 31 * result + mRole;
         result = 31 * result + mChannelType;
-        result = 31 * result + (mCallback != null ? mCallback.hashCode() : 0);
         return result;
     }
 
@@ -98,9 +90,10 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
     public String toString() {
         return "BluetoothHealthAppConfiguration [mName = " + mName +
             ",mDataType = " + mDataType + ", mRole = " + mRole + ",mChannelType = " +
-            mChannelType +  ",callback=" + mCallback +"]";
+            mChannelType + "]";
     }
 
+    @Override
     public int describeContents() {
         return 0;
     }
@@ -144,37 +137,31 @@ public final class BluetoothHealthAppConfiguration implements Parcelable {
         return mChannelType;
     }
 
-    /**
-     * Return the callback associated with this application configuration.
-     *
-     * @return IBluetoothHealthCallback
-     */
-    public IBluetoothHealthCallback getCallback() {
-        return mCallback;
-    }
-
     public static final Parcelable.Creator<BluetoothHealthAppConfiguration> CREATOR =
         new Parcelable.Creator<BluetoothHealthAppConfiguration>() {
+        @Override
         public BluetoothHealthAppConfiguration createFromParcel(Parcel in) {
             String name = in.readString();
             int type = in.readInt();
             int role = in.readInt();
             int channelType = in.readInt();
-            IBluetoothHealthCallback callback =
-                IBluetoothHealthCallback.Stub.asInterface(in.readStrongBinder());
-            return new BluetoothHealthAppConfiguration(name, type, role, channelType,
-                    callback);
+            return new BluetoothHealthAppConfiguration(name, type, role,
+                channelType);
         }
+
+        @Override
         public BluetoothHealthAppConfiguration[] newArray(int size) {
             return new BluetoothHealthAppConfiguration[size];
         }
     };
 
+    @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mName);
         out.writeInt(mDataType);
         out.writeInt(mRole);
         out.writeInt(mChannelType);
-        out.writeStrongInterface(mCallback);
     }
+
+
 }

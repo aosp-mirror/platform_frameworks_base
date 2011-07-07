@@ -24,8 +24,6 @@
 
 package android.server;
 
-import com.android.internal.app.IBatteryStats;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -40,6 +38,7 @@ import android.bluetooth.BluetoothSocket;
 import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothCallback;
+import android.bluetooth.IBluetoothHealthCallback;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -57,6 +56,8 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
+
+import com.android.internal.app.IBatteryStats;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedWriter;
@@ -2084,11 +2085,12 @@ public class BluetoothService extends IBluetooth.Stub {
     /**** Handlers for Health Device Profile ****/
     // TODO: All these need to be converted to a state machine.
 
-    public boolean registerAppConfiguration(BluetoothHealthAppConfiguration config) {
+    public boolean registerAppConfiguration(BluetoothHealthAppConfiguration config,
+                                            IBluetoothHealthCallback callback) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM,
                 "Need BLUETOOTH permission");
         synchronized (mBluetoothHealthProfileHandler) {
-                return mBluetoothHealthProfileHandler.registerAppConfiguration(config);
+                return mBluetoothHealthProfileHandler.registerAppConfiguration(config, callback);
         }
     }
 
