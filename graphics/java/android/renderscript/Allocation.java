@@ -67,6 +67,22 @@ public class Allocation extends BaseObj {
     Type mType;
     Bitmap mBitmap;
     int mUsage;
+    Allocation mAdaptedAllocation;
+
+    boolean mConstrainedLOD;
+    boolean mConstrainedFace;
+    boolean mConstrainedY;
+    boolean mConstrainedZ;
+    int mSelectedY;
+    int mSelectedZ;
+    int mSelectedLOD;
+    Type.CubemapFace mSelectedFace = Type.CubemapFace.POSITIVE_X;
+
+    int mCurrentDimX;
+    int mCurrentDimY;
+    int mCurrentDimZ;
+    int mCurrentCount;
+
 
     /**
      * The usage of the allocation.  These signal to renderscript
@@ -139,6 +155,7 @@ public class Allocation extends BaseObj {
         }
     }
 
+
     Allocation(int id, RenderScript rs, Type t, int usage) {
         super(id, rs);
         if ((usage & ~(USAGE_SCRIPT |
@@ -149,6 +166,17 @@ public class Allocation extends BaseObj {
             throw new RSIllegalArgumentException("Unknown usage specified.");
         }
         mType = t;
+
+        mCurrentDimX = t.getX();
+        mCurrentDimY = t.getY();
+        mCurrentDimZ = t.getZ();
+        mCurrentCount = mCurrentDimX;
+        if (mCurrentDimY > 1) {
+            mCurrentCount *= mCurrentDimY;
+        }
+        if (mCurrentDimZ > 1) {
+            mCurrentCount *= mCurrentDimZ;
+        }
     }
 
     private void validateIsInt32() {
@@ -234,15 +262,15 @@ public class Allocation extends BaseObj {
     public void copyFrom(BaseObj[] d) {
         mRS.validate();
         validateIsObject();
-        if (d.length != mType.getCount()) {
+        if (d.length != mCurrentCount) {
             throw new RSIllegalArgumentException("Array size mismatch, allocation sizeX = " +
-                                                 mType.getCount() + ", array length = " + d.length);
+                                                 mCurrentCount + ", array length = " + d.length);
         }
         int i[] = new int[d.length];
         for (int ct=0; ct < d.length; ct++) {
             i[ct] = d[ct].getID();
         }
-        copy1DRangeFromUnchecked(0, mType.getCount(), i);
+        copy1DRangeFromUnchecked(0, mCurrentCount, i);
     }
 
     private void validateBitmapFormat(Bitmap b) {
@@ -292,8 +320,7 @@ public class Allocation extends BaseObj {
     }
 
     private void validateBitmapSize(Bitmap b) {
-        if(mType.getX() != b.getWidth() ||
-           mType.getY() != b.getHeight()) {
+        if((mCurrentDimX != b.getWidth()) || (mCurrentDimY != b.getHeight())) {
             throw new RSIllegalArgumentException("Cannot update allocation from bitmap, sizes mismatch");
         }
     }
@@ -307,7 +334,7 @@ public class Allocation extends BaseObj {
      */
     public void copyFromUnchecked(int[] d) {
         mRS.validate();
-        copy1DRangeFromUnchecked(0, mType.getCount(), d);
+        copy1DRangeFromUnchecked(0, mCurrentCount, d);
     }
     /**
      * Copy an allocation from an array.  This variant is not type
@@ -318,7 +345,7 @@ public class Allocation extends BaseObj {
      */
     public void copyFromUnchecked(short[] d) {
         mRS.validate();
-        copy1DRangeFromUnchecked(0, mType.getCount(), d);
+        copy1DRangeFromUnchecked(0, mCurrentCount, d);
     }
     /**
      * Copy an allocation from an array.  This variant is not type
@@ -329,7 +356,7 @@ public class Allocation extends BaseObj {
      */
     public void copyFromUnchecked(byte[] d) {
         mRS.validate();
-        copy1DRangeFromUnchecked(0, mType.getCount(), d);
+        copy1DRangeFromUnchecked(0, mCurrentCount, d);
     }
     /**
      * Copy an allocation from an array.  This variant is not type
@@ -340,7 +367,7 @@ public class Allocation extends BaseObj {
      */
     public void copyFromUnchecked(float[] d) {
         mRS.validate();
-        copy1DRangeFromUnchecked(0, mType.getCount(), d);
+        copy1DRangeFromUnchecked(0, mCurrentCount, d);
     }
 
     /**
@@ -352,7 +379,7 @@ public class Allocation extends BaseObj {
      */
     public void copyFrom(int[] d) {
         mRS.validate();
-        copy1DRangeFrom(0, mType.getCount(), d);
+        copy1DRangeFrom(0, mCurrentCount, d);
     }
 
     /**
@@ -364,7 +391,7 @@ public class Allocation extends BaseObj {
      */
     public void copyFrom(short[] d) {
         mRS.validate();
-        copy1DRangeFrom(0, mType.getCount(), d);
+        copy1DRangeFrom(0, mCurrentCount, d);
     }
 
     /**
@@ -376,7 +403,7 @@ public class Allocation extends BaseObj {
      */
     public void copyFrom(byte[] d) {
         mRS.validate();
-        copy1DRangeFrom(0, mType.getCount(), d);
+        copy1DRangeFrom(0, mCurrentCount, d);
     }
 
     /**
@@ -388,7 +415,7 @@ public class Allocation extends BaseObj {
      */
     public void copyFrom(float[] d) {
         mRS.validate();
-        copy1DRangeFrom(0, mType.getCount(), d);
+        copy1DRangeFrom(0, mCurrentCount, d);
     }
 
     /**
@@ -420,8 +447,7 @@ public class Allocation extends BaseObj {
             throw new RSIllegalArgumentException("Field packer length " + data.length +
                                                " not divisible by element size " + eSize + ".");
         }
-        data1DChecks(xoff, count, data.length, data.length);
-        mRS.nAllocationData1D(getID(), xoff, 0, count, data, data.length);
+        copy1DRangeFromUnchecked(xoff, count, data);
     }
 
     /**
@@ -448,7 +474,8 @@ public class Allocation extends BaseObj {
                                                " does not match component size " + eSize + ".");
         }
 
-        mRS.nAllocationElementData1D(getID(), xoff, 0, component_number, data, data.length);
+        mRS.nAllocationElementData1D(getID(), xoff, mSelectedLOD,
+                                     component_number, data, data.length);
     }
 
     private void data1DChecks(int off, int count, int len, int dataSize) {
@@ -459,11 +486,11 @@ public class Allocation extends BaseObj {
         if(count < 1) {
             throw new RSIllegalArgumentException("Count must be >= 1.");
         }
-        if((off + count) > mType.getCount()) {
-            throw new RSIllegalArgumentException("Overflow, Available count " + mType.getCount() +
+        if((off + count) > mCurrentCount) {
+            throw new RSIllegalArgumentException("Overflow, Available count " + mCurrentCount +
                                                ", got " + count + " at offset " + off + ".");
         }
-        if((len) < dataSize) {
+        if(len < dataSize) {
             throw new RSIllegalArgumentException("Array too small for allocation type.");
         }
     }
@@ -494,7 +521,7 @@ public class Allocation extends BaseObj {
     public void copy1DRangeFromUnchecked(int off, int count, int[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
-        mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
+        mRS.nAllocationData1D(getID(), off, mSelectedLOD, count, d, dataSize);
     }
     /**
      * Copy part of an allocation from an array.  This variant is
@@ -508,7 +535,7 @@ public class Allocation extends BaseObj {
     public void copy1DRangeFromUnchecked(int off, int count, short[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 2, dataSize);
-        mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
+        mRS.nAllocationData1D(getID(), off, mSelectedLOD, count, d, dataSize);
     }
     /**
      * Copy part of an allocation from an array.  This variant is
@@ -522,7 +549,7 @@ public class Allocation extends BaseObj {
     public void copy1DRangeFromUnchecked(int off, int count, byte[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length, dataSize);
-        mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
+        mRS.nAllocationData1D(getID(), off, mSelectedLOD, count, d, dataSize);
     }
     /**
      * Copy part of an allocation from an array.  This variant is
@@ -536,7 +563,7 @@ public class Allocation extends BaseObj {
     public void copy1DRangeFromUnchecked(int off, int count, float[] d) {
         int dataSize = mType.mElement.getSizeBytes() * count;
         data1DChecks(off, count, d.length * 4, dataSize);
-        mRS.nAllocationData1D(getID(), off, 0, count, d, dataSize);
+        mRS.nAllocationData1D(getID(), off, mSelectedLOD, count, d, dataSize);
     }
 
     /**
@@ -606,21 +633,25 @@ public class Allocation extends BaseObj {
      */
     public void copy1DRangeFrom(int off, int count, Allocation data, int dataOff) {
         mRS.nAllocationData2D(getID(), off, 0,
-                              0, Type.CubemapFace.POSITIVE_X.mID,
+                              mSelectedLOD, mSelectedFace.mID,
                               count, 1, data.getID(), dataOff, 0,
-                              0, Type.CubemapFace.POSITIVE_X.mID);
+                              data.mSelectedLOD, data.mSelectedFace.mID);
     }
 
     private void validate2DRange(int xoff, int yoff, int w, int h) {
-        if (xoff < 0 || yoff < 0) {
-            throw new RSIllegalArgumentException("Offset cannot be negative.");
-        }
-        if (h < 0 || w < 0) {
-            throw new RSIllegalArgumentException("Height or width cannot be negative.");
-        }
-        if ((xoff + w) > mType.mDimX ||
-            (yoff + h) > mType.mDimY) {
-            throw new RSIllegalArgumentException("Updated region larger than allocation.");
+        if (mAdaptedAllocation != null) {
+
+        } else {
+
+            if (xoff < 0 || yoff < 0) {
+                throw new RSIllegalArgumentException("Offset cannot be negative.");
+            }
+            if (h < 0 || w < 0) {
+                throw new RSIllegalArgumentException("Height or width cannot be negative.");
+            }
+            if (((xoff + w) > mCurrentDimX) || ((yoff + h) > mCurrentDimY)) {
+                throw new RSIllegalArgumentException("Updated region larger than allocation.");
+            }
         }
     }
 
@@ -637,25 +668,29 @@ public class Allocation extends BaseObj {
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, byte[] data) {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
-        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length);
+        mRS.nAllocationData2D(getID(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
+                              w, h, data, data.length);
     }
 
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, short[] data) {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
-        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length * 2);
+        mRS.nAllocationData2D(getID(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
+                              w, h, data, data.length * 2);
     }
 
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, int[] data) {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
-        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length * 4);
+        mRS.nAllocationData2D(getID(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
+                              w, h, data, data.length * 4);
     }
 
     public void copy2DRangeFrom(int xoff, int yoff, int w, int h, float[] data) {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
-        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, w, h, data, data.length * 4);
+        mRS.nAllocationData2D(getID(), xoff, yoff, mSelectedLOD, mSelectedFace.mID,
+                              w, h, data, data.length * 4);
     }
 
     /**
@@ -675,9 +710,9 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validate2DRange(xoff, yoff, w, h);
         mRS.nAllocationData2D(getID(), xoff, yoff,
-                              0, Type.CubemapFace.POSITIVE_X.mID,
+                              mSelectedLOD, mSelectedFace.mID,
                               w, h, data.getID(), dataXoff, dataYoff,
-                              0, Type.CubemapFace.POSITIVE_X.mID);
+                              data.mSelectedLOD, data.mSelectedFace.mID);
     }
 
     /**
@@ -693,7 +728,7 @@ public class Allocation extends BaseObj {
         mRS.validate();
         validateBitmapFormat(data);
         validate2DRange(xoff, yoff, data.getWidth(), data.getHeight());
-        mRS.nAllocationData2D(getID(), xoff, yoff, 0, 0, data);
+        mRS.nAllocationData2D(getID(), xoff, yoff, mSelectedLOD, mSelectedFace.mID, data);
     }
 
 
