@@ -189,6 +189,19 @@ class GLES20Canvas extends HardwareCanvas {
         return mHeight;
     }
 
+    @Override
+    public int getMaximumBitmapWidth() {
+        return nGetMaximumTextureWidth();
+    }
+
+    @Override
+    public int getMaximumBitmapHeight() {
+        return nGetMaximumTextureHeight();
+    }
+
+    private static native int nGetMaximumTextureWidth();
+    private static native int nGetMaximumTextureHeight();    
+
     ///////////////////////////////////////////////////////////////////////////
     // Setup
     ///////////////////////////////////////////////////////////////////////////
