@@ -52,6 +52,25 @@ interface IRestoreSession {
     int restoreAll(long token, IRestoreObserver observer);
 
     /**
+     * Restore select packages from the given set onto the device, replacing the
+     * current data of any app contained in the set with the data previously
+     * backed up.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     *
+     * @return Zero on success, nonzero on error. The observer will only receive
+     *   progress callbacks if this method returned zero.
+     * @param token The token from {@link getAvailableRestoreSets()} corresponding to
+     *   the restore set that should be used.
+     * @param observer If non-null, this binder points to an object that will receive
+     *   progress callbacks during the restore operation.
+     * @param packages The set of packages for which to attempt a restore.  Regardless of
+     *   the contents of the actual back-end dataset named by {@code token}, only
+     *   applications mentioned in this list will have their data restored.
+     */
+    int restoreSome(long token, IRestoreObserver observer, in String[] packages);
+
+    /**
      * Restore a single application from backup.  The data will be restored from the
      * current backup dataset if the given package has stored data there, or from
      * the dataset used during the last full device setup operation if the current
