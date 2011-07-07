@@ -1536,6 +1536,23 @@ public final class ContactsContract {
         }
 
         /**
+         * A sub-directory of a single contact that contains all of the constituent raw contact
+         * {@link ContactsContract.StreamItems} rows.  This directory can be used either
+         * with a {@link #CONTENT_URI} or {@link #CONTENT_LOOKUP_URI}.
+         */
+        public static final class StreamItems implements StreamItemsColumns {
+            /**
+             * no public constructor since this is a utility class
+             */
+            private StreamItems() {}
+
+            /**
+             * The directory twig for this sub-table
+             */
+            public static final String CONTENT_DIRECTORY = "stream_items";
+        }
+
+        /**
          * <p>
          * A <i>read-only</i> sub-directory of a single contact aggregate that
          * contains all aggregation suggestions (other contacts). The
@@ -2443,6 +2460,28 @@ public final class ContactsContract {
         }
 
         /**
+         * <p>
+         * A sub-directory of a single raw contact that contains all of its
+         * {@link ContactsContract.StreamItems} rows. To access this directory append
+         * {@link RawContacts.StreamItems#CONTENT_DIRECTORY} to the raw contact URI. See
+         * {@link ContactsContract.StreamItems} for a stand-alone table containing the
+         * same data.
+         * </p>
+         */
+        public static final class StreamItems implements BaseColumns, StreamItemsColumns {
+            /**
+             * No public constructor since this is a utility class
+             */
+            private StreamItems() {
+            }
+
+            /**
+             * The directory twig for this sub-table
+             */
+            public static final String CONTENT_DIRECTORY = "stream_items";
+        }
+
+        /**
          * TODO: javadoc
          * @param cursor
          * @return
@@ -2658,6 +2697,483 @@ public final class ContactsContract {
          * camera that can be used for video chat (e.g. a front-facing camera on a phone).
          */
         public static final int CAPABILITY_HAS_CAMERA = 4;
+    }
+
+    /**
+     * <p>
+     * Constants for the stream_items table, which contains social stream updates from
+     * the user's contact list.
+     * </p>
+     * <p>
+     * Only a certain number of stream items will ever be stored under a given raw contact.
+     * Users of this API can query {@link ContactsContract.StreamItems#CONTENT_LIMIT_URI} to
+     * determine this limit, and should restrict the number of items inserted in any given
+     * transaction correspondingly.  Insertion of more items beyond the limit will
+     * automatically lead to deletion of the oldest items, by {@link StreamItems#TIMESTAMP}.
+     * </p>
+     * <h3>Operations</h3>
+     * <dl>
+     * <dt><b>Insert</b></dt>
+     * <dd>
+     * <p>Social stream updates are always associated with a raw contact.  There are a couple
+     * of ways to insert these entries.
+     * <dl>
+     * <dt>Via the {@link RawContacts.StreamItems#CONTENT_DIRECTORY} sub-path of a raw contact:</dt>
+     * <dd>
+     * <pre>
+     * ContentValues values = new ContentValues();
+     * values.put(StreamItems.TEXT, "Breakfasted at Tiffanys");
+     * values.put(StreamItems.TIMESTAMP, timestamp);
+     * values.put(StreamItems.COMMENT, "3 people reshared this");
+     * values.put(StreamItems.ACTION, action);
+     * values.put(StreamItems.ACTION_URI, actionUri);
+     * Uri streamItemUri = getContentResolver().insert(
+     *     Uri.withAppendedPath(ContentUris.withAppendedId(RawContacts.CONTENT_URI, rawContactId),
+     *         RawContacts.StreamItems.CONTENT_DIRECTORY), values);
+     * long streamItemId = ContentUris.parseId(streamItemUri);
+     * </pre>
+     * </dd>
+     * <dt>Via the {@link StreamItems#CONTENT_URI} URI:</dt>
+     * <dd>
+     * ContentValues values = new ContentValues();
+     * values.put(StreamItems.RAW_CONTACT_ID, rawContactId);
+     * values.put(StreamItems.TEXT, "Breakfasted at Tiffanys");
+     * values.put(StreamItems.TIMESTAMP, timestamp);
+     * values.put(StreamItems.COMMENT, "3 people reshared this");
+     * values.put(StreamItems.ACTION, action);
+     * values.put(StreamItems.ACTION_URI, actionUri);
+     * Uri streamItemUri = getContentResolver().insert(StreamItems.CONTENT_URI, values);
+     * long streamItemId = ContentUris.parseId(streamItemUri);
+     * </dd>
+     * </dl>
+     * </dd>
+     * </p>
+     * <p>
+     * Once a {@link StreamItems} entry has been inserted, photos associated with that
+     * social update can be inserted.  For example, after one of the insertions above,
+     * photos could be added to the stream item in one of the following ways:
+     * <dl>
+     * <dt>Via a URI including the stream item ID:</dt>
+     * <dd>
+     * <pre>
+     * values.clear();
+     * values.put(StreamItemPhotos.SORT_INDEX, 1);
+     * values.put(StreamItemPhotos.PICTURE, photoData);
+     * values.put(StreamItemPhotos.ACTION, action);
+     * values.put(StreamItemPhotos.ACTION_URI, actionUri);
+     * getContentResolver().insert(Uri.withAppendedPath(
+     *     ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId),
+     *     StreamItems.StreamItemPhotos.CONTENT_DIRECTORY), values);
+     * </pre>
+     * </dd>
+     * <dt>Via {@link ContactsContract.StreamItems#CONTENT_PHOTO_URI}</dt>
+     * <dd>
+     * <pre>
+     * values.clear();
+     * values.put(StreamItemPhotos.STREAM_ITEM_ID, streamItemId);
+     * values.put(StreamItemPhotos.SORT_INDEX, 1);
+     * values.put(StreamItemPhotos.PICTURE, photoData);
+     * values.put(StreamItemPhotos.ACTION, action);
+     * values.put(StreamItemPhotos.ACTION_URI, actionUri);
+     * getContentResolver().insert(StreamItems.CONTENT_PHOTO_URI, values);
+     * </pre>
+     * Note that this latter form allows the insertion of a stream item and its
+     * photos in a single transaction, by using {@link ContentProviderOperation} with
+     * back references to populate the stream item ID in the {@link ContentValues}.
+     * </dd>
+     * </dl>
+     * </p>
+     * </dd>
+     * <dt><b>Update</b></dt>
+     * <dd>Updates can be performed by appending the stream item ID to the
+     * {@link StreamItems#CONTENT_URI} URI.  Only social stream entries that were
+     * created by the calling package can be updated.</dd>
+     * <dt><b>Delete</b></dt>
+     * <dd>Deletes can be performed by appending the stream item ID to the
+     * {@link StreamItems#CONTENT_URI} URI.  Only social stream entries that were
+     * created by the calling package can be deleted.</dd>
+     * <dt><b>Query</b></dt>
+     * <dl>
+     * <dt>Finding all social stream updates for a given contact</dt>
+     * <dd>By Contact ID:
+     * <pre>
+     * Cursor c = getContentResolver().query(Uri.withAppendedPath(
+     *          ContentUris.withAppendedId(Contacts.CONTENT_URI, contactId),
+     *          Contacts.StreamItems.CONTENT_DIRECTORY),
+     *          null, null, null, null);
+     * </pre>
+     * </dd>
+     * <dd>By lookup key:
+     * <pre>
+     * Cursor c = getContentResolver().query(Contacts.CONTENT_URI.buildUpon()
+     *          .appendPath(lookupKey)
+     *          .appendPath(Contacts.StreamItems.CONTENT_DIRECTORY).build(),
+     *          null, null, null, null);
+     * </pre>
+     * </dd>
+     * <dt>Finding all social stream updates for a given raw contact</dt>
+     * <dd>
+     * <pre>
+     * Cursor c = getContentResolver().query(Uri.withAppendedPath(
+     *          ContentUris.withAppendedId(RawContacts.CONTENT_URI, rawContactId),
+     *          RawContacts.StreamItems.CONTENT_DIRECTORY)),
+     *          null, null, null, null);
+     * </pre>
+     * </dd>
+     * <dt>Querying for a specific stream item by ID</dt>
+     * <dd>
+     * <pre>
+     * Cursor c = getContentResolver().query(ContentUris.withAppendedId(
+     *          StreamItems.CONTENT_URI, streamItemId),
+     *          null, null, null, null);
+     * </pre>
+     * </dd>
+     * </dl>
+     */
+    public static final class StreamItems implements BaseColumns, StreamItemsColumns {
+        /**
+         * This utility class cannot be instantiated
+         */
+        private StreamItems() {
+        }
+
+        /**
+         * The content:// style URI for this table, which handles social network stream
+         * updates for the user's contacts.
+         */
+        public static final Uri CONTENT_URI = Uri.withAppendedPath(AUTHORITY_URI, "stream_items");
+
+        /**
+         * <p>
+         * A content:// style URI for the photos stored in a sub-table underneath
+         * stream items.  This is only used for inserts, and updates - queries and deletes
+         * for photos should be performed by appending
+         * {@link StreamItems.StreamItemPhotos#CONTENT_DIRECTORY} path to URIs for a
+         * specific stream item.
+         * </p>
+         * <p>
+         * When using this URI, the stream item ID for the photo(s) must be identified
+         * in the {@link ContentValues} passed in.
+         * </p>
+         */
+        public static final Uri CONTENT_PHOTO_URI = Uri.withAppendedPath(CONTENT_URI, "photo");
+
+        /**
+         * This URI allows the caller to query for the maximum number of stream items
+         * that will be stored under any single raw contact, as well as the maximum
+         * photo size (in bytes) accepted in stream item photos.
+         */
+        public static final Uri CONTENT_LIMIT_URI =
+                Uri.withAppendedPath(AUTHORITY_URI, "stream_items_limit");
+
+        /**
+         * Queries to {@link ContactsContract.StreamItems#CONTENT_LIMIT_URI} will
+         * contain this column, with the value indicating the maximum number of
+         * stream items that will be stored under any single raw contact.
+         */
+        public static final String MAX_ITEMS = "max_items";
+
+        /**
+         * Queries to {@link ContactsContract.StreamItems#CONTENT_LIMIT_URI} will
+         * contain this column, with the value indicating the byte limit for
+         * individual photos.
+         */
+        public static final String PHOTO_MAX_BYTES = "photo_max_bytes";
+
+        /**
+         * <p>
+         * A sub-directory of a single stream item entry that contains all of its
+         * photo rows. To access this
+         * directory append {@link StreamItems.StreamItemPhotos#CONTENT_DIRECTORY} to
+         * an individual stream item URI.
+         * </p>
+         */
+        public static final class StreamItemPhotos
+                implements BaseColumns, StreamItemPhotosColumns {
+            /**
+             * No public constructor since this is a utility class
+             */
+            private StreamItemPhotos() {
+            }
+
+            /**
+             * The directory twig for this sub-table
+             */
+            public static final String CONTENT_DIRECTORY = "photo";
+        }
+    }
+
+    /**
+     * Columns in the StreamItems table.
+     *
+     * @see ContactsContract.StreamItems
+     */
+    protected interface StreamItemsColumns {
+        /**
+         * A reference to the {@link RawContacts#_ID}
+         * that this stream item belongs to.
+         */
+        public static final String RAW_CONTACT_ID = "raw_contact_id";
+
+        /**
+         * The package name to use when creating {@link Resources} objects for
+         * this stream item. This value is only designed for use when building
+         * user interfaces, and should not be used to infer the owner.
+         * <P>Type: NUMBER</P>
+         */
+        public static final String RES_PACKAGE = "res_package";
+
+        /**
+         * The resource ID of the icon for the source of the stream item.
+         * This resource should be scoped by the {@link #RES_PACKAGE}.
+         * <P>Type: NUMBER</P>
+         */
+        public static final String RES_ICON = "icon";
+
+        /**
+         * The resource ID of the label describing the source of the status update, e.g. "Google
+         * Talk".  This resource should be scoped by the {@link #RES_PACKAGE}.
+         * <p>Type: NUMBER</p>
+         */
+        public static final String RES_LABEL = "label";
+
+        /**
+         * <P>
+         * The main textual contents of the item. Typically this is content
+         * that was posted by the source of this stream item, but it can also
+         * be a textual representation of an action (e.g. ”Checked in at Joe's”).
+         * This text is displayed to the user and allows formatting and embedded
+         * resource images via HTML (as parseable via
+         * {@link android.text.Html#fromHtml}).
+         * </P>
+         * <P>
+         * Long content may be truncated and/or ellipsized - the exact behavior
+         * is unspecified, but it should not break tags.
+         * </P>
+         * <P>Type: TEXT</P>
+         */
+        public static final String TEXT = "text";
+
+        /**
+         * The absolute time (milliseconds since epoch) when this stream item was
+         * inserted/updated.
+         * <P>Type: NUMBER</P>
+         */
+        public static final String TIMESTAMP = "timestamp";
+
+        /**
+         * <P>
+         * Summary information about the stream item, for example to indicate how
+         * many people have reshared it, how many have liked it, how many thumbs
+         * up and/or thumbs down it has, what the original source was, etc.
+         * </P>
+         * <P>
+         * This text is displayed to the user and allows simple formatting via
+         * HTML, in the same manner as {@link #TEXT} allows.
+         * </P>
+         * <P>
+         * Long content may be truncated and/or ellipsized - the exact behavior
+         * is unspecified, but it should not break tags.
+         * </P>
+         * <P>Type: TEXT</P>
+         */
+        public static final String COMMENTS = "comments";
+
+        /**
+         * The activity action to execute when the item is tapped.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACTION = "action";
+
+        /**
+         * The URI that is launched when the item is pressed. May be handled by
+         * the source app, but could also reference a website (e.g. YouTube).
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACTION_URI = "action_uri";
+    }
+
+    /**
+     * <p>
+     * Constants for the stream_item_photos table, which contains photos associated with
+     * social stream updates.
+     * </p>
+     * <h3>Operations</h3>
+     * <dl>
+     * <dt><b>Insert</b></dt>
+     * <dd>
+     * <p>Social stream photo entries are associated with a social stream item.  Photos
+     * can be inserted into a social stream item in a couple of ways:
+     * <dl>
+     * <dt>
+     * Via the {@link StreamItems.StreamItemPhotos#CONTENT_DIRECTORY} sub-path of a
+     * stream item:
+     * </dt>
+     * <dd>
+     * <pre>
+     * ContentValues values = new ContentValues();
+     * values.put(StreamItemPhotos.SORT_INDEX, 1);
+     * values.put(StreamItemPhotos.PICTURE, photoData);
+     * values.put(StreamItemPhotos.ACTION, action);
+     * values.put(StreamItemPhotos.ACTION_URI, actionUri);
+     * Uri photoUri = getContentResolver().insert(Uri.withAppendedPath(
+     *     ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId)
+     *     StreamItems.StreamItemPhotos#CONTENT_DIRECTORY), values);
+     * long photoId = ContentUris.parseId(photoUri);
+     * </pre>
+     * </dd>
+     * <dt>Via the {@link ContactsContract.StreamItems#CONTENT_PHOTO_URI} URI:</dt>
+     * <dd>
+     * <pre>
+     * ContentValues values = new ContentValues();
+     * values.put(StreamItemPhotos.STREAM_ITEM_ID, streamItemId);
+     * values.put(StreamItemPhotos.SORT_INDEX, 1);
+     * values.put(StreamItemPhotos.PICTURE, photoData);
+     * values.put(StreamItemPhotos.ACTION, action);
+     * values.put(StreamItemPhotos.ACTION_URI, actionUri);
+     * Uri photoUri = getContentResolver().insert(StreamItems.CONTENT_PHOTO_URI, values);
+     * long photoId = ContentUris.parseId(photoUri);
+     * </pre>
+     * </dd>
+     * </dl>
+     * </p>
+     * </dd>
+     * <dt><b>Update</b></dt>
+     * <dd>
+     * <p>Updates can only be made against a specific {@link StreamItemPhotos} entry,
+     * identified by both the stream item ID it belongs to and the stream item photo ID.
+     * This can be specified in two ways.
+     * <dl>
+     * <dt>Via the {@link StreamItems.StreamItemPhotos#CONTENT_DIRECTORY} sub-path of a
+     * stream item:
+     * </dt>
+     * <dd>
+     * <pre>
+     * ContentValues values = new ContentValues();
+     * values.put(StreamItemPhotos.PICTURE, newPhotoData);
+     * getContentResolver().update(
+     *     ContentUris.withAppendedId(
+     *         Uri.withAppendedPath(
+     *             ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId)
+     *             StreamItems.StreamItemPhotos#CONTENT_DIRECTORY),
+     *         streamItemPhotoId), values, null, null);
+     * </pre>
+     * </dd>
+     * <dt>Via the {@link ContactsContract.StreamItems#CONTENT_PHOTO_URI} URI:</dt>
+     * <dd>
+     * <pre>
+     * ContentValues values = new ContentValues();
+     * values.put(StreamItemPhotos.STREAM_ITEM_ID, streamItemId);
+     * values.put(StreamItemPhotos.PICTURE, newPhotoData);
+     * getContentResolver().update(StreamItems.CONTENT_PHOTO_URI, values);
+     * </pre>
+     * </dd>
+     * </dl>
+     * </p>
+     * </dd>
+     * <dt><b>Delete</b></dt>
+     * <dd>Deletes can be made against either a specific photo item in a stream item, or
+     * against all or a selected subset of photo items under a stream item.
+     * For example:
+     * <dl>
+     * <dt>Deleting a single photo via the
+     * {@link StreamItems.StreamItemPhotos#CONTENT_DIRECTORY} sub-path of a stream item:
+     * </dt>
+     * <dd>
+     * <pre>
+     * getContentResolver().delete(
+     *     ContentUris.withAppendedId(
+     *         Uri.withAppendedPath(
+     *             ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId)
+     *             StreamItems.StreamItemPhotos#CONTENT_DIRECTORY),
+     *         streamItemPhotoId), null, null);
+     * </pre>
+     * </dd>
+     * <dt>Deleting all photos under a stream item</dt>
+     * <dd>
+     * <pre>
+     * getContentResolver().delete(
+     *     Uri.withAppendedPath(
+     *         ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId)
+     *         StreamItems.StreamItemPhotos#CONTENT_DIRECTORY), null, null);
+     * </pre>
+     * </dd>
+     * </dl>
+     * </dd>
+     * <dt><b>Query</b></dt>
+     * <dl>
+     * <dt>Querying for a specific photo in a stream item</dt>
+     * <dd>
+     * <pre>
+     * Cursor c = getContentResolver().query(
+     *     ContentUris.withAppendedId(
+     *         Uri.withAppendedPath(
+     *             ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId)
+     *             StreamItems.StreamItemPhotos#CONTENT_DIRECTORY),
+     *         streamItemPhotoId), null, null, null, null);
+     * </pre>
+     * </dd>
+     * <dt>Querying for all photos in a stream item</dt>
+     * <dd>
+     * <pre>
+     * Cursor c = getContentResolver().query(
+     *     Uri.withAppendedPath(
+     *         ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId)
+     *         StreamItems.StreamItemPhotos#CONTENT_DIRECTORY),
+     *     null, null, null, StreamItemPhotos.SORT_INDEX);
+     * </pre>
+     * </dl>
+     * </dd>
+     * </dl>
+     */
+    public static final class StreamItemPhotos implements BaseColumns, StreamItemPhotosColumns {
+        /**
+         * No public constructor since this is a utility class
+         */
+        private StreamItemPhotos() {
+        }
+    }
+
+    /**
+     * Columns in the StreamItemPhotos table.
+     *
+     * @see ContactsContract.StreamItemPhotos
+     */
+    protected interface StreamItemPhotosColumns {
+        /**
+         * A reference to the {@link StreamItems#_ID} this photo is associated with.
+         * <P>Type: NUMBER</P>
+         */
+        public static final String STREAM_ITEM_ID = "stream_item_id";
+
+        /**
+         * An integer to use for sort order for photos in the stream item.  If not
+         * specified, the {@link StreamItemPhotos#_ID} will be used for sorting.
+         * <P>Type: NUMBER</P>
+         */
+        public static final String SORT_INDEX = "sort_index";
+
+        /**
+         * The binary representation of the picture.  Pictures larger than
+         * {@link ContactsContract.StreamItems#PHOTO_MAX_BYTES} bytes in size (as
+         * queryable from {@link ContactsContract.StreamItems#CONTENT_LIMIT_URI})
+         * will be rejected.
+         * <P>Type: BLOB</P>
+         */
+        public static final String PICTURE = "picture";
+
+        /**
+         * The activity action to execute when the photo is tapped.
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACTION = "action";
+
+        /**
+         * The URI that is launched when the photo is pressed. May be handled by
+         * the source app, but could also reference a website (e.g. YouTube).
+         * <P>Type: TEXT</P>
+         */
+        public static final String ACTION_URI = "action_uri";
     }
 
     /**
