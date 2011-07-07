@@ -143,7 +143,7 @@ status_t Visualizer::setCaptureSize(uint32_t size)
 
     p->psize = sizeof(uint32_t);
     p->vsize = sizeof(uint32_t);
-    *(int32_t *)p->data = VISU_PARAM_CAPTURE_SIZE;
+    *(int32_t *)p->data = VISUALIZER_PARAM_CAPTURE_SIZE;
     *((int32_t *)p->data + 1)= size;
     status_t status = setParameter(p);
 
@@ -171,7 +171,7 @@ status_t Visualizer::getWaveForm(uint8_t *waveform)
     status_t status = NO_ERROR;
     if (mEnabled) {
         uint32_t replySize = mCaptureSize;
-        status = command(VISU_CMD_CAPTURE, 0, NULL, &replySize, waveform);
+        status = command(VISUALIZER_CMD_CAPTURE, 0, NULL, &replySize, waveform);
         LOGV("getWaveForm() command returned %d", status);
         if (replySize == 0) {
             status = NOT_ENOUGH_DATA;
@@ -276,7 +276,7 @@ uint32_t Visualizer::initCaptureSize()
 
     p->psize = sizeof(uint32_t);
     p->vsize = sizeof(uint32_t);
-    *(int32_t *)p->data = VISU_PARAM_CAPTURE_SIZE;
+    *(int32_t *)p->data = VISUALIZER_PARAM_CAPTURE_SIZE;
     status_t status = getParameter(p);
 
     if (status == NO_ERROR) {

@@ -12,6 +12,9 @@ LOCAL_SHARED_LIBRARIES := \
 	libnativehelper \
 	libmedia
 
+LOCAL_C_INCLUDES := \
+	system/media/audio_effects/include
+
 LOCAL_MODULE:= libaudioeffect_jni
 
 include $(BUILD_SHARED_LIBRARY)

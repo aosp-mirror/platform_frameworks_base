@@ -17,9 +17,9 @@
 #ifndef ANDROID_EFFECTBUNDLE_H_
 #define ANDROID_EFFECTBUNDLE_H_
 
-#include <media/EffectEqualizerApi.h>
-#include <media/EffectBassBoostApi.h>
-#include <media/EffectVirtualizerApi.h>
+#include <audio_effects/effect_bassboost.h>
+#include <audio_effects/effect_equalizer.h>
+#include <audio_effects/effect_virtualizer.h>
 #include <LVM.h>
 #include <limits.h>
 

@@ -23,8 +23,8 @@ LOCAL_SHARED_LIBRARIES += libdl
 endif
 
 LOCAL_C_INCLUDES := \
-	$(call include-path-for, graphics corecg)
-
+	$(call include-path-for, graphics corecg) \
+	system/media/audio_effects/include
 
 
 include $(BUILD_SHARED_LIBRARY)

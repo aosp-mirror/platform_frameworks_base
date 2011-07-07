@@ -17,8 +17,8 @@
 #ifndef ANDROID_EFFECTREVERB_H_
 #define ANDROID_EFFECTREVERB_H_
 
-#include <media/EffectEnvironmentalReverbApi.h>
-#include <media/EffectPresetReverbApi.h>
+#include <audio_effects/effect_environmentalreverb.h>
+#include <audio_effects/effect_presetreverb.h>
 
 #if __cplusplus
 extern "C" {
