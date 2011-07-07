@@ -21,13 +21,15 @@ import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.EventLogTags;
 import com.android.internal.telephony.RILConstants;
 
+import android.content.Intent;
 import android.telephony.SignalStrength;
 import android.telephony.ServiceState;
 import android.telephony.cdma.CdmaCellLocation;
 import android.os.AsyncResult;
 import android.os.Message;
+import android.provider.Telephony.Intents;
 
-
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.EventLog;
 
@@ -37,6 +39,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
     CDMALTEPhone mCdmaLtePhone;
 
     private ServiceState  mLteSS;  // The last LTE state from Voice Registration
+    private String mCurrentSpn = null;
 
     public CdmaLteServiceStateTracker(CDMALTEPhone phone) {
         super(phone);
@@ -73,6 +76,9 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             pollState();
             // Signal strength polling stops when radio is off.
             queueNextSignalStrengthPoll();
+
+            // load ERI file
+            phone.prepareEri();
             break;
         case EVENT_SIM_RECORDS_LOADED:
             CdmaLteUiccRecords sim = (CdmaLteUiccRecords)phone.mIccRecords;
@@ -84,6 +90,10 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 mIsMinInfoReady = true;
                 updateOtaspState();
             }
+            // SID/NID/PRL is loaded. Poll service state
+            // again to update to the roaming state with
+            // the latest variables.
+            pollState();
             break;
         default:
             super.handleMessage(msg);
@@ -319,7 +329,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         }
 
         if (hasChanged) {
-            if (cm.getNvState().isNVReady()) {
+            if (phone.isEriFileLoaded()) {
                 String eriText;
                 // Now the CDMAPhone sees the new ServiceState so it can get the
                 // new ERI text
@@ -333,13 +343,6 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                             .getText(com.android.internal.R.string.roamingTextSearching).toString();
                 }
                 ss.setOperatorAlphaLong(eriText);
-            }
-            if (cm.getSimState().isSIMReady()) {
-                // SIM is found on the device. Read the operator name from the card.
-                ss.setOperatorAlphaLong(phone.mIccRecords.getServiceProviderName());
-
-                // If SIM card is present, Eri will not be used. Turn it off
-                ss.setCdmaEriIconIndex(EriInfo.ROAMING_INDICATOR_OFF);
             }
 
             String operatorNumeric;
@@ -462,6 +465,43 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         int provisioningState = OTASP_NOT_NEEDED;
         if (DBG) log("getOtasp: state=" + provisioningState);
         return provisioningState;
+    }
+
+    @Override
+    protected void updateSpnDisplay() {
+        // mOperatorAlphaLong contains the ERI text
+        String plmn = ss.getOperatorAlphaLong();
+
+        boolean showSpn = false;
+        String spn = null;
+        if (cm.getSimState().isSIMReady()) {
+            // SIM is found on the device. Read the operator name from the card.
+            showSpn = ((CdmaLteUiccRecords)phone.mIccRecords).getCsimSpnDisplayCondition();
+            spn = phone.mIccRecords.getServiceProviderName();
+
+            // double check we are not printing identicall test
+            if (TextUtils.equals(plmn, spn)) showSpn = false;
+        }
+
+        if (!TextUtils.equals(plmn, mCurPlmn) ||
+            !TextUtils.equals(spn, mCurrentSpn)) {
+            boolean showPlmn = plmn != null;
+            if (DBG) {
+                log(String.format("updateSpnDisplay: changed sending intent" +
+                                  " showPlmn='%b' plmn='%s' showSpn='%b' spn='%s'",
+                                  showPlmn, plmn, showSpn, spn));
+            }
+            Intent intent = new Intent(Intents.SPN_STRINGS_UPDATED_ACTION);
+            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+            intent.putExtra(Intents.EXTRA_SHOW_SPN, showSpn);
+            intent.putExtra(Intents.EXTRA_SPN, spn);
+            intent.putExtra(Intents.EXTRA_SHOW_PLMN, showPlmn);
+            intent.putExtra(Intents.EXTRA_PLMN, plmn);
+            phone.getContext().sendStickyBroadcast(intent);
+        }
+
+        mCurPlmn = plmn;
+        mCurrentSpn = spn;
     }
 
     @Override
