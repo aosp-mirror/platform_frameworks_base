@@ -127,7 +127,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     private static final String WAKELOCK_TAG = "ServiceStateTracker";
 
     /** Contains the name of the registered network in CDMA (either ONS or ERI text). */
-    private String curPlmn = null;
+    protected String mCurPlmn = null;
 
     protected String mMdn;
     private int mHomeSystemId[] = null;
@@ -484,7 +484,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
 
         // mOperatorAlphaLong contains the ERI text
         String plmn = ss.getOperatorAlphaLong();
-        if (!TextUtils.equals(plmn, curPlmn)) {
+        if (!TextUtils.equals(plmn, mCurPlmn)) {
             // Allow A blank plmn, "" to set showPlmn to true. Previously, we
             // would set showPlmn to true only if plmn was not empty, i.e. was not
             // null and not blank. But this would cause us to incorrectly display
@@ -503,7 +503,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
             phone.getContext().sendStickyBroadcast(intent);
         }
 
-        curPlmn = plmn;
+        mCurPlmn = plmn;
     }
 
     @Override

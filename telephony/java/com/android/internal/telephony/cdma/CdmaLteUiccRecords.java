@@ -38,7 +38,7 @@ public final class CdmaLteUiccRecords extends SIMRecords {
     // From CSIM application
     private byte[] mEFpl = null;
     private byte[] mEFli = null;
-    boolean csimSpnDisplayCondition = false;
+    boolean mCsimSpnDisplayCondition = false;
     private String mMdn;
     private String mMin;
     private String mPrlVersion;
@@ -235,7 +235,7 @@ public final class CdmaLteUiccRecords extends SIMRecords {
                      IccUtils.bytesToHexString(data));
 
         // C.S0065 for EF_SPN decoding
-        csimSpnDisplayCondition = ((0x02 & data[0]) > 0)?true:false;
+        mCsimSpnDisplayCondition = ((0x01 & data[0]) != 0) ? true : false;
 
         int encoding = data[1];
         int language = data[2];
@@ -272,7 +272,7 @@ public final class CdmaLteUiccRecords extends SIMRecords {
             log("spn decode error: " + e);
         }
         if (DBG) log("spn=" + spn);
-        if (DBG) log("spnCondition=" + csimSpnDisplayCondition);
+        if (DBG) log("spnCondition=" + mCsimSpnDisplayCondition);
         phone.setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, spn);
     }
 
@@ -435,6 +435,10 @@ public final class CdmaLteUiccRecords extends SIMRecords {
 
     public String getPrlVersion() {
         return mPrlVersion;
+    }
+
+    public boolean getCsimSpnDisplayCondition() {
+        return mCsimSpnDisplayCondition;
     }
 
     @Override

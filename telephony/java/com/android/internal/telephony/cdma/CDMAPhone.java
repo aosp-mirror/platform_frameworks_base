@@ -1030,13 +1030,8 @@ public class CDMAPhone extends PhoneBase {
             case EVENT_NV_READY:{
                 Log.d(LOG_TAG, "Event EVENT_NV_READY Received");
                 //Inform the Service State Tracker
-                mEriManager.loadEriFile();
                 mNvLoadedRegistrants.notifyRegistrants();
-                if(mEriManager.isEriFileLoaded()) {
-                    // when the ERI file is loaded
-                    Log.d(LOG_TAG, "ERI read, notify registrants");
-                    mEriFileLoadedRegistrants.notifyRegistrants();
-                }
+                prepareEri();
             }
             break;
 
@@ -1422,6 +1417,19 @@ public class CDMAPhone extends PhoneBase {
             }
         }
         return false;
+    }
+
+    public void prepareEri() {
+        mEriManager.loadEriFile();
+        if(mEriManager.isEriFileLoaded()) {
+            // when the ERI file is loaded
+            log("ERI read, notify registrants");
+            mEriFileLoadedRegistrants.notifyRegistrants();
+        }
+    }
+
+    public boolean isEriFileLoaded() {
+        return mEriManager.isEriFileLoaded();
     }
 
     protected void log(String s) {
