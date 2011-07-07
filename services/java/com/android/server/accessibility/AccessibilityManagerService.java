@@ -436,7 +436,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public IAccessibilityServiceConnection registerEventListener(IEventListener listener) {
         mSecurityPolicy.enforceCallingPermission(Manifest.permission.RETRIEVE_WINDOW_CONTENT,
                 FUNCTION_REGISTER_EVENT_LISTENER);
-        ComponentName componentName = new ComponentName("foo.bar", "FakeAccessibilityService");
+        ComponentName componentName = new ComponentName("foo.bar",
+                "AutomationAccessibilityService");
         synchronized (mLock) {
             Service oldService = mComponentNameToServiceMap.get(componentName);
             if (oldService != null) {
@@ -829,7 +830,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         boolean mCanRetrieveScreenContent;
 
-        boolean mIsFake;
+        boolean mIsAutomation;
 
         final Callback mCallback = new Callback();
 
@@ -842,12 +843,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             new SparseArray<AccessibilityEvent>();
 
         public Service(ComponentName componentName,
-                AccessibilityServiceInfo accessibilityServiceInfo, boolean isFake) {
+                AccessibilityServiceInfo accessibilityServiceInfo, boolean isAutomation) {
             mId = sIdCounter++;
             mComponentName = componentName;
             mAccessibilityServiceInfo = accessibilityServiceInfo;
-            mIsFake = isFake;
-            if (!isFake) {
+            mIsAutomation = isAutomation;
+            if (!isAutomation) {
                 mCanRetrieveScreenContent = accessibilityServiceInfo.getCanRetrieveWindowContent();
                 mIntent = new Intent().setComponent(mComponentName);
                 mIntent.putExtra(Intent.EXTRA_CLIENT_LABEL,
@@ -881,7 +882,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
          * @return True if binding is successful.
          */
         public boolean bind() {
-            if (!mIsFake && mService == null) {
+            if (!mIsAutomation && mService == null) {
                 return mContext.bindService(mIntent, this, Context.BIND_AUTO_CREATE);
             }
             return false;
@@ -898,7 +899,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 synchronized (mLock) {
                     tryRemoveServiceLocked(this);
                 }
-                if (!mIsFake) {
+                if (!mIsAutomation) {
                     mContext.unbindService(this);
                 }
                 mService = null;
@@ -938,15 +939,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
                 final boolean permissionGranted = mSecurityPolicy.canRetrieveWindowContent(this);
-                if (permissionGranted) {
+                if (!permissionGranted) {
+                    return null;
+                } else {
                     connection = getConnectionToRetrievalAllowingWindowLocked();
+                    if (connection == null) {
+                        if (DEBUG) {
+                            Slog.e(LOG_TAG, "No interaction connection to a retrieve "
+                                    + "allowing window.");
+                        }
+                        return null;
+                    }
                 }
-            }
-            if (connection == null) {
-                if (DEBUG) {
-                    Slog.e(LOG_TAG, "No interaction connection to a retrieve allowing window.");
-                }
-                return null;
             }
             final long identityToken = Binder.clearCallingIdentity();
             try {
@@ -982,15 +986,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             synchronized (mLock) {
                 final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, accessibilityWindowId);
-                if (permissionGranted) {
+                if (!permissionGranted) {
+                    return null;
+                } else {
                     connection = getConnectionToRetrievalAllowingWindowLocked();
+                    if (connection == null) {
+                        if (DEBUG) {
+                            Slog.e(LOG_TAG, "No interaction connection to focused window.");
+                        }
+                        return null;
+                    }
                 }
-            }
-            if (connection == null) {
-                if (DEBUG) {
-                    Slog.e(LOG_TAG, "No interaction connection to focused window.");
-                }
-                return null;
             }
             final long identityToken = Binder.clearCallingIdentity();
             try {
@@ -1025,16 +1031,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             synchronized (mLock) {
                 final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, accessibilityWindowId);
-                if (permissionGranted) {
+                if (!permissionGranted) {
+                    return null;
+                } else {
                     connection = mWindowIdToInteractionConnectionMap.get(accessibilityWindowId);
+                    if (connection == null) {
+                        if (DEBUG) {
+                            Slog.e(LOG_TAG, "No interaction connection to window: "
+                                    + accessibilityWindowId);
+                        }
+                        return null;
+                    }
                 }
-            }
-            if (connection == null) {
-                if (DEBUG) {
-                    Slog.e(LOG_TAG, "No interaction connection to window: "
-                            + accessibilityWindowId);
-                }
-                return null;
             }
             final long identityToken = Binder.clearCallingIdentity();
             try {
@@ -1066,16 +1074,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             synchronized (mLock) {
                 final boolean permissionGranted = mSecurityPolicy.canPerformActionLocked(this,
                         accessibilityWindowId, action);
-                if (permissionGranted) {
+                if (!permissionGranted) {
+                    return false;
+                } else {
                     connection = mWindowIdToInteractionConnectionMap.get(accessibilityWindowId);
+                    if (connection == null) {
+                        if (DEBUG) {
+                            Slog.e(LOG_TAG, "No interaction connection to window: "
+                                    + accessibilityWindowId);
+                        }
+                        return false;
+                    }
                 }
-            }
-            if (connection == null) {
-                if (DEBUG) {
-                    Slog.e(LOG_TAG, "No interaction connection to window: "
-                            + accessibilityWindowId);
-                }
-                return false;
             }
             final long identityToken = Binder.clearCallingIdentity();
             try {
