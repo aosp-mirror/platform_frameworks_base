@@ -3467,40 +3467,6 @@ public class WebView extends AbsoluteLayout
         return Math.min(duration, MAX_DURATION);
     }
 
-
-    // Helper to build a TouchEventData object from a MotionEvent object.
-    // A few fields are allocated now but will be set later:
-    //     mAction, mPoints and mPointsInView.
-    private static TouchEventData buildTouchFromEvent(MotionEvent ev) {
-        TouchEventData ted = new TouchEventData();
-        ted.mAction = ev.getActionMasked();
-        ted.mEventTime = ev.getEventTime();
-
-        final int count = ev.getPointerCount();
-        ted.mIds = new int[count];
-        ted.mPoints = new Point[count];
-        ted.mPointsInView = new Point[count];
-        ted.mPressures = new float[count];
-        ted.mTouchMajor = new int[count];
-        ted.mTouchMinor = new int[count];
-        ted.mOrientation = new float[count];
-        for (int c = 0; c < count; c++) {
-            ted.mIds[c] = ev.getPointerId(c);
-            ted.mPressures[c] = ev.getPressure(c);
-            ted.mTouchMajor[c] = (int) ev.getTouchMajor(c);
-            ted.mTouchMinor[c] = (int) ev.getTouchMinor(c);
-            ted.mOrientation[c] = ev.getOrientation(c);
-        }
-
-        if (ted.mAction == MotionEvent.ACTION_POINTER_DOWN
-            || ted.mAction == MotionEvent.ACTION_POINTER_UP) {
-            ted.mActionIndex = ev.getActionIndex();
-        }
-        ted.mMetaState = ev.getMetaState();
-
-        return ted;
-    }
-
     // helper to pin the scrollBy parameters (already in view coordinates)
     // returns true if the scroll was changed
     private boolean pinScrollBy(int dx, int dy, boolean animate, int animationDuration) {
@@ -5899,10 +5865,15 @@ public class WebView extends AbsoluteLayout
                     }
                     // pass the touch events from UI thread to WebCore thread
                     if (shouldForwardTouchEvent()) {
-                        TouchEventData ted = buildTouchFromEvent(ev);
+                        TouchEventData ted = new TouchEventData();
                         ted.mAction = action;
+                        ted.mIds = new int[1];
+                        ted.mIds[0] = ev.getPointerId(0);
+                        ted.mPoints = new Point[1];
                         ted.mPoints[0] = new Point(contentX, contentY);
+                        ted.mPointsInView = new Point[1];
                         ted.mPointsInView[0] = new Point(x, y);
+                        ted.mMetaState = ev.getMetaState();
                         ted.mReprocess = mDeferTouchProcess;
                         ted.mNativeLayer = nativeScrollableLayer(
                                 contentX, contentY, ted.mNativeLayerRect, null);
@@ -5944,10 +5915,15 @@ public class WebView extends AbsoluteLayout
                 // pass the touch events from UI thread to WebCore thread
                 if (shouldForwardTouchEvent() && mConfirmMove && (firstMove
                         || eventTime - mLastSentTouchTime > mCurrentTouchInterval)) {
-                    TouchEventData ted = buildTouchFromEvent(ev);
+                    TouchEventData ted = new TouchEventData();
                     ted.mAction = action;
+                    ted.mIds = new int[1];
+                    ted.mIds[0] = ev.getPointerId(0);
+                    ted.mPoints = new Point[1];
                     ted.mPoints[0] = new Point(contentX, contentY);
+                    ted.mPointsInView = new Point[1];
                     ted.mPointsInView[0] = new Point(x, y);
+                    ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
                     ted.mNativeLayer = mScrollingLayer;
                     ted.mNativeLayerRect.set(mScrollingLayerRect);
@@ -6117,10 +6093,15 @@ public class WebView extends AbsoluteLayout
                 if (!isFocused()) requestFocus();
                 // pass the touch events from UI thread to WebCore thread
                 if (shouldForwardTouchEvent()) {
-                    TouchEventData ted = buildTouchFromEvent(ev);
+                    TouchEventData ted = new TouchEventData();
+                    ted.mIds = new int[1];
+                    ted.mIds[0] = ev.getPointerId(0);
                     ted.mAction = action;
+                    ted.mPoints = new Point[1];
                     ted.mPoints[0] = new Point(contentX, contentY);
+                    ted.mPointsInView = new Point[1];
                     ted.mPointsInView[0] = new Point(x, y);
+                    ted.mMetaState = ev.getMetaState();
                     ted.mReprocess = mDeferTouchProcess;
                     ted.mNativeLayer = mScrollingLayer;
                     ted.mNativeLayerRect.set(mScrollingLayerRect);
@@ -6137,10 +6118,15 @@ public class WebView extends AbsoluteLayout
                         mPrivateHandler.removeMessages(SWITCH_TO_SHORTPRESS);
                         mPrivateHandler.removeMessages(SWITCH_TO_LONGPRESS);
                         if (inFullScreenMode() || mDeferTouchProcess) {
-                            TouchEventData ted = buildTouchFromEvent(ev);
+                            TouchEventData ted = new TouchEventData();
+                            ted.mIds = new int[1];
+                            ted.mIds[0] = ev.getPointerId(0);
                             ted.mAction = WebViewCore.ACTION_DOUBLETAP;
+                            ted.mPoints = new Point[1];
                             ted.mPoints[0] = new Point(contentX, contentY);
+                            ted.mPointsInView = new Point[1];
                             ted.mPointsInView[0] = new Point(x, y);
+                            ted.mMetaState = ev.getMetaState();
                             ted.mReprocess = mDeferTouchProcess;
                             ted.mNativeLayer = nativeScrollableLayer(
                                     contentX, contentY,
@@ -6272,14 +6258,24 @@ public class WebView extends AbsoluteLayout
     }
 
     private void passMultiTouchToWebKit(MotionEvent ev, long sequence) {
-        TouchEventData ted = buildTouchFromEvent(ev);
-        for (int c = 0; c < ev.getPointerCount(); c++) {
+        TouchEventData ted = new TouchEventData();
+        ted.mAction = ev.getActionMasked();
+        final int count = ev.getPointerCount();
+        ted.mIds = new int[count];
+        ted.mPoints = new Point[count];
+        ted.mPointsInView = new Point[count];
+        for (int c = 0; c < count; c++) {
             ted.mIds[c] = ev.getPointerId(c);
             int x = viewToContentX((int) ev.getX(c) + mScrollX);
             int y = viewToContentY((int) ev.getY(c) + mScrollY);
             ted.mPoints[c] = new Point(x, y);
             ted.mPointsInView[c] = new Point((int) ev.getX(c), (int) ev.getY(c));
         }
+        if (ted.mAction == MotionEvent.ACTION_POINTER_DOWN
+            || ted.mAction == MotionEvent.ACTION_POINTER_UP) {
+            ted.mActionIndex = ev.getActionIndex();
+        }
+        ted.mMetaState = ev.getMetaState();
         ted.mReprocess = true;
         ted.mMotionEvent = MotionEvent.obtain(ev);
         ted.mSequence = sequence;
@@ -6353,11 +6349,7 @@ public class WebView extends AbsoluteLayout
             if (removeEvents) {
                 mWebViewCore.removeMessages(EventHub.TOUCH_EVENT);
             }
-
             TouchEventData ted = new TouchEventData();
-            ted.mAction = MotionEvent.ACTION_CANCEL;
-            ted.mEventTime = mLastTouchTime;
-            ted.mMetaState = 0;
             ted.mIds = new int[1];
             ted.mIds[0] = 0;
             ted.mPoints = new Point[1];
@@ -6366,15 +6358,7 @@ public class WebView extends AbsoluteLayout
             int viewX = contentToViewX(x) - mScrollX;
             int viewY = contentToViewY(y) - mScrollY;
             ted.mPointsInView[0] = new Point(viewX, viewY);
-            ted.mPressures = new float[1];
-            ted.mPressures[0] = 1;
-            ted.mTouchMajor = new int[1];
-            ted.mTouchMajor[0] = 1;
-            ted.mTouchMinor = new int[1];
-            ted.mTouchMinor[0] = 1;
-            ted.mOrientation = new float[1];
-            ted.mOrientation[0] = 0;
-
+            ted.mAction = MotionEvent.ACTION_CANCEL;
             ted.mNativeLayer = nativeScrollableLayer(
                     x, y, ted.mNativeLayerRect, null);
             ted.mSequence = mTouchEventQueue.nextTouchSequence();
@@ -8053,7 +8037,6 @@ public class WebView extends AbsoluteLayout
                     if (inFullScreenMode() || mDeferTouchProcess) {
                         TouchEventData ted = new TouchEventData();
                         ted.mAction = WebViewCore.ACTION_LONGPRESS;
-                        ted.mEventTime = mLastTouchTime;
                         ted.mIds = new int[1];
                         ted.mIds[0] = 0;
                         ted.mPoints = new Point[1];
@@ -8061,15 +8044,6 @@ public class WebView extends AbsoluteLayout
                                                    viewToContentY(mLastTouchY + mScrollY));
                         ted.mPointsInView = new Point[1];
                         ted.mPointsInView[0] = new Point(mLastTouchX, mLastTouchY);
-                        ted.mPressures = new float[1];
-                        ted.mPressures[0] = 1;
-                        ted.mTouchMajor = new int[1];
-                        ted.mTouchMajor[0] = 1;
-                        ted.mTouchMinor = new int[1];
-                        ted.mTouchMinor[0] = 1;
-                        ted.mOrientation = new float[1];
-                        ted.mOrientation[0] = 0;
-
                         // metaState for long press is tricky. Should it be the
                         // state when the press started or when the press was
                         // released? Or some intermediary key state? For
