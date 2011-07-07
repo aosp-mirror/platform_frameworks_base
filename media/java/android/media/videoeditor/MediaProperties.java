@@ -17,8 +17,9 @@
 
 package android.media.videoeditor;
 
+import android.media.videoeditor.VideoEditorProfile;
 import android.util.Pair;
-
+import java.lang.System;
 /**
  * This class defines all properties of a media file such as supported height,
  * aspect ratio, bitrate for export function.
@@ -33,7 +34,7 @@ public class MediaProperties {
     public static final int HEIGHT_360 = 360;
     public static final int HEIGHT_480 = 480;
     public static final int HEIGHT_720 = 720;
-    public static final int HEIGHT_1088 = 1088;
+    public static final int HEIGHT_1080 = 1080;
 
     /**
      *  Supported aspect ratios
@@ -63,8 +64,7 @@ public class MediaProperties {
     private static final Pair<Integer, Integer>[] ASPECT_RATIO_3_2_RESOLUTIONS =
         new Pair[] {
         new Pair<Integer, Integer>(720, HEIGHT_480),
-//*tmpLSA*/        new Pair<Integer, Integer>(1080, HEIGHT_720)
-/*tmpLSA*/        new Pair<Integer, Integer>(1088, HEIGHT_720)
+        new Pair<Integer, Integer>(1080, HEIGHT_720)
     };
 
     @SuppressWarnings({"unchecked"})
@@ -92,6 +92,7 @@ public class MediaProperties {
         new Pair[] {
         new Pair<Integer, Integer>(848, HEIGHT_480),
         new Pair<Integer, Integer>(1280, HEIGHT_720),
+        new Pair<Integer, Integer>(1920, HEIGHT_1080),
     };
 
     /**
@@ -345,7 +346,31 @@ public class MediaProperties {
             }
         }
 
-        return resolutions;
+        /** Check the platform specific maximum export resolution */
+        VideoEditorProfile veProfile = VideoEditorProfile.get();
+        if (veProfile == null) {
+            throw new RuntimeException("Can't get the video editor profile");
+        }
+        final int maxWidth = veProfile.maxOutputVideoFrameWidth;
+        final int maxHeight = veProfile.maxOutputVideoFrameHeight;
+        Pair<Integer, Integer>[] tmpResolutions = new Pair[resolutions.length];
+        int numSupportedResolution = 0;
+        int i = 0;
+
+        /** Get supported resolution list */
+        for (i = 0; i < resolutions.length; i++) {
+            if ((resolutions[i].first <= maxWidth) &&
+                (resolutions[i].second <= maxHeight)) {
+                tmpResolutions[numSupportedResolution] = resolutions[i];
+                numSupportedResolution++;
+            }
+        }
+        final Pair<Integer, Integer>[] supportedResolutions =
+            new Pair[numSupportedResolution];
+        System.arraycopy(tmpResolutions, 0,
+            supportedResolutions, 0, numSupportedResolution);
+
+        return supportedResolutions;
     }
 
     /**

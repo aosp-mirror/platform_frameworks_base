@@ -132,6 +132,16 @@ MediaProfiles::logAudioDecoderCap(const MediaProfiles::AudioDecoderCap& cap)
     LOGV("codec = %d", cap.mCodec);
 }
 
+/*static*/ void
+MediaProfiles::logVideoEditorCap(const MediaProfiles::VideoEditorCap& cap)
+{
+    LOGV("videoeditor cap:");
+    LOGV("mMaxInputFrameWidth = %d", cap.mMaxInputFrameWidth);
+    LOGV("mMaxInputFrameHeight = %d", cap.mMaxInputFrameHeight);
+    LOGV("mMaxOutputFrameWidth = %d", cap.mMaxOutputFrameWidth);
+    LOGV("mMaxOutputFrameHeight = %d", cap.mMaxOutputFrameHeight);
+}
+
 /*static*/ int
 MediaProfiles::findTagForName(const MediaProfiles::NameToTagMap *map, size_t nMappings, const char *name)
 {
@@ -368,6 +378,24 @@ void MediaProfiles::addStartTimeOffset(int cameraId, const char** atts)
     mStartTimeOffsets.replaceValueFor(cameraId, offsetTimeMs);
 }
 
+/*static*/ MediaProfiles::VideoEditorCap*
+MediaProfiles::createVideoEditorCap(const char **atts, MediaProfiles *profiles)
+{
+    CHECK(!strcmp("maxInputFrameWidth", atts[0]) &&
+          !strcmp("maxInputFrameHeight", atts[2])  &&
+          !strcmp("maxOutputFrameWidth", atts[4]) &&
+          !strcmp("maxOutputFrameHeight", atts[6]));
+
+    MediaProfiles::VideoEditorCap *pVideoEditorCap =
+        new MediaProfiles::VideoEditorCap(atoi(atts[1]), atoi(atts[3]),
+                atoi(atts[5]), atoi(atts[7]));
+
+    logVideoEditorCap(*pVideoEditorCap);
+    profiles->mVideoEditorCap = pVideoEditorCap;
+
+    return pVideoEditorCap;
+}
+
 /*static*/ void
 MediaProfiles::startElementHandler(void *userData, const char *name, const char **atts)
 {
@@ -398,6 +426,8 @@ MediaProfiles::startElementHandler(void *userData, const char *name, const char 
             createCamcorderProfile(profiles->mCurrentCameraId, atts, profiles->mCameraIds));
     } else if (strcmp("ImageEncoding", name) == 0) {
         profiles->addImageEncodingQualityLevel(profiles->mCurrentCameraId, atts);
+    } else if (strcmp("VideoEditorCap", name) == 0) {
+        createVideoEditorCap(atts, profiles);
     }
 }
 
@@ -790,6 +820,17 @@ MediaProfiles::createDefaultImageEncodingQualityLevels(MediaProfiles *profiles)
     profiles->mImageEncodingQualityLevels.add(levels);
 }
 
+/*static*/ void
+MediaProfiles::createDefaultVideoEditorCap(MediaProfiles *profiles)
+{
+    profiles->mVideoEditorCap =
+        new MediaProfiles::VideoEditorCap(
+                VIDEOEDITOR_DEFAULT_MAX_INPUT_FRAME_WIDTH,
+                VIDEOEDITOR_DEFUALT_MAX_INPUT_FRAME_HEIGHT,
+                VIDEOEDITOR_DEFAULT_MAX_OUTPUT_FRAME_WIDTH,
+                VIDEOEDITOR_DEFUALT_MAX_OUTPUT_FRAME_HEIGHT);
+}
+
 /*static*/ MediaProfiles*
 MediaProfiles::createDefaultInstance()
 {
@@ -801,6 +842,7 @@ MediaProfiles::createDefaultInstance()
     createDefaultAudioDecoders(profiles);
     createDefaultEncoderOutputFileFormats(profiles);
     createDefaultImageEncodingQualityLevels(profiles);
+    createDefaultVideoEditorCap(profiles);
     return profiles;
 }
 
@@ -896,6 +938,28 @@ int MediaProfiles::getVideoEncoderParamByName(const char *name, video_encoder co
     if (!strcmp("enc.vid.fps.max", name)) return mVideoEncoders[index]->mMaxFrameRate;
 
     LOGE("The given video encoder param name %s is not found", name);
+    return -1;
+}
+
+int MediaProfiles::getVideoEditorCapParamByName(const char *name) const
+{
+    LOGV("getVideoEditorCapParamByName: %s", name);
+
+    if (mVideoEditorCap == NULL) {
+        LOGE("The mVideoEditorCap is not created, then create default cap.");
+        createDefaultVideoEditorCap(sInstance);
+    }
+
+    if (!strcmp("videoeditor.input.width.max", name))
+        return mVideoEditorCap->mMaxInputFrameWidth;
+    if (!strcmp("videoeditor.input.height.max", name))
+        return mVideoEditorCap->mMaxInputFrameHeight;
+    if (!strcmp("videoeditor.output.width.max", name))
+        return mVideoEditorCap->mMaxOutputFrameWidth;
+    if (!strcmp("videoeditor.output.height.max", name))
+        return mVideoEditorCap->mMaxOutputFrameHeight;
+
+    LOGE("The given video editor param name %s is not found", name);
     return -1;
 }
 

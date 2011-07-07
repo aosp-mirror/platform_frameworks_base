@@ -337,7 +337,8 @@ public class VideoEditorImpl implements VideoEditor {
      */
     public void export(String filename, int height, int bitrate,
                        int audioCodec, int videoCodec,
-                       ExportProgressListener listener) throws IOException {
+                       ExportProgressListener listener)
+                       throws IOException {
 
         switch (audioCodec) {
             case MediaProperties.ACODEC_AAC_LC:
@@ -372,7 +373,8 @@ public class VideoEditorImpl implements VideoEditor {
      * {@inheritDoc}
      */
     public void export(String filename, int height, int bitrate,
-                       ExportProgressListener listener) throws IOException {
+                       ExportProgressListener listener)
+                       throws IOException {
         if (filename == null) {
             throw new IllegalArgumentException("export: filename is null");
         }
@@ -386,6 +388,20 @@ public class VideoEditorImpl implements VideoEditor {
             throw new IllegalStateException("No MediaItems added");
         }
 
+        /** Check the platform specific maximum export resolution */
+        VideoEditorProfile veProfile = VideoEditorProfile.get();
+        if (veProfile == null) {
+            throw new RuntimeException("Can't get the video editor profile");
+        }
+        final int maxOutputHeight = veProfile.maxOutputVideoFrameHeight;
+        final int maxOutputWidth = veProfile.maxOutputVideoFrameWidth;
+        if (height > maxOutputHeight) {
+            throw new IllegalArgumentException(
+                    "Unsupported export resolution. Supported maximum width:" +
+                    maxOutputWidth + " height:" + maxOutputHeight +
+                    " current height:" + height);
+        }
+
         switch (height) {
             case MediaProperties.HEIGHT_144:
                 break;
@@ -396,6 +412,8 @@ public class VideoEditorImpl implements VideoEditor {
             case MediaProperties.HEIGHT_480:
                 break;
             case MediaProperties.HEIGHT_720:
+                break;
+            case MediaProperties.HEIGHT_1080:
                 break;
 
             default: {

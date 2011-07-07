@@ -370,7 +370,7 @@ public interface VideoEditor {
      */
     public void export(String filename, int height, int bitrate,
                        ExportProgressListener listener)
-    throws IOException;
+                       throws IOException;
 
     /**
      * Create the output movie based on all media items added and the applied
@@ -413,7 +413,7 @@ public interface VideoEditor {
      */
     public void export(String filename, int height, int bitrate, int audioCodec,
                        int videoCodec, ExportProgressListener listener)
-                           throws IOException;
+                       throws IOException;
 
     /**
      * Cancel the running export operation. This method blocks until the export

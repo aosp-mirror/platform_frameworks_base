@@ -503,7 +503,60 @@ public class MediaImageItem extends MediaItem {
 
         return adjustedOverlays;
     }
+    /**
+     * This function get the proper width by given aspect ratio
+     * and height.
+     *
+     * @param aspectRatio  Given aspect ratio
+     * @param height  Given height
+     */
+    private int getWidthByAspectRatioAndHeight(int aspectRatio, int height) {
+        int width = 0;
 
+        switch (aspectRatio) {
+            case MediaProperties.ASPECT_RATIO_3_2:
+                if (height == MediaProperties.HEIGHT_480)
+                    width = 720;
+                else if (height == MediaProperties.HEIGHT_720)
+                    width = 1080;
+                break;
+
+            case MediaProperties.ASPECT_RATIO_16_9:
+                if (height == MediaProperties.HEIGHT_360)
+                    width = 640;
+                else if (height == MediaProperties.HEIGHT_480)
+                    width = 854;
+                else if (height == MediaProperties.HEIGHT_720)
+                    width = 1280;
+                else if (height == MediaProperties.HEIGHT_1080)
+                    width = 1920;
+                break;
+
+            case MediaProperties.ASPECT_RATIO_4_3:
+                if (height == MediaProperties.HEIGHT_480)
+                    width = 640;
+                if (height == MediaProperties.HEIGHT_720)
+                    width = 960;
+                break;
+
+            case MediaProperties.ASPECT_RATIO_5_3:
+                if (height == MediaProperties.HEIGHT_480)
+                    width = 800;
+                break;
+
+            case MediaProperties.ASPECT_RATIO_11_9:
+                if (height == MediaProperties.HEIGHT_144)
+                    width = 176;
+                break;
+
+            default : {
+                throw new IllegalArgumentException(
+                    "Illegal arguments for aspectRatio");
+            }
+        }
+
+        return width;
+    }
 
     /**
      * This function sets the Ken Burn effect generated clip
@@ -515,39 +568,10 @@ public class MediaImageItem extends MediaItem {
     void setGeneratedImageClip(String generatedFilePath) {
         super.setGeneratedImageClip(generatedFilePath);
 
-
         // set the Kenburns clip width and height
         mGeneratedClipHeight = getScaledHeight();
-        switch (mVideoEditor.getAspectRatio()) {
-            case MediaProperties.ASPECT_RATIO_3_2:
-                if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
-                    mGeneratedClipWidth = 720;
-                else if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
-                    mGeneratedClipWidth = 1080;
-                break;
-            case MediaProperties.ASPECT_RATIO_16_9:
-                if (mGeneratedClipHeight == MediaProperties.HEIGHT_360)
-                    mGeneratedClipWidth = 640;
-                else if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
-                    mGeneratedClipWidth = 854;
-                else if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
-                    mGeneratedClipWidth = 1280;
-                break;
-            case MediaProperties.ASPECT_RATIO_4_3:
-                if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
-                    mGeneratedClipWidth = 640;
-                if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
-                    mGeneratedClipWidth = 960;
-                break;
-            case MediaProperties.ASPECT_RATIO_5_3:
-                if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
-                    mGeneratedClipWidth = 800;
-                break;
-            case MediaProperties.ASPECT_RATIO_11_9:
-                if (mGeneratedClipHeight == MediaProperties.HEIGHT_144)
-                    mGeneratedClipWidth = 176;
-                break;
-        }
+        mGeneratedClipWidth = getWidthByAspectRatioAndHeight(
+                mVideoEditor.getAspectRatio(), mGeneratedClipHeight);
     }
 
     /**
@@ -841,37 +865,8 @@ public class MediaImageItem extends MediaItem {
             clipSettings.fileType = FileType.THREE_GPP;
 
             mGeneratedClipHeight = getScaledHeight();
-            switch (mVideoEditor.getAspectRatio()) {
-                case MediaProperties.ASPECT_RATIO_3_2:
-                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
-                        mGeneratedClipWidth = 720;
-                    else if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
-                        mGeneratedClipWidth = 1080;
-                    break;
-                case MediaProperties.ASPECT_RATIO_16_9:
-                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_360)
-                        mGeneratedClipWidth = 640;
-                    else if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
-                        mGeneratedClipWidth = 854;
-                    else if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
-                        mGeneratedClipWidth = 1280;
-                    break;
-                case MediaProperties.ASPECT_RATIO_4_3:
-                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
-                        mGeneratedClipWidth = 640;
-                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_720)
-                        mGeneratedClipWidth = 960;
-                    break;
-                case MediaProperties.ASPECT_RATIO_5_3:
-                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_480)
-                        mGeneratedClipWidth = 800;
-                    break;
-                case MediaProperties.ASPECT_RATIO_11_9:
-                    if (mGeneratedClipHeight == MediaProperties.HEIGHT_144)
-                        mGeneratedClipWidth = 176;
-                    break;
-            }
-
+            mGeneratedClipWidth = getWidthByAspectRatioAndHeight(
+                    mVideoEditor.getAspectRatio(), mGeneratedClipHeight);
         } else {
             if (getGeneratedImageClip() == null) {
                 clipSettings.clipPath = getDecodedImageFileName();
