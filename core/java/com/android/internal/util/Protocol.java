@@ -26,6 +26,9 @@ package com.android.internal.util;
  * codes with Message.what starting at Protocol.WIFI + 1 and less than or equal to Protocol.WIFI +
  * Protocol.MAX_MESSAGE
  *
+ * NOTE: After a value is created and source released a value shouldn't be changed to
+ * maintain backwards compatibility.
+ *
  * {@hide}
  */
 public class Protocol {
@@ -40,7 +43,7 @@ public class Protocol {
     public static final int BASE_DHCP                                               = 0x00030000;
     public static final int BASE_DATA_CONNECTION                                    = 0x00040000;
     public static final int BASE_DATA_CONNECTION_AC                                 = 0x00041000;
-    public static final int BASE_DATA_CONNECTION_TRACKER                            = 0x00050000;
+    public static final int BASE_DATA_CONNECTION_TRACKER                            = 0x00042000;
 
     //TODO: define all used protocols
 }
