@@ -231,7 +231,7 @@ public class WindowManagerService extends IWindowManager.Stub
     // Maximum number of milliseconds to wait for input devices to be enumerated before
     // proceding with safe mode detection.
     private static final int INPUT_DEVICES_READY_FOR_SAFE_MODE_DETECTION_TIMEOUT_MILLIS = 1000;
-    
+
     // Default input dispatching timeout in nanoseconds.
     static final long DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS = 5000 * 1000000L;
 
@@ -4886,8 +4886,13 @@ public class WindowManagerService extends IWindowManager.Stub
             int fw = frame.width();
             int fh = frame.height();
 
-            // First try reducing to fit in x dimension.
-            scale = width/(float)fw;
+            // Constrain thumbnail to smaller of screen width or height. Assumes aspect
+            // of thumbnail is the same as the screen (in landscape) or square.
+            if (dw <= dh) {
+                scale = width / (float) fw; // portrait
+            } else {
+                scale = height / (float) fh; // landscape
+            }
 
             // The screen shot will contain the entire screen.
             dw = (int)(dw*scale);
