@@ -97,8 +97,8 @@ public class Activity2 extends Activity {
             Space v = new Space(context);
             {
                 LayoutParams lp = new LayoutParams(row5, col3);
-                lp.widthSpec = CAN_STRETCH;
-                lp.heightSpec = CAN_STRETCH;
+                lp.columnGroup.flexibility = CAN_STRETCH;
+                lp.rowGroup.flexibility = CAN_STRETCH;
                 vg.addView(v, lp);
             }
         }

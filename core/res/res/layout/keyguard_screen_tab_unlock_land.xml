@@ -24,15 +24,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:rowCount="10"
+    android:rowCount="8"
     android:id="@+id/root"
     android:clipChildren="false">
 
     <!-- Column 0 -->
-    <Space android:height="20dip"/>
-
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
-        android:layout_marginTop="16dip"
+        android:layout_marginTop="8dip"
         android:layout_marginBottom="8dip"
         android:layout_gravity="right">
 
@@ -120,7 +118,10 @@
         android:layout_gravity="right"
         />
 
-    <Space android:height="20dip"/>
+    <Space
+        android:layout_rowFlexibility="canStretch"
+        android:layout_columnFlexibility="canStretch"
+        />
 
     <LinearLayout android:orientation="vertical"
         android:layout_gravity="right"
@@ -169,17 +170,14 @@
     </LinearLayout>
 
     <!-- Column 1 -->
-    <Space
-        android:width="20dip"
-        android:layout_heightSpec="canStretch"
-        android:layout_rowSpan="10" />
+    <Space android:layout_width="32dip" android:layout_rowSpan="8" />
 
     <!-- Column 2 -->
     <com.android.internal.widget.multiwaveview.MultiWaveView
         android:id="@+id/unlock_widget"
-        android:layout_width="300dip"
+        android:layout_width="200dip"
         android:layout_height="match_parent"
-        android:layout_rowSpan="10"
+        android:layout_rowSpan="8"
 
         android:targetDrawables="@array/lockscreen_targets_when_silent"
         android:handleDrawable="@drawable/ic_lockscreen_handle"

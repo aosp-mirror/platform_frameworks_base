@@ -598,10 +598,10 @@ package android {
     field public static final int layout_centerInParent = 16843151; // 0x101018f
     field public static final int layout_centerVertical = 16843153; // 0x1010191
     field public static final int layout_column = 16843084; // 0x101014c
-    field public static final int layout_columnSpan = 16843644; // 0x101037c
+    field public static final int layout_columnFlexibility = 16843646; // 0x101037e
+    field public static final int layout_columnSpan = 16843645; // 0x101037d
     field public static final int layout_gravity = 16842931; // 0x10100b3
     field public static final int layout_height = 16842997; // 0x10100f5
-    field public static final int layout_heightSpec = 16843646; // 0x101037e
     field public static final int layout_margin = 16842998; // 0x10100f6
     field public static final int layout_marginBottom = 16843002; // 0x10100fa
     field public static final int layout_marginEnd = 16843674; // 0x101039a
@@ -610,6 +610,7 @@ package android {
     field public static final int layout_marginStart = 16843673; // 0x1010399
     field public static final int layout_marginTop = 16843000; // 0x10100f8
     field public static final int layout_row = 16843642; // 0x101037a
+    field public static final int layout_rowFlexibility = 16843644; // 0x101037c
     field public static final int layout_rowSpan = 16843643; // 0x101037b
     field public static final int layout_scale = 16843155; // 0x1010193
     field public static final int layout_span = 16843085; // 0x101014d
@@ -617,7 +618,6 @@ package android {
     field public static final int layout_toRightOf = 16843139; // 0x1010183
     field public static final int layout_weight = 16843137; // 0x1010181
     field public static final int layout_width = 16842996; // 0x10100f4
-    field public static final int layout_widthSpec = 16843645; // 0x101037d
     field public static final int layout_x = 16843135; // 0x101017f
     field public static final int layout_y = 16843136; // 0x1010180
     field public static final int left = 16843181; // 0x10101ad
@@ -24998,11 +24998,9 @@ package android.widget {
     field public static final int ALIGN_MARGINS = 1; // 0x1
     field public static final android.widget.GridLayout.Alignment BASELINE;
     field public static final android.widget.GridLayout.Alignment BOTTOM;
-    field public static final android.widget.GridLayout.Spec CAN_SHRINK;
-    field public static final android.widget.GridLayout.Spec CAN_STRETCH;
+    field public static final int CAN_STRETCH = 2; // 0x2
     field public static final android.widget.GridLayout.Alignment CENTER;
     field public static final android.widget.GridLayout.Alignment FILL;
-    field public static final android.widget.GridLayout.Spec FIXED;
     field public static final int HORIZONTAL = 0; // 0x0
     field public static final android.widget.GridLayout.Alignment LEFT;
     field public static final android.widget.GridLayout.Alignment RIGHT;
@@ -25018,6 +25016,7 @@ package android.widget {
     ctor public GridLayout.Group(int, int, android.widget.GridLayout.Alignment);
     ctor public GridLayout.Group(int, android.widget.GridLayout.Alignment);
     field public final android.widget.GridLayout.Alignment alignment;
+    field public int flexibility;
   }
 
   public static class GridLayout.LayoutParams extends android.view.ViewGroup.MarginLayoutParams {
@@ -25029,13 +25028,7 @@ package android.widget {
     ctor public GridLayout.LayoutParams(android.content.Context, android.util.AttributeSet);
     method public void setGravity(int);
     field public android.widget.GridLayout.Group columnGroup;
-    field public android.widget.GridLayout.Spec heightSpec;
     field public android.widget.GridLayout.Group rowGroup;
-    field public android.widget.GridLayout.Spec widthSpec;
-  }
-
-  public static abstract class GridLayout.Spec {
-    ctor public GridLayout.Spec();
   }
 
   public class GridView extends android.widget.AbsListView {

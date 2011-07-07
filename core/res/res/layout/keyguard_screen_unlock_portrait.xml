@@ -125,7 +125,7 @@
         android:layout_marginBottom="4dip"
         android:layout_marginLeft="8dip"
         android:layout_gravity="center|bottom"
-        android:layout_heightSpec="canStretch"
+        android:layout_rowFlexibility="canStretch"
      />
 
     <TextView
