@@ -645,7 +645,9 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     } else {
         setupDrawExternalTexture(layer->getTexture());
     }
-    if (mSnapshot->transform->isPureTranslate()) {
+    if (mSnapshot->transform->isPureTranslate() &&
+            layer->getWidth() == (uint32_t) rect.getWidth() &&
+            layer->getHeight() == (uint32_t) rect.getHeight()) {
         const float x = (int) floorf(rect.left + mSnapshot->transform->getTranslateX() + 0.5f);
         const float y = (int) floorf(rect.top + mSnapshot->transform->getTranslateY() + 0.5f);
 
@@ -673,7 +675,9 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
         float y = rect.top;
         bool simpleTransform = mSnapshot->transform->isPureTranslate();
 
-        if (simpleTransform) {
+        if (simpleTransform &&
+                layer->getWidth() == (uint32_t) rect.getWidth() &&
+                layer->getHeight() == (uint32_t) rect.getHeight()) {
             // When we're swapping, the layer is already in screen coordinates
             if (!swap) {
                 x = (int) floorf(rect.left + mSnapshot->transform->getTranslateX() + 0.5f);
