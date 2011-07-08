@@ -16,7 +16,6 @@
 
 package com.android.test.hwui;
 
-import android.animation.AnimatorSet;
 import android.app.Activity;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -34,7 +33,6 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
     private Camera mCamera;
     private TextureView mTextureView;
     private FrameLayout mContent;
-    private AnimatorSet mAnimatorSet;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +51,6 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
             @Override
             public void onClick(View v) {
                 if (mAdded) {
-                    if (mAnimatorSet != null) mAnimatorSet.cancel();
                     mContent.removeView(mTextureView);
                 } else {
                     mContent.addView(mTextureView);

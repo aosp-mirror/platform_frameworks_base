@@ -16,6 +16,8 @@
 
 package com.android.test.hwui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
@@ -40,6 +42,10 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 
+import java.io.BufferedOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -57,6 +63,25 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
 
         mTextureView = new TextureView(this);
         mTextureView.setSurfaceTextureListener(this);
+        mTextureView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Bitmap b = mTextureView.getBitmap(600, 350);
+                BufferedOutputStream out = null;
+                try {
+                    out = new BufferedOutputStream(new FileOutputStream("/sdcard/out.png"));
+                    b.compress(Bitmap.CompressFormat.PNG, 100, out);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
+                    if (out != null) try {
+                        out.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
 
         setContentView(mTextureView, new FrameLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
@@ -77,7 +102,7 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                ((View) mTextureView.getParent()).invalidate();
+                mTextureView.invalidate();
             }
         });
         animator.start();
