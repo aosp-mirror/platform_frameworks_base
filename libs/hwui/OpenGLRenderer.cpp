@@ -449,12 +449,11 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         return false;
     }
 
-    layer->mode = mode;
-    layer->alpha = alpha;
+    layer->setAlpha(alpha, mode);
     layer->layer.set(bounds);
-    layer->texCoords.set(0.0f, bounds.getHeight() / float(layer->height),
-            bounds.getWidth() / float(layer->width), 0.0f);
-    layer->colorFilter = mColorFilter;
+    layer->texCoords.set(0.0f, bounds.getHeight() / float(layer->getHeight()),
+            bounds.getWidth() / float(layer->getWidth()), 0.0f);
+    layer->setColorFilter(mColorFilter);
 
     // Save the layer in the snapshot
     snapshot->flags |= Snapshot::kFlagIsLayer;
@@ -464,12 +463,13 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
         return createFboLayer(layer, bounds, snapshot, previousFbo);
     } else {
         // Copy the framebuffer into the layer
-        glBindTexture(GL_TEXTURE_2D, layer->texture);
+        layer->bindTexture();
         if (!bounds.isEmpty()) {
-            if (layer->empty) {
-                glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bounds.left,
-                        snapshot->height - bounds.bottom, layer->width, layer->height, 0);
-                layer->empty = false;
+            if (layer->isEmpty()) {
+                glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+                        bounds.left, snapshot->height - bounds.bottom,
+                        layer->getWidth(), layer->getHeight(), 0);
+                layer->setEmpty(false);
             } else {
                 glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, bounds.left,
                         snapshot->height - bounds.bottom, bounds.getWidth(), bounds.getHeight());
@@ -485,7 +485,7 @@ bool OpenGLRenderer::createLayer(sp<Snapshot> snapshot, float left, float top,
 
 bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> snapshot,
         GLuint previousFbo) {
-    layer->fbo = mCaches.fboCache.get();
+    layer->setFbo(mCaches.fboCache.get());
 
 #if RENDER_LAYERS_AS_REGIONS
     snapshot->region = &snapshot->layer->region;
@@ -507,7 +507,7 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> sna
     clip.translate(-bounds.left, -bounds.top);
 
     snapshot->flags |= Snapshot::kFlagIsFboLayer;
-    snapshot->fbo = layer->fbo;
+    snapshot->fbo = layer->getFbo();
     snapshot->resetTransform(-bounds.left, -bounds.top, 0.0f);
     snapshot->resetClip(clip.left, clip.top, clip.right, clip.bottom);
     snapshot->viewport.set(0.0f, 0.0f, bounds.getWidth(), bounds.getHeight());
@@ -516,18 +516,17 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> sna
     snapshot->orthoMatrix.load(mOrthoMatrix);
 
     // Bind texture to FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, layer->fbo);
-    glBindTexture(GL_TEXTURE_2D, layer->texture);
+    glBindFramebuffer(GL_FRAMEBUFFER, layer->getFbo());
+    layer->bindTexture();
 
     // Initialize the texture if needed
-    if (layer->empty) {
-        layer->empty = false;
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, layer->width, layer->height, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    if (layer->isEmpty()) {
+        layer->allocateTexture(GL_RGBA, GL_UNSIGNED_BYTE);
+        layer->setEmpty(false);
     }
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-            layer->texture, 0);
+            layer->getTexture(), 0);
 
 #if DEBUG_LAYERS_AS_REGIONS
     GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
@@ -535,8 +534,8 @@ bool OpenGLRenderer::createFboLayer(Layer* layer, Rect& bounds, sp<Snapshot> sna
         LOGE("Framebuffer incomplete (GL error code 0x%x)", status);
 
         glBindFramebuffer(GL_FRAMEBUFFER, previousFbo);
-        glDeleteTextures(1, &layer->texture);
-        mCaches.fboCache.put(layer->fbo);
+        layer->deleteTexture();
+        mCaches.fboCache.put(layer->getFbo());
 
         delete layer;
 
@@ -578,11 +577,11 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     Layer* layer = current->layer;
     const Rect& rect = layer->layer;
 
-    if (!fboLayer && layer->alpha < 255) {
+    if (!fboLayer && layer->getAlpha() < 255) {
         drawColorRect(rect.left, rect.top, rect.right, rect.bottom,
-                layer->alpha << 24, SkXfermode::kDstIn_Mode, true);
+                layer->getAlpha() << 24, SkXfermode::kDstIn_Mode, true);
         // Required below, composeLayerRect() will divide by 255
-        layer->alpha = 255;
+        layer->setAlpha(255);
     }
 
     mCaches.unbindMeshBuffer();
@@ -593,18 +592,16 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     // drawing only the dirty region
     if (fboLayer) {
         dirtyLayer(rect.left, rect.top, rect.right, rect.bottom, *previous->transform);
-        if (layer->colorFilter) {
-            setupColorFilter(layer->colorFilter);
+        if (layer->getColorFilter()) {
+            setupColorFilter(layer->getColorFilter());
         }
         composeLayerRegion(layer, rect);
-        if (layer->colorFilter) {
+        if (layer->getColorFilter()) {
             resetColorFilter();
         }
-    } else {
-        if (!rect.isEmpty()) {
-            dirtyLayer(rect.left, rect.top, rect.right, rect.bottom);
-            composeLayerRect(layer, rect, true);
-        }
+    } else if (!rect.isEmpty()) {
+        dirtyLayer(rect.left, rect.top, rect.right, rect.bottom);
+        composeLayerRect(layer, rect, true);
     }
 
     if (fboLayer) {
@@ -622,16 +619,16 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
     // Failing to add the layer to the cache should happen only if the layer is too large
     if (!mCaches.layerCache.put(layer)) {
         LAYER_LOGD("Deleting layer");
-        glDeleteTextures(1, &layer->texture);
+        layer->deleteTexture();
         delete layer;
     }
 }
 
 void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
-    float alpha = layer->alpha / 255.0f;
+    float alpha = layer->getAlpha() / 255.0f;
 
     setupDraw();
-    if (layer->renderTarget == GL_TEXTURE_2D) {
+    if (layer->getRenderTarget() == GL_TEXTURE_2D) {
         setupDrawWithTexture();
     } else {
         setupDrawWithExternalTexture();
@@ -639,17 +636,26 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     setupDrawTextureTransform();
     setupDrawColor(alpha, alpha, alpha, alpha);
     setupDrawColorFilter();
-    setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode);
+    setupDrawBlending(layer->isBlend() || alpha < 1.0f, layer->getMode());
     setupDrawProgram();
-    setupDrawModelView(rect.left, rect.top, rect.right, rect.bottom);
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
-    if (layer->renderTarget == GL_TEXTURE_2D) {
-        setupDrawTexture(layer->texture);
+    if (layer->getRenderTarget() == GL_TEXTURE_2D) {
+        setupDrawTexture(layer->getTexture());
     } else {
-        setupDrawExternalTexture(layer->texture);
+        setupDrawExternalTexture(layer->getTexture());
     }
-    setupDrawTextureTransformUniforms(layer->texTransform);
+    if (mSnapshot->transform->isPureTranslate()) {
+        const float x = (int) floorf(rect.left + mSnapshot->transform->getTranslateX() + 0.5f);
+        const float y = (int) floorf(rect.top + mSnapshot->transform->getTranslateY() + 0.5f);
+
+        layer->setFilter(GL_NEAREST, GL_NEAREST);
+        setupDrawModelView(x, y, x + rect.getWidth(), y + rect.getHeight(), true);
+    } else {
+        layer->setFilter(GL_LINEAR, GL_LINEAR);
+        setupDrawModelView(rect.left, rect.top, rect.right, rect.bottom);
+    }
+    setupDrawTextureTransformUniforms(layer->getTexTransform());
     setupDrawMesh(&mMeshVertices[0].position[0], &mMeshVertices[0].texture[0]);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
@@ -658,14 +664,32 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
 }
 
 void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap) {
-    if (!layer->isTextureLayer) {
+    if (!layer->isTextureLayer()) {
         const Rect& texCoords = layer->texCoords;
         resetDrawTextureTexCoords(texCoords.left, texCoords.top,
                 texCoords.right, texCoords.bottom);
 
-        drawTextureMesh(rect.left, rect.top, rect.right, rect.bottom, layer->texture,
-                layer->alpha / 255.0f, layer->mode, layer->blend, &mMeshVertices[0].position[0],
-                &mMeshVertices[0].texture[0], GL_TRIANGLE_STRIP, gMeshCount, swap, swap);
+        float x = rect.left;
+        float y = rect.top;
+        bool simpleTransform = mSnapshot->transform->isPureTranslate();
+
+        if (simpleTransform) {
+            // When we're swapping, the layer is already in screen coordinates
+            if (!swap) {
+                x = (int) floorf(rect.left + mSnapshot->transform->getTranslateX() + 0.5f);
+                y = (int) floorf(rect.top + mSnapshot->transform->getTranslateY() + 0.5f);
+            }
+
+            layer->setFilter(GL_NEAREST, GL_NEAREST, true);
+        } else {
+            layer->setFilter(GL_LINEAR, GL_LINEAR, true);
+        }
+
+        drawTextureMesh(x, y, x + rect.getWidth(), y + rect.getHeight(),
+                layer->getTexture(), layer->getAlpha() / 255.0f,
+                layer->getMode(), layer->isBlend(),
+                &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
+                GL_TRIANGLE_STRIP, gMeshCount, swap, swap || simpleTransform);
 
         resetDrawTextureTexCoords(0.0f, 0.0f, 1.0f, 1.0f);
     } else {
@@ -690,9 +714,9 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         size_t count;
         const android::Rect* rects = layer->region.getArray(&count);
 
-        const float alpha = layer->alpha / 255.0f;
-        const float texX = 1.0f / float(layer->width);
-        const float texY = 1.0f / float(layer->height);
+        const float alpha = layer->getAlpha() / 255.0f;
+        const float texX = 1.0f / float(layer->getWidth());
+        const float texY = 1.0f / float(layer->getHeight());
         const float height = rect.getHeight();
 
         TextureVertex* mesh = mCaches.getRegionMesh();
@@ -702,13 +726,22 @@ void OpenGLRenderer::composeLayerRegion(Layer* layer, const Rect& rect) {
         setupDrawWithTexture();
         setupDrawColor(alpha, alpha, alpha, alpha);
         setupDrawColorFilter();
-        setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode, false);
+        setupDrawBlending(layer->isBlend() || alpha < 1.0f, layer->getMode(), false);
         setupDrawProgram();
         setupDrawDirtyRegionsDisabled();
         setupDrawPureColorUniforms();
         setupDrawColorFilterUniforms();
-        setupDrawTexture(layer->texture);
-        setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
+        setupDrawTexture(layer->getTexture());
+        if (mSnapshot->transform->isPureTranslate()) {
+            const float x = (int) floorf(rect.left + mSnapshot->transform->getTranslateX() + 0.5f);
+            const float y = (int) floorf(rect.top + mSnapshot->transform->getTranslateY() + 0.5f);
+
+            layer->setFilter(GL_NEAREST, GL_NEAREST);
+            setupDrawModelViewTranslate(x, y, x + rect.getWidth(), y + rect.getHeight(), true);
+        } else {
+            layer->setFilter(GL_LINEAR, GL_LINEAR);
+            setupDrawModelViewTranslate(rect.left, rect.top, rect.right, rect.bottom);
+        }
         setupDrawMesh(&mesh[0].position[0], &mesh[0].texture[0]);
 
         for (size_t i = 0; i < count; i++) {
@@ -2154,8 +2187,7 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    layer->alpha = alpha;
-    layer->mode = mode;
+    layer->setAlpha(alpha, mode);
 
 #if RENDER_LAYERS_AS_REGIONS
     if (!layer->region.isEmpty()) {
@@ -2169,13 +2201,23 @@ void OpenGLRenderer::drawLayer(Layer* layer, float x, float y, SkPaint* paint) {
             setupDrawWithTexture();
             setupDrawColor(a, a, a, a);
             setupDrawColorFilter();
-            setupDrawBlending(layer->blend || layer->alpha < 255, layer->mode, false);
+            setupDrawBlending(layer->isBlend() || a < 1.0f, layer->getMode(), false);
             setupDrawProgram();
-            setupDrawModelViewTranslate(x, y,
-                    x + layer->layer.getWidth(), y + layer->layer.getHeight());
             setupDrawPureColorUniforms();
             setupDrawColorFilterUniforms();
-            setupDrawTexture(layer->texture);
+            setupDrawTexture(layer->getTexture());
+            if (mSnapshot->transform->isPureTranslate()) {
+                x = (int) floorf(x + mSnapshot->transform->getTranslateX() + 0.5f);
+                y = (int) floorf(y + mSnapshot->transform->getTranslateY() + 0.5f);
+
+                layer->setFilter(GL_NEAREST, GL_NEAREST);
+                setupDrawModelViewTranslate(x, y,
+                        x + layer->layer.getWidth(), y + layer->layer.getHeight(), true);
+            } else {
+                layer->setFilter(GL_LINEAR, GL_LINEAR);
+                setupDrawModelViewTranslate(x, y,
+                        x + layer->layer.getWidth(), y + layer->layer.getHeight());
+            }
             setupDrawMesh(&layer->mesh[0].position[0], &layer->mesh[0].texture[0]);
 
             glDrawElements(GL_TRIANGLES, layer->meshElementCount,

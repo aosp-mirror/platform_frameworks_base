@@ -115,6 +115,18 @@ static jboolean android_view_GLES20Canvas_isBackBufferPreserved(JNIEnv* env, job
     return error == EGL_SUCCESS && value == EGL_BUFFER_PRESERVED;
 }
 
+static void android_view_GLES20Canvas_disableVsync(JNIEnv* env, jobject clazz) {
+    EGLDisplay display = eglGetCurrentDisplay();
+
+    eglGetError();
+    eglSwapInterval(display, 0);
+
+    EGLint error = eglGetError();
+    if (error != EGL_SUCCESS) {
+        RENDERER_LOGD("Could not disable v-sync (%x)", error);
+    }
+}
+
 // ----------------------------------------------------------------------------
 // Constructors
 // ----------------------------------------------------------------------------
@@ -621,7 +633,7 @@ static Layer* android_view_GLES20Canvas_createTextureLayer(JNIEnv* env, jobject 
 
     if (layer) {
         jint* storage = env->GetIntArrayElements(layerInfo, NULL);
-        storage[0] = layer->texture;
+        storage[0] = layer->getTexture();
         env->ReleaseIntArrayElements(layerInfo, storage, 0);
     }
 
@@ -634,8 +646,8 @@ static Layer* android_view_GLES20Canvas_createLayer(JNIEnv* env, jobject clazz,
 
     if (layer) {
         jint* storage = env->GetIntArrayElements(layerInfo, NULL);
-        storage[0] = layer->width;
-        storage[1] = layer->height;
+        storage[0] = layer->getWidth();
+        storage[1] = layer->getHeight();
         env->ReleaseIntArrayElements(layerInfo, storage, 0);
     }
 
@@ -647,8 +659,8 @@ static void android_view_GLES20Canvas_resizeLayer(JNIEnv* env, jobject clazz,
     LayerRenderer::resizeLayer(layer, width, height);
 
     jint* storage = env->GetIntArrayElements(layerInfo, NULL);
-    storage[0] = layer->width;
-    storage[1] = layer->height;
+    storage[0] = layer->getWidth();
+    storage[1] = layer->getHeight();
     env->ReleaseIntArrayElements(layerInfo, storage, 0);
 }
 
@@ -722,6 +734,7 @@ static JNINativeMethod gMethods[] = {
 #ifdef USE_OPENGL_RENDERER
     { "nIsBackBufferPreserved", "()Z",         (void*) android_view_GLES20Canvas_isBackBufferPreserved },
     { "nPreserveBackBuffer",    "()Z",         (void*) android_view_GLES20Canvas_preserveBackBuffer },
+    { "nDisableVsync",          "()V",         (void*) android_view_GLES20Canvas_disableVsync },
 
     { "nCreateRenderer",    "()I",             (void*) android_view_GLES20Canvas_createRenderer },
     { "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },

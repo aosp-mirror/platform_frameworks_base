@@ -68,8 +68,8 @@ void LayerCache::setMaxSize(uint32_t maxSize) {
 
 void LayerCache::deleteLayer(Layer* layer) {
     if (layer) {
-        mSize -= layer->width * layer->height * 4;
-        glDeleteTextures(1, &layer->texture);
+        mSize -= layer->getWidth() * layer->getHeight() * 4;
+        layer->deleteTexture();
         delete layer;
     }
 }
@@ -93,28 +93,22 @@ Layer* LayerCache::get(const uint32_t width, const uint32_t height) {
         mCache.removeAt(index);
 
         layer = entry.mLayer;
-        mSize -= layer->width * layer->height * 4;
+        mSize -= layer->getWidth() * layer->getHeight() * 4;
 
-        LAYER_LOGD("Reusing layer %dx%d", layer->width, layer->height);
+        LAYER_LOGD("Reusing layer %dx%d", layer->getWidth(), layer->getHeight());
     } else {
         LAYER_LOGD("Creating new layer %dx%d", entry.mWidth, entry.mHeight);
 
         layer = new Layer(entry.mWidth, entry.mHeight);
-        layer->blend = true;
-        layer->empty = true;
-        layer->fbo = 0;
-        layer->colorFilter = NULL;
+        layer->setBlend(true);
+        layer->setEmpty(true);
+        layer->setFbo(0);
 
-        glGenTextures(1, &layer->texture);
-        glBindTexture(GL_TEXTURE_2D, layer->texture);
-
+        layer->generateTexture();
+        layer->bindTexture();
+        layer->setFilter(GL_NEAREST, GL_NEAREST);
+        layer->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 #if DEBUG_LAYERS
         size_t size = mCache.size();
@@ -133,30 +127,30 @@ bool LayerCache::resize(Layer* layer, const uint32_t width, const uint32_t heigh
     //       size already in the cache, and reuse it instead of creating a new one
 
     LayerEntry entry(width, height);
-    if (entry.mWidth <= layer->width && entry.mHeight <= layer->height) {
+    if (entry.mWidth <= layer->getWidth() && entry.mHeight <= layer->getHeight()) {
         return true;
     }
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, layer->texture);
+    uint32_t oldWidth = layer->getWidth();
+    uint32_t oldHeight = layer->getHeight();
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, entry.mWidth, entry.mHeight, 0,
-            GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glActiveTexture(GL_TEXTURE0);
+    layer->bindTexture();
+    layer->setSize(entry.mWidth, entry.mHeight);
+    layer->allocateTexture(GL_RGBA, GL_UNSIGNED_BYTE);
 
     if (glGetError() != GL_NO_ERROR) {
+        layer->setSize(oldWidth, oldHeight);
         return false;
     }
-
-    layer->width = entry.mWidth;
-    layer->height = entry.mHeight;
 
     return true;
 }
 
 bool LayerCache::put(Layer* layer) {
-    if (!layer->isCacheable) return false;
+    if (!layer->isCacheable()) return false;
 
-    const uint32_t size = layer->width * layer->height * 4;
+    const uint32_t size = layer->getWidth() * layer->getHeight() * 4;
     // Don't even try to cache a layer that's bigger than the cache
     if (size < mMaxSize) {
         // TODO: Use an LRU
