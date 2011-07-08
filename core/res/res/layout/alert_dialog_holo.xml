@@ -30,13 +30,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
-        <ImageView android:id="@+id/titleDividerTop"
+        <View android:id="@+id/titleDividerTop"
             android:layout_width="match_parent"
-            android:layout_height="1dip"
+            android:layout_height="2dip"
             android:visibility="gone"
-            android:scaleType="fitXY"
-            android:gravity="fill_horizontal"
-            android:src="@android:drawable/divider_strong_holo" />
+            android:background="@android:color/holo_blue_light" />
         <LinearLayout android:id="@+id/title_template"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -51,20 +49,17 @@
                 android:paddingRight="8dip"
                 android:src="@null" />
             <com.android.internal.widget.DialogTitle android:id="@+id/alertTitle"
-                style="?android:attr/textAppearanceLarge"
-                android:textColor="@android:color/holo_blue"
+                style="?android:attr/windowTitleStyle"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
-        <ImageView android:id="@+id/titleDivider"
+        <View android:id="@+id/titleDivider"
             android:layout_width="match_parent"
-            android:layout_height="1dip"
+            android:layout_height="2dip"
             android:visibility="gone"
-            android:scaleType="fitXY"
-            android:gravity="fill_horizontal"
-            android:src="@android:drawable/divider_strong_holo" />
+            android:background="@android:color/holo_blue_light" />
         <!-- If the client uses a customTitle, it will be added here. -->
     </LinearLayout>
 

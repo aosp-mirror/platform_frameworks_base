@@ -54,21 +54,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
-        <ImageView android:id="@+id/titleDivider"
+        <View android:id="@+id/titleDivider"
             android:layout_width="match_parent"
-            android:layout_height="4dip"
-            android:layout_marginLeft="16dip"
-            android:layout_marginRight="16dip"
-            android:scaleType="fitXY"
-            android:gravity="fill_horizontal"
-            android:src="@android:drawable/divider_strong_holo" />
+            android:layout_height="2dip"
+            android:background="@android:color/holo_blue_light" />
         <!-- If the client uses a customTitle, it will be added here. -->
     </LinearLayout>
 
     <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_marginLeft="32dip"
-        android:layout_marginRight="32dip"
         android:layout_height="0dip"
         android:layout_weight="1">
 
@@ -95,15 +89,12 @@
         android:minHeight="54dip"
         android:orientation="vertical"
         android:divider="?android:attr/dividerHorizontal"
-        android:showDividers="beginning"
-        android:dividerPadding="16dip">
+        android:showDividers="beginning">
         <LinearLayout
             style="?android:attr/buttonBarStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingLeft="2dip"
-            android:paddingRight="2dip"
             android:measureWithLargestChild="true">
             <LinearLayout android:id="@+id/leftSpacer"
                 android:layout_weight="0.25"

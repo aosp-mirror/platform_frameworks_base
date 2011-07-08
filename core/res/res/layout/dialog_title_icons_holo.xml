@@ -48,12 +48,10 @@ enabled.
             android:layout_marginLeft="8dip" />
     </LinearLayout>
 
-    <ImageView android:id="@+id/titleDivider"
+    <View android:id="@+id/titleDivider"
             android:layout_width="match_parent"
             android:layout_height="1dip"
-            android:scaleType="fitXY"
-            android:gravity="fill_horizontal"
-            android:src="@android:drawable/divider_strong_holo" />
+            android:background="@android:color/holo_blue_light" />
 
     <FrameLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"

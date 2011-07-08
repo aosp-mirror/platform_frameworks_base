@@ -32,12 +32,10 @@
         android:duplicateParentState="true"
         android:singleLine="true" />
 
-    <ImageView
+    <View
         android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="2dip"
-        android:scaleType="fitXY"
-        android:gravity="fill_horizontal"
         android:src="@drawable/divider_strong_holo" />
 
 </LinearLayout>

@@ -143,19 +143,42 @@
     <color name="link_text_holo_light">#0000ee</color>
 
     <!-- Group buttons -->
+    <eat-comment />
     <color name="group_button_dialog_pressed_holo_dark">#46c5c1ff</color>
     <color name="group_button_dialog_focused_holo_dark">#2699cc00</color>
 
     <color name="group_button_dialog_pressed_holo_light">#ffffffff</color>
     <color name="group_button_dialog_focused_holo_light">#4699cc00</color>
 
+    <!-- Highlight colors for the legacy themes -->
+    <eat-comment />
+    <color name="legacy_pressed_highlight">#fffeaa0c</color>
+    <color name="legacy_selected_highlight">#fff17a0a</color>
+    <color name="legacy_long_pressed_highlight">#ffffffff</color>
+
     <!-- General purpose colors for Holo-themed elements -->
     <eat-comment />
 
-    <!-- A Holo shade of blue -->
-    <color name="holo_blue">#ff6699ff</color>
-    <!-- A Holo shade of green -->
-    <color name="holo_green">#ff99cc00</color>
+    <!-- A light Holo shade of blue -->
+    <color name="holo_blue_light">#ff33b5e5</color>
+    <!-- A light Holo shade of green -->
+    <color name="holo_green_light">#ff99cc00</color>
+    <!-- A light Holo shade of red -->
+    <color name="holo_red_light">#ffff4444</color>
+    <!-- A dark Holo shade of blue -->
+    <color name="holo_blue_dark">#ff0099cc</color>
+    <!-- A dark Holo shade of green -->
+    <color name="holo_green_dark">#ff669900</color>
+    <!-- A dark Holo shade of red -->
+    <color name="holo_red_dark">#ffcc0000</color>
+    <!-- A Holo shade of purple -->
+    <color name="holo_purple">#ffaa66cc</color>
+    <!-- A light Holo shade of orange -->
+    <color name="holo_orange_light">#ffffbb33</color>
+    <!-- A dark Holo shade of orange -->
+    <color name="holo_orange_dark">#ffff8800</color>
+    <!-- A really bright Holo shade of blue -->
+    <color name="holo_blue_bright">#ff00ddff</color>
 
 </resources>
 
