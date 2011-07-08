@@ -402,9 +402,7 @@ static jint android_net_wifi_getPowerModeCommand(JNIEnv* env, jobject clazz)
     }
     // reply comes back in the form "powermode = XX" where XX is the
     // number we're interested in.
-    if (sscanf(reply, "%*s = %u", &power) != 1) {
-        return (jint)-1;
-    }
+    sscanf(reply, "%*s = %u", &power);
     return (jint)power;
 }
 
