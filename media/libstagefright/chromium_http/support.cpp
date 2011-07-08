@@ -23,6 +23,7 @@
 #include "support.h"
 
 #include "android/net/android_network_library_impl.h"
+#include "base/logging.h"
 #include "base/threading/thread.h"
 #include "net/base/cert_verifier.h"
 #include "net/base/cookie_monster.h"
@@ -34,8 +35,10 @@
 
 #include "include/ChromiumHTTPDataSource.h"
 
+#include <cutils/log.h>
 #include <cutils/properties.h>
 #include <media/stagefright/MediaErrors.h>
+#include <string>
 
 namespace android {
 
@@ -43,6 +46,34 @@ static Mutex gNetworkThreadLock;
 static base::Thread *gNetworkThread = NULL;
 static scoped_refptr<net::URLRequestContext> gReqContext;
 static scoped_ptr<net::NetworkChangeNotifier> gNetworkChangeNotifier;
+
+bool logMessageHandler(
+        int severity,
+        const char* file,
+        int line,
+        size_t message_start,
+        const std::string& str) {
+    int androidSeverity = ANDROID_LOG_VERBOSE;
+    switch(severity) {
+    case logging::LOG_FATAL:
+        androidSeverity = ANDROID_LOG_FATAL;
+        break;
+    case logging::LOG_ERROR_REPORT:
+    case logging::LOG_ERROR:
+        androidSeverity = ANDROID_LOG_ERROR;
+        break;
+    case logging::LOG_WARNING:
+        androidSeverity = ANDROID_LOG_WARN;
+        break;
+    default:
+        androidSeverity = ANDROID_LOG_VERBOSE;
+        break;
+    }
+    android_printLog(androidSeverity, "chromium-libstagefright",
+                    "%s:%d: %s", file, line, str.c_str());
+    return false;
+}
+
 
 static void InitializeNetworkThreadIfNecessary() {
     Mutex::Autolock autoLock(gNetworkThreadLock);
@@ -58,6 +89,7 @@ static void InitializeNetworkThreadIfNecessary() {
 
         net::AndroidNetworkLibrary::RegisterSharedInstance(
                 new SfNetworkLibrary);
+        logging::SetLogMessageHandler(logMessageHandler);
     }
 }
 
@@ -179,6 +211,14 @@ SfDelegate::~SfDelegate() {
 
 void SfDelegate::setOwner(ChromiumHTTPDataSource *owner) {
     mOwner = owner;
+}
+
+void SfDelegate::setUID(uid_t uid) {
+    gReqContext->setUID(uid);
+}
+
+bool SfDelegate::getUID(uid_t *uid) const {
+    return gReqContext->getUID(uid);
 }
 
 void SfDelegate::OnReceivedRedirect(

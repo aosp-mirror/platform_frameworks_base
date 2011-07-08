@@ -545,6 +545,12 @@ struct MyHandler : public AHandler {
                 if (result != OK) {
                     if (track) {
                         if (!track->mUsingInterleavedTCP) {
+                            // Clear the tag
+                            if (mUIDValid) {
+                                HTTPBase::UnRegisterSocketUserTag(track->mRTPSocket);
+                                HTTPBase::UnRegisterSocketUserTag(track->mRTCPSocket);
+                            }
+
                             close(track->mRTPSocket);
                             close(track->mRTCPSocket);
                         }
@@ -617,6 +623,12 @@ struct MyHandler : public AHandler {
 
                     if (!info->mUsingInterleavedTCP) {
                         mRTPConn->removeStream(info->mRTPSocket, info->mRTCPSocket);
+
+                        // Clear the tag
+                        if (mUIDValid) {
+                            HTTPBase::UnRegisterSocketUserTag(info->mRTPSocket);
+                            HTTPBase::UnRegisterSocketUserTag(info->mRTCPSocket);
+                        }
 
                         close(info->mRTPSocket);
                         close(info->mRTCPSocket);
@@ -1181,8 +1193,10 @@ private:
                     &info->mRTPSocket, &info->mRTCPSocket, &rtpPort);
 
             if (mUIDValid) {
-                HTTPBase::RegisterSocketUser(info->mRTPSocket, mUID);
-                HTTPBase::RegisterSocketUser(info->mRTCPSocket, mUID);
+                HTTPBase::RegisterSocketUserTag(info->mRTPSocket, mUID,
+                                                (uint32_t)*(uint32_t*) "RTP_");
+                HTTPBase::RegisterSocketUserTag(info->mRTCPSocket, mUID,
+                                                (uint32_t)*(uint32_t*) "RTP_");
             }
 
             request.append("Transport: RTP/AVP/UDP;unicast;client_port=");
