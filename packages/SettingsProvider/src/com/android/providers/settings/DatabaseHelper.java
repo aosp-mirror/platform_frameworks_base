@@ -16,17 +16,6 @@
 
 package com.android.providers.settings;
 
-import com.android.internal.content.PackageHelper;
-import com.android.internal.telephony.BaseCommands;
-import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.RILConstants;
-import com.android.internal.util.XmlUtils;
-import com.android.internal.widget.LockPatternUtils;
-import com.android.internal.widget.LockPatternView;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
@@ -47,6 +36,17 @@ import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.android.internal.content.PackageHelper;
+import com.android.internal.telephony.BaseCommands;
+import com.android.internal.telephony.Phone;
+import com.android.internal.telephony.RILConstants;
+import com.android.internal.util.XmlUtils;
+import com.android.internal.widget.LockPatternUtils;
+import com.android.internal.widget.LockPatternView;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 65;
+    private static final int DATABASE_VERSION = 66;
 
     private Context mContext;
 
@@ -837,6 +837,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 if (stmt != null) stmt.close();
             }
             upgradeVersion = 65;
+        }
+
+        if (upgradeVersion == 65) {
+            /*
+             * Animations are removed from Settings. Turned on by default
+             */
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.WINDOW_ANIMATION_SCALE + "'");
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.TRANSITION_ANIMATION_SCALE + "'");
+                stmt = db.compileStatement("INSERT INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadDefaultAnimationSettings(stmt);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 66;
         }
 
         // *** Remember to update DATABASE_VERSION above!
