@@ -96,6 +96,8 @@
          is along the major axis (that is the screen is landscape).  This may
          be either a fraction or a dimension. -->
     <item type="dimen" name="dialog_min_width_major">65%</item>
+    <!-- Preference activity, vertical padding for the header list -->
+    <dimen name="preference_screen_header_vertical_padding">0dp</dimen>
 
     <!-- The platform's desired minimum size for a dialog's width when it
          is along the minor axis (that is the screen is portrait).  This may

@@ -44,5 +44,7 @@
     <!-- Size of status line font in LockScreen. -->
     <dimen name="keyguard_pattern_unlock_status_line_font_size">14sp</dimen>
 
+    <!-- Preference activity, vertical padding for the header list -->
+    <dimen name="reference_screen_header_vertical_padding">16dp</dimen>
 </resources>
 
