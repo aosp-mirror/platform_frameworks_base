@@ -16,6 +16,11 @@
 
 package android.widget;
 
+import com.android.internal.util.FastMath;
+import com.android.internal.widget.EditableInputConnection;
+
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.R;
 import android.content.ClipData;
 import android.content.ClipData.Item;
@@ -62,6 +67,7 @@ import android.text.StaticLayout;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.method.AllCapsTransformationMethod;
 import android.text.method.ArrowKeyMovementMethod;
 import android.text.method.DateKeyListener;
 import android.text.method.DateTimeKeyListener;
@@ -76,6 +82,7 @@ import android.text.method.SingleLineTransformationMethod;
 import android.text.method.TextKeyListener;
 import android.text.method.TimeKeyListener;
 import android.text.method.TransformationMethod;
+import android.text.method.TransformationMethod2;
 import android.text.method.WordIterator;
 import android.text.style.ClickableSpan;
 import android.text.style.ParagraphStyle;
@@ -124,11 +131,6 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RemoteViews.RemoteView;
-
-import com.android.internal.util.FastMath;
-import com.android.internal.widget.EditableInputConnection;
-
-import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -424,6 +426,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int textSize = 15;
         int typefaceIndex = -1;
         int styleIndex = -1;
+        boolean allCaps = false;
 
         /*
          * Look the appearance up without checking first if it exists because
@@ -470,6 +473,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 case com.android.internal.R.styleable.TextAppearance_textStyle:
                     styleIndex = appearance.getInt(attr, -1);
+                    break;
+
+                case com.android.internal.R.styleable.TextAppearance_textAllCaps:
+                    allCaps = appearance.getBoolean(attr, false);
                     break;
                 }
             }
@@ -822,6 +829,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             case com.android.internal.R.styleable.TextView_suggestionsEnabled:
                 mSuggestionsEnabled = a.getBoolean(attr, true);
                 break;
+
+            case com.android.internal.R.styleable.TextView_textAllCaps:
+                allCaps = a.getBoolean(attr, false);
+                break;
             }
         }
         a.recycle();
@@ -1003,6 +1014,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             setHighlightColor(textColorHighlight);
         }
         setRawTextSize(textSize);
+
+        if (allCaps) {
+            setTransformationMethod(new AllCapsTransformationMethod(getContext()));
+        }
 
         if (password || passwordInputType || webPasswordInputType || numberPasswordInputType) {
             setTransformationMethod(PasswordTransformationMethod.getInstance());
@@ -1330,6 +1345,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         mTransformation = method;
+
+        if (method instanceof TransformationMethod2) {
+            TransformationMethod2 method2 = (TransformationMethod2) method;
+            mAllowTransformationLengthChange = !mTextIsSelectable && !(mText instanceof Editable);
+            method2.setLengthChangesAllowed(mAllowTransformationLengthChange);
+        } else {
+            mAllowTransformationLengthChange = false;
+        }
 
         setText(mText);
     }
@@ -1775,6 +1798,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         setTypefaceByIndex(typefaceIndex, styleIndex);
         
+        if (appearance.getBoolean(com.android.internal.R.styleable.TextAppearance_textAllCaps,
+                false)) {
+            setTransformationMethod(new AllCapsTransformationMethod(getContext()));
+        }
+
         appearance.recycle();
     }
 
@@ -2823,14 +2851,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mBufferType = type;
         mText = text;
 
-        if (mTransformation == null)
+        if (mTransformation == null) {
             mTransformed = text;
-        else
+        } else {
             mTransformed = mTransformation.getTransformation(text, this);
+        }
 
         final int textLength = text.length();
 
-        if (text instanceof Spannable) {
+        if (text instanceof Spannable && !mAllowTransformationLengthChange) {
             Spannable sp = (Spannable) text;
 
             // Remove any ChangeWatchers that might have come
@@ -2852,7 +2881,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (mTransformation != null) {
                 sp.setSpan(mTransformation, 0, textLength, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-
             }
 
             if (mMovement != null) {
@@ -6570,6 +6598,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Sets the properties of this field to transform input to ALL CAPS
+     * display. This may use a "small caps" formatting if available.
+     * This setting will be ignored if this field is editable or selectable.
+     *
+     * This call replaces the current transformation method. Disabling this
+     * will not necessarily restore the previous behavior from before this
+     * was enabled.
+     *
+     * @see #setTransformationMethod(TransformationMethod)
+     * @attr ref android.R.styleable#TextView_textAllCaps
+     */
+    public void setAllCaps(boolean allCaps) {
+        if (allCaps) {
+            setTransformationMethod(new AllCapsTransformationMethod(getContext()));
+        } else {
+            setTransformationMethod(null);
+        }
+    }
+
+    /**
      * If true, sets the properties of this field (number of lines, horizontally scrolling,
      * transformation method) to be for a single-line input; if false, restores these to the default
      * conditions.
@@ -10254,6 +10302,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     private MovementMethod          mMovement;
     private TransformationMethod    mTransformation;
+    private boolean                 mAllowTransformationLengthChange;
     private ChangeWatcher           mChangeWatcher;
 
     private ArrayList<TextWatcher>  mListeners = null;

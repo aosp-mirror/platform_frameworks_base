@@ -1779,6 +1779,8 @@
   <public type="attr" name="backgroundStacked" />
   <public type="attr" name="backgroundSplit" />
 
+  <public type="attr" name="textAllCaps" />
+
   <public type="style" name="TextAppearance.SuggestionHighlight" />
   <public type="style" name="Theme.Holo.SplitActionBarWhenNarrow" />
   <public type="style" name="Theme.Holo.Light.SplitActionBarWhenNarrow" />
