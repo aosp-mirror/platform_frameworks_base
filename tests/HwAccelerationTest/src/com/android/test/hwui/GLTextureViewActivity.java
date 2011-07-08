@@ -16,8 +16,6 @@
 
 package com.android.test.hwui;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Activity;
@@ -41,7 +39,6 @@ import javax.microedition.khronos.egl.EGLContext;
 import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
-
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -66,7 +63,7 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
         mTextureView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Bitmap b = mTextureView.getBitmap(600, 350);
+                Bitmap b = mTextureView.getBitmap(800, 800);
                 BufferedOutputStream out = null;
                 try {
                     out = new BufferedOutputStream(new FileOutputStream("/sdcard/out.png"));
