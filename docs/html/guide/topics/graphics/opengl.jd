@@ -3,51 +3,215 @@ parent.title=Graphics
 parent.link=index.html
 @jd:body
 
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    
+    <ol>
+      <li><a href="#basics">The Basics</a></li>
+      <li><a href="#compatibility">OpenGL Versions and Device Compatibility</a>
+        <ol>
+          <li><a href="#textures">Texture Compression Support</a></li>
+          <li><a href="#declare-compression">Declaring Use of Compressed Textures</a></li>
+        </ol>
+      </li>
+    </ol>
+    <h2>Key classes</h2>
+    <ol>
+      <li>{@link android.opengl.GLSurfaceView}</li>
+      <li>{@link android.opengl.GLSurfaceView.Renderer}</li>
+      <li>{@link javax.microedition.khronos.opengles}</li>
+      <li>{@link android.opengl}</li>
+    </ol>
+    <h2>Related Samples</h2>
+    <ol>
+      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
+GLSurfaceViewActivity.html">GLSurfaceViewActivity</a></li>
+      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
+GLES20Activity.html">GLES20Activity</a></li>
+      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
+TouchRotateActivity.html">TouchRotateActivity</a></li>
+      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
+CompressedTextureActivity.html">Compressed Textures</a></li>
+    </ol>
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}resources/articles/glsurfaceview.html">Introducing
+GLSurfaceView</a></li>
+      <li><a href="http://www.khronos.org/opengles/">OpenGL ES</a></li>
+      <li><a href="http://www.khronos.org/opengles/1_X/">OpenGL ES 1.x Specification</a></li>
+      <li><a href="http://www.khronos.org/opengles/2_X/">OpenGL ES 2.x specification</a></li>
+    </ol>
+  </div>
+</div>
 
-<p>Android includes support for high performance 3D graphics 
-via the OpenGL API&mdash;specifically, the OpenGL ES API.</p>
+<p>Android includes support for high performance 2D and 3D graphics with the Open Graphics Library
+(OpenGL) API&mdash;specifically, the OpenGL ES API. OpenGL is a cross-platform graphics API that
+specifies a standard software interface for 3D graphics processing hardware. OpenGL ES is a flavor
+of the OpenGL specification intended for embedded devices. The OpenGL ES 1.0 and 1.1 API
+specifications have been supported since Android 1.0. Beginning with Android 2.2 (API
+Level 8), the framework supports the OpenGL ES 2.0 API specification.</p>
 
-<p>OpenGL ES is a flavor of the OpenGL specification intended for embedded devices. Versions of <a
-href="http://www.khronos.org/opengles/">OpenGL ES</a> are loosely peered to versions of the primary
-OpenGL standard. Beginning with Android 2.2, the platform supports OpenGL ES 2.0 (with
-backward compatibility support for OpenGL ES 1.1). For information about the relative number of
-Android-powered devices that support a given version of OpenGL ES, see the <a
-href="http://developer.android.com/resources/dashboard/opengl.html">OpenGL ES Versions</a>
-dashboard.</p>
+<p class="note"><b>Note:</b> The specific API provided by the Android framework is similar to the
+  J2ME JSR239 OpenGL ES  API, but is not identical. If you are familiar with J2ME JSR239
+  specification, be alert for variations.</p>
 
-<p>The specific API provided by Android is similar to the J2ME JSR239 OpenGL
-ES API. However, it may not be identical, so watch out for deviations.</p>
 
-<h2>Using the API</h2>
+<h2 id="basics">The Basics</h2>
 
-<p>Here's how to use the API at an extremely high level:</p>
+<p>Android supports OpenGL both through its framework API and the Native Development
+Kit (NDK). This topic focuses on the Android framework interfaces. For more information about the
+NDK, see the <a href="{@docRoot}sdk/ndk/index.html">Android NDK</a>.
 
-<ol>
-<li>Write a custom {@link android.view.View} subclass.</li>
-<li>Obtain a handle to an OpenGLContext, which provides access to the OpenGL functionality.</li>
-<li>In your View's {@link android.view.View#onDraw onDraw()} method, get a handle to a GL object,
-and use its methods to perform GL operations.</li>
-</ol>
-
-<p>Several samples using OpenGL ES are available in the <a
-href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/index.html">API
-Demos</a> sample application.
+<p>
+  There are two foundational classes in the Android framework that let you create and manipulate
+graphics with the OpenGL ES API: {@link android.opengl.GLSurfaceView} and {@link
+android.opengl.GLSurfaceView.Renderer}. If your goal is to use OpenGL in your Android application,
+understanding how to implement these classes in an activity should be your first objective.
 </p>
 
-<p>A summary of how to actually write 3D applications using OpenGL is
-beyond the scope of this text and is left as an exercise for the reader.</p>
+<dl>
+  <dt>{@link android.opengl.GLSurfaceView}</dt>
+  <dd>This class is a container on which you can draw and manipulate objects using OpenGL API calls.
+    This class is similar in function to a {@link android.view.SurfaceView}, except that it is
+    specifically for use with OpenGL. You can use this class by simply creating an instance of 
+    {@link android.opengl.GLSurfaceView} and adding your 
+    {@link android.opengl.GLSurfaceView.Renderer Renderer} to it. However, if you want to capture
+    touch screen events, you should extend the {@link android.opengl.GLSurfaceView} class to
+    implement the touch listeners, as shown in the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/TouchRotateActivity
+.html">TouchRotateActivity</a> sample.</dd>
+  
+  <dt>{@link android.opengl.GLSurfaceView.Renderer}</dt>
+  <dd>This interface defines the methods required for drawing graphics in an OpenGL {@link
+    android.opengl.GLSurfaceView}. You must provide an implementation of this interface as a
+    separate class and attach it to your {@link android.opengl.GLSurfaceView} instance using
+    {@link android.opengl.GLSurfaceView#setRenderer(android.opengl.GLSurfaceView.Renderer)
+    GLSurfaceView.setRenderer()}.
+    
+    <p>The {@link android.opengl.GLSurfaceView.Renderer} interface requires that you implement the
+      following methods:</p>
+    <ul>
+      <li>
+        {@link
+    android.opengl.GLSurfaceView.Renderer#onSurfaceCreated(javax.microedition.khronos.opengles.GL10,
+    javax.microedition.khronos.egl.EGLConfig) onSurfaceCreated()}: The system calls this
+    method once, when creating the {@link android.opengl.GLSurfaceView}. Use this method to perform
+    actions that need to happen only once, such as setting OpenGL environment parameters or
+    initializing OpenGL graphic objects.
+      </li>
+      <li>
+        {@link
+        android.opengl.GLSurfaceView.Renderer#onDrawFrame(javax.microedition.khronos.opengles.GL10)
+        onDrawFrame()}: The system calls this method on each redraw of the {@link
+        android.opengl.GLSurfaceView}. Use this method as the primary execution point for
+        drawing (and re-drawing) graphic objects.</li>
+      <li>
+        {@link
+    android.opengl.GLSurfaceView.Renderer#onSurfaceChanged(javax.microedition.khronos.opengles.GL10,
+    int, int) onSurfaceChanged()}: The system calls this method when the {@link
+    android.opengl.GLSurfaceView} geometry changes, including changes in size of the {@link
+    android.opengl.GLSurfaceView} or orientation of the device screen. For example, the system calls
+    this method when the device changes from portrait to landscape orientation. Use this method to
+    respond to changes in the {@link android.opengl.GLSurfaceView} container. 
+      </li>
+    </ul>
+    </dd>
+</dl>
 
-<h2>Links to Additional Information</h2>
+<p>Once you have established a container view for OpenGL using {@link
+android.opengl.GLSurfaceView} and {@link android.opengl.GLSurfaceView.Renderer}, you can begin
+calling OpenGL APIs using the following classes:</p>
 
-<p>Information about OpenGL ES can be
-found at <a title="http://www.khronos.org/opengles/"
-href="http://www.khronos.org/opengles/">http://www.khronos.org/opengles/</a>.</p> 
+<ul>
+  <li>OpenGL ES 1.0/1.1 API Packages
+    <ul>
+      <li>{@link javax.microedition.khronos.opengles} - This package provides the standard
+implementation of OpenGL ES 1.0 and 1.1.
+          <ul>
+            <li>{@link javax.microedition.khronos.opengles.GL10}</li>
+            <li>{@link javax.microedition.khronos.opengles.GL10Ext}</li>
+            <li>{@link javax.microedition.khronos.opengles.GL11}</li>
+            <li>{@link javax.microedition.khronos.opengles.GL11Ext}</li>
+            <li>{@link javax.microedition.khronos.opengles.GL11ExtensionPack}</li>
+          </ul>
+        </li>
+        <li>{@link android.opengl} - This package provides a static interface to the OpenGL classes
+          above. These interfaces were added with Android 1.6 (API Level 4).
+          <ul>
+            <li>{@link android.opengl.GLES10}</li>
+            <li>{@link android.opengl.GLES10Ext}</li>
+            <li>{@link android.opengl.GLES11}</li>
+            <li>{@link android.opengl.GLES10Ext}</li>
+          </ul>
+        </li>
+      </ul>
+  </li>
+  <li>OpenGL ES 2.0 API Class
+    <ul>
+      <li>{@link android.opengl.GLES20 android.opengl.GLES20}</li>
+    </ul>
+  </li>
+</ul>
 
-<p>Information specifically
-about OpenGL ES 1.0 (including a detailed specification) can be found
-at <a title="http://www.khronos.org/opengles/1_X/"
-href="http://www.khronos.org/opengles/1_X/">http://www.khronos.org/opengles/1_X/</a>.</p>
+<h2 id="compatibility">OpenGL Versions and Device Compatibility</h2>
 
-<p>The documentation for the Android OpenGL ES implementations are available in {@link
-android.opengl} and {@link javax.microedition.khronos.opengles}.</p>
+<p>
+  The OpenGL ES 1.0 and 1.1 API specifications have been supported since Android 1.0.
+Beginning with Android 2.2 (API Level 8), the framework supports the OpenGL ES 2.0 API
+specification. OpenGL ES 2.0 is supported by most Android devices and is recommended for new
+applications being developed with OpenGL. For information about the relative number of
+Android-powered devices that support a given version of OpenGL ES, see the <a
+href="{@docRoot}resources/dashboard/opengl.html">OpenGL ES Versions Dashboard</a>.</p>
 
+<h3 id="textures">Texture compression support</h3>
+<p>Texture compression can significantly increase the performance of your OpenGL application by
+reducing memory requirements and making more efficient use of memory bandwidth. The Android
+framework provides support for the ETC1 compression format as a standard feature, including a {@link
+android.opengl.ETC1Util} utility class and the {@code etc1tool} compression tool (located in your
+Android SDK at {@code &lt;sdk&gt;/tools/}).</p>
+
+<p>For an example of an Android application that uses texture compression, see the <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
+CompressedTextureActivity.html">CompressedTextureActivity</a> code sample.
+</p>
+
+<p>To check if the ETC1 format is supported on a device, call the {@link
+android.opengl.ETC1Util#isETC1Supported() ETC1Util.isETC1Supported()} method.</p>
+
+<p class="note"><b>Note:</b> The ETC1 texture compression format does not support textures with an
+alpha channel. If your application requires textures with an alpha channel, you should
+investigate other texture compression formats available on your target devices.</p>
+
+<p>Beyond the ETC1 format, Android devices have varied support for texture compression based on
+their GPU chipsets. You should investigate texture compression support on the the devices you are
+are targeting to determine what compression types your application should support.</p>
+
+<p>To determine if texture compression formats other than ETC1 are supported on a particular
+device:</p>
+<ol>
+  <li>Run the following code on your target devices to determine what texture compression
+formats are supported:
+<pre>
+  String extensions = javax.microedition.khronos.opengles.GL10.glGetString(GL10.GL_EXTENSIONS);
+</pre>
+  <p class="warning"><b>Warning:</b> The results of this call vary by device! You must run this
+call on several target devices to determine what compression types are commonly supported on
+your target devices.</p>
+  </li>
+  <li>Review the output of this method to determine what extensions are supported on the
+device.</li> 
+</ol>
+
+
+<h3 id="declare-compression">Declaring compressed textures</h3>
+<p>Once you have decided which texture compression types your application will support, you
+must declare them in your manifest file using <a
+href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">
+&lt;supports-gl-texture&gt;</a>. Declaring this information in your manifest file hides your
+application from users with devices that do not support at least one of your declared
+compression types. For more information on how Android Market filtering works for texture
+compressions, see the <a
+href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html#market-texture-filtering">
+Android Market and texture compression filtering</a> section of the {@code
+&lt;supports-gl-texture&gt;} documentation.
