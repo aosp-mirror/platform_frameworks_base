@@ -22,12 +22,22 @@ import android.os.Parcelable;
 import android.os.SystemClock;
 import android.text.ParcelableSpan;
 import android.text.TextUtils;
+import android.widget.TextView;
 
 import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * Holds suggestion candidates of words under this span.
+ * Holds suggestion candidates for the text enclosed in this span.
+ *
+ * When such a span is edited in an EditText, double tapping on the text enclosed in this span will
+ * display a popup dialog listing suggestion replacement for that text. The user can then replace
+ * the original text by one of the suggestions.
+ *
+ * These spans should typically be created by the input method to privide correction and alternates
+ * for the text.
+ *
+ * @see TextView#setSuggestionsEnabled(boolean)
  */
 public class SuggestionSpan implements ParcelableSpan {
     /**
@@ -115,14 +125,14 @@ public class SuggestionSpan implements ParcelableSpan {
     }
 
     /**
-     * @return suggestions
+     * @return an array of suggestion texts for this span
      */
     public String[] getSuggestions() {
         return mSuggestions;
     }
 
     /**
-     * @return locale of suggestions
+     * @return the locale of the suggestions
      */
     public String getLocale() {
         return mLocaleString;
