@@ -260,7 +260,6 @@ public class ScrollingTabContainerView extends HorizontalScrollView {
                     if (mTextView == null) {
                         TextView textView = new TextView(getContext(), null,
                                 com.android.internal.R.attr.actionBarTabTextStyle);
-                        textView.setSingleLine();
                         textView.setEllipsize(TruncateAt.END);
                         LayoutParams lp = new LayoutParams(LayoutParams.WRAP_CONTENT,
                                 LayoutParams.WRAP_CONTENT);

@@ -2810,6 +2810,8 @@
         <attr name="textColorHint" />
         <!-- Color of the links. -->
         <attr name="textColorLink" />
+        <!-- Present the text in ALL CAPS. This may use a small-caps form when available. -->
+        <attr name="textAllCaps" format="boolean" />
     </declare-styleable>
     <declare-styleable name="TextSwitcher">
     </declare-styleable>
@@ -3074,6 +3076,8 @@
         <attr name="textIsSelectable" />
         <!-- Suggestions will be displayed when the user double taps on editable text. -->
         <attr name="suggestionsEnabled" />
+        <!-- Present the text in ALL CAPS. This may use a small-caps form when available. -->
+        <attr name="textAllCaps" />
     </declare-styleable>
     <!-- An <code>input-extras</code> is a container for extra data to supply to
          an input method.  Contains

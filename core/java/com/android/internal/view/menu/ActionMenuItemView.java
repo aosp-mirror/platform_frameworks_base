@@ -154,12 +154,7 @@ public class ActionMenuItemView extends LinearLayout
         // populate accessibility description with title
         setContentDescription(title);
 
-        if (mShowTextAllCaps && title != null) {
-            mTextButton.setText(title.toString().toUpperCase(
-                    getContext().getResources().getConfiguration().locale));
-        } else {
-            mTextButton.setText(mTitle);
-        }
+        mTextButton.setText(mTitle);
 
         updateTextButtonVisibility();
     }
