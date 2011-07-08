@@ -31,7 +31,8 @@ public class AllocationAdapter extends Allocation {
     }
 
     int getID() {
-        return mAdaptedAllocation.getID();
+        throw new RSInvalidStateException(
+            "This operation is not supported with adapters at this time.");
     }
 
     /**
