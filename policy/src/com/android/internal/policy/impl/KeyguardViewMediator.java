@@ -690,13 +690,11 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
         switch (simState) {
             case ABSENT:
-            case PERM_DISABLED:
                 // only force lock screen in case of missing sim if user hasn't
                 // gone through setup wizard
                 if (!mUpdateMonitor.isDeviceProvisioned()) {
                     if (!isShowing()) {
-                        if (DEBUG) Log.d(TAG, "INTENT_VALUE_ICC_ABSENT "
-                                + "or PERM_DISABLED and keygaurd isn't showing,"
+                        if (DEBUG) Log.d(TAG, "ICC_ABSENT isn't showing,"
                                 + " we need to show the keyguard since the "
                                 + "device isn't provisioned yet.");
                         doKeyguard();
@@ -714,7 +712,17 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 } else {
                     resetStateLocked();
                 }
-
+                break;
+            case PERM_DISABLED:
+                if (!isShowing()) {
+                    if (DEBUG) Log.d(TAG, "PERM_DISABLED and "
+                          + "keygaurd isn't showing.");
+                    doKeyguard();
+                } else {
+                    if (DEBUG) Log.d(TAG, "PERM_DISABLED, resetStateLocked to"
+                          + "show permanently disabled message in lockscreen.");
+                    resetStateLocked();
+                }
                 break;
             case READY:
                 if (isShowing()) {
