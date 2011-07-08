@@ -174,6 +174,7 @@ private:
     void clipAudioBitRate();
     void clipAudioSampleRate();
     void clipNumberOfAudioChannels();
+    void setDefaultProfileIfNecessary();
 
     StagefrightRecorder(const StagefrightRecorder &);
     StagefrightRecorder &operator=(const StagefrightRecorder &);

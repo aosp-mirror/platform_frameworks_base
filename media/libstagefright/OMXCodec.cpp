@@ -1295,13 +1295,6 @@ status_t OMXCodec::setupAVCEncoderParameters(const sp<MetaData>& meta) {
     h264type.nAllowedPictureTypes =
         OMX_VIDEO_PictureTypeI | OMX_VIDEO_PictureTypeP;
 
-    h264type.nSliceHeaderSpacing = 0;
-    h264type.nBFrames = 0;   // No B frames support yet
-    h264type.nPFrames = setPFramesSpacing(iFramesInterval, frameRate);
-    if (h264type.nPFrames == 0) {
-        h264type.nAllowedPictureTypes = OMX_VIDEO_PictureTypeI;
-    }
-
     // Check profile and level parameters
     CodecProfileLevel defaultProfileLevel, profileLevel;
     defaultProfileLevel.mProfile = h264type.eProfile;
@@ -1312,8 +1305,14 @@ status_t OMXCodec::setupAVCEncoderParameters(const sp<MetaData>& meta) {
     h264type.eLevel = static_cast<OMX_VIDEO_AVCLEVELTYPE>(profileLevel.mLevel);
 
     if (h264type.eProfile == OMX_VIDEO_AVCProfileBaseline) {
+        h264type.nSliceHeaderSpacing = 0;
         h264type.bUseHadamard = OMX_TRUE;
         h264type.nRefFrames = 1;
+        h264type.nBFrames = 0;
+        h264type.nPFrames = setPFramesSpacing(iFramesInterval, frameRate);
+        if (h264type.nPFrames == 0) {
+            h264type.nAllowedPictureTypes = OMX_VIDEO_PictureTypeI;
+        }
         h264type.nRefIdx10ActiveMinus1 = 0;
         h264type.nRefIdx11ActiveMinus1 = 0;
         h264type.bEntropyCodingCABAC = OMX_FALSE;

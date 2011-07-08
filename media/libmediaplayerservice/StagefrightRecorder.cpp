@@ -1136,8 +1136,67 @@ status_t StagefrightRecorder::checkVideoEncoderCapabilities() {
         clipVideoFrameRate();
         clipVideoFrameWidth();
         clipVideoFrameHeight();
+        setDefaultProfileIfNecessary();
     }
     return OK;
+}
+
+// Set to use AVC baseline profile if the encoding parameters matches
+// CAMCORDER_QUALITY_LOW profile; this is for the sake of MMS service.
+void StagefrightRecorder::setDefaultProfileIfNecessary() {
+    LOGV("setDefaultProfileIfNecessary");
+
+    camcorder_quality quality = CAMCORDER_QUALITY_LOW;
+
+    int64_t durationUs   = mEncoderProfiles->getCamcorderProfileParamByName(
+                                "duration", mCameraId, quality) * 1000000LL;
+
+    int fileFormat       = mEncoderProfiles->getCamcorderProfileParamByName(
+                                "file.format", mCameraId, quality);
+
+    int videoCodec       = mEncoderProfiles->getCamcorderProfileParamByName(
+                                "vid.codec", mCameraId, quality);
+
+    int videoBitRate     = mEncoderProfiles->getCamcorderProfileParamByName(
+                                "vid.bps", mCameraId, quality);
+
+    int videoFrameRate   = mEncoderProfiles->getCamcorderProfileParamByName(
+                                "vid.fps", mCameraId, quality);
+
+    int videoFrameWidth  = mEncoderProfiles->getCamcorderProfileParamByName(
+                                "vid.width", mCameraId, quality);
+
+    int videoFrameHeight = mEncoderProfiles->getCamcorderProfileParamByName(
+                                "vid.height", mCameraId, quality);
+
+    int audioCodec       = mEncoderProfiles->getCamcorderProfileParamByName(
+                                "aud.codec", mCameraId, quality);
+
+    int audioBitRate     = mEncoderProfiles->getCamcorderProfileParamByName(
+                                "aud.bps", mCameraId, quality);
+
+    int audioSampleRate  = mEncoderProfiles->getCamcorderProfileParamByName(
+                                "aud.hz", mCameraId, quality);
+
+    int audioChannels    = mEncoderProfiles->getCamcorderProfileParamByName(
+                                "aud.ch", mCameraId, quality);
+
+    if (durationUs == mMaxFileDurationUs &&
+        fileFormat == mOutputFormat &&
+        videoCodec == mVideoEncoder &&
+        videoBitRate == mVideoBitRate &&
+        videoFrameRate == mFrameRate &&
+        videoFrameWidth == mVideoWidth &&
+        videoFrameHeight == mVideoHeight &&
+        audioCodec == mAudioEncoder &&
+        audioBitRate == mAudioBitRate &&
+        audioSampleRate == mSampleRate &&
+        audioChannels == mAudioChannels) {
+        if (videoCodec == VIDEO_ENCODER_H264) {
+            LOGI("Force to use AVC baseline profile");
+            setParamVideoEncoderProfile(OMX_VIDEO_AVCProfileBaseline);
+        }
+    }
 }
 
 status_t StagefrightRecorder::checkAudioEncoderCapabilities() {
