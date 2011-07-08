@@ -18,8 +18,6 @@ package android.widget;
 
 import static android.widget.SuggestionsAdapter.getColumnString;
 
-import com.android.internal.R;
-
 import android.app.PendingIntent;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -39,10 +37,14 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.text.Editable;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +52,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.TextView.OnEditorActionListener;
+
+import com.android.internal.R;
 
 import java.util.WeakHashMap;
 
@@ -87,6 +91,8 @@ public class SearchView extends LinearLayout {
     private View mSearchEditFrame;
     private View mVoiceButton;
     private SearchAutoComplete mQueryTextView;
+    private View mDropDownAnchor;
+    private ImageView mSearchHintIcon;
     private boolean mSubmitButtonEnabled;
     private CharSequence mQueryHint;
     private boolean mQueryRefinement;
@@ -195,6 +201,7 @@ public class SearchView extends LinearLayout {
         mSubmitButton = findViewById(R.id.search_go_btn);
         mCloseButton = (ImageView) findViewById(R.id.search_close_btn);
         mVoiceButton = findViewById(R.id.search_voice_btn);
+        mSearchHintIcon = (ImageView) findViewById(R.id.search_mag_icon);
 
         mSearchButton.setOnClickListener(mOnClickListener);
         mCloseButton.setOnClickListener(mOnClickListener);
@@ -244,7 +251,20 @@ public class SearchView extends LinearLayout {
         mVoiceAppSearchIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         mVoiceAppSearchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
+        mDropDownAnchor = findViewById(mQueryTextView.getDropDownAnchor());
+        if (mDropDownAnchor != null) {
+            mDropDownAnchor.addOnLayoutChangeListener(new OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                        int oldLeft, int oldTop, int oldRight, int oldBottom) {
+                    adjustDropDownSizeAndPosition();
+                }
+
+            });
+        }
+
         updateViewsVisibility(mIconifiedByDefault);
+        updateQueryHint();
     }
 
     /**
@@ -263,7 +283,7 @@ public class SearchView extends LinearLayout {
         }
         // Cache the voice search capability
         mVoiceButtonEnabled = hasVoiceSearch();
-        updateViewsVisibility(mIconifiedByDefault);
+        updateViewsVisibility(isIconified());
     }
 
     /**
@@ -300,7 +320,6 @@ public class SearchView extends LinearLayout {
         mQueryTextView.clearFocus();
         setImeVisibility(false);
         mClearingFocus = false;
-        updateViewsVisibility(mIconifiedByDefault);
     }
 
     /**
@@ -555,6 +574,7 @@ public class SearchView extends LinearLayout {
         mSearchButton.setVisibility(visCollapsed);
         updateSubmitButton(hasText);
         mSearchEditFrame.setVisibility(collapsed ? GONE : VISIBLE);
+        mSearchHintIcon.setVisibility(mIconifiedByDefault ? GONE : VISIBLE);
         updateCloseButton();
         updateVoiceButton(!hasText);
         updateSubmitArea();
@@ -822,9 +842,29 @@ public class SearchView extends LinearLayout {
         return result;
     }
 
+    private int getSearchIconId() {
+        TypedValue outValue = new TypedValue();
+        getContext().getTheme().resolveAttribute(com.android.internal.R.attr.searchViewSearchIcon,
+                outValue, true);
+        return outValue.resourceId;
+    }
+
+    private CharSequence getDecoratedHint(CharSequence hintText) {
+        // If the field is always expanded, then don't add the search icon to the hint
+        if (!mIconifiedByDefault) return hintText;
+
+        SpannableStringBuilder ssb = new SpannableStringBuilder("   "); // for the icon
+        ssb.append(hintText);
+        Drawable searchIcon = getContext().getResources().getDrawable(getSearchIconId());
+        int textSize = (int) (mQueryTextView.getTextSize() * 1.25);
+        searchIcon.setBounds(0, 0, textSize, textSize);
+        ssb.setSpan(new ImageSpan(searchIcon), 1, 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return ssb;
+    }
+
     private void updateQueryHint() {
         if (mQueryHint != null) {
-            mQueryTextView.setHint(mQueryHint);
+            mQueryTextView.setHint(getDecoratedHint(mQueryHint));
         } else if (mSearchable != null) {
             CharSequence hint = null;
             int hintId = mSearchable.getHintId();
@@ -832,8 +872,10 @@ public class SearchView extends LinearLayout {
                 hint = getContext().getString(hintId);
             }
             if (hint != null) {
-                mQueryTextView.setHint(hint);
+                mQueryTextView.setHint(getDecoratedHint(hint));
             }
+        } else {
+            mQueryTextView.setHint(getDecoratedHint(""));
         }
     }
 
@@ -922,9 +964,13 @@ public class SearchView extends LinearLayout {
         CharSequence text = mQueryTextView.getText();
         if (TextUtils.isEmpty(text)) {
             if (mIconifiedByDefault) {
-                // query field already empty, hide the keyboard and remove focus
-                clearFocus();
-                setImeVisibility(false);
+                // If the app doesn't override the close behavior
+                if (mOnCloseListener == null || !mOnCloseListener.onClose()) {
+                    // hide the keyboard and remove focus
+                    clearFocus();
+                    // collapse the search field
+                    updateViewsVisibility(true);
+                }
             }
         } else {
             mQueryTextView.setText("");
@@ -932,10 +978,6 @@ public class SearchView extends LinearLayout {
             setImeVisibility(true);
         }
 
-        if (mIconifiedByDefault && (mOnCloseListener == null || !mOnCloseListener.onClose())) {
-            updateViewsVisibility(mIconifiedByDefault);
-            setImeVisibility(false);
-        }
     }
 
     private void onSearchClicked() {
@@ -973,6 +1015,28 @@ public class SearchView extends LinearLayout {
     void onTextFocusChanged() {
         updateViewsVisibility(isIconified());
         updateFocusedState(mQueryTextView.hasFocus());
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+    }
+
+    private void adjustDropDownSizeAndPosition() {
+        if (mDropDownAnchor.getWidth() > 1) {
+            Resources res = getContext().getResources();
+            int anchorPadding = mSearchPlate.getPaddingLeft();
+            Rect dropDownPadding = new Rect();
+            int iconOffset = mIconifiedByDefault
+                    ? res.getDimensionPixelSize(R.dimen.dropdownitem_icon_width)
+                    + res.getDimensionPixelSize(R.dimen.dropdownitem_text_padding_left)
+                    : 0;
+            mQueryTextView.getDropDownBackground().getPadding(dropDownPadding);
+            mQueryTextView.setDropDownHorizontalOffset(-(dropDownPadding.left + iconOffset)
+                    + anchorPadding);
+            mQueryTextView.setDropDownWidth(mDropDownAnchor.getWidth() + dropDownPadding.left
+                    + dropDownPadding.right + iconOffset - (anchorPadding));
+        }
     }
 
     private boolean onItemClicked(int position, int actionKey, String actionMsg) {
@@ -1393,5 +1457,32 @@ public class SearchView extends LinearLayout {
         public boolean enoughToFilter() {
             return mThreshold <= 0 || super.enoughToFilter();
         }
+
+        @Override
+        public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                // special case for the back key, we do not even try to send it
+                // to the drop down list but instead, consume it immediately
+                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+                    KeyEvent.DispatcherState state = getKeyDispatcherState();
+                    if (state != null) {
+                        state.startTracking(event, this);
+                    }
+                    return true;
+                } else if (event.getAction() == KeyEvent.ACTION_UP) {
+                    KeyEvent.DispatcherState state = getKeyDispatcherState();
+                    if (state != null) {
+                        state.handleUpEvent(event);
+                    }
+                    if (event.isTracking() && !event.isCanceled()) {
+                        mSearchView.clearFocus();
+                        mSearchView.setImeVisibility(false);
+                        return true;
+                    }
+                }
+            }
+            return super.onKeyPreIme(keyCode, event);
+        }
+
     }
 }

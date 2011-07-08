@@ -141,4 +141,13 @@
     <!-- The default gap between components in a layout. -->
     <dimen name="default_gap">16dip</dimen>
 
+    <!-- Text padding for dropdown items -->
+    <dimen name="dropdownitem_text_padding_left">6dip</dimen>
+
+    <!-- Text padding for dropdown items -->
+    <dimen name="dropdownitem_text_padding_right">6dip</dimen>
+
+    <!-- Width of the icon in a dropdown list -->
+    <dimen name="dropdownitem_icon_width">48dip</dimen>
+
 </resources>

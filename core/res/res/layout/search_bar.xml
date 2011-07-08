@@ -66,7 +66,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:maxWidth="600dip"
-            android:iconifiedByDefault="false"
             android:layout_gravity="center_vertical"
             />
 

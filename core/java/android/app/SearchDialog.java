@@ -168,6 +168,7 @@ public class SearchDialog extends Dialog {
         SearchBar searchBar = (SearchBar) findViewById(com.android.internal.R.id.search_bar);
         searchBar.setSearchDialog(this);
         mSearchView = (SearchView) findViewById(com.android.internal.R.id.search_view);
+        mSearchView.setIconified(false);
         mSearchView.setOnCloseListener(mOnCloseListener);
         mSearchView.setOnQueryTextListener(mOnQueryChangeListener);
         mSearchView.setOnSuggestionListener(mOnSuggestionSelectionListener);
@@ -630,31 +631,6 @@ public class SearchDialog extends Dialog {
 
         public void setSearchDialog(SearchDialog searchDialog) {
             mSearchDialog = searchDialog;
-        }
-
-        /**
-         * Overrides the handling of the back key to move back to the previous
-         * sources or dismiss the search dialog, instead of dismissing the input
-         * method.
-         */
-        @Override
-        public boolean dispatchKeyEventPreIme(KeyEvent event) {
-            if (DBG)
-                Log.d(LOG_TAG, "onKeyPreIme(" + event + ")");
-            if (mSearchDialog != null && event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-                KeyEvent.DispatcherState state = getKeyDispatcherState();
-                if (state != null) {
-                    if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
-                        state.startTracking(event, this);
-                        return true;
-                    } else if (event.getAction() == KeyEvent.ACTION_UP && !event.isCanceled()
-                            && state.isTracking(event)) {
-                        mSearchDialog.onBackPressed();
-                        return true;
-                    }
-                }
-            }
-            return super.dispatchKeyEventPreIme(event);
         }
 
         /**

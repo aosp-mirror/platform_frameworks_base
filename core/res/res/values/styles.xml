@@ -563,8 +563,8 @@
 
     <style name="Widget.DropDownItem">
         <item name="android:textAppearance">@style/TextAppearance.Widget.DropDownItem</item>
-        <item name="android:paddingLeft">6dip</item>
-        <item name="android:paddingRight">6dip</item>
+        <item name="android:paddingLeft">@dimen/dropdownitem_text_padding_left</item>
+        <item name="android:paddingRight">@dimen/dropdownitem_text_padding_right</item>
         <item name="android:gravity">center_vertical</item>
     </style>
     

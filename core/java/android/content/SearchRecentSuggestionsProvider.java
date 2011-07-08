@@ -186,6 +186,9 @@ public class SearchRecentSuggestionsProvider extends ContentProvider {
 
             mSuggestionProjection = new String [] {
                     "0 AS " + SearchManager.SUGGEST_COLUMN_FORMAT,
+                    "'android.resource://system/"
+                            + com.android.internal.R.drawable.ic_menu_recent_history + "' AS "
+                            + SearchManager.SUGGEST_COLUMN_ICON_1,
                     "display1 AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
                     "display2 AS " + SearchManager.SUGGEST_COLUMN_TEXT_2,
                     "query AS " + SearchManager.SUGGEST_COLUMN_QUERY,
@@ -196,6 +199,9 @@ public class SearchRecentSuggestionsProvider extends ContentProvider {
 
             mSuggestionProjection = new String [] {
                     "0 AS " + SearchManager.SUGGEST_COLUMN_FORMAT,
+                    "'android.resource://system/"
+                            + com.android.internal.R.drawable.ic_menu_recent_history + "' AS "
+                            + SearchManager.SUGGEST_COLUMN_ICON_1,
                     "display1 AS " + SearchManager.SUGGEST_COLUMN_TEXT_1,
                     "query AS " + SearchManager.SUGGEST_COLUMN_QUERY,
                     "_id"

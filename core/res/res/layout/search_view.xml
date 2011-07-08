@@ -22,6 +22,8 @@
     android:id="@+id/search_bar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingLeft="8dip"
+    android:paddingRight="8dip"
     android:orientation="horizontal"
     >
 
@@ -30,7 +32,7 @@
         android:id="@+id/search_badge"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
         android:layout_marginBottom="2dip"
         android:drawablePadding="0dip"
         android:textAppearance="?android:attr/textAppearanceMedium"
@@ -54,11 +56,20 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_gravity="center_vertical"
-        android:layout_marginLeft="8dip"
-        android:layout_marginRight="8dip"
         android:layout_marginTop="4dip"
         android:layout_marginBottom="4dip"
         android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/search_mag_icon"
+            android:layout_width="@dimen/dropdownitem_icon_width"
+            android:layout_height="wrap_content"
+            android:scaleType="centerInside"
+            android:layout_marginLeft="@dimen/dropdownitem_text_padding_left"
+            android:layout_gravity="center_vertical"
+            android:src="?android:attr/searchViewSearchIcon"
+            android:visibility="gone"
+        />
 
         <!-- Inner layout contains the app icon, button(s) and EditText -->
         <LinearLayout
@@ -70,14 +81,6 @@
             android:orientation="horizontal"
             android:background="?android:attr/searchViewTextField">
 
-            <ImageView
-                android:id="@+id/search_app_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_vertical"
-                android:src="?android:attr/searchViewSearchIcon"
-            />
-
             <view class="android.widget.SearchView$SearchAutoComplete"
                 android:id="@+id/search_src_text"
                 android:layout_height="36dip"
@@ -85,8 +88,8 @@
                 android:layout_weight="1"
                 android:minWidth="@dimen/search_view_text_min_width"
                 android:layout_gravity="bottom"
-                android:paddingLeft="8dip"
-                android:paddingRight="6dip"
+                android:paddingLeft="@dimen/dropdownitem_text_padding_left"
+                android:paddingRight="@dimen/dropdownitem_text_padding_right"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:background="@null"
@@ -100,7 +103,7 @@
 
             <ImageView
                 android:id="@+id/search_close_btn"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/dropdownitem_icon_width"
                 android:layout_height="match_parent"
                 android:paddingLeft="8dip"
                 android:paddingRight="8dip"
@@ -131,7 +134,7 @@
                 android:visibility="gone"
                 android:focusable="true"
             />
-    
+
             <ImageView
                 android:id="@+id/search_voice_btn"
                 android:layout_width="wrap_content"

@@ -16,8 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.app.SearchDialog;
 import android.app.SearchManager;
 import android.app.SearchableInfo;
@@ -46,6 +44,8 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+
+import com.android.internal.R;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -88,8 +88,8 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
     private int mIconName2Col = INVALID_INDEX;
     private int mFlagsCol = INVALID_INDEX;
 
-    private final Runnable mStartSpinnerRunnable;
-    private final Runnable mStopSpinnerRunnable;
+    // private final Runnable mStartSpinnerRunnable;
+    // private final Runnable mStopSpinnerRunnable;
 
     /**
      * The amount of time we delay in the filter when the user presses the delete key.
@@ -113,17 +113,18 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
 
         mOutsideDrawablesCache = outsideDrawablesCache;
         
-        mStartSpinnerRunnable = new Runnable() {
-                public void run() {
-                // mSearchView.setWorking(true); // TODO:
-                }
-            };
 
-        mStopSpinnerRunnable = new Runnable() {
-            public void run() {
-                // mSearchView.setWorking(false); // TODO:
-            }
-        };
+        // mStartSpinnerRunnable = new Runnable() {
+        // public void run() {
+        // // mSearchView.setWorking(true); // TODO:
+        // }
+        // };
+        //
+        // mStopSpinnerRunnable = new Runnable() {
+        // public void run() {
+        // // mSearchView.setWorking(false); // TODO:
+        // }
+        // };
 
         // delay 500ms when deleting
         getFilter().setDelayer(new Filter.Delayer() {
@@ -341,10 +342,10 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
         }
 
         if (views.mIcon1 != null) {
-            setViewDrawable(views.mIcon1, getIcon1(cursor));
+            setViewDrawable(views.mIcon1, getIcon1(cursor), View.INVISIBLE);
         }
         if (views.mIcon2 != null) {
-            setViewDrawable(views.mIcon2, getIcon2(cursor));
+            setViewDrawable(views.mIcon2, getIcon2(cursor), View.GONE);
         }
         if (mQueryRefinement == REFINE_ALL
                 || (mQueryRefinement == REFINE_BY_ENTRY
@@ -414,13 +415,13 @@ class SuggestionsAdapter extends ResourceCursorAdapter implements OnClickListene
      * Sets the drawable in an image view, makes sure the view is only visible if there
      * is a drawable.
      */
-    private void setViewDrawable(ImageView v, Drawable drawable) {
+    private void setViewDrawable(ImageView v, Drawable drawable, int nullVisibility) {
         // Set the icon even if the drawable is null, since we need to clear any
         // previous icon.
         v.setImageDrawable(drawable);
 
         if (drawable == null) {
-            v.setVisibility(View.GONE);
+            v.setVisibility(nullVisibility);
         } else {
             v.setVisibility(View.VISIBLE);
 
