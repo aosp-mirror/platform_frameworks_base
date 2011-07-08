@@ -1602,8 +1602,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (linkProperties != null) {
                 String iface = linkProperties.getInterfaceName();
                 if (TextUtils.isEmpty(iface) == false) {
-                    if (DBG) log("resetConnections(" + iface + ")");
-                    NetworkUtils.resetConnections(iface);
+                    if (DBG) {
+                        log("resetConnections(" + iface + ", NetworkUtils.RESET_ALL_ADDRESSES)");
+                    }
+                    NetworkUtils.resetConnections(iface, NetworkUtils.RESET_ALL_ADDRESSES);
                 }
             }
         }

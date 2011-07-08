@@ -38,8 +38,22 @@ public class NetworkUtils {
     /** Bring the named network interface down. */
     public native static int disableInterface(String interfaceName);
 
-    /** Reset any sockets that are connected via the named interface. */
-    public native static int resetConnections(String interfaceName);
+    /** Setting bit 0 indicates reseting of IPv4 addresses required */
+    public static final int RESET_IPV4_ADDRESSES = 0x01;
+
+    /** Setting bit 1 indicates reseting of IPv4 addresses required */
+    public static final int RESET_IPV6_ADDRESSES = 0x02;
+
+    /** Reset all addresses */
+    public static final int RESET_ALL_ADDRESSES = RESET_IPV4_ADDRESSES | RESET_IPV6_ADDRESSES;
+
+    /**
+     * Reset IPv6 or IPv4 sockets that are connected via the named interface.
+     *
+     * @param interfaceName is the interface to reset
+     * @param mask {@see #RESET_IPV4_ADDRESSES} and {@see #RESET_IPV6_ADDRESSES}
+     */
+    public native static int resetConnections(String interfaceName, int mask);
 
     /**
      * Start the DHCP client daemon, in order to have it request addresses
