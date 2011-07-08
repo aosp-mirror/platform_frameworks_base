@@ -71,7 +71,8 @@ private:
     bool mUse32BitOffset;
     bool mIsFileSizeLimitExplicitlyRequested;
     bool mPaused;
-    bool mStarted;
+    bool mStarted;  // Writer thread + track threads started successfully
+    bool mWriterThreadStarted;  // Only writer thread started successfully
     off64_t mOffset;
     off_t mMdatOffset;
     uint8_t *mMoovBoxBuffer;
@@ -182,6 +183,7 @@ private:
     void writeLatitude(int degreex10000);
     void writeLongitude(int degreex10000);
     void sendSessionSummary();
+    void release();
 
     MPEG4Writer(const MPEG4Writer &);
     MPEG4Writer &operator=(const MPEG4Writer &);

@@ -246,6 +246,7 @@ MPEG4Writer::MPEG4Writer(const char *filename)
       mIsFileSizeLimitExplicitlyRequested(false),
       mPaused(false),
       mStarted(false),
+      mWriterThreadStarted(false),
       mOffset(0),
       mMdatOffset(0),
       mEstimatedMoovBoxSize(0),
@@ -269,6 +270,7 @@ MPEG4Writer::MPEG4Writer(int fd)
       mIsFileSizeLimitExplicitlyRequested(false),
       mPaused(false),
       mStarted(false),
+      mWriterThreadStarted(false),
       mOffset(0),
       mMdatOffset(0),
       mEstimatedMoovBoxSize(0),
@@ -538,6 +540,9 @@ status_t MPEG4Writer::pause() {
 
 void MPEG4Writer::stopWriterThread() {
     LOGD("Stopping writer thread");
+    if (!mWriterThreadStarted) {
+        return;
+    }
 
     {
         Mutex::Autolock autolock(mLock);
@@ -548,6 +553,7 @@ void MPEG4Writer::stopWriterThread() {
 
     void *dummy;
     pthread_join(mThread, &dummy);
+    mWriterThreadStarted = false;
     LOGD("Writer thread stopped");
 }
 
@@ -603,10 +609,25 @@ void MPEG4Writer::writeCompositionMatrix(int degrees) {
     writeInt32(0x40000000);  // w
 }
 
+void MPEG4Writer::release() {
+    close(mFd);
+    mFd = -1;
+    mInitCheck = NO_INIT;
+    mStarted = false;
+}
 
 status_t MPEG4Writer::stop() {
     if (mInitCheck != OK) {
         return OK;
+    } else {
+        if (!mWriterThreadStarted ||
+            !mStarted) {
+            if (mWriterThreadStarted) {
+                stopWriterThread();
+            }
+            release();
+            return OK;
+        }
     }
 
     status_t err = OK;
@@ -637,10 +658,7 @@ status_t MPEG4Writer::stop() {
 
     // Do not write out movie header on error.
     if (err != OK) {
-        close(mFd);
-        mFd = -1;
-        mInitCheck = NO_INIT;
-        mStarted = false;
+        release();
         return err;
     }
 
@@ -688,11 +706,7 @@ status_t MPEG4Writer::stop() {
 
     CHECK(mBoxes.empty());
 
-    close(mFd);
-    mFd = -1;
-    mInitCheck = NO_INIT;
-    mStarted = false;
-
+    release();
     return err;
 }
 
@@ -1415,6 +1429,7 @@ status_t MPEG4Writer::startWriterThread() {
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
     pthread_create(&mThread, &attr, ThreadWrapper, this);
     pthread_attr_destroy(&attr);
+    mWriterThreadStarted = true;
     return OK;
 }
 
