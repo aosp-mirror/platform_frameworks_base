@@ -46,7 +46,6 @@ import com.android.internal.util.Predicate;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Locale;
 
 /**
  * <p>
@@ -5019,7 +5018,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     @Override
     protected void resolveTextDirection() {
-        int resolvedTextDirection = TEXT_DIRECTION_UNDEFINED;
+        int resolvedTextDirection;
         switch(mTextDirection) {
             default:
             case TEXT_DIRECTION_INHERIT:

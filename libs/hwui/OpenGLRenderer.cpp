@@ -673,11 +673,11 @@ void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap)
 
         float x = rect.left;
         float y = rect.top;
-        bool simpleTransform = mSnapshot->transform->isPureTranslate();
-
-        if (simpleTransform &&
+        bool simpleTransform = mSnapshot->transform->isPureTranslate() &&
                 layer->getWidth() == (uint32_t) rect.getWidth() &&
-                layer->getHeight() == (uint32_t) rect.getHeight()) {
+                layer->getHeight() == (uint32_t) rect.getHeight();
+
+        if (simpleTransform) {
             // When we're swapping, the layer is already in screen coordinates
             if (!swap) {
                 x = (int) floorf(rect.left + mSnapshot->transform->getTranslateX() + 0.5f);
