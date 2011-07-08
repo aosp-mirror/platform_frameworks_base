@@ -224,6 +224,7 @@ class BackupManagerService extends IBackupManager.Stub {
         public PackageInfo pkgInfo;
         public int pmToken; // in post-install restore, the PM's token for this transaction
         public boolean needFullBackup;
+        public String[] filterSet;
 
         RestoreParams(IBackupTransport _transport, IRestoreObserver _obs,
                 long _token, PackageInfo _pkg, int _pmToken, boolean _needFullBackup) {
@@ -233,6 +234,7 @@ class BackupManagerService extends IBackupManager.Stub {
             pkgInfo = _pkg;
             pmToken = _pmToken;
             needFullBackup = _needFullBackup;
+            filterSet = null;
         }
 
         RestoreParams(IBackupTransport _transport, IRestoreObserver _obs, long _token,
@@ -243,6 +245,18 @@ class BackupManagerService extends IBackupManager.Stub {
             pkgInfo = null;
             pmToken = 0;
             needFullBackup = _needFullBackup;
+            filterSet = null;
+        }
+
+        RestoreParams(IBackupTransport _transport, IRestoreObserver _obs, long _token,
+                String[] _filterSet, boolean _needFullBackup) {
+            transport = _transport;
+            observer = _obs;
+            token = _token;
+            pkgInfo = null;
+            pmToken = 0;
+            needFullBackup = _needFullBackup;
+            filterSet = _filterSet;
         }
     }
 
@@ -404,7 +418,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 Slog.d(TAG, "MSG_RUN_RESTORE observer=" + params.observer);
                 (new PerformRestoreTask(params.transport, params.observer,
                         params.token, params.pkgInfo, params.pmToken,
-                        params.needFullBackup)).run();
+                        params.needFullBackup, params.filterSet)).run();
                 break;
             }
 
@@ -3020,6 +3034,7 @@ class BackupManagerService extends IBackupManager.Stub {
         private File mStateDir;
         private int mPmToken;
         private boolean mNeedFullBackup;
+        private HashSet<String> mFilterSet;
 
         class RestoreRequest {
             public PackageInfo app;
@@ -3033,13 +3048,22 @@ class BackupManagerService extends IBackupManager.Stub {
 
         PerformRestoreTask(IBackupTransport transport, IRestoreObserver observer,
                 long restoreSetToken, PackageInfo targetPackage, int pmToken,
-                boolean needFullBackup) {
+                boolean needFullBackup, String[] filterSet) {
             mTransport = transport;
             mObserver = observer;
             mToken = restoreSetToken;
             mTargetPackage = targetPackage;
             mPmToken = pmToken;
             mNeedFullBackup = needFullBackup;
+
+            if (filterSet != null) {
+                mFilterSet = new HashSet<String>();
+                for (String pkg : filterSet) {
+                    mFilterSet.add(pkg);
+                }
+            } else {
+                mFilterSet = null;
+            }
 
             try {
                 mStateDir = new File(mBaseStateDir, transport.transportDirName());
@@ -3052,7 +3076,8 @@ class BackupManagerService extends IBackupManager.Stub {
             long startRealtime = SystemClock.elapsedRealtime();
             if (DEBUG) Slog.v(TAG, "Beginning restore process mTransport=" + mTransport
                     + " mObserver=" + mObserver + " mToken=" + Long.toHexString(mToken)
-                    + " mTargetPackage=" + mTargetPackage + " mPmToken=" + mPmToken);
+                    + " mTargetPackage=" + mTargetPackage + " mFilterSet=" + mFilterSet
+                    + " mPmToken=" + mPmToken);
 
             PackageManagerBackupAgent pmAgent = null;
             int error = -1; // assume error
@@ -3071,6 +3096,22 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 List<PackageInfo> agentPackages = allAgentPackages();
                 if (mTargetPackage == null) {
+                    // if there's a filter set, strip out anything that isn't
+                    // present before proceeding
+                    if (mFilterSet != null) {
+                        for (int i = agentPackages.size() - 1; i >= 0; i--) {
+                            final PackageInfo pkg = agentPackages.get(i);
+                            if (! mFilterSet.contains(pkg.packageName)) {
+                                agentPackages.remove(i);
+                            }
+                        }
+                        if (DEBUG) {
+                            Slog.i(TAG, "Post-filter package set for restore:");
+                            for (PackageInfo p : agentPackages) {
+                                Slog.i(TAG, "    " + p);
+                            }
+                        }
+                    }
                     restorePackages.addAll(agentPackages);
                 } else {
                     // Just one package to attempt restore of
@@ -4255,6 +4296,67 @@ class BackupManagerService extends IBackupManager.Stub {
                         mWakelock.acquire();
                         Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
                         msg.obj = new RestoreParams(mRestoreTransport, observer, token, true);
+                        mBackupHandler.sendMessage(msg);
+                        Binder.restoreCallingIdentity(oldId);
+                        return 0;
+                    }
+                }
+            }
+
+            Slog.w(TAG, "Restore token " + Long.toHexString(token) + " not found");
+            return -1;
+        }
+
+        public synchronized int restoreSome(long token, IRestoreObserver observer,
+                String[] packages) {
+            mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                    "performRestore");
+
+            if (DEBUG) {
+                StringBuilder b = new StringBuilder(128);
+                b.append("restoreSome token=");
+                b.append(Long.toHexString(token));
+                b.append(" observer=");
+                b.append(observer.toString());
+                b.append(" packages=");
+                if (packages == null) {
+                    b.append("null");
+                } else {
+                    b.append('{');
+                    boolean first = true;
+                    for (String s : packages) {
+                        if (!first) {
+                            b.append(", ");
+                        } else first = false;
+                        b.append(s);
+                    }
+                    b.append('}');
+                }
+                Slog.d(TAG, b.toString());
+            }
+
+            if (mEnded) {
+                throw new IllegalStateException("Restore session already ended");
+            }
+
+            if (mRestoreTransport == null || mRestoreSets == null) {
+                Slog.e(TAG, "Ignoring restoreAll() with no restore set");
+                return -1;
+            }
+
+            if (mPackageName != null) {
+                Slog.e(TAG, "Ignoring restoreAll() on single-package session");
+                return -1;
+            }
+
+            synchronized (mQueueLock) {
+                for (int i = 0; i < mRestoreSets.length; i++) {
+                    if (token == mRestoreSets[i].token) {
+                        long oldId = Binder.clearCallingIdentity();
+                        mWakelock.acquire();
+                        Message msg = mBackupHandler.obtainMessage(MSG_RUN_RESTORE);
+                        msg.obj = new RestoreParams(mRestoreTransport, observer, token,
+                                packages, true);
                         mBackupHandler.sendMessage(msg);
                         Binder.restoreCallingIdentity(oldId);
                         return 0;
