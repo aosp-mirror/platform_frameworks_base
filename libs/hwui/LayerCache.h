@@ -119,7 +119,7 @@ private:
         }
 
         LayerEntry(Layer* layer):
-            mLayer(layer), mWidth(layer->width), mHeight(layer->height) {
+            mLayer(layer), mWidth(layer->getWidth()), mHeight(layer->getHeight()) {
         }
 
         bool operator<(const LayerEntry& rhs) const {

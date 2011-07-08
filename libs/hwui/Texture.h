@@ -29,8 +29,22 @@ struct Texture {
     Texture() {
         cleanup = false;
         bitmapSize = 0;
+
         wrapS = GL_CLAMP_TO_EDGE;
         wrapT = GL_CLAMP_TO_EDGE;
+
+        minFilter = GL_NEAREST;
+        magFilter = GL_NEAREST;
+    }
+
+    void setWrap(GLenum wrapS, GLenum wrapT) {
+        this->wrapS = wrapS;
+        this->wrapT = wrapT;
+    }
+
+    void setFilter(GLenum min, GLenum mag) {
+        minFilter = min;
+        magFilter = mag;
     }
 
     /**
@@ -67,6 +81,12 @@ struct Texture {
      */
     GLenum wrapS;
     GLenum wrapT;
+
+    /**
+     * Last filters set on this texture. Defaults to GL_NEAREST.
+     */
+    GLenum minFilter;
+    GLenum magFilter;
 }; // struct Texture
 
 class AutoTexture {

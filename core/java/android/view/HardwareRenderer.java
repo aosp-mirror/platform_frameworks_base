@@ -57,6 +57,16 @@ public abstract class HardwareRenderer {
      * "false", to disable partial invalidates
      */
     static final String RENDER_DIRTY_REGIONS_PROPERTY = "hwui.render_dirty_regions";
+    
+    /**
+     * System property used to enable or disable vsync.
+     * The default value of this property is assumed to be false.
+     * 
+     * Possible values:
+     * "true", to disable vsync
+     * "false", to enable vsync
+     */
+    static final String DISABLE_VSYNC_PROPERTY = "hwui.disable_vsync";
 
     /**
      * Turn on to draw dirty regions every other frame.
@@ -303,6 +313,7 @@ public abstract class HardwareRenderer {
 
         boolean mDirtyRegions;
         final boolean mDirtyRegionsRequested;
+        final boolean mVsyncDisabled;
 
         final int mGlVersion;
         final boolean mTranslucent;
@@ -314,10 +325,17 @@ public abstract class HardwareRenderer {
         GlRenderer(int glVersion, boolean translucent) {
             mGlVersion = glVersion;
             mTranslucent = translucent;
+
             final String dirtyProperty = SystemProperties.get(RENDER_DIRTY_REGIONS_PROPERTY, "true");
             //noinspection PointlessBooleanExpression,ConstantConditions
             mDirtyRegions = RENDER_DIRTY_REGIONS && "true".equalsIgnoreCase(dirtyProperty);
             mDirtyRegionsRequested = mDirtyRegions;
+
+            final String vsyncProperty = SystemProperties.get(DISABLE_VSYNC_PROPERTY, "false");
+            mVsyncDisabled = "true".equalsIgnoreCase(vsyncProperty);
+            if (mVsyncDisabled) {
+                Log.d(LOG_TAG, "Disabling v-sync");
+            }
         }
 
         /**
@@ -761,6 +779,14 @@ public abstract class HardwareRenderer {
                 if (full && mGlCanvas != null) {
                     mGlCanvas = null;
                 }
+            }
+        }
+
+        @Override
+        void setup(int width, int height) {
+            super.setup(width, height);
+            if (mVsyncDisabled) {
+                GLES20Canvas.disableVsync();
             }
         }
 

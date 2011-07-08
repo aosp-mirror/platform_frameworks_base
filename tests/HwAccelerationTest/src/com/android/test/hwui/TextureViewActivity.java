@@ -62,7 +62,9 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
             }
         });
 
-        mContent.addView(mTextureView, new FrameLayout.LayoutParams(500, 400, Gravity.CENTER));
+        mContent.addView(mTextureView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.CENTER));
         mContent.addView(button, new FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT,
                 Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM));
@@ -72,6 +74,9 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         mCamera = Camera.open();
+        Camera.Size previewSize = mCamera.getParameters().getPreviewSize();
+        mTextureView.setLayoutParams(new FrameLayout.LayoutParams(
+                previewSize.width, previewSize.height, Gravity.CENTER));
 
         try {
             mCamera.setPreviewTexture(surface);
@@ -82,20 +87,6 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
         mCamera.startPreview();
 
         mTextureView.setCameraDistance(5000);
-
-//        ObjectAnimator rotationY = ObjectAnimator.ofFloat(mTextureView, "rotationY", 0.0f, 360.0f);
-//        rotationY.setRepeatMode(ObjectAnimator.REVERSE);
-//        rotationY.setRepeatCount(ObjectAnimator.INFINITE);
-//        rotationY.setDuration(4000);
-
-//        ObjectAnimator alpha = ObjectAnimator.ofFloat(mTextureView, "alpha", 1.0f, 0.0f);
-//        alpha.setRepeatMode(ObjectAnimator.REVERSE);
-//        alpha.setRepeatCount(ObjectAnimator.INFINITE);
-//        alpha.setDuration(4000);
-
-//        mAnimatorSet = new AnimatorSet();
-//        mAnimatorSet.play(alpha).with(rotationY);
-//        mAnimatorSet.start();
     }
 
     @Override

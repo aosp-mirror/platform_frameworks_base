@@ -246,8 +246,19 @@ class GLES20Canvas extends HardwareCanvas {
         return nIsBackBufferPreserved();
     }
 
-    private static native boolean nIsBackBufferPreserved();    
-    
+    private static native boolean nIsBackBufferPreserved();
+
+    /**
+     * Disables v-sync. For performance testing only.
+     * 
+     * @hide
+     */
+    public static void disableVsync() {
+        nDisableVsync();
+    }
+
+    private static native void nDisableVsync();
+
     @Override
     void onPreDraw(Rect dirty) {
         if (dirty != null) {
@@ -265,7 +276,7 @@ class GLES20Canvas extends HardwareCanvas {
     void onPostDraw() {
         nFinish(mRenderer);
     }
-    
+
     private static native void nFinish(int renderer);
 
     @Override
