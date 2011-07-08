@@ -252,9 +252,10 @@ public class RuntimeInit {
      *   <li> <code> [--] &lt;start class name&gt;  &lt;args&gt;
      * </ul>
      *
+     * @param targetSdkVersion target SDK version
      * @param argv arg strings
      */
-    public static final void zygoteInit(String[] argv)
+    public static final void zygoteInit(int targetSdkVersion, String[] argv)
             throws ZygoteInit.MethodAndArgsCaller {
         if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from zygote");
 
@@ -263,7 +264,7 @@ public class RuntimeInit {
         commonInit();
         zygoteInitNative();
 
-        applicationInit(argv);
+        applicationInit(targetSdkVersion, argv);
     }
 
     /**
@@ -274,20 +275,22 @@ public class RuntimeInit {
      * which calls {@link WrapperInit#main} which then calls this method.
      * So we don't need to call commonInit() here.
      *
+     * @param targetSdkVersion target SDK version
      * @param argv arg strings
      */
-    public static void wrapperInit(String[] argv)
+    public static void wrapperInit(int targetSdkVersion, String[] argv)
             throws ZygoteInit.MethodAndArgsCaller {
         if (DEBUG) Slog.d(TAG, "RuntimeInit: Starting application from wrapper");
 
-        applicationInit(argv);
+        applicationInit(targetSdkVersion, argv);
     }
 
-    private static void applicationInit(String[] argv)
+    private static void applicationInit(int targetSdkVersion, String[] argv)
             throws ZygoteInit.MethodAndArgsCaller {
         // We want to be fairly aggressive about heap utilization, to avoid
         // holding on to a lot of memory that isn't needed.
         VMRuntime.getRuntime().setTargetHeapUtilization(0.75f);
+        VMRuntime.getRuntime().setTargetSdkVersion(targetSdkVersion);
 
         final Arguments args;
         try {

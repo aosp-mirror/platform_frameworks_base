@@ -48,7 +48,7 @@ import java.util.ArrayList;
  * Startup class for the zygote process.
  *
  * Pre-initializes some classes, and then waits for commands on a UNIX domain
- * socket. Based on these commands, forks of child processes that inherit
+ * socket. Based on these commands, forks off child processes that inherit
  * the initial state of the VM.
  *
  * Please see {@link ZygoteConnection.Arguments} for documentation on the
@@ -453,12 +453,13 @@ public class ZygoteInit {
 
         if (parsedArgs.invokeWith != null) {
             WrapperInit.execApplication(parsedArgs.invokeWith,
-                    parsedArgs.niceName, null, parsedArgs.remainingArgs);
+                    parsedArgs.niceName, parsedArgs.targetSdkVersion,
+                    null, parsedArgs.remainingArgs);
         } else {
             /*
              * Pass the remaining arguments to SystemServer.
              */
-            RuntimeInit.zygoteInit(parsedArgs.remainingArgs);
+            RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs);
         }
 
         /* should never reach here */
@@ -491,7 +492,9 @@ public class ZygoteInit {
             /* Request to fork the system server process */
             pid = Zygote.forkSystemServer(
                     parsedArgs.uid, parsedArgs.gid,
-                    parsedArgs.gids, parsedArgs.debugFlags, null,
+                    parsedArgs.gids,
+                    parsedArgs.debugFlags,
+                    null,
                     parsedArgs.permittedCapabilities,
                     parsedArgs.effectiveCapabilities);
         } catch (IllegalArgumentException ex) {

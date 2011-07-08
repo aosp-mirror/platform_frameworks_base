@@ -47,16 +47,22 @@ public class WrapperInit {
      * wrapper process instead of by forking Zygote.
      *
      * The first argument specifies the file descriptor for a pipe that should receive
-     * the pid of this process, or 0 if none.  The remaining arguments are passed to
-     * the runtime.
+     * the pid of this process, or 0 if none.
+     *
+     * The second argument is the target SDK version for the app.
+     *
+     * The remaining arguments are passed to the runtime.
      *
      * @param args The command-line arguments.
      */
     public static void main(String[] args) {
         try {
+            // Parse our mandatory arguments.
+            int fdNum = Integer.parseInt(args[0], 10);
+            int targetSdkVersion = Integer.parseInt(args[1], 10);
+
             // Tell the Zygote what our actual PID is (since it only knows about the
             // wrapper that it directly forked).
-            int fdNum = Integer.parseInt(args[0], 10);
             if (fdNum != 0) {
                 try {
                     FileDescriptor fd = ZygoteInit.createFileDescriptor(fdNum);
@@ -73,9 +79,9 @@ public class WrapperInit {
             ZygoteInit.preload();
 
             // Launch the application.
-            String[] runtimeArgs = new String[args.length - 1];
-            System.arraycopy(args, 1, runtimeArgs, 0, runtimeArgs.length);
-            RuntimeInit.wrapperInit(runtimeArgs);
+            String[] runtimeArgs = new String[args.length - 2];
+            System.arraycopy(args, 2, runtimeArgs, 0, runtimeArgs.length);
+            RuntimeInit.wrapperInit(targetSdkVersion, runtimeArgs);
         } catch (ZygoteInit.MethodAndArgsCaller caller) {
             caller.run();
         }
@@ -87,11 +93,12 @@ public class WrapperInit {
      *
      * @param invokeWith The wrapper command.
      * @param niceName The nice name for the application, or null if none.
+     * @param targetSdkVersion The target SDK version for the app.
      * @param pipeFd The pipe to which the application's pid should be written, or null if none.
      * @param args Arguments for {@link RuntimeInit.main}.
      */
     public static void execApplication(String invokeWith, String niceName,
-            FileDescriptor pipeFd, String[] args) {
+            int targetSdkVersion, FileDescriptor pipeFd, String[] args) {
         StringBuilder command = new StringBuilder(invokeWith);
         command.append(" /system/bin/app_process /system/bin --application");
         if (niceName != null) {
@@ -99,6 +106,8 @@ public class WrapperInit {
         }
         command.append(" com.android.internal.os.WrapperInit ");
         command.append(pipeFd != null ? pipeFd.getInt$() : 0);
+        command.append(' ');
+        command.append(targetSdkVersion);
         Zygote.appendQuotedShellArgs(command, args);
         Zygote.execShell(command.toString());
     }

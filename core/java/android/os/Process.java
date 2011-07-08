@@ -266,7 +266,8 @@ public class Process {
      * @param uid The user-id under which the process will run.
      * @param gid The group-id under which the process will run.
      * @param gids Additional group-ids associated with the process.
-     * @param enableDebugger True if debugging should be enabled for this process.
+     * @param debugFlags Additional flags.
+     * @param targetSdkVersion The target SDK version for the app.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      * 
      * @return int If > 0 the pid of the new process; if 0 the process is
@@ -278,13 +279,13 @@ public class Process {
     public static final int start(final String processClass,
                                   final String niceName,
                                   int uid, int gid, int[] gids,
-                                  int debugFlags,
+                                  int debugFlags, int targetSdkVersion,
                                   String[] zygoteArgs)
     {
         if (supportsProcesses()) {
             try {
                 return startViaZygote(processClass, niceName, uid, gid, gids,
-                        debugFlags, zygoteArgs);
+                        debugFlags, targetSdkVersion, zygoteArgs);
             } catch (ZygoteStartFailedEx ex) {
                 Log.e(LOG_TAG,
                         "Starting VM process through Zygote failed");
@@ -316,9 +317,10 @@ public class Process {
      * {@hide}
      */
     public static final int start(String processClass, int uid, int gid,
-            int[] gids, int debugFlags, String[] zygoteArgs) {
+            int[] gids, int debugFlags, int targetSdkVersion,
+            String[] zygoteArgs) {
         return start(processClass, "", uid, gid, gids, 
-                debugFlags, zygoteArgs);
+                debugFlags, targetSdkVersion, zygoteArgs);
     }
 
     private static void invokeStaticMain(String className) {
@@ -500,7 +502,8 @@ public class Process {
      * @param gid a POSIX gid that the new process shuold setgid() to
      * @param gids null-ok; a list of supplementary group IDs that the
      * new process should setgroup() to.
-     * @param enableDebugger True if debugging should be enabled for this process.
+     * @param debugFlags Additional flags.
+     * @param targetSdkVersion The target SDK version for the app.
      * @param extraArgs Additional arguments to supply to the zygote process.
      * @return PID
      * @throws ZygoteStartFailedEx if process start failed for any reason
@@ -509,7 +512,7 @@ public class Process {
                                   final String niceName,
                                   final int uid, final int gid,
                                   final int[] gids,
-                                  int debugFlags,
+                                  int debugFlags, int targetSdkVersion,
                                   String[] extraArgs)
                                   throws ZygoteStartFailedEx {
         int pid;
@@ -537,6 +540,7 @@ public class Process {
             if ((debugFlags & Zygote.DEBUG_ENABLE_ASSERT) != 0) {
                 argsForZygote.add("--enable-assert");
             }
+            argsForZygote.add("--target-sdk-version=" + targetSdkVersion);
 
             //TODO optionally enable debuger
             //argsForZygote.add("--enable-debugger");
