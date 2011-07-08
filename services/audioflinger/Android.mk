@@ -20,6 +20,7 @@ LOCAL_SHARED_LIBRARIES := \
     libeffects
 
 LOCAL_STATIC_LIBRARIES := \
+    libcpustats \
     libmedia_helper
 
 ifeq ($(TARGET_SIMULATOR),true)
