@@ -68,11 +68,15 @@ public interface SearchBox {
      * Notify the search page of any changes to the searchbox. Such as
      * a change in the typed query (onchange), the user commiting a given query
      * (onsubmit), or a change in size of a suggestions dropdown (onresize).
+     *
+     * @param listener an optional listener to notify of the success of the operation,
+     *      indicating if the javascript function existed and could be called or not.
+     *      It will be called on the UI thread.
      */
-    void onchange();
-    void onsubmit();
-    void onresize();
-    void oncancel();
+    void onchange(SearchBoxListener listener);
+    void onsubmit(SearchBoxListener listener);
+    void onresize(SearchBoxListener listener);
+    void oncancel(SearchBoxListener listener);
 
     /**
      * Add and remove listeners to the given Searchbox. Listeners are notified
@@ -91,8 +95,12 @@ public interface SearchBox {
      * Listeners (if any) will be called on the thread that created the
      * webview.
      */
-    interface SearchBoxListener {
-        void onSuggestionsReceived(String query, List<String> suggestions);
+    public abstract class SearchBoxListener {
+        public void onSuggestionsReceived(String query, List<String> suggestions) {}
+        public void onChangeComplete(boolean called) {}
+        public void onSubmitComplete(boolean called) {}
+        public void onResizeComplete(boolean called) {}
+        public void onCancelComplete(boolean called) {}
     }
 
     interface IsSupportedCallback {

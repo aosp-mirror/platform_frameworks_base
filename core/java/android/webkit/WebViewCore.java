@@ -248,7 +248,7 @@ public final class WebViewCore {
 
     /* Get the BrowserFrame component. This is used for subwindow creation and
      * is called only from BrowserFrame in the WebCore thread. */
-    /* package */ BrowserFrame getBrowserFrame() {
+    /* package */ synchronized BrowserFrame getBrowserFrame() {
         return mBrowserFrame;
     }
 

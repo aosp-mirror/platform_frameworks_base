@@ -120,6 +120,7 @@ class CallbackProxy extends Handler {
     private static final int AUTO_LOGIN                          = 140;
     private static final int CLIENT_CERT_REQUEST                 = 141;
     private static final int SEARCHBOX_IS_SUPPORTED_CALLBACK     = 142;
+    private static final int SEARCHBOX_DISPATCH_COMPLETE_CALLBACK= 143;
 
     // Message triggered by the client to resume execution
     private static final int NOTIFY                              = 200;
@@ -819,6 +820,13 @@ class CallbackProxy extends Handler {
                 SearchBoxImpl searchBox = (SearchBoxImpl) mWebView.getSearchBox();
                 Boolean supported = (Boolean) msg.obj;
                 searchBox.handleIsSupportedCallback(supported);
+                break;
+            }
+            case SEARCHBOX_DISPATCH_COMPLETE_CALLBACK: {
+                SearchBoxImpl searchBox = (SearchBoxImpl) mWebView.getSearchBox();
+                Boolean success = (Boolean) msg.obj;
+                searchBox.handleDispatchCompleteCallback(msg.getData().getString("function"),
+                        msg.getData().getInt("id"), success);
                 break;
             }
         }
@@ -1639,6 +1647,15 @@ class CallbackProxy extends Handler {
     void onIsSupportedCallback(boolean isSupported) {
         Message msg = obtainMessage(SEARCHBOX_IS_SUPPORTED_CALLBACK);
         msg.obj = new Boolean(isSupported);
+        sendMessage(msg);
+    }
+
+    void onSearchboxDispatchCompleteCallback(String function, int id, boolean success) {
+        Message msg = obtainMessage(SEARCHBOX_DISPATCH_COMPLETE_CALLBACK);
+        msg.obj = Boolean.valueOf(success);
+        msg.getData().putString("function", function);
+        msg.getData().putInt("id", id);
+
         sendMessage(msg);
     }
 }

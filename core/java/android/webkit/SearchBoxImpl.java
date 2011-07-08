@@ -16,10 +16,12 @@
 
 package android.webkit;
 
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.WebViewCore.EventHub;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -69,7 +71,7 @@ final class SearchBoxImpl implements SearchBox {
 
     private static final String SET_VERBATIM_SCRIPT
             =  "if (window.chrome && window.chrome.searchBox) {"
-            + "  window.chrome.searchBox.verbatim = %s;"
+            + "  window.chrome.searchBox.verbatim = %1$s;"
             + "}";
 
     private static final String SET_SELECTION_SCRIPT
@@ -89,13 +91,21 @@ final class SearchBoxImpl implements SearchBox {
             + "}";
 
     private static final String DISPATCH_EVENT_SCRIPT
-            = "if (window.chrome && window.chrome.searchBox &&"
-            + "  window.chrome.searchBox.on%1$s) { window.chrome.searchBox.on%1$s(); }";
+            = "if (window.chrome && window.chrome.searchBox && window.chrome.searchBox.on%1$s) {"
+            + "  window.chrome.searchBox.on%1$s();"
+            + "  window.searchBoxJavaBridge_.dispatchCompleteCallback('%1$s', %2$d, true);"
+            + "} else {"
+            + "  window.searchBoxJavaBridge_.dispatchCompleteCallback('%1$s', %2$d, false);"
+            + "}";
+
+    private static final String EVENT_CHANGE = "change";
+    private static final String EVENT_SUBMIT = "submit";
+    private static final String EVENT_RESIZE = "resize";
+    private static final String EVENT_CANCEL = "cancel";
 
     private static final String IS_SUPPORTED_SCRIPT
             = "if (window.searchBoxJavaBridge_) {"
-            + "  if (window.chrome && window.chrome.searchBox && "
-            + "  window.chrome.searchBox.onsubmit) {"
+            + "  if (window.chrome && window.chrome.sv) {"
             + "    window.searchBoxJavaBridge_.isSupportedCallback(true);"
             + "  } else {"
             + "    window.searchBoxJavaBridge_.isSupportedCallback(false);"
@@ -105,11 +115,14 @@ final class SearchBoxImpl implements SearchBox {
     private final WebViewCore mWebViewCore;
     private final CallbackProxy mCallbackProxy;
     private IsSupportedCallback mSupportedCallback;
+    private int mNextEventId = 1;
+    private final HashMap<Integer, SearchBoxListener> mEventCallbacks;
 
     SearchBoxImpl(WebViewCore webViewCore, CallbackProxy callbackProxy) {
         mListeners = new ArrayList<SearchBoxListener>();
         mWebViewCore = webViewCore;
         mCallbackProxy = callbackProxy;
+        mEventCallbacks = new HashMap<Integer, SearchBoxListener>();
     }
 
     @Override
@@ -141,27 +154,36 @@ final class SearchBoxImpl implements SearchBox {
     }
 
     @Override
-    public void onchange() {
-        dispatchEvent("change");
+    public void onchange(SearchBoxListener callback) {
+        dispatchEvent(EVENT_CHANGE, callback);
     }
 
     @Override
-    public void onsubmit() {
-        dispatchEvent("submit");
+    public void onsubmit(SearchBoxListener callback) {
+        dispatchEvent(EVENT_SUBMIT, callback);
     }
 
     @Override
-    public void onresize() {
-        dispatchEvent("resize");
+    public void onresize(SearchBoxListener callback) {
+        dispatchEvent(EVENT_RESIZE, callback);
     }
 
     @Override
-    public void oncancel() {
-        dispatchEvent("cancel");
+    public void oncancel(SearchBoxListener callback) {
+        dispatchEvent(EVENT_CANCEL, callback);
     }
 
-    private void dispatchEvent(String eventName) {
-        final String js = String.format(DISPATCH_EVENT_SCRIPT, eventName);
+    private void dispatchEvent(String eventName, SearchBoxListener callback) {
+        int eventId;
+        if (callback != null) {
+            synchronized(this) {
+                eventId = mNextEventId++;
+                mEventCallbacks.put(eventId, callback);
+            }
+        } else {
+            eventId = 0;
+        }
+        final String js = String.format(DISPATCH_EVENT_SCRIPT, eventName, eventId);
         dispatchJs(js);
     }
 
@@ -202,9 +224,35 @@ final class SearchBoxImpl implements SearchBox {
         }
     }
 
+    // Called by Javascript through the Java bridge.
+    public void dispatchCompleteCallback(String function, int id, boolean successful) {
+        mCallbackProxy.onSearchboxDispatchCompleteCallback(function, id, successful);
+    }
+
+    public void handleDispatchCompleteCallback(String function, int id, boolean successful) {
+        if (id != 0) {
+            SearchBoxListener listener;
+            synchronized(this) {
+                listener = mEventCallbacks.get(id);
+                mEventCallbacks.remove(id);
+            }
+            if (listener != null) {
+                if (TextUtils.equals(EVENT_CHANGE, function)) {
+                    listener.onChangeComplete(successful);
+                } else if (TextUtils.equals(EVENT_SUBMIT, function)) {
+                    listener.onSubmitComplete(successful);
+                } else if (TextUtils.equals(EVENT_RESIZE, function)) {
+                    listener.onResizeComplete(successful);
+                } else if (TextUtils.equals(EVENT_CANCEL, function)) {
+                    listener.onCancelComplete(successful);
+                }
+            }
+        }
+    }
+
     // This is used as a hackish alternative to javascript escaping.
     // There appears to be no such functionality in the core framework.
-    private String jsonSerialize(String query) {
+    private static String jsonSerialize(String query) {
         JSONStringer stringer = new JSONStringer();
         try {
             stringer.array().value(query).endArray();
