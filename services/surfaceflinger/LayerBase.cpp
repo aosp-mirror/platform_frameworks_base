@@ -228,13 +228,18 @@ void LayerBase::validateVisibility(const Transform& planeTransform)
     const Layer::State& s(drawingState());
     const Transform tr(planeTransform * s.transform);
     const bool transformed = tr.transformed();
-   
+    const DisplayHardware& hw(graphicPlane(0).displayHardware());
+    const uint32_t hw_h = hw.getHeight();
+
     uint32_t w = s.w;
     uint32_t h = s.h;    
     tr.transform(mVertices[0], 0, 0);
     tr.transform(mVertices[1], 0, h);
     tr.transform(mVertices[2], w, h);
     tr.transform(mVertices[3], w, 0);
+    for (size_t i=0 ; i<4 ; i++)
+        mVertices[i][1] = hw_h - mVertices[i][1];
+
     if (UNLIKELY(transformed)) {
         // NOTE: here we could also punt if we have too many rectangles
         // in the transparent region

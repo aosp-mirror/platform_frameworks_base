@@ -276,7 +276,8 @@ status_t SurfaceFlinger::readyToRun()
     glViewport(0, 0, w, h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glOrthof(0, w, h, 0, 0, 1);
+    // put the origin in the left-bottom corner
+    glOrthof(0, w, 0, h, 0, 1); // l=0, r=w ; b=0, t=h
 
     mReadyToRunBarrier.open();
 
@@ -1791,7 +1792,7 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
     }
 
     GLfloat vtx[8];
-    const GLfloat texCoords[4][2] = { {0,v}, {0,0}, {u,0}, {u,v} };
+    const GLfloat texCoords[4][2] = { {0,1}, {0,1-v}, {u,1-v}, {u,1} };
     glBindTexture(GL_TEXTURE_2D, tname);
     glTexEnvx(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glTexParameterx(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1799,6 +1800,22 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
     glTexCoordPointer(2, GL_FLOAT, 0, texCoords);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glVertexPointer(2, GL_FLOAT, 0, vtx);
+
+    /*
+     * Texture coordinate mapping
+     *
+     *                 u
+     *    1 +----------+---+
+     *      |     |    |   |  image is inverted
+     *      |     V    |   |  w.r.t. the texture
+     *  1-v +----------+   |  coordinates
+     *      |              |
+     *      |              |
+     *      |              |
+     *    0 +--------------+
+     *      0              1
+     *
+     */
 
     class s_curve_interpolator {
         const float nbFrames, s, v;
@@ -1824,10 +1841,10 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
             const GLfloat h = hw_h - (hw_h * v);
             const GLfloat x = (hw_w - w) * 0.5f;
             const GLfloat y = (hw_h - h) * 0.5f;
-            vtx[0] = x;         vtx[1] = y + h;
-            vtx[2] = x;         vtx[3] = y;
-            vtx[4] = x + w;     vtx[5] = y;
-            vtx[6] = x + w;     vtx[7] = y + h;
+            vtx[0] = x;         vtx[1] = y;
+            vtx[2] = x;         vtx[3] = y + h;
+            vtx[4] = x + w;     vtx[5] = y + h;
+            vtx[6] = x + w;     vtx[7] = y;
         }
     };
 
@@ -1842,15 +1859,20 @@ status_t SurfaceFlinger::electronBeamOffAnimationImplLocked()
             const GLfloat h = 1.0f;
             const GLfloat x = (hw_w - w) * 0.5f;
             const GLfloat y = (hw_h - h) * 0.5f;
-            vtx[0] = x;         vtx[1] = y + h;
-            vtx[2] = x;         vtx[3] = y;
-            vtx[4] = x + w;     vtx[5] = y;
-            vtx[6] = x + w;     vtx[7] = y + h;
+            vtx[0] = x;         vtx[1] = y;
+            vtx[2] = x;         vtx[3] = y + h;
+            vtx[4] = x + w;     vtx[5] = y + h;
+            vtx[6] = x + w;     vtx[7] = y;
         }
     };
 
     // the full animation is 24 frames
-    const int nbFrames = 12;
+    char value[PROPERTY_VALUE_MAX];
+    property_get("debug.sf.electron_frames", value, "24");
+    int nbFrames = (atoi(value) + 1) >> 1;
+    if (nbFrames <= 0) // just in case
+        nbFrames = 24;
+
     s_curve_interpolator itr(nbFrames, 7.5f);
     s_curve_interpolator itg(nbFrames, 8.0f);
     s_curve_interpolator itb(nbFrames, 8.5f);
@@ -2225,10 +2247,11 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
         // invert everything, b/c glReadPixel() below will invert the FB
         glViewport(0, 0, sw, sh);
         glScissor(0, 0, sw, sh);
+        glEnable(GL_SCISSOR_TEST);
         glMatrixMode(GL_PROJECTION);
         glPushMatrix();
         glLoadIdentity();
-        glOrthof(0, hw_w, 0, hw_h, 0, 1);
+        glOrthof(0, hw_w, hw_h, 0, 0, 1);
         glMatrixMode(GL_MODELVIEW);
 
         // redraw the screen entirely...
@@ -2244,6 +2267,7 @@ status_t SurfaceFlinger::captureScreenImplLocked(DisplayID dpy,
         }
 
         // XXX: this is needed on tegra
+        glEnable(GL_SCISSOR_TEST);
         glScissor(0, 0, sw, sh);
 
         // check for errors and return screen capture
