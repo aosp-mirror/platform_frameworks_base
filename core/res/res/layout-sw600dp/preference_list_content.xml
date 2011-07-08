@@ -46,7 +46,6 @@
                 android:layout_weight="1"
                 android:paddingTop="16dp"
                 android:paddingBottom="16dp"
-
                 android:drawSelectorOnTop="false"
                 android:cacheColorHint="@android:color/transparent"
                 android:listPreferredItemHeight="48dp"
