@@ -1415,7 +1415,7 @@ public class WifiStateMachine extends StateMachine {
         /*
          * stop DHCP
          */
-       NetworkUtils.resetConnections(mInterfaceName);
+       NetworkUtils.resetConnections(mInterfaceName, NetworkUtils.RESET_ALL_ADDRESSES);
 
         if (mDhcpStateMachine != null) {
             mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
@@ -1509,7 +1509,7 @@ public class WifiStateMachine extends StateMachine {
             if (!linkProperties.equals(mLinkProperties)) {
                 Log.d(TAG, "Link configuration changed for netId: " + mLastNetworkId
                     + " old: " + mLinkProperties + "new: " + linkProperties);
-                NetworkUtils.resetConnections(mInterfaceName);
+                NetworkUtils.resetConnections(mInterfaceName, NetworkUtils.RESET_ALL_ADDRESSES);
                 mLinkProperties = linkProperties;
                 sendLinkConfigurationChangedBroadcast();
             }
