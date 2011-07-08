@@ -687,7 +687,7 @@ public final class CalendarContract {
     /**
      * Fields and helpers for interacting with Attendees. Each row of this table
      * represents a single attendee or guest of an event. Calling
-     * {@link #query(ContentResolver, long)} will return a list of attendees for
+     * {@link #query(ContentResolver, long, String[])} will return a list of attendees for
      * the event with the given eventId. Both apps and sync adapters may write
      * to this table. There are six writable fields and all of them except
      * {@link #ATTENDEE_NAME} must be included when inserting a new attendee.
@@ -708,24 +708,20 @@ public final class CalendarContract {
          */
         @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/attendees");
-        /**
-         * the projection used by the attendees query
-         */
-        public static final String[] PROJECTION = new String[] {
-                _ID, ATTENDEE_NAME, ATTENDEE_EMAIL, ATTENDEE_RELATIONSHIP, ATTENDEE_STATUS,};
         private static final String ATTENDEES_WHERE = Attendees.EVENT_ID + "=?";
 
         /**
          * Queries all attendees associated with the given event. This is a
          * blocking call and should not be done on the UI thread.
-         *
+         * 
          * @param cr The content resolver to use for the query
          * @param eventId The id of the event to retrieve attendees for
+         * @param projection the columns to return in the cursor
          * @return A Cursor containing all attendees for the event
          */
-        public static final Cursor query(ContentResolver cr, long eventId) {
+        public static final Cursor query(ContentResolver cr, long eventId, String[] projection) {
             String[] attArgs = {Long.toString(eventId)};
-            return cr.query(CONTENT_URI, PROJECTION, ATTENDEES_WHERE, attArgs /* selection args */,
+            return cr.query(CONTENT_URI, projection, ATTENDEES_WHERE, attArgs /* selection args */,
                     null /* sort order */);
         }
     }
@@ -1746,13 +1742,6 @@ public final class CalendarContract {
     public static final class EventDays implements EventDaysColumns {
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY
                 + "/instances/groupbyday");
-
-        /**
-         * The projection used by the EventDays query.
-         */
-        public static final String[] PROJECTION = {
-                STARTDAY, ENDDAY
-        };
         private static final String SELECTION = "selected=1";
 
         /**
@@ -1761,14 +1750,16 @@ public final class CalendarContract {
          * endday representing the max range of days for all events beginning on
          * each startday.This is a blocking function and should not be done on
          * the UI thread.
-         *
+         * 
          * @param cr the ContentResolver
          * @param startDay the first Julian day in the range
          * @param numDays the number of days to load (must be at least 1)
+         * @param projection the columns to return in the cursor
          * @return a database cursor containing a list of start and end days for
          *         events
          */
-        public static final Cursor query(ContentResolver cr, int startDay, int numDays) {
+        public static final Cursor query(ContentResolver cr, int startDay, int numDays,
+                String[] projection) {
             if (numDays < 1) {
                 return null;
             }
@@ -1776,7 +1767,7 @@ public final class CalendarContract {
             Uri.Builder builder = CONTENT_URI.buildUpon();
             ContentUris.appendId(builder, startDay);
             ContentUris.appendId(builder, endDay);
-            return cr.query(builder.build(), PROJECTION, SELECTION,
+            return cr.query(builder.build(), projection, SELECTION,
                     null /* selection args */, STARTDAY);
         }
     }
@@ -1821,7 +1812,7 @@ public final class CalendarContract {
     /**
      * Fields and helpers for accessing reminders for an event. Each row of this
      * table represents a single reminder for an event. Calling
-     * {@link #query(ContentResolver, long)} will return a list of reminders for
+     * {@link #query(ContentResolver, long, String[])} will return a list of reminders for
      * the event with the given eventId. Both apps and sync adapters may write
      * to this table. There are three writable fields and all of them must be
      * included when inserting a new reminder. They are:
@@ -1833,25 +1824,21 @@ public final class CalendarContract {
      */
     public static final class Reminders implements BaseColumns, RemindersColumns, EventsColumns {
         private static final String REMINDERS_WHERE = CalendarContract.Reminders.EVENT_ID + "=?";
-        /**
-         * The projection used by the reminders query.
-         */
-        public static final String[] PROJECTION = new String[] {
-                _ID, MINUTES, METHOD,};
         @SuppressWarnings("hiding")
         public static final Uri CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/reminders");
 
         /**
          * Queries all reminders associated with the given event. This is a
          * blocking call and should not be done on the UI thread.
-         *
+         * 
          * @param cr The content resolver to use for the query
          * @param eventId The id of the event to retrieve reminders for
+         * @param projection the columns to return in the cursor
          * @return A Cursor containing all reminders for the event
          */
-        public static final Cursor query(ContentResolver cr, long eventId) {
+        public static final Cursor query(ContentResolver cr, long eventId, String[] projection) {
             String[] remArgs = {Long.toString(eventId)};
-            return cr.query(CONTENT_URI, PROJECTION, REMINDERS_WHERE, remArgs /* selection args */,
+            return cr.query(CONTENT_URI, projection, REMINDERS_WHERE, remArgs /*selection args*/,
                     null /* sort order */);
         }
     }
@@ -2134,7 +2121,7 @@ public final class CalendarContract {
          * given event id, begin time and alarm time. If one is found then this
          * alarm already exists and this method returns true. TODO Move to
          * provider
-         * 
+         *
          * @param cr the ContentResolver
          * @param eventId the event id to match
          * @param begin the start time of the event in UTC millis
