@@ -417,11 +417,11 @@ public class RecentsPanelView extends RelativeLayout
         mActivityDescriptions = getRecentTasks();
         mListAdapter.notifyDataSetInvalidated();
         if (mActivityDescriptions.size() > 0) {
-            Log.v(TAG, "Showing " + mActivityDescriptions.size() + " apps");
+            if (DEBUG) Log.v(TAG, "Showing " + mActivityDescriptions.size() + " apps");
             updateUiElements(getResources().getConfiguration());
         } else {
             // Immediately hide this panel
-            Log.v(TAG, "Nothing to show");
+            if (DEBUG) Log.v(TAG, "Nothing to show");
             hide(false);
         }
     }
@@ -436,7 +436,7 @@ public class RecentsPanelView extends RelativeLayout
             paint.setAlpha(255);
             final int srcWidth = thumbnail.getWidth();
             final int srcHeight = thumbnail.getHeight();
-            Log.v(TAG, "Source thumb: " + srcWidth + "x" + srcHeight);
+            if (DEBUG) Log.v(TAG, "Source thumb: " + srcWidth + "x" + srcHeight);
             canvas.drawBitmap(thumbnail,
                     new Rect(0, 0, srcWidth-1, srcHeight-1),
                     new RectF(mGlowBitmapPaddingLeftPx, mGlowBitmapPaddingTopPx,
@@ -486,7 +486,7 @@ public class RecentsPanelView extends RelativeLayout
 
     public void handleSwipe(View view, int direction) {
         ActivityDescription ad = ((ViewHolder) view.getTag()).activityDescription;
-        Log.v(TAG, "Jettison " + ad.label);
+        if (DEBUG) Log.v(TAG, "Jettison " + ad.label);
         mActivityDescriptions.remove(ad);
 
         // Handled by widget containers to enable LayoutTransitions properly

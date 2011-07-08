@@ -25,6 +25,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -33,6 +34,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
@@ -42,12 +44,9 @@ import com.android.systemui.R;
 
 public class RecentsVerticalScrollView extends ScrollView
         implements View.OnClickListener, View.OnTouchListener {
-    private static final float FADE_CONSTANT = 0.5f;
-    private static final int SNAP_BACK_DURATION = 250;
-    private static final int ESCAPE_VELOCITY = 100; // speed of item required to "curate" it
     private static final String TAG = RecentsPanelView.TAG;
-    private static final float THRESHHOLD = 50;
     private static final boolean DEBUG_INVALIDATE = false;
+    private static final boolean DEBUG = RecentsPanelView.DEBUG;
     private LinearLayout mLinearLayout;
     private ActivityDescriptionAdapter mAdapter;
     private RecentsCallback mCallback;
@@ -56,6 +55,8 @@ public class RecentsVerticalScrollView extends ScrollView
     private float mLastX;
     private boolean mDragging;
     private VelocityTracker mVelocityTracker;
+    private float mDensityScale;
+    private float mPagingTouchSlop;
 
     public RecentsVerticalScrollView(Context context) {
         this(context, null);
@@ -63,6 +64,8 @@ public class RecentsVerticalScrollView extends ScrollView
 
     public RecentsVerticalScrollView(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
+        mDensityScale = getResources().getDisplayMetrics().density;
+        mPagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
     }
 
     private int scrollPositionOfMostRecent() {
@@ -101,8 +104,8 @@ public class RecentsVerticalScrollView extends ScrollView
 
             case MotionEvent.ACTION_MOVE:
                 float delta = ev.getX() - mLastX;
-                Log.v(TAG, "ACTION_MOVE : " + delta);
-                if (Math.abs(delta) > THRESHHOLD) {
+                if (DEBUG) Log.v(TAG, "ACTION_MOVE : " + delta);
+                if (Math.abs(delta) > mPagingTouchSlop) {
                     mDragging = true;
                 }
                 break;
@@ -115,14 +118,14 @@ public class RecentsVerticalScrollView extends ScrollView
     }
 
     private float getAlphaForOffset(View view, float thumbWidth) {
-        final float fadeWidth = FADE_CONSTANT * thumbWidth;
+        final float fadeWidth = Constants.FADE_CONSTANT * thumbWidth;
         float result = 1.0f;
         if (view.getX() >= thumbWidth) {
             result = 1.0f - (view.getX() - thumbWidth) / fadeWidth;
         } else if (view.getX() < 0.0f) {
             result = 1.0f + (thumbWidth + view.getX()) / fadeWidth;
         }
-        Log.v(TAG, "FADE AMOUNT: " + result);
+        if (DEBUG) Log.v(TAG, "FADE AMOUNT: " + result);
         return result;
     }
 
@@ -157,12 +160,13 @@ public class RecentsVerticalScrollView extends ScrollView
                     final float velocityY = velocityTracker.getYVelocity();
                     final float curX = animView.getX();
                     final float newX = (velocityX >= 0.0f ? 1 : -1) * animView.getWidth();
-
+                    final float maxVelocity = Constants.ESCAPE_VELOCITY * mDensityScale;
                     if (Math.abs(velocityX) > Math.abs(velocityY)
-                            && Math.abs(velocityX) > ESCAPE_VELOCITY
+                            && Math.abs(velocityX) > maxVelocity
                             && (velocityX > 0.0f) == (animView.getX() >= 0)) {
-                        final long duration =
+                        long duration =
                             (long) (Math.abs(newX-curX) * 1000.0f / Math.abs(velocityX));
+                        duration = Math.min(duration, Constants.MAX_ESCAPE_ANIMATION_DURATION);
                         anim = ObjectAnimator.ofFloat(animView, "x", curX, newX);
                         anim.setInterpolator(new LinearInterpolator());
                         final int swipeDirection = animView.getX() >= 0.0f ?
@@ -183,9 +187,10 @@ public class RecentsVerticalScrollView extends ScrollView
                         });
                         anim.setDuration(duration);
                     } else { // Animate back to position
-                        final long duration = Math.abs(velocityX) > 0.0f ?
+                        long duration = Math.abs(velocityX) > 0.0f ?
                                 (long) (Math.abs(newX-curX) * 1000.0f / Math.abs(velocityX))
-                                : SNAP_BACK_DURATION;
+                                : Constants.SNAP_BACK_DURATION;
+                        duration = Math.min(duration, Constants.SNAP_BACK_DURATION);
                         anim = ObjectAnimator.ofFloat(animView, "x", animView.getX(), 0.0f);
                         anim.setInterpolator(new DecelerateInterpolator(4.0f));
                         anim.setDuration(duration);
@@ -241,6 +246,13 @@ public class RecentsVerticalScrollView extends ScrollView
         final int leftPadding = mContext.getResources()
             .getDimensionPixelOffset(R.dimen.status_bar_recents_thumbnail_left_margin);
         setOverScrollEffectPadding(leftPadding, 0);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDensityScale = getResources().getDisplayMetrics().density;
+        mPagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
     }
 
     private void setOverScrollEffectPadding(int leftPadding, int i) {

@@ -25,6 +25,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.RectF;
 import android.util.AttributeSet;
@@ -33,6 +34,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.HorizontalScrollView;
@@ -42,12 +44,9 @@ import com.android.systemui.R;
 
 public class RecentsHorizontalScrollView extends HorizontalScrollView
         implements View.OnClickListener, View.OnTouchListener {
-    private static final float FADE_CONSTANT = 0.5f;
-    private static final int SNAP_BACK_DURATION = 250;
-    private static final int ESCAPE_VELOCITY = 100; // speed of item required to "curate" it
-    private static final String TAG = RecentsPanelView.TAG;
-    private static final float THRESHHOLD = 50;
     private static final boolean DEBUG_INVALIDATE = false;
+    private static final String TAG = RecentsPanelView.TAG;
+    private static final boolean DEBUG = RecentsPanelView.DEBUG;
     private LinearLayout mLinearLayout;
     private ActivityDescriptionAdapter mAdapter;
     private RecentsCallback mCallback;
@@ -56,6 +55,8 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     private float mLastY;
     private boolean mDragging;
     private VelocityTracker mVelocityTracker;
+    private float mDensityScale;
+    private float mPagingTouchSlop;
 
     public RecentsHorizontalScrollView(Context context) {
         this(context, null);
@@ -63,6 +64,8 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
 
     public RecentsHorizontalScrollView(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
+        mDensityScale = getResources().getDisplayMetrics().density;
+        mPagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
     }
 
     private int scrollPositionOfMostRecent() {
@@ -101,7 +104,8 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
 
             case MotionEvent.ACTION_MOVE:
                 float delta = ev.getY() - mLastY;
-                if (Math.abs(delta) > THRESHHOLD) {
+                if (DEBUG) Log.v(TAG, "ACTION_MOVE : " + delta);
+                if (Math.abs(delta) > mPagingTouchSlop) {
                     mDragging = true;
                 }
                 break;
@@ -114,13 +118,14 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     }
 
     private float getAlphaForOffset(View view, float thumbHeight) {
-        final float fadeHeight = FADE_CONSTANT * thumbHeight;
+        final float fadeHeight = Constants.FADE_CONSTANT * thumbHeight;
         float result = 1.0f;
         if (view.getY() >= thumbHeight) {
             result = 1.0f - (view.getY() - thumbHeight) / fadeHeight;
         } else if (view.getY() < 0.0f) {
             result = 1.0f + (thumbHeight + view.getY()) / fadeHeight;
         }
+        if (DEBUG) Log.v(TAG, "FADE AMOUNT: " + result);
         return result;
     }
 
@@ -155,12 +160,13 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                     final float velocityY = velocityTracker.getYVelocity();
                     final float curY = animView.getY();
                     final float newY = (velocityY >= 0.0f ? 1 : -1) * animView.getHeight();
-
+                    final float maxVelocity = Constants.ESCAPE_VELOCITY * mDensityScale;
                     if (Math.abs(velocityY) > Math.abs(velocityX)
-                            && Math.abs(velocityY) > ESCAPE_VELOCITY
+                            && Math.abs(velocityY) > maxVelocity
                             && (velocityY >= 0.0f) == (animView.getY() >= 0)) {
-                        final long duration =
+                        long duration =
                             (long) (Math.abs(newY - curY) * 1000.0f / Math.abs(velocityY));
+                        duration = Math.min(duration, Constants.MAX_ESCAPE_ANIMATION_DURATION);
                         anim = ObjectAnimator.ofFloat(animView, "y", curY, newY);
                         anim.setInterpolator(new LinearInterpolator());
                         final int swipeDirection = animView.getY() >= 0.0f ?
@@ -181,9 +187,10 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                         });
                         anim.setDuration(duration);
                     } else { // Animate back to position
-                        final long duration = Math.abs(velocityY) > 0.0f ?
+                        long duration = Math.abs(velocityY) > 0.0f ?
                                 (long) (Math.abs(newY - curY) * 1000.0f / Math.abs(velocityY))
-                                : SNAP_BACK_DURATION;
+                                : Constants.SNAP_BACK_DURATION;
+                        duration = Math.min(duration, Constants.SNAP_BACK_DURATION);
                         anim = ObjectAnimator.ofFloat(animView, "y", animView.getY(), 0.0f);
                         anim.setInterpolator(new DecelerateInterpolator(2.0f));
                         anim.setDuration(duration);
@@ -241,8 +248,15 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         setOverScrollEffectPadding(leftPadding, 0);
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDensityScale = getResources().getDisplayMetrics().density;
+        mPagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
+    }
+
     private void setOverScrollEffectPadding(int leftPadding, int i) {
-        // TODO Add to RecentsHorizontalScrollView
+        // TODO Add to (Vertical)ScrollView
     }
 
     @Override
