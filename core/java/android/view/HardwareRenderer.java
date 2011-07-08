@@ -128,8 +128,14 @@ public abstract class HardwareRenderer {
     abstract void updateSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException;
 
     /**
-     * Setup the hardware renderer for drawing. This is called for every
-     * frame to draw.
+     * Invoked whenever the size of the target surface changes. This will
+     * not be invoked when the surface is first created.
+     */
+    abstract void preapareSurfaceForResize();
+
+    /**
+     * Setup the hardware renderer for drawing. This is called whenever the
+     * size of the target surface changes or when the surface is first created.
      * 
      * @param width Width of the drawing surface.
      * @param height Height of the drawing surface.
@@ -289,9 +295,9 @@ public abstract class HardwareRenderer {
     static abstract class GlRenderer extends HardwareRenderer {
         // These values are not exposed in our EGL APIs
         static final int EGL_CONTEXT_CLIENT_VERSION = 0x3098;
-        static final int EGL_SURFACE_TYPE = 0x3033;
-        static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;
         static final int EGL_OPENGL_ES2_BIT = 4;
+        static final int EGL_SURFACE_TYPE = 0x3033;
+        static final int EGL_SWAP_BEHAVIOR_PRESERVED_BIT = 0x0400;        
 
         private static final int SURFACE_STATE_ERROR = 0;
         private static final int SURFACE_STATE_SUCCESS = 1;
@@ -311,8 +317,16 @@ public abstract class HardwareRenderer {
         int mFrameCount;
         Paint mDebugPaint;
 
-        boolean mDirtyRegions;
-        final boolean mDirtyRegionsRequested;
+        static boolean sDirtyRegions;
+        static final boolean sDirtyRegionsRequested;
+        static {
+            String dirtyProperty = SystemProperties.get(RENDER_DIRTY_REGIONS_PROPERTY, "true");
+            //noinspection PointlessBooleanExpression,ConstantConditions
+            sDirtyRegions = RENDER_DIRTY_REGIONS && "true".equalsIgnoreCase(dirtyProperty);
+            sDirtyRegionsRequested = sDirtyRegions;
+        }
+
+        boolean mDirtyRegionsEnabled;
         final boolean mVsyncDisabled;
 
         final int mGlVersion;
@@ -326,11 +340,6 @@ public abstract class HardwareRenderer {
             mGlVersion = glVersion;
             mTranslucent = translucent;
 
-            final String dirtyProperty = SystemProperties.get(RENDER_DIRTY_REGIONS_PROPERTY, "true");
-            //noinspection PointlessBooleanExpression,ConstantConditions
-            mDirtyRegions = RENDER_DIRTY_REGIONS && "true".equalsIgnoreCase(dirtyProperty);
-            mDirtyRegionsRequested = mDirtyRegions;
-
             final String vsyncProperty = SystemProperties.get(DISABLE_VSYNC_PROPERTY, "false");
             mVsyncDisabled = "true".equalsIgnoreCase(vsyncProperty);
             if (mVsyncDisabled) {
@@ -342,7 +351,7 @@ public abstract class HardwareRenderer {
          * Indicates whether this renderer instance can track and update dirty regions.
          */
         boolean hasDirtyRegions() {
-            return mDirtyRegions;
+            return mDirtyRegionsEnabled;
         }
 
         /**
@@ -479,8 +488,8 @@ public abstract class HardwareRenderer {
             sEglConfig = chooseEglConfig();
             if (sEglConfig == null) {
                 // We tried to use EGL_SWAP_BEHAVIOR_PRESERVED_BIT, try again without
-                if (mDirtyRegions) {
-                    mDirtyRegions = false;
+                if (sDirtyRegions) {
+                    sDirtyRegions = false;
                     sEglConfig = chooseEglConfig();
                     if (sEglConfig == null) {
                         throw new RuntimeException("eglConfig not initialized");
@@ -500,7 +509,7 @@ public abstract class HardwareRenderer {
         private EGLConfig chooseEglConfig() {
             int[] configsCount = new int[1];
             EGLConfig[] configs = new EGLConfig[1];
-            int[] configSpec = getConfig(mDirtyRegions);
+            int[] configSpec = getConfig(sDirtyRegions);
             if (!sEgl.eglChooseConfig(sEglDisplay, configSpec, configs, 1, configsCount)) {
                 throw new IllegalArgumentException("eglChooseConfig failed " +
                         getEGLErrorString(sEgl.eglGetError()));
@@ -566,18 +575,18 @@ public abstract class HardwareRenderer {
 
             // If mDirtyRegions is set, this means we have an EGL configuration
             // with EGL_SWAP_BEHAVIOR_PRESERVED_BIT set
-            if (mDirtyRegions) {
-                if (!GLES20Canvas.preserveBackBuffer()) {
+            if (sDirtyRegions) {
+                if (!(mDirtyRegionsEnabled = GLES20Canvas.preserveBackBuffer())) {
                     Log.w(LOG_TAG, "Backbuffer cannot be preserved");
                 }
-            } else if (mDirtyRegionsRequested) {
+            } else if (sDirtyRegionsRequested) {
                 // If mDirtyRegions is not set, our EGL configuration does not
                 // have EGL_SWAP_BEHAVIOR_PRESERVED_BIT; however, the default
                 // swap behavior might be EGL_BUFFER_PRESERVED, which means we
                 // want to set mDirtyRegions. We try to do this only if dirty
                 // regions were initially requested as part of the device
                 // configuration (see RENDER_DIRTY_REGIONS)
-                mDirtyRegions = GLES20Canvas.isBackBufferPreserved();
+                mDirtyRegionsEnabled = GLES20Canvas.isBackBufferPreserved();
             }
 
             return sEglContext.getGL();
@@ -617,6 +626,14 @@ public abstract class HardwareRenderer {
             mGl = null;
 
             setEnabled(false);
+        }
+
+        @Override
+        void preapareSurfaceForResize() {
+            // Cancels any existing buffer to ensure we'll get a buffer
+            // of the right size before we call eglSwapBuffers
+            sEgl.eglMakeCurrent(sEglDisplay, EGL10.EGL_NO_SURFACE,
+                    EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);              
         }
 
         @Override

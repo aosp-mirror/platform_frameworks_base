@@ -1314,6 +1314,9 @@ public final class ViewAncestor extends Handler implements ViewParent,
             if (hwInitialized || ((windowShouldResize || params != null) &&
                     mAttachInfo.mHardwareRenderer != null &&
                     mAttachInfo.mHardwareRenderer.isEnabled())) {
+                if (!hwInitialized) {
+                    mAttachInfo.mHardwareRenderer.preapareSurfaceForResize();
+                }
                 mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
             }
 
