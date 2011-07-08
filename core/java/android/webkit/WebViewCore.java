@@ -2240,6 +2240,10 @@ public final class WebViewCore {
     }
 
     private void setupViewport(boolean updateViewState) {
+        if (mWebView == null || mSettings == null) {
+            // We've been destroyed or are being destroyed, return early
+            return;
+        }
         // set the viewport settings from WebKit
         setViewportSettingsFromNative();
 
