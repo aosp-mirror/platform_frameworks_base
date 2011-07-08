@@ -30,6 +30,7 @@ final class SynthesisMessageParams extends MessageParams {
     final int mChannelCount;
     final float mVolume;
     final float mPan;
+    final EventLogger mLogger;
 
     public volatile AudioTrack mAudioTrack;
 
@@ -38,7 +39,7 @@ final class SynthesisMessageParams extends MessageParams {
     SynthesisMessageParams(int streamType, int sampleRate,
             int audioFormat, int channelCount,
             float volume, float pan, UtteranceCompletedDispatcher dispatcher,
-            String callingApp) {
+            String callingApp, EventLogger logger) {
         super(dispatcher, callingApp);
 
         mStreamType = streamType;
@@ -47,6 +48,7 @@ final class SynthesisMessageParams extends MessageParams {
         mChannelCount = channelCount;
         mVolume = volume;
         mPan = pan;
+        mLogger = logger;
 
         // initially null.
         mAudioTrack = null;

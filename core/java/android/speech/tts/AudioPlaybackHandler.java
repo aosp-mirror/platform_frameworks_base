@@ -384,11 +384,16 @@ class AudioPlaybackHandler {
             }
             count += written;
         }
+
+        param.mLogger.onPlaybackStart();
     }
 
     private void handleSynthesisDone(MessageParams msg) {
         final SynthesisMessageParams params = (SynthesisMessageParams) msg;
         handleSynthesisDone(params);
+        // This call is delayed more than it should be, but we are
+        // certain at this point that we have all the data we want.
+        params.mLogger.onWriteData();
     }
 
     // Flush all remaining data to the audio track, stop it and release
@@ -415,6 +420,8 @@ class AudioPlaybackHandler {
     private void handleSynthesisCompleteDataAvailable(MessageParams msg) {
         final SynthesisMessageParams params = (SynthesisMessageParams) msg;
         if (DBG) Log.d(TAG, "completeAudioAvailable(" + params + ")");
+
+        params.mLogger.onPlaybackStart();
 
         // Channel config and bytes per frame are checked before
         // this message is sent.

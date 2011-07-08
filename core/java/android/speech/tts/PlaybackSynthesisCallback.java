@@ -65,29 +65,42 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
 
     private final UtteranceCompletedDispatcher mDispatcher;
     private final String mCallingApp;
+    private final EventLogger mLogger;
 
     PlaybackSynthesisCallback(int streamType, float volume, float pan,
             AudioPlaybackHandler audioTrackHandler, UtteranceCompletedDispatcher dispatcher,
-            String callingApp) {
+            String callingApp, EventLogger logger) {
         mStreamType = streamType;
         mVolume = volume;
         mPan = pan;
         mAudioTrackHandler = audioTrackHandler;
         mDispatcher = dispatcher;
         mCallingApp = callingApp;
+        mLogger = logger;
     }
 
     @Override
     void stop() {
         if (DBG) Log.d(TAG, "stop()");
 
+        // Note that mLogger.mError might be true too at this point.
+        mLogger.onStopped();
+
         synchronized (mStateLock) {
-            if (mToken == null || mStopped) {
-                Log.w(TAG, "stop() called twice, before start(), or after done()");
+            if (mStopped) {
+                Log.w(TAG, "stop() called twice");
                 return;
             }
-            mAudioTrackHandler.stop(mToken);
-            mToken = null;
+            // mToken will be null if the engine encounters
+            // an error before it called start().
+            if (mToken != null) {
+                mAudioTrackHandler.stop(mToken);
+                mToken = null;
+            } else {
+                // In all other cases, mAudioTrackHandler.stop() will
+                // result in onComplete being called.
+                mLogger.onWriteData();
+            }
             mStopped = true;
         }
     }
@@ -124,7 +137,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
             }
             SynthesisMessageParams params = new SynthesisMessageParams(
                     mStreamType, sampleRateInHz, audioFormat, channelCount, mVolume, mPan,
-                    mDispatcher, mCallingApp);
+                    mDispatcher, mCallingApp, mLogger);
             mAudioTrackHandler.enqueueSynthesisStart(params);
 
             mToken = params;
@@ -157,6 +170,8 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
             mAudioTrackHandler.enqueueSynthesisDataAvailable(mToken);
         }
 
+        mLogger.onEngineDataReceived();
+
         return TextToSpeech.SUCCESS;
     }
 
@@ -177,6 +192,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
             }
 
             mAudioTrackHandler.enqueueSynthesisDone(mToken);
+            mLogger.onEngineComplete();
         }
         return TextToSpeech.SUCCESS;
     }
@@ -184,6 +200,9 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
     @Override
     public void error() {
         if (DBG) Log.d(TAG, "error() [will call stop]");
+        // Currently, this call will not be logged if error( ) is called
+        // before start.
+        mLogger.onError();
         stop();
     }
 
@@ -208,7 +227,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
             }
             SynthesisMessageParams params = new SynthesisMessageParams(
                     mStreamType, sampleRateInHz, audioFormat, channelCount, mVolume, mPan,
-                    mDispatcher, mCallingApp);
+                    mDispatcher, mCallingApp, mLogger);
             params.addBuffer(buffer, offset, length);
 
             mAudioTrackHandler.enqueueSynthesisCompleteDataAvailable(params);

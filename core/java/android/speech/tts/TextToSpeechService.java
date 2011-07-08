@@ -82,8 +82,7 @@ public abstract class TextToSpeechService extends Service {
     private AudioPlaybackHandler mAudioPlaybackHandler;
 
     private CallbackMap mCallbacks;
-
-    private int mDefaultAvailability = TextToSpeech.LANG_NOT_SUPPORTED;
+    private String mPackageName;
 
     @Override
     public void onCreate() {
@@ -99,9 +98,10 @@ public abstract class TextToSpeechService extends Service {
 
         mCallbacks = new CallbackMap();
 
+        mPackageName = getApplicationInfo().packageName;
+
         // Load default language
-        mDefaultAvailability = onLoadLanguage(getDefaultLanguage(),
-                getDefaultCountry(), getDefaultVariant());
+        onLoadLanguage(getDefaultLanguage(), getDefaultCountry(), getDefaultVariant());
     }
 
     @Override
@@ -457,12 +457,14 @@ public abstract class TextToSpeechService extends Service {
         // Non null after synthesis has started, and all accesses
         // guarded by 'this'.
         private AbstractSynthesisCallback mSynthesisCallback;
+        private final EventLogger mEventLogger;
 
         public SynthesisSpeechItem(String callingApp, Bundle params, String text) {
             super(callingApp, params);
             mText = text;
             mSynthesisRequest = new SynthesisRequest(mText, mParams);
             setRequestParams(mSynthesisRequest);
+            mEventLogger = new EventLogger(mSynthesisRequest, getCallingApp(), mPackageName);
         }
 
         public String getText() {
@@ -485,6 +487,7 @@ public abstract class TextToSpeechService extends Service {
         @Override
         protected int playImpl() {
             AbstractSynthesisCallback synthesisCallback;
+            mEventLogger.onRequestProcessingStart();
             synchronized (this) {
                 mSynthesisCallback = createSynthesisCallback();
                 synthesisCallback = mSynthesisCallback;
@@ -495,7 +498,7 @@ public abstract class TextToSpeechService extends Service {
 
         protected AbstractSynthesisCallback createSynthesisCallback() {
             return new PlaybackSynthesisCallback(getStreamType(), getVolume(), getPan(),
-                    mAudioPlaybackHandler, this, getCallingApp());
+                    mAudioPlaybackHandler, this, getCallingApp(), mEventLogger);
         }
 
         private void setRequestParams(SynthesisRequest request) {
