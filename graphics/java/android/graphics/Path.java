@@ -40,6 +40,7 @@ public class Path {
      */
     public Region rects;
     private boolean mDetectSimplePaths;
+    private Direction mLastDirection = null;
 
     /**
      * Create an empty path
@@ -70,6 +71,7 @@ public class Path {
     public void reset() {
         isSimplePath = true;
         if (mDetectSimplePaths) {
+            mLastDirection = null;
             if (rects != null) rects.setEmpty();
         }
         native_reset(mNativePath);
@@ -82,6 +84,7 @@ public class Path {
     public void rewind() {
         isSimplePath = true;
         if (mDetectSimplePaths) {
+            mLastDirection = null;
             if (rects != null) rects.setEmpty();
         }
         native_rewind(mNativePath);
@@ -378,6 +381,20 @@ public class Path {
         final int nativeInt;
     }
     
+    private void detectSimplePath(float left, float top, float right, float bottom, Direction dir) {
+        if (mDetectSimplePaths) {
+            if (mLastDirection == null) {
+                mLastDirection = dir;
+            }
+            if (mLastDirection != dir) {
+                isSimplePath = false;
+            } else {
+                if (rects == null) rects = new Region();
+                rects.op((int) left, (int) top, (int) right, (int) bottom, Region.Op.UNION);
+            }
+        }
+    }
+
     /**
      * Add a closed rectangle contour to the path
      *
@@ -388,11 +405,7 @@ public class Path {
         if (rect == null) {
             throw new NullPointerException("need rect parameter");
         }
-        if (mDetectSimplePaths) {
-            if (rects == null) rects = new Region();
-            rects.op((int) rect.left, (int) rect.top, (int) rect.right, (int) rect.bottom,
-                    Region.Op.UNION);
-        }
+        detectSimplePath(rect.left, rect.top, rect.right, rect.bottom, dir);
         native_addRect(mNativePath, rect, dir.nativeInt);
     }
 
@@ -406,10 +419,7 @@ public class Path {
      * @param dir    The direction to wind the rectangle's contour
      */
     public void addRect(float left, float top, float right, float bottom, Direction dir) {
-        if (mDetectSimplePaths) {
-            if (rects == null) rects = new Region();
-            rects.op((int) left, (int) top, (int) right, (int) bottom, Region.Op.UNION);
-        }
+        detectSimplePath(left, top, right, bottom, dir);
         native_addRect(mNativePath, left, top, right, bottom, dir.nativeInt);
     }
 
