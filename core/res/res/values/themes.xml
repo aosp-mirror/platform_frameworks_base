@@ -31,6 +31,13 @@
         <item name="colorForegroundInverse">@android:color/bright_foreground_dark_inverse</item>
         <item name="colorBackground">@android:color/background_dark</item>
         <item name="colorBackgroundCacheHint">?android:attr/colorBackground</item>
+
+        <item name="colorPressedHighlight">@color/legacy_pressed_highlight</item>
+        <item name="colorLongPressedHighlight">@color/legacy_long_pressed_highlight</item>
+        <item name="colorFocusedHighlight">@color/legacy_selected_highlight</item>
+        <item name="colorMultiSelectHighlight">@color/legacy_selected_highlight</item>
+        <item name="colorActivatedHighlight">@color/legacy_selected_highlight</item>
+
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
@@ -799,6 +806,12 @@
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
+        <item name="colorPressedHighlight">@color/holo_blue_light</item>
+        <item name="colorLongPressedHighlight">@color/holo_blue_bright</item>
+        <item name="colorFocusedHighlight">@color/holo_blue_dark</item>
+        <item name="colorMultiSelectHighlight">@color/holo_green_light</item>
+        <item name="colorActivatedHighlight">@color/holo_blue_dark</item>
+
         <!-- Text styles -->
         <item name="textAppearance">@android:style/TextAppearance.Holo</item>
         <item name="textAppearanceInverse">@android:style/TextAppearance.Holo.Inverse</item>
@@ -1090,6 +1103,11 @@
         <item name="disabledAlpha">0.5</item>
         <item name="backgroundDimAmount">0.6</item>
 
+        <item name="colorPressedHighlight">@color/holo_blue_light</item>
+        <item name="colorLongPressedHighlight">@color/holo_blue_bright</item>
+        <item name="colorFocusedHighlight">@color/holo_blue_dark</item>
+        <item name="colorMultiSelectHighlight">@color/holo_green_light</item>
+        <item name="colorActivatedHighlight">@color/holo_blue_dark</item>
 
         <!-- Text styles -->
         <item name="textAppearance">@android:style/TextAppearance.Holo.Light</item>

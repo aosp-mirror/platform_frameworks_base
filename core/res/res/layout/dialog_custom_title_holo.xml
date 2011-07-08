@@ -28,12 +28,10 @@ This is an custom layout for a dialog.
         android:gravity="center_vertical|left"
         style="?android:attr/windowTitleBackgroundStyle">
     </FrameLayout>
-    <ImageView android:id="@+id/titleDivider"
+    <View android:id="@+id/titleDivider"
             android:layout_width="match_parent"
-            android:layout_height="1dip"
-            android:scaleType="fitXY"
-            android:gravity="fill_horizontal"
-            android:src="@android:drawable/divider_strong_holo" />
+            android:layout_height="2dip"
+            android:background="@android:color/holo_blue_light" />
     <FrameLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:layout_weight="1"

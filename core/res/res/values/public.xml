@@ -1781,6 +1781,12 @@
 
   <public type="attr" name="textAllCaps" />
 
+  <public type="attr" name="colorPressedHighlight" />
+  <public type="attr" name="colorLongPressedHighlight" />
+  <public type="attr" name="colorFocusedHighlight" />
+  <public type="attr" name="colorActivatedHighlight" />
+  <public type="attr" name="colorMultiSelectHighlight" />
+
   <public type="style" name="TextAppearance.SuggestionHighlight" />
   <public type="style" name="Theme.Holo.SplitActionBarWhenNarrow" />
   <public type="style" name="Theme.Holo.Light.SplitActionBarWhenNarrow" />
@@ -1808,5 +1814,16 @@
 
   <public type="integer" name="status_bar_notification_info_maxnum" />
   <public type="string" name="status_bar_notification_info_overflow" />
+
+  <public type="color" name="holo_blue_light" />
+  <public type="color" name="holo_blue_dark" />
+  <public type="color" name="holo_green_light" />
+  <public type="color" name="holo_green_dark" />
+  <public type="color" name="holo_red_light" />
+  <public type="color" name="holo_red_dark" />
+  <public type="color" name="holo_orange_light" />
+  <public type="color" name="holo_orange_dark" />
+  <public type="color" name="holo_purple" />
+  <public type="color" name="holo_blue_bright" />
 
 </resources>

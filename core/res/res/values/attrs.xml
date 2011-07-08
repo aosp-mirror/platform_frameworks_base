@@ -40,6 +40,21 @@
              to use accelerated drawing (thus setting state_accelerated), the
              cache hint is ignored and always assumed to be transparent. -->
         <attr name="colorBackgroundCacheHint" format="color" />
+
+        <!-- Default highlight color for items that are pressed. -->
+        <attr name="colorPressedHighlight" format="color" />
+        <!-- Default highlight color for items that are long-pressed. -->
+        <attr name="colorLongPressedHighlight" format="color" />
+        <!-- Default highlight color for items that are
+             focused. (Focused meaning cursor-based selection.) -->
+        <attr name="colorFocusedHighlight" format="color" />
+        <!-- Default highlight color for items that are
+             activated. (Activated meaning persistent selection.) -->
+        <attr name="colorActivatedHighlight" format="color" />
+        <!-- Default highlight color for items in multiple selection
+             mode. -->
+        <attr name="colorMultiSelectHighlight" format="color" />
+
         <!-- Default disabled alpha for widgets that set enabled/disabled alpha programmatically. -->
         <attr name="disabledAlpha" format="float" />
         <!-- Default background dim amount when a menu, dialog, or something similar pops up. -->

@@ -1356,7 +1356,7 @@
 
     <style name="TextAppearance.Holo.DialogWindowTitle">
         <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@android:color/holo_blue</item>
+        <item name="android:textColor">@android:color/holo_blue_light</item>
     </style>
 
     <style name="TextAppearance.Holo.CalendarViewWeekDayView" parent="TextAppearance.Small.CalendarViewWeekDayView">
@@ -1455,7 +1455,7 @@
 
     <style name="TextAppearance.Holo.Light.DialogWindowTitle">
         <item name="android:textSize">22sp</item>
-        <item name="android:textColor">@android:color/holo_blue</item>
+        <item name="android:textColor">@android:color/holo_blue_light</item>
     </style>
 
     <style name="TextAppearance.Holo.Light.CalendarViewWeekDayView" parent="TextAppearance.Small.CalendarViewWeekDayView">
