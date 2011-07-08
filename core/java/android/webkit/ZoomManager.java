@@ -300,7 +300,7 @@ class ZoomManager {
     }
 
     public final float getDefaultScale() {
-        return mDefaultScale;
+        return mInitialScale > 0 ? mInitialScale : mDefaultScale;
     }
 
     public final float getReadingLevelScale() {
@@ -1087,6 +1087,7 @@ class ZoomManager {
             float scale;
             if (mInitialScale > 0) {
                 scale = mInitialScale;
+                mTextWrapScale = scale;
             } else if (viewState.mViewScale > 0) {
                 mTextWrapScale = viewState.mTextWrapScale;
                 scale = viewState.mViewScale;
@@ -1105,7 +1106,7 @@ class ZoomManager {
             }
             boolean reflowText = false;
             if (!viewState.mIsRestored) {
-                if (settings.getUseFixedViewport()) {
+                if (settings.getUseFixedViewport() && mInitialScale == 0) {
                     // Override the scale only in case of fixed viewport.
                     scale = Math.max(scale, overviewScale);
                     mTextWrapScale = Math.max(mTextWrapScale, overviewScale);
