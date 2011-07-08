@@ -62,6 +62,7 @@ public final class BluetoothServerSocket implements Closeable {
     /*package*/ final BluetoothSocket mSocket;
     private Handler mHandler;
     private int mMessage;
+    private final int mChannel;
 
     /**
      * Construct a socket for incoming connections.
@@ -74,6 +75,7 @@ public final class BluetoothServerSocket implements Closeable {
      */
     /*package*/ BluetoothServerSocket(int type, boolean auth, boolean encrypt, int port)
             throws IOException {
+        mChannel = port;
         mSocket = new BluetoothSocket(type, -1, auth, encrypt, null, port, null);
     }
 
@@ -124,5 +126,13 @@ public final class BluetoothServerSocket implements Closeable {
     /*package*/ synchronized void setCloseHandler(Handler handler, int message) {
         mHandler = handler;
         mMessage = message;
+    }
+
+    /**
+     * Returns the channel on which this socket is bound.
+     * @hide
+     */
+    public int getChannel() {
+        return mChannel;
     }
 }
