@@ -74,7 +74,8 @@ public class L10nUtils {
         com.android.internal.R.string.autofill_country_code_re,             // IDS_AUTOFILL_COUNTRY_CODE_RE
         com.android.internal.R.string.autofill_area_code_notext_re,         // IDS_AUTOFILL_AREA_CODE_NOTEXT_RE
         com.android.internal.R.string.autofill_phone_prefix_separator_re,   // IDS_AUTOFILL_PHONE_PREFIX_SEPARATOR_RE
-        com.android.internal.R.string.autofill_phone_suffix_separator_re    // IDS_AUTOFILL_PHONE_SUFFIX_SEPARATOR_RE
+        com.android.internal.R.string.autofill_phone_suffix_separator_re,   // IDS_AUTOFILL_PHONE_SUFFIX_SEPARATOR_RE
+        com.android.internal.R.string.credit_card_number_preview_format     // IDS_CREDIT_CARD_NUMBER_PREVIEW_FORMAT
     };
 
     private static Context mApplicationContext;
