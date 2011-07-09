@@ -270,13 +270,12 @@ public class Process {
      * @param targetSdkVersion The target SDK version for the app.
      * @param zygoteArgs Additional arguments to supply to the zygote process.
      * 
-     * @return int If > 0 the pid of the new process; if 0 the process is
-     *         being emulated by a thread
+     * @return An object that describes the result of the attempt to start the process.
      * @throws RuntimeException on fatal start failure
      * 
      * {@hide}
      */
-    public static final int start(final String processClass,
+    public static final ProcessStartResult start(final String processClass,
                                   final String niceName,
                                   int uid, int gid, int[] gids,
                                   int debugFlags, int targetSdkVersion,
@@ -376,14 +375,11 @@ public class Process {
      * and returns the child's pid. Please note: the present implementation
      * replaces newlines in the argument list with spaces.
      * @param args argument list
-     * @return PID of new child process
+     * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
      */
-    private static int zygoteSendArgsAndGetPid(ArrayList<String> args)
+    private static ProcessStartResult zygoteSendArgsAndGetResult(ArrayList<String> args)
             throws ZygoteStartFailedEx {
-
-        int pid;
-
         openZygoteSocketIfNeeded();
 
         try {
@@ -394,7 +390,8 @@ public class Process {
              * b) a number of newline-separated argument strings equal to count
              *
              * After the zygote process reads these it will write the pid of
-             * the child or -1 on failure.
+             * the child or -1 on failure, followed by boolean to
+             * indicate whether a wrapper process was used.
              */
 
             sZygoteWriter.write(Integer.toString(args.size()));
@@ -414,11 +411,13 @@ public class Process {
             sZygoteWriter.flush();
 
             // Should there be a timeout on this?
-            pid = sZygoteInputStream.readInt();
-
-            if (pid < 0) {
+            ProcessStartResult result = new ProcessStartResult();
+            result.pid = sZygoteInputStream.readInt();
+            if (result.pid < 0) {
                 throw new ZygoteStartFailedEx("fork() failed");
             }
+            result.usingWrapper = sZygoteInputStream.readBoolean();
+            return result;
         } catch (IOException ex) {
             try {
                 if (sZygoteSocket != null) {
@@ -433,8 +432,6 @@ public class Process {
 
             throw new ZygoteStartFailedEx(ex);
         }
-
-        return pid;
     }
 
     /**
@@ -449,18 +446,16 @@ public class Process {
      * @param debugFlags Additional flags.
      * @param targetSdkVersion The target SDK version for the app.
      * @param extraArgs Additional arguments to supply to the zygote process.
-     * @return PID
+     * @return An object that describes the result of the attempt to start the process.
      * @throws ZygoteStartFailedEx if process start failed for any reason
      */
-    private static int startViaZygote(final String processClass,
+    private static ProcessStartResult startViaZygote(final String processClass,
                                   final String niceName,
                                   final int uid, final int gid,
                                   final int[] gids,
                                   int debugFlags, int targetSdkVersion,
                                   String[] extraArgs)
                                   throws ZygoteStartFailedEx {
-        int pid;
-
         synchronized(Process.class) {
             ArrayList<String> argsForZygote = new ArrayList<String>();
 
@@ -516,15 +511,9 @@ public class Process {
                     argsForZygote.add(arg);
                 }
             }
-            
-            pid = zygoteSendArgsAndGetPid(argsForZygote);
-        }
 
-        if (pid <= 0) {
-            throw new ZygoteStartFailedEx("zygote start failed:" + pid);
+            return zygoteSendArgsAndGetResult(argsForZygote);
         }
-
-        return pid;
     }
     
     /**
@@ -808,4 +797,21 @@ public class Process {
      * @hide
      */
     public static final native long getPss(int pid);
+
+    /**
+     * Specifies the outcome of having started a process.
+     * @hide
+     */
+    public static final class ProcessStartResult {
+        /**
+         * The PID of the newly started process.
+         * Always >= 0.  (If the start failed, an exception will have been thrown instead.)
+         */
+        public int pid;
+
+        /**
+         * True if the process was started with a wrapper attached.
+         */
+        public boolean usingWrapper;
+    }
 }

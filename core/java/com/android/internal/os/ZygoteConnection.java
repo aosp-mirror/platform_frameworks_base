@@ -900,6 +900,7 @@ class ZygoteConnection {
             }
         }
 
+        boolean usingWrapper = false;
         if (pipeFd != null && pid > 0) {
             DataInputStream is = new DataInputStream(new FileInputStream(pipeFd));
             int innerPid = -1;
@@ -924,6 +925,7 @@ class ZygoteConnection {
                 if (parentPid > 0) {
                     Log.i(TAG, "Wrapped process has pid " + innerPid);
                     pid = innerPid;
+                    usingWrapper = true;
                 } else {
                     Log.w(TAG, "Wrapped process reported a pid that is not a child of "
                             + "the process that we forked: childPid=" + pid
@@ -934,6 +936,7 @@ class ZygoteConnection {
 
         try {
             mSocketOutStream.writeInt(pid);
+            mSocketOutStream.writeBoolean(usingWrapper);
         } catch (IOException ex) {
             Log.e(TAG, "Error reading from command socket", ex);
             return true;

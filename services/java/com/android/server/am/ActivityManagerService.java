@@ -208,6 +208,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     // before we decide it's never going to come up for real.
     static final int PROC_START_TIMEOUT = 10*1000;
 
+    // How long we wait for a launched process to attach to the activity manager
+    // before we decide it's never going to come up for real, when the process was
+    // started with a wrapper for instrumentation (such as Valgrind) because it
+    // could take much longer than usual.
+    static final int PROC_START_TIMEOUT_WITH_WRAPPER = 300*1000;
+
     // How long to wait after going idle before forcing apps to GC.
     static final int GC_TIMEOUT = 5*1000;
 
@@ -1950,9 +1956,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             if ("1".equals(SystemProperties.get("debug.assert"))) {
                 debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
-            int pid = Process.start("android.app.ActivityThread",
+
+            // Start the process.  It will either succeed and return a result containing
+            // the PID of the new process, or else throw a RuntimeException.
+            Process.ProcessStartResult startResult = Process.start("android.app.ActivityThread",
                     app.processName, uid, uid, gids, debugFlags,
                     app.info.targetSdkVersion, null);
+
             BatteryStatsImpl bs = app.batteryStats.getBatteryStats();
             synchronized (bs) {
                 if (bs.isOnBattery()) {
@@ -1960,12 +1970,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             
-            EventLog.writeEvent(EventLogTags.AM_PROC_START, pid, uid,
+            EventLog.writeEvent(EventLogTags.AM_PROC_START, startResult.pid, uid,
                     app.processName, hostingType,
                     hostingNameStr != null ? hostingNameStr : "");
             
             if (app.persistent) {
-                Watchdog.getInstance().processStarted(app.processName, pid);
+                Watchdog.getInstance().processStarted(app.processName, startResult.pid);
             }
             
             StringBuilder buf = mStringBuilder;
@@ -1979,7 +1989,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 buf.append(hostingNameStr);
             }
             buf.append(": pid=");
-            buf.append(pid);
+            buf.append(startResult.pid);
             buf.append(" uid=");
             buf.append(uid);
             buf.append(" gids={");
@@ -1992,21 +2002,15 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             buf.append("}");
             Slog.i(TAG, buf.toString());
-            if (pid > 0) {
-                app.pid = pid;
-                app.removed = false;
-                synchronized (mPidsSelfLocked) {
-                    this.mPidsSelfLocked.put(pid, app);
-                    Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
-                    msg.obj = app;
-                    mHandler.sendMessageDelayed(msg, PROC_START_TIMEOUT);
-                }
-            } else {
-                app.pid = 0;
-                RuntimeException e = new RuntimeException(
-                        "Failure starting process " + app.processName
-                        + ": returned pid=" + pid);
-                Slog.e(TAG, e.getMessage(), e);
+            app.pid = startResult.pid;
+            app.usingWrapper = startResult.usingWrapper;
+            app.removed = false;
+            synchronized (mPidsSelfLocked) {
+                this.mPidsSelfLocked.put(startResult.pid, app);
+                Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
+                msg.obj = app;
+                mHandler.sendMessageDelayed(msg, startResult.usingWrapper
+                        ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
             }
         } catch (RuntimeException e) {
             // XXX do better error recovery.
