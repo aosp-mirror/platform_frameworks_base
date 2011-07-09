@@ -118,12 +118,12 @@ public class RecentsVerticalScrollView extends ScrollView
     }
 
     private float getAlphaForOffset(View view, float thumbWidth) {
-        final float fadeWidth = Constants.FADE_CONSTANT * thumbWidth;
+        final float fadeWidth = Constants.ALPHA_FADE_END * thumbWidth;
         float result = 1.0f;
-        if (view.getX() >= thumbWidth) {
-            result = 1.0f - (view.getX() - thumbWidth) / fadeWidth;
-        } else if (view.getX() < 0.0f) {
-            result = 1.0f + (thumbWidth + view.getX()) / fadeWidth;
+        if (view.getX() >= thumbWidth*Constants.ALPHA_FADE_START) {
+            result = 1.0f - (view.getX() - thumbWidth*Constants.ALPHA_FADE_START) / fadeWidth;
+        } else if (view.getX() < thumbWidth* (1.0f - Constants.ALPHA_FADE_START)) {
+            result = 1.0f + (thumbWidth*Constants.ALPHA_FADE_START + view.getX()) / fadeWidth;
         }
         if (DEBUG) Log.v(TAG, "FADE AMOUNT: " + result);
         return result;

@@ -118,12 +118,12 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     }
 
     private float getAlphaForOffset(View view, float thumbHeight) {
-        final float fadeHeight = Constants.FADE_CONSTANT * thumbHeight;
+        final float fadeHeight = Constants.ALPHA_FADE_END * thumbHeight;
         float result = 1.0f;
-        if (view.getY() >= thumbHeight) {
-            result = 1.0f - (view.getY() - thumbHeight) / fadeHeight;
-        } else if (view.getY() < 0.0f) {
-            result = 1.0f + (thumbHeight + view.getY()) / fadeHeight;
+        if (view.getY() >= thumbHeight * Constants.ALPHA_FADE_START) {
+            result = 1.0f - (view.getY() - thumbHeight * Constants.ALPHA_FADE_START) / fadeHeight;
+        } else if (view.getY() < thumbHeight * (1.0f - Constants.ALPHA_FADE_START)) {
+            result = 1.0f + (thumbHeight * Constants.ALPHA_FADE_START + view.getY()) / fadeHeight;
         }
         if (DEBUG) Log.v(TAG, "FADE AMOUNT: " + result);
         return result;
@@ -269,7 +269,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         // This has to happen post-layout, so run it "in the future"
         post(new Runnable() {
             public void run() {
-                scrollTo(0, mLastScrollPosition);
+                scrollTo(mLastScrollPosition, 0);
             }
         });
     }

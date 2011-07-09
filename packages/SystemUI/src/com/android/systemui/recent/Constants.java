@@ -18,7 +18,8 @@ package com.android.systemui.recent;
 
 public class Constants {
     static final int MAX_ESCAPE_ANIMATION_DURATION = 500; // in ms
-    static final float FADE_CONSTANT = 0.5f; // unitless
     static final int SNAP_BACK_DURATION = 250; // in ms
     static final int ESCAPE_VELOCITY = 100; // speed of item required to "curate" it in dp/s
+    public static float ALPHA_FADE_START = 0.8f; // fraction of thumbnail width where fade starts
+    static final float ALPHA_FADE_END = 0.5f; // fraction of thumbnail width beyond which alpha->0
 }

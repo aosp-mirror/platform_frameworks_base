@@ -307,7 +307,7 @@ public class PhoneStatusBar extends StatusBar {
         mDateView.setVisibility(View.INVISIBLE);
 
         // Recents Panel
-        initializeRecentsPanel();
+        updateRecentsPanel();
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -338,7 +338,7 @@ public class PhoneStatusBar extends StatusBar {
         return lp;
     }
 
-    protected void initializeRecentsPanel() {
+    protected void updateRecentsPanel() {
         // Recents Panel
         boolean visible = false;
         if (mRecentsPanel != null) {
@@ -385,9 +385,9 @@ public class PhoneStatusBar extends StatusBar {
     // For small-screen devices (read: phones) that lack hardware navigation buttons
     private void addNavigationBar() {
         if (mNavigationBarView == null) return;
-        
+
         mNavigationBarView.reorient();
- 
+
         mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
 
         WindowManagerImpl.getDefault().addView(
@@ -396,7 +396,7 @@ public class PhoneStatusBar extends StatusBar {
 
     private void repositionNavigationBar() {
         if (mNavigationBarView == null) return;
-        
+
         mNavigationBarView.reorient();
 
         mNavigationBarView.getRecentsButton().setOnClickListener(mRecentsClickListener);
@@ -656,7 +656,7 @@ public class PhoneStatusBar extends StatusBar {
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
-        initializeRecentsPanel();
+        updateRecentsPanel();
     }
 
 
