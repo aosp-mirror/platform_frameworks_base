@@ -1335,16 +1335,19 @@ public class VideoEditorAPITest extends
     @LargeTest
     public void testEffectKenBurn() throws Exception {
         // Test ken burn effect using a JPEG file.
-        testEffectKenBurn(INPUT_FILE_PATH + "IMG_640x480.jpg");
+        testEffectKenBurn(INPUT_FILE_PATH + "IMG_640x480.jpg",
+         "mediaImageItem1");
 
         // Test ken burn effect using a PNG file
-        testEffectKenBurn(INPUT_FILE_PATH + "IMG_640x480.png");
+        testEffectKenBurn(INPUT_FILE_PATH + "IMG_640x480.png",
+         "mediaImageItem2");
     }
 
-    private void testEffectKenBurn(final String imageItemFileName) throws Exception {
+    private void testEffectKenBurn(final String imageItemFileName,
+     final String MediaId) throws Exception {
         final int imageItemRenderingMode =MediaItem.RENDERING_MODE_BLACK_BORDER;
         final MediaImageItem mediaImageItem =
-            mVideoEditorHelper.createMediaItem(mVideoEditor, "mediaImageItem1",
+            mVideoEditorHelper.createMediaItem(mVideoEditor, MediaId,
             imageItemFileName, 5000, imageItemRenderingMode);
         mVideoEditor.addMediaItem(mediaImageItem);
 
