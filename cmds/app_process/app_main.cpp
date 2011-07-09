@@ -82,35 +82,27 @@ public:
     virtual void onStarted()
     {
         sp<ProcessState> proc = ProcessState::self();
-        if (proc->supportsProcesses()) {
-            LOGV("App process: starting thread pool.\n");
-            proc->startThreadPool();
-        }
+        LOGV("App process: starting thread pool.\n");
+        proc->startThreadPool();
 
         AndroidRuntime* ar = AndroidRuntime::getRuntime();
         ar->callMain(mClassName, mClass, mArgC, mArgV);
 
-        if (ProcessState::self()->supportsProcesses()) {
-            IPCThreadState::self()->stopProcess();
-        }
+        IPCThreadState::self()->stopProcess();
     }
 
     virtual void onZygoteInit()
     {
         sp<ProcessState> proc = ProcessState::self();
-        if (proc->supportsProcesses()) {
-            LOGV("App process: starting thread pool.\n");
-            proc->startThreadPool();
-        }
+        LOGV("App process: starting thread pool.\n");
+        proc->startThreadPool();
     }
 
     virtual void onExit(int code)
     {
         if (mClassName == NULL) {
             // if zygote
-            if (ProcessState::self()->supportsProcesses()) {
-                IPCThreadState::self()->stopProcess();
-            }
+            IPCThreadState::self()->stopProcess();
         }
 
         AndroidRuntime::onExit(code);

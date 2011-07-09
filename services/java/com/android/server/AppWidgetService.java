@@ -1072,7 +1072,7 @@ class AppWidgetService extends IAppWidgetService.Stub
             throw new IllegalArgumentException("packageName and uid don't match packageName="
                     + packageName);
         }
-        if (callingUid != packageUid && Process.supportsProcesses()) {
+        if (callingUid != packageUid) {
             throw new IllegalArgumentException("packageName and uid don't match packageName="
                     + packageName);
         }

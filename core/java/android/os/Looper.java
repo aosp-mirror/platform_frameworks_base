@@ -86,9 +86,7 @@ public class Looper {
     public static final void prepareMainLooper() {
         prepare();
         setMainLooper(myLooper());
-        if (Process.supportsProcesses()) {
-            myLooper().mQueue.mQuitAllowed = false;
-        }
+        myLooper().mQueue.mQuitAllowed = false;
     }
 
     private synchronized static void setMainLooper(Looper looper) {

@@ -4093,11 +4093,6 @@ public final class ActivityThread {
         });
     }
 
-    private final void detach()
-    {
-        sThreadLocal.set(null);
-    }
-
     public static final ActivityThread systemMain() {
         HardwareRenderer.disable();
         ActivityThread thread = new ActivityThread();
@@ -4105,10 +4100,9 @@ public final class ActivityThread {
         return thread;
     }
 
-    public final void installSystemProviders(List providers) {
+    public final void installSystemProviders(List<ProviderInfo> providers) {
         if (providers != null) {
-            installContentProviders(mInitialApplication,
-                                    (List<ProviderInfo>)providers);
+            installContentProviders(mInitialApplication, providers);
         }
     }
 
@@ -4147,14 +4141,6 @@ public final class ActivityThread {
 
         Looper.loop();
 
-        if (Process.supportsProcesses()) {
-            throw new RuntimeException("Main thread loop unexpectedly exited");
-        }
-
-        thread.detach();
-        String name = (thread.mInitialApplication != null)
-            ? thread.mInitialApplication.getPackageName()
-            : "<unknown>";
-        Slog.i(TAG, "Main thread of " + name + " is now exiting");
+        throw new RuntimeException("Main thread loop unexpectedly exited");
     }
 }

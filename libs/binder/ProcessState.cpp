@@ -43,8 +43,6 @@
 
 #define BINDER_VM_SIZE ((1*1024*1024) - (4096 *2))
 
-static bool gSingleProcess = false;
-
 
 // ---------------------------------------------------------------------------
 
@@ -82,12 +80,6 @@ sp<ProcessState> ProcessState::self()
     return gProcess;
 }
 
-void ProcessState::setSingleProcess(bool singleProcess)
-{
-    gSingleProcess = singleProcess;
-}
-
-
 void ProcessState::setContextObject(const sp<IBinder>& object)
 {
     setContextObject(object, String16("default"));
@@ -95,11 +87,7 @@ void ProcessState::setContextObject(const sp<IBinder>& object)
 
 sp<IBinder> ProcessState::getContextObject(const sp<IBinder>& caller)
 {
-    if (supportsProcesses()) {
-        return getStrongProxyForHandle(0);
-    } else {
-        return getContextObject(String16("default"), caller);
-    }
+    return getStrongProxyForHandle(0);
 }
 
 void ProcessState::setContextObject(const sp<IBinder>& object, const String16& name)
@@ -144,11 +132,6 @@ sp<IBinder> ProcessState::getContextObject(const String16& name, const sp<IBinde
     return object;
 }
 
-bool ProcessState::supportsProcesses() const
-{
-    return mDriverFD >= 0;
-}
-
 void ProcessState::startThreadPool()
 {
     AutoMutex _l(mLock);
@@ -169,24 +152,19 @@ bool ProcessState::becomeContextManager(context_check_func checkFunc, void* user
         AutoMutex _l(mLock);
         mBinderContextCheckFunc = checkFunc;
         mBinderContextUserData = userData;
-        if (mDriverFD >= 0) {
-            int dummy = 0;
+
+        int dummy = 0;
 #if defined(HAVE_ANDROID_OS)
-            status_t result = ioctl(mDriverFD, BINDER_SET_CONTEXT_MGR, &dummy);
+        status_t result = ioctl(mDriverFD, BINDER_SET_CONTEXT_MGR, &dummy);
 #else
-            status_t result = INVALID_OPERATION;
+        status_t result = INVALID_OPERATION;
 #endif
-            if (result == 0) {
-                mManagesContexts = true;
-            } else if (result == -1) {
-                mBinderContextCheckFunc = NULL;
-                mBinderContextUserData = NULL;
-                LOGE("Binder ioctl to become context manager failed: %s\n", strerror(errno));
-            }
-        } else {
-            // If there is no driver, our only world is the local
-            // process so we can always become the context manager there.
+        if (result == 0) {
             mManagesContexts = true;
+        } else if (result == -1) {
+            mBinderContextCheckFunc = NULL;
+            mBinderContextUserData = NULL;
+            LOGE("Binder ioctl to become context manager failed: %s\n", strerror(errno));
         }
     }
     return mManagesContexts;
@@ -322,10 +300,6 @@ void ProcessState::spawnPooledThread(bool isMain)
 
 static int open_driver()
 {
-    if (gSingleProcess) {
-        return -1;
-    }
-
     int fd = open("/dev/binder", O_RDWR);
     if (fd >= 0) {
         fcntl(fd, F_SETFD, FD_CLOEXEC);
@@ -386,9 +360,8 @@ ProcessState::ProcessState()
         mDriverFD = -1;
 #endif
     }
-    if (mDriverFD < 0) {
-        // Need to run without the driver, starting our own thread pool.
-    }
+
+    LOG_ALWAYS_FATAL_IF(mDriverFD < 0, "Binder driver could not be opened.  Terminating.");
 }
 
 ProcessState::~ProcessState()

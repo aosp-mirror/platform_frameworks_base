@@ -1163,9 +1163,6 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("permission is null");
         }
 
-        if (!Process.supportsProcesses()) {
-            return PackageManager.PERMISSION_GRANTED;
-        }
         try {
             return ActivityManagerNative.getDefault().checkPermission(
                     permission, pid, uid);
@@ -1180,9 +1177,6 @@ class ContextImpl extends Context {
             throw new IllegalArgumentException("permission is null");
         }
 
-        if (!Process.supportsProcesses()) {
-            return PackageManager.PERMISSION_GRANTED;
-        }
         int pid = Binder.getCallingPid();
         if (pid != Process.myPid()) {
             return checkPermission(permission, pid,
@@ -1263,9 +1257,6 @@ class ContextImpl extends Context {
 
     @Override
     public int checkUriPermission(Uri uri, int pid, int uid, int modeFlags) {
-        if (!Process.supportsProcesses()) {
-            return PackageManager.PERMISSION_GRANTED;
-        }
         try {
             return ActivityManagerNative.getDefault().checkUriPermission(
                     uri, pid, uid, modeFlags);
@@ -1276,9 +1267,6 @@ class ContextImpl extends Context {
 
     @Override
     public int checkCallingUriPermission(Uri uri, int modeFlags) {
-        if (!Process.supportsProcesses()) {
-            return PackageManager.PERMISSION_GRANTED;
-        }
         int pid = Binder.getCallingPid();
         if (pid != Process.myPid()) {
             return checkUriPermission(uri, pid,

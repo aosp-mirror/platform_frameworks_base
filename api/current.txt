@@ -14392,7 +14392,7 @@ package android.os {
     method public static final void sendSignal(int, int);
     method public static final void setThreadPriority(int, int) throws java.lang.IllegalArgumentException, java.lang.SecurityException;
     method public static final void setThreadPriority(int) throws java.lang.IllegalArgumentException, java.lang.SecurityException;
-    method public static final boolean supportsProcesses();
+    method public static final deprecated boolean supportsProcesses();
     field public static final int BLUETOOTH_GID = 2000; // 0x7d0
     field public static final int FIRST_APPLICATION_UID = 10000; // 0x2710
     field public static final int LAST_APPLICATION_UID = 99999; // 0x1869f

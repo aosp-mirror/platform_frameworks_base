@@ -318,17 +318,15 @@ jboolean android_os_Process_setOomAdj(JNIEnv* env, jobject clazz,
                                       jint pid, jint adj)
 {
 #ifdef HAVE_OOM_ADJ
-    if (ProcessState::self()->supportsProcesses()) {
-        char text[64];
-        sprintf(text, "/proc/%d/oom_adj", pid);
-        int fd = open(text, O_WRONLY);
-        if (fd >= 0) {
-            sprintf(text, "%d", adj);
-            write(fd, text, strlen(text));
-            close(fd);
-        }
-        return true;
+    char text[64];
+    sprintf(text, "/proc/%d/oom_adj", pid);
+    int fd = open(text, O_WRONLY);
+    if (fd >= 0) {
+        sprintf(text, "%d", adj);
+        write(fd, text, strlen(text));
+        close(fd);
     }
+    return true;
 #endif
     return false;
 }
@@ -368,11 +366,6 @@ jint android_os_Process_setGid(JNIEnv* env, jobject clazz, jint uid)
     #else
     return ENOSYS;
     #endif
-}
-
-jboolean android_os_Process_supportsProcesses(JNIEnv* env, jobject clazz)
-{
-    return ProcessState::self()->supportsProcesses();
 }
 
 static int pid_compare(const void* v1, const void* v2)
@@ -878,7 +871,6 @@ static const JNINativeMethod methods[] = {
     {"setGid", "(I)I", (void*)android_os_Process_setGid},
     {"sendSignal", "(II)V", (void*)android_os_Process_sendSignal},
     {"sendSignalQuiet", "(II)V", (void*)android_os_Process_sendSignalQuiet},
-    {"supportsProcesses", "()Z", (void*)android_os_Process_supportsProcesses},
     {"getFreeMemory", "()J", (void*)android_os_Process_getFreeMemory},
     {"readProcLines", "(Ljava/lang/String;[Ljava/lang/String;[J)V", (void*)android_os_Process_readProcLines},
     {"getPids", "(Ljava/lang/String;[I)[I", (void*)android_os_Process_getPids},

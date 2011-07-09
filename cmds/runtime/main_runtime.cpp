@@ -93,12 +93,11 @@ extern void QuickTests();
 static void usage(const char* argv0)
 {
     fprintf(stderr,
-        "Usage: runtime [-g gamma] [-l logfile] [-n] [-s]\n"
+        "Usage: runtime [-g gamma] [-l logfile] [-n]\n"
         "               [-j app-component] [-v app-verb] [-d app-data]\n"
         "\n"
         "-l: File to send log messages to\n"
         "-n: Don't print to stdout/stderr\n"
-        "-s: Force single-process mode\n"
         "-j: Custom home app component name\n"
         "-v: Custom home app intent verb\n"
         "-d: Custom home app intent data\n"
@@ -145,21 +144,14 @@ static int run(sp<ProcessState>& proc)
 LOGI("run() sending FIRST_CALL_TRANSACTION to activity manager");
     am->transact(IBinder::FIRST_CALL_TRANSACTION, data, &reply);
 
-    if (proc->supportsProcesses()) {
-        // Now we link to the Activity Manager waiting for it to die. If it does kill ourself.
-        // initd will restart this process and bring the system back up.
-        sp<GrimReaper> grim = new GrimReaper();
-        am->linkToDeath(grim, grim.get(), 0);
+    // Now we link to the Activity Manager waiting for it to die. If it does kill ourself.
+    // initd will restart this process and bring the system back up.
+    sp<GrimReaper> grim = new GrimReaper();
+    am->linkToDeath(grim, grim.get(), 0);
 
-        // Now join the thread pool. Note this is needed so that the message enqueued in the driver
-        // for the linkToDeath gets processed.
-        IPCThreadState::self()->joinThreadPool();
-    } else {
-        // Keep this thread running forever...
-        while (1) {
-            usleep(100000);
-        }
-    }
+    // Now join the thread pool. Note this is needed so that the message enqueued in the driver
+    // for the linkToDeath gets processed.
+    IPCThreadState::self()->joinThreadPool();
     return 1;
 }
 
@@ -179,14 +171,7 @@ LOGI("run() sending FIRST_CALL_TRANSACTION to activity manager");
  */
 static void finish_system_init(sp<ProcessState>& proc)
 {
-    // If we are running multiprocess, we now need to have the
-    // thread pool started here.  We don't do this in boot_init()
-    // because when running single process we need to start the
-    // thread pool after the Android runtime has been started (so
-    // the pool uses Dalvik threads).
-    if (proc->supportsProcesses()) {
-        proc->startThreadPool();
-    }
+    proc->startThreadPool();
 }
 
 
@@ -214,11 +199,7 @@ static void boot_init()
     LOGD("ProcessState: %p\n", proc.get());
     proc->becomeContextManager(contextChecker, NULL);
 
-    if (proc->supportsProcesses()) {
-        LOGI("Binder driver opened.  Multiprocess enabled.\n");
-    } else {
-        LOGI("Binder driver not found.  Processes not supported.\n");
-    }
+    LOGI("Binder driver opened.\n");
 
     sp<BServiceManager> sm = new BServiceManager;
     proc->setContextObject(sm);
@@ -340,7 +321,6 @@ static status_t start_process(const char* name)
 extern "C"
 int main(int argc, char* const argv[])
 {
-    bool singleProcess = false;
     const char* logFile = NULL;
     int ic;
     int result = 1;
@@ -359,7 +339,7 @@ int main(int argc, char* const argv[])
 #endif
 
     while (1) {
-        ic = getopt(argc, argv, "g:j:v:d:l:ns");
+        ic = getopt(argc, argv, "g:j:v:d:l:n");
         if (ic < 0)
             break;
 
@@ -381,9 +361,6 @@ int main(int argc, char* const argv[])
         case 'n':
             redirectStdFds();
             break;
-        case 's':
-            singleProcess = true;
-            break;
         case '?':
         default:
             LOGE("runtime: unrecognized flag -%c\n", ic);
@@ -394,10 +371,6 @@ int main(int argc, char* const argv[])
     if (optind < argc) {
         LOGE("runtime: extra stuff: %s\n", argv[optind]);
         usage(argv[0]);
-    }
-
-    if (singleProcess) {
-        ProcessState::setSingleProcess(true);
     }
 
     if (logFile != NULL) {
@@ -475,33 +448,17 @@ int main(int argc, char* const argv[])
 
     boot_init();
 
-    /* If we are in multiprocess mode, have zygote spawn the system
-     * server process and call system_init(). If we are running in
-     * single process mode just call system_init() directly.
-     */
-    if (proc->supportsProcesses()) {
-        // If stdio logging is on, system_server should not inherit our stdio
-        // The dalvikvm instance will copy stdio to the log on its own
-        char propBuf[PROPERTY_VALUE_MAX];
-        bool logStdio = false;
-        property_get("log.redirect-stdio", propBuf, "");
-        logStdio = (strcmp(propBuf, "true") == 0);
+    // Have zygote spawn the system server process and call system_init().
+    // If stdio logging is on, system_server should not inherit our stdio
+    // The dalvikvm instance will copy stdio to the log on its own
+    char propBuf[PROPERTY_VALUE_MAX];
+    bool logStdio = false;
+    property_get("log.redirect-stdio", propBuf, "");
+    logStdio = (strcmp(propBuf, "true") == 0);
 
-        zygote_run_oneshot((int)(!logStdio),
-                sizeof(ZYGOTE_ARGV) / sizeof(ZYGOTE_ARGV[0]),
-                ZYGOTE_ARGV);
-
-        //start_process("/system/bin/mediaserver");
-
-    } else {
-#ifndef HAVE_ANDROID_OS
-        QuickRuntime* runt = new QuickRuntime();
-        runt->start("com/android/server/SystemServer",
-                    "" /* spontaneously fork system server from zygote */);
-#endif
-    }
-
-    //printf("+++ post-zygote\n");
+    zygote_run_oneshot((int)(!logStdio),
+            sizeof(ZYGOTE_ARGV) / sizeof(ZYGOTE_ARGV[0]),
+            ZYGOTE_ARGV);
 
     finish_system_init(proc);
     run(proc);

@@ -783,7 +783,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         // whether we are running on the simulator and thus need to take
         // care of building the /data file structure ourself.
         // (apparently the sim now has a working installer)
-        if (installer.ping() && Process.supportsProcesses()) {
+        if (installer.ping()) {
             mInstaller = installer;
         } else {
             mInstaller = null;
@@ -3237,7 +3237,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
                 // If we have mismatched owners for the data path, we have a
                 // problem (unless we're running in the simulator.)
-                if (mOutPermissions[1] != pkg.applicationInfo.uid && Process.supportsProcesses()) {
+                if (mOutPermissions[1] != pkg.applicationInfo.uid) {
                     boolean recovered = false;
                     if ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
                         // If this is a system app, we can at least delete its

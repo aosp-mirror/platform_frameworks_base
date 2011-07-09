@@ -280,72 +280,16 @@ public class Process {
                                   final String niceName,
                                   int uid, int gid, int[] gids,
                                   int debugFlags, int targetSdkVersion,
-                                  String[] zygoteArgs)
-    {
-        if (supportsProcesses()) {
-            try {
-                return startViaZygote(processClass, niceName, uid, gid, gids,
-                        debugFlags, targetSdkVersion, zygoteArgs);
-            } catch (ZygoteStartFailedEx ex) {
-                Log.e(LOG_TAG,
-                        "Starting VM process through Zygote failed");
-                throw new RuntimeException(
-                        "Starting VM process through Zygote failed", ex);
-            }
-        } else {
-            // Running in single-process mode
-            
-            Runnable runnable = new Runnable() {
-                        public void run() {
-                            Process.invokeStaticMain(processClass);
-                        }
-            };
-            
-            // Thread constructors must not be called with null names (see spec). 
-            if (niceName != null) {
-                new Thread(runnable, niceName).start();
-            } else {
-                new Thread(runnable).start();
-            }
-            
-            return 0;
-        }
-    }
-    
-    /**
-     * Start a new process.  Don't supply a custom nice name.
-     * {@hide}
-     */
-    public static final int start(String processClass, int uid, int gid,
-            int[] gids, int debugFlags, int targetSdkVersion,
-            String[] zygoteArgs) {
-        return start(processClass, "", uid, gid, gids, 
-                debugFlags, targetSdkVersion, zygoteArgs);
-    }
-
-    private static void invokeStaticMain(String className) {
-        Class cl;
-        Object args[] = new Object[1];
-
-        args[0] = new String[0];     //this is argv
-   
+                                  String[] zygoteArgs) {
         try {
-            cl = Class.forName(className);
-            cl.getMethod("main", new Class[] { String[].class })
-                    .invoke(null, args);            
-        } catch (Exception ex) {
-            // can be: ClassNotFoundException,
-            // NoSuchMethodException, SecurityException,
-            // IllegalAccessException, IllegalArgumentException
-            // InvocationTargetException
-            // or uncaught exception from main()
-
-            Log.e(LOG_TAG, "Exception invoking static main on " 
-                    + className, ex);
-
-            throw new RuntimeException(ex);
+            return startViaZygote(processClass, niceName, uid, gid, gids,
+                    debugFlags, targetSdkVersion, zygoteArgs);
+        } catch (ZygoteStartFailedEx ex) {
+            Log.e(LOG_TAG,
+                    "Starting VM process through Zygote failed");
+            throw new RuntimeException(
+                    "Starting VM process through Zygote failed", ex);
         }
-
     }
 
     /** retry interval for opening a zygote socket */
@@ -740,8 +684,13 @@ public class Process {
      * 
      * @return Returns true if the system can run in multiple processes, else
      * false if everything is running in a single process.
+     *
+     * @deprecated This method always returns true.  Do not use.
      */
-    public static final native boolean supportsProcesses();
+    @Deprecated
+    public static final boolean supportsProcesses() {
+        return true;
+    }
 
     /**
      * Set the out-of-memory badness adjustment for a process.
