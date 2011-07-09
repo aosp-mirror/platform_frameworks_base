@@ -1960,7 +1960,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
             int pid = Process.start("android.app.ActivityThread",
-                    app.processName, uid, uid, gids, debugFlags, null);
+                    app.processName, uid, uid, gids, debugFlags,
+                    app.info.targetSdkVersion, null);
             BatteryStatsImpl bs = app.batteryStats.getBatteryStats();
             synchronized (bs) {
                 if (bs.isOnBattery()) {

@@ -18,6 +18,7 @@ package com.android.internal.os;
 
 import android.net.Credentials;
 import android.net.LocalSocket;
+import android.os.Build;
 import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Log;
@@ -333,6 +334,10 @@ class ZygoteConnection {
          */
         int debugFlags;
 
+        /** from --target-sdk-version. */
+        int targetSdkVersion;
+        boolean targetSdkVersionSpecified;
+
         /** from --classpath */
         String classpath;
 
@@ -401,6 +406,14 @@ class ZygoteConnection {
                     }
                     gidSpecified = true;
                     gid = Integer.parseInt(
+                            arg.substring(arg.indexOf('=') + 1));
+                } else if (arg.startsWith("--target-sdk-version=")) {
+                    if (targetSdkVersionSpecified) {
+                        throw new IllegalArgumentException(
+                                "Duplicate target-sdk-version specified");
+                    }
+                    targetSdkVersionSpecified = true;
+                    targetSdkVersion = Integer.parseInt(
                             arg.substring(arg.indexOf('=') + 1));
                 } else if (arg.equals("--enable-debugger")) {
                     debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
@@ -503,6 +516,10 @@ class ZygoteConnection {
             if (runtimeInit && classpath != null) {
                 throw new IllegalArgumentException(
                         "--runtime-init and -classpath are incompatible");
+            }
+
+            if (!targetSdkVersionSpecified) {
+                targetSdkVersion = Build.VERSION.SDK_INT;
             }
 
             remainingArgs = new String[args.length - curArg];
@@ -821,9 +838,11 @@ class ZygoteConnection {
         if (parsedArgs.runtimeInit) {
             if (parsedArgs.invokeWith != null) {
                 WrapperInit.execApplication(parsedArgs.invokeWith,
-                        parsedArgs.niceName, pipeFd, parsedArgs.remainingArgs);
+                        parsedArgs.niceName, parsedArgs.targetSdkVersion,
+                        pipeFd, parsedArgs.remainingArgs);
             } else {
-                RuntimeInit.zygoteInit(parsedArgs.remainingArgs);
+                RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion,
+                        parsedArgs.remainingArgs);
             }
         } else {
             String className;
