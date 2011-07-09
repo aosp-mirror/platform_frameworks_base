@@ -16,6 +16,7 @@
 package com.android.internal.telephony.cdma;
 
 import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_TEST_CSIM;
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.IccCardApplication.AppType;
 import com.android.internal.telephony.IccFileHandler;
@@ -447,6 +448,12 @@ public final class CdmaLteUiccRecords extends SIMRecords {
         // to determine if the SIM is provisioned.  Otherwise,
         // consider the SIM is provisioned. (for case of ordinal
         // USIM only UICC.)
+        // If PROPERTY_TEST_CSIM is defined, bypess provision check
+        // and consider the SIM is provisioned.
+        if (SystemProperties.getBoolean(PROPERTY_TEST_CSIM, false)) {
+            return true;
+        }
+
         if (phone.mIccCard.isApplicationOnIcc(AppType.APPTYPE_CSIM) &&
             ((mMdn == null) || (mMin == null))) {
             return false;
