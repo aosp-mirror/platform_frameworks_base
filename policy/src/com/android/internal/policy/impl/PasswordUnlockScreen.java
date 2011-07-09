@@ -29,7 +29,9 @@ import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.security.KeyStore;
 import android.telephony.TelephonyManager;
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.text.method.TextKeyListener;
 import android.util.Log;
@@ -120,15 +122,6 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             }
         });
 
-        // We don't currently use the IME for PIN mode, but this will make it work if we ever do...
-        if (!mIsAlpha) {
-            mPasswordEntry.setInputType(InputType.TYPE_CLASS_NUMBER
-                    | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-        } else {
-            mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT
-                    | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        }
-
         mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
         mEmergencyCallButton.setOnClickListener(this);
         mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
@@ -151,14 +144,17 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
         mPasswordEntry.requestFocus();
 
-        // This allows keyboards with overlapping qwerty/numeric keys to choose just the
-        // numeric keys.
+        // This allows keyboards with overlapping qwerty/numeric keys to choose just numeric keys.
         if (mIsAlpha) {
             mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
+            mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT
+                    | InputType.TYPE_TEXT_VARIATION_PASSWORD);
             // mStatusView.setHelpMessage(R.string.keyguard_password_enter_password_code,
             //      StatusView.LOCK_ICON);
         } else {
             mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
+            mPasswordEntry.setInputType(InputType.TYPE_CLASS_NUMBER
+                    | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
             //mStatusView.setHelpMessage(R.string.keyguard_password_enter_pin_code,
             //      StatusView.LOCK_ICON);
         }
@@ -179,6 +175,19 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         //mUpdateMonitor.registerSimStateCallback(this);
 
         resetStatusInfo();
+
+        // Poke the wakelock any time the text is modified
+        mPasswordEntry.addTextChangedListener(new TextWatcher() {
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void afterTextChanged(Editable s) {
+                mCallback.pokeWakelock();
+            }
+        });
     }
 
     @Override
