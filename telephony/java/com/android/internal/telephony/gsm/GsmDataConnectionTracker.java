@@ -1055,10 +1055,16 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                     }
                 }
                 if (!found) {
-                    // ApnContext does not have dcan reorted in data call list.
+                    // ApnContext does not have dcac reported in data call list.
+                    // Fetch all the ApnContexts that map to this dcac which are in
+                    // INITING state too.
                     if (DBG) log("onDataStateChanged(ar): Connected apn not found in the list (" +
                                  apnContext.toString() + ")");
-                    list.add(apnContext);
+                    if (apnContext.getDataConnectionAc() != null) {
+                        list.addAll(apnContext.getDataConnectionAc().getApnListSync());
+                    } else {
+                        list.add(apnContext);
+                    }
                 }
             }
         }
@@ -1110,10 +1116,12 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
             Collection<ApnContext> apns = dcac.getApnListSync();
 
-            // filter out ApnContext with "Connected" state.
+            // filter out ApnContext with "Connected/Connecting" state.
             ArrayList<ApnContext> connectedApns = new ArrayList<ApnContext>();
             for (ApnContext apnContext : apns) {
-                if (apnContext.getState() == State.CONNECTED) {
+                if (apnContext.getState() == State.CONNECTED ||
+                       apnContext.getState() == State.CONNECTING ||
+                       apnContext.getState() == State.INITING) {
                     connectedApns.add(apnContext);
                 }
             }
