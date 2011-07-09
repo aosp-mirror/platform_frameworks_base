@@ -26,7 +26,7 @@
 extern "C" {
 int ifc_enable(const char *ifname);
 int ifc_disable(const char *ifname);
-int ifc_reset_connections(const char *ifname);
+int ifc_reset_connections(const char *ifname, int reset_mask);
 
 int dhcp_do_request(const char *ifname,
                     const char *ipaddr,
@@ -90,12 +90,17 @@ static jint android_net_utils_disableInterface(JNIEnv* env, jobject clazz, jstri
     return (jint)result;
 }
 
-static jint android_net_utils_resetConnections(JNIEnv* env, jobject clazz, jstring ifname)
+static jint android_net_utils_resetConnections(JNIEnv* env, jobject clazz,
+      jstring ifname, jint mask)
 {
     int result;
 
     const char *nameStr = env->GetStringUTFChars(ifname, NULL);
-    result = ::ifc_reset_connections(nameStr);
+
+    LOGD("android_net_utils_resetConnections in env=%p clazz=%p iface=%s mask=0x%x\n",
+          env, clazz, nameStr, mask);
+
+    result = ::ifc_reset_connections(nameStr, mask);
     env->ReleaseStringUTFChars(ifname, nameStr);
     return (jint)result;
 }
@@ -206,7 +211,7 @@ static JNINativeMethod gNetworkUtilMethods[] = {
 
     { "enableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_enableInterface },
     { "disableInterface", "(Ljava/lang/String;)I",  (void *)android_net_utils_disableInterface },
-    { "resetConnections", "(Ljava/lang/String;)I",  (void *)android_net_utils_resetConnections },
+    { "resetConnections", "(Ljava/lang/String;I)I",  (void *)android_net_utils_resetConnections },
     { "runDhcp", "(Ljava/lang/String;Landroid/net/DhcpInfoInternal;)Z",  (void *)android_net_utils_runDhcp },
     { "runDhcpRenew", "(Ljava/lang/String;Landroid/net/DhcpInfoInternal;)Z",  (void *)android_net_utils_runDhcpRenew },
     { "stopDhcp", "(Ljava/lang/String;)Z",  (void *)android_net_utils_stopDhcp },
