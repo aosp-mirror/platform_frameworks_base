@@ -16,41 +16,71 @@
 
 package android.util;
 
+import android.content.ContentResolver;
+import android.content.Context;
+import android.content.res.Resources;
 import android.net.SntpClient;
 import android.os.SystemClock;
+import android.provider.Settings;
 
 /**
- * {@link TrustedTime} that connects with a remote NTP server as its remote
- * trusted time source.
+ * {@link TrustedTime} that connects with a remote NTP server as its trusted
+ * time source.
  *
  * @hide
  */
 public class NtpTrustedTime implements TrustedTime {
-    private String mNtpServer;
-    private long mNtpTimeout;
+    private static final String TAG = "NtpTrustedTime";
+    private static final boolean LOGD = false;
+
+    private static NtpTrustedTime sSingleton;
+
+    private final String mServer;
+    private final long mTimeout;
 
     private boolean mHasCache;
     private long mCachedNtpTime;
     private long mCachedNtpElapsedRealtime;
     private long mCachedNtpCertainty;
 
-    public NtpTrustedTime() {
+    private NtpTrustedTime(String server, long timeout) {
+        if (LOGD) Log.d(TAG, "creating NtpTrustedTime using " + server);
+        mServer = server;
+        mTimeout = timeout;
     }
 
-    public void setNtpServer(String server, long timeout) {
-        mNtpServer = server;
-        mNtpTimeout = timeout;
+    public static synchronized NtpTrustedTime getInstance(Context context) {
+        if (sSingleton == null) {
+            final Resources res = context.getResources();
+            final ContentResolver resolver = context.getContentResolver();
+
+            final String defaultServer = res.getString(
+                    com.android.internal.R.string.config_ntpServer);
+            final long defaultTimeout = res.getInteger(
+                    com.android.internal.R.integer.config_ntpTimeout);
+
+            final String secureServer = Settings.Secure.getString(
+                    resolver, Settings.Secure.NTP_SERVER);
+            final long timeout = Settings.Secure.getLong(
+                    resolver, Settings.Secure.NTP_TIMEOUT, defaultTimeout);
+
+            final String server = secureServer != null ? secureServer : defaultServer;
+            sSingleton = new NtpTrustedTime(server, timeout);
+        }
+
+        return sSingleton;
     }
 
     /** {@inheritDoc} */
     public boolean forceRefresh() {
-        if (mNtpServer == null) {
+        if (mServer == null) {
             // missing server, so no trusted time available
             return false;
         }
 
+        if (LOGD) Log.d(TAG, "forceRefresh() from cache miss");
         final SntpClient client = new SntpClient();
-        if (client.requestTime(mNtpServer, (int) mNtpTimeout)) {
+        if (client.requestTime(mServer, (int) mTimeout)) {
             mHasCache = true;
             mCachedNtpTime = client.getNtpTime();
             mCachedNtpElapsedRealtime = client.getNtpTimeReference();
@@ -89,9 +119,19 @@ public class NtpTrustedTime implements TrustedTime {
         if (!mHasCache) {
             throw new IllegalStateException("Missing authoritative time source");
         }
+        if (LOGD) Log.d(TAG, "currentTimeMillis() cache hit");
 
         // current time is age after the last ntp cache; callers who
         // want fresh values will hit makeAuthoritative() first.
         return mCachedNtpTime + getCacheAge();
+    }
+
+    public long getCachedNtpTime() {
+        if (LOGD) Log.d(TAG, "getCachedNtpTime() cache hit");
+        return mCachedNtpTime;
+    }
+
+    public long getCachedNtpTimeReference() {
+        return mCachedNtpElapsedRealtime;
     }
 }

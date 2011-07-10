@@ -27,7 +27,6 @@ import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_REMOVED;
-import static android.provider.Settings.Secure.NETSTATS_ENABLED;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_BUCKET_DURATION;
 import static android.provider.Settings.Secure.NETSTATS_NETWORK_MAX_HISTORY;
 import static android.provider.Settings.Secure.NETSTATS_PERSIST_THRESHOLD;
@@ -71,7 +70,6 @@ import android.util.Slog;
 import android.util.TrustedTime;
 
 import com.android.internal.os.AtomicFile;
-import com.android.server.NativeDaemonConnectorException;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
 
@@ -175,9 +173,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     public NetworkStatsService(
             Context context, INetworkManagementService networkManager, IAlarmManager alarmManager) {
-        // TODO: move to using cached NtpTrustedTime
-        this(context, networkManager, alarmManager, new NtpTrustedTime(), getSystemDir(),
-                new DefaultNetworkStatsSettings(context));
+        this(context, networkManager, alarmManager, NtpTrustedTime.getInstance(context),
+                getSystemDir(), new DefaultNetworkStatsSettings(context));
     }
 
     private static File getSystemDir() {

@@ -3833,6 +3833,11 @@ public final class Settings {
         /** {@hide} */
         public static final String NETSTATS_TAG_MAX_HISTORY = "netstats_tag_max_history";
 
+        /** Preferred NTP server. {@hide} */
+        public static final String NTP_SERVER = "ntp_server";
+        /** Timeout in milliseconds to wait for NTP server. {@hide} */
+        public static final String NTP_TIMEOUT = "ntp_timeout";
+
         /**
          * @hide
          */

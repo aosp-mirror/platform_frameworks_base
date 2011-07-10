@@ -204,9 +204,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             IPowerManager powerManager, INetworkStatsService networkStats,
             INetworkManagementService networkManagement) {
-        // TODO: move to using cached NtpTrustedTime
         this(context, activityManager, powerManager, networkStats, networkManagement,
-                new NtpTrustedTime(), getSystemDir());
+                NtpTrustedTime.getInstance(context), getSystemDir());
     }
 
     private static File getSystemDir() {

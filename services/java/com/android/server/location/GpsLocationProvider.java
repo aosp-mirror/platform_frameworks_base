@@ -32,7 +32,6 @@ import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.SntpClient;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,6 +50,7 @@ import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
+import android.util.NtpTrustedTime;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IBatteryStats;
@@ -61,7 +61,7 @@ import com.android.internal.telephony.Phone;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.StringBufferInputStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map.Entry;
@@ -235,13 +235,13 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     // properties loaded from PROPERTIES_FILE
     private Properties mProperties;
-    private String mNtpServer;
     private String mSuplServerHost;
     private int mSuplServerPort;
     private String mC2KServerHost;
     private int mC2KServerPort;
 
     private final Context mContext;
+    private final NtpTrustedTime mNtpTime;
     private final ILocationManager mLocationManager;
     private Location mLocation = new Location(LocationManager.GPS_PROVIDER);
     private Bundle mLocationExtras = new Bundle();
@@ -285,10 +285,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
     // how long to wait if we have a network error in NTP or XTRA downloading
     // current setting - 5 minutes
     private static final long RETRY_INTERVAL = 5*60*1000;
-
-    // to avoid injecting bad NTP time, we reject any time fixes that differ from system time
-    // by more than 5 minutes.
-    private static final long MAX_NTP_SYSTEM_TIME_OFFSET = 5*60*1000;
 
     private final IGpsStatusProvider mGpsStatusProvider = new IGpsStatusProvider.Stub() {
         public void addGpsStatusListener(IGpsStatusListener listener) throws RemoteException {
@@ -378,6 +374,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
 
     public GpsLocationProvider(Context context, ILocationManager locationManager) {
         mContext = context;
+        mNtpTime = NtpTrustedTime.getInstance(context);
         mLocationManager = locationManager;
         mNIHandler = new GpsNetInitiatedHandler(context);
 
@@ -418,7 +415,6 @@ public class GpsLocationProvider implements LocationProviderInterface {
             FileInputStream stream = new FileInputStream(file);
             mProperties.load(stream);
             stream.close();
-            mNtpServer = mProperties.getProperty("NTP_SERVER", null);
 
             mSuplServerHost = mProperties.getProperty("SUPL_HOST");
             String portString = mProperties.getProperty("SUPL_PORT");
@@ -530,13 +526,18 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
         mInjectNtpTimePending = false;
 
-        SntpClient client = new SntpClient();
         long delay;
 
-        if (client.requestTime(mNtpServer, 10000)) {
-            long time = client.getNtpTime();
-            long timeReference = client.getNtpTimeReference();
-            int certainty = (int)(client.getRoundTripTime()/2);
+        // force refresh NTP cache when outdated
+        if (mNtpTime.getCacheAge() >= NTP_INTERVAL) {
+            mNtpTime.forceRefresh();
+        }
+
+        // only update when NTP time is fresh
+        if (mNtpTime.getCacheAge() < NTP_INTERVAL) {
+            long time = mNtpTime.getCachedNtpTime();
+            long timeReference = mNtpTime.getCachedNtpTimeReference();
+            long certainty = mNtpTime.getCacheCertainty();
             long now = System.currentTimeMillis();
 
             Log.d(TAG, "NTP server returned: "
@@ -545,7 +546,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
                     + " certainty: " + certainty
                     + " system time offset: " + (time - now));
 
-            native_inject_time(time, timeReference, certainty);
+            native_inject_time(time, timeReference, (int) certainty);
             delay = NTP_INTERVAL;
         } else {
             if (DEBUG) Log.d(TAG, "requestTime failed");
@@ -1395,7 +1396,7 @@ public class GpsLocationProvider implements LocationProviderInterface {
         Properties extraProp = new Properties();
 
         try {
-            extraProp.load(new StringBufferInputStream(extras));
+            extraProp.load(new StringReader(extras));
         }
         catch (IOException e)
         {
