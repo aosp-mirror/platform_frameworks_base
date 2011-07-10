@@ -251,19 +251,18 @@ public class UsbDeviceManager {
 
         public UsbHandler() {
             try {
+                // persist.sys.usb.config should never be unset.  But if it is, set it to "adb"
+                // so we have a chance of debugging what happened.
+                mDefaultFunctions = SystemProperties.get("persist.sys.usb.config", "adb");
                 // sanity check the sys.usb.config system property
                 // this may be necessary if we crashed while switching USB configurations
                 String config = SystemProperties.get("sys.usb.config", "none");
-                if (config.equals("none")) {
-                    String persistConfig = SystemProperties.get("persist.sys.usb.config", "none");
-                    Slog.w(TAG, "resetting config to persistent property: " + persistConfig);
-                    SystemProperties.set("sys.usb.config", persistConfig);
+                if (!config.equals(mDefaultFunctions)) {
+                    Slog.w(TAG, "resetting config to persistent property: " + mDefaultFunctions);
+                    SystemProperties.set("sys.usb.config", mDefaultFunctions);
                 }
 
-                // Read initial USB state
-                mCurrentFunctions = FileUtils.readTextFile(
-                        new File(FUNCTIONS_PATH), 0, null).trim();
-                mDefaultFunctions = mCurrentFunctions;
+                mCurrentFunctions = mDefaultFunctions;
                 String state = FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim();
                 updateState(state);
                 mAdbEnabled = containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ADB);
