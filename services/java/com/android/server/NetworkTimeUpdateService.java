@@ -16,8 +16,6 @@
 
 package com.android.server;
 
-import com.android.internal.telephony.TelephonyIntents;
-
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -28,7 +26,6 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.SntpClient;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -36,12 +33,10 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.util.Log;
-import android.util.Slog;
+import android.util.NtpTrustedTime;
+import android.util.TrustedTime;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Properties;
+import com.android.internal.telephony.TelephonyIntents;
 
 /**
  * Monitors the network time and updates the system time if it is out of sync
@@ -68,14 +63,11 @@ public class NetworkTimeUpdateService {
     private static final long POLLING_INTERVAL_SHORTER_MS = 60 * 1000L; // 60 seconds
     /** Number of times to try again */
     private static final int TRY_AGAIN_TIMES_MAX = 3;
-    /** How long to wait for the NTP server to respond. */
-    private static final int MAX_NTP_FETCH_WAIT_MS = 20 * 1000;
     /** If the time difference is greater than this threshold, then update the time. */
     private static final int TIME_ERROR_THRESHOLD_MS = 5 * 1000;
 
     private static final String ACTION_POLL =
             "com.android.server.NetworkTimeUpdateService.action.POLL";
-    private static final String PROPERTIES_FILE = "/etc/gps.conf";
     private static int POLL_REQUEST = 0;
 
     private static final long NOT_SET = -1;
@@ -84,14 +76,14 @@ public class NetworkTimeUpdateService {
     private long mNitzZoneSetTime = NOT_SET;
 
     private Context mContext;
+    private TrustedTime mTime;
+
     // NTP lookup is done on this thread and handler
     private Handler mHandler;
     private HandlerThread mThread;
     private AlarmManager mAlarmManager;
     private PendingIntent mPendingPollIntent;
     private SettingsObserver mSettingsObserver;
-    // Address of the NTP server
-    private String mNtpServer;
     // The last time that we successfully fetched the NTP time.
     private long mLastNtpFetchTime = NOT_SET;
     // Keeps track of how many quick attempts were made to fetch NTP time.
@@ -101,6 +93,7 @@ public class NetworkTimeUpdateService {
 
     public NetworkTimeUpdateService(Context context) {
         mContext = context;
+        mTime = NtpTrustedTime.getInstance(context);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         Intent pollIntent = new Intent(ACTION_POLL, null);
         mPendingPollIntent = PendingIntent.getBroadcast(mContext, POLL_REQUEST, pollIntent, 0);
@@ -108,12 +101,6 @@ public class NetworkTimeUpdateService {
 
     /** Initialize the receivers and initiate the first NTP request */
     public void systemReady() {
-        mNtpServer = getNtpServerAddress();
-        if (mNtpServer == null) {
-            Slog.e(TAG, "NTP server address not found, not syncing to NTP time");
-            return;
-        }
-
         registerForTelephonyIntents();
         registerForAlarms();
         registerForConnectivityIntents();
@@ -126,27 +113,6 @@ public class NetworkTimeUpdateService {
 
         mSettingsObserver = new SettingsObserver(mHandler, EVENT_AUTO_TIME_CHANGED);
         mSettingsObserver.observe(mContext);
-    }
-
-    private String getNtpServerAddress() {
-        String serverAddress = null;
-        FileInputStream stream = null;
-        try {
-            Properties properties = new Properties();
-            File file = new File(PROPERTIES_FILE);
-            stream = new FileInputStream(file);
-            properties.load(stream);
-            serverAddress = properties.getProperty("NTP_SERVER", null);
-        } catch (IOException e) {
-            Slog.e(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE);
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (Exception e) {}
-            }
-        }
-        return serverAddress;
     }
 
     private void registerForTelephonyIntents() {
@@ -189,9 +155,15 @@ public class NetworkTimeUpdateService {
         if (mLastNtpFetchTime == NOT_SET || refTime >= mLastNtpFetchTime + POLLING_INTERVAL_MS
                 || event == EVENT_AUTO_TIME_CHANGED) {
             if (DBG) Log.d(TAG, "Before Ntp fetch");
-            long ntp = getNtpTime();
-            if (DBG) Log.d(TAG, "Ntp = " + ntp);
-            if (ntp > 0) {
+
+            // force refresh NTP cache when outdated
+            if (mTime.getCacheAge() >= POLLING_INTERVAL_MS) {
+                mTime.forceRefresh();
+            }
+
+            // only update when NTP time is fresh
+            if (mTime.getCacheAge() < POLLING_INTERVAL_MS) {
+                final long ntp = mTime.currentTimeMillis();
                 mTryAgainCounter = 0;
                 mLastNtpFetchTime = SystemClock.elapsedRealtime();
                 if (Math.abs(ntp - currentTime) > TIME_ERROR_THRESHOLD_MS) {
@@ -230,15 +202,6 @@ public class NetworkTimeUpdateService {
         long now = SystemClock.elapsedRealtime();
         long next = now + interval;
         mAlarmManager.set(AlarmManager.ELAPSED_REALTIME, next, mPendingPollIntent);
-    }
-
-    private long getNtpTime() {
-        SntpClient client = new SntpClient();
-        if (client.requestTime(mNtpServer, MAX_NTP_FETCH_WAIT_MS)) {
-            return client.getNtpTime();
-        } else {
-            return 0;
-        }
     }
 
     /**

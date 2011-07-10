@@ -16,9 +16,6 @@
 
 package com.android.server;
 
-import com.android.internal.R;
-import com.android.internal.telephony.TelephonyProperties;
-
 import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -54,6 +51,9 @@ import android.util.NtpTrustedTime;
 import android.util.Slog;
 import android.util.TrustedTime;
 
+import com.android.internal.R;
+import com.android.internal.telephony.TelephonyProperties;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -63,7 +63,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -87,7 +86,6 @@ public class ThrottleService extends IThrottleManager.Stub {
     private static final long TESTING_THRESHOLD = 1 * 1024 * 1024;
 
     private static final long MAX_NTP_CACHE_AGE = 24 * 60 * 60 * 1000;
-    private static final long MAX_NTP_FETCH_WAIT = 20 * 1000;
 
     private long mMaxNtpCacheAge = MAX_NTP_CACHE_AGE;
 
@@ -127,8 +125,6 @@ public class ThrottleService extends IThrottleManager.Stub {
     private static final int THROTTLE_INDEX_UNINITIALIZED = -1;
     private static final int THROTTLE_INDEX_UNTHROTTLED   =  0;
 
-    private static final String PROPERTIES_FILE = "/etc/gps.conf";
-
     private Intent mPollStickyBroadcast;
 
     private TrustedTime mTime;
@@ -139,8 +135,7 @@ public class ThrottleService extends IThrottleManager.Stub {
     }
 
     public ThrottleService(Context context) {
-        // TODO: move to using cached NtpTrustedTime
-        this(context, getNetworkManagementService(), new NtpTrustedTime(),
+        this(context, getNetworkManagementService(), NtpTrustedTime.getInstance(context),
                 context.getResources().getString(R.string.config_datause_iface));
     }
 
@@ -340,26 +335,6 @@ public class ThrottleService extends IThrottleManager.Stub {
                     dispatchReset();
                 }
             }, new IntentFilter(ACTION_RESET));
-
-        FileInputStream stream = null;
-        try {
-            Properties properties = new Properties();
-            File file = new File(PROPERTIES_FILE);
-            stream = new FileInputStream(file);
-            properties.load(stream);
-            final String ntpServer = properties.getProperty("NTP_SERVER", null);
-            if (mTime instanceof NtpTrustedTime) {
-                ((NtpTrustedTime) mTime).setNtpServer(ntpServer, MAX_NTP_FETCH_WAIT);
-            }
-        } catch (IOException e) {
-            Slog.e(TAG, "Could not open GPS configuration file " + PROPERTIES_FILE);
-        } finally {
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (Exception e) {}
-            }
-        }
 
         // use a new thread as we don't want to stall the system for file writes
         mThread = new HandlerThread(TAG);
