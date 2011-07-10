@@ -66,10 +66,35 @@ static jlong readNumber(char const* filename) {
 #endif
 }
 
-// Return the number from the first file which exists and contains data
-static jlong tryBoth(char const* a, char const* b) {
-    jlong num = readNumber(a);
-    return num >= 0 ? num : readNumber(b);
+static const char* mobile_iface_list[] = {
+    "rmnet0",
+    "rmnet1",
+    "rmnet2",
+    "rmnet3",
+    "ppp0",
+    0
+};
+
+static jlong getAll(const char** iface_list, const char* what) {
+
+    char filename[80];
+    int idx = 0;
+    bool supported = false;
+    jlong total = 0;
+    while (iface_list[idx] != 0) {
+
+        snprintf(filename, sizeof(filename), "/sys/class/net/%s/statistics/%s",
+                 iface_list[idx], what);
+        jlong number = readNumber(filename);
+        if (number >= 0) {
+            supported = true;
+            total += number;
+        }
+        idx++;
+    }
+    if (supported) return total;
+
+    return -1;
 }
 
 // Returns the sum of numbers from the specified path under /sys/class/net/*,
@@ -107,30 +132,22 @@ static jlong readTotal(char const* suffix) {
 // each file every time (rather than caching which ones exist).
 
 static jlong getMobileTxPackets(JNIEnv* env, jobject clazz) {
-    return tryBoth(
-            "/sys/class/net/rmnet0/statistics/tx_packets",
-            "/sys/class/net/ppp0/statistics/tx_packets");
+    return getAll(mobile_iface_list, "tx_packets");
 }
 
 static jlong getMobileRxPackets(JNIEnv* env, jobject clazz) {
-    return tryBoth(
-            "/sys/class/net/rmnet0/statistics/rx_packets",
-            "/sys/class/net/ppp0/statistics/rx_packets");
+    return getAll(mobile_iface_list, "rx_packets");
 }
 
 static jlong getMobileTxBytes(JNIEnv* env, jobject clazz) {
-    return tryBoth(
-            "/sys/class/net/rmnet0/statistics/tx_bytes",
-            "/sys/class/net/ppp0/statistics/tx_bytes");
+    return getAll(mobile_iface_list, "tx_bytes");
 }
 
 static jlong getMobileRxBytes(JNIEnv* env, jobject clazz) {
-    return tryBoth(
-            "/sys/class/net/rmnet0/statistics/rx_bytes",
-            "/sys/class/net/ppp0/statistics/rx_bytes");
+    return getAll(mobile_iface_list, "rx_bytes");
 }
 
-static jlong getData(JNIEnv* env, char *what, jstring interface) {
+static jlong getData(JNIEnv* env, const char *what, jstring interface) {
     char filename[80];
     jboolean isCopy;
 
