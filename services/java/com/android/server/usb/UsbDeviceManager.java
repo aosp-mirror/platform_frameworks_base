@@ -620,6 +620,16 @@ public class UsbDeviceManager {
             pw.println("    mConnected: " + mConnected);
             pw.println("    mConfigured: " + mConfigured);
             pw.println("    mCurrentAccessory: " + mCurrentAccessory);
+            try {
+                pw.println("    Kernel state: "
+                        + FileUtils.readTextFile(new File(STATE_PATH), 0, null).trim());
+                pw.println("    Kernel function list: "
+                        + FileUtils.readTextFile(new File(FUNCTIONS_PATH), 0, null).trim());
+                pw.println("    Mass storage backing file: "
+                        + FileUtils.readTextFile(new File(MASS_STORAGE_FILE_PATH), 0, null).trim());
+            } catch (IOException e) {
+                pw.println("IOException: " + e);
+            }
         }
     }
 
