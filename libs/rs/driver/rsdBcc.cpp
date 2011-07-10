@@ -214,14 +214,13 @@ bool rsdScriptInit(const Context *rsc,
     const char ** mPragmaKeys;
     const char ** mPragmaValues;
 
-    const static int pragmaMax = 16;
     drv->mPragmaCount = bccGetPragmaCount(drv->mBccScript);
     if (drv->mPragmaCount <= 0) {
         drv->mPragmaKeys = NULL;
         drv->mPragmaValues = NULL;
     } else {
-        drv->mPragmaKeys = (const char **) calloc(drv->mFieldCount, sizeof(const char *));
-        drv->mPragmaValues = (const char **) calloc(drv->mFieldCount, sizeof(const char *));
+        drv->mPragmaKeys = (const char **) calloc(drv->mPragmaCount, sizeof(const char *));
+        drv->mPragmaValues = (const char **) calloc(drv->mPragmaCount, sizeof(const char *));
         bccGetPragmaList(drv->mBccScript, drv->mPragmaCount, drv->mPragmaKeys, drv->mPragmaValues);
     }
 
