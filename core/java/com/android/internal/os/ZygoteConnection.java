@@ -518,10 +518,6 @@ class ZygoteConnection {
                         "--runtime-init and -classpath are incompatible");
             }
 
-            if (!targetSdkVersionSpecified) {
-                targetSdkVersion = Build.VERSION.SDK_INT;
-            }
-
             remainingArgs = new String[args.length - curArg];
 
             System.arraycopy(args, curArg, remainingArgs, 0,
