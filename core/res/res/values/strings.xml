@@ -2085,9 +2085,41 @@
     <!-- Do not translate. Regex used by AutoFill. -->
     <string name="autofill_phone_suffix_separator_re">^-$</string>
 
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <!-- Ex: ************1234 -->
-    <string name="credit_card_number_preview_format">$1</string>
+    <!-- Label in a web form for "Province" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_province">Province</string>
+
+    <!-- Label in a web form for "Postal code" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_postal_code">Postal code</string>
+
+    <!-- Label in a web form for "State" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_state">State</string>
+
+    <!-- Label in a web form for "ZIP code" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_zip_code">ZIP code</string>
+
+    <!-- Label in a web form for "County" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_county">County</string>
+
+    <!-- Label in a web form for "Island" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_island">Island</string>
+
+    <!-- Label in a web form for "District" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_district">District</string>
+
+    <!-- Label in a web form for "Department" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_department">Department</string>
+
+    <!-- Label in a web form for "Prefecture" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_prefecture">Prefecture</string>
+
+    <!-- Label in a web form for "Parish" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_parish">Parish</string>
+
+    <!-- Label in a web form for "Area" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_area">Area</string>
+
+    <!-- Label in a web form for "Emirate" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_emirate">Emirate</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
