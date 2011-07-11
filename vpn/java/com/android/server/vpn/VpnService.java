@@ -325,7 +325,7 @@ abstract class VpnService<E extends VpnProfile> {
 
                             if (heavyCheck) {
                                 i = 10;
-                                if (checkConnectivity()) checkDns();
+                                checkConnectivity();
                             }
                             long t = 1000L - System.currentTimeMillis() + now;
                             if (t > 100L) VpnService.this.wait(t);
@@ -356,22 +356,24 @@ abstract class VpnService<E extends VpnProfile> {
     }
 
     // returns false if vpn connectivity is broken
-    private boolean checkConnectivity() {
-        if (mDaemons.anyDaemonStopped() || isLocalIpChanged()) {
+    private void checkConnectivity() {
+        if (mDaemons.anyDaemonStopped() || isLocalIpChanged() || isDnsChanged()) {
             onError(new IOException("Connectivity lost"));
-            return false;
-        } else {
-            return true;
         }
     }
 
-    private void checkDns() {
+    private boolean isDnsChanged() {
         String dns1 = SystemProperties.get(DNS1);
         String vpnDns1 = SystemProperties.get(VPN_DNS1);
-        if (!dns1.equals(vpnDns1) && dns1.equals(mOriginalDns1)) {
+        if (dns1.equals(vpnDns1)) {
+            return false;
+        }
+        if (dns1.equals(mOriginalDns1)) {
             // dhcp expires?
             setVpnDns();
+            return false;
         }
+        return true;
     }
 
     private boolean isLocalIpChanged() {
