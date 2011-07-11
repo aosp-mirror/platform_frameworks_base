@@ -3231,7 +3231,8 @@ int Effect_getDescriptor(effect_handle_t   self,
 const struct effect_interface_s gLvmEffectInterface = {
     Effect_process,
     Effect_command,
-    Effect_getDescriptor
+    Effect_getDescriptor,
+    NULL,
 };    /* end gLvmEffectInterface */
 
 audio_effect_library_t AUDIO_EFFECT_LIBRARY_INFO_SYM = {

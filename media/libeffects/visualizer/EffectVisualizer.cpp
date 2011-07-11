@@ -450,7 +450,8 @@ int Visualizer_getDescriptor(effect_handle_t   self,
 const struct effect_interface_s gVisualizerInterface = {
         Visualizer_process,
         Visualizer_command,
-        Visualizer_getDescriptor
+        Visualizer_getDescriptor,
+        NULL,
 };
 
 

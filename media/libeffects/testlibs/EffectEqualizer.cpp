@@ -736,7 +736,8 @@ extern "C" int Equalizer_getDescriptor(effect_handle_t   self,
 const struct effect_interface_s gEqualizerInterface = {
         Equalizer_process,
         Equalizer_command,
-        Equalizer_getDescriptor
+        Equalizer_getDescriptor,
+        NULL
 };
 
 

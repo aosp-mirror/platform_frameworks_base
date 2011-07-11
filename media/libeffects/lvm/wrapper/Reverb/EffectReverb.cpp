@@ -2134,7 +2134,8 @@ int Reverb_getDescriptor(effect_handle_t   self,
 const struct effect_interface_s gReverbInterface = {
     Reverb_process,
     Reverb_command,
-    Reverb_getDescriptor
+    Reverb_getDescriptor,
+    NULL,
 };    /* end gReverbInterface */
 
 audio_effect_library_t AUDIO_EFFECT_LIBRARY_INFO_SYM = {

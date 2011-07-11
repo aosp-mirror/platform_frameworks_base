@@ -27,7 +27,8 @@
 const struct effect_interface_s gReverbInterface = {
         Reverb_Process,
         Reverb_Command,
-        Reverb_GetDescriptor
+        Reverb_GetDescriptor,
+        NULL
 };
 
 // Google auxiliary environmental reverb UUID: 1f0ae2e0-4ef7-11df-bc09-0002a5d5c51b
