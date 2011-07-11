@@ -166,4 +166,11 @@ public interface TelephonyProperties
      * the value of config_sms_capable
      */
     static final String PROPERTY_SMS_SEND = "telephony.sms.send";
+
+    /**
+     * Set to true to indicate a test CSIM card is used in the device.
+     * This property is for testing purpose only. This should not be defined
+     * in commercial configuration.
+     */
+    static final String PROPERTY_TEST_CSIM = "persist.radio.test-csim";
 }
