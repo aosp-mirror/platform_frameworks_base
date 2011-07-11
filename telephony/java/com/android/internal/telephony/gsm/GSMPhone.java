@@ -855,6 +855,10 @@ public class GSMPhone extends PhoneBase {
         return mImeiSv;
     }
 
+    public String getImei() {
+        return mImei;
+    }
+
     public String getEsn() {
         Log.e(LOG_TAG, "[GSMPhone] getEsn() is a CDMA method");
         return "0";
