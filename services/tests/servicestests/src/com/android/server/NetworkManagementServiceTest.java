@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.net.NetworkStats.TAG_NONE;
+import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 import static com.android.server.NetworkManagementSocketTagger.tagToKernel;
 
@@ -25,9 +27,11 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import com.android.frameworks.servicestests.R;
+import com.google.common.io.Files;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -46,13 +50,22 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        mTestProc = getContext().getFilesDir();
-        mService = NetworkManagementService.createForTest(mContext, mTestProc);
+        final File canonicalFilesDir = getContext().getFilesDir().getCanonicalFile();
+        mTestProc = new File(canonicalFilesDir, "proc");
+        if (mTestProc.exists()) {
+            Files.deleteRecursively(mTestProc);
+        }
+
+        mService = NetworkManagementService.createForTest(mContext, mTestProc, true);
     }
 
     @Override
     public void tearDown() throws Exception {
         mService = null;
+
+        if (mTestProc.exists()) {
+            Files.deleteRecursively(mTestProc);
+        }
 
         super.tearDown();
     }
@@ -61,7 +74,7 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         stageFile(R.raw.xt_qtaguid_typical, new File(mTestProc, "net/xt_qtaguid/stats"));
 
         final NetworkStats stats = mService.getNetworkStatsDetail();
-        assertEquals(31, stats.size);
+        assertEquals(31, stats.size());
         assertStatsEntry(stats, "wlan0", 0, 0, 14615L, 4270L);
         assertStatsEntry(stats, "wlan0", 10004, 0, 333821L, 53558L);
         assertStatsEntry(stats, "wlan0", 10004, 1947740890, 18725L, 1066L);
@@ -73,9 +86,35 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         stageFile(R.raw.xt_qtaguid_extended, new File(mTestProc, "net/xt_qtaguid/stats"));
 
         final NetworkStats stats = mService.getNetworkStatsDetail();
-        assertEquals(2, stats.size);
+        assertEquals(2, stats.size());
         assertStatsEntry(stats, "test0", 1000, 0, 1024L, 2048L);
         assertStatsEntry(stats, "test0", 1000, 0xF00D, 512L, 512L);
+    }
+
+    public void testNetworkStatsSummary() throws Exception {
+        stageFile(R.raw.net_dev_typical, new File(mTestProc, "net/dev"));
+
+        final NetworkStats stats = mService.getNetworkStatsSummary();
+        assertEquals(6, stats.size());
+        assertStatsEntry(stats, "lo", UID_ALL, TAG_NONE, 8308L, 8308L);
+        assertStatsEntry(stats, "rmnet0", UID_ALL, TAG_NONE, 1507570L, 489339L);
+        assertStatsEntry(stats, "ifb0", UID_ALL, TAG_NONE, 52454L, 0L);
+        assertStatsEntry(stats, "ifb1", UID_ALL, TAG_NONE, 52454L, 0L);
+        assertStatsEntry(stats, "sit0", UID_ALL, TAG_NONE, 0L, 0L);
+        assertStatsEntry(stats, "ip6tnl0", UID_ALL, TAG_NONE, 0L, 0L);
+    }
+
+    public void testNetworkStatsSummaryDown() throws Exception {
+        stageFile(R.raw.net_dev_typical, new File(mTestProc, "net/dev"));
+        stageLong(1024L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/rx_bytes"));
+        stageLong(128L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/rx_packets"));
+        stageLong(2048L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/tx_bytes"));
+        stageLong(256L, new File(mTestProc, "net/xt_qtaguid/iface_stat/wlan0/tx_packets"));
+
+        final NetworkStats stats = mService.getNetworkStatsSummary();
+        assertEquals(7, stats.size());
+        assertStatsEntry(stats, "rmnet0", UID_ALL, TAG_NONE, 1507570L, 489339L);
+        assertStatsEntry(stats, "wlan0", UID_ALL, TAG_NONE, 1024L, 2048L);
     }
 
     public void testKernelTags() throws Exception {
@@ -90,7 +129,6 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         assertEquals(2147483647, kernelToTag("0x7fffffff00000000"));
         assertEquals(0, kernelToTag("0x0000000000000000"));
         assertEquals(2147483136, kernelToTag("0x7FFFFE0000000000"));
-
     }
 
     /**
@@ -111,11 +149,23 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         }
     }
 
+    private void stageLong(long value, File file) throws Exception {
+        new File(file.getParent()).mkdirs();
+        FileWriter out = null;
+        try {
+            out = new FileWriter(file);
+            out.write(Long.toString(value));
+        } finally {
+            IoUtils.closeQuietly(out);
+        }
+    }
+
     private static void assertStatsEntry(
-            NetworkStats stats, String iface, int uid, int tag, long rx, long tx) {
+            NetworkStats stats, String iface, int uid, int tag, long rxBytes, long txBytes) {
         final int i = stats.findIndex(iface, uid, tag);
-        assertEquals(rx, stats.rx[i]);
-        assertEquals(tx, stats.tx[i]);
+        final NetworkStats.Entry entry = stats.getValues(i, null);
+        assertEquals(rxBytes, entry.rxBytes);
+        assertEquals(txBytes, entry.txBytes);
     }
 
 }

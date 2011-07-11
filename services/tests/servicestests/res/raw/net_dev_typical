@@ -1,0 +1,8 @@
+Inter-|   Receive                                                |  Transmit
+ face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
+    lo:    8308     116    0    0    0     0          0         0     8308     116    0    0    0     0       0          0
+rmnet0: 1507570    2205    0    0    0     0          0         0   489339    2237    0    0    0     0       0          0
+  ifb0:   52454     151    0  151    0     0          0         0        0       0    0    0    0     0       0          0
+  ifb1:   52454     151    0  151    0     0          0         0        0       0    0    0    0     0       0          0
+  sit0:       0       0    0    0    0     0          0         0        0       0  148    0    0     0       0          0
+ip6tnl0:       0       0    0    0    0     0          0         0        0       0  151  151    0     0       0          0
