@@ -5318,6 +5318,8 @@
         <attr name="mtpReserve" format="integer" />
         <!-- true if the storage can be shared via USB mass storage -->
         <attr name="allowMassStorage" format="boolean" />
+        <!-- maximum file size for the volume in megabytes, zero or unspecified if it is unbounded -->
+        <attr name="maxFileSize" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="SwitchPreference">

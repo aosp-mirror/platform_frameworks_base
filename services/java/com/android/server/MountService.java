@@ -1075,18 +1075,22 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                             com.android.internal.R.styleable.Storage_mtpReserve, 0);
                     boolean allowMassStorage = a.getBoolean(
                             com.android.internal.R.styleable.Storage_allowMassStorage, false);
+                    // resource parser does not support longs, so XML value is in megabytes
+                    long maxFileSize = a.getInt(
+                            com.android.internal.R.styleable.Storage_maxFileSize, 0) * 1024L * 1024L;
 
                     Slog.d(TAG, "got storage path: " + path + " description: " + description +
                             " primary: " + primary + " removable: " + removable +
                             " emulated: " + emulated +  " mtpReserve: " + mtpReserve +
-                            " allowMassStorage: " + allowMassStorage);
+                            " allowMassStorage: " + allowMassStorage +
+                            " maxFileSize: " + maxFileSize);
                     if (path == null || description == null) {
                         Slog.e(TAG, "path or description is null in readStorageList");
                     } else {
                         String pathString = path.toString();
                         StorageVolume volume = new StorageVolume(pathString,
                                 description.toString(), removable, emulated,
-                                mtpReserve, allowMassStorage);
+                                mtpReserve, allowMassStorage, maxFileSize);
                         if (primary) {
                             if (mPrimaryVolume == null) {
                                 mPrimaryVolume = volume;

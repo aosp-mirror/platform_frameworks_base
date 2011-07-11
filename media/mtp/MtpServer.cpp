@@ -871,6 +871,14 @@ MtpResponseCode MtpServer::doSendObjectInfo() {
     // check space first
     if (mSendObjectFileSize > storage->getFreeSpace())
         return MTP_RESPONSE_STORAGE_FULL;
+    uint64_t maxFileSize = storage->getMaxFileSize();
+    // check storage max file size
+    if (maxFileSize != 0) {
+        // if mSendObjectFileSize is 0xFFFFFFFF, then all we know is the file size
+        // is >= 0xFFFFFFFF
+        if (mSendObjectFileSize > maxFileSize || mSendObjectFileSize == 0xFFFFFFFF)
+            return MTP_RESPONSE_OBJECT_TOO_LARGE;
+    }
 
 LOGD("path: %s parent: %d storageID: %08X", (const char*)path, parent, storageID);
     MtpObjectHandle handle = mDatabase->beginSendObject((const char*)path,

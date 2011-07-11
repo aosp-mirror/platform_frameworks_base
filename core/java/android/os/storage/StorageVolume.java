@@ -34,6 +34,8 @@ public class StorageVolume implements Parcelable {
     private final int mMtpReserveSpace;
     private final boolean mAllowMassStorage;
     private int mStorageId;
+    // maximum file size for the storage, or zero for no limit
+    private final long mMaxFileSize;
 
     // StorageVolume extra for ACTION_MEDIA_REMOVED, ACTION_MEDIA_UNMOUNTED, ACTION_MEDIA_CHECKING,
     // ACTION_MEDIA_NOFS, ACTION_MEDIA_MOUNTED, ACTION_MEDIA_SHARED, ACTION_MEDIA_UNSHARED,
@@ -41,18 +43,20 @@ public class StorageVolume implements Parcelable {
     public static final String EXTRA_STORAGE_VOLUME = "storage_volume";
 
     public StorageVolume(String path, String description, boolean removable,
-            boolean emulated, int mtpReserveSpace, boolean allowMassStorage) {
+            boolean emulated, int mtpReserveSpace, boolean allowMassStorage, long maxFileSize) {
         mPath = path;
         mDescription = description;
         mRemovable = removable;
         mEmulated = emulated;
         mMtpReserveSpace = mtpReserveSpace;
         mAllowMassStorage = allowMassStorage;
+        mMaxFileSize = maxFileSize;
     }
 
     // for parcelling only
     private StorageVolume(String path, String description, boolean removable,
-            boolean emulated, int mtpReserveSpace, int storageId, boolean allowMassStorage) {
+            boolean emulated, int mtpReserveSpace, int storageId,
+            boolean allowMassStorage, long maxFileSize) {
         mPath = path;
         mDescription = description;
         mRemovable = removable;
@@ -60,6 +64,7 @@ public class StorageVolume implements Parcelable {
         mMtpReserveSpace = mtpReserveSpace;
         mAllowMassStorage = allowMassStorage;
         mStorageId = storageId;
+        mMaxFileSize = maxFileSize;
     }
 
     /**
@@ -142,6 +147,15 @@ public class StorageVolume implements Parcelable {
         return mAllowMassStorage;
     }
 
+    /**
+     * Returns maximum file size for the volume, or zero if it is unbounded.
+     *
+     * @return maximum file size
+     */
+    public long getMaxFileSize() {
+        return mMaxFileSize;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof StorageVolume && mPath != null) {
@@ -171,9 +185,10 @@ public class StorageVolume implements Parcelable {
             int storageId = in.readInt();
             int mtpReserveSpace = in.readInt();
             int allowMassStorage = in.readInt();
+            long maxFileSize = in.readLong();
             return new StorageVolume(path, description,
-                    removable == 1, emulated == 1,
-                    mtpReserveSpace, storageId, allowMassStorage == 1);
+                    removable == 1, emulated == 1, mtpReserveSpace,
+                    storageId, allowMassStorage == 1, maxFileSize);
         }
 
         public StorageVolume[] newArray(int size) {
@@ -193,5 +208,6 @@ public class StorageVolume implements Parcelable {
         parcel.writeInt(mStorageId);
         parcel.writeInt(mMtpReserveSpace);
         parcel.writeInt(mAllowMassStorage ? 1 : 0);
+        parcel.writeLong(mMaxFileSize);
     }
 }
