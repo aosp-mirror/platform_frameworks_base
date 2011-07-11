@@ -713,10 +713,7 @@
 
         <!-- Layout of a the view that is used to create the text suggestions popup window in an
              EditText. This window will be displayed below the text line. -->
-        <attr name="textEditSuggestionsBottomWindowLayout" format="reference" />
-        <!-- Same as textEditSuggestionsBottomWindowLayout, but used when the popup is displayed
-             above the current line of text instead of below. -->
-        <attr name="textEditSuggestionsTopWindowLayout" format="reference" />
+        <attr name="textEditSuggestionsWindowLayout" format="reference" />
         <!-- Layout of the TextView item that will populate the suggestion popup window. -->
         <attr name="textEditSuggestionItemLayout" format="reference" />
 
@@ -3082,10 +3079,7 @@
 
         <!-- Layout of a the view that is used to create the text suggestions popup window in an
              EditText. This window will be displayed below the text line. -->
-        <attr name="textEditSuggestionsBottomWindowLayout" />
-        <!-- Same as textEditSuggestionsBottomWindowLayout, but used when the popup is displayed
-             above the current line of text instead of below. -->
-        <attr name="textEditSuggestionsTopWindowLayout" />
+        <attr name="textEditSuggestionsWindowLayout" />
         <!-- Layout of the TextView item that will populate the suggestion popup window. -->
         <attr name="textEditSuggestionItemLayout" />
 
