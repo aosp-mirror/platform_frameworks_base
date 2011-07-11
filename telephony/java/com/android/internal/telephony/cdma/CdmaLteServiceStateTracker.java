@@ -39,7 +39,6 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
     CDMALTEPhone mCdmaLtePhone;
 
     private ServiceState  mLteSS;  // The last LTE state from Voice Registration
-    private String mCurrentSpn = null;
 
     public CdmaLteServiceStateTracker(CDMALTEPhone phone) {
         super(phone);
@@ -345,6 +344,18 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 ss.setOperatorAlphaLong(eriText);
             }
 
+            if (cm.getSimState().isSIMReady()) {
+                // SIM is found on the device. If ERI roaming is OFF, use operator name
+                // from CSIM record.
+                boolean showSpn =
+                    ((CdmaLteUiccRecords)phone.mIccRecords).getCsimSpnDisplayCondition();
+                int iconIndex = ss.getCdmaEriIconIndex();
+
+                if (showSpn && (iconIndex == EriInfo.ROAMING_INDICATOR_OFF)) {
+                    ss.setOperatorAlphaLong(phone.mIccRecords.getServiceProviderName());
+                }
+            }
+
             String operatorNumeric;
 
             phone.setSystemProperty(TelephonyProperties.PROPERTY_OPERATOR_ALPHA,
@@ -465,43 +476,6 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         int provisioningState = OTASP_NOT_NEEDED;
         if (DBG) log("getOtasp: state=" + provisioningState);
         return provisioningState;
-    }
-
-    @Override
-    protected void updateSpnDisplay() {
-        // mOperatorAlphaLong contains the ERI text
-        String plmn = ss.getOperatorAlphaLong();
-
-        boolean showSpn = false;
-        String spn = null;
-        if (cm.getSimState().isSIMReady()) {
-            // SIM is found on the device. Read the operator name from the card.
-            showSpn = ((CdmaLteUiccRecords)phone.mIccRecords).getCsimSpnDisplayCondition();
-            spn = phone.mIccRecords.getServiceProviderName();
-
-            // double check we are not printing identicall test
-            if (TextUtils.equals(plmn, spn)) showSpn = false;
-        }
-
-        if (!TextUtils.equals(plmn, mCurPlmn) ||
-            !TextUtils.equals(spn, mCurrentSpn)) {
-            boolean showPlmn = plmn != null;
-            if (DBG) {
-                log(String.format("updateSpnDisplay: changed sending intent" +
-                                  " showPlmn='%b' plmn='%s' showSpn='%b' spn='%s'",
-                                  showPlmn, plmn, showSpn, spn));
-            }
-            Intent intent = new Intent(Intents.SPN_STRINGS_UPDATED_ACTION);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
-            intent.putExtra(Intents.EXTRA_SHOW_SPN, showSpn);
-            intent.putExtra(Intents.EXTRA_SPN, spn);
-            intent.putExtra(Intents.EXTRA_SHOW_PLMN, showPlmn);
-            intent.putExtra(Intents.EXTRA_PLMN, plmn);
-            phone.getContext().sendStickyBroadcast(intent);
-        }
-
-        mCurPlmn = plmn;
-        mCurrentSpn = spn;
     }
 
     @Override
