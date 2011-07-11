@@ -31,6 +31,7 @@
 #include <cutils/properties.h>
 #include <cutils/memory.h>
 
+#include <utils/CallStack.h>
 #include <utils/String8.h>
 
 #include "egldefs.h"
@@ -147,6 +148,10 @@ static int gl_no_context() {
     if (egl_tls_t::logNoContextCall()) {
         LOGE("call to OpenGL ES API with no current context "
              "(logged once per thread)");
+        LOGE("call stack before error:");
+        CallStack stack;
+        stack.update();
+        stack.dump();
     }
     return 0;
 }

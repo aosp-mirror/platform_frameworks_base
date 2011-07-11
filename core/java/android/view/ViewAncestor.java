@@ -901,6 +901,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
                             !mAttachInfo.mTurnOffWindowResizeAnim &&
                             mAttachInfo.mHardwareRenderer != null &&
                             mAttachInfo.mHardwareRenderer.isEnabled() &&
+                            mAttachInfo.mHardwareRenderer.validate() &&
                             lp != null && !PixelFormat.formatHasAlpha(lp.format)) {
 
                         disposeResizeBuffer();
@@ -1314,10 +1315,10 @@ public final class ViewAncestor extends Handler implements ViewParent,
             if (hwInitialized || ((windowShouldResize || params != null) &&
                     mAttachInfo.mHardwareRenderer != null &&
                     mAttachInfo.mHardwareRenderer.isEnabled())) {
-                if (!hwInitialized) {
-                    mAttachInfo.mHardwareRenderer.preapareSurfaceForResize();
-                }
                 mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
+                if (!hwInitialized) {
+                    mAttachInfo.mHardwareRenderer.invalidate();
+                }
             }
 
             if (!mStopped) {

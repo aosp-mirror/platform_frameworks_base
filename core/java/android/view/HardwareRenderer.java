@@ -128,10 +128,19 @@ public abstract class HardwareRenderer {
     abstract void updateSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException;
 
     /**
-     * Invoked whenever the size of the target surface changes. This will
-     * not be invoked when the surface is first created.
+     * This method should be invoked whenever the current hardware renderer
+     * context should be reset. 
      */
-    abstract void preapareSurfaceForResize();
+    abstract void invalidate();
+
+    /**
+     * This method should be invoked to ensure the hardware renderer is in
+     * valid state (for instance, to ensure the correct EGL context is bound
+     * to the current thread.)
+     * 
+     * @return true if the renderer is now valid, false otherwise
+     */
+    abstract boolean validate();
 
     /**
      * Setup the hardware renderer for drawing. This is called whenever the
@@ -629,11 +638,16 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void preapareSurfaceForResize() {
+        void invalidate() {
             // Cancels any existing buffer to ensure we'll get a buffer
             // of the right size before we call eglSwapBuffers
             sEgl.eglMakeCurrent(sEglDisplay, EGL10.EGL_NO_SURFACE,
-                    EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);              
+                    EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+        }
+        
+        @Override
+        boolean validate() {
+            return checkCurrent() != SURFACE_STATE_ERROR;
         }
 
         @Override
@@ -662,7 +676,7 @@ public abstract class HardwareRenderer {
                 attachInfo.mDrawingTime = SystemClock.uptimeMillis();
 
                 view.mPrivateFlags |= View.DRAWN;
-                
+
                 final int surfaceState = checkCurrent();
                 if (surfaceState != SURFACE_STATE_ERROR) {
                     // We had to change the current surface and/or context, redraw everything
@@ -723,10 +737,21 @@ public abstract class HardwareRenderer {
                 }
             }
         }
-        
+
+        /**
+         * Ensures the currnet EGL context is the one we expect.
+         * 
+         * @return {@link #SURFACE_STATE_ERROR} if the correct EGL context cannot be made current,
+         *         {@link #SURFACE_STATE_UPDATED} if the EGL context was changed or
+         *         {@link #SURFACE_STATE_SUCCESS} if the EGL context was the correct one
+         */
         private int checkCurrent() {
-            // TODO: Don't check the current context when we have one per UI thread
-            // TODO: Use a threadlocal flag to know whether the surface has changed
+            if (sEglThread != Thread.currentThread()) {
+                throw new IllegalStateException("Hardware acceleration can only be used with a " +
+                        "single UI thread.\nOriginal thread: " + sEglThread + "\n" +
+                        "Current thread: " + Thread.currentThread());
+            }
+
             if (!sEglContext.equals(sEgl.eglGetCurrentContext()) ||
                     !mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL10.EGL_DRAW))) {
                 if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, sEglContext)) {
