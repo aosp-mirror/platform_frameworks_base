@@ -6212,6 +6212,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         int scrollx, scrolly;
 
+        // Convert to left, center, or right alignment.
+        if (a == Layout.Alignment.ALIGN_NORMAL) {
+            a = dir == Layout.DIR_LEFT_TO_RIGHT ? Layout.Alignment.ALIGN_LEFT :
+                Layout.Alignment.ALIGN_RIGHT;
+        } else if (a == Layout.Alignment.ALIGN_OPPOSITE){
+            a = dir == Layout.DIR_LEFT_TO_RIGHT ? Layout.Alignment.ALIGN_RIGHT :
+                Layout.Alignment.ALIGN_LEFT;
+        }
+
         if (a == Layout.Alignment.ALIGN_CENTER) {
             /*
              * Keep centered if possible, or, if it is too wide to fit,
@@ -6230,28 +6239,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     scrollx = left;
                 }
             }
-        } else if (a == Layout.Alignment.ALIGN_NORMAL) {
-            /*
-             * Keep leading edge in view.
-             */
-
-            if (dir < 0) {
-                int right = (int) FloatMath.ceil(mLayout.getLineRight(line));
-                scrollx = right - hspace;
-            } else {
-                scrollx = (int) FloatMath.floor(mLayout.getLineLeft(line));
-            }
-        } else /* a == Layout.Alignment.ALIGN_OPPOSITE */ {
-            /*
-             * Keep trailing edge in view.
-             */
-
-            if (dir < 0) {
-                scrollx = (int) FloatMath.floor(mLayout.getLineLeft(line));
-            } else {
-                int right = (int) FloatMath.ceil(mLayout.getLineRight(line));
-                scrollx = right - hspace;
-            }
+        } else if (a == Layout.Alignment.ALIGN_LEFT) {
+            scrollx = (int) FloatMath.floor(mLayout.getLineLeft(line));
+        } else { // a == Layout.Alignment.ALIGN_RIGHT
+            int right = (int) FloatMath.ceil(mLayout.getLineRight(line));
+            scrollx = right - hspace;
         }
 
         if (ht < vspace) {
@@ -6293,19 +6285,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int grav;
 
         switch (mLayout.getParagraphAlignment(line)) {
-            case ALIGN_NORMAL:
+            case ALIGN_LEFT:
                 grav = 1;
                 break;
-
-            case ALIGN_OPPOSITE:
+            case ALIGN_RIGHT:
                 grav = -1;
                 break;
-
+            case ALIGN_NORMAL:
+                grav = mLayout.getParagraphDirection(line);
+                break;
+            case ALIGN_OPPOSITE:
+                grav = -mLayout.getParagraphDirection(line);
+                break;
+            case ALIGN_CENTER:
             default:
                 grav = 0;
+                break;
         }
-
-        grav *= mLayout.getParagraphDirection(line);
 
         int hspace = mRight - mLeft - getCompoundPaddingLeft() - getCompoundPaddingRight();
         int vspace = mBottom - mTop - getExtendedPaddingTop() - getExtendedPaddingBottom();
