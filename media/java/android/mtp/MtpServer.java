@@ -16,18 +16,13 @@
 
 package android.mtp;
 
-import android.util.Log;
-
 /**
  * Java wrapper for MTP/PTP support as USB responder.
  * {@hide}
  */
-public class MtpServer {
+public class MtpServer implements Runnable {
 
-    private final Object mLock = new Object();
-    private boolean mStarted;
-
-    private static final String TAG = "MtpServer";
+    private int mNativeContext; // accessed by native methods
 
     static {
         System.loadLibrary("media_jni");
@@ -38,19 +33,14 @@ public class MtpServer {
     }
 
     public void start() {
-        synchronized (mLock) {
-            native_start();
-            mStarted = true;
-        }
+        Thread thread = new Thread(this, "MtpServer");
+        thread.start();
     }
 
-    public void stop() {
-        synchronized (mLock) {
-            if (mStarted) {
-                native_stop();
-                mStarted = false;
-            }
-        }
+    @Override
+    public void run() {
+        native_run();
+        native_cleanup();
     }
 
     public void sendObjectAdded(int handle) {
@@ -70,8 +60,8 @@ public class MtpServer {
     }
 
     private native final void native_setup(MtpDatabase database, boolean usePtp);
-    private native final void native_start();
-    private native final void native_stop();
+    private native final void native_run();
+    private native final void native_cleanup();
     private native final void native_send_object_added(int handle);
     private native final void native_send_object_removed(int handle);
     private native final void native_add_storage(MtpStorage storage);

@@ -237,6 +237,8 @@ void MtpServer::run() {
 
     if (mSessionOpen)
         mDatabase->sessionEnded();
+    close(fd);
+    mFD = -1;
 }
 
 void MtpServer::sendObjectAdded(MtpObjectHandle handle) {
