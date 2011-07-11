@@ -368,6 +368,34 @@ public class MediaScanner
         }
     }
 
+    private class FileInserter {
+
+        ContentValues[] mValues = new ContentValues[1000];
+        int mIndex = 0;
+
+        public Uri insert(ContentValues values) {
+            if (mIndex == mValues.length) {
+                flush();
+            }
+            mValues[mIndex++] = values;
+            // URI not needed when doing bulk inserts
+            return null;
+        }
+
+        public void flush() {
+            while (mIndex < mValues.length) {
+                mValues[mIndex++] = null;
+            }
+            try {
+                mMediaProvider.bulkInsert(mFilesUri, mValues);
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException in FileInserter.flush()", e);
+            }
+            mIndex = 0;
+        }
+    }
+    private FileInserter mFileInserter;
+
     // hashes file path to FileCacheEntry.
     // path should be lower case if mCaseInsensitivePaths is true
     private HashMap<String, FileCacheEntry> mFileCache;
@@ -805,37 +833,31 @@ public class MediaScanner
                 }
             }
 
-            Uri tableUri = mFilesUri;
-            if (!mNoMedia) {
-                if (MediaFile.isVideoFileType(mFileType)) {
-                    tableUri = mVideoUri;
-                } else if (MediaFile.isImageFileType(mFileType)) {
-                    tableUri = mImagesUri;
-                } else if (MediaFile.isAudioFileType(mFileType)) {
-                    tableUri = mAudioUri;
-                }
-            }
             Uri result = null;
             if (rowId == 0) {
                 if (mMtpObjectHandle != 0) {
                     values.put(MediaStore.MediaColumns.MEDIA_SCANNER_NEW_OBJECT_ID, mMtpObjectHandle);
                 }
-                if (tableUri == mFilesUri) {
-                    int format = entry.mFormat;
-                    if (format == 0) {
-                        format = MediaFile.getFormatCode(entry.mPath, mMimeType);
-                    }
-                    values.put(Files.FileColumns.FORMAT, format);
+                int format = entry.mFormat;
+                if (format == 0) {
+                    format = MediaFile.getFormatCode(entry.mPath, mMimeType);
                 }
+                values.put(Files.FileColumns.FORMAT, format);
+
                 // new file, insert it
-                result = mMediaProvider.insert(tableUri, values);
+                if (mFileInserter != null) {
+                    result = mFileInserter.insert(values);
+                } else {
+                    result = mMediaProvider.insert(mFilesUri, values);
+                }
+
                 if (result != null) {
                     rowId = ContentUris.parseId(result);
                     entry.mRowId = rowId;
                 }
             } else {
                 // updated file
-                result = ContentUris.withAppendedId(tableUri, rowId);
+                result = ContentUris.withAppendedId(mFilesUri, rowId);
                 // path should never change, and we want to avoid replacing mixed cased paths
                 // with squashed lower case paths
                 values.remove(MediaStore.MediaColumns.DATA);
@@ -854,7 +876,7 @@ public class MediaScanner
                                         new String[] { genre }, null);
                         if (cursor == null || cursor.getCount() == 0) {
                             // genre does not exist, so create the genre in the genre table
-                            values.clear();
+                            values = new ContentValues();
                             values.put(MediaStore.Audio.Genres.NAME, genre);
                             uri = mMediaProvider.insert(mGenresUri, values);
                         } else {
@@ -876,7 +898,7 @@ public class MediaScanner
 
                 if (uri != null) {
                     // add entry to audio_genre_map
-                    values.clear();
+                    values = new ContentValues();
                     values.put(MediaStore.Audio.Genres.Members.AUDIO_ID, Long.valueOf(rowId));
                     mMediaProvider.insert(uri, values);
                 }
@@ -885,19 +907,19 @@ public class MediaScanner
             if (notifications && !mDefaultNotificationSet) {
                 if (TextUtils.isEmpty(mDefaultNotificationFilename) ||
                         doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename)) {
-                    setSettingIfNotSet(Settings.System.NOTIFICATION_SOUND, tableUri, rowId);
+                    setSettingIfNotSet(Settings.System.NOTIFICATION_SOUND, mFilesUri, rowId);
                     mDefaultNotificationSet = true;
                 }
             } else if (ringtones && !mDefaultRingtoneSet) {
                 if (TextUtils.isEmpty(mDefaultRingtoneFilename) ||
                         doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename)) {
-                    setSettingIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
+                    setSettingIfNotSet(Settings.System.RINGTONE, mFilesUri, rowId);
                     mDefaultRingtoneSet = true;
                 }
             } else if (alarms && !mDefaultAlarmSet) {
                 if (TextUtils.isEmpty(mDefaultAlarmAlertFilename) ||
                         doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)) {
-                    setSettingIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
+                    setSettingIfNotSet(Settings.System.ALARM_ALERT, mFilesUri, rowId);
                     mDefaultAlarmSet = true;
                 }
             }
@@ -1165,10 +1187,14 @@ public class MediaScanner
             initialize(volumeName);
             prescan(null, true);
             long prescan = System.currentTimeMillis();
+            mFileInserter = new FileInserter();
 
             for (int i = 0; i < directories.length; i++) {
                 processDirectory(directories[i], mClient);
             }
+            mFileInserter.flush();
+            mFileInserter = null;
+
             long scan = System.currentTimeMillis();
             postscan(directories);
             long end = System.currentTimeMillis();

@@ -104,10 +104,9 @@ public class MediaFile {
     public static final int FILE_TYPE_MS_POWERPOINT = 106;
     public static final int FILE_TYPE_ZIP           = 107;
     
-    static class MediaFileType {
-    
-        int fileType;
-        String mimeType;
+    public static class MediaFileType {
+        public final int fileType;
+        public final String mimeType;
         
         MediaFileType(int fileType, String mimeType) {
             this.fileType = fileType;
