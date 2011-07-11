@@ -67,7 +67,11 @@ public final class NfcAdapterExtras {
 
     /** get service handles */
     private static void initService() {
-        sService = sAdapter.getNfcAdapterExtrasInterface();
+        final INfcAdapterExtras service = sAdapter.getNfcAdapterExtrasInterface();
+        if (service != null) {
+            // Leave stale rather than receive a null value.
+            sService = service;
+        }
     }
 
     /**
@@ -84,18 +88,19 @@ public final class NfcAdapterExtras {
             if (sSingleton == null) {
                 try {
                     sAdapter = adapter;
-                    sRouteOff = new CardEmulationRoute(CardEmulationRoute.ROUTE_OFF, null);
                     sSingleton = new NfcAdapterExtras();
                     sEmbeddedEe = new NfcExecutionEnvironment(sSingleton);
+                    sRouteOff = new CardEmulationRoute(CardEmulationRoute.ROUTE_OFF, null);
                     sRouteOnWhenScreenOn = new CardEmulationRoute(
                             CardEmulationRoute.ROUTE_ON_WHEN_SCREEN_ON, sEmbeddedEe);
                     initService();
                 } finally {
-                    if (sSingleton == null) {
-                        sService = null;
-                        sEmbeddedEe = null;
-                        sRouteOff = null;
+                    if (sService == null) {
                         sRouteOnWhenScreenOn = null;
+                        sRouteOff = null;
+                        sEmbeddedEe = null;
+                        sSingleton = null;
+                        sAdapter = null;
                     }
                 }
             }
