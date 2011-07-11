@@ -23,10 +23,30 @@
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
+#include <media/IOMX.h>
 
 #include "mp4dec_api.h"
 
 namespace android {
+
+static const CodecProfileLevel kM4VProfileLevels[] = {
+    { OMX_VIDEO_MPEG4ProfileSimple, OMX_VIDEO_MPEG4Level0 },
+    { OMX_VIDEO_MPEG4ProfileSimple, OMX_VIDEO_MPEG4Level0b },
+    { OMX_VIDEO_MPEG4ProfileSimple, OMX_VIDEO_MPEG4Level1 },
+    { OMX_VIDEO_MPEG4ProfileSimple, OMX_VIDEO_MPEG4Level2 },
+    { OMX_VIDEO_MPEG4ProfileSimple, OMX_VIDEO_MPEG4Level3 },
+};
+
+static const CodecProfileLevel kH263ProfileLevels[] = {
+    { OMX_VIDEO_H263ProfileBaseline, OMX_VIDEO_H263Level10 },
+    { OMX_VIDEO_H263ProfileBaseline, OMX_VIDEO_H263Level20 },
+    { OMX_VIDEO_H263ProfileBaseline, OMX_VIDEO_H263Level30 },
+    { OMX_VIDEO_H263ProfileBaseline, OMX_VIDEO_H263Level45 },
+    { OMX_VIDEO_H263ProfileISWV2,    OMX_VIDEO_H263Level10 },
+    { OMX_VIDEO_H263ProfileISWV2,    OMX_VIDEO_H263Level20 },
+    { OMX_VIDEO_H263ProfileISWV2,    OMX_VIDEO_H263Level30 },
+    { OMX_VIDEO_H263ProfileISWV2,    OMX_VIDEO_H263Level45 },
+};
 
 template<class T>
 static void InitOMXParams(T *params) {
@@ -178,6 +198,39 @@ OMX_ERRORTYPE SoftMPEG4::internalGetParameter(
                 formatParams->xFramerate = 0;
             }
 
+            return OMX_ErrorNone;
+        }
+
+        case OMX_IndexParamVideoProfileLevelQuerySupported:
+        {
+            OMX_VIDEO_PARAM_PROFILELEVELTYPE *profileLevel =
+                    (OMX_VIDEO_PARAM_PROFILELEVELTYPE *) params;
+
+            if (profileLevel->nPortIndex != 0) {  // Input port only
+                LOGE("Invalid port index: %ld", profileLevel->nPortIndex);
+                return OMX_ErrorUnsupportedIndex;
+            }
+
+            size_t index = profileLevel->nProfileIndex;
+            if (mMode == MODE_H263) {
+                size_t nProfileLevels =
+                    sizeof(kH263ProfileLevels) / sizeof(kH263ProfileLevels[0]);
+                if (index >= nProfileLevels) {
+                    return OMX_ErrorNoMore;
+                }
+
+                profileLevel->eProfile = kH263ProfileLevels[index].mProfile;
+                profileLevel->eLevel = kH263ProfileLevels[index].mLevel;
+            } else {
+                size_t nProfileLevels =
+                    sizeof(kM4VProfileLevels) / sizeof(kM4VProfileLevels[0]);
+                if (index >= nProfileLevels) {
+                    return OMX_ErrorNoMore;
+                }
+
+                profileLevel->eProfile = kM4VProfileLevels[index].mProfile;
+                profileLevel->eLevel = kM4VProfileLevels[index].mLevel;
+            }
             return OMX_ErrorNone;
         }
 

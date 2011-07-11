@@ -23,9 +23,29 @@
 #include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/MediaDefs.h>
 #include <media/stagefright/MediaErrors.h>
+#include <media/IOMX.h>
 
 
 namespace android {
+
+static const CodecProfileLevel kProfileLevels[] = {
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel1  },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel1b },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel11 },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel12 },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel13 },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel2  },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel21 },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel22 },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel3  },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel31 },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel32 },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel4  },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel41 },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel42 },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel5  },
+    { OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel51 },
+};
 
 template<class T>
 static void InitOMXParams(T *params) {
@@ -174,6 +194,28 @@ OMX_ERRORTYPE SoftAVC::internalGetParameter(
                 formatParams->xFramerate = 0;
             }
 
+            return OMX_ErrorNone;
+        }
+
+        case OMX_IndexParamVideoProfileLevelQuerySupported:
+        {
+            OMX_VIDEO_PARAM_PROFILELEVELTYPE *profileLevel =
+                    (OMX_VIDEO_PARAM_PROFILELEVELTYPE *) params;
+
+            if (profileLevel->nPortIndex != kInputPortIndex) {
+                LOGE("Invalid port index: %ld", profileLevel->nPortIndex);
+                return OMX_ErrorUnsupportedIndex;
+            }
+
+            size_t index = profileLevel->nProfileIndex;
+            size_t nProfileLevels =
+                    sizeof(kProfileLevels) / sizeof(kProfileLevels[0]);
+            if (index >= nProfileLevels) {
+                return OMX_ErrorNoMore;
+            }
+
+            profileLevel->eProfile = kProfileLevels[index].mProfile;
+            profileLevel->eLevel = kProfileLevels[index].mLevel;
             return OMX_ErrorNone;
         }
 
