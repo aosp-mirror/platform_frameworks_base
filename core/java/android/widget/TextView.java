@@ -5571,8 +5571,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
-    protected void resetLayoutDirectionResolution() {
-        super.resetLayoutDirectionResolution();
+    protected void resetResolvedLayoutDirection() {
+        super.resetResolvedLayoutDirection();
 
         if (mLayoutAlignment != null &&
                 (mTextAlign == TextAlign.VIEW_START ||
