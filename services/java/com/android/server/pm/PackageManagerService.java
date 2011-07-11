@@ -778,16 +778,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             mSeparateProcesses = null;
         }
 
-        Installer installer = new Installer();
-        // Little hacky thing to check if installd is here, to determine
-        // whether we are running on the simulator and thus need to take
-        // care of building the /data file structure ourself.
-        // (apparently the sim now has a working installer)
-        if (installer.ping()) {
-            mInstaller = installer;
-        } else {
-            mInstaller = null;
-        }
+        mInstaller = new Installer();
 
         WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         Display d = wm.getDefaultDisplay();
@@ -805,17 +796,6 @@ public class PackageManagerService extends IPackageManager.Stub {
             mDrmAppPrivateInstallDir = new File(dataDir, "app-private");
 
             mUserManager = new UserManager(mInstaller, mUserAppDataDir);
-
-            if (mInstaller == null) {
-                // Make sure these dirs exist, when we are running in
-                // the simulator.
-                // Make a wide-open directory for random misc stuff.
-                File miscDir = new File(dataDir, "misc");
-                miscDir.mkdirs();
-                mAppDataDir.mkdirs();
-                mUserAppDataDir.mkdirs();
-                mDrmAppPrivateInstallDir.mkdirs();
-            }
 
             readPermissions();
 
@@ -838,104 +818,102 @@ public class PackageManagerService extends IPackageManager.Stub {
             mFrameworkDir = new File(Environment.getRootDirectory(), "framework");
             mDalvikCacheDir = new File(dataDir, "dalvik-cache");
 
-            if (mInstaller != null) {
-                boolean didDexOpt = false;
+            boolean didDexOpt = false;
 
-                /**
-                 * Out of paranoia, ensure that everything in the boot class
-                 * path has been dexed.
-                 */
-                String bootClassPath = System.getProperty("java.boot.class.path");
-                if (bootClassPath != null) {
-                    String[] paths = splitString(bootClassPath, ':');
-                    for (int i=0; i<paths.length; i++) {
-                        try {
-                            if (dalvik.system.DexFile.isDexOptNeeded(paths[i])) {
-                                libFiles.add(paths[i]);
-                                mInstaller.dexopt(paths[i], Process.SYSTEM_UID, true);
-                                didDexOpt = true;
-                            }
-                        } catch (FileNotFoundException e) {
-                            Slog.w(TAG, "Boot class path not found: " + paths[i]);
-                        } catch (IOException e) {
-                            Slog.w(TAG, "Exception reading boot class path: " + paths[i], e);
+            /**
+             * Out of paranoia, ensure that everything in the boot class
+             * path has been dexed.
+             */
+            String bootClassPath = System.getProperty("java.boot.class.path");
+            if (bootClassPath != null) {
+                String[] paths = splitString(bootClassPath, ':');
+                for (int i=0; i<paths.length; i++) {
+                    try {
+                        if (dalvik.system.DexFile.isDexOptNeeded(paths[i])) {
+                            libFiles.add(paths[i]);
+                            mInstaller.dexopt(paths[i], Process.SYSTEM_UID, true);
+                            didDexOpt = true;
                         }
-                    }
-                } else {
-                    Slog.w(TAG, "No BOOTCLASSPATH found!");
-                }
-
-                /**
-                 * Also ensure all external libraries have had dexopt run on them.
-                 */
-                if (mSharedLibraries.size() > 0) {
-                    Iterator<String> libs = mSharedLibraries.values().iterator();
-                    while (libs.hasNext()) {
-                        String lib = libs.next();
-                        try {
-                            if (dalvik.system.DexFile.isDexOptNeeded(lib)) {
-                                libFiles.add(lib);
-                                mInstaller.dexopt(lib, Process.SYSTEM_UID, true);
-                                didDexOpt = true;
-                            }
-                        } catch (FileNotFoundException e) {
-                            Slog.w(TAG, "Library not found: " + lib);
-                        } catch (IOException e) {
-                            Slog.w(TAG, "Exception reading library: " + lib, e);
-                        }
+                    } catch (FileNotFoundException e) {
+                        Slog.w(TAG, "Boot class path not found: " + paths[i]);
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Exception reading boot class path: " + paths[i], e);
                     }
                 }
+            } else {
+                Slog.w(TAG, "No BOOTCLASSPATH found!");
+            }
 
-                // Gross hack for now: we know this file doesn't contain any
-                // code, so don't dexopt it to avoid the resulting log spew.
-                libFiles.add(mFrameworkDir.getPath() + "/framework-res.apk");
-
-                /**
-                 * And there are a number of commands implemented in Java, which
-                 * we currently need to do the dexopt on so that they can be
-                 * run from a non-root shell.
-                 */
-                String[] frameworkFiles = mFrameworkDir.list();
-                if (frameworkFiles != null) {
-                    for (int i=0; i<frameworkFiles.length; i++) {
-                        File libPath = new File(mFrameworkDir, frameworkFiles[i]);
-                        String path = libPath.getPath();
-                        // Skip the file if we alrady did it.
-                        if (libFiles.contains(path)) {
-                            continue;
+            /**
+             * Also ensure all external libraries have had dexopt run on them.
+             */
+            if (mSharedLibraries.size() > 0) {
+                Iterator<String> libs = mSharedLibraries.values().iterator();
+                while (libs.hasNext()) {
+                    String lib = libs.next();
+                    try {
+                        if (dalvik.system.DexFile.isDexOptNeeded(lib)) {
+                            libFiles.add(lib);
+                            mInstaller.dexopt(lib, Process.SYSTEM_UID, true);
+                            didDexOpt = true;
                         }
-                        // Skip the file if it is not a type we want to dexopt.
-                        if (!path.endsWith(".apk") && !path.endsWith(".jar")) {
-                            continue;
-                        }
-                        try {
-                            if (dalvik.system.DexFile.isDexOptNeeded(path)) {
-                                mInstaller.dexopt(path, Process.SYSTEM_UID, true);
-                                didDexOpt = true;
-                            }
-                        } catch (FileNotFoundException e) {
-                            Slog.w(TAG, "Jar not found: " + path);
-                        } catch (IOException e) {
-                            Slog.w(TAG, "Exception reading jar: " + path, e);
-                        }
+                    } catch (FileNotFoundException e) {
+                        Slog.w(TAG, "Library not found: " + lib);
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Exception reading library: " + lib, e);
                     }
                 }
+            }
 
-                if (didDexOpt) {
-                    // If we had to do a dexopt of one of the previous
-                    // things, then something on the system has changed.
-                    // Consider this significant, and wipe away all other
-                    // existing dexopt files to ensure we don't leave any
-                    // dangling around.
-                    String[] files = mDalvikCacheDir.list();
-                    if (files != null) {
-                        for (int i=0; i<files.length; i++) {
-                            String fn = files[i];
-                            if (fn.startsWith("data@app@")
-                                    || fn.startsWith("data@app-private@")) {
-                                Slog.i(TAG, "Pruning dalvik file: " + fn);
-                                (new File(mDalvikCacheDir, fn)).delete();
-                            }
+            // Gross hack for now: we know this file doesn't contain any
+            // code, so don't dexopt it to avoid the resulting log spew.
+            libFiles.add(mFrameworkDir.getPath() + "/framework-res.apk");
+
+            /**
+             * And there are a number of commands implemented in Java, which
+             * we currently need to do the dexopt on so that they can be
+             * run from a non-root shell.
+             */
+            String[] frameworkFiles = mFrameworkDir.list();
+            if (frameworkFiles != null) {
+                for (int i=0; i<frameworkFiles.length; i++) {
+                    File libPath = new File(mFrameworkDir, frameworkFiles[i]);
+                    String path = libPath.getPath();
+                    // Skip the file if we alrady did it.
+                    if (libFiles.contains(path)) {
+                        continue;
+                    }
+                    // Skip the file if it is not a type we want to dexopt.
+                    if (!path.endsWith(".apk") && !path.endsWith(".jar")) {
+                        continue;
+                    }
+                    try {
+                        if (dalvik.system.DexFile.isDexOptNeeded(path)) {
+                            mInstaller.dexopt(path, Process.SYSTEM_UID, true);
+                            didDexOpt = true;
+                        }
+                    } catch (FileNotFoundException e) {
+                        Slog.w(TAG, "Jar not found: " + path);
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Exception reading jar: " + path, e);
+                    }
+                }
+            }
+
+            if (didDexOpt) {
+                // If we had to do a dexopt of one of the previous
+                // things, then something on the system has changed.
+                // Consider this significant, and wipe away all other
+                // existing dexopt files to ensure we don't leave any
+                // dangling around.
+                String[] files = mDalvikCacheDir.list();
+                if (files != null) {
+                    for (int i=0; i<files.length; i++) {
+                        String fn = files[i];
+                        if (fn.startsWith("data@app@")
+                                || fn.startsWith("data@app-private@")) {
+                            Slog.i(TAG, "Pruning dalvik file: " + fn);
+                            (new File(mDalvikCacheDir, fn)).delete();
                         }
                     }
                 }
@@ -965,11 +943,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             scanDirLI(mVendorAppDir, PackageParser.PARSE_IS_SYSTEM
                     | PackageParser.PARSE_IS_SYSTEM_DIR, scanMode, 0);
 
-            if (mInstaller != null) {
-                if (DEBUG_UPGRADE) Log.v(TAG, "Running installd update commands");
-                mInstaller.moveFiles();
-            }
-            
+            if (DEBUG_UPGRADE) Log.v(TAG, "Running installd update commands");
+            mInstaller.moveFiles();
+
             // Prune any system packages that no longer exist.
             Iterator<PackageSetting> psit = mSettings.mPackages.values().iterator();
             while (psit.hasNext()) {
@@ -981,19 +957,12 @@ public class PackageManagerService extends IPackageManager.Stub {
                     String msg = "System package " + ps.name
                             + " no longer exists; wiping its data";
                     reportSettingsProblem(Log.WARN, msg);
-                    if (mInstaller != null) {
-                        mInstaller.remove(ps.name, 0);
-                        mUserManager.removePackageForAllUsers(ps.name);
-                    }
+                    mInstaller.remove(ps.name, 0);
+                    mUserManager.removePackageForAllUsers(ps.name);
                 }
             }
             
             mAppInstallDir = new File(dataDir, "app");
-            if (mInstaller == null) {
-                // Make sure these dirs exist, when we are running in
-                // the simulator.
-                mAppInstallDir.mkdirs(); // scanDirLI() assumes this dir exists
-            }
             //look for any incomplete package installations
             ArrayList<PackageSetting> deletePkgsList = mSettings.getListOfIncompleteInstallPackagesLPr();
             //clean up list
@@ -1067,19 +1036,12 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     void cleanupInstallFailedPackage(PackageSetting ps) {
         Slog.i(TAG, "Cleaning up incompletely installed app: " + ps.name);
-        if (mInstaller != null) {
-            int retCode = mInstaller.remove(ps.name, 0);
-            if (retCode < 0) {
-                Slog.w(TAG, "Couldn't remove app data directory for package: "
-                           + ps.name + ", retcode=" + retCode);
-            } else {
-                mUserManager.removePackageForAllUsers(ps.name);
-            }
+        int retCode = mInstaller.remove(ps.name, 0);
+        if (retCode < 0) {
+            Slog.w(TAG, "Couldn't remove app data directory for package: "
+                       + ps.name + ", retcode=" + retCode);
         } else {
-            //for emulator
-            PackageParser.Package pkg = mPackages.get(ps.name);
-            File dataDir = new File(pkg.applicationInfo.dataDir);
-            dataDir.delete();
+            mUserManager.removePackageForAllUsers(ps.name);
         }
         if (ps.codePath != null) {
             if (!ps.codePath.delete()) {
@@ -1562,12 +1524,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             public void run() {
                 mHandler.removeCallbacks(this);
                 int retCode = -1;
-                if (mInstaller != null) {
-                    retCode = mInstaller.freeCache(freeStorageSize);
-                    if (retCode < 0) {
-                        Slog.w(TAG, "Couldn't clear application caches");
-                    }
-                } //end if mInstaller
+                retCode = mInstaller.freeCache(freeStorageSize);
+                if (retCode < 0) {
+                    Slog.w(TAG, "Couldn't clear application caches");
+                }
                 if (observer != null) {
                     try {
                         observer.onRemoveCompleted(null, (retCode >= 0));
@@ -1587,11 +1547,9 @@ public class PackageManagerService extends IPackageManager.Stub {
             public void run() {
                 mHandler.removeCallbacks(this);
                 int retCode = -1;
-                if (mInstaller != null) {
-                    retCode = mInstaller.freeCache(freeStorageSize);
-                    if (retCode < 0) {
-                        Slog.w(TAG, "Couldn't clear application caches");
-                    }
+                retCode = mInstaller.freeCache(freeStorageSize);
+                if (retCode < 0) {
+                    Slog.w(TAG, "Couldn't clear application caches");
                 }
                 if(pi != null) {
                     try {
@@ -2850,7 +2808,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     private int performDexOptLI(PackageParser.Package pkg, boolean forceDex) {
         boolean performed = false;
-        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0 && mInstaller != null) {
+        if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
             String path = pkg.mScanPath;
             int ret = 0;
             try {
@@ -3235,42 +3193,39 @@ public class PackageManagerService extends IPackageManager.Stub {
                 mOutPermissions[1] = 0;
                 FileUtils.getPermissions(dataPath.getPath(), mOutPermissions);
 
-                // If we have mismatched owners for the data path, we have a
-                // problem (unless we're running in the simulator.)
+                // If we have mismatched owners for the data path, we have a problem.
                 if (mOutPermissions[1] != pkg.applicationInfo.uid) {
                     boolean recovered = false;
                     if ((parseFlags&PackageParser.PARSE_IS_SYSTEM) != 0) {
                         // If this is a system app, we can at least delete its
                         // current data so the application will still work.
-                        if (mInstaller != null) {
-                            int ret = mInstaller.remove(pkgName, 0);
-                            if (ret >= 0) {
-                                // TODO: Kill the processes first
-                                // Remove the data directories for all users
-                                mUserManager.removePackageForAllUsers(pkgName);
-                                // Old data gone!
-                                String msg = "System package " + pkg.packageName
-                                        + " has changed from uid: "
-                                        + mOutPermissions[1] + " to "
-                                        + pkg.applicationInfo.uid + "; old data erased";
-                                reportSettingsProblem(Log.WARN, msg);
-                                recovered = true;
+                        int ret = mInstaller.remove(pkgName, 0);
+                        if (ret >= 0) {
+                            // TODO: Kill the processes first
+                            // Remove the data directories for all users
+                            mUserManager.removePackageForAllUsers(pkgName);
+                            // Old data gone!
+                            String msg = "System package " + pkg.packageName
+                                    + " has changed from uid: "
+                                    + mOutPermissions[1] + " to "
+                                    + pkg.applicationInfo.uid + "; old data erased";
+                            reportSettingsProblem(Log.WARN, msg);
+                            recovered = true;
 
-                                // And now re-install the app.
-                                ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
-                                        pkg.applicationInfo.uid);
-                                if (ret == -1) {
-                                    // Ack should not happen!
-                                    msg = "System package " + pkg.packageName
-                                            + " could not have data directory re-created after delete.";
-                                    reportSettingsProblem(Log.WARN, msg);
-                                    mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                                    return null;
-                                }
-                                // Create data directories for all users
-                                mUserManager.installPackageForAllUsers(pkgName,
-                                        pkg.applicationInfo.uid);
+                            // And now re-install the app.
+                            ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
+                                    pkg.applicationInfo.uid);
+                            if (ret == -1) {
+                                // Ack should not happen!
+                                msg = "System package " + pkg.packageName
+                                        + " could not have data directory re-created after delete.";
+                                reportSettingsProblem(Log.WARN, msg);
+                                mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                                return null;
                             }
+                            // Create data directories for all users
+                            mUserManager.installPackageForAllUsers(pkgName,
+                                    pkg.applicationInfo.uid);
                         }
                         if (!recovered) {
                             mHasSystemUidErrors = true;
@@ -3303,25 +3258,16 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Log.v(TAG, "Want this data dir: " + dataPath);
                 }
                 //invoke installer to do the actual installation
-                if (mInstaller != null) {
-                    int ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
-                            pkg.applicationInfo.uid);
-                    if (ret < 0) {
-                        // Error from installer
-                        mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                        return null;
-                    }
-                    // Create data directories for all users
-                    mUserManager.installPackageForAllUsers(pkgName, pkg.applicationInfo.uid);
-                } else {
-                    dataPath.mkdirs();
-                    if (dataPath.exists()) {
-                        FileUtils.setPermissions(
-                            dataPath.toString(),
-                            FileUtils.S_IRWXU|FileUtils.S_IRWXG|FileUtils.S_IXOTH,
-                            pkg.applicationInfo.uid, pkg.applicationInfo.uid);
-                    }
+                int ret = mInstaller.install(pkgName, pkg.applicationInfo.uid,
+                        pkg.applicationInfo.uid);
+                if (ret < 0) {
+                    // Error from installer
+                    mLastScanError = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+                    return null;
                 }
+                // Create data directories for all users
+                mUserManager.installPackageForAllUsers(pkgName, pkg.applicationInfo.uid);
+
                 if (dataPath.exists()) {
                     pkg.applicationInfo.dataDir = dataPath.getPath();
                 } else {
@@ -3352,65 +3298,62 @@ public class PackageManagerService extends IPackageManager.Stub {
             pkgSetting.uidError = uidError;
         }
 
-        // If we're running in the simulator, we don't need to unpack anything.
-        if (mInstaller != null) {
-            String path = scanFile.getPath();
-            /* Note: We don't want to unpack the native binaries for
-             *        system applications, unless they have been updated
-             *        (the binaries are already under /system/lib).
-             *        Also, don't unpack libs for apps on the external card
-             *        since they should have their libraries in the ASEC
-             *        container already.
-             *
-             *        In other words, we're going to unpack the binaries
-             *        only for non-system apps and system app upgrades.
-             */
-            if (pkg.applicationInfo.nativeLibraryDir != null) {
-                try {
-                    final File nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
-                    final String dataPathString = dataPath.getCanonicalFile().getPath();
+        String path = scanFile.getPath();
+        /* Note: We don't want to unpack the native binaries for
+         *        system applications, unless they have been updated
+         *        (the binaries are already under /system/lib).
+         *        Also, don't unpack libs for apps on the external card
+         *        since they should have their libraries in the ASEC
+         *        container already.
+         *
+         *        In other words, we're going to unpack the binaries
+         *        only for non-system apps and system app upgrades.
+         */
+        if (pkg.applicationInfo.nativeLibraryDir != null) {
+            try {
+                final File nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
+                final String dataPathString = dataPath.getCanonicalFile().getPath();
 
-                    if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
-                        /*
-                         * Upgrading from a previous version of the OS sometimes
-                         * leaves native libraries in the /data/data/<app>/lib
-                         * directory for system apps even when they shouldn't be.
-                         * Recent changes in the JNI library search path
-                         * necessitates we remove those to match previous behavior.
-                         */
-                        if (NativeLibraryHelper.removeNativeBinariesFromDirLI(nativeLibraryDir)) {
-                            Log.i(TAG, "removed obsolete native libraries for system package "
-                                    + path);
-                        }
-                    } else if (nativeLibraryDir.getCanonicalFile().getParent()
-                            .equals(dataPathString)) {
-                        /*
-                         * If this is an internal application or our
-                         * nativeLibraryPath points to our data directory, unpack
-                         * the libraries. The native library path pointing to the
-                         * data directory for an application in an ASEC container
-                         * can happen for older apps that existed before an OTA to
-                         * Gingerbread.
-                         */
-                        Slog.i(TAG, "Unpacking native libraries for " + path);
-                        mInstaller.unlinkNativeLibraryDirectory(dataPathString);
-                        NativeLibraryHelper.copyNativeBinariesLI(scanFile, nativeLibraryDir);
-                    } else {
-                        Slog.i(TAG, "Linking native library dir for " + path);
-                        mInstaller.linkNativeLibraryDirectory(dataPathString,
-                                pkg.applicationInfo.nativeLibraryDir);
+                if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
+                    /*
+                     * Upgrading from a previous version of the OS sometimes
+                     * leaves native libraries in the /data/data/<app>/lib
+                     * directory for system apps even when they shouldn't be.
+                     * Recent changes in the JNI library search path
+                     * necessitates we remove those to match previous behavior.
+                     */
+                    if (NativeLibraryHelper.removeNativeBinariesFromDirLI(nativeLibraryDir)) {
+                        Log.i(TAG, "removed obsolete native libraries for system package "
+                                + path);
                     }
-                } catch (IOException ioe) {
-                    Log.e(TAG, "Unable to get canonical file " + ioe.toString());
+                } else if (nativeLibraryDir.getCanonicalFile().getParent()
+                        .equals(dataPathString)) {
+                    /*
+                     * If this is an internal application or our
+                     * nativeLibraryPath points to our data directory, unpack
+                     * the libraries. The native library path pointing to the
+                     * data directory for an application in an ASEC container
+                     * can happen for older apps that existed before an OTA to
+                     * Gingerbread.
+                     */
+                    Slog.i(TAG, "Unpacking native libraries for " + path);
+                    mInstaller.unlinkNativeLibraryDirectory(dataPathString);
+                    NativeLibraryHelper.copyNativeBinariesLI(scanFile, nativeLibraryDir);
+                } else {
+                    Slog.i(TAG, "Linking native library dir for " + path);
+                    mInstaller.linkNativeLibraryDirectory(dataPathString,
+                            pkg.applicationInfo.nativeLibraryDir);
                 }
+            } catch (IOException ioe) {
+                Log.e(TAG, "Unable to get canonical file " + ioe.toString());
             }
-            pkg.mScanPath = path;
+        }
+        pkg.mScanPath = path;
 
-            if ((scanMode&SCAN_NO_DEX) == 0) {
-                if (performDexOptLI(pkg, forceDex) == DEX_OPT_FAILED) {
-                    mLastScanError = PackageManager.INSTALL_FAILED_DEXOPT;
-                    return null;
-                }
+        if ((scanMode&SCAN_NO_DEX) == 0) {
+            if (performDexOptLI(pkg, forceDex) == DEX_OPT_FAILED) {
+                mLastScanError = PackageManager.INSTALL_FAILED_DEXOPT;
+                return null;
             }
         }
 
@@ -5434,7 +5377,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         void cleanUpResourcesLI() {
             String sourceDir = getCodePath();
-            if (cleanUp() && mInstaller != null) {
+            if (cleanUp()) {
                 int retCode = mInstaller.rmdex(sourceDir);
                 if (retCode < 0) {
                     Slog.w(TAG, "Couldn't remove dex file for package: "
@@ -5662,14 +5605,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         void cleanUpResourcesLI() {
             String sourceFile = getCodePath();
             // Remove dex file
-            if (mInstaller != null) {
-                int retCode = mInstaller.rmdex(sourceFile);
-                if (retCode < 0) {
-                    Slog.w(TAG, "Couldn't remove dex file for package: "
-                            + " at location "
-                            + sourceFile.toString() + ", retcode=" + retCode);
-                    // we don't consider this to be a failure of the core package deletion
-                }
+            int retCode = mInstaller.rmdex(sourceFile);
+            if (retCode < 0) {
+                Slog.w(TAG, "Couldn't remove dex file for package: "
+                        + " at location "
+                        + sourceFile.toString() + ", retcode=" + retCode);
+                // we don't consider this to be a failure of the core package deletion
             }
             cleanUp();
         }
@@ -6077,9 +6018,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
         if((res.returnCode = setPermissionsLI(newPackage))
                 != PackageManager.INSTALL_SUCCEEDED) {
-            if (mInstaller != null) {
-                mInstaller.rmdex(newPackage.mScanPath);
-            }
+            mInstaller.rmdex(newPackage.mScanPath);
             return;
         } else {
             Log.d(TAG, "New package installed in " + newPackage.mPath);
@@ -6207,15 +6146,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             } finally {
                 //TODO clean up the extracted public files
             }
-            if (mInstaller != null) {
-                retCode = mInstaller.setForwardLockPerm(getApkName(newPackage.mPath),
-                        newPackage.applicationInfo.uid);
-            } else {
-                final int filePermissions =
-                        FileUtils.S_IRUSR|FileUtils.S_IWUSR|FileUtils.S_IRGRP;
-                retCode = FileUtils.setPermissions(newPackage.mPath, filePermissions, -1,
-                                                   newPackage.applicationInfo.uid);
-            }
+            retCode = mInstaller.setForwardLockPerm(getApkName(newPackage.mPath),
+                    newPackage.applicationInfo.uid);
         } else {
             // The permissions on the resource file was set when it was copied for
             // non forward locked apps and apps on sdcard
@@ -6478,25 +6410,14 @@ public class PackageManagerService extends IPackageManager.Stub {
             deletedPs = mSettings.mPackages.get(packageName);
         }
         if ((flags&PackageManager.DONT_DELETE_DATA) == 0) {
-            if (mInstaller != null) {
-                int retCode = mInstaller.remove(packageName, 0);
-                if (retCode < 0) {
-                    Slog.w(TAG, "Couldn't remove app data or cache directory for package: "
-                               + packageName + ", retcode=" + retCode);
-                    // we don't consider this to be a failure of the core package deletion
-                } else {
-                    // TODO: Kill the processes first
-                    mUserManager.removePackageForAllUsers(packageName);
-                }
+            int retCode = mInstaller.remove(packageName, 0);
+            if (retCode < 0) {
+                Slog.w(TAG, "Couldn't remove app data or cache directory for package: "
+                           + packageName + ", retcode=" + retCode);
+                // we don't consider this to be a failure of the core package deletion
             } else {
-                // for simulator
-                File dataDir;
-                // reader
-                synchronized (mPackages) {
-                    PackageParser.Package pkg = mPackages.get(packageName);
-                    dataDir = new File(pkg.applicationInfo.dataDir);
-                }
-                dataDir.delete();
+                // TODO: Kill the processes first
+                mUserManager.removePackageForAllUsers(packageName);
             }
             schedulePackageCleaning(packageName);
         }
@@ -6745,13 +6666,11 @@ public class PackageManagerService extends IPackageManager.Stub {
                 return false;
             }
         }
-        if (mInstaller != null) {
-            int retCode = mInstaller.clearUserData(packageName, 0); // TODO - correct userId
-            if (retCode < 0) {
-                Slog.w(TAG, "Couldn't remove cache files for package: "
-                        + packageName);
-                return false;
-            }
+        int retCode = mInstaller.clearUserData(packageName, 0); // TODO - correct userId
+        if (retCode < 0) {
+            Slog.w(TAG, "Couldn't remove cache files for package: "
+                    + packageName);
+            return false;
         }
         return true;
     }
@@ -6797,13 +6716,11 @@ public class PackageManagerService extends IPackageManager.Stub {
             Slog.w(TAG, "Package " + packageName + " has no applicationInfo.");
             return false;
         }
-        if (mInstaller != null) {
-            int retCode = mInstaller.deleteCacheFiles(packageName);
-            if (retCode < 0) {
-                Slog.w(TAG, "Couldn't remove cache files for package: "
-                           + packageName);
-                return false;
-            }
+        int retCode = mInstaller.deleteCacheFiles(packageName);
+        if (retCode < 0) {
+            Slog.w(TAG, "Couldn't remove cache files for package: "
+                       + packageName);
+            return false;
         }
         return true;
     }
@@ -6867,14 +6784,10 @@ public class PackageManagerService extends IPackageManager.Stub {
                 publicSrcDir = applicationInfo.publicSourceDir;
             }
         }
-        if (mInstaller != null) {
-            int res = mInstaller.getSizeInfo(packageName, p.mPath, publicSrcDir,
-                    asecPath, pStats);
-            if (res < 0) {
-                return false;
-            } else {
-                return true;
-            }
+        int res = mInstaller.getSizeInfo(packageName, p.mPath, publicSrcDir,
+                asecPath, pStats);
+        if (res < 0) {
+            return false;
         }
         return true;
     }
