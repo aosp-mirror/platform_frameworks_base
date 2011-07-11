@@ -157,6 +157,11 @@ public class Am {
                 String value = nextArgRequired();
                 intent.putExtra(key, Integer.valueOf(value));
                 hasIntentInfo = true;
+            } else if (opt.equals("--eu")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                intent.putExtra(key, Uri.parse(value));
+                hasIntentInfo = true;
             } else if (opt.equals("--eia")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -1119,6 +1124,7 @@ public class Am {
                 "    [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
                 "    [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
                 "    [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]\n" +
+                "    [--eu <EXTRA_KEY> <EXTRA_URI_VALUE> ...]\n" +
                 "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
                 "    [-n <COMPONENT>] [-f <FLAGS>]\n" +
