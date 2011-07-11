@@ -158,12 +158,10 @@ CameraSource::CameraSource(
     mVideoSize.width  = -1;
     mVideoSize.height = -1;
 
-    int64_t token = IPCThreadState::self()->clearCallingIdentity();
     mInitCheck = init(camera, proxy, cameraId,
                     videoSize, frameRate,
                     storeMetaDataInVideoBuffers);
     if (mInitCheck != OK) releaseCamera();
-    IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
 status_t CameraSource::initCheck() const {
@@ -463,6 +461,22 @@ status_t CameraSource::init(
         bool storeMetaDataInVideoBuffers) {
 
     status_t err = OK;
+    int64_t token = IPCThreadState::self()->clearCallingIdentity();
+    err = initWithCameraAccess(camera, proxy, cameraId,
+                               videoSize, frameRate,
+                               storeMetaDataInVideoBuffers);
+    IPCThreadState::self()->restoreCallingIdentity(token);
+    return err;
+}
+
+status_t CameraSource::initWithCameraAccess(
+        const sp<ICamera>& camera,
+        const sp<ICameraRecordingProxy>& proxy,
+        int32_t cameraId,
+        Size videoSize,
+        int32_t frameRate,
+        bool storeMetaDataInVideoBuffers) {
+    status_t err = OK;
 
     if ((err = isCameraAvailable(camera, proxy, cameraId)) != OK) {
         LOGE("Camera connection could not be established.");
@@ -525,6 +539,11 @@ status_t CameraSource::init(
 CameraSource::~CameraSource() {
     if (mStarted) {
         stop();
+    } else if (mInitCheck == OK) {
+        // Camera is initialized but because start() is never called,
+        // the lock on Camera is never released(). This makes sure
+        // Camera's lock is released in this case.
+        releaseCamera();
     }
 }
 
@@ -571,6 +590,7 @@ void CameraSource::stopCameraRecording() {
 void CameraSource::releaseCamera() {
     LOGV("releaseCamera");
     if (mCamera != 0) {
+        int64_t token = IPCThreadState::self()->clearCallingIdentity();
         if ((mCameraFlags & FLAGS_HOT_CAMERA) == 0) {
             LOGV("Camera was cold when we started, stopping preview");
             mCamera->stopPreview();
@@ -580,6 +600,7 @@ void CameraSource::releaseCamera() {
             mCamera->unlock();
         }
         mCamera.clear();
+        IPCThreadState::self()->restoreCallingIdentity(token);
     }
     if (mCameraRecordingProxy != 0) {
         mCameraRecordingProxy->asBinder()->unlinkToDeath(mDeathNotifier);

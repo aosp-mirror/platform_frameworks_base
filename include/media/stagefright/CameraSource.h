@@ -197,6 +197,12 @@ private:
     status_t init(const sp<ICamera>& camera, const sp<ICameraRecordingProxy>& proxy,
                   int32_t cameraId, Size videoSize, int32_t frameRate,
                   bool storeMetaDataInVideoBuffers);
+
+    status_t initWithCameraAccess(
+                  const sp<ICamera>& camera, const sp<ICameraRecordingProxy>& proxy,
+                  int32_t cameraId, Size videoSize, int32_t frameRate,
+                  bool storeMetaDataInVideoBuffers);
+
     status_t isCameraAvailable(const sp<ICamera>& camera,
                                const sp<ICameraRecordingProxy>& proxy,
                                int32_t cameraId);
