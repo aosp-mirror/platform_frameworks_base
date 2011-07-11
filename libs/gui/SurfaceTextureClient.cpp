@@ -254,6 +254,12 @@ int SurfaceTextureClient::perform(int operation, va_list args)
     case NATIVE_WINDOW_SET_BUFFERS_TIMESTAMP:
         res = dispatchSetBuffersTimestamp(args);
         break;
+    case NATIVE_WINDOW_SET_BUFFERS_DIMENSIONS:
+        res = dispatchSetBuffersDimensions(args);
+        break;
+    case NATIVE_WINDOW_SET_BUFFERS_FORMAT:
+        res = dispatchSetBuffersFormat(args);
+        break;
     default:
         res = NAME_NOT_FOUND;
         break;
@@ -290,7 +296,22 @@ int SurfaceTextureClient::dispatchSetBuffersGeometry(va_list args) {
     int w = va_arg(args, int);
     int h = va_arg(args, int);
     int f = va_arg(args, int);
-    return setBuffersGeometry(w, h, f);
+    int err = setBuffersDimensions(w, h);
+    if (err != 0) {
+        return err;
+    }
+    return setBuffersFormat(f);
+}
+
+int SurfaceTextureClient::dispatchSetBuffersDimensions(va_list args) {
+    int w = va_arg(args, int);
+    int h = va_arg(args, int);
+    return setBuffersDimensions(w, h);
+}
+
+int SurfaceTextureClient::dispatchSetBuffersFormat(va_list args) {
+    int f = va_arg(args, int);
+    return setBuffersFormat(f);
 }
 
 int SurfaceTextureClient::dispatchSetBuffersTransform(va_list args) {
@@ -390,12 +411,12 @@ int SurfaceTextureClient::setBufferCount(int bufferCount)
     return err;
 }
 
-int SurfaceTextureClient::setBuffersGeometry(int w, int h, int format)
+int SurfaceTextureClient::setBuffersDimensions(int w, int h)
 {
-    LOGV("SurfaceTextureClient::setBuffersGeometry");
+    LOGV("SurfaceTextureClient::setBuffersDimensions");
     Mutex::Autolock lock(mMutex);
 
-    if (w<0 || h<0 || format<0)
+    if (w<0 || h<0)
         return BAD_VALUE;
 
     if ((w && !h) || (!w && h))
@@ -403,12 +424,24 @@ int SurfaceTextureClient::setBuffersGeometry(int w, int h, int format)
 
     mReqWidth = w;
     mReqHeight = h;
-    mReqFormat = format;
 
     status_t err = mSurfaceTexture->setCrop(Rect(0, 0));
     LOGE_IF(err, "ISurfaceTexture::setCrop(...) returned %s", strerror(-err));
 
     return err;
+}
+
+int SurfaceTextureClient::setBuffersFormat(int format)
+{
+    LOGV("SurfaceTextureClient::setBuffersFormat");
+    Mutex::Autolock lock(mMutex);
+
+    if (format<0)
+        return BAD_VALUE;
+
+    mReqFormat = format;
+
+    return NO_ERROR;
 }
 
 int SurfaceTextureClient::setBuffersTransform(int transform)

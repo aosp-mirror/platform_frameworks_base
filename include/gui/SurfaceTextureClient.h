@@ -65,6 +65,8 @@ private:
     int dispatchDisconnect(va_list args);
     int dispatchSetBufferCount(va_list args);
     int dispatchSetBuffersGeometry(va_list args);
+    int dispatchSetBuffersDimensions(va_list args);
+    int dispatchSetBuffersFormat(va_list args);
     int dispatchSetBuffersTransform(va_list args);
     int dispatchSetBuffersTimestamp(va_list args);
     int dispatchSetCrop(va_list args);
@@ -73,7 +75,8 @@ private:
     int connect(int api);
     int disconnect(int api);
     int setBufferCount(int bufferCount);
-    int setBuffersGeometry(int w, int h, int format);
+    int setBuffersDimensions(int w, int h);
+    int setBuffersFormat(int format);
     int setBuffersTransform(int transform);
     int setBuffersTimestamp(int64_t timestamp);
     int setCrop(Rect const* rect);
