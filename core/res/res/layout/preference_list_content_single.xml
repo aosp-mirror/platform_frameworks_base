@@ -56,7 +56,6 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:layout_weight="0"
-        android:background="@android:drawable/bottom_bar"
         android:visibility="gone">
 
         <Button android:id="@+id/back_button"
@@ -64,8 +63,6 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dip"
             android:layout_alignParentLeft="true"
-            android:drawableLeft="@drawable/ic_btn_back"
-            android:drawablePadding="3dip"
             android:text="@string/back_button_label"
         />
         <LinearLayout
@@ -86,8 +83,6 @@
                 android:layout_width="150dip"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dip"
-                android:drawableRight="@drawable/ic_btn_next"
-                android:drawablePadding="3dip"
                 android:text="@string/next_button_label"
             />
         </LinearLayout>
