@@ -630,20 +630,20 @@ public class UsbDeviceManager {
     }
 
     /* opens the currently attached USB accessory */
-        public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
-            UsbAccessory currentAccessory = mHandler.getCurrentAccessory();
-            if (currentAccessory == null) {
-                throw new IllegalArgumentException("no accessory attached");
-            }
-            if (!currentAccessory.equals(accessory)) {
-                String error = accessory.toString()
-                        + " does not match current accessory "
-                        + currentAccessory;
-                throw new IllegalArgumentException(error);
-            }
-            mSettingsManager.checkPermission(accessory);
-            return nativeOpenAccessory();
+    public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
+        UsbAccessory currentAccessory = mHandler.getCurrentAccessory();
+        if (currentAccessory == null) {
+            throw new IllegalArgumentException("no accessory attached");
         }
+        if (!currentAccessory.equals(accessory)) {
+            String error = accessory.toString()
+                    + " does not match current accessory "
+                    + currentAccessory;
+            throw new IllegalArgumentException(error);
+        }
+        mSettingsManager.checkPermission(accessory);
+        return nativeOpenAccessory();
+    }
 
     public void setCurrentFunction(String function, boolean makeDefault) {
         if (DEBUG) Slog.d(TAG, "setCurrentFunction(" + function + ") default: " + makeDefault);
