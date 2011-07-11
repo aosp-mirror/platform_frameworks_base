@@ -95,7 +95,7 @@ public class ScriptC extends Script {
         // E.g, /system/apps/Fountain.apk
         //String packageName = rs.getApplicationContext().getPackageResourcePath();
         // For res/raw/fountain.bc, it wil be /com.android.fountain:raw/fountain
-        String resName = resources.getResourceName(resourceID);
+        String resName = resources.getResourceEntryName(resourceID);
         String cacheDir = rs.getApplicationContext().getCacheDir().toString();
 
         Log.v(TAG, "Create script for resource = " + resName);

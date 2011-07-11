@@ -66,65 +66,6 @@ static Script * setTLS(Script *sc) {
 }
 
 
-// Input: cacheDir
-// Input: resName
-// Input: extName
-//
-// Note: cacheFile = resName + extName
-//
-// Output: Returns cachePath == cacheDir + cacheFile
-static char *genCacheFileName(const char *cacheDir,
-                              const char *resName,
-                              const char *extName) {
-    char cachePath[512];
-    char cacheFile[sizeof(cachePath)];
-    const size_t kBufLen = sizeof(cachePath) - 1;
-
-    cacheFile[0] = '\0';
-    // Note: resName today is usually something like
-    //       "/com.android.fountain:raw/fountain"
-    if (resName[0] != '/') {
-        // Get the absolute path of the raw/***.bc file.
-
-        // Generate the absolute path.  This doesn't do everything it
-        // should, e.g. if resName is "./out/whatever" it doesn't crunch
-        // the leading "./" out because this if-block is not triggered,
-        // but it'll make do.
-        //
-        if (getcwd(cacheFile, kBufLen) == NULL) {
-            LOGE("Can't get CWD while opening raw/***.bc file\n");
-            return NULL;
-        }
-        // Append "/" at the end of cacheFile so far.
-        strncat(cacheFile, "/", kBufLen);
-    }
-
-    // cacheFile = resName + extName
-    //
-    strncat(cacheFile, resName, kBufLen);
-    if (extName != NULL) {
-        // TODO(srhines): strncat() is a bit dangerous
-        strncat(cacheFile, extName, kBufLen);
-    }
-
-    // Turn the path into a flat filename by replacing
-    // any slashes after the first one with '@' characters.
-    char *cp = cacheFile + 1;
-    while (*cp != '\0') {
-        if (*cp == '/') {
-            *cp = '@';
-        }
-        cp++;
-    }
-
-    // Tack on the file name for the actual cache file path.
-    strncpy(cachePath, cacheDir, kBufLen);
-    strncat(cachePath, cacheFile, kBufLen);
-
-    LOGV("Cache file for '%s' '%s' is '%s'\n", resName, extName, cachePath);
-    return strdup(cachePath);
-}
-
 bool rsdScriptInit(const Context *rsc,
                      ScriptC *script,
                      char const *resName,
@@ -164,15 +105,12 @@ bool rsdScriptInit(const Context *rsc,
         goto error;
     }
 
-#if 1
     if (bccLinkFile(drv->mBccScript, "/system/lib/libclcore.bc", 0) != 0) {
         LOGE("bcc: FAILS to link bitcode");
         goto error;
     }
-#endif
-    cachePath = genCacheFileName(cacheDir, resName, ".oBCC");
 
-    if (bccPrepareExecutable(drv->mBccScript, cachePath, 0) != 0) {
+    if (bccPrepareExecutableEx(drv->mBccScript, cacheDir, resName, 0) != 0) {
         LOGE("bcc: FAILS to prepare executable");
         goto error;
     }
