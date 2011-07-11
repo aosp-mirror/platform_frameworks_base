@@ -31,6 +31,7 @@ private:
     MtpString               mFilePath;
     MtpString               mDescription;
     uint64_t                mMaxCapacity;
+    uint64_t                mMaxFileSize;
     // amount of free space to leave unallocated
     uint64_t                mReserveSpace;
     bool                    mRemovable;
@@ -38,7 +39,7 @@ private:
 public:
                             MtpStorage(MtpStorageID id, const char* filePath,
                                     const char* description, uint64_t reserveSpace,
-                                    bool removable);
+                                    bool removable, uint64_t maxFileSize);
     virtual                 ~MtpStorage();
 
     inline MtpStorageID     getStorageID() const { return mStorageID; }
@@ -50,6 +51,7 @@ public:
     const char*             getDescription() const;
     inline const char*      getPath() const { return (const char *)mFilePath; }
     inline bool             isRemovable() const { return mRemovable; }
+    inline uint64_t         getMaxFileSize() const { return mMaxFileSize; }
 };
 
 }; // namespace android

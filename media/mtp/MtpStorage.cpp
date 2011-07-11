@@ -33,11 +33,13 @@
 namespace android {
 
 MtpStorage::MtpStorage(MtpStorageID id, const char* filePath,
-        const char* description, uint64_t reserveSpace, bool removable)
+        const char* description, uint64_t reserveSpace,
+        bool removable, uint64_t maxFileSize)
     :   mStorageID(id),
         mFilePath(filePath),
         mDescription(description),
         mMaxCapacity(0),
+        mMaxFileSize(maxFileSize),
         mReserveSpace(reserveSpace),
         mRemovable(removable)
 {

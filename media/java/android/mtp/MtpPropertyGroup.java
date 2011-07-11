@@ -330,7 +330,6 @@ class MtpPropertyGroup {
             }
 
             int count = (c == null ? 1 : c.getCount());
-            Log.d(TAG, "count: " + count);
             MtpPropertyList result = new MtpPropertyList(count * mProperties.length,
                     MtpConstants.RESPONSE_OK);
 

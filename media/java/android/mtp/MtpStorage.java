@@ -32,6 +32,7 @@ public class MtpStorage {
     private final String mDescription;
     private final long mReserveSpace;
     private final boolean mRemovable;
+    private final long mMaxFileSize;
 
     public MtpStorage(StorageVolume volume) {
         mStorageId = volume.getStorageId();
@@ -39,6 +40,7 @@ public class MtpStorage {
         mDescription = volume.getDescription();
         mReserveSpace = volume.getMtpReserveSpace();
         mRemovable = volume.isRemovable();
+        mMaxFileSize = volume.getMaxFileSize();
     }
 
     /**
@@ -97,5 +99,14 @@ public class MtpStorage {
      */
     public final boolean isRemovable() {
         return mRemovable;
+    }
+
+   /**
+     * Returns maximum file size for the storage, or zero if it is unbounded.
+     *
+     * @return maximum file size
+     */
+    public long getMaxFileSize() {
+        return mMaxFileSize;
     }
 }
