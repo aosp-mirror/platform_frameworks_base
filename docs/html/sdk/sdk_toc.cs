@@ -77,7 +77,7 @@ class="new">new!</span></li>
     <ul>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>sdk/android-3.1.html">
-        <span class="en">Android 3.1 Platform</span></a> <span class="new">new!</span></div>
+        <span class="en">Android 3.1 Platform</span></a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>sdk/android-3.1-highlights.html">Platform Highlights</a></li> 
           <li><a href="<?cs var:toroot ?>sdk/api_diff/12/changes.html">API Differences Report &raquo;</a></li>
@@ -91,7 +91,7 @@ class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>sdk/api_diff/11/changes.html">API Differences Report &raquo;</a></li>
         </ul>
       </li>
-      <li><a href="<?cs var:toroot ?>sdk/android-2.3.4.html">Android 2.3.4 Platform</span></a> <span class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/android-2.3.4.html">Android 2.3.4 Platform</span></a></li>
       <li class="toggle-list">
       <div><a href="<?cs var:toroot ?>sdk/android-2.3.3.html">
       <span class="en">Android 2.3.3 Platform</span></a></div>
@@ -137,8 +137,8 @@ class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r12</a> <span
 class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">Google USB Driver, r4</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Compatibility Library, r2</a> <span
-class="new">new!</span></li>
+      <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Compatibility Library,
+r2</a></li>
     </ul>
   </li>
   <li>
