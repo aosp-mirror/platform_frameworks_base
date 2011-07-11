@@ -785,7 +785,7 @@ public class PhoneStatusBarPolicy {
             int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
             mBluetoothEnabled = state == BluetoothAdapter.STATE_ON;
         } else if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
-            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
                 BluetoothAdapter.STATE_DISCONNECTED);
             if (state == BluetoothAdapter.STATE_CONNECTED) {
                 iconId = R.drawable.stat_sys_data_bluetooth_connected;
