@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.bluetooth.IBluetoothCallback;
+import android.bluetooth.IBluetoothHealthCallback;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHealthAppConfiguration;
 import android.os.ParcelUuid;
@@ -102,7 +103,8 @@ interface IBluetooth
     boolean disconnectPanDevice(in BluetoothDevice device);
 
     // HDP profile APIs
-    boolean registerAppConfiguration(in BluetoothHealthAppConfiguration config);
+    boolean registerAppConfiguration(in BluetoothHealthAppConfiguration config,
+        in IBluetoothHealthCallback callback);
     boolean unregisterAppConfiguration(in BluetoothHealthAppConfiguration config);
     boolean connectChannelToSource(in BluetoothDevice device, in BluetoothHealthAppConfiguration config);
     boolean connectChannelToSink(in BluetoothDevice device, in BluetoothHealthAppConfiguration config,

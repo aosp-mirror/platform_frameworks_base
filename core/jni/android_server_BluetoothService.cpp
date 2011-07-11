@@ -1396,7 +1396,6 @@ static jstring registerSinkHealthApplicationNative(JNIEnv *env, jobject object,
                 LOG_AND_FREE_DBUS_ERROR(&err);
             }
         } else {
-            LOGE("--_Call made getting the patch...");
             if (!dbus_message_get_args(reply, &err,
                                       DBUS_TYPE_OBJECT_PATH, &c_path,
                                       DBUS_TYPE_INVALID)) {
@@ -1405,7 +1404,6 @@ static jstring registerSinkHealthApplicationNative(JNIEnv *env, jobject object,
                 }
             } else {
                 path = env->NewStringUTF(c_path);
-                LOGE("----Path is %s", c_path);
             }
             dbus_message_unref(reply);
         }
@@ -1459,7 +1457,6 @@ static jboolean createChannelNative(JNIEnv *env, jobject object,
         const char *c_device_path = env->GetStringUTFChars(devicePath, NULL);
         const char *c_app_path = env->GetStringUTFChars(appPath, NULL);
         const char *c_config = env->GetStringUTFChars(config, NULL);
-        LOGE("Params...%s, %s, %s \n", c_device_path, c_app_path, c_config);
 
         DBusMessage *reply  = dbus_func_args(env, nat->conn,
                                              c_device_path,
@@ -1531,7 +1528,6 @@ static jstring getMainChannelNative(JNIEnv *env, jobject object, jstring deviceP
         DBusError err;
         dbus_error_init(&err);
 
-        LOGE("---Args %s", c_device_path);
         DBusMessage *reply = dbus_func_args(env, nat->conn,
                            c_device_path,
                            DBUS_HEALTH_DEVICE_IFACE, "GetProperties",
@@ -1566,8 +1562,6 @@ static jstring getChannelApplicationNative(JNIEnv *env, jobject object, jstring 
         DBusError err;
         dbus_error_init(&err);
 
-        LOGE("---Args %s", c_channel_path);
-
         DBusMessage *reply = dbus_func_args(env, nat->conn,
                                             c_channel_path,
                                             DBUS_HEALTH_CHANNEL_IFACE, "GetProperties",
@@ -1596,7 +1590,6 @@ static jstring getChannelApplicationNative(JNIEnv *env, jobject object, jstring 
 
                 if (!strcmp(c_name, "Application")) {
                     path = (jstring) env->GetObjectArrayElement(str_array, i+1);
-                    LOGE("----Path is %s", env->GetStringUTFChars(path, NULL));
                     env->ReleaseStringUTFChars(name, c_name);
                     return path;
                 }
@@ -1655,13 +1648,11 @@ static jobject getChannelFdNative(JNIEnv *env, jobject object, jstring channelPa
         fd = dbus_returns_unixfd(env, reply);
         if (fd == -1) return NULL;
 
-        LOGE("---got fd %d\n", fd);
         // Create FileDescriptor object
         jobject fileDesc = jniCreateFileDescriptor(env, fd);
         if (fileDesc == NULL) {
             // FileDescriptor constructor has thrown an exception
             releaseChannelFdNative(env, object, channelPath);
-            LOGE("---File Desc is null");
             return NULL;
         }
 

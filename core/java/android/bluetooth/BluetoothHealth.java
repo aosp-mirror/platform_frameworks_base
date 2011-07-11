@@ -16,7 +16,6 @@
 
 package android.bluetooth;
 
-import android.annotation.SdkConstant;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
@@ -67,9 +66,6 @@ public final class BluetoothHealth implements BluetoothProfile {
      */
     public static final int CHANNEL_TYPE_ANY = 12;
 
-    private final ArrayList<BluetoothHealthAppConfiguration> mAppConfigs =
-        new ArrayList<BluetoothHealthAppConfiguration>();
-
     /**
      * Register an application configuration that acts as a Health SINK.
      * This is the configuration that will be used to communicate with health devices
@@ -86,7 +82,7 @@ public final class BluetoothHealth implements BluetoothProfile {
      * @return If true, callback will be called.
      */
     public boolean registerSinkAppConfiguration(String name, int dataType,
-            IBluetoothHealthCallback callback) {
+            BluetoothHealthCallback callback) {
         if (!isEnabled() || name == null) return false;
 
         if (DBG) log("registerSinkApplication(" + name + ":" + dataType + ")");
@@ -111,18 +107,18 @@ public final class BluetoothHealth implements BluetoothProfile {
      * @hide
      */
     public boolean registerAppConfiguration(String name, int dataType, int role,
-            int channelType, IBluetoothHealthCallback callback) {
+            int channelType, BluetoothHealthCallback callback) {
         boolean result = false;
         if (!isEnabled() || !checkAppParam(name, role, channelType, callback)) return result;
 
         if (DBG) log("registerApplication(" + name + ":" + dataType + ")");
+        BluetoothHealthCallbackWrapper wrapper = new BluetoothHealthCallbackWrapper(callback);
         BluetoothHealthAppConfiguration config =
-                new BluetoothHealthAppConfiguration(name, dataType, role, channelType,
-                callback);
+                new BluetoothHealthAppConfiguration(name, dataType, role, channelType);
 
         if (mService != null) {
             try {
-                result = mService.registerAppConfiguration(config);
+                result = mService.registerAppConfiguration(config, wrapper);
             } catch (RemoteException e) {
                 Log.e(TAG, e.toString());
             }
@@ -130,8 +126,6 @@ public final class BluetoothHealth implements BluetoothProfile {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
-
-        if (result) mAppConfigs.add(config);
         return result;
     }
 
@@ -147,7 +141,7 @@ public final class BluetoothHealth implements BluetoothProfile {
      */
     public boolean unregisterAppConfiguration(BluetoothHealthAppConfiguration config) {
         boolean result = false;
-        if (mService != null && isEnabled() && isValidAppConfig(config)) {
+        if (mService != null && isEnabled() && config != null) {
             try {
                 result = mService.unregisterAppConfiguration(config);
             } catch (RemoteException e) {
@@ -157,26 +151,26 @@ public final class BluetoothHealth implements BluetoothProfile {
             Log.w(TAG, "Proxy not attached to service");
             if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
         }
-        if (result) mAppConfigs.remove(config);
+
         return result;
     }
 
     /**
      * Connect to a health device which has the {@link #SOURCE_ROLE}.
-     * This is an asynchrnous call. If this function returns true, the callback
+     * This is an asynchronous call. If this function returns true, the callback
      * associated with the application configuration will be called.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device The remote Bluetooth device.
-     * @param config The application configuration which has been registed using
-     *        {@link #registerSinkAppConfiguration(String, int, IBluetoothHealthCallback) }
+     * @param config The application configuration which has been registered using
+     *        {@link #registerSinkAppConfiguration(String, int, BluetoothHealthCallback) }
      * @return If true, the callback associated with the application config will be called.
      */
     public boolean connectChannelToSource(BluetoothDevice device,
             BluetoothHealthAppConfiguration config) {
         if (mService != null && isEnabled() && isValidDevice(device) &&
-                isValidAppConfig(config)) {
+                config != null) {
             try {
                 return mService.connectChannelToSource(device, config);
             } catch (RemoteException e) {
@@ -197,15 +191,15 @@ public final class BluetoothHealth implements BluetoothProfile {
      *<p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device The remote Bluetooth device.
-     * @param config The application configuration which has been registed using
-     *        {@link #registerSinkAppConfiguration(String, int, IBluetoothHealthCallback) }
+     * @param config The application configuration which has been registered using
+     *        {@link #registerSinkAppConfiguration(String, int, BluetoothHealthCallback) }
      * @return If true, the callback associated with the application config will be called.
      * @hide
      */
     public boolean connectChannelToSink(BluetoothDevice device,
             BluetoothHealthAppConfiguration config, int channelType) {
         if (mService != null && isEnabled() && isValidDevice(device) &&
-                isValidAppConfig(config)) {
+                config != null) {
             try {
                 return mService.connectChannelToSink(device, config, channelType);
             } catch (RemoteException e) {
@@ -226,8 +220,8 @@ public final class BluetoothHealth implements BluetoothProfile {
      *<p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
      *
      * @param device The remote Bluetooth device.
-     * @param config The application configuration which has been registed using
-     *        {@link #registerSinkAppConfiguration(String, int, IBluetoothHealthCallback) }
+     * @param config The application configuration which has been registered using
+     *        {@link #registerSinkAppConfiguration(String, int, BluetoothHealthCallback) }
      * @param fd The file descriptor that was associated with the channel.
      * @return If true, the callback associated with the application config will be called.
      * @hide
@@ -235,7 +229,7 @@ public final class BluetoothHealth implements BluetoothProfile {
     public boolean disconnectChannel(BluetoothDevice device,
             BluetoothHealthAppConfiguration config, ParcelFileDescriptor fd) {
         if (mService != null && isEnabled() && isValidDevice(device) &&
-                isValidAppConfig(config)) {
+                config != null) {
             try {
                 return mService.disconnectChannel(device, config, fd);
             } catch (RemoteException e) {
@@ -262,7 +256,7 @@ public final class BluetoothHealth implements BluetoothProfile {
     public ParcelFileDescriptor getMainChannelFd(BluetoothDevice device,
             BluetoothHealthAppConfiguration config) {
         if (mService != null && isEnabled() && isValidDevice(device) &&
-                isValidAppConfig(config)) {
+                config != null) {
             try {
                 return mService.getMainChannelFd(device, config);
             } catch (RemoteException e) {
@@ -290,6 +284,7 @@ public final class BluetoothHealth implements BluetoothProfile {
      *               {@link #STATE_CONNECTED}, {@link #STATE_CONNECTING},
      *               {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING}
      */
+    @Override
     public int getConnectionState(BluetoothDevice device) {
         if (mService != null && isEnabled() && isValidDevice(device)) {
             try {
@@ -317,6 +312,7 @@ public final class BluetoothHealth implements BluetoothProfile {
      * local adapter.
      * @return List of devices. The list will be empty on error.
      */
+    @Override
     public List<BluetoothDevice> getConnectedDevices() {
         if (mService != null && isEnabled()) {
             try {
@@ -348,6 +344,7 @@ public final class BluetoothHealth implements BluetoothProfile {
      *              {@link #STATE_DISCONNECTED}, {@link #STATE_DISCONNECTING},
      * @return List of devices. The list will be empty on error.
      */
+    @Override
     public List<BluetoothDevice> getDevicesMatchingConnectionStates(int[] states) {
         if (mService != null && isEnabled()) {
             try {
@@ -359,6 +356,27 @@ public final class BluetoothHealth implements BluetoothProfile {
         }
         if (mService == null) Log.w(TAG, "Proxy not attached to service");
         return new ArrayList<BluetoothDevice>();
+    }
+
+    private static class BluetoothHealthCallbackWrapper extends IBluetoothHealthCallback.Stub {
+        private BluetoothHealthCallback mCallback;
+
+        public BluetoothHealthCallbackWrapper(BluetoothHealthCallback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void onHealthAppConfigurationStatusChange(BluetoothHealthAppConfiguration config,
+                                                         int status) {
+            mCallback.onHealthAppConfigurationStatusChange(config, status);
+        }
+
+        @Override
+        public void onHealthChannelStateChange(BluetoothHealthAppConfiguration config,
+                                       BluetoothDevice device, int prevState, int newState,
+                                       ParcelFileDescriptor fd) {
+            mCallback.onHealthChannelStateChange(config, device, prevState, newState, fd);
+        }
     }
 
      /** Health Channel Connection State - Disconnected */
@@ -379,7 +397,6 @@ public final class BluetoothHealth implements BluetoothProfile {
     /** Health App Configuration un-registration failure */
     public static final int APPLICATION_UNREGISTRATION_FAILURE = 3;
 
-    private Context mContext;
     private ServiceListener mServiceListener;
     private IBluetooth mService;
     BluetoothAdapter mAdapter;
@@ -420,14 +437,8 @@ public final class BluetoothHealth implements BluetoothProfile {
         return false;
     }
 
-    private boolean isValidAppConfig(BluetoothHealthAppConfiguration config) {
-        if (!mAppConfigs.isEmpty() && mAppConfigs.contains(config)) return true;
-        log("Not a valid config: " + config);
-        return false;
-    }
-
     private boolean checkAppParam(String name, int role, int channelType,
-            IBluetoothHealthCallback callback) {
+            BluetoothHealthCallback callback) {
         if (name == null || (role != SOURCE_ROLE && role != SINK_ROLE) ||
                 (channelType != CHANNEL_TYPE_RELIABLE &&
                 channelType != CHANNEL_TYPE_STREAMING &&

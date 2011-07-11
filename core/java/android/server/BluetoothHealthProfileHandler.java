@@ -20,25 +20,18 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHealth;
 import android.bluetooth.BluetoothHealthAppConfiguration;
-import android.bluetooth.BluetoothHealth;
-import android.bluetooth.BluetoothInputDevice;
+import android.bluetooth.IBluetoothHealthCallback;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
-
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.IOException;
 
 /**
  * This handles all the operations on the Bluetooth Health profile.
@@ -58,6 +51,7 @@ final class BluetoothHealthProfileHandler {
     private ArrayList<HealthChannel> mHealthChannels;
     private HashMap <BluetoothHealthAppConfiguration, String> mHealthAppConfigs;
     private HashMap <BluetoothDevice, Integer> mHealthDevices;
+    private HashMap <BluetoothHealthAppConfiguration, IBluetoothHealthCallback> mCallbacks;
 
     private static final int MESSAGE_REGISTER_APPLICATION = 0;
     private static final int MESSAGE_UNREGISTER_APPLICATION = 1;
@@ -103,6 +97,7 @@ final class BluetoothHealthProfileHandler {
                 }
 
                 if (path == null) {
+                    mCallbacks.remove(registerApp);
                     callHealthApplicationStatusCallback(registerApp,
                             BluetoothHealth.APPLICATION_REGISTRATION_FAILURE);
                 } else {
@@ -118,6 +113,7 @@ final class BluetoothHealthProfileHandler {
                 boolean result = mBluetoothService.unregisterHealthApplicationNative(
                         mHealthAppConfigs.get(unregisterApp));
                 if (result) {
+                    mCallbacks.remove(unregisterApp);
                     callHealthApplicationStatusCallback(unregisterApp,
                             BluetoothHealth.APPLICATION_UNREGISTRATION_SUCCESS);
                 } else {
@@ -149,6 +145,7 @@ final class BluetoothHealthProfileHandler {
         mHealthAppConfigs = new HashMap<BluetoothHealthAppConfiguration, String>();
         mHealthChannels = new ArrayList<HealthChannel>();
         mHealthDevices = new HashMap<BluetoothDevice, Integer>();
+        mCallbacks = new HashMap<BluetoothHealthAppConfiguration, IBluetoothHealthCallback>();
     }
 
     static synchronized BluetoothHealthProfileHandler getInstance(Context context,
@@ -157,10 +154,12 @@ final class BluetoothHealthProfileHandler {
         return sInstance;
     }
 
-    boolean registerAppConfiguration(BluetoothHealthAppConfiguration config) {
+    boolean registerAppConfiguration(BluetoothHealthAppConfiguration config,
+                                     IBluetoothHealthCallback callback) {
         Message msg = mHandler.obtainMessage(MESSAGE_REGISTER_APPLICATION);
         msg.obj = config;
         mHandler.sendMessage(msg);
+        mCallbacks.put(config, callback);
         return true;
     }
 
@@ -442,11 +441,11 @@ final class BluetoothHealthProfileHandler {
 
         debugLog("Health Device Callback: " + device + " State Change: "
                 + prevState + "->" + state);
-        try {
-            config.getCallback().onHealthChannelStateChange(config, device, prevState,
-                    state, fd);
-        } catch (RemoteException e) {
-            errorLog("Error while making health channel state change callback: " + e);
+        IBluetoothHealthCallback callback = mCallbacks.get(config);
+        if (callback != null) {
+            try {
+                callback.onHealthChannelStateChange(config, device, prevState, state, fd);
+            } catch (RemoteException e) {}
         }
     }
 
@@ -454,10 +453,11 @@ final class BluetoothHealthProfileHandler {
             BluetoothHealthAppConfiguration config, int status) {
         debugLog("Health Device Application: " + config + " State Change: status:"
                 + status);
-        try {
-            config.getCallback().onHealthAppConfigurationStatusChange(config, status);
-        } catch (RemoteException e) {
-            errorLog("Error while making health app registration state change callback: " + e);
+        IBluetoothHealthCallback callback = mCallbacks.get(config);
+        if (callback != null) {
+            try {
+                callback.onHealthAppConfigurationStatusChange(config, status);
+            } catch (RemoteException e) {}
         }
     }
 
@@ -526,19 +526,19 @@ final class BluetoothHealthProfileHandler {
             List<HealthChannel> chan;
             switch (currDeviceState) {
                 case BluetoothHealth.STATE_DISCONNECTED:
-                    updateAndsendIntent(device, currDeviceState, newDeviceState);
+                    updateAndSendIntent(device, currDeviceState, newDeviceState);
                     break;
                 case BluetoothHealth.STATE_CONNECTING:
                     // Channel got connected.
                     if (newDeviceState == BluetoothHealth.STATE_CONNECTED) {
-                        updateAndsendIntent(device, currDeviceState, newDeviceState);
+                        updateAndSendIntent(device, currDeviceState, newDeviceState);
                     } else {
                         // Channel got disconnected
                         chan = findChannelByStates(device, new int [] {
                                     BluetoothHealth.STATE_CHANNEL_CONNECTING,
                                     BluetoothHealth.STATE_CHANNEL_DISCONNECTING});
                         if (chan.isEmpty()) {
-                            updateAndsendIntent(device, currDeviceState, newDeviceState);
+                            updateAndSendIntent(device, currDeviceState, newDeviceState);
                         }
                     }
                     break;
@@ -548,22 +548,23 @@ final class BluetoothHealthProfileHandler {
                                 BluetoothHealth.STATE_CHANNEL_CONNECTING,
                                 BluetoothHealth.STATE_CHANNEL_CONNECTED});
                     if (chan.isEmpty()) {
-                        updateAndsendIntent(device, currDeviceState, newDeviceState);
+                        updateAndSendIntent(device, currDeviceState, newDeviceState);
                     }
+                    break;
                 case BluetoothHealth.STATE_DISCONNECTING:
                     // Channel got disconnected.
                     chan = findChannelByStates(device, new int [] {
                                 BluetoothHealth.STATE_CHANNEL_CONNECTING,
                                 BluetoothHealth.STATE_CHANNEL_DISCONNECTING});
                     if (chan.isEmpty()) {
-                        updateAndsendIntent(device, currDeviceState, newDeviceState);
+                        updateAndSendIntent(device, currDeviceState, newDeviceState);
                     }
                     break;
             }
         }
     }
 
-    private void updateAndsendIntent(BluetoothDevice device, int prevDeviceState,
+    private void updateAndSendIntent(BluetoothDevice device, int prevDeviceState,
             int newDeviceState) {
         mHealthDevices.put(device, newDeviceState);
         mBluetoothService.sendConnectionStateChange(device, prevDeviceState, newDeviceState);
