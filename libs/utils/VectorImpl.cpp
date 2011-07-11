@@ -290,7 +290,7 @@ void VectorImpl::clear()
 void* VectorImpl::editItemLocation(size_t index)
 {
     LOG_ASSERT(index<capacity(),
-        "[%p] itemLocation: index=%d, capacity=%d, count=%d",
+        "[%p] editItemLocation: index=%d, capacity=%d, count=%d",
         this, (int)index, (int)capacity(), (int)mCount);
             
     void* buffer = editArrayImpl();
@@ -302,7 +302,7 @@ void* VectorImpl::editItemLocation(size_t index)
 const void* VectorImpl::itemLocation(size_t index) const
 {
     LOG_ASSERT(index<capacity(),
-        "[%p] editItemLocation: index=%d, capacity=%d, count=%d",
+        "[%p] itemLocation: index=%d, capacity=%d, count=%d",
         this, (int)index, (int)capacity(), (int)mCount);
 
     const  void* buffer = arrayImpl();
