@@ -114,7 +114,7 @@ public final class ServiceManager {
      * @hide
      */
     public static void initServiceCache(Map<String, IBinder> cache) {
-        if (sCache.size() != 0 && Process.supportsProcesses()) {
+        if (sCache.size() != 0) {
             throw new IllegalStateException("setServiceCache may only be called once");
         }
         sCache.putAll(cache);

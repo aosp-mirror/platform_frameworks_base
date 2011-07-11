@@ -502,15 +502,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             = new ArrayList<ProcessRecord>();
 
     /**
-     * List of records for processes that we have started and are waiting
-     * for them to call back.  This is really only needed when running in
-     * single processes mode, in which case we do not have a unique pid for
-     * each process.
-     */
-    final ArrayList<ProcessRecord> mStartingProcesses
-            = new ArrayList<ProcessRecord>();
-
-    /**
      * List of persistent applications that are in the process
      * of being started.
      */
@@ -2001,12 +1992,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             buf.append("}");
             Slog.i(TAG, buf.toString());
-            if (pid == 0 || pid == MY_PID) {
-                // Processes are being emulated with threads.
-                app.pid = MY_PID;
-                app.removed = false;
-                mStartingProcesses.add(app);
-            } else if (pid > 0) {
+            if (pid > 0) {
                 app.pid = pid;
                 app.removed = false;
                 synchronized (mPidsSelfLocked) {
@@ -3606,9 +3592,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             synchronized (mPidsSelfLocked) {
                 app = mPidsSelfLocked.get(pid);
             }
-        } else if (mStartingProcesses.size() > 0) {
-            app = mStartingProcesses.remove(0);
-            app.setPid(pid);
         } else {
             app = null;
         }
@@ -4042,8 +4025,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         synchronized(this) {
             int callingUid = Binder.getCallingUid();
             try {
-                if (callingUid != 0 && callingUid != Process.SYSTEM_UID &&
-                        Process.supportsProcesses()) {
+                if (callingUid != 0 && callingUid != Process.SYSTEM_UID) {
                     int uid = AppGlobals.getPackageManager()
                             .getPackageUid(packageName);
                     if (uid != Binder.getCallingUid()) {
@@ -4302,8 +4284,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         // Root, system server and our own process get to do everything.
-        if (uid == 0 || uid == Process.SYSTEM_UID || pid == MY_PID ||
-            !Process.supportsProcesses()) {
+        if (uid == 0 || uid == Process.SYSTEM_UID || pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
         }
         // If there is a uid that owns whatever is being accessed, it has
@@ -4447,7 +4428,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     private final boolean checkUriPermissionLocked(Uri uri, int uid,
             int modeFlags) {
         // Root gets to do everything.
-        if (uid == 0 || !Process.supportsProcesses()) {
+        if (uid == 0) {
             return true;
         }
         HashMap<Uri, UriPermission> perms = mGrantedUriPermissions.get(uid);
@@ -5528,8 +5509,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     // CONTENT PROVIDERS
     // =========================================================
 
-    private final List generateApplicationProvidersLocked(ProcessRecord app) {
-        List providers = null;
+    private final List<ProviderInfo> generateApplicationProvidersLocked(ProcessRecord app) {
+        List<ProviderInfo> providers = null;
         try {
             providers = AppGlobals.getPackageManager().
                 queryContentProviders(app.processName, app.info.uid,
@@ -5967,7 +5948,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public static final void installSystemProviders() {
-        List providers;
+        List<ProviderInfo> providers;
         synchronized (mSelf) {
             ProcessRecord app = mSelf.mProcessNames.get("system", Process.SYSTEM_UID);
             providers = mSelf.generateApplicationProvidersLocked(app);
@@ -6585,13 +6566,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
     
     public void systemReady(final Runnable goingCallback) {
-        // In the simulator, startRunning will never have been called, which
-        // normally sets a few crucial variables. Do it here instead.
-        if (!Process.supportsProcesses()) {
-            mStartRunning = true;
-            mTopAction = Intent.ACTION_MAIN;
-        }
-
         synchronized(this) {
             if (mSystemReady) {
                 if (goingCallback != null) goingCallback.run();
@@ -7953,14 +7927,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  Persisent processes that are starting:");
             dumpProcessList(pw, this, mPersistentStartingProcesses, "    ",
                     "Starting Norm", "Restarting PERS");
-        }
-
-        if (mStartingProcesses.size() > 0) {
-            if (needSep) pw.println(" ");
-            needSep = true;
-            pw.println("  Processes that are starting:");
-            dumpProcessList(pw, this, mStartingProcesses, "    ",
-                    "Starting Norm", "Starting PERS");
         }
 
         if (mRemovedProcesses.size() > 0) {
@@ -13128,74 +13094,72 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         int adj = computeOomAdjLocked(app, hiddenAdj, TOP_APP, false);
 
-        if ((app.pid != 0 && app.pid != MY_PID) || Process.supportsProcesses()) {
-            if (app.curRawAdj != app.setRawAdj) {
-                if (app.curRawAdj > FOREGROUND_APP_ADJ
-                        && app.setRawAdj <= FOREGROUND_APP_ADJ) {
-                    // If this app is transitioning from foreground to
-                    // non-foreground, have it do a gc.
-                    scheduleAppGcLocked(app);
-                } else if (app.curRawAdj >= HIDDEN_APP_MIN_ADJ
-                        && app.setRawAdj < HIDDEN_APP_MIN_ADJ) {
-                    // Likewise do a gc when an app is moving in to the
-                    // background (such as a service stopping).
-                    scheduleAppGcLocked(app);
-                }
+        if (app.curRawAdj != app.setRawAdj) {
+            if (app.curRawAdj > FOREGROUND_APP_ADJ
+                    && app.setRawAdj <= FOREGROUND_APP_ADJ) {
+                // If this app is transitioning from foreground to
+                // non-foreground, have it do a gc.
+                scheduleAppGcLocked(app);
+            } else if (app.curRawAdj >= HIDDEN_APP_MIN_ADJ
+                    && app.setRawAdj < HIDDEN_APP_MIN_ADJ) {
+                // Likewise do a gc when an app is moving in to the
+                // background (such as a service stopping).
+                scheduleAppGcLocked(app);
+            }
 
-                if (wasKeeping && !app.keeping) {
-                    // This app is no longer something we want to keep.  Note
-                    // its current wake lock time to later know to kill it if
-                    // it is not behaving well.
-                    BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
-                    synchronized (stats) {
-                        app.lastWakeTime = stats.getProcessWakeTime(app.info.uid,
-                                app.pid, SystemClock.elapsedRealtime());
+            if (wasKeeping && !app.keeping) {
+                // This app is no longer something we want to keep.  Note
+                // its current wake lock time to later know to kill it if
+                // it is not behaving well.
+                BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
+                synchronized (stats) {
+                    app.lastWakeTime = stats.getProcessWakeTime(app.info.uid,
+                            app.pid, SystemClock.elapsedRealtime());
+                }
+                app.lastCpuTime = app.curCpuTime;
+            }
+
+            app.setRawAdj = app.curRawAdj;
+        }
+        if (adj != app.setAdj) {
+            if (Process.setOomAdj(app.pid, adj)) {
+                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(
+                    TAG, "Set app " + app.processName +
+                    " oom adj to " + adj);
+                app.setAdj = adj;
+            } else {
+                success = false;
+            }
+        }
+        if (app.setSchedGroup != app.curSchedGroup) {
+            app.setSchedGroup = app.curSchedGroup;
+            if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
+                    "Setting process group of " + app.processName
+                    + " to " + app.curSchedGroup);
+            if (app.waitingToKill != null &&
+                    app.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
+                Slog.i(TAG, "Killing " + app.toShortString() + ": " + app.waitingToKill);
+                EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
+                        app.processName, app.setAdj, app.waitingToKill);
+                Process.killProcessQuiet(app.pid);
+            } else {
+                if (true) {
+                    long oldId = Binder.clearCallingIdentity();
+                    try {
+                        Process.setProcessGroup(app.pid, app.curSchedGroup);
+                    } catch (Exception e) {
+                        Slog.w(TAG, "Failed setting process group of " + app.pid
+                                + " to " + app.curSchedGroup);
+                        e.printStackTrace();
+                    } finally {
+                        Binder.restoreCallingIdentity(oldId);
                     }
-                    app.lastCpuTime = app.curCpuTime;
                 }
-
-                app.setRawAdj = app.curRawAdj;
-            }
-            if (adj != app.setAdj) {
-                if (Process.setOomAdj(app.pid, adj)) {
-                    if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(
-                        TAG, "Set app " + app.processName +
-                        " oom adj to " + adj);
-                    app.setAdj = adj;
-                } else {
-                    success = false;
-                }
-            }
-            if (app.setSchedGroup != app.curSchedGroup) {
-                app.setSchedGroup = app.curSchedGroup;
-                if (DEBUG_SWITCH || DEBUG_OOM_ADJ) Slog.v(TAG,
-                        "Setting process group of " + app.processName
-                        + " to " + app.curSchedGroup);
-                if (app.waitingToKill != null &&
-                        app.setSchedGroup == Process.THREAD_GROUP_BG_NONINTERACTIVE) {
-                    Slog.i(TAG, "Killing " + app.toShortString() + ": " + app.waitingToKill);
-                    EventLog.writeEvent(EventLogTags.AM_KILL, app.pid,
-                            app.processName, app.setAdj, app.waitingToKill);
-                    Process.killProcessQuiet(app.pid);
-                } else {
-                    if (true) {
-                        long oldId = Binder.clearCallingIdentity();
+                if (false) {
+                    if (app.thread != null) {
                         try {
-                            Process.setProcessGroup(app.pid, app.curSchedGroup);
-                        } catch (Exception e) {
-                            Slog.w(TAG, "Failed setting process group of " + app.pid
-                                    + " to " + app.curSchedGroup);
-                            e.printStackTrace();
-                        } finally {
-                            Binder.restoreCallingIdentity(oldId);
-                        }
-                    }
-                    if (false) {
-                        if (app.thread != null) {
-                            try {
-                                app.thread.setSchedulingGroup(app.curSchedGroup);
-                            } catch (RemoteException e) {
-                            }
+                            app.thread.setSchedulingGroup(app.curSchedGroup);
+                        } catch (RemoteException e) {
                         }
                     }
                 }

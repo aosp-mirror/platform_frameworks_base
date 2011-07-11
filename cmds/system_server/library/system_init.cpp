@@ -76,23 +76,6 @@ extern "C" status_t system_init()
         SensorService::instantiate();
     }
 
-    // On the simulator, audioflinger et al don't get started the
-    // same way as on the device, and we need to start them here
-    if (!proc->supportsProcesses()) {
-
-        // Start the AudioFlinger
-        AudioFlinger::instantiate();
-
-        // Start the media playback service
-        MediaPlayerService::instantiate();
-
-        // Start the camera service
-        CameraService::instantiate();
-
-        // Start the audio policy service
-        AudioPolicyService::instantiate();
-    }
-
     // And now start the Android runtime.  We have to do this bit
     // of nastiness because the Android runtime initialization requires
     // some of the core system services to already be started.
@@ -117,14 +100,10 @@ extern "C" status_t system_init()
     }
     env->CallStaticVoidMethod(clazz, methodId);
 
-    // If running in our own process, just go into the thread
-    // pool.  Otherwise, call the initialization finished
-    // func to let this process continue its initilization.
-    if (proc->supportsProcesses()) {
-        LOGI("System server: entering thread pool.\n");
-        ProcessState::self()->startThreadPool();
-        IPCThreadState::self()->joinThreadPool();
-        LOGI("System server: exiting thread pool.\n");
-    }
+    LOGI("System server: entering thread pool.\n");
+    ProcessState::self()->startThreadPool();
+    IPCThreadState::self()->joinThreadPool();
+    LOGI("System server: exiting thread pool.\n");
+
     return NO_ERROR;
 }

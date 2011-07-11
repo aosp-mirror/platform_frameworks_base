@@ -73,14 +73,7 @@ private:
         CameraHardwareStub* mHardware;
     public:
         PreviewThread(CameraHardwareStub* hw) :
-#ifdef SINGLE_PROCESS
-            // In single process mode this thread needs to be a java thread,
-            // since we won't be calling through the binder.
-            Thread(true),
-#else
-            Thread(false),
-#endif
-              mHardware(hw) { }
+                Thread(false), mHardware(hw) { }
         virtual void onFirstRef() {
             run("CameraPreviewThread", PRIORITY_URGENT_DISPLAY);
         }

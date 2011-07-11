@@ -39,8 +39,6 @@ class ProcessState : public virtual RefBase
 public:
     static  sp<ProcessState>    self();
 
-    static  void                setSingleProcess(bool singleProcess);
-
             void                setContextObject(const sp<IBinder>& object);
             sp<IBinder>         getContextObject(const sp<IBinder>& caller);
         
@@ -48,8 +46,6 @@ public:
                                                  const String16& name);
             sp<IBinder>         getContextObject(const String16& name,
                                                  const sp<IBinder>& caller);
-                                                 
-            bool                supportsProcesses() const;
 
             void                startThreadPool();
                         

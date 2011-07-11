@@ -3848,10 +3848,6 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
 
         private static int checkCallingPermission(String permission) {
-            if (!Process.supportsProcesses()) {
-                return PackageManager.PERMISSION_GRANTED;
-            }
-
             try {
                 return ActivityManagerNative.getDefault().checkPermission(
                         permission, Binder.getCallingPid(), Binder.getCallingUid());
