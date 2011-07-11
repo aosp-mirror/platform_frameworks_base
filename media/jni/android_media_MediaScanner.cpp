@@ -45,7 +45,6 @@ struct fields_t {
     jfieldID    context;
 };
 static fields_t fields;
-static Mutex sLock;
 
 class MyMediaScannerClient : public MediaScannerClient
 {
@@ -159,13 +158,11 @@ static bool ExceptionCheck(void* env)
     return ((JNIEnv *)env)->ExceptionCheck();
 }
 
-// Call this method with sLock hold
 static MediaScanner *getNativeScanner_l(JNIEnv* env, jobject thiz)
 {
     return (MediaScanner *) env->GetIntField(thiz, fields.context);
 }
 
-// Call this method with sLock hold
 static void setNativeScanner_l(JNIEnv* env, jobject thiz, MediaScanner *s)
 {
     env->SetIntField(thiz, fields.context, (int)s);
@@ -176,7 +173,6 @@ android_media_MediaScanner_processDirectory(
         JNIEnv *env, jobject thiz, jstring path, jobject client)
 {
     LOGV("processDirectory");
-    Mutex::Autolock l(sLock);
     MediaScanner *mp = getNativeScanner_l(env, thiz);
     if (mp == NULL) {
         jniThrowException(env, kRunTimeException, "No scanner available");
@@ -243,7 +239,6 @@ android_media_MediaScanner_setLocale(
         JNIEnv *env, jobject thiz, jstring locale)
 {
     LOGV("setLocale");
-    Mutex::Autolock l(sLock);
     MediaScanner *mp = getNativeScanner_l(env, thiz);
     if (mp == NULL) {
         jniThrowException(env, kRunTimeException, "No scanner available");
@@ -268,7 +263,6 @@ android_media_MediaScanner_extractAlbumArt(
         JNIEnv *env, jobject thiz, jobject fileDescriptor)
 {
     LOGV("extractAlbumArt");
-    Mutex::Autolock l(sLock);
     MediaScanner *mp = getNativeScanner_l(env, thiz);
     if (mp == NULL) {
         jniThrowException(env, kRunTimeException, "No scanner available");
@@ -339,7 +333,6 @@ static void
 android_media_MediaScanner_native_finalize(JNIEnv *env, jobject thiz)
 {
     LOGV("native_finalize");
-    Mutex::Autolock l(sLock);
     MediaScanner *mp = getNativeScanner_l(env, thiz);
     if (mp == 0) {
         return;

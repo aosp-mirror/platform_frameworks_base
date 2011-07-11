@@ -101,6 +101,8 @@ import java.util.Iterator;
  * Java MyMediaScanner handleStringTag.
  * Once MediaScanner processFile returns, an entry is inserted in to the database.
  *
+ * The MediaScanner class is not thread-safe, so it should only be used in a single threaded manner.
+ *
  * {@hide}
  */
 public class MediaScanner
