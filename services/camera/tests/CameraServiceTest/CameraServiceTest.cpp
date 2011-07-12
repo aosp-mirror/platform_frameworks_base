@@ -29,7 +29,6 @@
 #include <camera/ICamera.h>
 #include <camera/ICameraClient.h>
 #include <camera/ICameraService.h>
-#include <ui/Overlay.h>
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
@@ -311,8 +310,6 @@ public:
     virtual status_t registerBuffers(const BufferHeap& buffers);
     virtual void postBuffer(ssize_t offset);
     virtual void unregisterBuffers();
-    virtual sp<OverlayRef> createOverlay(
-            uint32_t w, uint32_t h, int32_t format, int32_t orientation);
     virtual sp<GraphicBuffer> requestBuffer(int bufferIdx, int usage);
     virtual status_t setBufferCount(int bufferCount);
 
@@ -379,13 +376,6 @@ void MSurface::waitUntil(int c0, int c1, int c2) {
         }
         mCond.wait(mLock);
     }
-}
-
-sp<OverlayRef> MSurface::createOverlay(uint32_t w, uint32_t h, int32_t format,
-        int32_t orientation) {
-    // Not implemented.
-    ASSERT(0);
-    return NULL;
 }
 
 //
