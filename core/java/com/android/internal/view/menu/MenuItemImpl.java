@@ -164,10 +164,7 @@ public final class MenuItemImpl implements MenuItem {
             }
         }
 
-        if (mActionProvider != null) {
-            // The action view is created by the provider in this case.
-            View actionView = getActionView();
-            mActionProvider.onPerformDefaultAction(actionView);
+        if (mActionProvider != null && mActionProvider.onPerformDefaultAction()) {
             return true;
         }
 

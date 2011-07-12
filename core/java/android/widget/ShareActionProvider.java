@@ -16,15 +16,16 @@
 
 package android.widget;
 
+import com.android.internal.R;
+
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.util.TypedValue;
 import android.view.ActionProvider;
 import android.view.MenuItem;
+import android.view.SubMenu;
 import android.view.View;
-
-import com.android.internal.R;
 
 /**
  * This is a provider for a share action. It is responsible for creating views
@@ -102,17 +103,14 @@ public class ShareActionProvider extends ActionProvider {
         return activityChooserView;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void onPerformDefaultAction(View actionView) {
-        if (actionView instanceof ActivityChooserView) {
-            ActivityChooserView activityChooserView = (ActivityChooserView) actionView;
-            activityChooserView.showPopup();
-        } else {
-            throw new IllegalArgumentException("actionView not instance of ActivityChooserView");
-        }
+    public boolean hasSubMenu() {
+        return true;
+    }
+
+    @Override
+    public void onPrepareSubMenu(SubMenu subMenu) {
+        // TODO Implement me
     }
 
     /**

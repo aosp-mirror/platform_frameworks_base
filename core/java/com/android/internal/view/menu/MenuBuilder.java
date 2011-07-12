@@ -28,6 +28,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.SparseArray;
+import android.view.ActionProvider;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -807,7 +808,12 @@ public class MenuBuilder implements Menu {
         } else if (item.hasSubMenu()) {
             close(false);
 
-            invoked |= dispatchSubMenuSelected((SubMenuBuilder) item.getSubMenu());
+            final SubMenuBuilder subMenu = (SubMenuBuilder) item.getSubMenu();
+            final ActionProvider provider = item.getActionProvider();
+            if (provider != null && provider.hasSubMenu()) {
+                provider.onPrepareSubMenu(subMenu);
+            }
+            invoked |= dispatchSubMenuSelected(subMenu);
             if (!invoked) close(true);
         } else {
             if ((flags & FLAG_PERFORM_NO_CLOSE) == 0) {

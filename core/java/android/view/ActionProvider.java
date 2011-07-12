@@ -76,7 +76,7 @@ public abstract class ActionProvider {
      * Performs an optional default action.
      * <p>
      * For the case of an action provider placed in a menu item not shown as an action this
-     * method is invoked if none of the callbacks for processing menu selection has handled
+     * method is invoked if previous callbacks for processing menu selection has handled
      * the event.
      * </p>
      * <p>
@@ -104,11 +104,36 @@ public abstract class ActionProvider {
      * </ul>
      * </p>
      * <p>
-     * The default implementation does not perform any action.
+     * The default implementation does not perform any action and returns false.
      * </p>
-     *
-     * @param actionView A view created by {@link #onCreateActionView()}.
      */
-    public void onPerformDefaultAction(View actionView) {
+    public boolean onPerformDefaultAction() {
+        return false;
+    }
+
+    /**
+     * Determines if this ActionProvider has a submenu associated with it.
+     *
+     * <p>Associated submenus will be shown when an action view is not. This
+     * provider instance will receive a call to {@link #onPrepareSubMenu(SubMenu)}
+     * after the call to {@link #onPerformDefaultAction()} and before a submenu is
+     * displayed to the user.
+     *
+     * @return true if the item backed by this provider should have an associated submenu
+     */
+    public boolean hasSubMenu() {
+        return false;
+    }
+
+    /**
+     * Called to prepare an associated submenu for the menu item backed by this ActionProvider.
+     *
+     * <p>if {@link #hasSubMenu()} returns true, this method will be called when the
+     * menu item is selected to prepare the submenu for presentation to the user. Apps
+     * may use this to create or alter submenu content right before display.
+     *
+     * @param subMenu Submenu that will be displayed
+     */
+    public void onPrepareSubMenu(SubMenu subMenu) {
     }
 }
