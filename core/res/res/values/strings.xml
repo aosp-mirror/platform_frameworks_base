@@ -2038,13 +2038,13 @@
     <string name="autofill_phone_re">phone<!-- de-DE -->|telefonnummer<!-- es -->|telefono|teléfono<!-- fr-FR -->|telfixe<!-- ja-JP -->|電話<!-- pt-BR, pt-PT -->|telefone|telemovel<!-- ru -->|телефон<!-- zh-CN -->|电话</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_area_code_re">area code</string>
+    <string name="autofill_area_code_re">area.*code|acode|area</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_prefix_re">^-$|\\)$|prefix<!-- fr-FR -->|preselection<!-- pt-BR, pt-PT -->|ddd</string>
+    <string name="autofill_phone_prefix_re">prefix<!-- fr-FR -->|preselection<!-- pt-BR, pt-PT -->|ddd</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_suffix_re">^-$|suffix</string>
+    <string name="autofill_phone_suffix_re">suffix</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
     <string name="autofill_phone_extension_re">ext<!-- pt-BR, pt-PT -->|ramal</string>
@@ -2077,17 +2077,49 @@
     <string name="autofill_country_code_re">country.*code|ccode|_cc</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_area_code_notext_re">^\($</string>
+    <string name="autofill_area_code_notext_re">^\\($</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_prefix_separator_re">^-$|^\)$</string>
+    <string name="autofill_phone_prefix_separator_re">^-$|^\\)$</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
     <string name="autofill_phone_suffix_separator_re">^-$</string>
 
-    <!-- Do not translate. Regex used by AutoFill. -->
-    <!-- Ex: ************1234 -->
-    <string name="credit_card_number_preview_format">$1</string>
+    <!-- Label in a web form for "Province" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_province">Province</string>
+
+    <!-- Label in a web form for "Postal code" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_postal_code">Postal code</string>
+
+    <!-- Label in a web form for "State" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_state">State</string>
+
+    <!-- Label in a web form for "ZIP code" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_zip_code">ZIP code</string>
+
+    <!-- Label in a web form for "County" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_county">County</string>
+
+    <!-- Label in a web form for "Island" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_island">Island</string>
+
+    <!-- Label in a web form for "District" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_district">District</string>
+
+    <!-- Label in a web form for "Department" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_department">Department</string>
+
+    <!-- Label in a web form for "Prefecture" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_prefecture">Prefecture</string>
+
+    <!-- Label in a web form for "Parish" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_parish">Parish</string>
+
+    <!-- Label in a web form for "Area" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_area">Area</string>
+
+    <!-- Label in a web form for "Emirate" [CHAR-LIMIT=NONE]  -->
+    <string name="autofill_emirate">Emirate</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->

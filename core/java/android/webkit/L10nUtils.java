@@ -75,7 +75,18 @@ public class L10nUtils {
         com.android.internal.R.string.autofill_area_code_notext_re,         // IDS_AUTOFILL_AREA_CODE_NOTEXT_RE
         com.android.internal.R.string.autofill_phone_prefix_separator_re,   // IDS_AUTOFILL_PHONE_PREFIX_SEPARATOR_RE
         com.android.internal.R.string.autofill_phone_suffix_separator_re,   // IDS_AUTOFILL_PHONE_SUFFIX_SEPARATOR_RE
-        com.android.internal.R.string.credit_card_number_preview_format     // IDS_CREDIT_CARD_NUMBER_PREVIEW_FORMAT
+        com.android.internal.R.string.autofill_province,                    // IDS_AUTOFILL_DIALOG_PROVINCE
+        com.android.internal.R.string.autofill_postal_code,                 // IDS_AUTOFILL_DIALOG_POSTAL_CODE
+        com.android.internal.R.string.autofill_state,                       // IDS_AUTOFILL_DIALOG_STATE
+        com.android.internal.R.string.autofill_zip_code,                    // IDS_AUTOFILL_DIALOG_ZIP_CODE
+        com.android.internal.R.string.autofill_county,                      // IDS_AUTOFILL_DIALOG_COUNTY
+        com.android.internal.R.string.autofill_island,                      // IDS_AUTOFILL_DIALOG_ISLAND
+        com.android.internal.R.string.autofill_district,                    // IDS_AUTOFILL_DIALOG_DISTRICT
+        com.android.internal.R.string.autofill_department,                  // IDS_AUTOFILL_DIALOG_DEPARTMENT
+        com.android.internal.R.string.autofill_prefecture,                  // IDS_AUTOFILL_DIALOG_PREFECTURE
+        com.android.internal.R.string.autofill_parish,                      // IDS_AUTOFILL_DIALOG_PARISH
+        com.android.internal.R.string.autofill_area,                        // IDS_AUTOFILL_DIALOG_AREA
+        com.android.internal.R.string.autofill_emirate                      // IDS_AUTOFILL_DIALOG_EMIRATE
     };
 
     private static Context mApplicationContext;
