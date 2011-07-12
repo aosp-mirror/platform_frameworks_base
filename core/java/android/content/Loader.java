@@ -40,6 +40,8 @@ import java.io.PrintWriter;
  *
  * <p>Most implementations should not derive directly from this class, but
  * instead inherit from {@link AsyncTaskLoader}.</p>
+ * <p>For more information, see the <a
+ * href="{@docRoot}guide/topics/fundamentals/loaders.html">Loaders</a> developer guide.</p>
  *
  * @param <D> The result returned when the load is complete
  */

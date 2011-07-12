@@ -162,6 +162,9 @@ final class FragmentState implements Parcelable {
  * constructor to instantiate it.  If the empty constructor is not available,
  * a runtime exception will occur in some cases during state restore.
  *
+ * <p>For more documentation, also see the <a
+ * href="{@docRoot}guide/topics/fundamentals/fragments.html">Fragments</a> developer guide.</p>
+ *
  * <p>Topics covered here:
  * <ol>
  * <li><a href="#OlderPlatforms">Older Platforms</a>

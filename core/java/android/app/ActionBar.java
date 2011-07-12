@@ -29,10 +29,16 @@ import android.view.Window;
 import android.widget.SpinnerAdapter;
 
 /**
- * This is the public interface to the contextual ActionBar.
- * The ActionBar acts as a replacement for the title bar in Activities.
- * It provides facilities for creating toolbar actions as well as
- * methods of navigating around an application. 
+ * Acts as a replacement for the title bar in Activities.
+ * The action bar provides facilities for creating toolbar actions as well as
+ * methods of navigating the application.
+ * <p>By default, the action bar appears at the top of every activity, with the application icon on
+ * the left, followed by the activity title. Items from the activity's options menu are also
+ * accessible from the action bar.</p>
+ * <p>From your activity, you can retrieve an instance of {@link ActionBar} by calling {@link
+ * android.app.Activity#getActionBar getActionBar()}.</p>
+ * <p>For more information, read the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action
+ * Bar</a> developer guide.</p>
  */
 public abstract class ActionBar {
     /**
