@@ -16,11 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.util.FastMath;
-import com.android.internal.widget.EditableInputConnection;
-
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.R;
 import android.content.ClipData;
 import android.content.ClipData.Item;
@@ -131,6 +126,11 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RemoteViews.RemoteView;
+
+import com.android.internal.util.FastMath;
+import com.android.internal.widget.EditableInputConnection;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -9107,7 +9107,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         @Override
         public void onClick(View v) {
             if (canPaste()) {
-                paste(getSelectionStart(), getSelectionEnd());
+                onTextContextMenuItem(ID_PASTE);
             }
             hide();
         }
