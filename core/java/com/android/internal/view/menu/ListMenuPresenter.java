@@ -47,6 +47,8 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
     private Callback mCallback;
     private MenuAdapter mAdapter;
 
+    private int mId;
+
     public static final String VIEWS_TAG = "android:menu:list";
 
     /**
@@ -180,6 +182,31 @@ public class ListMenuPresenter implements MenuPresenter, AdapterView.OnItemClick
         if (viewStates != null) {
             ((View) mMenuView).restoreHierarchyState(viewStates);
         }
+    }
+
+    public void setId(int id) {
+        mId = id;
+    }
+
+    @Override
+    public int getId() {
+        return mId;
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        if (mMenuView == null) {
+            return null;
+        }
+
+        Bundle state = new Bundle();
+        saveHierarchyState(state);
+        return state;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        restoreHierarchyState((Bundle) state);
     }
 
     private class MenuAdapter extends BaseAdapter {

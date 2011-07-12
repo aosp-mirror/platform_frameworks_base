@@ -1555,9 +1555,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // We restore the panel if it was last open; we skip it if it
             // now is open, to avoid a race condition if the user immediately
             // opens it when we are resuming.
-            if ((st != null) && !st.isOpen && st.wasLastOpen) {
-                st.isInExpandedMode = st.wasLastExpanded;
-                openPanel(st, null);
+            if (st != null) {
+                st.applyFrozenState();
+                if (!st.isOpen && st.wasLastOpen) {
+                    st.isInExpandedMode = st.wasLastExpanded;
+                    openPanel(st, null);
+                }
             }
         }
     }
@@ -2234,6 +2237,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     mActionModePopup.dismiss();
                 }
                 mActionModePopup = null;
+            }
+
+            PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+            if (st != null && st.menu != null) {
+                st.menu.close();
             }
         }
 
@@ -3046,25 +3054,17 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             getIconMenuView(cb); // Need this initialized to know where our offset goes
 
-            boolean init = false;
             if (expandedMenuPresenter == null) {
                 expandedMenuPresenter = new ListMenuPresenter(
                         com.android.internal.R.layout.list_menu_item_layout,
                         com.android.internal.R.style.Theme_ExpandedMenu);
                 expandedMenuPresenter.setCallback(cb);
+                expandedMenuPresenter.setId(com.android.internal.R.id.list_menu_presenter);
                 menu.addMenuPresenter(expandedMenuPresenter);
-                init = true;
             }
 
             expandedMenuPresenter.setItemIndexOffset(iconMenuPresenter.getNumActualItemsShown());
             MenuView result = expandedMenuPresenter.getMenuView(decorView);
-
-            if (init && frozenMenuState != null) {
-                expandedMenuPresenter.restoreHierarchyState(frozenMenuState);
-                // Once we initialize the expanded menu we're done with the frozen state
-                // since we will have also restored any icon menu state.
-                frozenMenuState = null;
-            }
 
             return result;
         }
@@ -3072,19 +3072,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         MenuView getIconMenuView(MenuPresenter.Callback cb) {
             if (menu == null) return null;
 
-            boolean init = false;
             if (iconMenuPresenter == null) {
                 iconMenuPresenter = new IconMenuPresenter();
                 iconMenuPresenter.setCallback(cb);
+                iconMenuPresenter.setId(com.android.internal.R.id.icon_menu_presenter);
                 menu.addMenuPresenter(iconMenuPresenter);
-                init = true;
             }
 
             MenuView result = iconMenuPresenter.getMenuView(decorView);
-
-            if (init && frozenMenuState != null) {
-                iconMenuPresenter.restoreHierarchyState(frozenMenuState);
-            }
 
             return result;
         }
@@ -3097,12 +3092,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
             if (menu != null) {
                 savedState.menuState = new Bundle();
-                if (iconMenuPresenter != null) {
-                    iconMenuPresenter.saveHierarchyState(savedState.menuState);
-                }
-                if (expandedMenuPresenter != null) {
-                    expandedMenuPresenter.saveHierarchyState(savedState.menuState);
-                }
+                menu.savePresenterStates(savedState.menuState);
             }
 
             return savedState;
@@ -3125,6 +3115,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             createdPanelView = null;
             shownPanelView = null;
             decorView = null;
+        }
+
+        void applyFrozenState() {
+            if (menu != null && frozenMenuState != null) {
+                menu.restorePresenterStates(frozenMenuState);
+                frozenMenuState = null;
+            }
         }
 
         private static class SavedState implements Parcelable {

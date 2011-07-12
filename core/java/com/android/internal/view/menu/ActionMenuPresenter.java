@@ -20,7 +20,8 @@ import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.util.Log;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.SparseBooleanArray;
 import android.view.MenuItem;
 import android.view.SoundEffectConstants;
@@ -59,6 +60,9 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
     private ActionButtonSubmenu mActionButtonPopup;
 
     private OpenOverflowRunnable mPostedOpenRunnable;
+
+    final PopupPresenterCallback mPopupPresenterCallback = new PopupPresenterCallback();
+    int mOpenSubMenuId;
 
     public ActionMenuPresenter() {
         super(com.android.internal.R.layout.action_menu_layout,
@@ -196,8 +200,12 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
             topSubMenu = (SubMenuBuilder) topSubMenu.getParentMenu();
         }
         View anchor = findViewForItem(topSubMenu.getItem());
-        if (anchor == null) return false;
+        if (anchor == null) {
+            if (mOverflowButton == null) return false;
+            anchor = mOverflowButton;
+        }
 
+        mOpenSubMenuId = subMenu.getItem().getItemId();
         mActionButtonPopup = new ActionButtonSubmenu(mContext, subMenu);
         mActionButtonPopup.setAnchorView(anchor);
         mActionButtonPopup.show();
@@ -426,6 +434,57 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         super.onCloseMenu(menu, allMenusAreClosing);
     }
 
+    @Override
+    public Parcelable onSaveInstanceState() {
+        SavedState state = new SavedState();
+        state.openSubMenuId = mOpenSubMenuId;
+        return state;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        SavedState saved = (SavedState) state;
+        if (saved.openSubMenuId > 0) {
+            MenuItem item = mMenu.findItem(saved.openSubMenuId);
+            if (item != null) {
+                SubMenuBuilder subMenu = (SubMenuBuilder) item.getSubMenu();
+                onSubMenuSelected(subMenu);
+            }
+        }
+    }
+
+    private static class SavedState implements Parcelable {
+        public int openSubMenuId;
+
+        SavedState() {
+        }
+
+        SavedState(Parcel in) {
+            openSubMenuId = in.readInt();
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(openSubMenuId);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR
+                = new Parcelable.Creator<SavedState>() {
+            public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+            }
+
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        };
+    }
+
     private class OverflowMenuButton extends ImageButton implements ActionMenuChildView {
         public OverflowMenuButton(Context context) {
             super(context, null, com.android.internal.R.attr.actionOverflowButtonStyle);
@@ -460,6 +519,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         public OverflowPopup(Context context, MenuBuilder menu, View anchorView,
                 boolean overflowOnly) {
             super(context, menu, anchorView, overflowOnly);
+            setCallback(mPopupPresenterCallback);
         }
 
         @Override
@@ -482,6 +542,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
                 // Give a reasonable anchor to nested submenus.
                 setAnchorView(mOverflowButton == null ? (View) mMenuView : mOverflowButton);
             }
+
+            setCallback(mPopupPresenterCallback);
         }
 
         @Override
@@ -489,6 +551,20 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
             super.onDismiss();
             mSubMenu.close();
             mActionButtonPopup = null;
+            mOpenSubMenuId = 0;
+        }
+    }
+
+    private class PopupPresenterCallback implements MenuPresenter.Callback {
+
+        @Override
+        public boolean onOpenSubMenu(MenuBuilder subMenu) {
+            mOpenSubMenuId = ((SubMenuBuilder) subMenu).getItem().getItemId();
+            return false;
+        }
+
+        @Override
+        public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
         }
     }
 

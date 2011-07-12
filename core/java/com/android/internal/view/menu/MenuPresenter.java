@@ -17,6 +17,7 @@
 package com.android.internal.view.menu;
 
 import android.content.Context;
+import android.os.Parcelable;
 import android.view.Menu;
 import android.view.ViewGroup;
 
@@ -125,4 +126,24 @@ public interface MenuPresenter {
      * @return true if this presenter collapsed the action view, false otherwise.
      */
     public boolean collapseItemActionView(MenuBuilder menu, MenuItemImpl item);
+
+    /**
+     * Returns an ID for determining how to save/restore instance state.
+     * @return a valid ID value.
+     */
+    public int getId();
+
+    /**
+     * Returns a Parcelable describing the current state of the presenter.
+     * It will be passed to the {@link #onRestoreInstanceState(Parcelable)}
+     * method of the presenter sharing the same ID later.
+     * @return The saved instance state
+     */
+    public Parcelable onSaveInstanceState();
+
+    /**
+     * Supplies the previously saved instance state to be restored.
+     * @param state The previously saved instance state
+     */
+    public void onRestoreInstanceState(Parcelable state);
 }

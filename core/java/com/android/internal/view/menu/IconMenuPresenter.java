@@ -23,6 +23,7 @@ import android.os.Parcelable;
 import android.util.SparseArray;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -35,7 +36,12 @@ public class IconMenuPresenter extends BaseMenuPresenter {
     private IconMenuItemView mMoreView;
     private int mMaxItems = -1;
 
+    int mOpenSubMenuId;
+    SubMenuPresenterCallback mSubMenuPresenterCallback = new SubMenuPresenterCallback();
+    MenuDialogHelper mOpenSubMenu;
+
     private static final String VIEWS_TAG = "android:menu:icon";
+    private static final String OPEN_SUBMENU_KEY = "android:menu:icon:submenu";
 
     public IconMenuPresenter() {
         super(com.android.internal.R.layout.icon_menu_layout,
@@ -86,7 +92,11 @@ public class IconMenuPresenter extends BaseMenuPresenter {
         if (!subMenu.hasVisibleItems()) return false;
 
         // The window manager will give us a token.
-        new MenuDialogHelper(subMenu).show(null);
+        MenuDialogHelper helper = new MenuDialogHelper(subMenu);
+        helper.setPresenterCallback(mSubMenuPresenterCallback);
+        helper.show(null);
+        mOpenSubMenu = helper;
+        mOpenSubMenuId = subMenu.getItem().getItemId();
         super.onSubMenuSelected(subMenu);
         return true;
     }
@@ -137,5 +147,47 @@ public class IconMenuPresenter extends BaseMenuPresenter {
         if (viewStates != null) {
             ((View) mMenuView).restoreHierarchyState(viewStates);
         }
+        int subMenuId = inState.getInt(OPEN_SUBMENU_KEY, 0);
+        if (subMenuId > 0 && mMenu != null) {
+            MenuItem item = mMenu.findItem(subMenuId);
+            if (item != null) {
+                onSubMenuSelected((SubMenuBuilder) item.getSubMenu());
+            }
+        }
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        if (mMenuView == null) {
+            return null;
+        }
+
+        Bundle state = new Bundle();
+        saveHierarchyState(state);
+        if (mOpenSubMenuId > 0) {
+            state.putInt(OPEN_SUBMENU_KEY, mOpenSubMenuId);
+        }
+        return state;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        restoreHierarchyState((Bundle) state);
+    }
+
+    class SubMenuPresenterCallback implements MenuPresenter.Callback {
+        @Override
+        public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
+            mOpenSubMenuId = 0;
+            mOpenSubMenu.dismiss();
+            mOpenSubMenu = null;
+        }
+
+        @Override
+        public boolean onOpenSubMenu(MenuBuilder subMenu) {
+            mOpenSubMenuId = ((SubMenuBuilder) subMenu).getItem().getItemId();
+            return false;
+        }
+
     }
 }
