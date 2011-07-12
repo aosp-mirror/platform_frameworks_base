@@ -33,8 +33,10 @@ import com.android.resources.ScreenSize;
 
 import android.content.res.Configuration;
 import android.os.HandlerThread_Delegate;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.ViewConfiguration;
+import android.view.inputmethod.InputMethodManager;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -224,6 +226,9 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         mContext.initResources();
         sCurrentContext = mContext;
 
+        // create an InputMethodManager
+        InputMethodManager.getInstance(Looper.myLooper());
+
         LayoutLog currentLog = mParams.getLog();
         Bridge.setLog(currentLog);
         mContext.getRenderResources().setFrameworkResourceIdProvider(this);
@@ -244,6 +249,9 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
 
         // clear the stored ViewConfiguration since the map is per density and not per context.
         ViewConfiguration.sConfigurations.clear();
+
+        // remove the InputMethodManager
+        InputMethodManager.mInstance = null;
 
         sCurrentContext = null;
 

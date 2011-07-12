@@ -107,6 +107,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.view.LayoutInflater#rInflate",
         "android.view.LayoutInflater#parseInclude",
         "android.view.View#isInEditMode",
+        "android.view.inputmethod.InputMethodManager#getInstance",
         "com.android.internal.util.XmlUtils#convertValueToInt",
         // TODO: comment out once DelegateClass is working
     };
