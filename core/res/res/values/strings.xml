@@ -2038,13 +2038,13 @@
     <string name="autofill_phone_re">phone<!-- de-DE -->|telefonnummer<!-- es -->|telefono|teléfono<!-- fr-FR -->|telfixe<!-- ja-JP -->|電話<!-- pt-BR, pt-PT -->|telefone|telemovel<!-- ru -->|телефон<!-- zh-CN -->|电话</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_area_code_re">area code</string>
+    <string name="autofill_area_code_re">area.*code|acode|area</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_prefix_re">^-$|\\)$|prefix<!-- fr-FR -->|preselection<!-- pt-BR, pt-PT -->|ddd</string>
+    <string name="autofill_phone_prefix_re">prefix<!-- fr-FR -->|preselection<!-- pt-BR, pt-PT -->|ddd</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_suffix_re">^-$|suffix</string>
+    <string name="autofill_phone_suffix_re">suffix</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
     <string name="autofill_phone_extension_re">ext<!-- pt-BR, pt-PT -->|ramal</string>
@@ -2077,10 +2077,10 @@
     <string name="autofill_country_code_re">country.*code|ccode|_cc</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_area_code_notext_re">^\($</string>
+    <string name="autofill_area_code_notext_re">^\\($</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
-    <string name="autofill_phone_prefix_separator_re">^-$|^\)$</string>
+    <string name="autofill_phone_prefix_separator_re">^-$|^\\)$</string>
 
     <!-- Do not translate. Regex used by AutoFill. -->
     <string name="autofill_phone_suffix_separator_re">^-$</string>
