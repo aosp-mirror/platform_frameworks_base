@@ -2403,6 +2403,7 @@ public class BluetoothService extends IBluetooth.Stub {
                     convertToAdapterState(state));
             intent.putExtra(BluetoothAdapter.EXTRA_PREVIOUS_CONNECTION_STATE,
                     convertToAdapterState(prevState));
+            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
             Log.d(TAG, "CONNECTION_STATE_CHANGE: " + device + ": "
                     + prevState + " -> " + state);
