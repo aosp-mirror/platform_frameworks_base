@@ -65,7 +65,7 @@ import android.util.Base64;
 import android.util.Log;
 
 /**
- * Subclass of the Apache {@link DefaultHttpClient} that is configured with
+ * Implementation of the Apache {@link DefaultHttpClient} that is configured with
  * reasonable default settings and registered schemes for Android, and
  * also lets the user add {@link HttpRequestInterceptor} classes.
  * Don't create this directly, use the {@link #newInstance} factory method.
