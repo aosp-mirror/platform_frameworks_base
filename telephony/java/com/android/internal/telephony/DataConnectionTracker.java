@@ -18,10 +18,12 @@ package com.android.internal.telephony;
 
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.database.ContentObserver;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
@@ -334,6 +336,31 @@ public abstract class DataConnectionTracker extends Handler {
         }
     };
 
+    private final DataRoamingSettingObserver mDataRoamingSettingObserver;
+
+    private class DataRoamingSettingObserver extends ContentObserver {
+        public DataRoamingSettingObserver(Handler handler) {
+            super(handler);
+        }
+
+        public void register(Context context) {
+            final ContentResolver resolver = context.getContentResolver();
+            resolver.registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.DATA_ROAMING), false, this);
+        }
+
+        public void unregister(Context context) {
+            final ContentResolver resolver = context.getContentResolver();
+            resolver.unregisterContentObserver(this);
+        }
+
+        @Override
+        public void onChange(boolean selfChange) {
+            // already running on mPhone handler thread
+            handleDataOnRoamingChange();
+        }
+    }
+
     protected boolean isDataSetupCompleteOk(AsyncResult ar) {
         if (ar.exception != null) {
             if (DBG) log("isDataSetupCompleteOk return false, ar.result=" + ar.result);
@@ -398,6 +425,10 @@ public abstract class DataConnectionTracker extends Handler {
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mPhone.getContext());
         mAutoAttachOnCreation = sp.getBoolean(PhoneBase.DATA_DISABLED_ON_BOOT_KEY, false);
+
+        // watch for changes to Settings.Secure.DATA_ROAMING
+        mDataRoamingSettingObserver = new DataRoamingSettingObserver(mPhone);
+        mDataRoamingSettingObserver.register(mPhone.getContext());
     }
 
     public void dispose() {
@@ -407,6 +438,7 @@ public abstract class DataConnectionTracker extends Handler {
         mDataConnectionAsyncChannels.clear();
         mIsDisposed = true;
         mPhone.getContext().unregisterReceiver(this.mIntentReceiver);
+        mDataRoamingSettingObserver.unregister(mPhone.getContext());
     }
 
     protected void broadcastMessenger() {
@@ -461,29 +493,35 @@ public abstract class DataConnectionTracker extends Handler {
         return result;
     }
 
-    //The data roaming setting is now located in the shared preferences.
-    //  See if the requested preference value is the same as that stored in
-    //  the shared values.  If it is not, then update it.
+    /**
+     * Modify {@link Settings.Secure#DATA_ROAMING} value.
+     */
     public void setDataOnRoamingEnabled(boolean enabled) {
         if (getDataOnRoamingEnabled() != enabled) {
-            Settings.Secure.putInt(mPhone.getContext().getContentResolver(),
-                Settings.Secure.DATA_ROAMING, enabled ? 1 : 0);
-            if (mPhone.getServiceState().getRoaming()) {
-                if (enabled) {
-                    resetAllRetryCounts();
-                }
-                sendMessage(obtainMessage(EVENT_ROAMING_ON));
-            }
+            final ContentResolver resolver = mPhone.getContext().getContentResolver();
+            Settings.Secure.putInt(resolver, Settings.Secure.DATA_ROAMING, enabled ? 1 : 0);
+            // will trigger handleDataOnRoamingChange() through observer
         }
     }
 
-    // Retrieve the data roaming setting from the shared preferences.
+    /**
+     * Return current {@link Settings.Secure#DATA_ROAMING} value.
+     */
     public boolean getDataOnRoamingEnabled() {
         try {
-            return Settings.Secure.getInt(
-                    mPhone.getContext().getContentResolver(), Settings.Secure.DATA_ROAMING) > 0;
+            final ContentResolver resolver = mPhone.getContext().getContentResolver();
+            return Settings.Secure.getInt(resolver, Settings.Secure.DATA_ROAMING) != 0;
         } catch (SettingNotFoundException snfe) {
             return false;
+        }
+    }
+
+    private void handleDataOnRoamingChange() {
+        if (mPhone.getServiceState().getRoaming()) {
+            if (getDataOnRoamingEnabled()) {
+                resetAllRetryCounts();
+            }
+            sendMessage(obtainMessage(EVENT_ROAMING_ON));
         }
     }
 
