@@ -933,17 +933,17 @@ public class ValueAnimator extends Animator {
 
     @Override
     public void cancel() {
-        if (mListeners != null) {
-            ArrayList<AnimatorListener> tmpListeners =
-                    (ArrayList<AnimatorListener>) mListeners.clone();
-            for (AnimatorListener listener : tmpListeners) {
-                listener.onAnimationCancel(this);
-            }
-        }
         // Only cancel if the animation is actually running or has been started and is about
         // to run
         if (mPlayingState != STOPPED || sPendingAnimations.get().contains(this) ||
                 sDelayedAnims.get().contains(this)) {
+            if (mListeners != null) {
+                ArrayList<AnimatorListener> tmpListeners =
+                        (ArrayList<AnimatorListener>) mListeners.clone();
+                for (AnimatorListener listener : tmpListeners) {
+                    listener.onAnimationCancel(this);
+                }
+            }
             endAnimation();
         }
     }
