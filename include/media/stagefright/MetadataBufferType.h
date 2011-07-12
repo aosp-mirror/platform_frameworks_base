@@ -17,7 +17,11 @@
 #ifndef METADATA_BUFFER_TYPE_H
 #define METADATA_BUFFER_TYPE_H
 
+#ifdef __cplusplus
+extern "C" {
 namespace android {
+#endif
+
 /*
  * MetadataBufferType defines the type of the metadata buffers that
  * can be passed to video encoder component for encoding, via Stagefright
@@ -72,6 +76,9 @@ typedef enum {
 
 } MetadataBufferType;
 
+#ifdef __cplusplus
 }  // namespace android
+}
+#endif
 
 #endif  // METADATA_BUFFER_TYPE_H
