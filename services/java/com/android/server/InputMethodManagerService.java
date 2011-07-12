@@ -531,10 +531,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mImeSwitcherNotification.sound = null;
         mImeSwitcherNotification.vibrate = null;
         Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-                | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
-                | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        mImeSwitchPendingIntent = PendingIntent.getActivity(mContext, 0, intent, 0);
+        mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
         mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
                 com.android.internal.R.bool.show_ongoing_ime_switcher);
 
