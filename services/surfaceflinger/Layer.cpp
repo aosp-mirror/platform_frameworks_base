@@ -188,22 +188,37 @@ void Layer::setGeometry(hwc_layer_t* hwcl)
         return;
     }
 
+    /*
+     * Transformations are applied in this order:
+     * 1) buffer orientation/flip/mirror
+     * 2) state transformation (window manager)
+     * 3) layer orientation (screen orientation)
+     * (NOTE: the matrices are multiplied in reverse order)
+     */
+
+    const Transform bufferOrientation(mCurrentTransform);
+    const Transform& stateTransform(s.transform);
+    const Transform layerOrientation(mOrientation);
+
+    const Transform tr(layerOrientation * stateTransform * bufferOrientation);
+
+    // this gives us only the "orientation" component of the transform
+    const uint32_t finalTransform = tr.getOrientation();
+
     // we can only handle simple transformation
-    if (mOrientation & Transform::ROT_INVALID) {
+    if (finalTransform & Transform::ROT_INVALID) {
         hwcl->flags = HWC_SKIP_LAYER;
         return;
     }
 
-    // FIXME: shouldn't we take the state's transform into account here?
-
-    Transform tr(Transform(mOrientation) * Transform(mCurrentTransform));
-    hwcl->transform = tr.getOrientation();
+    hwcl->transform = finalTransform;
 
     if (!isOpaque()) {
         hwcl->blending = mPremultipliedAlpha ?
                 HWC_BLENDING_PREMULT : HWC_BLENDING_COVERAGE;
     }
 
+    // scaling is already applied in mTransformedBounds
     hwcl->displayFrame.left   = mTransformedBounds.left;
     hwcl->displayFrame.top    = mTransformedBounds.top;
     hwcl->displayFrame.right  = mTransformedBounds.right;
