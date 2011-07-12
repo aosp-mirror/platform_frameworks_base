@@ -8,7 +8,8 @@ test_src_files := \
 	ObbFile_test.cpp \
 	Looper_test.cpp \
 	String8_test.cpp \
-	Unicode_test.cpp
+	Unicode_test.cpp \
+	ZipFileRO_test.cpp \
 
 shared_libraries := \
 	libz \
