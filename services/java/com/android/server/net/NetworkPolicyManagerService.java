@@ -405,7 +405,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             try {
                 final NetworkStats stats = mNetworkStats.getSummaryForNetwork(
                         policy.template, start, end);
-                total = stats.rx[0] + stats.tx[0];
+                final NetworkStats.Entry entry = stats.getValues(0, null);
+                total = entry.rxBytes + entry.txBytes;
             } catch (RemoteException e) {
                 Slog.w(TAG, "problem reading summary for template " + policy.template);
                 continue;
@@ -605,7 +606,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final long total;
             try {
                 stats = mNetworkStats.getSummaryForNetwork(policy.template, start, end);
-                total = stats.rx[0] + stats.tx[0];
+                final NetworkStats.Entry entry = stats.getValues(0, null);
+                total = entry.rxBytes + entry.txBytes;
             } catch (RemoteException e) {
                 Slog.w(TAG, "problem reading summary for template " + policy.template);
                 continue;

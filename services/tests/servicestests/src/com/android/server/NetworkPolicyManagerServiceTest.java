@@ -447,7 +447,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // pretend that 512 bytes total have happened
         stats = new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, TAG_NONE, 256L, 256L);
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 256L, 2L, 256L, 2L);
         expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, TIME_MAR_10))
                 .andReturn(stats).atLeastOnce();
 

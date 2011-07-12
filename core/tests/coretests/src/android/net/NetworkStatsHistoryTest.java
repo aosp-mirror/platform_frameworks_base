@@ -54,8 +54,8 @@ public class NetworkStatsHistoryTest extends TestCase {
         // record data into narrow window to get single bucket
         stats.recordData(TEST_START, TEST_START + SECOND_IN_MILLIS, 1024L, 2048L);
 
-        assertEquals(1, stats.bucketCount);
-        assertBucket(stats, 0, 1024L, 2048L);
+        assertEquals(1, stats.size());
+        assertEntry(stats, 0, 1024L, 2048L);
     }
 
     public void testRecordEqualBuckets() throws Exception {
@@ -66,9 +66,9 @@ public class NetworkStatsHistoryTest extends TestCase {
         final long recordStart = TEST_START + (bucketDuration / 2);
         stats.recordData(recordStart, recordStart + bucketDuration, 1024L, 128L);
 
-        assertEquals(2, stats.bucketCount);
-        assertBucket(stats, 0, 512L, 64L);
-        assertBucket(stats, 1, 512L, 64L);
+        assertEquals(2, stats.size());
+        assertEntry(stats, 0, 512L, 64L);
+        assertEntry(stats, 1, 512L, 64L);
     }
 
     public void testRecordTouchingBuckets() throws Exception {
@@ -81,13 +81,13 @@ public class NetworkStatsHistoryTest extends TestCase {
         final long recordEnd = (TEST_START + (BUCKET_SIZE * 2)) + (MINUTE_IN_MILLIS * 4);
         stats.recordData(recordStart, recordEnd, 1000L, 5000L);
 
-        assertEquals(3, stats.bucketCount);
+        assertEquals(3, stats.size());
         // first bucket should have (1/20 of value)
-        assertBucket(stats, 0, 50L, 250L);
+        assertEntry(stats, 0, 50L, 250L);
         // second bucket should have (15/20 of value)
-        assertBucket(stats, 1, 750L, 3750L);
+        assertEntry(stats, 1, 750L, 3750L);
         // final bucket should have (4/20 of value)
-        assertBucket(stats, 2, 200L, 1000L);
+        assertEntry(stats, 2, 200L, 1000L);
     }
 
     public void testRecordGapBuckets() throws Exception {
@@ -101,9 +101,9 @@ public class NetworkStatsHistoryTest extends TestCase {
         stats.recordData(lastStart, lastStart + SECOND_IN_MILLIS, 64L, 512L);
 
         // we should have two buckets, far apart from each other
-        assertEquals(2, stats.bucketCount);
-        assertBucket(stats, 0, 128L, 256L);
-        assertBucket(stats, 1, 64L, 512L);
+        assertEquals(2, stats.size());
+        assertEntry(stats, 0, 128L, 256L);
+        assertEntry(stats, 1, 64L, 512L);
 
         // now record something in middle, spread across two buckets
         final long middleStart = TEST_START + DAY_IN_MILLIS;
@@ -111,11 +111,11 @@ public class NetworkStatsHistoryTest extends TestCase {
         stats.recordData(middleStart, middleEnd, 2048L, 2048L);
 
         // now should have four buckets, with new record in middle two buckets
-        assertEquals(4, stats.bucketCount);
-        assertBucket(stats, 0, 128L, 256L);
-        assertBucket(stats, 1, 1024L, 1024L);
-        assertBucket(stats, 2, 1024L, 1024L);
-        assertBucket(stats, 3, 64L, 512L);
+        assertEquals(4, stats.size());
+        assertEntry(stats, 0, 128L, 256L);
+        assertEntry(stats, 1, 1024L, 1024L);
+        assertEntry(stats, 2, 1024L, 1024L);
+        assertEntry(stats, 3, 64L, 512L);
     }
 
     public void testRecordOverlapBuckets() throws Exception {
@@ -128,9 +128,9 @@ public class NetworkStatsHistoryTest extends TestCase {
         stats.recordData(midStart, midStart + HOUR_IN_MILLIS, 1024L, 1024L);
 
         // should have two buckets, with some data mixed together
-        assertEquals(2, stats.bucketCount);
-        assertBucket(stats, 0, 768L, 768L);
-        assertBucket(stats, 1, 512L, 512L);
+        assertEquals(2, stats.size());
+        assertEntry(stats, 0, 768L, 768L);
+        assertEntry(stats, 1, 512L, 512L);
     }
 
     public void testRecordEntireGapIdentical() throws Exception {
@@ -154,10 +154,10 @@ public class NetworkStatsHistoryTest extends TestCase {
         assertTotalEquals(total, 3000L, 1500L);
 
         // now inspect internal buckets
-        assertBucket(stats, 0, 1000L, 500L);
-        assertBucket(stats, 1, 1000L, 500L);
-        assertBucket(stats, 2, 500L, 250L);
-        assertBucket(stats, 3, 500L, 250L);
+        assertEntry(stats, 0, 1000L, 500L);
+        assertEntry(stats, 1, 1000L, 500L);
+        assertEntry(stats, 2, 500L, 250L);
+        assertEntry(stats, 3, 500L, 250L);
     }
 
     public void testRecordEntireOverlapVaryingBuckets() throws Exception {
@@ -181,13 +181,13 @@ public class NetworkStatsHistoryTest extends TestCase {
         assertTotalEquals(total, 650L, 650L);
 
         // now inspect internal buckets
-        assertBucket(stats, 0, 10L, 10L);
-        assertBucket(stats, 1, 20L, 20L);
-        assertBucket(stats, 2, 20L, 20L);
-        assertBucket(stats, 3, 20L, 20L);
-        assertBucket(stats, 4, 20L, 20L);
-        assertBucket(stats, 5, 20L, 20L);
-        assertBucket(stats, 6, 10L, 10L);
+        assertEntry(stats, 0, 10L, 10L);
+        assertEntry(stats, 1, 20L, 20L);
+        assertEntry(stats, 2, 20L, 20L);
+        assertEntry(stats, 3, 20L, 20L);
+        assertEntry(stats, 4, 20L, 20L);
+        assertEntry(stats, 5, 20L, 20L);
+        assertEntry(stats, 6, 10L, 10L);
 
         // now combine using 15min buckets
         stats = new NetworkStatsHistory(HOUR_IN_MILLIS / 4);
@@ -199,10 +199,10 @@ public class NetworkStatsHistoryTest extends TestCase {
         assertTotalEquals(total, 650L, 650L);
 
         // and inspect buckets
-        assertBucket(stats, 0, 200L, 200L);
-        assertBucket(stats, 1, 150L, 150L);
-        assertBucket(stats, 2, 150L, 150L);
-        assertBucket(stats, 3, 150L, 150L);
+        assertEntry(stats, 0, 200L, 200L);
+        assertEntry(stats, 1, 150L, 150L);
+        assertEntry(stats, 2, 150L, 150L);
+        assertEntry(stats, 3, 150L, 150L);
     }
 
     public void testRemove() throws Exception {
@@ -210,28 +210,28 @@ public class NetworkStatsHistoryTest extends TestCase {
 
         // record some data across 24 buckets
         stats.recordData(TEST_START, TEST_START + DAY_IN_MILLIS, 24L, 24L);
-        assertEquals(24, stats.bucketCount);
+        assertEquals(24, stats.size());
 
         // try removing far before buckets; should be no change
         stats.removeBucketsBefore(TEST_START - YEAR_IN_MILLIS);
-        assertEquals(24, stats.bucketCount);
+        assertEquals(24, stats.size());
 
         // try removing just moments into first bucket; should be no change
         // since that bucket contains data beyond the cutoff
         stats.removeBucketsBefore(TEST_START + SECOND_IN_MILLIS);
-        assertEquals(24, stats.bucketCount);
+        assertEquals(24, stats.size());
 
         // try removing single bucket
         stats.removeBucketsBefore(TEST_START + HOUR_IN_MILLIS);
-        assertEquals(23, stats.bucketCount);
+        assertEquals(23, stats.size());
 
         // try removing multiple buckets
         stats.removeBucketsBefore(TEST_START + (4 * HOUR_IN_MILLIS));
-        assertEquals(20, stats.bucketCount);
+        assertEquals(20, stats.size());
 
         // try removing all buckets
         stats.removeBucketsBefore(TEST_START + YEAR_IN_MILLIS);
-        assertEquals(0, stats.bucketCount);
+        assertEquals(0, stats.size());
     }
 
     public void testTotalData() throws Exception {
@@ -293,19 +293,25 @@ public class NetworkStatsHistoryTest extends TestCase {
 
     private static void assertConsistent(NetworkStatsHistory stats) {
         // verify timestamps are monotonic
-        for (int i = 1; i < stats.bucketCount; i++) {
-            assertTrue(stats.bucketStart[i - 1] < stats.bucketStart[i]);
+        long lastStart = Long.MIN_VALUE;
+        NetworkStatsHistory.Entry entry = null;
+        for (int i = 0; i < stats.size(); i++) {
+            entry = stats.getValues(i, entry);
+            assertTrue(lastStart < entry.bucketStart);
+            lastStart = entry.bucketStart;
         }
     }
 
-    private static void assertTotalEquals(long[] total, long rx, long tx) {
-        assertEquals("unexpected rx", rx, total[0]);
-        assertEquals("unexpected tx", tx, total[1]);
+    private static void assertTotalEquals(long[] total, long rxBytes, long txBytes) {
+        assertEquals("unexpected rxBytes", rxBytes, total[0]);
+        assertEquals("unexpected txBytes", txBytes, total[1]);
     }
 
-    private static void assertBucket(NetworkStatsHistory stats, int index, long rx, long tx) {
-        assertEquals("unexpected rx", rx, stats.rx[index]);
-        assertEquals("unexpected tx", tx, stats.tx[index]);
+    private static void assertEntry(
+            NetworkStatsHistory stats, int index, long rxBytes, long txBytes) {
+        final NetworkStatsHistory.Entry entry = stats.getValues(index, null);
+        assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
+        assertEquals("unexpected txBytes", txBytes, entry.txBytes);
     }
 
 }

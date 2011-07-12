@@ -43,31 +43,19 @@ public class NetworkStats implements Parcelable {
     /** {@link #tag} value for without tag. */
     public static final int TAG_NONE = 0;
 
-    // TODO: move public fields to Entry accessors, then undeprecate
-    // TODO: refactor rx/tx to rxBytes/txBytes
-
     /**
      * {@link SystemClock#elapsedRealtime()} timestamp when this data was
      * generated.
      */
-    @Deprecated
-    public final long elapsedRealtime;
-    @Deprecated
-    public int size;
-    @Deprecated
-    public String[] iface;
-    @Deprecated
-    public int[] uid;
-    @Deprecated
-    public int[] tag;
-    @Deprecated
-    public long[] rx;
-    @Deprecated
-    public long[] rxPackets;
-    @Deprecated
-    public long[] tx;
-    @Deprecated
-    public long[] txPackets;
+    private final long elapsedRealtime;
+    private int size;
+    private String[] iface;
+    private int[] uid;
+    private int[] tag;
+    private long[] rxBytes;
+    private long[] rxPackets;
+    private long[] txBytes;
+    private long[] txPackets;
 
     public static class Entry {
         public String iface;
@@ -77,6 +65,20 @@ public class NetworkStats implements Parcelable {
         public long rxPackets;
         public long txBytes;
         public long txPackets;
+
+        public Entry() {
+        }
+
+        public Entry(String iface, int uid, int tag, long rxBytes, long rxPackets, long txBytes,
+                long txPackets) {
+            this.iface = iface;
+            this.uid = uid;
+            this.tag = tag;
+            this.rxBytes = rxBytes;
+            this.rxPackets = rxPackets;
+            this.txBytes = txBytes;
+            this.txPackets = txPackets;
+        }
     }
 
     public NetworkStats(long elapsedRealtime, int initialSize) {
@@ -85,9 +87,9 @@ public class NetworkStats implements Parcelable {
         this.iface = new String[initialSize];
         this.uid = new int[initialSize];
         this.tag = new int[initialSize];
-        this.rx = new long[initialSize];
+        this.rxBytes = new long[initialSize];
         this.rxPackets = new long[initialSize];
-        this.tx = new long[initialSize];
+        this.txBytes = new long[initialSize];
         this.txPackets = new long[initialSize];
     }
 
@@ -97,23 +99,15 @@ public class NetworkStats implements Parcelable {
         iface = parcel.createStringArray();
         uid = parcel.createIntArray();
         tag = parcel.createIntArray();
-        rx = parcel.createLongArray();
+        rxBytes = parcel.createLongArray();
         rxPackets = parcel.createLongArray();
-        tx = parcel.createLongArray();
+        txBytes = parcel.createLongArray();
         txPackets = parcel.createLongArray();
     }
 
-    /**
-     * Add new stats entry with given values.
-     */
-    public NetworkStats addEntry(String iface, int uid, int tag, long rx, long tx) {
-        final Entry entry = new Entry();
-        entry.iface = iface;
-        entry.uid = uid;
-        entry.tag = tag;
-        entry.rxBytes = rx;
-        entry.txBytes = tx;
-        return addValues(entry);
+    public NetworkStats addValues(String iface, int uid, int tag, long rxBytes, long rxPackets,
+            long txBytes, long txPackets) {
+        return addValues(new Entry(iface, uid, tag, rxBytes, rxPackets, txBytes, txPackets));
     }
 
     /**
@@ -126,18 +120,18 @@ public class NetworkStats implements Parcelable {
             iface = Arrays.copyOf(iface, newLength);
             uid = Arrays.copyOf(uid, newLength);
             tag = Arrays.copyOf(tag, newLength);
-            rx = Arrays.copyOf(rx, newLength);
+            rxBytes = Arrays.copyOf(rxBytes, newLength);
             rxPackets = Arrays.copyOf(rxPackets, newLength);
-            tx = Arrays.copyOf(tx, newLength);
+            txBytes = Arrays.copyOf(txBytes, newLength);
             txPackets = Arrays.copyOf(txPackets, newLength);
         }
 
         iface[size] = entry.iface;
         uid[size] = entry.uid;
         tag[size] = entry.tag;
-        rx[size] = entry.rxBytes;
+        rxBytes[size] = entry.rxBytes;
         rxPackets[size] = entry.rxPackets;
-        tx[size] = entry.txBytes;
+        txBytes[size] = entry.txBytes;
         txPackets[size] = entry.txPackets;
         size++;
 
@@ -152,9 +146,9 @@ public class NetworkStats implements Parcelable {
         entry.iface = iface[i];
         entry.uid = uid[i];
         entry.tag = tag[i];
-        entry.rxBytes = rx[i];
+        entry.rxBytes = rxBytes[i];
         entry.rxPackets = rxPackets[i];
-        entry.txBytes = tx[i];
+        entry.txBytes = txBytes[i];
         entry.txPackets = txPackets[i];
         return entry;
     }
@@ -167,20 +161,31 @@ public class NetworkStats implements Parcelable {
         return size;
     }
 
+    // @VisibleForTesting
+    public int internalSize() {
+        return iface.length;
+    }
+
+    public NetworkStats combineValues(String iface, int uid, int tag, long rxBytes, long rxPackets,
+            long txBytes, long txPackets) {
+        return combineValues(new Entry(iface, uid, tag, rxBytes, rxPackets, txBytes, txPackets));
+    }
+
     /**
      * Combine given values with an existing row, or create a new row if
      * {@link #findIndex(String, int, int)} is unable to find match. Can also be
      * used to subtract values from existing rows.
      */
-    public NetworkStats combineEntry(String iface, int uid, int tag, long rx, long tx) {
-        // TODO: extent to accept rxPackets/txPackets
-        final int i = findIndex(iface, uid, tag);
+    public NetworkStats combineValues(Entry entry) {
+        final int i = findIndex(entry.iface, entry.uid, entry.tag);
         if (i == -1) {
             // only create new entry when positive contribution
-            addEntry(iface, uid, tag, rx, tx);
+            addValues(entry);
         } else {
-            this.rx[i] += rx;
-            this.tx[i] += tx;
+            rxBytes[i] += entry.rxBytes;
+            rxPackets[i] += entry.rxPackets;
+            txBytes[i] += entry.txBytes;
+            txPackets[i] += entry.txPackets;
         }
         return this;
     }
@@ -280,15 +285,15 @@ public class NetworkStats implements Parcelable {
             final int j = value.findIndex(entry.iface, entry.uid, entry.tag);
             if (j == -1) {
                 // newly appearing row, return entire value
-                entry.rxBytes = rx[i];
+                entry.rxBytes = rxBytes[i];
                 entry.rxPackets = rxPackets[i];
-                entry.txBytes = tx[i];
+                entry.txBytes = txBytes[i];
                 entry.txPackets = txPackets[i];
             } else {
                 // existing row, subtract remote value
-                entry.rxBytes = rx[i] - value.rx[j];
+                entry.rxBytes = rxBytes[i] - value.rxBytes[j];
                 entry.rxPackets = rxPackets[i] - value.rxPackets[j];
-                entry.txBytes = tx[i] - value.tx[j];
+                entry.txBytes = txBytes[i] - value.txBytes[j];
                 entry.txPackets = txPackets[i] - value.txPackets[j];
                 if (enforceMonotonic
                         && (entry.rxBytes < 0 || entry.rxPackets < 0 || entry.txBytes < 0
@@ -321,9 +326,9 @@ public class NetworkStats implements Parcelable {
             pw.print("  iface="); pw.print(iface[i]);
             pw.print(" uid="); pw.print(uid[i]);
             pw.print(" tag="); pw.print(tag[i]);
-            pw.print(" rxBytes="); pw.print(rx[i]);
+            pw.print(" rxBytes="); pw.print(rxBytes[i]);
             pw.print(" rxPackets="); pw.print(rxPackets[i]);
-            pw.print(" txBytes="); pw.print(tx[i]);
+            pw.print(" txBytes="); pw.print(txBytes[i]);
             pw.print(" txPackets="); pw.println(txPackets[i]);
         }
     }
@@ -347,9 +352,9 @@ public class NetworkStats implements Parcelable {
         dest.writeStringArray(iface);
         dest.writeIntArray(uid);
         dest.writeIntArray(tag);
-        dest.writeLongArray(rx);
+        dest.writeLongArray(rxBytes);
         dest.writeLongArray(rxPackets);
-        dest.writeLongArray(tx);
+        dest.writeLongArray(txBytes);
         dest.writeLongArray(txPackets);
     }
 
