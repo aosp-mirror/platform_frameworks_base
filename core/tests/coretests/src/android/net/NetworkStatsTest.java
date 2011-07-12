@@ -44,20 +44,20 @@ public class NetworkStatsTest extends TestCase {
     public void testAddEntryGrow() throws Exception {
         final NetworkStats stats = new NetworkStats(TEST_START, 2);
 
-        assertEquals(0, stats.size);
+        assertEquals(0, stats.size());
         assertEquals(2, stats.iface.length);
 
         stats.addEntry(TEST_IFACE, TEST_UID, TAG_NONE, 1L, 2L);
         stats.addEntry(TEST_IFACE, TEST_UID, TAG_NONE, 2L, 2L);
 
-        assertEquals(2, stats.size);
+        assertEquals(2, stats.size());
         assertEquals(2, stats.iface.length);
 
         stats.addEntry(TEST_IFACE, TEST_UID, TAG_NONE, 3L, 4L);
         stats.addEntry(TEST_IFACE, TEST_UID, TAG_NONE, 4L, 4L);
         stats.addEntry(TEST_IFACE, TEST_UID, TAG_NONE, 5L, 5L);
 
-        assertEquals(5, stats.size);
+        assertEquals(5, stats.size());
         assertTrue(stats.iface.length >= 5);
 
         assertEquals(1L, stats.rx[0]);

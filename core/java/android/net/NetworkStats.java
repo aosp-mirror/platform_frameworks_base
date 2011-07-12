@@ -43,17 +43,41 @@ public class NetworkStats implements Parcelable {
     /** {@link #tag} value for without tag. */
     public static final int TAG_NONE = 0;
 
+    // TODO: move public fields to Entry accessors, then undeprecate
+    // TODO: refactor rx/tx to rxBytes/txBytes
+
     /**
      * {@link SystemClock#elapsedRealtime()} timestamp when this data was
      * generated.
      */
+    @Deprecated
     public final long elapsedRealtime;
+    @Deprecated
     public int size;
+    @Deprecated
     public String[] iface;
+    @Deprecated
     public int[] uid;
+    @Deprecated
     public int[] tag;
+    @Deprecated
     public long[] rx;
+    @Deprecated
+    public long[] rxPackets;
+    @Deprecated
     public long[] tx;
+    @Deprecated
+    public long[] txPackets;
+
+    public static class Entry {
+        public String iface;
+        public int uid;
+        public int tag;
+        public long rxBytes;
+        public long rxPackets;
+        public long txBytes;
+        public long txPackets;
+    }
 
     public NetworkStats(long elapsedRealtime, int initialSize) {
         this.elapsedRealtime = elapsedRealtime;
@@ -62,7 +86,9 @@ public class NetworkStats implements Parcelable {
         this.uid = new int[initialSize];
         this.tag = new int[initialSize];
         this.rx = new long[initialSize];
+        this.rxPackets = new long[initialSize];
         this.tx = new long[initialSize];
+        this.txPackets = new long[initialSize];
     }
 
     public NetworkStats(Parcel parcel) {
@@ -72,30 +98,73 @@ public class NetworkStats implements Parcelable {
         uid = parcel.createIntArray();
         tag = parcel.createIntArray();
         rx = parcel.createLongArray();
+        rxPackets = parcel.createLongArray();
         tx = parcel.createLongArray();
+        txPackets = parcel.createLongArray();
     }
 
     /**
      * Add new stats entry with given values.
      */
     public NetworkStats addEntry(String iface, int uid, int tag, long rx, long tx) {
+        final Entry entry = new Entry();
+        entry.iface = iface;
+        entry.uid = uid;
+        entry.tag = tag;
+        entry.rxBytes = rx;
+        entry.txBytes = tx;
+        return addValues(entry);
+    }
+
+    /**
+     * Add new stats entry, copying from given {@link Entry}. The {@link Entry}
+     * object can be recycled across multiple calls.
+     */
+    public NetworkStats addValues(Entry entry) {
         if (size >= this.iface.length) {
-            final int newLength = Math.max(this.iface.length, 10) * 3 / 2;
-            this.iface = Arrays.copyOf(this.iface, newLength);
-            this.uid = Arrays.copyOf(this.uid, newLength);
-            this.tag = Arrays.copyOf(this.tag, newLength);
-            this.rx = Arrays.copyOf(this.rx, newLength);
-            this.tx = Arrays.copyOf(this.tx, newLength);
+            final int newLength = Math.max(iface.length, 10) * 3 / 2;
+            iface = Arrays.copyOf(iface, newLength);
+            uid = Arrays.copyOf(uid, newLength);
+            tag = Arrays.copyOf(tag, newLength);
+            rx = Arrays.copyOf(rx, newLength);
+            rxPackets = Arrays.copyOf(rxPackets, newLength);
+            tx = Arrays.copyOf(tx, newLength);
+            txPackets = Arrays.copyOf(txPackets, newLength);
         }
 
-        this.iface[size] = iface;
-        this.uid[size] = uid;
-        this.tag[size] = tag;
-        this.rx[size] = rx;
-        this.tx[size] = tx;
+        iface[size] = entry.iface;
+        uid[size] = entry.uid;
+        tag[size] = entry.tag;
+        rx[size] = entry.rxBytes;
+        rxPackets[size] = entry.rxPackets;
+        tx[size] = entry.txBytes;
+        txPackets[size] = entry.txPackets;
         size++;
 
         return this;
+    }
+
+    /**
+     * Return specific stats entry.
+     */
+    public Entry getValues(int i, Entry recycle) {
+        final Entry entry = recycle != null ? recycle : new Entry();
+        entry.iface = iface[i];
+        entry.uid = uid[i];
+        entry.tag = tag[i];
+        entry.rxBytes = rx[i];
+        entry.rxPackets = rxPackets[i];
+        entry.txBytes = tx[i];
+        entry.txPackets = txPackets[i];
+        return entry;
+    }
+
+    public long getElapsedRealtime() {
+        return elapsedRealtime;
+    }
+
+    public int size() {
+        return size;
     }
 
     /**
@@ -104,6 +173,7 @@ public class NetworkStats implements Parcelable {
      * used to subtract values from existing rows.
      */
     public NetworkStats combineEntry(String iface, int uid, int tag, long rx, long tx) {
+        // TODO: extent to accept rxPackets/txPackets
         final int i = findIndex(iface, uid, tag);
         if (i == -1) {
             // only create new entry when positive contribution
@@ -199,30 +269,41 @@ public class NetworkStats implements Parcelable {
         }
 
         // result will have our rows, and elapsed time between snapshots
+        final Entry entry = new Entry();
         final NetworkStats result = new NetworkStats(deltaRealtime, size);
         for (int i = 0; i < size; i++) {
-            final String iface = this.iface[i];
-            final int uid = this.uid[i];
-            final int tag = this.tag[i];
+            entry.iface = iface[i];
+            entry.uid = uid[i];
+            entry.tag = tag[i];
 
             // find remote row that matches, and subtract
-            final int j = value.findIndex(iface, uid, tag);
+            final int j = value.findIndex(entry.iface, entry.uid, entry.tag);
             if (j == -1) {
                 // newly appearing row, return entire value
-                result.addEntry(iface, uid, tag, this.rx[i], this.tx[i]);
+                entry.rxBytes = rx[i];
+                entry.rxPackets = rxPackets[i];
+                entry.txBytes = tx[i];
+                entry.txPackets = txPackets[i];
             } else {
                 // existing row, subtract remote value
-                long rx = this.rx[i] - value.rx[j];
-                long tx = this.tx[i] - value.tx[j];
-                if (enforceMonotonic && (rx < 0 || tx < 0)) {
+                entry.rxBytes = rx[i] - value.rx[j];
+                entry.rxPackets = rxPackets[i] - value.rxPackets[j];
+                entry.txBytes = tx[i] - value.tx[j];
+                entry.txPackets = txPackets[i] - value.txPackets[j];
+                if (enforceMonotonic
+                        && (entry.rxBytes < 0 || entry.rxPackets < 0 || entry.txBytes < 0
+                                || entry.txPackets < 0)) {
                     throw new IllegalArgumentException("found non-monotonic values");
                 }
                 if (clampNegative) {
-                    rx = Math.max(0, rx);
-                    tx = Math.max(0, tx);
+                    entry.rxBytes = Math.max(0, entry.rxBytes);
+                    entry.rxPackets = Math.max(0, entry.rxPackets);
+                    entry.txBytes = Math.max(0, entry.txBytes);
+                    entry.txPackets = Math.max(0, entry.txPackets);
                 }
-                result.addEntry(iface, uid, tag, rx, tx);
             }
+
+            result.addValues(entry);
         }
 
         return result;
@@ -235,13 +316,15 @@ public class NetworkStats implements Parcelable {
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
         pw.print("NetworkStats: elapsedRealtime="); pw.println(elapsedRealtime);
-        for (int i = 0; i < iface.length; i++) {
+        for (int i = 0; i < size; i++) {
             pw.print(prefix);
             pw.print("  iface="); pw.print(iface[i]);
             pw.print(" uid="); pw.print(uid[i]);
             pw.print(" tag="); pw.print(tag[i]);
-            pw.print(" rx="); pw.print(rx[i]);
-            pw.print(" tx="); pw.println(tx[i]);
+            pw.print(" rxBytes="); pw.print(rx[i]);
+            pw.print(" rxPackets="); pw.print(rxPackets[i]);
+            pw.print(" txBytes="); pw.print(tx[i]);
+            pw.print(" txPackets="); pw.println(txPackets[i]);
         }
     }
 
@@ -265,7 +348,9 @@ public class NetworkStats implements Parcelable {
         dest.writeIntArray(uid);
         dest.writeIntArray(tag);
         dest.writeLongArray(rx);
+        dest.writeLongArray(rxPackets);
         dest.writeLongArray(tx);
+        dest.writeLongArray(txPackets);
     }
 
     public static final Creator<NetworkStats> CREATOR = new Creator<NetworkStats>() {
