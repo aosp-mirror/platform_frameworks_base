@@ -64,6 +64,7 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -91,7 +92,11 @@ public final class BridgeContext extends Activity {
     private final Object mProjectKey;
     private final DisplayMetrics mMetrics;
     private final RenderResources mRenderResources;
+    private final Configuration mConfig;
     private final ApplicationInfo mApplicationInfo;
+    private final IProjectCallback mProjectCallback;
+
+    private final BridgeWindowManager mIWindowManager;
 
     private final Map<Object, Map<String, String>> mDefaultPropMaps =
         new IdentityHashMap<Object, Map<String,String>>();
@@ -105,7 +110,6 @@ public final class BridgeContext extends Activity {
     private Map<int[], Map<Integer, TypedArray>> mTypedArrayCache;
     private BridgeInflater mBridgeInflater;
 
-    private final IProjectCallback mProjectCallback;
     private BridgeContentResolver mContentResolver;
 
     private final Stack<BridgeXmlBlockParser> mParserStack = new Stack<BridgeXmlBlockParser>();
@@ -113,28 +117,25 @@ public final class BridgeContext extends Activity {
     /**
      * @param projectKey An Object identifying the project. This is used for the cache mechanism.
      * @param metrics the {@link DisplayMetrics}.
-     * @param themeName The name of the theme to use.
-     * @param projectResources the resources of the project. The map contains (String, map) pairs
-     * where the string is the type of the resource reference used in the layout file, and the
-     * map contains (String, {@link }) pairs where the key is the resource name,
-     * and the value is the resource value.
-     * @param frameworkResources the framework resources. The map contains (String, map) pairs
-     * where the string is the type of the resource reference used in the layout file, and the map
-     * contains (String, {@link ResourceValue}) pairs where the key is the resource name, and the
-     * value is the resource value.
-     * @param styleInheritanceMap
+     * @param renderResources the configured resources (both framework and projects) for this
+     * render.
      * @param projectCallback
+     * @param config the Configuration object for this render.
      * @param targetSdkVersion the targetSdkVersion of the application.
      */
     public BridgeContext(Object projectKey, DisplayMetrics metrics,
             RenderResources renderResources,
             IProjectCallback projectCallback,
+            Configuration config,
             int targetSdkVersion) {
         mProjectKey = projectKey;
         mMetrics = metrics;
         mProjectCallback = projectCallback;
 
         mRenderResources = renderResources;
+        mConfig = config;
+
+        mIWindowManager = new BridgeWindowManager(mConfig, metrics, Surface.ROTATION_0);
 
         mFragments.mCurState = Fragment.CREATED;
         mFragments.mActivity = this;
@@ -151,13 +152,12 @@ public final class BridgeContext extends Activity {
      */
     public void initResources() {
         AssetManager assetManager = AssetManager.getSystem();
-        Configuration config = new Configuration();
 
         mSystemResources = BridgeResources.initSystem(
                 this,
                 assetManager,
                 mMetrics,
-                config,
+                mConfig,
                 mProjectCallback);
         mTheme = mSystemResources.newTheme();
     }
@@ -195,6 +195,10 @@ public final class BridgeContext extends Activity {
 
     public RenderResources getRenderResources() {
         return mRenderResources;
+    }
+
+    public BridgeWindowManager getIWindowManager() {
+        return mIWindowManager;
     }
 
     public Map<String, String> getDefaultPropMap(Object key) {

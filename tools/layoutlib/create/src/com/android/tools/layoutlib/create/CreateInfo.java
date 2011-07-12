@@ -103,6 +103,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.os.Handler#sendMessageAtTime",
         "android.os.HandlerThread#run",
         "android.os.Build#getString",
+        "android.view.Display#getWindowManager",
         "android.view.LayoutInflater#rInflate",
         "android.view.LayoutInflater#parseInclude",
         "android.view.View#isInEditMode",
@@ -154,6 +155,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.Xfermode",
         "android.os.SystemClock",
         "android.util.FloatMath",
+        "android.view.Display",
         "libcore.icu.ICU",
     };
 
