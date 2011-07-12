@@ -49,19 +49,11 @@ LOCAL_SRC_FILES:= \
 LOCAL_SHARED_LIBRARIES := \
 	libui libcutils libutils libbinder libsonivox libicuuc libexpat \
         libcamera_client libstagefright_foundation \
-        libgui
+        libgui libdl
 
 LOCAL_WHOLE_STATIC_LIBRARY := libmedia_helper
 
 LOCAL_MODULE:= libmedia
-
-ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
-LOCAL_LDLIBS += -ldl -lpthread
-endif
-
-ifneq ($(TARGET_SIMULATOR),true)
-LOCAL_SHARED_LIBRARIES += libdl
-endif
 
 LOCAL_C_INCLUDES := \
     $(JNI_H_INCLUDE) \

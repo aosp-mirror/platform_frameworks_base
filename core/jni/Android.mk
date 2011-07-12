@@ -224,21 +224,13 @@ LOCAL_CFLAGS += -DHAVE_BLUETOOTH
 LOCAL_SHARED_LIBRARIES += libbluedroid libdbus
 endif
 
-ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += \
 	libdl
-  # we need to access the private Bionic header
-  # <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
-  LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
-endif
+# we need to access the private Bionic header
+# <bionic_tls.h> in com_google_android_gles_jni_GLImpl.cpp
+LOCAL_CFLAGS += -I$(LOCAL_PATH)/../../../../bionic/libc/private
 
 LOCAL_LDLIBS += -lpthread -ldl
-
-ifeq ($(TARGET_SIMULATOR),true)
-ifeq ($(TARGET_OS)-$(TARGET_ARCH),linux-x86)
-LOCAL_LDLIBS += -lrt
-endif
-endif
 
 ifeq ($(WITH_MALLOC_LEAK_CHECK),true)
 	LOCAL_CFLAGS += -DMALLOC_LEAK_CHECK

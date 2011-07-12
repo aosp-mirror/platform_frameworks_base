@@ -16,10 +16,6 @@ LOCAL_SRC_FILES:=               \
     StagefrightPlayer.cpp       \
     StagefrightRecorder.cpp
 
-ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
-LOCAL_LDLIBS += -ldl -lpthread
-endif
-
 LOCAL_SHARED_LIBRARIES :=     		\
 	libcutils             			\
 	libutils              			\
@@ -32,15 +28,12 @@ LOCAL_SHARED_LIBRARIES :=     		\
 	libstagefright        			\
 	libstagefright_omx    			\
 	libstagefright_foundation       \
-	libgui
+	libgui                          \
+	libdl
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_rtsp                     \
         libstagefright_nuplayer                 \
-
-ifneq ($(TARGET_SIMULATOR),true)
-LOCAL_SHARED_LIBRARIES += libdl
-endif
 
 LOCAL_C_INCLUDES :=                                                 \
 	$(JNI_H_INCLUDE)                                                \

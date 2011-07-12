@@ -2,8 +2,6 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-ifneq ($(TARGET_SIMULATOR),true)
-
 LOCAL_MODULE := EGL_test
 
 LOCAL_MODULE_TAGS := tests
@@ -28,8 +26,6 @@ LOCAL_C_INCLUDES := \
     external/stlport/stlport \
 
 include $(BUILD_EXECUTABLE)
-
-endif
 
 # Include subdirectory makefiles
 # ============================================================

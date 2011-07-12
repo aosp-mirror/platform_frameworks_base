@@ -2,8 +2,6 @@
 # OpenGL ES Perf App
 # This makefile builds both an activity and a shared library.
 #########################################################################
-ifneq ($(TARGET_SIMULATOR),true) # not 64 bit clean
-
 TOP_LOCAL_PATH:= $(call my-dir)
 
 # Build activity
@@ -50,5 +48,3 @@ LOCAL_MODULE := libglperf
 
 
 include $(BUILD_SHARED_LIBRARY)
-
-endif # TARGET_SIMULATOR

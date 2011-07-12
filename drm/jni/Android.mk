@@ -26,13 +26,8 @@ LOCAL_SHARED_LIBRARIES := \
     libutils \
     libandroid_runtime \
     libnativehelper \
-    libbinder
-
-ifeq ($(TARGET_SIMULATOR),true)
- LOCAL_LDLIBS += -ldl
-else
- LOCAL_SHARED_LIBRARIES += libdl
-endif
+    libbinder \
+    libdl
 
 LOCAL_STATIC_LIBRARIES :=
 

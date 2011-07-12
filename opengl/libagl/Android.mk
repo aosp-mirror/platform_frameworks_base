@@ -38,15 +38,13 @@ ifeq ($(ARCH_ARM_HAVE_TLS_REGISTER),true)
     LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
 endif
 
-ifneq ($(TARGET_SIMULATOR),true)
-    # we need to access the private Bionic header <bionic_tls.h>
-    # on ARM platforms, we need to mirror the ARCH_ARM_HAVE_TLS_REGISTER
-    # behavior from the bionic Android.mk file
-    ifeq ($(TARGET_ARCH)-$(ARCH_ARM_HAVE_TLS_REGISTER),arm-true)
-        LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
-    endif
-    LOCAL_C_INCLUDES += bionic/libc/private
+# we need to access the private Bionic header <bionic_tls.h>
+# on ARM platforms, we need to mirror the ARCH_ARM_HAVE_TLS_REGISTER
+# behavior from the bionic Android.mk file
+ifeq ($(TARGET_ARCH)-$(ARCH_ARM_HAVE_TLS_REGISTER),arm-true)
+    LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
 endif
+LOCAL_C_INCLUDES += bionic/libc/private
 
 LOCAL_MODULE_PATH := $(TARGET_OUT_SHARED_LIBRARIES)/egl
 LOCAL_MODULE:= libGLES_android

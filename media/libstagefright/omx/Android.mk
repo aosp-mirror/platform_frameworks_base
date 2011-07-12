@@ -23,14 +23,7 @@ LOCAL_SHARED_LIBRARIES :=               \
         libui                           \
         libcutils                       \
         libstagefright_foundation       \
-
-ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
-        LOCAL_LDLIBS += -lpthread -ldl
-endif
-
-ifneq ($(TARGET_SIMULATOR),true)
-LOCAL_SHARED_LIBRARIES += libdl
-endif
+        libdl
 
 LOCAL_MODULE:= libstagefright_omx
 

@@ -15,10 +15,8 @@ LOCAL_C_INCLUDES:= \
 
 LOCAL_CFLAGS += -Wno-multichar
 
-ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libstlport
 include external/stlport/libstlport.mk
-endif
 
 LOCAL_MODULE:= libstagefright_chromium_http
 

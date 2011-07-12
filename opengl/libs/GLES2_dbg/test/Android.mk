@@ -27,9 +27,7 @@ LOCAL_MODULE:= libGLESv2_dbg_test
 ifeq ($(ARCH_ARM_HAVE_TLS_REGISTER),true)
     LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
 endif
-ifneq ($(TARGET_SIMULATOR),true)
-    LOCAL_C_INCLUDES += bionic/libc/private
-endif
+LOCAL_C_INCLUDES += bionic/libc/private
 
 LOCAL_CFLAGS += -DLOG_TAG=\"libEGL\"
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES

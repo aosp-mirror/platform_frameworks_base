@@ -26,13 +26,6 @@ ifeq ($(TARGET_BOARD_PLATFORM), s5pc110)
 endif
 
 
-# need "-lrt" on Linux simulator to pick up clock_gettime
-ifeq ($(TARGET_SIMULATOR),true)
-	ifeq ($(HOST_OS),linux)
-		LOCAL_LDLIBS += -lrt -lpthread
-	endif
-endif
-
 LOCAL_SHARED_LIBRARIES := \
 	libcutils \
 	libhardware \
