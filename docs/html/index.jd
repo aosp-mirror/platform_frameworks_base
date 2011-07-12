@@ -11,15 +11,14 @@ home=true
                             </div><!-- end homeTitle -->
                             <div id="announcement-block">
                             <!-- total max width is 520px -->
-                                  <img src="{@docRoot}assets/images/home/IO-logo-2011.png"
-alt="Android at Google IO 2011" width="200px"
-style="padding-left:22px;padding-bottom:15px;padding-top:15px;"/>
+                                  <img src="{@docRoot}images/home/market_icon.png"
+alt="Android Market" width="120px" style="padding:10px 53px 5px"/>
                                   <div id="announcement" style="width:275px">
-    <p>Thanks to everybody who joined us at Google I/O! If you couldn't make it or would like to
-review any of the Android sessions, they're now available on YouTube at the <a
-href="http://www.youtube.com/googledevelopers">Google Developers</a> channel, along with the keynote
-and other developer sessions. You can also find all the Google I/O Android sessions on this site, on
-the <a href="{@docRoot}videos/index.html">Videos</a> page.</p>
+    <p>We've completely redesigned Android Market for phones to make it easier to
+explore Android apps, games, and other content. Look for the new version coming to your
+Android phone!</p> <p><a
+href="http://android-developers.blogspot.com/2011/07/new-android-market-for-phones.html">Learn more
+&raquo;</a></p>
                                 </div> <!-- end annoucement -->
                             </div> <!-- end annoucement-block -->
                         </div><!-- end topAnnouncement -->
@@ -130,14 +129,14 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
     'sdk': {
       'layout':"imgLeft",
       'icon':"sdk-small.png",
-      'name':"Android 3.1",
+      'name':"Android 3.2",
       'img':"honeycomb-android.png",
-      'title':"Android 3.1 now available!",
-      'desc': "<p>Android 3.1 includes new developer features such as APIs for USB "
-+ "accessories, MTP/PTP, and RTP, as well as new input events from mice, trackballs, joysticks, "
-+ "and more.</p>"
-+ "<p>For more information about all the new APIs in Android 3.1, read the "
-+ "<a href='{@docRoot}sdk/android-3.1.html'>version notes</a>.</p>"
+      'title':"Android 3.2 is here!",
+      'desc': "<p>Android 3.2 is a minor feature update that includes new APIs that allow you to "
++ "better target your layouts for specific screen sizes and other miscellaneous new APIs.</p>"
++ "<p>For more information about all the changes in Android 3.2, read the "
++ "<a href='{@docRoot}sdk/android-3.2.html'>version notes</a> and <a "
++ "href='{@docRoot}sdk/api_diff/13/changes.html'>diff report</a>.</p>"
 /*
 + "<p>If you have an existing SDK, add Android 3.0 as an "
 + "<a href='{@docRoot}sdk/adding-components.html'>SDK "
@@ -153,10 +152,11 @@ href="{@docRoot}resources/dashboard/platform-versions.html">Learn more &raquo;</
       'img':"GTV_icon_large.png",
       'title':"Google TV!",
       'desc': "<p>Build something big. By big, we mean <em>worthy-of-the-living-room</em> big.</p>"
-	        +  " <p>Use <a href='http://code.google.com/tv'>Google TV</a> to bring the power of Android" 
+	        +  " <p>Google TV brings the power of Android" 
 	        +  " and Google Chrome to television."
-			+  " The average American watches five hours of TV per day. Give them the web and apps"
-			+  " to update their status, listen to music, watch web videos, and much more...</p>"
+		+  " The average American watches five hours of TV per day. Give them the apps"
+		+  " to update their status, listen to music, watch web videos, and more.</p>"
+                +  "<p><a href='http://code.google.com/tv'>Develop for Google TV &raquo;</a></p>"
     },
 
 
