@@ -18,6 +18,7 @@ package com.android.internal.view.menu;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.os.Parcelable;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -295,5 +296,19 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             itemView.initialize(getItem(position), 0);
             return convertView;
         }
+    }
+
+    @Override
+    public int getId() {
+        return 0;
+    }
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        return null;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
     }
 }

@@ -25,8 +25,8 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.KeyCharacterMap;
@@ -38,7 +38,6 @@ import android.view.View;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -48,6 +47,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class MenuBuilder implements Menu {
     private static final String LOGTAG = "MenuBuilder";
+
+    private static final String PRESENTER_KEY = "android:menu:presenters";
 
     private static final int[]  sCategoryToOrder = new int[] {
         1, /* No category */
@@ -252,6 +253,58 @@ public class MenuBuilder implements Menu {
             }
         }
         return result;
+    }
+
+    private void dispatchSaveInstanceState(Bundle outState) {
+        if (mPresenters.isEmpty()) return;
+
+        SparseArray<Parcelable> presenterStates = new SparseArray<Parcelable>();
+
+        for (WeakReference<MenuPresenter> ref : mPresenters) {
+            final MenuPresenter presenter = ref.get();
+            if (presenter == null) {
+                mPresenters.remove(ref);
+            } else {
+                final int id = presenter.getId();
+                if (id > 0) {
+                    final Parcelable state = presenter.onSaveInstanceState();
+                    if (state != null) {
+                        presenterStates.put(id, state);
+                    }
+                }
+            }
+        }
+
+        outState.putSparseParcelableArray(PRESENTER_KEY, presenterStates);
+    }
+
+    private void dispatchRestoreInstanceState(Bundle state) {
+        SparseArray<Parcelable> presenterStates = state.getSparseParcelableArray(PRESENTER_KEY);
+
+        if (presenterStates == null || mPresenters.isEmpty()) return;
+
+        for (WeakReference<MenuPresenter> ref : mPresenters) {
+            final MenuPresenter presenter = ref.get();
+            if (presenter == null) {
+                mPresenters.remove(ref);
+            } else {
+                final int id = presenter.getId();
+                if (id > 0) {
+                    Parcelable parcel = presenterStates.get(id);
+                    if (parcel != null) {
+                        presenter.onRestoreInstanceState(parcel);
+                    }
+                }
+            }
+        }
+    }
+
+    public void savePresenterStates(Bundle outState) {
+        dispatchSaveInstanceState(outState);
+    }
+
+    public void restorePresenterStates(Bundle state) {
+        dispatchRestoreInstanceState(state);
     }
 
     public void setCallback(Callback cb) {

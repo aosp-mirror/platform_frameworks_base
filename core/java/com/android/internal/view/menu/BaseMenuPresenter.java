@@ -39,6 +39,8 @@ public abstract class BaseMenuPresenter implements MenuPresenter {
 
     protected MenuView mMenuView;
 
+    private int mId;
+
     /**
      * Construct a new BaseMenuPresenter.
      *
@@ -199,5 +201,13 @@ public abstract class BaseMenuPresenter implements MenuPresenter {
 
     public boolean collapseItemActionView(MenuBuilder menu, MenuItemImpl item) {
         return false;
+    }
+
+    public int getId() {
+        return mId;
+    }
+
+    public void setId(int id) {
+        mId = id;
     }
 }
