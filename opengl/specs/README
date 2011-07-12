@@ -1,0 +1,12 @@
+This directory contains OpenGL ES and EGL extension specifications that have
+been or are being defined for Android.  
+
+The table below tracks usage of EGL enumerant values that have been reserved
+for use by Android extensions.
+
+     Value                       Extension
+----------------     ----------------------------------
+0x3140               EGL_ANDROID_image_native_buffer
+0x3141               (unused)
+0x3142               EGL_ANDROID_recordable
+0x3143 - 0x314F      (unused)
