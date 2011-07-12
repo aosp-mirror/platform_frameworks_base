@@ -264,11 +264,7 @@ UsbDevice device = (UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE
 UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
 ...  
 HashMap&lt;String, UsbDevice&gt; deviceList = manager.getDeviceList();
-Iterator&lt;UsbDevice&gt; deviceIterator  = deviceList.values().iterator();
-while(deviceIterator.hasNext()){
-    UsbDevice device = deviceIterator.next();
-    // your code
-}
+UsbDevice device = deviceList.get("deviceName");
 </pre>
 
   <p>If desired, you can also just obtain an iterator from the hash map and process each device one
