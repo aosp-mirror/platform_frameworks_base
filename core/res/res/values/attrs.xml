@@ -3345,7 +3345,7 @@
         <!-- The row span: the difference between the bottom and top
         boundaries delimiting the group of cells occupied by this view.
         The default is one.
-        See {@link android.widget.GridLayout.Group}. -->
+        See {@link android.widget.GridLayout.Spec}. -->
         <attr name="layout_rowSpan" format="integer" min="1" />
         <!-- The column boundary delimiting the left of the group of cells
         occupied by this view. -->
@@ -3353,23 +3353,21 @@
         <!-- The column span: the difference between the right and left
         boundaries delimiting the group of cells occupied by this view.
         The default is one.
-        See {@link android.widget.GridLayout.Group}. -->
+        See {@link android.widget.GridLayout.Spec}. -->
         <attr name="layout_columnSpan" format="integer" min="1" />
         <!-- Gravity specifies how a component should be placed in its group of cells.
         The default is LEFT | BASELINE.
         See {@link android.widget.GridLayout.LayoutParams#setGravity(int)}. -->
         <attr name="layout_gravity" />
         <!-- A value specifying how much deficit or excess width this component can accomodate.
-        The default is FIXED.
-        See {@link android.widget.GridLayout.Group#flexibility}.-->
+        The default is FIXED. -->
         <attr name="layout_columnFlexibility" >
             <!-- If possible, width should be greater than or equal to the specified width.
             See {@link android.widget.GridLayout#CAN_STRETCH}. -->
             <enum name="canStretch" value="2" />
         </attr>
         <!-- A value specifying how much deficit or excess height this component can accomodate.
-        The default is FIXED.
-        See {@link android.widget.GridLayout.Group#flexibility}.-->
+        The default is FIXED. -->
         <attr name="layout_rowFlexibility" >
             <!-- If possible, height should be greater than or equal to the specified height.
             See {@link android.widget.GridLayout#CAN_STRETCH}. -->

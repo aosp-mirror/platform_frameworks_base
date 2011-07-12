@@ -38,20 +38,20 @@ public class Activity2 extends Activity {
         vg.setUseDefaultMargins(true);
         vg.setAlignmentMode(ALIGN_BOUNDS);
 
-        Group row1 = new Group(1, CENTER);
-        Group row2 = new Group(2, CENTER);
-        Group row3 = new Group(3, BASELINE);
-        Group row4 = new Group(4, BASELINE);
-        Group row5 = new Group(5, FILL);
-        Group row6 = new Group(6, CENTER);
-        Group row7 = new Group(7, CENTER);
+        Spec row1 = spec(0, CENTER);
+        Spec row2 = spec(1, CENTER);
+        Spec row3 = spec(2, BASELINE);
+        Spec row4 = spec(3, BASELINE);
+        Spec row5 = spec(4, FILL, CAN_STRETCH);
+        Spec row6 = spec(5, CENTER);
+        Spec row7 = spec(6, CENTER);
 
-        Group col1a = new Group(1, 4, CENTER);
-        Group col1b = new Group(1, 4, LEFT);
-        Group col1c = new Group(1, RIGHT);
-        Group col2 = new Group(2, LEFT);
-        Group col3 = new Group(3, FILL);
-        Group col4 = new Group(4, FILL);
+        Spec col1a = spec(0, 4, CENTER);
+        Spec col1b = spec(0, 4, LEFT);
+        Spec col1c = spec(0, RIGHT);
+        Spec col2 = spec(1, LEFT);
+        Spec col3 = spec(2, FILL, CAN_STRETCH);
+        Spec col4 = spec(3, FILL);
 
         {
             TextView v = new TextView(context);
@@ -96,10 +96,7 @@ public class Activity2 extends Activity {
         {
             Space v = new Space(context);
             {
-                LayoutParams lp = new LayoutParams(row5, col3);
-                lp.columnGroup.flexibility = CAN_STRETCH;
-                lp.rowGroup.flexibility = CAN_STRETCH;
-                vg.addView(v, lp);
+                vg.addView(v, new LayoutParams(row5, col3));
             }
         }
         {
