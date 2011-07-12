@@ -19,6 +19,9 @@ package com.android.server.sip;
 import gov.nist.javax.sip.SipStackExt;
 import gov.nist.javax.sip.clientauthutils.AccountManager;
 import gov.nist.javax.sip.clientauthutils.AuthenticationHelper;
+import gov.nist.javax.sip.header.extensions.ReferencesHeader;
+import gov.nist.javax.sip.header.extensions.ReferredByHeader;
+import gov.nist.javax.sip.header.extensions.ReplacesHeader;
 
 import android.net.sip.SipProfile;
 import android.util.Log;
@@ -284,14 +287,18 @@ class SipHelper {
     }
 
     public ClientTransaction sendInvite(SipProfile caller, SipProfile callee,
-            String sessionDescription, String tag)
-            throws SipException {
+            String sessionDescription, String tag, ReferredByHeader referredBy,
+            String replaces) throws SipException {
         try {
             Request request = createRequest(Request.INVITE, caller, callee, tag);
+            if (referredBy != null) request.addHeader(referredBy);
+            if (replaces != null) {
+                request.addHeader(mHeaderFactory.createHeader(
+                        ReplacesHeader.NAME, replaces));
+            }
             request.setContent(sessionDescription,
                     mHeaderFactory.createContentTypeHeader(
                             "application", "sdp"));
-
             ClientTransaction clientTransaction =
                     mSipProvider.getNewClientTransaction(request);
             if (DEBUG) Log.d(TAG, "send INVITE: " + request);
@@ -452,6 +459,25 @@ class SipHelper {
             getServerTransaction(event).sendResponse(response);
         } catch (ParseException e) {
             throw new SipException("sendResponse()", e);
+        }
+    }
+
+    public void sendReferNotify(Dialog dialog, String content)
+            throws SipException {
+        try {
+            Request request = dialog.createRequest(Request.NOTIFY);
+            request.addHeader(mHeaderFactory.createSubscriptionStateHeader(
+                    "active;expires=60"));
+            // set content here
+            request.setContent(content,
+                    mHeaderFactory.createContentTypeHeader(
+                            "message", "sipfrag"));
+            request.addHeader(mHeaderFactory.createEventHeader(
+                    ReferencesHeader.REFER));
+            if (DEBUG) Log.d(TAG, "send NOTIFY: " + request);
+            dialog.sendRequest(mSipProvider.getNewClientTransaction(request));
+        } catch (ParseException e) {
+            throw new SipException("sendReferNotify()", e);
         }
     }
 
