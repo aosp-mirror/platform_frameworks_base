@@ -16,8 +16,11 @@
 
 package android.view.accessibility;
 
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.content.pm.ServiceInfo;
+import android.view.IWindow;
+import android.view.View;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +39,19 @@ import java.util.List;
  */
 public final class AccessibilityManager {
     private static AccessibilityManager sInstance = new AccessibilityManager();
+
+    /**
+     * Listener for the accessibility state.
+     */
+    public interface AccessibilityStateChangeListener {
+
+        /**
+         * Called back on change in the accessibility state.
+         *
+         * @param enabled Whether accessibility is enabled.
+         */
+        public void onAccessibilityStateChanged(boolean enabled);
+    }
 
     /**
      * Get an AccessibilityManager instance (create one if necessary).
@@ -92,4 +108,30 @@ public final class AccessibilityManager {
         List<ServiceInfo> services = null;
         return Collections.unmodifiableList(services);
     }
+
+    public List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList() {
+        // normal implementation does this in some case, so let's do the same
+        // (unmodifiableList wrapped around null).
+        List<AccessibilityServiceInfo> services = null;
+        return Collections.unmodifiableList(services);
+    }
+
+    public boolean addAccessibilityStateChangeListener(
+            AccessibilityStateChangeListener listener) {
+        return true;
+    }
+
+    public boolean removeAccessibilityStateChangeListener(
+            AccessibilityStateChangeListener listener) {
+        return true;
+    }
+
+    public int addAccessibilityInteractionConnection(IWindow windowToken,
+            IAccessibilityInteractionConnection connection) {
+        return View.NO_ID;
+    }
+
+    public void removeAccessibilityInteractionConnection(IWindow windowToken) {
+    }
+
 }
