@@ -21,6 +21,7 @@ import com.android.internal.R;
 import android.annotation.Widget;
 import android.app.Service;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Canvas;
@@ -239,19 +240,9 @@ public class CalendarView extends FrameLayout {
     private String[] mDayLabels;
 
     /**
-     * Temporary instance to avoid multiple instantiations.
-     */
-    private Calendar mTempDate = Calendar.getInstance();
-
-    /**
      * The first day of the week.
      */
     private int mFirstDayOfWeek;
-
-    /**
-     * The first day of the focused month.
-     */
-    private Calendar mFirstDayOfMonth = Calendar.getInstance();
 
     /**
      * Which month should be displayed/highlighted [0-11].
@@ -289,19 +280,34 @@ public class CalendarView extends FrameLayout {
     private ScrollStateRunnable mScrollStateChangedRunnable = new ScrollStateRunnable();
 
     /**
+     * Temporary instance to avoid multiple instantiations.
+     */
+    private Calendar mTempDate;
+
+    /**
+     * The first day of the focused month.
+     */
+    private Calendar mFirstDayOfMonth;
+
+    /**
      * The start date of the range supported by this picker.
      */
-    private Calendar mMinDate = Calendar.getInstance();
+    private Calendar mMinDate;
 
     /**
      * The end date of the range supported by this picker.
      */
-    private Calendar mMaxDate = Calendar.getInstance();
+    private Calendar mMaxDate;
 
     /**
      * Date format for parsing dates.
      */
     private final java.text.DateFormat mDateFormat = new SimpleDateFormat(DATE_FORMAT);
+
+    /**
+     * The current locale.
+     */
+    private Locale mCurrentLocale;
 
     /**
      * The callback used to indicate the user changes the date.
@@ -329,6 +335,9 @@ public class CalendarView extends FrameLayout {
 
     public CalendarView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, 0);
+
+        // initialization based on locale
+        setCurrentLocale(Locale.getDefault());
 
         TypedValue calendarViewStyle = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.calendarViewStyle, calendarViewStyle, true);
@@ -411,6 +420,12 @@ public class CalendarView extends FrameLayout {
     @Override
     public boolean isEnabled() {
         return mListView.isEnabled();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setCurrentLocale(newConfig.locale);
     }
 
     /**
@@ -621,6 +636,41 @@ public class CalendarView extends FrameLayout {
             return;
         }
         goTo(mTempDate, animate, true, center);
+    }
+
+    /**
+     * Sets the current locale.
+     *
+     * @param locale The current locale.
+     */
+    private void setCurrentLocale(Locale locale) {
+        if (locale.equals(mCurrentLocale)) {
+            return;
+        }
+
+        mCurrentLocale = locale;
+
+        mTempDate = getCalendarForLocale(mTempDate, locale);
+        mFirstDayOfMonth = getCalendarForLocale(mFirstDayOfMonth, locale);
+        mMinDate = getCalendarForLocale(mMinDate, locale);
+        mMaxDate = getCalendarForLocale(mMaxDate, locale);
+    }
+
+    /**
+     * Gets a calendar for locale bootstrapped with the value of a given calendar.
+     *
+     * @param oldCalendar The old calendar.
+     * @param locale The locale.
+     */
+    private Calendar getCalendarForLocale(Calendar oldCalendar, Locale locale) {
+        if (oldCalendar == null) {
+            return Calendar.getInstance(locale);
+        } else {
+            final long currentTimeMillis = oldCalendar.getTimeInMillis();
+            Calendar newCalendar = Calendar.getInstance(locale);
+            newCalendar.setTimeInMillis(currentTimeMillis);
+            return newCalendar;
+        }
     }
 
     /**

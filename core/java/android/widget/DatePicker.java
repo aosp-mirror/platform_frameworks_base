@@ -16,10 +16,9 @@
 
 package android.widget;
 
-import com.android.internal.R;
-
 import android.annotation.Widget;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,6 +31,8 @@ import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.NumberPicker.OnValueChangeListener;
+
+import com.android.internal.R;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -89,23 +90,23 @@ public class DatePicker extends FrameLayout {
 
     private final CalendarView mCalendarView;
 
+    private Locale mCurrentLocale;
+
     private OnDateChangedListener mOnDateChangedListener;
 
-    private Locale mMonthLocale;
-
-    private final Calendar mTempDate = Calendar.getInstance();
-
-    private final int mNumberOfMonths = mTempDate.getActualMaximum(Calendar.MONTH) + 1;
-
-    private final String[] mShortMonths = new String[mNumberOfMonths];
+    private String[] mShortMonths;
 
     private final java.text.DateFormat mDateFormat = new SimpleDateFormat(DATE_FORMAT);
 
-    private final Calendar mMinDate = Calendar.getInstance();
+    private int mNumberOfMonths;
 
-    private final Calendar mMaxDate = Calendar.getInstance();
+    private Calendar mTempDate;
 
-    private final Calendar mCurrentDate = Calendar.getInstance();
+    private Calendar mMinDate;
+
+    private Calendar mMaxDate;
+
+    private Calendar mCurrentDate;
 
     private boolean mIsEnabled = DEFAULT_ENABLED_STATE;
 
@@ -136,6 +137,9 @@ public class DatePicker extends FrameLayout {
 
     public DatePicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
+        // initialization based on locale
+        setCurrentLocale(Locale.getDefault());
 
         TypedArray attributesArray = context.obtainStyledAttributes(attrs, R.styleable.DatePicker,
                 defStyle, 0);
@@ -213,7 +217,7 @@ public class DatePicker extends FrameLayout {
         mMonthSpinner = (NumberPicker) findViewById(R.id.month);
         mMonthSpinner.setMinValue(0);
         mMonthSpinner.setMaxValue(mNumberOfMonths - 1);
-        mMonthSpinner.setDisplayedValues(getShortMonths());
+        mMonthSpinner.setDisplayedValues(mShortMonths);
         mMonthSpinner.setOnLongPressUpdateInterval(200);
         mMonthSpinner.setOnValueChangedListener(onChangeListener);
 
@@ -363,6 +367,12 @@ public class DatePicker extends FrameLayout {
         event.getText().add(selectedDateUtterance);
     }
 
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setCurrentLocale(newConfig.locale);
+    }
+
     /**
      * Gets whether the {@link CalendarView} is shown.
      *
@@ -408,6 +418,48 @@ public class DatePicker extends FrameLayout {
      */
     public void setSpinnersShown(boolean shown) {
         mSpinners.setVisibility(shown ? VISIBLE : GONE);
+    }
+
+    /**
+     * Sets the current locale.
+     *
+     * @param locale The current locale.
+     */
+    private void setCurrentLocale(Locale locale) {
+        if (locale.equals(mCurrentLocale)) {
+            return;
+        }
+
+        mCurrentLocale = locale;
+
+        mTempDate = getCalendarForLocale(mTempDate, locale);
+        mMinDate = getCalendarForLocale(mMinDate, locale);
+        mMaxDate = getCalendarForLocale(mMaxDate, locale);
+        mCurrentDate = getCalendarForLocale(mCurrentDate, locale);
+
+        mNumberOfMonths = mTempDate.getActualMaximum(Calendar.MONTH) + 1;
+        mShortMonths = new String[mNumberOfMonths];
+        for (int i = 0; i < mNumberOfMonths; i++) {
+            mShortMonths[i] = DateUtils.getMonthString(Calendar.JANUARY + i,
+                    DateUtils.LENGTH_MEDIUM);
+        }
+    }
+
+    /**
+     * Gets a calendar for locale bootstrapped with the value of a given calendar.
+     *
+     * @param oldCalendar The old calendar.
+     * @param locale The locale.
+     */
+    private Calendar getCalendarForLocale(Calendar oldCalendar, Locale locale) {
+        if (oldCalendar == null) {
+            return Calendar.getInstance(locale);
+        } else {
+            final long currentTimeMillis = oldCalendar.getTimeInMillis();
+            Calendar newCalendar = Calendar.getInstance(locale);
+            newCalendar.setTimeInMillis(currentTimeMillis);
+            return newCalendar;
+        }
     }
 
     /**
@@ -507,23 +559,6 @@ public class DatePicker extends FrameLayout {
         }
     }
 
-    /**
-     * @return The short month abbreviations.
-     */
-    private String[] getShortMonths() {
-        final Locale currentLocale = Locale.getDefault();
-        if (currentLocale.equals(mMonthLocale)) {
-            return mShortMonths;
-        } else {
-            for (int i = 0; i < mNumberOfMonths; i++) {
-                mShortMonths[i] = DateUtils.getMonthString(Calendar.JANUARY + i,
-                        DateUtils.LENGTH_MEDIUM);
-            }
-            mMonthLocale = currentLocale;
-            return mShortMonths;
-        }
-    }
-
     private boolean isNewDate(int year, int month, int dayOfMonth) {
         return (mCurrentDate.get(Calendar.YEAR) != year
                 || mCurrentDate.get(Calendar.MONTH) != dayOfMonth
@@ -569,7 +604,7 @@ public class DatePicker extends FrameLayout {
 
         // make sure the month names are a zero based array
         // with the months in the month spinner
-        String[] displayedValues = Arrays.copyOfRange(getShortMonths(),
+        String[] displayedValues = Arrays.copyOfRange(mShortMonths,
                 mMonthSpinner.getMinValue(), mMonthSpinner.getMaxValue() + 1);
         mMonthSpinner.setDisplayedValues(displayedValues);
 
