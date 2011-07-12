@@ -16,11 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.util.FastMath;
-import com.android.internal.widget.EditableInputConnection;
-
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.R;
 import android.content.ClipData;
 import android.content.ClipData.Item;
@@ -131,6 +126,11 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RemoteViews.RemoteView;
+
+import com.android.internal.util.FastMath;
+import com.android.internal.widget.EditableInputConnection;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -1119,6 +1119,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
         super.setEnabled(enabled);
+        prepareCursorControllers();
     }
 
     /**
@@ -2841,8 +2842,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 // Do not change the movement method for text that support text selection as it
                 // would prevent an arbitrary cursor displacement.
-                final boolean hasTextSelection = this instanceof EditText || mTextIsSelectable;
-                if (mLinksClickable && !hasTextSelection) {
+                if (mLinksClickable && !textCanBeSelected()) {
                     setMovementMethod(LinkMovementMethod.getInstance());
                 }
             }
@@ -4228,7 +4228,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * {@link android.R.styleable#TextView_textIsSelectable} XML attribute to make this TextView
      * selectable (text is not selectable by default).
      *
-     * Note that the content of an EditText is always selectable.
+     * Note that this method simply returns the state of this flag. Although this flag has to be set
+     * in order to select text in non-editable TextView, the content of an {@link EditText} can
+     * always be selected, independently of the value of this flag.
      *
      * @return True if the text displayed in this TextView can be selected by the user.
      *
@@ -4465,12 +4467,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             selStart = getSelectionStart();
             selEnd = getSelectionEnd();
 
-            if ((isCursorVisible() || mTextIsSelectable) && selStart >= 0 && isEnabled()) {
+            if (selStart >= 0) {
                 if (mHighlightPath == null)
                     mHighlightPath = new Path();
 
                 if (selStart == selEnd) {
-                    if (!mTextIsSelectable &&
+                    if (isCursorVisible() &&
                             (SystemClock.uptimeMillis() - mShowCursor) % (2 * BLINK) < BLINK) {
                         if (mHighlightPathBogus) {
                             mHighlightPath.reset();
@@ -4489,7 +4491,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         highlight = mHighlightPath;
                         drawCursor = mCursorCount > 0;
                     }
-                } else {
+                } else if (textCanBeSelected()) {
                     if (mHighlightPathBogus) {
                         mHighlightPath.reset();
                         mLayout.getSelectionPath(selStart, selEnd, mHighlightPath);
@@ -7450,9 +7452,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean onTouchEvent(MotionEvent event) {
         final int action = event.getActionMasked();
 
-        if (hasInsertionController()) {
-            getInsertionController().onTouchEvent(event);
-        }
         if (hasSelectionController()) {
             getSelectionController().onTouchEvent(event);
         }
@@ -7880,7 +7879,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // prepareCursorController() relies on this method.
         // If you change this condition, make sure prepareCursorController is called anywhere
         // the value of this condition might be changed.
-        return mText instanceof Spannable && mMovement != null && mMovement.canSelectArbitrarily();
+        if (mMovement == null || !mMovement.canSelectArbitrarily()) return false;
+        return isTextEditable() || (mTextIsSelectable && mText instanceof Spannable && isEnabled());
     }
 
     private boolean canCut() {
@@ -7967,6 +7967,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         long lastTouchOffsets = getLastTouchOffsets();
         final int minOffset = extractRangeStartFromLong(lastTouchOffsets);
         final int maxOffset = extractRangeEndFromLong(lastTouchOffsets);
+
+        // Safety check in case standard touch event handling has been bypassed
+        if (minOffset < 0 || minOffset >= mText.length()) return false;
+        if (maxOffset < 0 || maxOffset >= mText.length()) return false;
 
         int selectionStart, selectionEnd;
 
@@ -9723,13 +9727,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void hide();
 
         /**
-         * This method is called by {@link #onTouchEvent(MotionEvent)} and gives the controller
-         * a chance to become active and/or visible.
-         * @param event The touch event
-         */
-        public boolean onTouchEvent(MotionEvent event);
-
-        /**
          * Called when the view is detached from window. Perform house keeping task, such as
          * stopping Runnable thread that would otherwise keep a reference on the context, thus
          * preventing the activity from being recycled.
@@ -9754,10 +9751,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mHandle != null) {
                 mHandle.hide();
             }
-        }
-
-        public boolean onTouchEvent(MotionEvent ev) {
-            return false;
         }
 
         public void onTouchModeChanged(boolean isInTouchMode) {
@@ -9818,52 +9811,49 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (mEndHandle != null) mEndHandle.hide();
         }
 
-        public boolean onTouchEvent(MotionEvent event) {
+        public void onTouchEvent(MotionEvent event) {
             // This is done even when the View does not have focus, so that long presses can start
             // selection and tap can move cursor from this tap position.
-            if (isTextEditable() || mTextIsSelectable) {
-                switch (event.getActionMasked()) {
-                    case MotionEvent.ACTION_DOWN:
-                        final float x = event.getX();
-                        final float y = event.getY();
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    final float x = event.getX();
+                    final float y = event.getY();
 
-                        // Remember finger down position, to be able to start selection from there
-                        mMinTouchOffset = mMaxTouchOffset = getOffsetForPosition(x, y);
+                    // Remember finger down position, to be able to start selection from there
+                    mMinTouchOffset = mMaxTouchOffset = getOffsetForPosition(x, y);
 
-                        // Double tap detection
-                        long duration = SystemClock.uptimeMillis() - mPreviousTapUpTime;
-                        if (duration <= ViewConfiguration.getDoubleTapTimeout() &&
-                                isPositionOnText(x, y)) {
-                            final float deltaX = x - mPreviousTapPositionX;
-                            final float deltaY = y - mPreviousTapPositionY;
-                            final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
-                            if (distanceSquared < mSquaredTouchSlopDistance) {
-                                showSuggestions();
-                                mDiscardNextActionUp = true;
-                            }
+                    // Double tap detection
+                    long duration = SystemClock.uptimeMillis() - mPreviousTapUpTime;
+                    if (duration <= ViewConfiguration.getDoubleTapTimeout() &&
+                            isPositionOnText(x, y)) {
+                        final float deltaX = x - mPreviousTapPositionX;
+                        final float deltaY = y - mPreviousTapPositionY;
+                        final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                        if (distanceSquared < mSquaredTouchSlopDistance) {
+                            showSuggestions();
+                            mDiscardNextActionUp = true;
                         }
+                    }
 
-                        mPreviousTapPositionX = x;
-                        mPreviousTapPositionY = y;
+                    mPreviousTapPositionX = x;
+                    mPreviousTapPositionY = y;
 
-                        break;
+                    break;
 
-                    case MotionEvent.ACTION_POINTER_DOWN:
-                    case MotionEvent.ACTION_POINTER_UP:
-                        // Handle multi-point gestures. Keep min and max offset positions.
-                        // Only activated for devices that correctly handle multi-touch.
-                        if (mContext.getPackageManager().hasSystemFeature(
-                                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT)) {
-                            updateMinAndMaxOffsets(event);
-                        }
-                        break;
+                case MotionEvent.ACTION_POINTER_DOWN:
+                case MotionEvent.ACTION_POINTER_UP:
+                    // Handle multi-point gestures. Keep min and max offset positions.
+                    // Only activated for devices that correctly handle multi-touch.
+                    if (mContext.getPackageManager().hasSystemFeature(
+                            PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT)) {
+                        updateMinAndMaxOffsets(event);
+                    }
+                    break;
 
-                    case MotionEvent.ACTION_UP:
-                        mPreviousTapUpTime = SystemClock.uptimeMillis();
-                        break;
-                }
+                case MotionEvent.ACTION_UP:
+                    mPreviousTapUpTime = SystemClock.uptimeMillis();
+                    break;
             }
-            return false;
         }
 
         /**
