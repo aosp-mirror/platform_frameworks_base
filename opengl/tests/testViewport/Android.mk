@@ -2,8 +2,6 @@
 # OpenGL ES JNI sample
 # This makefile builds both an activity and a shared library.
 #########################################################################
-ifneq ($(TARGET_SIMULATOR),true) # not 64 bit clean
-
 TOP_LOCAL_PATH:= $(call my-dir)
 
 # Build activity
@@ -22,5 +20,3 @@ LOCAL_PACKAGE_NAME := TestViewport
 LOCAL_SDK_VERSION := 8
 
 include $(BUILD_PACKAGE)
-
-endif # TARGET_SIMULATOR

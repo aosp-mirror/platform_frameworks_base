@@ -159,10 +159,8 @@ LOCAL_STATIC_LIBRARIES += \
         libchromium_net         \
         libwebcore              \
 
-ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_SHARED_LIBRARIES += libstlport
 include external/stlport/libstlport.mk
-endif
 
 LOCAL_CPPFLAGS += -DCHROMIUM_AVAILABLE=1
 
@@ -175,20 +173,7 @@ LOCAL_SHARED_LIBRARIES += \
         libstagefright_enc_common \
         libstagefright_avc_common \
         libstagefright_foundation \
-
-ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
-        LOCAL_LDLIBS += -lpthread -ldl
-        LOCAL_SHARED_LIBRARIES += libdvm
-        LOCAL_CPPFLAGS += -DANDROID_SIMULATOR
-endif
-
-ifneq ($(TARGET_SIMULATOR),true)
-LOCAL_SHARED_LIBRARIES += libdl
-endif
-
-ifeq ($(TARGET_OS)-$(TARGET_SIMULATOR),linux-true)
-        LOCAL_LDLIBS += -lpthread
-endif
+        libdl
 
 LOCAL_CFLAGS += -Wno-multichar
 

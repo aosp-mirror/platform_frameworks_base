@@ -16,8 +16,6 @@
 
 LOCAL_PATH:= $(call my-dir)
 
-ifneq ($(TARGET_SIMULATOR),true)
-
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:=                                       \
@@ -44,8 +42,6 @@ LOCAL_CFLAGS := -DMTP_DEVICE -DMTP_HOST
 LOCAL_SHARED_LIBRARIES := libutils libcutils libusbhost libbinder
 
 include $(BUILD_SHARED_LIBRARY)
-
-endif
 
 ifeq ($(HOST_OS),linux)
 

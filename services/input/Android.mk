@@ -41,10 +41,6 @@ LOCAL_MODULE:= libinput
 
 LOCAL_MODULE_TAGS := optional
 
-ifeq ($(TARGET_SIMULATOR),true)
-    LOCAL_LDLIBS += -lpthread
-endif
-
 include $(BUILD_SHARED_LIBRARY)
 
 

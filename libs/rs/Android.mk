@@ -77,11 +77,6 @@ rs_generated_source += $(GEN)
 
 LOCAL_GENERATED_SOURCES += $(GEN)
 
-# libRS needs libacc, which isn't 64-bit clean, and so can't be built
-# for the simulator on gHardy, and therefore libRS needs to be excluded
-# from the simulator as well.
-ifneq ($(TARGET_SIMULATOR),true)
-
 LOCAL_SRC_FILES:= \
 	rsAdapter.cpp \
 	rsAllocation.cpp \
@@ -228,5 +223,3 @@ LOCAL_STATIC_LIBRARIES := libcutils libutils
 LOCAL_LDLIBS := -lpthread
 
 include $(BUILD_HOST_STATIC_LIBRARY)
-
-endif #simulator

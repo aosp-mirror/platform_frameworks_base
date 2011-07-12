@@ -39,14 +39,6 @@ LOCAL_SHARED_LIBRARIES := \
     libgui \
     libusbhost
 
-ifeq ($(TARGET_SIMULATOR),true)
-ifeq ($(TARGET_OS),linux)
-ifeq ($(TARGET_ARCH),x86)
-LOCAL_LDLIBS += -lpthread -ldl -lrt
-endif
-endif
-endif
-
 ifeq ($(WITH_MALLOC_LEAK_CHECK),true)
     LOCAL_CFLAGS += -DMALLOC_LEAK_CHECK
 endif

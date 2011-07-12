@@ -1,5 +1,3 @@
-ifneq ($(TARGET_SIMULATOR),true)
-
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
@@ -12,5 +10,3 @@ LOCAL_STATIC_LIBRARIES := libpng
 LOCAL_C_INCLUDES += external/zlib
 
 include $(BUILD_EXECUTABLE)
-
-endif

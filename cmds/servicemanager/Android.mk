@@ -1,4 +1,3 @@
-ifneq ($(TARGET_SIMULATOR),true)
 LOCAL_PATH:= $(call my-dir)
 
 #include $(CLEAR_VARS)
@@ -14,4 +13,3 @@ ifeq ($(BOARD_USE_LVMX),true)
     LOCAL_CFLAGS += -DLVMX
 endif
 include $(BUILD_EXECUTABLE)
-endif

@@ -24,13 +24,8 @@ LOCAL_SRC_FILES:= \
 LOCAL_SHARED_LIBRARIES := \
     libmedia \
     libutils \
-    libbinder
-
-ifeq ($(TARGET_SIMULATOR),true)
- LOCAL_LDLIBS += -ldl
-else
- LOCAL_SHARED_LIBRARIES += libdl
-endif
+    libbinder \
+    libdl
 
 LOCAL_STATIC_LIBRARIES := libdrmframeworkcommon
 

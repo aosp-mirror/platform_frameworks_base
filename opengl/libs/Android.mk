@@ -21,18 +21,14 @@ LOCAL_SHARED_LIBRARIES += libcutils libutils libGLESv2_dbg
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libEGL
 LOCAL_LDFLAGS += -Wl,--exclude-libs=ALL
-# needed on sim build because of weird logging issues
-ifeq ($(TARGET_SIMULATOR),true)
-else
-    LOCAL_SHARED_LIBRARIES += libdl
-    # Bionic's private TLS header relies on the ARCH_ARM_HAVE_TLS_REGISTER to
-    # select the appropriate TLS codepath
-    ifeq ($(ARCH_ARM_HAVE_TLS_REGISTER),true)
-        LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
-    endif
-    # we need to access the private Bionic header <bionic_tls.h>
-    LOCAL_C_INCLUDES += bionic/libc/private
+LOCAL_SHARED_LIBRARIES += libdl
+# Bionic's private TLS header relies on the ARCH_ARM_HAVE_TLS_REGISTER to
+# select the appropriate TLS codepath
+ifeq ($(ARCH_ARM_HAVE_TLS_REGISTER),true)
+    LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
 endif
+# we need to access the private Bionic header <bionic_tls.h>
+LOCAL_C_INCLUDES += bionic/libc/private
 
 LOCAL_CFLAGS += -DLOG_TAG=\"libEGL\"
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
@@ -81,16 +77,12 @@ LOCAL_SHARED_LIBRARIES += libcutils libEGL
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libGLESv1_CM
 
-# needed on sim build because of weird logging issues
-ifeq ($(TARGET_SIMULATOR),true)
-else
-    LOCAL_SHARED_LIBRARIES += libdl
-    # we need to access the private Bionic header <bionic_tls.h>
-    ifeq ($(ARCH_ARM_HAVE_TLS_REGISTER),true)
-        LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
-    endif
-    LOCAL_C_INCLUDES += bionic/libc/private
+LOCAL_SHARED_LIBRARIES += libdl
+# we need to access the private Bionic header <bionic_tls.h>
+ifeq ($(ARCH_ARM_HAVE_TLS_REGISTER),true)
+    LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
 endif
+LOCAL_C_INCLUDES += bionic/libc/private
 
 LOCAL_CFLAGS += -DLOG_TAG=\"libGLESv1\"
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES
@@ -117,16 +109,12 @@ LOCAL_SHARED_LIBRARIES += libcutils libEGL
 LOCAL_LDLIBS := -lpthread -ldl
 LOCAL_MODULE:= libGLESv2
 
-# needed on sim build because of weird logging issues
-ifeq ($(TARGET_SIMULATOR),true)
-else
-    LOCAL_SHARED_LIBRARIES += libdl
-    # we need to access the private Bionic header <bionic_tls.h>
-    ifeq ($(ARCH_ARM_HAVE_TLS_REGISTER),true)
-        LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
-    endif
-    LOCAL_C_INCLUDES += bionic/libc/private
+LOCAL_SHARED_LIBRARIES += libdl
+# we need to access the private Bionic header <bionic_tls.h>
+ifeq ($(ARCH_ARM_HAVE_TLS_REGISTER),true)
+    LOCAL_CFLAGS += -DHAVE_ARM_TLS_REGISTER
 endif
+LOCAL_C_INCLUDES += bionic/libc/private
 
 LOCAL_CFLAGS += -DLOG_TAG=\"libGLESv2\"
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES -DEGL_EGLEXT_PROTOTYPES

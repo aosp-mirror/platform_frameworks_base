@@ -20,23 +20,12 @@ LOCAL_SHARED_LIBRARIES := \
     libmedia \
     libhardware \
     libhardware_legacy \
-    libeffects
+    libeffects \
+    libdl
 
 LOCAL_STATIC_LIBRARIES := \
     libmedia_helper
 
-ifeq ($(TARGET_SIMULATOR),true)
- LOCAL_LDLIBS += -ldl
-else
- LOCAL_SHARED_LIBRARIES += libdl
-endif
-
 LOCAL_MODULE:= libaudioflinger
-
-ifeq ($(TARGET_SIMULATOR),true)
-    ifeq ($(HOST_OS),linux)
-        LOCAL_LDLIBS += -lrt -lpthread
-    endif
-endif
 
 include $(BUILD_SHARED_LIBRARY)

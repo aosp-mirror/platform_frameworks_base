@@ -19,12 +19,7 @@ LOCAL_STATIC_LIBRARIES += libmusicbundle
 
 LOCAL_SHARED_LIBRARIES := \
      libcutils \
-
-ifeq ($(TARGET_SIMULATOR),true)
-LOCAL_LDLIBS += -ldl
-else
-LOCAL_SHARED_LIBRARIES += libdl
-endif
+     libdl
 
 
 LOCAL_C_INCLUDES += \
@@ -54,12 +49,7 @@ LOCAL_STATIC_LIBRARIES += libreverb
 
 LOCAL_SHARED_LIBRARIES := \
      libcutils \
-
-ifeq ($(TARGET_SIMULATOR),true)
-LOCAL_LDLIBS += -ldl
-else
-LOCAL_SHARED_LIBRARIES += libdl
-endif
+     libdl
 
 LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/Reverb \

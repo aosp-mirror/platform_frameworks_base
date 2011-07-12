@@ -68,10 +68,6 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_MODULE:= libui
 
-ifeq ($(TARGET_SIMULATOR),true)
-    LOCAL_LDLIBS += -lpthread
-endif
-
 include $(BUILD_SHARED_LIBRARY)
 
 
