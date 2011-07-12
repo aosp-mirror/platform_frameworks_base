@@ -168,7 +168,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectTime(TEST_START + elapsedRealtime);
         expectDefaultSettings();
         expectNetworkStatsSummary(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, TAG_NONE, 1024L, 2048L));
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 1024L, 1L, 2048L, 2L));
         expectNetworkStatsDetail(buildEmptyStats(elapsedRealtime));
 
         replay();
@@ -184,7 +184,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectTime(TEST_START + elapsedRealtime);
         expectDefaultSettings();
         expectNetworkStatsSummary(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, TAG_NONE, 4096L, 8192L));
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 4096L, 4L, 8192L, 8L));
         expectNetworkStatsDetail(buildEmptyStats(elapsedRealtime));
 
         replay();
@@ -219,10 +219,10 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectTime(TEST_START + elapsedRealtime);
         expectDefaultSettings();
         expectNetworkStatsSummary(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, TAG_NONE, 1024L, 2048L));
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 1024L, 8L, 2048L, 16L));
         expectNetworkStatsDetail(new NetworkStats(elapsedRealtime, 2)
-                .addEntry(TEST_IFACE, UID_RED, TAG_NONE, 512L, 256L)
-                .addEntry(TEST_IFACE, UID_BLUE, TAG_NONE, 128L, 128L));
+                .addValues(TEST_IFACE, UID_RED, TAG_NONE, 512L, 4L, 256L, 2L)
+                .addValues(TEST_IFACE, UID_BLUE, TAG_NONE, 128L, 1L, 128L, 1L));
 
         replay();
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
@@ -284,7 +284,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectTime(TEST_START + elapsedRealtime);
         expectSettings(0L, HOUR_IN_MILLIS, WEEK_IN_MILLIS);
         expectNetworkStatsSummary(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, TAG_NONE, 512L, 512L));
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 512L, 4L, 512L, 4L));
         expectNetworkStatsDetail(buildEmptyStats(elapsedRealtime));
 
         replay();
@@ -295,8 +295,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         total = history.getTotalData(Long.MIN_VALUE, Long.MAX_VALUE, null);
         assertEquals(512L, total[0]);
         assertEquals(512L, total[1]);
-        assertEquals(HOUR_IN_MILLIS, history.bucketDuration);
-        assertEquals(2, history.bucketCount);
+        assertEquals(HOUR_IN_MILLIS, history.getBucketDuration());
+        assertEquals(2, history.size());
         verifyAndReset();
 
         // now change bucket duration setting and trigger another poll with
@@ -314,8 +314,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         total = history.getTotalData(Long.MIN_VALUE, Long.MAX_VALUE, null);
         assertEquals(512L, total[0]);
         assertEquals(512L, total[1]);
-        assertEquals(30 * MINUTE_IN_MILLIS, history.bucketDuration);
-        assertEquals(4, history.bucketCount);
+        assertEquals(30 * MINUTE_IN_MILLIS, history.getBucketDuration());
+        assertEquals(4, history.size());
         verifyAndReset();
 
     }
@@ -338,11 +338,11 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectTime(TEST_START + elapsedRealtime);
         expectDefaultSettings();
         expectNetworkStatsSummary(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, TAG_NONE, 2048L, 512L));
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 2048L, 16L, 512L, 4L));
         expectNetworkStatsDetail(new NetworkStats(elapsedRealtime, 3)
-                .addEntry(TEST_IFACE, UID_RED, TAG_NONE, 1536L, 512L)
-                .addEntry(TEST_IFACE, UID_RED, 0xF00D, 512L, 512L)
-                .addEntry(TEST_IFACE, UID_BLUE, TAG_NONE, 512L, 0L));
+                .addValues(TEST_IFACE, UID_RED, TAG_NONE, 1536L, 12L, 512L, 4L)
+                .addValues(TEST_IFACE, UID_RED, 0xF00D, 512L, 4L, 512L, 4L)
+                .addValues(TEST_IFACE, UID_BLUE, TAG_NONE, 512L, 4L, 0L, 0L));
 
         replay();
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
@@ -373,9 +373,9 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectTime(TEST_START + elapsedRealtime);
         expectDefaultSettings();
         expectNetworkStatsSummary(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, TAG_NONE, 128L, 1024L));
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 128L, 1L, 1024L, 8L));
         expectNetworkStatsDetail(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_BLUE, TAG_NONE, 128L, 1024L));
+                .addValues(TEST_IFACE, UID_BLUE, TAG_NONE, 128L, 1L, 1024L, 8L));
 
         replay();
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
@@ -412,11 +412,11 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectTime(TEST_START + elapsedRealtime);
         expectDefaultSettings();
         expectNetworkStatsSummary(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_ALL, TAG_NONE, 4128L, 544L));
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 4128L, 258L, 544L, 34L));
         expectNetworkStatsDetail(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_RED, TAG_NONE, 16L, 16L)
-                .addEntry(TEST_IFACE, UID_BLUE, TAG_NONE, 4096L, 512L)
-                .addEntry(TEST_IFACE, UID_GREEN, TAG_NONE, 16L, 16L));
+                .addValues(TEST_IFACE, UID_RED, TAG_NONE, 16L, 1L, 16L, 1L)
+                .addValues(TEST_IFACE, UID_BLUE, TAG_NONE, 4096L, 258L, 512L, 32L)
+                .addValues(TEST_IFACE, UID_GREEN, TAG_NONE, 16L, 1L, 16L, 1L));
 
         replay();
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
@@ -468,8 +468,8 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkStatsSummary(buildEmptyStats(elapsedRealtime));
         expectNetworkStatsDetail(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_RED, TAG_NONE, 1024L, 1024L)
-                .addEntry(TEST_IFACE, UID_RED, 0xF00D, 512L, 512L));
+                .addValues(TEST_IFACE, UID_RED, TAG_NONE, 1024L, 8L, 1024L, 8L)
+                .addValues(TEST_IFACE, UID_RED, 0xF00D, 512L, 4L, 512L, 4L));
 
         replay();
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
@@ -497,7 +497,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkStatsSummary(buildEmptyStats(elapsedRealtime));
         expectNetworkStatsDetail(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_RED, TAG_NONE, 512L, 256L));
+                .addValues(TEST_IFACE, UID_RED, TAG_NONE, 512L, 4L, 256L, 2L));
 
         replay();
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
@@ -548,9 +548,9 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkStatsSummary(buildEmptyStats(elapsedRealtime));
         expectNetworkStatsDetail(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_RED, TAG_NONE, 50L, 50L)
-                .addEntry(TEST_IFACE, UID_RED, 0xF00D, 10L, 10L)
-                .addEntry(TEST_IFACE, UID_BLUE, TAG_NONE, 1024L, 512L));
+                .addValues(TEST_IFACE, UID_RED, TAG_NONE, 50L, 5L, 50L, 5L)
+                .addValues(TEST_IFACE, UID_RED, 0xF00D, 10L, 1L, 10L, 1L)
+                .addValues(TEST_IFACE, UID_BLUE, TAG_NONE, 1024L, 8L, 512L, 4L));
 
         replay();
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
@@ -566,7 +566,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         expectDefaultSettings();
         expectNetworkStatsSummary(buildEmptyStats(elapsedRealtime));
         expectNetworkStatsDetail(new NetworkStats(elapsedRealtime, 1)
-                .addEntry(TEST_IFACE, UID_BLUE, TAG_NONE, 2048L, 1024L));
+                .addValues(TEST_IFACE, UID_BLUE, TAG_NONE, 2048L, 16L, 1024L, 8L));
 
         replay();
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
@@ -574,17 +574,17 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         // first verify entire history present
         NetworkStats stats = mService.getSummaryForAllUid(
                 sTemplateWifi, Long.MIN_VALUE, Long.MAX_VALUE, true);
-        assertEquals(3, stats.size);
-        assertStatsEntry(stats, 0, IFACE_ALL, UID_RED, TAG_NONE, 50L, 50L);
-        assertStatsEntry(stats, 1, IFACE_ALL, UID_RED, 0xF00D, 10L, 10L);
-        assertStatsEntry(stats, 2, IFACE_ALL, UID_BLUE, TAG_NONE, 2048L, 1024L);
+        assertEquals(3, stats.size());
+        assertEntry(stats, 0, IFACE_ALL, UID_RED, TAG_NONE, 50L, 5L, 50L, 5L);
+        assertEntry(stats, 1, IFACE_ALL, UID_RED, 0xF00D, 10L, 1L, 10L, 1L);
+        assertEntry(stats, 2, IFACE_ALL, UID_BLUE, TAG_NONE, 2048L, 16L, 1024L, 8L);
 
         // now verify that recent history only contains one uid
         final long currentTime = TEST_START + elapsedRealtime;
         stats = mService.getSummaryForAllUid(
                 sTemplateWifi, currentTime - HOUR_IN_MILLIS, currentTime, true);
-        assertEquals(1, stats.size);
-        assertStatsEntry(stats, 0, IFACE_ALL, UID_BLUE, TAG_NONE, 1024L, 512L);
+        assertEquals(1, stats.size());
+        assertEntry(stats, 0, IFACE_ALL, UID_BLUE, TAG_NONE, 1024L, 8L, 512L, 4L);
 
         verifyAndReset();
     }
@@ -660,13 +660,17 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         }
     }
 
-    private static void assertStatsEntry(
-            NetworkStats stats, int i, String iface, int uid, int tag, long rx, long tx) {
-        assertEquals(iface, stats.iface[i]);
-        assertEquals(uid, stats.uid[i]);
-        assertEquals(tag, stats.tag[i]);
-        assertEquals(rx, stats.rx[i]);
-        assertEquals(tx, stats.tx[i]);
+    private static void assertEntry(NetworkStats stats, int i, String iface, int uid, int tag,
+            long rxBytes, long rxPackets, long txBytes, long txPackets) {
+        final NetworkStats.Entry entry = stats.getValues(i, null);
+        assertEquals(iface, entry.iface);
+        assertEquals(uid, entry.uid);
+        assertEquals(tag, entry.tag);
+        assertEquals(rxBytes, entry.rxBytes);
+        // TODO: enable testing packet counts once stored in history
+//        assertEquals(rxPackets, entry.rxPackets);
+        assertEquals(txBytes, entry.txBytes);
+//        assertEquals(txPackets, entry.txPackets);
     }
 
     private static NetworkState buildWifiState() {

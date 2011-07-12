@@ -31,9 +31,9 @@ public class NetworkStatsTest extends TestCase {
 
     public void testFindIndex() throws Exception {
         final NetworkStats stats = new NetworkStats(TEST_START, 3)
-                .addEntry(TEST_IFACE, 100, TAG_NONE, 1024L, 0L)
-                .addEntry(TEST_IFACE, 101, TAG_NONE, 0L, 1024L)
-                .addEntry(TEST_IFACE, 102, TAG_NONE, 1024L, 1024L);
+                .addValues(TEST_IFACE, 100, TAG_NONE, 1024L, 8L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, TAG_NONE, 0L, 0L, 1024L, 8L)
+                .addValues(TEST_IFACE, 102, TAG_NONE, 1024L, 8L, 1024L, 8L);
 
         assertEquals(2, stats.findIndex(TEST_IFACE, 102, TAG_NONE));
         assertEquals(2, stats.findIndex(TEST_IFACE, 102, TAG_NONE));
@@ -45,109 +45,105 @@ public class NetworkStatsTest extends TestCase {
         final NetworkStats stats = new NetworkStats(TEST_START, 2);
 
         assertEquals(0, stats.size());
-        assertEquals(2, stats.iface.length);
+        assertEquals(2, stats.internalSize());
 
-        stats.addEntry(TEST_IFACE, TEST_UID, TAG_NONE, 1L, 2L);
-        stats.addEntry(TEST_IFACE, TEST_UID, TAG_NONE, 2L, 2L);
+        stats.addValues(TEST_IFACE, TEST_UID, TAG_NONE, 1L, 1L, 2L, 2L);
+        stats.addValues(TEST_IFACE, TEST_UID, TAG_NONE, 2L, 2L, 2L, 2L);
 
         assertEquals(2, stats.size());
-        assertEquals(2, stats.iface.length);
+        assertEquals(2, stats.internalSize());
 
-        stats.addEntry(TEST_IFACE, TEST_UID, TAG_NONE, 3L, 4L);
-        stats.addEntry(TEST_IFACE, TEST_UID, TAG_NONE, 4L, 4L);
-        stats.addEntry(TEST_IFACE, TEST_UID, TAG_NONE, 5L, 5L);
+        stats.addValues(TEST_IFACE, TEST_UID, TAG_NONE, 3L, 30L, 4L, 40L);
+        stats.addValues(TEST_IFACE, TEST_UID, TAG_NONE, 4L, 40L, 4L, 40L);
+        stats.addValues(TEST_IFACE, TEST_UID, TAG_NONE, 5L, 50L, 5L, 50L);
 
         assertEquals(5, stats.size());
-        assertTrue(stats.iface.length >= 5);
+        assertTrue(stats.internalSize() >= 5);
 
-        assertEquals(1L, stats.rx[0]);
-        assertEquals(2L, stats.rx[1]);
-        assertEquals(3L, stats.rx[2]);
-        assertEquals(4L, stats.rx[3]);
-        assertEquals(5L, stats.rx[4]);
+        assertEntry(stats, 0, TEST_IFACE, TEST_UID, TAG_NONE, 1L, 1L, 2L, 2L);
+        assertEntry(stats, 1, TEST_IFACE, TEST_UID, TAG_NONE, 2L, 2L, 2L, 2L);
+        assertEntry(stats, 2, TEST_IFACE, TEST_UID, TAG_NONE, 3L, 30L, 4L, 40L);
+        assertEntry(stats, 3, TEST_IFACE, TEST_UID, TAG_NONE, 4L, 40L, 4L, 40L);
+        assertEntry(stats, 4, TEST_IFACE, TEST_UID, TAG_NONE, 5L, 50L, 5L, 50L);
     }
 
     public void testCombineExisting() throws Exception {
         final NetworkStats stats = new NetworkStats(TEST_START, 10);
 
-        stats.addEntry(TEST_IFACE, 1001, TAG_NONE, 512L, 256L);
-        stats.addEntry(TEST_IFACE, 1001, 0xff, 128L, 128L);
-        stats.combineEntry(TEST_IFACE, 1001, TAG_NONE, -128L, -128L);
+        stats.addValues(TEST_IFACE, 1001, TAG_NONE, 512L, 4L, 256L, 2L);
+        stats.addValues(TEST_IFACE, 1001, 0xff, 128L, 1L, 128L, 1L);
+        stats.combineValues(TEST_IFACE, 1001, TAG_NONE, -128L, -1L, -128L, -1L);
 
-        assertStatsEntry(stats, 0, TEST_IFACE, 1001, TAG_NONE, 384L, 128L);
-        assertStatsEntry(stats, 1, TEST_IFACE, 1001, 0xff, 128L, 128L);
+        assertEntry(stats, 0, TEST_IFACE, 1001, TAG_NONE, 384L, 3L, 128L, 1L);
+        assertEntry(stats, 1, TEST_IFACE, 1001, 0xff, 128L, 1L, 128L, 1L);
 
         // now try combining that should create row
-        stats.combineEntry(TEST_IFACE, 5005, TAG_NONE, 128L, 128L);
-        assertStatsEntry(stats, 2, TEST_IFACE, 5005, TAG_NONE, 128L, 128L);
-        stats.combineEntry(TEST_IFACE, 5005, TAG_NONE, 128L, 128L);
-        assertStatsEntry(stats, 2, TEST_IFACE, 5005, TAG_NONE, 256L, 256L);
+        stats.combineValues(TEST_IFACE, 5005, TAG_NONE, 128L, 1L, 128L, 1L);
+        assertEntry(stats, 2, TEST_IFACE, 5005, TAG_NONE, 128L, 1L, 128L, 1L);
+        stats.combineValues(TEST_IFACE, 5005, TAG_NONE, 128L, 1L, 128L, 1L);
+        assertEntry(stats, 2, TEST_IFACE, 5005, TAG_NONE, 256L, 2L, 256L, 2L);
     }
 
     public void testSubtractIdenticalData() throws Exception {
         final NetworkStats before = new NetworkStats(TEST_START, 2)
-                .addEntry(TEST_IFACE, 100, TAG_NONE, 1024L, 0L)
-                .addEntry(TEST_IFACE, 101, TAG_NONE, 0L, 1024L);
+                .addValues(TEST_IFACE, 100, TAG_NONE, 1024L, 8L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, TAG_NONE, 0L, 0L, 1024L, 8L);
 
         final NetworkStats after = new NetworkStats(TEST_START, 2)
-                .addEntry(TEST_IFACE, 100, TAG_NONE, 1024L, 0L)
-                .addEntry(TEST_IFACE, 101, TAG_NONE, 0L, 1024L);
+                .addValues(TEST_IFACE, 100, TAG_NONE, 1024L, 8L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, TAG_NONE, 0L, 0L, 1024L, 8L);
 
         final NetworkStats result = after.subtract(before);
 
         // identical data should result in zero delta
-        assertEquals(0, result.rx[0]);
-        assertEquals(0, result.tx[0]);
-        assertEquals(0, result.rx[1]);
-        assertEquals(0, result.tx[1]);
+        assertEntry(result, 0, TEST_IFACE, 100, TAG_NONE, 0L, 0L, 0L, 0L);
+        assertEntry(result, 1, TEST_IFACE, 101, TAG_NONE, 0L, 0L, 0L, 0L);
     }
 
     public void testSubtractIdenticalRows() throws Exception {
         final NetworkStats before = new NetworkStats(TEST_START, 2)
-                .addEntry(TEST_IFACE, 100, TAG_NONE, 1024L, 0L)
-                .addEntry(TEST_IFACE, 101, TAG_NONE, 0L, 1024L);
+                .addValues(TEST_IFACE, 100, TAG_NONE, 1024L, 8L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, TAG_NONE, 0L, 0L, 1024L, 8L);
 
         final NetworkStats after = new NetworkStats(TEST_START, 2)
-                .addEntry(TEST_IFACE, 100, TAG_NONE, 1025L, 2L)
-                .addEntry(TEST_IFACE, 101, TAG_NONE, 3L, 1028L);
+                .addValues(TEST_IFACE, 100, TAG_NONE, 1025L, 9L, 2L, 1L)
+                .addValues(TEST_IFACE, 101, TAG_NONE, 3L, 1L, 1028L, 9L);
 
         final NetworkStats result = after.subtract(before);
 
         // expect delta between measurements
-        assertEquals(1, result.rx[0]);
-        assertEquals(2, result.tx[0]);
-        assertEquals(3, result.rx[1]);
-        assertEquals(4, result.tx[1]);
+        assertEntry(result, 0, TEST_IFACE, 100, TAG_NONE, 1L, 1L, 2L, 1L);
+        assertEntry(result, 1, TEST_IFACE, 101, TAG_NONE, 3L, 1L, 4L, 1L);
     }
 
     public void testSubtractNewRows() throws Exception {
         final NetworkStats before = new NetworkStats(TEST_START, 2)
-                .addEntry(TEST_IFACE, 100, TAG_NONE, 1024L, 0L)
-                .addEntry(TEST_IFACE, 101, TAG_NONE, 0L, 1024L);
+                .addValues(TEST_IFACE, 100, TAG_NONE, 1024L, 8L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, TAG_NONE, 0L, 0L, 1024L, 8L);
 
         final NetworkStats after = new NetworkStats(TEST_START, 3)
-                .addEntry(TEST_IFACE, 100, TAG_NONE, 1024L, 0L)
-                .addEntry(TEST_IFACE, 101, TAG_NONE, 0L, 1024L)
-                .addEntry(TEST_IFACE, 102, TAG_NONE, 1024L, 1024L);
+                .addValues(TEST_IFACE, 100, TAG_NONE, 1024L, 8L, 0L, 0L)
+                .addValues(TEST_IFACE, 101, TAG_NONE, 0L, 0L, 1024L, 8L)
+                .addValues(TEST_IFACE, 102, TAG_NONE, 1024L, 8L, 1024L, 8L);
 
         final NetworkStats result = after.subtract(before);
 
         // its okay to have new rows
-        assertEquals(0, result.rx[0]);
-        assertEquals(0, result.tx[0]);
-        assertEquals(0, result.rx[1]);
-        assertEquals(0, result.tx[1]);
-        assertEquals(1024, result.rx[2]);
-        assertEquals(1024, result.tx[2]);
+        assertEntry(result, 0, TEST_IFACE, 100, TAG_NONE, 0L, 0L, 0L, 0L);
+        assertEntry(result, 1, TEST_IFACE, 101, TAG_NONE, 0L, 0L, 0L, 0L);
+        assertEntry(result, 2, TEST_IFACE, 102, TAG_NONE, 1024L, 8L, 1024L, 8L);
     }
 
-    private static void assertStatsEntry(
-            NetworkStats stats, int i, String iface, int uid, int tag, long rx, long tx) {
-        assertEquals(iface, stats.iface[i]);
-        assertEquals(uid, stats.uid[i]);
-        assertEquals(tag, stats.tag[i]);
-        assertEquals(rx, stats.rx[i]);
-        assertEquals(tx, stats.tx[i]);
+    private static void assertEntry(NetworkStats stats, int index, String iface, int uid, int tag,
+            long rxBytes, long rxPackets, long txBytes, long txPackets) {
+        final NetworkStats.Entry entry = stats.getValues(index, null);
+        assertEquals(iface, entry.iface);
+        assertEquals(uid, entry.uid);
+        assertEquals(tag, entry.tag);
+        assertEquals(rxBytes, entry.rxBytes);
+        assertEquals(rxPackets, entry.rxPackets);
+        assertEquals(txBytes, entry.txBytes);
+        assertEquals(txPackets, entry.txPackets);
     }
 
 }

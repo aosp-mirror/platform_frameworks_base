@@ -313,22 +313,26 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
 
         synchronized (mStatsLock) {
-            long rx = 0;
-            long tx = 0;
-            long[] networkTotal = new long[2];
+            final NetworkStats stats = new NetworkStats(end - start, 1);
+            final NetworkStats.Entry entry = new NetworkStats.Entry();
+            long[] total = new long[2];
 
             // combine total from all interfaces that match template
             for (NetworkIdentitySet ident : mNetworkStats.keySet()) {
                 if (templateMatches(template, ident)) {
                     final NetworkStatsHistory history = mNetworkStats.get(ident);
-                    networkTotal = history.getTotalData(start, end, networkTotal);
-                    rx += networkTotal[0];
-                    tx += networkTotal[1];
+                    total = history.getTotalData(start, end, total);
+
+                    entry.iface = IFACE_ALL;
+                    entry.uid = UID_ALL;
+                    entry.tag = TAG_NONE;
+                    entry.rxBytes = total[0];
+                    entry.txBytes = total[1];
+
+                    stats.combineValues(entry);
                 }
             }
 
-            final NetworkStats stats = new NetworkStats(end - start, 1);
-            stats.addEntry(IFACE_ALL, UID_ALL, TAG_NONE, rx, tx);
             return stats;
         }
     }
@@ -342,6 +346,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             ensureUidStatsLoadedLocked();
 
             final NetworkStats stats = new NetworkStats(end - start, 24);
+            final NetworkStats.Entry entry = new NetworkStats.Entry();
             long[] total = new long[2];
 
             for (NetworkIdentitySet ident : mUidStats.keySet()) {
@@ -357,10 +362,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                         if (tag == TAG_NONE || includeTags) {
                             final NetworkStatsHistory history = uidStats.valueAt(i);
                             total = history.getTotalData(start, end, total);
-                            final long rx = total[0];
-                            final long tx = total[1];
-                            if (rx > 0 || tx > 0) {
-                                stats.combineEntry(IFACE_ALL, uid, tag, rx, tx);
+
+                            entry.iface = IFACE_ALL;
+                            entry.uid = uid;
+                            entry.tag = tag;
+                            entry.rxBytes = total[0];
+                            entry.txBytes = total[1];
+
+                            if (entry.rxBytes > 0 || entry.txBytes > 0) {
+                                stats.combineValues(entry);
                             }
                         }
                     }
@@ -512,10 +522,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats persistDelta = computeStatsDelta(
                 mLastPersistNetworkSnapshot, networkSnapshot);
         final long persistThreshold = mSettings.getPersistThreshold();
+
+        NetworkStats.Entry entry = null;
         for (String iface : persistDelta.getUniqueIfaces()) {
             final int index = persistDelta.findIndex(iface, UID_ALL, TAG_NONE);
-            if (forcePersist || persistDelta.rx[index] > persistThreshold
-                    || persistDelta.tx[index] > persistThreshold) {
+            entry = persistDelta.getValues(index, entry);
+            if (forcePersist || entry.rxBytes > persistThreshold
+                    || entry.txBytes > persistThreshold) {
                 writeNetworkStatsLocked();
                 if (mUidStatsLoaded) {
                     writeUidStatsLocked();
@@ -538,20 +551,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final HashSet<String> unknownIface = Sets.newHashSet();
 
         final NetworkStats delta = computeStatsDelta(mLastNetworkSnapshot, networkSnapshot);
-        final long timeStart = currentTime - delta.elapsedRealtime;
-        for (int i = 0; i < delta.size; i++) {
-            final String iface = delta.iface[i];
-            final NetworkIdentitySet ident = mActiveIfaces.get(iface);
+        final long timeStart = currentTime - delta.getElapsedRealtime();
+
+        NetworkStats.Entry entry = null;
+        for (int i = 0; i < delta.size(); i++) {
+            entry = delta.getValues(i, entry);
+            final NetworkIdentitySet ident = mActiveIfaces.get(entry.iface);
             if (ident == null) {
-                unknownIface.add(iface);
+                unknownIface.add(entry.iface);
                 continue;
             }
 
-            final long rx = delta.rx[i];
-            final long tx = delta.tx[i];
-
             final NetworkStatsHistory history = findOrCreateNetworkStatsLocked(ident);
-            history.recordData(timeStart, currentTime, rx, tx);
+            history.recordData(timeStart, currentTime, entry.rxBytes, entry.txBytes);
         }
 
         // trim any history beyond max
@@ -574,22 +586,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         ensureUidStatsLoadedLocked();
 
         final NetworkStats delta = computeStatsDelta(mLastUidSnapshot, uidSnapshot);
-        final long timeStart = currentTime - delta.elapsedRealtime;
+        final long timeStart = currentTime - delta.getElapsedRealtime();
 
-        for (int i = 0; i < delta.size; i++) {
-            final String iface = delta.iface[i];
-            final NetworkIdentitySet ident = mActiveIfaces.get(iface);
+        NetworkStats.Entry entry = null;
+        for (int i = 0; i < delta.size(); i++) {
+            entry = delta.getValues(i, entry);
+            final NetworkIdentitySet ident = mActiveIfaces.get(entry.iface);
             if (ident == null) {
                 continue;
             }
 
-            final int uid = delta.uid[i];
-            final int tag = delta.tag[i];
-            final long rx = delta.rx[i];
-            final long tx = delta.tx[i];
-
-            final NetworkStatsHistory history = findOrCreateUidStatsLocked(ident, uid, tag);
-            history.recordData(timeStart, currentTime, rx, tx);
+            final NetworkStatsHistory history = findOrCreateUidStatsLocked(
+                    ident, entry.uid, entry.tag);
+            history.recordData(timeStart, currentTime, entry.rxBytes, entry.txBytes);
         }
 
         // trim any history beyond max
@@ -651,7 +660,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         NetworkStatsHistory updated = null;
         if (existing == null) {
             updated = new NetworkStatsHistory(bucketDuration, 10);
-        } else if (existing.bucketDuration != bucketDuration) {
+        } else if (existing.getBucketDuration() != bucketDuration) {
             updated = new NetworkStatsHistory(
                     bucketDuration, estimateResizeBuckets(existing, bucketDuration));
             updated.recordEntireHistory(existing);
@@ -683,7 +692,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         NetworkStatsHistory updated = null;
         if (existing == null) {
             updated = new NetworkStatsHistory(bucketDuration, 10);
-        } else if (existing.bucketDuration != bucketDuration) {
+        } else if (existing.getBucketDuration() != bucketDuration) {
             updated = new NetworkStatsHistory(
                     bucketDuration, estimateResizeBuckets(existing, bucketDuration));
             updated.recordEntireHistory(existing);
@@ -1003,7 +1012,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private static int estimateResizeBuckets(NetworkStatsHistory existing, long newBucketDuration) {
-        return (int) (existing.bucketCount * existing.bucketDuration / newBucketDuration);
+        return (int) (existing.size() * existing.getBucketDuration() / newBucketDuration);
     }
 
     // @VisibleForTesting

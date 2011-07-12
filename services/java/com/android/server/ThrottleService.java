@@ -515,8 +515,9 @@ public class ThrottleService extends IThrottleManager.Stub {
                         mIface, NetworkStats.UID_ALL, NetworkStats.TAG_NONE);
 
                 if (index != -1) {
-                    incRead = stats.rx[index] - mLastRead;
-                    incWrite = stats.tx[index] - mLastWrite;
+                    final NetworkStats.Entry entry = stats.getValues(index, null);
+                    incRead = entry.rxBytes - mLastRead;
+                    incWrite = entry.txBytes - mLastWrite;
                 } else {
                     // missing iface, assume stats are 0
                     Slog.w(TAG, "unable to find stats for iface " + mIface);
