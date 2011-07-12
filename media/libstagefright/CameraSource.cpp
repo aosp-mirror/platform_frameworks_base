@@ -103,6 +103,10 @@ static int32_t getColorFormat(const char* colorFormat) {
        return OMX_COLOR_Format16bitRGB565;
     }
 
+    if (!strcmp(colorFormat, "OMX_TI_COLOR_FormatYUV420PackedSemiPlanar")) {
+       return OMX_TI_COLOR_FormatYUV420PackedSemiPlanar;
+    }
+
     LOGE("Uknown color format (%s), please add it to "
          "CameraSource::getColorFormat", colorFormat);
 
