@@ -20,6 +20,7 @@ import com.android.internal.R;
 
 import android.annotation.Widget;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -32,6 +33,7 @@ import android.widget.NumberPicker.OnValueChangeListener;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * A view for selecting the time of day, in either 24 hour or AM/PM mode. The
@@ -92,6 +94,8 @@ public class TimePicker extends FrameLayout {
 
     private Calendar mTempCalendar;
 
+    private Locale mCurrentLocale;
+
     /**
      * The callback interface used to indicate the time has been adjusted.
      */
@@ -115,6 +119,9 @@ public class TimePicker extends FrameLayout {
 
     public TimePicker(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+
+        // initialization based on locale
+        setCurrentLocale(Locale.getDefault());
 
         // process style attributes
         TypedArray attributesArray = context.obtainStyledAttributes(
@@ -211,8 +218,6 @@ public class TimePicker extends FrameLayout {
         updateHourControl();
         updateAmPmControl();
 
-        // initialize to current time
-        mTempCalendar = Calendar.getInstance();
         setOnTimeChangedListener(NO_OP_CHANGE_LISTENER);
 
         // set to current time
@@ -246,6 +251,25 @@ public class TimePicker extends FrameLayout {
     @Override
     public boolean isEnabled() {
         return mIsEnabled;
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        setCurrentLocale(newConfig.locale);
+    }
+
+    /**
+     * Sets the current locale.
+     *
+     * @param locale The current locale.
+     */
+    private void setCurrentLocale(Locale locale) {
+        if (locale.equals(mCurrentLocale)) {
+            return;
+        }
+        mCurrentLocale = locale;
+        mTempCalendar = Calendar.getInstance(locale);
     }
 
     /**
