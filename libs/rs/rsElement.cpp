@@ -263,10 +263,10 @@ void Element::incRefs(const void *ptr) const {
     const uint8_t *p = static_cast<const uint8_t *>(ptr);
     for (uint32_t i=0; i < mFieldCount; i++) {
         if (mFields[i].e->mHasReference) {
-            p = &p[mFields[i].offsetBits >> 3];
+            const uint8_t *p2 = &p[mFields[i].offsetBits >> 3];
             for (uint32_t ct=0; ct < mFields[i].arraySize; ct++) {
-                mFields[i].e->incRefs(p);
-                p += mFields[i].e->getSizeBytes();
+                mFields[i].e->incRefs(p2);
+                p2 += mFields[i].e->getSizeBytes();
             }
         }
     }
@@ -285,10 +285,10 @@ void Element::decRefs(const void *ptr) const {
     const uint8_t *p = static_cast<const uint8_t *>(ptr);
     for (uint32_t i=0; i < mFieldCount; i++) {
         if (mFields[i].e->mHasReference) {
-            p = &p[mFields[i].offsetBits >> 3];
+            const uint8_t *p2 = &p[mFields[i].offsetBits >> 3];
             for (uint32_t ct=0; ct < mFields[i].arraySize; ct++) {
-                mFields[i].e->decRefs(p);
-                p += mFields[i].e->getSizeBytes();
+                mFields[i].e->decRefs(p2);
+                p2 += mFields[i].e->getSizeBytes();
             }
         }
     }
