@@ -88,7 +88,7 @@ import android.view.SurfaceView;
  * well as how many bits are allocated to each channel. Therefore, the first thing
  * GLSurfaceView has to do when starting to render is choose what EGLConfig to use.
  * <p>
- * By default GLSurfaceView chooses a EGLConfig that has an RGB_656 pixel format,
+ * By default GLSurfaceView chooses a EGLConfig that has an RGB_565 pixel format,
  * with at least a 16-bit depth buffer and no stencil.
  * <p>
  * If you would prefer a different EGLConfig
