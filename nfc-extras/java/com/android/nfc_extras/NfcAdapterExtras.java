@@ -56,20 +56,12 @@ public final class NfcAdapterExtras {
     public static final String ACTION_RF_FIELD_OFF_DETECTED =
             "com.android.nfc_extras.action.RF_FIELD_OFF_DETECTED";
 
-    // protected by NfcAdapterExtras.class, and final after first construction,
-    // except for attemptDeadServiceRecovery() when NFC crashes - we accept a
-    // best effort recovery
-    private static NfcAdapter sAdapter;
+    // protected by NfcAdapterExtras.class, and final after first construction
     private static INfcAdapterExtras sService;
     private static NfcAdapterExtras sSingleton;
     private static NfcExecutionEnvironment sEmbeddedEe;
     private static CardEmulationRoute sRouteOff;
     private static CardEmulationRoute sRouteOnWhenScreenOn;
-
-    /** get service handles */
-    private static void initService() {
-        sService = sAdapter.getNfcAdapterExtrasInterface();
-    }
 
     /**
      * Get the {@link NfcAdapterExtras} for the given {@link NfcAdapter}.
@@ -84,13 +76,12 @@ public final class NfcAdapterExtras {
         synchronized(NfcAdapterExtras.class) {
             if (sSingleton == null) {
                 try {
-                    sAdapter = adapter;
+                    sService = adapter.getNfcAdapterExtrasInterface();
+                    sEmbeddedEe = new NfcExecutionEnvironment(sService);
                     sRouteOff = new CardEmulationRoute(CardEmulationRoute.ROUTE_OFF, null);
-                    sSingleton = new NfcAdapterExtras();
-                    sEmbeddedEe = new NfcExecutionEnvironment(sSingleton);
                     sRouteOnWhenScreenOn = new CardEmulationRoute(
                             CardEmulationRoute.ROUTE_ON_WHEN_SCREEN_ON, sEmbeddedEe);
-                    initService();
+                    sSingleton = new NfcAdapterExtras();
                 } finally {
                     if (sSingleton == null) {
                         sService = null;
@@ -145,19 +136,6 @@ public final class NfcAdapterExtras {
     }
 
     /**
-     * NFC service dead - attempt best effort recovery
-     */
-    void attemptDeadServiceRecovery(Exception e) {
-        Log.e(TAG, "NFC Adapter Extras dead - attempting to recover");
-        sAdapter.attemptDeadServiceRecovery(e);
-        initService();
-    }
-
-    INfcAdapterExtras getService() {
-        return sService;
-    }
-
-    /**
      * Get the routing state of this NFC EE.
      *
      * <p class="note">
@@ -172,7 +150,7 @@ public final class NfcAdapterExtras {
                     sRouteOff :
                     sRouteOnWhenScreenOn;
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "", e);
             return sRouteOff;
         }
     }
@@ -191,7 +169,7 @@ public final class NfcAdapterExtras {
         try {
             sService.setCardEmulationRoute(route.route);
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "", e);
         }
     }
 
@@ -212,7 +190,7 @@ public final class NfcAdapterExtras {
         try {
             sService.registerTearDownApdus(packageName, apdus);
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "", e);
         }
     }
 
@@ -220,7 +198,7 @@ public final class NfcAdapterExtras {
         try {
             sService.unregisterTearDownApdus(packageName);
         } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
+            Log.e(TAG, "", e);
         }
     }
 }
