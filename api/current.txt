@@ -20904,8 +20904,10 @@ package android.view {
 
   public abstract class ActionProvider {
     ctor public ActionProvider(android.content.Context);
+    method public boolean hasSubMenu();
     method public abstract android.view.View onCreateActionView();
-    method public void onPerformDefaultAction(android.view.View);
+    method public boolean onPerformDefaultAction();
+    method public void onPrepareSubMenu(android.view.SubMenu);
   }
 
   public abstract interface ContextMenu implements android.view.Menu {

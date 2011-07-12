@@ -166,7 +166,12 @@ public class MenuInflater {
                         // Add the item if it hasn't been added (if the item was
                         // a submenu, it would have been added already)
                         if (!menuState.hasAddedItem()) {
-                            menuState.addItem();
+                            if (menuState.itemActionProvider != null &&
+                                    menuState.itemActionProvider.hasSubMenu()) {
+                                menuState.addSubMenuItem();
+                            } else {
+                                menuState.addItem();
+                            }
                         }
                     } else if (tagName.equals(XML_MENU)) {
                         reachedEndOfMenu = true;
@@ -270,6 +275,8 @@ public class MenuInflater {
 
         private String itemListenerMethodName;
         
+        private ActionProvider itemActionProvider;
+
         private static final int defaultGroupId = NO_ID;
         private static final int defaultItemId = NO_ID;
         private static final int defaultItemCategory = 0;
@@ -347,6 +354,19 @@ public class MenuInflater {
             itemActionViewClassName = a.getString(com.android.internal.R.styleable.MenuItem_actionViewClass);
             itemActionProviderClassName = a.getString(com.android.internal.R.styleable.MenuItem_actionProviderClass);
 
+            final boolean hasActionProvider = itemActionProviderClassName != null;
+            if (hasActionProvider && itemActionViewLayout == 0 && itemActionViewClassName == null) {
+                itemActionProvider = newInstance(itemActionProviderClassName,
+                            ACTION_PROVIDER_CONSTRUCTOR_SIGNATURE,
+                            mActionProviderConstructorArguments);
+            } else {
+                if (hasActionProvider) {
+                    Log.w(LOG_TAG, "Ignoring attribute 'actionProviderClass'."
+                            + " Action view already specified.");
+                }
+                itemActionProvider = null;
+            }
+
             a.recycle();
 
             itemAdded = false;
@@ -406,16 +426,8 @@ public class MenuInflater {
                             + " Action view already specified.");
                 }
             }
-            if (itemActionProviderClassName != null) {
-                if (!actionViewSpecified) {
-                    ActionProvider actionProvider = newInstance(itemActionProviderClassName,
-                            ACTION_PROVIDER_CONSTRUCTOR_SIGNATURE,
-                            mActionProviderConstructorArguments);
-                    item.setActionProvider(actionProvider);
-                } else {
-                    Log.w(LOG_TAG, "Ignoring attribute 'itemActionProviderClass'."
-                            + " Action view already specified.");
-                }
+            if (itemActionProvider != null) {
+                item.setActionProvider(itemActionProvider);
             }
         }
 
