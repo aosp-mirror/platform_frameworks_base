@@ -1471,6 +1471,24 @@ public class ActivityManager {
     }
 
     /**
+     * Returns the usage statistics of each installed package.
+     *
+     * @hide
+     */
+    public PkgUsageStats[] getAllPackageUsageStats() {
+        try {
+            IUsageStats usageStatsService = IUsageStats.Stub.asInterface(
+                    ServiceManager.getService("usagestats"));
+            if (usageStatsService != null) {
+                return usageStatsService.getAllPkgUsageStats();
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Could not query usage stats", e);
+        }
+        return new PkgUsageStats[0];
+    }
+
+    /**
      * @param userid the user's id. Zero indicates the default user 
      * @hide
      */
