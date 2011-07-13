@@ -2,7 +2,6 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
- 	M4vH263Decoder.cpp \
  	src/adaptive_smooth_no_mmx.cpp \
  	src/bitstream.cpp \
  	src/block_idct.cpp \

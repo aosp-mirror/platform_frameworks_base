@@ -2,7 +2,6 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-        AMRWBDecoder.cpp \
 	src/agc2_amr_wb.cpp \
  	src/band_pass_6k_7k.cpp \
  	src/dec_acelp_2p_in_64.cpp \

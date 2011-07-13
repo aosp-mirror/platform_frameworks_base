@@ -18,20 +18,11 @@
 #define LOG_TAG "OMXCodec"
 #include <utils/Log.h>
 
-#include "include/AACDecoder.h"
 #include "include/AACEncoder.h"
-#include "include/AMRNBDecoder.h"
 #include "include/AMRNBEncoder.h"
-#include "include/AMRWBDecoder.h"
 #include "include/AMRWBEncoder.h"
-#include "include/AVCDecoder.h"
 #include "include/AVCEncoder.h"
-#include "include/G711Decoder.h"
-#include "include/M4vH263Decoder.h"
 #include "include/M4vH263Encoder.h"
-#include "include/MP3Decoder.h"
-#include "include/VorbisDecoder.h"
-#include "include/VPXDecoder.h"
 
 #include "include/ESDS.h"
 
@@ -52,10 +43,6 @@
 
 #include <OMX_Audio.h>
 #include <OMX_Component.h>
-
-#if HAVE_SOFTWARE_DECODERS
-#include "include/ThreadedSource.h"
-#endif
 
 #include "include/avc_utils.h"
 
@@ -78,24 +65,6 @@ FACTORY_CREATE_ENCODER(AMRWBEncoder)
 FACTORY_CREATE_ENCODER(AACEncoder)
 FACTORY_CREATE_ENCODER(AVCEncoder)
 FACTORY_CREATE_ENCODER(M4vH263Encoder)
-
-#if HAVE_SOFTWARE_DECODERS
-
-#define FACTORY_CREATE(name) \
-static sp<MediaSource> Make##name(const sp<MediaSource> &source) { \
-    return new name(source); \
-}
-
-FACTORY_CREATE(AMRNBDecoder)
-FACTORY_CREATE(AMRWBDecoder)
-FACTORY_CREATE(AACDecoder)
-FACTORY_CREATE(AVCDecoder)
-FACTORY_CREATE(G711Decoder)
-FACTORY_CREATE(MP3Decoder)
-FACTORY_CREATE(M4vH263Decoder)
-FACTORY_CREATE(VorbisDecoder)
-FACTORY_CREATE(VPXDecoder)
-#endif
 
 static sp<MediaSource> InstantiateSoftwareEncoder(
         const char *name, const sp<MediaSource> &source,
@@ -122,40 +91,6 @@ static sp<MediaSource> InstantiateSoftwareEncoder(
     return NULL;
 }
 
-static sp<MediaSource> InstantiateSoftwareCodec(
-        const char *name, const sp<MediaSource> &source) {
-#if HAVE_SOFTWARE_DECODERS
-    struct FactoryInfo {
-        const char *name;
-        sp<MediaSource> (*CreateFunc)(const sp<MediaSource> &);
-    };
-
-    static const FactoryInfo kFactoryInfo[] = {
-        FACTORY_REF(AMRNBDecoder)
-        FACTORY_REF(AMRWBDecoder)
-        FACTORY_REF(AACDecoder)
-        FACTORY_REF(AVCDecoder)
-        FACTORY_REF(G711Decoder)
-        FACTORY_REF(MP3Decoder)
-        FACTORY_REF(M4vH263Decoder)
-        FACTORY_REF(VorbisDecoder)
-        FACTORY_REF(VPXDecoder)
-    };
-    for (size_t i = 0;
-         i < sizeof(kFactoryInfo) / sizeof(kFactoryInfo[0]); ++i) {
-        if (!strcmp(name, kFactoryInfo[i].name)) {
-            if (!strcmp(name, "VPXDecoder")) {
-                return new ThreadedSource(
-                        (*kFactoryInfo[i].CreateFunc)(source));
-            }
-            return (*kFactoryInfo[i].CreateFunc)(source);
-        }
-    }
-#endif
-
-    return NULL;
-}
-
 #undef FACTORY_REF
 #undef FACTORY_CREATE
 
@@ -163,23 +98,17 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_IMAGE_JPEG, "OMX.TI.JPEG.decode" },
 //    { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.TI.MP3.decode" },
     { MEDIA_MIMETYPE_AUDIO_MPEG, "OMX.google.mp3.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_MPEG, "MP3Decoder" },
 //    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.TI.AMR.decode" },
 //    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.Nvidia.amr.decoder" },
     { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.google.amrnb.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "AMRNBDecoder" },
 //    { MEDIA_MIMETYPE_AUDIO_AMR_NB, "OMX.Nvidia.amrwb.decoder" },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.TI.WBAMR.decode" },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB, "OMX.google.amrwb.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_AMR_WB, "AMRWBDecoder" },
 //    { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.Nvidia.aac.decoder" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.TI.AAC.decode" },
     { MEDIA_MIMETYPE_AUDIO_AAC, "OMX.google.aac.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_AAC, "AACDecoder" },
     { MEDIA_MIMETYPE_AUDIO_G711_ALAW, "OMX.google.g711.alaw.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_G711_ALAW, "G711Decoder" },
     { MEDIA_MIMETYPE_AUDIO_G711_MLAW, "OMX.google.g711.mlaw.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_G711_MLAW, "G711Decoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.DUCATI1.VIDEO.DECODER" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.Nvidia.mp4.decode" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.qcom.7x30.video.decoder.mpeg4" },
@@ -187,14 +116,12 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.TI.Video.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.SEC.MPEG4.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG4, "OMX.google.mpeg4.decoder" },
-    { MEDIA_MIMETYPE_VIDEO_MPEG4, "M4vH263Decoder" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.TI.DUCATI1.VIDEO.DECODER" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.Nvidia.h263.decode" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.7x30.video.decoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.qcom.video.decoder.h263" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.SEC.H263.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_H263, "OMX.google.h263.decoder" },
-    { MEDIA_MIMETYPE_VIDEO_H263, "M4vH263Decoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.TI.DUCATI1.VIDEO.DECODER" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.Nvidia.h264.decode" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.qcom.7x30.video.decoder.avc" },
@@ -203,11 +130,8 @@ static const CodecInfo kDecoderInfo[] = {
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.SEC.AVC.Decoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.google.h264.decoder" },
     { MEDIA_MIMETYPE_VIDEO_AVC, "OMX.google.avc.decoder" },
-    { MEDIA_MIMETYPE_VIDEO_AVC, "AVCDecoder" },
     { MEDIA_MIMETYPE_AUDIO_VORBIS, "OMX.google.vorbis.decoder" },
-    { MEDIA_MIMETYPE_AUDIO_VORBIS, "VorbisDecoder" },
     { MEDIA_MIMETYPE_VIDEO_VPX, "OMX.google.vpx.decoder" },
-    { MEDIA_MIMETYPE_VIDEO_VPX, "VPXDecoder" },
     { MEDIA_MIMETYPE_VIDEO_MPEG2, "OMX.Nvidia.mpeg2v.decode" },
 };
 
@@ -518,14 +442,15 @@ sp<MediaSource> OMXCodec::Create(
     for (size_t i = 0; i < matchingCodecs.size(); ++i) {
         componentName = matchingCodecs[i].string();
 
-        sp<MediaSource> softwareCodec = createEncoder?
-            InstantiateSoftwareEncoder(componentName, source, meta):
-            InstantiateSoftwareCodec(componentName, source);
+        if (createEncoder) {
+            sp<MediaSource> softwareCodec =
+                InstantiateSoftwareEncoder(componentName, source, meta);
 
-        if (softwareCodec != NULL) {
-            LOGV("Successfully allocated software codec '%s'", componentName);
+            if (softwareCodec != NULL) {
+                LOGV("Successfully allocated software codec '%s'", componentName);
 
-            return softwareCodec;
+                return softwareCodec;
+            }
         }
 
         LOGV("Attempting to allocate OMX node '%s'", componentName);
@@ -4430,12 +4355,9 @@ status_t QueryCodecs(
         if (strncmp(componentName, "OMX.", 4)) {
             // Not an OpenMax component but a software codec.
 
-#if HAVE_SOFTWARE_DECODERS
             results->push();
             CodecCapabilities *caps = &results->editItemAt(results->size() - 1);
             caps->mComponentName = componentName;
-#endif
-
             continue;
         }
 
