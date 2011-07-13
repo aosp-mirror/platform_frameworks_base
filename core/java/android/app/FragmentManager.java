@@ -1307,6 +1307,7 @@ final class FragmentManagerImpl extends FragmentManager {
             mExecutingActions = true;
             for (int i=0; i<numActions; i++) {
                 mTmpActions[i].run();
+                mTmpActions[i] = null;
             }
             mExecutingActions = false;
             didSomething = true;
