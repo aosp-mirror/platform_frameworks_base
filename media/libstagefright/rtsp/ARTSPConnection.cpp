@@ -34,7 +34,7 @@
 #include <openssl/md5.h>
 #include <sys/socket.h>
 
-#include "HTTPStream.h"
+#include "HTTPBase.h"
 
 namespace android {
 
@@ -251,7 +251,7 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
     mSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     if (mUIDValid) {
-        HTTPStream::RegisterSocketUser(mSocket, mUID);
+        HTTPBase::RegisterSocketUser(mSocket, mUID);
     }
 
     MakeSocketBlocking(mSocket, false);
