@@ -502,38 +502,67 @@ void CameraService::Client::disconnect() {
 
 // ----------------------------------------------------------------------------
 
-// set the Surface that the preview will use
-status_t CameraService::Client::setPreviewDisplay(const sp<Surface>& surface) {
-    LOG1("setPreviewDisplay(%p) (pid %d)", surface.get(), getCallingPid());
+static void disconnectWindow(const sp<ANativeWindow>& window) {
+    if (window != 0) {
+        status_t result = native_window_disconnect(window.get(),
+                NATIVE_WINDOW_API_CAMERA);
+        if (result != NO_ERROR) {
+            LOGW("native_window_disconnect failed: %s (%d)", strerror(-result),
+                    result);
+        }
+    }
+}
+
+status_t CameraService::Client::setPreviewWindow(const sp<IBinder>& binder,
+        const sp<ANativeWindow>& window) {
     Mutex::Autolock lock(mLock);
     status_t result = checkPidAndHardware();
     if (result != NO_ERROR) return result;
 
-    result = NO_ERROR;
-
     // return if no change in surface.
-    sp<IBinder> binder(surface != 0 ? surface->asBinder() : 0);
     if (binder == mSurface) {
-        return result;
+        return NO_ERROR;
     }
 
-    if (mSurface != 0) {
-        LOG1("clearing old preview surface %p", mSurface.get());
-    }
-    mSurface = binder;
-    mPreviewWindow = surface;
-
-    // If preview has been already started, register preview
-    // buffers now.
-    if (mHardware->previewEnabled()) {
-        if (mPreviewWindow != 0) {
-            native_window_set_buffers_transform(mPreviewWindow.get(),
-                                                mOrientation);
-            result = mHardware->setPreviewWindow(mPreviewWindow);
+    if (window != 0) {
+        result = native_window_connect(window.get(), NATIVE_WINDOW_API_CAMERA);
+        if (result != NO_ERROR) {
+            LOGE("native_window_connect failed: %s (%d)", strerror(-result),
+                    result);
+            return result;
         }
     }
 
+    // If preview has been already started, register preview buffers now.
+    if (mHardware->previewEnabled()) {
+        if (window != 0) {
+            native_window_set_buffers_transform(window.get(), mOrientation);
+            result = mHardware->setPreviewWindow(window);
+        }
+    }
+
+    if (result == NO_ERROR) {
+        // Everything has succeeded.  Disconnect the old window and remember the
+        // new window.
+        disconnectWindow(mPreviewWindow);
+        mSurface = binder;
+        mPreviewWindow = window;
+    } else {
+        // Something went wrong after we connected to the new window, so
+        // disconnect here.
+        disconnectWindow(window);
+    }
+
     return result;
+}
+
+// set the Surface that the preview will use
+status_t CameraService::Client::setPreviewDisplay(const sp<Surface>& surface) {
+    LOG1("setPreviewDisplay(%p) (pid %d)", surface.get(), getCallingPid());
+
+    sp<IBinder> binder(surface != 0 ? surface->asBinder() : 0);
+    sp<ANativeWindow> window(surface);
+    return setPreviewWindow(binder, window);
 }
 
 // set the SurfaceTexture that the preview will use
@@ -541,38 +570,14 @@ status_t CameraService::Client::setPreviewTexture(
         const sp<ISurfaceTexture>& surfaceTexture) {
     LOG1("setPreviewTexture(%p) (pid %d)", surfaceTexture.get(),
             getCallingPid());
-    Mutex::Autolock lock(mLock);
-    status_t result = checkPidAndHardware();
-    if (result != NO_ERROR) return result;
 
-    // return if no change in surface.
-    // asBinder() is safe on NULL (returns NULL)
-    if (surfaceTexture->asBinder() == mSurface) {
-        return result;
-    }
-
-    if (mSurface != 0) {
-        LOG1("clearing old preview surface %p", mSurface.get());
-    }
-    mSurface = surfaceTexture->asBinder();
+    sp<IBinder> binder;
+    sp<ANativeWindow> window;
     if (surfaceTexture != 0) {
-        mPreviewWindow = new SurfaceTextureClient(surfaceTexture);
-    } else {
-        mPreviewWindow = 0;
+        binder = surfaceTexture->asBinder();
+        window = new SurfaceTextureClient(surfaceTexture);
     }
-
-    // If preview has been already started, set overlay or register preview
-    // buffers now.
-    if (mHardware->previewEnabled()) {
-        // XXX: What if the new preview window is 0?
-        if (mPreviewWindow != 0) {
-            native_window_set_buffers_transform(mPreviewWindow.get(),
-                                                mOrientation);
-            result = mHardware->setPreviewWindow(mPreviewWindow);
-        }
-    }
-
-    return result;
+    return setPreviewWindow(binder, window);
 }
 
 // set the preview callback flag to affect how the received frames from
