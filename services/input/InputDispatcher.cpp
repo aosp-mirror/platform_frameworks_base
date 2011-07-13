@@ -3154,9 +3154,11 @@ void InputDispatcher::setInputWindows(const Vector<InputWindow>& inputWindows) {
             mLastHoverWindow = NULL;
         }
 
+        mWindows.clear();
+
         // Loop over new windows and rebuild the necessary window pointers for
         // tracking focus and touch.
-        mWindows = inputWindows;
+        mWindows.appendVector(inputWindows);
 
         size_t numWindows = mWindows.size();
         for (size_t i = 0; i < numWindows; i++) {
@@ -4558,7 +4560,8 @@ void InputDispatcher::TouchState::copyFrom(const TouchState& other) {
     split = other.split;
     deviceId = other.deviceId;
     source = other.source;
-    windows = other.windows;
+    windows.clear();
+    windows.appendVector(other.windows);
 }
 
 void InputDispatcher::TouchState::addOrUpdateWindow(const InputWindow* window,
