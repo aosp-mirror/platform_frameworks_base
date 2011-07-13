@@ -124,6 +124,22 @@ public class NetworkStatsHistory implements Parcelable {
         return bucketDuration;
     }
 
+    public long getStart() {
+        if (bucketCount > 0) {
+            return bucketStart[0];
+        } else {
+            return Long.MAX_VALUE;
+        }
+    }
+
+    public long getEnd() {
+        if (bucketCount > 0) {
+            return bucketStart[bucketCount - 1] + bucketDuration;
+        } else {
+            return Long.MIN_VALUE;
+        }
+    }
+
     /**
      * Return specific stats entry.
      */
@@ -253,9 +269,20 @@ public class NetworkStatsHistory implements Parcelable {
      * Return interpolated data usage across the requested range. Interpolates
      * across buckets, so values may be rounded slightly.
      */
-    public long[] getTotalData(long start, long end, long[] outTotal) {
-        long rx = 0;
-        long tx = 0;
+    public Entry getValues(long start, long end, Entry recycle) {
+        return getValues(start, end, Long.MAX_VALUE, recycle);
+    }
+
+    /**
+     * Return interpolated data usage across the requested range. Interpolates
+     * across buckets, so values may be rounded slightly.
+     */
+    public Entry getValues(long start, long end, long now, Entry recycle) {
+        final Entry entry = recycle != null ? recycle : new Entry();
+        entry.bucketStart = start;
+        entry.bucketDuration = end - start;
+        entry.rxBytes = 0;
+        entry.txBytes = 0;
 
         for (int i = bucketCount - 1; i >= 0; i--) {
             final long curStart = bucketStart[i];
@@ -266,19 +293,19 @@ public class NetworkStatsHistory implements Parcelable {
             // bucket is newer than record; keep looking
             if (curStart > end) continue;
 
+            // include full value for active buckets, otherwise only fractional
+            final boolean activeBucket = curStart < now && curEnd > now;
             final long overlap = Math.min(curEnd, end) - Math.max(curStart, start);
-            if (overlap > 0) {
-                rx += this.rxBytes[i] * overlap / bucketDuration;
-                tx += this.txBytes[i] * overlap / bucketDuration;
+            if (activeBucket || overlap == bucketDuration) {
+                entry.rxBytes += rxBytes[i];
+                entry.txBytes += txBytes[i];
+            } else if (overlap > 0) {
+                entry.rxBytes += rxBytes[i] * overlap / bucketDuration;
+                entry.txBytes += txBytes[i] * overlap / bucketDuration;
             }
         }
 
-        if (outTotal == null || outTotal.length != 2) {
-            outTotal = new long[2];
-        }
-        outTotal[0] = rx;
-        outTotal[1] = tx;
-        return outTotal;
+        return entry;
     }
 
     /**
