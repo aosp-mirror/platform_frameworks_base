@@ -278,7 +278,6 @@ jint android_os_Debug_getProxyObjectCount(JNIEnv* env, jobject clazz);
 jint android_os_Debug_getDeathObjectCount(JNIEnv* env, jobject clazz);
 
 
-#ifdef HAVE_ANDROID_OS
 /* pulled out of bionic */
 extern "C" void get_malloc_leak_info(uint8_t** info, size_t* overallSize,
     size_t* infoSize, size_t* totalMemory, size_t* backtraceSize);
@@ -414,7 +413,6 @@ static void dumpNativeHeap(FILE* fp)
 
     fprintf(fp, "END\n");
 }
-#endif /*HAVE_ANDROID_OS*/
 
 /*
  * Dump the native heap, writing human-readable output to the specified
@@ -449,13 +447,9 @@ static void android_os_Debug_dumpNativeHeap(JNIEnv* env, jobject clazz,
         return;
     }
 
-#ifdef HAVE_ANDROID_OS
     LOGD("Native heap dump starting...\n");
     dumpNativeHeap(fp);
     LOGD("Native heap dump complete.\n");
-#else
-    fprintf(fp, "Native heap dump not available on this platform\n");
-#endif
 
     fclose(fp);
 }

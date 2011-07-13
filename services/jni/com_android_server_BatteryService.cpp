@@ -32,10 +32,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <dirent.h>
-
-#ifdef HAVE_ANDROID_OS
 #include <linux/ioctl.h>
-#endif
 
 namespace android {
 

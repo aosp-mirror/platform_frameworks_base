@@ -623,16 +623,9 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
     }
 
     /* enable debugging; set suspend=y to pause during VM init */
-#ifdef HAVE_ANDROID_OS
     /* use android ADB transport */
     opt.optionString =
         "-agentlib:jdwp=transport=dt_android_adb,suspend=n,server=y";
-#else
-    /* use TCP socket; address=0 means start at port 8000 and probe up */
-    LOGI("Using TCP socket for JDWP\n");
-    opt.optionString =
-        "-agentlib:jdwp=transport=dt_socket,suspend=n,server=y,address=0";
-#endif
     mOptions.add(opt);
 
     char enableDPBuf[sizeof("-Xdeadlockpredict:") + PROPERTY_VALUE_MAX];

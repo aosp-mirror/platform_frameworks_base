@@ -27,13 +27,11 @@
 #include <JNIHelp.h>
 #include "android_runtime/AndroidRuntime.h"
 
-#ifdef HAVE_ANDROID_OS
 #include <linux/capability.h>
 #include <linux/prctl.h>
 #include <sys/prctl.h>
 extern "C" int capget(cap_user_header_t hdrp, cap_user_data_t datap);
 extern "C" int capset(cap_user_header_t hdrp, const cap_user_data_t datap);
-#endif
 
 
 namespace android {
@@ -168,7 +166,6 @@ static void com_android_internal_os_ZygoteInit_setCloseOnExec (JNIEnv *env,
 static void com_android_internal_os_ZygoteInit_setCapabilities (JNIEnv *env,
     jobject clazz, jlong permitted, jlong effective)
 {
-#ifdef HAVE_ANDROID_OS
     struct __user_cap_header_struct capheader;
     struct __user_cap_data_struct capdata;
     int err;
@@ -190,15 +187,11 @@ static void com_android_internal_os_ZygoteInit_setCapabilities (JNIEnv *env,
         jniThrowIOException(env, errno);
         return;
     }
-#endif /* HAVE_ANDROID_OS */
 }
 
 static jlong com_android_internal_os_ZygoteInit_capgetPermitted (JNIEnv *env,
     jobject clazz, jint pid)
 {
-#ifndef HAVE_ANDROID_OS
-    return (jlong)0;
-#else
     struct __user_cap_header_struct capheader;
     struct __user_cap_data_struct capdata;
     int err;
@@ -217,7 +210,6 @@ static jlong com_android_internal_os_ZygoteInit_capgetPermitted (JNIEnv *env,
     }
 
     return (jlong) capdata.permitted;
-#endif /* HAVE_ANDROID_OS */
 }
 
 static jint com_android_internal_os_ZygoteInit_selectReadable (

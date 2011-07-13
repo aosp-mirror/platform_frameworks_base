@@ -48,9 +48,6 @@ static const int kDumpLockRetries = 50;
 static const int kDumpLockSleep = 20000;
 
 static bool checkPermission() {
-#ifndef HAVE_ANDROID_OS
-    return true;
-#endif
     if (getpid() == IPCThreadState::self()->getCallingPid()) return true;
     bool ok = checkCallingPermission(String16("android.permission.MODIFY_AUDIO_SETTINGS"));
     if (!ok) LOGE("Request requires android.permission.MODIFY_AUDIO_SETTINGS");

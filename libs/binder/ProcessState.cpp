@@ -154,11 +154,7 @@ bool ProcessState::becomeContextManager(context_check_func checkFunc, void* user
         mBinderContextUserData = userData;
 
         int dummy = 0;
-#if defined(HAVE_ANDROID_OS)
         status_t result = ioctl(mDriverFD, BINDER_SET_CONTEXT_MGR, &dummy);
-#else
-        status_t result = INVALID_OPERATION;
-#endif
         if (result == 0) {
             mManagesContexts = true;
         } else if (result == -1) {
@@ -304,12 +300,7 @@ static int open_driver()
     if (fd >= 0) {
         fcntl(fd, F_SETFD, FD_CLOEXEC);
         int vers;
-#if defined(HAVE_ANDROID_OS)
         status_t result = ioctl(fd, BINDER_VERSION, &vers);
-#else
-        status_t result = -1;
-        errno = EPERM;
-#endif
         if (result == -1) {
             LOGE("Binder ioctl to obtain version failed: %s", strerror(errno));
             close(fd);
@@ -320,14 +311,11 @@ static int open_driver()
             close(fd);
             fd = -1;
         }
-#if defined(HAVE_ANDROID_OS)
         size_t maxThreads = 15;
         result = ioctl(fd, BINDER_SET_MAX_THREADS, &maxThreads);
         if (result == -1) {
             LOGE("Binder ioctl to set max threads failed: %s", strerror(errno));
         }
-#endif
-        
     } else {
         LOGW("Opening '/dev/binder' failed: %s\n", strerror(errno));
     }

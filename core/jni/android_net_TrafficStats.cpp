@@ -44,7 +44,6 @@ enum Tcp_Udp {
 
 // Returns an ASCII decimal number read from the specified file, -1 on error.
 static jlong readNumber(char const* filename) {
-#ifdef HAVE_ANDROID_OS
     char buf[80];
     int fd = open(filename, O_RDONLY);
     if (fd < 0) {
@@ -62,9 +61,6 @@ static jlong readNumber(char const* filename) {
     close(fd);
     buf[len] = '\0';
     return atoll(buf);
-#else  // Simulator
-    return -1;
-#endif
 }
 
 static const char* mobile_iface_list[] = {
@@ -101,7 +97,6 @@ static jlong getAll(const char** iface_list, const char* what) {
 // Returns the sum of numbers from the specified path under /sys/class/net/*,
 // -1 if no such file exists.
 static jlong readTotal(char const* suffix) {
-#ifdef HAVE_ANDROID_OS
     char filename[PATH_MAX] = "/sys/class/net/";
     DIR *dir = opendir(filename);
     if (dir == NULL) {
@@ -123,9 +118,6 @@ static jlong readTotal(char const* suffix) {
 
     closedir(dir);
     return total;
-#else  // Simulator
-    return -1;
-#endif
 }
 
 // Mobile stats get accessed a lot more often than total stats.

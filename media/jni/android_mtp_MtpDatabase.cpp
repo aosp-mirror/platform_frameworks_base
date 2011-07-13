@@ -79,7 +79,6 @@ MtpDatabase* getMtpDatabase(JNIEnv *env, jobject database) {
     return (MtpDatabase *)env->GetIntField(database, field_context);
 }
 
-#ifdef HAVE_ANDROID_OS
 // ----------------------------------------------------------------------------
 
 class MyMtpDatabase : public MtpDatabase {
@@ -1066,42 +1065,32 @@ void MyMtpDatabase::sessionEnded() {
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
-#endif // HAVE_ANDROID_OS
-
 // ----------------------------------------------------------------------------
 
 static void
 android_mtp_MtpDatabase_setup(JNIEnv *env, jobject thiz)
 {
-#ifdef HAVE_ANDROID_OS
     MyMtpDatabase* database = new MyMtpDatabase(env, thiz);
     env->SetIntField(thiz, field_context, (int)database);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
-#endif
 }
 
 static void
 android_mtp_MtpDatabase_finalize(JNIEnv *env, jobject thiz)
 {
-#ifdef HAVE_ANDROID_OS
     MyMtpDatabase* database = (MyMtpDatabase *)env->GetIntField(thiz, field_context);
     database->cleanup(env);
     delete database;
     env->SetIntField(thiz, field_context, 0);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
-#endif
 }
 
 static jstring
 android_mtp_MtpPropertyGroup_format_date_time(JNIEnv *env, jobject thiz, jlong seconds)
 {
-#ifdef HAVE_ANDROID_OS
     char    date[20];
     formatDateTime(seconds, date, sizeof(date));
     return env->NewStringUTF(date);
-#else
-    return NULL;
-#endif
 }
 
 // ----------------------------------------------------------------------------

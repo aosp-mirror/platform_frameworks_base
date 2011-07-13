@@ -58,9 +58,6 @@ static int toLevel(const char* value)
 
 static jboolean android_util_Log_isLoggable(JNIEnv* env, jobject clazz, jstring tag, jint level)
 {
-#ifndef HAVE_ANDROID_OS
-    return false;
-#else /* HAVE_ANDROID_OS */
     int len;
     char key[PROPERTY_KEY_MAX];
     char buf[PROPERTY_VALUE_MAX];
@@ -93,7 +90,6 @@ static jboolean android_util_Log_isLoggable(JNIEnv* env, jobject clazz, jstring 
     len = property_get(key, buf, "");
     int logLevel = toLevel(buf);
     return (logLevel >= 0 && level >= logLevel) ? true : false;
-#endif /* HAVE_ANDROID_OS */
 }
 
 /*
