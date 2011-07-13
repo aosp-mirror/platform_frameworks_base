@@ -835,6 +835,9 @@ public class MediaScanner
                 }
             }
 
+            // For inserts we always use the file URI so we can insert in bulk.
+            // For updates we compute the URI based on the media type.
+            Uri tableUri = mFilesUri;
             Uri result = null;
             if (rowId == 0) {
                 if (mMtpObjectHandle != 0) {
@@ -850,7 +853,7 @@ public class MediaScanner
                 if (mFileInserter != null) {
                     result = mFileInserter.insert(values);
                 } else {
-                    result = mMediaProvider.insert(mFilesUri, values);
+                    result = mMediaProvider.insert(tableUri, values);
                 }
 
                 if (result != null) {
@@ -858,8 +861,18 @@ public class MediaScanner
                     entry.mRowId = rowId;
                 }
             } else {
+                if (!mNoMedia) {
+                    if (MediaFile.isVideoFileType(mFileType)) {
+                        tableUri = mVideoUri;
+                    } else if (MediaFile.isImageFileType(mFileType)) {
+                        tableUri = mImagesUri;
+                    } else if (MediaFile.isAudioFileType(mFileType)) {
+                        tableUri = mAudioUri;
+                    }
+                }
+
                 // updated file
-                result = ContentUris.withAppendedId(mFilesUri, rowId);
+                result = ContentUris.withAppendedId(tableUri, rowId);
                 // path should never change, and we want to avoid replacing mixed cased paths
                 // with squashed lower case paths
                 values.remove(MediaStore.MediaColumns.DATA);
@@ -909,19 +922,19 @@ public class MediaScanner
             if (notifications && !mDefaultNotificationSet) {
                 if (TextUtils.isEmpty(mDefaultNotificationFilename) ||
                         doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename)) {
-                    setSettingIfNotSet(Settings.System.NOTIFICATION_SOUND, mFilesUri, rowId);
+                    setSettingIfNotSet(Settings.System.NOTIFICATION_SOUND, tableUri, rowId);
                     mDefaultNotificationSet = true;
                 }
             } else if (ringtones && !mDefaultRingtoneSet) {
                 if (TextUtils.isEmpty(mDefaultRingtoneFilename) ||
                         doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename)) {
-                    setSettingIfNotSet(Settings.System.RINGTONE, mFilesUri, rowId);
+                    setSettingIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
                     mDefaultRingtoneSet = true;
                 }
             } else if (alarms && !mDefaultAlarmSet) {
                 if (TextUtils.isEmpty(mDefaultAlarmAlertFilename) ||
                         doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)) {
-                    setSettingIfNotSet(Settings.System.ALARM_ALERT, mFilesUri, rowId);
+                    setSettingIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
                     mDefaultAlarmSet = true;
                 }
             }
