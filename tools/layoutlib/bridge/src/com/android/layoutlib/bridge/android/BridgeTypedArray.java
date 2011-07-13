@@ -131,6 +131,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public CharSequence getText(int index) {
+        if (index < 0 || index >= mResourceData.length) {
+            return null;
+        }
+
         if (mResourceData[index] != null) {
             // FIXME: handle styled strings!
             return mResourceData[index].getValue();
@@ -149,6 +153,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public String getString(int index) {
+        if (index < 0 || index >= mResourceData.length) {
+            return null;
+        }
+
         if (mResourceData[index] != null) {
             return mResourceData[index].getValue();
         }
@@ -166,6 +174,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public boolean getBoolean(int index, boolean defValue) {
+        if (index < 0 || index >= mResourceData.length) {
+            return defValue;
+        }
+
         if (mResourceData[index] == null) {
             return defValue;
         }
@@ -188,6 +200,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public int getInt(int index, int defValue) {
+        if (index < 0 || index >= mResourceData.length) {
+            return defValue;
+        }
+
         if (mResourceData[index] == null) {
             return defValue;
         }
@@ -252,6 +268,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public float getFloat(int index, float defValue) {
+        if (index < 0 || index >= mResourceData.length) {
+            return defValue;
+        }
+
         if (mResourceData[index] == null) {
             return defValue;
         }
@@ -287,6 +307,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public int getColor(int index, int defValue) {
+        if (index < 0 || index >= mResourceData.length) {
+            return defValue;
+        }
+
         if (mResourceData[index] == null) {
             return defValue;
         }
@@ -311,6 +335,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public ColorStateList getColorStateList(int index) {
+        if (index < 0 || index >= mResourceData.length) {
+            return null;
+        }
+
         if (mResourceData[index] == null) {
             return null;
         }
@@ -395,6 +423,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public float getDimension(int index, float defValue) {
+        if (index < 0 || index >= mResourceData.length) {
+            return defValue;
+        }
+
         if (mResourceData[index] == null) {
             return defValue;
         }
@@ -568,6 +600,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public float getFraction(int index, int base, int pbase, float defValue) {
+        if (index < 0 || index >= mResourceData.length) {
+            return defValue;
+        }
+
         if (mResourceData[index] == null) {
             return defValue;
         }
@@ -607,6 +643,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public int getResourceId(int index, int defValue) {
+        if (index < 0 || index >= mResourceData.length) {
+            return defValue;
+        }
+
         // get the Resource for this index
         ResourceValue resValue = mResourceData[index];
 
@@ -718,6 +758,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public Drawable getDrawable(int index) {
+        if (index < 0 || index >= mResourceData.length) {
+            return null;
+        }
+
         if (mResourceData[index] == null) {
             return null;
         }
@@ -744,6 +788,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public CharSequence[] getTextArray(int index) {
+        if (index < 0 || index >= mResourceData.length) {
+            return null;
+        }
+
         if (mResourceData[index] == null) {
             return null;
         }
@@ -776,6 +824,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public boolean getValue(int index, TypedValue outValue) {
+        if (index < 0 || index >= mResourceData.length) {
+            return false;
+        }
+
         if (mResourceData[index] == null) {
             return false;
         }
@@ -795,6 +847,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public boolean hasValue(int index) {
+        if (index < 0 || index >= mResourceData.length) {
+            return false;
+        }
+
         return mResourceData[index] != null;
     }
 
@@ -811,6 +867,10 @@ public final class BridgeTypedArray extends TypedArray {
      */
     @Override
     public TypedValue peekValue(int index) {
+        if (index < 0 || index >= mResourceData.length) {
+            return null;
+        }
+
         if (getValue(index, mValue)) {
             return mValue;
         }
