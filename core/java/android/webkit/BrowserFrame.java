@@ -1163,7 +1163,12 @@ class BrowserFrame extends Handler {
         final SslError ssl_error;
         try {
             X509Certificate cert = new X509CertImpl(cert_der);
-            ssl_error = new SslError(cert_error, cert, url);
+            SslCertificate sslCert = new SslCertificate(cert);
+            if (JniUtil.useChromiumHttpStack()) {
+                ssl_error = SslError.SslErrorFromChromiumErrorCode(cert_error, sslCert, url);
+            } else {
+                ssl_error = new SslError(cert_error, cert, url);
+            }
         } catch (IOException e) {
             // Can't get the certificate, not much to do.
             Log.e(LOGTAG, "Can't get the certificate from WebKit, canceling");
