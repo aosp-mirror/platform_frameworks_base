@@ -52,7 +52,7 @@ public class DataCallState {
     /**
      * Class returned by onSetupConnectionCompleted.
      */
-    protected enum SetupResult {
+    public enum SetupResult {
         SUCCESS,
         ERR_BadCommand,
         ERR_UnacceptableParameter,

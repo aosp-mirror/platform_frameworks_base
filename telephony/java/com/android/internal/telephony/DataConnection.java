@@ -17,30 +17,25 @@
 package com.android.internal.telephony;
 
 
+import com.android.internal.telephony.DataCallState.SetupResult;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
 import android.app.PendingIntent;
-import android.net.LinkAddress;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
-import android.net.NetworkUtils;
+import android.net.LinkProperties.CompareAddressesResult;
 import android.net.ProxyProperties;
 import android.os.AsyncResult;
-import android.os.Bundle;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * {@hide}
@@ -497,8 +492,7 @@ public abstract class DataConnection extends StateMachine {
         } else {
             if (DBG) log("onSetupConnectionCompleted received DataCallState: " + response);
             cid = response.cid;
-            // set link properties based on data call response
-            result = setLinkProperties(response, mLinkProperties);
+            result = updateLinkProperty(response).setupResult;
         }
 
         return result;
@@ -527,48 +521,41 @@ public abstract class DataConnection extends StateMachine {
         return response.setLinkProperties(lp, okToUseSystemPropertyDns);
     }
 
-    private DataConnectionAc.LinkPropertyChangeAction updateLinkProperty(
-                                                      DataCallState newState) {
-        DataConnectionAc.LinkPropertyChangeAction changed =
-                        DataConnectionAc.LinkPropertyChangeAction.NONE;
+    public static class UpdateLinkPropertyResult {
+        public DataCallState.SetupResult setupResult = DataCallState.SetupResult.SUCCESS;
+        public LinkProperties oldLp;
+        public LinkProperties newLp;
+        public UpdateLinkPropertyResult(LinkProperties curLp) {
+            oldLp = curLp;
+            newLp = curLp;
+        }
+    }
 
-        if (newState == null) return changed;
+    private UpdateLinkPropertyResult updateLinkProperty(DataCallState newState) {
+        UpdateLinkPropertyResult result = new UpdateLinkPropertyResult(mLinkProperties);
 
-        DataCallState.SetupResult result;
-        LinkProperties newLp = new LinkProperties();
+        if (newState == null) return result;
+
+        DataCallState.SetupResult setupResult;
+        result.newLp = new LinkProperties();
 
         // set link properties based on data call response
-        result = setLinkProperties(newState, newLp);
-        if (result != DataCallState.SetupResult.SUCCESS) {
-            if (DBG) log("UpdateLinkProperty failed : " + result);
-            return changed;
+        result.setupResult = setLinkProperties(newState, result.newLp);
+        if (result.setupResult != DataCallState.SetupResult.SUCCESS) {
+            if (DBG) log("updateLinkProperty failed : " + result.setupResult);
+            return result;
         }
         // copy HTTP proxy as it is not part DataCallState.
-        newLp.setHttpProxy(mLinkProperties.getHttpProxy());
+        result.newLp.setHttpProxy(mLinkProperties.getHttpProxy());
 
-        if (DBG) log("old LP=" + mLinkProperties);
-        if (DBG) log("new LP=" + newLp);
-
-        // Check consistency of link address. Currently we expect
-        // only one "global" address is assigned per each IP type.
-        Collection<LinkAddress> oLinks = mLinkProperties.getLinkAddresses();
-        Collection<LinkAddress> nLinks = newLp.getLinkAddresses();
-        for (LinkAddress oldLink : oLinks) {
-            for (LinkAddress newLink : nLinks) {
-                if ((NetworkUtils.addressTypeMatches(oldLink.getAddress(),
-                                        newLink.getAddress())) &&
-                    (oldLink.equals(newLink) == false)) {
-                    return DataConnectionAc.LinkPropertyChangeAction.RESET;
-                }
-            }
+        if (DBG && (! result.oldLp.equals(result.newLp))) {
+            if (DBG) log("updateLinkProperty old != new");
+            if (VDBG) log("updateLinkProperty old LP=" + result.oldLp);
+            if (VDBG) log("updateLinkProperty new LP=" + result.newLp);
         }
+        mLinkProperties = result.newLp;
 
-        if (mLinkProperties == null || !mLinkProperties.equals(newLp)) {
-            mLinkProperties = newLp;
-            changed = DataConnectionAc.LinkPropertyChangeAction.CHANGED;
-        }
-
-        return changed;
+        return result;
     }
 
     /**
@@ -643,14 +630,15 @@ public abstract class DataConnection extends StateMachine {
                 }
                 case DataConnectionAc.REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE: {
                     DataCallState newState = (DataCallState) msg.obj;
-                    DataConnectionAc.LinkPropertyChangeAction action = updateLinkProperty(newState);
+                    UpdateLinkPropertyResult result =
+                                             updateLinkProperty(newState);
                     if (VDBG) {
-                        log("REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE action="
-                            + action + " newState=" + newState);
+                        log("REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE result="
+                            + result + " newState=" + newState);
                     }
                     mAc.replyToMessage(msg,
                                    DataConnectionAc.RSP_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE,
-                                   action.ordinal());
+                                   result);
                     break;
                 }
                 case DataConnectionAc.REQ_GET_LINK_CAPABILITIES: {
@@ -688,7 +676,7 @@ public abstract class DataConnection extends StateMachine {
                 case DataConnectionAc.REQ_GET_APNCONTEXT_LIST: {
                     if (VDBG) log("REQ_GET_APNCONTEXT_LIST num in list=" + mApnList.size());
                     mAc.replyToMessage(msg, DataConnectionAc.RSP_GET_APNCONTEXT_LIST,
-                                       new ArrayList(mApnList));
+                                       new ArrayList<ApnContext>(mApnList));
                     break;
                 }
                 case DataConnectionAc.REQ_SET_RECONNECT_INTENT: {
