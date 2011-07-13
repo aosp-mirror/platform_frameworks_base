@@ -57,6 +57,7 @@ public class SipAudioCall {
     private static final boolean RELEASE_SOCKET = true;
     private static final boolean DONT_RELEASE_SOCKET = false;
     private static final int SESSION_TIMEOUT = 5; // in seconds
+    private static final int TRANSFER_TIMEOUT = 15; // in seconds
 
     /** Listener for events relating to a SIP call, such as when a call is being
      * recieved ("on ringing") or a call is outgoing ("on calling").
@@ -537,10 +538,14 @@ public class SipAudioCall {
                 Log.v(TAG, "onCallTransferring mSipSession:"
                         + mSipSession + " newSession:" + newSession);
                 mTransferringSession = newSession;
-                // session changing request
                 try {
-                    String answer = createAnswer(sessionDescription).encode();
-                    newSession.answerCall(answer, SESSION_TIMEOUT);
+                    if (sessionDescription == null) {
+                        newSession.makeCall(newSession.getPeerProfile(),
+                                createOffer().encode(), TRANSFER_TIMEOUT);
+                    } else {
+                        String answer = createAnswer(sessionDescription).encode();
+                        newSession.answerCall(answer, SESSION_TIMEOUT);
+                    }
                 } catch (Throwable e) {
                     Log.e(TAG, "onCallTransferring()", e);
                     newSession.endCall();

@@ -18,12 +18,15 @@ package com.android.server.sip;
 
 import gov.nist.javax.sip.clientauthutils.AccountManager;
 import gov.nist.javax.sip.clientauthutils.UserCredentials;
-import gov.nist.javax.sip.header.SIPHeaderNames;
 import gov.nist.javax.sip.header.ProxyAuthenticate;
+import gov.nist.javax.sip.header.ReferTo;
+import gov.nist.javax.sip.header.SIPHeaderNames;
+import gov.nist.javax.sip.header.StatusLine;
 import gov.nist.javax.sip.header.WWWAuthenticate;
 import gov.nist.javax.sip.header.extensions.ReferredByHeader;
 import gov.nist.javax.sip.header.extensions.ReplacesHeader;
 import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPResponse;
 
 import android.net.sip.ISipSession;
 import android.net.sip.ISipSessionListener;
@@ -71,11 +74,14 @@ import javax.sip.address.SipURI;
 import javax.sip.header.CSeqHeader;
 import javax.sip.header.ExpiresHeader;
 import javax.sip.header.FromHeader;
+import javax.sip.header.HeaderAddress;
 import javax.sip.header.MinExpiresHeader;
+import javax.sip.header.ReferToHeader;
 import javax.sip.header.ViaHeader;
 import javax.sip.message.Message;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
+
 
 /**
  * Manages {@link ISipSession}'s for a SIP account.
@@ -390,23 +396,24 @@ class SipSessionGroup implements SipListener {
         }
     }
 
+    private SipSessionImpl createNewSession(RequestEvent event,
+            ISipSessionListener listener, ServerTransaction transaction,
+            int newState) throws SipException {
+        SipSessionImpl newSession = new SipSessionImpl(listener);
+        newSession.mServerTransaction = transaction;
+        newSession.mState = newState;
+        newSession.mDialog = newSession.mServerTransaction.getDialog();
+        newSession.mInviteReceived = event;
+        newSession.mPeerProfile = createPeerProfile((HeaderAddress)
+                event.getRequest().getHeader(FromHeader.NAME));
+        newSession.mPeerSessionDescription =
+                extractContent(event.getRequest());
+        return newSession;
+    }
+
     private class SipSessionCallReceiverImpl extends SipSessionImpl {
         public SipSessionCallReceiverImpl(ISipSessionListener listener) {
             super(listener);
-        }
-
-        private SipSessionImpl createNewSession(RequestEvent event,
-                ISipSessionListener listener, ServerTransaction transaction)
-                throws SipException {
-            SipSessionImpl newSession = new SipSessionImpl(listener);
-            newSession.mServerTransaction = transaction;
-            newSession.mState = SipSession.State.INCOMING_CALL;
-            newSession.mDialog = newSession.mServerTransaction.getDialog();
-            newSession.mInviteReceived = event;
-            newSession.mPeerProfile = createPeerProfile(event.getRequest());
-            newSession.mPeerSessionDescription =
-                    extractContent(event.getRequest());
-            return newSession;
         }
 
         private int processInviteWithReplaces(RequestEvent event,
@@ -452,7 +459,8 @@ class SipSessionGroup implements SipListener {
                     // got INVITE w/ replaces request.
                     newSession = createNewSession(event,
                             replacedSession.mProxy.getListener(),
-                            mSipHelper.getServerTransaction(event));
+                            mSipHelper.getServerTransaction(event),
+                            SipSession.State.INCOMING_CALL);
                     newSession.mProxy.onCallTransferring(newSession,
                             newSession.mPeerSessionDescription);
                 } else {
@@ -461,7 +469,8 @@ class SipSessionGroup implements SipListener {
             } else {
                 // New Incoming call.
                 newSession = createNewSession(event, mProxy,
-                        mSipHelper.sendRinging(event, generateTag()));
+                        mSipHelper.sendRinging(event, generateTag()),
+                        SipSession.State.INCOMING_CALL);
                 mProxy.onRinging(newSession, newSession.mPeerProfile,
                         newSession.mPeerSessionDescription);
             }
@@ -506,6 +515,11 @@ class SipSessionGroup implements SipListener {
         private KeepAliveProcess mKeepAliveProcess;
 
         private SipSessionImpl mKeepAliveSession;
+
+        // the following three members are used for handling refer request.
+        SipSessionImpl mReferSession;
+        ReferredByHeader mReferredBy;
+        String mReplaces;
 
         // lightweight timer
         class SessionTimer {
@@ -556,6 +570,9 @@ class SipSessionGroup implements SipListener {
             mInviteReceived = null;
             mPeerSessionDescription = null;
             mAuthenticationRetryCount = 0;
+            mReferSession = null;
+            mReferredBy = null;
+            mReplaces = null;
 
             if (mDialog != null) mDialog.delete();
             mDialog = null;
@@ -969,15 +986,26 @@ class SipSessionGroup implements SipListener {
             return (proxyAuth == null) ? null : proxyAuth.getNonce();
         }
 
+        private String getResponseString(int statusCode) {
+            StatusLine statusLine = new StatusLine();
+            statusLine.setStatusCode(statusCode);
+            statusLine.setReasonPhrase(SIPResponse.getReasonPhrase(statusCode));
+            return statusLine.encode();
+        }
+
         private boolean readyForCall(EventObject evt) throws SipException {
             // expect MakeCallCommand, RegisterCommand, DEREGISTER
             if (evt instanceof MakeCallCommand) {
                 mState = SipSession.State.OUTGOING_CALL;
                 MakeCallCommand cmd = (MakeCallCommand) evt;
                 mPeerProfile = cmd.getPeerProfile();
-                mClientTransaction = mSipHelper.sendInvite(mLocalProfile,
-                        mPeerProfile, cmd.getSessionDescription(),
-                        generateTag());
+                if (mReferSession != null) {
+                    mSipHelper.sendReferNotify(mReferSession.mDialog,
+                            getResponseString(Response.TRYING));
+                }
+                mClientTransaction = mSipHelper.sendInvite(
+                        mLocalProfile, mPeerProfile, cmd.getSessionDescription(),
+                        generateTag(), mReferredBy, mReplaces);
                 mDialog = mClientTransaction.getDialog();
                 addSipSession(this);
                 startSessionTimer(cmd.getTimeout());
@@ -1072,6 +1100,12 @@ class SipSessionGroup implements SipListener {
                     }
                     return true;
                 case Response.OK:
+                    if (mReferSession != null) {
+                        mSipHelper.sendReferNotify(mReferSession.mDialog,
+                                getResponseString(Response.OK));
+                        // since we don't need to remember the session anymore.
+                        mReferSession = null;
+                    }
                     mSipHelper.sendInviteAck(event, mDialog);
                     mPeerSessionDescription = extractContent(response);
                     establishCall(true);
@@ -1087,6 +1121,10 @@ class SipSessionGroup implements SipListener {
                     // rfc3261#section-14.1; re-schedule invite
                     return true;
                 default:
+                    if (mReferSession != null) {
+                        mSipHelper.sendReferNotify(mReferSession.mDialog,
+                                getResponseString(Response.SERVICE_UNAVAILABLE));
+                    }
                     if (statusCode >= 400) {
                         // error: an ack is sent automatically by the stack
                         onError(response);
@@ -1155,6 +1193,38 @@ class SipSessionGroup implements SipListener {
             return false;
         }
 
+        private boolean processReferRequest(RequestEvent event)
+                throws SipException {
+            try {
+                ReferToHeader referto = (ReferToHeader) event.getRequest()
+                        .getHeader(ReferTo.NAME);
+                Address address = referto.getAddress();
+                SipURI uri = (SipURI) address.getURI();
+                String replacesHeader = uri.getHeader(ReplacesHeader.NAME);
+                String username = uri.getUser();
+                if (username == null) {
+                    mSipHelper.sendResponse(event, Response.BAD_REQUEST);
+                    return false;
+                }
+                // send notify accepted
+                mSipHelper.sendResponse(event, Response.ACCEPTED);
+                SipSessionImpl newSession = createNewSession(event,
+                        this.mProxy.getListener(),
+                        mSipHelper.getServerTransaction(event),
+                        SipSession.State.READY_TO_CALL);
+                newSession.mReferSession = this;
+                newSession.mReferredBy = (ReferredByHeader) event.getRequest()
+                        .getHeader(ReferredByHeader.NAME);
+                newSession.mReplaces = replacesHeader;
+                newSession.mPeerProfile = createPeerProfile(referto);
+                newSession.mProxy.onCallTransferring(newSession,
+                        null);
+                return true;
+            } catch (IllegalArgumentException e) {
+                throw new SipException("createPeerProfile()", e);
+            }
+        }
+
         private boolean inCall(EventObject evt) throws SipException {
             // expect END_CALL cmd, BYE request, hold call (MakeCallCommand)
             // OK retransmission is handled in SipStack
@@ -1175,6 +1245,8 @@ class SipSessionGroup implements SipListener {
                 mSipHelper.sendResponse((RequestEvent) evt, Response.OK);
                 endCallNormally();
                 return true;
+            } else if (isRequestEvent(Request.REFER, evt)) {
+                return processReferRequest((RequestEvent) evt);
             } else if (evt instanceof MakeCallCommand) {
                 // to change call
                 mState = SipSession.State.OUTGOING_CALL;
@@ -1182,6 +1254,8 @@ class SipSessionGroup implements SipListener {
                         ((MakeCallCommand) evt).getSessionDescription());
                 startSessionTimer(((MakeCallCommand) evt).getTimeout());
                 return true;
+            } else if (evt instanceof ResponseEvent) {
+                if (expectResponse(Request.NOTIFY, evt)) return true;
             }
             return false;
         }
@@ -1558,12 +1632,10 @@ class SipSessionGroup implements SipListener {
         return false;
     }
 
-    private static SipProfile createPeerProfile(Request request)
+    private static SipProfile createPeerProfile(HeaderAddress header)
             throws SipException {
         try {
-            FromHeader fromHeader =
-                    (FromHeader) request.getHeader(FromHeader.NAME);
-            Address address = fromHeader.getAddress();
+            Address address = header.getAddress();
             SipURI uri = (SipURI) address.getURI();
             String username = uri.getUser();
             if (username == null) username = ANONYMOUS;
