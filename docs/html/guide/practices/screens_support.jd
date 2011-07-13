@@ -444,7 +444,7 @@ provide special resources for different screen configurations.</p>
 </tr>
 
 <tr>
-<td rowspan="5">Density</td>
+<td rowspan="6">Density</td>
 <td><code>ldpi</code></td>
 <td>Resources for low-density (<em>ldpi</em>) screens (~120dpi).</td>
 </tr>
@@ -466,7 +466,15 @@ density.)</td>
 <td>Resources for all densities. These are density-independent resources. The system does not
 scale resources tagged with this qualifier, regardless of the current screen's density.</td>
 </tr>
-
+<tr>
+<td><code>tvdpi</code></td>
+<td>Resources for screens somewhere between mdpi and hdpi; approximately 213dpi. This is not
+considered a "primary" density group. It is mostly intended for televisions and most apps shouldn't
+need it&mdash;providing mdpi and hdpi resources is sufficient for most apps and the system will
+scale them as appropriate. If you find it necessary to provide tvdpi resources, you should size them
+at a factor of 1.33*mdpi. For example, a 100px x 100px image for mdpi screens should be 133px x
+133px for tvdpi.</td>
+</tr>
 <tr>
 <td rowspan="2">Orientation</td>
 <td><code>land</code></td>
@@ -520,6 +528,20 @@ res/drawable-xhdpi/my_icon.png       // bitmap for extra high density
 configuration qualifiers (not just for screen configurations), see
 <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">
 Providing Alternative Resources</a>.</p>
+
+<p>Be aware that, when the Android system picks which resources to use at runtime, it uses
+certain logic to determing the "best matching" resources. That is, the qualifiers you use don't
+have to exactly match the current screen configuration in all cases in order for the system to
+use them. Specifically, when selecting resources based on the size qualifiers, the system will
+use resources designed for a screen smaller than the current screen if there are no resources
+that better match (for example, a large-size screen will use normal-size screen resources if
+necessary). However, if the only available resources are <em>larger</em> than the current screen,
+the system will not use them and your application will crash if no other resources match the device
+configuration (for example, if all layout resources are tagged with the {@code xlarge} qualifier,
+but the device is a normal-size screen). For more information about how the system selects
+resources, read <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#BestMatch">How Android Finds the
+Best-matching Resource</a>.</p>
 
   <p class="note"><strong>Tip:</strong> If you have some drawable resources that the system
 should never scale (perhaps because you perform some adjustments to the image yourself at
