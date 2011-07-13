@@ -2361,6 +2361,19 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                 pw.print(" -> "); pw.println(e.getValue().toString());
             }
         }
+
+        pw.println("");
+
+        synchronized (mVolumes) {
+            pw.println("  mVolumes:");
+
+            final int N = mVolumes.size();
+            for (int i = 0; i < N; i++) {
+                final StorageVolume v = mVolumes.get(i);
+                pw.print("    ");
+                pw.println(v.toString());
+            }
+        }
     }
 }
 
