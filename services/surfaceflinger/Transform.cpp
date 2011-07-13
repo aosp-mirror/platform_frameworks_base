@@ -308,6 +308,7 @@ uint32_t Transform::type() const
                 scale = true;
             }
         } else {
+            // there is a skew component and/or a non 90 degrees rotation
             flags = ROT_INVALID;
         }
 
