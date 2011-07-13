@@ -16008,6 +16008,8 @@ package android.provider {
   }
 
   protected static abstract interface ContactsContract.GroupsColumns {
+    field public static final java.lang.String ACTION = "action";
+    field public static final java.lang.String ACTION_URI = "action_uri";
     field public static final java.lang.String AUTO_ADD = "auto_add";
     field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String DELETED = "deleted";

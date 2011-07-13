@@ -17,6 +17,7 @@
 package android.provider;
 
 import android.accounts.Account;
+import android.app.Activity;
 import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -6249,6 +6250,28 @@ public final class ContactsContract {
          * Type: TEXT
          */
         public static final String NOTES = "notes";
+
+        /**
+         * The Activity action to open the group in the source app (e.g.
+         * {@link Intent#ACTION_VIEW}). Can be NULL if the group does not have a dedicated viewer.
+         * This is used in conjunction with {@link #ACTION_URI}: In order to show an "Open in
+         * (sourceapp)"-button, both of these fields must be set
+         * <p>
+         * Type: TEXT
+         */
+        public static final String ACTION = "action";
+
+
+        /**
+         * Uri to open the group in the source app.
+         * Can be NULL if the group does not have a dedicated viewer.
+         * This is used in conjunction with {@link #ACTION}: In order to show an "Open in
+         * (sourceapp)"-button, both of these fields must be set
+         * <p>
+         * Type: TEXT
+         */
+        public static final String ACTION_URI = "action_uri";
+
 
         /**
          * The ID of this group if it is a System Group, i.e. a group that has a special meaning
