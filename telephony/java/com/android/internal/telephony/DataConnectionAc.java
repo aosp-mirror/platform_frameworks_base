@@ -16,12 +16,14 @@
 
 package com.android.internal.telephony;
 
+import com.android.internal.telephony.DataConnection.UpdateLinkPropertyResult;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 
 import android.app.PendingIntent;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
+import android.net.LinkProperties.CompareAddressesResult;
 import android.net.ProxyProperties;
 import android.os.Message;
 
@@ -310,18 +312,18 @@ public class DataConnectionAc extends AsyncChannel {
         if (DBG) log("reqUpdateLinkPropertiesDataCallState");
     }
 
-    public LinkPropertyChangeAction rspUpdateLinkPropertiesDataCallState(Message response) {
-        LinkPropertyChangeAction retVal = LinkPropertyChangeAction.fromInt(response.arg1);
-        if (DBG) log("rspUpdateLinkPropertiesState=" + retVal);
+    public UpdateLinkPropertyResult rspUpdateLinkPropertiesDataCallState(Message response) {
+        UpdateLinkPropertyResult retVal = (UpdateLinkPropertyResult)response.obj;
+        if (DBG) log("rspUpdateLinkPropertiesState: retVal=" + retVal);
         return retVal;
     }
 
     /**
      * Update link properties in the data connection
      *
-     * @return true if link property has been updated. false otherwise.
+     * @return the removed and added addresses.
      */
-    public LinkPropertyChangeAction updateLinkPropertiesDataCallStateSync(DataCallState newState) {
+    public UpdateLinkPropertyResult updateLinkPropertiesDataCallStateSync(DataCallState newState) {
         Message response =
             sendMessageSynchronously(REQ_UPDATE_LINK_PROPERTIES_DATA_CALL_STATE, newState);
         if ((response != null) &&
@@ -329,7 +331,7 @@ public class DataConnectionAc extends AsyncChannel {
             return rspUpdateLinkPropertiesDataCallState(response);
         } else {
             log("getLinkProperties error response=" + response);
-            return LinkPropertyChangeAction.NONE;
+            return new UpdateLinkPropertyResult(new LinkProperties());
         }
     }
 
