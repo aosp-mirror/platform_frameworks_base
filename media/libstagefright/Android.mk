@@ -3,8 +3,6 @@ include $(CLEAR_VARS)
 
 include frameworks/base/media/libstagefright/codecs/common/Config.mk
 
-BUILD_WITH_SOFTWARE_DECODERS := false
-
 LOCAL_SRC_FILES:=                         \
         ACodec.cpp                        \
         AACExtractor.cpp                  \
@@ -96,26 +94,6 @@ LOCAL_STATIC_LIBRARIES := \
         libstagefright_id3 \
         libFLAC \
 
-ifeq ($(BUILD_WITH_SOFTWARE_DECODERS),true)
-
-LOCAL_SRC_FILES += \
-        ThreadedSource.cpp                \
-
-LOCAL_STATIC_LIBRARIES += \
-        libstagefright_aacdec \
-        libstagefright_amrnbdec \
-        libstagefright_amrwbdec \
-        libstagefright_avcdec \
-        libstagefright_g711dec \
-        libstagefright_mp3dec \
-        libstagefright_m4vh263dec \
-        libstagefright_vorbisdec \
-        libstagefright_vpxdec \
-        libvpx \
-
-endif
-
-
 ################################################################################
 
 # The following was shamelessly copied from external/webkit/Android.mk and
@@ -176,10 +154,6 @@ LOCAL_SHARED_LIBRARIES += \
         libdl
 
 LOCAL_CFLAGS += -Wno-multichar
-
-ifeq ($(BUILD_WITH_SOFTWARE_DECODERS),true)
-    LOCAL_CFLAGS += -DHAVE_SOFTWARE_DECODERS
-endif
 
 LOCAL_MODULE:= libstagefright
 

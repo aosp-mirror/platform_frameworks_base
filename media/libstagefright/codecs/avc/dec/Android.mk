@@ -2,7 +2,6 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES := \
-        AVCDecoder.cpp \
         src/avcdec_api.cpp \
         src/avc_bitstream.cpp \
         src/header.cpp \
