@@ -85,8 +85,6 @@ static jfieldID field_objectInfo_dateCreated;
 static jfieldID field_objectInfo_dateModified;
 static jfieldID field_objectInfo_keywords;
 
-#ifdef HAVE_ANDROID_OS
-
 MtpDevice* get_device_from_object(JNIEnv* env, jobject javaDevice)
 {
     return (MtpDevice*)env->GetIntField(javaDevice, field_context);
@@ -100,15 +98,11 @@ static void checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodNa
     }
 }
 
-#endif // HAVE_ANDROID_OS
-
 // ----------------------------------------------------------------------------
 
 static jboolean
 android_mtp_MtpDevice_open(JNIEnv *env, jobject thiz, jstring deviceName, jint fd)
 {
-#ifdef HAVE_ANDROID_OS
-    LOGD("open\n");
     const char *deviceNameStr = env->GetStringUTFChars(deviceName, NULL);
     if (deviceNameStr == NULL) {
         return false;
@@ -120,27 +114,22 @@ android_mtp_MtpDevice_open(JNIEnv *env, jobject thiz, jstring deviceName, jint f
     if (device)
         env->SetIntField(thiz, field_context, (int)device);
     return (device != NULL);
-#endif
 }
 
 static void
 android_mtp_MtpDevice_close(JNIEnv *env, jobject thiz)
 {
-#ifdef HAVE_ANDROID_OS
-    LOGD("close\n");
     MtpDevice* device = get_device_from_object(env, thiz);
     if (device) {
         device->close();
         delete device;
         env->SetIntField(thiz, field_context, 0);
     }
-#endif
 }
 
 static jobject
 android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
 {
-#ifdef HAVE_ANDROID_OS
     MtpDevice* device = get_device_from_object(env, thiz);
     if (!device) {
         LOGD("android_mtp_MtpDevice_get_device_info device is null");
@@ -173,15 +162,11 @@ android_mtp_MtpDevice_get_device_info(JNIEnv *env, jobject thiz)
 
     delete deviceInfo;
     return info;
-#else
-    return NULL;
-#endif
 }
 
 static jintArray
 android_mtp_MtpDevice_get_storage_ids(JNIEnv *env, jobject thiz)
 {
-#ifdef HAVE_ANDROID_OS
     MtpDevice* device = get_device_from_object(env, thiz);
     if (!device)
         return NULL;
@@ -196,15 +181,11 @@ android_mtp_MtpDevice_get_storage_ids(JNIEnv *env, jobject thiz)
 
     delete storageIDs;
     return array;
-#else
-    return NULL;
-#endif
 }
 
 static jobject
 android_mtp_MtpDevice_get_storage_info(JNIEnv *env, jobject thiz, jint storageID)
 {
-#ifdef HAVE_ANDROID_OS
     MtpDevice* device = get_device_from_object(env, thiz);
     if (!device)
         return NULL;
@@ -234,16 +215,12 @@ android_mtp_MtpDevice_get_storage_info(JNIEnv *env, jobject thiz, jint storageID
 
     delete storageInfo;
     return info;
-#else
-    return NULL;
-#endif
 }
 
 static jintArray
 android_mtp_MtpDevice_get_object_handles(JNIEnv *env, jobject thiz,
         jint storageID, jint format, jint objectID)
 {
-#ifdef HAVE_ANDROID_OS
     MtpDevice* device = get_device_from_object(env, thiz);
     if (!device)
         return NULL;
@@ -258,15 +235,11 @@ android_mtp_MtpDevice_get_object_handles(JNIEnv *env, jobject thiz,
 
     delete handles;
     return array;
-#else
-    return NULL;
-#endif
 }
 
 static jobject
 android_mtp_MtpDevice_get_object_info(JNIEnv *env, jobject thiz, jint objectID)
 {
-#ifdef HAVE_ANDROID_OS
     MtpDevice* device = get_device_from_object(env, thiz);
     if (!device)
         return NULL;
@@ -324,9 +297,6 @@ android_mtp_MtpDevice_get_object_info(JNIEnv *env, jobject thiz, jint objectID)
 
     delete objectInfo;
     return info;
-#else
-    return NULL;
-#endif
 }
 
 struct get_object_callback_data {
@@ -344,7 +314,6 @@ static bool get_object_callback(void* data, int offset, int length, void* client
 static jbyteArray
 android_mtp_MtpDevice_get_object(JNIEnv *env, jobject thiz, jint objectID, jint objectSize)
 {
-#ifdef HAVE_ANDROID_OS
     MtpDevice* device = get_device_from_object(env, thiz);
     if (!device)
         return NULL;
@@ -361,14 +330,12 @@ android_mtp_MtpDevice_get_object(JNIEnv *env, jobject thiz, jint objectID, jint 
 
     if (device->readObject(objectID, get_object_callback, objectSize, &data))
         return array;
-#endif
     return NULL;
 }
 
 static jbyteArray
 android_mtp_MtpDevice_get_thumbnail(JNIEnv *env, jobject thiz, jint objectID)
 {
-#ifdef HAVE_ANDROID_OS
     MtpDevice* device = get_device_from_object(env, thiz);
     if (!device)
         return NULL;
@@ -382,51 +349,41 @@ android_mtp_MtpDevice_get_thumbnail(JNIEnv *env, jobject thiz, jint objectID)
 
     free(thumbnail);
     return array;
-#else
-    return NULL;
-#endif
 }
 
 static jboolean
 android_mtp_MtpDevice_delete_object(JNIEnv *env, jobject thiz, jint object_id)
 {
-#ifdef HAVE_ANDROID_OS
     MtpDevice* device = get_device_from_object(env, thiz);
     if (device)
         return device->deleteObject(object_id);
     else
- #endif
         return NULL;
 }
 
 static jlong
 android_mtp_MtpDevice_get_parent(JNIEnv *env, jobject thiz, jint object_id)
 {
-#ifdef HAVE_ANDROID_OS
     MtpDevice* device = get_device_from_object(env, thiz);
     if (device)
         return device->getParent(object_id);
     else
-#endif
         return -1;
 }
 
 static jlong
 android_mtp_MtpDevice_get_storage_id(JNIEnv *env, jobject thiz, jint object_id)
 {
- #ifdef HAVE_ANDROID_OS
     MtpDevice* device = get_device_from_object(env, thiz);
     if (device)
         return device->getStorageID(object_id);
     else
-#endif
         return -1;
 }
 
 static jboolean
 android_mtp_MtpDevice_import_file(JNIEnv *env, jobject thiz, jint object_id, jstring dest_path)
 {
-#ifdef HAVE_ANDROID_OS
     MtpDevice* device = get_device_from_object(env, thiz);
     if (device) {
         const char *destPathStr = env->GetStringUTFChars(dest_path, NULL);
@@ -438,7 +395,7 @@ android_mtp_MtpDevice_import_file(JNIEnv *env, jobject thiz, jint object_id, jst
         env->ReleaseStringUTFChars(dest_path, destPathStr);
         return result;
     }
-#endif
+
     return false;
 }
 

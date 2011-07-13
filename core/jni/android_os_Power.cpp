@@ -70,16 +70,11 @@ setScreenState(JNIEnv *env, jobject clazz, jboolean on)
 
 static void android_os_Power_shutdown(JNIEnv *env, jobject clazz)
 {
-#ifdef HAVE_ANDROID_OS
     android_reboot(ANDROID_RB_POWEROFF, 0, 0);
-#else
-    sync();
-#endif
 }
 
 static void android_os_Power_reboot(JNIEnv *env, jobject clazz, jstring reason)
 {
-#ifdef HAVE_ANDROID_OS
     if (reason == NULL) {
         android_reboot(ANDROID_RB_RESTART, 0, 0);
     } else {
@@ -88,9 +83,6 @@ static void android_os_Power_reboot(JNIEnv *env, jobject clazz, jstring reason)
         env->ReleaseStringUTFChars(reason, chars);  // In case it fails.
     }
     jniThrowIOException(env, errno);
-#else
-    sync();
-#endif
 }
 
 static JNINativeMethod method_table[] = {

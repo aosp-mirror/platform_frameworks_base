@@ -28,11 +28,8 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <signal.h>
-
-#if HAVE_ANDROID_OS
 #include <sys/ioctl.h>
 #include <linux/msdos_fs.h>
-#endif
 
 namespace android {
 
@@ -53,7 +50,6 @@ jint android_os_FileUtils_setPermissions(JNIEnv* env, jobject clazz,
                                          jstring file, jint mode,
                                          jint uid, jint gid)
 {
-    #if HAVE_ANDROID_OS
     const jchar* str = env->GetStringCritical(file, 0);
     String8 file8;
     if (str) {
@@ -70,15 +66,11 @@ jint android_os_FileUtils_setPermissions(JNIEnv* env, jobject clazz,
         }
     }
     return chmod(file8.string(), mode) == 0 ? 0 : errno;
-    #else
-    return ENOSYS;
-    #endif
 }
 
 jint android_os_FileUtils_getPermissions(JNIEnv* env, jobject clazz,
                                          jstring file, jintArray outArray)
 {
-    #if HAVE_ANDROID_OS
     const jchar* str = env->GetStringCritical(file, 0);
     String8 file8;
     if (str) {
@@ -107,9 +99,6 @@ jint android_os_FileUtils_getPermissions(JNIEnv* env, jobject clazz,
     }
     env->ReleasePrimitiveArrayCritical(outArray, array, 0);
     return 0;
-    #else
-    return ENOSYS;
-    #endif
 }
 
 jint android_os_FileUtils_setUMask(JNIEnv* env, jobject clazz, jint mask)
@@ -119,7 +108,6 @@ jint android_os_FileUtils_setUMask(JNIEnv* env, jobject clazz, jint mask)
 
 jint android_os_FileUtils_getFatVolumeId(JNIEnv* env, jobject clazz, jstring path)
 {
-    #if HAVE_ANDROID_OS
     if (path == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
         return -1;
@@ -137,9 +125,6 @@ jint android_os_FileUtils_getFatVolumeId(JNIEnv* env, jobject clazz, jstring pat
 
     env->ReleaseStringUTFChars(path, pathStr);
     return result;
-    #else
-    return -1;
-    #endif
 }
 
 jboolean android_os_FileUtils_getFileStatus(JNIEnv* env, jobject clazz, jstring path, jobject fileStatus) {
