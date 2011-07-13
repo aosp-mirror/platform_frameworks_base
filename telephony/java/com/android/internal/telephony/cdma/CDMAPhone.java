@@ -122,6 +122,8 @@ public class CDMAPhone extends PhoneBase {
     //keep track of if phone is in emergency callback mode
     private boolean mIsPhoneInEcmState;
     private Registrant mEcmExitRespRegistrant;
+    protected String mImei;
+    protected String mImeiSv;
     private String mEsn;
     private String mMeid;
     // string to define how the carrier specifies its own ota sp number
@@ -487,6 +489,11 @@ public class CDMAPhone extends PhoneBase {
 
     public String getSubscriberId() {
         return mSST.getImsi();
+    }
+
+    public String getImei() {
+        Log.e(LOG_TAG, "IMEI is not available in CDMA");
+        return null;
     }
 
     public boolean canConference() {
@@ -987,6 +994,8 @@ public class CDMAPhone extends PhoneBase {
                     break;
                 }
                 String[] respId = (String[])ar.result;
+                mImei = respId[0];
+                mImeiSv = respId[1];
                 mEsn  =  respId[2];
                 mMeid =  respId[3];
             }

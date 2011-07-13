@@ -1430,6 +1430,11 @@ public interface Phone {
     String getMeid();
 
     /**
+     * Retrieves IMEI for phones. Returns null if IMEI is not set.
+     */
+    String getImei();
+
+    /**
      * Retrieves the PhoneSubInfo of the Phone
      */
     public PhoneSubInfo getPhoneSubInfo();
