@@ -1715,7 +1715,10 @@ status_t MPEG4Writer::Track::parseAVCCodecSpecificData(
             return ERROR_MALFORMED;
         }
     }
-
+// FIXME:
+// Add chromat_format_idc, bit depth values, etc for AVC/h264 high profile and above
+// and remove #if 0
+#if 0
     {
         // Check on the profiles
         // These profiles requires additional parameter set extensions
@@ -1725,7 +1728,7 @@ status_t MPEG4Writer::Track::parseAVCCodecSpecificData(
             return BAD_VALUE;
         }
     }
-
+#endif
     return OK;
 }
 
