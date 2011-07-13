@@ -377,9 +377,11 @@ package android {
     field public static final int drawSelectorOnTop = 16843004; // 0x10100fc
     field public static final int drawable = 16843161; // 0x1010199
     field public static final int drawableBottom = 16843118; // 0x101016e
+    field public static final int drawableEnd = 16843687; // 0x10103a7
     field public static final int drawableLeft = 16843119; // 0x101016f
     field public static final int drawablePadding = 16843121; // 0x1010171
     field public static final int drawableRight = 16843120; // 0x1010170
+    field public static final int drawableStart = 16843686; // 0x10103a6
     field public static final int drawableTop = 16843117; // 0x101016d
     field public static final int drawingCacheQuality = 16842984; // 0x10100e8
     field public static final int dropDownAnchor = 16843363; // 0x1010263
@@ -26421,7 +26423,9 @@ package android.widget {
     method protected void onTextChanged(java.lang.CharSequence, int, int, int);
     method public boolean onTextContextMenuItem(int);
     method public void removeTextChangedListener(android.text.TextWatcher);
+    method protected void resetResolvedDrawables();
     method protected void resetResolvedLayoutDirection();
+    method protected void resolveDrawables();
     method public void setAllCaps(boolean);
     method public final void setAutoLinkMask(int);
     method public void setCompoundDrawablePadding(int);

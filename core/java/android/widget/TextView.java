@@ -260,9 +260,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     class Drawables {
         final Rect mCompoundRect = new Rect();
-        Drawable mDrawableTop, mDrawableBottom, mDrawableLeft, mDrawableRight;
-        int mDrawableSizeTop, mDrawableSizeBottom, mDrawableSizeLeft, mDrawableSizeRight;
-        int mDrawableWidthTop, mDrawableWidthBottom, mDrawableHeightLeft, mDrawableHeightRight;
+        Drawable mDrawableTop, mDrawableBottom, mDrawableLeft, mDrawableRight,
+                mDrawableStart, mDrawableEnd;
+        int mDrawableSizeTop, mDrawableSizeBottom, mDrawableSizeLeft, mDrawableSizeRight,
+                mDrawableSizeStart, mDrawableSizeEnd;
+        int mDrawableWidthTop, mDrawableWidthBottom, mDrawableHeightLeft, mDrawableHeightRight,
+                mDrawableHeightStart, mDrawableHeightEnd;
         int mDrawablePadding;
     }
     private Drawables mDrawables;
@@ -351,6 +354,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private static enum TextAlign {
         INHERIT, GRAVITY, TEXT_START, TEXT_END, CENTER, VIEW_START, VIEW_END;
     }
+
+    private boolean bResolvedDrawables = false;
 
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
@@ -494,7 +499,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         int buffertype = 0;
         boolean selectallonfocus = false;
         Drawable drawableLeft = null, drawableTop = null, drawableRight = null,
-            drawableBottom = null;
+            drawableBottom = null, drawableStart = null, drawableEnd = null;
         int drawablePadding = 0;
         int ellipsize = -1;
         boolean singleLine = false;
@@ -569,6 +574,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_drawableBottom:
                 drawableBottom = a.getDrawable(attr);
+                break;
+
+            case com.android.internal.R.styleable.TextView_drawableStart:
+                drawableStart = a.getDrawable(attr);
+                break;
+
+            case com.android.internal.R.styleable.TextView_drawableEnd:
+                drawableEnd = a.getDrawable(attr);
                 break;
 
             case com.android.internal.R.styleable.TextView_drawablePadding:
@@ -980,6 +993,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         setCompoundDrawablesWithIntrinsicBounds(
             drawableLeft, drawableTop, drawableRight, drawableBottom);
+        setRelativeDrawablesIfNeeded(drawableStart, drawableEnd);
         setCompoundDrawablePadding(drawablePadding);
 
         // Same as setSingleLine(), but make sure the transformation method and the maximum number
@@ -1103,6 +1117,42 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         setTypeface(tf, styleIndex);
+    }
+
+    private void setRelativeDrawablesIfNeeded(Drawable start, Drawable end) {
+        boolean hasRelativeDrawables = (start != null) || (end != null);
+        if (hasRelativeDrawables) {
+            Drawables dr = mDrawables;
+            if (dr == null) {
+                mDrawables = dr = new Drawables();
+            }
+            final Rect compoundRect = dr.mCompoundRect;
+            int[] state = getDrawableState();
+            if (start != null) {
+                start.setBounds(0, 0, start.getIntrinsicWidth(), start.getIntrinsicHeight());
+                start.setState(state);
+                start.copyBounds(compoundRect);
+                start.setCallback(this);
+
+                dr.mDrawableStart = start;
+                dr.mDrawableSizeStart = compoundRect.width();
+                dr.mDrawableHeightStart = compoundRect.height();
+            } else {
+                dr.mDrawableSizeStart = dr.mDrawableHeightStart = 0;
+            }
+            if (end != null) {
+                end.setBounds(0, 0, end.getIntrinsicWidth(), end.getIntrinsicHeight());
+                end.setState(state);
+                end.copyBounds(compoundRect);
+                end.setCallback(this);
+
+                dr.mDrawableEnd = end;
+                dr.mDrawableSizeEnd = compoundRect.width();
+                dr.mDrawableHeightEnd = compoundRect.height();
+            } else {
+                dr.mDrawableSizeEnd = dr.mDrawableHeightEnd = 0;
+            }
+        }
     }
 
     @Override
@@ -1411,6 +1461,40 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Returns the start padding of the view, plus space for the start
+     * Drawable if any.
+     *
+     * @hide
+     */
+    public int getCompoundPaddingStart() {
+        resolveDrawables();
+        switch(getResolvedLayoutDirection()) {
+            default:
+            case LAYOUT_DIRECTION_LTR:
+                return getCompoundPaddingLeft();
+            case LAYOUT_DIRECTION_RTL:
+                return getCompoundPaddingRight();
+        }
+    }
+
+    /**
+     * Returns the end padding of the view, plus space for the end
+     * Drawable if any.
+     *
+     * @hide
+     */
+    public int getCompoundPaddingEnd() {
+        resolveDrawables();
+        switch(getResolvedLayoutDirection()) {
+            default:
+            case LAYOUT_DIRECTION_LTR:
+                return getCompoundPaddingRight();
+            case LAYOUT_DIRECTION_RTL:
+                return getCompoundPaddingLeft();
+        }
+    }
+
+    /**
      * Returns the extended top padding of the view, including both the
      * top Drawable if any and any extra space to keep more than maxLines
      * of text from showing.  It is only valid to call this after measuring.
@@ -1490,6 +1574,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     public int getTotalPaddingRight() {
         return getCompoundPaddingRight();
+    }
+
+    /**
+     * Returns the total start padding of the view, including the start
+     * Drawable if any.
+     *
+     * @hide
+     */
+    public int getTotalPaddingStart() {
+        return getCompoundPaddingStart();
+    }
+
+    /**
+     * Returns the total end padding of the view, including the end
+     * Drawable if any.
+     *
+     * @hide
+     */
+    public int getTotalPaddingEnd() {
+        return getCompoundPaddingEnd();
     }
 
     /**
@@ -1679,6 +1783,185 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     /**
+     * Sets the Drawables (if any) to appear to the start of, above,
+     * to the end of, and below the text.  Use null if you do not
+     * want a Drawable there.  The Drawables must already have had
+     * {@link Drawable#setBounds} called.
+     *
+     * @attr ref android.R.styleable#TextView_drawableStart
+     * @attr ref android.R.styleable#TextView_drawableTop
+     * @attr ref android.R.styleable#TextView_drawableEnd
+     * @attr ref android.R.styleable#TextView_drawableBottom
+     *
+     * @hide
+     */
+    public void setCompoundDrawablesRelative(Drawable start, Drawable top,
+                                     Drawable end, Drawable bottom) {
+        Drawables dr = mDrawables;
+
+        final boolean drawables = start != null || top != null
+                || end != null || bottom != null;
+
+        if (!drawables) {
+            // Clearing drawables...  can we free the data structure?
+            if (dr != null) {
+                if (dr.mDrawablePadding == 0) {
+                    mDrawables = null;
+                } else {
+                    // We need to retain the last set padding, so just clear
+                    // out all of the fields in the existing structure.
+                    if (dr.mDrawableStart != null) dr.mDrawableStart.setCallback(null);
+                    dr.mDrawableStart = null;
+                    if (dr.mDrawableTop != null) dr.mDrawableTop.setCallback(null);
+                    dr.mDrawableTop = null;
+                    if (dr.mDrawableEnd != null) dr.mDrawableEnd.setCallback(null);
+                    dr.mDrawableEnd = null;
+                    if (dr.mDrawableBottom != null) dr.mDrawableBottom.setCallback(null);
+                    dr.mDrawableBottom = null;
+                    dr.mDrawableSizeStart = dr.mDrawableHeightStart = 0;
+                    dr.mDrawableSizeEnd = dr.mDrawableHeightEnd = 0;
+                    dr.mDrawableSizeTop = dr.mDrawableWidthTop = 0;
+                    dr.mDrawableSizeBottom = dr.mDrawableWidthBottom = 0;
+                }
+            }
+        } else {
+            if (dr == null) {
+                mDrawables = dr = new Drawables();
+            }
+
+            if (dr.mDrawableStart != start && dr.mDrawableStart != null) {
+                dr.mDrawableStart.setCallback(null);
+            }
+            dr.mDrawableStart = start;
+
+            if (dr.mDrawableTop != top && dr.mDrawableTop != null) {
+                dr.mDrawableTop.setCallback(null);
+            }
+            dr.mDrawableTop = top;
+
+            if (dr.mDrawableEnd != end && dr.mDrawableEnd != null) {
+                dr.mDrawableEnd.setCallback(null);
+            }
+            dr.mDrawableEnd = end;
+
+            if (dr.mDrawableBottom != bottom && dr.mDrawableBottom != null) {
+                dr.mDrawableBottom.setCallback(null);
+            }
+            dr.mDrawableBottom = bottom;
+
+            final Rect compoundRect = dr.mCompoundRect;
+            int[] state;
+
+            state = getDrawableState();
+
+            if (start != null) {
+                start.setState(state);
+                start.copyBounds(compoundRect);
+                start.setCallback(this);
+                dr.mDrawableSizeStart = compoundRect.width();
+                dr.mDrawableHeightStart = compoundRect.height();
+            } else {
+                dr.mDrawableSizeStart = dr.mDrawableHeightStart = 0;
+            }
+
+            if (end != null) {
+                end.setState(state);
+                end.copyBounds(compoundRect);
+                end.setCallback(this);
+                dr.mDrawableSizeEnd = compoundRect.width();
+                dr.mDrawableHeightEnd = compoundRect.height();
+            } else {
+                dr.mDrawableSizeEnd = dr.mDrawableHeightEnd = 0;
+            }
+
+            if (top != null) {
+                top.setState(state);
+                top.copyBounds(compoundRect);
+                top.setCallback(this);
+                dr.mDrawableSizeTop = compoundRect.height();
+                dr.mDrawableWidthTop = compoundRect.width();
+            } else {
+                dr.mDrawableSizeTop = dr.mDrawableWidthTop = 0;
+            }
+
+            if (bottom != null) {
+                bottom.setState(state);
+                bottom.copyBounds(compoundRect);
+                bottom.setCallback(this);
+                dr.mDrawableSizeBottom = compoundRect.height();
+                dr.mDrawableWidthBottom = compoundRect.width();
+            } else {
+                dr.mDrawableSizeBottom = dr.mDrawableWidthBottom = 0;
+            }
+        }
+
+        resolveDrawables();
+        invalidate();
+        requestLayout();
+    }
+
+    /**
+     * Sets the Drawables (if any) to appear to the start of, above,
+     * to the end of, and below the text.  Use 0 if you do not
+     * want a Drawable there. The Drawables' bounds will be set to
+     * their intrinsic bounds.
+     *
+     * @param start Resource identifier of the start Drawable.
+     * @param top Resource identifier of the top Drawable.
+     * @param end Resource identifier of the end Drawable.
+     * @param bottom Resource identifier of the bottom Drawable.
+     *
+     * @attr ref android.R.styleable#TextView_drawableStart
+     * @attr ref android.R.styleable#TextView_drawableTop
+     * @attr ref android.R.styleable#TextView_drawableEnd
+     * @attr ref android.R.styleable#TextView_drawableBottom
+     *
+     * @hide
+     */
+    public void setCompoundDrawablesRelativeWithIntrinsicBounds(int start, int top, int end,
+            int bottom) {
+        resetResolvedDrawables();
+        final Resources resources = getContext().getResources();
+        setCompoundDrawablesRelativeWithIntrinsicBounds(
+                start != 0 ? resources.getDrawable(start) : null,
+                top != 0 ? resources.getDrawable(top) : null,
+                end != 0 ? resources.getDrawable(end) : null,
+                bottom != 0 ? resources.getDrawable(bottom) : null);
+    }
+
+    /**
+     * Sets the Drawables (if any) to appear to the start of, above,
+     * to the end of, and below the text.  Use null if you do not
+     * want a Drawable there. The Drawables' bounds will be set to
+     * their intrinsic bounds.
+     *
+     * @attr ref android.R.styleable#TextView_drawableStart
+     * @attr ref android.R.styleable#TextView_drawableTop
+     * @attr ref android.R.styleable#TextView_drawableEnd
+     * @attr ref android.R.styleable#TextView_drawableBottom
+     *
+     * @hide
+     */
+    public void setCompoundDrawablesRelativeWithIntrinsicBounds(Drawable start, Drawable top,
+            Drawable end, Drawable bottom) {
+
+        resetResolvedDrawables();
+        if (start != null) {
+            start.setBounds(0, 0, start.getIntrinsicWidth(), start.getIntrinsicHeight());
+        }
+        if (end != null) {
+            end.setBounds(0, 0, end.getIntrinsicWidth(), end.getIntrinsicHeight());
+        }
+        if (top != null) {
+            top.setBounds(0, 0, top.getIntrinsicWidth(), top.getIntrinsicHeight());
+        }
+        if (bottom != null) {
+            bottom.setBounds(0, 0, bottom.getIntrinsicWidth(), bottom.getIntrinsicHeight());
+        }
+        setCompoundDrawablesRelative(start, top, end, bottom);
+    }
+
+    /**
      * Returns drawables for the left, top, right, and bottom borders.
      */
     public Drawable[] getCompoundDrawables() {
@@ -1686,6 +1969,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (dr != null) {
             return new Drawable[] {
                 dr.mDrawableLeft, dr.mDrawableTop, dr.mDrawableRight, dr.mDrawableBottom
+            };
+        } else {
+            return new Drawable[] { null, null, null, null };
+        }
+    }
+
+    /**
+     * Returns drawables for the start, top, end, and bottom borders.
+     *
+     * @hide
+     */
+    public Drawable[] getCompoundDrawablesRelative() {
+        final Drawables dr = mDrawables;
+        if (dr != null) {
+            return new Drawable[] {
+                dr.mDrawableStart, dr.mDrawableTop, dr.mDrawableEnd, dr.mDrawableBottom
             };
         } else {
             return new Drawable[] { null, null, null, null };
@@ -2494,6 +2793,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             if (dr.mDrawableRight != null && dr.mDrawableRight.isStateful()) {
                 dr.mDrawableRight.setState(state);
+            }
+            if (dr.mDrawableStart != null && dr.mDrawableStart.isStateful()) {
+                dr.mDrawableStart.setState(state);
+            }
+            if (dr.mDrawableEnd != null && dr.mDrawableEnd.isStateful()) {
+                dr.mDrawableEnd.setState(state);
             }
         }
     }
@@ -3546,7 +3851,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         mErrorWasChanged = true;
         final Drawables dr = mDrawables;
         if (dr != null) {
-            setCompoundDrawables(dr.mDrawableLeft, dr.mDrawableTop, icon, dr.mDrawableBottom);
+            switch (getResolvedLayoutDirection()) {
+                default:
+                case LAYOUT_DIRECTION_LTR:
+                    setCompoundDrawables(dr.mDrawableLeft, dr.mDrawableTop, icon,
+                            dr.mDrawableBottom);
+                    break;
+                case LAYOUT_DIRECTION_RTL:
+                    setCompoundDrawables(icon, dr.mDrawableTop, dr.mDrawableRight,
+                            dr.mDrawableBottom);
+                    break;
+            }
         } else {
             setCompoundDrawables(null, null, icon, null);
         }
@@ -4048,6 +4363,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mSelectionModifierCursorController != null) {
             observer.addOnTouchModeChangeListener(mSelectionModifierCursorController);
         }
+
+        // Resolve drawables as the layout direction has been resolved
+        resolveDrawables();
     }
 
     @Override
@@ -4077,6 +4395,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         hideControllers();
+
+        resetResolvedDrawables();
     }
 
     @Override
@@ -4111,7 +4431,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         final boolean verified = super.verifyDrawable(who);
         if (!verified && mDrawables != null) {
             return who == mDrawables.mDrawableLeft || who == mDrawables.mDrawableTop ||
-                    who == mDrawables.mDrawableRight || who == mDrawables.mDrawableBottom;
+                    who == mDrawables.mDrawableRight || who == mDrawables.mDrawableBottom ||
+                    who == mDrawables.mDrawableStart || who == mDrawables.mDrawableEnd;
         }
         return verified;
     }
@@ -4131,6 +4452,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
             if (mDrawables.mDrawableBottom != null) {
                 mDrawables.mDrawableBottom.jumpToCurrentState();
+            }
+            if (mDrawables.mDrawableStart != null) {
+                mDrawables.mDrawableStart.jumpToCurrentState();
+            }
+            if (mDrawables.mDrawableEnd != null) {
+                mDrawables.mDrawableEnd.jumpToCurrentState();
             }
         }
     }
@@ -4192,7 +4519,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mDrawables != null) {
             final Drawables drawables = mDrawables;
             if (who == drawables.mDrawableLeft || who == drawables.mDrawableRight ||
-                who == drawables.mDrawableTop || who == drawables.mDrawableBottom) {
+                who == drawables.mDrawableTop || who == drawables.mDrawableBottom ||
+                who == drawables.mDrawableStart || who == drawables.mDrawableEnd) {
                 return getResolvedLayoutDirection();
             }
         }
@@ -4211,6 +4539,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (dr.mDrawableTop != null) dr.mDrawableTop.mutate().setAlpha(alpha);
                 if (dr.mDrawableRight != null) dr.mDrawableRight.mutate().setAlpha(alpha);
                 if (dr.mDrawableBottom != null) dr.mDrawableBottom.mutate().setAlpha(alpha);
+                if (dr.mDrawableStart != null) dr.mDrawableStart.mutate().setAlpha(alpha);
+                if (dr.mDrawableEnd != null) dr.mDrawableEnd.mutate().setAlpha(alpha);
             }
             return true;
         }
@@ -10273,6 +10603,68 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     private static boolean isStrongLtrChar(final byte dir) {
         return (dir == Character.DIRECTIONALITY_LEFT_TO_RIGHT);
+    }
+
+    /**
+     * Subclasses will need to override this method to implement their own way of resolving
+     * drawables depending on the layout direction.
+     *
+     * A call to the super method will be required from the subclasses implementation.
+     *
+     */
+    protected void resolveDrawables() {
+        // No need to resolve twice
+        if (bResolvedDrawables) {
+            return;
+        }
+        // No drawable to resolve
+        if (mDrawables == null) {
+            return;
+        }
+        // No relative drawable to resolve
+        if (mDrawables.mDrawableStart == null && mDrawables.mDrawableEnd == null) {
+            bResolvedDrawables = true;
+            return;
+        }
+
+        Drawables dr = mDrawables;
+        switch(getResolvedLayoutDirection()) {
+            case LAYOUT_DIRECTION_RTL:
+                if (dr.mDrawableStart != null) {
+                    dr.mDrawableRight = dr.mDrawableStart;
+
+                    dr.mDrawableSizeRight = dr.mDrawableSizeStart;
+                    dr.mDrawableHeightRight = dr.mDrawableHeightStart;
+                }
+                if (dr.mDrawableEnd != null) {
+                    dr.mDrawableLeft = dr.mDrawableEnd;
+
+                    dr.mDrawableSizeLeft = dr.mDrawableSizeEnd;
+                    dr.mDrawableHeightLeft = dr.mDrawableHeightEnd;
+                }
+                break;
+
+            case LAYOUT_DIRECTION_LTR:
+            default:
+                if (dr.mDrawableStart != null) {
+                    dr.mDrawableLeft = dr.mDrawableStart;
+
+                    dr.mDrawableSizeLeft = dr.mDrawableSizeStart;
+                    dr.mDrawableHeightLeft = dr.mDrawableHeightStart;
+                }
+                if (dr.mDrawableEnd != null) {
+                    dr.mDrawableRight = dr.mDrawableEnd;
+
+                    dr.mDrawableSizeRight = dr.mDrawableSizeEnd;
+                    dr.mDrawableHeightRight = dr.mDrawableHeightEnd;
+                }
+                break;
+        }
+        bResolvedDrawables = true;
+    }
+
+    protected void resetResolvedDrawables() {
+        bResolvedDrawables = false;
     }
 
     @ViewDebug.ExportedProperty(category = "text")

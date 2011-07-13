@@ -134,6 +134,9 @@ public class BiDiTestActivity extends Activity {
         addItem(result, "TextDirection LTR", BiDiTestTextViewDirectionLtr.class, R.id.textview_direction_ltr);
         addItem(result, "TextDirection RTL", BiDiTestTextViewDirectionRtl.class, R.id.textview_direction_rtl);
 
+        addItem(result, "TextView Drawables LTR", BiDiTestTextViewDrawablesLtr.class, R.id.textview_drawables_ltr);
+        addItem(result, "TextView Drawables RTL", BiDiTestTextViewDrawablesRtl.class, R.id.textview_drawables_rtl);
+
         return result;
     }
 
