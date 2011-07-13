@@ -138,12 +138,9 @@ public class UsbDeviceManager {
 
         // create a thread for our Handler
         HandlerThread thread = new HandlerThread("UsbDeviceManager",
-                Process.THREAD_PRIORITY_BACKGROUND) {
-            protected void onLooperPrepared() {
-                mHandler = new UsbHandler();
-            }
-        };
+                Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
+        mHandler = new UsbHandler(thread.getLooper());
     }
 
     public void systemReady() {
@@ -249,7 +246,8 @@ public class UsbDeviceManager {
         private static final int NOTIFICATION_INSTALLER = 3;
         private static final int NOTIFICATION_ADB = 4;
 
-        public UsbHandler() {
+        public UsbHandler(Looper looper) {
+            super(looper);
             try {
                 // persist.sys.usb.config should never be unset.  But if it is, set it to "adb"
                 // so we have a chance of debugging what happened.
