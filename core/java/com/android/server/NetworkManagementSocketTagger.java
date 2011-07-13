@@ -16,24 +16,37 @@
 
 package com.android.server;
 
+import android.os.SystemProperties;
+import android.util.Log;
+
 import dalvik.system.SocketTagger;
+
 import java.io.FileDescriptor;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.SocketException;
 import java.nio.charset.Charsets;
+
+import libcore.io.IoUtils;
 
 /**
  * Assigns tags to sockets for traffic stats.
  */
 public final class NetworkManagementSocketTagger extends SocketTagger {
+    private static final String TAG = "NetworkManagementSocketTagger";
+    private static final boolean LOGD = false;
 
-    private static final boolean LOGI = false;
-    private static final boolean ENABLE_TAGGING = false;
+    /**
+     * {@link SystemProperties} key that indicates if {@code qtaguid} bandwidth
+     * controls have been enabled.
+     */
+    // TODO: remove when always enabled, or once socket tagging silently fails.
+    public static final String PROP_QTAGUID_ENABLED = "net.qtaguid_enabled";
 
     private static ThreadLocal<SocketTags> threadSocketTags = new ThreadLocal<SocketTags>() {
-        @Override protected SocketTags initialValue() {
+        @Override
+        protected SocketTags initialValue() {
             return new SocketTags();
         }
     };
@@ -50,11 +63,12 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
         threadSocketTags.get().statsUid = uid;
     }
 
-    @Override public void tag(FileDescriptor fd) throws SocketException {
+    @Override
+    public void tag(FileDescriptor fd) throws SocketException {
         final SocketTags options = threadSocketTags.get();
-        if (LOGI) {
-            System.logI("tagSocket(" + fd.getInt$() + ") with statsTag="
-                    + options.statsTag + ", statsUid=" + options.statsUid);
+        if (LOGD) {
+            Log.d(TAG, "tagSocket(" + fd.getInt$() + ") with statsTag=" + options.statsTag
+                    + ", statsUid=" + options.statsUid);
         }
         try {
             // TODO: skip tagging when options would be no-op
@@ -82,9 +96,10 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
         internalModuleCtrl(cmd);
     }
 
-    @Override public void untag(FileDescriptor fd) throws SocketException {
-        if (LOGI) {
-            System.logI("untagSocket(" + fd.getInt$() + ")");
+    @Override
+    public void untag(FileDescriptor fd) throws SocketException {
+        if (LOGD) {
+            Log.i(TAG, "untagSocket(" + fd.getInt$() + ")");
         }
         try {
             unTagSocketFd(fd);
@@ -125,31 +140,22 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
      *
      */
     private void internalModuleCtrl(String cmd) throws IOException {
-        if (!ENABLE_TAGGING) return;
+        if (!SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) return;
 
-        final FileOutputStream procOut;
-        // TODO: Use something like
-        //  android.os.SystemProperties.getInt("persist.bandwidth.enable", 0)
-        // to see if tagging should happen or not.
+        // TODO: migrate to native library for tagging commands
+        FileOutputStream procOut = null;
         try {
             procOut = new FileOutputStream("/proc/net/xt_qtaguid/ctrl");
-        } catch (FileNotFoundException e) {
-            if (LOGI) {
-                System.logI("Can't talk to kernel module:" + e);
-            }
-            return;
-        }
-        try {
             procOut.write(cmd.getBytes(Charsets.US_ASCII));
         } finally {
-            procOut.close();
+            IoUtils.closeQuietly(procOut);
         }
     }
 
     /**
      * Convert {@link Integer} tag to {@code /proc/} format. Assumes unsigned
      * base-10 format like {@code 2147483647}. Currently strips signed bit to
-     * avoid using {@link java.math.BigInteger}.
+     * avoid using {@link BigInteger}.
      */
     public static String tagToKernel(int tag) {
         // TODO: eventually write in hex, since that's what proc exports

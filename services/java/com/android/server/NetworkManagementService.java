@@ -196,6 +196,9 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         } else {
             Slog.d(TAG, "not enabling bandwidth control");
         }
+
+        SystemProperties.set(NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED,
+                mBandwidthControlEnabled ? "1" : "0");
     }
 
     public void registerObserver(INetworkManagementEventObserver obs) {
