@@ -503,7 +503,7 @@ application and send 500 pseudo-random events to it.</p>
 <ul>
     <li><code>V</code> &mdash; Verbose (lowest priority)</li>
 	<li><code>D</code> &mdash; Debug</li>
-	<li><code>I</code> &mdash; Info</li>
+	<li><code>I</code> &mdash; Info (default priority)</li>
 	<li><code>W</code> &mdash; Warning</li>
 	<li><code>E</code> &mdash; Error</li>
 	<li><code>F</code> &mdash; Fatal</li>
@@ -520,7 +520,7 @@ of each message, given as <code>&lt;priority&gt;/&lt;tag&gt;</code>. </p>
 
 <p>To reduce the log output to a manageable level, you can restrict log output using <em>filter expressions</em>. Filter expressions let you indicate to the system the tags-priority combinations that you are interested in &mdash; the system suppresses other messages for the specified tags. </p>
 
-<p>A filter expression follows this format <code>tag:priority ...</code>, where <code>tag</code> indicates the tag of interest and <code>priority</code> indicates the <em>minimum</em> level of priority to report for that tag.  Messages for that tag at or above the specified priority are written to the log. You can supply any number of <code>tag:priority</code> specifications in a single filter expression. The series of specifications is whitespace-delimited. </p>
+<p>A filter expression follows this format <code>tag:priority ...</code>, where <code>tag</code> indicates the tag of interest and <code>priority</code> indicates the <em>minimum</em> level of priority to report for that tag.  Messages for that tag at or above the specified priority are written to the log. You can supply any number of <code>tag:priority</code> specifications in a single filter expression. The series of specifications is whitespace-delimited. The default output is to show all log messages with the Info priority (*:I).</p>
 
 <p>Here's an example of a filter expression that suppresses all log messages except those with the tag "ActivityManager", at priority "Info" or above, and all log messages with tag "MyApp", with priority "Debug" or above:</p>
 
