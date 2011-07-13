@@ -32,7 +32,9 @@ final class SynthesisMessageParams extends MessageParams {
     final float mPan;
     final EventLogger mLogger;
 
-    public volatile AudioTrack mAudioTrack;
+    volatile AudioTrack mAudioTrack;
+    // Not volatile, accessed only from the synthesis thread.
+    int mBytesWritten;
 
     private final LinkedList<ListEntry> mDataBufferList = new LinkedList<ListEntry>();
 
@@ -52,6 +54,7 @@ final class SynthesisMessageParams extends MessageParams {
 
         // initially null.
         mAudioTrack = null;
+        mBytesWritten = 0;
     }
 
     @Override

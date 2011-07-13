@@ -384,7 +384,7 @@ class AudioPlaybackHandler {
             }
             count += written;
         }
-
+        param.mBytesWritten += count;
         param.mLogger.onPlaybackStart();
     }
 
@@ -396,14 +396,16 @@ class AudioPlaybackHandler {
         params.mLogger.onWriteData();
     }
 
-    // Flush all remaining data to the audio track, stop it and release
-    // all it's resources.
+    // Wait for the audio track to stop playing, and then release it's resources.
     private void handleSynthesisDone(SynthesisMessageParams params) {
         if (DBG) Log.d(TAG, "handleSynthesisDone()");
         final AudioTrack audioTrack = params.getAudioTrack();
 
         try {
             if (audioTrack != null) {
+                if (DBG) Log.d(TAG, "Waiting for audio track to complete : " +
+                        audioTrack.hashCode());
+                blockUntilDone(params);
                 if (DBG) Log.d(TAG, "Releasing audio track [" + audioTrack.hashCode() + "]");
                 // The last call to AudioTrack.write( ) will return only after
                 // all data from the audioTrack has been sent to the mixer, so
@@ -415,6 +417,18 @@ class AudioPlaybackHandler {
             params.getDispatcher().dispatchUtteranceCompleted();
             mLastSynthesisRequest = null;
         }
+    }
+
+    private static void blockUntilDone(SynthesisMessageParams params) {
+        if (params.mAudioTrack == null || params.mBytesWritten <= 0) {
+            return;
+        }
+
+        final AudioTrack track = params.mAudioTrack;
+        final int bytesPerFrame = getBytesPerFrame(params.mAudioFormat);
+        final int lengthInBytes = params.mBytesWritten;
+
+        blockUntilDone(track, bytesPerFrame, lengthInBytes);
     }
 
     private void handleSynthesisCompleteDataAvailable(MessageParams msg) {
@@ -455,13 +469,18 @@ class AudioPlaybackHandler {
     }
 
 
-    private static void blockUntilDone(AudioTrack audioTrack, int bytesPerFrame, int length) {
-        int lengthInFrames = length / bytesPerFrame;
+    private static void blockUntilDone(AudioTrack audioTrack, int bytesPerFrame,
+            int lengthInBytes) {
+        int lengthInFrames = lengthInBytes / bytesPerFrame;
         int currentPosition = 0;
         while ((currentPosition = audioTrack.getPlaybackHeadPosition()) < lengthInFrames) {
+            if (audioTrack.getPlayState() != AudioTrack.PLAYSTATE_PLAYING) {
+                break;
+            }
+
             long estimatedTimeMs = ((lengthInFrames - currentPosition) * 1000) /
                     audioTrack.getSampleRate();
-            audioTrack.getPlayState();
+
             if (DBG) Log.d(TAG, "About to sleep for : " + estimatedTimeMs + " ms," +
                     " Playback position : " + currentPosition);
             try {
