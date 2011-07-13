@@ -313,21 +313,24 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
 
         synchronized (mStatsLock) {
+            // use system clock to be externally consistent
+            final long now = System.currentTimeMillis();
+
             final NetworkStats stats = new NetworkStats(end - start, 1);
             final NetworkStats.Entry entry = new NetworkStats.Entry();
-            long[] total = new long[2];
+            NetworkStatsHistory.Entry historyEntry = null;
 
             // combine total from all interfaces that match template
             for (NetworkIdentitySet ident : mNetworkStats.keySet()) {
                 if (templateMatches(template, ident)) {
                     final NetworkStatsHistory history = mNetworkStats.get(ident);
-                    total = history.getTotalData(start, end, total);
+                    historyEntry = history.getValues(start, end, now, historyEntry);
 
                     entry.iface = IFACE_ALL;
                     entry.uid = UID_ALL;
                     entry.tag = TAG_NONE;
-                    entry.rxBytes = total[0];
-                    entry.txBytes = total[1];
+                    entry.rxBytes = historyEntry.rxBytes;
+                    entry.txBytes = historyEntry.txBytes;
 
                     stats.combineValues(entry);
                 }
@@ -345,9 +348,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         synchronized (mStatsLock) {
             ensureUidStatsLoadedLocked();
 
+            // use system clock to be externally consistent
+            final long now = System.currentTimeMillis();
+
             final NetworkStats stats = new NetworkStats(end - start, 24);
             final NetworkStats.Entry entry = new NetworkStats.Entry();
-            long[] total = new long[2];
+            NetworkStatsHistory.Entry historyEntry = null;
 
             for (NetworkIdentitySet ident : mUidStats.keySet()) {
                 if (templateMatches(template, ident)) {
@@ -361,13 +367,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                         // other tags when requested.
                         if (tag == TAG_NONE || includeTags) {
                             final NetworkStatsHistory history = uidStats.valueAt(i);
-                            total = history.getTotalData(start, end, total);
+                            historyEntry = history.getValues(start, end, now, historyEntry);
 
                             entry.iface = IFACE_ALL;
                             entry.uid = uid;
                             entry.tag = tag;
-                            entry.rxBytes = total[0];
-                            entry.txBytes = total[1];
+                            entry.rxBytes = historyEntry.rxBytes;
+                            entry.txBytes = historyEntry.txBytes;
 
                             if (entry.rxBytes > 0 || entry.txBytes > 0) {
                                 stats.combineValues(entry);
@@ -425,6 +431,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // broadcast.
             final int uid = intent.getIntExtra(EXTRA_UID, 0);
             synchronized (mStatsLock) {
+                // TODO: perform one last stats poll for UID
                 removeUidLocked(uid);
             }
         }

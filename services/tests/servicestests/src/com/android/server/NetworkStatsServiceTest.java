@@ -264,7 +264,6 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     public void testStatsBucketResize() throws Exception {
         long elapsedRealtime = 0;
         NetworkStatsHistory history = null;
-        long[] total = null;
 
         assertStatsFilesExist(false);
 
@@ -292,9 +291,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         // verify service recorded history
         history = mService.getHistoryForNetwork(new NetworkTemplate(MATCH_WIFI, null));
-        total = history.getTotalData(Long.MIN_VALUE, Long.MAX_VALUE, null);
-        assertEquals(512L, total[0]);
-        assertEquals(512L, total[1]);
+        assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, 512L, 512L);
         assertEquals(HOUR_IN_MILLIS, history.getBucketDuration());
         assertEquals(2, history.size());
         verifyAndReset();
@@ -311,9 +308,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
         // verify identical stats, but spread across 4 buckets now
         history = mService.getHistoryForNetwork(new NetworkTemplate(MATCH_WIFI, null));
-        total = history.getTotalData(Long.MIN_VALUE, Long.MAX_VALUE, null);
-        assertEquals(512L, total[0]);
-        assertEquals(512L, total[1]);
+        assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, 512L, 512L);
         assertEquals(30 * MINUTE_IN_MILLIS, history.getBucketDuration());
         assertEquals(4, history.size());
         verifyAndReset();
@@ -575,32 +570,28 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         NetworkStats stats = mService.getSummaryForAllUid(
                 sTemplateWifi, Long.MIN_VALUE, Long.MAX_VALUE, true);
         assertEquals(3, stats.size());
-        assertEntry(stats, 0, IFACE_ALL, UID_RED, TAG_NONE, 50L, 5L, 50L, 5L);
-        assertEntry(stats, 1, IFACE_ALL, UID_RED, 0xF00D, 10L, 1L, 10L, 1L);
-        assertEntry(stats, 2, IFACE_ALL, UID_BLUE, TAG_NONE, 2048L, 16L, 1024L, 8L);
+        assertValues(stats, 0, IFACE_ALL, UID_RED, TAG_NONE, 50L, 5L, 50L, 5L);
+        assertValues(stats, 1, IFACE_ALL, UID_RED, 0xF00D, 10L, 1L, 10L, 1L);
+        assertValues(stats, 2, IFACE_ALL, UID_BLUE, TAG_NONE, 2048L, 16L, 1024L, 8L);
 
         // now verify that recent history only contains one uid
         final long currentTime = TEST_START + elapsedRealtime;
         stats = mService.getSummaryForAllUid(
                 sTemplateWifi, currentTime - HOUR_IN_MILLIS, currentTime, true);
         assertEquals(1, stats.size());
-        assertEntry(stats, 0, IFACE_ALL, UID_BLUE, TAG_NONE, 1024L, 8L, 512L, 4L);
+        assertValues(stats, 0, IFACE_ALL, UID_BLUE, TAG_NONE, 1024L, 8L, 512L, 4L);
 
         verifyAndReset();
     }
 
-    private void assertNetworkTotal(NetworkTemplate template, long rx, long tx) {
+    private void assertNetworkTotal(NetworkTemplate template, long rxBytes, long txBytes) {
         final NetworkStatsHistory history = mService.getHistoryForNetwork(template);
-        final long[] total = history.getTotalData(Long.MIN_VALUE, Long.MAX_VALUE, null);
-        assertEquals(rx, total[0]);
-        assertEquals(tx, total[1]);
+        assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, rxBytes, txBytes);
     }
 
-    private void assertUidTotal(NetworkTemplate template, int uid, long rx, long tx) {
+    private void assertUidTotal(NetworkTemplate template, int uid, long rxBytes, long txBytes) {
         final NetworkStatsHistory history = mService.getHistoryForUid(template, uid, TAG_NONE);
-        final long[] total = history.getTotalData(Long.MIN_VALUE, Long.MAX_VALUE, null);
-        assertEquals(rx, total[0]);
-        assertEquals(tx, total[1]);
+        assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, rxBytes, txBytes);
     }
 
     private void expectSystemReady() throws Exception {
@@ -660,7 +651,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         }
     }
 
-    private static void assertEntry(NetworkStats stats, int i, String iface, int uid, int tag,
+    private static void assertValues(NetworkStats stats, int i, String iface, int uid, int tag,
             long rxBytes, long rxPackets, long txBytes, long txPackets) {
         final NetworkStats.Entry entry = stats.getValues(i, null);
         assertEquals(iface, entry.iface);
@@ -671,6 +662,13 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 //        assertEquals(rxPackets, entry.rxPackets);
         assertEquals(txBytes, entry.txBytes);
 //        assertEquals(txPackets, entry.txPackets);
+    }
+
+    private static void assertValues(
+            NetworkStatsHistory stats, long start, long end, long rxBytes, long txBytes) {
+        final NetworkStatsHistory.Entry entry = stats.getValues(start, end, null);
+        assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
+        assertEquals("unexpected txBytes", txBytes, entry.txBytes);
     }
 
     private static NetworkState buildWifiState() {
