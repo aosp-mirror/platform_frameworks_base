@@ -299,18 +299,38 @@ int FramebufferNativeWindow::perform(ANativeWindow* window,
 {
     switch (operation) {
         case NATIVE_WINDOW_SET_USAGE:
-        case NATIVE_WINDOW_SET_BUFFERS_FORMAT:
+            // TODO: we should implement this
+            return NO_ERROR;
         case NATIVE_WINDOW_CONNECT:
+            // TODO: we should implement this
+            return NO_ERROR;
         case NATIVE_WINDOW_DISCONNECT:
-            break;
+            // TODO: we should implement this
+            return NO_ERROR;
         case NATIVE_WINDOW_LOCK:
             return INVALID_OPERATION;
         case NATIVE_WINDOW_UNLOCK_AND_POST:
             return INVALID_OPERATION;
-        default:
-            return NAME_NOT_FOUND;
+        case NATIVE_WINDOW_SET_CROP:
+            return INVALID_OPERATION;
+        case NATIVE_WINDOW_SET_BUFFER_COUNT:
+            // TODO: we should implement this
+            return INVALID_OPERATION;
+        case NATIVE_WINDOW_SET_BUFFERS_GEOMETRY:
+            return INVALID_OPERATION;
+        case NATIVE_WINDOW_SET_BUFFERS_TRANSFORM:
+            return INVALID_OPERATION;
+        case NATIVE_WINDOW_SET_BUFFERS_TIMESTAMP:
+            return INVALID_OPERATION;
+        case NATIVE_WINDOW_SET_BUFFERS_DIMENSIONS:
+            return INVALID_OPERATION;
+        case NATIVE_WINDOW_SET_BUFFERS_FORMAT:
+            // TODO: we should implement this
+            return NO_ERROR;
+        case NATIVE_WINDOW_SET_SCALING_MODE:
+            return INVALID_OPERATION;
     }
-    return NO_ERROR;
+    return NAME_NOT_FOUND;
 }
 
 // ----------------------------------------------------------------------------

@@ -87,6 +87,7 @@ protected:
 
     virtual status_t setCrop(const Rect& reg) = 0;
     virtual status_t setTransform(uint32_t transform) = 0;
+    virtual status_t setScalingMode(int mode) = 0;
 
     // getAllocator retrieves the binder object that must be referenced as long
     // as the GraphicBuffers dequeued from this ISurfaceTexture are referenced.

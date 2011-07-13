@@ -63,6 +63,7 @@ private:
     int dispatchSetBuffersGeometry(va_list args);
     int dispatchSetBuffersDimensions(va_list args);
     int dispatchSetBuffersFormat(va_list args);
+    int dispatchSetScalingMode(va_list args);
     int dispatchSetBuffersTransform(va_list args);
     int dispatchSetBuffersTimestamp(va_list args);
     int dispatchSetCrop(va_list args);
@@ -84,6 +85,7 @@ protected:
     virtual int setBufferCount(int bufferCount);
     virtual int setBuffersDimensions(int w, int h);
     virtual int setBuffersFormat(int format);
+    virtual int setScalingMode(int mode);
     virtual int setBuffersTransform(int transform);
     virtual int setBuffersTimestamp(int64_t timestamp);
     virtual int setCrop(Rect const* rect);
