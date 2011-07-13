@@ -22,12 +22,7 @@
 #include <limits.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/ioctl.h>
 #include <utils/threads.h>
-
-#ifdef HAVE_ANDROID_OS
-#include <linux/usb/f_mtp.h>
-#endif
 
 #include "jni.h"
 #include "JNIHelp.h"
@@ -39,8 +34,8 @@
 
 using namespace android;
 
-// MtpStorage class
-jclass clazz_MtpStorage;
+// MtpServer fields
+static jfieldID field_MtpServer_nativeContext;
 
 // MtpStorage fields
 static jfieldID field_MtpStorage_storageId;
@@ -57,173 +52,78 @@ static Mutex sMutex;
 // in android_mtp_MtpDatabase.cpp
 extern MtpDatabase* getMtpDatabase(JNIEnv *env, jobject database);
 
-// ----------------------------------------------------------------------------
-
-#ifdef HAVE_ANDROID_OS
-
-static bool ExceptionCheck(void* env)
-{
-    return ((JNIEnv *)env)->ExceptionCheck();
+static inline MtpServer* getMtpServer(JNIEnv *env, jobject thiz) {
+    return (MtpServer*)env->GetIntField(thiz, field_MtpServer_nativeContext);
 }
-
-class MtpThread : public Thread {
-private:
-    MtpDatabase*    mDatabase;
-    bool            mPtp;
-    MtpServer*      mServer;
-    MtpStorageList  mStorageList;
-    int             mFd;
-
-public:
-    MtpThread(MtpDatabase* database, bool usePtp)
-        :   mDatabase(database),
-            mPtp(usePtp),
-            mServer(NULL),
-            mFd(-1)
-    {
-    }
-
-    virtual ~MtpThread() {
-    }
-
-    void addStorage(MtpStorage *storage) {
-        mStorageList.push(storage);
-        if (mServer)
-            mServer->addStorage(storage);
-    }
-
-    void removeStorage(MtpStorageID id) {
-        MtpStorage* storage = mServer->getStorage(id);
-        if (storage) {
-            for (size_t i = 0; i < mStorageList.size(); i++) {
-                if (mStorageList[i] == storage) {
-                    mStorageList.removeAt(i);
-                    break;
-                }
-            }
-            if (mServer)
-                mServer->removeStorage(storage);
-            delete storage;
-        }
-    }
-
-    void start() {
-        run("MtpThread");
-    }
-
-    virtual bool threadLoop() {
-        sMutex.lock();
-
-        mFd = open("/dev/mtp_usb", O_RDWR);
-        if (mFd >= 0) {
-            mServer = new MtpServer(mFd, mDatabase, mPtp, AID_MEDIA_RW, 0664, 0775);
-            for (size_t i = 0; i < mStorageList.size(); i++) {
-                mServer->addStorage(mStorageList[i]);
-            }
-        } else {
-            LOGE("could not open MTP driver, errno: %d", errno);
-        }
-
-        sMutex.unlock();
-        mServer->run();
-        sMutex.lock();
-
-        close(mFd);
-        mFd = -1;
-        delete mServer;
-        mServer = NULL;
-
-        sMutex.unlock();
-        // delay a bit before retrying to avoid excessive spin
-        if (!exitPending()) {
-            sleep(1);
-        }
-
-        return true;
-    }
-
-    void sendObjectAdded(MtpObjectHandle handle) {
-        if (mServer)
-            mServer->sendObjectAdded(handle);
-    }
-
-    void sendObjectRemoved(MtpObjectHandle handle) {
-        if (mServer)
-            mServer->sendObjectRemoved(handle);
-    }
-};
-
-// This smart pointer is necessary for preventing MtpThread from exiting too early
-static sp<MtpThread> sThread;
-
-#endif // HAVE_ANDROID_OS
 
 static void
 android_mtp_MtpServer_setup(JNIEnv *env, jobject thiz, jobject javaDatabase, jboolean usePtp)
 {
-#ifdef HAVE_ANDROID_OS
-    // create the thread and assign it to the smart pointer
-    sThread = new MtpThread(getMtpDatabase(env, javaDatabase), usePtp);
-#endif
-}
-
-static void
-android_mtp_MtpServer_start(JNIEnv *env, jobject thiz)
-{
-#ifdef HAVE_ANDROID_OS
-   sMutex.lock();
-    MtpThread *thread = sThread.get();
-    if (thread)
-        thread->start();
-    sMutex.unlock();
-#endif // HAVE_ANDROID_OS
-}
-
-static void
-android_mtp_MtpServer_stop(JNIEnv *env, jobject thiz)
-{
-#ifdef HAVE_ANDROID_OS
-    sMutex.lock();
-    MtpThread *thread = sThread.get();
-    if (thread) {
-        thread->requestExitAndWait();
-        sThread = NULL;
+    int fd = open("/dev/mtp_usb", O_RDWR);
+    if (fd >= 0) {
+        MtpServer* server = new MtpServer(fd, getMtpDatabase(env, javaDatabase),
+                usePtp, AID_MEDIA_RW, 0664, 0775);
+        env->SetIntField(thiz, field_MtpServer_nativeContext, (int)server);
+    } else {
+        LOGE("could not open MTP driver, errno: %d", errno);
     }
-    sMutex.unlock();
-#endif
+}
+
+static void
+android_mtp_MtpServer_run(JNIEnv *env, jobject thiz)
+{
+    MtpServer* server = getMtpServer(env, thiz);
+    if (server)
+        server->run();
+    else
+        LOGE("server is null in run");
+}
+
+static void
+android_mtp_MtpServer_cleanup(JNIEnv *env, jobject thiz)
+{
+    Mutex::Autolock autoLock(sMutex);
+
+    MtpServer* server = getMtpServer(env, thiz);
+    if (server) {
+        delete server;
+        env->SetIntField(thiz, field_MtpServer_nativeContext, 0);
+    } else {
+        LOGE("server is null in cleanup");
+    }
 }
 
 static void
 android_mtp_MtpServer_send_object_added(JNIEnv *env, jobject thiz, jint handle)
 {
-#ifdef HAVE_ANDROID_OS
-    sMutex.lock();
-    MtpThread *thread = sThread.get();
-    if (thread)
-        thread->sendObjectAdded(handle);
-    sMutex.unlock();
-#endif
+    Mutex::Autolock autoLock(sMutex);
+
+    MtpServer* server = getMtpServer(env, thiz);
+    if (server)
+        server->sendObjectAdded(handle);
+    else
+        LOGE("server is null in send_object_added");
 }
 
 static void
 android_mtp_MtpServer_send_object_removed(JNIEnv *env, jobject thiz, jint handle)
 {
-#ifdef HAVE_ANDROID_OS
-    sMutex.lock();
-    MtpThread *thread = sThread.get();
-    if (thread)
-        thread->sendObjectRemoved(handle);
-    sMutex.unlock();
-#endif
+    Mutex::Autolock autoLock(sMutex);
+
+    MtpServer* server = getMtpServer(env, thiz);
+    if (server)
+        server->sendObjectRemoved(handle);
+    else
+        LOGE("server is null in send_object_removed");
 }
 
 static void
 android_mtp_MtpServer_add_storage(JNIEnv *env, jobject thiz, jobject jstorage)
 {
-#ifdef HAVE_ANDROID_OS
-    sMutex.lock();
-    MtpThread *thread = sThread.get();
-    if (thread) {
+    Mutex::Autolock autoLock(sMutex);
+
+    MtpServer* server = getMtpServer(env, thiz);
+    if (server) {
         jint storageID = env->GetIntField(jstorage, field_MtpStorage_storageId);
         jstring path = (jstring)env->GetObjectField(jstorage, field_MtpStorage_path);
         jstring description = (jstring)env->GetObjectField(jstorage, field_MtpStorage_description);
@@ -237,7 +137,7 @@ android_mtp_MtpServer_add_storage(JNIEnv *env, jobject thiz, jobject jstorage)
             if (descriptionStr != NULL) {
                 MtpStorage* storage = new MtpStorage(storageID, pathStr, descriptionStr,
                         reserveSpace, removable, maxFileSize);
-                thread->addStorage(storage);
+                server->addStorage(storage);
                 env->ReleaseStringUTFChars(path, pathStr);
                 env->ReleaseStringUTFChars(description, descriptionStr);
             } else {
@@ -245,24 +145,24 @@ android_mtp_MtpServer_add_storage(JNIEnv *env, jobject thiz, jobject jstorage)
             }
         }
     } else {
-        LOGE("MtpThread is null in add_storage");
+        LOGE("server is null in add_storage");
     }
-    sMutex.unlock();
-#endif
 }
 
 static void
 android_mtp_MtpServer_remove_storage(JNIEnv *env, jobject thiz, jint storageId)
 {
-#ifdef HAVE_ANDROID_OS
-    sMutex.lock();
-    MtpThread *thread = sThread.get();
-    if (thread)
-        thread->removeStorage(storageId);
-    else
-        LOGE("MtpThread is null in remove_storage");
-    sMutex.unlock();
-#endif
+    Mutex::Autolock autoLock(sMutex);
+
+    MtpServer* server = getMtpServer(env, thiz);
+    if (server) {
+        MtpStorage* storage = server->getStorage(storageId);
+        if (storage) {
+            server->removeStorage(storage);
+            delete storage;
+        }
+    } else
+        LOGE("server is null in remove_storage");
 }
 
 // ----------------------------------------------------------------------------
@@ -270,8 +170,8 @@ android_mtp_MtpServer_remove_storage(JNIEnv *env, jobject thiz, jint storageId)
 static JNINativeMethod gMethods[] = {
     {"native_setup",                "(Landroid/mtp/MtpDatabase;Z)V",
                                             (void *)android_mtp_MtpServer_setup},
-    {"native_start",                "()V",  (void *)android_mtp_MtpServer_start},
-    {"native_stop",                 "()V",  (void *)android_mtp_MtpServer_stop},
+    {"native_run",                  "()V",  (void *)android_mtp_MtpServer_run},
+    {"native_cleanup",              "()V",  (void *)android_mtp_MtpServer_cleanup},
     {"native_send_object_added",    "(I)V", (void *)android_mtp_MtpServer_send_object_added},
     {"native_send_object_removed",  "(I)V", (void *)android_mtp_MtpServer_send_object_removed},
     {"native_add_storage",          "(Landroid/mtp/MtpStorage;)V",
@@ -320,11 +220,15 @@ int register_android_mtp_MtpServer(JNIEnv *env)
         LOGE("Can't find MtpStorage.mMaxFileSize");
         return -1;
     }
-    clazz_MtpStorage = (jclass)env->NewGlobalRef(clazz);
 
     clazz = env->FindClass("android/mtp/MtpServer");
     if (clazz == NULL) {
         LOGE("Can't find android/mtp/MtpServer");
+        return -1;
+    }
+    field_MtpServer_nativeContext = env->GetFieldID(clazz, "mNativeContext", "I");
+    if (field_MtpServer_nativeContext == NULL) {
+        LOGE("Can't find MtpServer.mNativeContext");
         return -1;
     }
 
