@@ -264,6 +264,10 @@ abstract class SipPhoneBase extends PhoneBase {
         return null;
     }
 
+    public String getImei() {
+        return null;
+    }
+
     public String getEsn() {
         Log.e(LOG_TAG, "[SipPhone] getEsn() is a CDMA method");
         return "0";
