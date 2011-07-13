@@ -9066,11 +9066,20 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         // Set resolved depending on layout direction
         switch (getLayoutDirection()) {
             case LAYOUT_DIRECTION_INHERIT:
+                // We cannot do the resolution if there is no parent
+                if (mParent == null) return;
+
                 // If this is root view, no need to look at parent's layout dir.
-                if (mParent != null &&
-                        mParent instanceof ViewGroup &&
-                        ((ViewGroup) mParent).getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
-                    mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
+                if (mParent instanceof ViewGroup) {
+                    ViewGroup viewGroup = ((ViewGroup) mParent);
+
+                    // Check if the parent view group can resolve
+                    if (! viewGroup.canResolveLayoutDirection()) {
+                        return;
+                    }
+                    if (viewGroup.getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL) {
+                        mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED_RTL;
+                    }
                 }
                 break;
             case LAYOUT_DIRECTION_RTL:
@@ -9130,6 +9139,15 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         mUserPaddingBottom = (mUserPaddingBottom >= 0) ? mUserPaddingBottom : mPaddingBottom;
 
         recomputePadding();
+    }
+
+    protected boolean canResolveLayoutDirection() {
+        switch (getLayoutDirection()) {
+            case LAYOUT_DIRECTION_INHERIT:
+                return (mParent != null);
+            default:
+                return true;
+        }
     }
 
     /**
