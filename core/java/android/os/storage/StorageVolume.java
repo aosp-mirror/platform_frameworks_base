@@ -172,7 +172,10 @@ public class StorageVolume implements Parcelable {
 
     @Override
     public String toString() {
-        return mPath;
+        return "StorageVolume [mAllowMassStorage=" + mAllowMassStorage + ", mDescription="
+                + mDescription + ", mEmulated=" + mEmulated + ", mMaxFileSize=" + mMaxFileSize
+                + ", mMtpReserveSpace=" + mMtpReserveSpace + ", mPath=" + mPath + ", mRemovable="
+                + mRemovable + ", mStorageId=" + mStorageId + "]";
     }
 
     public static final Parcelable.Creator<StorageVolume> CREATOR =
