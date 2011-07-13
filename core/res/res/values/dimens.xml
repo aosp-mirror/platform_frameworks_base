@@ -133,4 +133,7 @@
     <!-- Size of right margin on Unsecure unlock LockScreen -->
     <dimen name="keyguard_lockscreen_status_line_font_right_margin">45dip</dimen>
 
+    <!-- Minimum popup width for selecting an activity in ActivityChooserDialog/ActivityChooserView. -->
+    <dimen name="activity_chooser_popup_min_width">200dip</dimen>
+
 </resources>

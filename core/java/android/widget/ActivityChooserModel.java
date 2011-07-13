@@ -126,7 +126,7 @@ public class ActivityChooserModel extends DataSetObservable {
          */
         // This cannot be done by a simple comparator since an Activity weight
         // is computed from history. Note that Activity implements Comparable.
-        public void sort(Intent intent, List<Activity> activities,
+        public void sort(Intent intent, List<ActivityResolveInfo> activities,
                 List<HistoricalRecord> historicalRecords);
     }
 
@@ -215,7 +215,7 @@ public class ActivityChooserModel extends DataSetObservable {
     /**
      * List of activities that can handle the current intent.
      */
-    private final List<Activity> mActivitys = new ArrayList<Activity>();
+    private final List<ActivityResolveInfo> mActivites = new ArrayList<ActivityResolveInfo>();
 
     /**
      * List with historical choice records.
@@ -311,9 +311,6 @@ public class ActivityChooserModel extends DataSetObservable {
      * @return The model.
      */
     public static ActivityChooserModel get(Context context, String historyFileName) {
-        if (historyFileName == null) {
-            return new ActivityChooserModel(context, historyFileName);
-        }
         synchronized (sRegistryLock) {
             ActivityChooserModel dataModel = sDataModelRegistry.get(historyFileName);
             if (dataModel == null) {
@@ -380,7 +377,7 @@ public class ActivityChooserModel extends DataSetObservable {
      */
     public int getActivityCount() {
         synchronized (mInstanceLock) {
-            return mActivitys.size();
+            return mActivites.size();
         }
     }
 
@@ -389,12 +386,12 @@ public class ActivityChooserModel extends DataSetObservable {
      *
      * @return The activity.
      *
-     * @see Activity
+     * @see ActivityResolveInfo
      * @see #setIntent(Intent)
      */
     public ResolveInfo getActivity(int index) {
         synchronized (mInstanceLock) {
-            return mActivitys.get(index).resolveInfo;
+            return mActivites.get(index).resolveInfo;
         }
     }
 
@@ -406,10 +403,10 @@ public class ActivityChooserModel extends DataSetObservable {
      * @return The index if found, -1 otherwise.
      */
     public int getActivityIndex(ResolveInfo activity) {
-        List<Activity> activities = mActivitys;
+        List<ActivityResolveInfo> activities = mActivites;
         final int activityCount = activities.size();
         for (int i = 0; i < activityCount; i++) {
-            Activity currentActivity = activities.get(i);
+            ActivityResolveInfo currentActivity = activities.get(i);
             if (currentActivity.resolveInfo == activity) {
                 return i;
             }
@@ -433,8 +430,8 @@ public class ActivityChooserModel extends DataSetObservable {
      * @see HistoricalRecord
      */
     public Intent chooseActivity(int index) {
-        Activity chosenActivity = mActivitys.get(index);
-        Activity defaultActivity = mActivitys.get(0);
+        ActivityResolveInfo chosenActivity = mActivites.get(index);
+        ActivityResolveInfo defaultActivity = mActivites.get(0);
 
         ComponentName chosenName = new ComponentName(
                 chosenActivity.resolveInfo.activityInfo.packageName,
@@ -460,8 +457,8 @@ public class ActivityChooserModel extends DataSetObservable {
      */
     public ResolveInfo getDefaultActivity() {
         synchronized (mInstanceLock) {
-            if (!mActivitys.isEmpty()) {
-                return mActivitys.get(0).resolveInfo;
+            if (!mActivites.isEmpty()) {
+                return mActivites.get(0).resolveInfo;
             }
         }
         return null;
@@ -478,8 +475,8 @@ public class ActivityChooserModel extends DataSetObservable {
      * @param index The index of the activity to set as default.
      */
     public void setDefaultActivity(int index) {
-        Activity newDefaultActivity = mActivitys.get(index);
-        Activity oldDefaultActivity = mActivitys.get(0);
+        ActivityResolveInfo newDefaultActivity = mActivites.get(index);
+        ActivityResolveInfo oldDefaultActivity = mActivites.get(0);
 
         final float weight;
         if (oldDefaultActivity != null) {
@@ -572,8 +569,8 @@ public class ActivityChooserModel extends DataSetObservable {
      */
     private void sortActivities() {
         synchronized (mInstanceLock) {
-            if (mActivitySorter != null && !mActivitys.isEmpty()) {
-                mActivitySorter.sort(mIntent, mActivitys,
+            if (mActivitySorter != null && !mActivites.isEmpty()) {
+                mActivitySorter.sort(mIntent, mActivites,
                         Collections.unmodifiableList(mHistoricalRecords));
                 notifyChanged();
             }
@@ -661,14 +658,14 @@ public class ActivityChooserModel extends DataSetObservable {
      * Loads the activities.
      */
     private void loadActivitiesLocked() {
-        mActivitys.clear();
+        mActivites.clear();
         if (mIntent != null) {
             List<ResolveInfo> resolveInfos =
                 mContext.getPackageManager().queryIntentActivities(mIntent, 0);
             final int resolveInfoCount = resolveInfos.size();
             for (int i = 0; i < resolveInfoCount; i++) {
                 ResolveInfo resolveInfo = resolveInfos.get(i);
-                mActivitys.add(new Activity(resolveInfo));
+                mActivites.add(new ActivityResolveInfo(resolveInfo));
             }
             sortActivities();
         } else {
@@ -797,7 +794,7 @@ public class ActivityChooserModel extends DataSetObservable {
     /**
      * Represents an activity.
      */
-    public final class Activity implements Comparable<Activity> {
+    public final class ActivityResolveInfo implements Comparable<ActivityResolveInfo> {
 
         /**
          * The {@link ResolveInfo} of the activity.
@@ -814,7 +811,7 @@ public class ActivityChooserModel extends DataSetObservable {
          *
          * @param resolveInfo activity {@link ResolveInfo}.
          */
-        public Activity(ResolveInfo resolveInfo) {
+        public ActivityResolveInfo(ResolveInfo resolveInfo) {
             this.resolveInfo = resolveInfo;
         }
 
@@ -834,14 +831,14 @@ public class ActivityChooserModel extends DataSetObservable {
             if (getClass() != obj.getClass()) {
                 return false;
             }
-            Activity other = (Activity) obj;
+            ActivityResolveInfo other = (ActivityResolveInfo) obj;
             if (Float.floatToIntBits(weight) != Float.floatToIntBits(other.weight)) {
                 return false;
             }
             return true;
         }
 
-        public int compareTo(Activity another) {
+        public int compareTo(ActivityResolveInfo another) {
              return  Float.floatToIntBits(another.weight) - Float.floatToIntBits(weight);
         }
 
@@ -862,18 +859,18 @@ public class ActivityChooserModel extends DataSetObservable {
     private final class DefaultSorter implements ActivitySorter {
         private static final float WEIGHT_DECAY_COEFFICIENT = 0.95f;
 
-        private final Map<String, Activity> mPackageNameToActivityMap =
-            new HashMap<String, Activity>();
+        private final Map<String, ActivityResolveInfo> mPackageNameToActivityMap =
+            new HashMap<String, ActivityResolveInfo>();
 
-        public void sort(Intent intent, List<Activity> activities,
+        public void sort(Intent intent, List<ActivityResolveInfo> activities,
                 List<HistoricalRecord> historicalRecords) {
-            Map<String, Activity> packageNameToActivityMap =
+            Map<String, ActivityResolveInfo> packageNameToActivityMap =
                 mPackageNameToActivityMap;
             packageNameToActivityMap.clear();
 
             final int activityCount = activities.size();
             for (int i = 0; i < activityCount; i++) {
-                Activity activity = activities.get(i);
+                ActivityResolveInfo activity = activities.get(i);
                 activity.weight = 0.0f;
                 String packageName = activity.resolveInfo.activityInfo.packageName;
                 packageNameToActivityMap.put(packageName, activity);
@@ -884,9 +881,11 @@ public class ActivityChooserModel extends DataSetObservable {
             for (int i = lastShareIndex; i >= 0; i--) {
                 HistoricalRecord historicalRecord = historicalRecords.get(i);
                 String packageName = historicalRecord.activity.getPackageName();
-                Activity activity = packageNameToActivityMap.get(packageName);
-                activity.weight += historicalRecord.weight * nextRecordWeight;
-                nextRecordWeight = nextRecordWeight * WEIGHT_DECAY_COEFFICIENT;
+                ActivityResolveInfo activity = packageNameToActivityMap.get(packageName);
+                if (activity != null) {
+                    activity.weight += historicalRecord.weight * nextRecordWeight;
+                    nextRecordWeight = nextRecordWeight * WEIGHT_DECAY_COEFFICIENT;
+                }
             }
 
             Collections.sort(activities);

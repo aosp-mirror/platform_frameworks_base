@@ -16,10 +16,7 @@
 
 package android.widget;
 
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -27,12 +24,20 @@ import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.os.Debug;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ActivityChooserModel;
 import android.widget.ActivityChooserModel.ActivityChooserModelClient;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ListPopupWindow;
+import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import com.android.internal.R;
 
@@ -55,11 +60,6 @@ import com.android.internal.R;
  * "Show all..." serves as an affordance to display all available activities.
  * </li>
  * </ul>
- * </p>
- * </p>
- * This view is backed by a {@link ActivityChooserModel}. Calling {@link #showPopup()}
- * while this view is attached to the view hierarchy will show a popup with
- * activities while if the view is not attached it will show a dialog.
  * </p>
  *
  * @hide
@@ -92,39 +92,26 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     private final ImageButton mDefaultActionButton;
 
     /**
-     * The header for handlers list.
+     * Observer for the model data.
      */
-    private final View mListHeaderView;
+    private final DataSetObserver mModelDataSetOberver = new DataSetObserver() {
 
-    /**
-     * The footer for handlers list.
-     */
-    private final View mListFooterView;
-
-    /**
-     * The title of the header view.
-     */
-    private TextView mListHeaderViewTitle;
-
-    /**
-     * The title for expanding the activities list.
-     */
-    private final String mListHeaderViewTitleSelectDefault;
-
-    /**
-     * The title if no activity exist.
-     */
-    private final String mListHeaderViewTitleNoActivities;
+        @Override
+        public void onChanged() {
+            super.onChanged();
+            mAdapter.notifyDataSetChanged();
+        }
+        @Override
+        public void onInvalidated() {
+            super.onInvalidated();
+            mAdapter.notifyDataSetInvalidated();
+        }
+    };
 
     /**
      * Popup window for showing the activity overflow list.
      */
     private ListPopupWindow mListPopupWindow;
-
-    /**
-     * Alert dialog for showing the activity overflow list.
-     */
-    private AlertDialog mAlertDialog;
 
     /**
      * Listener for the dismissal of the popup/alert.
@@ -145,16 +132,6 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      * Flag whether this view is attached to a window.
      */
     private boolean mIsAttachedToWindow;
-
-    /**
-     * Flag whether this view is showing an alert dialog.
-     */
-    private boolean mIsShowingAlertDialog;
-
-    /**
-     * Flag whether this view is showing a popup window.
-     */
-    private boolean mIsShowingPopuWindow;
 
     /**
      * Create a new instance.
@@ -195,8 +172,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         Drawable expandActivityOverflowButtonDrawable = attributesArray.getDrawable(
                 R.styleable.ActivityChooserView_expandActivityOverflowButtonDrawable);
 
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(
-                Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         inflater.inflate(R.layout.activity_chooser_view, this, true);
 
         mCallbacks = new Callbacks();
@@ -210,15 +186,6 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         mExpandActivityOverflowButton = (ImageButton) findViewById(R.id.expand_activities_button);
         mExpandActivityOverflowButton.setOnClickListener(mCallbacks);
         mExpandActivityOverflowButton.setBackgroundDrawable(expandActivityOverflowButtonDrawable);
-
-        mListHeaderView = inflater.inflate(R.layout.activity_chooser_list_header, null);
-        mListFooterView = inflater.inflate(R.layout.activity_chooser_list_footer, null);
-
-        mListHeaderViewTitle = (TextView) mListHeaderView.findViewById(R.id.title);
-        mListHeaderViewTitleSelectDefault = context.getString(
-                R.string.activity_chooser_view_select_default);
-        mListHeaderViewTitleNoActivities = context.getString(
-                R.string.activity_chooser_view_no_activities);
 
         mAdapter = new ActivityChooserViewAdapter();
         mAdapter.registerDataSetObserver(new DataSetObserver() {
@@ -262,7 +229,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      * @return True if the popup was shown, false if already showing.
      */
     public boolean showPopup() {
-        if (isShowingPopup()) {
+        if (isShowingPopup() || !mIsAttachedToWindow) {
             return false;
         }
         mIsSelectingDefaultActivity = false;
@@ -276,38 +243,29 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      * @param maxActivityCount The max number of activities to display.
      */
     private void showPopupUnchecked(int maxActivityCount) {
+        if (mAdapter.getDataModel() == null) {
+            throw new IllegalStateException("No data model. Did you call #setDataModel?");
+        }
+
         mAdapter.setMaxActivityCount(maxActivityCount);
-        if (mIsSelectingDefaultActivity) {
-            if (mAdapter.getActivityCount() > 0) {
-                mListHeaderViewTitle.setText(mListHeaderViewTitleSelectDefault);
+
+        final int activityCount = mAdapter.getActivityCount();
+        if (maxActivityCount != ActivityChooserViewAdapter.MAX_ACTIVITY_COUNT_UNLIMITED
+                && activityCount > maxActivityCount + 1) {
+            mAdapter.setShowFooterView(true);
+        } else {
+            mAdapter.setShowFooterView(false);
+        }
+
+        ListPopupWindow popupWindow = getListPopupWindow();
+        if (!popupWindow.isShowing()) {
+            if (mIsSelectingDefaultActivity) {
+                mAdapter.setShowDefaultActivity(true);
             } else {
-                mListHeaderViewTitle.setText(mListHeaderViewTitleNoActivities);
+                mAdapter.setShowDefaultActivity(false);
             }
-            mAdapter.setHeaderView(mListHeaderView);
-        } else {
-            mAdapter.setHeaderView(null);
-        }
-
-        if (mAdapter.getActivityCount() > maxActivityCount + 1) {
-            mAdapter.setFooterView(mListFooterView);
-        } else {
-            mAdapter.setFooterView(null);
-        }
-
-        if (!mIsAttachedToWindow || mIsShowingAlertDialog) {
-            AlertDialog alertDialog = getAlertDilalog();
-            if (!alertDialog.isShowing()) {
-                alertDialog.setCustomTitle(this);
-                alertDialog.show();
-                mIsShowingAlertDialog = true;
-            }
-        } else {
-            ListPopupWindow popupWindow = getListPopupWindow();
-            if (!popupWindow.isShowing()) {
-                popupWindow.setContentWidth(mAdapter.measureContentWidth());
-                popupWindow.show();
-                mIsShowingPopuWindow = true;
-            }
+            popupWindow.setContentWidth(mAdapter.measureContentWidth());
+            popupWindow.show();
         }
     }
 
@@ -317,12 +275,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      * @return True if dismissed, false if already dismissed.
      */
     public boolean dismissPopup() {
-        if (!isShowingPopup()) {
-            return false;
-        }
-        if (mIsShowingAlertDialog) {
-            getAlertDilalog().dismiss();
-        } else if (mIsShowingPopuWindow) {
+        if (isShowingPopup()) {
             getListPopupWindow().dismiss();
         }
         return true;
@@ -334,12 +287,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      * @return True if the popup is shown.
      */
     public boolean isShowingPopup() {
-        if (mIsShowingAlertDialog) {
-            return getAlertDilalog().isShowing();
-        } else if (mIsShowingPopuWindow) {
-            return getListPopupWindow().isShowing();
-        }
-        return false;
+        return getListPopupWindow().isShowing();
     }
 
     @Override
@@ -347,6 +295,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         super.onAttachedToWindow();
         ActivityChooserModel dataModel = mAdapter.getDataModel();
         if (dataModel != null) {
+            dataModel.registerObserver(mModelDataSetOberver);
             dataModel.readHistoricalData();
         }
         mIsAttachedToWindow = true;
@@ -357,6 +306,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         super.onDetachedFromWindow();
         ActivityChooserModel dataModel = mAdapter.getDataModel();
         if (dataModel != null) {
+            dataModel.unregisterObserver(mModelDataSetOberver);
             dataModel.persistHistoricalData();
         }
         mIsAttachedToWindow = false;
@@ -371,13 +321,11 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        mActivityChooserContent.layout(left, top, right, bottom);
-        if (mIsShowingPopuWindow) {
-            if (isShown()) {
-                showPopupUnchecked(mAdapter.getMaxActivityCount());
-            } else {
-                dismissPopup();
-            }
+        mActivityChooserContent.layout(0, 0, right - left, bottom - top);
+        if (getListPopupWindow().isShowing()) {
+            showPopupUnchecked(mAdapter.getMaxActivityCount());
+        } else {
+            dismissPopup();
         }
     }
 
@@ -429,22 +377,6 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     }
 
     /**
-     * Gets the alert dialog which is lazily initialized.
-     *
-     * @return The popup.
-     */
-    private AlertDialog getAlertDilalog() {
-        if (mAlertDialog == null) {
-            Builder builder = new Builder(getContext());
-            builder.setAdapter(mAdapter, null);
-            mAlertDialog = builder.create();
-            mAlertDialog.getListView().setOnItemClickListener(mCallbacks);
-            mAlertDialog.setOnDismissListener(mCallbacks);
-        }
-        return mAlertDialog;
-    }
-
-    /**
      * Updates the buttons state.
      */
     private void updateButtons() {
@@ -469,24 +401,23 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      * Interface implementation to avoid publishing them in the APIs.
      */
     private class Callbacks implements AdapterView.OnItemClickListener,
-            View.OnClickListener, View.OnLongClickListener, PopupWindow.OnDismissListener,
-            DialogInterface.OnDismissListener {
+            View.OnClickListener, View.OnLongClickListener, PopupWindow.OnDismissListener {
 
         // AdapterView#OnItemClickListener
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             ActivityChooserViewAdapter adapter = (ActivityChooserViewAdapter) parent.getAdapter();
             final int itemViewType = adapter.getItemViewType(position);
             switch (itemViewType) {
-                case ActivityChooserViewAdapter.ITEM_VIEW_TYPE_HEADER: {
-                    /* do nothing */
-                } break;
                 case ActivityChooserViewAdapter.ITEM_VIEW_TYPE_FOOTER: {
                     showPopupUnchecked(ActivityChooserViewAdapter.MAX_ACTIVITY_COUNT_UNLIMITED);
                 } break;
                 case ActivityChooserViewAdapter.ITEM_VIEW_TYPE_ACTIVITY: {
                     dismissPopup();
                     if (mIsSelectingDefaultActivity) {
-                        mAdapter.getDataModel().setDefaultActivity(position);
+                        // The item at position zero is the default already.
+                        if (position > 0) {
+                            mAdapter.getDataModel().setDefaultActivity(position);
+                        }
                     } else {
                         // The first item in the model is default action => adjust index
                         Intent launchIntent = mAdapter.getDataModel().chooseActivity(position + 1);
@@ -530,16 +461,6 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         // PopUpWindow.OnDismissListener#onDismiss
         public void onDismiss() {
-            mIsShowingPopuWindow = false;
-            notifyOnDismissListener();
-        }
-
-        // DialogInterface.OnDismissListener#onDismiss
-        @Override
-        public void onDismiss(DialogInterface dialog) {
-            mIsShowingAlertDialog = false;
-            AlertDialog alertDialog = (AlertDialog) dialog;
-            alertDialog.setCustomTitle(null);
             notifyOnDismissListener();
         }
 
@@ -559,59 +480,35 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         public static final int MAX_ACTIVITY_COUNT_DEFAULT = 4;
 
-        private static final int ITEM_VIEW_TYPE_HEADER = 0;
+        private static final int ITEM_VIEW_TYPE_ACTIVITY = 0;
 
-        private static final int ITEM_VIEW_TYPE_ACTIVITY = 1;
-
-        private static final int ITEM_VIEW_TYPE_FOOTER = 2;
+        private static final int ITEM_VIEW_TYPE_FOOTER = 1;
 
         private static final int ITEM_VIEW_TYPE_COUNT = 3;
-
-        private final DataSetObserver mDataSetOberver = new DataSetObserver() {
-
-            @Override
-            public void onChanged() {
-                super.onChanged();
-                notifyDataSetChanged();
-            }
-            @Override
-            public void onInvalidated() {
-                super.onInvalidated();
-                notifyDataSetInvalidated();
-            }
-        };
 
         private ActivityChooserModel mDataModel;
 
         private int mMaxActivityCount = MAX_ACTIVITY_COUNT_DEFAULT;
 
-        private ResolveInfo mDefaultActivity;
+        private boolean mShowDefaultActivity;
 
-        private View mHeaderView;
-
-        private View mFooterView;
+        private boolean mShowFooterView;
 
         public void setDataModel(ActivityChooserModel dataModel) {
+            ActivityChooserModel oldDataModel = mAdapter.getDataModel();
+            if (oldDataModel != null && isShown()) {
+                oldDataModel.unregisterObserver(mModelDataSetOberver);
+            }
             mDataModel = dataModel;
-            mDataModel.registerObserver(mDataSetOberver);
+            if (dataModel != null && isShown()) {
+                dataModel.registerObserver(mModelDataSetOberver);
+            }
             notifyDataSetChanged();
         }
 
         @Override
-        public void notifyDataSetChanged() {
-            if (mDataModel.getActivityCount() > 0) {
-                mDefaultActivity = mDataModel.getDefaultActivity();
-            } else {
-                mDefaultActivity = null;
-            }
-            super.notifyDataSetChanged();
-        }
-
-        @Override
         public int getItemViewType(int position) {
-            if (mHeaderView != null && position == 0) {
-                return ITEM_VIEW_TYPE_HEADER;
-            } else if (mFooterView != null && position == getCount() - 1) {
+            if (mShowFooterView && position == getCount() - 1) {
                 return ITEM_VIEW_TYPE_FOOTER;
             } else {
                 return ITEM_VIEW_TYPE_ACTIVITY;
@@ -626,14 +523,11 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         public int getCount() {
             int count = 0;
             int activityCount = mDataModel.getActivityCount();
-            if (activityCount > 0) {
+            if (!mShowDefaultActivity && mDataModel.getDefaultActivity() != null) {
                 activityCount--;
             }
             count = Math.min(activityCount, mMaxActivityCount);
-            if (mHeaderView != null) {
-                count++;
-            }
-            if (mFooterView != null) {
+            if (mShowFooterView) {
                 count++;
             }
             return count;
@@ -642,16 +536,13 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         public Object getItem(int position) {
             final int itemViewType = getItemViewType(position);
             switch (itemViewType) {
-                case ITEM_VIEW_TYPE_HEADER:
-                    return mHeaderView;
                 case ITEM_VIEW_TYPE_FOOTER:
-                    return mFooterView;
+                    return null;
                 case ITEM_VIEW_TYPE_ACTIVITY:
-                    int targetIndex = (mHeaderView == null) ? position : position - 1;
-                    if (mDefaultActivity != null) {
-                        targetIndex++;
+                    if (!mShowDefaultActivity && mDataModel.getDefaultActivity() != null) {
+                        position++;
                     }
-                    return mDataModel.getActivity(targetIndex);
+                    return mDataModel.getActivity(position);
                 default:
                     throw new IllegalArgumentException();
             }
@@ -661,27 +552,19 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             return position;
         }
 
-        @Override
-        public boolean isEnabled(int position) {
-            final int itemViewType = getItemViewType(position);
-            switch (itemViewType) {
-                case ITEM_VIEW_TYPE_HEADER:
-                    return false;
-                case ITEM_VIEW_TYPE_FOOTER:
-                case ITEM_VIEW_TYPE_ACTIVITY:
-                    return true;
-                default:
-                    throw new IllegalArgumentException();
-            }
-        }
-
         public View getView(int position, View convertView, ViewGroup parent) {
             final int itemViewType = getItemViewType(position);
             switch (itemViewType) {
-                case ITEM_VIEW_TYPE_HEADER:
-                    return mHeaderView;
                 case ITEM_VIEW_TYPE_FOOTER:
-                    return mFooterView;
+                    if (convertView == null || convertView.getId() != ITEM_VIEW_TYPE_FOOTER) {
+                        convertView = LayoutInflater.from(getContext()).inflate(
+                                R.layout.activity_chooser_view_list_item, parent, false);
+                        convertView.setId(ITEM_VIEW_TYPE_FOOTER);
+                        TextView titleView = (TextView) convertView.findViewById(R.id.title);
+                        titleView.setText(mContext.getString(
+                                R.string.activity_chooser_view_see_all));
+                    }
+                    return convertView;
                 case ITEM_VIEW_TYPE_ACTIVITY:
                     if (convertView == null || convertView.getId() != R.id.list_item) {
                         convertView = LayoutInflater.from(getContext()).inflate(
@@ -695,6 +578,12 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                     // Set the title.
                     TextView titleView = (TextView) convertView.findViewById(R.id.title);
                     titleView.setText(activity.loadLabel(packageManager));
+                    // Highlight the default.
+                    if (mShowDefaultActivity && position == 0) {
+                        convertView.setActivated(true);
+                    } else {
+                        convertView.setActivated(false);
+                    }
                     return convertView;
                 default:
                     throw new IllegalArgumentException();
@@ -702,7 +591,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         }
 
         public int measureContentWidth() {
-            // The user may have specified some of the target not to be show but we
+            // The user may have specified some of the target not to be shown but we
             // want to measure all of them since after expansion they should fit.
             final int oldMaxActivityCount = mMaxActivityCount;
             mMaxActivityCount = MAX_ACTIVITY_COUNT_UNLIMITED;
@@ -733,19 +622,12 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         }
 
         public ResolveInfo getDefaultActivity() {
-            return mDefaultActivity;
+            return mDataModel.getDefaultActivity();
         }
 
-        public void setHeaderView(View headerView) {
-            if (mHeaderView != headerView) {
-                mHeaderView = headerView;
-                notifyDataSetChanged();
-            }
-        }
-
-        public void setFooterView(View footerView) {
-            if (mFooterView != footerView) {
-                mFooterView = footerView;
+        public void setShowFooterView(boolean showFooterView) {
+            if (mShowFooterView != showFooterView) {
+                mShowFooterView = showFooterView;
                 notifyDataSetChanged();
             }
         }
@@ -760,6 +642,13 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         public ActivityChooserModel getDataModel() {
             return mDataModel;
+        }
+
+        public void setShowDefaultActivity(boolean showDefaultActivity) {
+            if (mShowDefaultActivity != showDefaultActivity) {
+                mShowDefaultActivity = showDefaultActivity;
+                notifyDataSetChanged();
+            }
         }
     }
 }

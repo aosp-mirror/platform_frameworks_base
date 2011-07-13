@@ -28,7 +28,9 @@ import android.content.Context;
  * {@link android.app.ActionBar} as a substitute for the menu item when the item is
  * displayed as an action item. Also the provider is responsible for performing a
  * default action if a menu item placed on the overflow menu of the ActionBar is
- * selected and none of the menu item callbacks has handled the selection.
+ * selected and none of the menu item callbacks has handled the selection. For this
+ * case the provider can also optionally provide a sub-menu for accomplishing the
+ * task at hand.
  * </p>
  * <p>
  * There are two ways for using an action provider for creating and handling of action views:

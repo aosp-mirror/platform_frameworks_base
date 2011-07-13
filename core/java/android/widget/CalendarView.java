@@ -375,6 +375,7 @@ public class CalendarView extends FrameLayout {
                 com.android.internal.R.styleable.TextAppearance);
         mDateTextSize = dateTextAppearance.getDimensionPixelSize(
                 R.styleable.TextAppearance_textSize, DEFAULT_DATE_TEXT_SIZE);
+        dateTextAppearance.recycle();
 
         int weekDayTextAppearanceResId = attributesArray.getResourceId(
                 R.styleable.CalendarView_weekDayTextAppearance,

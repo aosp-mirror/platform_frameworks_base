@@ -320,11 +320,6 @@ public final class MenuItemImpl implements MenuItem {
     }
 
     void setSubMenu(SubMenuBuilder subMenu) {
-        if ((mMenu != null) && (mMenu instanceof SubMenu)) {
-            throw new UnsupportedOperationException(
-            "Attempt to add a sub-menu to a sub-menu.");
-        }
-        
         mSubMenu = subMenu;
         
         subMenu.setHeaderTitle(getTitle());

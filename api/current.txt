@@ -26082,7 +26082,7 @@ package android.widget {
     ctor public ShareActionProvider(android.content.Context);
     method public android.view.View onCreateActionView();
     method public void setShareHistoryFileName(java.lang.String);
-    method public void setShareIntent(android.view.View, android.content.Intent);
+    method public void setShareIntent(android.content.Intent);
     field public static final java.lang.String DEFAULT_SHARE_HISTORY_FILE_NAME = "share_history.xml";
   }
 

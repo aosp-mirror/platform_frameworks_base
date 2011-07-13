@@ -3036,9 +3036,10 @@
 
     <!-- Title for a button to expand the list of activities in ActivityChooserView [CHAR LIMIT=25] -->
     <string name="activity_chooser_view_see_all">See all...</string>
-    <!-- Title for a message that there are no activities in ActivityChooserView [CHAR LIMIT=25] -->
-    <string name="activity_chooser_view_no_activities">No activities</string>
-    <!-- Title for a message that prompts selection of a default share handler in ActivityChooserView [CHAR LIMIT=25] -->
-    <string name="activity_chooser_view_select_default">Select default</string>
+    <!-- Title default for a dialog showing possible activities in ActivityChooserView [CHAR LIMIT=25] -->
+    <string name="activity_chooser_view_dialog_title_default">Select activity</string>
+
+    <!-- Title for a dialog showing possible activities for sharing in ShareActionProvider [CHAR LIMIT=25] -->
+    <string name="share_action_provider_share_with">Share with...</string>
 
 </resources>
