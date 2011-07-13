@@ -309,6 +309,9 @@ int SurfaceTextureClient::connect(int api) {
     int err = NO_ERROR;
     switch (api) {
         case NATIVE_WINDOW_API_EGL:
+        case NATIVE_WINDOW_API_CPU:
+        case NATIVE_WINDOW_API_MEDIA:
+        case NATIVE_WINDOW_API_CAMERA:
             if (mConnectedApi) {
                 err = -EINVAL;
             } else {
@@ -328,6 +331,9 @@ int SurfaceTextureClient::disconnect(int api) {
     int err = NO_ERROR;
     switch (api) {
         case NATIVE_WINDOW_API_EGL:
+        case NATIVE_WINDOW_API_CPU:
+        case NATIVE_WINDOW_API_MEDIA:
+        case NATIVE_WINDOW_API_CAMERA:
             if (mConnectedApi == api) {
                 mConnectedApi = 0;
             } else {
