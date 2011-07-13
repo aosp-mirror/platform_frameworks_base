@@ -19,15 +19,16 @@ package com.android.internal.view.menu;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Parcelable;
-import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.FrameLayout;
 import android.widget.ListAdapter;
 import android.widget.ListPopupWindow;
 import android.widget.PopupWindow;
@@ -58,6 +59,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
     private Callback mPresenterCallback;
 
+    boolean mForceShowIcon;
+
+    private ViewGroup mMeasureParent;
+
     public MenuPopupHelper(Context context, MenuBuilder menu) {
         this(context, menu, null, false);
     }
@@ -84,6 +89,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
 
     public void setAnchorView(View anchor) {
         mAnchorView = anchor;
+    }
+
+    public void setForceShowIcon(boolean forceShow) {
+        mForceShowIcon = forceShow;
     }
 
     public void show() {
@@ -170,7 +179,10 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
                 itemType = positionType;
                 itemView = null;
             }
-            itemView = adapter.getView(i, itemView, null);
+            if (mMeasureParent == null) {
+                mMeasureParent = new FrameLayout(mContext);
+            }
+            itemView = adapter.getView(i, itemView, mMeasureParent);
             itemView.measure(widthMeasureSpec, heightMeasureSpec);
             width = Math.max(width, itemView.getMeasuredWidth());
         }
@@ -228,6 +240,18 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
         if (subMenu.hasVisibleItems()) {
             MenuPopupHelper subPopup = new MenuPopupHelper(mContext, subMenu, mAnchorView, false);
             subPopup.setCallback(mPresenterCallback);
+
+            boolean preserveIconSpacing = false;
+            final int count = subMenu.size();
+            for (int i = 0; i < count; i++) {
+                MenuItem childItem = subMenu.getItem(i);
+                if (childItem.isVisible() && childItem.getIcon() != null) {
+                    preserveIconSpacing = true;
+                    break;
+                }
+            }
+            subPopup.setForceShowIcon(preserveIconSpacing);
+
             if (subPopup.tryShow()) {
                 if (mPresenterCallback != null) {
                     mPresenterCallback.onOpenSubMenu(subMenu);
@@ -293,6 +317,9 @@ public class MenuPopupHelper implements AdapterView.OnItemClickListener, View.On
             }
 
             MenuView.ItemView itemView = (MenuView.ItemView) convertView;
+            if (mForceShowIcon) {
+                ((ListMenuItemView) convertView).setForceShowIcon(true);
+            }
             itemView.initialize(getItem(position), 0);
             return convertView;
         }
