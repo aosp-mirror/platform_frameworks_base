@@ -948,8 +948,6 @@ preprocess_aidl(const Options& options)
 int
 main(int argc, const char **argv)
 {
-    int err = 0;
-
     Options options;
     int result = parse_options(argc, argv, &options);
     if (result) {

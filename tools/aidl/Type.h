@@ -46,18 +46,18 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 
     virtual bool    CanBeArray() const;
 
     virtual void    WriteArrayToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 
 protected:
     void SetQualifiedName(const string& qualified);
@@ -89,16 +89,16 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 
     virtual bool    CanBeArray() const;
 
     virtual void    WriteArrayToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 
 private:
     string m_marshallMethod;
@@ -116,16 +116,16 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 
     virtual bool    CanBeArray() const;
 
     virtual void    WriteArrayToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class CharType : public Type
@@ -136,16 +136,16 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 
     virtual bool    CanBeArray() const;
 
     virtual void    WriteArrayToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 
@@ -159,16 +159,16 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 
     virtual bool    CanBeArray() const;
 
     virtual void    WriteArrayToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class CharSequenceType : public Type
@@ -181,7 +181,7 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class RemoteExceptionType : public Type
@@ -192,7 +192,7 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class RuntimeExceptionType : public Type
@@ -203,7 +203,7 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class IBinderType : public Type
@@ -214,14 +214,14 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 
     virtual void    WriteArrayToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class IInterfaceType : public Type
@@ -232,7 +232,7 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class BinderType : public Type
@@ -243,7 +243,7 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class BinderProxyType : public Type
@@ -254,7 +254,7 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class ParcelType : public Type
@@ -265,7 +265,7 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class ParcelableInterfaceType : public Type
@@ -276,7 +276,7 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class MapType : public Type
@@ -287,9 +287,9 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class ListType : public Type
@@ -302,9 +302,9 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class ParcelableType : public Type
@@ -318,18 +318,18 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 
     virtual bool    CanBeArray() const;
 
     virtual void    WriteArrayToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadArrayFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 };
 
 class InterfaceType : public Type
@@ -344,7 +344,7 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
                                     
 private:
     bool m_oneway;
@@ -364,9 +364,9 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 
 private:
     string m_genericArguments;
@@ -387,9 +387,9 @@ public:
     virtual void    WriteToParcel(StatementBlock* addTo, Variable* v,
                                     Variable* parcel, int flags);
     virtual void    CreateFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
     virtual void    ReadFromParcel(StatementBlock* addTo, Variable* v,
-                                    Variable* parcel);
+                                    Variable* parcel, Variable** cl);
 
 private:
     string m_creator;
