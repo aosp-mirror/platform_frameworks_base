@@ -9089,6 +9089,52 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /**
+     * Begin collecting per-tile profiling data
+     *
+     * @hide only used by profiling tests
+     */
+    public void tileProfilingStart() {
+        nativeTileProfilingStart();
+    }
+    /**
+     * Return per-tile profiling data
+     *
+     * @hide only used by profiling tests
+     */
+    public float tileProfilingStop() {
+        return nativeTileProfilingStop();
+    }
+
+    /** @hide only used by profiling tests */
+    public void tileProfilingClear() {
+        nativeTileProfilingClear();
+    }
+    /** @hide only used by profiling tests */
+    public int tileProfilingNumFrames() {
+        return nativeTileProfilingNumFrames();
+    }
+    /** @hide only used by profiling tests */
+    public int tileProfilingNumTilesInFrame(int frame) {
+        return nativeTileProfilingNumTilesInFrame(frame);
+    }
+    /** @hide only used by profiling tests */
+    public int tileProfilingGetX(int frame, int tile) {
+        return nativeTileProfilingGetX(frame, tile);
+    }
+    /** @hide only used by profiling tests */
+    public int tileProfilingGetY(int frame, int tile) {
+        return nativeTileProfilingGetY(frame, tile);
+    }
+    /** @hide only used by profiling tests */
+    public boolean tileProfilingGetReady(int frame, int tile) {
+        return nativeTileProfilingGetReady(frame, tile);
+    }
+    /** @hide only used by profiling tests */
+    public int tileProfilingGetLevel(int frame, int tile) {
+        return nativeTileProfilingGetLevel(frame, tile);
+    }
+
     private native int nativeCacheHitFramePointer();
     private native boolean  nativeCacheHitIsPlugin();
     private native Rect nativeCacheHitNodeBounds();
@@ -9211,6 +9257,15 @@ public class WebView extends AbsoluteLayout
     private native void     nativeStopGL();
     private native Rect     nativeSubtractLayers(Rect content);
     private native int      nativeTextGeneration();
+    private native void     nativeTileProfilingStart();
+    private native float    nativeTileProfilingStop();
+    private native void     nativeTileProfilingClear();
+    private native int      nativeTileProfilingNumFrames();
+    private native int      nativeTileProfilingNumTilesInFrame(int frame);
+    private native int      nativeTileProfilingGetX(int frame, int tile);
+    private native int      nativeTileProfilingGetY(int frame, int tile);
+    private native boolean  nativeTileProfilingGetReady(int frame, int tile);
+    private native int      nativeTileProfilingGetLevel(int frame, int tile);
     // Never call this version except by updateCachedTextfield(String) -
     // we always want to pass in our generation number.
     private native void     nativeUpdateCachedTextfield(String updatedText,
