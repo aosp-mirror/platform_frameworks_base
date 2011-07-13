@@ -70,6 +70,7 @@ typedef struct {
         int (*invokeRoot)(const Context *rsc, Script *s);
         void (*invokeForEach)(const Context *rsc,
                               Script *s,
+                              uint32_t slot,
                               const Allocation * ain,
                               Allocation * aout,
                               const void * usr,

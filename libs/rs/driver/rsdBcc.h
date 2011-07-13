@@ -32,6 +32,7 @@ void rsdScriptInvokeFunction(const android::renderscript::Context *dc,
 
 void rsdScriptInvokeForEach(const android::renderscript::Context *rsc,
                             android::renderscript::Script *s,
+                            uint32_t slot,
                             const android::renderscript::Allocation * ain,
                             android::renderscript::Allocation * aout,
                             const void * usr,

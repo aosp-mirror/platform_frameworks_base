@@ -269,6 +269,7 @@ static void wc_x(void *usr, uint32_t idx) {
 
 void rsdScriptInvokeForEach(const Context *rsc,
                             Script *s,
+                            uint32_t slot,
                             const Allocation * ain,
                             Allocation * aout,
                             const void * usr,

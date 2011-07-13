@@ -121,7 +121,7 @@ void ScriptC::runForEach(Context *rsc,
 
     setupGLState(rsc);
     setupScript(rsc);
-    rsc->mHal.funcs.script.invokeForEach(rsc, this, ain, aout, usr, usrBytes, sc);
+    rsc->mHal.funcs.script.invokeForEach(rsc, this, 0, ain, aout, usr, usrBytes, sc);
 }
 
 void ScriptC::Invoke(Context *rsc, uint32_t slot, const void *data, size_t len) {
