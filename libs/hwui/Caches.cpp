@@ -73,7 +73,6 @@ void Caches::dumpMemoryUsage() {
     String8 stringLog;
     dumpMemoryUsage(stringLog);
     LOGD("%s", stringLog.string());
-    delete stringLog;
 }
 
 void Caches::dumpMemoryUsage(String8 &log) {
