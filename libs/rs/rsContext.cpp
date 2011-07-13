@@ -693,7 +693,9 @@ RsContext rsContextCreateGL(RsDevice vdev, uint32_t version,
     LOGV("rsContextCreateGL %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = Context::createContext(dev, &sc);
-    rsc->setDPI(dpi);
+    if (rsc) {
+        rsc->setDPI(dpi);
+    }
     LOGV("rsContextCreateGL ret %p ", rsc);
     return rsc;
 }
