@@ -481,6 +481,14 @@ static int write_pax_header_entry(char* buf, const char* key, const char* value)
     return sprintf(buf, "%d %s=%s\n", len, key, value);
 }
 
+// Wire format to the backup manager service is chunked:  each chunk is prefixed by
+// a 4-byte count of its size.  A chunk size of zero (four zero bytes) indicates EOD.
+void send_tarfile_chunk(BackupDataWriter* writer, const char* buffer, size_t size) {
+    uint32_t chunk_size_no = htonl(size);
+    writer->WriteEntityData(&chunk_size_no, 4);
+    if (size != 0) writer->WriteEntityData(buffer, size);
+}
+
 int write_tarfile(const String8& packageName, const String8& domain,
         const String8& rootpath, const String8& filepath, BackupDataWriter* writer)
 {
@@ -660,16 +668,16 @@ int write_tarfile(const String8& packageName, const String8& domain,
 
         // Checksum and write the pax block header
         calc_tar_checksum(paxHeader);
-        writer->WriteEntityData(paxHeader, 512);
+        send_tarfile_chunk(writer, paxHeader, 512);
 
         // Now write the pax data itself
         int paxblocks = (paxLen + 511) / 512;
-        writer->WriteEntityData(paxData, 512 * paxblocks);
+        send_tarfile_chunk(writer, paxData, 512 * paxblocks);
     }
 
     // Checksum and write the 512-byte ustar file header block to the output
     calc_tar_checksum(buf);
-    writer->WriteEntityData(buf, 512);
+    send_tarfile_chunk(writer, buf, 512);
 
     // Now write the file data itself, for real files.  We honor tar's convention that
     // only full 512-byte blocks are sent to write().
@@ -699,7 +707,7 @@ int write_tarfile(const String8& packageName, const String8& domain,
                 memset(buf + nRead, 0, remainder);
                 nRead += remainder;
             }
-            writer->WriteEntityData(buf, nRead);
+            send_tarfile_chunk(writer, buf, nRead);
             toWrite -= nRead;
         }
     }

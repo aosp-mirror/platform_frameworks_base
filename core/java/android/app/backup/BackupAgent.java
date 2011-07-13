@@ -28,6 +28,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -533,6 +534,16 @@ public abstract class BackupAgent extends ContextWrapper {
                 Log.d(TAG, "onBackup (" + BackupAgent.this.getClass().getName() + ") threw", ex);
                 throw ex;
             } finally {
+                // Send the EOD marker indicating that there is no more data
+                // forthcoming from this agent.
+                try {
+                    FileOutputStream out = new FileOutputStream(data.getFileDescriptor());
+                    byte[] buf = new byte[4];
+                    out.write(buf);
+                } catch (IOException e) {
+                    Log.e(TAG, "Unable to finalize backup stream!");
+                }
+
                 Binder.restoreCallingIdentity(ident);
                 try {
                     callbackBinder.opComplete(token);

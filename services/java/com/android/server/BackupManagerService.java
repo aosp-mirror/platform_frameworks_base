@@ -76,6 +76,7 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.LocalTransport;
 import com.android.server.PackageManagerBackupAgent.Metadata;
 
+import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -96,6 +97,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
@@ -1679,6 +1684,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     class PerformFullBackupTask implements Runnable {
         ParcelFileDescriptor mOutputFile;
+        DeflaterOutputStream mDeflater;
         IFullBackupRestoreObserver mObserver;
         boolean mIncludeApks;
         boolean mIncludeShared;
@@ -1687,6 +1693,55 @@ class BackupManagerService extends IBackupManager.Stub {
         AtomicBoolean mLatchObject;
         File mFilesDir;
         File mManifestFile;
+
+        class FullBackupRunner implements Runnable {
+            PackageInfo mPackage;
+            IBackupAgent mAgent;
+            ParcelFileDescriptor mPipe;
+            int mToken;
+            boolean mSendApk;
+
+            FullBackupRunner(PackageInfo pack, IBackupAgent agent, ParcelFileDescriptor pipe,
+                    int token, boolean sendApk)  throws IOException {
+                mPackage = pack;
+                mAgent = agent;
+                mPipe = ParcelFileDescriptor.dup(pipe.getFileDescriptor());
+                mToken = token;
+                mSendApk = sendApk;
+            }
+
+            @Override
+            public void run() {
+                try {
+                    BackupDataOutput output = new BackupDataOutput(
+                            mPipe.getFileDescriptor());
+
+                    if (DEBUG) Slog.d(TAG, "Writing manifest for " + mPackage.packageName);
+                    writeAppManifest(mPackage, mManifestFile, mSendApk);
+                    FullBackup.backupToTar(mPackage.packageName, null, null,
+                            mFilesDir.getAbsolutePath(),
+                            mManifestFile.getAbsolutePath(),
+                            output);
+
+                    if (mSendApk) {
+                        writeApkToBackup(mPackage, output);
+                    }
+
+                    if (DEBUG) Slog.d(TAG, "Calling doFullBackup()");
+                    prepareOperationTimeout(mToken, TIMEOUT_FULL_BACKUP_INTERVAL);
+                    mAgent.doFullBackup(mPipe, mToken, mBackupManagerBinder);
+                } catch (IOException e) {
+                    Slog.e(TAG, "Error running full backup for " + mPackage.packageName);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote agent vanished during full backup of "
+                            + mPackage.packageName);
+                } finally {
+                    try {
+                        mPipe.close();
+                    } catch (IOException e) {}
+                }
+            }
+        }
 
         PerformFullBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer, 
                 boolean includeApks, boolean includeShared,
@@ -1736,13 +1791,21 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
 
+            // Set up the compression stage
+            FileOutputStream ofstream = new FileOutputStream(mOutputFile.getFileDescriptor());
+            Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
+            DeflaterOutputStream out = new DeflaterOutputStream(ofstream, deflater, true);
+
+            // !!! TODO: if using encryption, set up the encryption stage
+            // and emit the tar header stating the password salt.
+
             PackageInfo pkg = null;
             try {
                 // Now back up the app data via the agent mechanism
                 int N = packagesToBackup.size();
                 for (int i = 0; i < N; i++) {
                     pkg = packagesToBackup.get(i);
-                    backupOnePackage(pkg);
+                    backupOnePackage(pkg, out);
                 }
 
                 // Finally, shared storage if requested
@@ -1754,6 +1817,7 @@ class BackupManagerService extends IBackupManager.Stub {
             } finally {
                 tearDown(pkg);
                 try {
+                    out.close();
                     mOutputFile.close();
                 } catch (IOException e) {
                     /* nothing we can do about this */
@@ -1771,13 +1835,17 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        private void backupOnePackage(PackageInfo pkg) throws RemoteException {
+        private void backupOnePackage(PackageInfo pkg, DeflaterOutputStream out)
+                throws RemoteException {
             Slog.d(TAG, "Binding to full backup agent : " + pkg.packageName);
 
             IBackupAgent agent = bindToAgentSynchronous(pkg.applicationInfo,
                     IApplicationThread.BACKUP_MODE_FULL);
             if (agent != null) {
+                ParcelFileDescriptor[] pipes = null;
                 try {
+                     pipes = ParcelFileDescriptor.createPipe();
+
                     ApplicationInfo app = pkg.applicationInfo;
                     final boolean sendApk = mIncludeApks
                             && ((app.flags & ApplicationInfo.FLAG_FORWARD_LOCK) == 0)
@@ -1786,31 +1854,54 @@ class BackupManagerService extends IBackupManager.Stub {
 
                     sendOnBackupPackage(pkg.packageName);
 
-                    BackupDataOutput output = new BackupDataOutput(
-                            mOutputFile.getFileDescriptor());
+                    final int token = generateToken();
+                    FullBackupRunner runner = new FullBackupRunner(pkg, agent, pipes[1],
+                            token, sendApk);
+                    pipes[1].close();   // the runner has dup'd it
+                    pipes[1] = null;
+                    Thread t = new Thread(runner);
+                    t.start();
 
-                    if (DEBUG) Slog.d(TAG, "Writing manifest for " + pkg.packageName);
-                    writeAppManifest(pkg, mManifestFile, sendApk);
-                    FullBackup.backupToTar(pkg.packageName, null, null,
-                            mFilesDir.getAbsolutePath(),
-                            mManifestFile.getAbsolutePath(),
-                            output);
+                    // Now pull data from the app and stuff it into the compressor
+                    try {
+                        FileInputStream raw = new FileInputStream(pipes[0].getFileDescriptor());
+                        DataInputStream in = new DataInputStream(raw);
 
-                    if (sendApk) {
-                        writeApkToBackup(pkg, output);
+                        byte[] buffer = new byte[16 * 1024];
+                        int chunkTotal;
+                        while ((chunkTotal = in.readInt()) > 0) {
+                            while (chunkTotal > 0) {
+                                int toRead = (chunkTotal > buffer.length)
+                                        ? buffer.length : chunkTotal;
+                                int nRead = in.read(buffer, 0, toRead);
+                                out.write(buffer, 0, nRead);
+                                chunkTotal -= nRead;
+                            }
+                        }
+                    } catch (IOException e) {
+                        Slog.i(TAG, "Caught exception reading from agent", e);
                     }
 
-                    if (DEBUG) Slog.d(TAG, "Calling doFullBackup()");
-                    final int token = generateToken();
-                    prepareOperationTimeout(token, TIMEOUT_FULL_BACKUP_INTERVAL);
-                    agent.doFullBackup(mOutputFile, token, mBackupManagerBinder);
                     if (!waitUntilOperationComplete(token)) {
                         Slog.e(TAG, "Full backup failed on package " + pkg.packageName);
                     } else {
-                        if (DEBUG) Slog.d(TAG, "Full backup success: " + pkg.packageName);
+                        if (DEBUG) Slog.d(TAG, "Full package backup success: " + pkg.packageName);
                     }
+
                 } catch (IOException e) {
                     Slog.e(TAG, "Error backing up " + pkg.packageName, e);
+                } finally {
+                    try {
+                        if (pipes != null) {
+                            if (pipes[0] != null) pipes[0].close();
+                            if (pipes[1] != null) pipes[1].close();
+                        }
+
+                        // Apply a full sync/flush after each application's data
+                        out.flush();
+                    } catch (IOException e) {
+                        Slog.w(TAG, "Error bringing down backup stack");
+                    }
                 }
             } else {
                 Slog.w(TAG, "Unable to bind to full agent for " + pkg.packageName);
@@ -2084,11 +2175,12 @@ class BackupManagerService extends IBackupManager.Stub {
             try {
                 mBytes = 0;
                 byte[] buffer = new byte[32 * 1024];
-                FileInputStream instream = new FileInputStream(mInputFile.getFileDescriptor());
+                FileInputStream rawInStream = new FileInputStream(mInputFile.getFileDescriptor());
+                InflaterInputStream in = new InflaterInputStream(rawInStream);
 
                 boolean didRestore;
                 do {
-                    didRestore = restoreOneFile(instream, buffer);
+                    didRestore = restoreOneFile(in, buffer);
                 } while (didRestore);
 
                 if (DEBUG) Slog.v(TAG, "Done consuming input tarfile, total bytes=" + mBytes);
