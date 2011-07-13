@@ -53,11 +53,7 @@ page.title=What is the NDK?
 
     <li>ARMv7-A (including Thumb-2 and VFPv3-D16 instructions, with optional support for
     NEON/VFPv3-D32 instructions)</li>
-  </ul>
 
-  <p>Future releases of the NDK will also support:</p>
-
-  <ul>
     <li>x86 instructions (see CPU-ARCH-ABIS.HTML for more information)</li>
   </ul>
 
