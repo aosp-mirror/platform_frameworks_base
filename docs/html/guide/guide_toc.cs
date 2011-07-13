@@ -256,8 +256,7 @@
       <li class="toggle-list">
 	        <div><a href="<?cs var:toroot ?>guide/topics/renderscript/index.html">
 	            <span class="en">RenderScript</span>
-	          </a>
-	          <span class="new">new!</span></div>
+	          </a></div>
 	        <ul>
 	          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/graphics.html">
 	                <span class="en">3D Graphics</span>
@@ -304,11 +303,9 @@
   <!--<li><a style="color:gray;">Localization</a></li>  -->
       <li><a href="<?cs var:toroot ?>guide/topics/appwidgets/index.html">
             <span class="en">App Widgets</span></a>
-            <span class="new">updated</span>
           </li>
       <li><a href="<?cs var:toroot?>guide/topics/wireless/bluetooth.html">
             <span class="en">Bluetooth</span></a>
-            <span class="new">updated</span>
           </li>
       <li><a href="<?cs var:toroot?>guide/topics/nfc/index.html">
             <span class="en">Near Field Communication</span>
@@ -316,7 +313,6 @@
       <li class="toggle-list">
           <div><a href="<?cs var:toroot?>guide/topics/usb/index.html">
             <span class="en">USB</span></a>
-            <span class="new">new!</span>
           </div>
             <ul>
               <li><a href="<?cs var:toroot ?>guide/topics/usb/accessory.html">Accessory</a></li>
@@ -341,7 +337,6 @@
       </li>
       <li><a href="<?cs var:toroot?>guide/topics/admin/device-admin.html">
             <span class="en">Device Administration</span></a>
-            <span class="new">updated</span>
       </li>
       <li class="toggle-list">
            <div>
