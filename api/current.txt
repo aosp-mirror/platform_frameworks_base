@@ -15750,6 +15750,7 @@ package android.provider {
   public static final class ContactsContract.CommonDataKinds.Photo implements android.provider.ContactsContract.DataColumnsWithJoins {
     field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/photo";
     field public static final java.lang.String PHOTO = "data15";
+    field public static final java.lang.String PHOTO_FILE_ID = "data14";
   }
 
   public static final class ContactsContract.CommonDataKinds.Relation implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
@@ -15889,7 +15890,9 @@ package android.provider {
 
   public static final class ContactsContract.Contacts.Photo implements android.provider.BaseColumns android.provider.ContactsContract.DataColumnsWithJoins {
     field public static final java.lang.String CONTENT_DIRECTORY = "photo";
+    field public static final java.lang.String DISPLAY_PHOTO = "display_photo";
     field public static final java.lang.String PHOTO = "data15";
+    field public static final java.lang.String PHOTO_FILE_ID = "data14";
   }
 
   public static final class ContactsContract.Contacts.StreamItems implements android.provider.ContactsContract.StreamItemsColumns {
@@ -15902,6 +15905,7 @@ package android.provider {
     field public static final java.lang.String IN_VISIBLE_GROUP = "in_visible_group";
     field public static final java.lang.String IS_USER_PROFILE = "is_user_profile";
     field public static final java.lang.String LOOKUP_KEY = "lookup";
+    field public static final java.lang.String PHOTO_FILE_ID = "photo_file_id";
     field public static final java.lang.String PHOTO_ID = "photo_id";
     field public static final java.lang.String PHOTO_THUMBNAIL_URI = "photo_thumb_uri";
     field public static final java.lang.String PHOTO_URI = "photo_uri";
@@ -15988,6 +15992,13 @@ package android.provider {
     field public static final int PHONE = 20; // 0x14
     field public static final int STRUCTURED_NAME = 40; // 0x28
     field public static final int UNDEFINED = 0; // 0x0
+  }
+
+  public static final class ContactsContract.DisplayPhoto {
+    field public static final android.net.Uri CONTENT_MAX_DIMENSIONS_URI;
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DISPLAY_MAX_DIM = "display_max_dim";
+    field public static final java.lang.String THUMBNAIL_MAX_DIM = "thumbnail_max_dim";
   }
 
   public static abstract interface ContactsContract.FullNameStyle {
@@ -16125,6 +16136,10 @@ package android.provider {
 
   public static final class ContactsContract.RawContacts.Data implements android.provider.BaseColumns android.provider.ContactsContract.DataColumns {
     field public static final java.lang.String CONTENT_DIRECTORY = "data";
+  }
+
+  public static final class ContactsContract.RawContacts.DisplayPhoto {
+    field public static final java.lang.String CONTENT_DIRECTORY = "display_photo";
   }
 
   public static final class ContactsContract.RawContacts.Entity implements android.provider.BaseColumns android.provider.ContactsContract.DataColumns {
