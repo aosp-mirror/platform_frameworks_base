@@ -671,12 +671,6 @@ android.view.GLES20Canvas
 android.view.GLES20Canvas$CanvasFinalizer
 android.view.Gravity
 android.view.HardwareCanvas
-android.view.HardwareRenderer
-android.view.HardwareRenderer$Gl20Renderer
-android.view.HardwareRenderer$GlRenderer
-android.view.HardwareRenderer$GlRenderer$ComponentSizeChooser
-android.view.HardwareRenderer$GlRenderer$EglConfigChooser
-android.view.HardwareRenderer$HardwareDrawCallbacks
 android.view.IWindow
 android.view.IWindow$Stub
 android.view.IWindowManager
