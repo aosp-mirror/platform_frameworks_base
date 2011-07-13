@@ -51,6 +51,17 @@ struct IStreamListener : public IInterface {
     // will be suppressed until media time reaches this timestamp.
     static const char *const kKeyResumeAtPTS;
 
+    // When signalling a discontinuity you can optionally
+    // signal that this is a "hard" discontinuity, i.e. the format
+    // or configuration of subsequent stream data differs from that
+    // currently active. To do so, include a non-zero int32_t value
+    // under the key "kKeyFormatChange" when issuing the DISCONTINUITY
+    // command.
+    // The new logical stream must start with proper codec initialization
+    // information for playback to continue, i.e. SPS and PPS in the case
+    // of AVC video etc.
+    static const char *const kKeyFormatChange;
+
     virtual void issueCommand(
             Command cmd, bool synchronous, const sp<AMessage> &msg = NULL) = 0;
 };

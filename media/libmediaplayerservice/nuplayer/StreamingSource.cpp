@@ -63,8 +63,17 @@ bool NuPlayer::StreamingSource::feedMoreTSData() {
             mEOS = true;
             break;
         } else if (n == INFO_DISCONTINUITY) {
-            mTSParser->signalDiscontinuity(
-                    ATSParser::DISCONTINUITY_SEEK, extra);
+            ATSParser::DiscontinuityType type = ATSParser::DISCONTINUITY_SEEK;
+
+            int32_t formatChange;
+            if (extra != NULL
+                    && extra->findInt32(
+                        IStreamListener::kKeyFormatChange, &formatChange)
+                    && formatChange != 0) {
+                type = ATSParser::DISCONTINUITY_FORMATCHANGE;
+            }
+
+            mTSParser->signalDiscontinuity(type, extra);
         } else if (n < 0) {
             CHECK_EQ(n, -EWOULDBLOCK);
             break;
