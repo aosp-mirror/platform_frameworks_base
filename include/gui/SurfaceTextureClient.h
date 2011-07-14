@@ -126,9 +126,6 @@ private:
     // a timestamp is auto-generated when queueBuffer is called.
     int64_t mTimestamp;
 
-    // mConnectedApi holds the currently connected API to this surface
-    int mConnectedApi;
-
     // mQueryWidth is the width returned by query(). It is set to width
     // of the last dequeued buffer or to mReqWidth if no buffer was dequeued.
     uint32_t mQueryWidth;

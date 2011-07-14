@@ -44,6 +44,7 @@ public:
         MIN_SYNC_BUFFER_SLOTS  = MIN_UNDEQUEUED_BUFFERS
     };
     enum { NUM_BUFFER_SLOTS = 32 };
+    enum { NO_CONNECTED_API = 0 };
 
     struct FrameAvailableListener : public virtual RefBase {
         // onFrameAvailable() is called from queueBuffer() each time an
@@ -96,6 +97,24 @@ public:
     // queued buffers will be retired in order.
     // The default mode is asynchronous.
     virtual status_t setSynchronousMode(bool enabled);
+
+    // connect attempts to connect a client API to the SurfaceTexture.  This
+    // must be called before any other ISurfaceTexture methods are called except
+    // for getAllocator.
+    //
+    // This method will fail if the connect was previously called on the
+    // SurfaceTexture and no corresponding disconnect call was made.
+    virtual status_t connect(int api);
+
+    // disconnect attempts to disconnect a client API from the SurfaceTexture.
+    // Calling this method will cause any subsequent calls to other
+    // ISurfaceTexture methods to fail except for getAllocator and connect.
+    // Successfully calling connect after this will allow the other methods to
+    // succeed again.
+    //
+    // This method will fail if the the SurfaceTexture is not currently
+    // connected to the specified client API.
+    virtual status_t disconnect(int api);
 
     // updateTexImage sets the image contents of the target texture to that of
     // the most recently queued buffer.
@@ -361,6 +380,11 @@ private:
 
     // mAllowSynchronousMode whether we allow synchronous mode or not
     const bool mAllowSynchronousMode;
+
+    // mConnectedApi indicates the API that is currently connected to this
+    // SurfaceTexture.  It defaults to NO_CONNECTED_API (= 0), and gets updated
+    // by the connect and disconnect methods.
+    int mConnectedApi;
 
     // mDequeueCondition condition used for dequeueBuffer in synchronous mode
     mutable Condition mDequeueCondition;

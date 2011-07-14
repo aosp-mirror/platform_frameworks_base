@@ -41,6 +41,8 @@ enum {
     GET_ALLOCATOR,
     QUERY,
     SET_SYNCHRONOUS_MODE,
+    CONNECT,
+    DISCONNECT,
 };
 
 
@@ -154,7 +156,23 @@ public:
         return result;
     }
 
+    virtual status_t connect(int api) {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
+        data.writeInt32(api);
+        remote()->transact(CONNECT, data, &reply);
+        status_t result = reply.readInt32();
+        return result;
+    }
 
+    virtual status_t disconnect(int api) {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
+        data.writeInt32(api);
+        remote()->transact(DISCONNECT, data, &reply);
+        status_t result = reply.readInt32();
+        return result;
+    }
 };
 
 IMPLEMENT_META_INTERFACE(SurfaceTexture, "android.gui.SurfaceTexture");
@@ -245,6 +263,20 @@ status_t BnSurfaceTexture::onTransact(
             CHECK_INTERFACE(ISurfaceTexture, data, reply);
             bool enabled = data.readInt32();
             status_t res = setSynchronousMode(enabled);
+            reply->writeInt32(res);
+            return NO_ERROR;
+        } break;
+        case CONNECT: {
+            CHECK_INTERFACE(ISurfaceTexture, data, reply);
+            int api = data.readInt32();
+            status_t res = connect(api);
+            reply->writeInt32(res);
+            return NO_ERROR;
+        } break;
+        case DISCONNECT: {
+            CHECK_INTERFACE(ISurfaceTexture, data, reply);
+            int api = data.readInt32();
+            status_t res = connect(api);
             reply->writeInt32(res);
             return NO_ERROR;
         } break;

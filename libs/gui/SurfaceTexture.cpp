@@ -92,7 +92,8 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode) :
     mNextTransform(0),
     mTexName(tex),
     mSynchronousMode(false),
-    mAllowSynchronousMode(allowSynchronousMode) {
+    mAllowSynchronousMode(allowSynchronousMode),
+    mConnectedApi(NO_CONNECTED_API) {
     LOGV("SurfaceTexture::SurfaceTexture");
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
@@ -491,6 +492,50 @@ status_t SurfaceTexture::setTransform(uint32_t transform) {
     Mutex::Autolock lock(mMutex);
     mNextTransform = transform;
     return OK;
+}
+
+status_t SurfaceTexture::connect(int api) {
+    LOGV("SurfaceTexture::connect");
+    Mutex::Autolock lock(mMutex);
+    int err = NO_ERROR;
+    switch (api) {
+        case NATIVE_WINDOW_API_EGL:
+        case NATIVE_WINDOW_API_CPU:
+        case NATIVE_WINDOW_API_MEDIA:
+        case NATIVE_WINDOW_API_CAMERA:
+            if (mConnectedApi != NO_CONNECTED_API) {
+                err = -EINVAL;
+            } else {
+                mConnectedApi = api;
+            }
+            break;
+        default:
+            err = -EINVAL;
+            break;
+    }
+    return err;
+}
+
+status_t SurfaceTexture::disconnect(int api) {
+    LOGV("SurfaceTexture::disconnect");
+    Mutex::Autolock lock(mMutex);
+    int err = NO_ERROR;
+    switch (api) {
+        case NATIVE_WINDOW_API_EGL:
+        case NATIVE_WINDOW_API_CPU:
+        case NATIVE_WINDOW_API_MEDIA:
+        case NATIVE_WINDOW_API_CAMERA:
+            if (mConnectedApi == api) {
+                mConnectedApi = NO_CONNECTED_API;
+            } else {
+                err = -EINVAL;
+            }
+            break;
+        default:
+            err = -EINVAL;
+            break;
+    }
+    return err;
 }
 
 status_t SurfaceTexture::updateTexImage() {

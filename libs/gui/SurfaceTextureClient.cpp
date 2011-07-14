@@ -27,7 +27,7 @@ SurfaceTextureClient::SurfaceTextureClient(
         const sp<ISurfaceTexture>& surfaceTexture):
         mSurfaceTexture(surfaceTexture), mAllocator(0), mReqWidth(0),
         mReqHeight(0), mReqFormat(0), mReqUsage(0),
-        mTimestamp(NATIVE_WINDOW_TIMESTAMP_AUTO), mConnectedApi(0),
+        mTimestamp(NATIVE_WINDOW_TIMESTAMP_AUTO),
         mQueryWidth(0), mQueryHeight(0), mQueryFormat(0),
         mMutex() {
     // Initialize the ANativeWindow function pointers.
@@ -306,51 +306,22 @@ int SurfaceTextureClient::dispatchSetBuffersTimestamp(va_list args) {
 int SurfaceTextureClient::connect(int api) {
     LOGV("SurfaceTextureClient::connect");
     Mutex::Autolock lock(mMutex);
-    int err = NO_ERROR;
-    switch (api) {
-        case NATIVE_WINDOW_API_EGL:
-        case NATIVE_WINDOW_API_CPU:
-        case NATIVE_WINDOW_API_MEDIA:
-        case NATIVE_WINDOW_API_CAMERA:
-            if (mConnectedApi) {
-                err = -EINVAL;
-            } else {
-                mConnectedApi = api;
-            }
-            break;
-        default:
-            err = -EINVAL;
-            break;
-    }
-    return err;
+    return mSurfaceTexture->connect(api);
 }
 
 int SurfaceTextureClient::disconnect(int api) {
     LOGV("SurfaceTextureClient::disconnect");
     Mutex::Autolock lock(mMutex);
-    int err = NO_ERROR;
-    switch (api) {
-        case NATIVE_WINDOW_API_EGL:
-        case NATIVE_WINDOW_API_CPU:
-        case NATIVE_WINDOW_API_MEDIA:
-        case NATIVE_WINDOW_API_CAMERA:
-            if (mConnectedApi == api) {
-                mConnectedApi = 0;
-            } else {
-                err = -EINVAL;
-            }
-            break;
-        default:
-            err = -EINVAL;
-            break;
-    }
-    return err;
+    return mSurfaceTexture->disconnect(api);
 }
 
 int SurfaceTextureClient::getConnectedApi() const
 {
+    // XXX: This method will be going away shortly, and is currently bogus.  It
+    // always returns "nothing is connected".  It will go away once Surface gets
+    // updated to actually connect as the 'CPU' API when locking a buffer.
     Mutex::Autolock lock(mMutex);
-    return mConnectedApi;
+    return 0;
 }
 
 
