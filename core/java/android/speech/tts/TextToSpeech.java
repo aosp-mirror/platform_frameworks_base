@@ -181,7 +181,7 @@ public class TextToSpeech {
          *
          * @hide
          * @deprecated No longer in use, the default engine is determined by
-         *         the sort order defined in {@link EngineInfoComparator}. Note that
+         *         the sort order defined in {@link TtsEngines}. Note that
          *         this doesn't "break" anything because there is no guarantee that
          *         the engine specified below is installed on a given build, let
          *         alone be the default.
@@ -504,36 +504,39 @@ public class TextToSpeech {
     }
 
     private int initTts() {
-        String defaultEngine = getDefaultEngine();
-        String engine = defaultEngine;
-        if (mEnginesHelper.isEngineInstalled(mRequestedEngine)) {
-            engine = mRequestedEngine;
+        // Step 1: Try connecting to the engine that was requested.
+        if (mRequestedEngine != null && mEnginesHelper.isEngineInstalled(mRequestedEngine)) {
+            if (connectToEngine(mRequestedEngine)) {
+                mCurrentEngine = mRequestedEngine;
+                return SUCCESS;
+            }
         }
 
-        // Try requested engine
-        if (connectToEngine(engine)) {
-            mCurrentEngine = engine;
-            return SUCCESS;
-        }
-
-        // Fall back to user's default engine if different from the already tested one
-        if (!engine.equals(defaultEngine)) {
+        // Step 2: Try connecting to the user's default engine.
+        final String defaultEngine = getDefaultEngine();
+        if (defaultEngine != null && !defaultEngine.equals(mRequestedEngine)) {
             if (connectToEngine(defaultEngine)) {
-                mCurrentEngine = engine;
+                mCurrentEngine = defaultEngine;
                 return SUCCESS;
             }
         }
 
+        // Step 3: Try connecting to the highest ranked engine in the
+        // system.
         final String highestRanked = mEnginesHelper.getHighestRankedEngineName();
-        // Fall back to the hardcoded default if different from the two above
-        if (!defaultEngine.equals(highestRanked)
-                && !engine.equals(highestRanked)) {
+        if (highestRanked != null && !highestRanked.equals(mRequestedEngine) &&
+                !highestRanked.equals(defaultEngine)) {
             if (connectToEngine(highestRanked)) {
-                mCurrentEngine = engine;
+                mCurrentEngine = highestRanked;
                 return SUCCESS;
             }
         }
 
+        // NOTE: The API currently does not allow the caller to query whether
+        // they are actually connected to any engine. This might fail for various
+        // reasons like if the user disables all her TTS engines.
+
+        mCurrentEngine = null;
         dispatchOnInit(ERROR);
         return ERROR;
     }
@@ -963,7 +966,7 @@ public class TextToSpeech {
     /**
      * Synthesizes the given text to a file using the specified parameters.
      *
-     * @param text Thetext that should be synthesized
+     * @param text The text that should be synthesized
      * @param params Parameters for the request. Can be null.
      *            Supported parameter names:
      *            {@link Engine#KEY_PARAM_UTTERANCE_ID}.
@@ -1073,7 +1076,9 @@ public class TextToSpeech {
      *
      * @deprecated This doesn't inform callers when the TTS engine has been
      *        initialized. {@link #TextToSpeech(Context, OnInitListener, String)}
-     *        can be used with the appropriate engine name.
+     *        can be used with the appropriate engine name. Also, there is no
+     *        guarantee that the engine specified will be loaded. If it isn't
+     *        installed or disabled, the user / system wide defaults will apply.
      *
      * @param enginePackageName The package name for the synthesis engine (e.g. "com.svox.pico")
      *
