@@ -33,9 +33,9 @@ public class GridLayoutTest extends AbstractLayoutTest {
             int va = VERTICAL_ALIGNMENTS[i];
             for (int j = 0; j < HORIZONTAL_ALIGNMENTS.length; j++) {
                 int ha = HORIZONTAL_ALIGNMENTS[j];
-                GridLayout.Group rowGroup = new GridLayout.Group(UNDEFINED, null);
-                GridLayout.Group colGroup = new GridLayout.Group(UNDEFINED, null);
-                GridLayout.LayoutParams lp = new GridLayout.LayoutParams(rowGroup, colGroup);
+                Spec rowSpec = spec(UNDEFINED, null);
+                Spec colSpec = spec(UNDEFINED, null);
+                GridLayout.LayoutParams lp = new GridLayout.LayoutParams(rowSpec, colSpec);
                 //GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
                 lp.setGravity(va | ha);
                 View v = create(context, VERTICAL_NAMES[i] + "-" + HORIZONTAL_NAMES[j], 20);

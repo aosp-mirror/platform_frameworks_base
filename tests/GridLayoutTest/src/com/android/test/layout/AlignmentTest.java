@@ -21,7 +21,6 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewParent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
@@ -84,9 +83,7 @@ public class AlignmentTest  extends Activity {
             Alignment va = VERTICAL_ALIGNMENTS[i];
             for (int j = 0; j < HORIZONTAL_ALIGNMENTS.length; j++) {
                 Alignment ha = HORIZONTAL_ALIGNMENTS[j];
-                Group rowGroup = new Group(i, va);
-                Group colGroup = new Group(j, ha);
-                LayoutParams layoutParams = new LayoutParams(rowGroup, colGroup);
+                LayoutParams layoutParams = new LayoutParams(spec(i, va), spec(j, ha));
                 String name = VERTICAL_NAMES[i] + "-" + HORIZONTAL_NAMES[j];
                 ViewFactory factory = FACTORIES[(i + j) % FACTORIES.length];
                 container.addView(factory.create(name, 20), layoutParams);
