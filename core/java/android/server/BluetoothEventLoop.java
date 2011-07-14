@@ -660,7 +660,6 @@ class BluetoothEventLoop {
             case BluetoothClass.Device.AUDIO_VIDEO_HANDSFREE:
             case BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES:
             case BluetoothClass.Device.AUDIO_VIDEO_PORTABLE_AUDIO:
-            case BluetoothClass.Device.AUDIO_VIDEO_CAR_AUDIO:
             case BluetoothClass.Device.AUDIO_VIDEO_HIFI_AUDIO:
                 if (mBluetoothService.attemptAutoPair(address)) return;
            }
