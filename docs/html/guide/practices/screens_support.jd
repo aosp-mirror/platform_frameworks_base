@@ -648,16 +648,17 @@ layouts was to put them in a directory with the {@code xlarge} configuration qua
  {@code res/layout-xlarge/}). In order to accommodate other types of tablets and screen
 sizes&mdash;in particular, 7" tablets&mdash;Android 3.2 introduces a new way to specify resources
 for more discrete screen sizes. The new technique is based on the amount of space your layout needs
-(such as 600dp of width), rather than trying to make your layout fit generalized size groups (such
-as <em>large</em> or <em>xlarge</em>).</p>
+(such as 600dp of width), rather than trying to make your layout fit the generalized size groups
+(such as <em>large</em> or <em>xlarge</em>).</p>
 
 <p>The reason designing for 7" tablets is tricky when using the generalized size groups is
 that a 7" tablet is technically in the same group as a 5" handset (the <em>large</em> group). While
 these two devices are seemingly close to each other in size, the amount of space for an
 application's UI is significantly different, as is the style of user interaction. Thus, a 7" and 5"
-screen should not always use the same layout. To make it possible for these two kinds of screens to
-offer different layouts, Android now allows you to specify your layout resources based on the width
-and/or height that's actually available for your application's layout, specified in dp units.</p>
+screen should not always use the same layout. To make it possible for you to provide different
+layouts for these two kinds of screens, Android now allows you to specify your layout resources
+based on the width and/or height that's actually available for your application's layout, specified
+in dp units.</p>
 
 <p>For example, after you've designed the layout you want to use for tablet-style devices, you might
 determine that the layout stops working well when the screen is less than 600dp wide. This threshold
@@ -668,16 +669,20 @@ such, you can now specify that these layout resources should be used only when t
 <p>You should either pick a width and design to it as your minimum size, or test what is the
 smallest width your layout supports once it's complete.</p>
 
+<p class="note"><strong>Note:</strong> Remember that all the figures used with these new size APIs
+are density-indpendent pixel (dp) values and your layout dimensions should also always be defined
+using dp units, because what you care about is the amount of screen space available after the system
+accounts for screen density (as opposed to using raw pixel resolution). For more information about
+density-indpendent pixels, read <a href="#terms">Terms and concepts</a>, earlier in this
+document.</p>
+
 
 <h3 id="NewQualifiers">Using new size qualifiers</h3>
 
-<p>The numbers describing the width and height available for your layout are all in dp
-units&mdash;remember that your layout dimensions should always be defined using dp units,
-because what you care about is the amount of space available after the system accounts for screen
-density (as opposed to using raw pixel numbers). The different resource configurations that you can
-specify based on the space available for your layout are summarized in table 2. When building an
-application for Android 3.2 and higher, you should use these new qualifiers instead of those for the
-traditional screen size groups (small, normal, large, and xlarge).</p>
+<p>The different resource configurations that you can specify based on the space available for your
+layout are summarized in table 2. These new qualifiers offer you more control over the specific
+screen sizes your application supports, compared to the traditional screen size groups (small,
+normal, large, and xlarge).</p>
 
 <p class="note"><strong>Note:</strong> The sizes that you specify using these qualifiers are
 <strong>not the actual screen sizes</strong>. Rather, the sizes are for the width or height in dp
@@ -694,30 +699,40 @@ the space available for your layout and you must account for it in your design.<
 (introduced in Android 3.2).</p>
 <table>
   <tr><th>Screen configuration</th><th>Qualifier values</th><th>Description</th></tr>
-  <tr><td>Smallest available width</td>
+  <tr><td>smallestWidth</td>
       <td><code>sw&lt;N&gt;dp</code><br/><br/>
         Examples:<br/>
         <code>sw600dp</code><br/>
         <code>sw720dp</code><br/>
       </td>
       <td>
-        <p>Specifies the "smallest width" in dp units that must be available to your
-application in order for the resources to be used&mdash;defined by the <code>&lt;N&gt;</code>
-value&mdash;regardless of the screen's current orientation.
-For example, if your layout requires that its shortest side be at least 600 dp in length at all
-times, then you can put your layout files in <code>res/layout-sw600dp/</code> and
-the system will use them only when the shortest side of available screen space it at least
-600dp.</p>
-  <p>This is the most important size configuration value, because it replaces the old screen size
-buckets with a discrete number that specifies the effective size available for your UI.  This number
-is based on width because that is most often the driving factor in designing a layout.  A UI will
-often scroll vertically, but have fairly hard constraints on the minimum space it needs
-horizontally. The available width is also the key factor in determining whether to use a one-pane
-layout for handsets or multi-pane layout for tablets.</p>
+        <p>The fundamental size of a screen, as indicated by the shortest dimension of the available
+screen area. Specifically, the device's smallestWidth is the shortest of the screen's available
+height and width (you may also think of it as the "smallest possible width" for the screen). You can
+use this qualifier to ensure that, regardless of the screen's current orientation, your
+application's has at least {@code &lt;N&gt;} dps of width available for it UI.</p>
+        <p>For example, if your layout requires that its smallest dimension of screen area be at
+least 600 dp at all times, then you can use this qualifer to create the layout resources, {@code
+res/layout-sw600dp/}. The system will use these resources only when the smallest dimension of
+available screen is at least 600dp, regardless of whether the 600dp side is the user-perceived
+height or width. The smallestWidth is a fixed screen size characteristic of the device; <strong>the
+device's smallestWidth does not change when the screen's orientation changes</strong>.</p>
+  <p>The smallestWidth of a device takes into account screen decorations and system UI. For
+example, if the device has some persistent UI elements on the screen that account for space along
+the axis of the smallestWidth, the system declares the smallestWidth to be smaller than the actual
+screen size, because those are screen pixels not available for your UI.</p>
+  <p>This is an alternative to the generalized screen size qualifiers (small, normal, large, xlarge)
+that allows you to define a discrete number for the effective size available for your UI.
+Using smallestWidth to determine the general screen size is useful because width is
+often the driving factor in designing a layout. A UI will often scroll vertically, but have fairly
+hard constraints on the minimum space it needs horizontally. The available width is also the key
+factor in determining whether to use a one-pane layout for handsets or multi-pane layout for
+tablets. Thus, you likely care most about what the smallest possible width will be on each
+device.</p>
     </td>
   </tr>
     <tr>
-      <td>Available width</td>
+      <td>Available screen width</td>
       <td><code>w&lt;N&gt;dp</code><br/><br/>
         Examples:<br/>
         <code>w720dp</code><br/>
@@ -735,7 +750,7 @@ of using both the screen size and orientation qualifiers together.</p>
       </td>
     </tr>
     <tr>
-      <td>Available height</td>
+      <td>Available screen height</td>
       <td><code>h&lt;N&gt;dp</code><br/><br/>
         Examples:<br/>
         <code>h720dp</code><br/>
@@ -763,6 +778,10 @@ a handset-style UI and a tablet-style UI that uses multiple panes. The exact poi
 will depend on your particular design&mdash;maybe you need a 720dp width for your tablet layout,
 maybe 600dp is enough, or 480dp, or some number between these. Using these qualifiers in table 2,
 you are in control of the precise size at which your layout changes.</p>
+
+<p>For more discussion about these size configuration qualifiers, see the <a
+href="{@docRoot}guide/topics/resources/providing-resources.html#SmallestScreenWidthQualifier">
+Providing Resources</a> document.</p>
 
 
 <h3 id="ConfigurationExamples">Configuration examples</h3>
@@ -836,17 +855,16 @@ href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;support
 manifest element:</p>
 
 <dl>
-  <!-- 
-
-  #### Sorry, Android Market does not yet support filtering based on this element. ####
-
+  
   <dt><a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html#requiresSmallest">
 {@code android:requiresSmallestWidthDp}</a></dt>
-  <dd>This attribute specifies the minimum "smallest width" with which your
-application is compatible. In order for a device to be considered compatible with your
-application, the shortest side of the available screen space must be equal to or greater than this
-value.
+  <dd>Specifies the minimum smallestWidth required. The smallestWidth is the shortest dimension of
+the screen space (in {@code dp} units) that must be available to your application UI&mdash;that is,
+the shortest of the available screen's two dimensions. So, in order for a device to be considered
+compatible with your application, the device's smallestWidth must be equal to or greater than this
+value. (Usually, the value you supply for this is the "smallest width" that your layout supports,
+regardless of the screen's current orientation.)
   <p>For example, if your application is only for tablet-style devices with a 600dp
 smallest available width:</p>
 <pre>
@@ -858,8 +876,14 @@ smallest available width:</p>
   <p>However, if your application supports all screen sizes supported by Android (as small as
 426dp x 320dp), then you don't need to declare this attribute, because the smallest width your
 application requires is the smallest possible on any device.</p>
+
+  <p class="caution"><strong>Caution:</strong> The Android system does not pay attention to this
+attribute, so it does not affect how your application behaves at runtime. Instead, it is used
+to enable filtering for your application on services such as Android Market. However,
+<strong>Android Market currently does not support this attribute for filtering</strong> (on Android
+3.2), so you should continue using the other size attributes if your application does not support
+small screens.</p>
 </dd>
-  -->
 
   <dt><a
 href="{@docRoot}guide/topics/manifest/supports-screens-element.html#compatibleWidth">

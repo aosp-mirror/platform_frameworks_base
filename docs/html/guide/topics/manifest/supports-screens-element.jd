@@ -129,26 +129,24 @@ Screens</a> document for more information).</p>
   </dd>
   
   <dt id="requiresSmallest">{@code android:requiresSmallestWidthDp}</dt>
-  <dd>This attribute specifies the minimum "smallest screen width" with which your
-application is compatible. In order for a device to be considered compatible with your
-application, the shortest side of the available screen space must be equal to or greater than this
-value.
+  <dd>Specifies the minimum smallestWidth required. The smallestWidth is the shortest dimension of
+the screen space (in {@code dp} units) that must be available to your application UI&mdash;that is,
+the shortest of the available screen's two dimensions. So, in order for a device to be considered
+compatible with your application, the device's smallestWidth must be equal to or greater than this
+value. (Usually, the value you supply for this is the "smallest width" that your layout supports,
+regardless of the screen's current orientation.) 
 
-  <p class="caution"><strong>Caution:</strong> The Android system does not pay attention to this
-attribute, so it does not affect how your application behaves at runtime. Instead, it is used
-to enable filtering for your application on services such as Android Market. However,
-<strong>Android Market currently does not support this attribute</strong> (on Android 3.2), so you
-should continue using the other size attributes if your application does not support
-small screens.</p>
+  <p>For example, a typical handset screen has a smallestWidth of 320dp, a 7" tablet has a
+smallestWidth of 600dp, and a 10" tablet has a smallestWidth of 720dp. These values are generally
+the smallestWidth because they are the shortest dimension of the screen's available space.</p>
 
-<!-- 
-     #### Android Market does not support this attribute yet. ####
+<p>The size against which your value is compared takes into account screen decorations and system
+UI. For example, if the device has some persistent UI elements on the display, the system declares
+the device's smallestWidth as one that is smaller than the actual screen size, accounting for these
+UI elements because those are screen pixels not available for your UI. Thus, the value you use
+should be the minimum width required by your layout, regardless of the screen's current
+orientation.</p>
 
-<p>The width against which your value is compared takes into account screen decorations and system
-UI. For example, if the device has some persistent UI elements on the left or right edge of the
-display, the system declares the device's available width as one that is smaller than the actual
-screen size, accounting for these UI elements because those are screen pixels not available for your
-UI. Thus, the value you use should be the actual smallest width required by your layout.</p>
 <p>If your application properly resizes for smaller screen sizes (down to the
 <em>small</em> size or a minimum width of 320dp), you do
 not need to use this attribute. Otherwise, you should use a value for this attribute that
@@ -156,12 +154,14 @@ matches the smallest value used by your application for the <a
 href="{@docRoot}guide/topics/resources/providing-resources.html#SmallestScreenWidthQualifier">
 smallest screen width qualifier</a> ({@code sw&lt;N&gt;dp}).</p>
 
-<p>For example, a typical handset screen has a minimum width of 320dp, a 7" tablet has a minimum
-width of 600dp, and a 10" tablet has a minimum width of 720dp. If the smallest available screen
-width on a device is less than the value you supply here, then the application is considered
-incompatible with that
-device. External services such as Android Market use this to determine whether a device
-is compatible with your application and prevent incompatible devices from installing it.</p>
+  <p class="caution"><strong>Caution:</strong> The Android system does not pay attention to this
+attribute, so it does not affect how your application behaves at runtime. Instead, it is used
+to enable filtering for your application on services such as Android Market. However,
+<strong>Android Market currently does not support this attribute for filtering</strong> (on Android
+3.2), so you should continue using the other size attributes if your application does not support
+small screens.</p>
+
+<!--
 <p>Beginning with Android 3.2 (API level 13), using this attribute is the preferred way to
 specify the minimum screen size your application requires, instead of using the other attributes
 for small, normal, large, and xlarge screens. The advantage of using this attribute is that you
