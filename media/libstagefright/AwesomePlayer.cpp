@@ -890,7 +890,11 @@ status_t AwesomePlayer::play_l() {
         CHECK(!(mFlags & AUDIO_RUNNING));
 
         if (mVideoSource == NULL) {
-            status_t err = startAudioPlayer_l();
+            // We don't want to post an error notification at this point,
+            // the error returned from MediaPlayer::start() will suffice.
+
+            status_t err = startAudioPlayer_l(
+                    false /* sendErrorNotification */);
 
             if (err != OK) {
                 delete mAudioPlayer;
@@ -940,7 +944,7 @@ status_t AwesomePlayer::play_l() {
     return OK;
 }
 
-status_t AwesomePlayer::startAudioPlayer_l() {
+status_t AwesomePlayer::startAudioPlayer_l(bool sendErrorNotification) {
     CHECK(!(mFlags & AUDIO_RUNNING));
 
     if (mAudioSource == NULL || mAudioPlayer == NULL) {
@@ -958,7 +962,10 @@ status_t AwesomePlayer::startAudioPlayer_l() {
                 true /* sourceAlreadyStarted */);
 
         if (err != OK) {
-            notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, err);
+            if (sendErrorNotification) {
+                notifyListener_l(MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, err);
+            }
+
             return err;
         }
 
@@ -1684,7 +1691,7 @@ void AwesomePlayer::onVideoEvent() {
     if (mAudioPlayer != NULL && !(mFlags & (AUDIO_RUNNING | SEEK_PREVIEW))) {
         status_t err = startAudioPlayer_l();
         if (err != OK) {
-            LOGE("Startung the audio player failed w/ err %d", err);
+            LOGE("Starting the audio player failed w/ err %d", err);
             return;
         }
     }

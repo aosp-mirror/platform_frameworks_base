@@ -291,7 +291,7 @@ private:
     void finishSeekIfNecessary(int64_t videoTimeUs);
     void ensureCacheIsFetching_l();
 
-    status_t startAudioPlayer_l();
+    status_t startAudioPlayer_l(bool sendErrorNotification = true);
     void postAudioSeekComplete_l();
 
     void shutdownVideoDecoder_l();
