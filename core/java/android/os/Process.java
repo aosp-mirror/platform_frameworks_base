@@ -86,6 +86,12 @@ public class Process {
     public static final int WIFI_UID = 1010;
 
     /**
+     * Defines the UID/GID for the mediaserver process.
+     * @hide
+     */
+    public static final int MEDIA_UID = 1013;
+
+    /**
      * Defines the GID for the group that allows write access to the SD card.
      * @hide
      */
