@@ -11958,6 +11958,8 @@ package android.nfc {
   public final class NdefRecord implements android.os.Parcelable {
     ctor public NdefRecord(short, byte[], byte[], byte[]);
     ctor public NdefRecord(byte[]) throws android.nfc.FormatException;
+    method public static android.nfc.NdefRecord createUri(android.net.Uri);
+    method public static android.nfc.NdefRecord createUri(java.lang.String);
     method public int describeContents();
     method public byte[] getId();
     method public byte[] getPayload();

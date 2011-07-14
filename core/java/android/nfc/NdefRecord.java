@@ -334,8 +334,6 @@ public final class NdefRecord implements Parcelable {
 
     /**
      * Creates an NDEF record of well known type URI.
-     * TODO: Make a public API
-     * @hide
      */
     public static NdefRecord createUri(Uri uri) {
         return createUri(uri.toString());
@@ -343,8 +341,6 @@ public final class NdefRecord implements Parcelable {
 
     /**
      * Creates an NDEF record of well known type URI.
-     * TODO: Make a public API
-     * @hide
      */
     public static NdefRecord createUri(String uriString) {
         byte prefix = 0x0;
