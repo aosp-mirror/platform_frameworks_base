@@ -34,6 +34,7 @@ import android.net.IConnectivityManager;
 import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.LinkProperties;
+import android.net.LinkProperties.CompareAddressesResult;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
@@ -76,6 +77,7 @@ import com.google.android.collect.Sets;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -92,6 +94,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ConnectivityService extends IConnectivityManager.Stub {
 
     private static final boolean DBG = true;
+    private static final boolean VDBG = true;
     private static final String TAG = "ConnectivityService";
 
     private static final boolean LOGD_RULES = false;
@@ -124,6 +127,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * abstractly.
      */
     private NetworkStateTracker mNetTrackers[];
+
+    /**
+     * The link properties that define the current links
+     */
+    private LinkProperties mCurrentLinkProperties[];
 
     /**
      * A per Net list of the PID's that requested access to the net
@@ -332,6 +340,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         mNetTrackers = new NetworkStateTracker[
                 ConnectivityManager.MAX_NETWORK_TYPE+1];
+        mCurrentLinkProperties = new LinkProperties[ConnectivityManager.MAX_NETWORK_TYPE+1];
 
         mNetworkPreference = getPersistedNetworkPreference();
 
@@ -468,6 +477,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         mNetConfigs[netType].radio);
                 continue;
             }
+            mCurrentLinkProperties[netType] = mNetTrackers[netType].getLinkProperties();
         }
 
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
@@ -1563,6 +1573,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * right routing table entries exist.
      */
     private void handleConnectivityChange(int netType, boolean doReset) {
+        int resetMask = doReset ? NetworkUtils.RESET_ALL_ADDRESSES : 0;
+
         /*
          * If a non-default network is enabled, add the host routes that
          * will allow it's DNS servers to be accessed.
@@ -1570,6 +1582,45 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         handleDnsConfigurationChange(netType);
 
         if (mNetTrackers[netType].getNetworkInfo().isConnected()) {
+            LinkProperties newLp = mNetTrackers[netType].getLinkProperties();
+            LinkProperties curLp = mCurrentLinkProperties[netType];
+            mCurrentLinkProperties[netType] = newLp;
+            if (VDBG) {
+                log("handleConnectivityChange: changed linkProperty[" + netType + "]:" +
+                        " doReset=" + doReset + " resetMask=" + resetMask +
+                        "\n   curLp=" + curLp +
+                        "\n   newLp=" + newLp);
+            }
+
+            if (curLp.isIdenticalInterfaceName(newLp)) {
+                CompareAddressesResult car = curLp.compareAddresses(newLp);
+                if ((car.removed.size() != 0) || (car.added.size() != 0)) {
+                    for (LinkAddress linkAddr : car.removed) {
+                        if (linkAddr.getAddress() instanceof Inet4Address) {
+                            resetMask |= NetworkUtils.RESET_IPV4_ADDRESSES;
+                        }
+                        if (linkAddr.getAddress() instanceof Inet6Address) {
+                            resetMask |= NetworkUtils.RESET_IPV6_ADDRESSES;
+                        }
+                    }
+                    if (DBG) {
+                        log("handleConnectivityChange: addresses changed" +
+                                " linkProperty[" + netType + "]:" + " resetMask=" + resetMask +
+                                "\n   car=" + car);
+                    }
+                } else {
+                    if (DBG) {
+                        log("handleConnectivityChange: address are the same reset per doReset" +
+                               " linkProperty[" + netType + "]:" +
+                               " resetMask=" + resetMask);
+                    }
+                }
+            } else {
+                resetMask = NetworkUtils.RESET_ALL_ADDRESSES;
+                log("handleConnectivityChange: interface not not equivalent reset both" +
+                        " linkProperty[" + netType + "]:" +
+                        " resetMask=" + resetMask);
+            }
             if (mNetConfigs[netType].isDefault()) {
                 handleApplyDefaultProxy(netType);
                 addDefaultRoute(mNetTrackers[netType]);
@@ -1597,15 +1648,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
 
-        if (doReset) {
+        if (doReset || resetMask != 0) {
             LinkProperties linkProperties = mNetTrackers[netType].getLinkProperties();
             if (linkProperties != null) {
                 String iface = linkProperties.getInterfaceName();
                 if (TextUtils.isEmpty(iface) == false) {
-                    if (DBG) {
-                        log("resetConnections(" + iface + ", NetworkUtils.RESET_ALL_ADDRESSES)");
-                    }
-                    NetworkUtils.resetConnections(iface, NetworkUtils.RESET_ALL_ADDRESSES);
+                    if (DBG) log("resetConnections(" + iface + ", " + resetMask + ")");
+                    NetworkUtils.resetConnections(iface, resetMask);
                 }
             }
         }
