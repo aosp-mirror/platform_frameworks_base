@@ -27,7 +27,7 @@ import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.LinkAddress;
-import android.net.LinkProperties.CompareAddressesResult;
+import android.net.LinkProperties.CompareResult;
 import android.net.NetworkUtils;
 import android.net.ProxyProperties;
 import android.net.TrafficStats;
@@ -1152,7 +1152,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                                     ! result.oldLp.isIdenticalHttpProxy(result.newLp) ||
                                     ! result.oldLp.isIdenticalAddresses(result.newLp)) {
                                 // If the same address type was removed and added we need to cleanup
-                                CompareAddressesResult car =
+                                CompareResult<LinkAddress> car =
                                     result.oldLp.compareAddresses(result.newLp);
                                 boolean needToClean = false;
                                 for (LinkAddress added : car.added) {

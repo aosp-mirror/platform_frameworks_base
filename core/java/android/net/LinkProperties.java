@@ -57,16 +57,16 @@ public class LinkProperties implements Parcelable {
     private Collection<RouteInfo> mRoutes = new ArrayList<RouteInfo>();
     private ProxyProperties mHttpProxy;
 
-    public static class CompareAddressesResult {
-        public ArrayList<LinkAddress> removed = new ArrayList<LinkAddress>();
-        public ArrayList<LinkAddress> added = new ArrayList<LinkAddress>();
+    public static class CompareResult<T> {
+        public ArrayList<T> removed = new ArrayList<T>();
+        public ArrayList<T> added = new ArrayList<T>();
 
         @Override
         public String toString() {
-            String retVal = "removedAddresses=[";
-            for (LinkAddress addr : removed) retVal += addr.toString() + ",";
-            retVal += "] addedAddresses=[";
-            for (LinkAddress addr : added) retVal += addr.toString() + ",";
+            String retVal = "removed=[";
+            for (T addr : removed) retVal += addr.toString() + ",";
+            retVal += "] added=[";
+            for (T addr : added) retVal += addr.toString() + ",";
             retVal += "]";
             return retVal;
         }
@@ -263,10 +263,10 @@ public class LinkProperties implements Parcelable {
      * mLinkAddress which would then result in target and mLinkAddresses
      * being the same list.
      *
-     * @param target is a new list of addresses
+     * @param target is a LinkProperties with the new list of addresses
      * @return the removed and added lists.
      */
-    public CompareAddressesResult compareAddresses(LinkProperties target) {
+    public CompareResult<LinkAddress> compareAddresses(LinkProperties target) {
         /*
          * Duplicate the LinkAddresses into removed, we will be removing
          * address which are common between mLinkAddresses and target
@@ -274,16 +274,80 @@ public class LinkProperties implements Parcelable {
          * are in target but not in mLinkAddresses are placed in the
          * addedAddresses.
          */
-        CompareAddressesResult result = new CompareAddressesResult();
+        CompareResult<LinkAddress> result = new CompareResult<LinkAddress>();
         result.removed = new ArrayList<LinkAddress>(mLinkAddresses);
         result.added.clear();
-        for (LinkAddress newAddress : target.getLinkAddresses()) {
-            if (! result.removed.remove(newAddress)) {
-                result.added.add(newAddress);
+        if (target != null) {
+            for (LinkAddress newAddress : target.getLinkAddresses()) {
+                if (! result.removed.remove(newAddress)) {
+                    result.added.add(newAddress);
+                }
             }
         }
         return result;
     }
+
+    /**
+     * Return two lists, a list of dns addresses that would be removed from
+     * mDnses and a list of addresses that would be added to
+     * mDnses which would then result in target and mDnses
+     * being the same list.
+     *
+     * @param target is a LinkProperties with the new list of dns addresses
+     * @return the removed and added lists.
+     */
+    public CompareResult<InetAddress> compareDnses(LinkProperties target) {
+        /*
+         * Duplicate the InetAddresses into removed, we will be removing
+         * dns address which are common between mDnses and target
+         * leaving the addresses that are different. And dns address which
+         * are in target but not in mDnses are placed in the
+         * addedAddresses.
+         */
+        CompareResult<InetAddress> result = new CompareResult<InetAddress>();
+
+        result.removed = new ArrayList<InetAddress>(mDnses);
+        result.added.clear();
+        if (target != null) {
+            for (InetAddress newAddress : target.getDnses()) {
+                if (! result.removed.remove(newAddress)) {
+                    result.added.add(newAddress);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Return two lists, a list of routes that would be removed from
+     * mRoutes and a list of routes that would be added to
+     * mRoutes which would then result in target and mRoutes
+     * being the same list.
+     *
+     * @param target is a LinkProperties with the new list of routes
+     * @return the removed and added lists.
+     */
+    public CompareResult<RouteInfo> compareRoutes(LinkProperties target) {
+        /*
+         * Duplicate the RouteInfos into removed, we will be removing
+         * routes which are common between mDnses and target
+         * leaving the routes that are different. And route address which
+         * are in target but not in mRoutes are placed in added.
+         */
+        CompareResult<RouteInfo> result = new CompareResult<RouteInfo>();
+
+        result.removed = new ArrayList<RouteInfo>(mRoutes);
+        result.added.clear();
+        if (target != null) {
+            for (RouteInfo r : target.getRoutes()) {
+                if (! result.removed.remove(r)) {
+                    result.added.add(r);
+                }
+            }
+        }
+        return result;
+    }
+
 
     @Override
     /**
