@@ -116,7 +116,7 @@ static jobject doDecode(JNIEnv* env, SkStream* stream, jobject padding,
                         bool forcePurgeable = false) {
     int sampleSize = 1;
     SkImageDecoder::Mode mode = SkImageDecoder::kDecodePixels_Mode;
-    SkBitmap::Config prefConfig = SkBitmap::kNo_Config;
+    SkBitmap::Config prefConfig = SkBitmap::kARGB_8888_Config;
     bool doDither = true;
     bool isMutable = false;
     bool isPurgeable = forcePurgeable ||
