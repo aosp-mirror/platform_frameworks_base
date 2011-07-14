@@ -838,8 +838,6 @@ public class TouchExplorer implements Explorer {
     */
     private void sendAccessibilityEvent(int eventType) {
         AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
-        event.setPackageName(mContext.getPackageName());
-        event.setClassName(getClass().getName());
         mAccessibilityManager.sendAccessibilityEvent(event);
     }
 

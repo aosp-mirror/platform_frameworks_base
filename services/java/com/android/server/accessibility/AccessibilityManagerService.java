@@ -1155,9 +1155,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             | AccessibilityNodeInfo.ACTION_CLEAR_SELECTION;
 
         private static final int RETRIEVAL_ALLOWING_EVENT_TYPES =
-            AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_END
-            | AccessibilityEvent.TYPE_TOUCH_EXPLORATION_GESTURE_START
-            | AccessibilityEvent.TYPE_VIEW_CLICKED | AccessibilityEvent.TYPE_VIEW_FOCUSED
+            AccessibilityEvent.TYPE_VIEW_CLICKED | AccessibilityEvent.TYPE_VIEW_FOCUSED
             | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT
             | AccessibilityEvent.TYPE_VIEW_LONG_CLICKED | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED
             | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | AccessibilityEvent.TYPE_VIEW_SELECTED
