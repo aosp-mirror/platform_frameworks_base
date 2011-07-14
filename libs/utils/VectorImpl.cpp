@@ -347,9 +347,10 @@ void* VectorImpl::_grow(size_t where, size_t amount)
 //    LOGV("_grow(this=%p, where=%d, amount=%d) count=%d, capacity=%d",
 //        this, (int)where, (int)amount, (int)mCount, (int)capacity());
 
-    if (where > mCount)
-        where = mCount;
-      
+    LOG_ASSERT(where <= mCount,
+            "[%p] _grow: where=%d, amount=%d, count=%d",
+            this, (int)where, (int)amount, (int)mCount); // caller already checked
+
     const size_t new_size = mCount + amount;
     if (capacity() < new_size) {
         const size_t new_capacity = max(kMinVectorCapacity, ((new_size*3)+1)/2);
@@ -400,8 +401,9 @@ void VectorImpl::_shrink(size_t where, size_t amount)
 //    LOGV("_shrink(this=%p, where=%d, amount=%d) count=%d, capacity=%d",
 //        this, (int)where, (int)amount, (int)mCount, (int)capacity());
 
-    if (where >= mCount)
-        where = mCount - amount;
+    LOG_ASSERT(where + amount <= mCount,
+            "[%p] _shrink: where=%d, amount=%d, count=%d",
+            this, (int)where, (int)amount, (int)mCount); // caller already checked
 
     const size_t new_size = mCount - amount;
     if (new_size*3 < capacity()) {
