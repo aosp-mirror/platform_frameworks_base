@@ -22,7 +22,6 @@ LOCAL_SRC_FILES:=                         \
         FileSource.cpp                    \
         FLACExtractor.cpp                 \
         HTTPBase.cpp                      \
-        HTTPStream.cpp                    \
         JPEGSource.cpp                    \
         MP3Extractor.cpp                  \
         MPEG2TSWriter.cpp                 \
@@ -36,13 +35,11 @@ LOCAL_SRC_FILES:=                         \
         MediaSourceSplitter.cpp           \
         MetaData.cpp                      \
         NuCachedSource2.cpp               \
-        NuHTTPDataSource.cpp              \
         OMXClient.cpp                     \
         OMXCodec.cpp                      \
         OggExtractor.cpp                  \
         SampleIterator.cpp                \
         SampleTable.cpp                   \
-        ShoutcastSource.cpp               \
         StagefrightMediaScanner.cpp       \
         StagefrightMetadataRetriever.cpp  \
         ThrottledSource.cpp               \

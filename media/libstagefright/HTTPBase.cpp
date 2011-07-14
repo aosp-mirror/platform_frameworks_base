@@ -24,10 +24,11 @@
 #include "include/ChromiumHTTPDataSource.h"
 #endif
 
-#include "include/NuHTTPDataSource.h"
-
+#include <media/stagefright/foundation/ADebug.h>
 #include <media/stagefright/foundation/ALooper.h>
+
 #include <cutils/properties.h>
+#include <cutils/qtaguid.h>
 
 namespace android {
 
@@ -44,14 +45,12 @@ HTTPBase::HTTPBase()
 // static
 sp<HTTPBase> HTTPBase::Create(uint32_t flags) {
 #if CHROMIUM_AVAILABLE
-    char value[PROPERTY_VALUE_MAX];
-    if (!property_get("media.stagefright.use-chromium", value, NULL)
-            || (strcasecmp("false", value) && strcmp("0", value))) {
         return new ChromiumHTTPDataSource(flags);
-    } else
 #endif
     {
-        return new NuHTTPDataSource(flags);
+        TRESPASS();
+
+        return NULL;
     }
 }
 
@@ -133,6 +132,12 @@ bool HTTPBase::getUID(uid_t *uid) const {
     *uid = mUID;
 
     return true;
+}
+
+// static
+void HTTPBase::RegisterSocketUser(int s, uid_t uid) {
+    static const uint32_t kTag = 0xdeadbeef;
+    set_qtaguid(s, kTag, uid);
 }
 
 }  // namespace android

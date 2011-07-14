@@ -53,6 +53,8 @@ struct HTTPBase : public DataSource {
 
     static sp<HTTPBase> Create(uint32_t flags = 0);
 
+    static void RegisterSocketUser(int s, uid_t uid);
+
 protected:
     void addBandwidthMeasurement(size_t numBytes, int64_t delayUs);
 

@@ -40,7 +40,7 @@
 #include <sys/socket.h>
 #include <netdb.h>
 
-#include "HTTPStream.h"
+#include "HTTPBase.h"
 
 // If no access units are received within 5 secs, assume that the rtp
 // stream has ended and signal end of stream.
@@ -1181,8 +1181,8 @@ private:
                     &info->mRTPSocket, &info->mRTCPSocket, &rtpPort);
 
             if (mUIDValid) {
-                HTTPStream::RegisterSocketUser(info->mRTPSocket, mUID);
-                HTTPStream::RegisterSocketUser(info->mRTCPSocket, mUID);
+                HTTPBase::RegisterSocketUser(info->mRTPSocket, mUID);
+                HTTPBase::RegisterSocketUser(info->mRTCPSocket, mUID);
             }
 
             request.append("Transport: RTP/AVP/UDP;unicast;client_port=");
