@@ -27,6 +27,8 @@ namespace android {
 
 static struct {
     jfieldID ptr;
+    jfieldID name;
+    jfieldID dispatchingTimeoutNanos;
 } gInputApplicationHandleClassInfo;
 
 static Mutex gHandleMutex;
@@ -45,6 +47,31 @@ NativeInputApplicationHandle::~NativeInputApplicationHandle() {
 
 jobject NativeInputApplicationHandle::getInputApplicationHandleObjLocalRef(JNIEnv* env) {
     return env->NewLocalRef(mObjWeak);
+}
+
+bool NativeInputApplicationHandle::update() {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jobject obj = env->NewLocalRef(mObjWeak);
+    if (!obj) {
+        return false;
+    }
+
+    jstring nameObj = jstring(env->GetObjectField(obj,
+            gInputApplicationHandleClassInfo.name));
+    if (nameObj) {
+        const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
+        name.setTo(nameStr);
+        env->ReleaseStringUTFChars(nameObj, nameStr);
+        env->DeleteLocalRef(nameObj);
+    } else {
+        name.setTo("<null>");
+    }
+
+    dispatchingTimeout = env->GetLongField(obj,
+            gInputApplicationHandleClassInfo.dispatchingTimeoutNanos);
+
+    env->DeleteLocalRef(obj);
+    return true;
 }
 
 
@@ -112,6 +139,13 @@ int register_android_server_InputApplicationHandle(JNIEnv* env) {
 
     GET_FIELD_ID(gInputApplicationHandleClassInfo.ptr, clazz,
             "ptr", "I");
+
+    GET_FIELD_ID(gInputApplicationHandleClassInfo.name, clazz,
+            "name", "Ljava/lang/String;");
+
+    GET_FIELD_ID(gInputApplicationHandleClassInfo.dispatchingTimeoutNanos,
+            clazz,
+            "dispatchingTimeoutNanos", "J");
 
     return 0;
 }

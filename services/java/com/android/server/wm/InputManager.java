@@ -25,7 +25,6 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.os.Environment;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.MessageQueue;
 import android.os.SystemProperties;
@@ -83,10 +82,10 @@ public class InputManager {
     private static native int nativeInjectInputEvent(InputEvent event,
             int injectorPid, int injectorUid, int syncMode, int timeoutMillis,
             int policyFlags);
-    private static native void nativeSetInputWindows(InputWindow[] windows);
+    private static native void nativeSetInputWindows(InputWindowHandle[] windowHandles);
     private static native void nativeSetInputDispatchMode(boolean enabled, boolean frozen);
     private static native void nativeSetSystemUiVisibility(int visibility);
-    private static native void nativeSetFocusedApplication(InputApplication application);
+    private static native void nativeSetFocusedApplication(InputApplicationHandle application);
     private static native InputDevice nativeGetInputDevice(int deviceId);
     private static native void nativeGetInputConfiguration(Configuration configuration);
     private static native int[] nativeGetInputDeviceIds();
@@ -372,11 +371,11 @@ public class InputManager {
         return nativeGetInputDeviceIds();
     }
     
-    public void setInputWindows(InputWindow[] windows) {
-        nativeSetInputWindows(windows);
+    public void setInputWindows(InputWindowHandle[] windowHandles) {
+        nativeSetInputWindows(windowHandles);
     }
     
-    public void setFocusedApplication(InputApplication application) {
+    public void setFocusedApplication(InputApplicationHandle application) {
         nativeSetFocusedApplication(application);
     }
     

@@ -46,9 +46,7 @@
 #include <android/graphics/GraphicsJNI.h>
 
 #include "com_android_server_PowerManagerService.h"
-#include "com_android_server_InputApplication.h"
 #include "com_android_server_InputApplicationHandle.h"
-#include "com_android_server_InputWindow.h"
 #include "com_android_server_InputWindowHandle.h"
 
 namespace android {
@@ -175,8 +173,8 @@ public:
             const sp<InputWindowHandle>& inputWindowHandle, bool monitor);
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
 
-    void setInputWindows(JNIEnv* env, jobjectArray windowObjArray);
-    void setFocusedApplication(JNIEnv* env, jobject applicationObj);
+    void setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray);
+    void setFocusedApplication(JNIEnv* env, jobject applicationHandleObj);
     void setInputDispatchMode(bool enabled, bool frozen);
     void setSystemUiVisibility(int32_t visibility);
     void setPointerSpeed(int32_t speed);
@@ -582,31 +580,38 @@ bool NativeInputManager::isKeyRepeatEnabled() {
     return isScreenOn();
 }
 
-void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowObjArray) {
-    Vector<InputWindow> windows;
+void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray) {
+    Vector<sp<InputWindowHandle> > windowHandles;
 
-    bool newPointerGesturesEnabled = true;
-    jsize length = env->GetArrayLength(windowObjArray);
-    for (jsize i = 0; i < length; i++) {
-        jobject windowObj = env->GetObjectArrayElement(windowObjArray, i);
-        if (! windowObj) {
-            break; // found null element indicating end of used portion of the array
-        }
-
-        windows.push();
-        InputWindow& window = windows.editTop();
-        android_server_InputWindow_toNative(env, windowObj, &window);
-        if (window.inputChannel == NULL) {
-            windows.pop();
-        } else if (window.hasFocus) {
-            if (window.inputFeatures & InputWindow::INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES) {
-                newPointerGesturesEnabled = false;
+    if (windowHandleObjArray) {
+        jsize length = env->GetArrayLength(windowHandleObjArray);
+        for (jsize i = 0; i < length; i++) {
+            jobject windowHandleObj = env->GetObjectArrayElement(windowHandleObjArray, i);
+            if (! windowHandleObj) {
+                break; // found null element indicating end of used portion of the array
             }
+
+            sp<InputWindowHandle> windowHandle =
+                    android_server_InputWindowHandle_getHandle(env, windowHandleObj);
+            if (windowHandle != NULL) {
+                windowHandles.push(windowHandle);
+            }
+            env->DeleteLocalRef(windowHandleObj);
         }
-        env->DeleteLocalRef(windowObj);
     }
 
-    mInputManager->getDispatcher()->setInputWindows(windows);
+    mInputManager->getDispatcher()->setInputWindows(windowHandles);
+
+    // Do this after the dispatcher has updated the window handle state.
+    bool newPointerGesturesEnabled = true;
+    size_t numWindows = windowHandles.size();
+    for (size_t i = 0; i < numWindows; i++) {
+        const sp<InputWindowHandle>& windowHandle = windowHandles.itemAt(i);
+        if (windowHandle->hasFocus && (windowHandle->inputFeatures
+                & InputWindowHandle::INPUT_FEATURE_DISABLE_TOUCH_PAD_GESTURES)) {
+            newPointerGesturesEnabled = false;
+        }
+    }
 
     uint32_t changes = 0;
     { // acquire lock
@@ -623,16 +628,10 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowObjArra
     }
 }
 
-void NativeInputManager::setFocusedApplication(JNIEnv* env, jobject applicationObj) {
-    if (applicationObj) {
-        InputApplication application;
-        android_server_InputApplication_toNative(env, applicationObj, &application);
-        if (application.inputApplicationHandle != NULL) {
-            mInputManager->getDispatcher()->setFocusedApplication(&application);
-            return;
-        }
-    }
-    mInputManager->getDispatcher()->setFocusedApplication(NULL);
+void NativeInputManager::setFocusedApplication(JNIEnv* env, jobject applicationHandleObj) {
+    sp<InputApplicationHandle> applicationHandle =
+            android_server_InputApplicationHandle_getHandle(env, applicationHandleObj);
+    mInputManager->getDispatcher()->setFocusedApplication(applicationHandle);
 }
 
 void NativeInputManager::setInputDispatchMode(bool enabled, bool frozen) {
@@ -1137,21 +1136,21 @@ static jint android_server_InputManager_nativeInjectInputEvent(JNIEnv* env, jcla
 }
 
 static void android_server_InputManager_nativeSetInputWindows(JNIEnv* env, jclass clazz,
-        jobjectArray windowObjArray) {
+        jobjectArray windowHandleObjArray) {
     if (checkInputManagerUnitialized(env)) {
         return;
     }
 
-    gNativeInputManager->setInputWindows(env, windowObjArray);
+    gNativeInputManager->setInputWindows(env, windowHandleObjArray);
 }
 
 static void android_server_InputManager_nativeSetFocusedApplication(JNIEnv* env, jclass clazz,
-        jobject applicationObj) {
+        jobject applicationHandleObj) {
     if (checkInputManagerUnitialized(env)) {
         return;
     }
 
-    gNativeInputManager->setFocusedApplication(env, applicationObj);
+    gNativeInputManager->setFocusedApplication(env, applicationHandleObj);
 }
 
 static void android_server_InputManager_nativeSetInputDispatchMode(JNIEnv* env,
@@ -1313,9 +1312,9 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeSetInputFilterEnabled },
     { "nativeInjectInputEvent", "(Landroid/view/InputEvent;IIIII)I",
             (void*) android_server_InputManager_nativeInjectInputEvent },
-    { "nativeSetInputWindows", "([Lcom/android/server/wm/InputWindow;)V",
+    { "nativeSetInputWindows", "([Lcom/android/server/wm/InputWindowHandle;)V",
             (void*) android_server_InputManager_nativeSetInputWindows },
-    { "nativeSetFocusedApplication", "(Lcom/android/server/wm/InputApplication;)V",
+    { "nativeSetFocusedApplication", "(Lcom/android/server/wm/InputApplicationHandle;)V",
             (void*) android_server_InputManager_nativeSetFocusedApplication },
     { "nativeSetInputDispatchMode", "(ZZ)V",
             (void*) android_server_InputManager_nativeSetInputDispatchMode },

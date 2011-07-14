@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import android.graphics.Region;
+import android.view.InputChannel;
 import android.view.WindowManagerPolicy;
 
 /**
@@ -34,6 +36,57 @@ public final class InputWindowHandle {
 
     // The window manager's window state.
     public final WindowManagerPolicy.WindowState windowState;
+
+    // The input channel associated with the window.
+    public InputChannel inputChannel;
+
+    // The window name.
+    public String name;
+
+    // Window layout params attributes.  (WindowManager.LayoutParams)
+    public int layoutParamsFlags;
+    public int layoutParamsType;
+
+    // Dispatching timeout.
+    public long dispatchingTimeoutNanos;
+
+    // Window frame.
+    public int frameLeft;
+    public int frameTop;
+    public int frameRight;
+    public int frameBottom;
+
+    // Global scaling factor applied to touch events when they are dispatched
+    // to the window
+    public float scaleFactor;
+
+    // Window touchable region.
+    public final Region touchableRegion = new Region();
+
+    // Window is visible.
+    public boolean visible;
+
+    // Window can receive keys.
+    public boolean canReceiveKeys;
+
+    // Window has focus.
+    public boolean hasFocus;
+
+    // Window has wallpaper.  (window is the current wallpaper target)
+    public boolean hasWallpaper;
+
+    // Input event dispatching is paused.
+    public boolean paused;
+
+    // Window layer.
+    public int layer;
+
+    // Id of process and user that owns the window.
+    public int ownerPid;
+    public int ownerUid;
+
+    // Window input features.
+    public int inputFeatures;
 
     private native void nativeDispose();
 

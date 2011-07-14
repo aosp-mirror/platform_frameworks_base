@@ -31,6 +31,8 @@ public:
 
     jobject getInputApplicationHandleObjLocalRef(JNIEnv* env);
 
+    virtual bool update();
+
 private:
     jweak mObjWeak;
 };

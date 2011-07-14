@@ -321,13 +321,14 @@ public:
      *
      * This method may be called on any thread (usually by the input manager).
      */
-    virtual void setInputWindows(const Vector<InputWindow>& inputWindows) = 0;
+    virtual void setInputWindows(const Vector<sp<InputWindowHandle> >& inputWindowHandles) = 0;
 
     /* Sets the focused application.
      *
      * This method may be called on any thread (usually by the input manager).
      */
-    virtual void setFocusedApplication(const InputApplication* inputApplication) = 0;
+    virtual void setFocusedApplication(
+            const sp<InputApplicationHandle>& inputApplicationHandle) = 0;
 
     /* Sets the input dispatching mode.
      *
@@ -406,8 +407,8 @@ public:
             int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis,
             uint32_t policyFlags);
 
-    virtual void setInputWindows(const Vector<InputWindow>& inputWindows);
-    virtual void setFocusedApplication(const InputApplication* inputApplication);
+    virtual void setInputWindows(const Vector<sp<InputWindowHandle> >& inputWindowHandles);
+    virtual void setFocusedApplication(const sp<InputApplicationHandle>& inputApplicationHandle);
     virtual void setInputDispatchMode(bool enabled, bool frozen);
     virtual void setInputFilterEnabled(bool enabled);
 
@@ -578,7 +579,6 @@ private:
         sp<Connection> connection;
         nsecs_t eventTime;
         KeyEntry* keyEntry;
-        sp<InputChannel> inputChannel;
         sp<InputApplicationHandle> inputApplicationHandle;
         sp<InputWindowHandle> inputWindowHandle;
         int32_t userActivityEventType;
@@ -894,7 +894,7 @@ private:
     // to transfer focus to a new application.
     EventEntry* mNextUnblockedEvent;
 
-    const InputWindow* findTouchedWindowAtLocked(int32_t x, int32_t y);
+    sp<InputWindowHandle> findTouchedWindowAtLocked(int32_t x, int32_t y);
 
     // All registered connections mapped by receive pipe file descriptor.
     KeyedVector<int, sp<Connection> > mConnectionsByReceiveFd;
@@ -953,19 +953,19 @@ private:
     bool mDispatchFrozen;
     bool mInputFilterEnabled;
 
-    Vector<InputWindow> mWindows;
+    Vector<sp<InputWindowHandle> > mWindowHandles;
 
-    const InputWindow* getWindowLocked(const sp<InputChannel>& inputChannel);
+    sp<InputWindowHandle> getWindowHandleLocked(const sp<InputChannel>& inputChannel) const;
+    bool hasWindowHandleLocked(const sp<InputWindowHandle>& windowHandle) const;
 
     // Focus tracking for keys, trackball, etc.
-    const InputWindow* mFocusedWindow;
+    sp<InputWindowHandle> mFocusedWindowHandle;
 
     // Focus tracking for touch.
     struct TouchedWindow {
-        const InputWindow* window;
+        sp<InputWindowHandle> windowHandle;
         int32_t targetFlags;
         BitSet32 pointerIds;        // zero unless target flag FLAG_SPLIT is set
-        sp<InputChannel> channel;
     };
     struct TouchState {
         bool down;
@@ -978,9 +978,10 @@ private:
         ~TouchState();
         void reset();
         void copyFrom(const TouchState& other);
-        void addOrUpdateWindow(const InputWindow* window,int32_t targetFlags, BitSet32 pointerIds);
+        void addOrUpdateWindow(const sp<InputWindowHandle>& windowHandle,
+                int32_t targetFlags, BitSet32 pointerIds);
         void filterNonAsIsTouchWindows();
-        const InputWindow* getFirstForegroundWindow() const;
+        sp<InputWindowHandle> getFirstForegroundWindowHandle() const;
         bool isSlippery() const;
     };
 
@@ -988,9 +989,7 @@ private:
     TouchState mTempTouchState;
 
     // Focused application.
-    InputApplication* mFocusedApplication;
-    InputApplication mFocusedApplicationStorage; // preallocated storage for mFocusedApplication
-    void releaseFocusedApplicationLocked();
+    sp<InputApplicationHandle> mFocusedApplicationHandle;
 
     // Dispatch inbound events.
     bool dispatchConfigurationChangedLocked(
@@ -1021,16 +1020,17 @@ private:
     nsecs_t mInputTargetWaitStartTime;
     nsecs_t mInputTargetWaitTimeoutTime;
     bool mInputTargetWaitTimeoutExpired;
-    sp<InputApplicationHandle> mInputTargetWaitApplication;
+    sp<InputApplicationHandle> mInputTargetWaitApplicationHandle;
 
     // Contains the last window which received a hover event.
-    const InputWindow* mLastHoverWindow;
+    sp<InputWindowHandle> mLastHoverWindowHandle;
 
     // Finding targets for input events.
     void resetTargetsLocked();
     void commitTargetsLocked();
     int32_t handleTargetsNotReadyLocked(nsecs_t currentTime, const EventEntry* entry,
-            const InputApplication* application, const InputWindow* window,
+            const sp<InputApplicationHandle>& applicationHandle,
+            const sp<InputWindowHandle>& windowHandle,
             nsecs_t* nextWakeupTime);
     void resumeAfterTargetsNotReadyTimeoutLocked(nsecs_t newTimeout,
             const sp<InputChannel>& inputChannel);
@@ -1043,15 +1043,17 @@ private:
             nsecs_t* nextWakeupTime, bool* outConflictingPointerActions,
             const MotionSample** outSplitBatchAfterSample);
 
-    void addWindowTargetLocked(const InputWindow* window, int32_t targetFlags,
-            BitSet32 pointerIds);
+    void addWindowTargetLocked(const sp<InputWindowHandle>& windowHandle,
+            int32_t targetFlags, BitSet32 pointerIds);
     void addMonitoringTargetsLocked();
     void pokeUserActivityLocked(const EventEntry* eventEntry);
-    bool checkInjectionPermission(const InputWindow* window, const InjectionState* injectionState);
-    bool isWindowObscuredAtPointLocked(const InputWindow* window, int32_t x, int32_t y) const;
-    bool isWindowFinishedWithPreviousInputLocked(const InputWindow* window);
-    String8 getApplicationWindowLabelLocked(const InputApplication* application,
-            const InputWindow* window);
+    bool checkInjectionPermission(const sp<InputWindowHandle>& windowHandle,
+            const InjectionState* injectionState);
+    bool isWindowObscuredAtPointLocked(const sp<InputWindowHandle>& windowHandle,
+            int32_t x, int32_t y) const;
+    bool isWindowFinishedWithPreviousInputLocked(const sp<InputWindowHandle>& windowHandle);
+    String8 getApplicationWindowLabelLocked(const sp<InputApplicationHandle>& applicationHandle,
+            const sp<InputWindowHandle>& windowHandle);
 
     // Manage the dispatch cycle for a single connection.
     // These methods are deliberately not Interruptible because doing all of the work
@@ -1100,7 +1102,8 @@ private:
     void onDispatchCycleBrokenLocked(
             nsecs_t currentTime, const sp<Connection>& connection);
     void onANRLocked(
-            nsecs_t currentTime, const InputApplication* application, const InputWindow* window,
+            nsecs_t currentTime, const sp<InputApplicationHandle>& applicationHandle,
+            const sp<InputWindowHandle>& windowHandle,
             nsecs_t eventTime, nsecs_t waitStartTime);
 
     // Outbound policy interactions.

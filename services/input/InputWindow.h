@@ -31,29 +31,14 @@ namespace android {
 
 /*
  * A handle to a window that can receive input.
+ *
  * Used by the native input dispatcher to indirectly refer to the window manager objects
  * that describe a window.
  */
 class InputWindowHandle : public RefBase {
-protected:
-    InputWindowHandle(const sp<InputApplicationHandle>& inputApplicationHandle) :
-            mInputApplicationHandle(inputApplicationHandle) { }
-    virtual ~InputWindowHandle() { }
-
 public:
-    inline sp<InputApplicationHandle> getInputApplicationHandle() {
-        return mInputApplicationHandle;
-    }
+    const sp<InputApplicationHandle> inputApplicationHandle;
 
-private:
-    sp<InputApplicationHandle> mInputApplicationHandle;
-};
-
-
-/*
- * An input window describes the bounds of a window that can receive input.
- */
-struct InputWindow {
     // Window flags from WindowManager.LayoutParams
     enum {
         FLAG_ALLOW_LOCK_WHILE_SCREEN_ON     = 0x00000001,
@@ -164,6 +149,22 @@ struct InputWindow {
     bool isTrustedOverlay() const;
 
     bool supportsSplitTouch() const;
+
+    /**
+     * Requests that the state of this object be updated to reflect
+     * the most current available information about the application.
+     *
+     * This method should only be called from within the input dispatcher's
+     * critical section.
+     *
+     * Returns true on success, or false if the handle is no longer valid.
+     */
+    virtual bool update() = 0;
+
+protected:
+    InputWindowHandle(const sp<InputApplicationHandle>& inputApplicationHandle) :
+            inputApplicationHandle(inputApplicationHandle) { }
+    virtual ~InputWindowHandle() { }
 };
 
 } // namespace android

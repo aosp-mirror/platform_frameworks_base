@@ -21,6 +21,9 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/threads.h>
 
+#include <android_view_InputChannel.h>
+#include <android/graphics/Region.h>
+
 #include "com_android_server_InputWindowHandle.h"
 #include "com_android_server_InputApplicationHandle.h"
 
@@ -29,6 +32,26 @@ namespace android {
 static struct {
     jfieldID ptr;
     jfieldID inputApplicationHandle;
+    jfieldID inputChannel;
+    jfieldID name;
+    jfieldID layoutParamsFlags;
+    jfieldID layoutParamsType;
+    jfieldID dispatchingTimeoutNanos;
+    jfieldID frameLeft;
+    jfieldID frameTop;
+    jfieldID frameRight;
+    jfieldID frameBottom;
+    jfieldID scaleFactor;
+    jfieldID touchableRegion;
+    jfieldID visible;
+    jfieldID canReceiveKeys;
+    jfieldID hasFocus;
+    jfieldID hasWallpaper;
+    jfieldID paused;
+    jfieldID layer;
+    jfieldID ownerPid;
+    jfieldID ownerUid;
+    jfieldID inputFeatures;
 } gInputWindowHandleClassInfo;
 
 static Mutex gHandleMutex;
@@ -49,6 +72,83 @@ NativeInputWindowHandle::~NativeInputWindowHandle() {
 
 jobject NativeInputWindowHandle::getInputWindowHandleObjLocalRef(JNIEnv* env) {
     return env->NewLocalRef(mObjWeak);
+}
+
+bool NativeInputWindowHandle::update() {
+    JNIEnv* env = AndroidRuntime::getJNIEnv();
+    jobject obj = env->NewLocalRef(mObjWeak);
+    if (!obj) {
+        return false;
+    }
+
+    jobject inputChannelObj = env->GetObjectField(obj,
+            gInputWindowHandleClassInfo.inputChannel);
+    if (inputChannelObj) {
+        inputChannel = android_view_InputChannel_getInputChannel(env, inputChannelObj);
+        env->DeleteLocalRef(inputChannelObj);
+    } else {
+        inputChannel = NULL;
+    }
+
+    jstring nameObj = jstring(env->GetObjectField(obj,
+            gInputWindowHandleClassInfo.name));
+    if (nameObj) {
+        const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
+        name.setTo(nameStr);
+        env->ReleaseStringUTFChars(nameObj, nameStr);
+        env->DeleteLocalRef(nameObj);
+    } else {
+        name.setTo("<null>");
+    }
+
+    layoutParamsFlags = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.layoutParamsFlags);
+    layoutParamsType = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.layoutParamsType);
+    dispatchingTimeout = env->GetLongField(obj,
+            gInputWindowHandleClassInfo.dispatchingTimeoutNanos);
+    frameLeft = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.frameLeft);
+    frameTop = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.frameTop);
+    frameRight = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.frameRight);
+    frameBottom = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.frameBottom);
+    scaleFactor = env->GetFloatField(obj,
+            gInputWindowHandleClassInfo.scaleFactor);
+
+    jobject regionObj = env->GetObjectField(obj,
+            gInputWindowHandleClassInfo.touchableRegion);
+    if (regionObj) {
+        SkRegion* region = android_graphics_Region_getSkRegion(env, regionObj);
+        touchableRegion.set(*region);
+        env->DeleteLocalRef(regionObj);
+    } else {
+        touchableRegion.setEmpty();
+    }
+
+    visible = env->GetBooleanField(obj,
+            gInputWindowHandleClassInfo.visible);
+    canReceiveKeys = env->GetBooleanField(obj,
+            gInputWindowHandleClassInfo.canReceiveKeys);
+    hasFocus = env->GetBooleanField(obj,
+            gInputWindowHandleClassInfo.hasFocus);
+    hasWallpaper = env->GetBooleanField(obj,
+            gInputWindowHandleClassInfo.hasWallpaper);
+    paused = env->GetBooleanField(obj,
+            gInputWindowHandleClassInfo.paused);
+    layer = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.layer);
+    ownerPid = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.ownerPid);
+    ownerUid = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.ownerUid);
+    inputFeatures = env->GetIntField(obj,
+            gInputWindowHandleClassInfo.inputFeatures);
+
+    env->DeleteLocalRef(obj);
+    return true;
 }
 
 
@@ -127,6 +227,65 @@ int register_android_server_InputWindowHandle(JNIEnv* env) {
             clazz,
             "inputApplicationHandle", "Lcom/android/server/wm/InputApplicationHandle;");
 
+    GET_FIELD_ID(gInputWindowHandleClassInfo.inputChannel, clazz,
+            "inputChannel", "Landroid/view/InputChannel;");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.name, clazz,
+            "name", "Ljava/lang/String;");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.layoutParamsFlags, clazz,
+            "layoutParamsFlags", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.layoutParamsType, clazz,
+            "layoutParamsType", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.dispatchingTimeoutNanos, clazz,
+            "dispatchingTimeoutNanos", "J");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.frameLeft, clazz,
+            "frameLeft", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.frameTop, clazz,
+            "frameTop", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.frameRight, clazz,
+            "frameRight", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.frameBottom, clazz,
+            "frameBottom", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.scaleFactor, clazz,
+            "scaleFactor", "F");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.touchableRegion, clazz,
+            "touchableRegion", "Landroid/graphics/Region;");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.visible, clazz,
+            "visible", "Z");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.canReceiveKeys, clazz,
+            "canReceiveKeys", "Z");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.hasFocus, clazz,
+            "hasFocus", "Z");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.hasWallpaper, clazz,
+            "hasWallpaper", "Z");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.paused, clazz,
+            "paused", "Z");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.layer, clazz,
+            "layer", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.ownerPid, clazz,
+            "ownerPid", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.ownerUid, clazz,
+            "ownerUid", "I");
+
+    GET_FIELD_ID(gInputWindowHandleClassInfo.inputFeatures, clazz,
+            "inputFeatures", "I");
     return 0;
 }
 
