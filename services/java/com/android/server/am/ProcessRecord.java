@@ -61,6 +61,7 @@ class ProcessRecord {
     int setAdj;                 // Last set OOM adjustment for this process
     int curSchedGroup;          // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
+    int trimMemoryLevel;        // Last selected memory trimming level
     boolean keeping;            // Actively running code so don't kill due to that?
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean foregroundServices; // Running any services that are foreground?
@@ -181,7 +182,8 @@ class ProcessRecord {
                 pw.print(" cur="); pw.print(curAdj);
                 pw.print(" set="); pw.println(setAdj);
         pw.print(prefix); pw.print("curSchedGroup="); pw.print(curSchedGroup);
-                pw.print(" setSchedGroup="); pw.println(setSchedGroup);
+                pw.print(" setSchedGroup="); pw.print(setSchedGroup);
+                pw.print(" trimMemoryLevel="); pw.println(trimMemoryLevel);
         pw.print(prefix); pw.print("setIsForeground="); pw.print(setIsForeground);
                 pw.print(" foregroundServices="); pw.print(foregroundServices);
                 pw.print(" forcingToForeground="); pw.println(forcingToForeground);
@@ -305,8 +307,6 @@ class ProcessRecord {
     }
     
     void toShortString(StringBuilder sb) {
-        sb.append(Integer.toHexString(System.identityHashCode(this)));
-        sb.append(' ');
         sb.append(pid);
         sb.append(':');
         sb.append(processName);
@@ -320,6 +320,8 @@ class ProcessRecord {
         }
         StringBuilder sb = new StringBuilder(128);
         sb.append("ProcessRecord{");
+        sb.append(Integer.toHexString(System.identityHashCode(this)));
+        sb.append(' ');
         toShortString(sb);
         sb.append('}');
         return stringName = sb.toString();

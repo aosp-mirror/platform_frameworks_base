@@ -51,4 +51,16 @@ public interface ComponentCallbacks {
      * The system will perform a gc for you after returning from this method.
      */
     void onLowMemory();
+
+    /** @hide */
+    static final int TRIM_MEMORY_COMPLETE = 80;
+
+    /** @hide */
+    static final int TRIM_MEMORY_MODERATE = 60;
+
+    /** @hide */
+    static final int TRIM_MEMORY_BACKGROUND = 40;
+
+    /** @hide */
+    static final int TRIM_MEMORY_INVISIBLE = 20;
 }
