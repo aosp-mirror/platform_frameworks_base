@@ -145,8 +145,8 @@ class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/tools-notes.html">SDK Tools, r12</a> <span
 class="new">new!</span></li>
       <li><a href="<?cs var:toroot ?>sdk/win-usb.html">Google USB Driver, r4</a></li>
-      <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Compatibility Library,
-r2</a></li>
+      <li><a href="<?cs var:toroot ?>sdk/compatibility-library.html">Compatibility Package,
+r3</a> <span class="new">new!</span></li>
     </ul>
   </li>
   <li>
@@ -183,8 +183,8 @@ r2</a></li>
       <span style="display:none" class="zh-TW"></span>
     </h2>
     <ul>
-      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r6 <span
-       class="new">new!</span></a>
+      <li><a href="<?cs var:toroot ?>sdk/ndk/index.html">Android NDK, r6</a> 
+        <span class="new">new!</span>
         </li>
       <li><a href="<?cs var:toroot ?>sdk/ndk/overview.html">What is the NDK?</a></li>
     </ul>
