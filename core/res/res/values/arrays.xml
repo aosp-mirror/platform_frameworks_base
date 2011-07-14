@@ -22,6 +22,15 @@
     <!-- Do not translate. These are all of the drawable resources that should be preloaded by
          the zygote process before it starts forking application processes. -->
     <array name="preloaded_drawables">
+       <item>@drawable/spinner_black_16</item>
+       <item>@drawable/spinner_black_20</item>
+       <item>@drawable/spinner_black_48</item>
+       <item>@drawable/spinner_black_76</item>
+       <item>@drawable/spinner_white_16</item>
+       <item>@drawable/spinner_white_48</item>
+       <item>@drawable/spinner_white_76</item>
+       <item>@drawable/toast_frame</item>
+       <item>@drawable/toast_frame_holo</item>
        <item>@drawable/btn_check_on_selected</item>
        <item>@drawable/btn_check_on_pressed_holo_light</item>
        <item>@drawable/btn_check_on_pressed_holo_dark</item>
@@ -109,6 +118,11 @@
        <item>@drawable/btn_default_disabled_holo_dark</item>
        <item>@drawable/btn_default_disabled_focused_holo_light</item>
        <item>@drawable/btn_default_disabled_focused_holo_dark</item>
+       <item>@drawable/btn_dropdown_disabled</item>
+       <item>@drawable/btn_dropdown_disabled_focused</item>
+       <item>@drawable/btn_dropdown_normal</item>
+       <item>@drawable/btn_dropdown_pressed</item>
+       <item>@drawable/btn_dropdown_selected</item>
        <item>@drawable/btn_toggle_on_pressed_holo_light</item>
        <item>@drawable/btn_toggle_on_pressed_holo_dark</item>
        <item>@drawable/btn_toggle_on_normal_holo_light</item>
@@ -141,6 +155,10 @@
        <item>@drawable/edit_text_holo_light</item>
        <item>@drawable/edit_text_holo_dark</item>
        <item>@drawable/edit_text</item>
+       <item>@drawable/expander_close_holo_dark</item>
+       <item>@drawable/expander_close_holo_light</item>
+       <item>@drawable/expander_ic_maximized</item>
+       <item>@drawable/expander_ic_minimized</item>
        <item>@drawable/expander_group</item>
        <item>@drawable/expander_group_holo_dark</item>
        <item>@drawable/expander_group_holo_light</item>
@@ -157,6 +175,8 @@
        <item>@drawable/menu_background_fill_parent_width</item>
        <item>@drawable/menu_submenu_background</item>
        <item>@drawable/menu_selector</item>
+       <item>@drawable/overscroll_edge</item>
+       <item>@drawable/overscroll_glow</item>
        <item>@drawable/panel_background</item>
        <item>@drawable/popup_bottom_bright</item>
        <item>@drawable/popup_bottom_dark</item>
