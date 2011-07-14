@@ -340,10 +340,6 @@ Context::Context() {
 Context * Context::createContext(Device *dev, const RsSurfaceConfig *sc) {
     Context * rsc = new Context();
 
-    // Temporary to avoid breaking the tools
-    if (!dev) {
-        return rsc;
-    }
     if (!rsc->initContext(dev, sc)) {
         delete rsc;
         return NULL;
