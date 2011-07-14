@@ -2528,8 +2528,23 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * @hide
      */
     @Override
-    public void protectVpn(ParcelFileDescriptor socket) {
-        mVpn.protect(socket, getDefaultInterface());
+    public boolean protectVpn(ParcelFileDescriptor socket) {
+        try {
+            int type = mActiveDefaultNetwork;
+            if (ConnectivityManager.isNetworkTypeValid(type)) {
+                mVpn.protect(socket, mNetTrackers[type].getLinkProperties().getInterfaceName());
+                return true;
+            }
+        } catch (Exception e) {
+            // ignore
+        } finally {
+            try {
+                socket.close();
+            } catch (Exception e) {
+                // ignore
+            }
+        }
+        return false;
     }
 
     /**
@@ -2575,19 +2590,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     @Override
     public LegacyVpnInfo getLegacyVpnInfo() {
         return mVpn.getLegacyVpnInfo();
-    }
-
-    private String getDefaultInterface() {
-        if (ConnectivityManager.isNetworkTypeValid(mActiveDefaultNetwork)) {
-            NetworkStateTracker tracker = mNetTrackers[mActiveDefaultNetwork];
-            if (tracker != null) {
-                LinkProperties properties = tracker.getLinkProperties();
-                if (properties != null) {
-                    return properties.getInterfaceName();
-                }
-            }
-        }
-        throw new IllegalStateException("No default interface");
     }
 
     /**

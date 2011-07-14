@@ -70,22 +70,14 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
 
     /**
      * Protect a socket from routing changes by binding it to the given
-     * interface. The socket IS closed by this method.
+     * interface. The socket is NOT closed by this method.
      *
      * @param socket The socket to be bound.
      * @param name The name of the interface.
      */
     public void protect(ParcelFileDescriptor socket, String interfaze) {
-        try {
-            mContext.enforceCallingPermission(VPN, "protect");
-            jniProtect(socket.getFd(), interfaze);
-        } finally {
-            try {
-                socket.close();
-            } catch (Exception e) {
-                // ignore
-            }
-        }
+        mContext.enforceCallingPermission(VPN, "protect");
+        jniProtect(socket.getFd(), interfaze);
     }
 
     /**
