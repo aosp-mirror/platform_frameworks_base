@@ -1672,6 +1672,7 @@
 
     <style name="Widget.Holo.ProgressBar.Small" parent="Widget.ProgressBar.Small">
         <item name="android:indeterminateDrawable">@android:drawable/progress_small_holo</item>
+        <item name="android:animationResolution">33</item>
     </style>
 
     <style name="Widget.Holo.ProgressBar.Small.Title">
@@ -1679,6 +1680,7 @@
 
     <style name="Widget.Holo.ProgressBar.Large" parent="Widget.ProgressBar.Large">
         <item name="android:indeterminateDrawable">@android:drawable/progress_large_holo</item>
+        <item name="android:animationResolution">33</item>
     </style>
 
     <style name="Widget.Holo.ProgressBar.Inverse">
