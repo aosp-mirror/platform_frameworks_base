@@ -6571,11 +6571,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     scrollx = left;
                 }
             }
-        } else if (a == Layout.Alignment.ALIGN_LEFT) {
-            scrollx = (int) FloatMath.floor(mLayout.getLineLeft(line));
-        } else { // a == Layout.Alignment.ALIGN_RIGHT
+        } else if (a == Layout.Alignment.ALIGN_RIGHT) {
             int right = (int) FloatMath.ceil(mLayout.getLineRight(line));
             scrollx = right - hspace;
+        } else { // a == Layout.Alignment.ALIGN_LEFT (will also be the default)
+            scrollx = (int) FloatMath.floor(mLayout.getLineLeft(line));
         }
 
         if (ht < vspace) {
