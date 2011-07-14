@@ -28,23 +28,25 @@ SensorFusion::SensorFusion()
       mEnabled(false), mGyroTime(0)
 {
     sensor_t const* list;
-    size_t count = mSensorDevice.getSensorList(&list);
-    for (size_t i=0 ; i<count ; i++) {
-        if (list[i].type == SENSOR_TYPE_ACCELEROMETER) {
-            mAcc = Sensor(list + i);
+    ssize_t count = mSensorDevice.getSensorList(&list);
+    if (count > 0) {
+        for (size_t i=0 ; i<size_t(count) ; i++) {
+            if (list[i].type == SENSOR_TYPE_ACCELEROMETER) {
+                mAcc = Sensor(list + i);
+            }
+            if (list[i].type == SENSOR_TYPE_MAGNETIC_FIELD) {
+                mMag = Sensor(list + i);
+            }
+            if (list[i].type == SENSOR_TYPE_GYROSCOPE) {
+                mGyro = Sensor(list + i);
+                // 200 Hz for gyro events is a good compromise between precision
+                // and power/cpu usage.
+                mGyroRate = 200;
+                mTargetDelayNs = 1000000000LL/mGyroRate;
+            }
         }
-        if (list[i].type == SENSOR_TYPE_MAGNETIC_FIELD) {
-            mMag = Sensor(list + i);
-        }
-        if (list[i].type == SENSOR_TYPE_GYROSCOPE) {
-            mGyro = Sensor(list + i);
-            // 200 Hz for gyro events is a good compromise between precision
-            // and power/cpu usage.
-            mGyroRate = 200;
-            mTargetDelayNs = 1000000000LL/mGyroRate;
-        }
+        mFusion.init();
     }
-    mFusion.init();
 }
 
 void SensorFusion::process(const sensors_event_t& event) {
