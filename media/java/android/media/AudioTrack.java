@@ -32,24 +32,25 @@ import android.util.Log;
  * It allows to stream PCM audio buffers to the audio hardware for playback. This is
  * achieved by "pushing" the data to the AudioTrack object using one of the
  *  {@link #write(byte[], int, int)} and {@link #write(short[], int, int)} methods.
- *  
+ *
  * <p>An AudioTrack instance can operate under two modes: static or streaming.<br>
  * In Streaming mode, the application writes a continuous stream of data to the AudioTrack, using
- * one of the write() methods. These are blocking and return when the data has been transferred
- * from the Java layer to the native layer and queued for playback. The streaming mode
- *  is most useful when playing blocks of audio data that for instance are:
+ * one of the {@code write()} methods. These are blocking and return when the data has been
+ * transferred from the Java layer to the native layer and queued for playback. The streaming
+ * mode is most useful when playing blocks of audio data that for instance are:
+ *
  * <ul>
  *   <li>too big to fit in memory because of the duration of the sound to play,</li>
  *   <li>too big to fit in memory because of the characteristics of the audio data
  *         (high sampling rate, bits per sample ...)</li>
  *   <li>received or generated while previously queued audio is playing.</li>
  * </ul>
+ *
  * The static mode is to be chosen when dealing with short sounds that fit in memory and
- * that need to be played with the smallest latency possible. AudioTrack instances in static mode
- * can play the sound without the need to transfer the audio data from Java to native layer
- * each time the sound is to be played. The static mode will therefore be preferred for UI and
- * game sounds that are played often, and with the smallest overhead possible.
- * 
+ * that need to be played with the smallest latency possible. The static mode will
+ * therefore be preferred for UI and game sounds that are played often, and with the
+ * smallest overhead possible.
+ *
  * <p>Upon creation, an AudioTrack object initializes its associated audio buffer.
  * The size of this buffer, specified during the construction, determines how long an AudioTrack
  * can play before running out of data.<br>
@@ -816,6 +817,7 @@ public class AudioTrack
     //--------------------
     /**
      * Starts playing an AudioTrack.
+     *
      * @throws IllegalStateException
      */
     public void play()
@@ -832,6 +834,7 @@ public class AudioTrack
 
     /**
      * Stops playing the audio data.
+     *
      * @throws IllegalStateException
      */
     public void stop()
@@ -848,7 +851,10 @@ public class AudioTrack
     }
 
     /**
-     * Pauses the playback of the audio data.
+     * Pauses the playback of the audio data. Data that has not been played
+     * back will not be discarded. Subsequent calls to {@link #play} will play
+     * this data back.
+     *
      * @throws IllegalStateException
      */
     public void pause()
@@ -871,9 +877,9 @@ public class AudioTrack
     //--------------------
 
     /**
-     * Flushes the audio data currently queued for playback.
+     * Flushes the audio data currently queued for playback. Any data that has
+     * not been played back will be discarded.
      */
-
     public void flush() {
         if (mState == STATE_INITIALIZED) {
             // flush the data in native layer
@@ -883,9 +889,14 @@ public class AudioTrack
     }
 
     /**
-     * Writes the audio data to the audio hardware for playback.
+     * Writes the audio data to the audio hardware for playback. Will block until
+     * all data has been written to the audio mixer.
+     * Note that the actual playback of this data might occur after this function
+     * returns. This function is thread safe with respect to {@link #stop} calls,
+     * in which case all of the specified data might not be written to the mixer.
+     *
      * @param audioData the array that holds the data to play.
-     * @param offsetInBytes the offset expressed in bytes in audioData where the data to play 
+     * @param offsetInBytes the offset expressed in bytes in audioData where the data to play
      *    starts.
      * @param sizeInBytes the number of bytes to read in audioData after the offset.
      * @return the number of bytes that were written or {@link #ERROR_INVALID_OPERATION}
@@ -914,7 +925,12 @@ public class AudioTrack
 
 
     /**
-     * Writes the audio data to the audio hardware for playback.
+     * Writes the audio data to the audio hardware for playback. Will block until
+     * all data has been written to the audio mixer.
+     * Note that the actual playback of this data might occur after this function
+     * returns. This function is thread safe with respect to {@link #stop} calls,
+     * in which case all of the specified data might not be written to the mixer.
+     *
      * @param audioData the array that holds the data to play.
      * @param offsetInShorts the offset expressed in shorts in audioData where the data to play
      *     starts.
@@ -988,7 +1004,7 @@ public class AudioTrack
 
     /**
      * Sets the send level of the audio track to the attached auxiliary effect
-     * {@see #attachAuxEffect(int)}. The level value range is 0 to 1.0.
+     * {@link #attachAuxEffect(int)}. The level value range is 0 to 1.0.
      * <p>By default the send level is 0, so even if an effect is attached to the player
      * this method must be called for the effect to be applied.
      * <p>Note that the passed level value is a raw scalar. UI controls should be scaled
