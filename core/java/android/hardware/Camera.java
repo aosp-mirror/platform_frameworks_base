@@ -720,8 +720,20 @@ public class Camera {
          * onAutoFocus will be called immediately with a fake value of
          * <code>success</code> set to <code>true</code>.
          *
+         * The auto-focus routine may lock auto-exposure and auto-white balance
+         * after it completes. To check for the state of these locks, use the
+         * {@link android.hardware.Camera.Parameters#getAutoExposureLock()} and
+         * {@link android.hardware.Camera.Parameters#getAutoWhiteBalanceLock()}
+         * methods. If such locking is undesirable, use
+         * {@link android.hardware.Camera.Parameters#setAutoExposureLock(boolean)}
+         * and
+         * {@link android.hardware.Camera.Parameters#setAutoWhiteBalanceLock(boolean)}
+         * to release the locks.
+         *
          * @param success true if focus was successful, false if otherwise
          * @param camera  the Camera service object
+         * @see android.hardware.Camera.Parameters#setAutoExposureLock(boolean)
+         * @see android.hardware.Camera.Parameters#setAutoWhiteBalanceLock(boolean)
          */
         void onAutoFocus(boolean success, Camera camera);
     };
@@ -747,8 +759,21 @@ public class Camera {
      * {@link android.hardware.Camera.Parameters#FLASH_MODE_OFF}, flash may be
      * fired during auto-focus, depending on the driver and camera hardware.<p>
      *
+     * The auto-focus routine may lock auto-exposure and auto-white balance
+     * after it completes. To check for the state of these locks, use the
+     * {@link android.hardware.Camera.Parameters#getAutoExposureLock()} and
+     * {@link android.hardware.Camera.Parameters#getAutoWhiteBalanceLock()}
+     * methods after the {@link AutoFocusCallback#onAutoFocus(boolean, Camera)}
+     * callback is invoked. If such locking is undesirable, use
+     * {@link android.hardware.Camera.Parameters#setAutoExposureLock(boolean)}
+     * and
+     * {@link android.hardware.Camera.Parameters#setAutoWhiteBalanceLock(boolean)}
+     * to release the locks.
+     *
      * @param cb the callback to run
      * @see #cancelAutoFocus()
+     * @see android.hardware.Camera.Parameters#setAutoExposureLock(boolean)
+     * @see android.hardware.Camera.Parameters#setAutoWhiteBalanceLock(boolean)
      */
     public final void autoFocus(AutoFocusCallback cb)
     {
@@ -763,7 +788,13 @@ public class Camera {
      * this function will return the focus position to the default.
      * If the camera does not support auto-focus, this is a no-op.
      *
+     * Canceling auto-focus will return the auto-exposure lock and auto-white
+     * balance lock to their state before {@link #autoFocus(AutoFocusCallback)}
+     * was called.
+     *
      * @see #autoFocus(Camera.AutoFocusCallback)
+     * @see android.hardware.Camera.Parameters#setAutoExposureLock(boolean)
+     * @see android.hardware.Camera.Parameters#setAutoWhiteBalanceLock(boolean)
      */
     public final void cancelAutoFocus()
     {
@@ -2562,8 +2593,6 @@ public class Camera {
          *        routine is free to run normally.
          *
          * @see #getAutoExposureLock()
-         *
-         * @hide
          */
         public void setAutoExposureLock(boolean toggle) {
             set(KEY_AUTO_EXPOSURE_LOCK, toggle ? TRUE : FALSE);
@@ -2583,7 +2612,6 @@ public class Camera {
          *
          * @see #setAutoExposureLock(boolean)
          *
-         * @hide
          */
         public boolean getAutoExposureLock() {
             String str = get(KEY_AUTO_EXPOSURE_LOCK);
@@ -2598,7 +2626,6 @@ public class Camera {
          * @return true if auto-exposure lock is supported.
          * @see #setAutoExposureLock(boolean)
          *
-         * @hide
          */
         public boolean isAutoExposureLockSupported() {
             String str = get(KEY_AUTO_EXPOSURE_LOCK_SUPPORTED);
@@ -2645,8 +2672,6 @@ public class Camera {
          *        auto-white balance routine is free to run normally.
          *
          * @see #getAutoWhiteBalanceLock()
-         *
-         * @hide
          */
         public void setAutoWhiteBalanceLock(boolean toggle) {
             set(KEY_AUTO_WHITEBALANCE_LOCK, toggle ? TRUE : FALSE);
@@ -2668,7 +2693,6 @@ public class Camera {
          *
          * @see #setAutoWhiteBalanceLock(boolean)
          *
-         * @hide
          */
         public boolean getAutoWhiteBalanceLock() {
             String str = get(KEY_AUTO_WHITEBALANCE_LOCK);
@@ -2683,7 +2707,6 @@ public class Camera {
          * @return true if auto-white balance lock is supported.
          * @see #setAutoWhiteBalanceLock(boolean)
          *
-         * @hide
          */
         public boolean isAutoWhiteBalanceLockSupported() {
             String str = get(KEY_AUTO_WHITEBALANCE_LOCK_SUPPORTED);
