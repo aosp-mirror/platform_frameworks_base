@@ -69,6 +69,16 @@ typedef enum {
      * kMetadataBufferTypeGrallocSource is used to indicate that
      * the payload of the metadata buffers can be interpreted as
      * a buffer_handle_t.
+     * So in this case,the metadata that the encoder receives
+     * will have a byte stream that consists of two parts:
+     * 1. First, there is an integer indicating that it is a GRAlloc
+     * source (kMetadataBufferTypeGrallocSource)
+     * 2. This is followed by the buffer_handle_t that is a handle to the
+     * GRalloc buffer. The encoder needs to interpret this GRalloc handle
+     * and encode the frames.
+     * --------------------------------------------------------------
+     * |  kMetadataBufferTypeGrallocSource | sizeof(buffer_handle_t) |
+     * --------------------------------------------------------------
      */
     kMetadataBufferTypeGrallocSource = 1,
 

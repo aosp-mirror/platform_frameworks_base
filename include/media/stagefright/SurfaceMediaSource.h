@@ -63,6 +63,10 @@ public:
             MediaBuffer **buffer, const ReadOptions *options = NULL);
     virtual sp<MetaData> getFormat();
 
+    // Pass the metadata over to the buffer, call when you have the lock
+    void passMetadataBufferLocked(MediaBuffer **buffer);
+    bool checkBufferMatchesSlot(int slot, MediaBuffer *buffer);
+
     // Get / Set the frame rate used for encoding. Default fps = 30
     status_t setFrameRate(int32_t fps) ;
     int32_t getFrameRate( ) const;
@@ -152,7 +156,7 @@ public:
     status_t setBufferCountServer(int bufferCount);
 
     // getTimestamp retrieves the timestamp associated with the image
-    // set by the most recent call to updateFrameInfoLocked().
+    // set by the most recent call to read()
     //
     // The timestamp is in nanoseconds, and is monotonically increasing. Its
     // other semantics (zero point, etc) are source-dependent and should be
