@@ -100,7 +100,7 @@ interface IConnectivityManager
 
     void setDataDependency(int networkType, boolean met);
 
-    void protectVpn(in ParcelFileDescriptor socket);
+    boolean protectVpn(in ParcelFileDescriptor socket);
 
     boolean prepareVpn(String oldPackage, String newPackage);
 
