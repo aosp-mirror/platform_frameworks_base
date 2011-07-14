@@ -75,6 +75,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
     private StatusView mStatusView;
     private final boolean mUseSystemIME = true; // TODO: Make configurable
+    private boolean mResuming; // used to prevent poking the wakelock during onResume()
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
     // any passwords with length less than or equal to this length.
@@ -185,7 +186,9 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             }
 
             public void afterTextChanged(Editable s) {
-                mCallback.pokeWakelock();
+                if (!mResuming) {
+                    mCallback.pokeWakelock();
+                }
             }
         });
     }
@@ -208,6 +211,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
     /** {@inheritDoc} */
     public void onResume() {
+        mResuming = true;
         // reset status
         mStatusView.resetStatusInfo(mUpdateMonitor, mLockPatternUtils);
 
@@ -222,6 +226,7 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         if (deadline != 0) {
             handleAttemptLockout(deadline);
         }
+        mResuming = false;
     }
 
     /** {@inheritDoc} */
