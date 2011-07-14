@@ -336,11 +336,6 @@ private:
     OMXCodec &operator=(const OMXCodec &);
 };
 
-struct CodecProfileLevel {
-    OMX_U32 mProfile;
-    OMX_U32 mLevel;
-};
-
 struct CodecCapabilities {
     String8 mComponentName;
     Vector<CodecProfileLevel> mProfileLevels;

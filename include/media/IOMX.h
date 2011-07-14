@@ -184,6 +184,11 @@ public:
             uint32_t flags = 0);
 };
 
+struct CodecProfileLevel {
+    OMX_U32 mProfile;
+    OMX_U32 mLevel;
+};
+
 }  // namespace android
 
 #endif  // ANDROID_IOMX_H_
