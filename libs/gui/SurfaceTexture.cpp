@@ -495,7 +495,7 @@ status_t SurfaceTexture::setTransform(uint32_t transform) {
 }
 
 status_t SurfaceTexture::connect(int api) {
-    LOGV("SurfaceTexture::connect");
+    LOGV("SurfaceTexture::connect(this=%p, %d)", this, api);
     Mutex::Autolock lock(mMutex);
     int err = NO_ERROR;
     switch (api) {
@@ -504,6 +504,8 @@ status_t SurfaceTexture::connect(int api) {
         case NATIVE_WINDOW_API_MEDIA:
         case NATIVE_WINDOW_API_CAMERA:
             if (mConnectedApi != NO_CONNECTED_API) {
+                LOGE("connect: already connected (cur=%d, req=%d)",
+                        mConnectedApi, api);
                 err = -EINVAL;
             } else {
                 mConnectedApi = api;
@@ -517,7 +519,7 @@ status_t SurfaceTexture::connect(int api) {
 }
 
 status_t SurfaceTexture::disconnect(int api) {
-    LOGV("SurfaceTexture::disconnect");
+    LOGV("SurfaceTexture::disconnect(this=%p, %d)", this, api);
     Mutex::Autolock lock(mMutex);
     int err = NO_ERROR;
     switch (api) {
@@ -528,6 +530,8 @@ status_t SurfaceTexture::disconnect(int api) {
             if (mConnectedApi == api) {
                 mConnectedApi = NO_CONNECTED_API;
             } else {
+                LOGE("disconnect: connected to another api (cur=%d, req=%d)",
+                        mConnectedApi, api);
                 err = -EINVAL;
             }
             break;

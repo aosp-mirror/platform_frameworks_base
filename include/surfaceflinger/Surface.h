@@ -28,6 +28,8 @@
 #include <ui/Region.h>
 #include <ui/egl/android_natives.h>
 
+#include <gui/SurfaceTextureClient.h>
+
 #include <surfaceflinger/ISurface.h>
 #include <surfaceflinger/ISurfaceComposerClient.h>
 
@@ -37,14 +39,9 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-class GraphicBuffer;
-class GraphicBufferMapper;
-class IOMX;
 class ISurfaceTexture;
-class Rect;
 class Surface;
 class SurfaceComposerClient;
-class SurfaceTextureClient;
 
 // ---------------------------------------------------------------------------
 
@@ -129,8 +126,7 @@ private:
     
 // ---------------------------------------------------------------------------
 
-class Surface 
-    : public EGLNativeBase<ANativeWindow, Surface, RefBase>
+class Surface : public SurfaceTextureClient
 {
 public:
     struct SurfaceInfo {
@@ -158,32 +154,14 @@ public:
     sp<ISurfaceTexture> getSurfaceTexture();
 
     // the lock/unlock APIs must be used from the same thread
-    status_t    lock(SurfaceInfo* info, bool blocking = true);
-    status_t    lock(SurfaceInfo* info, Region* dirty, bool blocking = true);
+    status_t    lock(SurfaceInfo* info, Region* dirty = NULL);
     status_t    unlockAndPost();
 
     sp<IBinder> asBinder() const;
 
 private:
-    /*
-     * Android frameworks friends
-     * (eventually this should go away and be replaced by proper APIs)
-     */
-    // camera and camcorder need access to the ISurface binder interface for preview
-    friend class CameraService;
-    friend class MediaRecorder;
-    // MediaPlayer needs access to ISurface for display
-    friend class MediaPlayer;
-    friend class IOMX;
-    friend class SoftwareRenderer;
     // this is just to be able to write some unit tests
     friend class Test;
-    // videoEditor preview classes
-    friend class VideoEditorPreviewController;
-    friend class PreviewRenderer;
-
-private:
-    friend class SurfaceComposerClient;
     friend class SurfaceControl;
 
     // can't be copied
@@ -194,61 +172,26 @@ private:
     Surface(const Parcel& data, const sp<IBinder>& ref);
     ~Surface();
 
-
-    /*
-     *  ANativeWindow hooks
-     */
-    static int setSwapInterval(ANativeWindow* window, int interval);
-    static int dequeueBuffer(ANativeWindow* window, ANativeWindowBuffer** buffer);
-    static int cancelBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
-    static int lockBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
-    static int queueBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
-    static int query(const ANativeWindow* window, int what, int* value);
-    static int perform(ANativeWindow* window, int operation, ...);
-
-    int setSwapInterval(int interval);
-    int dequeueBuffer(ANativeWindowBuffer** buffer);
-    int lockBuffer(ANativeWindowBuffer* buffer);
-    int queueBuffer(ANativeWindowBuffer* buffer);
-    int cancelBuffer(ANativeWindowBuffer* buffer);
-    int query(int what, int* value) const;
-    int perform(int operation, va_list args);
-
     /*
      *  private stuff...
      */
     void init();
     status_t validate(bool inCancelBuffer = false) const;
 
-    int getConnectedApi() const;
-    
     static void cleanCachedSurfacesLocked();
+
+    virtual int query(int what, int* value) const;
 
     // constants
     status_t                    mInitCheck;
     sp<ISurface>                mSurface;
-    sp<SurfaceTextureClient>    mSurfaceTextureClient;
     uint32_t                    mIdentity;
     PixelFormat                 mFormat;
     uint32_t                    mFlags;
-    
-    // protected by mSurfaceLock. These are also used from lock/unlock
-    // but in that case, they must be called form the same thread.
-    mutable Region              mDirtyRegion;
-
-    // must be used from the lock/unlock thread
-    sp<GraphicBuffer>           mLockedBuffer;
-    sp<GraphicBuffer>           mPostedBuffer;
-    mutable Region              mOldDirtyRegion;
-    bool                        mReserved;
 
     // query() must be called from dequeueBuffer() thread
     uint32_t                    mWidth;
     uint32_t                    mHeight;
-
-    // Inherently thread-safe
-    mutable Mutex               mSurfaceLock;
-    mutable Mutex               mApiLock;
 
     // A cache of Surface objects that have been deserialized into this process.
     static Mutex sCachedSurfacesLock;

@@ -81,39 +81,9 @@ int32_t ANativeWindow_setBuffersGeometry(ANativeWindow* window, int32_t width,
 
 int32_t ANativeWindow_lock(ANativeWindow* window, ANativeWindow_Buffer* outBuffer,
         ARect* inOutDirtyBounds) {
-    int type = -1;
-    if (window->query(window, NATIVE_WINDOW_CONCRETE_TYPE, &type) != 0 ||
-            type != NATIVE_WINDOW_SURFACE) {
-        return BAD_VALUE;
-    }
-
-    Region dirtyRegion;
-    Region* dirtyParam = NULL;
-    if (inOutDirtyBounds != NULL) {
-        dirtyRegion.set(*(Rect*)inOutDirtyBounds);
-        dirtyParam = &dirtyRegion;
-    }
-    
-    Surface::SurfaceInfo info;
-    status_t res = static_cast<Surface*>(window)->lock(&info, dirtyParam);
-    if (res != OK) {
-        return -1;
-    }
-    
-    outBuffer->width = (int32_t)info.w;
-    outBuffer->height = (int32_t)info.h;
-    outBuffer->stride = (int32_t)info.s;
-    outBuffer->format = (int32_t)info.format;
-    outBuffer->bits = info.bits;
-    
-    if (inOutDirtyBounds != NULL) {
-        *inOutDirtyBounds = dirtyRegion.getBounds();
-    }
-    
-    return 0;
+    return window->perform(window, NATIVE_WINDOW_LOCK, outBuffer, inOutDirtyBounds);
 }
 
 int32_t ANativeWindow_unlockAndPost(ANativeWindow* window) {
-    status_t res = static_cast<Surface*>(window)->unlockAndPost();
-    return res == android::OK ? 0 : -1;
+    return window->perform(window, NATIVE_WINDOW_UNLOCK_AND_POST);
 }
