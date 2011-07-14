@@ -478,6 +478,13 @@ public abstract class ApplicationThreadNative extends Binder
             updatePackageCompatibilityInfo(pkg, compat);
             return true;
         }
+
+        case SCHEDULE_TRIM_MEMORY_TRANSACTION: {
+            data.enforceInterface(IApplicationThread.descriptor);
+            int level = data.readInt();
+            scheduleTrimMemory(level);
+            return true;
+        }
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -987,6 +994,14 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeString(pkg);
         info.writeToParcel(data, 0);
         mRemote.transact(UPDATE_PACKAGE_COMPATIBILITY_INFO_TRANSACTION, data, null,
+                IBinder.FLAG_ONEWAY);
+    }
+
+    public void scheduleTrimMemory(int level) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        data.writeInterfaceToken(IApplicationThread.descriptor);
+        data.writeInt(level);
+        mRemote.transact(SCHEDULE_TRIM_MEMORY_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
     }
 }

@@ -932,6 +932,10 @@ public final class ActivityThread {
             ucd.info = info;
             queueOrSendMessage(H.UPDATE_PACKAGE_COMPATIBILITY_INFO, ucd);
         }
+
+        public void scheduleTrimMemory(int level) {
+            queueOrSendMessage(H.TRIM_MEMORY, level);
+        }
     }
 
     private final class H extends Handler {
@@ -975,6 +979,7 @@ public final class ActivityThread {
         public static final int SLEEPING                = 137;
         public static final int SET_CORE_SETTINGS       = 138;
         public static final int UPDATE_PACKAGE_COMPATIBILITY_INFO = 139;
+        public static final int TRIM_MEMORY             = 140;
         String codeToString(int code) {
             if (DEBUG_MESSAGES) {
                 switch (code) {
@@ -1018,6 +1023,7 @@ public final class ActivityThread {
                     case SLEEPING: return "SLEEPING";
                     case SET_CORE_SETTINGS: return "SET_CORE_SETTINGS";
                     case UPDATE_PACKAGE_COMPATIBILITY_INFO: return "UPDATE_PACKAGE_COMPATIBILITY_INFO";
+                    case TRIM_MEMORY: return "TRIM_MEMORY";
                 }
             }
             return "(unknown)";
@@ -1158,6 +1164,8 @@ public final class ActivityThread {
                     break;
                 case UPDATE_PACKAGE_COMPATIBILITY_INFO:
                     handleUpdatePackageCompatibilityInfo((UpdateCompatibilityData)msg.obj);
+                case TRIM_MEMORY:
+                    handleTrimMemory(msg.arg1);
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + msg.what);
         }
@@ -3527,6 +3535,9 @@ public final class ActivityThread {
         Canvas.freeCaches();
 
         BinderInternal.forceGc("mem");
+    }
+
+    final void handleTrimMemory(int level) {
     }
 
     private final void handleBindApplication(AppBindData data) {

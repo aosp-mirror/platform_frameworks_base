@@ -28,7 +28,6 @@ import android.os.Message;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.WindowManagerImpl;
 
 public class LoadAverageService extends Service {
     private View mView;
@@ -91,32 +90,46 @@ public class LoadAverageService extends Service {
             setPadding(4, 4, 4, 4);
             //setBackgroundResource(com.android.internal.R.drawable.load_average_background);
 
+            // Need to scale text size by density...  but we won't do it
+            // linearly, because with higher dps it is nice to squeeze the
+            // text a bit to fit more of it.  And with lower dps, trying to
+            // go much smaller will result in unreadable text.
+            int textSize = 10;
+            float density = c.getResources().getDisplayMetrics().density;
+            if (density < 1) {
+                textSize = 9;
+            } else {
+                textSize = (int)(10*density);
+                if (textSize < 10) {
+                    textSize = 10;
+                }
+            }
             mLoadPaint = new Paint();
             mLoadPaint.setAntiAlias(true);
-            mLoadPaint.setTextSize(10);
+            mLoadPaint.setTextSize(textSize);
             mLoadPaint.setARGB(255, 255, 255, 255);
 
             mAddedPaint = new Paint();
             mAddedPaint.setAntiAlias(true);
-            mAddedPaint.setTextSize(10);
+            mAddedPaint.setTextSize(textSize);
             mAddedPaint.setARGB(255, 128, 255, 128);
 
             mRemovedPaint = new Paint();
             mRemovedPaint.setAntiAlias(true);
             mRemovedPaint.setStrikeThruText(true);
-            mRemovedPaint.setTextSize(10);
+            mRemovedPaint.setTextSize(textSize);
             mRemovedPaint.setARGB(255, 255, 128, 128);
 
             mShadowPaint = new Paint();
             mShadowPaint.setAntiAlias(true);
-            mShadowPaint.setTextSize(10);
+            mShadowPaint.setTextSize(textSize);
             //mShadowPaint.setFakeBoldText(true);
             mShadowPaint.setARGB(192, 0, 0, 0);
             mLoadPaint.setShadowLayer(4, 0, 0, 0xff000000);
 
             mShadow2Paint = new Paint();
             mShadow2Paint.setAntiAlias(true);
-            mShadow2Paint.setTextSize(10);
+            mShadow2Paint.setTextSize(textSize);
             //mShadow2Paint.setFakeBoldText(true);
             mShadow2Paint.setARGB(192, 0, 0, 0);
             mLoadPaint.setShadowLayer(2, 0, 0, 0xff000000);
@@ -153,14 +166,16 @@ public class LoadAverageService extends Service {
         }
 
         @Override
-        protected void onMeasure(int widthMeasureSpect, int heightMeasureSpec) {
-            setMeasuredDimension(mNeededWidth, mNeededHeight);
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            setMeasuredDimension(resolveSize(mNeededWidth, widthMeasureSpec),
+                    resolveSize(mNeededHeight, heightMeasureSpec));
         }
 
         @Override
         public void onDraw(Canvas canvas) {
             super.onDraw(canvas);
-            final int W = getWidth();
+            final int W = mNeededWidth;
+            final int RIGHT = getWidth()-1;
 
             final Stats stats = mStats;
             final int userTime = stats.getLastUserTime();
@@ -178,7 +193,7 @@ public class LoadAverageService extends Service {
             int systemW = (systemTime*W)/totalTime;
             int irqW = ((iowaitTime+irqTime+softIrqTime)*W)/totalTime;
 
-            int x = W - mPaddingRight;
+            int x = RIGHT - mPaddingRight;
             int top = mPaddingTop + 2;
             int bottom = mPaddingTop + mFH - 2;
 
@@ -196,15 +211,15 @@ public class LoadAverageService extends Service {
             }
 
             int y = mPaddingTop - (int)mAscent;
-            canvas.drawText(stats.mLoadText, W-mPaddingRight-stats.mLoadWidth-1,
+            canvas.drawText(stats.mLoadText, RIGHT-mPaddingRight-stats.mLoadWidth-1,
                     y-1, mShadowPaint);
-            canvas.drawText(stats.mLoadText, W-mPaddingRight-stats.mLoadWidth-1,
+            canvas.drawText(stats.mLoadText, RIGHT-mPaddingRight-stats.mLoadWidth-1,
                     y+1, mShadowPaint);
-            canvas.drawText(stats.mLoadText, W-mPaddingRight-stats.mLoadWidth+1,
+            canvas.drawText(stats.mLoadText, RIGHT-mPaddingRight-stats.mLoadWidth+1,
                     y-1, mShadow2Paint);
-            canvas.drawText(stats.mLoadText, W-mPaddingRight-stats.mLoadWidth+1,
+            canvas.drawText(stats.mLoadText, RIGHT-mPaddingRight-stats.mLoadWidth+1,
                     y+1, mShadow2Paint);
-            canvas.drawText(stats.mLoadText, W-mPaddingRight-stats.mLoadWidth,
+            canvas.drawText(stats.mLoadText, RIGHT-mPaddingRight-stats.mLoadWidth,
                     y, mLoadPaint);
 
             int N = stats.countWorkingStats();
@@ -216,7 +231,7 @@ public class LoadAverageService extends Service {
 
                 userW = (st.rel_utime*W)/totalTime;
                 systemW = (st.rel_stime*W)/totalTime;
-                x = W - mPaddingRight;
+                x = RIGHT - mPaddingRight;
                 if (systemW > 0) {
                     canvas.drawRect(x-systemW, top, x, bottom, mSystemPaint);
                     x -= systemW;
@@ -226,18 +241,18 @@ public class LoadAverageService extends Service {
                     x -= userW;
                 }
 
-                canvas.drawText(st.name, W-mPaddingRight-st.nameWidth-1,
+                canvas.drawText(st.name, RIGHT-mPaddingRight-st.nameWidth-1,
                         y-1, mShadowPaint);
-                canvas.drawText(st.name, W-mPaddingRight-st.nameWidth-1,
+                canvas.drawText(st.name, RIGHT-mPaddingRight-st.nameWidth-1,
                         y+1, mShadowPaint);
-                canvas.drawText(st.name, W-mPaddingRight-st.nameWidth+1,
+                canvas.drawText(st.name, RIGHT-mPaddingRight-st.nameWidth+1,
                         y-1, mShadow2Paint);
-                canvas.drawText(st.name, W-mPaddingRight-st.nameWidth+1,
+                canvas.drawText(st.name, RIGHT-mPaddingRight-st.nameWidth+1,
                         y+1, mShadow2Paint);
                 Paint p = mLoadPaint;
                 if (st.added) p = mAddedPaint;
                 if (st.removed) p = mRemovedPaint;
-                canvas.drawText(st.name, W-mPaddingRight-st.nameWidth, y, p);
+                canvas.drawText(st.name, RIGHT-mPaddingRight-st.nameWidth, y, p);
             }
         }
 
@@ -270,7 +285,7 @@ public class LoadAverageService extends Service {
         super.onCreate();
         mView = new LoadView(this);
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE|

@@ -119,6 +119,7 @@ public interface IApplicationThread extends IInterface {
             throws RemoteException;
     void setCoreSettings(Bundle coreSettings) throws RemoteException;
     void updatePackageCompatibilityInfo(String pkg, CompatibilityInfo info) throws RemoteException;
+    void scheduleTrimMemory(int level) throws RemoteException;
 
     String descriptor = "android.app.IApplicationThread";
 
@@ -162,4 +163,5 @@ public interface IApplicationThread extends IInterface {
     int SET_HTTP_PROXY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+38;
     int SET_CORE_SETTINGS_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+39;
     int UPDATE_PACKAGE_COMPATIBILITY_INFO_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+40;
+    int SCHEDULE_TRIM_MEMORY_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+41;
 }
