@@ -272,7 +272,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
     float mSurfaceAlpha;
     
     // Input channel and input window handle used by the input dispatcher.
-    InputWindowHandle mInputWindowHandle;
+    final InputWindowHandle mInputWindowHandle;
     InputChannel mInputChannel;
     
     // Used to improve performance of toString()
@@ -306,6 +306,7 @@ final class WindowState implements WindowManagerPolicy.WindowState {
             mIsFloatingLayer = false;
             mBaseLayer = 0;
             mSubLayer = 0;
+            mInputWindowHandle = null;
             return;
         }
         mDeathRecipient = deathRecipient;

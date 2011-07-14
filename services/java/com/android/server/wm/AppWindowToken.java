@@ -101,7 +101,7 @@ class AppWindowToken extends WindowToken {
     boolean firstWindowDrawn;
 
     // Input application handle used by the input dispatcher.
-    InputApplicationHandle mInputApplicationHandle;
+    final InputApplicationHandle mInputApplicationHandle;
 
     AppWindowToken(WindowManagerService _service, IApplicationToken _token) {
         super(_service, _token.asBinder(),

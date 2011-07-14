@@ -4,10 +4,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
     com_android_server_AlarmManagerService.cpp \
     com_android_server_BatteryService.cpp \
-    com_android_server_InputApplication.cpp \
     com_android_server_InputApplicationHandle.cpp \
     com_android_server_InputManager.cpp \
-    com_android_server_InputWindow.cpp \
     com_android_server_InputWindowHandle.cpp \
     com_android_server_LightsService.cpp \
     com_android_server_PowerManagerService.cpp \

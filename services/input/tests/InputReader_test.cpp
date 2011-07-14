@@ -369,11 +369,12 @@ private:
         return INPUT_EVENT_INJECTION_FAILED;
     }
 
-    virtual void setInputWindows(const Vector<InputWindow>& inputWindows) {
+    virtual void setInputWindows(const Vector<sp<InputWindowHandle> >& inputWindowHandles) {
         ADD_FAILURE() << "Should never be called by input reader.";
     }
 
-    virtual void setFocusedApplication(const InputApplication* inputApplication) {
+    virtual void setFocusedApplication(
+            const sp<InputApplicationHandle>& inputApplicationHandle) {
         ADD_FAILURE() << "Should never be called by input reader.";
     }
 

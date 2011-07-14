@@ -26,24 +26,30 @@
 namespace android {
 
 /*
- * A handle to an application that can receive input.
- * Used by the native input dispatcher to indirectly refer to the window manager objects
+ * Describes the properties of an application that can receive input.
+ *
+ * Used by the native input dispatcher as a handle for the window manager objects
  * that describe an application.
  */
 class InputApplicationHandle : public RefBase {
+public:
+    String8 name;
+    nsecs_t dispatchingTimeout;
+
+    /**
+     * Requests that the state of this object be updated to reflect
+     * the most current available information about the application.
+     *
+     * This method should only be called from within the input dispatcher's
+     * critical section.
+     *
+     * Returns true on success, or false if the handle is no longer valid.
+     */
+    virtual bool update() = 0;
+
 protected:
     InputApplicationHandle() { }
     virtual ~InputApplicationHandle() { }
-};
-
-
-/*
- * An input application describes properties of an application that can receive input.
- */
-struct InputApplication {
-    sp<InputApplicationHandle> inputApplicationHandle;
-    String8 name;
-    nsecs_t dispatchingTimeout;
 };
 
 } // namespace android

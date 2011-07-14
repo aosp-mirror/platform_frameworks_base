@@ -32,6 +32,12 @@ public final class InputApplicationHandle {
     // The window manager's application window token.
     public final AppWindowToken appWindowToken;
 
+    // Application name.
+    public String name;
+
+    // Dispatching timeout.
+    public long dispatchingTimeoutNanos;
+
     private native void nativeDispose();
 
     public InputApplicationHandle(AppWindowToken appWindowToken) {

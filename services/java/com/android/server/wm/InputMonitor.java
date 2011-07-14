@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import android.graphics.Rect;
-import android.os.Binder;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
@@ -26,6 +25,7 @@ import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 final class InputMonitor {
     private final WindowManagerService mService;
@@ -42,12 +42,14 @@ final class InputMonitor {
     // When true, need to call updateInputWindowsLw().
     private boolean mUpdateInputWindowsNeeded = true;
 
-    // Temporary list of windows information to provide to the input dispatcher.
-    private InputWindowList mTempInputWindows = new InputWindowList();
-    
-    // Temporary input application object to provide to the input dispatcher.
-    private InputApplication mTempInputApplication = new InputApplication();
-    
+    // Fake handles for the drag surface, lazily initialized.
+    private InputApplicationHandle mDragApplicationHandle;
+    private InputWindowHandle mDragWindowHandle;
+
+    // Array of window handles to provide to the input dispatcher.
+    private InputWindowHandle[] mInputWindowHandles;
+    private int mInputWindowHandleCount;
+
     // Set to true when the first input device configuration change notification
     // is received to indicate that the input devices are ready.
     private final Object mInputDevicesReadyMonitor = new Object();
@@ -68,8 +70,10 @@ final class InputMonitor {
 
         synchronized (mService.mWindowMap) {
             WindowState windowState = (WindowState) inputWindowHandle.windowState;
-            Slog.i(WindowManagerService.TAG, "WINDOW DIED " + windowState);
-            mService.removeWindowLocked(windowState.mSession, windowState);
+            if (windowState != null) {
+                Slog.i(WindowManagerService.TAG, "WINDOW DIED " + windowState);
+                mService.removeWindowLocked(windowState.mSession, windowState);
+            }
         }
     }
     
@@ -94,8 +98,11 @@ final class InputMonitor {
         
         if (appWindowToken == null && inputApplicationHandle != null) {
             appWindowToken = inputApplicationHandle.appWindowToken;
-            Slog.i(WindowManagerService.TAG, "Input event dispatching timed out sending to application "
-                    + appWindowToken.stringName);
+            if (appWindowToken != null) {
+                Slog.i(WindowManagerService.TAG,
+                        "Input event dispatching timed out sending to application "
+                                + appWindowToken.stringName);
+            }
         }
 
         if (appWindowToken != null && appWindowToken.appToken != null) {
@@ -114,32 +121,59 @@ final class InputMonitor {
         return 0; // abort dispatching
     }
 
-    private void addDragInputWindowLw(InputWindowList windowList) {
-        final InputWindow inputWindow = windowList.add();
-        inputWindow.inputChannel = mService.mDragState.mServerChannel;
-        inputWindow.name = "drag";
-        inputWindow.layoutParamsFlags = 0;
-        inputWindow.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
-        inputWindow.dispatchingTimeoutNanos = WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
-        inputWindow.visible = true;
-        inputWindow.canReceiveKeys = false;
-        inputWindow.hasFocus = true;
-        inputWindow.hasWallpaper = false;
-        inputWindow.paused = false;
-        inputWindow.layer = mService.mDragState.getDragLayerLw();
-        inputWindow.ownerPid = Process.myPid();
-        inputWindow.ownerUid = Process.myUid();
-        inputWindow.inputFeatures = 0;
-        inputWindow.scaleFactor = 1.0f;
+    private void addDragInputWindowLw() {
+        if (mDragWindowHandle == null) {
+            mDragApplicationHandle = new InputApplicationHandle(null);
+            mDragApplicationHandle.name = "drag";
+            mDragApplicationHandle.dispatchingTimeoutNanos =
+                    WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+
+            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null);
+            mDragWindowHandle.name = "drag";
+            mDragWindowHandle.layoutParamsFlags = 0;
+            mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
+            mDragWindowHandle.dispatchingTimeoutNanos =
+                    WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+            mDragWindowHandle.visible = true;
+            mDragWindowHandle.canReceiveKeys = false;
+            mDragWindowHandle.hasFocus = true;
+            mDragWindowHandle.hasWallpaper = false;
+            mDragWindowHandle.paused = false;
+            mDragWindowHandle.ownerPid = Process.myPid();
+            mDragWindowHandle.ownerUid = Process.myUid();
+            mDragWindowHandle.inputFeatures = 0;
+            mDragWindowHandle.scaleFactor = 1.0f;
+
+            // The drag window cannot receive new touches.
+            mDragWindowHandle.touchableRegion.setEmpty();
+        }
+
+        mDragWindowHandle.layer = mService.mDragState.getDragLayerLw();
 
         // The drag window covers the entire display
-        inputWindow.frameLeft = 0;
-        inputWindow.frameTop = 0;
-        inputWindow.frameRight = mService.mDisplay.getRealWidth();
-        inputWindow.frameBottom = mService.mDisplay.getRealHeight();
+        mDragWindowHandle.frameLeft = 0;
+        mDragWindowHandle.frameTop = 0;
+        mDragWindowHandle.frameRight = mService.mDisplay.getRealWidth();
+        mDragWindowHandle.frameBottom = mService.mDisplay.getRealHeight();
 
-        // The drag window cannot receive new touches.
-        inputWindow.touchableRegion.setEmpty();
+        addInputWindowHandleLw(mDragWindowHandle);
+    }
+
+    private void addInputWindowHandleLw(InputWindowHandle windowHandle) {
+        if (mInputWindowHandles == null) {
+            mInputWindowHandles = new InputWindowHandle[16];
+        }
+        if (mInputWindowHandleCount >= mInputWindowHandles.length) {
+            mInputWindowHandles = Arrays.copyOf(mInputWindowHandles,
+                    mInputWindowHandleCount * 2);
+        }
+        mInputWindowHandles[mInputWindowHandleCount++] = windowHandle;
+    }
+
+    private void clearInputWindowHandlesLw() {
+        while (mInputWindowHandleCount != 0) {
+            mInputWindowHandles[--mInputWindowHandleCount] = null;
+        }
     }
 
     public void setUpdateInputWindowsNeededLw() {
@@ -154,7 +188,7 @@ final class InputMonitor {
         mUpdateInputWindowsNeeded = false;
 
         if (false) Slog.d(WindowManagerService.TAG, ">>>>>> ENTERED updateInputWindowsLw");
-        
+
         // Populate the input window list with information about all of the windows that
         // could potentially receive input.
         // As an optimization, we could try to prune the list of windows but this turns
@@ -168,7 +202,7 @@ final class InputMonitor {
             if (WindowManagerService.DEBUG_DRAG) {
                 Log.d(WindowManagerService.TAG, "Inserting drag window");
             }
-            addDragInputWindowLw(mTempInputWindows);
+            addDragInputWindowLw();
         }
 
         final int N = windows.size();
@@ -194,48 +228,48 @@ final class InputMonitor {
             }
 
             // Add a window to our list of input windows.
-            final InputWindow inputWindow = mTempInputWindows.add();
-            inputWindow.inputWindowHandle = child.mInputWindowHandle;
-            inputWindow.inputChannel = child.mInputChannel;
-            inputWindow.name = child.toString();
-            inputWindow.layoutParamsFlags = flags;
-            inputWindow.layoutParamsType = type;
-            inputWindow.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
-            inputWindow.visible = isVisible;
-            inputWindow.canReceiveKeys = child.canReceiveKeys();
-            inputWindow.hasFocus = hasFocus;
-            inputWindow.hasWallpaper = hasWallpaper;
-            inputWindow.paused = child.mAppToken != null ? child.mAppToken.paused : false;
-            inputWindow.layer = child.mLayer;
-            inputWindow.ownerPid = child.mSession.mPid;
-            inputWindow.ownerUid = child.mSession.mUid;
-            inputWindow.inputFeatures = child.mAttrs.inputFeatures;
+            final InputWindowHandle inputWindowHandle = child.mInputWindowHandle;
+            inputWindowHandle.inputChannel = child.mInputChannel;
+            inputWindowHandle.name = child.toString();
+            inputWindowHandle.layoutParamsFlags = flags;
+            inputWindowHandle.layoutParamsType = type;
+            inputWindowHandle.dispatchingTimeoutNanos = child.getInputDispatchingTimeoutNanos();
+            inputWindowHandle.visible = isVisible;
+            inputWindowHandle.canReceiveKeys = child.canReceiveKeys();
+            inputWindowHandle.hasFocus = hasFocus;
+            inputWindowHandle.hasWallpaper = hasWallpaper;
+            inputWindowHandle.paused = child.mAppToken != null ? child.mAppToken.paused : false;
+            inputWindowHandle.layer = child.mLayer;
+            inputWindowHandle.ownerPid = child.mSession.mPid;
+            inputWindowHandle.ownerUid = child.mSession.mUid;
+            inputWindowHandle.inputFeatures = child.mAttrs.inputFeatures;
 
             final Rect frame = child.mFrame;
-            inputWindow.frameLeft = frame.left;
-            inputWindow.frameTop = frame.top;
-            inputWindow.frameRight = frame.right;
-            inputWindow.frameBottom = frame.bottom;
+            inputWindowHandle.frameLeft = frame.left;
+            inputWindowHandle.frameTop = frame.top;
+            inputWindowHandle.frameRight = frame.right;
+            inputWindowHandle.frameBottom = frame.bottom;
 
             if (child.mGlobalScale != 1) {
                 // If we are scaling the window, input coordinates need
                 // to be inversely scaled to map from what is on screen
                 // to what is actually being touched in the UI.
-                inputWindow.scaleFactor = 1.0f/child.mGlobalScale;
+                inputWindowHandle.scaleFactor = 1.0f/child.mGlobalScale;
             } else {
-                inputWindow.scaleFactor = 1;
+                inputWindowHandle.scaleFactor = 1;
             }
 
-            child.getTouchableRegion(inputWindow.touchableRegion);
+            child.getTouchableRegion(inputWindowHandle.touchableRegion);
+
+            addInputWindowHandleLw(inputWindowHandle);
         }
 
         // Send windows to native code.
-        mService.mInputManager.setInputWindows(mTempInputWindows.toNullTerminatedArray());
-        
+        mService.mInputManager.setInputWindows(mInputWindowHandles);
+
         // Clear the list in preparation for the next round.
-        // Also avoids keeping InputChannel objects referenced unnecessarily.
-        mTempInputWindows.clear();
-        
+        clearInputWindowHandlesLw();
+
         if (false) Slog.d(WindowManagerService.TAG, "<<<<<<< EXITED updateInputWindowsLw");
     }
 
@@ -329,14 +363,11 @@ final class InputMonitor {
         if (newApp == null) {
             mService.mInputManager.setFocusedApplication(null);
         } else {
-            mTempInputApplication.inputApplicationHandle = newApp.mInputApplicationHandle;
-            mTempInputApplication.name = newApp.toString();
-            mTempInputApplication.dispatchingTimeoutNanos =
-                    newApp.inputDispatchingTimeoutNanos;
+            final InputApplicationHandle handle = newApp.mInputApplicationHandle;
+            handle.name = newApp.toString();
+            handle.dispatchingTimeoutNanos = newApp.inputDispatchingTimeoutNanos;
 
-            mService.mInputManager.setFocusedApplication(mTempInputApplication);
-
-            mTempInputApplication.recycle();
+            mService.mInputManager.setFocusedApplication(handle);
         }
     }
     
