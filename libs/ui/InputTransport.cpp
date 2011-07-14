@@ -83,7 +83,9 @@ status_t InputChannel::openInputChannelPair(const String8& name,
         sp<InputChannel>& outServerChannel, sp<InputChannel>& outClientChannel) {
     status_t result;
 
-    int serverAshmemFd = ashmem_create_region(name.string(), DEFAULT_MESSAGE_BUFFER_SIZE);
+    String8 ashmemName("InputChannel ");
+    ashmemName.append(name);
+    int serverAshmemFd = ashmem_create_region(ashmemName.string(), DEFAULT_MESSAGE_BUFFER_SIZE);
     if (serverAshmemFd < 0) {
         result = -errno;
         LOGE("channel '%s' ~ Could not create shared memory region. errno=%d",
