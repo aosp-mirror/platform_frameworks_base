@@ -18,7 +18,6 @@
 
 #define LOG_TAG "VpnJni"
 #include <cutils/log.h>
-#include <cutils/properties.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -54,7 +53,7 @@ static inline in_addr_t *as_in_addr(sockaddr *sa) {
 #define SYSTEM_ERROR -1
 #define BAD_ARGUMENT -2
 
-static int create_interface(char *name, int *index, int mtu)
+static int create_interface(int mtu)
 {
     int tun = open("/dev/tun", O_RDWR | O_NONBLOCK);
 
@@ -82,14 +81,6 @@ static int create_interface(char *name, int *index, int mtu)
         goto error;
     }
 
-    // Get interface index.
-    if (ioctl(inet4, SIOGIFINDEX, &ifr4)) {
-        LOGE("Cannot get index of %s: %s", ifr4.ifr_name, strerror(errno));
-        goto error;
-    }
-
-    strncpy(name, ifr4.ifr_name, IFNAMSIZ);
-    *index = ifr4.ifr_ifindex;
     return tun;
 
 error:
@@ -97,12 +88,40 @@ error:
     return SYSTEM_ERROR;
 }
 
-static int set_addresses(const char *name, int index, const char *addresses)
+static int get_interface_name(char *name, int tun)
 {
+    ifreq ifr4;
+    if (ioctl(tun, TUNGETIFF, &ifr4)) {
+        LOGE("Cannot get interface name: %s", strerror(errno));
+        return SYSTEM_ERROR;
+    }
+    strncpy(name, ifr4.ifr_name, IFNAMSIZ);
+    return 0;
+}
+
+static int get_interface_index(const char *name)
+{
+    ifreq ifr4;
+    strncpy(ifr4.ifr_name, name, IFNAMSIZ);
+    if (ioctl(inet4, SIOGIFINDEX, &ifr4)) {
+        LOGE("Cannot get index of %s: %s", name, strerror(errno));
+        return SYSTEM_ERROR;
+    }
+    return ifr4.ifr_ifindex;
+}
+
+static int set_addresses(const char *name, const char *addresses)
+{
+    int index = get_interface_index(name);
+    if (index < 0) {
+        return index;
+    }
+
     ifreq ifr4;
     memset(&ifr4, 0, sizeof(ifr4));
     strncpy(ifr4.ifr_name, name, IFNAMSIZ);
     ifr4.ifr_addr.sa_family = AF_INET;
+    ifr4.ifr_netmask.sa_family = AF_INET;
 
     in6_ifreq ifr6;
     memset(&ifr6, 0, sizeof(ifr6));
@@ -146,7 +165,7 @@ static int set_addresses(const char *name, int index, const char *addresses)
             }
 
             in_addr_t mask = prefix ? (~0 << (32 - prefix)) : 0;
-            *as_in_addr(&ifr4.ifr_addr) = htonl(mask);
+            *as_in_addr(&ifr4.ifr_netmask) = htonl(mask);
             if (ioctl(inet4, SIOCSIFNETMASK, &ifr4)) {
                 count = (errno == EINVAL) ? BAD_ARGUMENT : SYSTEM_ERROR;
                 break;
@@ -168,8 +187,13 @@ static int set_addresses(const char *name, int index, const char *addresses)
     return count;
 }
 
-static int set_routes(const char *name, int index, const char *routes)
+static int set_routes(const char *name, const char *routes)
 {
+    int index = get_interface_index(name);
+    if (index < 0) {
+        return index;
+    }
+
     rtentry rt4;
     memset(&rt4, 0, sizeof(rt4));
     rt4.rt_dev = (char *)name;
@@ -253,17 +277,6 @@ static int set_routes(const char *name, int index, const char *routes)
     return count;
 }
 
-static int get_interface_name(char *name, int tun)
-{
-    ifreq ifr4;
-    if (ioctl(tun, TUNGETIFF, &ifr4)) {
-        LOGE("Cannot get interface name: %s", strerror(errno));
-        return SYSTEM_ERROR;
-    }
-    strncpy(name, ifr4.ifr_name, IFNAMSIZ);
-    return 0;
-}
-
 static int reset_interface(const char *name)
 {
     ifreq ifr4;
@@ -309,53 +322,14 @@ static void throwException(JNIEnv *env, int error, const char *message)
     }
 }
 
-static jint configure(JNIEnv *env, jobject thiz,
-        jint mtu, jstring jAddresses, jstring jRoutes)
+static jint create(JNIEnv *env, jobject thiz, jint mtu)
 {
-    char name[IFNAMSIZ];
-    int index;
-    int tun = create_interface(name, &index, mtu);
+    int tun = create_interface(mtu);
     if (tun < 0) {
         throwException(env, tun, "Cannot create interface");
         return -1;
     }
-
-    const char *addresses = NULL;
-    const char *routes = NULL;
-    int count;
-
-    // At least one address must be set.
-    addresses = jAddresses ? env->GetStringUTFChars(jAddresses, NULL) : NULL;
-    if (!addresses) {
-        jniThrowNullPointerException(env, "address");
-        goto error;
-    }
-    count = set_addresses(name, index, addresses);
-    env->ReleaseStringUTFChars(jAddresses, addresses);
-    if (count <= 0) {
-        throwException(env, count, "Cannot set address");
-        goto error;
-    }
-    LOGD("Configured %d address(es) on %s", count, name);
-
-    // On the contrary, routes are optional.
-    routes = jRoutes ? env->GetStringUTFChars(jRoutes, NULL) : NULL;
-    if (routes) {
-        count = set_routes(name, index, routes);
-        env->ReleaseStringUTFChars(jRoutes, routes);
-        if (count < 0) {
-            throwException(env, count, "Cannot set route");
-            goto error;
-        }
-        LOGD("Configured %d route(s) on %s", count, name);
-    }
-
     return tun;
-
-error:
-    close(tun);
-    LOGD("%s is destroyed", name);
-    return -1;
 }
 
 static jstring getName(JNIEnv *env, jobject thiz, jint tun)
@@ -366,6 +340,72 @@ static jstring getName(JNIEnv *env, jobject thiz, jint tun)
         return NULL;
     }
     return env->NewStringUTF(name);
+}
+
+static jint setAddresses(JNIEnv *env, jobject thiz, jstring jName,
+        jstring jAddresses)
+{
+    const char *name = NULL;
+    const char *addresses = NULL;
+    int count = -1;
+
+    name = jName ? env->GetStringUTFChars(jName, NULL) : NULL;
+    if (!name) {
+        jniThrowNullPointerException(env, "name");
+        goto error;
+    }
+    addresses = jAddresses ? env->GetStringUTFChars(jAddresses, NULL) : NULL;
+    if (!addresses) {
+        jniThrowNullPointerException(env, "addresses");
+        goto error;
+    }
+    count = set_addresses(name, addresses);
+    if (count < 0) {
+        throwException(env, count, "Cannot set address");
+        count = -1;
+    }
+
+error:
+    if (name) {
+        env->ReleaseStringUTFChars(jName, name);
+    }
+    if (addresses) {
+        env->ReleaseStringUTFChars(jAddresses, addresses);
+    }
+    return count;
+}
+
+static jint setRoutes(JNIEnv *env, jobject thiz, jstring jName,
+        jstring jRoutes)
+{
+    const char *name = NULL;
+    const char *routes = NULL;
+    int count = -1;
+
+    name = jName ? env->GetStringUTFChars(jName, NULL) : NULL;
+    if (!name) {
+        jniThrowNullPointerException(env, "name");
+        goto error;
+    }
+    routes = jRoutes ? env->GetStringUTFChars(jRoutes, NULL) : NULL;
+    if (!routes) {
+        jniThrowNullPointerException(env, "routes");
+        goto error;
+    }
+    count = set_routes(name, routes);
+    if (count < 0) {
+        throwException(env, count, "Cannot set route");
+        count = -1;
+    }
+
+error:
+    if (name) {
+        env->ReleaseStringUTFChars(jName, name);
+    }
+    if (routes) {
+        env->ReleaseStringUTFChars(jRoutes, routes);
+    }
+    return count;
 }
 
 static void reset(JNIEnv *env, jobject thiz, jstring jName)
@@ -409,8 +449,10 @@ static void protect(JNIEnv *env, jobject thiz, jint socket, jstring jName)
 //------------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"jniConfigure", "(ILjava/lang/String;Ljava/lang/String;)I", (void *)configure},
+    {"jniCreate", "(I)I", (void *)create},
     {"jniGetName", "(I)Ljava/lang/String;", (void *)getName},
+    {"jniSetAddresses", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)setAddresses},
+    {"jniSetRoutes", "(Ljava/lang/String;Ljava/lang/String;)I", (void *)setRoutes},
     {"jniReset", "(Ljava/lang/String;)V", (void *)reset},
     {"jniCheck", "(Ljava/lang/String;)I", (void *)check},
     {"jniProtect", "(ILjava/lang/String;)V", (void *)protect},

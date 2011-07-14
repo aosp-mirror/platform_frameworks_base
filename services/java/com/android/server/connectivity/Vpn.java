@@ -41,6 +41,9 @@ import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
 import com.android.server.ConnectivityService.VpnCallback;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charsets;
 import java.util.Arrays;
@@ -192,10 +195,15 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
 
         // Configure the interface. Abort if any of these steps fails.
-        ParcelFileDescriptor tun = ParcelFileDescriptor.adoptFd(
-                jniConfigure(config.mtu, config.addresses, config.routes));
+        ParcelFileDescriptor tun = ParcelFileDescriptor.adoptFd(jniCreate(config.mtu));
         try {
             String interfaze = jniGetName(tun.getFd());
+            if (jniSetAddresses(interfaze, config.addresses) < 1) {
+                throw new IllegalArgumentException("At least one address must be specified");
+            }
+            if (config.routes != null) {
+                jniSetRoutes(interfaze, config.routes);
+            }
             if (mInterface != null && !mInterface.equals(interfaze)) {
                 jniReset(mInterface);
             }
@@ -279,8 +287,10 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
     }
 
-    private native int jniConfigure(int mtu, String addresses, String routes);
+    private native int jniCreate(int mtu);
     private native String jniGetName(int tun);
+    private native int jniSetAddresses(String interfaze, String addresses);
+    private native int jniSetRoutes(String interfaze, String routes);
     private native void jniReset(String interfaze);
     private native int jniCheck(String interfaze);
     private native void jniProtect(int socket, String interfaze);
@@ -323,7 +333,6 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
      */
     private class LegacyVpnRunner extends Thread {
         private static final String TAG = "LegacyVpnRunner";
-        private static final String NONE = "--";
 
         private final VpnConfig mConfig;
         private final String[] mDaemons;
@@ -346,10 +355,10 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
 
         public void exit() {
             // We assume that everything is reset after the daemons die.
+            interrupt();
             for (String daemon : mDaemons) {
                 SystemProperties.set("ctl.stop", daemon);
             }
-            interrupt();
         }
 
         public LegacyVpnInfo getInfo() {
@@ -380,7 +389,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                 Thread.sleep(yield ? 200 : 1);
             } else {
                 mInfo.state = LegacyVpnInfo.STATE_TIMEOUT;
-                throw new IllegalStateException("time is up");
+                throw new IllegalStateException("Time is up");
             }
         }
 
@@ -404,12 +413,11 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     }
                 }
 
-                // Reset the properties.
-                SystemProperties.set("vpn.dns", NONE);
-                SystemProperties.set("vpn.via", NONE);
-                while (!NONE.equals(SystemProperties.get("vpn.dns")) ||
-                        !NONE.equals(SystemProperties.get("vpn.via"))) {
-                    checkpoint(true);
+                // Clear the previous state.
+                File state = new File("/data/misc/vpn/state");
+                state.delete();
+                if (state.exists()) {
+                    throw new IllegalStateException("Cannot delete the state");
                 }
 
                 // Check if we need to restart any of the daemons.
@@ -461,29 +469,34 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     OutputStream out = socket.getOutputStream();
                     for (String argument : arguments) {
                         byte[] bytes = argument.getBytes(Charsets.UTF_8);
-                        if (bytes.length >= 0xFFFF) {
-                            throw new IllegalArgumentException("argument is too large");
+                        if (bytes.length > 0xFFFF) {
+                            throw new IllegalArgumentException("Argument is too large");
                         }
                         out.write(bytes.length >> 8);
                         out.write(bytes.length);
                         out.write(bytes);
                         checkpoint(false);
                     }
-
-                    // Send End-Of-Arguments.
-                    out.write(0xFF);
-                    out.write(0xFF);
                     out.flush();
+                    socket.shutdownOutput();
+
+                    // Wait for End-of-File.
+                    InputStream in = socket.getInputStream();
+                    while (true) {
+                        try {
+                            if (in.read() == -1) {
+                                break;
+                            }
+                        } catch (Exception e) {
+                            // ignore
+                        }
+                        checkpoint(true);
+                    }
                     socket.close();
                 }
 
-                // Now here is the beast from the old days. We check few
-                // properties to figure out the current status. Ideally we
-                // can read things back from the sockets and get rid of the
-                // properties, but we have no time...
-                while (NONE.equals(SystemProperties.get("vpn.dns")) ||
-                        NONE.equals(SystemProperties.get("vpn.via"))) {
-
+                // Wait for the daemons to create the new state.
+                while (!state.exists()) {
                     // Check if a running daemon is dead.
                     for (int i = 0; i < mDaemons.length; ++i) {
                         String daemon = mDaemons[i];
@@ -495,20 +508,45 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     checkpoint(true);
                 }
 
-                // Now we are connected. Get the interface.
-                mConfig.interfaze = SystemProperties.get("vpn.via");
+                // Now we are connected. Read and parse the new state.
+                byte[] buffer = new byte[(int) state.length()];
+                if (new FileInputStream(state).read(buffer) != buffer.length) {
+                    throw new IllegalStateException("Cannot read the state");
+                }
+                String[] parameters = new String(buffer, Charsets.UTF_8).split("\n", -1);
+                if (parameters.length != 6) {
+                    throw new IllegalStateException("Cannot parse the state");
+                }
 
-                // Get the DNS servers if they are not set in config.
+                // Set the interface and the addresses in the config.
+                mConfig.interfaze = parameters[0].trim();
+                mConfig.addresses = parameters[1].trim();
+
+                // Set the routes if they are not set in the config.
+                if (mConfig.routes == null || mConfig.routes.isEmpty()) {
+                    mConfig.routes = parameters[2].trim();
+                }
+
+                // Set the DNS servers if they are not set in the config.
                 if (mConfig.dnsServers == null || mConfig.dnsServers.size() == 0) {
-                    String dnsServers = SystemProperties.get("vpn.dns").trim();
+                    String dnsServers = parameters[3].trim();
                     if (!dnsServers.isEmpty()) {
                         mConfig.dnsServers = Arrays.asList(dnsServers.split(" "));
                     }
                 }
 
-                // TODO: support search domains from ISAKMP mode config.
+                // Set the search domains if they are not set in the config.
+                if (mConfig.searchDomains == null || mConfig.searchDomains.size() == 0) {
+                    String searchDomains = parameters[4].trim();
+                    if (!searchDomains.isEmpty()) {
+                        mConfig.searchDomains = Arrays.asList(searchDomains.split(" "));
+                    }
+                }
 
-                // The final step must be synchronized.
+                // Set the routes.
+                jniSetRoutes(mConfig.interfaze, mConfig.routes);
+
+                // Here is the last step and it must be done synchronously.
                 synchronized (Vpn.this) {
                     // Check if the thread is interrupted while we are waiting.
                     checkpoint(false);
