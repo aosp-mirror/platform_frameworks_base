@@ -17,7 +17,6 @@
 package com.android.server;
 
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,7 +27,6 @@ import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.RecoverySystem;
 import android.os.SystemProperties;
-import android.provider.Settings;
 import android.util.Slog;
 
 import java.io.File;
@@ -59,17 +57,6 @@ public class BootReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, Intent intent) {
-        try {
-            // Start the load average overlay, if activated
-            ContentResolver res = context.getContentResolver();
-            if (Settings.System.getInt(res, Settings.System.SHOW_PROCESSES, 0) != 0) {
-                Intent loadavg = new Intent(context, com.android.server.LoadAverageService.class);
-                context.startService(loadavg);
-            }
-        } catch (Exception e) {
-            Slog.e(TAG, "Can't start load average service", e);
-        }
-
         // Log boot events in the background to avoid blocking the main thread with I/O
         new Thread() {
             @Override

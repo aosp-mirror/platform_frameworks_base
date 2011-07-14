@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.systemui;
+
+import com.android.internal.os.ProcessStats;
 
 import android.app.Service;
 import android.content.Context;

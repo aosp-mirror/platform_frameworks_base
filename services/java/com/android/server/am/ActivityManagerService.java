@@ -18,10 +18,10 @@ package com.android.server.am;
 
 import com.android.internal.R;
 import com.android.internal.os.BatteryStatsImpl;
+import com.android.internal.os.ProcessStats;
 import com.android.server.AttributeCache;
 import com.android.server.IntentResolver;
 import com.android.server.ProcessMap;
-import com.android.server.ProcessStats;
 import com.android.server.SystemServer;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityStack.ActivityState;

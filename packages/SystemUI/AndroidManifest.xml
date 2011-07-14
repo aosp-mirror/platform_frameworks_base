@@ -30,6 +30,15 @@
         <service android:name=".screenshot.TakeScreenshotService"
             android:exported="false" />
 
+        <service android:name=".LoadAverageService"
+                android:exported="true" />
+
+        <receiver android:name=".BootReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
         <activity android:name=".usb.UsbStorageActivity"
                 android:excludeFromRecents="true">
         </activity>
