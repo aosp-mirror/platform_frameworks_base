@@ -36,6 +36,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Handler;
 import android.view.ActionMode;
 import android.view.LayoutInflater;
@@ -155,6 +156,13 @@ public class ActionBarImpl extends ActionBar {
                 CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;
 
         mContentHeight = mActionView.getContentHeight();
+
+        // Older apps get the home button interaction enabled by default.
+        // Newer apps need to enable it explicitly.
+        if (mContext.getApplicationInfo().targetSdkVersion <
+                Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            setHomeButtonEnabled(true);
+        }
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
@@ -266,8 +274,8 @@ public class ActionBarImpl extends ActionBar {
     }
 
     @Override
-    public void setDisplayDisableHomeEnabled(boolean disableHome) {
-        setDisplayOptions(disableHome ? DISPLAY_DISABLE_HOME : 0, DISPLAY_DISABLE_HOME);
+    public void setHomeButtonEnabled(boolean enable) {
+        mActionView.setHomeButtonEnabled(enable);
     }
 
     @Override

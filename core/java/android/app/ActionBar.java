@@ -81,6 +81,9 @@ public abstract class ActionBar {
      * Set this flag if selecting the 'home' button in the action bar to return
      * up by a single level in your UI rather than back to the top level or front page.
      *
+     * <p>Setting this option will implicitly enable interaction with the home/up
+     * button. See {@link #setHomeButtonEnabled(boolean)}.
+     *
      * @see #setDisplayOptions(int)
      * @see #setDisplayOptions(int, int)
      */
@@ -105,18 +108,6 @@ public abstract class ActionBar {
      * @see #setDisplayOptions(int, int)
      */
     public static final int DISPLAY_SHOW_CUSTOM = 0x10;
-
-    /**
-     * Disable the 'home' element. This may be combined with
-     * {@link #DISPLAY_SHOW_HOME} to create a non-focusable/non-clickable
-     * 'home' element. Useful for a level of your app's navigation hierarchy
-     * where clicking 'home' doesn't do anything.
-     *
-     * @see #setDisplayOptions(int)
-     * @see #setDisplayOptions(int, int)
-     * @see #setDisplayDisableHomeEnabled(boolean)
-     */
-    public static final int DISPLAY_DISABLE_HOME = 0x20;
 
     /**
      * Set the action bar into custom navigation mode, supplying a view
@@ -405,21 +396,6 @@ public abstract class ActionBar {
     public abstract void setDisplayShowCustomEnabled(boolean showCustom);
 
     /**
-     * Set whether the 'home' affordance on the action bar should be disabled.
-     * If set, the 'home' element will not be focusable or clickable, useful if
-     * the user is at the top level of the app's navigation hierarchy.
-     *
-     * <p>To set several display options at once, see the setDisplayOptions methods.
-     *
-     * @param disableHome true to disable the 'home' element.
-     *
-     * @see #setDisplayOptions(int)
-     * @see #setDisplayOptions(int, int)
-     * @see #DISPLAY_DISABLE_HOME
-     */
-    public abstract void setDisplayDisableHomeEnabled(boolean disableHome);
-
-    /**
      * Set the ActionBar's background.
      * 
      * @param d Background drawable
@@ -630,6 +606,22 @@ public abstract class ActionBar {
      * @param listener A listener to remove that was previously added
      */
     public abstract void removeOnMenuVisibilityListener(OnMenuVisibilityListener listener);
+
+    /**
+     * Enable or disable the "home" button in the corner of the action bar. (Note that this
+     * is the application home/up affordance on the action bar, not the systemwide home
+     * button.)
+     *
+     * <p>This defaults to true for packages targeting &lt; API 14. For packages targeting
+     * API 14 or greater, the application should call this method to enable interaction
+     * with the home/up affordance.
+     *
+     * <p>Setting the {@link #DISPLAY_HOME_AS_UP} display option will automatically enable
+     * the home button.
+     *
+     * @param enabled true to enable the home button, false to disable the home button.
+     */
+    public abstract void setHomeButtonEnabled(boolean enabled);
 
     /**
      * Listener interface for ActionBar navigation events.

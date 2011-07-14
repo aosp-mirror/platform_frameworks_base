@@ -434,14 +434,23 @@ public class ActionBarView extends AbsActionBarView {
         }
     }
 
+    public void setHomeButtonEnabled(boolean enable) {
+        mHomeLayout.setEnabled(enable);
+        // Make sure the home button has an accurate content description for accessibility.
+        if (!enable) {
+            mHomeLayout.setContentDescription(null);
+        } else if ((mDisplayOptions & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
+            mHomeLayout.setContentDescription(mContext.getResources().getText(
+                    R.string.action_bar_up_description));
+        } else {
+            mHomeLayout.setContentDescription(mContext.getResources().getText(
+                    R.string.action_bar_home_description));
+        }
+    }
+
     public void setDisplayOptions(int options) {
         final int flagsChanged = options ^ mDisplayOptions;
         mDisplayOptions = options;
-
-        if ((flagsChanged & ActionBar.DISPLAY_DISABLE_HOME) != 0) {
-            final boolean disableHome = (options & ActionBar.DISPLAY_DISABLE_HOME) != 0;
-            mHomeLayout.setEnabled(!disableHome);
-        }
 
         if ((flagsChanged & DISPLAY_RELAYOUT_MASK) != 0) {
             final boolean showHome = (options & ActionBar.DISPLAY_SHOW_HOME) != 0;
@@ -449,7 +458,16 @@ public class ActionBarView extends AbsActionBarView {
             mHomeLayout.setVisibility(vis);
 
             if ((flagsChanged & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
-                mHomeLayout.setUp((options & ActionBar.DISPLAY_HOME_AS_UP) != 0);
+                final boolean setUp = (options & ActionBar.DISPLAY_HOME_AS_UP) != 0;
+                mHomeLayout.setUp(setUp);
+
+                // Showing home as up implicitly enables interaction with it.
+                // In honeycomb it was always enabled, so make this transition
+                // a bit easier for developers in the common case.
+                // (It would be silly to show it as up without responding to it.)
+                if (setUp) {
+                    setHomeButtonEnabled(true);
+                }
             }
 
             if ((flagsChanged & ActionBar.DISPLAY_USE_LOGO) != 0) {
@@ -487,7 +505,7 @@ public class ActionBarView extends AbsActionBarView {
         }
 
         // Make sure the home button has an accurate content description for accessibility.
-        if ((options & ActionBar.DISPLAY_DISABLE_HOME) != 0) {
+        if (!mHomeLayout.isEnabled()) {
             mHomeLayout.setContentDescription(null);
         } else if ((options & ActionBar.DISPLAY_HOME_AS_UP) != 0) {
             mHomeLayout.setContentDescription(mContext.getResources().getText(
