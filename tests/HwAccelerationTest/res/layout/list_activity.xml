@@ -30,8 +30,10 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dip"
             android:layout_marginRight="3dip"
+            
+            android:onClick="startProfiling"
 
-            android:text="Add" />
+            android:text="Start" />
         
         <Button
             android:layout_width="0dip"
@@ -39,8 +41,10 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="3dip"
             android:layout_marginRight="10dip"
+            
+            android:onClick="stopProfiling"
 
-            android:text="Remove" />
+            android:text="Stop" />
         
     </LinearLayout>
     

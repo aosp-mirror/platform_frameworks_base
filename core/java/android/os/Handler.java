@@ -169,6 +169,21 @@ public class Handler {
     }
 
     /**
+     * Returns a string representing the name of the specified message.
+     * The default implementation will either return the class name of the
+     * message callback if any, or the hexadecimal representation of the
+     * message "what" field.
+     *  
+     * @param message The message whose name is being queried 
+     */
+    public String getMessageName(Message message) {
+        if (message.callback != null) {
+            return message.callback.getClass().getName();
+        }
+        return "0x" + Integer.toHexString(message.what);
+    }
+
+    /**
      * Returns a new {@link android.os.Message Message} from the global message pool. More efficient than
      * creating and allocating new instances. The retrieved message has its handler set to this instance (Message.target == this).
      *  If you don't want that facility, just call Message.obtain() instead.

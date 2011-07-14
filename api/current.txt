@@ -14035,6 +14035,7 @@ package android.os {
     method public void dispatchMessage(android.os.Message);
     method public final void dump(android.util.Printer, java.lang.String);
     method public final android.os.Looper getLooper();
+    method public java.lang.String getMessageName(android.os.Message);
     method public void handleMessage(android.os.Message);
     method public final boolean hasMessages(int);
     method public final boolean hasMessages(int, java.lang.Object);
@@ -14104,13 +14105,13 @@ package android.os {
 
   public class Looper {
     method public void dump(android.util.Printer, java.lang.String);
-    method public static final synchronized android.os.Looper getMainLooper();
+    method public static synchronized android.os.Looper getMainLooper();
     method public java.lang.Thread getThread();
-    method public static final void loop();
-    method public static final android.os.Looper myLooper();
-    method public static final android.os.MessageQueue myQueue();
-    method public static final void prepare();
-    method public static final void prepareMainLooper();
+    method public static void loop();
+    method public static android.os.Looper myLooper();
+    method public static android.os.MessageQueue myQueue();
+    method public static void prepare();
+    method public static void prepareMainLooper();
     method public void quit();
     method public void setMessageLogging(android.util.Printer);
   }
@@ -22642,8 +22643,10 @@ package android.view {
     ctor public ViewDebug();
     method public static void dumpCapturedView(java.lang.String, java.lang.Object);
     method public static void startHierarchyTracing(java.lang.String, android.view.View);
+    method public static void startLooperProfiling(java.io.File);
     method public static void startRecyclerTracing(java.lang.String, android.view.View);
     method public static void stopHierarchyTracing();
+    method public static void stopLooperProfiling();
     method public static void stopRecyclerTracing();
     method public static void trace(android.view.View, android.view.ViewDebug.RecyclerTraceType, int...);
     method public static void trace(android.view.View, android.view.ViewDebug.HierarchyTraceType);
