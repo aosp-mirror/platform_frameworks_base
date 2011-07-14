@@ -179,8 +179,10 @@ public class IconMenuPresenter extends BaseMenuPresenter {
         @Override
         public void onCloseMenu(MenuBuilder menu, boolean allMenusAreClosing) {
             mOpenSubMenuId = 0;
-            mOpenSubMenu.dismiss();
-            mOpenSubMenu = null;
+            if (mOpenSubMenu != null) {
+                mOpenSubMenu.dismiss();
+                mOpenSubMenu = null;
+            }
         }
 
         @Override
