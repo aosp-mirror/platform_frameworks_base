@@ -1115,7 +1115,7 @@ DBusHandlerResult agent_event_filter(DBusConnection *conn,
         LOGV("... uuid = %s", uuid);
 
         dbus_message_ref(msg);  // increment refcount because we pass to java
-        env->CallBooleanMethod(nat->me, method_onAgentAuthorize,
+        env->CallVoidMethod(nat->me, method_onAgentAuthorize,
                 env->NewStringUTF(object_path), env->NewStringUTF(uuid),
                 int(msg));
 
