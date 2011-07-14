@@ -22,6 +22,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
@@ -49,6 +50,8 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
     private int mMenuType;
     
     private LayoutInflater mInflater;
+
+    private boolean mForceShowIcon;
 
     public ListMenuItemView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs);
@@ -97,6 +100,10 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
         setShortcut(itemData.shouldShowShortcut(), itemData.getShortcut());
         setIcon(itemData.getIcon());
         setEnabled(itemData.isEnabled());
+    }
+
+    public void setForceShowIcon(boolean forceShow) {
+        mPreserveIconSpacing = mForceShowIcon = forceShow;
     }
 
     public void setTitle(CharSequence title) {
@@ -189,12 +196,12 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
     }
     
     public void setIcon(Drawable icon) {
-        final boolean showIcon = mItemData.shouldShowIcon();
+        final boolean showIcon = mItemData.shouldShowIcon() || mForceShowIcon;
         if (!showIcon && !mPreserveIconSpacing) {
             return;
         }
         
-        if (mIconView == null && icon == null) {
+        if (mIconView == null && icon == null && !mPreserveIconSpacing) {
             return;
         }
         
@@ -213,6 +220,19 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
         }
     }
     
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (mIconView != null && mPreserveIconSpacing) {
+            // Enforce minimum icon spacing
+            ViewGroup.LayoutParams lp = getLayoutParams();
+            LayoutParams iconLp = (LayoutParams) mIconView.getLayoutParams();
+            if (lp.height > 0 && iconLp.width <= 0) {
+                iconLp.width = lp.height;
+            }
+        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
     private void insertIconView() {
         LayoutInflater inflater = getInflater();
         mIconView = (ImageView) inflater.inflate(com.android.internal.R.layout.list_menu_item_icon,
@@ -241,7 +261,7 @@ public class ListMenuItemView extends LinearLayout implements MenuView.ItemView 
     }
 
     public boolean showsIcon() {
-        return false;
+        return mForceShowIcon;
     }
     
     private LayoutInflater getInflater() {

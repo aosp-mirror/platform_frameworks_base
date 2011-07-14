@@ -544,6 +544,17 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
             }
 
             setCallback(mPopupPresenterCallback);
+
+            boolean preserveIconSpacing = false;
+            final int count = subMenu.size();
+            for (int i = 0; i < count; i++) {
+                MenuItem childItem = subMenu.getItem(i);
+                if (childItem.isVisible() && childItem.getIcon() != null) {
+                    preserveIconSpacing = true;
+                    break;
+                }
+            }
+            setForceShowIcon(preserveIconSpacing);
         }
 
         @Override
