@@ -104,6 +104,24 @@ protected:
     // queued buffers will be retired in order.
     // The default mode is asynchronous.
     virtual status_t setSynchronousMode(bool enabled) = 0;
+
+    // connect attempts to connect a client API to the SurfaceTexture.  This
+    // must be called before any other ISurfaceTexture methods are called except
+    // for getAllocator.
+    //
+    // This method will fail if the connect was previously called on the
+    // SurfaceTexture and no corresponding disconnect call was made.
+    virtual status_t connect(int api) = 0;
+
+    // disconnect attempts to disconnect a client API from the SurfaceTexture.
+    // Calling this method will cause any subsequent calls to other
+    // ISurfaceTexture methods to fail except for getAllocator and connect.
+    // Successfully calling connect after this will allow the other methods to
+    // succeed again.
+    //
+    // This method will fail if the the SurfaceTexture is not currently
+    // connected to the specified client API.
+    virtual status_t disconnect(int api) = 0;
 };
 
 // ----------------------------------------------------------------------------
