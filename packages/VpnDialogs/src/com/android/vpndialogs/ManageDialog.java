@@ -58,6 +58,13 @@ public class ManageDialog extends Activity implements Handler.Callback,
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (getCallingPackage() != null) {
+            Log.e(TAG, getCallingPackage() + " cannot start this activity");
+            finish();
+            return;
+        }
+
         try {
             mConfig = getIntent().getParcelableExtra("config");
 
@@ -83,7 +90,6 @@ public class ManageDialog extends Activity implements Handler.Callback,
             } else {
                 PackageManager pm = getPackageManager();
                 ApplicationInfo app = pm.getApplicationInfo(mConfig.packagz, 0);
-
                 mDialog = new AlertDialog.Builder(this)
                         .setIcon(app.loadIcon(pm))
                         .setTitle(app.loadLabel(pm))
