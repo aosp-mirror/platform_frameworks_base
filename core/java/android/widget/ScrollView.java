@@ -65,7 +65,6 @@ public class ScrollView extends FrameLayout {
 
     static final float MAX_SCROLL_FACTOR = 0.5f;
 
-
     private long mLastScroll;
 
     private final Rect mTempRect = new Rect();
@@ -1430,17 +1429,6 @@ public class ScrollView extends FrameLayout {
                     Math.max(0, bottom - height), 0, height/2);
 
             final boolean movingDown = velocityY > 0;
-
-            View currentFocused = findFocus();
-            View newFocused =
-                    findFocusableViewInMyBounds(movingDown, mScroller.getFinalY(), currentFocused);
-            if (newFocused == null) {
-                newFocused = this;
-            }
-
-            if (newFocused != currentFocused) {
-                    newFocused.requestFocus(movingDown ? View.FOCUS_DOWN : View.FOCUS_UP);
-            }
 
             if (mFlingStrictSpan == null) {
                 mFlingStrictSpan = StrictMode.enterCriticalSpan("ScrollView-fling");
