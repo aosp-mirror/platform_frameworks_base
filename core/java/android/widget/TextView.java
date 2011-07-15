@@ -9441,7 +9441,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         @Override
         public void onClick(View v) {
             if (canPaste()) {
-                paste(getSelectionStart(), getSelectionEnd());
+                onTextContextMenuItem(ID_PASTE);
             }
             hide();
         }
