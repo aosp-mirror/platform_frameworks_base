@@ -187,37 +187,6 @@ class FileSynthesisCallback extends AbstractSynthesisCallback {
         }
     }
 
-    @Override
-    public int completeAudioAvailable(int sampleRateInHz, int audioFormat, int channelCount,
-            byte[] buffer, int offset, int length) {
-        synchronized (mStateLock) {
-            if (mStopped) {
-                if (DBG) Log.d(TAG, "Request has been aborted.");
-                return TextToSpeech.ERROR;
-            }
-        }
-        FileOutputStream out = null;
-        try {
-            out = new FileOutputStream(mFileName);
-            out.write(makeWavHeader(sampleRateInHz, audioFormat, channelCount, length));
-            out.write(buffer, offset, length);
-            mDone = true;
-            return TextToSpeech.SUCCESS;
-        } catch (IOException ex) {
-            Log.e(TAG, "Failed to write to " + mFileName + ": " + ex);
-            mFileName.delete();
-            return TextToSpeech.ERROR;
-        } finally {
-            try {
-                if (out != null) {
-                    out.close();
-                }
-            } catch (IOException ex) {
-                Log.e(TAG, "Failed to close " + mFileName + ": " + ex);
-            }
-        }
-    }
-
     private byte[] makeWavHeader(int sampleRateInHz, int audioFormat, int channelCount,
             int dataLength) {
         // TODO: is AudioFormat.ENCODING_DEFAULT always the same as ENCODING_PCM_16BIT?

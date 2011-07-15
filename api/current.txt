@@ -18024,7 +18024,6 @@ package android.speech.tts {
 
   public abstract interface SynthesisCallback {
     method public abstract int audioAvailable(byte[], int, int);
-    method public abstract int completeAudioAvailable(int, int, int, byte[], int, int);
     method public abstract int done();
     method public abstract void error();
     method public abstract int getMaxBufferSize();
