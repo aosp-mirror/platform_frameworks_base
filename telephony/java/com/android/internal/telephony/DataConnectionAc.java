@@ -23,7 +23,6 @@ import com.android.internal.util.Protocol;
 import android.app.PendingIntent;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
-import android.net.LinkProperties.CompareAddressesResult;
 import android.net.ProxyProperties;
 import android.os.Message;
 

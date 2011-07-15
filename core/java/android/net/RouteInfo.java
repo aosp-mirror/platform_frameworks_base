@@ -43,6 +43,7 @@ public class RouteInfo implements Parcelable {
     private final InetAddress mGateway;
 
     private final boolean mIsDefault;
+    private final boolean mIsHost;
 
     public RouteInfo(LinkAddress destination, InetAddress gateway) {
         if (destination == null) {
@@ -68,6 +69,7 @@ public class RouteInfo implements Parcelable {
                 destination.getNetworkPrefixLength()), destination.getNetworkPrefixLength());
         mGateway = gateway;
         mIsDefault = isDefault();
+        mIsHost = isHost();
     }
 
     public RouteInfo(InetAddress gateway) {
@@ -88,6 +90,10 @@ public class RouteInfo implements Parcelable {
         }
     }
 
+    private boolean isHost() {
+        return (mGateway.equals(Inet4Address.ANY) || mGateway.equals(Inet6Address.ANY));
+    }
+
     private boolean isDefault() {
         boolean val = false;
         if (mGateway != null) {
@@ -100,6 +106,7 @@ public class RouteInfo implements Parcelable {
         return val;
     }
 
+
     public LinkAddress getDestination() {
         return mDestination;
     }
@@ -110,6 +117,10 @@ public class RouteInfo implements Parcelable {
 
     public boolean isDefaultRoute() {
         return mIsDefault;
+    }
+
+    public boolean isHostRoute() {
+        return mIsHost;
     }
 
     public String toString() {
