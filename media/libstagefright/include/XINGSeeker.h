@@ -37,7 +37,7 @@ private:
     int32_t mSizeBytes;
 
     // TOC entries in XING header. Skip the first one since it's always 0.
-    char mTableOfContents[99];
+    unsigned char mTableOfContents[99];
 
     XINGSeeker();
 
