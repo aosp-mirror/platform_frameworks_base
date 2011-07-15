@@ -23,8 +23,8 @@ package android.security;
  */
 interface IKeyChainService {
     // APIs used by KeyChain
-    byte[] getPrivateKey(String alias, String authToken);
-    byte[] getCertificate(String alias, String authToken);
+    byte[] getPrivateKey(String alias);
+    byte[] getCertificate(String alias);
 
     // APIs used by CertInstaller
     void installCaCertificate(in byte[] caCertificate);
@@ -32,4 +32,8 @@ interface IKeyChainService {
     // APIs used by Settings
     boolean deleteCaCertificate(String alias);
     boolean reset();
+
+    // APIs used by KeyChainActivity
+    void setGrant(int uid, String alias, boolean value);
+    boolean hasGrant(int uid, String alias);
 }

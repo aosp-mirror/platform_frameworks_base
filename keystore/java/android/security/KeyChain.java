@@ -15,36 +15,25 @@
  */
 package android.security;
 
-import android.accounts.Account;
-import android.accounts.AccountManager;
-import android.accounts.AccountManagerCallback;
-import android.accounts.AccountManagerFuture;
-import android.accounts.AuthenticatorException;
-import android.accounts.OperationCanceledException;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.IOException;
-import java.security.KeyFactory;
 import java.security.KeyPair;
-import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -266,7 +255,7 @@ public final class KeyChain {
             throw new NullPointerException("response == null");
         }
         Intent intent = new Intent(ACTION_CHOOSER);
-        intent.putExtra(EXTRA_RESPONSE, new AliasResponse(activity, response));
+        intent.putExtra(EXTRA_RESPONSE, new AliasResponse(response));
         intent.putExtra(EXTRA_HOST, host);
         intent.putExtra(EXTRA_PORT, port);
         intent.putExtra(EXTRA_ALIAS, alias);
@@ -276,56 +265,12 @@ public final class KeyChain {
     }
 
     private static class AliasResponse extends IKeyChainAliasCallback.Stub {
-        private final Activity activity;
         private final KeyChainAliasCallback keyChainAliasResponse;
-        private AliasResponse(Activity activity, KeyChainAliasCallback keyChainAliasResponse) {
-            this.activity = activity;
+        private AliasResponse(KeyChainAliasCallback keyChainAliasResponse) {
             this.keyChainAliasResponse = keyChainAliasResponse;
         }
         @Override public void alias(String alias) {
-            if (alias == null) {
-                keyChainAliasResponse.alias(null);
-                return;
-            }
-            AccountManager accountManager = AccountManager.get(activity);
-            accountManager.getAuthToken(getAccount(activity),
-                                        alias,
-                                        null,
-                                        activity,
-                                        new AliasAccountManagerCallback(keyChainAliasResponse,
-                                                                        alias),
-                                        null);
-        }
-    }
-
-    private static class AliasAccountManagerCallback implements AccountManagerCallback<Bundle> {
-        private final KeyChainAliasCallback keyChainAliasResponse;
-        private final String alias;
-        private AliasAccountManagerCallback(KeyChainAliasCallback keyChainAliasResponse,
-                                            String alias) {
-            this.keyChainAliasResponse = keyChainAliasResponse;
-            this.alias = alias;
-        }
-        @Override public void run(AccountManagerFuture<Bundle> future) {
-            Bundle bundle;
-            try {
-                bundle = future.getResult();
-            } catch (OperationCanceledException e) {
-                keyChainAliasResponse.alias(null);
-                return;
-            } catch (IOException e) {
-                keyChainAliasResponse.alias(null);
-                return;
-            } catch (AuthenticatorException e) {
-                keyChainAliasResponse.alias(null);
-                return;
-            }
-            String authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-            if (authToken != null) {
-                keyChainAliasResponse.alias(alias);
-            } else {
-                keyChainAliasResponse.alias(null);
-            }
+            keyChainAliasResponse.alias(alias);
         }
     }
 
@@ -347,12 +292,8 @@ public final class KeyChain {
         }
         KeyChainConnection keyChainConnection = bind(context);
         try {
-            String authToken = authToken(context, alias);
-            if (authToken == null) {
-                return null;
-            }
             IKeyChainService keyChainService = keyChainConnection.getService();
-            byte[] privateKeyBytes = keyChainService.getPrivateKey(alias, authToken);
+            byte[] privateKeyBytes = keyChainService.getPrivateKey(alias);
             return toPrivateKey(privateKeyBytes);
         } catch (RemoteException e) {
             throw new KeyChainException(e);
@@ -382,12 +323,8 @@ public final class KeyChain {
         }
         KeyChainConnection keyChainConnection = bind(context);
         try {
-            String authToken = authToken(context, alias);
-            if (authToken == null) {
-                return null;
-            }
             IKeyChainService keyChainService = keyChainConnection.getService();
-            byte[] certificateBytes = keyChainService.getCertificate(alias, authToken);
+            byte[] certificateBytes = keyChainService.getCertificate(alias);
             List<X509Certificate> chain = new ArrayList<X509Certificate>();
             chain.add(toCertificate(certificateBytes));
             TrustedCertificateStore store = new TrustedCertificateStore();
@@ -438,50 +375,6 @@ public final class KeyChain {
         }
     }
 
-    private static String authToken(Context context, String alias) {
-        AccountManager accountManager = AccountManager.get(context);
-        AccountManagerFuture<Bundle> future = accountManager.getAuthToken(getAccount(context),
-                                                                          alias,
-                                                                          false,
-                                                                          null,
-                                                                          null);
-        Bundle bundle;
-        try {
-            bundle = future.getResult();
-        } catch (OperationCanceledException e) {
-            throw new AssertionError(e);
-        } catch (IOException e) {
-            // KeyChainAccountAuthenticator doesn't do I/O
-            throw new AssertionError(e);
-        } catch (AuthenticatorException e) {
-            throw new AssertionError(e);
-        }
-        Intent intent = bundle.getParcelable(AccountManager.KEY_INTENT);
-        if (intent != null) {
-            return null;
-        }
-        String authToken = bundle.getString(AccountManager.KEY_AUTHTOKEN);
-        if (authToken == null) {
-            throw new AssertionError("Invalid authtoken");
-        }
-        return authToken;
-    }
-
-    private static Account getAccount(Context context) {
-        AccountManager accountManager = AccountManager.get(context);
-        Account[] accounts = accountManager.getAccountsByType(ACCOUNT_TYPE);
-        if (accounts.length == 0) {
-            try {
-                // Account is created if necessary during binding of the IKeyChainService
-                bind(context).close();
-            } catch (InterruptedException e) {
-                throw new AssertionError(e);
-            }
-            accounts = accountManager.getAccountsByType(ACCOUNT_TYPE);
-        }
-        return accounts[0];
-    }
-
     /**
      * @hide for reuse by CertInstaller and Settings.
      * @see KeyChain#bind
@@ -517,11 +410,15 @@ public final class KeyChain {
         ensureNotOnMainThread(context);
         final BlockingQueue<IKeyChainService> q = new LinkedBlockingQueue<IKeyChainService>(1);
         ServiceConnection keyChainServiceConnection = new ServiceConnection() {
+            volatile boolean mConnectedAtLeastOnce = false;
             @Override public void onServiceConnected(ComponentName name, IBinder service) {
-                try {
-                    q.put(IKeyChainService.Stub.asInterface(service));
-                } catch (InterruptedException e) {
-                    throw new AssertionError(e);
+                if (!mConnectedAtLeastOnce) {
+                    mConnectedAtLeastOnce = true;
+                    try {
+                        q.put(IKeyChainService.Stub.asInterface(service));
+                    } catch (InterruptedException e) {
+                        // will never happen, since the queue starts with one available slot
+                    }
                 }
             }
             @Override public void onServiceDisconnected(ComponentName name) {}
