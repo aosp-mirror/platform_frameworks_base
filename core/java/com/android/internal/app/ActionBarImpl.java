@@ -500,7 +500,7 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public int getHeight() {
-        return mActionView.getHeight();
+        return mContainerView.getHeight();
     }
 
     @Override
