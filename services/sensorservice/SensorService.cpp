@@ -70,73 +70,76 @@ void SensorService::onFirstRef()
     SensorDevice& dev(SensorDevice::getInstance());
 
     if (dev.initCheck() == NO_ERROR) {
-        ssize_t orientationIndex = -1;
-        bool hasGyro = false;
-        uint32_t virtualSensorsNeeds =
-                (1<<SENSOR_TYPE_GRAVITY) |
-                (1<<SENSOR_TYPE_LINEAR_ACCELERATION) |
-                (1<<SENSOR_TYPE_ROTATION_VECTOR);
         sensor_t const* list;
-        int count = dev.getSensorList(&list);
-        mLastEventSeen.setCapacity(count);
-        for (int i=0 ; i<count ; i++) {
-            registerSensor( new HardwareSensor(list[i]) );
-            switch (list[i].type) {
-                case SENSOR_TYPE_ORIENTATION:
-                    orientationIndex = i;
-                    break;
-                case SENSOR_TYPE_GYROSCOPE:
-                    hasGyro = true;
-                    break;
-                case SENSOR_TYPE_GRAVITY:
-                case SENSOR_TYPE_LINEAR_ACCELERATION:
-                case SENSOR_TYPE_ROTATION_VECTOR:
-                    virtualSensorsNeeds &= ~(1<<list[i].type);
-                    break;
+        ssize_t count = dev.getSensorList(&list);
+        if (count > 0) {
+            ssize_t orientationIndex = -1;
+            bool hasGyro = false;
+            uint32_t virtualSensorsNeeds =
+                    (1<<SENSOR_TYPE_GRAVITY) |
+                    (1<<SENSOR_TYPE_LINEAR_ACCELERATION) |
+                    (1<<SENSOR_TYPE_ROTATION_VECTOR);
+
+            mLastEventSeen.setCapacity(count);
+            for (ssize_t i=0 ; i<count ; i++) {
+                registerSensor( new HardwareSensor(list[i]) );
+                switch (list[i].type) {
+                    case SENSOR_TYPE_ORIENTATION:
+                        orientationIndex = i;
+                        break;
+                    case SENSOR_TYPE_GYROSCOPE:
+                        hasGyro = true;
+                        break;
+                    case SENSOR_TYPE_GRAVITY:
+                    case SENSOR_TYPE_LINEAR_ACCELERATION:
+                    case SENSOR_TYPE_ROTATION_VECTOR:
+                        virtualSensorsNeeds &= ~(1<<list[i].type);
+                        break;
+                }
             }
-        }
 
-        // it's safe to instantiate the SensorFusion object here
-        // (it wants to be instantiated after h/w sensors have been
-        // registered)
-        const SensorFusion& fusion(SensorFusion::getInstance());
+            // it's safe to instantiate the SensorFusion object here
+            // (it wants to be instantiated after h/w sensors have been
+            // registered)
+            const SensorFusion& fusion(SensorFusion::getInstance());
 
-        if (hasGyro) {
-            // Always instantiate Android's virtual sensors. Since they are
-            // instantiated behind sensors from the HAL, they won't
-            // interfere with applications, unless they looks specifically
-            // for them (by name).
+            if (hasGyro) {
+                // Always instantiate Android's virtual sensors. Since they are
+                // instantiated behind sensors from the HAL, they won't
+                // interfere with applications, unless they looks specifically
+                // for them (by name).
 
-            registerVirtualSensor( new RotationVectorSensor() );
-            registerVirtualSensor( new GravitySensor(list, count) );
-            registerVirtualSensor( new LinearAccelerationSensor(list, count) );
+                registerVirtualSensor( new RotationVectorSensor() );
+                registerVirtualSensor( new GravitySensor(list, count) );
+                registerVirtualSensor( new LinearAccelerationSensor(list, count) );
 
-            // these are optional
-            registerVirtualSensor( new OrientationSensor() );
-            registerVirtualSensor( new CorrectedGyroSensor(list, count) );
+                // these are optional
+                registerVirtualSensor( new OrientationSensor() );
+                registerVirtualSensor( new CorrectedGyroSensor(list, count) );
 
-            // virtual debugging sensors...
-            char value[PROPERTY_VALUE_MAX];
-            property_get("debug.sensors", value, "0");
-            if (atoi(value)) {
-                registerVirtualSensor( new GyroDriftSensor() );
+                // virtual debugging sensors...
+                char value[PROPERTY_VALUE_MAX];
+                property_get("debug.sensors", value, "0");
+                if (atoi(value)) {
+                    registerVirtualSensor( new GyroDriftSensor() );
+                }
             }
-        }
 
-        // build the sensor list returned to users
-        mUserSensorList = mSensorList;
-        if (hasGyro &&
-                (virtualSensorsNeeds & (1<<SENSOR_TYPE_ROTATION_VECTOR))) {
-            // if we have the fancy sensor fusion, and it's not provided by the
-            // HAL, use our own (fused) orientation sensor by removing the
-            // HAL supplied one form the user list.
-            if (orientationIndex >= 0) {
-                mUserSensorList.removeItemsAt(orientationIndex);
+            // build the sensor list returned to users
+            mUserSensorList = mSensorList;
+            if (hasGyro &&
+                    (virtualSensorsNeeds & (1<<SENSOR_TYPE_ROTATION_VECTOR))) {
+                // if we have the fancy sensor fusion, and it's not provided by the
+                // HAL, use our own (fused) orientation sensor by removing the
+                // HAL supplied one form the user list.
+                if (orientationIndex >= 0) {
+                    mUserSensorList.removeItemsAt(orientationIndex);
+                }
             }
-        }
 
-        run("SensorService", PRIORITY_URGENT_DISPLAY);
-        mInitCheck = NO_ERROR;
+            run("SensorService", PRIORITY_URGENT_DISPLAY);
+            mInitCheck = NO_ERROR;
+        }
     }
 }
 
