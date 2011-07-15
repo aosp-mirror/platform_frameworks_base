@@ -252,13 +252,15 @@ ssize_t VectorImpl::replaceAt(const void* prototype, size_t index)
         "[%p] replace: index=%d, size=%d", this, (int)index, (int)size());
 
     void* item = editItemLocation(index);
-    if (item == 0)
-        return NO_MEMORY;
-    _do_destroy(item, 1);
-    if (prototype == 0) {
-        _do_construct(item, 1);
-    } else {
-        _do_copy(item, prototype, 1);
+    if (item != prototype) {
+        if (item == 0)
+            return NO_MEMORY;
+        _do_destroy(item, 1);
+        if (prototype == 0) {
+            _do_construct(item, 1);
+        } else {
+            _do_copy(item, prototype, 1);
+        }
     }
     return ssize_t(index);
 }
@@ -367,10 +369,10 @@ void* VectorImpl::_grow(size_t where, size_t amount)
             SharedBuffer* sb = SharedBuffer::alloc(new_capacity * mItemSize);
             if (sb) {
                 void* array = sb->data();
-                if (where>0) {
+                if (where != 0) {
                     _do_copy(array, mStorage, where);
                 }
-                if (mCount>where) {
+                if (where != mCount) {
                     const void* from = reinterpret_cast<const uint8_t *>(mStorage) + where*mItemSize;
                     void* dest = reinterpret_cast<uint8_t *>(array) + (where+amount)*mItemSize;
                     _do_copy(dest, from, mCount-where);
@@ -380,15 +382,14 @@ void* VectorImpl::_grow(size_t where, size_t amount)
             }
         }
     } else {
-        ssize_t s = mCount-where;
-        if (s>0) {
-            void* array = editArrayImpl();    
-            void* to = reinterpret_cast<uint8_t *>(array) + (where+amount)*mItemSize;
+        if (where != mCount) {
+            void* array = editArrayImpl();
             const void* from = reinterpret_cast<const uint8_t *>(array) + where*mItemSize;
-            _do_move_forward(to, from, s);
+            void* to = reinterpret_cast<uint8_t *>(array) + (where+amount)*mItemSize;
+            _do_move_forward(to, from, mCount - where);
         }
     }
-    mCount += amount;
+    mCount = new_size;
     void* free_space = const_cast<void*>(itemLocation(where));
     return free_space;
 }
@@ -409,7 +410,7 @@ void VectorImpl::_shrink(size_t where, size_t amount)
     if (new_size*3 < capacity()) {
         const size_t new_capacity = max(kMinVectorCapacity, new_size*2);
 //        LOGV("shrink vector %p, new_capacity=%d", this, (int)new_capacity);
-        if ((where == mCount-amount) &&
+        if ((where == new_size) &&
             (mFlags & HAS_TRIVIAL_COPY) &&
             (mFlags & HAS_TRIVIAL_DTOR))
         {
@@ -420,31 +421,28 @@ void VectorImpl::_shrink(size_t where, size_t amount)
             SharedBuffer* sb = SharedBuffer::alloc(new_capacity * mItemSize);
             if (sb) {
                 void* array = sb->data();
-                if (where>0) {
+                if (where != 0) {
                     _do_copy(array, mStorage, where);
                 }
-                if (mCount > where+amount) {
+                if (where != new_size) {
                     const void* from = reinterpret_cast<const uint8_t *>(mStorage) + (where+amount)*mItemSize;
                     void* dest = reinterpret_cast<uint8_t *>(array) + where*mItemSize;
-                    _do_copy(dest, from, mCount-(where+amount));
+                    _do_copy(dest, from, new_size - where);
                 }
                 release_storage();
                 mStorage = const_cast<void*>(array);
             }
         }
     } else {
-        void* array = editArrayImpl();    
+        void* array = editArrayImpl();
         void* to = reinterpret_cast<uint8_t *>(array) + where*mItemSize;
         _do_destroy(to, amount);
-        ssize_t s = mCount-(where+amount);
-        if (s>0) {
+        if (where != new_size) {
             const void* from = reinterpret_cast<uint8_t *>(array) + (where+amount)*mItemSize;
-            _do_move_backward(to, from, s);
+            _do_move_backward(to, from, new_size - where);
         }
     }
-
-    // adjust the number of items...
-    mCount -= amount;
+    mCount = new_size;
 }
 
 size_t VectorImpl::itemSize() const {
