@@ -103,6 +103,10 @@ public class EthernetDataTracker implements NetworkStateTracker {
         public void interfaceRemoved(String iface) {
             mTracker.interfaceRemoved(iface);
         }
+
+        public void limitReached(String limitName, String iface) {
+            // Ignored.
+        }
     }
 
     private EthernetDataTracker() {

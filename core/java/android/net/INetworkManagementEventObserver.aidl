@@ -52,4 +52,14 @@ interface INetworkManagementEventObserver {
      * @param iface The interface.
      */
     void interfaceRemoved(String iface);
+
+    /**
+     * A networking quota limit has been reached. The quota might not
+     * be specific to an interface.
+     *
+     * @param limitName The name of the limit that triggered.
+     * @param iface The interface on which the limit was detected.
+     */
+    void limitReached(String limitName, String iface);
+
 }
