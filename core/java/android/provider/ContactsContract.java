@@ -1747,9 +1747,9 @@ public final class ContactsContract {
          *     Uri displayPhotoUri = Uri.withAppendedPath(contactUri, Contacts.Photo.DISPLAY_PHOTO);
          *     try {
          *         AssetFileDescriptor fd =
-         *             getContentResolver().openAssetFile(displayPhotoUri, "r");
+         *             getContentResolver().openAssetFileDescriptor(displayPhotoUri, "r");
          *         return fd.createInputStream();
-         *     } catch (FileNotFoundException e) {
+         *     } catch (IOException e) {
          *         return null;
          *     }
          * }
@@ -2586,7 +2586,7 @@ public final class ContactsContract {
          * display photo.  To access this directory append
          * {@link RawContacts.DisplayPhoto#CONTENT_DIRECTORY} to the raw contact URI.
          * The resulting URI represents an image file, and should be interacted with
-         * using ContentProvider.openAssetFile.
+         * using ContentResolver.openAssetFileDescriptor.
          * <p>
          * <p>
          * Note that this sub-directory also supports opening the photo as an asset file
@@ -2605,7 +2605,7 @@ public final class ContactsContract {
          *             RawContacts.DisplayPhoto.CONTENT_DIRECTORY);
          *     try {
          *         AssetFileDescriptor fd =
-         *             getContentResolver().openAssetFile(rawContactPhotoUri, "rw");
+         *             getContentResolver().openAssetFileDescriptor(rawContactPhotoUri, "rw");
          *         OutputStream os = fd.createOutputStream();
          *         os.write(photo);
          *         os.close();
@@ -2804,7 +2804,7 @@ public final class ContactsContract {
 
         /**
          * The package containing resources for this status: label and icon.
-         * <p>Type: NUMBER</p>
+         * <p>Type: TEXT</p>
          */
         public static final String STATUS_RES_PACKAGE = "status_res_package";
 
@@ -2872,7 +2872,7 @@ public final class ContactsContract {
      * ContentValues values = new ContentValues();
      * values.put(StreamItems.TEXT, "Breakfasted at Tiffanys");
      * values.put(StreamItems.TIMESTAMP, timestamp);
-     * values.put(StreamItems.COMMENT, "3 people reshared this");
+     * values.put(StreamItems.COMMENTS, "3 people reshared this");
      * values.put(StreamItems.ACTION, action);
      * values.put(StreamItems.ACTION_URI, actionUri);
      * Uri streamItemUri = getContentResolver().insert(
@@ -2887,7 +2887,7 @@ public final class ContactsContract {
      * values.put(StreamItems.RAW_CONTACT_ID, rawContactId);
      * values.put(StreamItems.TEXT, "Breakfasted at Tiffanys");
      * values.put(StreamItems.TIMESTAMP, timestamp);
-     * values.put(StreamItems.COMMENT, "3 people reshared this");
+     * values.put(StreamItems.COMMENTS, "3 people reshared this");
      * values.put(StreamItems.ACTION, action);
      * values.put(StreamItems.ACTION_URI, actionUri);
      * Uri streamItemUri = getContentResolver().insert(StreamItems.CONTENT_URI, values);
@@ -2906,7 +2906,7 @@ public final class ContactsContract {
      * <pre>
      * values.clear();
      * values.put(StreamItemPhotos.SORT_INDEX, 1);
-     * values.put(StreamItemPhotos.PICTURE, photoData);
+     * values.put(StreamItemPhotos.PHOTO, photoData);
      * values.put(StreamItemPhotos.ACTION, action);
      * values.put(StreamItemPhotos.ACTION_URI, actionUri);
      * getContentResolver().insert(Uri.withAppendedPath(
@@ -2920,7 +2920,7 @@ public final class ContactsContract {
      * values.clear();
      * values.put(StreamItemPhotos.STREAM_ITEM_ID, streamItemId);
      * values.put(StreamItemPhotos.SORT_INDEX, 1);
-     * values.put(StreamItemPhotos.PICTURE, photoData);
+     * values.put(StreamItemPhotos.PHOTO, photoData);
      * values.put(StreamItemPhotos.ACTION, action);
      * values.put(StreamItemPhotos.ACTION_URI, actionUri);
      * getContentResolver().insert(StreamItems.CONTENT_PHOTO_URI, values);
@@ -3008,8 +3008,7 @@ public final class ContactsContract {
 
         /**
          * This URI allows the caller to query for the maximum number of stream items
-         * that will be stored under any single raw contact, as well as the maximum
-         * photo size (in bytes) accepted in stream item photos.
+         * that will be stored under any single raw contact.
          */
         public static final Uri CONTENT_LIMIT_URI =
                 Uri.withAppendedPath(AUTHORITY_URI, "stream_items_limit");
@@ -3020,13 +3019,6 @@ public final class ContactsContract {
          * stream items that will be stored under any single raw contact.
          */
         public static final String MAX_ITEMS = "max_items";
-
-        /**
-         * Queries to {@link ContactsContract.StreamItems#CONTENT_LIMIT_URI} will
-         * contain this column, with the value indicating the byte limit for
-         * individual photos.
-         */
-        public static final String PHOTO_MAX_BYTES = "photo_max_bytes";
 
         /**
          * <p>
@@ -3067,7 +3059,7 @@ public final class ContactsContract {
          * The package name to use when creating {@link Resources} objects for
          * this stream item. This value is only designed for use when building
          * user interfaces, and should not be used to infer the owner.
-         * <P>Type: NUMBER</P>
+         * <P>Type: TEXT</P>
          */
         public static final String RES_PACKAGE = "res_package";
 
@@ -3161,7 +3153,7 @@ public final class ContactsContract {
      * <pre>
      * ContentValues values = new ContentValues();
      * values.put(StreamItemPhotos.SORT_INDEX, 1);
-     * values.put(StreamItemPhotos.PICTURE, photoData);
+     * values.put(StreamItemPhotos.PHOTO, photoData);
      * values.put(StreamItemPhotos.ACTION, action);
      * values.put(StreamItemPhotos.ACTION_URI, actionUri);
      * Uri photoUri = getContentResolver().insert(Uri.withAppendedPath(
@@ -3176,7 +3168,7 @@ public final class ContactsContract {
      * ContentValues values = new ContentValues();
      * values.put(StreamItemPhotos.STREAM_ITEM_ID, streamItemId);
      * values.put(StreamItemPhotos.SORT_INDEX, 1);
-     * values.put(StreamItemPhotos.PICTURE, photoData);
+     * values.put(StreamItemPhotos.PHOTO, photoData);
      * values.put(StreamItemPhotos.ACTION, action);
      * values.put(StreamItemPhotos.ACTION_URI, actionUri);
      * Uri photoUri = getContentResolver().insert(StreamItems.CONTENT_PHOTO_URI, values);
@@ -3198,7 +3190,7 @@ public final class ContactsContract {
      * <dd>
      * <pre>
      * ContentValues values = new ContentValues();
-     * values.put(StreamItemPhotos.PICTURE, newPhotoData);
+     * values.put(StreamItemPhotos.PHOTO, newPhotoData);
      * getContentResolver().update(
      *     ContentUris.withAppendedId(
      *         Uri.withAppendedPath(
@@ -3212,7 +3204,7 @@ public final class ContactsContract {
      * <pre>
      * ContentValues values = new ContentValues();
      * values.put(StreamItemPhotos.STREAM_ITEM_ID, streamItemId);
-     * values.put(StreamItemPhotos.PICTURE, newPhotoData);
+     * values.put(StreamItemPhotos.PHOTO, newPhotoData);
      * getContentResolver().update(StreamItems.CONTENT_PHOTO_URI, values);
      * </pre>
      * </dd>
@@ -3271,6 +3263,21 @@ public final class ContactsContract {
      *     null, null, null, StreamItemPhotos.SORT_INDEX);
      * </pre>
      * </dl>
+     * The record will contain both a {@link StreamItemPhotos#PHOTO_FILE_ID} and a
+     * {@link StreamItemPhotos#PHOTO_URI}.  The {@link StreamItemPhotos#PHOTO_FILE_ID}
+     * can be used in conjunction with the {@link ContactsContract.DisplayPhoto} API to
+     * retrieve photo content, or you can open the {@link StreamItemPhotos#PHOTO_URI} as
+     * an asset file, as follows:
+     * <pre>
+     * public InputStream openDisplayPhoto(String photoUri) {
+     *     try {
+     *         AssetFileDescriptor fd = getContentResolver().openAssetFileDescriptor(photoUri, "r");
+     *         return fd.createInputStream();
+     *     } catch (IOException e) {
+     *         return null;
+     *     }
+     * }
+     * <pre>
      * </dd>
      * </dl>
      */
@@ -3280,6 +3287,20 @@ public final class ContactsContract {
          */
         private StreamItemPhotos() {
         }
+
+        /**
+         * <p>
+         * The binary representation of the photo.  Any size photo can be inserted;
+         * the provider will resize it appropriately for storage and display.
+         * </p>
+         * <p>
+         * This is only intended for use when inserting or updating a stream item photo.
+         * To retrieve the photo that was stored, open {@link StreamItemPhotos#PHOTO_URI}
+         * as an asset file.
+         * </p>
+         * <P>Type: BLOB</P>
+         */
+        public static final String PHOTO = "photo";
     }
 
     /**
@@ -3302,13 +3323,18 @@ public final class ContactsContract {
         public static final String SORT_INDEX = "sort_index";
 
         /**
-         * The binary representation of the picture.  Pictures larger than
-         * {@link ContactsContract.StreamItems#PHOTO_MAX_BYTES} bytes in size (as
-         * queryable from {@link ContactsContract.StreamItems#CONTENT_LIMIT_URI})
-         * will be rejected.
-         * <P>Type: BLOB</P>
+         * Photo file ID for the photo.
+         * See {@link ContactsContract.DisplayPhoto}.
+         * <P>Type: NUMBER</P>
          */
-        public static final String PICTURE = "picture";
+        public static final String PHOTO_FILE_ID = "photo_file_id";
+
+        /**
+         * URI for retrieving the photo content, automatically populated.  Callers
+         * may retrieve the photo content by opening this URI as an asset file.
+         * <P>Type: TEXT</P>
+         */
+        public static final String PHOTO_URI = "photo_uri";
 
         /**
          * The activity action to execute when the photo is tapped.
@@ -7273,9 +7299,10 @@ public final class ContactsContract {
      * public InputStream openDisplayPhoto(long photoFileId) {
      *     Uri displayPhotoUri = ContentUris.withAppendedId(DisplayPhoto.CONTENT_URI, photoKey);
      *     try {
-     *         AssetFileDescriptor fd = getContentResolver().openAssetFile(displayPhotoUri, "r");
+     *         AssetFileDescriptor fd = getContentResolver().openAssetFileDescriptor(
+     *             displayPhotoUri, "r");
      *         return fd.createInputStream();
-     *     } catch (FileNotFoundException e) {
+     *     } catch (IOException e) {
      *         return null;
      *     }
      * }
