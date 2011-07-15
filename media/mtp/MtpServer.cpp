@@ -731,14 +731,12 @@ MtpResponseCode MtpServer::doGetObject() {
     }
     mfr.offset = 0;
     mfr.length = fileLength;
-
-    // send data header
-    mData.setOperationCode(mRequest.getOperationCode());
-    mData.setTransactionID(mRequest.getTransactionID());
-    mData.writeDataHeader(mFD, fileLength + MTP_CONTAINER_HEADER_SIZE);
+    mfr.command = mRequest.getOperationCode();
+    mfr.transaction_id = mRequest.getTransactionID();
 
     // then transfer the file
-    int ret = ioctl(mFD, MTP_SEND_FILE, (unsigned long)&mfr);
+    int ret = ioctl(mFD, MTP_SEND_FILE_WITH_HEADER, (unsigned long)&mfr);
+    LOGV("MTP_SEND_FILE_WITH_HEADER returned %d\n", ret);
     close(mfr.fd);
     if (ret < 0) {
         if (errno == ECANCELED)
@@ -798,15 +796,13 @@ MtpResponseCode MtpServer::doGetPartialObject(MtpOperationCode operation) {
     }
     mfr.offset = offset;
     mfr.length = length;
+    mfr.command = mRequest.getOperationCode();
+    mfr.transaction_id = mRequest.getTransactionID();
     mResponse.setParameter(1, length);
 
-    // send data header
-    mData.setOperationCode(mRequest.getOperationCode());
-    mData.setTransactionID(mRequest.getTransactionID());
-    mData.writeDataHeader(mFD, length + MTP_CONTAINER_HEADER_SIZE);
-
-    // then transfer the file
-    int ret = ioctl(mFD, MTP_SEND_FILE, (unsigned long)&mfr);
+    // transfer the file
+    int ret = ioctl(mFD, MTP_SEND_FILE_WITH_HEADER, (unsigned long)&mfr);
+    LOGV("MTP_SEND_FILE_WITH_HEADER returned %d\n", ret);
     close(mfr.fd);
     if (ret < 0) {
         if (errno == ECANCELED)
@@ -918,7 +914,7 @@ MtpResponseCode MtpServer::doSendObject() {
         return MTP_RESPONSE_GENERAL_ERROR;
     MtpResponseCode result = MTP_RESPONSE_OK;
     mode_t mask;
-    int ret;
+    int ret, initialData;
 
     if (mSendObjectHandle == kInvalidObjectHandle) {
         LOGE("Expected SendObjectInfo before SendObject");
@@ -926,12 +922,13 @@ MtpResponseCode MtpServer::doSendObject() {
         goto done;
     }
 
-    // read the header
-    ret = mData.readDataHeader(mFD);
-    // FIXME - check for errors here.
-
-    // reset so we don't attempt to send this back
-    mData.reset();
+    // read the header, and possibly some data
+    ret = mData.read(mFD);
+    if (ret < MTP_CONTAINER_HEADER_SIZE) {
+        result = MTP_RESPONSE_GENERAL_ERROR;
+        goto done;
+    }
+    initialData = ret - MTP_CONTAINER_HEADER_SIZE;
 
     mtp_file_range  mfr;
     mfr.fd = open(mSendObjectFilePath, O_RDWR | O_CREAT | O_TRUNC);
@@ -945,15 +942,19 @@ MtpResponseCode MtpServer::doSendObject() {
     fchmod(mfr.fd, mFilePermission);
     umask(mask);
 
-    mfr.offset = 0;
-    mfr.length = mSendObjectFileSize;
+    if (initialData > 0)
+        ret = write(mfr.fd, mData.getData(), initialData);
 
-    LOGV("receiving %s\n", (const char *)mSendObjectFilePath);
-    // transfer the file
-    ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
+    if (mSendObjectFileSize - initialData > 0) {
+        mfr.offset = initialData;
+        mfr.length = mSendObjectFileSize - initialData;
+
+        LOGV("receiving %s\n", (const char *)mSendObjectFilePath);
+        // transfer the file
+        ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
+        LOGV("MTP_RECEIVE_FILE returned %d\n", ret);
+    }
     close(mfr.fd);
-
-    LOGV("MTP_RECEIVE_FILE returned %d", ret);
 
     if (ret < 0) {
         unlink(mSendObjectFilePath);
@@ -964,6 +965,9 @@ MtpResponseCode MtpServer::doSendObject() {
     }
 
 done:
+    // reset so we don't attempt to send the data back
+    mData.reset();
+
     mDatabase->endSendObject(mSendObjectFilePath, mSendObjectHandle, mSendObjectFormat,
             result == MTP_RESPONSE_OK);
     mSendObjectHandle = kInvalidObjectHandle;
@@ -1096,23 +1100,31 @@ MtpResponseCode MtpServer::doSendPartialObject() {
         return MTP_RESPONSE_GENERAL_ERROR;
     }
 
-    // read the header
-    int ret = mData.readDataHeader(mFD);
-    // FIXME - check for errors here.
-
-    // reset so we don't attempt to send this back
-    mData.reset();
-
     const char* filePath = (const char *)edit->mPath;
-    LOGV("receiving partial %s %lld %ld\n", filePath, offset, length);
-    mtp_file_range  mfr;
-    mfr.fd = edit->mFD;
-    mfr.offset = offset;
-    mfr.length = length;
+    LOGV("receiving partial %s %lld %lld\n", filePath, offset, length);
 
-    // transfer the file
-    ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
-    LOGV("MTP_RECEIVE_FILE returned %d", ret);
+    // read the header, and possibly some data
+    int ret = mData.read(mFD);
+    if (ret < MTP_CONTAINER_HEADER_SIZE)
+        return MTP_RESPONSE_GENERAL_ERROR;
+    int initialData = ret - MTP_CONTAINER_HEADER_SIZE;
+
+    if (initialData > 0) {
+        ret = write(edit->mFD, mData.getData(), initialData);
+        offset += initialData;
+        length -= initialData;
+    }
+
+    if (length > 0) {
+        mtp_file_range  mfr;
+        mfr.fd = edit->mFD;
+        mfr.offset = offset;
+        mfr.length = length;
+
+        // transfer the file
+        ret = ioctl(mFD, MTP_RECEIVE_FILE, (unsigned long)&mfr);
+        LOGV("MTP_RECEIVE_FILE returned %d", ret);
+    }
     if (ret < 0) {
         mResponse.setParameter(1, 0);
         if (errno == ECANCELED)
@@ -1120,6 +1132,9 @@ MtpResponseCode MtpServer::doSendPartialObject() {
         else
             return MTP_RESPONSE_GENERAL_ERROR;
     }
+
+    // reset so we don't attempt to send this back
+    mData.reset();
     mResponse.setParameter(1, length);
     uint64_t end = offset + length;
     if (end > edit->mSize) {
