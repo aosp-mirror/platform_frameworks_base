@@ -2634,8 +2634,9 @@ public final class ViewAncestor extends Handler implements ViewParent,
             mInputEventDeliverTimeNanos = System.nanoTime();
         }
 
+        final boolean isTouchEvent = event.isTouchEvent();
         if (mInputEventConsistencyVerifier != null) {
-            if (event.isTouchEvent()) {
+            if (isTouchEvent) {
                 mInputEventConsistencyVerifier.onTouchEvent(event, 0);
             } else {
                 mInputEventConsistencyVerifier.onGenericMotionEvent(event, 0);
@@ -2653,9 +2654,9 @@ public final class ViewAncestor extends Handler implements ViewParent,
             mTranslator.translateEventInScreenToAppWindow(event);
         }
 
-        // Enter touch mode on the down.
-        boolean isDown = event.getAction() == MotionEvent.ACTION_DOWN;
-        if (isDown) {
+        // Enter touch mode on down or scroll.
+        final int action = event.getAction();
+        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_SCROLL) {
             ensureTouchMode(true);
         }
 
@@ -2668,8 +2669,10 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
 
         // Remember the touch position for possible drag-initiation.
-        mLastTouchPoint.x = event.getRawX();
-        mLastTouchPoint.y = event.getRawY();
+        if (isTouchEvent) {
+            mLastTouchPoint.x = event.getRawX();
+            mLastTouchPoint.y = event.getRawY();
+        }
 
         // Dispatch touch to view hierarchy.
         boolean handled = mView.dispatchPointerEvent(event);
