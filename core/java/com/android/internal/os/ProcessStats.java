@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server;
+package com.android.internal.os;
 
 import static android.os.Process.*;
 
@@ -182,7 +182,7 @@ public class ProcessStats {
 
         public String baseName;
         public String name;
-        int nameWidth;
+        public int nameWidth;
 
         public long base_uptime;
         public long rel_uptime;
