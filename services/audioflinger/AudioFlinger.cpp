@@ -52,6 +52,9 @@
 #include <media/EffectsFactoryApi.h>
 #include <audio_effects/effect_visualizer.h>
 
+#include <cpustats/ThreadCpuUsage.h>
+// #define DEBUG_CPU_USAGE 10  // log statistics every n wall clock seconds
+
 // ----------------------------------------------------------------------------
 
 
@@ -1529,9 +1532,40 @@ bool AudioFlinger::MixerThread::threadLoop()
     uint32_t idleSleepTime = idleSleepTimeUs();
     uint32_t sleepTime = idleSleepTime;
     Vector< sp<EffectChain> > effectChains;
+#ifdef DEBUG_CPU_USAGE
+    ThreadCpuUsage cpu;
+    const CentralTendencyStatistics& stats = cpu.statistics();
+#endif
 
     while (!exitPending())
     {
+#ifdef DEBUG_CPU_USAGE
+        cpu.sampleAndEnable();
+        unsigned n = stats.n();
+        // cpu.elapsed() is expensive, so don't call it every loop
+        if ((n & 127) == 1) {
+            long long elapsed = cpu.elapsed();
+            if (elapsed >= DEBUG_CPU_USAGE * 1000000000LL) {
+                double perLoop = elapsed / (double) n;
+                double perLoop100 = perLoop * 0.01;
+                double mean = stats.mean();
+                double stddev = stats.stddev();
+                double minimum = stats.minimum();
+                double maximum = stats.maximum();
+                cpu.resetStatistics();
+                LOGI("CPU usage over past %.1f secs (%u mixer loops at %.1f mean ms per loop):\n  us per mix loop: mean=%.0f stddev=%.0f min=%.0f max=%.0f\n  %% of wall: mean=%.1f stddev=%.1f min=%.1f max=%.1f",
+                        elapsed * .000000001, n, perLoop * .000001,
+                        mean * .001,
+                        stddev * .001,
+                        minimum * .001,
+                        maximum * .001,
+                        mean / perLoop100,
+                        stddev / perLoop100,
+                        minimum / perLoop100,
+                        maximum / perLoop100);
+            }
+        }
+#endif
         processConfigEvents();
 
         mixerStatus = MIXER_IDLE;

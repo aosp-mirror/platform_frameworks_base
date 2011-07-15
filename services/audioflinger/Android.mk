@@ -24,6 +24,7 @@ LOCAL_SHARED_LIBRARIES := \
     libdl
 
 LOCAL_STATIC_LIBRARIES := \
+    libcpustats \
     libmedia_helper
 
 LOCAL_MODULE:= libaudioflinger
