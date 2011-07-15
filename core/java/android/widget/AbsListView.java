@@ -2762,6 +2762,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 // touch mode). Force an initial layout to get rid of the selection.
                 layoutChildren();
             }
+            updateSelectorState();
         } else {
             int touchMode = mTouchMode;
             if (touchMode == TOUCH_MODE_OVERSCROLL || touchMode == TOUCH_MODE_OVERFLING) {
