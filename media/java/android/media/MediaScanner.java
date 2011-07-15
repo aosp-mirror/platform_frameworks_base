@@ -707,7 +707,9 @@ public class MediaScanner
             map.put(MediaStore.MediaColumns.MIME_TYPE, mMimeType);
             map.put(MediaStore.MediaColumns.IS_DRM, mIsDrm);
 
-            if (!mNoMedia) {
+            if (mNoMedia) {
+                map.put(MediaStore.MediaColumns.NO_MEDIA, true);
+            } else {
                 if (MediaFile.isVideoFileType(mFileType)) {
                     map.put(Video.Media.ARTIST, (mArtist != null && mArtist.length() > 0
                             ? mArtist : MediaStore.UNKNOWN_STRING));
