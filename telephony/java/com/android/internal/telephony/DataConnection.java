@@ -26,7 +26,6 @@ import com.android.internal.util.StateMachine;
 import android.app.PendingIntent;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
-import android.net.LinkProperties.CompareAddressesResult;
 import android.net.ProxyProperties;
 import android.os.AsyncResult;
 import android.os.Message;
