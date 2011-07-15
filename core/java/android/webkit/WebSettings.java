@@ -1783,6 +1783,20 @@ public class WebSettings {
     }
 
     /**
+     * @hide
+     */
+    public void setProperty(String key, String value) {
+        mWebView.nativeSetProperty(key, value);
+    }
+
+    /**
+     * @hide
+     */
+    public String getProperty(String key) {
+        return mWebView.nativeGetProperty(key);
+    }
+
+    /**
      * Transfer messages from the queue to the new WebCoreThread. Called from
      * WebCore thread.
      */
