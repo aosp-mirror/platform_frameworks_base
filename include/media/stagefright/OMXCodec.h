@@ -329,6 +329,7 @@ private:
     void restorePatchedDataPointer(BufferInfo *info);
 
     status_t applyRotation();
+    status_t waitForBufferFilled_l();
 
     int64_t retrieveDecodingTimeUs(bool isCodecSpecific);
 
