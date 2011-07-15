@@ -16,8 +16,6 @@
 
 package android.text;
 
-import com.android.internal.util.ArrayUtils;
-
 import android.emoji.EmojiFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -31,6 +29,8 @@ import android.text.style.LineBackgroundSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.ReplacementSpan;
 import android.text.style.TabStopSpan;
+
+import com.android.internal.util.ArrayUtils;
 
 import java.util.Arrays;
 
@@ -113,6 +113,29 @@ public abstract class Layout {
     protected Layout(CharSequence text, TextPaint paint,
                      int width, Alignment align,
                      float spacingMult, float spacingAdd) {
+        this(text, paint, width, align, TextDirectionHeuristics.FIRSTSTRONG_LTR,
+                spacingMult, spacingAdd);
+    }
+
+    /**
+     * Subclasses of Layout use this constructor to set the display text,
+     * width, and other standard properties.
+     * @param text the text to render
+     * @param paint the default paint for the layout.  Styles can override
+     * various attributes of the paint.
+     * @param width the wrapping width for the text.
+     * @param align whether to left, right, or center the text.  Styles can
+     * override the alignment.
+     * @param spacingMult factor by which to scale the font size to get the
+     * default line spacing
+     * @param spacingAdd amount to add to the default line spacing
+     *
+     * @hide
+     */
+    protected Layout(CharSequence text, TextPaint paint,
+                     int width, Alignment align, TextDirectionHeuristic textDir,
+                     float spacingMult, float spacingAdd) {
+
         if (width < 0)
             throw new IllegalArgumentException("Layout: " + width + " < 0");
 
@@ -133,6 +156,7 @@ public abstract class Layout {
         mSpacingMult = spacingMult;
         mSpacingAdd = spacingAdd;
         mSpannedText = text instanceof Spanned;
+        mTextDir = textDir;
     }
 
     /**
@@ -528,6 +552,14 @@ public abstract class Layout {
      */
     public final float getSpacingAdd() {
         return mSpacingAdd;
+    }
+
+    /**
+     * Return the heuristic used to determine paragraph text direction.
+     * @hide
+     */
+    public final TextDirectionHeuristic getTextDirectionHeuristic() {
+        return mTextDir;
     }
 
     /**
@@ -1419,7 +1451,7 @@ public abstract class Layout {
         MeasuredText mt = MeasuredText.obtain();
         TextLine tl = TextLine.obtain();
         try {
-            mt.setPara(text, start, end, DIR_REQUEST_LTR);
+            mt.setPara(text, start, end, TextDirectionHeuristics.LTR);
             Directions directions;
             int dir;
             if (mt.mEasy) {
@@ -1769,6 +1801,7 @@ public abstract class Layout {
     private float mSpacingAdd;
     private static final Rect sTempRect = new Rect();
     private boolean mSpannedText;
+    private TextDirectionHeuristic mTextDir;
 
     public static final int DIR_LEFT_TO_RIGHT = 1;
     public static final int DIR_RIGHT_TO_LEFT = -1;

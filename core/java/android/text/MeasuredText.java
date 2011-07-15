@@ -85,7 +85,7 @@ class MeasuredText {
      * Analyzes text for bidirectional runs.  Allocates working buffers.
      */
     /* package */
-    void setPara(CharSequence text, int start, int end, int bidiRequest) {
+    void setPara(CharSequence text, int start, int end, TextDirectionHeuristic textDir) {
         mText = text;
         mTextStart = start;
 
@@ -115,12 +115,28 @@ class MeasuredText {
             }
         }
 
-        if (TextUtils.doesNotNeedBidi(mChars, 0, len)) {
+        if ((textDir == TextDirectionHeuristics.LTR ||
+                textDir == TextDirectionHeuristics.FIRSTSTRONG_LTR ||
+                textDir == TextDirectionHeuristics.ANYRTL_LTR) &&
+                TextUtils.doesNotNeedBidi(mChars, 0, len)) {
             mDir = Layout.DIR_LEFT_TO_RIGHT;
             mEasy = true;
         } else {
             if (mLevels == null || mLevels.length < len) {
                 mLevels = new byte[ArrayUtils.idealByteArraySize(len)];
+            }
+            int bidiRequest;
+            if (textDir == TextDirectionHeuristics.LTR) {
+                bidiRequest = Layout.DIR_REQUEST_LTR;
+            } else if (textDir == TextDirectionHeuristics.RTL) {
+                bidiRequest = Layout.DIR_REQUEST_RTL;
+            } else if (textDir == TextDirectionHeuristics.FIRSTSTRONG_LTR) {
+                bidiRequest = Layout.DIR_REQUEST_DEFAULT_LTR;
+            } else if (textDir == TextDirectionHeuristics.FIRSTSTRONG_RTL) {
+                bidiRequest = Layout.DIR_REQUEST_DEFAULT_RTL;
+            } else {
+                boolean isRtl = textDir.isRtl(mChars, 0, len);
+                bidiRequest = isRtl ? Layout.DIR_REQUEST_RTL : Layout.DIR_REQUEST_LTR;
             }
             mDir = AndroidBidi.bidi(bidiRequest, mChars, mLevels, len, false);
             mEasy = false;

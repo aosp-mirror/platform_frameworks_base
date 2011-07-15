@@ -16,9 +16,6 @@
 
 package android.text;
 
-import com.android.internal.R;
-import com.android.internal.util.ArrayUtils;
-
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -44,6 +41,9 @@ import android.text.style.TypefaceSpan;
 import android.text.style.URLSpan;
 import android.text.style.UnderlineSpan;
 import android.util.Printer;
+
+import com.android.internal.R;
+import com.android.internal.util.ArrayUtils;
 
 import java.lang.reflect.Array;
 import java.util.Iterator;
@@ -1001,13 +1001,37 @@ public class TextUtils {
      * will be padded with zero-width spaces to preserve the original
      * length and offsets instead of truncating.
      * If <code>callback</code> is non-null, it will be called to
-     * report the start and end of the ellipsized range.
+     * report the start and end of the ellipsized range.  TextDirection
+     * is determined by the first strong directional character.
      */
     public static CharSequence ellipsize(CharSequence text,
                                          TextPaint paint,
                                          float avail, TruncateAt where,
                                          boolean preserveLength,
                                          EllipsizeCallback callback) {
+        return ellipsize(text, paint, avail, where, preserveLength, callback,
+                TextDirectionHeuristics.FIRSTSTRONG_LTR);
+    }
+
+    /**
+     * Returns the original text if it fits in the specified width
+     * given the properties of the specified Paint,
+     * or, if it does not fit, a copy with ellipsis character added
+     * at the specified edge or center.
+     * If <code>preserveLength</code> is specified, the returned copy
+     * will be padded with zero-width spaces to preserve the original
+     * length and offsets instead of truncating.
+     * If <code>callback</code> is non-null, it will be called to
+     * report the start and end of the ellipsized range.
+     *
+     * @hide
+     */
+    public static CharSequence ellipsize(CharSequence text,
+            TextPaint paint,
+            float avail, TruncateAt where,
+            boolean preserveLength,
+            EllipsizeCallback callback,
+            TextDirectionHeuristic textDir) {
         if (sEllipsis == null) {
             Resources r = Resources.getSystem();
             sEllipsis = r.getString(R.string.ellipsis);
@@ -1017,8 +1041,7 @@ public class TextUtils {
 
         MeasuredText mt = MeasuredText.obtain();
         try {
-            float width = setPara(mt, paint, text, 0, text.length(),
-                    Layout.DIR_REQUEST_DEFAULT_LTR);
+            float width = setPara(mt, paint, text, 0, text.length(), textDir);
 
             if (width <= avail) {
                 if (callback != null) {
@@ -1108,11 +1131,20 @@ public class TextUtils {
                                               TextPaint p, float avail,
                                               String oneMore,
                                               String more) {
+        return commaEllipsize(text, p, avail, oneMore, more,
+                TextDirectionHeuristics.FIRSTSTRONG_LTR);
+    }
+
+    /**
+     * @hide
+     */
+    public static CharSequence commaEllipsize(CharSequence text, TextPaint p,
+         float avail, String oneMore, String more, TextDirectionHeuristic textDir) {
 
         MeasuredText mt = MeasuredText.obtain();
         try {
             int len = text.length();
-            float width = setPara(mt, p, text, 0, len, Layout.DIR_REQUEST_DEFAULT_LTR);
+            float width = setPara(mt, p, text, 0, len, textDir);
             if (width <= avail) {
                 return text;
             }
@@ -1135,9 +1167,6 @@ public class TextUtils {
             int count = 0;
             float[] widths = mt.mWidths;
 
-            int request = mt.mDir == 1 ? Layout.DIR_REQUEST_LTR :
-                Layout.DIR_REQUEST_RTL;
-
             MeasuredText tempMt = MeasuredText.obtain();
             for (int i = 0; i < len; i++) {
                 w += widths[i];
@@ -1155,7 +1184,7 @@ public class TextUtils {
                     }
 
                     // XXX this is probably ok, but need to look at it more
-                    tempMt.setPara(format, 0, format.length(), request);
+                    tempMt.setPara(format, 0, format.length(), textDir);
                     float moreWid = tempMt.addStyleRun(p, tempMt.mLen, null);
 
                     if (w + moreWid <= avail) {
@@ -1175,9 +1204,9 @@ public class TextUtils {
     }
 
     private static float setPara(MeasuredText mt, TextPaint paint,
-            CharSequence text, int start, int end, int bidiRequest) {
+            CharSequence text, int start, int end, TextDirectionHeuristic textDir) {
 
-        mt.setPara(text, start, end, bidiRequest);
+        mt.setPara(text, start, end, textDir);
 
         float width;
         Spanned sp = text instanceof Spanned ? (Spanned) text : null;

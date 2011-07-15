@@ -226,7 +226,17 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      */
     public static Metrics isBoring(CharSequence text,
                                    TextPaint paint) {
-        return isBoring(text, paint, null);
+        return isBoring(text, paint, TextDirectionHeuristics.FIRSTSTRONG_LTR, null);
+    }
+
+    /**
+     * Returns null if not boring; the width, ascent, and descent if boring.
+     * @hide
+     */
+    public static Metrics isBoring(CharSequence text,
+                                   TextPaint paint,
+                                   TextDirectionHeuristic textDir) {
+        return isBoring(text, paint, textDir, null);
     }
 
     /**
@@ -235,6 +245,17 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
      * if boring.
      */
     public static Metrics isBoring(CharSequence text, TextPaint paint, Metrics metrics) {
+        return isBoring(text, paint, TextDirectionHeuristics.FIRSTSTRONG_LTR, metrics);
+    }
+
+    /**
+     * Returns null if not boring; the width, ascent, and descent in the
+     * provided Metrics object (or a new one if the provided one was null)
+     * if boring.
+     * @hide
+     */
+    public static Metrics isBoring(CharSequence text, TextPaint paint,
+            TextDirectionHeuristic textDir, Metrics metrics) {
         char[] temp = TextUtils.obtain(500);
         int length = text.length();
         boolean boring = true;
@@ -257,6 +278,11 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                     boring = false;
                     break outer;
                 }
+            }
+
+            if (textDir.isRtl(temp, 0, n)) {
+               boring = false;
+               break outer;
             }
         }
 
