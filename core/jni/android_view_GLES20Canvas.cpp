@@ -859,10 +859,8 @@ int register_android_view_GLES20Canvas(JNIEnv* env) {
 
 const char* const kActivityThreadPathName = "android/app/ActivityThread";
 
-int register_android_app_ActivityThread(JNIEnv* env)
-{
-    return AndroidRuntime::registerNativeMethods(
-            env, kActivityThreadPathName,
+int register_android_app_ActivityThread(JNIEnv* env) {
+    return AndroidRuntime::registerNativeMethods(env, kActivityThreadPathName,
             gActivityThreadMethods, NELEM(gActivityThreadMethods));
 }
 

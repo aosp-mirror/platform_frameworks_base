@@ -20,6 +20,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -107,6 +108,14 @@ public class TextureView extends View {
 
     private SurfaceTexture.OnFrameAvailableListener mUpdateListener;
 
+    private Canvas mCanvas;
+    private int mSaveCount;
+
+    private final Object[] mNativeWindowLock = new Object[0];
+    // Used from native code, do not write!
+    @SuppressWarnings({"UnusedDeclaration"})
+    private int mNativeWindow;
+
     /**
      * Creates a new TextureView.
      * 
@@ -190,7 +199,11 @@ public class TextureView extends View {
                 mListener.onSurfaceTextureDestroyed(mSurface);
             }
 
-            mLayer.destroy();            
+            synchronized (mNativeWindowLock) {
+                nDestroyNativeWindow();
+            }
+
+            mLayer.destroy();
             mSurface = null;
             mLayer = null;
         }
@@ -274,6 +287,7 @@ public class TextureView extends View {
             mLayer = mAttachInfo.mHardwareRenderer.createHardwareLayer(mOpaque);
             mSurface = mAttachInfo.mHardwareRenderer.createSurfaceTexture(mLayer);
             nSetDefaultBufferSize(mSurface, getWidth(), getHeight());
+            nCreateNativeWindow(mSurface);            
 
             mUpdateListener = new SurfaceTexture.OnFrameAvailableListener() {
                 @Override
@@ -431,6 +445,79 @@ public class TextureView extends View {
     }
 
     /**
+     * <p>Start editing the pixels in the surface.  The returned Canvas can be used
+     * to draw into the surface's bitmap.  A null is returned if the surface has
+     * not been created or otherwise cannot be edited. You will usually need
+     * to implement
+     * {@link SurfaceTextureListener#onSurfaceTextureAvailable(android.graphics.SurfaceTexture, int, int)}
+     * to find out when the Surface is available for use.</p>
+     * 
+     * <p>The content of the Surface is never preserved between unlockCanvas()
+     * and lockCanvas(), for this reason, every pixel within the Surface area
+     * must be written. The only exception to this rule is when a dirty
+     * rectangle is specified, in which case, non-dirty pixels will be
+     * preserved.</p>
+     * 
+     * @return A Canvas used to draw into the surface.
+     * 
+     * @see #lockCanvas(android.graphics.Rect) 
+     * @see #unlockCanvasAndPost(android.graphics.Canvas) 
+     */
+    public Canvas lockCanvas() {
+        return lockCanvas(null);
+    }
+
+    /**
+     * Just like {@link #lockCanvas()} but allows specification of a dirty
+     * rectangle. Every pixel within that rectangle must be written; however
+     * pixels outside the dirty rectangle will be preserved by the next call
+     * to lockCanvas().
+     * 
+     * @param dirty Area of the surface that will be modified.
+
+     * @return A Canvas used to draw into the surface.
+     * 
+     * @see #lockCanvas() 
+     * @see #unlockCanvasAndPost(android.graphics.Canvas) 
+     */
+    public Canvas lockCanvas(Rect dirty) {
+        if (!isAvailable()) return null;
+
+        if (mCanvas == null) {
+            mCanvas = new Canvas();
+        }
+
+        synchronized (mNativeWindowLock) {
+            nLockCanvas(mNativeWindow, mCanvas, dirty);
+        }
+        mSaveCount = mCanvas.save();
+
+        return mCanvas;
+    }
+
+    /**
+     * Finish editing pixels in the surface. After this call, the surface's
+     * current pixels will be shown on the screen, but its content is lost,
+     * in particular there is no guarantee that the content of the Surface
+     * will remain unchanged when lockCanvas() is called again.
+     * 
+     * @param canvas The Canvas previously returned by lockCanvas()
+     * 
+     * @see #lockCanvas()
+     * @see #lockCanvas(android.graphics.Rect) 
+     */
+    public void unlockCanvasAndPost(Canvas canvas) {
+        if (mCanvas != null && canvas == mCanvas) {
+            canvas.restoreToCount(mSaveCount);
+            mSaveCount = 0;
+
+            synchronized (mNativeWindowLock) {
+                nUnlockCanvasAndPost(mNativeWindow, mCanvas);
+            }
+        }
+    }
+
+    /**
      * Returns the {@link SurfaceTexture} used by this view. This method
      * may return null if the view is not attached to a window or if the surface
      * texture has not been initialized yet.
@@ -506,6 +593,12 @@ public class TextureView extends View {
         public void onSurfaceTextureUpdated(SurfaceTexture surface);
     }
 
+    private native void nCreateNativeWindow(SurfaceTexture surface);
+    private native void nDestroyNativeWindow();
+
     private static native void nSetDefaultBufferSize(SurfaceTexture surfaceTexture,
             int width, int height);
+
+    private static native void nLockCanvas(int nativeWindow, Canvas canvas, Rect dirty);
+    private static native void nUnlockCanvasAndPost(int nativeWindow, Canvas canvas);
 }
