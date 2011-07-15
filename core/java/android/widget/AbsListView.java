@@ -271,12 +271,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     Drawable mSelector;
 
     /**
-     * Set to true if we would like to have the selector showing itself.
-     * We still need to draw and position it even if this is false.
-     */
-    boolean mSelectorShowing;
-
-    /**
      * The current position of the selector in the list.
      */
     int mSelectorPosition = INVALID_POSITION;
@@ -1669,7 +1663,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         setSelectedPositionInt(INVALID_POSITION);
         setNextSelectedPositionInt(INVALID_POSITION);
         mSelectedTop = 0;
-        mSelectorShowing = false;
         mSelectorPosition = INVALID_POSITION;
         mSelectorRect.setEmpty();
         invalidate();
@@ -2025,7 +2018,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         final boolean isChildViewEnabled = mIsChildViewEnabled;
         if (sel.isEnabled() != isChildViewEnabled) {
             mIsChildViewEnabled = !isChildViewEnabled;
-            if (mSelectorShowing) {
+            if (getSelectedItemPosition() != INVALID_POSITION) {
                 refreshDrawableState();
             }
         }
@@ -4529,7 +4522,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             setSelectedPositionInt(INVALID_POSITION);
             setNextSelectedPositionInt(INVALID_POSITION);
             mSelectedTop = 0;
-            mSelectorShowing = false;
         }
     }
 
