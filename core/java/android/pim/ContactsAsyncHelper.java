@@ -186,7 +186,7 @@ public class ContactsAsyncHelper extends Handler {
                     InputStream inputStream = null;
                     try {
                         inputStream = Contacts.openContactPhotoInputStream(
-                                args.context.getContentResolver(), args.uri);
+                                args.context.getContentResolver(), args.uri, true);
                     } catch (Exception e) {
                         Log.e(LOG_TAG, "Error opening photo input stream", e);
                     }
