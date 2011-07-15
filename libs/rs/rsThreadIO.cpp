@@ -21,8 +21,7 @@
 using namespace android;
 using namespace android::renderscript;
 
-ThreadIO::ThreadIO() {
-    mToCore.init(16 * 1024);
+ThreadIO::ThreadIO() : mUsingSocket(false) {
 }
 
 ThreadIO::~ThreadIO() {
@@ -30,6 +29,7 @@ ThreadIO::~ThreadIO() {
 
 void ThreadIO::init(bool useSocket) {
     mUsingSocket = useSocket;
+    mToCore.init(16 * 1024);
 
     if (mUsingSocket) {
         mToClientSocket.init();

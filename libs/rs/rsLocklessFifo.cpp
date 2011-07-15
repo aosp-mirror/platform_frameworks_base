@@ -21,14 +21,16 @@
 using namespace android;
 using namespace android::renderscript;
 
-LocklessCommandFifo::LocklessCommandFifo() {
+LocklessCommandFifo::LocklessCommandFifo() : mBuffer(0) {
 }
 
 LocklessCommandFifo::~LocklessCommandFifo() {
     if (!mInShutdown) {
         shutdown();
     }
-    free(mBuffer);
+    if (mBuffer) {
+        free(mBuffer);
+    }
 }
 
 void LocklessCommandFifo::shutdown() {
