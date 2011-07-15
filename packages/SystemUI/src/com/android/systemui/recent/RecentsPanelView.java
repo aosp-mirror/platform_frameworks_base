@@ -22,6 +22,7 @@ import java.util.List;
 import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -39,16 +40,22 @@ import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.net.Uri;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -69,7 +76,7 @@ public class RecentsPanelView extends RelativeLayout
     private int mIconDpi;
     private View mRecentsScrim;
     private View mRecentsGlowView;
-    private View mRecentsContainer;
+    private ViewGroup mRecentsContainer;
     private Bitmap mGlowBitmap;
     // TODO: add these widgets attributes to the layout file
     private int mGlowBitmapPaddingLeftPx;
@@ -107,8 +114,18 @@ public class RecentsPanelView extends RelativeLayout
         }
     };
 
+    private final class OnLongClickDelegate implements View.OnLongClickListener {
+        View mOtherView;
+        OnLongClickDelegate(View other) {
+            mOtherView = other;
+        }
+        public boolean onLongClick(View v) {
+            return mOtherView.performLongClick();
+        }
+    }
+
     /* package */ final static class ViewHolder {
-        ImageView thumbnailView;
+        View thumbnailView;
         ImageView iconView;
         TextView labelView;
         TextView descriptionView;
@@ -139,7 +156,7 @@ public class RecentsPanelView extends RelativeLayout
             if (convertView == null) {
                 convertView = mInflater.inflate(R.layout.status_bar_recent_item, null);
                 holder = new ViewHolder();
-                holder.thumbnailView = (ImageView) convertView.findViewById(R.id.app_thumbnail);
+                holder.thumbnailView = convertView.findViewById(R.id.app_thumbnail);
                 holder.iconView = (ImageView) convertView.findViewById(R.id.app_icon);
                 holder.labelView = (TextView) convertView.findViewById(R.id.app_label);
                 holder.descriptionView = (TextView) convertView.findViewById(R.id.app_description);
@@ -153,11 +170,12 @@ public class RecentsPanelView extends RelativeLayout
 
             final ActivityDescription activityDescription = mActivityDescriptions.get(activityId);
             final Bitmap thumb = activityDescription.thumbnail;
-            holder.thumbnailView.setImageBitmap(compositeBitmap(mGlowBitmap, thumb));
+            updateDrawable(holder.thumbnailView, compositeBitmap(mGlowBitmap, thumb));
             holder.iconView.setImageDrawable(activityDescription.icon);
             holder.labelView.setText(activityDescription.label);
             holder.descriptionView.setText(activityDescription.description);
             holder.thumbnailView.setTag(activityDescription);
+            holder.thumbnailView.setOnLongClickListener(new OnLongClickDelegate(convertView));
             holder.activityDescription = activityDescription;
 
             return convertView;
@@ -172,6 +190,20 @@ public class RecentsPanelView extends RelativeLayout
         final int t = mRecentsGlowView.getTop();
         final int b = mRecentsGlowView.getBottom();
         return x >= l && x < r && y >= t && y < b;
+    }
+
+    private void updateDrawable(View thumbnailView, Bitmap bitmap) {
+        Drawable d = thumbnailView.getBackground();
+        if (d instanceof LayerDrawable) {
+            LayerDrawable layerD = (LayerDrawable) d;
+            Drawable thumb = layerD.findDrawableByLayerId(R.id.base_layer);
+            if (thumb != null) {
+                layerD.setDrawableByLayerId(R.id.base_layer,
+                        new BitmapDrawable(getResources(), bitmap));
+                return;
+            }
+        }
+        Log.w(TAG, "Failed to update drawable");
     }
 
     public void show(boolean show, boolean animate) {
@@ -260,7 +292,7 @@ public class RecentsPanelView extends RelativeLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
         mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mRecentsContainer = findViewById(R.id.recents_container);
+        mRecentsContainer = (ViewGroup) findViewById(R.id.recents_container);
         mListAdapter = new ActivityDescriptionAdapter(mContext);
         if (mRecentsContainer instanceof RecentsListView) {
             RecentsListView listView = (RecentsListView) mRecentsContainer;
@@ -503,7 +535,35 @@ public class RecentsPanelView extends RelativeLayout
         am.removeTask(ad.taskId, ActivityManager.REMOVE_TASK_KILL_PROCESS);
     }
 
-    public void handleLongPress(View selectedView) {
-        // TODO show context menu : "Remove from list", "Show properties"
+    private void startApplicationDetailsActivity(String packageName) {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.fromParts("package", packageName, null));
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getContext().startActivity(intent);
+    }
+
+    public void handleLongPress(final View selectedView, final View anchorView) {
+        PopupMenu popup = new PopupMenu(mContext, anchorView == null ? selectedView : anchorView);
+        popup.getMenuInflater().inflate(R.menu.recent_popup_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.recent_remove_item) {
+                    mRecentsContainer.removeViewInLayout(selectedView);
+                } else if (item.getItemId() == R.id.recent_inspect_item) {
+                    ViewHolder viewHolder = (ViewHolder) selectedView.getTag();
+                    if (viewHolder != null) {
+                        final ActivityDescription ad = viewHolder.activityDescription;
+                        startApplicationDetailsActivity(ad.packageName);
+                        mBar.animateCollapse();
+                    } else {
+                        throw new IllegalStateException("Oops, no tag on view " + selectedView);
+                    }
+                } else {
+                    return false;
+                }
+                return true;
+            }
+        });
+        popup.show();
     }
 }

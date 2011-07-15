@@ -20,6 +20,7 @@ import com.android.systemui.recent.RecentsPanelView.ActivityDescriptionAdapter;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -42,8 +43,7 @@ import android.widget.ScrollView;
 
 import com.android.systemui.R;
 
-public class RecentsVerticalScrollView extends ScrollView
-        implements View.OnClickListener, View.OnTouchListener {
+public class RecentsVerticalScrollView extends ScrollView {
     private static final String TAG = RecentsPanelView.TAG;
     private static final boolean DEBUG_INVALIDATE = false;
     private static final boolean DEBUG = RecentsPanelView.DEBUG;
@@ -57,6 +57,15 @@ public class RecentsVerticalScrollView extends ScrollView
     private VelocityTracker mVelocityTracker;
     private float mDensityScale;
     private float mPagingTouchSlop;
+    private OnLongClickListener mOnLongClick = new OnLongClickListener() {
+        public boolean onLongClick(View v) {
+            final View anchorView = v.findViewById(R.id.app_description);
+            mCurrentView = v;
+            mCallback.handleLongPress(v, anchorView);
+            mCurrentView = null; // make sure we don't accept the return click from this
+            return true;
+        }
+    };
 
     public RecentsVerticalScrollView(Context context) {
         this(context, null);
@@ -72,13 +81,12 @@ public class RecentsVerticalScrollView extends ScrollView
         return mLinearLayout.getHeight() - getHeight();
     }
 
-    public void update() {
+    private void update() {
         mLinearLayout.removeAllViews();
         for (int i = 0; i < mAdapter.getCount(); i++) {
-            View view = mAdapter.getView(i, null, mLinearLayout);
+            final View view = mAdapter.getView(i, null, mLinearLayout);
             view.setClickable(true);
-            view.setOnClickListener(this);
-            view.setOnTouchListener(this);
+            view.setOnLongClickListener(mOnLongClick);
             mLinearLayout.addView(view);
         }
         // Scroll to end after layout.
@@ -91,7 +99,20 @@ public class RecentsVerticalScrollView extends ScrollView
     }
 
     @Override
+    public void removeViewInLayout(final View view) {
+        ObjectAnimator anim = animateClosed(view, Constants.MAX_ESCAPE_ANIMATION_DURATION,
+                "x", view.getX(), view.getX() + view.getWidth());
+        anim.addListener(new AnimatorListenerAdapter() {
+            public void onAnimationEnd(Animator animation) {
+                RecentsVerticalScrollView.super.removeViewInLayout(view);
+            }
+        });
+        anim.start();
+    }
+
+    @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
@@ -100,6 +121,18 @@ public class RecentsVerticalScrollView extends ScrollView
             case MotionEvent.ACTION_DOWN:
                 mDragging = false;
                 mLastX = ev.getX();
+                final float x = ev.getX() + getScrollX();
+                final float y = ev.getY() + getScrollY();
+                mCurrentView = null;
+                for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
+                    View item = mLinearLayout.getChildAt(i);
+                    if (x >= item.getLeft() && x < item.getRight()
+                            && y >= item.getTop() && y < item.getBottom()) {
+                        mCurrentView = item;
+                        Log.v(TAG, "Hit item " + item);
+                        break;
+                    }
+                }
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -111,6 +144,9 @@ public class RecentsVerticalScrollView extends ScrollView
                 break;
 
             case MotionEvent.ACTION_UP:
+                if (mCurrentView != null) {
+                    mCallback.handleOnClick(mCurrentView);
+                }
                 mDragging = false;
                 break;
         }
@@ -125,7 +161,6 @@ public class RecentsVerticalScrollView extends ScrollView
         } else if (view.getX() < thumbWidth* (1.0f - Constants.ALPHA_FADE_START)) {
             result = 1.0f + (thumbWidth*Constants.ALPHA_FADE_START + view.getX()) / fadeWidth;
         }
-        if (DEBUG) Log.v(TAG, "FADE AMOUNT: " + result);
         return result;
     }
 
@@ -138,12 +173,12 @@ public class RecentsVerticalScrollView extends ScrollView
         mVelocityTracker.addMovement(ev);
 
         final View animView = mCurrentView;
-        // TODO: Cache thumbnail
-        final View thumb = animView.findViewById(R.id.app_thumbnail);
+
         switch (ev.getAction()) {
             case MotionEvent.ACTION_MOVE:
                 if (animView != null) {
                     final float delta = ev.getX() - mLastX;
+                    final View thumb = animView.findViewById(R.id.app_thumbnail);
                     animView.setX(animView.getX() + delta);
                     animView.setAlpha(getAlphaForOffset(animView, thumb.getWidth()));
                     invalidateGlobalRegion(animView);
@@ -163,29 +198,11 @@ public class RecentsVerticalScrollView extends ScrollView
                     final float maxVelocity = Constants.ESCAPE_VELOCITY * mDensityScale;
                     if (Math.abs(velocityX) > Math.abs(velocityY)
                             && Math.abs(velocityX) > maxVelocity
-                            && (velocityX > 0.0f) == (animView.getX() >= 0)) {
+                            && (velocityX >= 0.0f) == (animView.getX() >= 0)) {
                         long duration =
                             (long) (Math.abs(newX-curX) * 1000.0f / Math.abs(velocityX));
                         duration = Math.min(duration, Constants.MAX_ESCAPE_ANIMATION_DURATION);
-                        anim = ObjectAnimator.ofFloat(animView, "x", curX, newX);
-                        anim.setInterpolator(new LinearInterpolator());
-                        final int swipeDirection = animView.getX() >= 0.0f ?
-                                RecentsCallback.SWIPE_RIGHT : RecentsCallback.SWIPE_LEFT;
-                        anim.addListener(new AnimatorListener() {
-                            public void onAnimationStart(Animator animation) {
-                            }
-                            public void onAnimationRepeat(Animator animation) {
-                            }
-                            public void onAnimationEnd(Animator animation) {
-                                mLinearLayout.removeView(mCurrentView);
-                                mCallback.handleSwipe(animView, swipeDirection);
-                            }
-                            public void onAnimationCancel(Animator animation) {
-                                mLinearLayout.removeView(mCurrentView);
-                                mCallback.handleSwipe(animView, swipeDirection);
-                            }
-                        });
-                        anim.setDuration(duration);
+                        anim = animateClosed(animView, duration, "x", curX, newX);
                     } else { // Animate back to position
                         long duration = Math.abs(velocityX) > 0.0f ?
                                 (long) (Math.abs(newX-curX) * 1000.0f / Math.abs(velocityX))
@@ -196,6 +213,7 @@ public class RecentsVerticalScrollView extends ScrollView
                         anim.setDuration(duration);
                     }
 
+                    final View thumb = animView.findViewById(R.id.app_thumbnail);
                     anim.addUpdateListener(new AnimatorUpdateListener() {
                         public void onAnimationUpdate(ValueAnimator animation) {
                             animView.setAlpha(getAlphaForOffset(animView, thumb.getWidth()));
@@ -210,6 +228,26 @@ public class RecentsVerticalScrollView extends ScrollView
                 break;
         }
         return true;
+    }
+
+    private ObjectAnimator animateClosed(final View animView, long duration,
+            String attr, float from, float to) {
+        ObjectAnimator anim = ObjectAnimator.ofFloat(animView, attr, from, to);
+        anim.setInterpolator(new LinearInterpolator());
+        final int swipeDirection = animView.getX() >= 0.0f ?
+                RecentsCallback.SWIPE_RIGHT : RecentsCallback.SWIPE_LEFT;
+        anim.addListener(new AnimatorListenerAdapter() {
+            public void onAnimationEnd(Animator animation) {
+                mLinearLayout.removeView(animView);
+                mCallback.handleSwipe(animView, swipeDirection);
+            }
+            public void onAnimationCancel(Animator animation) {
+                mLinearLayout.removeView(animView);
+                mCallback.handleSwipe(animView, swipeDirection);
+            }
+        });
+        anim.setDuration(duration);
+        return anim;
     }
 
     void invalidateGlobalRegion(View view) {
@@ -236,13 +274,8 @@ public class RecentsVerticalScrollView extends ScrollView
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        LayoutInflater inflater = (LayoutInflater)
-                mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
         setScrollbarFadingEnabled(true);
-
         mLinearLayout = (LinearLayout) findViewById(R.id.recents_linear_layout);
-
         final int leftPadding = mContext.getResources()
             .getDimensionPixelOffset(R.dimen.status_bar_recents_thumbnail_left_margin);
         setOverScrollEffectPadding(leftPadding, 0);
@@ -306,16 +339,7 @@ public class RecentsVerticalScrollView extends ScrollView
         mLinearLayout.setLayoutTransition(transition);
     }
 
-    public void onClick(View view) {
-        mCallback.handleOnClick(view);
-    }
-
     public void setCallback(RecentsCallback callback) {
         mCallback = callback;
-    }
-
-    public boolean onTouch(View v, MotionEvent event) {
-        mCurrentView = v;
-        return false;
     }
 }

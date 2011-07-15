@@ -48,7 +48,6 @@
                 android:fadingEdge="vertical"
                 android:scrollbars="none"
                 android:fadingEdgeLength="@*android:dimen/status_bar_height"
-                android:listSelector="@drawable/recents_thumbnail_bg_selector"
                 android:layout_gravity="bottom|left"
                 android:clipToPadding="false"
                 android:clipChildren="false">

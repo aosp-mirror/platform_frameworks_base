@@ -51,7 +51,6 @@
                 android:fadingEdge="horizontal"
                 android:scrollbars="none"
                 android:fadingEdgeLength="@dimen/status_bar_recents_fading_edge_length"
-                android:listSelector="@drawable/recents_thumbnail_bg_selector"
                 android:layout_gravity="bottom|left"
                 android:orientation="horizontal"
                 android:clipToPadding="false"
