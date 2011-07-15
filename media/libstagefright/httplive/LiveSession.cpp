@@ -36,10 +36,9 @@
 
 #include <ctype.h>
 #include <openssl/aes.h>
+#include <openssl/md5.h>
 
 namespace android {
-
-const int64_t LiveSession::kMaxPlaylistAgeUs = 15000000ll;
 
 LiveSession::LiveSession(uint32_t flags, bool uidValid, uid_t uid)
     : mFlags(flags),
@@ -59,7 +58,8 @@ LiveSession::LiveSession(uint32_t flags, bool uidValid, uid_t uid)
       mDurationUs(-1),
       mSeekDone(false),
       mDisconnectPending(false),
-      mMonitorQueueGeneration(0) {
+      mMonitorQueueGeneration(0),
+      mRefreshState(INITIAL_MINIMUM_RELOAD_DELAY) {
     if (mUIDValid) {
         mHTTPDataSource->setUID(mUID);
     }
@@ -175,7 +175,8 @@ void LiveSession::onConnect(const sp<AMessage> &msg) {
 
     mMasterURL = url;
 
-    sp<M3UParser> playlist = fetchPlaylist(url.c_str());
+    bool dummy;
+    sp<M3UParser> playlist = fetchPlaylist(url.c_str(), &dummy);
 
     if (playlist == NULL) {
         LOGE("unable to fetch master playlist '%s'.", url.c_str());
@@ -289,13 +290,47 @@ status_t LiveSession::fetchFile(const char *url, sp<ABuffer> *out) {
     return OK;
 }
 
-sp<M3UParser> LiveSession::fetchPlaylist(const char *url) {
+sp<M3UParser> LiveSession::fetchPlaylist(const char *url, bool *unchanged) {
+    *unchanged = false;
+
     sp<ABuffer> buffer;
     status_t err = fetchFile(url, &buffer);
 
     if (err != OK) {
         return NULL;
     }
+
+    // MD5 functionality is not available on the simulator, treat all
+    // playlists as changed.
+
+#if defined(HAVE_ANDROID_OS)
+    uint8_t hash[16];
+
+    MD5_CTX m;
+    MD5_Init(&m);
+    MD5_Update(&m, buffer->data(), buffer->size());
+
+    MD5_Final(hash, &m);
+
+    if (mPlaylist != NULL && !memcmp(hash, mPlaylistHash, 16)) {
+        // playlist unchanged
+
+        if (mRefreshState != THIRD_UNCHANGED_RELOAD_ATTEMPT) {
+            mRefreshState = (RefreshState)(mRefreshState + 1);
+        }
+
+        *unchanged = true;
+
+        LOGV("Playlist unchanged, refresh state is now %d",
+             (int)mRefreshState);
+
+        return NULL;
+    }
+
+    memcpy(mPlaylistHash, hash, sizeof(hash));
+
+    mRefreshState = INITIAL_MINIMUM_RELOAD_DELAY;
+#endif
 
     sp<M3UParser> playlist =
         new M3UParser(url, buffer->data(), buffer->size());
@@ -384,6 +419,63 @@ size_t LiveSession::getBandwidthIndex() {
     return index;
 }
 
+bool LiveSession::timeToRefreshPlaylist(int64_t nowUs) const {
+    if (mPlaylist == NULL) {
+        CHECK_EQ((int)mRefreshState, (int)INITIAL_MINIMUM_RELOAD_DELAY);
+        return true;
+    }
+
+    int32_t targetDurationSecs;
+    CHECK(mPlaylist->meta()->findInt32("target-duration", &targetDurationSecs));
+
+    int64_t targetDurationUs = targetDurationSecs * 1000000ll;
+
+    int64_t minPlaylistAgeUs;
+
+    switch (mRefreshState) {
+        case INITIAL_MINIMUM_RELOAD_DELAY:
+        {
+            size_t n = mPlaylist->size();
+            if (n > 0) {
+                sp<AMessage> itemMeta;
+                CHECK(mPlaylist->itemAt(n - 1, NULL /* uri */, &itemMeta));
+
+                int64_t itemDurationUs;
+                CHECK(itemMeta->findInt64("durationUs", &itemDurationUs));
+
+                minPlaylistAgeUs = itemDurationUs;
+                break;
+            }
+
+            // fall through
+        }
+
+        case FIRST_UNCHANGED_RELOAD_ATTEMPT:
+        {
+            minPlaylistAgeUs = targetDurationUs / 2;
+            break;
+        }
+
+        case SECOND_UNCHANGED_RELOAD_ATTEMPT:
+        {
+            minPlaylistAgeUs = (targetDurationUs * 3) / 2;
+            break;
+        }
+
+        case THIRD_UNCHANGED_RELOAD_ATTEMPT:
+        {
+            minPlaylistAgeUs = targetDurationUs * 3;
+            break;
+        }
+
+        default:
+            TRESPASS();
+            break;
+    }
+
+    return mLastPlaylistFetchTimeUs + minPlaylistAgeUs <= nowUs;
+}
+
 void LiveSession::onDownloadNext() {
     size_t bandwidthIndex = getBandwidthIndex();
 
@@ -392,8 +484,7 @@ rinse_repeat:
 
     if (mLastPlaylistFetchTimeUs < 0
             || (ssize_t)bandwidthIndex != mPrevBandwidthIndex
-            || (!mPlaylist->isComplete()
-                && mLastPlaylistFetchTimeUs + kMaxPlaylistAgeUs <= nowUs)) {
+            || (!mPlaylist->isComplete() && timeToRefreshPlaylist(nowUs))) {
         AString url;
         if (mBandwidthItems.size() > 0) {
             url = mBandwidthItems.editItemAt(bandwidthIndex).mURI;
@@ -403,11 +494,19 @@ rinse_repeat:
 
         bool firstTime = (mPlaylist == NULL);
 
-        mPlaylist = fetchPlaylist(url.c_str());
-        if (mPlaylist == NULL) {
-            LOGE("failed to load playlist at url '%s'", url.c_str());
-            mDataSource->queueEOS(ERROR_IO);
-            return;
+        bool unchanged;
+        sp<M3UParser> playlist = fetchPlaylist(url.c_str(), &unchanged);
+        if (playlist == NULL) {
+            if (unchanged) {
+                // We succeeded in fetching the playlist, but it was
+                // unchanged from the last time we tried.
+            } else {
+                LOGE("failed to load playlist at url '%s'", url.c_str());
+                mDataSource->queueEOS(ERROR_IO);
+                return;
+            }
+        } else {
+            mPlaylist = playlist;
         }
 
         if (firstTime) {

@@ -62,8 +62,6 @@ private:
         kMaxNumRetries         = 5,
     };
 
-    static const int64_t kMaxPlaylistAgeUs;
-
     enum {
         kWhatConnect        = 'conn',
         kWhatDisconnect     = 'disc',
@@ -106,6 +104,16 @@ private:
 
     int32_t mMonitorQueueGeneration;
 
+    enum RefreshState {
+        INITIAL_MINIMUM_RELOAD_DELAY,
+        FIRST_UNCHANGED_RELOAD_ATTEMPT,
+        SECOND_UNCHANGED_RELOAD_ATTEMPT,
+        THIRD_UNCHANGED_RELOAD_ATTEMPT
+    };
+    RefreshState mRefreshState;
+
+    uint8_t mPlaylistHash[16];
+
     void onConnect(const sp<AMessage> &msg);
     void onDisconnect();
     void onDownloadNext();
@@ -113,13 +121,15 @@ private:
     void onSeek(const sp<AMessage> &msg);
 
     status_t fetchFile(const char *url, sp<ABuffer> *out);
-    sp<M3UParser> fetchPlaylist(const char *url);
+    sp<M3UParser> fetchPlaylist(const char *url, bool *unchanged);
     size_t getBandwidthIndex();
 
     status_t decryptBuffer(
             size_t playlistIndex, const sp<ABuffer> &buffer);
 
     void postMonitorQueue(int64_t delayUs = 0);
+
+    bool timeToRefreshPlaylist(int64_t nowUs) const;
 
     static int SortByBandwidth(const BandwidthItem *, const BandwidthItem *);
 
