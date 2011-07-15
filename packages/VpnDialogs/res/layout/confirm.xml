@@ -18,7 +18,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="5mm">
+        android:padding="3mm">
 
     <ImageView android:id="@+id/icon"
             android:layout_width="@android:dimen/app_icon_size"
