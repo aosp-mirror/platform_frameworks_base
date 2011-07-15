@@ -117,12 +117,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewRootImpl;
 import android.view.ViewConfiguration;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewParent;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
@@ -3424,7 +3424,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mHint;
     }
 
-    private boolean isMultilineInputType(int type) {
+    private static boolean isMultilineInputType(int type) {
         return (type & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE)) ==
             (EditorInfo.TYPE_CLASS_TEXT | EditorInfo.TYPE_TEXT_FLAG_MULTI_LINE);
     }
@@ -3500,7 +3500,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mTransformation instanceof PasswordTransformationMethod;
     }
 
-    private boolean isPasswordInputType(int inputType) {
+    private static boolean isPasswordInputType(int inputType) {
         final int variation =
                 inputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION);
         return variation
@@ -3511,7 +3511,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 == (EditorInfo.TYPE_CLASS_NUMBER | EditorInfo.TYPE_NUMBER_VARIATION_PASSWORD);
     }
 
-    private boolean isVisiblePasswordInputType(int inputType) {
+    private static boolean isVisiblePasswordInputType(int inputType) {
         final int variation =
                 inputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION);
         return variation
@@ -5082,6 +5082,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @hide
      * @param offsetRequired
      */
+    @Override
     protected int getFadeHeight(boolean offsetRequired) {
         return mLayout != null ? mLayout.getHeight() : 0;
     }
@@ -7616,7 +7617,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // mode (if any) as soon as this TextView is recycled.
         stopSelectionActionMode();
     }
-    
+
     @Override
     public void onFinishTemporaryDetach() {
         super.onFinishTemporaryDetach();
@@ -7624,7 +7625,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // usually because this instance is an editable field in a list
         if (!mDispatchTemporaryDetach) mTemporaryDetach = false;
     }
-    
+
     @Override
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         if (mTemporaryDetach) {
@@ -9198,16 +9199,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * Paste actions, depending on what this View supports.
      *
      * A custom implementation can add new entries in the default menu in its
-     * {@link ActionMode.Callback#onPrepareActionMode(ActionMode, Menu)} method. The default actions
-     * can also be removed from the menu using {@link Menu#removeItem(int)} and passing
-     * {@link android.R.id#selectAll}, {@link android.R.id#cut}, {@link android.R.id#copy} or
-     * {@link android.R.id#paste} ids as parameters.
+     * {@link android.view.ActionMode.Callback#onPrepareActionMode(ActionMode, Menu)} method. The
+     * default actions can also be removed from the menu using {@link Menu#removeItem(int)} and
+     * passing {@link android.R.id#selectAll}, {@link android.R.id#cut}, {@link android.R.id#copy}
+     * or {@link android.R.id#paste} ids as parameters.
      *
-     * Returning false from {@link ActionMode.Callback#onCreateActionMode(ActionMode, Menu)} will
-     * prevent the action mode from being started.
+     * Returning false from 
+     * {@link android.view.ActionMode.Callback#onCreateActionMode(ActionMode, Menu)} will prevent
+     * the action mode from being started.
      *
      * Action click events should be handled by the custom implementation of
-     * {@link ActionMode.Callback#onActionItemClicked(ActionMode, MenuItem)}.
+     * {@link android.view.ActionMode.Callback#onActionItemClicked(ActionMode, MenuItem)}.
      *
      * Note that text selection mode is not started when a TextView receives focus and the
      * {@link android.R.attr#selectAllOnFocus} flag has been set. The content is highlighted in
@@ -9763,9 +9765,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         mLastParentX = mTempCoords[0];
                         mLastParentY = mTempCoords[1];
                     }
-                }
 
-                onHandleMoved();
+                    onHandleMoved();
+                }
 
                 if (isPositionVisible()) {
                     mContainer.update(mContainerPositionX, mContainerPositionY,
@@ -10208,7 +10210,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                     mPreviousTapPositionX = x;
                     mPreviousTapPositionY = y;
-
                     break;
 
                 case MotionEvent.ACTION_POINTER_DOWN:
@@ -10524,6 +10525,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mTextDir = TextDirectionHeuristics.RTL;
                 break;
         }
+
     }
 
     /**
