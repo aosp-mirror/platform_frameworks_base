@@ -38,5 +38,10 @@ abstract class MessageParams {
         return mCallingApp;
     }
 
+    @Override
+    public String toString() {
+        return "MessageParams[" + hashCode() + "]";
+    }
+
     abstract int getType();
 }

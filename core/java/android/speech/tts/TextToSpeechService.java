@@ -282,6 +282,8 @@ public abstract class TextToSpeechService extends Service {
             if (current != null) {
                 current.stop();
             }
+
+            // The AudioPlaybackHandler will be destroyed by the caller.
         }
 
         /**
@@ -337,6 +339,8 @@ public abstract class TextToSpeechService extends Service {
             }
 
             removeCallbacksAndMessages(callingApp);
+            // This stops writing data to the file / or publishing
+            // items to the audio playback handler.
             SpeechItem current = setCurrentSpeechItem(null);
             if (current != null && TextUtils.equals(callingApp, current.getCallingApp())) {
                 current.stop();
@@ -628,9 +632,7 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected void stopImpl() {
-            if (mToken != null) {
-                mAudioPlaybackHandler.stop(mToken);
-            }
+            // Do nothing.
         }
     }
 
@@ -657,9 +659,7 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected void stopImpl() {
-            if (mToken != null) {
-                mAudioPlaybackHandler.stop(mToken);
-            }
+            // Do nothing.
         }
     }
 

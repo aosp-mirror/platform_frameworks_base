@@ -17,6 +17,7 @@ package android.speech.tts;
 
 import android.media.AudioFormat;
 import android.media.AudioTrack;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.Iterator;
@@ -25,6 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 class AudioPlaybackHandler {
     private static final String TAG = "TTS.AudioPlaybackHandler";
+    private static final boolean DBG_THREADING = false;
     private static final boolean DBG = false;
 
     private static final int MIN_AUDIO_BUFFER_SIZE = 8192;
@@ -64,41 +66,64 @@ class AudioPlaybackHandler {
      * Stops all synthesis for a given {@code token}. If the current token
      * is currently being processed, an effort will be made to stop it but
      * that is not guaranteed.
+     *
+     * NOTE: This assumes that all other messages in the queue with {@code token}
+     * have been removed already.
+     *
+     * NOTE: Must be called synchronized on {@code AudioPlaybackHandler.this}.
      */
-    synchronized public void stop(MessageParams token) {
+    private void stop(MessageParams token) {
         if (token == null) {
             return;
         }
 
-        removeMessages(token);
+        if (DBG) Log.d(TAG, "Stopping token : " + token);
 
         if (token.getType() == MessageParams.TYPE_SYNTHESIS) {
             AudioTrack current = ((SynthesisMessageParams) token).getAudioTrack();
             if (current != null) {
                 // Stop the current audio track if it's still playing.
-                // The audio track is thread safe in this regard.
+                // The audio track is thread safe in this regard. The current
+                // handleSynthesisDataAvailable call will return soon after this
+                // call.
                 current.stop();
             }
+            // This is safe because PlaybackSynthesisCallback#stop would have
+            // been called before this method, and will no longer enqueue any
+            // audio for this token.
+            //
+            // (Even if it did, all it would result in is a warning message).
             mQueue.add(new ListEntry(SYNTHESIS_DONE, token, HIGH_PRIORITY));
         } else  {
-            final MessageParams current = getCurrentParams();
-
-            if (current != null) {
+            if (token != null) {
                 if (token.getType() == MessageParams.TYPE_AUDIO) {
-                    ((AudioMessageParams) current).getPlayer().stop();
+                    ((AudioMessageParams) token).getPlayer().stop();
                 } else if (token.getType() == MessageParams.TYPE_SILENCE) {
-                    ((SilenceMessageParams) current).getConditionVariable().open();
+                    ((SilenceMessageParams) token).getConditionVariable().open();
                 }
             }
         }
     }
 
+    // -----------------------------------------------------
+    // Methods that add and remove elements from the queue. These do not
+    // need to be synchronized strictly speaking, but they make the behaviour
+    // a lot more predictable. (though it would still be correct without
+    // synchronization).
+    // -----------------------------------------------------
+
     synchronized public void removePlaybackItems(String callingApp) {
+        if (DBG_THREADING) Log.d(TAG, "Removing all callback items for : " + callingApp);
         removeMessages(callingApp);
-        stop(getCurrentParams());
+
+        final MessageParams current = getCurrentParams();
+        if (current != null && TextUtils.equals(callingApp, current.getCallingApp())) {
+            stop(current);
+        }
     }
 
     synchronized public void removeAllItems() {
+        if (DBG_THREADING) Log.d(TAG, "Removing all items");
         removeAllMessages();
         stop(getCurrentParams());
     }
@@ -115,27 +140,33 @@ class AudioPlaybackHandler {
      * Shut down the audio playback thread.
      */
     synchronized public void quit() {
+        removeAllMessages();
         stop(getCurrentParams());
         mQueue.add(new ListEntry(SHUTDOWN, null, HIGH_PRIORITY));
     }
 
-    void enqueueSynthesisStart(SynthesisMessageParams token) {
+    synchronized void enqueueSynthesisStart(SynthesisMessageParams token) {
+        if (DBG_THREADING) Log.d(TAG, "Enqueuing synthesis start : " + token);
         mQueue.add(new ListEntry(SYNTHESIS_START, token));
     }
 
-    void enqueueSynthesisDataAvailable(SynthesisMessageParams token) {
+    synchronized void enqueueSynthesisDataAvailable(SynthesisMessageParams token) {
+        if (DBG_THREADING) Log.d(TAG, "Enqueuing synthesis data available : " + token);
         mQueue.add(new ListEntry(SYNTHESIS_DATA_AVAILABLE, token));
     }
 
-    void enqueueSynthesisDone(SynthesisMessageParams token) {
+    synchronized void enqueueSynthesisDone(SynthesisMessageParams token) {
+        if (DBG_THREADING) Log.d(TAG, "Enqueuing synthesis done : " + token);
         mQueue.add(new ListEntry(SYNTHESIS_DONE, token));
     }
 
-    void enqueueAudio(AudioMessageParams token) {
+    synchronized void enqueueAudio(AudioMessageParams token) {
+        if (DBG_THREADING) Log.d(TAG, "Enqueuing audio : " + token);
         mQueue.add(new ListEntry(PLAY_AUDIO, token));
     }
 
-    void enqueueSilence(SilenceMessageParams token) {
+    synchronized void enqueueSilence(SilenceMessageParams token) {
+        if (DBG_THREADING) Log.d(TAG, "Enqueuing silence : " + token);
         mQueue.add(new ListEntry(PLAY_SILENCE, token));
     }
 
@@ -175,26 +206,6 @@ class AudioPlaybackHandler {
                 setCurrentParams(entry.mMessage);
                 handleMessage(entry);
                 setCurrentParams(null);
-            }
-        }
-    }
-
-    /*
-     * Remove all messages from the queue that contain the supplied token.
-     * Note that the Iterator is thread safe, and other methods can safely
-     * continue adding to the queue at this point.
-     */
-    synchronized private void removeMessages(MessageParams token) {
-        if (token == null) {
-            return;
-        }
-
-        Iterator<ListEntry> it = mQueue.iterator();
-
-        while (it.hasNext()) {
-            final ListEntry current = it.next();
-            if (current.mMessage == token) {
-                it.remove();
             }
         }
     }
@@ -263,6 +274,13 @@ class AudioPlaybackHandler {
     }
 
     private void setCurrentParams(MessageParams p) {
+        if (DBG_THREADING) {
+            if (p != null) {
+                Log.d(TAG, "Started handling :" + p);
+            } else {
+                Log.d(TAG, "End handling : " + mCurrentParams);
+            }
+        }
         mCurrentParams = p;
     }
 
@@ -353,7 +371,7 @@ class AudioPlaybackHandler {
     private void handleSynthesisDataAvailable(MessageParams msg) {
         final SynthesisMessageParams param = (SynthesisMessageParams) msg;
         if (param.getAudioTrack() == null) {
-            Log.w(TAG, "Error : null audio track in handleDataAvailable.");
+            Log.w(TAG, "Error : null audio track in handleDataAvailable : " + param);
             return;
         }
 

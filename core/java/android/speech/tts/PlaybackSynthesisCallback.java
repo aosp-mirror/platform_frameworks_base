@@ -90,12 +90,10 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
                 Log.w(TAG, "stop() called twice");
                 return;
             }
+
             // mToken will be null if the engine encounters
             // an error before it called start().
-            if (mToken != null) {
-                mAudioTrackHandler.stop(mToken);
-                mToken = null;
-            } else {
+            if (mToken == null) {
                 // In all other cases, mAudioTrackHandler.stop() will
                 // result in onComplete being called.
                 mLogger.onWriteData();
@@ -158,7 +156,7 @@ class PlaybackSynthesisCallback extends AbstractSynthesisCallback {
         }
 
         synchronized (mStateLock) {
-            if (mToken == null) {
+            if (mToken == null || mStopped) {
                 return TextToSpeech.ERROR;
             }
 
