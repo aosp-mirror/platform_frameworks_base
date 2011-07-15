@@ -2888,7 +2888,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         }
 
         case MotionEvent.ACTION_MOVE: {
-            final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+            int pointerIndex = ev.findPointerIndex(mActivePointerId);
+            if (pointerIndex == -1) {
+                pointerIndex = 0;
+                mActivePointerId = ev.getPointerId(pointerIndex);
+            }
             final int y = (int) ev.getY(pointerIndex);
             deltaY = y - mMotionY;
             switch (mTouchMode) {
@@ -3464,7 +3468,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         case MotionEvent.ACTION_MOVE: {
             switch (mTouchMode) {
             case TOUCH_MODE_DOWN:
-                final int pointerIndex = ev.findPointerIndex(mActivePointerId);
+                int pointerIndex = ev.findPointerIndex(mActivePointerId);
+                if (pointerIndex == -1) {
+                    pointerIndex = 0;
+                    mActivePointerId = ev.getPointerId(pointerIndex);
+                }
                 final int y = (int) ev.getY(pointerIndex);
                 if (startScrollIfNeeded(y - mMotionY)) {
                     return true;
