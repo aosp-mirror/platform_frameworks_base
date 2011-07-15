@@ -23,7 +23,12 @@ import com.android.internal.util.ArrayUtils;
  * there can be gaps in the indices.  It is intended to be more efficient
  * than using a HashMap to map Integers to Integers.
  */
-public class SparseIntArray {
+public class SparseIntArray implements Cloneable {
+
+    private int[] mKeys;
+    private int[] mValues;
+    private int mSize;
+
     /**
      * Creates a new SparseIntArray containing no mappings.
      */
@@ -42,6 +47,19 @@ public class SparseIntArray {
         mKeys = new int[initialCapacity];
         mValues = new int[initialCapacity];
         mSize = 0;
+    }
+
+    @Override
+    public SparseIntArray clone() {
+        SparseIntArray clone = null;
+        try {
+            clone = (SparseIntArray) super.clone();
+            clone.mKeys = mKeys.clone();
+            clone.mValues = mValues.clone();
+        } catch (CloneNotSupportedException cnse) {
+            /* ignore */
+        }
+        return clone;
     }
 
     /**
@@ -232,20 +250,4 @@ public class SparseIntArray {
         else
             return ~high;
     }
-
-    private void checkIntegrity() {
-        for (int i = 1; i < mSize; i++) {
-            if (mKeys[i] <= mKeys[i - 1]) {
-                for (int j = 0; j < mSize; j++) {
-                    Log.e("FAIL", j + ": " + mKeys[j] + " -> " + mValues[j]);
-                }
-
-                throw new RuntimeException();
-            }
-        }
-    }
-
-    private int[] mKeys;
-    private int[] mValues;
-    private int mSize;
 }

@@ -1823,6 +1823,7 @@ package android.accessibilityservice {
     method public static java.lang.String feedbackTypeToString(int);
     method public static java.lang.String flagToString(int);
     method public boolean getCanRetrieveWindowContent();
+    method public java.lang.String getDescription();
     method public java.lang.String getId();
     method public android.content.pm.ResolveInfo getResolveInfo();
     method public java.lang.String getSettingsActivityName();
@@ -16702,6 +16703,7 @@ package android.provider {
     field public static final java.lang.String SELECTED_INPUT_METHOD_SUBTYPE = "selected_input_method_subtype";
     field public static final java.lang.String SETTINGS_CLASSNAME = "settings_classname";
     field public static final java.lang.String SYS_PROP_SETTING_VERSION = "sys.settings_secure_version";
+    field public static final java.lang.String TOUCH_EXPLORATION_REQUESTED = "touch_exploration_requested";
     field public static final java.lang.String TTS_DEFAULT_COUNTRY = "tts_default_country";
     field public static final java.lang.String TTS_DEFAULT_LANG = "tts_default_lang";
     field public static final java.lang.String TTS_DEFAULT_PITCH = "tts_default_pitch";
@@ -20731,11 +20733,12 @@ package android.util {
     method public void set(T, V);
   }
 
-  public class SparseArray {
+  public class SparseArray implements java.lang.Cloneable {
     ctor public SparseArray();
     ctor public SparseArray(int);
     method public void append(int, E);
     method public void clear();
+    method public android.util.SparseArray<E> clone();
     method public void delete(int);
     method public E get(int);
     method public E get(int, E);
@@ -20750,11 +20753,12 @@ package android.util {
     method public E valueAt(int);
   }
 
-  public class SparseBooleanArray {
+  public class SparseBooleanArray implements java.lang.Cloneable {
     ctor public SparseBooleanArray();
     ctor public SparseBooleanArray(int);
     method public void append(int, boolean);
     method public void clear();
+    method public android.util.SparseBooleanArray clone();
     method public void delete(int);
     method public boolean get(int);
     method public boolean get(int, boolean);
@@ -20766,11 +20770,12 @@ package android.util {
     method public boolean valueAt(int);
   }
 
-  public class SparseIntArray {
+  public class SparseIntArray implements java.lang.Cloneable {
     ctor public SparseIntArray();
     ctor public SparseIntArray(int);
     method public void append(int, int);
     method public void clear();
+    method public android.util.SparseIntArray clone();
     method public void delete(int);
     method public int get(int);
     method public int get(int, int);
@@ -23265,6 +23270,7 @@ package android.view.accessibility {
     method public java.util.List<android.accessibilityservice.AccessibilityServiceInfo> getInstalledAccessibilityServiceList();
     method public void interrupt();
     method public boolean isEnabled();
+    method public boolean isTouchExplorationEnabled();
     method public boolean removeAccessibilityStateChangeListener(android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener);
     method public void sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent);
   }
@@ -23301,6 +23307,7 @@ package android.view.accessibility {
     method public boolean isSelected();
     method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.View);
     method public static android.view.accessibility.AccessibilityNodeInfo obtain();
+    method public static android.view.accessibility.AccessibilityNodeInfo obtain(android.view.accessibility.AccessibilityNodeInfo);
     method public boolean performAction(int);
     method public void recycle();
     method public void setBoundsInParent(android.graphics.Rect);

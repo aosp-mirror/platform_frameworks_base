@@ -542,6 +542,9 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         public void setEnabled(boolean enabled) {
             mIsEnabled = enabled;
         }
+
+        public void setTouchExplorationEnabled(boolean enabled) {
+        }
     }
 
     /**

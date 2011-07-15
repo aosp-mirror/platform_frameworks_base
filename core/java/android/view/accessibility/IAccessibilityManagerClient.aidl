@@ -26,4 +26,5 @@ oneway interface IAccessibilityManagerClient {
 
     void setEnabled(boolean enabled);
 
+    void setTouchExplorationEnabled(boolean enabled);
 }

@@ -2302,6 +2302,8 @@
         <!-- Flag whether the accessibility service wants to be able to retrieve the
              active window content. This setting cannot be changed at runtime. -->
         <attr name="canRetrieveWindowContent" format="boolean" />
+        <!-- Short description of the accessibility serivce purpose or behavior.-->
+        <attr name="description" />
     </declare-styleable>
 
     <!-- =============================== -->

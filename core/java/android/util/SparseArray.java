@@ -23,9 +23,13 @@ import com.android.internal.util.ArrayUtils;
  * there can be gaps in the indices.  It is intended to be more efficient
  * than using a HashMap to map Integers to Objects.
  */
-public class SparseArray<E> {
+public class SparseArray<E> implements Cloneable {
     private static final Object DELETED = new Object();
     private boolean mGarbage = false;
+
+    private int[] mKeys;
+    private Object[] mValues;
+    private int mSize;
 
     /**
      * Creates a new SparseArray containing no mappings.
@@ -47,6 +51,20 @@ public class SparseArray<E> {
         mSize = 0;
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public SparseArray<E> clone() {
+        SparseArray<E> clone = null;
+        try {
+            clone = (SparseArray<E>) super.clone();
+            clone.mKeys = mKeys.clone();
+            clone.mValues = mValues.clone();
+        } catch (CloneNotSupportedException cnse) {
+            /* ignore */
+        }
+        return clone;
+    }
+
     /**
      * Gets the Object mapped from the specified key, or <code>null</code>
      * if no such mapping has been made.
@@ -59,6 +77,7 @@ public class SparseArray<E> {
      * Gets the Object mapped from the specified key, or the specified Object
      * if no such mapping has been made.
      */
+    @SuppressWarnings("unchecked")
     public E get(int key, E valueIfKeyNotFound) {
         int i = binarySearch(mKeys, 0, mSize, key);
 
@@ -209,6 +228,7 @@ public class SparseArray<E> {
      * the value from the <code>index</code>th key-value mapping that this
      * SparseArray stores.  
      */
+    @SuppressWarnings("unchecked")
     public E valueAt(int index) {
         if (mGarbage) {
             gc();
@@ -331,20 +351,4 @@ public class SparseArray<E> {
         else
             return ~high;
     }
-
-    private void checkIntegrity() {
-        for (int i = 1; i < mSize; i++) {
-            if (mKeys[i] <= mKeys[i - 1]) {
-                for (int j = 0; j < mSize; j++) {
-                    Log.e("FAIL", j + ": " + mKeys[j] + " -> " + mValues[j]);
-                }
-
-                throw new RuntimeException();
-            }
-        }
-    }
-
-    private int[] mKeys;
-    private Object[] mValues;
-    private int mSize;
 }

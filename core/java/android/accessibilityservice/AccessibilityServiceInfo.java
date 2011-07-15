@@ -171,6 +171,11 @@ public class AccessibilityServiceInfo implements Parcelable {
     private boolean mCanRetrieveWindowContent;
 
     /**
+     * Description of the accessibility service.
+     */
+    private String mDescription;
+
+    /**
      * Creates a new instance.
      */
     public AccessibilityServiceInfo() {
@@ -240,6 +245,8 @@ public class AccessibilityServiceInfo implements Parcelable {
             mCanRetrieveWindowContent = asAttributes.getBoolean(
                     com.android.internal.R.styleable.AccessibilityService_canRetrieveWindowContent,
                     false);
+            mDescription = asAttributes.getString(
+                    com.android.internal.R.styleable.AccessibilityService_description);
             asAttributes.recycle();
         } catch (NameNotFoundException e) {
             throw new XmlPullParserException( "Unable to create context for: "
@@ -313,6 +320,18 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
+     * Description of the accessibility service.
+     * <p>
+     *    <strong>Statically set from
+     *    {@link AccessibilityService#SERVICE_META_DATA meta-data}.</strong>
+     * </p>
+     * @return The description.
+     */
+    public String getDescription() {
+        return mDescription;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public int describeContents() {
@@ -329,6 +348,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeParcelable(mResolveInfo, 0);
         parcel.writeString(mSettingsActivityName);
         parcel.writeInt(mCanRetrieveWindowContent ? 1 : 0);
+        parcel.writeString(mDescription);
     }
 
     private void initFromParcel(Parcel parcel) {
@@ -341,6 +361,7 @@ public class AccessibilityServiceInfo implements Parcelable {
         mResolveInfo = parcel.readParcelable(null);
         mSettingsActivityName = parcel.readString();
         mCanRetrieveWindowContent = (parcel.readInt() == 1);
+        mDescription = parcel.readString();
     }
 
     @Override

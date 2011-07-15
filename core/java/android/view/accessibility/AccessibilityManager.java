@@ -71,13 +71,17 @@ public final class AccessibilityManager {
 
     private static AccessibilityManager sInstance;
 
-    private static final int DO_SET_ENABLED = 10;
+    private static final int DO_SET_ACCESSIBILITY_ENABLED = 10;
+
+    private static final int DO_SET_TOUCH_EXPLORATION_ENABLED = 20;
 
     final IAccessibilityManager mService;
 
     final Handler mHandler;
 
     boolean mIsEnabled;
+
+    boolean mIsTouchExplorationEnabled;
 
     final CopyOnWriteArrayList<AccessibilityStateChangeListener> mAccessibilityStateChangeListeners =
         new CopyOnWriteArrayList<AccessibilityStateChangeListener>();
@@ -97,7 +101,12 @@ public final class AccessibilityManager {
 
     final IAccessibilityManagerClient.Stub mClient = new IAccessibilityManagerClient.Stub() {
         public void setEnabled(boolean enabled) {
-            mHandler.obtainMessage(DO_SET_ENABLED, enabled ? 1 : 0, 0).sendToTarget();
+            mHandler.obtainMessage(DO_SET_ACCESSIBILITY_ENABLED, enabled ? 1 : 0, 0).sendToTarget();
+        }
+
+        public void setTouchExplorationEnabled(boolean enabled) {
+            mHandler.obtainMessage(DO_SET_TOUCH_EXPLORATION_ENABLED,
+                    enabled ? 1 : 0, 0).sendToTarget();
         }
     };
 
@@ -110,9 +119,14 @@ public final class AccessibilityManager {
         @Override
         public void handleMessage(Message message) {
             switch (message.what) {
-                case DO_SET_ENABLED :
-                    final boolean isEnabled = (message.arg1 == 1);
-                    setAccessibilityState(isEnabled);
+                case DO_SET_ACCESSIBILITY_ENABLED :
+                    final boolean isAccessibilityEnabled = (message.arg1 == 1);
+                    setAccessibilityState(isAccessibilityEnabled);
+                    return;
+                case DO_SET_TOUCH_EXPLORATION_ENABLED :
+                    synchronized (mHandler) {
+                        mIsTouchExplorationEnabled = (message.arg1 == 1);
+                    }
                     return;
                 default :
                     Log.w(LOG_TAG, "Unknown message type: " + message.what);
@@ -164,6 +178,17 @@ public final class AccessibilityManager {
     public boolean isEnabled() {
         synchronized (mHandler) {
             return mIsEnabled;
+        }
+    }
+
+    /**
+     * Returns if the touch exploration in the system is enabled.
+     *
+     * @return True if touch exploration is enabled, false otherwise.
+     */
+    public boolean isTouchExplorationEnabled() {
+        synchronized (mHandler) {
+            return mIsTouchExplorationEnabled;
         }
     }
 

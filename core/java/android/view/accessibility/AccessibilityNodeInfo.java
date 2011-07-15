@@ -120,7 +120,7 @@ public class AccessibilityNodeInfo implements Parcelable {
     private CharSequence mText;
     private CharSequence mContentDescription;
 
-    private final SparseIntArray mChildAccessibilityIds = new SparseIntArray();
+    private SparseIntArray mChildAccessibilityIds = new SparseIntArray();
     private int mActions;
 
     private IAccessibilityServiceConnection mConnection;
@@ -873,6 +873,20 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Returns a cached instance if such is available or a new one is
+     * create. The returned instance is initialized from the given
+     * <code>info</code>.
+     *
+     * @param info The other info.
+     * @return An instance.
+     */
+    public static AccessibilityNodeInfo obtain(AccessibilityNodeInfo info) {
+        AccessibilityNodeInfo infoClone = AccessibilityNodeInfo.obtain();
+        infoClone.init(info);
+        return infoClone;
+    }
+
+    /**
      * Return an instance back to be reused.
      * <p>
      * <strong>Note:</strong> You must not touch the object after calling this function.
@@ -945,6 +959,28 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
+     * Initializes this instance from another one.
+     *
+     * @param other The other instance.
+     */
+    private void init(AccessibilityNodeInfo other) {
+        mSealed = other.mSealed;
+        mConnection = other.mConnection;
+        mAccessibilityViewId = other.mAccessibilityViewId;
+        mParentAccessibilityViewId = other.mParentAccessibilityViewId;
+        mAccessibilityWindowId = other.mAccessibilityWindowId;
+        mBoundsInParent.set(other.mBoundsInParent);
+        mBoundsInScreen.set(other.mBoundsInScreen);
+        mPackageName = other.mPackageName;
+        mClassName = other.mClassName;
+        mText = other.mText;
+        mContentDescription = other.mContentDescription;
+        mActions= other.mActions;
+        mBooleanProperties = other.mBooleanProperties;
+        mChildAccessibilityIds = other.mChildAccessibilityIds.clone();
+    }
+
+    /**
      * Creates a new instance from a {@link Parcel}.
      *
      * @param parcel A parcel containing the state of a {@link AccessibilityNodeInfo}.
@@ -994,6 +1030,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         mConnection = null;
         mAccessibilityViewId = View.NO_ID;
         mParentAccessibilityViewId = View.NO_ID;
+        mAccessibilityWindowId = View.NO_ID;
         mChildAccessibilityIds.clear();
         mBoundsInParent.set(0, 0, 0, 0);
         mBoundsInScreen.set(0, 0, 0, 0);
