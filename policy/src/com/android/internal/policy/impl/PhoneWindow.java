@@ -2240,7 +2240,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
-            if (st != null && st.menu != null) {
+            if (st != null && st.menu != null && mFeatureId < 0) {
                 st.menu.close();
             }
         }
