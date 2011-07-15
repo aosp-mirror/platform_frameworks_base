@@ -276,7 +276,7 @@ status_t BnSurfaceTexture::onTransact(
         case DISCONNECT: {
             CHECK_INTERFACE(ISurfaceTexture, data, reply);
             int api = data.readInt32();
-            status_t res = connect(api);
+            status_t res = disconnect(api);
             reply->writeInt32(res);
             return NO_ERROR;
         } break;
