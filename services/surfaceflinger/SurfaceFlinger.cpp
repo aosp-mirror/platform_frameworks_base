@@ -1551,8 +1551,18 @@ status_t SurfaceFlinger::dump(int fd, const Vector<String16>& args)
          * Dump SurfaceFlinger global state
          */
 
-        snprintf(buffer, SIZE, "SurfaceFlinger global state\n");
+        snprintf(buffer, SIZE, "SurfaceFlinger global state:\n");
         result.append(buffer);
+
+        const GLExtensions& extensions(GLExtensions::getInstance());
+        snprintf(buffer, SIZE, "GLES: %s, %s, %s\n",
+                extensions.getVendor(),
+                extensions.getRenderer(),
+                extensions.getVersion());
+        result.append(buffer);
+        snprintf(buffer, SIZE, "EXTS: %s\n", extensions.getExtension());
+        result.append(buffer);
+
         mWormholeRegion.dump(result, "WormholeRegion");
         const DisplayHardware& hw(graphicPlane(0).displayHardware());
         snprintf(buffer, SIZE,
