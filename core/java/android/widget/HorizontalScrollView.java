@@ -498,13 +498,6 @@ public class HorizontalScrollView extends FrameLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-
-        if (ev.getAction() == MotionEvent.ACTION_DOWN && ev.getEdgeFlags() != 0) {
-            // Don't handle edge touches immediately -- they may actually belong to one of our
-            // descendants.
-            return false;
-        }
-
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }

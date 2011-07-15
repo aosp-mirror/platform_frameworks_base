@@ -1176,7 +1176,7 @@ private:
 
     TouchResult consumeOffScreenTouches(nsecs_t when, uint32_t policyFlags);
     void dispatchTouches(nsecs_t when, uint32_t policyFlags);
-    void prepareTouches(int32_t* outEdgeFlags, float* outXPrecision, float* outYPrecision);
+    void prepareTouches(float* outXPrecision, float* outYPrecision);
     void dispatchPointerGestures(nsecs_t when, uint32_t policyFlags, bool isTimeout);
     bool preparePointerGestures(nsecs_t when,
             bool* outCancelPreviousGesture, bool* outFinishPreviousGesture, bool isTimeout);

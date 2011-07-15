@@ -181,25 +181,6 @@ static bool isPointerDown(int32_t buttonState) {
                     | AMOTION_EVENT_BUTTON_TERTIARY);
 }
 
-static int32_t calculateEdgeFlagsUsingPointerBounds(
-        const sp<PointerControllerInterface>& pointerController, float x, float y) {
-    int32_t edgeFlags = 0;
-    float minX, minY, maxX, maxY;
-    if (pointerController->getBounds(&minX, &minY, &maxX, &maxY)) {
-        if (x <= minX) {
-            edgeFlags |= AMOTION_EVENT_EDGE_FLAG_LEFT;
-        } else if (x >= maxX) {
-            edgeFlags |= AMOTION_EVENT_EDGE_FLAG_RIGHT;
-        }
-        if (y <= minY) {
-            edgeFlags |= AMOTION_EVENT_EDGE_FLAG_TOP;
-        } else if (y >= maxY) {
-            edgeFlags |= AMOTION_EVENT_EDGE_FLAG_BOTTOM;
-        }
-    }
-    return edgeFlags;
-}
-
 static float calculateCommonVector(float a, float b) {
     if (a > 0 && b > 0) {
         return a < b ? a : b;
@@ -1619,7 +1600,6 @@ void CursorInputMapper::sync(nsecs_t when) {
     }
 
     int32_t motionEventAction;
-    int32_t motionEventEdgeFlags;
     int32_t lastButtonState, currentButtonState;
     PointerProperties pointerProperties;
     PointerCoords pointerCoords;
@@ -1697,8 +1677,6 @@ void CursorInputMapper::sync(nsecs_t when) {
             }
         }
 
-        motionEventEdgeFlags = AMOTION_EVENT_EDGE_FLAG_NONE;
-
         pointerProperties.clear();
         pointerProperties.id = 0;
         pointerProperties.toolType = AMOTION_EVENT_TOOL_TYPE_MOUSE;
@@ -1742,11 +1720,6 @@ void CursorInputMapper::sync(nsecs_t when) {
             mPointerController->getPosition(&x, &y);
             pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_X, x);
             pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_Y, y);
-
-            if (motionEventAction == AMOTION_EVENT_ACTION_DOWN) {
-                motionEventEdgeFlags = calculateEdgeFlagsUsingPointerBounds(
-                        mPointerController, x, y);
-            }
         } else {
             pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_X, deltaX);
             pointerCoords.setAxisValue(AMOTION_EVENT_AXIS_Y, deltaY);
@@ -1771,7 +1744,7 @@ void CursorInputMapper::sync(nsecs_t when) {
     // Send motion event.
     int32_t metaState = mContext->getGlobalMetaState();
     getDispatcher()->notifyMotion(when, getDeviceId(), mSource, policyFlags,
-            motionEventAction, 0, metaState, currentButtonState, motionEventEdgeFlags,
+            motionEventAction, 0, metaState, currentButtonState, 0,
             1, &pointerProperties, &pointerCoords, mXPrecision, mYPrecision, downTime);
 
     // Send hover move after UP to tell the application that the mouse is hovering now.
@@ -3168,9 +3141,8 @@ void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {
     }
 
     // Update current touch coordinates.
-    int32_t edgeFlags;
     float xPrecision, yPrecision;
-    prepareTouches(&edgeFlags, &xPrecision, &yPrecision);
+    prepareTouches(&xPrecision, &yPrecision);
 
     // Dispatch motions.
     BitSet32 currentIdBits = mCurrentTouch.idBits;
@@ -3239,13 +3211,10 @@ void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {
             if (dispatchedIdBits.count() == 1) {
                 // First pointer is going down.  Set down time.
                 mDownTime = when;
-            } else {
-                // Only send edge flags with first pointer down.
-                edgeFlags = AMOTION_EVENT_EDGE_FLAG_NONE;
             }
 
             dispatchMotion(when, policyFlags, mTouchSource,
-                    AMOTION_EVENT_ACTION_POINTER_DOWN, 0, metaState, buttonState, edgeFlags,
+                    AMOTION_EVENT_ACTION_POINTER_DOWN, 0, metaState, buttonState, 0,
                     mCurrentTouchProperties, mCurrentTouchCoords,
                     mCurrentTouch.idToIndex, dispatchedIdBits, downId,
                     xPrecision, yPrecision, mDownTime);
@@ -3259,8 +3228,7 @@ void TouchInputMapper::dispatchTouches(nsecs_t when, uint32_t policyFlags) {
     }
 }
 
-void TouchInputMapper::prepareTouches(int32_t* outEdgeFlags,
-        float* outXPrecision, float* outYPrecision) {
+void TouchInputMapper::prepareTouches(float* outXPrecision, float* outYPrecision) {
     uint32_t currentPointerCount = mCurrentTouch.pointerCount;
     uint32_t lastPointerCount = mLastTouch.pointerCount;
 
@@ -3471,28 +3439,6 @@ void TouchInputMapper::prepareTouches(int32_t* outEdgeFlags,
         properties.toolType = getTouchToolType(mCurrentTouch.pointers[i].isStylus);
     }
 
-    // Check edge flags by looking only at the first pointer since the flags are
-    // global to the event.
-    *outEdgeFlags = AMOTION_EVENT_EDGE_FLAG_NONE;
-    if (lastPointerCount == 0 && currentPointerCount > 0) {
-        const PointerData& in = mCurrentTouch.pointers[0];
-
-        if (in.x <= mRawAxes.x.minValue) {
-            *outEdgeFlags |= rotateEdgeFlag(AMOTION_EVENT_EDGE_FLAG_LEFT,
-                    mLocked.surfaceOrientation);
-        } else if (in.x >= mRawAxes.x.maxValue) {
-            *outEdgeFlags |= rotateEdgeFlag(AMOTION_EVENT_EDGE_FLAG_RIGHT,
-                    mLocked.surfaceOrientation);
-        }
-        if (in.y <= mRawAxes.y.minValue) {
-            *outEdgeFlags |= rotateEdgeFlag(AMOTION_EVENT_EDGE_FLAG_TOP,
-                    mLocked.surfaceOrientation);
-        } else if (in.y >= mRawAxes.y.maxValue) {
-            *outEdgeFlags |= rotateEdgeFlag(AMOTION_EVENT_EDGE_FLAG_BOTTOM,
-                    mLocked.surfaceOrientation);
-        }
-    }
-
     *outXPrecision = mLocked.orientedXPrecision;
     *outYPrecision = mLocked.orientedYPrecision;
 }
@@ -3640,19 +3586,12 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
             downGestureIdBits.clearBit(id);
             dispatchedGestureIdBits.markBit(id);
 
-            int32_t edgeFlags = AMOTION_EVENT_EDGE_FLAG_NONE;
             if (dispatchedGestureIdBits.count() == 1) {
-                // First pointer is going down.  Calculate edge flags and set down time.
-                uint32_t index = mPointerGesture.currentGestureIdToIndex[id];
-                const PointerCoords& downCoords = mPointerGesture.currentGestureCoords[index];
-                edgeFlags = calculateEdgeFlagsUsingPointerBounds(mPointerController,
-                        downCoords.getAxisValue(AMOTION_EVENT_AXIS_X),
-                        downCoords.getAxisValue(AMOTION_EVENT_AXIS_Y));
                 mPointerGesture.downTime = when;
             }
 
             dispatchMotion(when, policyFlags, mPointerSource,
-                    AMOTION_EVENT_ACTION_POINTER_DOWN, 0, metaState, buttonState, edgeFlags,
+                    AMOTION_EVENT_ACTION_POINTER_DOWN, 0, metaState, buttonState, 0,
                     mPointerGesture.currentGestureProperties,
                     mPointerGesture.currentGestureCoords, mPointerGesture.currentGestureIdToIndex,
                     dispatchedGestureIdBits, id,

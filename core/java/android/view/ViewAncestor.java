@@ -2684,51 +2684,6 @@ public final class ViewAncestor extends Handler implements ViewParent,
             return;
         }
 
-        // Apply edge slop and try again, if appropriate.
-        final int edgeFlags = event.getEdgeFlags();
-        if (edgeFlags != 0 && mView instanceof ViewGroup) {
-            final int edgeSlop = mViewConfiguration.getScaledEdgeSlop();
-            int direction = View.FOCUS_UP;
-            int x = (int)event.getX();
-            int y = (int)event.getY();
-            final int[] deltas = new int[2];
-
-            if ((edgeFlags & MotionEvent.EDGE_TOP) != 0) {
-                direction = View.FOCUS_DOWN;
-                if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
-                    deltas[0] = edgeSlop;
-                    x += edgeSlop;
-                } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
-                    deltas[0] = -edgeSlop;
-                    x -= edgeSlop;
-                }
-            } else if ((edgeFlags & MotionEvent.EDGE_BOTTOM) != 0) {
-                direction = View.FOCUS_UP;
-                if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
-                    deltas[0] = edgeSlop;
-                    x += edgeSlop;
-                } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
-                    deltas[0] = -edgeSlop;
-                    x -= edgeSlop;
-                }
-            } else if ((edgeFlags & MotionEvent.EDGE_LEFT) != 0) {
-                direction = View.FOCUS_RIGHT;
-            } else if ((edgeFlags & MotionEvent.EDGE_RIGHT) != 0) {
-                direction = View.FOCUS_LEFT;
-            }
-
-            View nearest = FocusFinder.getInstance().findNearestTouchable(
-                    ((ViewGroup) mView), x, y, direction, deltas);
-            if (nearest != null) {
-                event.offsetLocation(deltas[0], deltas[1]);
-                event.setEdgeFlags(0);
-                if (mView.dispatchPointerEvent(event)) {
-                    finishMotionEvent(event, sendDone, true);
-                    return;
-                }
-            }
-        }
-
         // Pointer event was unhandled.
         finishMotionEvent(event, sendDone, false);
     }
