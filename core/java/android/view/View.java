@@ -2167,21 +2167,27 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
     /**
      * Cache the paddingRight set by the user to append to the scrollbar's size.
+     *
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "padding")
-    int mUserPaddingRight;
+    protected int mUserPaddingRight;
 
     /**
      * Cache the paddingBottom set by the user to append to the scrollbar's size.
+     *
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "padding")
-    int mUserPaddingBottom;
+    protected int mUserPaddingBottom;
 
     /**
      * Cache the paddingLeft set by the user to append to the scrollbar's size.
+     *
+     * @hide
      */
     @ViewDebug.ExportedProperty(category = "padding")
-    int mUserPaddingLeft;
+    protected int mUserPaddingLeft;
 
     /**
      * Cache if the user padding is relative.
