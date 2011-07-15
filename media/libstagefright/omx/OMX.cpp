@@ -96,9 +96,14 @@ OMX::CallbackDispatcher::~CallbackDispatcher() {
         mQueueChanged.signal();
     }
 
-    // Don't call join on myself
+    // A join on self can happen if the last ref to CallbackDispatcher
+    // is released within the CallbackDispatcherThread loop
     status_t status = mThread->join();
-    CHECK(status == NO_ERROR);
+    if (status != WOULD_BLOCK) {
+        // Other than join to self, the only other error return codes are
+        // whatever readyToRun() returns, and we don't override that
+        CHECK_EQ(status, NO_ERROR);
+    }
 }
 
 void OMX::CallbackDispatcher::post(const omx_message &msg) {
