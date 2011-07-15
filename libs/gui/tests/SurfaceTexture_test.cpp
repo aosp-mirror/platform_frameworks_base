@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define LOG_TAG "SurfaceTexture_test"
 //#define LOG_NDEBUG 0
 
 #include <gtest/gtest.h>
@@ -377,6 +378,13 @@ protected:
         mTexMatrixHandle = glGetUniformLocation(mPgm, "texMatrix");
         ASSERT_EQ(GLenum(GL_NO_ERROR), glGetError());
         ASSERT_NE(-1, mTexMatrixHandle);
+    }
+
+    virtual void TearDown() {
+        mANW.clear();
+        mSTC.clear();
+        mST.clear();
+        GLTest::TearDown();
     }
 
     // drawTexture draws the SurfaceTexture over the entire GL viewport.
@@ -1089,13 +1097,21 @@ protected:
     // synchronously from SurfaceTexture::queueBuffer.
     class FrameCondition : public SurfaceTexture::FrameAvailableListener {
     public:
+        FrameCondition():
+                mFrameAvailable(false),
+                mFrameFinished(false) {
+        }
+
         // waitForFrame waits for the next frame to arrive.  This should be
         // called from the consumer thread once for every frame expected by the
         // test.
         void waitForFrame() {
-            LOGV("+waitForFrame");
             Mutex::Autolock lock(mMutex);
-            status_t result = mFrameAvailableCondition.wait(mMutex);
+            LOGV("+waitForFrame");
+            while (!mFrameAvailable) {
+                mFrameAvailableCondition.wait(mMutex);
+            }
+            mFrameAvailable = false;
             LOGV("-waitForFrame");
         }
 
@@ -1103,22 +1119,30 @@ protected:
         // on to produce the next frame.  This should be called by the consumer
         // thread once for every frame expected by the test.
         void finishFrame() {
-            LOGV("+finishFrame");
             Mutex::Autolock lock(mMutex);
+            LOGV("+finishFrame");
+            mFrameFinished = true;
             mFrameFinishCondition.signal();
             LOGV("-finishFrame");
         }
 
         // This should be called by SurfaceTexture on the producer thread.
         virtual void onFrameAvailable() {
-            LOGV("+onFrameAvailable");
             Mutex::Autolock lock(mMutex);
+            LOGV("+onFrameAvailable");
+            mFrameAvailable = true;
             mFrameAvailableCondition.signal();
-            mFrameFinishCondition.wait(mMutex);
+            while (!mFrameFinished) {
+                mFrameFinishCondition.wait(mMutex);
+            }
+            mFrameFinished = false;
             LOGV("-onFrameAvailable");
         }
 
     protected:
+        bool mFrameAvailable;
+        bool mFrameFinished;
+
         Mutex mMutex;
         Condition mFrameAvailableCondition;
         Condition mFrameFinishCondition;
@@ -1164,6 +1188,7 @@ protected:
         }
         mProducerThread.clear();
         mFC.clear();
+        SurfaceTextureGLTest::TearDown();
     }
 
     void runProducerThread(const sp<ProducerThread> producerThread) {
