@@ -57,8 +57,6 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Giãn ra để lấp đầy m.hình"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Thu phóng tương thích"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Khi ứng dụng được thiết kế cho một màn hình nhỏ hơn, điều khiển thu phóng sẽ xuất hiện bên cạnh đồng hồ."</string>
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
-    <skip />
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"Đã lưu ảnh chụp màn hình vào Thư viện"</string>
+    <string name="screenshot_failed_toast" msgid="655180965533683356">"Không thể lưu ảnh chụp màn hình"</string>
 </resources>

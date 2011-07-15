@@ -57,8 +57,6 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Розтягнути на весь екран"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Елемент керування масштабом для сумісності"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Якщо програму призначено для менших екранів, елемент керування масштабом буде відображатися біля годинника."</string>
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
-    <skip />
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"Знімок екрана збережено в Галереї"</string>
+    <string name="screenshot_failed_toast" msgid="655180965533683356">"Неможливо зберегти знімок екрана"</string>
 </resources>

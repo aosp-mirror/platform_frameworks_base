@@ -57,8 +57,6 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Развуци на цео екран"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Компатибилно зумирање"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Када је апликација намењена мањем екрану, контрола зумирања приказује се поред сата."</string>
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
-    <skip />
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"Снимак екрана је сачуван у Галерији"</string>
+    <string name="screenshot_failed_toast" msgid="655180965533683356">"Није могуће сачувати снимак екрана"</string>
 </resources>

@@ -57,8 +57,6 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Προβoλή σε πλήρη οθ."</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Ζουμ για συμβατότητα"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Όταν μια εφαρμογή έχει σχεδιαστεί για προβολή σε μικρότερη οθόνη, δίπλα από το ρολόι θα εμφανιστεί ένα στοιχείο ελέγχου ζουμ."</string>
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
-    <skip />
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"Το στιγμιότυπο οθόνης αποθηκεύτηκε στη συλλογή"</string>
+    <string name="screenshot_failed_toast" msgid="655180965533683356">"Δεν ήταν δυνατή η αποθήκευση του στιγμιοτύπου οθόνης"</string>
 </resources>

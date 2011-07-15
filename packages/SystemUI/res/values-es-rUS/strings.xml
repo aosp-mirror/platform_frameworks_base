@@ -57,8 +57,6 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Estirar p/ ocupar la pantalla"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom de compatibilidad"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Cuando una aplicación fue diseñada para una pantalla más pequeña, aparece un control de zoom junto al reloj."</string>
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
-    <skip />
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"Captura de pantalla guardada en la Galería"</string>
+    <string name="screenshot_failed_toast" msgid="655180965533683356">"No se pudo guardar la captura de pantalla."</string>
 </resources>
