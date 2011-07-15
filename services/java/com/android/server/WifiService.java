@@ -35,8 +35,8 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiStateMachine;
 import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiWatchdogStateMachine;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
-import android.net.wifi.WifiWatchdogService;
 import android.net.wifi.WpsConfiguration;
 import android.net.wifi.WpsResult;
 import android.net.ConnectivityManager;
@@ -343,7 +343,7 @@ public class WifiService extends IWifiManager.Stub {
      * Protected by mWifiStateTracker lock.
      */
     private final WorkSource mTmpWorkSource = new WorkSource();
-    private WifiWatchdogService mWifiWatchdogService;
+    private WifiWatchdogStateMachine mWifiWatchdogStateMachine;
 
     WifiService(Context context) {
         mContext = context;
@@ -434,8 +434,9 @@ public class WifiService extends IWifiManager.Stub {
                 (wifiEnabled ? "enabled" : "disabled"));
         setWifiEnabled(wifiEnabled);
 
-        //TODO: as part of WWS refactor, create only when needed
-        mWifiWatchdogService = new WifiWatchdogService(mContext);
+        mWifiWatchdogStateMachine = WifiWatchdogStateMachine.
+               makeWifiWatchdogStateMachine(mContext);
+
     }
 
     private boolean testAndClearWifiSavedState() {
@@ -1162,8 +1163,8 @@ public class WifiService extends IWifiManager.Stub {
         mLocks.dump(pw);
 
         pw.println();
-        pw.println("WifiWatchdogService dump");
-        mWifiWatchdogService.dump(pw);
+        pw.println("WifiWatchdogStateMachine dump");
+        mWifiWatchdogStateMachine.dump(pw);
     }
 
     private class WifiLock extends DeathRecipient {
