@@ -222,15 +222,21 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     }
 
     // INetworkManagementEventObserver.Stub
-    public void interfaceStatusChanged(String interfaze, boolean up) {
-    }
-
-    // INetworkManagementEventObserver.Stub
-    public void interfaceLinkStateChanged(String interfaze, boolean up) {
-    }
-
-    // INetworkManagementEventObserver.Stub
     public void interfaceAdded(String interfaze) {
+    }
+
+    // INetworkManagementEventObserver.Stub
+    public synchronized void interfaceStatusChanged(String interfaze, boolean up) {
+        if (!up && mLegacyVpnRunner != null) {
+            mLegacyVpnRunner.check(interfaze);
+        }
+    }
+
+    // INetworkManagementEventObserver.Stub
+    public synchronized void interfaceLinkStateChanged(String interfaze, boolean up) {
+        if (!up && mLegacyVpnRunner != null) {
+            mLegacyVpnRunner.check(interfaze);
+        }
     }
 
     // INetworkManagementEventObserver.Stub
@@ -329,6 +335,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         private final VpnConfig mConfig;
         private final String[] mDaemons;
         private final String[][] mArguments;
+        private final String mOuterInterface;
         private final LegacyVpnInfo mInfo;
 
         private long mTimer = -1;
@@ -340,9 +347,19 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             mArguments = new String[][] {racoon, mtpd};
             mInfo = new LegacyVpnInfo();
 
+            // This is the interface which VPN is running on.
+            mOuterInterface = mConfig.interfaze;
+
             // Legacy VPN is not a real package, so we use it to carry the key.
             mInfo.key = mConfig.packagz;
             mConfig.packagz = VpnConfig.LEGACY_VPN;
+        }
+
+        public void check(String interfaze) {
+            if (interfaze.equals(mOuterInterface)) {
+                Log.i(TAG, "Legacy VPN is going down with " + interfaze);
+                exit();
+            }
         }
 
         public void exit() {
