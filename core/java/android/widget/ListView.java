@@ -3588,17 +3588,6 @@ public class ListView extends AbsListView {
         return null;
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        //noinspection SimplifiableIfStatement
-        if (mItemsCanFocus && ev.getAction() == MotionEvent.ACTION_DOWN && ev.getEdgeFlags() != 0) {
-            // Don't handle edge touches immediately -- they may actually belong to one of our
-            // descendants.
-            return false;
-        }
-        return super.onTouchEvent(ev);
-    }
-
     /**
      * Returns the set of checked items ids. The result is only valid if the
      * choice mode has not been set to {@link #CHOICE_MODE_NONE}.

@@ -2840,14 +2840,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         }
                         postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());
                     } else {
-                        if (ev.getEdgeFlags() != 0 && motionPosition < 0) {
-                            // If we couldn't find a view to click on, but the down event
-                            // was touching the edge, we will bail out and try again.
-                            // This allows the edge correcting code in ViewAncestor to try to
-                            // find a nearby view to select
-                            return false;
-                        }
-
                         if (mTouchMode == TOUCH_MODE_FLING) {
                             // Stopped a fling. It is a scroll.
                             createScrollingCache();
