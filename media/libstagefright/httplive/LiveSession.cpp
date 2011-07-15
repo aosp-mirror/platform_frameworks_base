@@ -494,6 +494,12 @@ rinse_repeat:
 
         bool firstTime = (mPlaylist == NULL);
 
+        if ((ssize_t)bandwidthIndex != mPrevBandwidthIndex) {
+            // If we switch bandwidths, do not pay any heed to whether
+            // playlists changed since the last time...
+            mPlaylist.clear();
+        }
+
         bool unchanged;
         sp<M3UParser> playlist = fetchPlaylist(url.c_str(), &unchanged);
         if (playlist == NULL) {
