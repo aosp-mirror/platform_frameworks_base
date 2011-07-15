@@ -138,7 +138,7 @@ screen support API and the controls it provides, see the sections below. </p></l
 
 <h3 id="usb">Screens Support APIs</h3>
 
-<p>Android 2.3 introduces new screens support APIs that give you more
+<p>Android 3.2 introduces new screens support APIs that give you more
 control over how their applications are displayed across different screen sizes.
 The API builds on the existing screens-support API, including the platform's
 generalized screen density model, but extends it with the ability to precisely
