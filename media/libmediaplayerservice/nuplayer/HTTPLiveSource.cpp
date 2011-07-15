@@ -58,8 +58,10 @@ NuPlayer::HTTPLiveSource::HTTPLiveSource(
 }
 
 NuPlayer::HTTPLiveSource::~HTTPLiveSource() {
-    mLiveSession->disconnect();
-    mLiveLooper->stop();
+    if (mLiveSession != NULL) {
+        mLiveSession->disconnect();
+        mLiveLooper->stop();
+    }
 }
 
 void NuPlayer::HTTPLiveSource::start() {

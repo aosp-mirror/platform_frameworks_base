@@ -118,9 +118,15 @@ status_t NuPlayerDriver::start() {
             mPlayer->start();
 
             if (mStartupSeekTimeUs >= 0) {
-                mPlayer->seekToAsync(mStartupSeekTimeUs);
+                if (mStartupSeekTimeUs == 0) {
+                    notifySeekComplete();
+                } else {
+                    mPlayer->seekToAsync(mStartupSeekTimeUs);
+                }
+
                 mStartupSeekTimeUs = -1;
             }
+
             break;
         }
         case PLAYING:
