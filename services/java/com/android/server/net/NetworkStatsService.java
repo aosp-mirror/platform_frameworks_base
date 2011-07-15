@@ -73,11 +73,12 @@ import com.android.internal.os.AtomicFile;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -719,10 +720,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // clear any existing stats and read from disk
         mNetworkStats.clear();
 
-        FileInputStream fis = null;
+        DataInputStream in = null;
         try {
-            fis = mNetworkFile.openRead();
-            final DataInputStream in = new DataInputStream(fis);
+            in = new DataInputStream(new BufferedInputStream(mNetworkFile.openRead()));
 
             // verify file magic header intact
             final int magic = in.readInt();
@@ -751,7 +751,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } catch (IOException e) {
             Slog.e(TAG, "problem reading network stats", e);
         } finally {
-            IoUtils.closeQuietly(fis);
+            IoUtils.closeQuietly(in);
         }
     }
 
@@ -768,10 +768,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // clear any existing stats and read from disk
         mUidStats.clear();
 
-        FileInputStream fis = null;
+        DataInputStream in = null;
         try {
-            fis = mUidFile.openRead();
-            final DataInputStream in = new DataInputStream(fis);
+            in = new DataInputStream(new BufferedInputStream(mUidFile.openRead()));
 
             // verify file magic header intact
             final int magic = in.readInt();
@@ -826,7 +825,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } catch (IOException e) {
             Slog.e(TAG, "problem reading uid stats", e);
         } finally {
-            IoUtils.closeQuietly(fis);
+            IoUtils.closeQuietly(in);
         }
     }
 
@@ -838,7 +837,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         FileOutputStream fos = null;
         try {
             fos = mNetworkFile.startWrite();
-            final DataOutputStream out = new DataOutputStream(fos);
+            final DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fos));
 
             out.writeInt(FILE_MAGIC);
             out.writeInt(VERSION_NETWORK_INIT);
@@ -850,6 +849,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 history.writeToStream(out);
             }
 
+            out.flush();
             mNetworkFile.finishWrite(fos);
         } catch (IOException e) {
             if (fos != null) {
@@ -871,7 +871,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         FileOutputStream fos = null;
         try {
             fos = mUidFile.startWrite();
-            final DataOutputStream out = new DataOutputStream(fos);
+            final DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fos));
 
             out.writeInt(FILE_MAGIC);
             out.writeInt(VERSION_UID_WITH_TAG);
@@ -895,6 +895,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 }
             }
 
+            out.flush();
             mUidFile.finishWrite(fos);
         } catch (IOException e) {
             if (fos != null) {

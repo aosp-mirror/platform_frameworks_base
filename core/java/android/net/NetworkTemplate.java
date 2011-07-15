@@ -18,6 +18,7 @@ package android.net;
 
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
+import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_2_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_3_G;
@@ -38,41 +39,69 @@ import com.android.internal.util.Objects;
  */
 public class NetworkTemplate implements Parcelable {
 
+    /** {@hide} */
+    public static final int MATCH_MOBILE_ALL = 1;
+    /** {@hide} */
+    public static final int MATCH_MOBILE_3G_LOWER = 2;
+    /** {@hide} */
+    public static final int MATCH_MOBILE_4G = 3;
+    /** {@hide} */
+    public static final int MATCH_WIFI = 4;
+    /** {@hide} */
+    public static final int MATCH_ETHERNET = 5;
+
     /**
      * Template to combine all {@link ConnectivityManager#TYPE_MOBILE} style
      * networks together. Only uses statistics for requested IMSI.
      */
-    public static final int MATCH_MOBILE_ALL = 1;
+    public static NetworkTemplate buildTemplateMobileAll(String subscriberId) {
+        return new NetworkTemplate(MATCH_MOBILE_ALL, subscriberId);
+    }
 
     /**
      * Template to combine all {@link ConnectivityManager#TYPE_MOBILE} style
      * networks together that roughly meet a "3G" definition, or lower. Only
      * uses statistics for requested IMSI.
      */
-    public static final int MATCH_MOBILE_3G_LOWER = 2;
+    public static NetworkTemplate buildTemplateMobile3gLower(String subscriberId) {
+        return new NetworkTemplate(MATCH_MOBILE_3G_LOWER, subscriberId);
+    }
 
     /**
      * Template to combine all {@link ConnectivityManager#TYPE_MOBILE} style
      * networks together that meet a "4G" definition. Only uses statistics for
      * requested IMSI.
      */
-    public static final int MATCH_MOBILE_4G = 3;
+    public static NetworkTemplate buildTemplateMobile4g(String subscriberId) {
+        return new NetworkTemplate(MATCH_MOBILE_4G, subscriberId);
+    }
 
     /**
      * Template to combine all {@link ConnectivityManager#TYPE_WIFI} style
      * networks together.
      */
-    public static final int MATCH_WIFI = 4;
+    public static NetworkTemplate buildTemplateWifi() {
+        return new NetworkTemplate(MATCH_WIFI, null);
+    }
 
-    final int mMatchRule;
-    final String mSubscriberId;
+    /**
+     * Template to combine all {@link ConnectivityManager#TYPE_ETHERNET} style
+     * networks together.
+     */
+    public static NetworkTemplate buildTemplateEthernet() {
+        return new NetworkTemplate(MATCH_ETHERNET, null);
+    }
 
+    private final int mMatchRule;
+    private final String mSubscriberId;
+
+    /** {@hide} */
     public NetworkTemplate(int matchRule, String subscriberId) {
         this.mMatchRule = matchRule;
         this.mSubscriberId = subscriberId;
     }
 
-    public NetworkTemplate(Parcel in) {
+    private NetworkTemplate(Parcel in) {
         mMatchRule = in.readInt();
         mSubscriberId = in.readString();
     }
@@ -110,10 +139,12 @@ public class NetworkTemplate implements Parcelable {
         return false;
     }
 
+    /** {@hide} */
     public int getMatchRule() {
         return mMatchRule;
     }
 
+    /** {@hide} */
     public String getSubscriberId() {
         return mSubscriberId;
     }
@@ -131,6 +162,8 @@ public class NetworkTemplate implements Parcelable {
                 return matchesMobile4g(ident);
             case MATCH_WIFI:
                 return matchesWifi(ident);
+            case MATCH_ETHERNET:
+                return matchesEthernet(ident);
             default:
                 throw new IllegalArgumentException("unknown network template");
         }
@@ -190,7 +223,17 @@ public class NetworkTemplate implements Parcelable {
         return false;
     }
 
-    public static String getMatchRuleName(int matchRule) {
+    /**
+     * Check if matches Ethernet network template.
+     */
+    private boolean matchesEthernet(NetworkIdentity ident) {
+        if (ident.mType == TYPE_ETHERNET) {
+            return true;
+        }
+        return false;
+    }
+
+    private static String getMatchRuleName(int matchRule) {
         switch (matchRule) {
             case MATCH_MOBILE_3G_LOWER:
                 return "MOBILE_3G_LOWER";
@@ -200,6 +243,8 @@ public class NetworkTemplate implements Parcelable {
                 return "MOBILE_ALL";
             case MATCH_WIFI:
                 return "WIFI";
+            case MATCH_ETHERNET:
+                return "ETHERNET";
             default:
                 return "UNKNOWN";
         }

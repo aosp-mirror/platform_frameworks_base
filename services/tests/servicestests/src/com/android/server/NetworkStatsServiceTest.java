@@ -25,8 +25,8 @@ import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
-import static android.net.NetworkTemplate.MATCH_MOBILE_ALL;
-import static android.net.NetworkTemplate.MATCH_WIFI;
+import static android.net.NetworkTemplate.buildTemplateMobileAll;
+import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.UID_REMOVED;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
@@ -81,9 +81,9 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
     private static final String IMSI_1 = "310004";
     private static final String IMSI_2 = "310260";
 
-    private static NetworkTemplate sTemplateWifi = new NetworkTemplate(MATCH_WIFI, null);
-    private static NetworkTemplate sTemplateImsi1 = new NetworkTemplate(MATCH_MOBILE_ALL, IMSI_1);
-    private static NetworkTemplate sTemplateImsi2 = new NetworkTemplate(MATCH_MOBILE_ALL, IMSI_2);
+    private static NetworkTemplate sTemplateWifi = buildTemplateWifi();
+    private static NetworkTemplate sTemplateImsi1 = buildTemplateMobileAll(IMSI_1);
+    private static NetworkTemplate sTemplateImsi2 = buildTemplateMobileAll(IMSI_2);
 
     private static final int UID_RED = 1001;
     private static final int UID_BLUE = 1002;
@@ -290,7 +290,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
 
         // verify service recorded history
-        history = mService.getHistoryForNetwork(new NetworkTemplate(MATCH_WIFI, null));
+        history = mService.getHistoryForNetwork(sTemplateWifi);
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, 512L, 512L);
         assertEquals(HOUR_IN_MILLIS, history.getBucketDuration());
         assertEquals(2, history.size());
@@ -307,7 +307,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
 
         // verify identical stats, but spread across 4 buckets now
-        history = mService.getHistoryForNetwork(new NetworkTemplate(MATCH_WIFI, null));
+        history = mService.getHistoryForNetwork(sTemplateWifi);
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, 512L, 512L);
         assertEquals(30 * MINUTE_IN_MILLIS, history.getBucketDuration());
         assertEquals(4, history.size());
