@@ -161,6 +161,7 @@ int androidCreateRawThreadEtc(android_thread_func_t entryFunction,
     pthread_t thread;
     int result = pthread_create(&thread, &attr,
                     (android_pthread_entry)entryFunction, userData);
+    pthread_attr_destroy(&attr);
     if (result != 0) {
         LOGE("androidCreateRawThreadEtc failed (entry=%p, res=%d, errno=%d)\n"
              "(android threadPriority=%d)",
