@@ -145,7 +145,6 @@ LOCAL_SRC_FILES:= \
 	android_server_Watchdog.cpp \
 	android_ddm_DdmHandleNativeHeap.cpp \
 	com_android_internal_os_ZygoteInit.cpp \
-	com_android_internal_graphics_NativeUtils.cpp \
 	android_backup_BackupDataInput.cpp \
 	android_backup_BackupDataOutput.cpp \
 	android_backup_FileBackupHelperBase.cpp \

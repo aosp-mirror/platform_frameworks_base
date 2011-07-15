@@ -115,7 +115,6 @@ extern int register_android_graphics_Region(JNIEnv* env);
 extern int register_android_graphics_SurfaceTexture(JNIEnv* env);
 extern int register_android_graphics_Xfermode(JNIEnv* env);
 extern int register_android_graphics_PixelFormat(JNIEnv* env);
-extern int register_com_android_internal_graphics_NativeUtils(JNIEnv *env);
 extern int register_android_view_Display(JNIEnv* env);
 extern int register_android_view_GLES20Canvas(JNIEnv* env);
 extern int register_android_view_Surface(JNIEnv* env);
