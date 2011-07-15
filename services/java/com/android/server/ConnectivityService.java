@@ -35,7 +35,7 @@ import android.net.INetworkPolicyListener;
 import android.net.INetworkPolicyManager;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
-import android.net.LinkProperties.CompareAddressesResult;
+import android.net.LinkProperties.CompareResult;
 import android.net.MobileDataStateTracker;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
@@ -260,6 +260,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private InetAddress mDefaultDns;
 
+    // this collection is used to refcount the added routes - if there are none left
+    // it's time to remove the route from the route table
+    private Collection<RouteInfo> mAddedRoutes = new ArrayList<RouteInfo>();
+
     // used in DBG mode to track inet condition reports
     private static final int INET_CONDITION_LOG_MAX_SIZE = 15;
     private ArrayList mInetLog;
@@ -479,7 +483,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         mNetConfigs[netType].radio);
                 continue;
             }
-            mCurrentLinkProperties[netType] = mNetTrackers[netType].getLinkProperties();
+            mCurrentLinkProperties[netType] = null;
         }
 
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
@@ -1053,62 +1057,68 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         try {
             InetAddress addr = InetAddress.getByAddress(hostAddress);
-            return addHostRoute(tracker, addr, 0);
+            LinkProperties lp = tracker.getLinkProperties();
+            return addRoute(lp, RouteInfo.makeHostRoute(addr));
         } catch (UnknownHostException e) {}
         return false;
     }
 
-    /**
-     * Ensure that a network route exists to deliver traffic to the specified
-     * host via the mobile data network.
-     * @param hostAddress the IP address of the host to which the route is desired,
-     * in network byte order.
-     * TODO - deprecate
-     * @return {@code true} on success, {@code false} on failure
-     */
-    private boolean addHostRoute(NetworkStateTracker nt, InetAddress hostAddress, int cycleCount) {
-        LinkProperties lp = nt.getLinkProperties();
-        if ((lp == null) || (hostAddress == null)) return false;
-
-        String interfaceName = lp.getInterfaceName();
-        if (DBG) {
-            log("Requested host route to " + hostAddress + "(" + interfaceName + "), cycleCount=" +
-                    cycleCount);
-        }
-        if (interfaceName == null) {
-            if (DBG) loge("addHostRoute failed due to null interface name");
-            return false;
-        }
-
-        RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getRoutes(), hostAddress);
-        InetAddress gatewayAddress = null;
-        if (bestRoute != null) {
-            gatewayAddress = bestRoute.getGateway();
-            // if the best route is ourself, don't relf-reference, just add the host route
-            if (hostAddress.equals(gatewayAddress)) gatewayAddress = null;
-        }
-        if (gatewayAddress != null) {
-            if (cycleCount > MAX_HOSTROUTE_CYCLE_COUNT) {
-                loge("Error adding hostroute - too much recursion");
-                return false;
-            }
-            if (!addHostRoute(nt, gatewayAddress, cycleCount+1)) return false;
-        }
-
-        RouteInfo route = RouteInfo.makeHostRoute(hostAddress, gatewayAddress);
-
-        try {
-            mNetd.addRoute(interfaceName, route);
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
+    private boolean addRoute(LinkProperties p, RouteInfo r) {
+        return modifyRoute(p.getInterfaceName(), p, r, 0, true);
     }
 
-    // TODO support the removal of single host routes.  Keep a ref count of them so we
-    // aren't over-zealous
-    private boolean removeHostRoute(NetworkStateTracker nt, InetAddress hostAddress) {
-        return false;
+    private boolean removeRoute(LinkProperties p, RouteInfo r) {
+        return modifyRoute(p.getInterfaceName(), p, r, 0, false);
+    }
+
+    private boolean modifyRoute(String ifaceName, LinkProperties lp, RouteInfo r, int cycleCount,
+            boolean doAdd) {
+        if ((ifaceName == null) || (lp == null) || (r == null)) return false;
+
+        if (cycleCount > MAX_HOSTROUTE_CYCLE_COUNT) {
+            loge("Error adding route - too much recursion");
+            return false;
+        }
+
+        if (r.isHostRoute() == false) {
+            RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getRoutes(), r.getGateway());
+            if (bestRoute != null) {
+                if (bestRoute.getGateway().equals(r.getGateway()) == false) {
+                    bestRoute = RouteInfo.makeHostRoute(r.getGateway(), bestRoute.getGateway());
+                } else {
+                    bestRoute = RouteInfo.makeHostRoute(r.getGateway());
+                }
+                if (!modifyRoute(ifaceName, lp, bestRoute, cycleCount+1, doAdd)) return false;
+            }
+        }
+        if (doAdd) {
+            if (DBG) log("Adding " + r + " for interface " + ifaceName);
+            mAddedRoutes.add(r);
+            try {
+                mNetd.addRoute(ifaceName, r);
+            } catch (Exception e) {
+                // never crash - catch them all
+                loge("Exception trying to add a route: " + e);
+                return false;
+            }
+        } else {
+            // if we remove this one and there are no more like it, then refcount==0 and
+            // we can remove it from the table
+            mAddedRoutes.remove(r);
+            if (mAddedRoutes.contains(r) == false) {
+                if (DBG) log("Removing " + r + " for interface " + ifaceName);
+                try {
+                    mNetd.removeRoute(ifaceName, r);
+                } catch (Exception e) {
+                    // never crash - catch them all
+                    loge("Exception trying to remove a route: " + e);
+                    return false;
+                }
+            } else {
+                if (DBG) log("not removing " + r + " as it's still in use");
+            }
+        }
+        return true;
     }
 
     /**
@@ -1583,10 +1593,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
          */
         handleDnsConfigurationChange(netType);
 
+        LinkProperties curLp = mCurrentLinkProperties[netType];
+        LinkProperties newLp = null;
+
         if (mNetTrackers[netType].getNetworkInfo().isConnected()) {
-            LinkProperties newLp = mNetTrackers[netType].getLinkProperties();
-            LinkProperties curLp = mCurrentLinkProperties[netType];
-            mCurrentLinkProperties[netType] = newLp;
+            newLp = mNetTrackers[netType].getLinkProperties();
             if (VDBG) {
                 log("handleConnectivityChange: changed linkProperty[" + netType + "]:" +
                         " doReset=" + doReset + " resetMask=" + resetMask +
@@ -1594,61 +1605,50 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         "\n   newLp=" + newLp);
             }
 
-            if (curLp.isIdenticalInterfaceName(newLp)) {
-                CompareAddressesResult car = curLp.compareAddresses(newLp);
-                if ((car.removed.size() != 0) || (car.added.size() != 0)) {
-                    for (LinkAddress linkAddr : car.removed) {
-                        if (linkAddr.getAddress() instanceof Inet4Address) {
-                            resetMask |= NetworkUtils.RESET_IPV4_ADDRESSES;
+            if (curLp != null) {
+                if (curLp.isIdenticalInterfaceName(newLp)) {
+                    CompareResult<LinkAddress> car = curLp.compareAddresses(newLp);
+                    if ((car.removed.size() != 0) || (car.added.size() != 0)) {
+                        for (LinkAddress linkAddr : car.removed) {
+                            if (linkAddr.getAddress() instanceof Inet4Address) {
+                                resetMask |= NetworkUtils.RESET_IPV4_ADDRESSES;
+                            }
+                            if (linkAddr.getAddress() instanceof Inet6Address) {
+                                resetMask |= NetworkUtils.RESET_IPV6_ADDRESSES;
+                            }
                         }
-                        if (linkAddr.getAddress() instanceof Inet6Address) {
-                            resetMask |= NetworkUtils.RESET_IPV6_ADDRESSES;
+                        if (DBG) {
+                            log("handleConnectivityChange: addresses changed" +
+                                    " linkProperty[" + netType + "]:" + " resetMask=" + resetMask +
+                                    "\n   car=" + car);
                         }
-                    }
-                    if (DBG) {
-                        log("handleConnectivityChange: addresses changed" +
-                                " linkProperty[" + netType + "]:" + " resetMask=" + resetMask +
-                                "\n   car=" + car);
+                    } else {
+                        if (DBG) {
+                            log("handleConnectivityChange: address are the same reset per doReset" +
+                                   " linkProperty[" + netType + "]:" +
+                                   " resetMask=" + resetMask);
+                        }
                     }
                 } else {
-                    if (DBG) {
-                        log("handleConnectivityChange: address are the same reset per doReset" +
-                               " linkProperty[" + netType + "]:" +
-                               " resetMask=" + resetMask);
-                    }
+                    resetMask = NetworkUtils.RESET_ALL_ADDRESSES;
+                    log("handleConnectivityChange: interface not not equivalent reset both" +
+                            " linkProperty[" + netType + "]:" +
+                            " resetMask=" + resetMask);
                 }
-            } else {
-                resetMask = NetworkUtils.RESET_ALL_ADDRESSES;
-                log("handleConnectivityChange: interface not not equivalent reset both" +
-                        " linkProperty[" + netType + "]:" +
-                        " resetMask=" + resetMask);
             }
             if (mNetConfigs[netType].isDefault()) {
                 handleApplyDefaultProxy(netType);
-                addDefaultRoute(mNetTrackers[netType]);
-            } else {
-                // many radios add a default route even when we don't want one.
-                // remove the default route unless we need it for our active network
-                if (mActiveDefaultNetwork != -1) {
-                    LinkProperties defaultLinkProperties =
-                            mNetTrackers[mActiveDefaultNetwork].getLinkProperties();
-                    LinkProperties newLinkProperties =
-                            mNetTrackers[netType].getLinkProperties();
-                    String defaultIface = defaultLinkProperties.getInterfaceName();
-                    if (defaultIface != null &&
-                            !defaultIface.equals(newLinkProperties.getInterfaceName())) {
-                        removeDefaultRoute(mNetTrackers[netType]);
-                    }
-                }
-                addPrivateDnsRoutes(mNetTrackers[netType]);
             }
         } else {
-            if (mNetConfigs[netType].isDefault()) {
-                removeDefaultRoute(mNetTrackers[netType]);
-            } else {
-                removePrivateDnsRoutes(mNetTrackers[netType]);
+            if (VDBG) {
+                log("handleConnectivityChange: changed linkProperty[" + netType + "]:" +
+                        " doReset=" + doReset + " resetMask=" + resetMask +
+                        "\n  curLp=" + curLp +
+                        "\n  newLp= null");
             }
         }
+        mCurrentLinkProperties[netType] = newLp;
+        updateRoutes(newLp, curLp, mNetConfigs[netType].isDefault());
 
         if (doReset || resetMask != 0) {
             LinkProperties linkProperties = mNetTrackers[netType].getLinkProperties();
@@ -1672,107 +1672,63 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
-    private void addPrivateDnsRoutes(NetworkStateTracker nt) {
-        boolean privateDnsRouteSet = nt.isPrivateDnsRouteSet();
-        LinkProperties p = nt.getLinkProperties();
-        if (p == null) return;
-        String interfaceName = p.getInterfaceName();
+    /**
+     * Add and remove routes using the old properties (null if not previously connected),
+     * new properties (null if becoming disconnected).  May even be double null, which
+     * is a noop.
+     * Uses isLinkDefault to determine if default routes should be set or conversely if
+     * host routes should be set to the dns servers
+     */
+    private void updateRoutes(LinkProperties newLp, LinkProperties curLp, boolean isLinkDefault) {
+        Collection<RouteInfo> routesToAdd = null;
+        CompareResult<InetAddress> dnsDiff = null;
 
-        if (DBG) {
-            log("addPrivateDnsRoutes for " + nt +
-                    "(" + interfaceName + ") - mPrivateDnsRouteSet = " + privateDnsRouteSet);
-        }
-        if (interfaceName != null && !privateDnsRouteSet) {
-            Collection<InetAddress> dnsList = p.getDnses();
-            for (InetAddress dns : dnsList) {
-                addHostRoute(nt, dns, 0);
-            }
-            nt.privateDnsRouteSet(true);
-        }
-    }
+        if (curLp != null) {
+            // check for the delta between the current set and the new
+            CompareResult<RouteInfo> routeDiff = curLp.compareRoutes(newLp);
+            dnsDiff = curLp.compareDnses(newLp);
 
-    private void removePrivateDnsRoutes(NetworkStateTracker nt) {
-        LinkProperties p = nt.getLinkProperties();
-        if (p == null) return;
-        String interfaceName = p.getInterfaceName();
-        boolean privateDnsRouteSet = nt.isPrivateDnsRouteSet();
-        if (interfaceName != null && privateDnsRouteSet) {
-            if (DBG) {
-                log("removePrivateDnsRoutes for " + nt.getNetworkInfo().getTypeName() +
-                        " (" + interfaceName + ")");
-            }
-
-            Collection<InetAddress> dnsList = p.getDnses();
-            for (InetAddress dns : dnsList) {
-                if (DBG) log("  removing " + dns);
-                RouteInfo route = RouteInfo.makeHostRoute(dns);
-                try {
-                    mNetd.removeRoute(interfaceName, route);
-                } catch (Exception ex) {
-                    loge("error (" + ex + ") removing dns route " + route);
+            for (RouteInfo r : routeDiff.removed) {
+                if (isLinkDefault || ! r.isDefaultRoute()) {
+                    removeRoute(curLp, r);
                 }
             }
-            nt.privateDnsRouteSet(false);
+            routesToAdd = routeDiff.added;
         }
-    }
 
+        if (newLp != null) {
+            // if we didn't get a diff from cur -> new, then just use the new
+            if (routesToAdd == null) {
+                routesToAdd = newLp.getRoutes();
+            }
 
-    private void addDefaultRoute(NetworkStateTracker nt) {
-        LinkProperties p = nt.getLinkProperties();
-        if (p == null) return;
-        String interfaceName = p.getInterfaceName();
-        if (TextUtils.isEmpty(interfaceName)) return;
+            for (RouteInfo r :  routesToAdd) {
+                if (isLinkDefault || ! r.isDefaultRoute()) {
+                    addRoute(newLp, r);
+                }
+            }
+        }
 
-        for (RouteInfo route : p.getRoutes()) {
-            //TODO - handle non-default routes
-            if (route.isDefaultRoute()) {
-                if (DBG) log("adding default route " + route);
-                InetAddress gateway = route.getGateway();
-                if (addHostRoute(nt, gateway, 0)) {
-                    try {
-                        mNetd.addRoute(interfaceName, route);
-                    } catch (Exception e) {
-                        loge("error adding default route " + route);
-                        continue;
-                    }
-                    if (DBG) {
-                        NetworkInfo networkInfo = nt.getNetworkInfo();
-                        log("addDefaultRoute for " + networkInfo.getTypeName() +
-                                " (" + interfaceName + "), GatewayAddr=" +
-                                gateway.getHostAddress());
-                    }
-                } else {
-                    loge("error adding host route for default route " + route);
+        if (!isLinkDefault) {
+            // handle DNS routes
+            Collection<InetAddress> dnsToAdd = null;
+            if (dnsDiff != null) {
+                dnsToAdd = dnsDiff.added;
+                for (InetAddress dnsAddress : dnsDiff.removed) {
+                    removeRoute(curLp, RouteInfo.makeHostRoute(dnsAddress));
+                }
+            }
+            if (newLp != null) {
+                if (dnsToAdd == null) {
+                    dnsToAdd = newLp.getDnses();
+                }
+                for(InetAddress dnsAddress : dnsToAdd) {
+                    addRoute(newLp, RouteInfo.makeHostRoute(dnsAddress));
                 }
             }
         }
     }
 
-
-    public void removeDefaultRoute(NetworkStateTracker nt) {
-        LinkProperties p = nt.getLinkProperties();
-        if (p == null) return;
-        String interfaceName = p.getInterfaceName();
-
-        if (interfaceName == null) return;
-
-        for (RouteInfo route : p.getRoutes()) {
-            //TODO - handle non-default routes
-            if (route.isDefaultRoute()) {
-                try {
-                    mNetd.removeRoute(interfaceName, route);
-                } catch (Exception ex) {
-                    loge("error (" + ex + ") removing default route " + route);
-                    continue;
-                }
-                if (DBG) {
-                    NetworkInfo networkInfo = nt.getNetworkInfo();
-                    log("removeDefaultRoute for " + networkInfo.getTypeName() + " (" +
-                            interfaceName + ")");
-                }
-            }
-        }
-    }
 
    /**
      * Reads the network specific TCP buffer sizes from SystemProperties
