@@ -77,6 +77,11 @@ public class SeekBarPreference extends Preference
     }
 
     @Override
+    protected Object onGetDefaultValue(TypedArray a, int index) {
+        return a.getInt(index, 0);
+    }
+
+    @Override
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         if (event.getAction() != KeyEvent.ACTION_UP) {
             if (keyCode == KeyEvent.KEYCODE_PLUS
