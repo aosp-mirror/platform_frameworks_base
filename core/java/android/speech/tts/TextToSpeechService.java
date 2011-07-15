@@ -719,7 +719,7 @@ public abstract class TextToSpeechService extends Service {
         }
 
         public boolean isSpeaking() {
-            return mSynthHandler.isSpeaking();
+            return mSynthHandler.isSpeaking() || mAudioPlaybackHandler.isSpeaking();
         }
 
         public int stop(String callingApp) {
