@@ -27,19 +27,16 @@ href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps for And
 
 <p><em>Minimum API level supported:</em> <b>4</b></p>
 
-<p>The Compatibility Package includes static libraries you can add to your Android
+<p>The Compatibility Package includes static "support libraries" that you can add to your Android
 application in order to use APIs that are either not available for older platform versions or that
 offer "utility" APIs that aren't a part of the framework APIs. The goal is to simplify your
-development by offering even more APIs that you can bundle with your application so you can
+development by offering more APIs that you can bundle with your application so you can
 worry less about platform versions.</p>
 
-<p class="note"><strong>Note:</strong> The Compatibility Package includes more than one library.
-Each one has a different <em>minimum API level</em>. For example, one library requires API
-level 4 or higher, while another requires API level 13 or higher. The minimum version is
-indicated by the directory name, such as {@code v4/} and {@code v13/}. You can use more than one
-library in your application as long as your <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code android:minSdkVersion}</a>
-meets the requirements of each library.</p>
+<p class="note"><strong>Note:</strong> The Compatibility Package includes more than one support
+library. Each one has a different <em>minimum API level</em>. For example, one library requires API
+level 4 or higher, while another requires API level 13 or higher. The minimum version is indicated
+by the directory name, such as {@code v4/} and {@code v13/}.</p>
 
 
 <h2 id="Notes">Revisions</h2>
@@ -68,7 +65,8 @@ android.view.VelocityTracker} APIs</li>
           <li>Adds {@code ViewConfigurationCompat} to support a newer {@link
 android.view.ViewConfiguration} APIs</li>
           <li>All new APIs (available only in the support library) that allow you to create UIs
-with horizontal paging (with or without tabs at the top). Classes to support this include:
+with horizontal paging, allowing users to swipe left and right between content views. Classes to
+support this include:
             <ul>
               <li>{@code ViewPager}: A {@link android.view.ViewGroup} that manages the
 layout for the child views, which the user can swipe between.</li>
@@ -76,8 +74,9 @@ layout for the child views, which the user can swipe between.</li>
 views that represent each page.</li>
               <li>{@code FragmentPagerAdapter}: An extension of {@code PagerAdapter} for flipping
 between fragments.</li>
-              <li>{@code FragmentPagerAdapter}: An extension of {@code PagerAdapter} for flipping
-between fragments that uses the library's support for {@link android.app.Fragment.SavedState}.</li>
+              <li>{@code FragmentStatePagerAdapter}: An extension of {@code PagerAdapter} for
+flipping between fragments that uses the library's support for {@link
+android.app.Fragment.SavedState}.</li>
             </ul>
           </li>
         </ul>
