@@ -24,8 +24,8 @@ namespace android {
 static bool parse_xing_header(
         const sp<DataSource> &source, off64_t first_frame_pos,
         int32_t *frame_number = NULL, int32_t *byte_number = NULL,
-        char *table_of_contents = NULL, int32_t *quality_indicator = NULL,
-        int64_t *duration = NULL);
+        unsigned char *table_of_contents = NULL,
+        int32_t *quality_indicator = NULL, int64_t *duration = NULL);
 
 // static
 sp<XINGSeeker> XINGSeeker::CreateFromSource(
@@ -94,7 +94,7 @@ bool XINGSeeker::getOffsetForTime(int64_t *timeUs, off64_t *pos) {
 static bool parse_xing_header(
         const sp<DataSource> &source, off64_t first_frame_pos,
         int32_t *frame_number, int32_t *byte_number,
-        char *table_of_contents, int32_t *quality_indicator,
+        unsigned char *table_of_contents, int32_t *quality_indicator,
         int64_t *duration) {
     if (frame_number) {
         *frame_number = 0;
