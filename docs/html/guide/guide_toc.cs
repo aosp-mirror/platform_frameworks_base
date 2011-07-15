@@ -244,7 +244,7 @@
               </a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/opengl.html">
                 <span class="en">3D with OpenGL</span>
-              </a></li>
+              </a><span class="new">updated</span></li>
           <li><a href="<?cs var:toroot ?>guide/topics/graphics/animation.html">
                 <span class="en">Property Animation</span>
               </a></li>
