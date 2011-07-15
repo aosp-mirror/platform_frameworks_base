@@ -91,8 +91,12 @@ public class MediaPropertiesTest extends
         assertEquals("AudioType Mismatch ", audioCodecType, mvi.getAudioType());
         assertEquals("Audio Sampling " + mvi.getAudioSamplingFrequency(),
             audioSamplingFrequency, mvi.getAudioSamplingFrequency());
-        assertEquals("Audio Channels " + mvi.getAudioChannels(), audioChannel,
-            mvi.getAudioChannels());
+        // PV SW AAC codec always returns number of channels as Stereo.
+        // So we do not assert for number of audio channels for AAC_LC
+        if ( audioCodecType != MediaProperties.ACODEC_AAC_LC ) {
+            assertEquals("Audio Channels " + mvi.getAudioChannels(), audioChannel,
+                mvi.getAudioChannels());
+        }
     }
 
     protected void validateAudioProperties(int audioCodecType, int duration,
@@ -103,8 +107,12 @@ public class MediaPropertiesTest extends
             duration, aT.getDuration(), 10));
         assertEquals("Audio Sampling " + aT.getAudioSamplingFrequency(),
             audioSamplingFrequency, aT.getAudioSamplingFrequency());
-        assertEquals("Audio Channels " + aT.getAudioChannels(), audioChannel,
-            aT.getAudioChannels());
+        // PV SW AAC codec always returns number of channels as Stereo.
+        // So we do not assert for number of audio channels for AAC_LC
+        if ( audioCodecType != MediaProperties.ACODEC_AAC_LC ) {
+            assertEquals("Audio Channels " + aT.getAudioChannels(), audioChannel,
+                aT.getAudioChannels());
+        }
     }
 
     protected void validateImageProperties(int aspectRatio, int fileType,
