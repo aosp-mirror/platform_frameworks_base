@@ -24,8 +24,8 @@ import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
+import static android.net.ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
-import static android.net.ConnectivityManager.*;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.WARNING_DISABLED;
@@ -42,7 +42,7 @@ import static android.net.NetworkPolicyManager.dumpRules;
 import static android.net.NetworkPolicyManager.isUidValidForPolicy;
 import static android.net.NetworkTemplate.MATCH_MOBILE_3G_LOWER;
 import static android.net.NetworkTemplate.MATCH_MOBILE_4G;
-import static android.net.NetworkTemplate.MATCH_MOBILE_ALL;
+import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
@@ -678,7 +678,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             time.setToNow();
             final int cycleDay = time.monthDay;
 
-            final NetworkTemplate template = new NetworkTemplate(MATCH_MOBILE_ALL, subscriberId);
+            final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
             mNetworkPolicy.add(
                     new NetworkPolicy(template, cycleDay, 4 * GB_IN_BYTES, LIMIT_DISABLED));
             writePolicyLocked();

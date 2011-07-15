@@ -27,7 +27,6 @@ import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
-import static android.net.NetworkTemplate.MATCH_WIFI;
 import static org.easymock.EasyMock.anyInt;
 import static org.easymock.EasyMock.aryEq;
 import static org.easymock.EasyMock.capture;
@@ -88,7 +87,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     private static final long TEST_START = 1194220800000L;
     private static final String TEST_IFACE = "test0";
 
-    private static NetworkTemplate sTemplateWifi = new NetworkTemplate(MATCH_WIFI, null);
+    private static NetworkTemplate sTemplateWifi = NetworkTemplate.buildTemplateWifi();
 
     private BroadcastInterceptingContext mServiceContext;
     private File mPolicyDir;
