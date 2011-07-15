@@ -1083,12 +1083,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (r.isHostRoute() == false) {
             RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getRoutes(), r.getGateway());
             if (bestRoute != null) {
-                if (bestRoute.getGateway().equals(r.getGateway()) == false) {
-                    bestRoute = RouteInfo.makeHostRoute(r.getGateway(), bestRoute.getGateway());
-                } else {
+                if (bestRoute.getGateway().equals(r.getGateway())) {
+                    // if there is no better route, add the implied hostroute for our gateway
                     bestRoute = RouteInfo.makeHostRoute(r.getGateway());
+                } else {
+                    // if we will connect to our gateway through another route, add a direct
+                    // route to it's gateway
+                    bestRoute = RouteInfo.makeHostRoute(r.getGateway(), bestRoute.getGateway());
                 }
-                if (!modifyRoute(ifaceName, lp, bestRoute, cycleCount+1, doAdd)) return false;
+                modifyRoute(ifaceName, lp, bestRoute, cycleCount+1, doAdd);
             }
         }
         if (doAdd) {
@@ -1167,9 +1170,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     public void setDataDependency(int networkType, boolean met) {
         enforceConnectivityInternalPermission();
 
-        if (DBG) {
-            log("setDataDependency(" + networkType + ", " + met + ")");
-        }
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_SET_DEPENDENCY_MET,
                 (met ? ENABLED : DISABLED), networkType));
     }
