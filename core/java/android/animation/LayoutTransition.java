@@ -235,7 +235,7 @@ public class LayoutTransition {
             PropertyValuesHolder pvhBottom = PropertyValuesHolder.ofInt("bottom", 0, 1);
             PropertyValuesHolder pvhScrollX = PropertyValuesHolder.ofInt("scrollX", 0, 1);
             PropertyValuesHolder pvhScrollY = PropertyValuesHolder.ofInt("scrollY", 0, 1);
-            defaultChangeIn = ObjectAnimator.ofPropertyValuesHolder(this,
+            defaultChangeIn = ObjectAnimator.ofPropertyValuesHolder((Object)null,
                     pvhLeft, pvhTop, pvhRight, pvhBottom, pvhScrollX, pvhScrollY);
             defaultChangeIn.setDuration(DEFAULT_DURATION);
             defaultChangeIn.setStartDelay(mChangingAppearingDelay);
@@ -244,11 +244,11 @@ public class LayoutTransition {
             defaultChangeOut.setStartDelay(mChangingDisappearingDelay);
             defaultChangeOut.setInterpolator(mChangingDisappearingInterpolator);
 
-            defaultFadeIn = ObjectAnimator.ofFloat(this, "alpha", 0f, 1f);
+            defaultFadeIn = ObjectAnimator.ofFloat(null, "alpha", 0f, 1f);
             defaultFadeIn.setDuration(DEFAULT_DURATION);
             defaultFadeIn.setStartDelay(mAppearingDelay);
             defaultFadeIn.setInterpolator(mAppearingInterpolator);
-            defaultFadeOut = ObjectAnimator.ofFloat(this, "alpha", 1f, 0f);
+            defaultFadeOut = ObjectAnimator.ofFloat(null, "alpha", 1f, 0f);
             defaultFadeOut.setDuration(DEFAULT_DURATION);
             defaultFadeOut.setStartDelay(mDisappearingDelay);
             defaultFadeOut.setInterpolator(mDisappearingInterpolator);
