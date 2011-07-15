@@ -122,7 +122,10 @@ public:
         uint32_t    reserved[2];
     };
 
+    explicit Surface(const sp<ISurfaceTexture>& st);
+
     static status_t writeToParcel(const sp<Surface>& control, Parcel* parcel);
+
     static sp<Surface> readFromParcel(const Parcel& data);
     static bool isValid(const sp<Surface>& surface) {
         return (surface != 0) && surface->isValid();
@@ -147,14 +150,14 @@ private:
     Surface& operator = (Surface& rhs);
     Surface(const Surface& rhs);
 
-    Surface(const sp<SurfaceControl>& control);
+    explicit Surface(const sp<SurfaceControl>& control);
     Surface(const Parcel& data, const sp<IBinder>& ref);
     ~Surface();
 
     /*
      *  private stuff...
      */
-    void init();
+    void init(const sp<ISurfaceTexture>& surfaceTexture);
 
     static void cleanCachedSurfacesLocked();
 

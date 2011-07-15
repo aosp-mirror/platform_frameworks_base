@@ -22,6 +22,7 @@
 #include "android/graphics/GraphicsJNI.h"
 
 #include <binder/IMemory.h>
+#include <gui/SurfaceTexture.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
 #include <surfaceflinger/Surface.h>
 #include <ui/Region.h>
@@ -38,6 +39,7 @@
 #include "JNIHelp.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
+#include <android_runtime/android_graphics_SurfaceTexture.h>
 #include <utils/misc.h>
 
 
@@ -242,6 +244,19 @@ static void Surface_init(
         return;
     }
     setSurfaceControl(env, clazz, surface);
+}
+
+static void Surface_initFromSurfaceTexture(
+        JNIEnv* env, jobject clazz, jobject jst)
+{
+    sp<ISurfaceTexture> st(SurfaceTexture_getSurfaceTexture(env, jst));
+    sp<Surface> surface(new Surface(st));
+    if (surface == NULL) {
+        jniThrowException(env, OutOfResourcesException, NULL);
+        return;
+    }
+    setSurfaceControl(env, clazz, NULL);
+    setSurface(env, clazz, surface);
 }
 
 static void Surface_initParcel(JNIEnv* env, jobject clazz, jobject argParcel)
@@ -761,10 +776,26 @@ static void Surface_writeToParcel(
         return;
     }
 
+    // The Java instance may have a SurfaceControl (in the case of the
+    // WindowManager or a system app). In that case, we defer to the
+    // SurfaceControl to send its ISurface. Otherwise, if the Surface is
+    // available we let it parcel itself. Finally, if the Surface is also
+    // NULL we fall back to using the SurfaceControl path which sends an
+    // empty surface; this matches legacy behavior.
     const sp<SurfaceControl>& control(getSurfaceControl(env, clazz));
-    SurfaceControl::writeSurfaceToParcel(control, parcel);
+    if (control != NULL) {
+        SurfaceControl::writeSurfaceToParcel(control, parcel);
+    } else {
+        sp<Surface> surface(Surface_getSurface(env, clazz));
+        if (surface != NULL) {
+            Surface::writeToParcel(surface, parcel);
+        } else {
+            SurfaceControl::writeSurfaceToParcel(NULL, parcel);
+        }
+    }
     if (flags & PARCELABLE_WRITE_RETURN_VALUE) {
-        setSurfaceControl(env, clazz, 0);
+        setSurfaceControl(env, clazz, NULL);
+        setSurface(env, clazz, NULL);
     }
 }
 
@@ -784,6 +815,7 @@ static JNINativeMethod gSurfaceMethods[] = {
     {"nativeClassInit",     "()V",  (void*)nativeClassInit },
     {"init",                "(Landroid/view/SurfaceSession;ILjava/lang/String;IIIII)V",  (void*)Surface_init },
     {"init",                "(Landroid/os/Parcel;)V",  (void*)Surface_initParcel },
+    {"initFromSurfaceTexture", "(Landroid/graphics/SurfaceTexture;)V", (void*)Surface_initFromSurfaceTexture },
     {"getIdentity",         "()I",  (void*)Surface_getIdentity },
     {"destroy",             "()V",  (void*)Surface_destroy },
     {"release",             "()V",  (void*)Surface_release },

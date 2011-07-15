@@ -184,6 +184,7 @@ status_t SurfaceControl::writeSurfaceToParcel(
         identity = control->mIdentity;
     }
     parcel->writeStrongBinder(sur!=0 ? sur->asBinder() : NULL);
+    parcel->writeStrongBinder(NULL);  // NULL ISurfaceTexture in this case.
     parcel->writeInt32(identity);
     return NO_ERROR;
 }
@@ -192,7 +193,8 @@ sp<Surface> SurfaceControl::getSurface() const
 {
     Mutex::Autolock _l(mLock);
     if (mSurfaceData == 0) {
-        mSurfaceData = new Surface(const_cast<SurfaceControl*>(this));
+        sp<SurfaceControl> surface_control(const_cast<SurfaceControl*>(this));
+        mSurfaceData = new Surface(surface_control);
     }
     return mSurfaceData;
 }
@@ -208,31 +210,58 @@ Surface::Surface(const sp<SurfaceControl>& surface)
       mSurface(surface->mSurface),
       mIdentity(surface->mIdentity)
 {
-    init();
+    sp<ISurfaceTexture> st;
+    if (mSurface != NULL) {
+        st = mSurface->getSurfaceTexture();
+    }
+    init(st);
 }
 
 Surface::Surface(const Parcel& parcel, const sp<IBinder>& ref)
     : SurfaceTextureClient()
 {
-    mSurface    = interface_cast<ISurface>(ref);
+    mSurface = interface_cast<ISurface>(ref);
+    sp<IBinder> st_binder(parcel.readStrongBinder());
+    sp<ISurfaceTexture> st;
+    if (st_binder != NULL) {
+        st = interface_cast<ISurfaceTexture>(st_binder);
+    } else if (mSurface != NULL) {
+        st = mSurface->getSurfaceTexture();
+    }
+
     mIdentity   = parcel.readInt32();
-    init();
+    init(st);
+}
+
+Surface::Surface(const sp<ISurfaceTexture>& st)
+    : SurfaceTextureClient(),
+      mSurface(NULL),
+      mIdentity(0)
+{
+    init(st);
 }
 
 status_t Surface::writeToParcel(
         const sp<Surface>& surface, Parcel* parcel)
 {
     sp<ISurface> sur;
+    sp<ISurfaceTexture> st;
     uint32_t identity = 0;
     if (Surface::isValid(surface)) {
         sur      = surface->mSurface;
+        st       = surface->getISurfaceTexture();
         identity = surface->mIdentity;
-    } else if (surface != 0 && surface->mSurface != 0) {
-        LOGW("Parceling invalid surface with non-NULL ISurface as NULL: "
-             "mSurface = %p, mIdentity = %d",
-             surface->mSurface.get(), surface->mIdentity);
+    } else if (surface != 0 &&
+            (surface->mSurface != NULL ||
+             surface->getISurfaceTexture() != NULL)) {
+        LOGE("Parceling invalid surface with non-NULL ISurface/ISurfaceTexture as NULL: "
+             "mSurface = %p, surfaceTexture = %p, mIdentity = %d, ",
+             surface->mSurface.get(), surface->getISurfaceTexture().get(),
+             surface->mIdentity);
     }
-    parcel->writeStrongBinder(sur!=0 ? sur->asBinder() : NULL);
+
+    parcel->writeStrongBinder(sur != NULL ? sur->asBinder() : NULL);
+    parcel->writeStrongBinder(st != NULL ? st->asBinder() : NULL);
     parcel->writeInt32(identity);
     return NO_ERROR;
 
@@ -249,8 +278,8 @@ sp<Surface> Surface::readFromParcel(const Parcel& data) {
        surface = new Surface(data, binder);
        sCachedSurfaces.add(binder, surface);
     }
-    if (surface->mSurface == 0) {
-      surface = 0;
+    if (surface->mSurface == NULL && surface->getISurfaceTexture() == NULL) {
+        surface = 0;
     }
     cleanCachedSurfacesLocked();
     return surface;
@@ -267,10 +296,9 @@ void Surface::cleanCachedSurfacesLocked() {
     }
 }
 
-void Surface::init()
+void Surface::init(const sp<ISurfaceTexture>& surfaceTexture)
 {
-    if (mSurface != NULL) {
-        sp<ISurfaceTexture> surfaceTexture(mSurface->getSurfaceTexture());
+    if (mSurface != NULL || surfaceTexture != NULL) {
         LOGE_IF(surfaceTexture==0, "got a NULL ISurfaceTexture from ISurface");
         if (surfaceTexture != NULL) {
             setISurfaceTexture(surfaceTexture);

@@ -161,6 +161,9 @@ public class Surface implements Parcelable {
      */
     public static final int FLAGS_ORIENTATION_ANIMATION_DISABLE = 0x000000001;
 
+    // The mSurfaceControl will only be present for Surfaces used by the window
+    // server or system processes. When this class is parceled we defer to the
+    // mSurfaceControl to do the parceling. Otherwise we parcel the mNativeSurface.
     @SuppressWarnings("unused")
     private int mSurfaceControl;
     @SuppressWarnings("unused")
@@ -202,6 +205,19 @@ public class Surface implements Parcelable {
     native private static void nativeClassInit();
     static { nativeClassInit(); }
 
+    /**
+     * Create Surface from a SurfaceTexture.
+     *
+     * @param surfaceTexture The {@link SurfaceTexture} that is updated by this Surface.
+     * @hide
+     */
+    public Surface(SurfaceTexture surfaceTexture) {
+        if (DEBUG_RELEASE) {
+            mCreationStack = new Exception();
+        }
+        mCanvas = new CompatibleCanvas();
+        initFromSurfaceTexture(surfaceTexture);
+    }
     
     /**
      * create a surface
@@ -504,6 +520,8 @@ public class Surface implements Parcelable {
             throws OutOfResourcesException;
 
     private native void init(Parcel source);
+
+    private native void initFromSurfaceTexture(SurfaceTexture surfaceTexture);
 
     private native int getIdentity();
 }
