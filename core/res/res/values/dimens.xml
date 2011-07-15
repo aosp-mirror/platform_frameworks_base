@@ -136,4 +136,7 @@
     <!-- Minimum popup width for selecting an activity in ActivityChooserDialog/ActivityChooserView. -->
     <dimen name="activity_chooser_popup_min_width">200dip</dimen>
 
+    <!-- The default gap between components in a layout. -->
+    <dimen name="default_gap">16dip</dimen>
+
 </resources>
