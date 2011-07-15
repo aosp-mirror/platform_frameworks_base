@@ -87,8 +87,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,6 +111,8 @@ class BackupManagerService extends IBackupManager.Stub {
     // Name and current contents version of the full-backup manifest file
     static final String BACKUP_MANIFEST_FILENAME = "_manifest";
     static final int BACKUP_MANIFEST_VERSION = 1;
+    static final String BACKUP_FILE_HEADER_MAGIC = "ANDROID BACKUP\n";
+    static final int BACKUP_FILE_VERSION = 1;
 
     // How often we perform a backup pass.  Privileged external callers can
     // trigger an immediate pass.
@@ -1791,16 +1795,42 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
 
-            // Set up the compression stage
             FileOutputStream ofstream = new FileOutputStream(mOutputFile.getFileDescriptor());
+
+            // Set up the compression stage
             Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
             DeflaterOutputStream out = new DeflaterOutputStream(ofstream, deflater, true);
 
-            // !!! TODO: if using encryption, set up the encryption stage
-            // and emit the tar header stating the password salt.
-
             PackageInfo pkg = null;
             try {
+
+                // !!! TODO: if using encryption, set up the encryption stage
+                // and emit the tar header stating the password salt.
+
+                // Write the global file header.  All strings are UTF-8 encoded; lines end
+                // with a '\n' byte.  Actual backup data begins immediately following the
+                // final '\n'.
+                //
+                // line 1: "ANDROID BACKUP"
+                // line 2: backup file format version, currently "1"
+                // line 3: compressed?  "0" if not compressed, "1" if compressed.
+                // line 4: encryption salt?  "-" if not encrypted, otherwise this
+                //         line contains the encryption salt with which the user-
+                //         supplied password is to be expanded, in hexadecimal.
+                StringBuffer headerbuf = new StringBuffer(256);
+                // !!! TODO: programmatically build the compressed / encryption salt fields
+                headerbuf.append(BACKUP_FILE_HEADER_MAGIC);
+                headerbuf.append("1\n1\n-\n");
+
+                try {
+                    byte[] header = headerbuf.toString().getBytes("UTF-8");
+                    ofstream.write(header);
+                } catch (Exception e) {
+                    // Should never happen!
+                    Slog.e(TAG, "Unable to emit archive header", e);
+                    return;
+                }
+
                 // Now back up the app data via the agent mechanism
                 int N = packagesToBackup.size();
                 for (int i = 0; i < N; i++) {
@@ -2176,7 +2206,46 @@ class BackupManagerService extends IBackupManager.Stub {
                 mBytes = 0;
                 byte[] buffer = new byte[32 * 1024];
                 FileInputStream rawInStream = new FileInputStream(mInputFile.getFileDescriptor());
-                InflaterInputStream in = new InflaterInputStream(rawInStream);
+
+                // First, parse out the unencrypted/uncompressed header
+                boolean compressed = false;
+                boolean encrypted = false;
+                final InputStream in;
+
+                boolean okay = false;
+                final int headerLen = BACKUP_FILE_HEADER_MAGIC.length();
+                byte[] streamHeader = new byte[headerLen];
+                try {
+                    int got;
+                    if ((got = rawInStream.read(streamHeader, 0, headerLen)) == headerLen) {
+                        byte[] magicBytes = BACKUP_FILE_HEADER_MAGIC.getBytes("UTF-8");
+                        if (Arrays.equals(magicBytes, streamHeader)) {
+                            // okay, header looks good.  now parse out the rest of the fields.
+                            String s = readHeaderLine(rawInStream);
+                            if (Integer.parseInt(s) == BACKUP_FILE_VERSION) {
+                                // okay, it's a version we recognize
+                                s = readHeaderLine(rawInStream);
+                                compressed = (Integer.parseInt(s) != 0);
+                                s = readHeaderLine(rawInStream);
+                                if (!s.startsWith("-")) {
+                                    encrypted = true;
+                                    // TODO: parse out the salt here and process with the user pw
+                                }
+                                okay = true;
+                            } else Slog.e(TAG, "Wrong header version: " + s);
+                        } else Slog.e(TAG, "Didn't read the right header magic");
+                    } else Slog.e(TAG, "Only read " + got + " bytes of header");
+                } catch (NumberFormatException e) {
+                    Slog.e(TAG, "Can't parse restore data header");
+                }
+
+                if (!okay) {
+                    Slog.e(TAG, "Invalid restore data; aborting.");
+                    return;
+                }
+
+                // okay, use the right stream layer based on compression
+                in = (compressed) ? new InflaterInputStream(rawInStream) : rawInStream;
 
                 boolean didRestore;
                 do {
@@ -2184,6 +2253,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 } while (didRestore);
 
                 if (DEBUG) Slog.v(TAG, "Done consuming input tarfile, total bytes=" + mBytes);
+            } catch (IOException e) {
+                Slog.e(TAG, "Unable to read restore input");
             } finally {
                 tearDownPipes();
                 tearDownAgent(mTargetApp);
@@ -2205,6 +2276,16 @@ class BackupManagerService extends IBackupManager.Stub {
                 mWakelock.release();
                 if (DEBUG) Slog.d(TAG, "Full restore pass complete.");
             }
+        }
+
+        String readHeaderLine(InputStream in) throws IOException {
+            int c;
+            StringBuffer buffer = new StringBuffer(80);
+            while ((c = in.read()) >= 0) {
+                if (c == '\n') break;   // consume and discard the newlines
+                buffer.append((char)c);
+            }
+            return buffer.toString();
         }
 
         boolean restoreOneFile(InputStream instream, byte[] buffer) {
