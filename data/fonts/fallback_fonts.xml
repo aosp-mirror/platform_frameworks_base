@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Fallback Fonts
+
+    This file specifies the fonts, and the priority order, that will be searched for any
+    glyphs not handled by the default fonts specified in /system/etc/system_fonts.xml.
+    Each entry consists of a family tag and a list of files (file names) which support that
+    family. The fonts for each family are listed in the order of the styles that they
+    handle (the order is: regular, bold, italic, and bold-italic). The order in which the
+    families are listed in this file represents the order in which these fallback fonts
+    will be searched for glyphs that are not supported by the default system fonts (which are
+    found in /system/etc/system_fonts.xml).
+
+    Note that there is not nameset for fallback fonts, unlike the fonts specified in
+    system_fonts.xml. The ability to support specific names in fallback fonts may be supported
+    in the future. For now, the lack of files entries here is an indicator to the system that
+    these are fallback fonts, instead of default named system fonts.
+
+    There is another optional file in /vendor/etc/fallback_fonts.xml. That file can be used to
+    provide references to other font families that should be used in addition to the default
+    fallback fonts. That file can also specify the order in which the fallback fonts should be
+    searched, to ensure that a vendor-provided font will be used before another fallback font
+    which happens to handle the same glyph.
+-->
+<familyset>
+    <family>
+        <fileset>
+            <file>DroidSansArabic.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>DroidSansHebrew-Regular.ttf</file>
+            <file>DroidSansHebrew-Bold.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>DroidSansThai.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>DroidSansFallback.ttf</file>
+        </fileset>
+    </family>
+</familyset>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Vendor-provided fallback fonts
+
+    This file can be edited to add references to fonts that are not installed or referenced in the
+    default system. The file should then be placed in /vendor/etc/fallback_fonts.xml.
+
+    For example, vendors might want to build configurations for locales that are
+    better served by fonts which either handle glyphs not supported in the default fonts or which
+    handle these glyphs differently than the default fallback fonts.
+    Each entry in this list is a "family", which consists of a list of "files"
+    (the filenames for that family). The files objects are
+    provided in the order of the styles supported for that family: regular, bold, italic, and
+    bold-italic. Only providing one font means that all styles will be rendered with that font.
+    Providing two means that these two fonts will render regular and bold fonts (italics will
+    be mapped to these two fonts).
+
+    There is also an optional "order" attribute on the Family tag. This specifies the index at
+    which that family of fonts should be inserted in the fallback font list, where the
+    default fallback fonts on the system (in /system/etc/fallback_fonts.xml) start at index 0.
+    If no 'order' attribute is supplied, that family will be inserted either at the end of the
+    current fallback list (if no order was supplied for any previous family in this file) or
+    after the previous family (if there was an order specified previously). Typically, vendors
+    may want to supply an order for the first family that puts this set of fonts at the appropriate
+    place in the overall fallback fonts. The order of this list determines which fallback font
+    will be used to support any glyphs that are not handled by the default system fonts.
+
+    The sample configuration below is an example of how one might provide two families of fonts
+    that get inserted at the first and second (0  and 1) position in the overall fallback fonts.
+
+    See /system/etc/system_fonts.xml and /system/etc/fallback_fonts.xml for more information
+    and to understand the order in which the default system fonts are loaded and structured for
+    lookup.
+-->
+
+<!-- Sample fallback font additions to the default fallback list. These fonts will be added
+    to the top two positions of the fallback list, since the first has an order of 0. -->
+<!--
+<familyset>
+    <family order="0">
+        <fileset>
+            <file>MyFont.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
+            <file>MyOtherFont.ttf</file>
+        </fileset>
+    </family>
+</familyset>
+-->

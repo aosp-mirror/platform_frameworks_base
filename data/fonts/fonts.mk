@@ -30,4 +30,6 @@ PRODUCT_COPY_FILES := \
     frameworks/base/data/fonts/DroidSansFallback.ttf:system/fonts/DroidSansFallback.ttf \
     frameworks/base/data/fonts/AndroidClock.ttf:system/fonts/AndroidClock.ttf \
     frameworks/base/data/fonts/AndroidClock_Highlight.ttf:system/fonts/AndroidClock_Highlight.ttf \
-    frameworks/base/data/fonts/AndroidClock_Solid.ttf:system/fonts/AndroidClock_Solid.ttf
+    frameworks/base/data/fonts/AndroidClock_Solid.ttf:system/fonts/AndroidClock_Solid.ttf \
+    frameworks/base/data/fonts/system_fonts.xml:system/etc/system_fonts.xml \
+    frameworks/base/data/fonts/fallback_fonts.xml:system/etc/fallback_fonts.xml
