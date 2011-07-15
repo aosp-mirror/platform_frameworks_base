@@ -155,7 +155,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private boolean mInetConditionChangeInFlight = false;
     private int mDefaultConnectionSequence = 0;
 
+    private Object mDnsLock = new Object();
     private int mNumDnsEntries;
+    private boolean mDnsOverridden = false;
 
     private boolean mTestMode;
     private static ConnectivityService sServiceInstance;
@@ -243,6 +245,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private static final int EVENT_SET_DEPENDENCY_MET =
             MAX_NETWORK_STATE_TRACKER_EVENT + 10;
+
+    /**
+     * used internally to restore DNS properties back to the
+     * default network
+     */
+    private static final int EVENT_RESTORE_DNS =
+            MAX_NETWORK_STATE_TRACKER_EVENT + 11;
 
     private Handler mHandler;
 
@@ -1889,6 +1898,50 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mContext.sendBroadcast(intent);
     }
 
+    // Caller must grab mDnsLock.
+    private boolean updateDns(String network, Collection<InetAddress> dnses, String domains) {
+        boolean changed = false;
+        int last = 0;
+        if (dnses.size() == 0 && mDefaultDns != null) {
+            ++last;
+            String value = mDefaultDns.getHostAddress();
+            if (!value.equals(SystemProperties.get("net.dns1"))) {
+                if (DBG) {
+                    log("no dns provided for " + network + " - using " + value);
+                }
+                changed = true;
+                SystemProperties.set("net.dns1", value);
+            }
+        } else {
+            for (InetAddress dns : dnses) {
+                ++last;
+                String key = "net.dns" + last;
+                String value = dns.getHostAddress();
+                if (!changed && value.equals(SystemProperties.get(key))) {
+                    continue;
+                }
+                if (DBG) {
+                    log("adding dns " + value + " for " + network);
+                }
+                changed = true;
+                SystemProperties.set(key, value);
+            }
+        }
+        for (int i = last + 1; i <= mNumDnsEntries; ++i) {
+            String key = "net.dns" + i;
+            if (DBG) log("erasing " + key);
+            changed = true;
+            SystemProperties.set(key, "");
+        }
+        mNumDnsEntries = last;
+
+        if (!domains.equals(SystemProperties.get("net.dns.search"))) {
+            SystemProperties.set("net.dns.search", domains);
+            changed = true;
+        }
+        return changed;
+    }
+
     private void handleDnsConfigurationChange(int netType) {
         // add default net's dns entries
         NetworkStateTracker nt = mNetTrackers[netType];
@@ -1898,40 +1951,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             Collection<InetAddress> dnses = p.getDnses();
             boolean changed = false;
             if (mNetConfigs[netType].isDefault()) {
-                int j = 1;
-                if (dnses.size() == 0 && mDefaultDns != null) {
-                    String dnsString = mDefaultDns.getHostAddress();
-                    if (!dnsString.equals(SystemProperties.get("net.dns1"))) {
-                        if (DBG) {
-                            log("no dns provided - using " + dnsString);
-                        }
-                        changed = true;
-                        SystemProperties.set("net.dns1", dnsString);
-                    }
-                    j++;
-                } else {
-                    for (InetAddress dns : dnses) {
-                        String dnsString = dns.getHostAddress();
-                        if (!changed && dnsString.equals(SystemProperties.get("net.dns" + j))) {
-                            j++;
-                            continue;
-                        }
-                        if (DBG) {
-                            log("adding dns " + dns + " for " +
-                                    nt.getNetworkInfo().getTypeName());
-                        }
-                        changed = true;
-                        SystemProperties.set("net.dns" + j++, dnsString);
+                String network = nt.getNetworkInfo().getTypeName();
+                synchronized (mDnsLock) {
+                    if (!mDnsOverridden) {
+                        changed = updateDns(network, dnses, "");
                     }
                 }
-                for (int k=j ; k<mNumDnsEntries; k++) {
-                    if (changed || !TextUtils.isEmpty(SystemProperties.get("net.dns" + k))) {
-                        if (DBG) log("erasing net.dns" + k);
-                        changed = true;
-                        SystemProperties.set("net.dns" + k, "");
-                    }
-                }
-                mNumDnsEntries = j;
             } else {
                 // set per-pid dns for attached secondary nets
                 List pids = mNetRequestersPids[netType];
@@ -2136,6 +2161,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 {
                     boolean met = (msg.arg1 == ENABLED);
                     handleSetDependencyMet(msg.arg2, met);
+                    break;
+                }
+                case EVENT_RESTORE_DNS:
+                {
+                    if (mActiveDefaultNetwork != -1) {
+                        handleDnsConfigurationChange(mActiveDefaultNetwork);
+                    }
                     break;
                 }
             }
@@ -2585,12 +2617,57 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         private VpnCallback() {
         }
 
-        public synchronized void override(List<String> dnsServers, List<String> searchDomains) {
-            // TODO: override DNS servers and http proxy.
+        public void override(List<String> dnsServers, List<String> searchDomains) {
+            if (dnsServers == null) {
+                restore();
+                return;
+            }
+
+            // Convert DNS servers into addresses.
+            List<InetAddress> addresses = new ArrayList<InetAddress>();
+            for (String address : dnsServers) {
+                // Double check the addresses and remove invalid ones.
+                try {
+                    addresses.add(InetAddress.parseNumericAddress(address));
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+            if (addresses.isEmpty()) {
+                restore();
+                return;
+            }
+
+            // Concatenate search domains into a string.
+            StringBuilder buffer = new StringBuilder();
+            if (searchDomains != null) {
+                for (String domain : searchDomains) {
+                    buffer.append(domain).append(' ');
+                }
+            }
+            String domains = buffer.toString().trim();
+
+            // Apply DNS changes.
+            boolean changed = false;
+            synchronized (mDnsLock) {
+                changed = updateDns("VPN", addresses, domains);
+                mDnsOverridden = true;
+            }
+            if (changed) {
+                bumpDns();
+            }
+
+            // TODO: temporarily remove http proxy?
         }
 
-        public synchronized void restore() {
-            // TODO: restore VPN changes.
+        public void restore() {
+            synchronized (mDnsLock) {
+                if (!mDnsOverridden) {
+                    return;
+                }
+                mDnsOverridden = false;
+            }
+            mHandler.sendEmptyMessage(EVENT_RESTORE_DNS);
         }
     }
 }
