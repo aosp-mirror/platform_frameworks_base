@@ -165,10 +165,17 @@ public class Spinner extends AbsSpinner implements OnClickListener {
                     ViewGroup.LayoutParams.WRAP_CONTENT);
             popup.setBackgroundDrawable(a.getDrawable(
                     com.android.internal.R.styleable.Spinner_popupBackground));
-            popup.setVerticalOffset(a.getDimensionPixelOffset(
-                    com.android.internal.R.styleable.Spinner_dropDownVerticalOffset, 0));
-            popup.setHorizontalOffset(a.getDimensionPixelOffset(
-                    com.android.internal.R.styleable.Spinner_dropDownHorizontalOffset, 0));
+            final int verticalOffset = a.getDimensionPixelOffset(
+                    com.android.internal.R.styleable.Spinner_dropDownVerticalOffset, 0);
+            if (verticalOffset != 0) {
+                popup.setVerticalOffset(verticalOffset);
+            }
+
+            final int horizontalOffset = a.getDimensionPixelOffset(
+                    com.android.internal.R.styleable.Spinner_dropDownHorizontalOffset, 0);
+            if (horizontalOffset != 0) {
+                popup.setHorizontalOffset(horizontalOffset);
+            }
 
             mPopup = popup;
             break;

@@ -62,6 +62,7 @@ public class ListPopupWindow {
     private int mDropDownWidth = ViewGroup.LayoutParams.WRAP_CONTENT;
     private int mDropDownHorizontalOffset;
     private int mDropDownVerticalOffset;
+    private boolean mDropDownVerticalOffsetSet;
 
     private boolean mDropDownAlwaysVisible = false;
     private boolean mForceIgnoreOutsideTouch = false;
@@ -404,6 +405,9 @@ public class ListPopupWindow {
      * @return The vertical offset of the popup from its anchor in pixels.
      */
     public int getVerticalOffset() {
+        if (!mDropDownVerticalOffsetSet) {
+            return 0;
+        }
         return mDropDownVerticalOffset;
     }
 
@@ -414,6 +418,7 @@ public class ListPopupWindow {
      */
     public void setVerticalOffset(int offset) {
         mDropDownVerticalOffset = offset;
+        mDropDownVerticalOffsetSet = true;
     }
 
     /**
@@ -1061,20 +1066,26 @@ public class ListPopupWindow {
             }
         }
 
-        // Max height available on the screen for a popup.
-        boolean ignoreBottomDecorations =
-                mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED;
-        final int maxHeight = mPopup.getMaxAvailableHeight(
-                getAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);
-
-        // getMaxAvailableHeight() subtracts the padding, so we put it back,
+        // getMaxAvailableHeight() subtracts the padding, so we put it back
         // to get the available height for the whole window
         int padding = 0;
         Drawable background = mPopup.getBackground();
         if (background != null) {
             background.getPadding(mTempRect);
             padding = mTempRect.top + mTempRect.bottom;
+
+            // If we don't have an explicit vertical offset, determine one from the window
+            // background so that content will line up.
+            if (!mDropDownVerticalOffsetSet) {
+                mDropDownVerticalOffset = -mTempRect.top;
+            }
         }
+
+        // Max height available on the screen for a popup.
+        boolean ignoreBottomDecorations =
+                mPopup.getInputMethodMode() == PopupWindow.INPUT_METHOD_NOT_NEEDED;
+        final int maxHeight = mPopup.getMaxAvailableHeight(
+                getAnchorView(), mDropDownVerticalOffset, ignoreBottomDecorations);
 
         if (mDropDownAlwaysVisible || mDropDownHeight == ViewGroup.LayoutParams.MATCH_PARENT) {
             return maxHeight + padding;
