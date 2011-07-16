@@ -116,9 +116,6 @@ public class TouchExplorer implements Explorer {
     // which would perform a click and tapping and holding a long press.
     private final int mTouchExplorationTapSlop;
 
-    // Context handle for accessing resources.
-    private final Context mContext;
-
     // The InputFilter this tracker is associated with i.e. the filter
     // which delegates event processing to this touch explorer.
     private final InputFilter mInputFilter;
@@ -161,7 +158,6 @@ public class TouchExplorer implements Explorer {
             ViewConfiguration.get(context).getScaledTouchExplorationTapSlop();
         mDraggingDistance = mTouchExplorationTapSlop * COEFFICIENT_DRAGGING_DISTANCE;
         mPointerTracker = new PointerTracker(context);
-        mContext = context;
         mHandler = new Handler(context.getMainLooper());
         mSendHoverDelayed = new SendHoverDelayed();
         mAccessibilityManager = AccessibilityManager.getInstance(context);
@@ -216,7 +212,8 @@ public class TouchExplorer implements Explorer {
                 // Send a hover for every finger down so the user gets feedback
                 // where she is currently touching.
                 mSendHoverDelayed.forceSendAndRemove();
-                final int pointerIdBits = (1 << event.getActionIndex());
+                final int pointerIndex = event.getActionIndex();
+                final int pointerIdBits = (1 << event.getPointerId(pointerIndex));
                 mSendHoverDelayed.post(event, MotionEvent.ACTION_HOVER_ENTER, pointerIdBits,
                         policyFlags, DELAY_SEND_HOVER_MOVE);
             } break;
