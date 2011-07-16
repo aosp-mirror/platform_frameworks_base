@@ -158,7 +158,7 @@ characteristics: <em>smallestWidth</em>, <em>width</em>, and
 <li>A screen's <em>smallestWidth</em> is it's fundamental minimum size,
 measured in density-independent pixel ("dp") units. Of the screen's height or
 width, it is the shorter of the two. For a screen in portrait orientation, the
-smallestWidth is normally based on its width, while in landscape orientation it based
+smallestWidth is normally based on its width, while in landscape orientation it is based
 on its height. In all cases, the smallestWidth is derived from a fixed characteristic of the
 screen and the value does not change, regardless of orientation. The smallestWidth
 is important for applications because it represents the shortest possible width
