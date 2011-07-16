@@ -23,6 +23,7 @@
     <string name="button_left_text">Left</string>
     <string name="button_before_text">Start</string>
     <string name="button_requestlayout_text">Request Layout</string>
+    <string name="button_alert_dialog_text">AlertDialog</string>
     <string name="textview_text">This is a text for a TextView</string>
     <string name="edittext_text">mmmmmmmmmmmmmmmmmmmmmmmm</string>
     <string name="normal_text">Normal String</string>
