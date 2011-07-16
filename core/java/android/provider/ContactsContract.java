@@ -28,6 +28,7 @@ import android.content.CursorEntityIterator;
 import android.content.Entity;
 import android.content.EntityIterator;
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -40,6 +41,7 @@ import android.util.Pair;
 import android.view.View;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 
@@ -1757,8 +1759,8 @@ public final class ContactsContract {
          *
          * </p>
          * <p>You may also consider using the convenience method
-         * {@link ContactsContract.Contacts#openContactPhotoInputStream(ContentResolver, Uri)}
-         * to retrieve the raw photo contents of the thumbnail-sized photo.
+         * {@link ContactsContract.Contacts#openContactPhotoInputStream(ContentResolver, Uri, boolean)}
+         * to retrieve the raw photo contents of either the thumbnail-sized or the full-sized photo.
          * </p>
          * <p>
          * This directory can be used either with a {@link #CONTENT_URI} or
@@ -1799,22 +1801,37 @@ public final class ContactsContract {
         }
 
         /**
-         * Opens an InputStream for the contacts's default photo and returns the
-         * photo as a byte stream. If there is not photo null will be returned.
-         *
+         * Opens an InputStream for the contacts's photo and returns the
+         * photo as a byte stream.
+         * @param cr The content resolver to use for querying
          * @param contactUri the contact whose photo should be used. This can be used with
          * either a {@link #CONTENT_URI} or a {@link #CONTENT_LOOKUP_URI} URI.
-         * </p>
-
+         * @param preferHighres If this is true and the contact has a higher resolution photo
+         * available, it is returned. If false, this function always tries to get the thumbnail
          * @return an InputStream of the photo, or null if no photo is present
          */
-        public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri) {
+        public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri,
+                boolean preferHighres) {
+            if (preferHighres) {
+                final Uri displayPhotoUri = Uri.withAppendedPath(contactUri,
+                        Contacts.Photo.DISPLAY_PHOTO);
+                InputStream inputStream;
+                try {
+                    AssetFileDescriptor fd = cr.openAssetFileDescriptor(displayPhotoUri, "r");
+                    return fd.createInputStream();
+                } catch (IOException e) {
+                    // fallback to the thumbnail code
+                }
+           }
+
             Uri photoUri = Uri.withAppendedPath(contactUri, Photo.CONTENT_DIRECTORY);
             if (photoUri == null) {
                 return null;
             }
             Cursor cursor = cr.query(photoUri,
-                    new String[]{ContactsContract.CommonDataKinds.Photo.PHOTO}, null, null, null);
+                    new String[] {
+                        ContactsContract.CommonDataKinds.Photo.PHOTO
+                    }, null, null, null);
             try {
                 if (cursor == null || !cursor.moveToNext()) {
                     return null;
@@ -1829,6 +1846,20 @@ public final class ContactsContract {
                     cursor.close();
                 }
             }
+        }
+
+        /**
+         * Opens an InputStream for the contacts's thumbnail photo and returns the
+         * photo as a byte stream.
+         * @param cr The content resolver to use for querying
+         * @param contactUri the contact whose photo should be used. This can be used with
+         * either a {@link #CONTENT_URI} or a {@link #CONTENT_LOOKUP_URI} URI.
+         * @return an InputStream of the photo, or null if no photo is present
+         * @see #openContactPhotoInputStream(ContentResolver, Uri, boolean), if instead
+         * of the thumbnail the high-res picture is preferred
+         */
+        public static InputStream openContactPhotoInputStream(ContentResolver cr, Uri contactUri) {
+            return openContactPhotoInputStream(cr, contactUri, false);
         }
     }
 
