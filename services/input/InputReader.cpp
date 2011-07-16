@@ -120,29 +120,9 @@ static const int32_t keyCodeRotationMap[][4] = {
 static const size_t keyCodeRotationMapSize =
         sizeof(keyCodeRotationMap) / sizeof(keyCodeRotationMap[0]);
 
-int32_t rotateKeyCode(int32_t keyCode, int32_t orientation) {
+static int32_t rotateKeyCode(int32_t keyCode, int32_t orientation) {
     return rotateValueUsingRotationMap(keyCode, orientation,
             keyCodeRotationMap, keyCodeRotationMapSize);
-}
-
-static const int32_t edgeFlagRotationMap[][4] = {
-        // edge flags enumerated counter-clockwise with the original (unrotated) edge flag first
-        // no rotation,        90 degree rotation,  180 degree rotation, 270 degree rotation
-        { AMOTION_EVENT_EDGE_FLAG_BOTTOM,   AMOTION_EVENT_EDGE_FLAG_RIGHT,
-                AMOTION_EVENT_EDGE_FLAG_TOP,     AMOTION_EVENT_EDGE_FLAG_LEFT },
-        { AMOTION_EVENT_EDGE_FLAG_RIGHT,  AMOTION_EVENT_EDGE_FLAG_TOP,
-                AMOTION_EVENT_EDGE_FLAG_LEFT,   AMOTION_EVENT_EDGE_FLAG_BOTTOM },
-        { AMOTION_EVENT_EDGE_FLAG_TOP,     AMOTION_EVENT_EDGE_FLAG_LEFT,
-                AMOTION_EVENT_EDGE_FLAG_BOTTOM,   AMOTION_EVENT_EDGE_FLAG_RIGHT },
-        { AMOTION_EVENT_EDGE_FLAG_LEFT,   AMOTION_EVENT_EDGE_FLAG_BOTTOM,
-                AMOTION_EVENT_EDGE_FLAG_RIGHT,  AMOTION_EVENT_EDGE_FLAG_TOP },
-};
-static const size_t edgeFlagRotationMapSize =
-        sizeof(edgeFlagRotationMap) / sizeof(edgeFlagRotationMap[0]);
-
-static int32_t rotateEdgeFlag(int32_t edgeFlag, int32_t orientation) {
-    return rotateValueUsingRotationMap(edgeFlag, orientation,
-            edgeFlagRotationMap, edgeFlagRotationMapSize);
 }
 
 static inline bool sourcesMatchMask(uint32_t sources, uint32_t sourceMask) {
