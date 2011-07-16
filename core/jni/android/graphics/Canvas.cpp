@@ -799,24 +799,6 @@ public:
                 x, y, flags, paint);
     }
 
-    static void drawTextWithGlyphs___CIIFFIPaint(JNIEnv* env, jobject, SkCanvas* canvas,
-                                      jcharArray text, int index, int count,
-                                      jfloat x, jfloat y, int flags, SkPaint* paint) {
-        jchar* textArray = env->GetCharArrayElements(text, NULL);
-        drawTextWithGlyphs(canvas, textArray + index, 0, count, x, y, flags, paint);
-        env->ReleaseCharArrayElements(text, textArray, JNI_ABORT);
-    }
-
-    static void drawTextWithGlyphs__StringIIFFIPaint(JNIEnv* env, jobject,
-                                          SkCanvas* canvas, jstring text,
-                                          int start, int end,
-                                          jfloat x, jfloat y, int flags, SkPaint* paint) {
-
-        const jchar* textArray = env->GetStringChars(text, NULL);
-        drawTextWithGlyphs(canvas, textArray, start, end, x, y, flags, paint);
-        env->ReleaseStringChars(text, textArray);
-    }
-
     static void doDrawGlyphs(SkCanvas* canvas, const jchar* glyphArray, int index, int count,
             jfloat x, jfloat y, int flags, SkPaint* paint) {
         // TODO: need to suppress this code after the GL renderer is modified for not
@@ -831,16 +813,6 @@ public:
 
         // Get back old encoding
         paint->setTextEncoding(oldEncoding);
-    }
-
-    static void drawGlyphs___CIIFFIPaint(JNIEnv* env, jobject, SkCanvas* canvas,
-                                         jcharArray glyphs, int index, int count,
-                                         jfloat x, jfloat y, int flags, SkPaint* paint) {
-        jchar* glyphArray = env->GetCharArrayElements(glyphs, NULL);
-
-        doDrawGlyphs(canvas, glyphArray, index, count, x, y, flags, paint);
-
-        env->ReleaseCharArrayElements(glyphs, glyphArray, JNI_ABORT);
     }
 
     static void drawTextRun___CIIIIFFIPaint(
@@ -1044,12 +1016,6 @@ static JNINativeMethod gCanvasMethods[] = {
         (void*) SkCanvasGlue::drawText___CIIFFIPaint},
     {"native_drawText","(ILjava/lang/String;IIFFII)V",
         (void*) SkCanvasGlue::drawText__StringIIFFIPaint},
-    {"native_drawTextWithGlyphs","(I[CIIFFII)V",
-        (void*) SkCanvasGlue::drawTextWithGlyphs___CIIFFIPaint},
-    {"native_drawTextWithGlyphs","(ILjava/lang/String;IIFFII)V",
-        (void*) SkCanvasGlue::drawTextWithGlyphs__StringIIFFIPaint},
-    {"native_drawGlyphs","(I[CIIFFII)V",
-        (void*) SkCanvasGlue::drawGlyphs___CIIFFIPaint},
     {"native_drawTextRun","(I[CIIIIFFII)V",
         (void*) SkCanvasGlue::drawTextRun___CIIIIFFIPaint},
     {"native_drawTextRun","(ILjava/lang/String;IIIIFFII)V",
