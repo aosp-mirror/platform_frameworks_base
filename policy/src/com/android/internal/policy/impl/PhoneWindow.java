@@ -1668,14 +1668,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
             }
 
-            // Back cancels action modes first.
-            if (mActionMode != null && keyCode == KeyEvent.KEYCODE_BACK) {
-                if (action == KeyEvent.ACTION_UP) {
-                    mActionMode.finish();
-                }
-                return true;
-            }
-
             if (!isDestroyed()) {
                 final Callback cb = getCallback();
                 final boolean handled = cb != null && mFeatureId < 0 ? cb.dispatchKeyEvent(event)
@@ -1684,6 +1676,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     return true;
                 }
             }
+
             return isDown ? PhoneWindow.this.onKeyDown(mFeatureId, event.getKeyCode(), event)
                     : PhoneWindow.this.onKeyUp(mFeatureId, event.getKeyCode(), event);
         }
@@ -1730,7 +1723,32 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         }
 
         public boolean superDispatchKeyEvent(KeyEvent event) {
-            return super.dispatchKeyEvent(event);
+            if (super.dispatchKeyEvent(event)) {
+                return true;
+            }
+
+            // Not handled by the view hierarchy, does the action bar want it
+            // to cancel out of something special?
+            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                final int action = event.getAction();
+                // Back cancels action modes first.
+                if (mActionMode != null) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        mActionMode.finish();
+                    }
+                    return true;
+                }
+
+                // Next collapse any expanded action views.
+                if (mActionBar != null && mActionBar.hasExpandedActionView()) {
+                    if (action == KeyEvent.ACTION_UP) {
+                        mActionBar.collapseActionView();
+                    }
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public boolean superDispatchKeyShortcutEvent(KeyEvent event) {

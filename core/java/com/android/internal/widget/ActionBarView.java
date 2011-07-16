@@ -370,6 +370,19 @@ public class ActionBarView extends AbsActionBarView {
         mMenuView = menuView;
     }
 
+    public boolean hasExpandedActionView() {
+        return mExpandedMenuPresenter != null &&
+                mExpandedMenuPresenter.mCurrentExpandedItem != null;
+    }
+
+    public void collapseActionView() {
+        final MenuItemImpl item = mExpandedMenuPresenter == null ? null :
+                mExpandedMenuPresenter.mCurrentExpandedItem;
+        if (item != null) {
+            item.collapseActionView();
+        }
+    }
+
     public void setCustomNavigationView(View view) {
         final boolean showCustom = (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0;
         if (mCustomNavView != null && showCustom) {
