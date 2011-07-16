@@ -6618,6 +6618,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean bringPointIntoView(int offset) {
         boolean changed = false;
 
+        if (mLayout == null) return changed;
+
         int line = mLayout.getLineForOffset(offset);
 
         // FIXME: Is it okay to truncate this, or should we round?
