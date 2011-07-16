@@ -1272,7 +1272,7 @@ public class ActionBarView extends AbsActionBarView {
         @Override
         public boolean expandItemActionView(MenuBuilder menu, MenuItemImpl item) {
             mExpandedActionView = item.getActionView();
-            mExpandedHomeLayout.setIcon(item.getIcon());
+            mExpandedHomeLayout.setIcon(mIcon.getConstantState().newDrawable(getResources()));
             mCurrentExpandedItem = item;
             if (mExpandedActionView.getParent() != ActionBarView.this) {
                 addView(mExpandedActionView);

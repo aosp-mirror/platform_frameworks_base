@@ -159,10 +159,8 @@ public class ActionBarImpl extends ActionBar {
 
         // Older apps get the home button interaction enabled by default.
         // Newer apps need to enable it explicitly.
-        if (mContext.getApplicationInfo().targetSdkVersion <
-                Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            setHomeButtonEnabled(true);
-        }
+        setHomeButtonEnabled(mContext.getApplicationInfo().targetSdkVersion <
+                Build.VERSION_CODES.ICE_CREAM_SANDWICH);
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
