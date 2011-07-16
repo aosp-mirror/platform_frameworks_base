@@ -57,8 +57,6 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Esticar p. caber em ec. int."</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Compatibilidade de zoom"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Sempre que uma aplicação tiver sido concebida para ecrãs mais pequenos, aparecerá um controlo de zoom junto ao relógio."</string>
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
-    <skip />
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"Captura de ecrã guardada na Galeria"</string>
+    <string name="screenshot_failed_toast" msgid="655180965533683356">"Não foi possível guardar a captura de ecrã"</string>
 </resources>

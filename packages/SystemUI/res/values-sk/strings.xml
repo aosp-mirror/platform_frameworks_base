@@ -57,8 +57,6 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Na celú obrazovku"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Kompatibilné priblíženie"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Ak je aplikácia navrhnutá pre menšiu obrazovku, zobrazí sa vedľa hodín ovládací prvok priblíženia."</string>
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
-    <skip />
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"Snímka obrazovky bola uložená do Galérie"</string>
+    <string name="screenshot_failed_toast" msgid="655180965533683356">"Snímku obrazovky sa nepodarilo uložiť"</string>
 </resources>

@@ -61,8 +61,6 @@
     <skip />
     <!-- no translation found for compat_mode_help_body (4946726776359270040) -->
     <skip />
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
-    <skip />
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"Tangkapan skrin disimpan ke Galeri"</string>
+    <string name="screenshot_failed_toast" msgid="655180965533683356">"Tidak boleh menyimpan tangkapan skrin"</string>
 </resources>

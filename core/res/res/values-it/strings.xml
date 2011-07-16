@@ -491,8 +491,8 @@
     <string name="permdesc_readNetworkUsageHistory" msgid="6040738474779135653">"Consente a un\'applicazione di leggere dati storici di utilizzo della rete per reti e applicazioni specifiche."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"gestione norme rete"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="3723795285132803958">"Consente a un\'applicazione di gestire le norme di rete e definire le regole specifiche delle applicazioni."</string>
-    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"modifica dell\'effetto dell\'utilizzo della rete"</string>
-    <string name="permdesc_modifyNetworkAccounting" msgid="8702285686629184404">"Consente la modifica dell\'effetto dell\'utilizzo della rete sulle applicazioni. Da non usare per normali applicazioni."</string>
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"modifica calcolo dell\'utilizzo della rete"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="8702285686629184404">"Consente di modificare le modalità di calcolo dell\'utilizzo della rete da parte delle applicazioni. Da non usare per normali applicazioni."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Imposta regole password"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Controlla la lunghezza e i caratteri ammessi nelle password di sblocco dello schermo"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Monitora tentativi di sblocco dello schermo"</string>
@@ -701,6 +701,18 @@
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">", "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
+    <string name="autofill_province" msgid="2231806553863422300">"Provincia"</string>
+    <string name="autofill_postal_code" msgid="4696430407689377108">"Codice postale"</string>
+    <string name="autofill_state" msgid="6988894195520044613">"Stato"</string>
+    <string name="autofill_zip_code" msgid="8697544592627322946">"Codice postale"</string>
+    <string name="autofill_county" msgid="237073771020362891">"Contea"</string>
+    <string name="autofill_island" msgid="4020100875984667025">"Isola"</string>
+    <string name="autofill_district" msgid="8400735073392267672">"Distretto"</string>
+    <string name="autofill_department" msgid="5343279462564453309">"Reparto"</string>
+    <string name="autofill_prefecture" msgid="2028499485065800419">"Prefettura"</string>
+    <string name="autofill_parish" msgid="8202206105468820057">"Parrocchia"</string>
+    <string name="autofill_area" msgid="3547409050889952423">"Area"</string>
+    <string name="autofill_emirate" msgid="2893880978835698818">"Emirato"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"lettura cronologia e segnalibri del browser"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Consente all\'applicazione di leggere tutti gli URL visitati e tutti i segnalibri del browser."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"creazione cronologia e segnalibri del browser"</string>
@@ -944,14 +956,10 @@
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Se attivi l\'archivio USB, alcune applicazioni in uso si bloccheranno e potrebbero risultare non disponibili finché non disattiverai l\'archivio USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Operazione USB non riuscita"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
-    <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
-    <skip />
-    <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
-    <skip />
-    <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
-    <skip />
-    <!-- no translation found for usb_notification_message (4447869605109736382) -->
-    <skip />
+    <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Collegato come dispositivo multimediale"</string>
+    <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Collegato come fotocamera"</string>
+    <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Collegato come installer"</string>
+    <string name="usb_notification_message" msgid="4447869605109736382">"Tocca per altre opzioni USB"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formatta archivio USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatta scheda SD"</string>
     <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Formattare l\'archivio USB cancellando tutti i file memorizzati al suo interno? Questa azione è irreversibile."</string>
@@ -1015,10 +1023,8 @@
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Accessibilità"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Sfondo"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Cambia sfondo"</string>
-    <!-- no translation found for vpn_title (8219003246858087489) -->
-    <skip />
-    <!-- no translation found for vpn_title_long (6400714798049252294) -->
-    <skip />
+    <string name="vpn_title" msgid="8219003246858087489">"La VPN è attiva."</string>
+    <string name="vpn_title_long" msgid="6400714798049252294">"VPN attivata da <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="vpn_text" msgid="1610714069627824309">"Tocca per gestire la rete."</string>
     <string name="vpn_text_long" msgid="4907843483284977618">"Collegata a <xliff:g id="SESSION">%s</xliff:g>. Tocca per gestire la rete."</string>
     <string name="upload_file" msgid="2897957172366730416">"Scegli file"</string>
@@ -1095,18 +1101,13 @@
     <string name="validity_period" msgid="8818886137545983110">"Validità:"</string>
     <string name="issued_on" msgid="5895017404361397232">"Rilasciato il:"</string>
     <string name="expires_on" msgid="3676242949915959821">"Scade il:"</string>
-    <!-- no translation found for serial_number (758814067660862493) -->
+    <string name="serial_number" msgid="758814067660862493">"Numero di serie:"</string>
+    <string name="fingerprints" msgid="4516019619850763049">"Fingerprint:"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"Fingerprint SHA-256:"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"Fingerprint SHA-1:"</string>
+    <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Mostra tutto..."</string>
+    <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
     <skip />
-    <!-- no translation found for fingerprints (4516019619850763049) -->
-    <skip />
-    <!-- no translation found for sha256_fingerprint (4391271286477279263) -->
-    <skip />
-    <!-- no translation found for sha1_fingerprint (7930330235269404581) -->
-    <skip />
-    <!-- no translation found for activity_chooser_view_see_all (180268188117163072) -->
-    <skip />
-    <!-- no translation found for activity_chooser_view_no_activities (1306964627596326933) -->
-    <skip />
-    <!-- no translation found for activity_chooser_view_select_default (5450262016073956587) -->
+    <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
     <skip />
 </resources>

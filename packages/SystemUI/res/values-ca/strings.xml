@@ -57,8 +57,6 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"Estira per omplir pant."</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom de compatibilitat"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Quan una aplicació s\'hagi dissenyat per a una pantalla més petita, apareixerà un control de zoom al costat del rellotge."</string>
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
-    <skip />
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"Captura de pantalla desada a la galeria"</string>
+    <string name="screenshot_failed_toast" msgid="655180965533683356">"No es pot desar la captura de pantalla"</string>
 </resources>

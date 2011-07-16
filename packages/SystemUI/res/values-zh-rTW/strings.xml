@@ -57,8 +57,6 @@
     <string name="compat_mode_off" msgid="4434467572461327898">"放大為全螢幕"</string>
     <string name="compat_mode_help_header" msgid="7020175705401506719">"相容性縮放"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"執行專為較小螢幕設計的應用程式時，系統會在時鐘旁顯示縮放控制項。"</string>
-    <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
-    <skip />
-    <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
-    <skip />
+    <string name="screenshot_saving_toast" msgid="8592630119048713208">"螢幕擷取畫面已儲存至圖片庫"</string>
+    <string name="screenshot_failed_toast" msgid="655180965533683356">"無法儲存螢幕擷取畫面"</string>
 </resources>
