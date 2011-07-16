@@ -125,6 +125,28 @@ static int32_t rotateKeyCode(int32_t keyCode, int32_t orientation) {
             keyCodeRotationMap, keyCodeRotationMapSize);
 }
 
+static void rotateDelta(int32_t orientation, float* deltaX, float* deltaY) {
+    float temp;
+    switch (orientation) {
+    case DISPLAY_ORIENTATION_90:
+        temp = *deltaX;
+        *deltaX = *deltaY;
+        *deltaY = -temp;
+        break;
+
+    case DISPLAY_ORIENTATION_180:
+        *deltaX = -*deltaX;
+        *deltaY = -*deltaY;
+        break;
+
+    case DISPLAY_ORIENTATION_270:
+        temp = *deltaX;
+        *deltaX = -*deltaY;
+        *deltaY = temp;
+        break;
+    }
+}
+
 static inline bool sourcesMatchMask(uint32_t sources, uint32_t sourceMask) {
     return (sources & sourceMask & ~ AINPUT_SOURCE_CLASS_MASK) != 0;
 }
@@ -1636,25 +1658,7 @@ void CursorInputMapper::sync(nsecs_t when) {
                 orientation = DISPLAY_ORIENTATION_0;
             }
 
-            float temp;
-            switch (orientation) {
-            case DISPLAY_ORIENTATION_90:
-                temp = deltaX;
-                deltaX = deltaY;
-                deltaY = -temp;
-                break;
-
-            case DISPLAY_ORIENTATION_180:
-                deltaX = -deltaX;
-                deltaY = -deltaY;
-                break;
-
-            case DISPLAY_ORIENTATION_270:
-                temp = deltaX;
-                deltaX = -deltaY;
-                deltaY = temp;
-                break;
-            }
+            rotateDelta(orientation, &deltaX, &deltaY);
         }
 
         pointerProperties.clear();
@@ -3814,6 +3818,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             float deltaY = (currentPointer.y - lastPointer.y)
                     * mLocked.pointerGestureYMovementScale;
 
+            rotateDelta(mLocked.surfaceOrientation, &deltaX, &deltaY);
             mPointerGesture.pointerVelocityControl.move(when, &deltaX, &deltaY);
 
             // Move the pointer using a relative motion.
@@ -3952,6 +3957,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             float deltaY = (currentPointer.y - lastPointer.y)
                     * mLocked.pointerGestureYMovementScale;
 
+            rotateDelta(mLocked.surfaceOrientation, &deltaX, &deltaY);
             mPointerGesture.pointerVelocityControl.move(when, &deltaX, &deltaY);
 
             // Move the pointer using a relative motion.
@@ -4209,6 +4215,8 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
 
             commonDeltaX *= mLocked.pointerGestureXMovementScale;
             commonDeltaY *= mLocked.pointerGestureYMovementScale;
+
+            rotateDelta(mLocked.surfaceOrientation, &commonDeltaX, &commonDeltaY);
             mPointerGesture.pointerVelocityControl.move(when, &commonDeltaX, &commonDeltaY);
 
             mPointerGesture.referenceGestureX += commonDeltaX;
@@ -4216,32 +4224,11 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         }
 
         // Report gestures.
-        if (mPointerGesture.currentGestureMode == PointerGesture::PRESS) {
-            // PRESS mode.
+        if (mPointerGesture.currentGestureMode == PointerGesture::PRESS
+                || mPointerGesture.currentGestureMode == PointerGesture::SWIPE) {
+            // PRESS or SWIPE mode.
 #if DEBUG_GESTURES
-            LOGD("Gestures: PRESS activeTouchId=%d,"
-                    "activeGestureId=%d, currentTouchPointerCount=%d",
-                    activeTouchId, mPointerGesture.activeGestureId, mCurrentTouch.pointerCount);
-#endif
-            LOG_ASSERT(mPointerGesture.activeGestureId >= 0);
-
-            mPointerGesture.currentGestureIdBits.clear();
-            mPointerGesture.currentGestureIdBits.markBit(mPointerGesture.activeGestureId);
-            mPointerGesture.currentGestureIdToIndex[mPointerGesture.activeGestureId] = 0;
-            mPointerGesture.currentGestureProperties[0].clear();
-            mPointerGesture.currentGestureProperties[0].id = mPointerGesture.activeGestureId;
-            mPointerGesture.currentGestureProperties[0].toolType =
-                    AMOTION_EVENT_TOOL_TYPE_INDIRECT_FINGER;
-            mPointerGesture.currentGestureCoords[0].clear();
-            mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_X,
-                    mPointerGesture.referenceGestureX);
-            mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_Y,
-                    mPointerGesture.referenceGestureY);
-            mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
-        } else if (mPointerGesture.currentGestureMode == PointerGesture::SWIPE) {
-            // SWIPE mode.
-#if DEBUG_GESTURES
-            LOGD("Gestures: SWIPE activeTouchId=%d,"
+            LOGD("Gestures: PRESS or SWIPE activeTouchId=%d,"
                     "activeGestureId=%d, currentTouchPointerCount=%d",
                     activeTouchId, mPointerGesture.activeGestureId, mCurrentTouch.pointerCount);
 #endif
@@ -4335,10 +4322,11 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 mPointerGesture.currentGestureIdBits.markBit(gestureId);
                 mPointerGesture.currentGestureIdToIndex[gestureId] = i;
 
-                float x = (mCurrentTouch.pointers[i].x - mPointerGesture.referenceTouchX)
-                        * mLocked.pointerGestureXZoomScale + mPointerGesture.referenceGestureX;
-                float y = (mCurrentTouch.pointers[i].y - mPointerGesture.referenceTouchY)
-                        * mLocked.pointerGestureYZoomScale + mPointerGesture.referenceGestureY;
+                float deltaX = (mCurrentTouch.pointers[i].x - mPointerGesture.referenceTouchX)
+                        * mLocked.pointerGestureXZoomScale;
+                float deltaY = (mCurrentTouch.pointers[i].y - mPointerGesture.referenceTouchY)
+                        * mLocked.pointerGestureYZoomScale;
+                rotateDelta(mLocked.surfaceOrientation, &deltaX, &deltaY);
 
                 mPointerGesture.currentGestureProperties[i].clear();
                 mPointerGesture.currentGestureProperties[i].id = gestureId;
@@ -4346,9 +4334,9 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                         AMOTION_EVENT_TOOL_TYPE_INDIRECT_FINGER;
                 mPointerGesture.currentGestureCoords[i].clear();
                 mPointerGesture.currentGestureCoords[i].setAxisValue(
-                        AMOTION_EVENT_AXIS_X, x);
+                        AMOTION_EVENT_AXIS_X, mPointerGesture.referenceGestureX + deltaX);
                 mPointerGesture.currentGestureCoords[i].setAxisValue(
-                        AMOTION_EVENT_AXIS_Y, y);
+                        AMOTION_EVENT_AXIS_Y, mPointerGesture.referenceGestureY + deltaY);
                 mPointerGesture.currentGestureCoords[i].setAxisValue(
                         AMOTION_EVENT_AXIS_PRESSURE, 1.0f);
             }
