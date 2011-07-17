@@ -935,9 +935,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
 
-        public AccessibilityNodeInfo findAccessibilityNodeInfoByViewIdInActiveWindow(int viewId) {
+        public AccessibilityNodeInfo findAccessibilityNodeInfoByViewIdInActiveWindow(int viewId)
+                throws RemoteException {
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
+                mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 final boolean permissionGranted = mSecurityPolicy.canRetrieveWindowContent(this);
                 if (!permissionGranted) {
                     return null;
@@ -975,15 +977,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewTextInActiveWindow(
-                String text) {
+                String text) throws RemoteException {
             return findAccessibilityNodeInfosByViewText(text,
                     mSecurityPolicy.mRetrievalAlowingWindowId, View.NO_ID);
         }
 
         public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewText(String text,
-                int accessibilityWindowId, int accessibilityViewId) {
+                int accessibilityWindowId, int accessibilityViewId) throws RemoteException {
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
+                mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, accessibilityWindowId);
                 if (!permissionGranted) {
@@ -1026,9 +1029,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
 
         public AccessibilityNodeInfo findAccessibilityNodeInfoByAccessibilityId(
-                int accessibilityWindowId, int accessibilityViewId) {
+                int accessibilityWindowId, int accessibilityViewId) throws RemoteException {
             IAccessibilityInteractionConnection connection = null;
             synchronized (mLock) {
+                mSecurityPolicy.enforceCanRetrieveWindowContent(this);
                 final boolean permissionGranted =
                     mSecurityPolicy.canGetAccessibilityNodeInfoLocked(this, accessibilityWindowId);
                 if (!permissionGranted) {
@@ -1197,6 +1201,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         public boolean canRetrieveWindowContent(Service service) {
             return service.mCanRetrieveScreenContent;
+        }
+
+        public void enforceCanRetrieveWindowContent(Service service) throws RemoteException {
+            // This happens due to incorrect registration so make it apparent.
+            if (!canRetrieveWindowContent(service)) {
+                Slog.e(LOG_TAG, "Accessibility serivce " + service.mComponentName + " does not " +
+                        "declare android:canRetrieveWindowContent.");
+                throw new RemoteException();
+            }
         }
 
         private boolean isRetrievalAllowingWindow(int windowId) {
