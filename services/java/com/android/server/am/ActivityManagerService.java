@@ -8885,22 +8885,56 @@ public final class ActivityManagerService extends ActivityManagerNative
         pw.println("Applications Graphics Acceleration Info:");
         pw.println("Uptime: " + uptime + " Realtime: " + realtime);
         
-        String callArgs[] = {"graphics"};
         for (int i = procs.size() - 1 ; i >= 0 ; i--) {
             ProcessRecord r = procs.get(i);
             if (r.thread != null) {
                 pw.println("\n** Graphics info for pid " + r.pid + " [" + r.processName + "] **");
                 pw.flush();
                 try {
-                    TransferPipe.goDump(r.thread.asBinder(), fd, callArgs);
+                    TransferPipe tp = new TransferPipe();
+                    try {
+                        r.thread.dumpGfxInfo(tp.getWriteFd().getFileDescriptor(), args);
+                        tp.go(fd);
+                    } finally {
+                        tp.kill();
+                    }
                 } catch (IOException e) {
-                    pw.println("Failure: " + e);
+                    pw.println("Failure while dumping the app: " + r);
                     pw.flush();
                 } catch (RemoteException e) {
-                    pw.println("Got RemoteException!");
+                    pw.println("Got a RemoteException while dumping the app " + r);
                     pw.flush();
                 }
             }
+        }
+    }
+
+    final static class MemItem {
+        final String label;
+        final long pss;
+
+        public MemItem(String _label, long _pss) {
+            label = _label;
+            pss = _pss;
+        }
+    }
+
+    final void dumpMemItems(PrintWriter pw, String prefix, ArrayList<MemItem> items) {
+        Collections.sort(items, new Comparator<MemItem>() {
+            @Override
+            public int compare(MemItem lhs, MemItem rhs) {
+                if (lhs.pss < rhs.pss) {
+                    return 1;
+                } else if (lhs.pss > rhs.pss) {
+                    return -1;
+                }
+                return 0;
+            }
+        });
+
+        for (int i=0; i<items.size(); i++) {
+            MemItem mi = items.get(i);
+            pw.print(prefix); pw.printf("%8d Kb: ", mi.pss); pw.println(mi.label);
         }
     }
 
@@ -8923,6 +8957,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("Applications Memory Usage (kB):");
             pw.println("Uptime: " + uptime + " Realtime: " + realtime);
         }
+
+        ArrayList<MemItem> procMems = new ArrayList<MemItem>();
+        long nativePss=0, dalvikPss=0, otherPss=0;
+        long[] miscPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
+
         for (int i = procs.size() - 1 ; i >= 0 ; i--) {
             ProcessRecord r = procs.get(i);
             if (r.thread != null) {
@@ -8930,18 +8969,47 @@ public final class ActivityManagerService extends ActivityManagerNative
                     pw.println("\n** MEMINFO in pid " + r.pid + " [" + r.processName + "] **");
                     pw.flush();
                 }
+                Debug.MemoryInfo mi = null;
                 try {
-                    TransferPipe.goDump(r.thread.asBinder(), fd, args);
-                } catch (IOException e) {
-                    pw.println("Failure: " + e);
-                    pw.flush();
+                    mi = r.thread.dumpMemInfo(fd, args);
                 } catch (RemoteException e) {
                     if (!isCheckinRequest) {
                         pw.println("Got RemoteException!");
                         pw.flush();
                     }
                 }
+                if (!isCheckinRequest && mi != null) {
+                    procMems.add(new MemItem(r.processName + " (pid " + r.pid + ")",
+                            mi.getTotalPss()));
+
+                    nativePss += mi.nativePss;
+                    dalvikPss += mi.dalvikPss;
+                    otherPss += mi.otherPss;
+                    for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
+                        long mem = mi.getOtherPss(j);
+                        miscPss[j] += mem;
+                        otherPss -= mem;
+                    }
+                }
             }
+        }
+
+        if (!isCheckinRequest && procs.size() > 1) {
+            ArrayList<MemItem> catMems = new ArrayList<MemItem>();
+
+            catMems.add(new MemItem("Native", nativePss));
+            catMems.add(new MemItem("Dalvik", dalvikPss));
+            catMems.add(new MemItem("Unknown", otherPss));
+            for (int j=0; j<Debug.MemoryInfo.NUM_OTHER_STATS; j++) {
+                catMems.add(new MemItem(Debug.MemoryInfo.getOtherLabel(j), miscPss[j]));
+            }
+
+            pw.println();
+            pw.println("Total PSS by process:");
+            dumpMemItems(pw, "  ", procMems);
+            pw.println();
+            pw.println("Total PSS by category:");
+            dumpMemItems(pw, "  ", catMems);
         }
     }
 

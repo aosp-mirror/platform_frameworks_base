@@ -129,6 +129,11 @@ public final class Debug
         /** The shared dirty pages used by everything else. */
         public int otherSharedDirty;
 
+        /** @hide */
+        public static final int NUM_OTHER_STATS = 9;
+
+        private int[] otherStats = new int[NUM_OTHER_STATS*3];
+
         public MemoryInfo() {
         }
 
@@ -153,6 +158,38 @@ public final class Debug
             return dalvikSharedDirty + nativeSharedDirty + otherSharedDirty;
         }
 
+        /* @hide */
+        public int getOtherPss(int which) {
+            return otherStats[which*3];
+        }
+
+        /* @hide */
+        public int getOtherPrivateDirty(int which) {
+            return otherStats[which*3 + 1];
+        }
+
+        /* @hide */
+        public int getOtherSharedDirty(int which) {
+            return otherStats[which*3 + 2];
+        }
+
+
+        /* @hide */
+        public static String getOtherLabel(int which) {
+            switch (which) {
+                case 0: return "Cursor";
+                case 1: return "Ashmem";
+                case 2: return "Other dev";
+                case 3: return ".so mmap";
+                case 4: return ".jar mmap";
+                case 5: return ".apk mmap";
+                case 6: return ".ttf mmap";
+                case 7: return ".dex mmap";
+                case 8: return "Other mmap";
+                default: return "????";
+            }
+        }
+
         public int describeContents() {
             return 0;
         }
@@ -167,6 +204,7 @@ public final class Debug
             dest.writeInt(otherPss);
             dest.writeInt(otherPrivateDirty);
             dest.writeInt(otherSharedDirty);
+            dest.writeIntArray(otherStats);
         }
 
         public void readFromParcel(Parcel source) {
@@ -179,6 +217,7 @@ public final class Debug
             otherPss = source.readInt();
             otherPrivateDirty = source.readInt();
             otherSharedDirty = source.readInt();
+            otherStats = source.createIntArray();
         }
 
         public static final Creator<MemoryInfo> CREATOR = new Creator<MemoryInfo>() {
