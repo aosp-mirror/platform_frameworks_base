@@ -60,6 +60,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.INetworkManagementService;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
@@ -111,6 +112,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final IAlarmManager mAlarmManager;
     private final TrustedTime mTime;
     private final NetworkStatsSettings mSettings;
+
+    private final PowerManager.WakeLock mWakeLock;
 
     private IConnectivityManager mConnManager;
 
@@ -190,6 +193,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mAlarmManager = checkNotNull(alarmManager, "missing IAlarmManager");
         mTime = checkNotNull(time, "missing TrustedTime");
         mSettings = checkNotNull(settings, "missing NetworkStatsSettings");
+
+        final PowerManager powerManager = (PowerManager) context.getSystemService(
+                Context.POWER_SERVICE);
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
@@ -408,7 +415,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // on background handler thread, and verified CONNECTIVITY_INTERNAL
             // permission above.
             synchronized (mStatsLock) {
-                updateIfacesLocked();
+                mWakeLock.acquire();
+                try {
+                    updateIfacesLocked();
+                } finally {
+                    mWakeLock.release();
+                }
             }
         }
     };
@@ -419,8 +431,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             // on background handler thread, and verified UPDATE_DEVICE_STATS
             // permission above.
             synchronized (mStatsLock) {
-                // TODO: acquire wakelock while performing poll
-                performPollLocked(true, false);
+                mWakeLock.acquire();
+                try {
+                    performPollLocked(true, false);
+                } finally {
+                    mWakeLock.release();
+                }
             }
         }
     };
@@ -433,7 +449,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             final int uid = intent.getIntExtra(EXTRA_UID, 0);
             synchronized (mStatsLock) {
                 // TODO: perform one last stats poll for UID
-                removeUidLocked(uid);
+                mWakeLock.acquire();
+                try {
+                    removeUidLocked(uid);
+                } finally {
+                    mWakeLock.release();
+                }
             }
         }
     };
