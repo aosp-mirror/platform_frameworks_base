@@ -17,6 +17,7 @@
 #define LOG_TAG "BluetoothAudioGateway.cpp"
 
 #include "android_bluetooth_common.h"
+#include "android_bluetooth_c.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "JNIHelp.h"
 #include "jni.h"
@@ -491,7 +492,8 @@ static int setup_listening_socket(int dev, int channel) {
     }
 
     laddr.rc_family = AF_BLUETOOTH;
-    memcpy(&laddr.rc_bdaddr, BDADDR_ANY, sizeof(bdaddr_t));
+    bdaddr_t any = android_bluetooth_bdaddr_any();
+    memcpy(&laddr.rc_bdaddr, &any, sizeof(bdaddr_t));
     laddr.rc_channel = channel;
 
     if (bind(sk, (struct sockaddr *)&laddr, sizeof(laddr)) < 0) {
