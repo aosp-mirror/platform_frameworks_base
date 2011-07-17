@@ -16,10 +16,11 @@
 
 package android.net;
 
+import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.ConnectivityManager.TYPE_WIMAX;
-import static android.net.ConnectivityManager.TYPE_ETHERNET;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
+import static android.net.NetworkIdentity.scrubSubscriberId;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_2_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_3_G;
 import static android.telephony.TelephonyManager.NETWORK_CLASS_4_G;
@@ -119,7 +120,7 @@ public class NetworkTemplate implements Parcelable {
 
     @Override
     public String toString() {
-        final String scrubSubscriberId = mSubscriberId != null ? "valid" : "null";
+        final String scrubSubscriberId = scrubSubscriberId(mSubscriberId);
         return "NetworkTemplate: matchRule=" + getMatchRuleName(mMatchRule) + ", subscriberId="
                 + scrubSubscriberId;
     }
@@ -150,7 +151,7 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Test if this network matches the given template and IMEI.
+     * Test if this network matches the given template and IMSI.
      */
     public boolean matches(NetworkIdentity ident) {
         switch (mMatchRule) {
@@ -170,7 +171,7 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Check if mobile network with matching IMEI. Also matches
+     * Check if mobile network with matching IMSI. Also matches
      * {@link #TYPE_WIMAX}.
      */
     private boolean matchesMobile(NetworkIdentity ident) {
@@ -183,7 +184,7 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Check if mobile network classified 3G or lower with matching IMEI.
+     * Check if mobile network classified 3G or lower with matching IMSI.
      */
     private boolean matchesMobile3gLower(NetworkIdentity ident) {
         if (isNetworkTypeMobile(ident.mType) && Objects.equal(mSubscriberId, ident.mSubscriberId)) {
@@ -198,7 +199,7 @@ public class NetworkTemplate implements Parcelable {
     }
 
     /**
-     * Check if mobile network classified 4G with matching IMEI. Also matches
+     * Check if mobile network classified 4G with matching IMSI. Also matches
      * {@link #TYPE_WIMAX}.
      */
     private boolean matchesMobile4g(NetworkIdentity ident) {
