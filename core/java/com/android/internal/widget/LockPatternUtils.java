@@ -114,6 +114,23 @@ public class LockPatternUtils {
     private static final AtomicBoolean sHaveNonZeroPasswordFile = new AtomicBoolean(false);
     private static FileObserver sPasswordObserver;
 
+    private static class PasswordFileObserver extends FileObserver {
+        public PasswordFileObserver(String path, int mask) {
+            super(path, mask);
+        }
+
+        @Override
+        public void onEvent(int event, String path) {
+            if (LOCK_PATTERN_FILE.equals(path)) {
+                Log.d(TAG, "lock pattern file changed");
+                sHaveNonZeroPatternFile.set(new File(sLockPatternFilename).length() > 0);
+            } else if (LOCK_PASSWORD_FILE.equals(path)) {
+                Log.d(TAG, "lock password file changed");
+                sHaveNonZeroPasswordFile.set(new File(sLockPasswordFilename).length() > 0);
+            }
+        }
+    }
+
     public DevicePolicyManager getDevicePolicyManager() {
         if (mDevicePolicyManager == null) {
             mDevicePolicyManager =
@@ -143,18 +160,7 @@ public class LockPatternUtils {
             sHaveNonZeroPasswordFile.set(new File(sLockPasswordFilename).length() > 0);
             int fileObserverMask = FileObserver.CLOSE_WRITE | FileObserver.DELETE |
                     FileObserver.MOVED_TO | FileObserver.CREATE;
-            sPasswordObserver = new FileObserver(dataSystemDirectory, fileObserverMask) {
-                    @Override
-                    public void onEvent(int event, String path) {
-                        if (LOCK_PATTERN_FILE.equals(path)) {
-                            Log.d(TAG, "lock pattern file changed");
-                            sHaveNonZeroPatternFile.set(new File(sLockPatternFilename).length() > 0);
-                        } else if (LOCK_PASSWORD_FILE.equals(path)) {
-                            Log.d(TAG, "lock password file changed");
-                            sHaveNonZeroPasswordFile.set(new File(sLockPasswordFilename).length() > 0);
-                        }
-                    }
-                };
+            sPasswordObserver = new PasswordFileObserver(dataSystemDirectory, fileObserverMask);
             sPasswordObserver.startWatching();
         }
     }

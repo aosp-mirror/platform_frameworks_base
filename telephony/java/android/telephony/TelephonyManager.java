@@ -61,7 +61,7 @@ public class TelephonyManager {
     /** @hide */
     public TelephonyManager(Context context) {
         if (sContext == null) {
-            sContext = context;
+            sContext = context.getApplicationContext();
 
             sRegistry = ITelephonyRegistry.Stub.asInterface(ServiceManager.getService(
                     "telephony.registry"));
