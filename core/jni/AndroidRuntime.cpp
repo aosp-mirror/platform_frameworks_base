@@ -627,15 +627,6 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv)
         "-agentlib:jdwp=transport=dt_android_adb,suspend=n,server=y";
     mOptions.add(opt);
 
-    char enableDPBuf[sizeof("-Xdeadlockpredict:") + PROPERTY_VALUE_MAX];
-    property_get("dalvik.vm.deadlock-predict", propBuf, "");
-    if (strlen(propBuf) > 0) {
-        strcpy(enableDPBuf, "-Xdeadlockpredict:");
-        strcat(enableDPBuf, propBuf);
-        opt.optionString = enableDPBuf;
-        mOptions.add(opt);
-    }
-
     LOGD("CheckJNI is %s\n", checkJni ? "ON" : "OFF");
     if (checkJni) {
         /* extended JNI checking */
