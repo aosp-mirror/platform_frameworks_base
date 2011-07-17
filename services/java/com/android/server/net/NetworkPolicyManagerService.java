@@ -22,6 +22,7 @@ import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.Manifest.permission.READ_PHONE_STATE;
+import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED;
@@ -174,10 +175,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     /** Current policy for network templates. */
     private ArrayList<NetworkPolicy> mNetworkPolicy = Lists.newArrayList();
+    /** Current derived network rules for ifaces. */
+    private HashMap<NetworkPolicy, String[]> mNetworkRules = Maps.newHashMap();
 
     /** Current policy for each UID. */
     private SparseIntArray mUidPolicy = new SparseIntArray();
-    /** Current derived network rules for each UID. */
+    /** Current derived rules for each UID. */
     private SparseIntArray mUidRules = new SparseIntArray();
 
     /** Set of ifaces that are metered. */
@@ -198,8 +201,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     // TODO: keep whitelist of system-critical services that should never have
     // rules enforced, such as system, phone, and radio UIDs.
-
-    // TODO: watch for package added broadcast to catch new UIDs.
 
     public NetworkPolicyManagerService(Context context, IActivityManager activityManager,
             IPowerManager powerManager, INetworkStatsService networkStats,
@@ -242,7 +243,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         synchronized (mRulesLock) {
             // read policy from disk
             readPolicyLocked();
-            updateNotificationsLocked();
         }
 
         updateScreenOn();
@@ -268,9 +268,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final IntentFilter connFilter = new IntentFilter(CONNECTIVITY_ACTION);
         mContext.registerReceiver(mConnReceiver, connFilter, CONNECTIVITY_INTERNAL, mHandler);
 
-        // listen for uid removal to clean policy
-        final IntentFilter removedFilter = new IntentFilter(ACTION_UID_REMOVED);
-        mContext.registerReceiver(mRemovedReceiver, removedFilter, null, mHandler);
+        // listen for package/uid changes to update policy
+        final IntentFilter packageFilter = new IntentFilter();
+        packageFilter.addAction(ACTION_PACKAGE_ADDED);
+        packageFilter.addAction(ACTION_UID_REMOVED);
+        packageFilter.addDataScheme("package");
+        mContext.registerReceiver(mPackageReceiver, packageFilter, null, mHandler);
 
         // listen for stats update events
         final IntentFilter statsFilter = new IntentFilter(ACTION_NETWORK_STATS_UPDATED);
@@ -331,17 +334,28 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     };
 
-    private BroadcastReceiver mRemovedReceiver = new BroadcastReceiver() {
+    private BroadcastReceiver mPackageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // on background handler thread, and UID_REMOVED is protected
-            // broadcast.
+            // on background handler thread, and PACKAGE_ADDED and UID_REMOVED
+            // are protected broadcasts.
+
+            final String action = intent.getAction();
             final int uid = intent.getIntExtra(EXTRA_UID, 0);
             synchronized (mRulesLock) {
-                // remove any policy and update rules to clean up
-                mUidPolicy.delete(uid);
-                updateRulesForUidLocked(uid);
-                writePolicyLocked();
+                if (ACTION_PACKAGE_ADDED.equals(action)) {
+                    // update rules for UID, since it might be subject to
+                    // global background data policy.
+                    if (LOGV) Slog.v(TAG, "ACTION_PACKAGE_ADDED for uid=" + uid);
+                    updateRulesForUidLocked(uid);
+
+                } else if (ACTION_UID_REMOVED.equals(action)) {
+                    // remove any policy and update rules to clean up.
+                    if (LOGV) Slog.v(TAG, "ACTION_UID_REMOVED for uid=" + uid);
+                    mUidPolicy.delete(uid);
+                    updateRulesForUidLocked(uid);
+                    writePolicyLocked();
+                }
             }
         }
     };
@@ -396,8 +410,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         // TODO: when switching to kernel notifications, compute next future
         // cycle boundary to recompute notifications.
 
-        // examine stats for each policy defined
-        for (NetworkPolicy policy : mNetworkPolicy) {
+        // examine stats for each active policy
+        for (NetworkPolicy policy : mNetworkRules.keySet()) {
             final long start = computeLastCycleBoundary(currentTime, policy);
             final long end = currentTime;
 
@@ -423,6 +437,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 } else {
                     cancelNotification(policy, TYPE_WARNING);
                 }
+            }
+
+        }
+
+        // clear notifications for non-active policies
+        for (NetworkPolicy policy : mNetworkPolicy) {
+            if (!mNetworkRules.containsKey(policy)) {
+                cancelNotification(policy, TYPE_WARNING);
+                cancelNotification(policy, TYPE_LIMIT);
             }
         }
     }
@@ -531,7 +554,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // permission above.
             synchronized (mRulesLock) {
                 ensureActiveMobilePolicyLocked();
-                updateIfacesLocked();
+                updateNetworkRulesLocked();
+                updateNotificationsLocked();
             }
         }
     };
@@ -541,7 +565,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
      * {@link NetworkPolicy} that need to be enforced. When matches found, set
      * remaining quota based on usage cycle and historical stats.
      */
-    private void updateIfacesLocked() {
+    private void updateNetworkRulesLocked() {
         if (LOGV) Slog.v(TAG, "updateIfacesLocked()");
 
         final NetworkState[] states;
@@ -565,7 +589,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
 
         // build list of rules and ifaces to enforce them against
-        final HashMap<NetworkPolicy, String[]> rules = Maps.newHashMap();
+        mNetworkRules.clear();
         final ArrayList<String> ifaceList = Lists.newArrayList();
         for (NetworkPolicy policy : mNetworkPolicy) {
 
@@ -580,7 +604,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             if (ifaceList.size() > 0) {
                 final String[] ifaces = ifaceList.toArray(new String[ifaceList.size()]);
-                rules.put(policy, ifaces);
+                mNetworkRules.put(policy, ifaces);
             }
         }
 
@@ -596,8 +620,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // apply each policy that we found ifaces for; compute remaining data
         // based on current cycle and historical stats, and push to kernel.
-        for (NetworkPolicy policy : rules.keySet()) {
-            final String[] ifaces = rules.get(policy);
+        for (NetworkPolicy policy : mNetworkRules.keySet()) {
+            final String[] ifaces = mNetworkRules.get(policy);
 
             final long start = computeLastCycleBoundary(currentTime, policy);
             final long end = currentTime;
@@ -670,17 +694,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         if (!mobileDefined) {
             Slog.i(TAG, "no policy for active mobile network; generating default policy");
 
-            // default mobile policy has combined 4GB warning, and assume usage
-            // cycle starts today today.
+            // build default mobile policy, and assume usage cycle starts today
+            final long warningBytes = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_networkPolicyDefaultWarning)
+                    * MB_IN_BYTES;
 
-            // TODO: move this policy definition to overlay or secure setting
             final Time time = new Time(Time.TIMEZONE_UTC);
             time.setToNow();
             final int cycleDay = time.monthDay;
 
             final NetworkTemplate template = buildTemplateMobileAll(subscriberId);
-            mNetworkPolicy.add(
-                    new NetworkPolicy(template, cycleDay, 4 * GB_IN_BYTES, LIMIT_DISABLED));
+            mNetworkPolicy.add(new NetworkPolicy(template, cycleDay, warningBytes, LIMIT_DISABLED));
             writePolicyLocked();
         }
     }
@@ -859,7 +883,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 mNetworkPolicy.add(policy);
             }
 
-            updateIfacesLocked();
+            updateNetworkRulesLocked();
             updateNotificationsLocked();
             writePolicyLocked();
         }

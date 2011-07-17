@@ -665,4 +665,7 @@
     <!-- Timeout to wait for NTP server response. -->
     <integer name="config_ntpTimeout">20000</integer>
 
+    <!-- Default network policy warning threshold, in megabytes. -->
+    <integer name="config_networkPolicyDefaultWarning">2048</integer>
+
 </resources>

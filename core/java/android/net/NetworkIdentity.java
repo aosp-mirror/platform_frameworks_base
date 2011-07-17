@@ -19,6 +19,7 @@ package android.net;
 import static android.net.ConnectivityManager.isNetworkTypeMobile;
 
 import android.content.Context;
+import android.os.Build;
 import android.telephony.TelephonyManager;
 
 import com.android.internal.util.Objects;
@@ -68,7 +69,7 @@ public class NetworkIdentity {
             subTypeName = Integer.toString(mSubType);
         }
 
-        final String scrubSubscriberId = mSubscriberId != null ? "valid" : "null";
+        final String scrubSubscriberId = scrubSubscriberId(mSubscriberId);
         final String roaming = mRoaming ? ", ROAMING" : "";
         return "[type=" + typeName + ", subType=" + subTypeName + ", subscriberId="
                 + scrubSubscriberId + roaming + "]";
@@ -88,6 +89,17 @@ public class NetworkIdentity {
 
     public boolean getRoaming() {
         return mRoaming;
+    }
+
+    /**
+     * Scrub given IMSI on production builds.
+     */
+    public static String scrubSubscriberId(String subscriberId) {
+        if ("eng".equals(Build.TYPE)) {
+            return subscriberId;
+        } else {
+            return subscriberId != null ? "valid" : "null";
+        }
     }
 
     /**
