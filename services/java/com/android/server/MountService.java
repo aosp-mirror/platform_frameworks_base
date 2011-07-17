@@ -1339,7 +1339,11 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
             String state = mVolumeStates.get(mountPoint);
             if (state == null) {
                 Slog.w(TAG, "getVolumeState(" + mountPoint + "): Unknown volume");
-                throw new IllegalArgumentException();
+                if (SystemProperties.get("vold.encrypt_progress").length() != 0) {
+                    state = Environment.MEDIA_REMOVED;
+                } else {
+                    throw new IllegalArgumentException();
+                }
             }
 
             return state;
