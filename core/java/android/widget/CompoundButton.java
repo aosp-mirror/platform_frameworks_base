@@ -217,6 +217,7 @@ public abstract class CompoundButton extends Button implements Checkable {
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
+        info.setCheckable(true);
         info.setChecked(mChecked);
     }
 

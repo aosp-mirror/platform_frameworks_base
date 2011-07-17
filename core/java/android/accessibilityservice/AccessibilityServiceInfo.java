@@ -193,8 +193,6 @@ public class AccessibilityServiceInfo implements Parcelable {
         mId = new ComponentName(serviceInfo.packageName, serviceInfo.name).flattenToShortString();
         mResolveInfo = resolveInfo;
 
-        String settingsActivityName = null;
-        boolean retrieveScreenContent = false;
         XmlResourceParser parser = null;
 
         try {
