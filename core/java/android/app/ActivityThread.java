@@ -413,10 +413,10 @@ public final class ActivityThread {
     native private void dumpGraphicsInfo(FileDescriptor fd);
 
     private final class ApplicationThread extends ApplicationThreadNative {
-        private static final String HEAP_COLUMN = "%17s %8s %8s %8s %8s";
-        private static final String ONE_COUNT_COLUMN = "%17s %8d";
-        private static final String TWO_COUNT_COLUMNS = "%17s %8d %17s %8d";
-        private static final String TWO_COUNT_COLUMNS_DB = "%20s %8d %20s %8d";
+        private static final String HEAP_COLUMN = "%13s %8s %8s %8s %8s %8s %8s";
+        private static final String ONE_COUNT_COLUMN = "%21s %8d";
+        private static final String TWO_COUNT_COLUMNS = "%21s %8d %21s %8d";
+        private static final String TWO_COUNT_COLUMNS_DB = "%21s %8d %21s %8d";
         private static final String DB_INFO_FORMAT = "  %8s %8s %14s %14s  %s";
 
         // Formatting for checkin service - update version if row format changes
@@ -729,26 +729,23 @@ public final class ActivityThread {
         }
 
         @Override
-        protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (args != null && args.length == 1 && args[0].equals("graphics")) {
+        public Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, String[] args) {
+            FileOutputStream fout = new FileOutputStream(fd);
+            PrintWriter pw = new PrintWriter(fout);
+            try {
+                return dumpMemInfo(fd, pw, args);
+            } finally {
                 pw.flush();
-                dumpGraphicsInfo(fd);
-                return;
             }
+        }
+
+        private Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, PrintWriter pw, String[] args) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
             long nativeAllocated = Debug.getNativeHeapAllocatedSize() / 1024;
             long nativeFree = Debug.getNativeHeapFreeSize() / 1024;
 
             Debug.MemoryInfo memInfo = new Debug.MemoryInfo();
             Debug.getMemoryInfo(memInfo);
-
-            final int nativeShared = memInfo.nativeSharedDirty;
-            final int dalvikShared = memInfo.dalvikSharedDirty;
-            final int otherShared = memInfo.otherSharedDirty;
-
-            final int nativePrivate = memInfo.nativePrivateDirty;
-            final int dalvikPrivate = memInfo.dalvikPrivateDirty;
-            final int otherPrivate = memInfo.otherPrivateDirty;
 
             Runtime runtime = Runtime.getRuntime();
 
@@ -813,16 +810,18 @@ public final class ActivityThread {
                 pw.print(memInfo.nativePss + memInfo.dalvikPss + memInfo.otherPss); pw.print(',');
 
                 // Heap info - shared
-                pw.print(nativeShared); pw.print(',');
-                pw.print(dalvikShared); pw.print(',');
-                pw.print(otherShared); pw.print(',');
-                pw.print(nativeShared + dalvikShared + otherShared); pw.print(',');
+                pw.print(memInfo.nativeSharedDirty); pw.print(',');
+                pw.print(memInfo.dalvikSharedDirty); pw.print(',');
+                pw.print(memInfo.otherSharedDirty); pw.print(',');
+                pw.print(memInfo.nativeSharedDirty + memInfo.dalvikSharedDirty
+                        + memInfo.otherSharedDirty); pw.print(',');
 
                 // Heap info - private
-                pw.print(nativePrivate); pw.print(',');
-                pw.print(dalvikPrivate); pw.print(',');
-                pw.print(otherPrivate); pw.print(',');
-                pw.print(nativePrivate + dalvikPrivate + otherPrivate); pw.print(',');
+                pw.print(memInfo.nativePrivateDirty); pw.print(',');
+                pw.print(memInfo.dalvikPrivateDirty); pw.print(',');
+                pw.print(memInfo.otherPrivateDirty); pw.print(',');
+                pw.print(memInfo.nativePrivateDirty + memInfo.dalvikPrivateDirty
+                        + memInfo.otherPrivateDirty); pw.print(',');
 
                 // Object counts
                 pw.print(viewInstanceCount); pw.print(',');
@@ -850,24 +849,38 @@ public final class ActivityThread {
                     pw.print(',');
                 }
 
-                return;
+                return memInfo;
             }
 
             // otherwise, show human-readable format
-            printRow(pw, HEAP_COLUMN, "", "native", "dalvik", "other", "total");
-            printRow(pw, HEAP_COLUMN, "size:", nativeMax, dalvikMax, "N/A", nativeMax + dalvikMax);
-            printRow(pw, HEAP_COLUMN, "allocated:", nativeAllocated, dalvikAllocated, "N/A",
-                    nativeAllocated + dalvikAllocated);
-            printRow(pw, HEAP_COLUMN, "free:", nativeFree, dalvikFree, "N/A",
-                    nativeFree + dalvikFree);
+            printRow(pw, HEAP_COLUMN, "", "", "Shared", "Private", "Heap", "Heap", "Heap");
+            printRow(pw, HEAP_COLUMN, "", "Pss", "Dirty", "Dirty", "Size", "Alloc", "Free");
+            printRow(pw, HEAP_COLUMN, "", "------", "------", "------", "------", "------",
+                    "------");
+            printRow(pw, HEAP_COLUMN, "Native", memInfo.nativePss, memInfo.nativeSharedDirty,
+                    memInfo.nativePrivateDirty, nativeMax, nativeAllocated, nativeFree);
+            printRow(pw, HEAP_COLUMN, "Dalvik", memInfo.dalvikPss, memInfo.dalvikSharedDirty,
+                    memInfo.dalvikPrivateDirty, dalvikMax, dalvikAllocated, dalvikFree);
 
-            printRow(pw, HEAP_COLUMN, "(Pss):", memInfo.nativePss, memInfo.dalvikPss,
-                    memInfo.otherPss, memInfo.nativePss + memInfo.dalvikPss + memInfo.otherPss);
+            int otherPss = memInfo.otherPss;
+            int otherSharedDirty = memInfo.otherSharedDirty;
+            int otherPrivateDirty = memInfo.otherPrivateDirty;
 
-            printRow(pw, HEAP_COLUMN, "(shared dirty):", nativeShared, dalvikShared, otherShared,
-                    nativeShared + dalvikShared + otherShared);
-            printRow(pw, HEAP_COLUMN, "(priv dirty):", nativePrivate, dalvikPrivate, otherPrivate,
-                    nativePrivate + dalvikPrivate + otherPrivate);
+            for (int i=0; i<Debug.MemoryInfo.NUM_OTHER_STATS; i++) {
+                printRow(pw, HEAP_COLUMN, memInfo.getOtherLabel(i),
+                        memInfo.getOtherPss(i), memInfo.getOtherSharedDirty(i),
+                        memInfo.getOtherPrivateDirty(i), "", "", "");
+                otherPss -= memInfo.getOtherPss(i);
+                otherSharedDirty -= memInfo.getOtherSharedDirty(i);
+                otherPrivateDirty -= memInfo.getOtherPrivateDirty(i);
+            }
+
+            printRow(pw, HEAP_COLUMN, "Unknown", otherPss, otherSharedDirty,
+                    otherPrivateDirty, "", "", "");
+            printRow(pw, HEAP_COLUMN, "TOTAL", memInfo.getTotalPss(),
+                    memInfo.getTotalSharedDirty(), memInfo.getTotalPrivateDirty(),
+                    nativeMax+dalvikMax, nativeAllocated+dalvikAllocated,
+                    nativeFree+dalvikFree);
 
             pw.println(" ");
             pw.println(" Objects");
@@ -916,6 +929,13 @@ public final class ActivityThread {
                 pw.println(" Asset Allocations");
                 pw.print(assetAlloc);
             }
+
+            return memInfo;
+        }
+
+        @Override
+        public void dumpGfxInfo(FileDescriptor fd, String[] args) {
+            dumpGraphicsInfo(fd);
         }
 
         private void printRow(PrintWriter pw, String format, Object...objs) {
