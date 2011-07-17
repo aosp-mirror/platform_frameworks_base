@@ -50,7 +50,7 @@ import java.util.List;
  */
 public class AccessibilityRecord {
 
-    private static final int INVALID_POSITION = -1;
+    private static final int UNDEFINED = -1;
 
     private static final int PROPERTY_CHECKED = 0x00000001;
     private static final int PROPERTY_ENABLED = 0x00000002;
@@ -68,15 +68,15 @@ public class AccessibilityRecord {
 
     boolean mSealed;
     int mBooleanProperties;
-    int mCurrentItemIndex;
-    int mItemCount;
-    int mFromIndex;
-    int mToIndex;
-    int mScrollX;
-    int mScrollY;
+    int mCurrentItemIndex = UNDEFINED;
+    int mItemCount = UNDEFINED;
+    int mFromIndex = UNDEFINED;
+    int mToIndex = UNDEFINED;
+    int mScrollX = UNDEFINED;
+    int mScrollY = UNDEFINED;
 
-    int mAddedCount;
-    int mRemovedCount;
+    int mAddedCount= UNDEFINED;
+    int mRemovedCount = UNDEFINED;
     int mSourceViewId = View.NO_ID;
     int mSourceWindowId = View.NO_ID;
 
@@ -681,14 +681,14 @@ public class AccessibilityRecord {
     void clear() {
         mSealed = false;
         mBooleanProperties = 0;
-        mCurrentItemIndex = INVALID_POSITION;
-        mItemCount = 0;
-        mFromIndex = 0;
-        mToIndex = 0;
-        mScrollX = 0;
-        mScrollY = 0;
-        mAddedCount = 0;
-        mRemovedCount = 0;
+        mCurrentItemIndex = UNDEFINED;
+        mItemCount = UNDEFINED;
+        mFromIndex = UNDEFINED;
+        mToIndex = UNDEFINED;
+        mScrollX = UNDEFINED;
+        mScrollY = UNDEFINED;
+        mAddedCount = UNDEFINED;
+        mRemovedCount = UNDEFINED;
         mClassName = null;
         mContentDescription = null;
         mBeforeText = null;
