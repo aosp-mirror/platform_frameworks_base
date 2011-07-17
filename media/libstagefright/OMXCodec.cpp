@@ -4406,26 +4406,19 @@ status_t OMXCodec::pause() {
 
 status_t QueryCodecs(
         const sp<IOMX> &omx,
-        const char *mime, bool queryDecoders,
+        const char *mime, bool queryDecoders, bool hwCodecOnly,
         Vector<CodecCapabilities> *results) {
+    Vector<String8> matchingCodecs;
     results->clear();
 
-    for (int index = 0;; ++index) {
-        const char *componentName;
+    OMXCodec::findMatchingCodecs(mime,
+            !queryDecoders /*createEncoder*/,
+            NULL /*matchComponentName*/,
+            hwCodecOnly ? OMXCodec::kHardwareCodecsOnly : 0 /*flags*/,
+            &matchingCodecs);
 
-        if (!queryDecoders) {
-            componentName = GetCodec(
-                    kEncoderInfo, sizeof(kEncoderInfo) / sizeof(kEncoderInfo[0]),
-                    mime, index);
-        } else {
-            componentName = GetCodec(
-                    kDecoderInfo, sizeof(kDecoderInfo) / sizeof(kDecoderInfo[0]),
-                    mime, index);
-        }
-
-        if (!componentName) {
-            return OK;
-        }
+    for (size_t c = 0; c < matchingCodecs.size(); c++) {
+        const char *componentName = matchingCodecs.itemAt(c).string();
 
         if (strncmp(componentName, "OMX.", 4)) {
             // Not an OpenMax component but a software codec.
@@ -4490,6 +4483,8 @@ status_t QueryCodecs(
 
         CHECK_EQ(omx->freeNode(node), (status_t)OK);
     }
+
+    return OK;
 }
 
 void OMXCodec::restorePatchedDataPointer(BufferInfo *info) {
