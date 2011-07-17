@@ -20,17 +20,21 @@ import android.accounts.Account;
 import android.database.IContentObserver;
 import android.database.sqlite.SQLiteException;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
+import android.util.SparseIntArray;
 import android.Manifest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -70,6 +74,40 @@ public final class ContentService extends IContentService.Stub {
             } else {
                 mSyncManager.dump(fd, pw);
             }
+            pw.println();
+            pw.println("Observer tree:");
+            synchronized (mRootNode) {
+                int[] counts = new int[2];
+                final SparseIntArray pidCounts = new SparseIntArray();
+                mRootNode.dumpLocked(fd, pw, args, "", "  ", counts, pidCounts);
+                pw.println();
+                ArrayList<Integer> sorted = new ArrayList<Integer>();
+                for (int i=0; i<pidCounts.size(); i++) {
+                    sorted.add(pidCounts.keyAt(i));
+                }
+                Collections.sort(sorted, new Comparator<Integer>() {
+                    @Override
+                    public int compare(Integer lhs, Integer rhs) {
+                        int lc = pidCounts.get(lhs);
+                        int rc = pidCounts.get(rhs);
+                        if (lc < rc) {
+                            return 1;
+                        } else if (lc > rc) {
+                            return -1;
+                        }
+                        return 0;
+                    }
+
+                });
+                for (int i=0; i<sorted.size(); i++) {
+                    int pid = sorted.get(i);
+                    pw.print("  pid "); pw.print(pid); pw.print(": ");
+                            pw.print(pidCounts.get(pid)); pw.println(" observers");
+                }
+                pw.println();
+                pw.print(" Total number of nodes: "); pw.println(counts[0]);
+                pw.print(" Total number of observers: "); pw.println(counts[1]);
+            }
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -102,7 +140,8 @@ public final class ContentService extends IContentService.Stub {
             throw new IllegalArgumentException("You must pass a valid uri and observer");
         }
         synchronized (mRootNode) {
-            mRootNode.addObserverLocked(uri, observer, notifyForDescendents, mRootNode);
+            mRootNode.addObserverLocked(uri, observer, notifyForDescendents, mRootNode,
+                    Binder.getCallingUid(), Binder.getCallingPid());
             if (false) Log.v(TAG, "Registered observer " + observer + " at " + uri +
                     " with notifyForDescendents " + notifyForDescendents);
         }
@@ -465,12 +504,17 @@ public final class ContentService extends IContentService.Stub {
     public static final class ObserverNode {
         private class ObserverEntry implements IBinder.DeathRecipient {
             public final IContentObserver observer;
+            public final int uid;
+            public final int pid;
             public final boolean notifyForDescendents;
             private final Object observersLock;
 
-            public ObserverEntry(IContentObserver o, boolean n, Object observersLock) {
+            public ObserverEntry(IContentObserver o, boolean n, Object observersLock,
+                    int _uid, int _pid) {
                 this.observersLock = observersLock;
                 observer = o;
+                uid = _uid;
+                pid = _pid;
                 notifyForDescendents = n;
                 try {
                     observer.asBinder().linkToDeath(this, 0);
@@ -484,6 +528,16 @@ public final class ContentService extends IContentService.Stub {
                     removeObserverLocked(observer);
                 }
             }
+
+            public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+                    String name, String prefix, SparseIntArray pidCounts) {
+                pidCounts.put(pid, pidCounts.get(pid)+1);
+                pw.print(prefix); pw.print(name); pw.print(": pid=");
+                        pw.print(pid); pw.print(" uid=");
+                        pw.print(uid); pw.print(" target=");
+                        pw.println(Integer.toHexString(System.identityHashCode(
+                                observer != null ? observer.asBinder() : null)));
+            }
         }
 
         public static final int INSERT_TYPE = 0;
@@ -496,6 +550,37 @@ public final class ContentService extends IContentService.Stub {
 
         public ObserverNode(String name) {
             mName = name;
+        }
+
+        public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+                String name, String prefix, int[] counts, SparseIntArray pidCounts) {
+            String innerName = null;
+            if (mObservers.size() > 0) {
+                if ("".equals(name)) {
+                    innerName = mName;
+                } else {
+                    innerName = name + "/" + mName;
+                }
+                for (int i=0; i<mObservers.size(); i++) {
+                    counts[1]++;
+                    mObservers.get(i).dumpLocked(fd, pw, args, innerName, prefix,
+                            pidCounts);
+                }
+            }
+            if (mChildren.size() > 0) {
+                if (innerName == null) {
+                    if ("".equals(name)) {
+                        innerName = mName;
+                    } else {
+                        innerName = name + "/" + mName;
+                    }
+                }
+                for (int i=0; i<mChildren.size(); i++) {
+                    counts[0]++;
+                    mChildren.get(i).dumpLocked(fd, pw, args, innerName, prefix,
+                            counts, pidCounts);
+                }
+            }
         }
 
         private String getUriSegment(Uri uri, int index) {
@@ -518,15 +603,16 @@ public final class ContentService extends IContentService.Stub {
         }
 
         public void addObserverLocked(Uri uri, IContentObserver observer,
-                boolean notifyForDescendents, Object observersLock) {
-            addObserverLocked(uri, 0, observer, notifyForDescendents, observersLock);
+                boolean notifyForDescendents, Object observersLock, int uid, int pid) {
+            addObserverLocked(uri, 0, observer, notifyForDescendents, observersLock, uid, pid);
         }
 
         private void addObserverLocked(Uri uri, int index, IContentObserver observer,
-                boolean notifyForDescendents, Object observersLock) {
+                boolean notifyForDescendents, Object observersLock, int uid, int pid) {
             // If this is the leaf node add the observer
             if (index == countUriSegments(uri)) {
-                mObservers.add(new ObserverEntry(observer, notifyForDescendents, observersLock));
+                mObservers.add(new ObserverEntry(observer, notifyForDescendents, observersLock,
+                        uid, pid));
                 return;
             }
 
@@ -539,7 +625,8 @@ public final class ContentService extends IContentService.Stub {
             for (int i = 0; i < N; i++) {
                 ObserverNode node = mChildren.get(i);
                 if (node.mName.equals(segment)) {
-                    node.addObserverLocked(uri, index + 1, observer, notifyForDescendents, observersLock);
+                    node.addObserverLocked(uri, index + 1, observer, notifyForDescendents,
+                            observersLock, uid, pid);
                     return;
                 }
             }
@@ -547,7 +634,8 @@ public final class ContentService extends IContentService.Stub {
             // No child found, create one
             ObserverNode node = new ObserverNode(segment);
             mChildren.add(node);
-            node.addObserverLocked(uri, index + 1, observer, notifyForDescendents, observersLock);
+            node.addObserverLocked(uri, index + 1, observer, notifyForDescendents,
+                    observersLock, uid, pid);
         }
 
         public boolean removeObserverLocked(IContentObserver observer) {
