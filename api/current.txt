@@ -13927,6 +13927,10 @@ package android.os {
   public static class Debug.MemoryInfo implements android.os.Parcelable {
     ctor public Debug.MemoryInfo();
     method public int describeContents();
+    method public static java.lang.String getOtherLabel(int);
+    method public int getOtherPrivateDirty(int);
+    method public int getOtherPss(int);
+    method public int getOtherSharedDirty(int);
     method public int getTotalPrivateDirty();
     method public int getTotalPss();
     method public int getTotalSharedDirty();
