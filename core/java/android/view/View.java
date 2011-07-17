@@ -11122,6 +11122,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      *        background
      */
     public void setBackgroundDrawable(Drawable d) {
+        if (d == mBGDrawable) {
+            return;
+        }
+
         boolean requestLayout = false;
 
         mBackgroundResource = 0;
