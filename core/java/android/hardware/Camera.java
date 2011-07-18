@@ -16,6 +16,8 @@
 
 package android.hardware;
 
+import android.annotation.SdkConstant;
+import android.annotation.SdkConstant.SdkConstantType;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -140,6 +142,22 @@ public class Camera {
     private ErrorCallback mErrorCallback;
     private boolean mOneShot;
     private boolean mWithBuffer;
+
+    /**
+     * Broadcast Action:  A new picture is taken by the camera, and the entry of
+     * the picture has been added to the media store.
+     * {@link android.content.Intent#getData} is URI of the picture.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NEW_PICTURE = "android.hardware.action.NEW_PICTURE";
+
+    /**
+     * Broadcast Action:  A new video is recorded by the camera, and the entry
+     * of the video has been added to the media store.
+     * {@link android.content.Intent#getData} is URI of the video.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_NEW_VIDEO = "android.hardware.action.NEW_VIDEO";
 
     /**
      * Returns the number of physical cameras available on this device.
