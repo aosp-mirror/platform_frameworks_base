@@ -21,7 +21,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -38,7 +37,6 @@ public class BiDiTestView extends View {
 
     private static final float DEFAULT_ITALIC_SKEW_X = -0.25f;
 
-    private TextPaint paint = new TextPaint();
     private Rect rect = new Rect();
 
     private String NORMAL_TEXT;
@@ -53,8 +51,6 @@ public class BiDiTestView extends View {
     private String MIXED_TEXT_1;
     private String HEBREW_TEXT;
     private String RTL_TEXT;
-
-    private Typeface typeface;
 
     private int currentTextSize;
 
@@ -86,9 +82,6 @@ public class BiDiTestView extends View {
         MIXED_TEXT_1 = context.getString(R.string.mixed_text_1);
         HEBREW_TEXT = context.getString(R.string.hebrew_text);
         RTL_TEXT = context.getString(R.string.rtl);
-
-        typeface = paint.getTypeface();
-//        paint.setAntiAlias(true);
     }
 
     public void setCurrentTextSize(int size) {
@@ -98,54 +91,56 @@ public class BiDiTestView extends View {
 
     @Override
     public void onDraw(Canvas canvas) {
-        drawInsideRect(canvas, Color.BLACK);
+        drawInsideRect(canvas, new Paint(), Color.BLACK);
 
         int deltaX = 0;
 
         deltaX  = testString(canvas, NORMAL_TEXT, ORIGIN, ORIGIN,
-                paint, typeface, false, false,  Paint.DIRECTION_LTR, currentTextSize);
+                false, false,  Paint.DIRECTION_LTR, currentTextSize);
 
         deltaX += testString(canvas, ITALIC_TEXT, ORIGIN + deltaX, ORIGIN,
-                paint, typeface, true, false,  Paint.DIRECTION_LTR, currentTextSize);
+                true, false,  Paint.DIRECTION_LTR, currentTextSize);
 
         deltaX += testString(canvas, BOLD_TEXT, ORIGIN + deltaX, ORIGIN,
-                paint, typeface, false, true,  Paint.DIRECTION_LTR, currentTextSize);
+                false, true,  Paint.DIRECTION_LTR, currentTextSize);
 
         deltaX += testString(canvas, BOLD_ITALIC_TEXT, ORIGIN + deltaX, ORIGIN,
-                paint, typeface, true, true,  Paint.DIRECTION_LTR, currentTextSize);
+                true, true,  Paint.DIRECTION_LTR, currentTextSize);
 
         // Test with a long string
         deltaX = testString(canvas, NORMAL_LONG_TEXT, ORIGIN, ORIGIN + 2 * currentTextSize,
-                paint, typeface, false, false,  Paint.DIRECTION_LTR, currentTextSize);
+                false, false,  Paint.DIRECTION_LTR, currentTextSize);
 
         // Test with a long string
         deltaX = testString(canvas, NORMAL_LONG_TEXT_2, ORIGIN, ORIGIN + 4 * currentTextSize,
-                paint, typeface, false, false,  Paint.DIRECTION_LTR, currentTextSize);
+                false, false,  Paint.DIRECTION_LTR, currentTextSize);
 
         // Test with a long string
         deltaX = testString(canvas, NORMAL_LONG_TEXT_3, ORIGIN, ORIGIN + 6 * currentTextSize,
-                paint, typeface, false, false,  Paint.DIRECTION_LTR, currentTextSize);
+                false, false,  Paint.DIRECTION_LTR, currentTextSize);
 
         // Test Arabic ligature
         deltaX = testString(canvas, ARABIC_TEXT, ORIGIN, ORIGIN + 8 * currentTextSize,
-                paint, typeface, false, false,  Paint.DIRECTION_RTL, currentTextSize);
+                false, false,  Paint.DIRECTION_RTL, currentTextSize);
 
         // Test Chinese
         deltaX = testString(canvas, CHINESE_TEXT, ORIGIN, ORIGIN + 10 * currentTextSize,
-                paint, typeface, false, false,  Paint.DIRECTION_LTR, currentTextSize);
+                false, false,  Paint.DIRECTION_LTR, currentTextSize);
 
         // Test Mixed (English and Arabic)
         deltaX = testString(canvas, MIXED_TEXT_1, ORIGIN, ORIGIN + 12 * currentTextSize,
-                paint, typeface, false, false,  Paint.DIRECTION_LTR, currentTextSize);
+                false, false,  Paint.DIRECTION_LTR, currentTextSize);
 
         // Test Hebrew
         deltaX = testString(canvas, RTL_TEXT, ORIGIN, ORIGIN + 14 * currentTextSize,
-                paint, typeface, false, false,  Paint.DIRECTION_RTL, currentTextSize);
+                false, false,  Paint.DIRECTION_RTL, currentTextSize);
     }
 
-    private int testString(Canvas canvas, String text, int x, int y, Paint paint, Typeface typeface,
+    private int testString(Canvas canvas, String text, int x, int y,
             boolean isItalic, boolean isBold, int dir, int textSize) {
-        paint.setTypeface(typeface);
+
+        TextPaint paint = new TextPaint();
+        paint.setAntiAlias(true);
 
         // Set paint properties
         boolean oldFakeBold = paint.isFakeBoldText();
@@ -156,9 +151,9 @@ public class BiDiTestView extends View {
             paint.setTextSkewX(DEFAULT_ITALIC_SKEW_X);
         }
 
-        Log.v(TAG, "START -- drawTextWithCanvasDrawText");
-        drawTextWithCanvasDrawText(text, canvas, x, y, textSize, Color.WHITE, dir);
-        Log.v(TAG, "END   -- drawTextWithCanvasDrawText");
+        paint.setTextSize(textSize);
+        paint.setColor(Color.WHITE);
+        canvas.drawText(text, x, y, paint);
 
         int length = text.length();
         float[] advances = new float[length];
@@ -169,12 +164,6 @@ public class BiDiTestView extends View {
 
         logAdvances(text, textWidthHB, textWidthICU, advances);
         drawMetricsAroundText(canvas, x, y, textWidthHB, textWidthICU, textSize, Color.RED, Color.GREEN);
-
-        paint.setColor(Color.WHITE);
-
-        Log.v(TAG, "START -- drawText");
-        canvas.drawText(text, x, y + currentTextSize, this.paint);
-        Log.v(TAG, "END   -- drawText");
 
         // Restore old paint properties
         paint.setFakeBoldText(oldFakeBold);
@@ -188,7 +177,7 @@ public class BiDiTestView extends View {
         paint.setBidiFlags(dir);
     }
 
-    private void drawInsideRect(Canvas canvas, int color) {
+    private void drawInsideRect(Canvas canvas, Paint paint, int color) {
         paint.setColor(color);
         int width = getWidth();
         int height = getHeight();
@@ -196,16 +185,9 @@ public class BiDiTestView extends View {
         canvas.drawRect(rect, paint);
     }
 
-    private void drawTextWithCanvasDrawText(String text, Canvas canvas,
-            float x, float y, float textSize, int color, int dir) {
-        setPaintDir(paint, dir);
-        paint.setColor(color);
-        paint.setTextSize(textSize);
-        canvas.drawText(text, x, y, paint);
-    }
-
     private void drawMetricsAroundText(Canvas canvas, int x, int y, float textWidthHB,
             float textWidthICU, int textSize, int color, int colorICU) {
+        Paint paint = new Paint();
         paint.setColor(color);
         canvas.drawLine(x, y - textSize, x, y + 8, paint);
         canvas.drawLine(x, y + 8, x + textWidthHB, y + 8, paint);

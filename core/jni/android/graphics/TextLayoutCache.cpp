@@ -323,9 +323,7 @@ size_t TextLayoutCacheValue::getSize() {
 
 void TextLayoutCacheValue::setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec* font,
         FontData* fontData, SkPaint* paint, const UChar* chars, size_t start, size_t count,
-        size_t contextCount, int dirFlags) {
-    bool isRTL = dirFlags & 0x1;
-
+        size_t contextCount, bool isRTL) {
     font->klass = &harfbuzzSkiaClass;
     font->userData = 0;
     // The values which harfbuzzSkiaClass returns are already scaled to
@@ -374,10 +372,10 @@ void TextLayoutCacheValue::setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec
 
 void TextLayoutCacheValue::shapeWithHarfbuzz(HB_ShaperItem* shaperItem, HB_FontRec* font,
         FontData* fontData, SkPaint* paint, const UChar* chars, size_t start, size_t count,
-        size_t contextCount, int dirFlags) {
+        size_t contextCount, bool isRTL) {
     // Setup Harfbuzz Shaper
     setupShaperItem(shaperItem, font, fontData, paint, chars, start, count,
-            contextCount, dirFlags);
+            contextCount, isRTL);
 
     // Shape
     resetGlyphArrays(shaperItem);
@@ -430,7 +428,7 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                     LOGD("computeValuesWithHarfbuzz -- forcing run with LTR=%d RTL=%d",
                             forceLTR, forceRTL);
 #endif
-            computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
+            computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount, forceRTL,
                     outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
 
             if (forceRTL && *outGlyphsCount > 1) {
@@ -451,10 +449,15 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                     LOGD("computeValuesWithHarfbuzz -- dirFlags=%d run-count=%d paraDir=%d", dirFlags, rc, paraDir);
 #endif
                     if (rc == 1 || !U_SUCCESS(status)) {
+                        bool isRTL = (paraDir == 1);
+#if DEBUG_GLYPHS
+                        LOGD("computeValuesWithHarfbuzz -- processing SINGLE run "
+                                "-- run-start=%d run-len=%d isRTL=%d", start, count, isRTL);
+#endif
                         computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount,
-                                dirFlags, outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
+                                isRTL, outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
 
-                        if (dirFlags == 1 && *outGlyphsCount > 1) {
+                        if (isRTL && *outGlyphsCount > 1) {
                             reverseGlyphArray(*outGlyphs, *outGlyphsCount);
                         }
                     } else {
@@ -485,14 +488,14 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
 
                             lengthRun = endRun - startRun;
 
-                            int newFlags = (runDir == UBIDI_RTL) ? kDirection_RTL : kDirection_LTR;
+                            bool isRTL = (runDir == UBIDI_RTL);
                             jfloat runTotalAdvance = 0;
 #if DEBUG_GLYPHS
-                            LOGD("computeValuesWithHarfbuzz -- run-start=%d run-len=%d newFlags=%d",
-                                    startRun, lengthRun, newFlags);
+                            LOGD("computeValuesWithHarfbuzz -- run-start=%d run-len=%d isRTL=%d",
+                                    startRun, lengthRun, isRTL);
 #endif
                             computeRunValuesWithHarfbuzz(paint, chars, startRun,
-                                    lengthRun, contextCount, newFlags,
+                                    lengthRun, contextCount, isRTL,
                                     outAdvances, &runTotalAdvance,
                                     &runGlyphs, &runGlyphsCount);
 
@@ -506,7 +509,7 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                                 LOGD("                          -- glyphs[%d]=%d", j, runGlyphs[j]);
                             }
 #endif
-                            glyphRuns.push(GlyphRun(runGlyphs, runGlyphsCount, newFlags));
+                            glyphRuns.push(GlyphRun(runGlyphs, runGlyphsCount, isRTL));
                         }
                         *outGlyphs = new jchar[*outGlyphsCount];
 
@@ -528,13 +531,15 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
                 ubidi_close(bidi);
             } else {
                 // Cannot run BiDi, just consider one Run
+                bool isRTL = (bidiReq = 1) || (bidiReq = UBIDI_DEFAULT_RTL);
 #if DEBUG_GLYPHS
-                LOGD("computeValuesWithHarfbuzz -- cannot run BiDi, considering only one Run");
+                LOGD("computeValuesWithHarfbuzz -- cannot run BiDi, considering a SINGLE Run "
+                        "-- run-start=%d run-len=%d isRTL=%d", start, count, isRTL);
 #endif
-                computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount, dirFlags,
+                computeRunValuesWithHarfbuzz(paint, chars, start, count, contextCount, isRTL,
                         outAdvances, outTotalAdvance, outGlyphs, outGlyphsCount);
 
-                if (dirFlags == 1 && *outGlyphsCount > 1) {
+                if (isRTL && *outGlyphsCount > 1) {
                     reverseGlyphArray(*outGlyphs, *outGlyphsCount);
                 }
             }
@@ -545,17 +550,15 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
 }
 
 void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
-        size_t start, size_t count, size_t contextCount, int dirFlags,
+        size_t start, size_t count, size_t contextCount, bool isRTL,
         jfloat* outAdvances, jfloat* outTotalAdvance,
         jchar** outGlyphs, size_t* outGlyphsCount) {
-
-    bool isRTL = dirFlags & 0x1;
 
     HB_ShaperItem shaperItem;
     HB_FontRec font;
     FontData fontData;
     shapeWithHarfbuzz(&shaperItem, &font, &fontData, paint, chars, start, count,
-            contextCount, dirFlags);
+            contextCount, isRTL);
 
 #if DEBUG_GLYPHS
     LOGD("HARFBUZZ -- num_glypth=%d - kerning_applied=%d", shaperItem.num_glyphs,

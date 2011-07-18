@@ -25,25 +25,25 @@ import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class DrawTextTestView extends View {
+public class BiDiTestViewDrawText extends View {
     private float mSize;
     private int mColor;
     private String mText;
 
-    public DrawTextTestView(Context context) {
+    public BiDiTestViewDrawText(Context context) {
         this(context, null);
     }
 
-    public DrawTextTestView(Context context, AttributeSet attrs) {
+    public BiDiTestViewDrawText(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public DrawTextTestView(Context context, AttributeSet attrs, int defStyle) {
+    public BiDiTestViewDrawText(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
 
         final TypedArray a = context.obtainStyledAttributes(attrs,
                 R.styleable.DrawTextTestView, defStyle, 0);
-        mSize = a.getDimension(R.styleable.DrawTextTestView_size, 21.0f);
+        mSize = a.getDimension(R.styleable.DrawTextTestView_size, 40.0f);
         mColor = a.getColor(R.styleable.DrawTextTestView_color, Color.YELLOW);
         final CharSequence text = a.getText(R.styleable.DrawTextTestView_text);
         mText = (text != null) ? text.toString() : "(empty)";

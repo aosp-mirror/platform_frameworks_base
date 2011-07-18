@@ -27,36 +27,39 @@
 
         <TextView
             android:text="@string/ltr"
+            android:textSize="40dip"
             android:gravity="center"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content" />
 
-        <com.android.bidi.DrawTextTestView
+        <com.android.bidi.BiDiTestViewDrawText
             local:text="@string/ltr"
             android:layout_width="fill_parent"
-            android:layout_height="40dp" />
+            android:layout_height="64dp" />
 
         <TextView
             android:text="@string/rtl"
+            android:textSize="40dip"
             android:gravity="center"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
 
-        <com.android.bidi.DrawTextTestView
+        <com.android.bidi.BiDiTestViewDrawText
             local:text="@string/rtl"
             android:layout_width="fill_parent"
-            android:layout_height="40dp" />
+            android:layout_height="64dp" />
 
         <TextView
             android:text="@string/composing"
+            android:textSize="40dip"
             android:gravity="center"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"/>
 
-        <com.android.bidi.DrawTextTestView
+        <com.android.bidi.BiDiTestViewDrawText
             local:text="@string/composing"
             android:layout_width="fill_parent"
-            android:layout_height="40dp" />
+            android:layout_height="64dp" />
 
     </LinearLayout>
 

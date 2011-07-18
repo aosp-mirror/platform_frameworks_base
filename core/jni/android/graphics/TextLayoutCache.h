@@ -128,11 +128,11 @@ public:
 
     static void setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec* font, FontData* fontData,
             SkPaint* paint, const UChar* chars, size_t start, size_t count, size_t contextCount,
-            int dirFlags);
+            bool isRTL);
 
     static void shapeWithHarfbuzz(HB_ShaperItem* shaperItem, HB_FontRec* font, FontData* fontData,
             SkPaint* paint, const UChar* chars, size_t start, size_t count, size_t contextCount,
-            int dirFlags);
+            bool isRTL);
 
     static void computeValuesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
             size_t count, size_t contextCount, int dirFlags,
@@ -179,7 +179,7 @@ private:
     static void resetGlyphArrays(HB_ShaperItem* shaperItem);
 
     static void computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars, size_t start,
-            size_t count, size_t contextCount, int dirFlags,
+            size_t count, size_t contextCount, bool isRTL,
             jfloat* outAdvances, jfloat* outTotalAdvance,
             jchar** outGlyphs, size_t* outGlyphsCount);
 }; // TextLayoutCacheValue
