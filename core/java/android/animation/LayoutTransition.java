@@ -25,6 +25,7 @@ import android.view.animation.DecelerateInterpolator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -178,14 +179,17 @@ public class LayoutTransition {
      * the transition. The reason for this is that a further layout event should cause
      * existing animations to stop where they are prior to starting new animations. So
      * we cache all of the current animations in this map for possible cancellation on
-     * another layout event.
+     * another layout event. LinkedHashMaps are used to preserve the order in which animations
+     * are inserted, so that we process events (such as setting up start values) in the same order.
      */
-    private final HashMap<View, Animator> pendingAnimations = new HashMap<View, Animator>();
-    private final HashMap<View, Animator> currentChangingAnimations = new HashMap<View, Animator>();
-    private final HashMap<View, Animator> currentAppearingAnimations =
+    private final HashMap<View, Animator> pendingAnimations =
             new HashMap<View, Animator>();
-    private final HashMap<View, Animator> currentDisappearingAnimations =
-            new HashMap<View, Animator>();
+    private final LinkedHashMap<View, Animator> currentChangingAnimations =
+            new LinkedHashMap<View, Animator>();
+    private final LinkedHashMap<View, Animator> currentAppearingAnimations =
+            new LinkedHashMap<View, Animator>();
+    private final LinkedHashMap<View, Animator> currentDisappearingAnimations =
+            new LinkedHashMap<View, Animator>();
 
     /**
      * This hashmap is used to track the listeners that have been added to the children of
@@ -547,7 +551,7 @@ public class LayoutTransition {
     }
 
     /**
-     * This function sets up runs animations on all of the views that change during layout.
+     * This function sets up animations on all of the views that change during layout.
      * For every child in the parent, we create a change animation of the appropriate
      * type (appearing or disappearing) and ask it to populate its start values from its
      * target view. We add layout listeners to all child views and listen for changes. For
@@ -821,24 +825,24 @@ public class LayoutTransition {
      */
     public void cancel() {
         if (currentChangingAnimations.size() > 0) {
-            HashMap<View, Animator> currentAnimCopy =
-                    (HashMap<View, Animator>) currentChangingAnimations.clone();
+            LinkedHashMap<View, Animator> currentAnimCopy =
+                    (LinkedHashMap<View, Animator>) currentChangingAnimations.clone();
             for (Animator anim : currentAnimCopy.values()) {
                 anim.cancel();
             }
             currentChangingAnimations.clear();
         }
         if (currentAppearingAnimations.size() > 0) {
-            HashMap<View, Animator> currentAnimCopy =
-                    (HashMap<View, Animator>) currentAppearingAnimations.clone();
+            LinkedHashMap<View, Animator> currentAnimCopy =
+                    (LinkedHashMap<View, Animator>) currentAppearingAnimations.clone();
             for (Animator anim : currentAnimCopy.values()) {
                 anim.end();
             }
             currentAppearingAnimations.clear();
         }
         if (currentDisappearingAnimations.size() > 0) {
-            HashMap<View, Animator> currentAnimCopy =
-                    (HashMap<View, Animator>) currentDisappearingAnimations.clone();
+            LinkedHashMap<View, Animator> currentAnimCopy =
+                    (LinkedHashMap<View, Animator>) currentDisappearingAnimations.clone();
             for (Animator anim : currentAnimCopy.values()) {
                 anim.end();
             }
@@ -859,8 +863,8 @@ public class LayoutTransition {
             case CHANGE_APPEARING:
             case CHANGE_DISAPPEARING:
                 if (currentChangingAnimations.size() > 0) {
-                    HashMap<View, Animator> currentAnimCopy =
-                            (HashMap<View, Animator>) currentChangingAnimations.clone();
+                    LinkedHashMap<View, Animator> currentAnimCopy =
+                            (LinkedHashMap<View, Animator>) currentChangingAnimations.clone();
                     for (Animator anim : currentAnimCopy.values()) {
                         anim.cancel();
                     }
@@ -869,8 +873,8 @@ public class LayoutTransition {
                 break;
             case APPEARING:
                 if (currentAppearingAnimations.size() > 0) {
-                    HashMap<View, Animator> currentAnimCopy =
-                            (HashMap<View, Animator>) currentAppearingAnimations.clone();
+                    LinkedHashMap<View, Animator> currentAnimCopy =
+                            (LinkedHashMap<View, Animator>) currentAppearingAnimations.clone();
                     for (Animator anim : currentAnimCopy.values()) {
                         anim.end();
                     }
@@ -879,8 +883,8 @@ public class LayoutTransition {
                 break;
             case DISAPPEARING:
                 if (currentDisappearingAnimations.size() > 0) {
-                    HashMap<View, Animator> currentAnimCopy =
-                            (HashMap<View, Animator>) currentDisappearingAnimations.clone();
+                    LinkedHashMap<View, Animator> currentAnimCopy =
+                            (LinkedHashMap<View, Animator>) currentDisappearingAnimations.clone();
                     for (Animator anim : currentAnimCopy.values()) {
                         anim.end();
                     }
