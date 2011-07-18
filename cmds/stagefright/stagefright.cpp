@@ -805,6 +805,7 @@ int main(int argc, char **argv) {
             Vector<CodecCapabilities> results;
             CHECK_EQ(QueryCodecs(omx, kMimeTypes[k],
                                  true, // queryDecoders
+                                 false, // hwCodecOnly
                                  &results), (status_t)OK);
 
             for (size_t i = 0; i < results.size(); ++i) {
@@ -844,7 +845,12 @@ int main(int argc, char **argv) {
 
         for (List<IOMX::ComponentInfo>::iterator it = list.begin();
              it != list.end(); ++it) {
-            printf("%s\n", (*it).mName.string());
+            printf("%s\t Roles: ", (*it).mName.string());
+            for (List<String8>::iterator itRoles = (*it).mRoles.begin() ;
+                    itRoles != (*it).mRoles.end() ; ++itRoles) {
+                printf("%s\t", (*itRoles).string());
+            }
+            printf("\n");
         }
     }
 

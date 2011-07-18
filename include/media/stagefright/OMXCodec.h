@@ -355,7 +355,7 @@ struct CodecCapabilities {
 
 status_t QueryCodecs(
         const sp<IOMX> &omx,
-        const char *mimeType, bool queryDecoders,
+        const char *mimeType, bool queryDecoders, bool hwCodecOnly,
         Vector<CodecCapabilities> *results);
 
 }  // namespace android
