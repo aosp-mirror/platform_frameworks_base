@@ -25,8 +25,8 @@ VOMT:= exe
 
 
 # module macros
-# please append the additional macro definitions here for your module if necessary. 
-# e.g. -DVISUALON, macro VISUALON defined for your module 
+# please append the additional macro definitions here for your module if necessary.
+# e.g. -DVISUALON, macro VISUALON defined for your module
 VOMM:= #ARMV5E
 
 
@@ -36,7 +36,7 @@ VOTARGET:= voAACEncTestv7
 
 
 # please modify here to be sure to see the g1.mk
-include ../../../../Tools/eclair.mk 
+include ../../../../Tools/eclair.mk
 
 # dependent libraries.
 VODEPLIBS:=-ldl
@@ -51,5 +51,5 @@ VORELDIR:=../../../../../Release/
 
 
 # please modify here to be sure to see the doit.mk
-include ../../../../Tools/doit.mk 
+include ../../../../Tools/doit.mk
 

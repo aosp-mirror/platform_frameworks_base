@@ -122,8 +122,8 @@ void Levinson(
 	Word16 *old_A, *old_rc;
 
 	/* Last A(z) for case of unstable filter */
-	old_A = mem;                           
-	old_rc = mem + M;                      
+	old_A = mem;
+	old_rc = mem + M;
 
 	/* K = A[1] = -R[1] / R[0] */
 
@@ -135,7 +135,7 @@ void Levinson(
 
 	Kh = t0 >> 16;
 	Kl = (t0 & 0xffff)>>1;
-	rc[0] = Kh;                            
+	rc[0] = Kh;
 	t0 = (t0 >> 4);                        /* A[1] in Q27      */
 
 	Ah[1] = t0 >> 16;
@@ -163,7 +163,7 @@ void Levinson(
 	for (i = 2; i <= M; i++)
 	{
 		/* t0 = SUM ( R[j]*A[i-j] ,j=1,i-1 ) +  R[i] */
-		t0 = 0;                           
+		t0 = 0;
 		for (j = 1; j < i; j++)
 			t0 = vo_L_add(t0, Mpy_32(Rh[j], Rl[j], Ah[i - j], Al[i - j]));
 
@@ -182,14 +182,14 @@ void Levinson(
 		Kh = t2 >> 16;
 		Kl = (t2 & 0xffff)>>1;
 
-		rc[i - 1] = Kh;                   
+		rc[i - 1] = Kh;
 		/* Test for unstable filter. If unstable keep old A(z) */
 		if (abs_s(Kh) > 32750)
 		{
 			A[0] = 4096;                    /* Ai[0] not stored (always 1.0) */
 			for (j = 0; j < M; j++)
 			{
-				A[j + 1] = old_A[j];       
+				A[j + 1] = old_A[j];
 			}
 			rc[0] = old_rc[0];             /* only two rc coefficients are needed */
 			rc[1] = old_rc[1];
@@ -229,19 +229,19 @@ void Levinson(
 		/* A[j] = An[j] */
 		for (j = 1; j <= i; j++)
 		{
-			Ah[j] = Anh[j];               
-			Al[j] = Anl[j];                
+			Ah[j] = Anh[j];
+			Al[j] = Anl[j];
 		}
 	}
 	/* Truncate A[i] in Q27 to Q12 with rounding */
-	A[0] = 4096;                          
+	A[0] = 4096;
 	for (i = 1; i <= M; i++)
 	{
 		t0 = (Ah[i] << 16) + (Al[i] << 1);
-		old_A[i - 1] = A[i] = vo_round((t0 << 1));      
+		old_A[i - 1] = A[i] = vo_round((t0 << 1));
 	}
-	old_rc[0] = rc[0];                    
-	old_rc[1] = rc[1];                    
+	old_rc[0] = rc[0];
+	old_rc[1] = rc[1];
 
 	return;
 }

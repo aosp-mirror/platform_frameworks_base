@@ -39,7 +39,7 @@ void Updt_tar(
 	{
 		L_tmp = x[i] << 15;
 		L_tmp -= (y[i] * gain)<<1;
-		x2[i] = extract_h(L_shl2(L_tmp, 1)); 
+		x2[i] = extract_h(L_shl2(L_tmp, 1));
 	}
 
 	return;

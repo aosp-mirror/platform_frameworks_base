@@ -25,7 +25,7 @@ VOMT:= lib
 
 
 # module macros
-# please append the additional macro definitions here for your module if necessary. 
+# please append the additional macro definitions here for your module if necessary.
 ifeq ($(VOTT), v5)
 VOMM:=-DARM -DASM_OPT
 endif
@@ -35,7 +35,7 @@ VOTARGET:= libvoAMRWBEncv5
 
 
 # please modify here to be sure to see the g1.mk
-include ../../../../../Tools/eclair.mk 
+include ../../../../../Tools/eclair.mk
 
 # dependent libraries.
 VODEPLIBS:=-ldl -lstdc++ -lcutils
@@ -49,5 +49,5 @@ include ../ms.mk
 VORELDIR:=../../../../../../Release
 
 # please modify here to be sure to see the doit.mk
-include ../../../../../Tools/doit.mk 
+include ../../../../../Tools/doit.mk
 

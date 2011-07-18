@@ -106,21 +106,21 @@ void Isqrt_n(
 
 	if (*frac <= (Word32) 0)
 	{
-		*exp = 0;                          
-		*frac = 0x7fffffffL;               
+		*exp = 0;
+		*frac = 0x7fffffffL;
 		return;
 	}
 
 	if((*exp & 1) == 1)                       /*If exponant odd -> shift right */
 		*frac = (*frac) >> 1;
 
-	*exp = negate((*exp - 1) >> 1);   
+	*exp = negate((*exp - 1) >> 1);
 
-	*frac = (*frac >> 9);               
+	*frac = (*frac >> 9);
 	i = extract_h(*frac);                  /* Extract b25-b31 */
-	*frac = (*frac >> 1);              
+	*frac = (*frac >> 1);
 	a = (Word16)(*frac);                  /* Extract b10-b24 */
-	a = (Word16) (a & (Word16) 0x7fff);    
+	a = (Word16) (a & (Word16) 0x7fff);
 	i -= 16;
 	*frac = L_deposit_h(table_isqrt[i]);   /* table[i] << 16         */
 	tmp = vo_sub(table_isqrt[i], table_isqrt[i + 1]);      /* table[i] - table[i+1]) */
@@ -167,7 +167,7 @@ Word32 Pow2(                               /* (o) Q0  : result       (range: 0<=
 	i = extract_h(L_x);                    /* Extract b10-b16 of fraction */
 	L_x =L_x >> 1;
 	a = (Word16)(L_x);                    /* Extract b0-b9   of fraction */
-	a = (Word16) (a & (Word16) 0x7fff); 
+	a = (Word16) (a & (Word16) 0x7fff);
 
 	L_x = L_deposit_h(table_pow2[i]);      /* table[i] << 16        */
 	tmp = vo_sub(table_pow2[i], table_pow2[i + 1]);        /* table[i] - table[i+1] */
