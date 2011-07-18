@@ -286,6 +286,38 @@ class GLES20Canvas extends HardwareCanvas {
 
     private static native boolean nCallDrawGLFunction(int renderer, int drawGLFunction);
 
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Memory
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @see #flushCaches(int) 
+     */
+    public static final int FLUSH_CACHES_MODERATE = 0;
+
+    /**
+     * @see #flushCaches(int) 
+     */
+    public static final int FLUSH_CACHES_FULL = 1;
+
+    /**
+     * Flush caches to reclaim as much memory as possible. The amount of memory
+     * to reclaim is indicate by the level parameter.
+     * 
+     * The level can be one of {@link #FLUSH_CACHES_MODERATE} or
+     * {@link #FLUSH_CACHES_FULL}.
+     * 
+     * @param level Hint about the amount of memory to reclaim
+     * 
+     * @hide
+     */
+    public static void flushCaches(int level) {
+        nFlushCaches(level);
+    }
+
+    private static native void nFlushCaches(int level);
+
     ///////////////////////////////////////////////////////////////////////////
     // Display list
     ///////////////////////////////////////////////////////////////////////////

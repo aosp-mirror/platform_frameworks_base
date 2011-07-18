@@ -127,6 +127,13 @@ static void android_view_GLES20Canvas_disableVsync(JNIEnv* env, jobject clazz) {
     }
 }
 
+static void android_view_GLES20Canvas_flushCaches(JNIEnv* env, jobject clazz,
+        Caches::FlushMode mode) {
+    if (Caches::hasInstance()) {
+        Caches::getInstance().flush(mode);
+    }
+}
+
 // ----------------------------------------------------------------------------
 // Constructors
 // ----------------------------------------------------------------------------
@@ -735,6 +742,7 @@ static JNINativeMethod gMethods[] = {
     { "nIsBackBufferPreserved", "()Z",         (void*) android_view_GLES20Canvas_isBackBufferPreserved },
     { "nPreserveBackBuffer",    "()Z",         (void*) android_view_GLES20Canvas_preserveBackBuffer },
     { "nDisableVsync",          "()V",         (void*) android_view_GLES20Canvas_disableVsync },
+    { "nFlushCaches",           "(I)V",        (void*) android_view_GLES20Canvas_flushCaches },
 
     { "nCreateRenderer",    "()I",             (void*) android_view_GLES20Canvas_createRenderer },
     { "nDestroyRenderer",   "(I)V",            (void*) android_view_GLES20Canvas_destroyRenderer },

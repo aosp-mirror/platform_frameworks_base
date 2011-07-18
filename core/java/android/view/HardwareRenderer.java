@@ -17,6 +17,7 @@
 
 package android.view;
 
+import android.content.ComponentCallbacks;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -260,6 +261,18 @@ public abstract class HardwareRenderer {
                 return Gl20Renderer.create(translucent);
         }
         throw new IllegalArgumentException("Unknown GL version: " + glVersion);
+    }
+
+    /**
+     * Invoke this method when the system is running out of memory. This
+     * method will attempt to recover as much memory as possible, based on
+     * the specified hint.
+     * 
+     * @param level Hint about the amount of memory that should be trimmed,
+     *              see {@link android.content.ComponentCallbacks}
+     */
+    static void trimMemory(int level) {
+        Gl20Renderer.flushCaches(level);
     }
 
     /**
@@ -857,6 +870,17 @@ public abstract class HardwareRenderer {
                 return new Gl20Renderer(translucent);
             }
             return null;
+        }
+        
+        static void flushCaches(int level) {
+            switch (level) {
+                case ComponentCallbacks.TRIM_MEMORY_MODERATE:
+                    GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_MODERATE);
+                    break;
+                case ComponentCallbacks.TRIM_MEMORY_COMPLETE:
+                    GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_FULL);
+                    break;
+            }
         }
     }
 }
