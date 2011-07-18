@@ -3183,6 +3183,24 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     /**
+     * @hide
+     */
+    protected void onViewAdded(View child) {
+        if (mOnHierarchyChangeListener != null) {
+            mOnHierarchyChangeListener.onChildViewAdded(this, child);
+        }
+    }
+
+    /**
+     * @hide
+     */
+    protected void onViewRemoved(View child) {
+        if (mOnHierarchyChangeListener != null) {
+            mOnHierarchyChangeListener.onChildViewRemoved(this, child);
+        }
+    }
+
+    /**
      * Adds a view during layout. This is useful if in your onLayout() method,
      * you need to add more views (as does the list view for example).
      *
@@ -3283,9 +3301,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             ai.mKeepScreenOn = lastKeepOn;
         }
 
-        if (mOnHierarchyChangeListener != null) {
-            mOnHierarchyChangeListener.onChildViewAdded(this, child);
-        }
+        onViewAdded(child);
 
         if ((child.mViewFlags & DUPLICATE_PARENT_STATE) == DUPLICATE_PARENT_STATE) {
             mGroupFlags |= FLAG_NOTIFY_CHILDREN_ON_DRAWABLE_STATE_CHANGE;
@@ -3486,9 +3502,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
            view.dispatchDetachedFromWindow();
         }
 
-        if (mOnHierarchyChangeListener != null) {
-            mOnHierarchyChangeListener.onChildViewRemoved(this, view);
-        }
+        onViewRemoved(view);
 
         needGlobalAttributesUpdate(false);
 
@@ -3533,8 +3547,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     }
 
     private void removeViewsInternal(int start, int count) {
-        final OnHierarchyChangeListener onHierarchyChangeListener = mOnHierarchyChangeListener;
-        final boolean notifyListener = onHierarchyChangeListener != null;
         final View focused = mFocused;
         final boolean detach = mAttachInfo != null;
         View clearChildFocus = null;
@@ -3563,9 +3575,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
             needGlobalAttributesUpdate(false);
 
-            if (notifyListener) {
-                onHierarchyChangeListener.onChildViewRemoved(this, view);
-            }
+            onViewRemoved(view);
         }
 
         removeFromArray(start, count);
@@ -3603,8 +3613,6 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         mChildrenCount = 0;
 
-        final OnHierarchyChangeListener listener = mOnHierarchyChangeListener;
-        final boolean notify = listener != null;
         final View focused = mFocused;
         final boolean detach = mAttachInfo != null;
         View clearChildFocus = null;
@@ -3630,9 +3638,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                view.dispatchDetachedFromWindow();
             }
 
-            if (notify) {
-                listener.onChildViewRemoved(this, view);
-            }
+            onViewRemoved(view);
 
             view.mParent = null;
             children[i] = null;
@@ -3672,9 +3678,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             child.dispatchDetachedFromWindow();
         }
 
-        if (mOnHierarchyChangeListener != null) {
-            mOnHierarchyChangeListener.onChildViewRemoved(this, child);
-        }
+        onViewRemoved(child);
     }
 
     /**
