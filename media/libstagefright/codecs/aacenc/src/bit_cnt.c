@@ -496,7 +496,7 @@ Word16 codeValues(Word16 *values, Word16 width, Word16 codeBook, HANDLE_BIT_BUF 
 {
 
   Word32 i, t0, t1, t2, t3, t00, t01;
-  Word16 codeWord, codeLength;
+  UWord16 codeWord, codeLength;
   Word16 sign, signLength;
 
    
