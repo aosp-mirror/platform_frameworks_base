@@ -20,6 +20,7 @@ import com.android.systemui.recent.RecentsPanelView.ActivityDescriptionAdapter;
 
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
@@ -30,7 +31,6 @@ import android.database.DataSetObserver;
 import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
@@ -42,10 +42,9 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.R;
 
-public class RecentsHorizontalScrollView extends HorizontalScrollView
-        implements View.OnClickListener, View.OnTouchListener {
-    private static final boolean DEBUG_INVALIDATE = false;
+public class RecentsHorizontalScrollView extends HorizontalScrollView {
     private static final String TAG = RecentsPanelView.TAG;
+    private static final boolean DEBUG_INVALIDATE = false;
     private static final boolean DEBUG = RecentsPanelView.DEBUG;
     private LinearLayout mLinearLayout;
     private ActivityDescriptionAdapter mAdapter;
@@ -57,6 +56,15 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     private VelocityTracker mVelocityTracker;
     private float mDensityScale;
     private float mPagingTouchSlop;
+    private OnLongClickListener mOnLongClick = new OnLongClickListener() {
+        public boolean onLongClick(View v) {
+            final View anchorView = v.findViewById(R.id.app_description);
+            mCurrentView = v;
+            mCallback.handleLongPress(v, anchorView);
+            mCurrentView = null; // make sure we don't accept the return click from this
+            return true;
+        }
+    };
 
     public RecentsHorizontalScrollView(Context context) {
         this(context, null);
@@ -72,13 +80,12 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         return mLinearLayout.getWidth() - getWidth();
     }
 
-    public void update() {
+    private void update() {
         mLinearLayout.removeAllViews();
         for (int i = 0; i < mAdapter.getCount(); i++) {
-            View view = mAdapter.getView(i, null, mLinearLayout);
+            final View view = mAdapter.getView(i, null, mLinearLayout);
             view.setClickable(true);
-            view.setOnClickListener(this);
-            view.setOnTouchListener(this);
+            view.setOnLongClickListener(mOnLongClick);
             mLinearLayout.addView(view);
         }
         // Scroll to end after layout.
@@ -91,7 +98,20 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     }
 
     @Override
+    public void removeViewInLayout(final View view) {
+        ObjectAnimator anim = animateClosed(view, Constants.MAX_ESCAPE_ANIMATION_DURATION,
+                "y", view.getY(), view.getY() + view.getHeight());
+        anim.addListener(new AnimatorListenerAdapter() {
+            public void onAnimationEnd(Animator animation) {
+                RecentsHorizontalScrollView.super.removeViewInLayout(view);
+            }
+        });
+        anim.start();
+    }
+
+    @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
         if (mVelocityTracker == null) {
             mVelocityTracker = VelocityTracker.obtain();
         }
@@ -100,6 +120,18 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
             case MotionEvent.ACTION_DOWN:
                 mDragging = false;
                 mLastY = ev.getY();
+                final float x = ev.getX() + getScrollX();
+                final float y = ev.getY() + getScrollY();
+                mCurrentView = null;
+                for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
+                    View item = mLinearLayout.getChildAt(i);
+                    if (x >= item.getLeft() && x < item.getRight()
+                            && y >= item.getTop() && y < item.getBottom()) {
+                        mCurrentView = item;
+                        if (DEBUG) Log.v(TAG, "Hit item " + item);
+                        break;
+                    }
+                }
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -111,6 +143,9 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                 break;
 
             case MotionEvent.ACTION_UP:
+                if (mCurrentView != null) {
+                    mCallback.handleOnClick(mCurrentView);
+                }
                 mDragging = false;
                 break;
         }
@@ -125,7 +160,6 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         } else if (view.getY() < thumbHeight * (1.0f - Constants.ALPHA_FADE_START)) {
             result = 1.0f + (thumbHeight * Constants.ALPHA_FADE_START + view.getY()) / fadeHeight;
         }
-        if (DEBUG) Log.v(TAG, "FADE AMOUNT: " + result);
         return result;
     }
 
@@ -138,12 +172,12 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         mVelocityTracker.addMovement(ev);
 
         final View animView = mCurrentView;
-        // TODO: Cache thumbnail
-        final View thumb = animView.findViewById(R.id.app_thumbnail);
+
         switch (ev.getAction()) {
             case MotionEvent.ACTION_MOVE:
                 if (animView != null) {
                     final float delta = ev.getY() - mLastY;
+                    final View thumb = animView.findViewById(R.id.app_thumbnail);
                     animView.setY(animView.getY() + delta);
                     animView.setAlpha(getAlphaForOffset(animView, thumb.getHeight()));
                     invalidateGlobalRegion(animView);
@@ -167,35 +201,18 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                         long duration =
                             (long) (Math.abs(newY - curY) * 1000.0f / Math.abs(velocityY));
                         duration = Math.min(duration, Constants.MAX_ESCAPE_ANIMATION_DURATION);
-                        anim = ObjectAnimator.ofFloat(animView, "y", curY, newY);
-                        anim.setInterpolator(new LinearInterpolator());
-                        final int swipeDirection = animView.getY() >= 0.0f ?
-                                RecentsCallback.SWIPE_RIGHT : RecentsCallback.SWIPE_LEFT;
-                        anim.addListener(new AnimatorListener() {
-                            public void onAnimationStart(Animator animation) {
-                            }
-                            public void onAnimationRepeat(Animator animation) {
-                            }
-                            public void onAnimationEnd(Animator animation) {
-                                mLinearLayout.removeView(mCurrentView);
-                                mCallback.handleSwipe(animView, swipeDirection);
-                            }
-                            public void onAnimationCancel(Animator animation) {
-                                mLinearLayout.removeView(mCurrentView);
-                                mCallback.handleSwipe(animView, swipeDirection);
-                            }
-                        });
-                        anim.setDuration(duration);
+                        anim = animateClosed(animView, duration, "y", curY, newY);
                     } else { // Animate back to position
                         long duration = Math.abs(velocityY) > 0.0f ?
                                 (long) (Math.abs(newY - curY) * 1000.0f / Math.abs(velocityY))
                                 : Constants.SNAP_BACK_DURATION;
                         duration = Math.min(duration, Constants.SNAP_BACK_DURATION);
                         anim = ObjectAnimator.ofFloat(animView, "y", animView.getY(), 0.0f);
-                        anim.setInterpolator(new DecelerateInterpolator(2.0f));
+                        anim.setInterpolator(new DecelerateInterpolator(4.0f));
                         anim.setDuration(duration);
                     }
 
+                    final View thumb = animView.findViewById(R.id.app_thumbnail);
                     anim.addUpdateListener(new AnimatorUpdateListener() {
                         public void onAnimationUpdate(ValueAnimator animation) {
                             animView.setAlpha(getAlphaForOffset(animView, thumb.getHeight()));
@@ -210,6 +227,26 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
                 break;
         }
         return true;
+    }
+
+    private ObjectAnimator animateClosed(final View animView, long duration,
+            String attr, float from, float to) {
+        ObjectAnimator anim = ObjectAnimator.ofFloat(animView, attr, from, to);
+        anim.setInterpolator(new LinearInterpolator());
+        final int swipeDirection = animView.getX() >= 0.0f ?
+                RecentsCallback.SWIPE_RIGHT : RecentsCallback.SWIPE_LEFT;
+        anim.addListener(new AnimatorListenerAdapter() {
+            public void onAnimationEnd(Animator animation) {
+                mLinearLayout.removeView(animView);
+                mCallback.handleSwipe(animView, swipeDirection);
+            }
+            public void onAnimationCancel(Animator animation) {
+                mLinearLayout.removeView(animView);
+                mCallback.handleSwipe(animView, swipeDirection);
+            }
+        });
+        anim.setDuration(duration);
+        return anim;
     }
 
     void invalidateGlobalRegion(View view) {
@@ -236,13 +273,8 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        LayoutInflater inflater = (LayoutInflater)
-                mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
         setScrollbarFadingEnabled(true);
-
         mLinearLayout = (LinearLayout) findViewById(R.id.recents_linear_layout);
-
         final int leftPadding = mContext.getResources()
             .getDimensionPixelOffset(R.dimen.status_bar_recents_thumbnail_left_margin);
         setOverScrollEffectPadding(leftPadding, 0);
@@ -306,16 +338,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         mLinearLayout.setLayoutTransition(transition);
     }
 
-    public void onClick(View view) {
-        mCallback.handleOnClick(view);
-    }
-
     public void setCallback(RecentsCallback callback) {
         mCallback = callback;
-    }
-
-    public boolean onTouch(View v, MotionEvent event) {
-        mCurrentView = v;
-        return false;
     }
 }

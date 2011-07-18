@@ -56,7 +56,6 @@
                 android:scrollbars="none"
                 android:fadingEdgeLength="20dip"
                 android:layout_gravity="bottom|left"
-                android:listSelector="@drawable/recents_thumbnail_bg_selector"
                 android:clipToPadding="false"
                 android:clipChildren="false">
 

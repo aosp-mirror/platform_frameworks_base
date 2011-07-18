@@ -26,5 +26,5 @@ public interface RecentsCallback {
 
     void handleOnClick(View selectedView);
     void handleSwipe(View selectedView, int direction);
-    void handleLongPress(View selectedView);
+    void handleLongPress(View selectedView, View anchorView);
 }

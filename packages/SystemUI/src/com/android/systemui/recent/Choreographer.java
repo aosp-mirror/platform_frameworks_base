@@ -53,8 +53,6 @@ import android.view.View;
     void createAnimation(boolean appearing) {
         float start, end;
 
-        if (RecentsPanelView.DEBUG) Log.e(TAG, "createAnimation()", new Exception());
-
         // 0: on-screen
         // height: off-screen
         float y = mContentView.getTranslationY();

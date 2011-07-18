@@ -24,14 +24,15 @@
     android:layout_height="wrap_content"
     android:layout_width="@dimen/status_bar_recents_thumbnail_view_width">
 
-    <ImageView android:id="@+id/app_thumbnail"
+    <FrameLayout android:id="@+id/app_thumbnail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="@dimen/status_bar_recents_thumbnail_left_margin"
         android:scaleType="center"
-        android:background="@drawable/recents_thumbnail_bg_selector"
+        android:clickable="true"
+        android:background="@drawable/recents_thumbnail_layers"
     />
 
     <ImageView android:id="@+id/app_icon"
