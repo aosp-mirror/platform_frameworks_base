@@ -25,6 +25,8 @@
 #include <utils/KeyedVector.h>
 #include <utils/String8.h>
 
+class ANativeWindow;
+
 namespace android {
 
 class Surface;
@@ -196,6 +198,8 @@ private:
             status_t        prepareAsync_l();
             status_t        getDuration_l(int *msec);
             status_t        setDataSource(const sp<IMediaPlayer>& player);
+            void            disconnectNativeWindow();
+            status_t        reset_l();
 
     sp<IMediaPlayer>            mPlayer;
     thread_id_t                 mLockThreadId;
@@ -218,6 +222,8 @@ private:
     int                         mVideoHeight;
     int                         mAudioSessionId;
     float                       mSendLevel;
+    sp<ANativeWindow>           mConnectedWindow;
+    sp<IBinder>                 mConnectedWindowBinder;
 };
 
 }; // namespace android

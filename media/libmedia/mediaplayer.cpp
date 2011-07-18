@@ -27,6 +27,8 @@
 #include <binder/IServiceManager.h>
 #include <binder/IPCThreadState.h>
 
+#include <gui/SurfaceTextureClient.h>
+
 #include <media/mediaplayer.h>
 #include <media/AudioTrack.h>
 
@@ -38,6 +40,7 @@
 #include <utils/String8.h>
 
 #include <system/audio.h>
+#include <system/window.h>
 
 namespace android {
 
@@ -194,13 +197,62 @@ status_t MediaPlayer::getMetadata(bool update_only, bool apply_filter, Parcel *m
     return mPlayer->getMetadata(update_only, apply_filter, metadata);
 }
 
+void MediaPlayer::disconnectNativeWindow() {
+    if (mConnectedWindow != NULL) {
+        status_t err = native_window_disconnect(mConnectedWindow.get(),
+                NATIVE_WINDOW_API_MEDIA);
+
+        if (err != OK) {
+            LOGW("native_window_disconnect returned an error: %s (%d)",
+                    strerror(-err), err);
+        }
+    }
+    mConnectedWindow.clear();
+}
+
 status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
 {
     LOGV("setVideoSurface");
     Mutex::Autolock _l(mLock);
     if (mPlayer == 0) return NO_INIT;
 
-    return mPlayer->setVideoSurface(surface);
+    sp<IBinder> binder(surface == NULL ? NULL : surface->asBinder());
+    if (mConnectedWindowBinder == binder) {
+        return OK;
+    }
+
+    if (surface != NULL) {
+        status_t err = native_window_connect(surface.get(),
+                NATIVE_WINDOW_API_MEDIA);
+
+        if (err != OK) {
+            // Note that we must do the reset before disconnecting from the ANW.
+            // Otherwise queue/dequeue calls could be made on the disconnected
+            // ANW, which may result in errors.
+            reset_l();
+
+            disconnectNativeWindow();
+
+            return err;
+        }
+    }
+
+    // Note that we must set the player's new surface before disconnecting the
+    // old one.  Otherwise queue/dequeue calls could be made on the disconnected
+    // ANW, which may result in errors.
+    status_t err = mPlayer->setVideoSurface(surface);
+
+    disconnectNativeWindow();
+
+    mConnectedWindow = surface;
+
+    if (err == OK) {
+        mConnectedWindowBinder = binder;
+    } else {
+        disconnectNativeWindow();
+    }
+
+    return err;
 }
 
 status_t MediaPlayer::setVideoSurfaceTexture(
@@ -210,7 +262,46 @@ status_t MediaPlayer::setVideoSurfaceTexture(
     Mutex::Autolock _l(mLock);
     if (mPlayer == 0) return NO_INIT;
 
-    return mPlayer->setVideoSurfaceTexture(surfaceTexture);
+    sp<IBinder> binder(surfaceTexture == NULL ? NULL :
+            surfaceTexture->asBinder());
+    if (mConnectedWindowBinder == binder) {
+        return OK;
+    }
+
+    sp<ANativeWindow> anw;
+    if (surfaceTexture != NULL) {
+        anw = new SurfaceTextureClient(surfaceTexture);
+        status_t err = native_window_connect(anw.get(),
+                NATIVE_WINDOW_API_MEDIA);
+
+        if (err != OK) {
+            // Note that we must do the reset before disconnecting from the ANW.
+            // Otherwise queue/dequeue calls could be made on the disconnected
+            // ANW, which may result in errors.
+            reset_l();
+
+            disconnectNativeWindow();
+
+            return err;
+        }
+    }
+
+    // Note that we must set the player's new SurfaceTexture before
+    // disconnecting the old one.  Otherwise queue/dequeue calls could be made
+    // on the disconnected ANW, which may result in errors.
+    status_t err = mPlayer->setVideoSurfaceTexture(surfaceTexture);
+
+    disconnectNativeWindow();
+
+    mConnectedWindow = anw;
+
+    if (err == OK) {
+        mConnectedWindowBinder = binder;
+    } else {
+        disconnectNativeWindow();
+    }
+
+    return err;
 }
 
 // must call with lock held
@@ -434,10 +525,8 @@ status_t MediaPlayer::seekTo(int msec)
     return result;
 }
 
-status_t MediaPlayer::reset()
+status_t MediaPlayer::reset_l()
 {
-    LOGV("reset");
-    Mutex::Autolock _l(mLock);
     mLoop = false;
     if (mCurrentState == MEDIA_PLAYER_IDLE) return NO_ERROR;
     mPrepareSync = false;
@@ -456,6 +545,13 @@ status_t MediaPlayer::reset()
     }
     clear_l();
     return NO_ERROR;
+}
+
+status_t MediaPlayer::reset()
+{
+    LOGV("reset");
+    Mutex::Autolock _l(mLock);
+    return reset_l();
 }
 
 status_t MediaPlayer::setAudioStreamType(int type)
