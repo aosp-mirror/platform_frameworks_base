@@ -20494,6 +20494,14 @@ package android.util {
     ctor public Base64OutputStream(java.io.OutputStream, int);
   }
 
+  public final deprecated class Config {
+    field public static final deprecated boolean DEBUG = false;
+    field public static final deprecated boolean LOGD = true;
+    field public static final deprecated boolean LOGV = false;
+    field public static final deprecated boolean PROFILE = false;
+    field public static final deprecated boolean RELEASE = true;
+  }
+
   public class DebugUtils {
     method public static boolean isObjectSelected(java.lang.Object);
   }
