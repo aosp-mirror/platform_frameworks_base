@@ -28,7 +28,7 @@
 
 #define MAX_QUANT 8191
 
-void QuantizeSpectrum(Word16 sfbCnt, 
+void QuantizeSpectrum(Word16 sfbCnt,
                       Word16 maxSfbPerGroup,
                       Word16 sfbPerGroup,
                       Word16 *sfbOffset, Word32 *mdctSpectrum,

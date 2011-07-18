@@ -28,10 +28,10 @@ ifeq ($(VOMT), exe)
 TARGET=$(VOTARGET)
 endif
 
-CFLAGS=$(VOCFLAGS) $(addprefix -I, $(VOSRCDIR)) 
-CPPFLAGS=$(VOCPPFLAGS) $(addprefix -I, $(VOSRCDIR)) 
+CFLAGS=$(VOCFLAGS) $(addprefix -I, $(VOSRCDIR))
+CPPFLAGS=$(VOCPPFLAGS) $(addprefix -I, $(VOSRCDIR))
 ifneq ($(VOTT), pc)
-ASFLAGS=$(VOASFLAGS) $(addprefix -I, $(VOSRCDIR)) 
+ASFLAGS=$(VOASFLAGS) $(addprefix -I, $(VOSRCDIR))
 endif
 
 LDFLAGS:=$(VOLDFLAGS)
@@ -90,7 +90,7 @@ ifneq ($(VODBG), yes)
 endif
 
 $(LIB_DYNAMIC):$(OBJS)
-	$(GG) $(LDFLAGS) -o $@ $(OBJDIR)/*.o -Wl,--whole-archive $(VOSTCLIBS) -Wl,--no-whole-archive $(VOTLDEPS) 
+	$(GG) $(LDFLAGS) -o $@ $(OBJDIR)/*.o -Wl,--whole-archive $(VOSTCLIBS) -Wl,--no-whole-archive $(VOTLDEPS)
 ifneq ($(VODBG), yes)
 		$(STRIP) $@
 endif

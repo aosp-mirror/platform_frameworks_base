@@ -34,12 +34,12 @@ Residu_opt:
 
         LDRH    r5, [r0], #2
         LDRH    r6, [r0], #2
-        ORR     r5, r6, r5, LSL #16                  @r5 --- a0, a1	
+        ORR     r5, r6, r5, LSL #16                  @r5 --- a0, a1
 
         LDRH    r6, [r0], #2
 	LDRH    r7, [r0], #2
 	ORR     r6, r7, r6, LSL #16                  @r6 --- a2, a3
-	
+
         LDRH    r7, [r0], #2
 	LDRH    r8, [r0], #2
 	ORR     r7, r8, r7, LSL #16                  @r7 --- a4, a5
@@ -59,13 +59,13 @@ Residu_opt:
         LDRH    r11, [r0], #2
 	LDRH    r12, [r0], #2
 	ORR     r11, r12, r11, LSL #16               @r11 --- a12, a13
-	
+
 	LDRH    r12, [r0], #2
 	LDRH    r4, [r0], #2
 	ORR     r12, r4, r12, LSL #16                @r12 --- a14, a15
-	
 
-	STMFD   r13!, {r8 - r12}                     @store r8-r12 
+
+	STMFD   r13!, {r8 - r12}                     @store r8-r12
 	LDRH    r4, [r0], #2                         @load a16
         MOV     r14, r3, ASR #2                      @one loop get 4 outputs
 	ADD     r1, r1, #4
@@ -78,7 +78,7 @@ residu_loop:
 	LDR     r2,  [r1], #-4                       @r2   --- x[1], x[0]
 
 	SMULTB  r3, r5, r2                           @i1(0)  --- r3 = x[0] * a0
-        SMULTT  r4, r5, r2                           @i2(0)  --- r4 = x[1] * a0	
+        SMULTT  r4, r5, r2                           @i2(0)  --- r4 = x[1] * a0
 	SMULTB  r11, r5, r10                         @i3(0)  --- r11 = x[2] * a0
 	SMULTT  r12, r5, r10                         @i4(0)  --- r12 = x[3] * a0
 
@@ -88,20 +88,20 @@ residu_loop:
 
 	SMLATB  r11, r6, r2, r11                     @i3(2)  --- r11 += x[0] * a2
 	SMLATT  r12, r6, r2, r12                     @i4(2)  --- r12 += x[1] * a2
-	SMLABB  r12, r6, r2, r12                     @i4(3)  --- r12 += x[0] * a3                 
-	
+	SMLABB  r12, r6, r2, r12                     @i4(3)  --- r12 += x[0] * a3
+
 	LDR     r2, [r1], #-4                        @r2 ---- x[-1], x[-2]
 
 	SMLABT  r3, r5, r2, r3                       @i1(1) --- r3 += x[-1] * a1
 	SMLATT  r4, r6, r2, r4                       @i2(2) --- r4 += x[-1] * a2
 	SMLABT  r11, r6, r2, r11                     @i3(3) --- r11 += x[-1] * a3
 	SMLATT  r12, r7, r2, r12                     @i4(4) --- r12 += x[-1] * a4
-        SMLATB  r3, r6, r2, r3                       @i1(2) --- r3 += x[-2] * a2	
+        SMLATB  r3, r6, r2, r3                       @i1(2) --- r3 += x[-2] * a2
 
 	SMLABB	r4, r6, r2, r4				@ i2	(3)
 	SMLATB  r11,r7, r2, r11				@ i3	(4)
 	SMLABB	r12,r7, r2, r12				@ i4	(5)
-	
+
 	LDR	r2,[r1],#-4
 	SMLABT	r3, r6, r2, r3				@ i1	(3)
 	SMLATT	r4, r7, r2, r4				@ i2	(4)
@@ -111,7 +111,7 @@ residu_loop:
 	SMLABB	r4, r7, r2, r4				@ i2	(5)
 	SMLATB	r11,r8, r2, r11				@ i3	(6)
 	SMLABB	r12,r8, r2, r12				@ i4	(7)
-		
+
 	LDR	r2,[r1],#-4
 	SMLABT	r3, r7, r2, r3				@ i1	(5)
 	SMLATT	r4, r8, r2, r4				@ i2	(6)
@@ -122,7 +122,7 @@ residu_loop:
 	SMLATB	r11,r9, r2, r11				@ i3	(8)
 	SMLABB	r12,r9, r2, r12				@ i4	(9)
 	LDR	r10, [r13, #8]				@ [ a10 | a11]
-	
+
 	LDR	r2,[r1],#-4
 	SMLABT	r3, r8, r2, r3				@ i1	(7)
 	SMLATT	r4, r9, r2, r4				@ i2	(8)
@@ -133,7 +133,7 @@ residu_loop:
 	SMLATB	r11,r10, r2, r11			@ i3	(10)
 	SMLABB	r12,r10, r2, r12			@ i4	(11)
 	LDR	r8, [r13, #12]				@ [ a12 | a13 ]
-		
+
 	LDR	r2,[r1],#-4
 	SMLABT	r3, r9, r2, r3				@ i1	(9)
 	SMLATT	r4, r10, r2, r4				@ i2	(10)
@@ -144,7 +144,7 @@ residu_loop:
 	SMLATB	r11,r8, r2, r11				@ i3	(12)
 	SMLABB	r12,r8, r2, r12				@ i4	(13)
 	LDR	r9, [r13, #16]				@ [ a14 | a15 ]
-	
+
 	LDR	r2,[r1],#-4
 	SMLABT	r3, r10, r2, r3				@ i1	(11)
 	SMLATT	r4, r8, r2, r4				@ i2	(12)
@@ -154,7 +154,7 @@ residu_loop:
 	SMLABB	r4, r8, r2, r4				@ i2	(13)
 	SMLATB	r11,r9, r2, r11				@ i3	(14)
 	SMLABB	r12,r9, r2, r12				@ i4	(15)
-	
+
 
 	LDR	r2,[r1],#-4
 	SMLABT	r3, r8, r2, r3				@ i1	(13)
@@ -165,64 +165,64 @@ residu_loop:
 	SMLABB	r4, r9, r2, r4				@ i2	(15)
 	SMLABB	r11,r14, r2, r11			@ i3	(16)
 	LDR		r8, [r13]					@ [ a6 | a7 ]
-			
+
         LDR     r2,[r1],#44         		@ Change
 	SMLABT	r3, r9, r2, r3
 	SMLABB	r3, r14, r2, r3
 	SMLABT	r4, r14, r2, r4
 	LDR		r9, [r13, #4]				@ [ a8 | a9 ]
-	
 
-	QADD	r3,r3,r3					
-	QADD	r4,r4,r4					
-	QADD	r11,r11,r11					
-	QADD	r12,r12,r12					
-		
-	QADD	r3,r3,r3					
-	QADD	r4,r4,r4					
-	QADD	r11,r11,r11					
-	QADD	r12,r12,r12					
-	
-	QADD	r3,r3,r3					
-	QADD	r4,r4,r4					
-	QADD	r11,r11,r11					
-	QADD	r12,r12,r12					
-	
-	QADD	r3,r3,r3					
-	QADD	r4,r4,r4					
-	QADD	r11,r11,r11					
-	QADD	r12,r12,r12					
-	
-	MOV	r2,#32768	
-	
-	QDADD	r3,r2,r3					
-	QDADD	r4,r2,r4					
-	QDADD	r11,r2,r11					
-	QDADD	r12,r2,r12					
-		
-	
+
+	QADD	r3,r3,r3
+	QADD	r4,r4,r4
+	QADD	r11,r11,r11
+	QADD	r12,r12,r12
+
+	QADD	r3,r3,r3
+	QADD	r4,r4,r4
+	QADD	r11,r11,r11
+	QADD	r12,r12,r12
+
+	QADD	r3,r3,r3
+	QADD	r4,r4,r4
+	QADD	r11,r11,r11
+	QADD	r12,r12,r12
+
+	QADD	r3,r3,r3
+	QADD	r4,r4,r4
+	QADD	r11,r11,r11
+	QADD	r12,r12,r12
+
+	MOV	r2,#32768
+
+	QDADD	r3,r2,r3
+	QDADD	r4,r2,r4
+	QDADD	r11,r2,r11
+	QDADD	r12,r2,r12
+
+
 	MOV	r3,r3,asr #16
 	MOV	r4,r4,asr #16
 	MOV	r11,r11,asr #16
 	MOV	r12,r12,asr #16
-	
+
 	STRH	r3,[r0],#2
 	STRH	r4,[r0],#2
 	STRH	r11,[r0],#2
 	STRH	r12,[r0],#2
-	
+
 	MOV	r2,r14,asr #16
 	SUB	r14, r14, #0x10000
 	SUBS	r2,r2,#1
-	BNE	residu_loop	
+	BNE	residu_loop
 end:
-	LDMFD	r13!, {r8 -r12}	
+	LDMFD	r13!, {r8 -r12}
 	LDMFD	r13!, {r4 -r12,pc}
 
         @ENDFUNC
-        .END	 
-        
-	
-	  
+        .END
+
+
+
 
 

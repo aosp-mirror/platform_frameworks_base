@@ -16,7 +16,7 @@
 /*******************************************************************************
 	File:		adj_thr.h
 
-	Content:	Threshold compensation function 
+	Content:	Threshold compensation function
 
 *******************************************************************************/
 
@@ -44,7 +44,7 @@ void AdjustThresholds(ADJ_THR_STATE *adjThrState,
                       PSY_OUT_ELEMENT *psyOutElement,
                       Word16 *chBitDistribution,
                       Word16 logSfbEnergy[MAX_CHANNELS][MAX_GROUPED_SFB],
-                      Word16 sfbNRelevantLines[MAX_CHANNELS][MAX_GROUPED_SFB],                      
+                      Word16 sfbNRelevantLines[MAX_CHANNELS][MAX_GROUPED_SFB],
                       QC_OUT_ELEMENT* qcOE,
 					  ELEMENT_BITS* elBits,
 					  const Word16 nChannels,

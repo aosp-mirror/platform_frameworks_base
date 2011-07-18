@@ -42,25 +42,25 @@ void LP_Decim2(
 	Word32 i, j;
 	Word32 L_tmp;
 	/* copy initial filter states into buffer */
-	p_x = x_buf;                           
+	p_x = x_buf;
 	for (i = 0; i < L_MEM; i++)
 	{
-		*p_x++ = mem[i];  
-		mem[i] = x[l - L_MEM + i];  
+		*p_x++ = mem[i];
+		mem[i] = x[l - L_MEM + i];
 	}
 	for (i = 0; i < l; i++)
 	{
-		*p_x++ = x[i];                     
+		*p_x++ = x[i];
 	}
 	for (i = 0, j = 0; i < l; i += 2, j++)
 	{
-		p_x = &x_buf[i];  
+		p_x = &x_buf[i];
 		L_tmp  = ((*p_x++) * h_fir[0]);
 		L_tmp += ((*p_x++) * h_fir[1]);
 		L_tmp += ((*p_x++) * h_fir[2]);
 		L_tmp += ((*p_x++) * h_fir[3]);
 		L_tmp += ((*p_x++) * h_fir[4]);
-		x[j] = (L_tmp + 0x4000)>>15;              
+		x[j] = (L_tmp + 0x4000)>>15;
 	}
 	return;
 }
