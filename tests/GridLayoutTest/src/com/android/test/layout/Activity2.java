@@ -95,9 +95,7 @@ public class Activity2 extends Activity {
         }
         {
             Space v = new Space(context);
-            {
-                vg.addView(v, new LayoutParams(row5, col3));
-            }
+            vg.addView(v, new LayoutParams(row5, col3));
         }
         {
             Button v = new Button(context);

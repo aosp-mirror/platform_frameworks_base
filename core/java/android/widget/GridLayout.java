@@ -28,7 +28,7 @@ import android.util.Pair;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
-import com.android.internal.R.styleable;
+import com.android.internal.R;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -167,7 +167,7 @@ public class GridLayout extends ViewGroup {
     // Misc constants
 
     private static final String TAG = GridLayout.class.getName();
-    static final boolean DEBUG = false;
+    static boolean DEBUG = false;
     private static final int PRF = 1;
 
     // Defaults
@@ -178,19 +178,17 @@ public class GridLayout extends ViewGroup {
     private static final boolean DEFAULT_ORDER_PRESERVED = false;
     private static final int DEFAULT_ALIGNMENT_MODE = ALIGN_MARGINS;
     private static final int DEFAULT_CONTAINER_MARGIN = 0;
-    private static final int DEFAULT_MARGIN = 8;
-    private static final int DEFAULT_CONTAINER_PADDING = 16;
     private static final int MAX_SIZE = 100000;
 
     // TypedArray indices
 
-    private static final int ORIENTATION = styleable.GridLayout_orientation;
-    private static final int ROW_COUNT = styleable.GridLayout_rowCount;
-    private static final int COLUMN_COUNT = styleable.GridLayout_columnCount;
-    private static final int USE_DEFAULT_MARGINS = styleable.GridLayout_useDefaultMargins;
-    private static final int ALIGNMENT_MODE = styleable.GridLayout_alignmentMode;
-    private static final int ROW_ORDER_PRESERVED = styleable.GridLayout_rowOrderPreserved;
-    private static final int COLUMN_ORDER_PRESERVED = styleable.GridLayout_columnOrderPreserved;
+    private static final int ORIENTATION = R.styleable.GridLayout_orientation;
+    private static final int ROW_COUNT = R.styleable.GridLayout_rowCount;
+    private static final int COLUMN_COUNT = R.styleable.GridLayout_columnCount;
+    private static final int USE_DEFAULT_MARGINS = R.styleable.GridLayout_useDefaultMargins;
+    private static final int ALIGNMENT_MODE = R.styleable.GridLayout_alignmentMode;
+    private static final int ROW_ORDER_PRESERVED = R.styleable.GridLayout_rowOrderPreserved;
+    private static final int COLUMN_ORDER_PRESERVED = R.styleable.GridLayout_columnOrderPreserved;
 
     // Instance variables
 
@@ -201,6 +199,7 @@ public class GridLayout extends ViewGroup {
     private boolean mUseDefaultMargins = DEFAULT_USE_DEFAULT_MARGINS;
     private int mAlignmentMode = DEFAULT_ALIGNMENT_MODE;
     private int mDefaultGravity = Gravity.NO_GRAVITY;
+    private int mDefaultGap;
 
     // Constructors
 
@@ -212,7 +211,8 @@ public class GridLayout extends ViewGroup {
         if (DEBUG) {
             setWillNotDraw(false);
         }
-        TypedArray a = context.obtainStyledAttributes(attrs, styleable.GridLayout);
+        mDefaultGap = context.getResources().getDimensionPixelOffset(R.dimen.default_gap);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GridLayout);
         try {
             setRowCount(a.getInt(ROW_COUNT, DEFAULT_COUNT));
             setColumnCount(a.getInt(COLUMN_COUNT, DEFAULT_COUNT));
@@ -382,7 +382,7 @@ public class GridLayout extends ViewGroup {
     public void setUseDefaultMargins(boolean useDefaultMargins) {
         mUseDefaultMargins = useDefaultMargins;
         if (useDefaultMargins) {
-            int padding = DEFAULT_CONTAINER_PADDING;
+            int padding = mDefaultGap;
             setPadding(padding, padding, padding, padding);
         }
         requestLayout();
@@ -538,7 +538,7 @@ public class GridLayout extends ViewGroup {
     }
 
     private int getDefaultMargin(View c, boolean horizontal, boolean leading) {
-        return DEFAULT_MARGIN;
+        return mDefaultGap / 2;
     }
 
     private int getDefaultMargin(View c, boolean isAtEdge, boolean horizontal, boolean leading) {
@@ -784,6 +784,12 @@ public class GridLayout extends ViewGroup {
     @Override
     public void removeViewAt(int index) {
         super.removeViewAt(index);
+        invalidateStructure();
+    }
+
+    @Override
+    public void removeAllViews() {
+        super.removeAllViews();
         invalidateStructure();
     }
 
@@ -1596,8 +1602,8 @@ public class GridLayout extends ViewGroup {
      * each cell group. The fundamental parameters associated with each cell group are
      * gathered into their vertical and horizontal components and stored
      * in the {@link #rowSpec} and {@link #columnSpec} layout parameters.
-     * {@link android.widget.GridLayout.Spec Specs} are immutable structures and may be shared between the layout
-     * parameters of different children.
+     * {@link android.widget.GridLayout.Spec Specs} are immutable structures
+     * and may be shared between the layout parameters of different children.
      * <p>
      * The row and column specs contain the leading and trailing indices along each axis
      * and together specify the four grid indices that delimit the cells of this cell group.
@@ -1667,24 +1673,25 @@ public class GridLayout extends ViewGroup {
 
         // TypedArray indices
 
-        private static final int MARGIN = styleable.ViewGroup_MarginLayout_layout_margin;
-        private static final int LEFT_MARGIN = styleable.ViewGroup_MarginLayout_layout_marginLeft;
-        private static final int TOP_MARGIN = styleable.ViewGroup_MarginLayout_layout_marginTop;
-        private static final int RIGHT_MARGIN = styleable.ViewGroup_MarginLayout_layout_marginRight;
+        private static final int MARGIN = R.styleable.ViewGroup_MarginLayout_layout_margin;
+        private static final int LEFT_MARGIN = R.styleable.ViewGroup_MarginLayout_layout_marginLeft;
+        private static final int TOP_MARGIN = R.styleable.ViewGroup_MarginLayout_layout_marginTop;
+        private static final int RIGHT_MARGIN =
+                R.styleable.ViewGroup_MarginLayout_layout_marginRight;
         private static final int BOTTOM_MARGIN =
-                styleable.ViewGroup_MarginLayout_layout_marginBottom;
+                R.styleable.ViewGroup_MarginLayout_layout_marginBottom;
 
-        private static final int COLUMN = styleable.GridLayout_Layout_layout_column;
-        private static final int COLUMN_SPAN = styleable.GridLayout_Layout_layout_columnSpan;
+        private static final int COLUMN = R.styleable.GridLayout_Layout_layout_column;
+        private static final int COLUMN_SPAN = R.styleable.GridLayout_Layout_layout_columnSpan;
         private static final int COLUMN_FLEXIBILITY =
-                styleable.GridLayout_Layout_layout_columnFlexibility;
+                R.styleable.GridLayout_Layout_layout_columnFlexibility;
 
-        private static final int ROW = styleable.GridLayout_Layout_layout_row;
-        private static final int ROW_SPAN = styleable.GridLayout_Layout_layout_rowSpan;
+        private static final int ROW = R.styleable.GridLayout_Layout_layout_row;
+        private static final int ROW_SPAN = R.styleable.GridLayout_Layout_layout_rowSpan;
         private static final int ROW_FLEXIBILITY =
-                styleable.GridLayout_Layout_layout_rowFlexibility;
+                R.styleable.GridLayout_Layout_layout_rowFlexibility;
 
-        private static final int GRAVITY = styleable.GridLayout_Layout_layout_gravity;
+        private static final int GRAVITY = R.styleable.GridLayout_Layout_layout_gravity;
 
         // Instance variables
 
@@ -1804,7 +1811,8 @@ public class GridLayout extends ViewGroup {
 
         // This method could be parametrized and moved into MarginLayout.
         private void reInitSuper(Context context, AttributeSet attrs) {
-            TypedArray a = context.obtainStyledAttributes(attrs, styleable.ViewGroup_MarginLayout);
+            TypedArray a =
+                    context.obtainStyledAttributes(attrs, R.styleable.ViewGroup_MarginLayout);
             try {
                 int margin = a.getDimensionPixelSize(MARGIN, DEFAULT_MARGIN);
 
@@ -1840,7 +1848,7 @@ public class GridLayout extends ViewGroup {
         }
 
         private void init(Context context, AttributeSet attrs, int defaultGravity) {
-            TypedArray a = context.obtainStyledAttributes(attrs, styleable.GridLayout_Layout);
+            TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GridLayout_Layout);
             try {
                 int gravity = a.getInt(GRAVITY, defaultGravity);
 
@@ -2301,10 +2309,10 @@ public class GridLayout extends ViewGroup {
      */
     @Deprecated
     public static class Group extends Spec {
-    /**
-     * @deprecated  Please replace with {@link #spec(int, int, Alignment)}
-     * @hide
-     */
+        /**
+         * @deprecated Please replace with {@link #spec(int, int, Alignment)}
+         * @hide
+         */
         @Deprecated
         public Group(int start, int size, Alignment alignment) {
             super(start, size, alignment, UNDEFINED_FLEXIBILITY);
