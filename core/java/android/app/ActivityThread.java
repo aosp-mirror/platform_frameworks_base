@@ -70,7 +70,7 @@ import android.view.HardwareRenderer;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewManager;
-import android.view.ViewAncestor;
+import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
@@ -4072,7 +4072,7 @@ public final class ActivityThread {
         sThreadLocal.set(this);
         mSystemThread = system;
         if (!system) {
-            ViewAncestor.addFirstDrawHandler(new Runnable() {
+            ViewRootImpl.addFirstDrawHandler(new Runnable() {
                 public void run() {
                     ensureJitEnabled();
                 }
@@ -4102,7 +4102,7 @@ public final class ActivityThread {
             }
         }
         
-        ViewAncestor.addConfigCallback(new ComponentCallbacks() {
+        ViewRootImpl.addConfigCallback(new ComponentCallbacks() {
             public void onConfigurationChanged(Configuration newConfig) {
                 synchronized (mPackages) {
                     // We need to apply this change to the resources

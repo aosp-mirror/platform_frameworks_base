@@ -35,7 +35,7 @@ import android.os.Message;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Surface;
-import android.view.ViewAncestor;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 
 import junit.framework.Assert;
@@ -228,7 +228,7 @@ class BrowserFrame extends Handler {
             sConfigCallback = new ConfigCallback(
                     (WindowManager) appContext.getSystemService(
                             Context.WINDOW_SERVICE));
-            ViewAncestor.addConfigCallback(sConfigCallback);
+            ViewRootImpl.addConfigCallback(sConfigCallback);
         }
         sConfigCallback.addHandler(this);
 

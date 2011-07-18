@@ -92,7 +92,7 @@ import java.util.List;
  * {@hide}
  */
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
-public final class ViewAncestor extends Handler implements ViewParent,
+public final class ViewRootImpl extends Handler implements ViewParent,
         View.AttachInfo.Callbacks, HardwareRenderer.HardwareDrawCallbacks {
     private static final String TAG = "ViewAncestor";
     private static final boolean DBG = false;
@@ -303,7 +303,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
     }
     
-    public ViewAncestor(Context context) {
+    public ViewRootImpl(Context context) {
         super();
 
         if (MEASURE_LATENCY) {
@@ -3807,14 +3807,14 @@ public final class ViewAncestor extends Handler implements ViewParent,
     }
     
     static class InputMethodCallback extends IInputMethodCallback.Stub {
-        private WeakReference<ViewAncestor> mViewAncestor;
+        private WeakReference<ViewRootImpl> mViewAncestor;
 
-        public InputMethodCallback(ViewAncestor viewAncestor) {
-            mViewAncestor = new WeakReference<ViewAncestor>(viewAncestor);
+        public InputMethodCallback(ViewRootImpl viewAncestor) {
+            mViewAncestor = new WeakReference<ViewRootImpl>(viewAncestor);
         }
 
         public void finishedEvent(int seq, boolean handled) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchFinishedEvent(seq, handled);
             }
@@ -3826,15 +3826,15 @@ public final class ViewAncestor extends Handler implements ViewParent,
     }
 
     static class W extends IWindow.Stub {
-        private final WeakReference<ViewAncestor> mViewAncestor;
+        private final WeakReference<ViewRootImpl> mViewAncestor;
 
-        W(ViewAncestor viewAncestor) {
-            mViewAncestor = new WeakReference<ViewAncestor>(viewAncestor);
+        W(ViewRootImpl viewAncestor) {
+            mViewAncestor = new WeakReference<ViewRootImpl>(viewAncestor);
         }
 
         public void resized(int w, int h, Rect coveredInsets, Rect visibleInsets,
                 boolean reportDraw, Configuration newConfig) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchResized(w, h, coveredInsets, visibleInsets, reportDraw,
                         newConfig);
@@ -3842,21 +3842,21 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
 
         public void dispatchAppVisibility(boolean visible) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchAppVisibility(visible);
             }
         }
 
         public void dispatchGetNewSurface() {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchGetNewSurface();
             }
         }
 
         public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.windowFocusChanged(hasFocus, inTouchMode);
             }
@@ -3872,7 +3872,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
 
         public void executeCommand(String command, String parameters, ParcelFileDescriptor out) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 final View view = viewAncestor.mView;
                 if (view != null) {
@@ -3903,7 +3903,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
         
         public void closeSystemDialogs(String reason) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchCloseSystemDialogs(reason);
             }
@@ -3931,14 +3931,14 @@ public final class ViewAncestor extends Handler implements ViewParent,
 
         /* Drag/drop */
         public void dispatchDragEvent(DragEvent event) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchDragEvent(event);
             }
         }
 
         public void dispatchSystemUiVisibilityChanged(int visibility) {
-            final ViewAncestor viewAncestor = mViewAncestor.get();
+            final ViewRootImpl viewAncestor = mViewAncestor.get();
             if (viewAncestor != null) {
                 viewAncestor.dispatchSystemUiVisibilityChanged(visibility);
             }
@@ -4269,7 +4269,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
             if (!registered) {
                 mAttachInfo.mAccessibilityWindowId =
                     mAccessibilityManager.addAccessibilityInteractionConnection(mWindow,
-                            new AccessibilityInteractionConnection(ViewAncestor.this));
+                            new AccessibilityInteractionConnection(ViewRootImpl.this));
             }
         }
 
@@ -4289,10 +4289,10 @@ public final class ViewAncestor extends Handler implements ViewParent,
      */
     final class AccessibilityInteractionConnection
             extends IAccessibilityInteractionConnection.Stub {
-        private final WeakReference<ViewAncestor> mViewAncestor;
+        private final WeakReference<ViewRootImpl> mViewAncestor;
 
-        AccessibilityInteractionConnection(ViewAncestor viewAncestor) {
-            mViewAncestor = new WeakReference<ViewAncestor>(viewAncestor);
+        AccessibilityInteractionConnection(ViewRootImpl viewAncestor) {
+            mViewAncestor = new WeakReference<ViewRootImpl>(viewAncestor);
         }
 
         public void findAccessibilityNodeInfoByAccessibilityId(int accessibilityId,
@@ -4421,7 +4421,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
             try {
                 FindByAccessibilitytIdPredicate predicate = mFindByAccessibilityIdPredicate;
                 predicate.init(accessibilityId);
-                View root = ViewAncestor.this.mView;
+                View root = ViewRootImpl.this.mView;
                 View target = root.findViewByPredicate(predicate);
                 if (target != null && target.isShown()) {
                     info = target.createAccessibilityNodeInfo();
@@ -4453,7 +4453,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
 
             AccessibilityNodeInfo info = null;
             try {
-                View root = ViewAncestor.this.mView;
+                View root = ViewRootImpl.this.mView;
                 View target = root.findViewById(viewId);
                 if (target != null && target.isShown()) {
                     info = target.createAccessibilityNodeInfo();
@@ -4499,7 +4499,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
                 if (accessibilityViewId != View.NO_ID) {
                     root = findViewByAccessibilityId(accessibilityViewId);
                 } else {
-                    root = ViewAncestor.this.mView;
+                    root = ViewRootImpl.this.mView;
                 }
 
                 if (root == null || !root.isShown()) {
@@ -4624,7 +4624,7 @@ public final class ViewAncestor extends Handler implements ViewParent,
         }
 
         private View findViewByAccessibilityId(int accessibilityId) {
-            View root = ViewAncestor.this.mView;
+            View root = ViewRootImpl.this.mView;
             if (root == null) {
                 return null;
             }

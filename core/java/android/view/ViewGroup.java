@@ -954,7 +954,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final float tx = event.mX;
         final float ty = event.mY;
 
-        ViewAncestor root = getViewAncestor();
+        ViewRootImpl root = getViewRootImpl();
 
         // Dispatch down the view hierarchy
         switch (event.mAction) {
@@ -3839,13 +3839,13 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     if (drawAnimation) {
                         if (view != null) {
                             view.mPrivateFlags |= DRAW_ANIMATION;
-                        } else if (parent instanceof ViewAncestor) {
-                            ((ViewAncestor) parent).mIsAnimating = true;
+                        } else if (parent instanceof ViewRootImpl) {
+                            ((ViewRootImpl) parent).mIsAnimating = true;
                         }
                     }
 
-                    if (parent instanceof ViewAncestor) {
-                        ((ViewAncestor) parent).invalidate();
+                    if (parent instanceof ViewRootImpl) {
+                        ((ViewRootImpl) parent).invalidate();
                         parent = null;
                     } else if (view != null) {
                         if ((view.mPrivateFlags & DRAWN) == DRAWN ||
@@ -3902,8 +3902,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                     if (drawAnimation) {
                         if (view != null) {
                             view.mPrivateFlags |= DRAW_ANIMATION;
-                        } else if (parent instanceof ViewAncestor) {
-                            ((ViewAncestor) parent).mIsAnimating = true;
+                        } else if (parent instanceof ViewRootImpl) {
+                            ((ViewRootImpl) parent).mIsAnimating = true;
                         }
                     }
 
@@ -4426,7 +4426,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // If this group is dirty, check that the parent is dirty as well
             if ((mPrivateFlags & DIRTY_MASK) != 0) {
                 final ViewParent parent = getParent();
-                if (parent != null && !(parent instanceof ViewAncestor)) {
+                if (parent != null && !(parent instanceof ViewRootImpl)) {
                     if ((((View) parent).mPrivateFlags & DIRTY_MASK) == 0) {
                         result = false;
                         android.util.Log.d(ViewDebug.CONSISTENCY_LOG_TAG,
@@ -4995,7 +4995,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @hide
      */
     public void requestTransitionStart(LayoutTransition transition) {
-        ViewAncestor viewAncestor = getViewAncestor();
+        ViewRootImpl viewAncestor = getViewRootImpl();
         viewAncestor.requestTransitionStart(transition);
     }
 

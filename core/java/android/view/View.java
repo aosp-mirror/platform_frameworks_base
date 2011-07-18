@@ -5043,9 +5043,9 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /** Gets the ViewAncestor, or null if not attached. */
-    /*package*/ ViewAncestor getViewAncestor() {
+    /*package*/ ViewRootImpl getViewRootImpl() {
         View root = getRootView();
-        return root != null ? (ViewAncestor)root.getParent() : null;
+        return root != null ? (ViewRootImpl)root.getParent() : null;
     }
 
     /**
@@ -5061,7 +5061,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     public final boolean requestFocusFromTouch() {
         // Leave touch mode if we need to
         if (isInTouchMode()) {
-            ViewAncestor viewRoot = getViewAncestor();
+            ViewRootImpl viewRoot = getViewRootImpl();
             if (viewRoot != null) {
                 viewRoot.ensureTouchMode(false);
             }
@@ -5653,7 +5653,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         if (mAttachInfo != null) {
             return mAttachInfo.mInTouchMode;
         } else {
-            return ViewAncestor.isInTouchMode();
+            return ViewRootImpl.isInTouchMode();
         }
     }
 
@@ -8254,7 +8254,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             handler = attachInfo.mHandler;
         } else {
             // Assume that post will succeed later
-            ViewAncestor.getRunQueue().post(action);
+            ViewRootImpl.getRunQueue().post(action);
             return true;
         }
 
@@ -8284,7 +8284,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             handler = attachInfo.mHandler;
         } else {
             // Assume that post will succeed later
-            ViewAncestor.getRunQueue().postDelayed(action, delayMillis);
+            ViewRootImpl.getRunQueue().postDelayed(action, delayMillis);
             return true;
         }
 
@@ -8308,7 +8308,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             handler = attachInfo.mHandler;
         } else {
             // Assume that post will succeed later
-            ViewAncestor.getRunQueue().removeCallbacks(action);
+            ViewRootImpl.getRunQueue().removeCallbacks(action);
             return true;
         }
 
@@ -11580,9 +11580,9 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             viewParent = view.mParent;
         }
 
-        if (viewParent instanceof ViewAncestor) {
+        if (viewParent instanceof ViewRootImpl) {
             // *cough*
-            final ViewAncestor vr = (ViewAncestor)viewParent;
+            final ViewRootImpl vr = (ViewRootImpl)viewParent;
             location[1] -= vr.mCurScrollY;
         }
     }
@@ -12709,7 +12709,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                     surface.unlockCanvasAndPost(canvas);
                 }
 
-                final ViewAncestor root = getViewAncestor();
+                final ViewRootImpl root = getViewRootImpl();
 
                 // Cache the local state object for delivery with DragEvents
                 root.setLocalDragState(myLocalState);
@@ -13916,7 +13916,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         Canvas mCanvas;
 
         /**
-         * A Handler supplied by a view's {@link android.view.ViewAncestor}. This
+         * A Handler supplied by a view's {@link android.view.ViewRootImpl}. This
          * handler can be used to pump events in the UI events queue.
          */
         final Handler mHandler;

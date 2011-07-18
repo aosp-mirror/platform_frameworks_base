@@ -366,7 +366,7 @@ public class ViewDebug {
     }
 
     private static BufferedWriter sHierarchyTraces;
-    private static ViewAncestor sHierarhcyRoot;
+    private static ViewRootImpl sHierarhcyRoot;
     private static String sHierarchyTracePrefix;
 
     /**
@@ -415,7 +415,7 @@ public class ViewDebug {
      * @hide
      */
     public static long getViewAncestorInstanceCount() {
-        return Debug.countInstancesOfClass(ViewAncestor.class);
+        return Debug.countInstancesOfClass(ViewRootImpl.class);
     }
 
     /**
@@ -748,7 +748,7 @@ public class ViewDebug {
             return;
         }
 
-        sHierarhcyRoot = (ViewAncestor) view.getRootView().getParent();
+        sHierarhcyRoot = (ViewRootImpl) view.getRootView().getParent();
     }
 
     /**
@@ -1100,7 +1100,7 @@ public class ViewDebug {
 
     private static void outputDisplayList(View root, String parameter) throws IOException {
         final View view = findView(root, parameter);
-        view.getViewAncestor().outputDisplayList(view);
+        view.getViewRootImpl().outputDisplayList(view);
     }
 
     private static void capture(View root, final OutputStream clientStream, String parameter)

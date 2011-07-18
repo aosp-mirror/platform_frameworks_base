@@ -42,7 +42,7 @@ import android.util.Printer;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewAncestor;
+import android.view.ViewRootImpl;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -655,7 +655,7 @@ public final class InputMethodManager {
                 if (vh != null) {
                     // This will result in a call to reportFinishInputConnection()
                     // below.
-                    vh.sendMessage(vh.obtainMessage(ViewAncestor.FINISH_INPUT_CONNECTION,
+                    vh.sendMessage(vh.obtainMessage(ViewRootImpl.FINISH_INPUT_CONNECTION,
                             mServedInputConnection));
                 }
             }
@@ -1112,9 +1112,9 @@ public final class InputMethodManager {
 
     void scheduleCheckFocusLocked(View view) {
         Handler vh = view.getHandler();
-        if (vh != null && !vh.hasMessages(ViewAncestor.CHECK_FOCUS)) {
+        if (vh != null && !vh.hasMessages(ViewRootImpl.CHECK_FOCUS)) {
             // This will result in a call to checkFocus() below.
-            vh.sendMessage(vh.obtainMessage(ViewAncestor.CHECK_FOCUS));
+            vh.sendMessage(vh.obtainMessage(ViewRootImpl.CHECK_FOCUS));
         }
     }
     

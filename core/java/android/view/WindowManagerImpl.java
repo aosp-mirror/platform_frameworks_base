@@ -78,7 +78,7 @@ public class WindowManagerImpl implements WindowManager {
     public static final int ADD_PERMISSION_DENIED = -8;
 
     private View[] mViews;
-    private ViewAncestor[] mRoots;
+    private ViewRootImpl[] mRoots;
     private WindowManager.LayoutParams[] mParams;
 
     private final static Object sLock = new Object();
@@ -202,7 +202,7 @@ public class WindowManagerImpl implements WindowManager {
         final WindowManager.LayoutParams wparams
                 = (WindowManager.LayoutParams)params;
         
-        ViewAncestor root;
+        ViewRootImpl root;
         View panelParentView = null;
         
         synchronized (this) {
@@ -239,7 +239,7 @@ public class WindowManagerImpl implements WindowManager {
                 }
             }
             
-            root = new ViewAncestor(view.getContext());
+            root = new ViewRootImpl(view.getContext());
             root.mAddNesting = 1;
             if (cih == null) {
                 root.mCompatibilityInfo = new CompatibilityInfoHolder();
@@ -252,7 +252,7 @@ public class WindowManagerImpl implements WindowManager {
             if (mViews == null) {
                 index = 1;
                 mViews = new View[1];
-                mRoots = new ViewAncestor[1];
+                mRoots = new ViewRootImpl[1];
                 mParams = new WindowManager.LayoutParams[1];
             } else {
                 index = mViews.length + 1;
@@ -260,7 +260,7 @@ public class WindowManagerImpl implements WindowManager {
                 mViews = new View[index];
                 System.arraycopy(old, 0, mViews, 0, index-1);
                 old = mRoots;
-                mRoots = new ViewAncestor[index];
+                mRoots = new ViewRootImpl[index];
                 System.arraycopy(old, 0, mRoots, 0, index-1);
                 old = mParams;
                 mParams = new WindowManager.LayoutParams[index];
@@ -288,7 +288,7 @@ public class WindowManagerImpl implements WindowManager {
 
         synchronized (this) {
             int index = findViewLocked(view, true);
-            ViewAncestor root = mRoots[index];
+            ViewRootImpl root = mRoots[index];
             mParams[index] = wparams;
             root.setLayoutParams(wparams, false);
         }
@@ -310,7 +310,7 @@ public class WindowManagerImpl implements WindowManager {
     public void removeViewImmediate(View view) {
         synchronized (this) {
             int index = findViewLocked(view, true);
-            ViewAncestor root = mRoots[index];
+            ViewRootImpl root = mRoots[index];
             View curView = root.getView();
             
             root.mAddNesting = 0;
@@ -326,7 +326,7 @@ public class WindowManagerImpl implements WindowManager {
     }
     
     View removeViewLocked(int index) {
-        ViewAncestor root = mRoots[index];
+        ViewRootImpl root = mRoots[index];
         View view = root.getView();
         
         // Don't really remove until we have matched all calls to add().
@@ -354,7 +354,7 @@ public class WindowManagerImpl implements WindowManager {
         removeItem(tmpViews, mViews, index);
         mViews = tmpViews;
         
-        ViewAncestor[] tmpRoots = new ViewAncestor[count-1];
+        ViewRootImpl[] tmpRoots = new ViewRootImpl[count-1];
         removeItem(tmpRoots, mRoots, index);
         mRoots = tmpRoots;
         
@@ -381,7 +381,7 @@ public class WindowManagerImpl implements WindowManager {
                 //Log.i("foo", "@ " + i + " token " + mParams[i].token
                 //        + " view " + mRoots[i].getView());
                 if (token == null || mParams[i].token == token) {
-                    ViewAncestor root = mRoots[i];
+                    ViewRootImpl root = mRoots[i];
                     root.mAddNesting = 1;
                     
                     //Log.i("foo", "Force closing " + root);
@@ -417,7 +417,7 @@ public class WindowManagerImpl implements WindowManager {
             int count = mViews.length;
             for (int i=0; i<count; i++) {
                 if (token == null || mParams[i].token == token) {
-                    ViewAncestor root = mRoots[i];
+                    ViewRootImpl root = mRoots[i];
                     root.setStopped(stopped);
                 }
             }
@@ -429,7 +429,7 @@ public class WindowManagerImpl implements WindowManager {
             int count = mViews.length;
             config = new Configuration(config);
             for (int i=0; i<count; i++) {
-                ViewAncestor root = mRoots[i];
+                ViewRootImpl root = mRoots[i];
                 root.requestUpdateConfiguration(config);
             }
         }
@@ -437,13 +437,13 @@ public class WindowManagerImpl implements WindowManager {
 
     public WindowManager.LayoutParams getRootViewLayoutParameter(View view) {
         ViewParent vp = view.getParent();
-        while (vp != null && !(vp instanceof ViewAncestor)) {
+        while (vp != null && !(vp instanceof ViewRootImpl)) {
             vp = vp.getParent();
         }
         
         if (vp == null) return null;
         
-        ViewAncestor vr = (ViewAncestor)vp;
+        ViewRootImpl vr = (ViewRootImpl)vp;
         
         int N = mRoots.length;
         for (int i = 0; i < N; ++i) {
