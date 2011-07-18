@@ -581,6 +581,14 @@ public class TextToSpeech {
                 service.setCallback(getPackageName(), null);
                 service.stop(getPackageName());
                 mServiceConnection.disconnect();
+                // Context#unbindService does not result in a call to
+                // ServiceConnection#onServiceDisconnected. As a result, the
+                // service ends up being destroyed (if there are no other open
+                // connections to it) but the process lives on and the
+                // ServiceConnection continues to refer to the destroyed service.
+                //
+                // This leads to tons of log spam about SynthThread being dead.
+                mServiceConnection = null;
                 mCurrentEngine = null;
                 return null;
             }
