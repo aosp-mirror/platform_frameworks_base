@@ -1414,74 +1414,10 @@ public class Canvas {
         } else {
             char[] buf = TemporaryBuffer.obtain(end - start);
             TextUtils.getChars(text, start, end, buf, 0);
-            native_drawText(mNativeCanvas, buf, 0, end - start, x, y, 
+            native_drawText(mNativeCanvas, buf, 0, end - start, x, y,
                     paint.mBidiFlags, paint.mNativePaint);
             TemporaryBuffer.recycle(buf);
         }
-    }
-
-    /**
-     * Draw the text, with origin at (x,y), using the specified paint. The
-     * origin is interpreted based on the Align setting in the paint.
-     *
-     * @param text  The text to be drawn
-     * @param x     The x-coordinate of the origin of the text being drawn
-     * @param y     The y-coordinate of the origin of the text being drawn
-     * @param paint The paint used for the text (e.g. color, size, style)
-     *
-     * @hide
-     *
-     * Used only for BiDi / RTL Tests
-     */
-    public void drawTextWithGlyphs(char[] text, int index, int count, float x, float y,
-                         Paint paint) {
-        if ((index | count | (index + count) |
-            (text.length - index - count)) < 0) {
-            throw new IndexOutOfBoundsException();
-        }
-        native_drawTextWithGlyphs(mNativeCanvas, text, index, count, x, y, paint.mBidiFlags,
-                paint.mNativePaint);
-    }
-
-    /**
-     * Draw the text, with origin at (x,y), using the specified paint. The
-     * origin is interpreted based on the Align setting in the paint.
-     *
-     * @param text  The text to be drawn
-     * @param x     The x-coordinate of the origin of the text being drawn
-     * @param y     The y-coordinate of the origin of the text being drawn
-     * @param paint The paint used for the text (e.g. color, size, style)
-     *
-     * @hide
-     *
-     * Used only for BiDi / RTL Tests
-     */
-    public void drawTextWithGlyphs(String text, float x, float y, Paint paint) {
-        native_drawTextWithGlyphs(mNativeCanvas, text, 0, text.length(), x, y, paint.mBidiFlags,
-                paint.mNativePaint);
-    }
-
-    /**
-     * Draw the glyphs, with origin at (x,y), using the specified paint. The
-     * origin is interpreted based on the Align setting in the paint.
-     *
-     * @param glyphs The glyphs to be drawn
-     * @param x      The x-coordinate of the origin of the text being drawn
-     * @param y      The y-coordinate of the origin of the text being drawn
-     * @param paint  The paint used for the text (e.g. color, size, style)
-     *
-     * @hide
-     *
-     * Used only for BiDi / RTL Tests
-     */
-    public void drawGlyphs(char[] glyphs, int index, int count, float x, float y,
-                         Paint paint) {
-        if ((index | count | (index + count) |
-            (glyphs.length - index - count)) < 0) {
-            throw new IndexOutOfBoundsException();
-        }
-        native_drawGlyphs(mNativeCanvas, glyphs, index, count, x, y, paint.mBidiFlags,
-                paint.mNativePaint);
     }
 
     /**
@@ -1811,16 +1747,6 @@ public class Canvas {
                                                float y, int flags, int paint);
     private static native void native_drawText(int nativeCanvas, String text,
                                                int start, int end, float x,
-                                               float y, int flags, int paint);
-
-    private static native void native_drawTextWithGlyphs(int nativeCanvas, char[] text,
-                                               int index, int count, float x,
-                                               float y, int flags, int paint);
-    private static native void native_drawTextWithGlyphs(int nativeCanvas, String text,
-                                               int start, int end, float x,
-                                               float y, int flags, int paint);
-    private static native void native_drawGlyphs(int nativeCanvas, char[] glyphs,
-                                               int index, int count, float x,
                                                float y, int flags, int paint);
 
     private static native void native_drawTextRun(int nativeCanvas, String text,

@@ -168,15 +168,11 @@ public class BiDiTestView extends View {
         drawMetricsAroundText(canvas, x, y, textWidthHB, textWidthICU, textSize, Color.RED, Color.GREEN);
 
         paint.setColor(Color.WHITE);
-//        char[] glyphs = new char[2*length];
-//        int count = getGlyphs(text, glyphs, dir);
-//
-//        logGlypths(glyphs, count);
-//        drawTextWithDrawGlyph(canvas, glyphs, count, x, y + currentTextSize);
 
-        Log.v(TAG, "START -- drawTextWithGlyphs");
-        drawTextWithGlyphs(canvas, text, x, y + currentTextSize, dir);
-        Log.v(TAG, "END   -- drawTextWithGlyphs");
+        Log.v(TAG, "START -- drawText");
+        setPaintDir(paint, dir);
+        canvas.drawText(text, x, y + currentTextSize, this.paint);
+        Log.v(TAG, "END   -- drawText");
 
         // Restore old paint properties
         paint.setFakeBoldText(oldFakeBold);
@@ -188,26 +184,6 @@ public class BiDiTestView extends View {
     private void setPaintDir(Paint paint, int dir) {
         Log.v(TAG, "Setting Paint dir=" + dir);
         paint.setBidiFlags(dir);
-    }
-
-    private void drawTextWithDrawGlyph(Canvas canvas, char[] glyphs, int count, int x, int y) {
-        canvas.drawGlyphs(glyphs, 0, count, x, y, paint);
-    }
-
-    private void drawTextWithGlyphs(Canvas canvas, String text, int x, int y, int dir) {
-        setPaintDir(paint, dir);
-        canvas.drawTextWithGlyphs(text, x, y, paint);
-    }
-
-    private void logGlypths(char[] glyphs, int count) {
-        Log.v(TAG, "GlyphIds - count=" + count);
-        for (int n = 0; n < count; n++) {
-            Log.v(TAG, "GlyphIds - Id[" + n + "]="+ (int)glyphs[n]);
-        }
-    }
-
-    private int getGlyphs(String text, char[] glyphs, int dir) {
-        return paint.getTextGlypths(text, 0, text.length(), 0, text.length(), dir, glyphs);
     }
 
     private void drawInsideRect(Canvas canvas, int color) {
