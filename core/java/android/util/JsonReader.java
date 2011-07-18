@@ -196,6 +196,12 @@ public final class JsonReader implements Closeable {
     private int pos = 0;
     private int limit = 0;
 
+    /*
+     * The offset of the first character in the buffer.
+     */
+    private int bufferStartLine = 1;
+    private int bufferStartColumn = 1;
+
     private final List<JsonScope> stack = new ArrayList<JsonScope>();
     {
         push(JsonScope.EMPTY_DOCUMENT);
@@ -711,6 +717,16 @@ public final class JsonReader implements Closeable {
      * false.
      */
     private boolean fillBuffer(int minimum) throws IOException {
+        // Before clobbering the old characters, update where buffer starts
+        for (int i = 0; i < pos; i++) {
+            if (buffer[i] == '\n') {
+                bufferStartLine++;
+                bufferStartColumn = 1;
+            } else {
+                bufferStartColumn++;
+            }
+        }
+
         if (limit != pos) {
             limit -= pos;
             System.arraycopy(buffer, pos, buffer, 0, limit);
@@ -727,6 +743,28 @@ public final class JsonReader implements Closeable {
             }
         }
         return false;
+    }
+
+    private int getLineNumber() {
+        int result = bufferStartLine;
+        for (int i = 0; i < pos; i++) {
+            if (buffer[i] == '\n') {
+                result++;
+            }
+        }
+        return result;
+    }
+
+    private int getColumnNumber() {
+        int result = bufferStartColumn;
+        for (int i = 0; i < pos; i++) {
+            if (buffer[i] == '\n') {
+                result = 1;
+            } else {
+                result++;
+            }
+        }
+        return result;
     }
 
     private int nextNonWhitespace() throws IOException {
@@ -1107,7 +1145,8 @@ public final class JsonReader implements Closeable {
      * with this reader's content.
      */
     private IOException syntaxError(String message) throws IOException {
-        throw new MalformedJsonException(message + " near " + getSnippet());
+        throw new MalformedJsonException(message
+                + " at line " + getLineNumber() + " column " + getColumnNumber());
     }
 
     private CharSequence getSnippet() {
