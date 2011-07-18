@@ -55,7 +55,7 @@ New Tokens
     Accepted by the <attribute> parameter of eglGetConfigAttrib and
     the <attrib_list> parameter of eglChooseConfig:
 
-        EGL_RECORDABLE_ANDROID                      0xXXXX
+        EGL_RECORDABLE_ANDROID                      0x3142
 
 Changes to Chapter 3 of the EGL 1.4 Specification (EGL Functions and Errors)
 
@@ -103,11 +103,38 @@ Issues
 
     RESOLVED: It should not affect sorting.  Some implementations may not have
     any drawback associated with using a recordable EGLConfig.  Such
-    implementations should not have to double-up some of their configs to  one sort earlier than .
-    Implementations that do have drawbacks can use the existing caveat
-    mechanism to report this drawback to the client.
+    implementations should not have to double-up some of their configs to  one
+    sort earlier than .  Implementations that do have drawbacks can use the
+    existing caveat mechanism to report this drawback to the client.
+
+    3. How is this extension expected to be implemented?
+
+    RESPONSE: There are two basic approaches to implementing this extension
+    that were considered during its design.  In both cases it is assumed that a
+    color space conversion must be performed at some point because most video
+    encoding formats use a YUV color space.  The two approaches are
+    distinguished by the point at which this color space conversion is
+    performed.
+
+    One approach involves performing the color space conversion as part of the
+    eglSwapBuffers call before queuing the rendered image to the ANativeWindow.
+    In this case, the VisualID of the EGLConfig would correspond to a YUV
+    Android HAL pixel format from which the video encoder can read.  The
+    EGLConfig would likely have the EGL_SLOW_CONFIG caveat because using that
+    config to render normal window contents would result in an RGB -> YUV color
+    space conversion when rendering the frame as well as a YUV -> RGB
+    conversion when compositing the window.
+
+    The other approach involves performing the color space conversion in the
+    video encoder.  In this case, the VisualID of the EGLConfig would
+    correspond to an RGB HAL pixel format from which the video encoder can
+    read.  The EGLConfig would likely not need to have any caveat set, as using
+    this config for normal window rendering would not have any added cost.
 
 Revision History
+
+#2 (Jamie Gennis, July 15, 2011)
+    - Added issue 3.
 
 #1 (Jamie Gennis, July 8, 2011)
     - Initial draft.
