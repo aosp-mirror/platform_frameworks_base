@@ -473,10 +473,7 @@ public class UsbDeviceManager {
                 case MSG_SET_CURRENT_FUNCTION:
                     String function = (String)msg.obj;
                     boolean makeDefault = (msg.arg1 == 1);
-                    if (makeDefault) {
-                        if (function == null) {
-                            throw new NullPointerException();
-                        }
+                    if (function != null && makeDefault) {
                         if (mAdbEnabled) {
                             function = addFunction(function, UsbManager.USB_FUNCTION_ADB);
                         }
