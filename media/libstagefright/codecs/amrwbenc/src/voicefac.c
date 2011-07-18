@@ -18,7 +18,7 @@
 *   File: voicefac.c                                                   *
 *                                                                      *
 *   Description: Find the voicing factors (1 = voice to -1 = unvoiced) *
-*                                                                      *                                                 
+*                                                                      *
 ************************************************************************/
 
 #include "typedef.h"

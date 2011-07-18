@@ -151,58 +151,58 @@ void ACELP_4t64_fx(
 		case 20:                               /* 20 bits, 4 pulses, 4 tracks */
 			nbiter = 4;                          /* 4x16x16=1024 loop */
 			alp = 8192;                          /* alp = 2.0 (Q12) */
-			nb_pulse = 4;                      
-			nbpos[0] = 4;                      
-			nbpos[1] = 8;                      
+			nb_pulse = 4;
+			nbpos[0] = 4;
+			nbpos[1] = 8;
 			break;
 		case 36:                               /* 36 bits, 8 pulses, 4 tracks */
 			nbiter = 4;                          /* 4x20x16=1280 loop */
 			alp = 4096;                          /* alp = 1.0 (Q12) */
-			nb_pulse = 8;                      
-			nbpos[0] = 4;                      
-			nbpos[1] = 8;                      
-			nbpos[2] = 8;                      
+			nb_pulse = 8;
+			nbpos[0] = 4;
+			nbpos[1] = 8;
+			nbpos[2] = 8;
 			break;
 		case 44:                               /* 44 bits, 10 pulses, 4 tracks */
 			nbiter = 4;                          /* 4x26x16=1664 loop */
 			alp = 4096;                          /* alp = 1.0 (Q12) */
-			nb_pulse = 10;                     
-			nbpos[0] = 4;                      
-			nbpos[1] = 6;                      
-			nbpos[2] = 8;                      
-			nbpos[3] = 8;                      
+			nb_pulse = 10;
+			nbpos[0] = 4;
+			nbpos[1] = 6;
+			nbpos[2] = 8;
+			nbpos[3] = 8;
 			break;
 		case 52:                               /* 52 bits, 12 pulses, 4 tracks */
 			nbiter = 4;                          /* 4x26x16=1664 loop */
 			alp = 4096;                          /* alp = 1.0 (Q12) */
-			nb_pulse = 12;                     
-			nbpos[0] = 4;                      
-			nbpos[1] = 6;                      
-			nbpos[2] = 8;                      
-			nbpos[3] = 8;                      
+			nb_pulse = 12;
+			nbpos[0] = 4;
+			nbpos[1] = 6;
+			nbpos[2] = 8;
+			nbpos[3] = 8;
 			break;
 		case 64:                               /* 64 bits, 16 pulses, 4 tracks */
 			nbiter = 3;                          /* 3x36x16=1728 loop */
 			alp = 3277;                          /* alp = 0.8 (Q12) */
-			nb_pulse = 16;                     
-			nbpos[0] = 4;                      
-			nbpos[1] = 4;                      
-			nbpos[2] = 6;                      
-			nbpos[3] = 6;                      
-			nbpos[4] = 8;                      
-			nbpos[5] = 8;                      
+			nb_pulse = 16;
+			nbpos[0] = 4;
+			nbpos[1] = 4;
+			nbpos[2] = 6;
+			nbpos[3] = 6;
+			nbpos[4] = 8;
+			nbpos[5] = 8;
 			break;
 		case 72:                               /* 72 bits, 18 pulses, 4 tracks */
 			nbiter = 3;                          /* 3x35x16=1680 loop */
 			alp = 3072;                          /* alp = 0.75 (Q12) */
-			nb_pulse = 18;                     
-			nbpos[0] = 2;                      
-			nbpos[1] = 3;                      
-			nbpos[2] = 4;                      
-			nbpos[3] = 5;                      
-			nbpos[4] = 6;                      
-			nbpos[5] = 7;                      
-			nbpos[6] = 8;                      
+			nb_pulse = 18;
+			nbpos[0] = 2;
+			nbpos[1] = 3;
+			nbpos[2] = 4;
+			nbpos[3] = 5;
+			nbpos[4] = 6;
+			nbpos[5] = 7;
+			nbpos[6] = 8;
 			break;
 		case 88:                               /* 88 bits, 24 pulses, 4 tracks */
 			if(ser_size > 462)
@@ -211,17 +211,17 @@ void ACELP_4t64_fx(
 				nbiter = 2;                    /* 2x53x16=1696 loop */
 
 			alp = 2048;                          /* alp = 0.5 (Q12) */
-			nb_pulse = 24;                     
-			nbpos[0] = 2;                      
-			nbpos[1] = 2;                      
-			nbpos[2] = 3;                      
-			nbpos[3] = 4;                      
-			nbpos[4] = 5;                      
-			nbpos[5] = 6;                      
-			nbpos[6] = 7;                      
-			nbpos[7] = 8;                      
-			nbpos[8] = 8;                      
-			nbpos[9] = 8;                      
+			nb_pulse = 24;
+			nbpos[0] = 2;
+			nbpos[1] = 2;
+			nbpos[2] = 3;
+			nbpos[3] = 4;
+			nbpos[4] = 5;
+			nbpos[5] = 6;
+			nbpos[6] = 7;
+			nbpos[7] = 8;
+			nbpos[8] = 8;
+			nbpos[9] = 8;
 			break;
 		default:
 			nbiter = 0;
@@ -231,7 +231,7 @@ void ACELP_4t64_fx(
 
 	for (i = 0; i < nb_pulse; i++)
 	{
-		codvec[i] = i;                     
+		codvec[i] = i;
 	}
 
 	/*----------------------------------------------------------------*
@@ -246,7 +246,7 @@ void ACELP_4t64_fx(
 #endif
 
 	Isqrt_n(&s, &exp);
-	s = L_shl(s, (exp + 5)); 
+	s = L_shl(s, (exp + 5));
 	k_cn = extract_h(L_add(s, 0x8000));
 
 	/* set k_dn = 32..512 (ener_dn = 2^30..2^22) */
@@ -274,22 +274,22 @@ void ACELP_4t64_fx(
 		s = (k_cn* (*p0++))+(k_dn * (*p1++));
 		*p2++ = s >> 7;
 		s = (k_cn* (*p0++))+(k_dn * (*p1++));
-		*p2++ = s >> 7; 
+		*p2++ = s >> 7;
 	}
 
 	/* set sign according to dn2[] = k_cn*cn[] + k_dn*dn[]    */
 	for(i = 0; i < L_SUBFR; i++)
 	{
-		val = dn[i];                   
-		ps = dn2[i];                   
+		val = dn[i];
+		ps = dn2[i];
 		if (ps >= 0)
 		{
 			sign[i] = 32767;             /* sign = +1 (Q12) */
-			vec[i] = -32768;           
+			vec[i] = -32768;
 		} else
 		{
 			sign[i] = -32768;            /* sign = -1 (Q12) */
-			vec[i] = 32767;            
+			vec[i] = 32767;
 			dn[i] = -val;
 			dn2[i] = -ps;
 		}
@@ -302,19 +302,19 @@ void ACELP_4t64_fx(
 	{
 		for (k = 0; k < NB_MAX; k++)
 		{
-			ps = -1;                       
+			ps = -1;
 			for (j = i; j < L_SUBFR; j += STEP)
 			{
 				if(dn2[j] > ps)
 				{
-					ps = dn2[j];          
-					pos = j;               
+					ps = dn2[j];
+					pos = j;
 				}
 			}
 			dn2[pos] = (k - NB_MAX);     /* dn2 < 0 when position is selected */
 			if (k == 0)
 			{
-				pos_max[i] = pos;          
+				pos_max[i] = pos;
 			}
 		}
 	}
@@ -335,22 +335,22 @@ void ACELP_4t64_fx(
 
 	/* impulse response buffer for fast computation */
 
-	h = h_buf;                             
-	h_inv = h_buf + (2 * L_SUBFR);   
+	h = h_buf;
+	h_inv = h_buf + (2 * L_SUBFR);
 	L_tmp = 0;
 	for (i = 0; i < L_SUBFR; i++)
 	{
-		*h++ = 0;                          
-		*h_inv++ = 0;   
+		*h++ = 0;
+		*h_inv++ = 0;
 		L_tmp += (H[i] * H[i]) << 1;
 	}
 	/* scale h[] down (/2) when energy of h[] is high with many pulses used */
 	val = extract_h(L_tmp);
-	h_shift = 0;                           
+	h_shift = 0;
 
 	if ((nb_pulse >= 12) && (val > 1024))
 	{
-		h_shift = 1;                       
+		h_shift = 1;
 	}
 	p0 = H;
 	p1 = h;
@@ -358,14 +358,14 @@ void ACELP_4t64_fx(
 
 	for (i = 0; i < L_SUBFR/4; i++)
 	{
-		*p1 = *p0++ >> h_shift;         
-		*p2++ = -(*p1++);  
-		*p1 = *p0++ >> h_shift;         
-		*p2++ = -(*p1++); 
-		*p1 = *p0++ >> h_shift;         
-		*p2++ = -(*p1++); 
-		*p1 = *p0++ >> h_shift;         
-		*p2++ = -(*p1++); 
+		*p1 = *p0++ >> h_shift;
+		*p2++ = -(*p1++);
+		*p1 = *p0++ >> h_shift;
+		*p2++ = -(*p1++);
+		*p1 = *p0++ >> h_shift;
+		*p2++ = -(*p1++);
+		*p1 = *p0++ >> h_shift;
+		*p2++ = -(*p1++);
 	}
 
 	/*------------------------------------------------------------*
@@ -377,27 +377,27 @@ void ACELP_4t64_fx(
 	/* storage order --> i3i3, i2i2, i1i1, i0i0 */
 
 	/* Init pointers to last position of rrixix[] */
-	p0 = &rrixix[0][NB_POS - 1];           
-	p1 = &rrixix[1][NB_POS - 1];           
-	p2 = &rrixix[2][NB_POS - 1];           
-	p3 = &rrixix[3][NB_POS - 1];           
+	p0 = &rrixix[0][NB_POS - 1];
+	p1 = &rrixix[1][NB_POS - 1];
+	p2 = &rrixix[2][NB_POS - 1];
+	p3 = &rrixix[3][NB_POS - 1];
 
-	ptr_h1 = h;                            
+	ptr_h1 = h;
 	cor = 0x00008000L;                             /* for rounding */
 	for (i = 0; i < NB_POS; i++)
 	{
 		cor += vo_L_mult((*ptr_h1), (*ptr_h1));
 		ptr_h1++;
-		*p3-- = extract_h(cor);            
+		*p3-- = extract_h(cor);
 		cor += vo_L_mult((*ptr_h1), (*ptr_h1));
 		ptr_h1++;
-		*p2-- = extract_h(cor);            
+		*p2-- = extract_h(cor);
 		cor += vo_L_mult((*ptr_h1), (*ptr_h1));
 		ptr_h1++;
-		*p1-- = extract_h(cor);            
+		*p1-- = extract_h(cor);
 		cor += vo_L_mult((*ptr_h1), (*ptr_h1));
 		ptr_h1++;
-		*p0-- = extract_h(cor);            
+		*p0-- = extract_h(cor);
 	}
 
 	/*------------------------------------------------------------*
@@ -409,38 +409,38 @@ void ACELP_4t64_fx(
 
 	/* storage order --> i2i3, i1i2, i0i1, i3i0 */
 
-	pos = MSIZE - 1;                       
-	ptr_hf = h + 1;                        
+	pos = MSIZE - 1;
+	ptr_hf = h + 1;
 
 	for (k = 0; k < NB_POS; k++)
 	{
-		p3 = &rrixiy[2][pos];              
-		p2 = &rrixiy[1][pos];              
-		p1 = &rrixiy[0][pos];              
-		p0 = &rrixiy[3][pos - NB_POS];     
+		p3 = &rrixiy[2][pos];
+		p2 = &rrixiy[1][pos];
+		p1 = &rrixiy[0][pos];
+		p0 = &rrixiy[3][pos - NB_POS];
 
 		cor = 0x00008000L;                   /* for rounding */
-		ptr_h1 = h;                        
-		ptr_h2 = ptr_hf;                   
+		ptr_h1 = h;
+		ptr_h2 = ptr_hf;
 
 		for (i = k + 1; i < NB_POS; i++)
 		{
 			cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 			ptr_h1++;
 			ptr_h2++;
-			*p3 = extract_h(cor);          
+			*p3 = extract_h(cor);
 			cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 			ptr_h1++;
 			ptr_h2++;
-			*p2 = extract_h(cor);          
+			*p2 = extract_h(cor);
 			cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 			ptr_h1++;
 			ptr_h2++;
-			*p1 = extract_h(cor);          
+			*p1 = extract_h(cor);
 			cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 			ptr_h1++;
 			ptr_h2++;
-			*p0 = extract_h(cor);         
+			*p0 = extract_h(cor);
 
 			p3 -= (NB_POS + 1);
 			p2 -= (NB_POS + 1);
@@ -450,15 +450,15 @@ void ACELP_4t64_fx(
 		cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 		ptr_h1++;
 		ptr_h2++;
-		*p3 = extract_h(cor);              
+		*p3 = extract_h(cor);
 		cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 		ptr_h1++;
 		ptr_h2++;
-		*p2 = extract_h(cor);              
+		*p2 = extract_h(cor);
 		cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 		ptr_h1++;
 		ptr_h2++;
-		*p1 = extract_h(cor);              
+		*p1 = extract_h(cor);
 
 		pos -= NB_POS;
 		ptr_hf += STEP;
@@ -466,38 +466,38 @@ void ACELP_4t64_fx(
 
 	/* storage order --> i3i0, i2i3, i1i2, i0i1 */
 
-	pos = MSIZE - 1;                       
-	ptr_hf = h + 3;                        
+	pos = MSIZE - 1;
+	ptr_hf = h + 3;
 
 	for (k = 0; k < NB_POS; k++)
 	{
-		p3 = &rrixiy[3][pos];              
-		p2 = &rrixiy[2][pos - 1];          
-		p1 = &rrixiy[1][pos - 1];          
-		p0 = &rrixiy[0][pos - 1];          
+		p3 = &rrixiy[3][pos];
+		p2 = &rrixiy[2][pos - 1];
+		p1 = &rrixiy[1][pos - 1];
+		p0 = &rrixiy[0][pos - 1];
 
 		cor = 0x00008000L;								/* for rounding */
-		ptr_h1 = h;                        
-		ptr_h2 = ptr_hf;                   
+		ptr_h1 = h;
+		ptr_h2 = ptr_hf;
 
 		for (i = k + 1; i < NB_POS; i++)
 		{
 			cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 			ptr_h1++;
 			ptr_h2++;
-			*p3 = extract_h(cor);          
+			*p3 = extract_h(cor);
 			cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 			ptr_h1++;
 			ptr_h2++;
-			*p2 = extract_h(cor);          
+			*p2 = extract_h(cor);
 			cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 			ptr_h1++;
 			ptr_h2++;
-			*p1 = extract_h(cor);          
+			*p1 = extract_h(cor);
 			cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 			ptr_h1++;
 			ptr_h2++;
-			*p0 = extract_h(cor);          
+			*p0 = extract_h(cor);
 
 			p3 -= (NB_POS + 1);
 			p2 -= (NB_POS + 1);
@@ -507,7 +507,7 @@ void ACELP_4t64_fx(
 		cor += vo_L_mult((*ptr_h1), (*ptr_h2));
 		ptr_h1++;
 		ptr_h2++;
-		*p3 = extract_h(cor);              
+		*p3 = extract_h(cor);
 
 		pos--;
 		ptr_hf += STEP;
@@ -517,22 +517,22 @@ void ACELP_4t64_fx(
 	 * Modification of rrixiy[][] to take signs into account.     *
 	 *------------------------------------------------------------*/
 
-	p0 = &rrixiy[0][0];                    
+	p0 = &rrixiy[0][0];
 
 	for (k = 0; k < NB_TRACK; k++)
 	{
 		j_temp = (k + 1)&0x03;
 		for (i = k; i < L_SUBFR; i += STEP)
 		{
-			psign = sign;                  
+			psign = sign;
 			if (psign[i] < 0)
 			{
-				psign = vec;               
+				psign = vec;
 			}
 			j = j_temp;
 			for (; j < L_SUBFR; j += STEP)
 			{
-				*p0 = vo_mult(*p0, psign[j]);    
+				*p0 = vo_mult(*p0, psign[j]);
 				p0++;
 			}
 		}
@@ -542,8 +542,8 @@ void ACELP_4t64_fx(
 	 *                       Deep first search                           *
 	 *-------------------------------------------------------------------*/
 
-	psk = -1;                              
-	alpk = 1;                              
+	psk = -1;
+	alpk = 1;
 
 	for (k = 0; k < nbiter; k++)
 	{
@@ -553,12 +553,12 @@ void ACELP_4t64_fx(
 
 		if(nbbits == 20)
 		{
-			pos = 0;                       
-			ps = 0;                        
-			alp = 0;                       
+			pos = 0;
+			ps = 0;
+			alp = 0;
 			for (i = 0; i < L_SUBFR; i++)
 			{
-				vec[i] = 0;                
+				vec[i] = 0;
 			}
 		} else if ((nbbits == 36) || (nbbits == 44))
 		{
@@ -591,18 +591,18 @@ void ACELP_4t64_fx(
 
 			if(nbbits == 44)
 			{
-				ipos[8] = 0;               
-				ipos[9] = 1;               
+				ipos[8] = 0;
+				ipos[9] = 1;
 			}
 		} else
 		{
 			/* first stage: fix 4 pulses */
 			pos = 4;
 
-			ix = ind[0] = pos_max[ipos[0]];  
-			iy = ind[1] = pos_max[ipos[1]];  
-			i = ind[2] = pos_max[ipos[2]];   
-			j = ind[3] = pos_max[ipos[3]];   
+			ix = ind[0] = pos_max[ipos[0]];
+			iy = ind[1] = pos_max[ipos[1]];
+			i = ind[2] = pos_max[ipos[2]];
+			j = ind[3] = pos_max[ipos[3]];
 			ps = add1(add1(add1(dn[ix], dn[iy]), dn[i]), dn[j]);
 
 			if (sign[ix] < 0)
@@ -636,8 +636,8 @@ void ACELP_4t64_fx(
 
 			if(nbbits == 72)
 			{
-				ipos[16] = 0;              
-				ipos[17] = 1;              
+				ipos[16] = 0;
+				ipos[17] = 1;
 			}
 		}
 
@@ -668,8 +668,8 @@ void ACELP_4t64_fx(
 			search_ixiy(nbpos[st], ipos[j], ipos[j + 1], &ps, &alp,
 					&ix, &iy, dn, dn2, cor_x, cor_y, rrixiy);
 
-			ind[j] = ix;                   
-			ind[j + 1] = iy;               
+			ind[j] = ix;
+			ind[j + 1] = iy;
 
 			if (sign[ix] < 0)
 				p0 = h_inv - ix;
@@ -682,10 +682,10 @@ void ACELP_4t64_fx(
 
 			for (i = 0; i < L_SUBFR; i+=4)
 			{
-				vec[i]   += add1((*p0++), (*p1++));       
-				vec[i+1] += add1((*p0++), (*p1++));        
-				vec[i+2] += add1((*p0++), (*p1++));        
-				vec[i+3] += add1((*p0++), (*p1++));      
+				vec[i]   += add1((*p0++), (*p1++));
+				vec[i+1] += add1((*p0++), (*p1++));
+				vec[i+2] += add1((*p0++), (*p1++));
+				vec[i+3] += add1((*p0++), (*p1++));
 			}
 		}
 		/* memorise the best codevector */
@@ -693,15 +693,15 @@ void ACELP_4t64_fx(
 		s = vo_L_msu(vo_L_mult(alpk, ps), psk, alp);
 		if (s > 0)
 		{
-			psk = ps;                      
-			alpk = alp;                    
+			psk = ps;
+			alpk = alp;
 			for (i = 0; i < nb_pulse; i++)
 			{
-				codvec[i] = ind[i];        
+				codvec[i] = ind[i];
 			}
 			for (i = 0; i < L_SUBFR; i++)
 			{
-				y[i] = vec[i];             
+				y[i] = vec[i];
 			}
 		}
 	}
@@ -710,11 +710,11 @@ void ACELP_4t64_fx(
 	 *-------------------------------------------------------------------*/
 	for (i = 0; i < NPMAXPT * NB_TRACK; i++)
 	{
-		ind[i] = -1;                       
+		ind[i] = -1;
 	}
 	for (i = 0; i < L_SUBFR; i++)
 	{
-		code[i] = 0;                       
+		code[i] = 0;
 		y[i] = vo_shr_r(y[i], 3);               /* Q12 to Q9 */
 	}
 	val = (512 >> h_shift);               /* codeword in Q9 format */
@@ -727,12 +727,12 @@ void ACELP_4t64_fx(
 
 		if (j > 0)
 		{
-			code[i] += val;   
-			codvec[k] += 128;  
+			code[i] += val;
+			codvec[k] += 128;
 		} else
 		{
-			code[i] -= val;   
-			index += NB_POS;    
+			code[i] -= val;
+			index += NB_POS;
 		}
 
 		i = (Word16)((vo_L_mult(track, NPMAXPT) >> 1));
@@ -741,10 +741,10 @@ void ACELP_4t64_fx(
 		{
 			i += 1;
 		}
-		ind[i] = index;                    
+		ind[i] = index;
 	}
 
-	k = 0;                                 
+	k = 0;
 	/* Build index of codevector */
 	if(nbbits == 20)
 	{
@@ -849,20 +849,20 @@ void cor_h_vec_30(
 		p2 = &vec[pos];
 		for (j=pos;j < L_SUBFR; j++)
 		{
-			L_sum1 += *p1 * *p2;		
+			L_sum1 += *p1 * *p2;
 			p2-=3;
-			L_sum2 += *p1++ * *p2;		
+			L_sum2 += *p1++ * *p2;
 			p2+=4;
 		}
 		p2-=3;
-		L_sum2 += *p1++ * *p2++;	
-		L_sum2 += *p1++ * *p2++;	
-		L_sum2 += *p1++ * *p2++;	
+		L_sum2 += *p1++ * *p2++;
+		L_sum2 += *p1++ * *p2++;
+		L_sum2 += *p1++ * *p2++;
 
 		L_sum1 = (L_sum1 << 2);
 		L_sum2 = (L_sum2 << 2);
 
-		corr = vo_round(L_sum1);	
+		corr = vo_round(L_sum1);
 		*cor_x++ = vo_mult(corr, sign[pos]) + (*p0++);
 		corr = vo_round(L_sum2);
 		*cor_y++ = vo_mult(corr, sign[pos-3]) + (*p3++);
@@ -873,20 +873,20 @@ void cor_h_vec_30(
 		p2 = &vec[pos];
 		for (j=pos;j < L_SUBFR; j++)
 		{
-			L_sum1 += *p1 * *p2;		
+			L_sum1 += *p1 * *p2;
 			p2-=3;
-			L_sum2 += *p1++ * *p2;		
+			L_sum2 += *p1++ * *p2;
 			p2+=4;
 		}
 		p2-=3;
-		L_sum2 += *p1++ * *p2++;	
-		L_sum2 += *p1++ * *p2++;	
-		L_sum2 += *p1++ * *p2++;	
+		L_sum2 += *p1++ * *p2++;
+		L_sum2 += *p1++ * *p2++;
+		L_sum2 += *p1++ * *p2++;
 
 		L_sum1 = (L_sum1 << 2);
 		L_sum2 = (L_sum2 << 2);
 
-		corr = vo_round(L_sum1);	
+		corr = vo_round(L_sum1);
 		*cor_x++ = vo_mult(corr, sign[pos]) + (*p0++);
 		corr = vo_round(L_sum2);
 		*cor_y++ = vo_mult(corr, sign[pos-3]) + (*p3++);
@@ -982,17 +982,17 @@ void search_ixiy(
 	Word16 *p0, *p1, *p2;
 	Word32 s, alp0, alp1, alp2;
 
-	p0 = cor_x;                            
-	p1 = cor_y;                            
-	p2 = rrixiy[track_x];                  
+	p0 = cor_x;
+	p1 = cor_y;
+	p2 = rrixiy[track_x];
 
 	thres_ix = nb_pos_ix - NB_MAX;
 
 	alp0 = L_deposit_h(*alp);
 	alp0 = (alp0 + 0x00008000L);       /* for rounding */
 
-	sqk = -1;                              
-	alpk = 1;                              
+	sqk = -1;
+	alpk = 1;
 
 	for (x = track_x; x < L_SUBFR; x += STEP)
 	{
@@ -1014,17 +1014,17 @@ void search_ixiy(
 
 				if (s > 0)
 				{
-					sqk = sq;              
-					alpk = alp_16;         
-					pos = y;               
+					sqk = sq;
+					alpk = alp_16;
+					pos = y;
 				}
 			}
 			p1 -= NB_POS;
 
 			if (pos >= 0)
 			{
-				*ix = x;                   
-				*iy = pos;                 
+				*ix = x;
+				*iy = pos;
 			}
 		} else
 		{
@@ -1032,8 +1032,8 @@ void search_ixiy(
 		}
 	}
 
-	*ps = add1(*ps, add1(dn[*ix], dn[*iy])); 
-	*alp = alpk;                           
+	*ps = add1(*ps, add1(dn[*ix], dn[*iy]));
+	*alp = alpk;
 
 	return;
 }
