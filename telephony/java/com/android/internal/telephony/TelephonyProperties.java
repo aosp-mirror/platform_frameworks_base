@@ -79,6 +79,15 @@ public interface TelephonyProperties
      */
     static final String PROPERTY_LTE_ON_CDMA_PRODUCT_TYPE = "telephony.lteOnCdmaProductType";
 
+    /**
+     * The contents of this property is the one of {@link Phone#LTE_ON_CDMA_TRUE} or
+     * {@link Phone#LTE_ON_CDMA_FALSE}. If absent the value will assumed to be false
+     * and the {@see #PROPERTY_LTE_ON_CDMA_PRODUCT_TYPE} will be used to determine its
+     * final value which could also be {@link Phone#LTE_ON_CDMA_FALSE}.
+     * {@see BaseCommands#getLteOnCdmaMode()}
+     */
+    static final String PROPERTY_LTE_ON_CDMA_DEVICE = "telephony.lteOnCdmaDevice";
+
     static final String CURRENT_ACTIVE_PHONE = "gsm.current.phone-type";
 
     //****** SIM Card
