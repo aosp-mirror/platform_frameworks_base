@@ -23,6 +23,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.widget.Toast;
 import android.util.Log;
 import android.location.LocationManager;
@@ -44,8 +46,12 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
     private static final int POSITIVE_BUTTON = AlertDialog.BUTTON_POSITIVE;
     private static final int NEGATIVE_BUTTON = AlertDialog.BUTTON_NEGATIVE;
 
+    private static final int GPS_NO_RESPONSE_TIME_OUT = 1;
     // Received ID from intent, -1 when no notification is in progress
     private int notificationId = -1;
+    private int timeout = -1;
+    private int default_response = -1;
+    private int default_response_timeout = 6;
 
     /** Used to detect when NI request is received */
     private BroadcastReceiver mNetInitiatedReceiver = new BroadcastReceiver() {
@@ -54,6 +60,21 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
             if (DEBUG) Log.d(TAG, "NetInitiatedReceiver onReceive: " + intent.getAction());
             if (intent.getAction() == GpsNetInitiatedHandler.ACTION_NI_VERIFY) {
                 handleNIVerify(intent);
+            }
+        }
+    };
+
+    private final Handler mHandler = new Handler() {
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case GPS_NO_RESPONSE_TIME_OUT: {
+                if (notificationId != -1) {
+                    sendUserResponse(default_response);
+                }
+                finish();
+            }
+            break;
+            default:
             }
         }
     };
@@ -75,8 +96,11 @@ public class NetInitiatedActivity extends AlertActivity implements DialogInterfa
         p.mNegativeButtonListener = this;
 
         notificationId = intent.getIntExtra(GpsNetInitiatedHandler.NI_INTENT_KEY_NOTIF_ID, -1);
-        if (DEBUG) Log.d(TAG, "onCreate, notifId: " + notificationId);
+        timeout = intent.getIntExtra(GpsNetInitiatedHandler.NI_INTENT_KEY_TIMEOUT, default_response_timeout);
+        default_response = intent.getIntExtra(GpsNetInitiatedHandler.NI_INTENT_KEY_DEFAULT_RESPONSE, GpsNetInitiatedHandler.GPS_NI_RESPONSE_ACCEPT);
+        if (DEBUG) Log.d(TAG, "onCreate() : notificationId: " + notificationId + " timeout: " + timeout + " default_response:" + default_response);
 
+        mHandler.sendMessageDelayed(mHandler.obtainMessage(GPS_NO_RESPONSE_TIME_OUT), (timeout * 1000));
         setupAlert();
     }
 
