@@ -42,10 +42,6 @@ final class InputMonitor {
     // When true, need to call updateInputWindowsLw().
     private boolean mUpdateInputWindowsNeeded = true;
 
-    // Fake handles for the drag surface, lazily initialized.
-    private InputApplicationHandle mDragApplicationHandle;
-    private InputWindowHandle mDragWindowHandle;
-
     // Array of window handles to provide to the input dispatcher.
     private InputWindowHandle[] mInputWindowHandles;
     private int mInputWindowHandleCount;
@@ -121,44 +117,6 @@ final class InputMonitor {
         return 0; // abort dispatching
     }
 
-    private void addDragInputWindowLw() {
-        if (mDragWindowHandle == null) {
-            mDragApplicationHandle = new InputApplicationHandle(null);
-            mDragApplicationHandle.name = "drag";
-            mDragApplicationHandle.dispatchingTimeoutNanos =
-                    WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
-
-            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null);
-            mDragWindowHandle.name = "drag";
-            mDragWindowHandle.layoutParamsFlags = 0;
-            mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
-            mDragWindowHandle.dispatchingTimeoutNanos =
-                    WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
-            mDragWindowHandle.visible = true;
-            mDragWindowHandle.canReceiveKeys = false;
-            mDragWindowHandle.hasFocus = true;
-            mDragWindowHandle.hasWallpaper = false;
-            mDragWindowHandle.paused = false;
-            mDragWindowHandle.ownerPid = Process.myPid();
-            mDragWindowHandle.ownerUid = Process.myUid();
-            mDragWindowHandle.inputFeatures = 0;
-            mDragWindowHandle.scaleFactor = 1.0f;
-
-            // The drag window cannot receive new touches.
-            mDragWindowHandle.touchableRegion.setEmpty();
-        }
-
-        mDragWindowHandle.layer = mService.mDragState.getDragLayerLw();
-
-        // The drag window covers the entire display
-        mDragWindowHandle.frameLeft = 0;
-        mDragWindowHandle.frameTop = 0;
-        mDragWindowHandle.frameRight = mService.mDisplay.getRealWidth();
-        mDragWindowHandle.frameBottom = mService.mDisplay.getRealHeight();
-
-        addInputWindowHandleLw(mDragWindowHandle);
-    }
-
     private void addInputWindowHandleLw(InputWindowHandle windowHandle) {
         if (mInputWindowHandles == null) {
             mInputWindowHandles = new InputWindowHandle[16];
@@ -202,7 +160,7 @@ final class InputMonitor {
             if (WindowManagerService.DEBUG_DRAG) {
                 Log.d(WindowManagerService.TAG, "Inserting drag window");
             }
-            addDragInputWindowLw();
+            addInputWindowHandleLw(mService.mDragState.mDragWindowHandle);
         }
 
         final int N = windows.size();
