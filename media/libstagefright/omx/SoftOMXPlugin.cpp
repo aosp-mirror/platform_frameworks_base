@@ -38,7 +38,6 @@ static const struct {
     { "OMX.google.amrnb.decoder", "amrdec", "audio_decoder.amrnb" },
     { "OMX.google.amrwb.decoder", "amrdec", "audio_decoder.amrwb" },
     { "OMX.google.h264.decoder", "h264dec", "video_decoder.avc" },
-    { "OMX.google.avc.decoder", "avcdec", "video_decoder.avc" },
     { "OMX.google.g711.alaw.decoder", "g711dec", "audio_decoder.g711alaw" },
     { "OMX.google.g711.mlaw.decoder", "g711dec", "audio_decoder.g711mlaw" },
     { "OMX.google.h263.decoder", "mpeg4dec", "video_decoder.h263" },
