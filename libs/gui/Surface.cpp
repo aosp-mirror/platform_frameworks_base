@@ -46,59 +46,6 @@
 
 namespace android {
 
-// ----------------------------------------------------------------------
-
-static status_t copyBlt(
-        const sp<GraphicBuffer>& dst, 
-        const sp<GraphicBuffer>& src, 
-        const Region& reg)
-{
-    // src and dst with, height and format must be identical. no verification
-    // is done here.
-    status_t err;
-    uint8_t const * src_bits = NULL;
-    err = src->lock(GRALLOC_USAGE_SW_READ_OFTEN, reg.bounds(), (void**)&src_bits);
-    LOGE_IF(err, "error locking src buffer %s", strerror(-err));
-
-    uint8_t* dst_bits = NULL;
-    err = dst->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, reg.bounds(), (void**)&dst_bits);
-    LOGE_IF(err, "error locking dst buffer %s", strerror(-err));
-
-    Region::const_iterator head(reg.begin());
-    Region::const_iterator tail(reg.end());
-    if (head != tail && src_bits && dst_bits) {
-        const size_t bpp = bytesPerPixel(src->format);
-        const size_t dbpr = dst->stride * bpp;
-        const size_t sbpr = src->stride * bpp;
-
-        while (head != tail) {
-            const Rect& r(*head++);
-            ssize_t h = r.height();
-            if (h <= 0) continue;
-            size_t size = r.width() * bpp;
-            uint8_t const * s = src_bits + (r.left + src->stride * r.top) * bpp;
-            uint8_t       * d = dst_bits + (r.left + dst->stride * r.top) * bpp;
-            if (dbpr==sbpr && size==sbpr) {
-                size *= h;
-                h = 1;
-            }
-            do {
-                memcpy(d, s, size);
-                d += dbpr;
-                s += sbpr;
-            } while (--h > 0);
-        }
-    }
-    
-    if (src_bits)
-        src->unlock();
-    
-    if (dst_bits)
-        dst->unlock();
-    
-    return err;
-}
-
 // ============================================================================
 //  SurfaceControl
 // ============================================================================
@@ -277,7 +224,8 @@ sp<Surface> SurfaceControl::getSurface() const
 // ---------------------------------------------------------------------------
 
 Surface::Surface(const sp<SurfaceControl>& surface)
-    : mInitCheck(NO_INIT),
+    : SurfaceTextureClient(),
+      mInitCheck(NO_INIT),
       mSurface(surface->mSurface),
       mIdentity(surface->mIdentity),
       mFormat(surface->mFormat), mFlags(surface->mFlags),
@@ -287,7 +235,8 @@ Surface::Surface(const sp<SurfaceControl>& surface)
 }
 
 Surface::Surface(const Parcel& parcel, const sp<IBinder>& ref)
-    : mInitCheck(NO_INIT)
+    : SurfaceTextureClient(),
+      mInitCheck(NO_INIT)
 {
     mSurface    = interface_cast<ISurface>(ref);
     mIdentity   = parcel.readInt32();
@@ -363,36 +312,21 @@ void Surface::cleanCachedSurfacesLocked() {
 
 void Surface::init()
 {
-    ANativeWindow::setSwapInterval  = setSwapInterval;
-    ANativeWindow::dequeueBuffer    = dequeueBuffer;
-    ANativeWindow::cancelBuffer     = cancelBuffer;
-    ANativeWindow::lockBuffer       = lockBuffer;
-    ANativeWindow::queueBuffer      = queueBuffer;
-    ANativeWindow::query            = query;
-    ANativeWindow::perform          = perform;
-
     if (mSurface != NULL) {
         sp<ISurfaceTexture> surfaceTexture(mSurface->getSurfaceTexture());
         LOGE_IF(surfaceTexture==0, "got a NULL ISurfaceTexture from ISurface");
         if (surfaceTexture != NULL) {
-            mSurfaceTextureClient = new SurfaceTextureClient(surfaceTexture);
-            mSurfaceTextureClient->setUsage(GraphicBuffer::USAGE_HW_RENDER);
+            setISurfaceTexture(surfaceTexture);
+            setUsage(GraphicBuffer::USAGE_HW_RENDER);
         }
 
         DisplayInfo dinfo;
         SurfaceComposerClient::getDisplayInfo(0, &dinfo);
         const_cast<float&>(ANativeWindow::xdpi) = dinfo.xdpi;
         const_cast<float&>(ANativeWindow::ydpi) = dinfo.ydpi;
-
-        const_cast<int&>(ANativeWindow::minSwapInterval) =
-                mSurfaceTextureClient->minSwapInterval;
-
-        const_cast<int&>(ANativeWindow::maxSwapInterval) =
-                mSurfaceTextureClient->maxSwapInterval;
-
         const_cast<uint32_t&>(ANativeWindow::flags) = 0;
 
-        if (mSurfaceTextureClient != 0) {
+        if (surfaceTexture != NULL) {
             mInitCheck = NO_ERROR;
         }
     }
@@ -402,7 +336,6 @@ Surface::~Surface()
 {
     // clear all references and trigger an IPC now, to make sure things
     // happen without delay, since these resources are quite heavy.
-    mSurfaceTextureClient.clear();
     mSurface.clear();
     IPCThreadState::self()->flushCommands();
 }
@@ -431,77 +364,6 @@ sp<IBinder> Surface::asBinder() const {
 
 // ----------------------------------------------------------------------------
 
-int Surface::setSwapInterval(ANativeWindow* window, int interval) {
-    Surface* self = getSelf(window);
-    return self->setSwapInterval(interval);
-}
-
-int Surface::dequeueBuffer(ANativeWindow* window, 
-        ANativeWindowBuffer** buffer) {
-    Surface* self = getSelf(window);
-    return self->dequeueBuffer(buffer);
-}
-
-int Surface::cancelBuffer(ANativeWindow* window,
-        ANativeWindowBuffer* buffer) {
-    Surface* self = getSelf(window);
-    return self->cancelBuffer(buffer);
-}
-
-int Surface::lockBuffer(ANativeWindow* window, 
-        ANativeWindowBuffer* buffer) {
-    Surface* self = getSelf(window);
-    return self->lockBuffer(buffer);
-}
-
-int Surface::queueBuffer(ANativeWindow* window, 
-        ANativeWindowBuffer* buffer) {
-    Surface* self = getSelf(window);
-    return self->queueBuffer(buffer);
-}
-
-int Surface::query(const ANativeWindow* window,
-        int what, int* value) {
-    const Surface* self = getSelf(window);
-    return self->query(what, value);
-}
-
-int Surface::perform(ANativeWindow* window, 
-        int operation, ...) {
-    va_list args;
-    va_start(args, operation);
-    Surface* self = getSelf(window);
-    int res = self->perform(operation, args);
-    va_end(args);
-    return res;
-}
-
-// ----------------------------------------------------------------------------
-
-int Surface::setSwapInterval(int interval) {
-    return mSurfaceTextureClient->setSwapInterval(interval);
-}
-
-int Surface::dequeueBuffer(ANativeWindowBuffer** buffer) {
-    status_t err = mSurfaceTextureClient->dequeueBuffer(buffer);
-    if (err == NO_ERROR) {
-        mDirtyRegion.set(buffer[0]->width, buffer[0]->height);
-    }
-    return err;
-}
-
-int Surface::cancelBuffer(ANativeWindowBuffer* buffer) {
-    return mSurfaceTextureClient->cancelBuffer(buffer);
-}
-
-int Surface::lockBuffer(ANativeWindowBuffer* buffer) {
-    return mSurfaceTextureClient->lockBuffer(buffer);
-}
-
-int Surface::queueBuffer(ANativeWindowBuffer* buffer) {
-    return mSurfaceTextureClient->queueBuffer(buffer);
-}
-
 int Surface::query(int what, int* value) const {
     switch (what) {
     case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
@@ -509,141 +371,39 @@ int Surface::query(int what, int* value) const {
         *value = 1;
         return NO_ERROR;
     case NATIVE_WINDOW_CONCRETE_TYPE:
-        // TODO: this is not needed anymore
         *value = NATIVE_WINDOW_SURFACE;
         return NO_ERROR;
     }
-    return mSurfaceTextureClient->query(what, value);
-}
-
-int Surface::perform(int operation, va_list args) {
-    return mSurfaceTextureClient->perform(operation, args);
+    return SurfaceTextureClient::query(what, value);
 }
 
 // ----------------------------------------------------------------------------
 
-int Surface::getConnectedApi() const {
-    return mSurfaceTextureClient->getConnectedApi();
-}
+status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn) {
+    ANativeWindow_Buffer outBuffer;
 
-// ----------------------------------------------------------------------------
-
-status_t Surface::lock(SurfaceInfo* info, bool blocking) {
-    return Surface::lock(info, NULL, blocking);
-}
-
-status_t Surface::lock(SurfaceInfo* other, Region* dirtyIn, bool blocking) 
-{
-    if (getConnectedApi()) {
-        LOGE("Surface::lock(%p) failed. Already connected to another API",
-                (ANativeWindow*)this);
-        CallStack stack;
-        stack.update();
-        stack.dump("");
-        return INVALID_OPERATION;
+    ARect temp;
+    ARect* inOutDirtyBounds = NULL;
+    if (dirtyIn) {
+        temp = dirtyIn->getBounds();
+        inOutDirtyBounds = &temp;
     }
 
-    if (mApiLock.tryLock() != NO_ERROR) {
-        LOGE("calling Surface::lock from different threads!");
-        CallStack stack;
-        stack.update();
-        stack.dump("");
-        return WOULD_BLOCK;
-    }
+    status_t err = SurfaceTextureClient::lock(&outBuffer, inOutDirtyBounds);
 
-    /* Here we're holding mApiLock */
-    
-    if (mLockedBuffer != 0) {
-        LOGE("Surface::lock failed, already locked");
-        mApiLock.unlock();
-        return INVALID_OPERATION;
-    }
-
-    // we're intending to do software rendering from this point
-    mSurfaceTextureClient->setUsage(
-            GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN);
-
-    ANativeWindowBuffer* out;
-    status_t err = mSurfaceTextureClient->dequeueBuffer(&out);
-    LOGE_IF(err, "dequeueBuffer failed (%s)", strerror(-err));
     if (err == NO_ERROR) {
-        sp<GraphicBuffer> backBuffer(GraphicBuffer::getSelf(out));
-        err = mSurfaceTextureClient->lockBuffer(backBuffer.get());
-        LOGE_IF(err, "lockBuffer (handle=%p) failed (%s)",
-                backBuffer->handle, strerror(-err));
-        if (err == NO_ERROR) {
-            const Rect bounds(backBuffer->width, backBuffer->height);
-            const Region boundsRegion(bounds);
-            Region scratch(boundsRegion);
-            Region& newDirtyRegion(dirtyIn ? *dirtyIn : scratch);
-            newDirtyRegion &= boundsRegion;
-
-            // figure out if we can copy the frontbuffer back
-            const sp<GraphicBuffer>& frontBuffer(mPostedBuffer);
-            const bool canCopyBack = (frontBuffer != 0 &&
-                    backBuffer->width  == frontBuffer->width &&
-                    backBuffer->height == frontBuffer->height &&
-                    backBuffer->format == frontBuffer->format &&
-                    !(mFlags & ISurfaceComposer::eDestroyBackbuffer));
-
-            // the dirty region we report to surfaceflinger is the one
-            // given by the user (as opposed to the one *we* return to the
-            // user).
-            mDirtyRegion = newDirtyRegion;
-
-            if (canCopyBack) {
-                // copy the area that is invalid and not repainted this round
-                const Region copyback(mOldDirtyRegion.subtract(newDirtyRegion));
-                if (!copyback.isEmpty())
-                    copyBlt(backBuffer, frontBuffer, copyback);
-            } else {
-                // if we can't copy-back anything, modify the user's dirty
-                // region to make sure they redraw the whole buffer
-                newDirtyRegion = boundsRegion;
-            }
-
-            // keep track of the are of the buffer that is "clean"
-            // (ie: that will be redrawn)
-            mOldDirtyRegion = newDirtyRegion;
-
-            void* vaddr;
-            status_t res = backBuffer->lock(
-                    GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN,
-                    newDirtyRegion.bounds(), &vaddr);
-            
-            LOGW_IF(res, "failed locking buffer (handle = %p)", 
-                    backBuffer->handle);
-
-            mLockedBuffer = backBuffer;
-            other->w      = backBuffer->width;
-            other->h      = backBuffer->height;
-            other->s      = backBuffer->stride;
-            other->usage  = backBuffer->usage;
-            other->format = backBuffer->format;
-            other->bits   = vaddr;
-        }
+        other->w = uint32_t(outBuffer.width);
+        other->h = uint32_t(outBuffer.height);
+        other->s = uint32_t(outBuffer.stride);
+        other->usage = GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN;
+        other->format = uint32_t(outBuffer.format);
+        other->bits = outBuffer.bits;
     }
-    mApiLock.unlock();
     return err;
 }
-    
-status_t Surface::unlockAndPost() 
-{
-    if (mLockedBuffer == 0) {
-        LOGE("Surface::unlockAndPost failed, no locked buffer");
-        return INVALID_OPERATION;
-    }
 
-    status_t err = mLockedBuffer->unlock();
-    LOGE_IF(err, "failed unlocking buffer (%p)", mLockedBuffer->handle);
-    
-    err = mSurfaceTextureClient->queueBuffer(mLockedBuffer.get());
-    LOGE_IF(err, "queueBuffer (handle=%p) failed (%s)",
-            mLockedBuffer->handle, strerror(-err));
-
-    mPostedBuffer = mLockedBuffer;
-    mLockedBuffer = 0;
-    return err;
+status_t Surface::unlockAndPost() {
+    return SurfaceTextureClient::unlockAndPost();
 }
 
 // ----------------------------------------------------------------------------

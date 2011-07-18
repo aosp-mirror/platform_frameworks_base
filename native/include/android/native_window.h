@@ -99,10 +99,16 @@ int32_t ANativeWindow_getFormat(ANativeWindow* window);
  * width and height must be either both zero or both non-zero.
  *
  */
-int32_t ANativeWindow_setBuffersGeometry(ANativeWindow* window, int32_t width, int32_t height, int32_t format);
+int32_t ANativeWindow_setBuffersGeometry(ANativeWindow* window,
+        int32_t width, int32_t height, int32_t format);
 
 /**
  * Lock the window's next drawing surface for writing.
+ * inOutDirtyBounds is used as an in/out parameter, upon entering the
+ * function, it contains the dirty region, that is, the region the caller
+ * intends to redraw. When the function returns, inOutDirtyBounds is updated
+ * with the actual area the caller needs to redraw -- this region is often
+ * extended by ANativeWindow_lock.
  */
 int32_t ANativeWindow_lock(ANativeWindow* window, ANativeWindow_Buffer* outBuffer,
         ARect* inOutDirtyBounds);

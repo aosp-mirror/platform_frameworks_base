@@ -21,6 +21,7 @@
 #include <gui/SurfaceTexture.h>
 
 #include <ui/egl/android_natives.h>
+#include <ui/Region.h>
 
 #include <utils/RefBase.h>
 #include <utils/threads.h>
@@ -37,29 +38,24 @@ public:
 
     sp<ISurfaceTexture> getISurfaceTexture() const;
 
-private:
-    friend class Surface;
+protected:
+    SurfaceTextureClient();
+    void setISurfaceTexture(const sp<ISurfaceTexture>& surfaceTexture);
 
+private:
     // can't be copied
     SurfaceTextureClient& operator = (const SurfaceTextureClient& rhs);
     SurfaceTextureClient(const SurfaceTextureClient& rhs);
+    void init();
 
     // ANativeWindow hooks
-    static int cancelBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
-    static int dequeueBuffer(ANativeWindow* window, ANativeWindowBuffer** buffer);
-    static int lockBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
-    static int perform(ANativeWindow* window, int operation, ...);
-    static int query(const ANativeWindow* window, int what, int* value);
-    static int queueBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
-    static int setSwapInterval(ANativeWindow* window, int interval);
-
-    int cancelBuffer(ANativeWindowBuffer* buffer);
-    int dequeueBuffer(ANativeWindowBuffer** buffer);
-    int lockBuffer(ANativeWindowBuffer* buffer);
-    int perform(int operation, va_list args);
-    int query(int what, int* value) const;
-    int queueBuffer(ANativeWindowBuffer* buffer);
-    int setSwapInterval(int interval);
+    static int hook_cancelBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
+    static int hook_dequeueBuffer(ANativeWindow* window, ANativeWindowBuffer** buffer);
+    static int hook_lockBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
+    static int hook_perform(ANativeWindow* window, int operation, ...);
+    static int hook_query(const ANativeWindow* window, int what, int* value);
+    static int hook_queueBuffer(ANativeWindow* window, ANativeWindowBuffer* buffer);
+    static int hook_setSwapInterval(ANativeWindow* window, int interval);
 
     int dispatchConnect(va_list args);
     int dispatchDisconnect(va_list args);
@@ -71,25 +67,37 @@ private:
     int dispatchSetBuffersTimestamp(va_list args);
     int dispatchSetCrop(va_list args);
     int dispatchSetUsage(va_list args);
+    int dispatchLock(va_list args);
+    int dispatchUnlockAndPost(va_list args);
 
-    int connect(int api);
-    int disconnect(int api);
-    int setBufferCount(int bufferCount);
-    int setBuffersDimensions(int w, int h);
-    int setBuffersFormat(int format);
-    int setBuffersTransform(int transform);
-    int setBuffersTimestamp(int64_t timestamp);
-    int setCrop(Rect const* rect);
-    int setUsage(uint32_t reqUsage);
+protected:
+    virtual int cancelBuffer(ANativeWindowBuffer* buffer);
+    virtual int dequeueBuffer(ANativeWindowBuffer** buffer);
+    virtual int lockBuffer(ANativeWindowBuffer* buffer);
+    virtual int perform(int operation, va_list args);
+    virtual int query(int what, int* value) const;
+    virtual int queueBuffer(ANativeWindowBuffer* buffer);
+    virtual int setSwapInterval(int interval);
 
-    void freeAllBuffers();
-    int getSlotFromBufferLocked(android_native_buffer_t* buffer) const;
-
-    int getConnectedApi() const;
+    virtual int connect(int api);
+    virtual int disconnect(int api);
+    virtual int setBufferCount(int bufferCount);
+    virtual int setBuffersDimensions(int w, int h);
+    virtual int setBuffersFormat(int format);
+    virtual int setBuffersTransform(int transform);
+    virtual int setBuffersTimestamp(int64_t timestamp);
+    virtual int setCrop(Rect const* rect);
+    virtual int setUsage(uint32_t reqUsage);
+    virtual int lock(ANativeWindow_Buffer* outBuffer, ARect* inOutDirtyBounds);
+    virtual int unlockAndPost();
 
     enum { MIN_UNDEQUEUED_BUFFERS = SurfaceTexture::MIN_UNDEQUEUED_BUFFERS };
     enum { NUM_BUFFER_SLOTS = SurfaceTexture::NUM_BUFFER_SLOTS };
     enum { DEFAULT_FORMAT = PIXEL_FORMAT_RGBA_8888 };
+
+private:
+    void freeAllBuffers();
+    int getSlotFromBufferLocked(android_native_buffer_t* buffer) const;
 
     // mSurfaceTexture is the interface to the surface texture server. All
     // operations on the surface texture client ultimately translate into
@@ -145,6 +153,12 @@ private:
     // variables of SurfaceTexture objects. It must be locked whenever the
     // member variables are accessed.
     mutable Mutex mMutex;
+
+    // must be used from the lock/unlock thread
+    sp<GraphicBuffer>           mLockedBuffer;
+    sp<GraphicBuffer>           mPostedBuffer;
+    mutable Region              mOldDirtyRegion;
+    bool                        mConnectedToCpu;
 };
 
 }; // namespace android

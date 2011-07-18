@@ -303,6 +303,10 @@ int FramebufferNativeWindow::perform(ANativeWindow* window,
         case NATIVE_WINDOW_CONNECT:
         case NATIVE_WINDOW_DISCONNECT:
             break;
+        case NATIVE_WINDOW_LOCK:
+            return INVALID_OPERATION;
+        case NATIVE_WINDOW_UNLOCK_AND_POST:
+            return INVALID_OPERATION;
         default:
             return NAME_NOT_FOUND;
     }
