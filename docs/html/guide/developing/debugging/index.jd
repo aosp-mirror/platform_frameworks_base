@@ -1,4 +1,4 @@
-page.title=Debugging 
+page.title=Debugging
 @jd:body
 
 
@@ -10,7 +10,7 @@ page.title=Debugging
         <li><a href="#stack">Debugging Environment</a></li>
 
         <li><a href="#addltools">Additional Debugging Tools</a></li>
-        
+
         <li><a href="#tips">Debugging Tips</a></li>
       </ol>
     </div>
@@ -50,7 +50,7 @@ page.title=Debugging
 
     <dd>The Dalvik VM (Virtual Machine) supports the JDWP protocol to allow debuggers to attach to
     a VM. Each application runs in a VM and exposes a unique port that you can attach a debugger to
-    via DDMS. If you want to debug multiple applications, attaching to each port might become 
+    via DDMS. If you want to debug multiple applications, attaching to each port might become
     tedious, so DDMS provides a port forwarding feature that can forward a specific VM's debugging
     port to port 8700. You can switch freely from application to application by highlighting it in the
     Devices tab of DDMS. DDMS forwards the appropriate port to port 8700. Most modern Java IDEs include a JDWP debugger,
@@ -109,11 +109,11 @@ page.title=Debugging
     that provide useful information such as CPU usage and frame rate. You can also transfer the
     application to a hardware device.</dd>
   </dl>
-  
-  
-  <h2 id="tips">Debugging Tips</h2>  
-  
-<p>While debugging, keep these helpful tips in mind to help you figure out common problems with your 
+
+
+  <h2 id="tips">Debugging Tips</h2>
+
+<p>While debugging, keep these helpful tips in mind to help you figure out common problems with your
 applications:</p>
 
 <dl>
@@ -131,14 +131,14 @@ Debugging with the Dev Tools App</a>.
 </dd>
 
 <dt><strong>Get application and system state information from the emulator</strong></dt>
-<dd>You can access dumpstate information from the <code>adb shell</code> commands. See 
+<dd>You can access dumpstate information from the <code>adb shell</code> commands. See
 <a href="{@docRoot}guide/developing/tools/adb.html#dumpsys">dumpsys and
 dumpstate</a> on the adb topic page.</dd>
 
 
 
 <dt><strong>Get wireless connectivity information</strong></dt>
-<dd>You can get information about wireless connectivity using DDMS. 
+<dd>You can get information about wireless connectivity using DDMS.
 From the <strong>Device</strong> menu, select <strong>Dump
 radio state</strong>.</dd>
 
@@ -165,17 +165,20 @@ logcat -b radio
 <dt><strong>Use debugging helper classes</strong></dt>
 <dd>Android provides debug helper classes such as {@link android.util.Log
     util.Log} and {@link android.os.Debug} for your convenience. </dd>
+
+<dt><strong>Garbage collection</strong></dt>
+<dd>
+The debugger and garbage collector are currently loosely integrated. The VM guarantees that any
+object the debugger is aware of is not garbage collected until after the debugger disconnects.
+This can result in a buildup of objects over time while the debugger is connected. For example,
+if the debugger sees a running thread, the associated {@link java.lang.Thread} object is not
+garbage collected even after the thread terminates.
+</dd>
+
 </dl>
 
 <p>See the <a href="{@docRoot}resources/faq/troubleshooting.html">Troubleshooting</a> document
 for answers to some common developing and debugging issues.</p>
-
-
-
-
-
-
-
 
 
 
