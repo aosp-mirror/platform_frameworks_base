@@ -856,4 +856,33 @@ public final class JsonReaderTest extends TestCase {
         } catch (IOException expected) {
         }
     }
+
+    public void testFailWithPosition() throws IOException {
+        testFailWithPosition("Expected literal value at line 6 column   3",
+                "[\n\n\n\n\n0,}]");
+    }
+
+    public void testFailWithPositionGreaterThanBufferSize() throws IOException {
+        String spaces = repeat(' ', 8192);
+        testFailWithPosition("Expected literal value at line 6 column 3",
+                "[\n\n" + spaces + "\n\n\n0,}]");
+    }
+
+    private void testFailWithPosition(String message, String json) throws IOException {
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.beginArray();
+        reader.nextInt();
+        try {
+            reader.peek();
+            fail();
+        } catch (IOException expected) {
+            assertEquals(message, expected.getMessage());
+        }
+    }
+
+    private String repeat(char c, int count) {
+        char[] array = new char[count];
+        Arrays.fill(array, c);
+        return new String(array);
+    }
 }
