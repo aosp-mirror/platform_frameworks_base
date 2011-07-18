@@ -21,10 +21,8 @@
 *******************************************************************************/
 #include "cmnMemory.h"
 
-#include <malloc.h>
-#if defined LINUX
+#include <stdlib.h>
 #include <string.h>
-#endif
 
 //VO_MEM_OPERATOR		g_memOP;
 
