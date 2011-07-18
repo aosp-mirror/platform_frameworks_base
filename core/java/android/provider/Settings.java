@@ -2683,6 +2683,13 @@ public final class Settings {
         public static final String ACCESSIBILITY_ENABLED = "accessibility_enabled";
 
         /**
+         * If touch exploration is requested. Touch exploration is enabled if it is
+         * requested by this setting, accessibility is enabled and there is at least
+         * one enabled accessibility serivce that provides spoken feedback.
+         */
+        public static final String TOUCH_EXPLORATION_REQUESTED = "touch_exploration_requested";
+
+        /**
          * List of the enabled accessibility providers.
          */
         public static final String ENABLED_ACCESSIBILITY_SERVICES =

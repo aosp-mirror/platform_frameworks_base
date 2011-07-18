@@ -552,7 +552,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
 
     /**
      * Returns a cached instance if such is available or a new one is
-     * initialized with from the given <code>event</code>.
+     * created. The returned instance is initialized from the given
+     * <code>event</code>.
      *
      * @param event The other event.
      * @return An instance.
