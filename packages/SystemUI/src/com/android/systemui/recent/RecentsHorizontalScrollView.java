@@ -103,7 +103,7 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView {
                 "y", view.getY(), view.getY() + view.getHeight());
         anim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
-                RecentsHorizontalScrollView.super.removeViewInLayout(view);
+                RecentsHorizontalScrollView.super.removeView(view);
             }
         });
         anim.start();

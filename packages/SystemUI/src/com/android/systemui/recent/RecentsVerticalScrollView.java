@@ -104,7 +104,7 @@ public class RecentsVerticalScrollView extends ScrollView {
                 "x", view.getX(), view.getX() + view.getWidth());
         anim.addListener(new AnimatorListenerAdapter() {
             public void onAnimationEnd(Animator animation) {
-                RecentsVerticalScrollView.super.removeViewInLayout(view);
+                RecentsVerticalScrollView.super.removeView(view);
             }
         });
         anim.start();
