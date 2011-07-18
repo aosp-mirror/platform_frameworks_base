@@ -47,6 +47,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
@@ -1632,19 +1633,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public boolean setAdditionalInputMethodSubtypes(IBinder token, InputMethodSubtype[] subtypes) {
-        if (token == null || mCurToken != token) {
-            return false;
-        }
-        if (subtypes == null || subtypes.length == 0) return false;
+    public boolean setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
+        // By this IPC call, only a process which shares the same uid with the IME can add
+        // additional input method subtypes to the IME.
+        if (TextUtils.isEmpty(imiId) || subtypes == null || subtypes.length == 0) return false;
         synchronized (mMethodMap) {
-            final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
+            final InputMethodInfo imi = mMethodMap.get(imiId);
             if (imi == null) return false;
-            final int N = subtypes.length;
-            mFileManager.addInputMethodSubtypes(imi, subtypes);
-            buildInputMethodListLocked(mMethodList, mMethodMap);
-            return true;
+            final PackageManager pm = mContext.getPackageManager();
+            final String[] packageInfos = pm.getPackagesForUid(Binder.getCallingUid());
+            if (packageInfos != null) {
+                final int packageNum = packageInfos.length;
+                for (int i = 0; i < packageNum; ++i) {
+                    if (packageInfos[i].equals(imi.getPackageName())) {
+                        mFileManager.addInputMethodSubtypes(imi, subtypes);
+                        buildInputMethodListLocked(mMethodList, mMethodMap);
+                        return true;
+                    }
+                }
+            }
         }
+        return false;
     }
 
     private void setInputMethodWithSubtypeId(IBinder token, String id, int subtypeId) {
