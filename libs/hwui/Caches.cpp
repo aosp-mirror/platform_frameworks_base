@@ -33,6 +33,16 @@ ANDROID_SINGLETON_STATIC_INSTANCE(Caches);
 namespace uirenderer {
 
 ///////////////////////////////////////////////////////////////////////////////
+// Macros
+///////////////////////////////////////////////////////////////////////////////
+
+#if DEBUG_CACHE_FLUSH
+    #define FLUSH_LOGD(...) LOGD(__VA_ARGS__)
+#else
+    #define FLUSH_LOGD(...)
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -148,6 +158,30 @@ void Caches::clearGarbage() {
 void Caches::deleteLayerDeferred(Layer* layer) {
     Mutex::Autolock _l(mGarbageLock);
     mLayerGarbage.push(layer);
+}
+
+void Caches::flush(FlushMode mode) {
+    FLUSH_LOGD("Flushing caches (mode %d)", mode);
+
+    clearGarbage();
+
+    switch (mode) {
+        case kFlushMode_Full:
+            textureCache.clear();
+            patchCache.clear();
+            dropShadowCache.clear();
+            gradientCache.clear();
+            // fall through
+        case kFlushMode_Moderate:
+            layerCache.clear();
+            pathCache.clear();
+            roundRectShapeCache.clear();
+            circleShapeCache.clear();
+            ovalShapeCache.clear();
+            rectShapeCache.clear();
+            arcShapeCache.clear();
+            break;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

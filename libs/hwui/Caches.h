@@ -100,6 +100,18 @@ class Caches: public Singleton<Caches> {
     Vector<Layer*> mLayerGarbage;
 
 public:
+    enum FlushMode {
+        kFlushMode_Moderate = 0,
+        kFlushMode_Full
+    };
+
+    /**
+     * Flush the cache.
+     *
+     * @param mode Indicates how much of the cache should be flushed
+     */
+    void flush(FlushMode mode);
+
     /**
      * Indicates whether the renderer is in debug mode.
      * This debug mode provides limited information to app developers.

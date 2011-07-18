@@ -3558,6 +3558,7 @@ public final class ActivityThread {
     }
 
     final void handleTrimMemory(int level) {
+        WindowManagerImpl.getDefault().trimMemory(level);
     }
 
     private final void handleBindApplication(AppBindData data) {

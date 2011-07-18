@@ -16,17 +16,15 @@
 
 package android.view;
 
-import java.util.HashMap;
-
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
-import android.util.Slog;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
+
+import java.util.HashMap;
 
 final class WindowLeaked extends AndroidRuntimeException {
     public WindowLeaked(String msg) {
@@ -402,7 +400,16 @@ public class WindowManagerImpl implements WindowManager {
             }
         }
     }
-    
+
+    /**
+     * @param level See {@link android.content.ComponentCallbacks}
+     */
+    public void trimMemory(int level) {
+        if (HardwareRenderer.isAvailable()) {
+            HardwareRenderer.trimMemory(level);
+        }
+    }
+
     public void setStoppedState(IBinder token, boolean stopped) {
         synchronized (this) {
             if (mViews == null)
@@ -456,8 +463,7 @@ public class WindowManagerImpl implements WindowManager {
         return new Display(Display.DEFAULT_DISPLAY, null);
     }
 
-    private static void removeItem(Object[] dst, Object[] src, int index)
-    {
+    private static void removeItem(Object[] dst, Object[] src, int index) {
         if (dst.length > 0) {
             if (index > 0) {
                 System.arraycopy(src, 0, dst, 0, index);
@@ -468,8 +474,7 @@ public class WindowManagerImpl implements WindowManager {
         }
     }
 
-    private int findViewLocked(View view, boolean required)
-    {
+    private int findViewLocked(View view, boolean required) {
         synchronized (this) {
             final int count = mViews != null ? mViews.length : 0;
             for (int i=0; i<count; i++) {
