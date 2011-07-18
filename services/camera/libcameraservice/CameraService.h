@@ -161,6 +161,10 @@ private:
 
         int                     getOrientation(int orientation, bool mirror);
 
+        status_t                setPreviewWindow(
+                                    const sp<IBinder>& binder,
+                                    const sp<ANativeWindow>& window);
+
         // these are initialized in the constructor.
         sp<CameraService>               mCameraService;  // immutable after constructor
         sp<ICameraClient>               mCameraClient;
