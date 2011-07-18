@@ -1765,6 +1765,13 @@ status_t OMXCodec::allocateOutputBuffersFromNativeWindow() {
         return err;
     }
 
+    err = native_window_set_scaling_mode(mNativeWindow.get(),
+            NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW);
+
+    if (err != OK) {
+        return err;
+    }
+
     err = native_window_set_buffers_geometry(
             mNativeWindow.get(),
             def.format.video.nFrameWidth,

@@ -545,7 +545,7 @@ status_t SurfaceTexture::disconnect(int api) {
 }
 
 status_t SurfaceTexture::setScalingMode(int mode) {
-    LOGV("SurfaceTexture::setScalingMode");
+    LOGV("SurfaceTexture::setScalingMode(%d)", mode);
 
     switch (mode) {
         case NATIVE_WINDOW_SCALING_MODE_FREEZE:

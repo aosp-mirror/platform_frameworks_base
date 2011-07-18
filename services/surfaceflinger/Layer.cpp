@@ -56,14 +56,14 @@ Layer::Layer(SurfaceFlinger* flinger,
         mTextureName(-1U),
         mQueuedFrames(0),
         mCurrentTransform(0),
+        mCurrentScalingMode(NATIVE_WINDOW_SCALING_MODE_FREEZE),
         mCurrentOpacity(true),
         mFormat(PIXEL_FORMAT_NONE),
         mGLExtensions(GLExtensions::getInstance()),
         mOpaqueLayer(true),
         mNeedsDithering(false),
         mSecure(false),
-        mProtectedByApp(false),
-        mFixedSize(false)
+        mProtectedByApp(false)
 {
     mCurrentCrop.makeInvalid();
     glGenTextures(1, &mTextureName);
@@ -400,14 +400,7 @@ uint32_t Layer::doTransaction(uint32_t flags)
 }
 
 bool Layer::isFixedSize() const {
-    Mutex::Autolock _l(mLock);
-    return mFixedSize;
-}
-
-void Layer::setFixedSize(bool fixedSize)
-{
-    Mutex::Autolock _l(mLock);
-    mFixedSize = fixedSize;
+    return mCurrentScalingMode != NATIVE_WINDOW_SCALING_MODE_FREEZE;
 }
 
 bool Layer::isCropped() const {
@@ -437,9 +430,14 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 
         const Rect crop(mSurfaceTexture->getCurrentCrop());
         const uint32_t transform(mSurfaceTexture->getCurrentTransform());
-        if ((crop != mCurrentCrop) || (transform != mCurrentTransform)) {
+        const uint32_t scalingMode(mSurfaceTexture->getCurrentScalingMode());
+        if ((crop != mCurrentCrop) ||
+            (transform != mCurrentTransform) ||
+            (scalingMode != mCurrentScalingMode))
+        {
             mCurrentCrop = crop;
             mCurrentTransform = transform;
+            mCurrentScalingMode = scalingMode;
             mFlinger->invalidateHwcGeometry();
         }
 

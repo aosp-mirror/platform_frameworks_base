@@ -466,7 +466,7 @@ int SurfaceTextureClient::setBuffersFormat(int format)
 
 int SurfaceTextureClient::setScalingMode(int mode)
 {
-    LOGV("SurfaceTextureClient::setScalingMode");
+    LOGV("SurfaceTextureClient::setScalingMode(%d)", mode);
     Mutex::Autolock lock(mMutex);
     // mode is validated on the server
     status_t err = mSurfaceTexture->setScalingMode(mode);

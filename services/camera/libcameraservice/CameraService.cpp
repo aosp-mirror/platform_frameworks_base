@@ -536,6 +536,8 @@ status_t CameraService::Client::setPreviewWindow(const sp<IBinder>& binder,
     // If preview has been already started, register preview buffers now.
     if (mHardware->previewEnabled()) {
         if (window != 0) {
+            native_window_set_scaling_mode(window.get(),
+                    NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW);
             native_window_set_buffers_transform(window.get(), mOrientation);
             result = mHardware->setPreviewWindow(window);
         }
@@ -642,6 +644,8 @@ status_t CameraService::Client::startPreviewMode() {
     }
 
     if (mPreviewWindow != 0) {
+        native_window_set_scaling_mode(mPreviewWindow.get(),
+                NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW);
         native_window_set_buffers_transform(mPreviewWindow.get(),
                 mOrientation);
     }
