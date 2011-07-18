@@ -662,12 +662,6 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
     protected void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         writer.println("nothing to dump");
     }
-    
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        //Log.i("Service", "Finalizing Service: " + this);
-    }
 
     // ------------------ Internal API ------------------
     
