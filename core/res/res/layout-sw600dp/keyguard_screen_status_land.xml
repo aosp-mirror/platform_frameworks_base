@@ -114,19 +114,6 @@
 
     </LinearLayout>
 
-    <!-- Status2 is generally charge status  -->
-    <TextView
-        android:id="@+id/status2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="17sp"
-        android:layout_marginTop="10dip"
-        android:drawablePadding="4dip"
-        android:visibility="gone"
-        />
-
     <!-- Status1 is generally battery status and informational messages -->
     <TextView
         android:id="@+id/status1"

@@ -23,13 +23,10 @@ import android.os.SystemClock;
 import android.security.KeyStore;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.view.MotionEvent;
 import android.widget.Button;
 import android.util.Log;
 import com.android.internal.R;
-import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LinearLayoutWithDefaultTouchRecepient;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockPatternView;
@@ -42,8 +39,7 @@ import java.util.List;
  * the user how to unlock their device, or make an emergency call.
  */
 class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
-        implements KeyguardScreen, KeyguardUpdateMonitor.InfoCallback,
-        KeyguardUpdateMonitor.SimStateCallback {
+        implements KeyguardScreen {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "UnlockScreen";
@@ -73,7 +69,7 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
      */
     private boolean mEnableFallback;
 
-    private StatusView mStatusView;
+    private KeyguardStatusViewManager mKeyguardStatusViewManager;
     private LockPatternView mLockPatternView;
 
     /**
@@ -93,12 +89,6 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         }
     };
 
-    private final OnClickListener mEmergencyClick = new OnClickListener() {
-        public void onClick(View v) {
-            mCallback.takeEmergencyCallAction();
-        }
-    };
-
     private final OnClickListener mForgotPatternClick = new OnClickListener() {
         public void onClick(View v) {
             mCallback.forgotPattern(true);
@@ -106,7 +96,6 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
     };
 
     private Button mForgotPatternButton;
-    private Button mEmergencyButton;
     private int mCreationOrientation;
 
     enum FooterMode {
@@ -181,18 +170,10 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             inflater.inflate(R.layout.keyguard_screen_unlock_landscape, this, true);
         }
 
-        mStatusView = new StatusView(this, mUpdateMonitor, mLockPatternUtils);
-        // This shows up when no other information is required on status1
-        //mStatusView.setHelpMessage(R.string.lockscreen_pattern_instructions,StatusView.LOCK_ICON);
+        mKeyguardStatusViewManager = new KeyguardStatusViewManager(this, mUpdateMonitor,
+                mLockPatternUtils, mCallback);
 
         mLockPatternView = (LockPatternView) findViewById(R.id.lockPattern);
-
-        // emergency call buttons
-        mEmergencyButton = (Button) findViewById(R.id.emergencyCallButton);
-        mEmergencyButton.setFocusable(false); // touch only!
-        mEmergencyButton.setOnClickListener(mEmergencyClick);
-
-        refreshEmergencyButtonText();
 
         mForgotPatternButton = (Button) findViewById(R.id.forgotPatternButton);
         mForgotPatternButton.setText(R.string.lockscreen_forgot_pattern_button_text);
@@ -215,20 +196,10 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         // assume normal footer mode for now
         updateFooter(FooterMode.Normal);
 
-        mUpdateMonitor.registerInfoCallback(this);
-        mUpdateMonitor.registerSimStateCallback(this);
         setFocusableInTouchMode(true);
-
-        // until we get an update...
-        mStatusView.setCarrierText(LockScreen.getCarrierString(
-                        mUpdateMonitor.getTelephonyPlmn(),
-                        mUpdateMonitor.getTelephonySpn()));
-
     }
 
-    private void refreshEmergencyButtonText() {
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyButton);
-    }
+
 
     public void setEnableFallback(boolean state) {
         if (DEBUG) Log.d(TAG, "setEnableFallback(" + state + ")");
@@ -247,34 +218,6 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             mLastPokeTime = SystemClock.elapsedRealtime();
         }
         return result;
-    }
-
-    // ---------- InfoCallback
-
-    /** {@inheritDoc} */
-    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
-        mStatusView.onRefreshBatteryInfo(showBatteryInfo, pluggedIn, batteryLevel);
-    }
-
-    /** {@inheritDoc} */
-    public void onTimeChanged() {
-        mStatusView.onTimeChanged();
-    }
-
-    /** {@inheritDoc} */
-    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-        mStatusView.onRefreshCarrierInfo(plmn, spn);
-    }
-
-    /** {@inheritDoc} */
-    public void onRingerModeChanged(int state) {
-        // not currently used
-    }
-
-    // ---------- SimStateCallback
-
-    /** {@inheritDoc} */
-    public void onSimStateChanged(IccCard.State simState) {
     }
 
     @Override
@@ -319,12 +262,13 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             mCountdownTimer.cancel();
             mCountdownTimer = null;
         }
+        mKeyguardStatusViewManager.onPause();
     }
 
     /** {@inheritDoc} */
     public void onResume() {
         // reset status
-        mStatusView.resetStatusInfo(mUpdateMonitor, mLockPatternUtils);
+        mKeyguardStatusViewManager.onResume();
 
         // reset lock pattern
         mLockPatternView.enableInput();
@@ -354,7 +298,6 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             updateFooter(FooterMode.Normal);
         }
 
-        refreshEmergencyButtonText();
     }
 
     /** {@inheritDoc} */
@@ -401,8 +344,8 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             if (mLockPatternUtils.checkPattern(pattern)) {
                 mLockPatternView
                         .setDisplayMode(LockPatternView.DisplayMode.Correct);
-                mStatusView.setInstructions("");
-                mStatusView.updateStatusLines(true);
+                mKeyguardStatusViewManager.setInstructionText("");
+                mKeyguardStatusViewManager.updateStatusLines(true);
                 mCallback.keyguardDone(true);
                 mCallback.reportSuccessfulUnlockAttempt();
                 KeyStore.getInstance().password(LockPatternUtils.patternToString(pattern));
@@ -423,9 +366,9 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
                     handleAttemptLockout(deadline);
                 } else {
                     // TODO mUnlockIcon.setVisibility(View.VISIBLE);
-                    mStatusView.setInstructions(
+                    mKeyguardStatusViewManager.setInstructionText(
                             getContext().getString(R.string.lockscreen_pattern_wrong));
-                    mStatusView.updateStatusLines(true);
+                    mKeyguardStatusViewManager.updateStatusLines(true);
                     mLockPatternView.postDelayed(
                             mCancelPatternRunnable,
                             PATTERN_CLEAR_TIMEOUT_MS);
@@ -449,18 +392,18 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
             @Override
             public void onTick(long millisUntilFinished) {
                 int secondsRemaining = (int) (millisUntilFinished / 1000);
-                mStatusView.setInstructions(getContext().getString(
+                mKeyguardStatusViewManager.setInstructionText(getContext().getString(
                         R.string.lockscreen_too_many_failed_attempts_countdown,
                         secondsRemaining));
-                mStatusView.updateStatusLines(true);
+                mKeyguardStatusViewManager.updateStatusLines(true);
             }
 
             @Override
             public void onFinish() {
                 mLockPatternView.setEnabled(true);
-                mStatusView.setInstructions(getContext().getString(
+                mKeyguardStatusViewManager.setInstructionText(getContext().getString(
                         R.string.lockscreen_pattern_instructions));
-                mStatusView.updateStatusLines(true);
+                mKeyguardStatusViewManager.updateStatusLines(true);
                 // TODO mUnlockIcon.setVisibility(View.VISIBLE);
                 mFailedPatternAttemptsSinceLastTimeout = 0;
                 if (mEnableFallback) {
@@ -472,7 +415,4 @@ class PatternUnlockScreen extends LinearLayoutWithDefaultTouchRecepient
         }.start();
     }
 
-    public void onPhoneStateChanged(String newState) {
-        refreshEmergencyButtonText();
-    }
 }

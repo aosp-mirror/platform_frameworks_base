@@ -27,7 +27,6 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal">
 
-
     <com.android.internal.widget.DigitalClock android:id="@+id/time"
         android:layout_marginBottom="18dip"
         android:layout_marginRight="@dimen/keyguard_lockscreen_status_line_font_right_margin"
@@ -100,17 +99,7 @@
         android:drawablePadding="4dip"
         />
 
-    <TextView
-        android:id="@+id/status2"
-        android:layout_gravity="right"
-        android:layout_marginRight="@dimen/keyguard_lockscreen_status_line_font_right_margin"
-        android:singleLine="true"
-        android:ellipsize="marquee"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
-        android:drawablePadding="4dip"
-        android:visibility="gone"
-        />
+    <Space android:layout_gravity="fill" />
 
     <!-- We need MATCH_PARENT here only to force the size of the parent to be passed to
     the pattern view for it to compute its size. This is an unusual case, caused by
@@ -125,7 +114,6 @@
         android:layout_marginBottom="4dip"
         android:layout_marginLeft="8dip"
         android:layout_gravity="center|bottom"
-        android:layout_rowFlexibility="canStretch"
      />
 
     <TextView
@@ -170,5 +158,15 @@
         />
 
     </LinearLayout>
+
+    <!-- Music transport control -->
+    <include android:id="@+id/transport"
+        layout="@layout/keyguard_transport_control"
+        android:layout_row="0"
+        android:layout_column="0"
+        android:layout_rowSpan="4"
+        android:layout_columnSpan="1"
+        android:layout_gravity="fill"
+        />
 
 </GridLayout>

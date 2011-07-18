@@ -52,10 +52,9 @@ import java.io.IOException;
  * account's login/password to unlock the phone (and reset their lock pattern).
  */
 public class AccountUnlockScreen extends RelativeLayout implements KeyguardScreen,
-        KeyguardUpdateMonitor.InfoCallback,View.OnClickListener, TextWatcher {
+        View.OnClickListener, TextWatcher {
     private static final String LOCK_PATTERN_PACKAGE = "com.android.settings";
-    private static final String LOCK_PATTERN_CLASS =
-            "com.android.settings.ChooseLockPattern";
+    private static final String LOCK_PATTERN_CLASS = LOCK_PATTERN_PACKAGE + ".ChooseLockPattern";
 
     /**
      * The amount of millis to stay awake once this screen detects activity
@@ -71,19 +70,19 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
     private EditText mLogin;
     private EditText mPassword;
     private Button mOk;
-    private Button mEmergencyCall;
 
     /**
      * Shown while making asynchronous check of password.
      */
     private ProgressDialog mCheckingDialog;
+    private KeyguardStatusViewManager mKeyguardStatusViewManager;
 
     /**
      * AccountUnlockScreen constructor.
      * @param configuration
      * @param updateMonitor
      */
-    public AccountUnlockScreen(Context context,Configuration configuration,
+    public AccountUnlockScreen(Context context, Configuration configuration,
             KeyguardUpdateMonitor updateMonitor, KeyguardScreenCallback callback,
             LockPatternUtils lockPatternUtils) {
         super(context);
@@ -110,12 +109,10 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         mOk = (Button) findViewById(R.id.ok);
         mOk.setOnClickListener(this);
 
-        mEmergencyCall = (Button) findViewById(R.id.emergencyCallButton);
-        mEmergencyCall.setOnClickListener(this);
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCall);
-
         mUpdateMonitor = updateMonitor;
-        mUpdateMonitor.registerInfoCallback(this);
+
+        mKeyguardStatusViewManager = new KeyguardStatusViewManager(this, updateMonitor,
+                lockPatternUtils, callback);
     }
 
     public void afterTextChanged(Editable s) {
@@ -142,7 +139,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
 
     /** {@inheritDoc} */
     public void onPause() {
-
+        mKeyguardStatusViewManager.onPause();
     }
 
     /** {@inheritDoc} */
@@ -151,7 +148,7 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         mLogin.setText("");
         mPassword.setText("");
         mLogin.requestFocus();
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCall);
+        mKeyguardStatusViewManager.onResume();
     }
 
     /** {@inheritDoc} */
@@ -170,10 +167,6 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
         mCallback.pokeWakelock();
         if (v == mOk) {
             asyncCheckPassword();
-        }
-
-        if (v == mEmergencyCall) {
-            mCallback.takeEmergencyCallAction();
         }
     }
 
@@ -326,25 +319,5 @@ public class AccountUnlockScreen extends RelativeLayout implements KeyguardScree
             }
         }
         return mCheckingDialog;
-    }
-
-    public void onPhoneStateChanged(String newState) {
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCall);
-    }
-
-    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
-
-    }
-
-    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-
-    }
-
-    public void onRingerModeChanged(int state) {
-
-    }
-
-    public void onTimeChanged() {
-
     }
 }

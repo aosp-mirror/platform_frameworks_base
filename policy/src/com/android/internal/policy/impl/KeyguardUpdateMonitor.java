@@ -95,6 +95,7 @@ public class KeyguardUpdateMonitor {
     private static final int MSG_SIM_STATE_CHANGE = 304;
     private static final int MSG_RINGER_MODE_CHANGED = 305;
     private static final int MSG_PHONE_STATE_CHANGED = 306;
+    private static final int MSG_TRANSPORT_CONTROL_STATE_CHANGED = 307;
 
 
     /**
@@ -171,6 +172,9 @@ public class KeyguardUpdateMonitor {
                         break;
                     case MSG_PHONE_STATE_CHANGED:
                         handlePhoneStateChanged((String)msg.obj);
+                        break;
+                    case MSG_TRANSPORT_CONTROL_STATE_CHANGED:
+                        handleTransportControlStateChanged(msg.arg1);
                         break;
                 }
             }
@@ -261,8 +265,21 @@ public class KeyguardUpdateMonitor {
                     String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
                     mHandler.sendMessage(mHandler.obtainMessage(MSG_PHONE_STATE_CHANGED, state));
                 }
+                // TODO
+                else if ("android.media.TRANSPORT_CONTROL_CHANGED".equals(action)) {
+                    int state = intent.getIntExtra("state", 0);
+                    mHandler.sendMessage(mHandler.obtainMessage(MSG_TRANSPORT_CONTROL_STATE_CHANGED,
+                            state));
+                }
             }
         }, filter);
+    }
+
+    protected void handleTransportControlStateChanged(int state) {
+        if (DEBUG) Log.d(TAG, "handleTransportControlStateChanged()");
+        for (int i = 0; i < mInfoCallbacks.size(); i++) {
+            mInfoCallbacks.get(i).onTransportControlStateChanged(state);
+        }
     }
 
     protected void handlePhoneStateChanged(String newState) {
@@ -449,6 +466,12 @@ public class KeyguardUpdateMonitor {
          * {@link TelephonyManager#EXTRA_STATE_OFFHOOK
          */
         void onPhoneStateChanged(String newState);
+
+        /**
+         * Called when AudioService informs us of a change to the transport control client.
+         *
+         */
+        void onTransportControlStateChanged(int state);
     }
 
     /**
@@ -467,7 +490,8 @@ public class KeyguardUpdateMonitor {
         if (!mInfoCallbacks.contains(callback)) {
             mInfoCallbacks.add(callback);
         } else {
-            Log.e(TAG, "Object tried to add another INFO callback", new Exception("Whoops"));
+            if (DEBUG) Log.e(TAG, "Object tried to add another INFO callback",
+                    new Exception("Whoops"));
         }
     }
 
