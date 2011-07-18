@@ -613,4 +613,90 @@ TEST_F(SurfaceTextureClientTest, QueryFormatAfterSettingWorks) {
     }
 }
 
+class MultiSurfaceTextureClientTest : public ::testing::Test {
+
+public:
+    MultiSurfaceTextureClientTest() :
+            mEglDisplay(EGL_NO_DISPLAY),
+            mEglContext(EGL_NO_CONTEXT) {
+        for (int i = 0; i < NUM_SURFACE_TEXTURES; i++) {
+            mEglSurfaces[i] = EGL_NO_CONTEXT;
+        }
+    }
+
+protected:
+
+    enum { NUM_SURFACE_TEXTURES = 32 };
+
+    virtual void SetUp() {
+        mEglDisplay = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        ASSERT_NE(EGL_NO_DISPLAY, mEglDisplay);
+
+        EGLint majorVersion, minorVersion;
+        EXPECT_TRUE(eglInitialize(mEglDisplay, &majorVersion, &minorVersion));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+        EGLConfig myConfig;
+        EGLint numConfigs = 0;
+        EGLint configAttribs[] = {
+            EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
+            EGL_NONE
+        };
+        EXPECT_TRUE(eglChooseConfig(mEglDisplay, configAttribs, &myConfig, 1,
+                &numConfigs));
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+
+        mEglContext = eglCreateContext(mEglDisplay, myConfig, EGL_NO_CONTEXT,
+                0);
+        ASSERT_EQ(EGL_SUCCESS, eglGetError());
+        ASSERT_NE(EGL_NO_CONTEXT, mEglContext);
+
+        for (int i = 0; i < NUM_SURFACE_TEXTURES; i++) {
+            sp<SurfaceTexture> st(new SurfaceTexture(i));
+            sp<SurfaceTextureClient> stc(new SurfaceTextureClient(st));
+            mEglSurfaces[i] = eglCreateWindowSurface(mEglDisplay, myConfig,
+                    static_cast<ANativeWindow*>(stc.get()), NULL);
+            ASSERT_EQ(EGL_SUCCESS, eglGetError());
+            ASSERT_NE(EGL_NO_SURFACE, mEglSurfaces[i]);
+        }
+    }
+
+    virtual void TearDown() {
+        eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE,
+                EGL_NO_CONTEXT);
+
+        for (int i = 0; i < NUM_SURFACE_TEXTURES; i++) {
+            if (mEglSurfaces[i] != EGL_NO_SURFACE) {
+                eglDestroySurface(mEglDisplay, mEglSurfaces[i]);
+            }
+        }
+
+        if (mEglContext != EGL_NO_CONTEXT) {
+            eglDestroyContext(mEglDisplay, mEglContext);
+        }
+
+        if (mEglDisplay != EGL_NO_DISPLAY) {
+            eglTerminate(mEglDisplay);
+        }
+    }
+
+    EGLDisplay mEglDisplay;
+    EGLSurface mEglSurfaces[NUM_SURFACE_TEXTURES];
+    EGLContext mEglContext;
+};
+
+// XXX: This test is disabled because it causes a hang on some devices.  See bug
+// 5015672.
+TEST_F(MultiSurfaceTextureClientTest, DISABLED_MakeCurrentBetweenSurfacesWorks) {
+    for (int iter = 0; iter < 8; iter++) {
+        for (int i = 0; i < NUM_SURFACE_TEXTURES; i++) {
+            eglMakeCurrent(mEglDisplay, mEglSurfaces[i], mEglSurfaces[i],
+                    mEglContext);
+            glClear(GL_COLOR_BUFFER_BIT);
+            eglSwapBuffers(mEglDisplay, mEglSurfaces[i]);
+        }
+    }
+}
+
 } // namespace android
