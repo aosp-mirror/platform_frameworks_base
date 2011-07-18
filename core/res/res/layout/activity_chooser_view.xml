@@ -23,13 +23,9 @@
     style="?android:attr/actionButtonStyle">
 
     <ImageButton android:id="@+id/default_activity_button"
-        android:layout_width="32dip"
-        android:layout_height="32dip"
-        android:layout_marginRight="8dip" />
+        style="@style/Widget.ActivityChooserViewButton" />
 
     <ImageButton android:id="@+id/expand_activities_button"
-        android:layout_width="32dip"
-        android:layout_height="32dip"
-        android:layout_marginLeft="8dip" />
+        style="@style/Widget.ActivityChooserViewButton" />
 
 </LinearLayout>

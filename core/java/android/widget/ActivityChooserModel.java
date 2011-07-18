@@ -431,7 +431,6 @@ public class ActivityChooserModel extends DataSetObservable {
      */
     public Intent chooseActivity(int index) {
         ActivityResolveInfo chosenActivity = mActivites.get(index);
-        ActivityResolveInfo defaultActivity = mActivites.get(0);
 
         ComponentName chosenName = new ComponentName(
                 chosenActivity.resolveInfo.activityInfo.packageName,

@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Canvas;
@@ -90,6 +91,11 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      * The default activities action button;
      */
     private final ImageButton mDefaultActionButton;
+
+    /**
+     * The maximal width of the list popup.
+     */
+    private final int mListPopupMaxWidth;
 
     /**
      * Observer for the model data.
@@ -185,7 +191,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         mExpandActivityOverflowButton = (ImageButton) findViewById(R.id.expand_activities_button);
         mExpandActivityOverflowButton.setOnClickListener(mCallbacks);
-        mExpandActivityOverflowButton.setBackgroundDrawable(expandActivityOverflowButtonDrawable);
+        mExpandActivityOverflowButton.setImageDrawable(expandActivityOverflowButtonDrawable);
 
         mAdapter = new ActivityChooserViewAdapter();
         mAdapter.registerDataSetObserver(new DataSetObserver() {
@@ -195,6 +201,10 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                 updateButtons();
             }
         });
+
+        Resources resources = context.getResources();
+        mListPopupMaxWidth = Math.max(resources.getDisplayMetrics().widthPixels / 2,
+              resources.getDimensionPixelSize(com.android.internal.R.dimen.config_prefDialogWidth));
     }
 
     /**
@@ -220,7 +230,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      * @param drawable The drawable.
      */
     public void setExpandActivityOverflowButtonDrawable(Drawable drawable) {
-        mExpandActivityOverflowButton.setBackgroundDrawable(drawable);
+        mExpandActivityOverflowButton.setImageDrawable(drawable);
     }
 
     /**
@@ -264,7 +274,8 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             } else {
                 mAdapter.setShowDefaultActivity(false);
             }
-            popupWindow.setContentWidth(mAdapter.measureContentWidth());
+            final int contentWidth = Math.min(mAdapter.measureContentWidth(), mListPopupMaxWidth);
+            popupWindow.setContentWidth(contentWidth);
             popupWindow.show();
         }
     }
@@ -390,7 +401,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             }
             ResolveInfo activity = mAdapter.getDefaultActivity();
             PackageManager packageManager = mContext.getPackageManager();
-            mDefaultActionButton.setBackgroundDrawable(activity.loadIcon(packageManager));
+            mDefaultActionButton.setImageDrawable(activity.loadIcon(packageManager));
         } else {
             mDefaultActionButton.setVisibility(View.INVISIBLE);
             mExpandActivityOverflowButton.setEnabled(false);
@@ -574,7 +585,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                     // Set the icon
                     ImageView iconView = (ImageView) convertView.findViewById(R.id.icon);
                     ResolveInfo activity = (ResolveInfo) getItem(position);
-                    iconView.setBackgroundDrawable(activity.loadIcon(packageManager));
+                    iconView.setImageDrawable(activity.loadIcon(packageManager));
                     // Set the title.
                     TextView titleView = (TextView) convertView.findViewById(R.id.title);
                     titleView.setText(activity.loadLabel(packageManager));
