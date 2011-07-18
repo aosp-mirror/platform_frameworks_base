@@ -94,14 +94,12 @@ class AudioPlaybackHandler {
             //
             // (Even if it did, all it would result in is a warning message).
             mQueue.add(new ListEntry(SYNTHESIS_DONE, token, HIGH_PRIORITY));
-        } else  {
-            if (token != null) {
-                if (token.getType() == MessageParams.TYPE_AUDIO) {
-                    ((AudioMessageParams) token).getPlayer().stop();
-                } else if (token.getType() == MessageParams.TYPE_SILENCE) {
-                    ((SilenceMessageParams) token).getConditionVariable().open();
-                }
-            }
+        } else if (token.getType() == MessageParams.TYPE_AUDIO) {
+            ((AudioMessageParams) token).getPlayer().stop();
+            // No cleanup required for audio messages.
+        } else if (token.getType() == MessageParams.TYPE_SILENCE) {
+            ((SilenceMessageParams) token).getConditionVariable().open();
+            // No cleanup required for silence messages.
         }
     }
 

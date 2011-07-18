@@ -767,10 +767,6 @@ public abstract class TextToSpeechService extends Service {
             mCallbacks.setCallback(packageName, cb);
         }
 
-        private boolean isDefault(String lang, String country, String variant) {
-            return Locale.getDefault().equals(new Locale(lang, country, variant));
-        }
-
         private String intern(String in) {
             // The input parameter will be non null.
             return in.intern();
