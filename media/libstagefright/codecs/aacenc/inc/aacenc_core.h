@@ -47,7 +47,7 @@ typedef  struct {
 
 
 typedef struct {
-	
+
   AACENC_CONFIG config;     /* Word16 size: 8 */
 
   ELEMENT_INFO elInfo;      /* Word16 size: 4 */

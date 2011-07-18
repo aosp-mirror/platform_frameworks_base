@@ -42,7 +42,7 @@ const static Word16 table[129] = {
 
 /* slope in Q11 used to compute y = acos(x) */
 
-const static Word16 slope[128] = { 
+const static Word16 slope[128] = {
  -26214, -9039, -5243, -3799, -2979, -2405, -2064, -1771,
  -1579, -1409, -1279, -1170, -1079, -1004, -933, -880,
  -827, -783, -743, -708, -676, -647, -621, -599,

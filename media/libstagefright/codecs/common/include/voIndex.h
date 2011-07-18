@@ -173,7 +173,7 @@ enum
 // Module own error ID
 #define VO_ERR_Module					0x8xxx0X00
 */
- 
+
 #define	VO_PID_COMMON_BASE				 0x40000000						/*!< The base of common param ID */
 #define	VO_PID_COMMON_QUERYMEM			(VO_PID_COMMON_BASE | 0X0001)	/*!< Query the memory needed; Reserved. */
 #define	VO_PID_COMMON_INPUTTYPE			(VO_PID_COMMON_BASE | 0X0002)	/*!< Set or get the input buffer type. VO_INPUT_TYPE */

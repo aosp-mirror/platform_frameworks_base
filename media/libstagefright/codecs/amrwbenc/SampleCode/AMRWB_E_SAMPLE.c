@@ -70,10 +70,10 @@ int  GetNextBuf(FILE* inFile,unsigned char* dst,int size)
 typedef int (VO_API * VOGETAUDIOENCAPI) (VO_AUDIO_CODECAPI * pEncHandle);
 
 int encode(
-		   int mode, 
+		   int mode,
 		   short   allow_dtx,
 		   VOAMRWBFRAMETYPE frameType,
-		   const char* srcfile, 
+		   const char* srcfile,
 		   const char* dstfile
 		   )
 {
@@ -136,7 +136,7 @@ int encode(
 		return -1;
 	}
 
-	pfunc = dlsym(handle, "voGetAMRWBEncAPI");	
+	pfunc = dlsym(handle, "voGetAMRWBEncAPI");
 	if(pfunc == 0)
 	{
 		printf("open function error......");
@@ -159,7 +159,7 @@ int encode(
 		printf("get APIs error......");
 		goto safe_exit;
 	}
-#endif 
+#endif
 
 	//#######################################   Init Encoding Section   #########################################
 	ret = AudioAPI.Init(&hCodec, VO_AUDIO_CodingAMRWB, &useData);
@@ -214,7 +214,7 @@ int encode(
 				if(framenum == 1)
 				{
 					fwrite(OutputBuf, 1, outData.Length + size1, fdst);
-					fflush(fdst);	
+					fflush(fdst);
 				}
 				else
 				{
@@ -323,7 +323,7 @@ int main(int argc, char **argv)  // for gcc compiler;
 					case '1': frameType = VOAMRWB_ITU;
 						break;
 					case '2': frameType = VOAMRWB_RFC3267 ;
-						break; 
+						break;
 					default:
 						usage();
 						printf ("Invalid parameter '%s'.\n", argv [arg]);
@@ -338,11 +338,11 @@ int main(int argc, char **argv)  // for gcc compiler;
 
 			} else {
 				switch (filename) {
-						case 0: 
+						case 0:
 							inFileName  = argv[arg];
 							break;
-						case 1: 
-							outFileName = argv[arg]; 
+						case 1:
+							outFileName = argv[arg];
 							break;
 						default:
 							usage ();

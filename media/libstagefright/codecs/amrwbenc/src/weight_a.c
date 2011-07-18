@@ -19,7 +19,7 @@
 *                                                                      *
 *       Description:Weighting of LPC coefficients                      *
 *	               ap[i] = a[i] * (gamma ** i)                     *
-*                                                                      * 
+*                                                                      *
 ************************************************************************/
 
 #include "typedef.h"

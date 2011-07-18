@@ -21,22 +21,22 @@ OBJS:=basicop2.o oper_32b.o aac_rom.o aacenc.o aacenc_core.o adj_thr.o \
 			dyn_bits.o grp_data.o interface.o line_pe.o memalign.o ms_stereo.o \
 			pre_echo_control.o psy_configuration.o psy_main.o qc_main.o quantize.o sf_estim.o \
 			spreading.o stat_bits.o tns.o transform.o
-			
-# please list all directories that all source files relative with your module(.h .c .cpp) locate 
+
+# please list all directories that all source files relative with your module(.h .c .cpp) locate
 VOSRCDIR:=../../../src \
 					../../../inc \
 					../../../basic_op\
-					../../../../../Include 
-					
+					../../../../../Include
+
 ifeq ($(VOTT), v5)
 OBJS+= AutoCorrelation_v5.o band_nrg_v5.o CalcWindowEnergy_v5.o \
 				PrePostMDCT_v5.o R4R8First_v5.o Radix4FFT_v5.o
 VOSRCDIR+= ../../../src/asm/ARMV5E/
-endif	
+endif
 
 ifeq ($(VOTT), v7)
 OBJS+= AutoCorrelation_v5.o band_nrg_v5.o CalcWindowEnergy_v5.o \
 			 PrePostMDCT_v7.o R4R8First_v7.o Radix4FFT_v7.o
 VOSRCDIR+= ../../../src/asm/ARMV5E/
 VOSRCDIR+= ../../../src/asm/ARMV7/
-endif		
+endif
