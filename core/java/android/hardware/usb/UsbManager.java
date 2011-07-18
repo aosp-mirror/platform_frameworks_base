@@ -409,9 +409,10 @@ public class UsbManager {
 
     /**
      * Sets the current USB function.
+     * If function is null, then the current function is set to the default function.
      *
-     * @param function name of the USB function
-     * @param makeDefault true if this should be set as the default
+     * @param function name of the USB function, or null to restore the default function
+     * @param makeDefault true if the function should be set as the new default function
      *
      * {@hide}
      */
