@@ -109,6 +109,11 @@ public class TextToSpeech {
     /**
      * Broadcast Action: The TextToSpeech synthesizer has completed processing
      * of all the text in the speech queue.
+     *
+     * Note that this notifies callers when the <b>engine</b> has finished has
+     * processing text data. Audio playback might not have completed (or even started)
+     * at this point. If you wish to be notified when this happens, see
+     * {@link OnUtteranceCompletedListener}.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_TTS_QUEUE_PROCESSING_COMPLETED =
@@ -796,7 +801,10 @@ public class TextToSpeech {
     }
 
     /**
-     * Checks whether the TTS engine is busy speaking.
+     * Checks whether the TTS engine is busy speaking. Note that a speech item is
+     * considered complete once it's audio data has been sent to the audio mixer, or
+     * written to a file. There might be a finite lag between this point, and when
+     * the audio hardware completes playback.
      *
      * @return {@code true} if the TTS engine is speaking.
      */

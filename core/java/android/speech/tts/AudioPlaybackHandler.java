@@ -104,6 +104,14 @@ class AudioPlaybackHandler {
     }
 
     /**
+     * @return false iff the queue is empty and no queue item is currently
+     *        being handled, true otherwise.
+     */
+    public boolean isSpeaking() {
+        return (mQueue.peek() != null) || (mCurrentParams != null);
+    }
+
+    /**
      * Shut down the audio playback thread.
      */
     synchronized public void quit() {
