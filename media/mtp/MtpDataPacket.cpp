@@ -345,56 +345,28 @@ void MtpDataPacket::putString(const uint16_t* string) {
 
 #ifdef MTP_DEVICE 
 int MtpDataPacket::read(int fd) {
-    // first read the header
-    int ret = ::read(fd, mBuffer, MTP_CONTAINER_HEADER_SIZE);
-    if (ret != MTP_CONTAINER_HEADER_SIZE)
+    int ret = ::read(fd, mBuffer, mBufferSize);
+    if (ret < MTP_CONTAINER_HEADER_SIZE)
         return -1;
-    // then the following data
-    int total = MtpPacket::getUInt32(MTP_CONTAINER_LENGTH_OFFSET);
-    allocate(total);
-    int remaining = total - MTP_CONTAINER_HEADER_SIZE;
-    ret = ::read(fd, &mBuffer[0] + MTP_CONTAINER_HEADER_SIZE, remaining);
-    if (ret != remaining)
-        return -1;
-
-    mPacketSize = total;
+    mPacketSize = ret;
     mOffset = MTP_CONTAINER_HEADER_SIZE;
-    return total;
-}
-
-int MtpDataPacket::readDataHeader(int fd) {
-    int ret = ::read(fd, mBuffer, MTP_CONTAINER_HEADER_SIZE);
-    if (ret > 0)
-        mPacketSize = ret;
-    else
-        mPacketSize = 0;
     return ret;
 }
 
 int MtpDataPacket::write(int fd) {
     MtpPacket::putUInt32(MTP_CONTAINER_LENGTH_OFFSET, mPacketSize);
     MtpPacket::putUInt16(MTP_CONTAINER_TYPE_OFFSET, MTP_CONTAINER_TYPE_DATA);
-    // send header separately from data
-    int ret = ::write(fd, mBuffer, MTP_CONTAINER_HEADER_SIZE);
-    if (ret == MTP_CONTAINER_HEADER_SIZE)
-        ret = ::write(fd, mBuffer + MTP_CONTAINER_HEADER_SIZE,
-                        mPacketSize - MTP_CONTAINER_HEADER_SIZE);
-    return (ret < 0 ? ret : 0);
-}
-
-int MtpDataPacket::writeDataHeader(int fd, uint32_t length) {
-    MtpPacket::putUInt32(MTP_CONTAINER_LENGTH_OFFSET, length);
-    MtpPacket::putUInt16(MTP_CONTAINER_TYPE_OFFSET, MTP_CONTAINER_TYPE_DATA);
-    int ret = ::write(fd, mBuffer, MTP_CONTAINER_HEADER_SIZE);
+    int ret = ::write(fd, mBuffer, mPacketSize);
     return (ret < 0 ? ret : 0);
 }
 
 int MtpDataPacket::writeData(int fd, void* data, uint32_t length) {
-    MtpPacket::putUInt32(MTP_CONTAINER_LENGTH_OFFSET, length + MTP_CONTAINER_HEADER_SIZE);
+    allocate(length);
+    memcpy(mBuffer + MTP_CONTAINER_HEADER_SIZE, data, length);
+    length += MTP_CONTAINER_HEADER_SIZE;
+    MtpPacket::putUInt32(MTP_CONTAINER_LENGTH_OFFSET, length);
     MtpPacket::putUInt16(MTP_CONTAINER_TYPE_OFFSET, MTP_CONTAINER_TYPE_DATA);
-    int ret = ::write(fd, mBuffer, MTP_CONTAINER_HEADER_SIZE);
-    if (ret == MTP_CONTAINER_HEADER_SIZE)
-        ret = ::write(fd, data, length);
+    int ret = ::write(fd, mBuffer, length);
     return (ret < 0 ? ret : 0);
 }
 

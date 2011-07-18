@@ -41,6 +41,7 @@ public:
     void                setOperationCode(MtpOperationCode code);
     void                setTransactionID(MtpTransactionID id);
 
+    inline const uint8_t*     getData() const { return mBuffer + MTP_CONTAINER_HEADER_SIZE; }
     inline uint8_t      getUInt8() { return (uint8_t)mBuffer[mOffset++]; }
     inline int8_t       getInt8() { return (int8_t)mBuffer[mOffset++]; }
     uint16_t            getUInt16();
@@ -95,11 +96,9 @@ public:
 #ifdef MTP_DEVICE
     // fill our buffer with data from the given file descriptor
     int                 read(int fd);
-    int                 readDataHeader(int fd);
 
     // write our data to the given file descriptor
     int                 write(int fd);
-    int                 writeDataHeader(int fd, uint32_t length);
     int                 writeData(int fd, void* data, uint32_t length);
 #endif
 
