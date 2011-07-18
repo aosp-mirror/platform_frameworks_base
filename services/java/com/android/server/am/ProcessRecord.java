@@ -73,6 +73,7 @@ class ProcessRecord {
     int adjSeq;                 // Sequence id for identifying oom_adj assignment cycles
     int lruSeq;                 // Sequence id for identifying LRU update cycles
     CompatibilityInfo compat;   // last used compatibility mode
+    IBinder.DeathRecipient deathRecipient; // Who is watching for the death.
     ComponentName instrumentationClass;// class installed to instrument app
     ApplicationInfo instrumentationInfo; // the application being instrumented
     String instrumentationProfileFile; // where to save profiling
@@ -297,6 +298,13 @@ class ProcessRecord {
         }
     }
     
+    public void unlinkDeathRecipient() {
+        if (deathRecipient != null && thread != null) {
+            thread.asBinder().unlinkToDeath(deathRecipient, 0);
+        }
+        deathRecipient = null;
+    }
+
     public String toShortString() {
         if (shortStringName != null) {
             return shortStringName;

@@ -48,9 +48,9 @@ public class ObserverNodeTest extends AndroidTestCase {
         int[] nums = new int[] {4, 7, 1, 4, 2, 2, 3, 3};
 
         // special case
-        root.addObserverLocked(uris[0], new TestObserver().getContentObserver(), false, root);
+        root.addObserverLocked(uris[0], new TestObserver().getContentObserver(), false, root, 0, 0);
         for(int i = 1; i < uris.length; i++) {
-            root.addObserverLocked(uris[i], new TestObserver().getContentObserver(), true, root);
+            root.addObserverLocked(uris[i], new TestObserver().getContentObserver(), true, root, 0, 0);
         }
 
         ArrayList<ObserverCall> calls = new ArrayList<ObserverCall>();
@@ -77,7 +77,7 @@ public class ObserverNodeTest extends AndroidTestCase {
         int[] nums = new int[] {7, 1, 3, 3, 1, 1, 1, 1};
 
         for(int i = 0; i < uris.length; i++) {
-            root.addObserverLocked(uris[i], new TestObserver().getContentObserver(), false, root);
+            root.addObserverLocked(uris[i], new TestObserver().getContentObserver(), false, root, 0, 0);
         }
 
         ArrayList<ObserverCall> calls = new ArrayList<ObserverCall>();

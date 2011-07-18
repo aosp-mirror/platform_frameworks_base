@@ -3610,8 +3610,10 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         String processName = app.processName;
         try {
-            thread.asBinder().linkToDeath(new AppDeathRecipient(
-                    app, pid, thread), 0);
+            AppDeathRecipient adr = new AppDeathRecipient(
+                    app, pid, thread);
+            thread.asBinder().linkToDeath(adr, 0);
+            app.deathRecipient = adr;
         } catch (RemoteException e) {
             app.resetPackageList();
             startProcessLocked(app, "link fail", processName);
@@ -3687,6 +3689,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.w(TAG, "Exception thrown during bind!", e);
 
             app.resetPackageList();
+            app.unlinkDeathRecipient();
             startProcessLocked(app, "bind fail", processName);
             return false;
         }
@@ -9210,6 +9213,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.notResponding = false;
         
         app.resetPackageList();
+        app.unlinkDeathRecipient();
         app.thread = null;
         app.forcingToForeground = null;
         app.foregroundServices = false;
@@ -9327,7 +9331,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             // This app is persistent, so we need to keep its record around.
             // If it is not already on the pending app list, add it there
             // and start a new process for it.
-            app.thread = null;
             app.forcingToForeground = null;
             app.foregroundServices = false;
             if (mPersistentStartingProcesses.indexOf(app) < 0) {
