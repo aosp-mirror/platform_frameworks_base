@@ -20,6 +20,7 @@
     android:layout_height="?android:attr/dropdownListPreferredItemHeight"
     android:paddingLeft="16dip"
     android:paddingRight="16dip"
+    android:minWidth="196dip"
     android:background="?android:attr/activatedBackgroundIndicator"
     android:orientation="vertical" >
 

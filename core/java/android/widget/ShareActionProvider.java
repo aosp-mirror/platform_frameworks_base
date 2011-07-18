@@ -162,14 +162,17 @@ public class ShareActionProvider extends ActionProvider {
                 .setOnMenuItemClickListener(mOnMenuItemClickListener);
         }
 
-        // Add a sub-menu for showing all activities as a list item.
-        SubMenu expandedSubMenu = subMenu.addSubMenu(Menu.NONE, collapsedActivityCount,
-                collapsedActivityCount, mContext.getString(R.string.activity_chooser_view_see_all));
-        for (int i = 0; i < expandedActivityCount; i++) {
-            ResolveInfo activity = dataModel.getActivity(i);
-            expandedSubMenu.add(0, i, i, activity.loadLabel(packageManager))
-                .setIcon(activity.loadIcon(packageManager))
-                .setOnMenuItemClickListener(mOnMenuItemClickListener);
+        if (collapsedActivityCount < expandedActivityCount) {
+            // Add a sub-menu for showing all activities as a list item.
+            SubMenu expandedSubMenu = subMenu.addSubMenu(Menu.NONE, collapsedActivityCount,
+                    collapsedActivityCount,
+                    mContext.getString(R.string.activity_chooser_view_see_all));
+            for (int i = 0; i < expandedActivityCount; i++) {
+                ResolveInfo activity = dataModel.getActivity(i);
+                expandedSubMenu.add(0, i, i, activity.loadLabel(packageManager))
+                    .setIcon(activity.loadIcon(packageManager))
+                    .setOnMenuItemClickListener(mOnMenuItemClickListener);
+            }
         }
     }
 
