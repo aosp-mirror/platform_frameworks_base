@@ -77,6 +77,10 @@ private:
         kWhatRead       = 'read',
     };
 
+    enum {
+        kMaxNumRetries = 10,
+    };
+
     sp<DataSource> mSource;
     sp<AHandlerReflector<NuCachedSource2> > mReflector;
     sp<ALooper> mLooper;
@@ -92,6 +96,8 @@ private:
     sp<AMessage> mAsyncResult;
     bool mFetching;
     int64_t mLastFetchTimeUs;
+
+    int32_t mNumRetriesLeft;
 
     void onMessageReceived(const sp<AMessage> &msg);
     void onFetch();

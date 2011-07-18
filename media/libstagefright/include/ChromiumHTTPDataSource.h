@@ -51,6 +51,8 @@ struct ChromiumHTTPDataSource : public HTTPBase {
 
     virtual String8 getMIMEType() const;
 
+    virtual status_t reconnectAtOffset(off64_t offset);
+
 protected:
     virtual ~ChromiumHTTPDataSource();
 
