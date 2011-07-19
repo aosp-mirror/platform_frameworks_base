@@ -458,6 +458,17 @@ status_t CameraService::Client::connect(const sp<ICameraClient>& client) {
     return NO_ERROR;
 }
 
+static void disconnectWindow(const sp<ANativeWindow>& window) {
+    if (window != 0) {
+        status_t result = native_window_disconnect(window.get(),
+                NATIVE_WINDOW_API_CAMERA);
+        if (result != NO_ERROR) {
+            LOGW("native_window_disconnect failed: %s (%d)", strerror(-result),
+                    result);
+        }
+    }
+}
+
 void CameraService::Client::disconnect() {
     int callingPid = getCallingPid();
     LOG1("disconnect E (pid %d)", callingPid);
@@ -489,6 +500,7 @@ void CameraService::Client::disconnect() {
 
     // Release the held ANativeWindow resources.
     if (mPreviewWindow != 0) {
+        disconnectWindow(mPreviewWindow);
         mPreviewWindow = 0;
         mHardware->setPreviewWindow(mPreviewWindow);
     }
@@ -501,17 +513,6 @@ void CameraService::Client::disconnect() {
 }
 
 // ----------------------------------------------------------------------------
-
-static void disconnectWindow(const sp<ANativeWindow>& window) {
-    if (window != 0) {
-        status_t result = native_window_disconnect(window.get(),
-                NATIVE_WINDOW_API_CAMERA);
-        if (result != NO_ERROR) {
-            LOGW("native_window_disconnect failed: %s (%d)", strerror(-result),
-                    result);
-        }
-    }
-}
 
 status_t CameraService::Client::setPreviewWindow(const sp<IBinder>& binder,
         const sp<ANativeWindow>& window) {
