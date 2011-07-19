@@ -17,6 +17,7 @@
 #define LOG_TAG "BluetoothSocket.cpp"
 
 #include "android_bluetooth_common.h"
+#include "android_bluetooth_c.h"
 #include "android_runtime/AndroidRuntime.h"
 #include "JNIHelp.h"
 #include "utils/Log.h"
@@ -245,7 +246,7 @@ static int bindListenNative(JNIEnv *env, jobject obj) {
     jint type;
     socklen_t addr_sz;
     struct sockaddr *addr;
-    bdaddr_t bdaddr = *BDADDR_ANY;
+    bdaddr_t bdaddr = android_bluetooth_bdaddr_any();
     struct asocket *s = get_socketData(env, obj);
 
     if (!s)
