@@ -18,8 +18,8 @@ package com.android.server;
 
 import android.os.SystemProperties;
 import android.util.Log;
-
 import dalvik.system.SocketTagger;
+import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -27,8 +27,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.SocketException;
 import java.nio.charset.Charsets;
-
-import libcore.io.IoUtils;
 
 /**
  * Assigns tags to sockets for traffic stats.
@@ -57,6 +55,10 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
 
     public static void setThreadSocketStatsTag(int tag) {
         threadSocketTags.get().statsTag = tag;
+    }
+
+    public static int getThreadSocketStatsTag() {
+        return threadSocketTags.get().statsTag;
     }
 
     public static void setThreadSocketStatsUid(int uid) {
