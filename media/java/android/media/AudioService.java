@@ -332,10 +332,10 @@ public class AudioService extends IAudioService.Stub {
                 SOUND_EFFECT_DEFAULT_VOLUME_DB);
 
         mVolumePanel = new VolumePanel(context, this);
-        mSettingsObserver = new SettingsObserver();
         mForcedUseForComm = AudioSystem.FORCE_NONE;
         createAudioSystemThread();
         readPersistedSettings();
+        mSettingsObserver = new SettingsObserver();
         createStreamStates();
         // Call setMode() to initialize mSetModeDeathHandlers
         mMode = AudioSystem.MODE_INVALID;
@@ -427,15 +427,20 @@ public class AudioService extends IAudioService.Stub {
 
         mVibrateSetting = System.getInt(cr, System.VIBRATE_ON, 0);
 
+        // make sure settings for ringer mode are consistent with device type: non voice capable
+        // devices (tablets) include media stream in silent mode whereas phones don't.
         mRingerModeAffectedStreams = Settings.System.getInt(cr,
                 Settings.System.MODE_RINGER_STREAMS_AFFECTED,
                 ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
-                 (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)|
-                 (1 << AudioSystem.STREAM_MUSIC)));
-
-        if (!mVoiceCapable) {
+                 (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)));
+        if (mVoiceCapable) {
+            mRingerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
+        } else {
             mRingerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
         }
+        Settings.System.putInt(cr,
+                Settings.System.MODE_RINGER_STREAMS_AFFECTED, mRingerModeAffectedStreams);
+
         mMuteAffectedStreams = System.getInt(cr,
                 System.MUTE_STREAMS_AFFECTED,
                 ((1 << AudioSystem.STREAM_MUSIC)|(1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_SYSTEM)));
@@ -2166,12 +2171,14 @@ public class AudioService extends IAudioService.Stub {
             super.onChange(selfChange);
             synchronized (mSettingsLock) {
                 int ringerModeAffectedStreams = Settings.System.getInt(mContentResolver,
-                        Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                        0);
-                if (!mVoiceCapable) {
+                       Settings.System.MODE_RINGER_STREAMS_AFFECTED,
+                       ((1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_NOTIFICATION)|
+                       (1 << AudioSystem.STREAM_SYSTEM)|(1 << AudioSystem.STREAM_SYSTEM_ENFORCED)));
+                if (mVoiceCapable) {
+                    ringerModeAffectedStreams &= ~(1 << AudioSystem.STREAM_MUSIC);
+                } else {
                     ringerModeAffectedStreams |= (1 << AudioSystem.STREAM_MUSIC);
                 }
-
                 if (ringerModeAffectedStreams != mRingerModeAffectedStreams) {
                     /*
                      * Ensure all stream types that should be affected by ringer mode
