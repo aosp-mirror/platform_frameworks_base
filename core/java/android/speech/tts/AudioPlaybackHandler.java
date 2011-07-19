@@ -418,22 +418,30 @@ class AudioPlaybackHandler {
         if (DBG) Log.d(TAG, "handleSynthesisDone()");
         final AudioTrack audioTrack = params.getAudioTrack();
 
-        try {
-            if (audioTrack != null) {
-                if (DBG) Log.d(TAG, "Waiting for audio track to complete : " +
-                        audioTrack.hashCode());
-                blockUntilDone(params);
-                if (DBG) Log.d(TAG, "Releasing audio track [" + audioTrack.hashCode() + "]");
-                // The last call to AudioTrack.write( ) will return only after
-                // all data from the audioTrack has been sent to the mixer, so
-                // it's safe to release at this point.
-                audioTrack.release();
-            }
-        } finally {
-            params.setAudioTrack(null);
-            params.getDispatcher().dispatchUtteranceCompleted();
-            mLastSynthesisRequest = null;
+        if (audioTrack == null) {
+            return;
         }
+
+        if (DBG) Log.d(TAG, "Waiting for audio track to complete : " +
+                audioTrack.hashCode());
+        blockUntilDone(params);
+        if (DBG) Log.d(TAG, "Releasing audio track [" + audioTrack.hashCode() + "]");
+
+        // The last call to AudioTrack.write( ) will return only after
+        // all data from the audioTrack has been sent to the mixer, so
+        // it's safe to release at this point. Make sure release() and the call
+        // that set the audio track to null are performed atomically.
+        synchronized (this) {
+            // Never allow the audioTrack to be observed in a state where
+            // it is released but non null. The only case this might happen
+            // is in the various stopFoo methods that call AudioTrack#stop from
+            // different threads, but they are synchronized on AudioPlayBackHandler#this
+            // too.
+            audioTrack.release();
+            params.setAudioTrack(null);
+        }
+        params.getDispatcher().dispatchUtteranceCompleted();
+        mLastSynthesisRequest = null;
     }
 
     private static void blockUntilDone(SynthesisMessageParams params) {
