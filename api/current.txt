@@ -8905,6 +8905,8 @@ package android.hardware {
     method public final void takePicture(android.hardware.Camera.ShutterCallback, android.hardware.Camera.PictureCallback, android.hardware.Camera.PictureCallback);
     method public final void takePicture(android.hardware.Camera.ShutterCallback, android.hardware.Camera.PictureCallback, android.hardware.Camera.PictureCallback, android.hardware.Camera.PictureCallback);
     method public final void unlock();
+    field public static final java.lang.String ACTION_NEW_PICTURE = "android.hardware.action.NEW_PICTURE";
+    field public static final java.lang.String ACTION_NEW_VIDEO = "android.hardware.action.NEW_VIDEO";
     field public static final int CAMERA_ERROR_SERVER_DIED = 100; // 0x64
     field public static final int CAMERA_ERROR_UNKNOWN = 1; // 0x1
   }
