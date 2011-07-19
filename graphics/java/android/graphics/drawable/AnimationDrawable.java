@@ -33,7 +33,7 @@ import android.util.AttributeSet;
  * <p>
  * The simplest way to create a frame-by-frame animation is to define the animation in an XML
  * file, placed in the res/drawable/ folder, and set it as the background to a View object. Then, call
- * {@link #run()} to start the animation.
+ * {@link #start()} to run the animation.
  * <p>
  * An AnimationDrawable defined in XML consists of a single <code>&lt;animation-list></code> element,
  * and a series of nested <code>&lt;item></code> tags. Each item defines a frame of the animation.
