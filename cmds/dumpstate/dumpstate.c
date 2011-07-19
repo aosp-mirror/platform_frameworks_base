@@ -197,6 +197,15 @@ static void dumpstate() {
     dump_file(NULL, "/sys/class/leds/lcd-backlight/registers");
     printf("\n");
 
+#ifdef BOARD_HAS_DUMPSTATE
+    printf("========================================================\n");
+    printf("== Board\n");
+    printf("========================================================\n");
+
+    dumpstate_board();
+    printf("\n");
+#endif
+
     printf("========================================================\n");
     printf("== Android Framework Services\n");
     printf("========================================================\n");
@@ -218,6 +227,9 @@ static void dumpstate() {
 
     run_command("APP SERVICES", 30, "dumpsys", "activity", "service", "all", NULL);
 
+    printf("========================================================\n");
+    printf("== dumpstate: done\n");
+    printf("========================================================\n");
 }
 
 static void usage() {

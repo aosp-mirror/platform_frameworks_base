@@ -19,6 +19,7 @@
 
 #include <time.h>
 #include <unistd.h>
+#include <stdio.h>
 
 /* prints the contents of a file */
 int dump_file(const char *title, const char* path);
@@ -46,5 +47,8 @@ void show_wchan(int pid, const char *name);
 
 /* Play a sound via Stagefright */
 void play_sound(const char* path);
+
+/* Implemented by libdumpstate_board to dump board-specific info */
+void dumpstate_board();
 
 #endif /* _DUMPSTATE_H_ */
