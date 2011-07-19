@@ -18,7 +18,8 @@ package com.android.test.hwui;
 
 import android.app.Activity;
 import android.graphics.Canvas;
-import android.graphics.Rect;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -29,6 +30,7 @@ import android.widget.FrameLayout;
 public class CanvasTextureViewActivity extends Activity
         implements TextureView.SurfaceTextureListener {
     private TextureView mTextureView;
+    private CanvasTextureViewActivity.RenderingThread mThread;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,7 @@ public class CanvasTextureViewActivity extends Activity
 
         mTextureView = new TextureView(this);
         mTextureView.setSurfaceTextureListener(this);
+        mTextureView.setOpaque(false);
 
         content.addView(mTextureView, new FrameLayout.LayoutParams(500, 500, Gravity.CENTER));
         setContentView(content);
@@ -45,19 +48,8 @@ public class CanvasTextureViewActivity extends Activity
 
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-        Canvas c = mTextureView.lockCanvas();
-        try {
-            c.drawColor(0xff00ff00);
-        } finally {
-            mTextureView.unlockCanvasAndPost(c);
-        }
-
-        c = mTextureView.lockCanvas(new Rect(100, 100, 200, 200));
-        try {
-            c.drawColor(0xff0000ff);
-        } finally {
-            mTextureView.unlockCanvasAndPost(c);
-        }
+        mThread = new RenderingThread(mTextureView);
+        mThread.start();
     }
 
     @Override
@@ -67,11 +59,62 @@ public class CanvasTextureViewActivity extends Activity
 
     @Override
     public void onSurfaceTextureDestroyed(SurfaceTexture surface) {
-        // Ignored
+        if (mThread != null) mThread.stopRendering();
     }
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
         // Ignored
+    }
+
+    private static class RenderingThread extends Thread {
+        private final TextureView mSurface;
+        private volatile boolean mRunning = true;
+
+        public RenderingThread(TextureView surface) {
+            mSurface = surface;
+        }
+
+        @Override
+        public void run() {
+            float x = 0.0f;
+            float y = 0.0f;
+            float speedX = 5.0f;
+            float speedY = 3.0f;
+            
+            Paint paint = new Paint();
+            paint.setColor(0xff00ff00);
+
+            while (mRunning && !Thread.interrupted()) {
+                final Canvas canvas = mSurface.lockCanvas(null);
+                try {
+                    canvas.drawColor(0x00000000, PorterDuff.Mode.CLEAR);
+                    canvas.drawRect(x, y, x + 20.0f, y + 20.0f, paint);
+                } finally {
+                    mSurface.unlockCanvasAndPost(canvas);
+                }
+
+                if (x + 20.0f + speedX >= mSurface.getWidth() || x + speedX <= 0.0f) {
+                    speedX = -speedX;
+                }
+                if (y + 20.0f + speedY >= mSurface.getHeight() || y + speedY <= 0.0f) {
+                    speedY = -speedY;
+                }
+
+                x += speedX;
+                y += speedY;
+
+                try {
+                    Thread.sleep(15);
+                } catch (InterruptedException e) {
+                    // Interrupted
+                }
+            }
+        }
+        
+        void stopRendering() {
+            interrupt();
+            mRunning = false;
+        }
     }
 }
