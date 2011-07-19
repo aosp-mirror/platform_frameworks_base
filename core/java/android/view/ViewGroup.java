@@ -3960,7 +3960,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 final int left = mLeft;
                 final int top = mTop;
 
-                if (dirty.intersect(0, 0, mRight - left, mBottom - top) ||
+                if ((mGroupFlags & FLAG_CLIP_CHILDREN) != FLAG_CLIP_CHILDREN ||
+                        dirty.intersect(0, 0, mRight - left, mBottom - top) ||
                         (mPrivateFlags & DRAW_ANIMATION) == DRAW_ANIMATION) {
                     mPrivateFlags &= ~DRAWING_CACHE_VALID;
 
@@ -3978,8 +3979,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
 
                 location[CHILD_LEFT_INDEX] = mLeft;
                 location[CHILD_TOP_INDEX] = mTop;
-
-                dirty.set(0, 0, mRight - mLeft, mBottom - mTop);
+                if ((mGroupFlags & FLAG_CLIP_CHILDREN) == FLAG_CLIP_CHILDREN) {
+                    dirty.set(0, 0, mRight - mLeft, mBottom - mTop);
+                } else {
+                    // in case the dirty rect extends outside the bounds of this container
+                    dirty.union(0, 0, mRight - mLeft, mBottom - mTop);
+                }
 
                 if (mLayerType != LAYER_TYPE_NONE) {
                     mLocalDirtyRect.union(dirty);
