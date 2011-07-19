@@ -14434,6 +14434,7 @@ package android.os {
   public class RecoverySystem {
     ctor public RecoverySystem();
     method public static void installPackage(android.content.Context, java.io.File) throws java.io.IOException;
+    method public static void rebootWipeCache(android.content.Context) throws java.io.IOException;
     method public static void rebootWipeUserData(android.content.Context) throws java.io.IOException;
     method public static void verifyPackage(java.io.File, android.os.RecoverySystem.ProgressListener, java.io.File) throws java.security.GeneralSecurityException, java.io.IOException;
   }
