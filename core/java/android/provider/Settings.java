@@ -3853,6 +3853,10 @@ public final class Settings {
         /** Timeout in milliseconds to wait for NTP server. {@hide} */
         public static final String NTP_TIMEOUT = "ntp_timeout";
 
+        /** Autofill server address (Used in WebView/browser). {@hide} */
+        public static final String WEB_AUTOFILL_QUERY_URL =
+            "web_autofill_query_url";
+
         /**
          * @hide
          */
