@@ -151,6 +151,18 @@ private:
     // dequeued format or to mReqFormat if no buffer was dequeued.
     uint32_t mQueryFormat;
 
+    // mDefaultWidth is default width of the window, regardless of the
+    // set_dimension call
+    uint32_t mDefaultWidth;
+
+    // mDefaultHeight is default width of the window, regardless of the
+    // set_dimension call
+    uint32_t mDefaultHeight;
+
+    // mTransformHint is the transform probably applied to buffers of this
+    // window. this is only a hint, actual transform may differ.
+    uint32_t mTransformHint;
+
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of SurfaceTexture objects. It must be locked whenever the
     // member variables are accessed.

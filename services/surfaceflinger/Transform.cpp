@@ -20,47 +20,12 @@
 #include <utils/String8.h>
 #include <ui/Region.h>
 
+#include "clz.h"
 #include "Transform.h"
 
 // ---------------------------------------------------------------------------
 
 namespace android {
-
-// ---------------------------------------------------------------------------
-
-template <typename T>
-static inline T min(T a, T b) {
-    return a<b ? a : b;
-}
-template <typename T>
-static inline T min(T a, T b, T c) {
-    return min(a, min(b, c));
-}
-template <typename T>
-static inline T min(T a, T b, T c, T d) {
-    return min(a, b, min(c, d));
-}
-
-template <typename T>
-static inline T max(T a, T b) {
-    return a>b ? a : b;
-}
-template <typename T>
-static inline T max(T a, T b, T c) {
-    return max(a, max(b, c));
-}
-template <typename T>
-static inline T max(T a, T b, T c, T d) {
-    return max(a, b, max(c, d));
-}
-
-template <typename T>
-static inline
-void swap(T& a, T& b) {
-    T t(a);
-    a = b;
-    b = t;
-}
 
 // ---------------------------------------------------------------------------
 

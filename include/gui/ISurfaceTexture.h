@@ -78,7 +78,12 @@ protected:
     // client for this buffer. The timestamp is measured in nanoseconds, and
     // must be monotonically increasing. Its other properties (zero point, etc)
     // are client-dependent, and should be documented by the client.
-    virtual status_t queueBuffer(int slot, int64_t timestamp) = 0;
+    //
+    // outWidth, outHeight and outTransform are filed with the default width
+    // default height of the window and current transform applied to buffers,
+    // respectively.
+    virtual status_t queueBuffer(int slot, int64_t timestamp,
+            uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) = 0;
 
     // cancelBuffer indicates that the client does not wish to fill in the
     // buffer associated with slot and transfers ownership of the slot back to

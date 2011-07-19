@@ -84,7 +84,8 @@ public:
     // nanoseconds, and must be monotonically increasing. Its other semantics
     // (zero point, etc) are client-dependent and should be documented by the
     // client.
-    virtual status_t queueBuffer(int buf, int64_t timestamp);
+    virtual status_t queueBuffer(int buf, int64_t timestamp,
+            uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform);
     virtual void cancelBuffer(int buf);
     virtual status_t setCrop(const Rect& reg);
     virtual status_t setTransform(uint32_t transform);

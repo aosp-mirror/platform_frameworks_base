@@ -289,6 +289,18 @@ int FramebufferNativeWindow::query(const ANativeWindow* window,
         case NATIVE_WINDOW_CONCRETE_TYPE:
             *value = NATIVE_WINDOW_FRAMEBUFFER;
             return NO_ERROR;
+        case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
+            *value = 0;
+            return NO_ERROR;
+        case NATIVE_WINDOW_DEFAULT_WIDTH:
+            *value = fb->width;
+            return NO_ERROR;
+        case NATIVE_WINDOW_DEFAULT_HEIGHT:
+            *value = fb->height;
+            return NO_ERROR;
+        case NATIVE_WINDOW_TRANSFORM_HINT:
+            *value = 0;
+            return NO_ERROR;
     }
     *value = 0;
     return BAD_VALUE;

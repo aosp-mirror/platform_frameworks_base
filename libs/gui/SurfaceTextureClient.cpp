@@ -222,26 +222,38 @@ int SurfaceTextureClient::queueBuffer(android_native_buffer_t* buffer) {
     if (i < 0) {
         return i;
     }
-    mSurfaceTexture->queueBuffer(i, timestamp);
+    mSurfaceTexture->queueBuffer(i, timestamp,
+            &mDefaultWidth, &mDefaultHeight, &mTransformHint);
     return OK;
 }
 
 int SurfaceTextureClient::query(int what, int* value) const {
     LOGV("SurfaceTextureClient::query");
-    switch (what) {
-    case NATIVE_WINDOW_FORMAT:
-        if (mReqFormat) {
-            *value = mReqFormat;
-            return NO_ERROR;
+    { // scope for the lock
+        Mutex::Autolock lock(mMutex);
+        switch (what) {
+            case NATIVE_WINDOW_FORMAT:
+                if (mReqFormat) {
+                    *value = mReqFormat;
+                    return NO_ERROR;
+                }
+                break;
+            case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
+                *value = 0;
+                return NO_ERROR;
+            case NATIVE_WINDOW_CONCRETE_TYPE:
+                *value = NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT;
+                return NO_ERROR;
+            case NATIVE_WINDOW_DEFAULT_WIDTH:
+                *value = mDefaultWidth;
+                return NO_ERROR;
+            case NATIVE_WINDOW_DEFAULT_HEIGHT:
+                *value = mDefaultHeight;
+                return NO_ERROR;
+            case NATIVE_WINDOW_TRANSFORM_HINT:
+                *value = mTransformHint;
+                return NO_ERROR;
         }
-        break;
-    case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
-        // TODO: this is not needed anymore
-        *value = 0;
-        return NO_ERROR;
-    case NATIVE_WINDOW_CONCRETE_TYPE:
-        *value = NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT;
-        return NO_ERROR;
     }
     return mSurfaceTexture->query(what, value);
 }

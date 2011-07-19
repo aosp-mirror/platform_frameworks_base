@@ -44,10 +44,6 @@
 
 namespace android {
 
-template <typename T> inline T min(T a, T b) {
-    return a<b ? a : b;
-}
-
 // ---------------------------------------------------------------------------
 
 Layer::Layer(SurfaceFlinger* flinger,
@@ -457,13 +453,22 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
         // FIXME: mPostedDirtyRegion = dirty & bounds
         mPostedDirtyRegion.set(front.w, front.h);
 
-        sp<GraphicBuffer> newFrontBuffer(mActiveBuffer);
-        if ((newFrontBuffer->getWidth()  == front.requested_w &&
-            newFrontBuffer->getHeight() == front.requested_h) ||
-            isFixedSize())
+
+        if ((front.w != front.requested_w) ||
+            (front.h != front.requested_h))
         {
-            if ((front.w != front.requested_w) ||
-                (front.h != front.requested_h))
+            // check that we received a buffer of the right size
+            // (Take the buffer's orientation into account)
+            sp<GraphicBuffer> newFrontBuffer(mActiveBuffer);
+            uint32_t bufWidth  = newFrontBuffer->getWidth();
+            uint32_t bufHeight = newFrontBuffer->getHeight();
+            if (mCurrentTransform & Transform::ROT_90) {
+                swap(bufWidth, bufHeight);
+            }
+
+            if (isFixedSize() ||
+                    (bufWidth == front.requested_w &&
+                    bufHeight == front.requested_h))
             {
                 // Here we pretend the transaction happened by updating the
                 // current and drawing states. Drawing state is only accessed
@@ -483,10 +488,10 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 
                 // recompute visible region
                 recomputeVisibleRegions = true;
-            }
 
-            // we now have the correct size, unfreeze the screen
-            mFreezeLock.clear();
+                // we now have the correct size, unfreeze the screen
+                mFreezeLock.clear();
+            }
         }
     }
 }

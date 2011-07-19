@@ -402,7 +402,8 @@ status_t SurfaceTexture::setSynchronousMode(bool enabled) {
     return err;
 }
 
-status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
+status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp,
+        uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
     LOGV("SurfaceTexture::queueBuffer");
 
     sp<FrameAvailableListener> listener;
@@ -463,6 +464,11 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
     if (listener != 0) {
         listener->onFrameAvailable();
     }
+
+    *outWidth = mDefaultWidth;
+    *outHeight = mDefaultHeight;
+    *outTransform = 0;
+
     return OK;
 }
 
