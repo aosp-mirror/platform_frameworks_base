@@ -23,6 +23,36 @@ package android.view;
  * Examples of good action modes include selection modes, search, content editing, etc.
  */
 public abstract class ActionMode {
+    private Object mTag;
+
+    /**
+     * Set a tag object associated with this ActionMode.
+     *
+     * <p>Like the tag available to views, this allows applications to associate arbitrary
+     * data with an ActionMode for later reference.
+     *
+     * @param tag Tag to associate with this ActionMode
+     *
+     * @see #getTag()
+     */
+    public void setTag(Object tag) {
+        mTag = tag;
+    }
+
+    /**
+     * Retrieve the tag object associated with this ActionMode.
+     *
+     * <p>Like the tag available to views, this allows applications to associate arbitrary
+     * data with an ActionMode for later reference.
+     *
+     * @return Tag associated with this ActionMode
+     *
+     * @see #setTag(Object)
+     */
+    public Object getTag() {
+        return mTag;
+    }
+
     /**
      * Set the title of the action mode. This method will have no visible effect if
      * a custom view has been set.
