@@ -51,6 +51,8 @@ class DragState {
     float mCurrentX, mCurrentY;
     float mThumbOffsetX, mThumbOffsetY;
     InputChannel mServerChannel, mClientChannel;
+    InputApplicationHandle mDragApplicationHandle;
+    InputWindowHandle mDragWindowHandle;
     WindowState mTargetWindow;
     ArrayList<WindowState> mNotifiedWindows;
     boolean mDragInProgress;
@@ -91,6 +93,38 @@ class DragState {
             mService.mInputManager.registerInputChannel(mServerChannel, null);
             InputQueue.registerInputChannel(mClientChannel, mService.mDragInputHandler,
                     mService.mH.getLooper().getQueue());
+
+            mDragApplicationHandle = new InputApplicationHandle(null);
+            mDragApplicationHandle.name = "drag";
+            mDragApplicationHandle.dispatchingTimeoutNanos =
+                    WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+
+            mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null);
+            mDragWindowHandle.name = "drag";
+            mDragWindowHandle.inputChannel = mServerChannel;
+            mDragWindowHandle.layer = getDragLayerLw();
+            mDragWindowHandle.layoutParamsFlags = 0;
+            mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;
+            mDragWindowHandle.dispatchingTimeoutNanos =
+                    WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+            mDragWindowHandle.visible = true;
+            mDragWindowHandle.canReceiveKeys = false;
+            mDragWindowHandle.hasFocus = true;
+            mDragWindowHandle.hasWallpaper = false;
+            mDragWindowHandle.paused = false;
+            mDragWindowHandle.ownerPid = Process.myPid();
+            mDragWindowHandle.ownerUid = Process.myUid();
+            mDragWindowHandle.inputFeatures = 0;
+            mDragWindowHandle.scaleFactor = 1.0f;
+
+            // The drag window cannot receive new touches.
+            mDragWindowHandle.touchableRegion.setEmpty();
+
+            // The drag window covers the entire display
+            mDragWindowHandle.frameLeft = 0;
+            mDragWindowHandle.frameTop = 0;
+            mDragWindowHandle.frameRight = mService.mDisplay.getRealWidth();
+            mDragWindowHandle.frameBottom = mService.mDisplay.getRealHeight();
         }
     }
 
