@@ -1508,6 +1508,8 @@ int doPackage(Bundle* bundle)
     status_t err;
     sp<AaptAssets> assets;
     int N;
+    FILE* fp;
+    String8 dependencyFile;
 
     // -c zz_ZZ means do pseudolocalization
     ResourceFilter filter;
@@ -1542,6 +1544,13 @@ int doPackage(Bundle* bundle)
 
     // Load the assets.
     assets = new AaptAssets();
+
+    // Set up the resource gathering in assets if we're trying to make R.java
+    if (bundle->getGenDependencies()) {
+        sp<FilePathStore> pathStore = new FilePathStore;
+        assets->setFullResPaths(pathStore);
+    }
+
     err = assets->slurpFromArgs(bundle);
     if (err < 0) {
         goto bail;
@@ -1551,7 +1560,7 @@ int doPackage(Bundle* bundle)
         assets->print();
     }
 
-    // If they asked for any files that need to be compiled, do so.
+    // If they asked for any fileAs that need to be compiled, do so.
     if (bundle->getResourceSourceDirs().size() || bundle->getAndroidManifestFile()) {
         err = buildResources(bundle, assets);
         if (err != 0) {
@@ -1565,18 +1574,26 @@ int doPackage(Bundle* bundle)
         goto bail;
     }
 
+    if (bundle->getGenDependencies()) {
+        dependencyFile = String8(bundle->getRClassDir());
+        // Make sure we have a clean dependency file to start with
+        dependencyFile.appendPath("R.d");
+        fp = fopen(dependencyFile, "w");
+        fclose(fp);
+    }
+
     // Write out R.java constants
     if (assets->getPackage() == assets->getSymbolsPrivatePackage()) {
         if (bundle->getCustomPackage() == NULL) {
             err = writeResourceSymbols(bundle, assets, assets->getPackage(), true);
             // Copy R.java for libraries
             if (bundle->getExtraPackages() != NULL) {
-                // Split on semicolon
+                // Split on colon
                 String8 libs(bundle->getExtraPackages());
-                char* packageString = strtok(libs.lockBuffer(libs.length()), ";");
+                char* packageString = strtok(libs.lockBuffer(libs.length()), ":");
                 while (packageString != NULL) {
                     err = writeResourceSymbols(bundle, assets, String8(packageString), true);
-                    packageString = strtok(NULL, ";");
+                    packageString = strtok(NULL, ":");
                 }
                 libs.unlockBuffer();
             }
@@ -1596,6 +1613,19 @@ int doPackage(Bundle* bundle)
         if (err < 0) {
             goto bail;
         }
+    }
+
+    if (bundle->getGenDependencies()) {
+        // Now that writeResourceSymbols has taken care of writing the
+        // dependency targets to the dependencyFile, we'll write the
+        // pre-requisites.
+        fp = fopen(dependencyFile, "a+");
+        fprintf(fp, " : ");
+        err = writeDependencyPreReqs(bundle, assets, fp);
+
+        // Also manually add the AndroidManifeset since it's a non-asset
+        fprintf(fp, "%s \\\n", bundle->getAndroidManifestFile());
+        fclose(fp);
     }
 
     // Write out the ProGuard file

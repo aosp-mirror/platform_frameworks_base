@@ -51,6 +51,12 @@ ResourceTypeSet::ResourceTypeSet()
 {
 }
 
+FilePathStore::FilePathStore()
+    :RefBase(),
+     Vector<String8>()
+{
+}
+
 class ResourceDirIterator
 {
 public:
@@ -1917,6 +1923,16 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
             return err;
         }
         fclose(fp);
+
+        if (bundle->getGenDependencies()) {
+            // Add this R.java to the dependency file
+            String8 dependencyFile(bundle->getRClassDir());
+            dependencyFile.appendPath("R.d");
+
+            fp = fopen(dependencyFile.string(), "a");
+            fprintf(fp,"%s \\\n", dest.string());
+            fclose(fp);
+        }
     }
 
     return NO_ERROR;
@@ -2243,4 +2259,17 @@ writeProguardFile(Bundle* bundle, const sp<AaptAssets>& assets)
     fclose(fp);
 
     return err;
+}
+
+status_t
+writeDependencyPreReqs(Bundle* bundle, const sp<AaptAssets>& assets, FILE* fp)
+{
+    status_t deps = -1;
+    sp<FilePathStore> files = assets->getFullResPaths();
+    for (size_t file_i = 0; file_i < files->size(); ++file_i) {
+        // Add the full file path to the dependency file
+        fprintf(fp, "%s \\\n", files->itemAt(file_i).string());
+        deps++;
+    }
+    return deps;
 }
