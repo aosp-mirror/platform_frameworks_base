@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <!-- Button, steps back a single frame [CHAR LIMIT=15] -->
+    <string name="backward">Backward</string>
+    <!-- Button, steps forward a single frame [CHAR LIMIT=15] -->
+    <string name="forward">Forward</string>
+    <!-- The name of the application [CHAR LIMIT=20] -->
+    <string name="app_name">TileBenchmark</string>
+    <!-- name of the auto-scroller / tile logger activity [CHAR LIMIT=100] -->
+    <string name="profile_activity">Webview Profiler</string>
+    <!-- name of the tile log playback activity [CHAR LIMIT=100] -->
+    <string name="playback_activity">Webview Tile Playback</string>
+    <!-- Button, loads another tile log [CHAR LIMIT=30] -->
+    <string name="loadbutton">Load</string>
+    <!-- Button, opens the playback activity [CHAR LIMIT=20] -->
+    <string name="inspect_log">Inspect Log</string>
+    <!-- The speed of auto-scrolling [CHAR LIMIT=30] -->
+    <string name="desired_scroll_velocity">Choose Scroll Velocity</string>
+    <!-- Pixels moved per frame [CHAR LIMIT=10] -->
+    <string-array name="velocity_array">
+        <item>1</item>
+        <item>25</item>
+        <item>50</item>
+        <item>100</item>
+        <item>200</item>
+        <item>400</item>
+    </string-array>
+    <!-- 25th percentile - 25% of frames fall below this value [CHAR LIMIT=12]
+    -->
+    <string name="percentile_25">25%ile</string>
+    <!-- 50th percentile - 50% of frames fall below this value (aka median)
+    [CHAR LIMIT=12] -->
+    <string name="percentile_50">median</string>
+    <!-- 75th percentile - 75% of frames fall below this value [CHAR LIMIT=12]
+    -->
+    <string name="percentile_75">75%ile</string>
+    <!-- Frame rate [CHAR LIMIT=15] -->
+    <string name="frames_per_second">Frames/sec</string>
+    <!-- Portion of viewport covered by good tiles [CHAR LIMIT=15] -->
+    <string name="viewport_coverage">Coverage</string>
+    <!-- Format string for stat value overlay [CHAR LIMIT=15] -->
+    <string name="format_stat">%4.4f</string>
+    <!-- Format string for displaying aggregate stats+values (nr of valid tiles,
+    etc.) [CHAR LIMIT=20] -->
+    <string name="format_stat_name">%1$9s %2$3d</string>
+    <!-- Text hovering over canvas, number of tiles ready [CHAR LIMIT=15] -->
+    <string name="ready_tiles">Ready Tiles</string>
+    <!-- Text hovering over canvas, number tiles not ready [CHAR LIMIT=15] -->
+    <string name="unready_tiles">Unready Tiles</string>
+    <!-- Text hovering over canvas, number of tiles that haven't been
+    allocated to a place on the page [CHAR LIMIT=15] -->
+    <string name="unplaced_tiles">Unplaced Tiles</string>
+</resources>
