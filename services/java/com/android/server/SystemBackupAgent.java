@@ -21,6 +21,7 @@ import android.app.backup.BackupDataInput;
 import android.app.backup.BackupDataOutput;
 import android.app.backup.BackupAgentHelper;
 import android.app.backup.FullBackup;
+import android.app.backup.FullBackupDataOutput;
 import android.app.backup.WallpaperBackupHelper;
 import android.content.Context;
 import android.os.ParcelFileDescriptor;
@@ -53,13 +54,6 @@ public class SystemBackupAgent extends BackupAgentHelper {
     @Override
     public void onBackup(ParcelFileDescriptor oldState, BackupDataOutput data,
             ParcelFileDescriptor newState) throws IOException {
-        if (oldState == null) {
-            // Ah, it's a full backup dataset, being restored piecemeal.  Just
-            // pop over to the full restore handling and we're done.
-            runFullBackup(data);
-            return;
-        }
-
         // We only back up the data under the current "wallpaper" schema with metadata
         WallpaperManagerService wallpaper = (WallpaperManagerService)ServiceManager.getService(
                 Context.WALLPAPER_SERVICE);
@@ -74,19 +68,21 @@ public class SystemBackupAgent extends BackupAgentHelper {
         super.onBackup(oldState, data, newState);
     }
 
-    private void runFullBackup(BackupDataOutput output) {
-        fullWallpaperBackup(output);
+    @Override
+    public void onFullBackup(FullBackupDataOutput data) throws IOException {
+        // At present we back up only the wallpaper
+        fullWallpaperBackup(data);
     }
 
-    private void fullWallpaperBackup(BackupDataOutput output) {
+    private void fullWallpaperBackup(FullBackupDataOutput output) {
         // Back up the data files directly.  We do them in this specific order --
         // info file followed by image -- because then we need take no special
         // steps during restore; the restore will happen properly when the individual
         // files are restored piecemeal.
         FullBackup.backupToTar(getPackageName(), FullBackup.ROOT_TREE_TOKEN, null,
-                WALLPAPER_INFO_DIR, WALLPAPER_INFO, output);
+                WALLPAPER_INFO_DIR, WALLPAPER_INFO, output.getData());
         FullBackup.backupToTar(getPackageName(), FullBackup.ROOT_TREE_TOKEN, null,
-                WALLPAPER_IMAGE_DIR, WALLPAPER_IMAGE, output);
+                WALLPAPER_IMAGE_DIR, WALLPAPER_IMAGE, output.getData());
     }
 
     @Override

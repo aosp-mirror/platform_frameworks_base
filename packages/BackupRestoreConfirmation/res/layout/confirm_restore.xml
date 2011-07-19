@@ -29,11 +29,25 @@
               android:layout_marginBottom="30dp"
               android:text="@string/restore_confirm_text" />
 
+    <TextView android:id="@+id/password_desc"
+              android:layout_below="@id/confirm_text"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="10dp"
+              android:text="@string/restore_password_text" />
+
+    <EditText android:id="@+id/password"
+              android:layout_below="@id/password_desc"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="30dp"
+              android:password="true" />
+
     <TextView android:id="@+id/package_name"
               android:layout_width="match_parent"
               android:layout_height="20dp"
               android:layout_marginLeft="30dp"
-              android:layout_below="@id/confirm_text"
+              android:layout_below="@id/password"
               android:layout_marginBottom="30dp" />
 
     <Button android:id="@+id/button_allow"

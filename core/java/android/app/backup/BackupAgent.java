@@ -213,13 +213,13 @@ public abstract class BackupAgent extends ContextWrapper {
     public void onFullBackup(FullBackupDataOutput data) throws IOException {
         ApplicationInfo appInfo = getApplicationInfo();
 
-        String rootDir = new File(appInfo.dataDir).getAbsolutePath();
-        String filesDir = getFilesDir().getAbsolutePath();
-        String databaseDir = getDatabasePath("foo").getParentFile().getAbsolutePath();
-        String sharedPrefsDir = getSharedPrefsFile("foo").getParentFile().getAbsolutePath();
-        String cacheDir = getCacheDir().getAbsolutePath();
+        String rootDir = new File(appInfo.dataDir).getCanonicalPath();
+        String filesDir = getFilesDir().getCanonicalPath();
+        String databaseDir = getDatabasePath("foo").getParentFile().getCanonicalPath();
+        String sharedPrefsDir = getSharedPrefsFile("foo").getParentFile().getCanonicalPath();
+        String cacheDir = getCacheDir().getCanonicalPath();
         String libDir = (appInfo.nativeLibraryDir != null)
-                ? new File(appInfo.nativeLibraryDir).getAbsolutePath()
+                ? new File(appInfo.nativeLibraryDir).getCanonicalPath()
                 : null;
 
         // Filters, the scan queue, and the set of resulting entities
@@ -271,20 +271,27 @@ public abstract class BackupAgent extends ContextWrapper {
         String spDir;
         String cacheDir;
         String libDir;
+        String filePath;
 
         ApplicationInfo appInfo = getApplicationInfo();
 
-        mainDir = new File(appInfo.dataDir).getAbsolutePath();
-        filesDir = getFilesDir().getAbsolutePath();
-        dbDir = getDatabasePath("foo").getParentFile().getAbsolutePath();
-        spDir = getSharedPrefsFile("foo").getParentFile().getAbsolutePath();
-        cacheDir = getCacheDir().getAbsolutePath();
-        libDir = (appInfo.nativeLibraryDir == null) ? null
-                : new File(appInfo.nativeLibraryDir).getAbsolutePath();
+        try {
+            mainDir = new File(appInfo.dataDir).getCanonicalPath();
+            filesDir = getFilesDir().getCanonicalPath();
+            dbDir = getDatabasePath("foo").getParentFile().getCanonicalPath();
+            spDir = getSharedPrefsFile("foo").getParentFile().getCanonicalPath();
+            cacheDir = getCacheDir().getCanonicalPath();
+            libDir = (appInfo.nativeLibraryDir == null)
+                    ? null
+                    : new File(appInfo.nativeLibraryDir).getCanonicalPath();
 
-        // Now figure out which well-defined tree the file is placed in, working from
-        // most to least specific.  We also specifically exclude the lib and cache dirs.
-        String filePath = file.getAbsolutePath();
+            // Now figure out which well-defined tree the file is placed in, working from
+            // most to least specific.  We also specifically exclude the lib and cache dirs.
+            filePath = file.getCanonicalPath();
+        } catch (IOException e) {
+            Log.w(TAG, "Unable to obtain canonical paths");
+            return;
+        }
 
         if (filePath.startsWith(cacheDir) || filePath.startsWith(libDir)) {
             Log.w(TAG, "lib and cache files are not backed up");
@@ -334,15 +341,16 @@ public abstract class BackupAgent extends ContextWrapper {
 
             while (scanQueue.size() > 0) {
                 File file = scanQueue.remove(0);
-                String filePath = file.getAbsolutePath();
-
-                // prune this subtree?
-                if (excludes != null && excludes.contains(filePath)) {
-                    continue;
-                }
-
-                // If it's a directory, enqueue its contents for scanning.
+                String filePath;
                 try {
+                    filePath = file.getCanonicalPath();
+
+                    // prune this subtree?
+                    if (excludes != null && excludes.contains(filePath)) {
+                        continue;
+                    }
+
+                    // If it's a directory, enqueue its contents for scanning.
                     StructStat stat = Libcore.os.lstat(filePath);
                     if (OsConstants.S_ISLNK(stat.st_mode)) {
                         if (DEBUG) Log.i(TAG, "Symlink (skipping)!: " + file);
@@ -355,6 +363,9 @@ public abstract class BackupAgent extends ContextWrapper {
                             }
                         }
                     }
+                } catch (IOException e) {
+                    if (DEBUG) Log.w(TAG, "Error canonicalizing path of " + file);
+                    continue;
                 } catch (ErrnoException e) {
                     if (DEBUG) Log.w(TAG, "Error scanning file " + file + " : " + e);
                     continue;
@@ -415,15 +426,15 @@ public abstract class BackupAgent extends ContextWrapper {
 
         // Parse out the semantic domains into the correct physical location
         if (domain.equals(FullBackup.DATA_TREE_TOKEN)) {
-            basePath = getFilesDir().getAbsolutePath();
+            basePath = getFilesDir().getCanonicalPath();
         } else if (domain.equals(FullBackup.DATABASE_TREE_TOKEN)) {
-            basePath = getDatabasePath("foo").getParentFile().getAbsolutePath();
+            basePath = getDatabasePath("foo").getParentFile().getCanonicalPath();
         } else if (domain.equals(FullBackup.ROOT_TREE_TOKEN)) {
-            basePath = new File(getApplicationInfo().dataDir).getAbsolutePath();
+            basePath = new File(getApplicationInfo().dataDir).getCanonicalPath();
         } else if (domain.equals(FullBackup.SHAREDPREFS_TREE_TOKEN)) {
-            basePath = getSharedPrefsFile("foo").getParentFile().getAbsolutePath();
+            basePath = getSharedPrefsFile("foo").getParentFile().getCanonicalPath();
         } else if (domain.equals(FullBackup.CACHE_TREE_TOKEN)) {
-            basePath = getCacheDir().getAbsolutePath();
+            basePath = getCacheDir().getCanonicalPath();
         } else {
             // Not a supported location
             Log.i(TAG, "Data restored from non-app domain " + domain + ", ignoring");

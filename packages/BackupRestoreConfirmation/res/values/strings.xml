@@ -29,4 +29,11 @@
     <!-- Button to refuse to allow the requested full restore -->
     <string name="deny_restore_button_label">Do not restore</string>
 
+    <!-- Text for message to user that they must enter their predefined backup password in order to perform this operation. -->
+    <string name="backup_password_text">Please enter your predefined backup password below. The full backup will also be encrypted using this password:</string>
+    <!-- Text for message to user that they may optionally supply an encryption password to use for a full backup operation. -->
+    <string name="backup_password_optional">If you wish to encrypt the full backup data, enter a password below:</string>
+
+    <!-- Text for message to user when performing a full restore operation, explaining that they must enter the password originally used to encrypt the full backup data. -->
+    <string name="restore_password_text">If the backup data is encrypted, please enter the password below:</string>
 </resources>

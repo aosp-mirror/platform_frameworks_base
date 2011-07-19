@@ -126,7 +126,7 @@ public class BackupRestoreConfirmation extends Activity {
         final Intent intent = getIntent();
         final String action = intent.getAction();
 
-        int layoutId;
+        final int layoutId;
         if (action.equals(FullBackup.FULL_BACKUP_INTENT_ACTION)) {
             layoutId = R.layout.confirm_backup;
         } else if (action.equals(FullBackup.FULL_RESTORE_INTENT_ACTION)) {
@@ -155,6 +155,20 @@ public class BackupRestoreConfirmation extends Activity {
         mStatusView = (TextView) findViewById(R.id.package_name);
         mAllowButton = (Button) findViewById(R.id.button_allow);
         mDenyButton = (Button) findViewById(R.id.button_deny);
+
+        // For full backup, we vary the password prompt text depending on whether one is predefined
+        if (layoutId == R.layout.confirm_backup) {
+            TextView pwDesc = (TextView) findViewById(R.id.password_desc); 
+            try {
+                if (mBackupManager.hasBackupPassword()) {
+                    pwDesc.setText(R.string.backup_password_text);
+                } else {
+                    pwDesc.setText(R.string.backup_password_optional);
+                }
+            } catch (RemoteException e) {
+                // TODO: bail gracefully
+            }
+        }
 
         mAllowButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -188,8 +202,11 @@ public class BackupRestoreConfirmation extends Activity {
     void sendAcknowledgement(int token, boolean allow, IFullBackupRestoreObserver observer) {
         if (!mDidAcknowledge) {
             mDidAcknowledge = true;
+
             try {
-                mBackupManager.acknowledgeFullBackupOrRestore(mToken, true, mObserver);
+                TextView pwView = (TextView) findViewById(R.id.password);
+                mBackupManager.acknowledgeFullBackupOrRestore(mToken, allow,
+                        String.valueOf(pwView.getText()), mObserver);
             } catch (RemoteException e) {
                 // TODO: bail gracefully if we can't contact the backup manager
             }

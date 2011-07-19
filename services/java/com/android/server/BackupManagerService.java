@@ -76,7 +76,11 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.LocalTransport;
 import com.android.server.PackageManagerBackupAgent.Metadata;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -85,9 +89,16 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,8 +112,19 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
-import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
@@ -113,6 +135,7 @@ class BackupManagerService extends IBackupManager.Stub {
     static final int BACKUP_MANIFEST_VERSION = 1;
     static final String BACKUP_FILE_HEADER_MAGIC = "ANDROID BACKUP\n";
     static final int BACKUP_FILE_VERSION = 1;
+    static final boolean COMPRESS_FULL_BACKUPS = true; // should be true in production
 
     // How often we perform a backup pass.  Privileged external callers can
     // trigger an immediate pass.
@@ -148,8 +171,9 @@ class BackupManagerService extends IBackupManager.Stub {
     static final long TIMEOUT_SHARED_BACKUP_INTERVAL = 30 * 60 * 1000;
     static final long TIMEOUT_RESTORE_INTERVAL = 60 * 1000;
 
-    // User confirmation timeout for a full backup/restore operation
-    static final long TIMEOUT_FULL_CONFIRMATION = 30 * 1000;
+    // User confirmation timeout for a full backup/restore operation.  It's this long in
+    // order to give them time to enter the backup password.
+    static final long TIMEOUT_FULL_CONFIRMATION = 60 * 1000;
 
     private Context mContext;
     private PackageManager mPackageManager;
@@ -283,6 +307,7 @@ class BackupManagerService extends IBackupManager.Stub {
         public ParcelFileDescriptor fd;
         public final AtomicBoolean latch;
         public IFullBackupRestoreObserver observer;
+        public String password;     // filled in by the confirmation step
 
         FullParams() {
             latch = new AtomicBoolean(false);
@@ -328,6 +353,23 @@ class BackupManagerService extends IBackupManager.Stub {
     File mDataDir;
     File mJournalDir;
     File mJournal;
+
+    // Backup password, if any, and the file where it's saved.  What is stored is not the
+    // password text itself; it's the result of a PBKDF2 hash with a randomly chosen (but
+    // persisted) salt.  Validation is performed by running the challenge text through the
+    // same PBKDF2 cycle with the persisted salt; if the resulting derived key string matches
+    // the saved hash string, then the challenge text matches the originally supplied
+    // password text.
+    private final SecureRandom mRng = new SecureRandom();
+    private String mPasswordHash;
+    private File mPasswordHashFile;
+    private byte[] mPasswordSalt;
+
+    // Configuration of PBKDF2 that we use for generating pw hashes and intermediate keys
+    static final int PBKDF2_HASH_ROUNDS = 10000;
+    static final int PBKDF2_KEY_SIZE = 256;     // bits
+    static final int PBKDF2_SALT_SIZE = 512;    // bits
+    static final String ENCRYPTION_ALGORITHM_NAME = "AES-256";
 
     // Keep a log of all the apps we've ever backed up, and what the
     // dataset tokens are for both the current backup dataset and
@@ -416,7 +458,7 @@ class BackupManagerService extends IBackupManager.Stub {
             {
                 FullBackupParams params = (FullBackupParams)msg.obj;
                 (new PerformFullBackupTask(params.fd, params.observer, params.includeApks,
-                        params.includeShared, params.allApps, params.packages,
+                        params.includeShared, params.password, params.allApps, params.packages,
                         params.latch)).run();
                 break;
             }
@@ -434,7 +476,8 @@ class BackupManagerService extends IBackupManager.Stub {
             case MSG_RUN_FULL_RESTORE:
             {
                 FullRestoreParams params = (FullRestoreParams)msg.obj;
-                (new PerformFullRestoreTask(params.fd, params.observer, params.latch)).run();
+                (new PerformFullRestoreTask(params.fd, params.password,
+                        params.observer, params.latch)).run();
                 break;
             }
 
@@ -583,6 +626,32 @@ class BackupManagerService extends IBackupManager.Stub {
         mBaseStateDir = new File(Environment.getSecureDataDirectory(), "backup");
         mBaseStateDir.mkdirs();
         mDataDir = Environment.getDownloadCacheDirectory();
+
+        mPasswordHashFile = new File(mBaseStateDir, "pwhash");
+        if (mPasswordHashFile.exists()) {
+            FileInputStream fin = null;
+            DataInputStream in = null;
+            try {
+                fin = new FileInputStream(mPasswordHashFile);
+                in = new DataInputStream(new BufferedInputStream(fin));
+                // integer length of the salt array, followed by the salt,
+                // then the hex pw hash string
+                int saltLen = in.readInt();
+                byte[] salt = new byte[saltLen];
+                in.readFully(salt);
+                mPasswordHash = in.readUTF();
+                mPasswordSalt = salt;
+            } catch (IOException e) {
+                Slog.e(TAG, "Unable to read saved backup pw hash");
+            } finally {
+                try {
+                    if (in != null) in.close();
+                    if (fin != null) fin.close();
+                } catch (IOException e) {
+                    Slog.w(TAG, "Unable to close streams");
+                }
+            }
+        }
 
         // Alarm receivers for scheduled backups & initialization operations
         mRunBackupReceiver = new RunBackupReceiver();
@@ -841,6 +910,151 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             }
         }
+    }
+
+    private SecretKey buildPasswordKey(String pw, byte[] salt, int rounds) {
+        return buildCharArrayKey(pw.toCharArray(), salt, rounds);
+    }
+
+    private SecretKey buildCharArrayKey(char[] pwArray, byte[] salt, int rounds) {
+        try {
+            SecretKeyFactory keyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            KeySpec ks = new PBEKeySpec(pwArray, salt, rounds, PBKDF2_KEY_SIZE);
+            return keyFactory.generateSecret(ks);
+        } catch (InvalidKeySpecException e) {
+            Slog.e(TAG, "Invalid key spec for PBKDF2!");
+        } catch (NoSuchAlgorithmException e) {
+            Slog.e(TAG, "PBKDF2 unavailable!");
+        }
+        return null;
+    }
+
+    private String buildPasswordHash(String pw, byte[] salt, int rounds) {
+        SecretKey key = buildPasswordKey(pw, salt, rounds);
+        if (key != null) {
+            return byteArrayToHex(key.getEncoded());
+        }
+        return null;
+    }
+
+    private String byteArrayToHex(byte[] data) {
+        StringBuilder buf = new StringBuilder(data.length * 2);
+        for (int i = 0; i < data.length; i++) {
+            buf.append(Byte.toHexString(data[i], true));
+        }
+        return buf.toString();
+    }
+
+    private byte[] hexToByteArray(String digits) {
+        final int bytes = digits.length() / 2;
+        if (2*bytes != digits.length()) {
+            throw new IllegalArgumentException("Hex string must have an even number of digits");
+        }
+
+        byte[] result = new byte[bytes];
+        for (int i = 0; i < digits.length(); i += 2) {
+            result[i/2] = (byte) Integer.parseInt(digits.substring(i, i+2), 16);
+        }
+        return result;
+    }
+
+    private byte[] makeKeyChecksum(byte[] pwBytes, byte[] salt, int rounds) {
+        char[] mkAsChar = new char[pwBytes.length];
+        for (int i = 0; i < pwBytes.length; i++) {
+            mkAsChar[i] = (char) pwBytes[i];
+        }
+
+        Key checksum = buildCharArrayKey(mkAsChar, salt, rounds);
+        return checksum.getEncoded();
+    }
+
+    // Used for generating random salts or passwords
+    private byte[] randomBytes(int bits) {
+        byte[] array = new byte[bits / 8];
+        mRng.nextBytes(array);
+        return array;
+    }
+
+    // Backup password management
+    boolean passwordMatchesSaved(String candidatePw, int rounds) {
+        if (mPasswordHash == null) {
+            // no current password case -- require that 'currentPw' be null or empty
+            if (candidatePw == null || "".equals(candidatePw)) {
+                return true;
+            } // else the non-empty candidate does not match the empty stored pw
+        } else {
+            // hash the stated current pw and compare to the stored one
+            if (candidatePw != null && candidatePw.length() > 0) {
+                String currentPwHash = buildPasswordHash(candidatePw, mPasswordSalt, rounds);
+                if (mPasswordHash.equalsIgnoreCase(currentPwHash)) {
+                    // candidate hash matches the stored hash -- the password matches
+                    return true;
+                }
+            } // else the stored pw is nonempty but the candidate is empty; no match
+        }
+        return false;
+    }
+
+    @Override
+    public boolean setBackupPassword(String currentPw, String newPw) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "setBackupPassword");
+
+        // If the supplied pw doesn't hash to the the saved one, fail
+        if (!passwordMatchesSaved(currentPw, PBKDF2_HASH_ROUNDS)) {
+            return false;
+        }
+
+        // Clearing the password is okay
+        if (newPw == null || newPw.isEmpty()) {
+            if (mPasswordHashFile.exists()) {
+                if (!mPasswordHashFile.delete()) {
+                    // Unable to delete the old pw file, so fail
+                    Slog.e(TAG, "Unable to clear backup password");
+                    return false;
+                }
+            }
+            mPasswordHash = null;
+            mPasswordSalt = null;
+            return true;
+        }
+
+        try {
+            // Okay, build the hash of the new backup password
+            byte[] salt = randomBytes(PBKDF2_SALT_SIZE);
+            String newPwHash = buildPasswordHash(newPw, salt, PBKDF2_HASH_ROUNDS);
+
+            OutputStream pwf = null, buffer = null;
+            DataOutputStream out = null;
+            try {
+                pwf = new FileOutputStream(mPasswordHashFile);
+                buffer = new BufferedOutputStream(pwf);
+                out = new DataOutputStream(buffer);
+                // integer length of the salt array, followed by the salt,
+                // then the hex pw hash string
+                out.writeInt(salt.length);
+                out.write(salt);
+                out.writeUTF(newPwHash);
+                out.flush();
+                mPasswordHash = newPwHash;
+                mPasswordSalt = salt;
+                return true;
+            } finally {
+                if (out != null) out.close();
+                if (buffer != null) buffer.close();
+                if (pwf != null) pwf.close();
+            }
+        } catch (IOException e) {
+            Slog.e(TAG, "Unable to set backup password");
+        }
+        return false;
+    }
+
+    @Override
+    public boolean hasBackupPassword() {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
+                "hasBackupPassword");
+        return (mPasswordHash != null && mPasswordHash.length() > 0);
     }
 
     // Maintain persistent state around whether need to do an initialize operation.
@@ -1694,6 +1908,7 @@ class BackupManagerService extends IBackupManager.Stub {
         boolean mIncludeShared;
         boolean mAllApps;
         String[] mPackages;
+        String mUserPassword;
         AtomicBoolean mLatchObject;
         File mFilesDir;
         File mManifestFile;
@@ -1748,7 +1963,7 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         PerformFullBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer, 
-                boolean includeApks, boolean includeShared,
+                boolean includeApks, boolean includeShared, String password,
                 boolean doAllApps, String[] packages, AtomicBoolean latch) {
             mOutputFile = fd;
             mObserver = observer;
@@ -1756,6 +1971,7 @@ class BackupManagerService extends IBackupManager.Stub {
             mIncludeShared = includeShared;
             mAllApps = doAllApps;
             mPackages = packages;
+            mUserPassword = password;
             mLatchObject = latch;
 
             mFilesDir = new File("/data/system");
@@ -1796,16 +2012,13 @@ class BackupManagerService extends IBackupManager.Stub {
             }
 
             FileOutputStream ofstream = new FileOutputStream(mOutputFile.getFileDescriptor());
-
-            // Set up the compression stage
-            Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
-            DeflaterOutputStream out = new DeflaterOutputStream(ofstream, deflater, true);
+            OutputStream out = null;
 
             PackageInfo pkg = null;
             try {
-
-                // !!! TODO: if using encryption, set up the encryption stage
-                // and emit the tar header stating the password salt.
+                boolean encrypting = (mUserPassword != null && mUserPassword.length() > 0);
+                boolean compressing = COMPRESS_FULL_BACKUPS;
+                OutputStream finalOutput = ofstream;
 
                 // Write the global file header.  All strings are UTF-8 encoded; lines end
                 // with a '\n' byte.  Actual backup data begins immediately following the
@@ -1814,17 +2027,57 @@ class BackupManagerService extends IBackupManager.Stub {
                 // line 1: "ANDROID BACKUP"
                 // line 2: backup file format version, currently "1"
                 // line 3: compressed?  "0" if not compressed, "1" if compressed.
-                // line 4: encryption salt?  "-" if not encrypted, otherwise this
-                //         line contains the encryption salt with which the user-
-                //         supplied password is to be expanded, in hexadecimal.
-                StringBuffer headerbuf = new StringBuffer(256);
-                // !!! TODO: programmatically build the compressed / encryption salt fields
+                // line 4: name of encryption algorithm [currently only "none" or "AES-256"]
+                //
+                // When line 4 is not "none", then additional header data follows:
+                //
+                // line 5: user password salt [hex]
+                // line 6: master key checksum salt [hex]
+                // line 7: number of PBKDF2 rounds to use (same for user & master) [decimal]
+                // line 8: IV of the user key [hex]
+                // line 9: master key blob [hex]
+                //     IV of the master key, master key itself, master key checksum hash
+                //
+                // The master key checksum is the master key plus its checksum salt, run through
+                // 10k rounds of PBKDF2.  This is used to verify that the user has supplied the
+                // correct password for decrypting the archive:  the master key decrypted from
+                // the archive using the user-supplied password is also run through PBKDF2 in
+                // this way, and if the result does not match the checksum as stored in the
+                // archive, then we know that the user-supplied password does not match the
+                // archive's.
+                StringBuilder headerbuf = new StringBuilder(1024);
+
                 headerbuf.append(BACKUP_FILE_HEADER_MAGIC);
-                headerbuf.append("1\n1\n-\n");
+                headerbuf.append(BACKUP_FILE_VERSION); // integer, no trailing \n
+                headerbuf.append(compressing ? "\n1\n" : "\n0\n");
 
                 try {
+                    // Set up the encryption stage if appropriate, and emit the correct header
+                    if (encrypting) {
+                        // Verify that the given password matches the currently-active
+                        // backup password, if any
+                        if (hasBackupPassword()) {
+                            if (!passwordMatchesSaved(mUserPassword, PBKDF2_HASH_ROUNDS)) {
+                                if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
+                                return;
+                            }
+                        }
+
+                        finalOutput = emitAesBackupHeader(headerbuf, finalOutput);
+                    } else {
+                        headerbuf.append("none\n");
+                    }
+
                     byte[] header = headerbuf.toString().getBytes("UTF-8");
                     ofstream.write(header);
+
+                    // Set up the compression stage feeding into the encryption stage (if any)
+                    if (compressing) {
+                        Deflater deflater = new Deflater(Deflater.BEST_COMPRESSION);
+                        finalOutput = new DeflaterOutputStream(finalOutput, deflater, true);
+                    }
+
+                    out = finalOutput;
                 } catch (Exception e) {
                     // Should never happen!
                     Slog.e(TAG, "Unable to emit archive header", e);
@@ -1847,7 +2100,7 @@ class BackupManagerService extends IBackupManager.Stub {
             } finally {
                 tearDown(pkg);
                 try {
-                    out.close();
+                    if (out != null) out.close();
                     mOutputFile.close();
                 } catch (IOException e) {
                     /* nothing we can do about this */
@@ -1865,7 +2118,78 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        private void backupOnePackage(PackageInfo pkg, DeflaterOutputStream out)
+        private OutputStream emitAesBackupHeader(StringBuilder headerbuf,
+                OutputStream ofstream) throws Exception {
+            // User key will be used to encrypt the master key.
+            byte[] newUserSalt = randomBytes(PBKDF2_SALT_SIZE);
+            SecretKey userKey = buildPasswordKey(mUserPassword, newUserSalt,
+                    PBKDF2_HASH_ROUNDS);
+
+            // the master key is random for each backup
+            byte[] masterPw = new byte[256 / 8];
+            mRng.nextBytes(masterPw);
+            byte[] checksumSalt = randomBytes(PBKDF2_SALT_SIZE);
+
+            // primary encryption of the datastream with the random key
+            Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            SecretKeySpec masterKeySpec = new SecretKeySpec(masterPw, "AES");
+            c.init(Cipher.ENCRYPT_MODE, masterKeySpec);
+            OutputStream finalOutput = new CipherOutputStream(ofstream, c);
+
+            // line 4: name of encryption algorithm
+            headerbuf.append(ENCRYPTION_ALGORITHM_NAME);
+            headerbuf.append('\n');
+            // line 5: user password salt [hex]
+            headerbuf.append(byteArrayToHex(newUserSalt));
+            headerbuf.append('\n');
+            // line 6: master key checksum salt [hex]
+            headerbuf.append(byteArrayToHex(checksumSalt));
+            headerbuf.append('\n');
+            // line 7: number of PBKDF2 rounds used [decimal]
+            headerbuf.append(PBKDF2_HASH_ROUNDS);
+            headerbuf.append('\n');
+
+            // line 8: IV of the user key [hex]
+            Cipher mkC = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            mkC.init(Cipher.ENCRYPT_MODE, userKey);
+
+            byte[] IV = mkC.getIV();
+            headerbuf.append(byteArrayToHex(IV));
+            headerbuf.append('\n');
+
+            // line 9: master IV + key blob, encrypted by the user key [hex].  Blob format:
+            //    [byte] IV length = Niv
+            //    [array of Niv bytes] IV itself
+            //    [byte] master key length = Nmk
+            //    [array of Nmk bytes] master key itself
+            //    [byte] MK checksum hash length = Nck
+            //    [array of Nck bytes] master key checksum hash
+            //
+            // The checksum is the (master key + checksum salt), run through the
+            // stated number of PBKDF2 rounds
+            IV = c.getIV();
+            byte[] mk = masterKeySpec.getEncoded();
+            byte[] checksum = makeKeyChecksum(masterKeySpec.getEncoded(),
+                    checksumSalt, PBKDF2_HASH_ROUNDS);
+
+            ByteArrayOutputStream blob = new ByteArrayOutputStream(IV.length + mk.length
+                    + checksum.length + 3);
+            DataOutputStream mkOut = new DataOutputStream(blob);
+            mkOut.writeByte(IV.length);
+            mkOut.write(IV);
+            mkOut.writeByte(mk.length);
+            mkOut.write(mk);
+            mkOut.writeByte(checksum.length);
+            mkOut.write(checksum);
+            mkOut.flush();
+            byte[] encryptedMk = mkC.doFinal(blob.toByteArray());
+            headerbuf.append(byteArrayToHex(encryptedMk));
+            headerbuf.append('\n');
+
+            return finalOutput;
+        }
+
+        private void backupOnePackage(PackageInfo pkg, OutputStream out)
                 throws RemoteException {
             Slog.d(TAG, "Binding to full backup agent : " + pkg.packageName);
 
@@ -1922,13 +2246,12 @@ class BackupManagerService extends IBackupManager.Stub {
                     Slog.e(TAG, "Error backing up " + pkg.packageName, e);
                 } finally {
                     try {
+                        // flush after every package
+                        out.flush();
                         if (pipes != null) {
                             if (pipes[0] != null) pipes[0].close();
                             if (pipes[1] != null) pipes[1].close();
                         }
-
-                        // Apply a full sync/flush after each application's data
-                        out.flush();
                     } catch (IOException e) {
                         Slog.w(TAG, "Error bringing down backup stack");
                     }
@@ -2037,7 +2360,8 @@ class BackupManagerService extends IBackupManager.Stub {
                         mActivityManager.unbindBackupAgent(app);
 
                         // The agent was running with a stub Application object, so shut it down.
-                        if (app.uid != Process.SYSTEM_UID) {
+                        if (app.uid != Process.SYSTEM_UID
+                                && app.uid != Process.PHONE_UID) {
                             if (DEBUG) Slog.d(TAG, "Backup complete, killing host process");
                             mActivityManager.killApplicationProcess(app.processName, app.uid);
                         } else {
@@ -2121,6 +2445,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     class PerformFullRestoreTask implements Runnable {
         ParcelFileDescriptor mInputFile;
+        String mUserPassword;
         IFullBackupRestoreObserver mObserver;
         AtomicBoolean mLatchObject;
         IBackupAgent mAgent;
@@ -2144,9 +2469,10 @@ class BackupManagerService extends IBackupManager.Stub {
         // Packages we've already wiped data on when restoring their first file
         final HashSet<String> mClearedPackages = new HashSet<String>();
 
-        PerformFullRestoreTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer,
-                AtomicBoolean latch) {
+        PerformFullRestoreTask(ParcelFileDescriptor fd, String password,
+                IFullBackupRestoreObserver observer, AtomicBoolean latch) {
             mInputFile = fd;
+            mUserPassword = password;
             mObserver = observer;
             mLatchObject = latch;
             mAgent = null;
@@ -2202,50 +2528,51 @@ class BackupManagerService extends IBackupManager.Stub {
                 mPackagePolicies.put("com.android.sharedstoragebackup", RestorePolicy.ACCEPT);
             }
 
+            FileInputStream rawInStream = null;
+            DataInputStream rawDataIn = null;
             try {
                 mBytes = 0;
                 byte[] buffer = new byte[32 * 1024];
-                FileInputStream rawInStream = new FileInputStream(mInputFile.getFileDescriptor());
+                rawInStream = new FileInputStream(mInputFile.getFileDescriptor());
+                rawDataIn = new DataInputStream(rawInStream);
 
                 // First, parse out the unencrypted/uncompressed header
                 boolean compressed = false;
-                boolean encrypted = false;
+                InputStream preCompressStream = rawInStream;
                 final InputStream in;
 
                 boolean okay = false;
                 final int headerLen = BACKUP_FILE_HEADER_MAGIC.length();
                 byte[] streamHeader = new byte[headerLen];
-                try {
-                    int got;
-                    if ((got = rawInStream.read(streamHeader, 0, headerLen)) == headerLen) {
-                        byte[] magicBytes = BACKUP_FILE_HEADER_MAGIC.getBytes("UTF-8");
-                        if (Arrays.equals(magicBytes, streamHeader)) {
-                            // okay, header looks good.  now parse out the rest of the fields.
-                            String s = readHeaderLine(rawInStream);
-                            if (Integer.parseInt(s) == BACKUP_FILE_VERSION) {
-                                // okay, it's a version we recognize
-                                s = readHeaderLine(rawInStream);
-                                compressed = (Integer.parseInt(s) != 0);
-                                s = readHeaderLine(rawInStream);
-                                if (!s.startsWith("-")) {
-                                    encrypted = true;
-                                    // TODO: parse out the salt here and process with the user pw
-                                }
+                rawDataIn.readFully(streamHeader);
+                byte[] magicBytes = BACKUP_FILE_HEADER_MAGIC.getBytes("UTF-8");
+                if (Arrays.equals(magicBytes, streamHeader)) {
+                    // okay, header looks good.  now parse out the rest of the fields.
+                    String s = readHeaderLine(rawInStream);
+                    if (Integer.parseInt(s) == BACKUP_FILE_VERSION) {
+                        // okay, it's a version we recognize
+                        s = readHeaderLine(rawInStream);
+                        compressed = (Integer.parseInt(s) != 0);
+                        s = readHeaderLine(rawInStream);
+                        if (s.equals("none")) {
+                            // no more header to parse; we're good to go
+                            okay = true;
+                        } else if (mUserPassword != null && mUserPassword.length() > 0) {
+                            preCompressStream = decodeAesHeaderAndInitialize(s, rawInStream);
+                            if (preCompressStream != null) {
                                 okay = true;
-                            } else Slog.e(TAG, "Wrong header version: " + s);
-                        } else Slog.e(TAG, "Didn't read the right header magic");
-                    } else Slog.e(TAG, "Only read " + got + " bytes of header");
-                } catch (NumberFormatException e) {
-                    Slog.e(TAG, "Can't parse restore data header");
-                }
+                            }
+                        } else Slog.w(TAG, "Archive is encrypted but no password given");
+                    } else Slog.w(TAG, "Wrong header version: " + s);
+                } else Slog.w(TAG, "Didn't read the right header magic");
 
                 if (!okay) {
-                    Slog.e(TAG, "Invalid restore data; aborting.");
+                    Slog.w(TAG, "Invalid restore data; aborting.");
                     return;
                 }
 
                 // okay, use the right stream layer based on compression
-                in = (compressed) ? new InflaterInputStream(rawInStream) : rawInStream;
+                in = (compressed) ? new InflaterInputStream(preCompressStream) : preCompressStream;
 
                 boolean didRestore;
                 do {
@@ -2260,6 +2587,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 tearDownAgent(mTargetApp);
 
                 try {
+                    if (rawDataIn != null) rawDataIn.close();
+                    if (rawInStream != null) rawInStream.close();
                     mInputFile.close();
                 } catch (IOException e) {
                     Slog.w(TAG, "Close of restore data pipe threw", e);
@@ -2280,12 +2609,91 @@ class BackupManagerService extends IBackupManager.Stub {
 
         String readHeaderLine(InputStream in) throws IOException {
             int c;
-            StringBuffer buffer = new StringBuffer(80);
+            StringBuilder buffer = new StringBuilder(80);
             while ((c = in.read()) >= 0) {
                 if (c == '\n') break;   // consume and discard the newlines
                 buffer.append((char)c);
             }
             return buffer.toString();
+        }
+
+        InputStream decodeAesHeaderAndInitialize(String encryptionName, InputStream rawInStream) {
+            InputStream result = null;
+            try {
+                if (encryptionName.equals(ENCRYPTION_ALGORITHM_NAME)) {
+
+                    String userSaltHex = readHeaderLine(rawInStream); // 5
+                    byte[] userSalt = hexToByteArray(userSaltHex);
+
+                    String ckSaltHex = readHeaderLine(rawInStream); // 6
+                    byte[] ckSalt = hexToByteArray(ckSaltHex);
+
+                    int rounds = Integer.parseInt(readHeaderLine(rawInStream)); // 7
+                    String userIvHex = readHeaderLine(rawInStream); // 8
+
+                    String masterKeyBlobHex = readHeaderLine(rawInStream); // 9
+
+                    // decrypt the master key blob
+                    Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
+                    SecretKey userKey = buildPasswordKey(mUserPassword, userSalt,
+                            rounds);
+                    byte[] IV = hexToByteArray(userIvHex);
+                    IvParameterSpec ivSpec = new IvParameterSpec(IV);
+                    c.init(Cipher.DECRYPT_MODE,
+                            new SecretKeySpec(userKey.getEncoded(), "AES"),
+                            ivSpec);
+                    byte[] mkCipher = hexToByteArray(masterKeyBlobHex);
+                    byte[] mkBlob = c.doFinal(mkCipher);
+
+                    // first, the master key IV
+                    int offset = 0;
+                    int len = mkBlob[offset++];
+                    IV = Arrays.copyOfRange(mkBlob, offset, offset + len);
+                    offset += len;
+                    // then the master key itself
+                    len = mkBlob[offset++];
+                    byte[] mk = Arrays.copyOfRange(mkBlob,
+                            offset, offset + len);
+                    offset += len;
+                    // and finally the master key checksum hash
+                    len = mkBlob[offset++];
+                    byte[] mkChecksum = Arrays.copyOfRange(mkBlob,
+                            offset, offset + len);
+
+                    // now validate the decrypted master key against the checksum
+                    byte[] calculatedCk = makeKeyChecksum(mk, ckSalt, rounds);
+                    if (Arrays.equals(calculatedCk, mkChecksum)) {
+                        ivSpec = new IvParameterSpec(IV);
+                        c.init(Cipher.DECRYPT_MODE,
+                                new SecretKeySpec(mk, "AES"),
+                                ivSpec);
+                        // Only if all of the above worked properly will 'result' be assigned
+                        result = new CipherInputStream(rawInStream, c);
+                    } else Slog.w(TAG, "Incorrect password");
+                } else Slog.w(TAG, "Unsupported encryption method: " + encryptionName);
+            } catch (InvalidAlgorithmParameterException e) {
+                Slog.e(TAG, "Needed parameter spec unavailable!", e);
+            } catch (BadPaddingException e) {
+                // This case frequently occurs when the wrong password is used to decrypt
+                // the master key.  Use the identical "incorrect password" log text as is
+                // used in the checksum failure log in order to avoid providing additional
+                // information to an attacker.
+                Slog.w(TAG, "Incorrect password");
+            } catch (IllegalBlockSizeException e) {
+                Slog.w(TAG, "Invalid block size in master key");
+            } catch (NoSuchAlgorithmException e) {
+                Slog.e(TAG, "Needed decryption algorithm unavailable!");
+            } catch (NoSuchPaddingException e) {
+                Slog.e(TAG, "Needed padding mechanism unavailable!");
+            } catch (InvalidKeyException e) {
+                Slog.w(TAG, "Illegal password; aborting");
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "Can't parse restore data header");
+            } catch (IOException e) {
+                Slog.w(TAG, "Can't read input header");
+            }
+
+            return result;
         }
 
         boolean restoreOneFile(InputStream instream, byte[] buffer) {
@@ -2540,7 +2948,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     }
                 }
             } catch (IOException e) {
-                Slog.w(TAG, "io exception on restore socket read", e);
+                if (DEBUG) Slog.w(TAG, "io exception on restore socket read", e);
                 // treat as EOF
                 info = null;
             }
@@ -2929,110 +3337,142 @@ class BackupManagerService extends IBackupManager.Stub {
 
             boolean gotHeader = readTarHeader(instream, block);
             if (gotHeader) {
-                // okay, presume we're okay, and extract the various metadata
-                info = new FileMetadata();
-                info.size = extractRadix(block, 124, 12, 8);
-                info.mtime = extractRadix(block, 136, 12, 8);
-                info.mode = extractRadix(block, 100, 8, 8);
+                try {
+                    // okay, presume we're okay, and extract the various metadata
+                    info = new FileMetadata();
+                    info.size = extractRadix(block, 124, 12, 8);
+                    info.mtime = extractRadix(block, 136, 12, 8);
+                    info.mode = extractRadix(block, 100, 8, 8);
 
-                info.path = extractString(block, 345, 155); // prefix
-                String path = extractString(block, 0, 100);
-                if (path.length() > 0) {
-                    if (info.path.length() > 0) info.path += '/';
-                    info.path += path;
-                }
-
-                // tar link indicator field: 1 byte at offset 156 in the header.
-                int typeChar = block[156];
-                if (typeChar == 'x') {
-                    // pax extended header, so we need to read that
-                    gotHeader = readPaxExtendedHeader(instream, info);
-                    if (gotHeader) {
-                        // and after a pax extended header comes another real header -- read
-                        // that to find the real file type
-                        gotHeader = readTarHeader(instream, block);
+                    info.path = extractString(block, 345, 155); // prefix
+                    String path = extractString(block, 0, 100);
+                    if (path.length() > 0) {
+                        if (info.path.length() > 0) info.path += '/';
+                        info.path += path;
                     }
-                    if (!gotHeader) throw new IOException("Bad or missing pax header");
 
-                    typeChar = block[156];
-                }
-
-                switch (typeChar) {
-                    case '0': info.type = BackupAgent.TYPE_FILE; break;
-                    case '5': {
-                        info.type = BackupAgent.TYPE_DIRECTORY;
-                        if (info.size != 0) {
-                            Slog.w(TAG, "Directory entry with nonzero size in header");
-                            info.size = 0;
+                    // tar link indicator field: 1 byte at offset 156 in the header.
+                    int typeChar = block[156];
+                    if (typeChar == 'x') {
+                        // pax extended header, so we need to read that
+                        gotHeader = readPaxExtendedHeader(instream, info);
+                        if (gotHeader) {
+                            // and after a pax extended header comes another real header -- read
+                            // that to find the real file type
+                            gotHeader = readTarHeader(instream, block);
                         }
-                        break;
+                        if (!gotHeader) throw new IOException("Bad or missing pax header");
+
+                        typeChar = block[156];
                     }
-                    case 0: {
-                        // presume EOF
-                        if (DEBUG) Slog.w(TAG, "Saw type=0 in tar header block, info=" + info);
-                        return null;
-                    }
-                    default: {
-                        Slog.e(TAG, "Unknown tar entity type: " + typeChar);
-                        throw new IOException("Unknown entity type " + typeChar);
-                    }
-                }
 
-                // Parse out the path
-                //
-                // first: apps/shared/unrecognized
-                if (FullBackup.SHARED_PREFIX.regionMatches(0,
-                        info.path, 0, FullBackup.SHARED_PREFIX.length())) {
-                    // File in shared storage.  !!! TODO: implement this.
-                    info.path = info.path.substring(FullBackup.SHARED_PREFIX.length());
-                    info.packageName = "com.android.sharedstoragebackup";
-                    info.domain = FullBackup.SHARED_STORAGE_TOKEN;
-                    if (DEBUG) Slog.i(TAG, "File in shared storage: " + info.path);
-                } else if (FullBackup.APPS_PREFIX.regionMatches(0,
-                        info.path, 0, FullBackup.APPS_PREFIX.length())) {
-                    // App content!  Parse out the package name and domain
-
-                    // strip the apps/ prefix
-                    info.path = info.path.substring(FullBackup.APPS_PREFIX.length());
-
-                    // extract the package name
-                    int slash = info.path.indexOf('/');
-                    if (slash < 0) throw new IOException("Illegal semantic path in " + info.path);
-                    info.packageName = info.path.substring(0, slash);
-                    info.path = info.path.substring(slash+1);
-
-                    // if it's a manifest we're done, otherwise parse out the domains
-                    if (!info.path.equals(BACKUP_MANIFEST_FILENAME)) {
-                        slash = info.path.indexOf('/');
-                        if (slash < 0) throw new IOException("Illegal semantic path in non-manifest " + info.path);
-                        info.domain = info.path.substring(0, slash);
-                        // validate that it's one of the domains we understand
-                        if (!info.domain.equals(FullBackup.APK_TREE_TOKEN)
-                                && !info.domain.equals(FullBackup.DATA_TREE_TOKEN)
-                                && !info.domain.equals(FullBackup.DATABASE_TREE_TOKEN)
-                                && !info.domain.equals(FullBackup.ROOT_TREE_TOKEN)
-                                && !info.domain.equals(FullBackup.SHAREDPREFS_TREE_TOKEN)
-                                && !info.domain.equals(FullBackup.OBB_TREE_TOKEN)
-                                && !info.domain.equals(FullBackup.CACHE_TREE_TOKEN)) {
-                            throw new IOException("Unrecognized domain " + info.domain);
+                    switch (typeChar) {
+                        case '0': info.type = BackupAgent.TYPE_FILE; break;
+                        case '5': {
+                            info.type = BackupAgent.TYPE_DIRECTORY;
+                            if (info.size != 0) {
+                                Slog.w(TAG, "Directory entry with nonzero size in header");
+                                info.size = 0;
+                            }
+                            break;
                         }
-
-                        info.path = info.path.substring(slash + 1);
+                        case 0: {
+                            // presume EOF
+                            if (DEBUG) Slog.w(TAG, "Saw type=0 in tar header block, info=" + info);
+                            return null;
+                        }
+                        default: {
+                            Slog.e(TAG, "Unknown tar entity type: " + typeChar);
+                            throw new IOException("Unknown entity type " + typeChar);
+                        }
                     }
+
+                    // Parse out the path
+                    //
+                    // first: apps/shared/unrecognized
+                    if (FullBackup.SHARED_PREFIX.regionMatches(0,
+                            info.path, 0, FullBackup.SHARED_PREFIX.length())) {
+                        // File in shared storage.  !!! TODO: implement this.
+                        info.path = info.path.substring(FullBackup.SHARED_PREFIX.length());
+                        info.packageName = "com.android.sharedstoragebackup";
+                        info.domain = FullBackup.SHARED_STORAGE_TOKEN;
+                        if (DEBUG) Slog.i(TAG, "File in shared storage: " + info.path);
+                    } else if (FullBackup.APPS_PREFIX.regionMatches(0,
+                            info.path, 0, FullBackup.APPS_PREFIX.length())) {
+                        // App content!  Parse out the package name and domain
+
+                        // strip the apps/ prefix
+                        info.path = info.path.substring(FullBackup.APPS_PREFIX.length());
+
+                        // extract the package name
+                        int slash = info.path.indexOf('/');
+                        if (slash < 0) throw new IOException("Illegal semantic path in " + info.path);
+                        info.packageName = info.path.substring(0, slash);
+                        info.path = info.path.substring(slash+1);
+
+                        // if it's a manifest we're done, otherwise parse out the domains
+                        if (!info.path.equals(BACKUP_MANIFEST_FILENAME)) {
+                            slash = info.path.indexOf('/');
+                            if (slash < 0) throw new IOException("Illegal semantic path in non-manifest " + info.path);
+                            info.domain = info.path.substring(0, slash);
+                            // validate that it's one of the domains we understand
+                            if (!info.domain.equals(FullBackup.APK_TREE_TOKEN)
+                                    && !info.domain.equals(FullBackup.DATA_TREE_TOKEN)
+                                    && !info.domain.equals(FullBackup.DATABASE_TREE_TOKEN)
+                                    && !info.domain.equals(FullBackup.ROOT_TREE_TOKEN)
+                                    && !info.domain.equals(FullBackup.SHAREDPREFS_TREE_TOKEN)
+                                    && !info.domain.equals(FullBackup.OBB_TREE_TOKEN)
+                                    && !info.domain.equals(FullBackup.CACHE_TREE_TOKEN)) {
+                                throw new IOException("Unrecognized domain " + info.domain);
+                            }
+
+                            info.path = info.path.substring(slash + 1);
+                        }
+                    }
+                } catch (IOException e) {
+                    if (DEBUG) {
+                        Slog.e(TAG, "Parse error in header.  Hexdump:");
+                        HEXLOG(block);
+                    }
+                    throw e;
                 }
             }
             return info;
         }
 
-        boolean readTarHeader(InputStream instream, byte[] block) throws IOException {
-            int nRead = instream.read(block, 0, 512);
-            if (nRead >= 0) mBytes += nRead;
-            if (nRead > 0 && nRead != 512) {
-                // if we read only a partial block, then things are
-                // clearly screwed up.  terminate the restore.
-                throw new IOException("Partial header block: " + nRead);
+        private void HEXLOG(byte[] block) {
+            int offset = 0;
+            int todo = block.length;
+            StringBuilder buf = new StringBuilder(64);
+            while (todo > 0) {
+                buf.append(String.format("%04x   ", offset));
+                int numThisLine = (todo > 16) ? 16 : todo;
+                for (int i = 0; i < numThisLine; i++) {
+                    buf.append(String.format("%02x ", block[offset+i]));
+                }
+                Slog.i("hexdump", buf.toString());
+                buf.setLength(0);
+                todo -= numThisLine;
+                offset += numThisLine;
             }
-            return (nRead > 0);
+        }
+
+        boolean readTarHeader(InputStream instream, byte[] block) throws IOException {
+            int totalRead = 0;
+            while (totalRead < 512) {
+                int nRead = instream.read(block, totalRead, 512 - totalRead);
+                if (nRead >= 0) {
+                    mBytes += nRead;
+                    totalRead += nRead;
+                } else {
+                    if (totalRead == 0) {
+                        // EOF instead of a new header; we're done
+                        break;
+                    }
+                    throw new IOException("Unable to read full block header, t=" + totalRead);
+                }
+            }
+            return (totalRead == 512);
         }
 
         // overwrites 'info' fields based on the pax extended header
@@ -3102,7 +3542,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 // Numeric fields in tar can terminate with either NUL or SPC
                 if (b == 0 || b == ' ') break;
                 if (b < '0' || b > ('0' + radix - 1)) {
-                    throw new IOException("Invalid number in header");
+                    throw new IOException("Invalid number in header: '" + (char)b + "' for radix " + radix);
                 }
                 value = radix * value + (b - '0');
             }
@@ -3930,7 +4370,7 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     public void fullRestore(ParcelFileDescriptor fd) {
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullBackup");
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullRestore");
         Slog.i(TAG, "Beginning full restore...");
 
         long oldId = Binder.clearCallingIdentity();
@@ -4011,14 +4451,15 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Confirm that the previously-requested full backup/restore operation can proceed.  This
     // is used to require a user-facing disclosure about the operation.
+    @Override
     public void acknowledgeFullBackupOrRestore(int token, boolean allow,
-            IFullBackupRestoreObserver observer) {
+            String password, IFullBackupRestoreObserver observer) {
         if (DEBUG) Slog.d(TAG, "acknowledgeFullBackupOrRestore : token=" + token
                 + " allow=" + allow);
 
         // TODO: possibly require not just this signature-only permission, but even
         // require that the specific designated confirmation-UI app uid is the caller?
-        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "fullBackup");
+        mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "acknowledgeFullBackupOrRestore");
 
         long oldId = Binder.clearCallingIdentity();
         try {
@@ -4032,6 +4473,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
                     if (allow) {
                         params.observer = observer;
+                        params.password = password;
                         final int verb = params instanceof FullBackupParams
                                 ? MSG_RUN_FULL_BACKUP
                                 : MSG_RUN_FULL_RESTORE;
@@ -4057,7 +4499,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Enable/disable the backup service
     public void setBackupEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-        "setBackupEnabled");
+                "setBackupEnabled");
 
         Slog.i(TAG, "Backup enabled => " + enable);
 
@@ -4102,7 +4544,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // Enable/disable automatic restore of app data at install time
     public void setAutoRestore(boolean doAutoRestore) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-        "setBackupEnabled");
+                "setAutoRestore");
 
         Slog.i(TAG, "Auto restore => " + doAutoRestore);
 
@@ -4236,7 +4678,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // This string is used VERBATIM as the summary text of the relevant Settings item!
     public String getDestinationString(String transportName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
-                "getConfigurationIntent");
+                "getDestinationString");
 
         synchronized (mTransports) {
             final IBackupTransport transport = mTransports.get(transportName);

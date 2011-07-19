@@ -111,6 +111,23 @@ interface IBackupManager {
     boolean isBackupEnabled();
 
     /**
+     * Set the device's backup password.  Returns {@code true} if the password was set
+     * successfully, {@code false} otherwise.  Typically a failure means that an incorrect
+     * current password was supplied.
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    boolean setBackupPassword(in String currentPw, in String newPw);
+
+    /**
+     * Reports whether a backup password is currently set.  If not, then a null or empty
+     * "current password" argument should be passed to setBackupPassword().
+     *
+     * <p>Callers must hold the android.permission.BACKUP permission to use this method.
+     */
+    boolean hasBackupPassword();
+
+    /**
      * Schedule an immediate backup attempt for all pending updates.  This is
      * primarily intended for transports to use when they detect a suitable
      * opportunity for doing a backup pass.  If there are no pending updates to
@@ -161,9 +178,14 @@ interface IBackupManager {
      * the same time, the UI supplies a callback Binder for progress notifications during
      * the operation.
      *
+     * <p>The password passed by the confirming entity must match the saved backup or
+     * full-device encryption password in order to perform a backup.  If a password is
+     * supplied for restore, it must match the password used when creating the full
+     * backup dataset being used for restore.
+     *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
      */
-    void acknowledgeFullBackupOrRestore(int token, boolean allow,
+    void acknowledgeFullBackupOrRestore(int token, boolean allow, in String password,
             IFullBackupRestoreObserver observer);
 
     /**
