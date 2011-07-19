@@ -104,18 +104,30 @@ public class WifiNative {
 
     public native static boolean stopDriverCommand();
 
-    /**
-     * Start filtering out multicast packets, to reduce battery consumption
-     * that would result from processing them, only to discard them.
-     * @return {@code true} if the operation succeeded, {@code false} otherwise
-     */
-    public native static boolean startPacketFiltering();
 
     /**
-     * Stop filtering out multicast packets.
+     * Start filtering out Multicast V4 packets
      * @return {@code true} if the operation succeeded, {@code false} otherwise
      */
-    public native static boolean stopPacketFiltering();
+    public native static boolean startFilteringMulticastV4Packets();
+
+    /**
+     * Stop filtering out Multicast V4 packets.
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public native static boolean stopFilteringMulticastV4Packets();
+
+    /**
+     * Start filtering out Multicast V6 packets
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public native static boolean startFilteringMulticastV6Packets();
+
+    /**
+     * Stop filtering out Multicast V6 packets.
+     * @return {@code true} if the operation succeeded, {@code false} otherwise
+     */
+    public native static boolean stopFilteringMulticastV6Packets();
 
     public native static boolean setPowerModeCommand(int mode);
 
