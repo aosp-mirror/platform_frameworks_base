@@ -220,7 +220,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // list of DeathRecipients used to make sure features are turned off when
     // a process dies
-    private List mFeatureUsers;
+    private List<FeatureUser> mFeatureUsers;
 
     private boolean mSystemReady;
     private Intent mInitialBroadcast;
@@ -404,7 +404,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mNetRequestersPids[i] = new ArrayList();
         }
 
-        mFeatureUsers = new ArrayList();
+        mFeatureUsers = new ArrayList<FeatureUser>();
 
         mNumDnsEntries = 0;
 
@@ -677,6 +677,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             stopUsingNetworkFeature(this, false);
         }
 
+        public boolean isSameUser(FeatureUser u) {
+            if (u == null) return false;
+
+            return isSameUser(u.mPid, u.mUid, u.mNetworkType, u.mFeature);
+        }
+
+        public boolean isSameUser(int pid, int uid, int networkType, String feature) {
+            if ((mPid == pid) && (mUid == uid) && (mNetworkType == networkType) &&
+                TextUtils.equals(mFeature, feature)) {
+                return true;
+            }
+            return false;
+        }
+
         public String toString() {
             return "FeatureUser("+mNetworkType+","+mFeature+","+mPid+","+mUid+"), created " +
                     (System.currentTimeMillis() - mCreateTime) + " mSec ago";
@@ -727,15 +741,28 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                 }
 
+                int restoreTimer = getRestoreDefaultNetworkDelay(usedNetworkType);
+
                 synchronized(this) {
-                    mFeatureUsers.add(f);
+                    boolean addToList = true;
+                    if (restoreTimer < 0) {
+                        // In case there is no timer is specified for the feature,
+                        // make sure we don't add duplicate entry with the same request.
+                        for (FeatureUser u : mFeatureUsers) {
+                            if (u.isSameUser(f)) {
+                                // Duplicate user is found. Do not add.
+                                addToList = false;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (addToList) mFeatureUsers.add(f);
                     if (!mNetRequestersPids[usedNetworkType].contains(currentPid)) {
                         // this gets used for per-pid dns when connected
                         mNetRequestersPids[usedNetworkType].add(currentPid);
                     }
                 }
-
-                int restoreTimer = getRestoreDefaultNetworkDelay(usedNetworkType);
 
                 if (restoreTimer >= 0) {
                     mHandler.sendMessageDelayed(
@@ -786,11 +813,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         boolean found = false;
 
         synchronized(this) {
-            for (int i = 0; i < mFeatureUsers.size() ; i++) {
-                u = (FeatureUser)mFeatureUsers.get(i);
-                if (uid == u.mUid && pid == u.mPid &&
-                        networkType == u.mNetworkType &&
-                        TextUtils.equals(feature, u.mFeature)) {
+            for (FeatureUser x : mFeatureUsers) {
+                if (x.isSameUser(pid, uid, networkType, feature)) {
+                    u = x;
                     found = true;
                     break;
                 }
@@ -842,11 +867,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             // do not pay attention to duplicate requests - in effect the
             // API does not refcount and a single stop will counter multiple starts.
             if (ignoreDups == false) {
-                for (int i = 0; i < mFeatureUsers.size() ; i++) {
-                    FeatureUser x = (FeatureUser)mFeatureUsers.get(i);
-                    if (x.mUid == u.mUid && x.mPid == u.mPid &&
-                            x.mNetworkType == u.mNetworkType &&
-                            TextUtils.equals(x.mFeature, u.mFeature)) {
+                for (FeatureUser x : mFeatureUsers) {
+                    if (x.isSameUser(u)) {
                         if (DBG) log("ignoring stopUsingNetworkFeature as dup is found");
                         return 1;
                     }
