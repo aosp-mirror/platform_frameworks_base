@@ -106,21 +106,38 @@ static bool MakeURL(const char *baseURL, const char *url, AString *out) {
         return true;
     }
 
-    size_t n = strlen(baseURL);
-    if (baseURL[n - 1] == '/') {
-        out->setTo(baseURL);
-        out->append(url);
-    } else {
-        const char *slashPos = strrchr(baseURL, '/');
+    if (url[0] == '/') {
+        // URL is an absolute path.
 
-        if (slashPos > &baseURL[6]) {
-            out->setTo(baseURL, slashPos - baseURL);
+        char *protocolEnd = strstr(baseURL, "//") + 2;
+        char *pathStart = strchr(protocolEnd, '/');
+
+        if (pathStart != NULL) {
+            out->setTo(baseURL, pathStart - baseURL);
         } else {
             out->setTo(baseURL);
         }
 
-        out->append("/");
         out->append(url);
+    } else {
+        // URL is a relative path
+
+        size_t n = strlen(baseURL);
+        if (baseURL[n - 1] == '/') {
+            out->setTo(baseURL);
+            out->append(url);
+        } else {
+            const char *slashPos = strrchr(baseURL, '/');
+
+            if (slashPos > &baseURL[6]) {
+                out->setTo(baseURL, slashPos - baseURL);
+            } else {
+                out->setTo(baseURL);
+            }
+
+            out->append("/");
+            out->append(url);
+        }
     }
 
     LOGV("base:'%s', url:'%s' => '%s'", baseURL, url, out->c_str());

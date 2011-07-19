@@ -785,7 +785,10 @@ status_t LiveSession::decryptBuffer(
             keySource->setUID(mUID);
         }
 
-        status_t err = keySource->connect(keyURI.c_str());
+        status_t err =
+            keySource->connect(
+                    keyURI.c_str(),
+                    mExtraHeaders.isEmpty() ? NULL : &mExtraHeaders);
 
         if (err == OK) {
             size_t offset = 0;
