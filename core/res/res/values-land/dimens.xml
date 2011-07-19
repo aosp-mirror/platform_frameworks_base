@@ -25,8 +25,6 @@
     <dimen name="password_keyboard_key_height_numeric">60dip</dimen>
     <!-- Default correction for the space key in the password keyboard -->
     <dimen name="password_keyboard_spacebar_vertical_correction">2dip</dimen>
-    <dimen name="preference_screen_side_margin">16dp</dimen>
-    <dimen name="preference_screen_side_margin_negative">-20dp</dimen>
     <dimen name="preference_widget_width">72dp</dimen>
 
     <!-- Default height of an action bar. -->

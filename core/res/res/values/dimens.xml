@@ -67,9 +67,9 @@
     <dimen name="multiwaveview_hit_radius">60dip</dimen>
 
     <!-- Preference activity side margins -->
-    <dimen name="preference_screen_side_margin">0dp</dimen>
+    <dimen name="preference_screen_side_margin">16dp</dimen>
     <!-- Preference activity side margins negative-->
-    <dimen name="preference_screen_side_margin_negative">0dp</dimen>
+    <dimen name="preference_screen_side_margin_negative">16dp</dimen>
     <!-- Preference activity top margin -->
     <dimen name="preference_screen_top_margin">0dp</dimen>
     <!-- Preference activity bottom margin -->
