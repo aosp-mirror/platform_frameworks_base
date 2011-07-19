@@ -10756,12 +10756,14 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             // Remember our drawn bit
             int drawn = mPrivateFlags & DRAWN;
 
-            // Invalidate our old position
-            invalidate(true);
-
-
             int oldWidth = mRight - mLeft;
             int oldHeight = mBottom - mTop;
+            int newWidth = right - left;
+            int newHeight = bottom - top;
+            boolean sizeChanged = (newWidth != oldWidth) || (newHeight != oldHeight);
+
+            // Invalidate our old position
+            invalidate(sizeChanged);
 
             mLeft = left;
             mTop = top;
@@ -10770,10 +10772,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
             mPrivateFlags |= HAS_BOUNDS;
 
-            int newWidth = right - left;
-            int newHeight = bottom - top;
 
-            if (newWidth != oldWidth || newHeight != oldHeight) {
+            if (sizeChanged) {
                 if ((mPrivateFlags & PIVOT_EXPLICITLY_SET) == 0) {
                     // A change in dimension means an auto-centered pivot point changes, too
                     mMatrixDirty = true;
@@ -10788,7 +10788,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                 // before this call to setFrame came in, thereby clearing
                 // the DRAWN bit.
                 mPrivateFlags |= DRAWN;
-                invalidate(true);
+                invalidate(sizeChanged);
                 // parent display list may need to be recreated based on a change in the bounds
                 // of any child
                 invalidateParentCaches();
