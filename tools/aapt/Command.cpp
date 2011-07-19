@@ -1414,6 +1414,17 @@ int doPackage(Bundle* bundle)
     if (assets->getPackage() == assets->getSymbolsPrivatePackage()) {
         if (bundle->getCustomPackage() == NULL) {
             err = writeResourceSymbols(bundle, assets, assets->getPackage(), true);
+            // Copy R.java for libraries
+            if (bundle->getExtraPackages() != NULL) {
+                // Split on semicolon
+                String8 libs(bundle->getExtraPackages());
+                char* packageString = strtok(libs.lockBuffer(libs.length()), ";");
+                while (packageString != NULL) {
+                    err = writeResourceSymbols(bundle, assets, String8(packageString), true);
+                    packageString = strtok(NULL, ";");
+                }
+                libs.unlockBuffer();
+            }
         } else {
             const String8 customPkg(bundle->getCustomPackage());
             err = writeResourceSymbols(bundle, assets, customPkg, true);
