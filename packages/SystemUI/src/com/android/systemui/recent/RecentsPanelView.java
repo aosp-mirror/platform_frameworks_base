@@ -529,7 +529,7 @@ public class RecentsPanelView extends RelativeLayout
         handleOnClick(view);
     }
 
-    public void handleSwipe(View view, int direction) {
+    public void handleSwipe(View view) {
         ActivityDescription ad = ((ViewHolder) view.getTag()).activityDescription;
         if (DEBUG) Log.v(TAG, "Jettison " + ad.label);
         mActivityDescriptions.remove(ad);

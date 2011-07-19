@@ -21,47 +21,33 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.TimeAnimator;
-import android.animation.ValueAnimator;
 import android.content.Context;
-import android.content.res.Resources;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
-import android.graphics.Canvas;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Slog;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
-import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+
+import com.android.systemui.R;
+import com.android.systemui.SwipeHelper;
 
 import java.util.HashSet;
 
-import com.android.systemui.R;
-
-public class NotificationRowLayout extends ViewGroup {
+public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Callback {
     private static final String TAG = "NotificationRowLayout";
     private static final boolean DEBUG = false;
     private static final boolean SLOW_ANIMATIONS = false; // DEBUG;
 
     private static final boolean ANIMATE_LAYOUT = true;
 
-    private static final boolean CLEAR_IF_SWIPED_FAR_ENOUGH = true;
-    
-    private static final boolean CONSTRAIN_SWIPE_ON_PERMANENT = true;
-
     private static final int APPEAR_ANIM_LEN = SLOW_ANIMATIONS ? 5000 : 250;
     private static final int DISAPPEAR_ANIM_LEN = APPEAR_ANIM_LEN;
-    private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 250;
-
-    private static final float SWIPE_ESCAPE_VELOCITY = 1500f;
-    private static final float SWIPE_ANIM_VELOCITY_MIN = 1000f;
 
     Rect mTmpRect = new Rect();
     int mNumRows = 0;
@@ -71,10 +57,7 @@ public class NotificationRowLayout extends ViewGroup {
     HashSet<View> mAppearingViews = new HashSet<View>();
     HashSet<View> mDisappearingViews = new HashSet<View>();
 
-    VelocityTracker mVT;
-    float mInitialTouchX, mInitialTouchY;
-    View mSlidingChild = null;
-    float mLiftoffVelocity;
+    private SwipeHelper mSwipeHelper;
 
     public NotificationRowLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -82,8 +65,6 @@ public class NotificationRowLayout extends ViewGroup {
 
     public NotificationRowLayout(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
-        mVT = VelocityTracker.obtain();
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NotificationRowLayout,
                 defStyle, 0);
@@ -107,117 +88,71 @@ public class NotificationRowLayout extends ViewGroup {
             setBackgroundColor(0x80FF8000);
         }
 
+        float densityScale = getResources().getDisplayMetrics().density;
+        float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
+        mSwipeHelper = new SwipeHelper(SwipeHelper.X, this, densityScale, pagingTouchSlop);
     }
 
-    // Swipey code
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        final int action = ev.getAction();
-//        if (DEBUG) Slog.d(TAG, "intercepting touch event: " + ev);
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                mVT.clear();
-                mVT.addMovement(ev);
-                mInitialTouchX = ev.getX();
-                mInitialTouchY = ev.getY();
-                mSlidingChild = null;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                mVT.addMovement(ev);
-                if (mSlidingChild == null) {
-                    if (Math.abs(ev.getX() - mInitialTouchX) > 4) { // slide slop
-
-                        // find the view under the pointer, accounting for GONE views
-                        final int count = getChildCount();
-                        int y = 0;
-                        int childIdx = 0;
-                        for (; childIdx < count; childIdx++) {
-                            mSlidingChild = getChildAt(childIdx);
-                            if (mSlidingChild.getVisibility() == GONE) {
-                                continue;
-                            }
-                            y += mRowHeight;
-                            if (mInitialTouchY < y) break;
-                        }
-
-                        mInitialTouchX -= mSlidingChild.getTranslationX();
-                        mSlidingChild.animate().cancel();
-
-                        if (DEBUG) {
-                            Slog.d(TAG, String.format(
-                                "now sliding child %d: %s (touchY=%.1f, rowHeight=%d, count=%d)",
-                                childIdx, mSlidingChild, mInitialTouchY, mRowHeight, count));
-                        }
-
-
-                        // We need to prevent the surrounding ScrollView from intercepting us now;
-                        // the scroll position will be locked while we swipe
-                        requestDisallowInterceptTouchEvent(true);
-                    }
-                }
-                break;
-        }
-        return mSlidingChild != null;
-    }
-
-    protected boolean canBeCleared(View v) {
-        final View veto = v.findViewById(R.id.veto);
-        return (veto != null && veto.getVisibility() != View.GONE);
-    }
-
-    protected boolean clear(View v) {
-        final View veto = v.findViewById(R.id.veto);
-        if (veto != null && veto.getVisibility() != View.GONE) {
-            veto.performClick();
-            return true;
-        }
-        return false;
+        if (DEBUG) Log.v(TAG, "onInterceptTouchEvent()");
+        return mSwipeHelper.onInterceptTouchEvent(ev) ||
+            super.onInterceptTouchEvent(ev);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        final int action = ev.getAction();
-//        if (DEBUG) Slog.d(TAG, "touch event: " + ev + " sliding: " + mSlidingChild);
-        if (mSlidingChild != null) {
-            switch (action) {
-                case MotionEvent.ACTION_OUTSIDE:
-                case MotionEvent.ACTION_MOVE:
-                    mVT.addMovement(ev);
+        return mSwipeHelper.onTouchEvent(ev) ||
+            super.onTouchEvent(ev);
+    }
 
-                    float delta = (ev.getX() - mInitialTouchX);
-                    if (CONSTRAIN_SWIPE_ON_PERMANENT && !canBeCleared(mSlidingChild)) {
-                        delta = Math.copySign(
-                                    Math.min(Math.abs(delta),
-                                    mSlidingChild.getMeasuredWidth() * 0.2f), delta);
-                    }
-                    mSlidingChild.setTranslationX(delta);
-                    break;
-                case MotionEvent.ACTION_UP:
-                case MotionEvent.ACTION_CANCEL:
-                    mVT.addMovement(ev);
-                    mVT.computeCurrentVelocity(1000 /* px/sec */);
-                    if (DEBUG) Slog.d(TAG, "exit velocity: " + mVT.getXVelocity());
-                    boolean restore = true;
-                    mLiftoffVelocity = mVT.getXVelocity();
-                    if (Math.abs(mLiftoffVelocity) > SWIPE_ESCAPE_VELOCITY
-                        || (CLEAR_IF_SWIPED_FAR_ENOUGH && 
-                            (mSlidingChild.getTranslationX() * 2) > mSlidingChild.getMeasuredWidth()))
-                    {
+    public boolean canChildBeDismissed(View v) {
+        final View veto = v.findViewById(R.id.veto);
+        return (veto != null && veto.getVisibility() != View.GONE);
+    }
 
-                        // flingadingy
-                        restore = ! clear(mSlidingChild);
-                    }
-                    if (restore) {
-                        // snappity
-                        mSlidingChild.animate().translationX(0)
-                            .setDuration(SNAP_ANIM_LEN)
-                            .start();
-                    }
-                    break;
-            }
-            return true;
+    public void onChildDismissed(View v) {
+        final View veto = v.findViewById(R.id.veto);
+        if (veto != null && veto.getVisibility() != View.GONE) {
+            veto.performClick();
         }
-        return false;
+    }
+
+    public void onBeginDrag(View v) {
+        // We need to prevent the surrounding ScrollView from intercepting us now;
+        // the scroll position will be locked while we swipe
+        requestDisallowInterceptTouchEvent(true);
+    }
+
+    public View getChildAtPosition(MotionEvent ev) {
+        // find the view under the pointer, accounting for GONE views
+        final int count = getChildCount();
+        int y = 0;
+        int touchY = (int) ev.getY();
+        int childIdx = 0;
+        View slidingChild;
+        for (; childIdx < count; childIdx++) {
+            slidingChild = getChildAt(childIdx);
+            if (slidingChild.getVisibility() == GONE) {
+                continue;
+            }
+            y += mRowHeight;
+            if (touchY < y) return slidingChild;
+        }
+        return null;
+    }
+
+    public View getChildContentView(View v) {
+        return v;
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        float densityScale = getResources().getDisplayMetrics().density;
+        mSwipeHelper.setDensityScale(densityScale);
+        float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
+        mSwipeHelper.setPagingTouchSlop(pagingTouchSlop);
     }
 
     //**
@@ -260,9 +195,10 @@ public class NotificationRowLayout extends ViewGroup {
 
             child.setPivotY(0);
 
-            final float velocity = (mSlidingChild == child) 
-                    ? Math.min(mLiftoffVelocity, SWIPE_ANIM_VELOCITY_MIN)
-                    : SWIPE_ESCAPE_VELOCITY;
+            //final float velocity = (mSlidingChild == child)
+             //       ? Math.min(mLiftoffVelocity, SWIPE_ANIM_VELOCITY_MIN)
+            //        : SWIPE_ESCAPE_VELOCITY;
+            final float velocity = 0f;
             final TimeAnimator zoom = new TimeAnimator();
             zoom.setTimeListener(new TimeAnimator.TimeListener() {
                 @Override
