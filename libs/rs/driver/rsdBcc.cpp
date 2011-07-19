@@ -19,6 +19,8 @@
 #include "rsdBcc.h"
 #include "rsdRuntime.h"
 
+#include <bcinfo/bcinfo.h>
+
 #include "rsContext.h"
 #include "rsScriptC.h"
 
@@ -38,22 +40,14 @@ struct DrvScript {
 
     BCCScriptRef mBccScript;
 
-    uint32_t mInvokeFunctionCount;
+    struct BCScriptMetadata *mScriptMetadata;
+
     InvokeFunc_t *mInvokeFunctions;
-    uint32_t mFieldCount;
     void ** mFieldAddress;
     bool * mFieldIsObject;
 
     const uint8_t * mScriptText;
     uint32_t mScriptTextLength;
-
-    //uint32_t * mObjectSlots;
-    //uint32_t mObjectSlotCount;
-
-    uint32_t mPragmaCount;
-    const char ** mPragmaKeys;
-    const char ** mPragmaValues;
-
 };
 
 
@@ -77,7 +71,7 @@ bool rsdScriptInit(const Context *rsc,
 
     pthread_mutex_lock(&rsdgInitMutex);
     char *cachePath = NULL;
-    uint32_t objectSlotCount = 0;
+    struct BCScriptMetadata *md = NULL;
 
     DrvScript *drv = (DrvScript *)calloc(1, sizeof(DrvScript));
     if (drv == NULL) {
@@ -89,6 +83,14 @@ bool rsdScriptInit(const Context *rsc,
     script->mHal.info.isThreadable = true;
     drv->mScriptText = bitcode;
     drv->mScriptTextLength = bitcodeSize;
+
+    md = bcinfoGetScriptMetadata((const char*)drv->mScriptText,
+                                 drv->mScriptTextLength, 0);
+    if (!md) {
+      LOGE("bcinfo: failed to read script metadata");
+      goto error;
+    }
+    drv->mScriptMetadata = md;
 
     //LOGE("mBccScript %p", script->mBccScript);
 
@@ -120,58 +122,41 @@ bool rsdScriptInit(const Context *rsc,
     drv->mRoot = reinterpret_cast<int (*)()>(bccGetFuncAddr(drv->mBccScript, "root"));
     drv->mInit = reinterpret_cast<void (*)()>(bccGetFuncAddr(drv->mBccScript, "init"));
 
-    drv->mInvokeFunctionCount = bccGetExportFuncCount(drv->mBccScript);
-    if (drv->mInvokeFunctionCount <= 0)
+    if (md->exportFuncCount > 0) {
+        drv->mInvokeFunctions = (InvokeFunc_t*) calloc(md->exportFuncCount,
+                                                       sizeof(InvokeFunc_t));
+        bccGetExportFuncList(drv->mBccScript,
+                             md->exportFuncCount,
+                             (void **) drv->mInvokeFunctions);
+    } else {
         drv->mInvokeFunctions = NULL;
-    else {
-        drv->mInvokeFunctions = (InvokeFunc_t*) calloc(drv->mInvokeFunctionCount, sizeof(InvokeFunc_t));
-        bccGetExportFuncList(drv->mBccScript, drv->mInvokeFunctionCount, (void **) drv->mInvokeFunctions);
     }
 
-    drv->mFieldCount = bccGetExportVarCount(drv->mBccScript);
-    if (drv->mFieldCount <= 0) {
+    if (md->exportVarCount > 0) {
+        drv->mFieldAddress = (void **) calloc(md->exportVarCount,
+                                              sizeof(void*));
+        drv->mFieldIsObject = (bool *) calloc(md->exportVarCount, sizeof(bool));
+        bccGetExportVarList(drv->mBccScript,
+                            md->exportVarCount,
+                            (void **) drv->mFieldAddress);
+    } else {
         drv->mFieldAddress = NULL;
         drv->mFieldIsObject = NULL;
-    } else {
-        drv->mFieldAddress = (void **) calloc(drv->mFieldCount, sizeof(void *));
-        drv->mFieldIsObject = (bool *) calloc(drv->mFieldCount, sizeof(bool));
-        bccGetExportVarList(drv->mBccScript, drv->mFieldCount, (void **) drv->mFieldAddress);
     }
 
-    objectSlotCount = bccGetObjectSlotCount(drv->mBccScript);
-    if (objectSlotCount) {
-        uint32_t * slots = new uint32_t[objectSlotCount];
-        bccGetObjectSlotList(drv->mBccScript, objectSlotCount, slots);
-        for (uint32_t ct=0; ct < objectSlotCount; ct++) {
-            drv->mFieldIsObject[slots[ct]] = true;
+    if (md->objectSlotCount) {
+        for (uint32_t ct=0; ct < md->objectSlotCount; ct++) {
+            drv->mFieldIsObject[md->objectSlotList[ct]] = true;
         }
-        delete [] slots;
     }
-
-    uint32_t mPragmaCount;
-    const char ** mPragmaKeys;
-    const char ** mPragmaValues;
-
-    drv->mPragmaCount = bccGetPragmaCount(drv->mBccScript);
-    if (drv->mPragmaCount <= 0) {
-        drv->mPragmaKeys = NULL;
-        drv->mPragmaValues = NULL;
-    } else {
-        drv->mPragmaKeys = (const char **) calloc(drv->mPragmaCount, sizeof(const char *));
-        drv->mPragmaValues = (const char **) calloc(drv->mPragmaCount, sizeof(const char *));
-        bccGetPragmaList(drv->mBccScript, drv->mPragmaCount, drv->mPragmaKeys, drv->mPragmaValues);
-    }
-
-
 
     // Copy info over to runtime
-    script->mHal.info.exportedFunctionCount = drv->mInvokeFunctionCount;
-    script->mHal.info.exportedVariableCount = drv->mFieldCount;
-    script->mHal.info.exportedPragmaCount = drv->mPragmaCount;
-    script->mHal.info.exportedPragmaKeyList = drv->mPragmaKeys;
-    script->mHal.info.exportedPragmaValueList = drv->mPragmaValues;
+    script->mHal.info.exportedFunctionCount = md->exportFuncCount;
+    script->mHal.info.exportedVariableCount = md->exportVarCount;
+    script->mHal.info.exportedPragmaCount = md->pragmaCount;
+    script->mHal.info.exportedPragmaKeyList = md->pragmaKeyList;
+    script->mHal.info.exportedPragmaValueList = md->pragmaValueList;
     script->mHal.info.root = drv->mRoot;
-
 
     pthread_mutex_unlock(&rsdgInitMutex);
     return true;
@@ -460,9 +445,10 @@ void rsdScriptSetGlobalObj(const Context *dc, const Script *script, uint32_t slo
 
 void rsdScriptDestroy(const Context *dc, Script *script) {
     DrvScript *drv = (DrvScript *)script->mHal.drv;
+    struct BCScriptMetadata *md = drv->mScriptMetadata;
 
     if (drv->mFieldAddress) {
-        for (size_t ct=0; ct < drv->mFieldCount; ct++) {
+        for (size_t ct = 0; ct < md->exportVarCount; ct++) {
             if (drv->mFieldIsObject[ct]) {
                 // The field address can be NULL if the script-side has
                 // optimized the corresponding global variable away.
@@ -471,18 +457,18 @@ void rsdScriptDestroy(const Context *dc, Script *script) {
                 }
             }
         }
-        delete [] drv->mFieldAddress;
-        delete [] drv->mFieldIsObject;
+        free(drv->mFieldAddress);
         drv->mFieldAddress = NULL;
-        drv->mFieldIsObject = NULL;
-        drv->mFieldCount = 0;
-    }
+        free(drv->mFieldIsObject);
+        drv->mFieldIsObject = NULL;    }
 
     if (drv->mInvokeFunctions) {
-        delete [] drv->mInvokeFunctions;
+        free(drv->mInvokeFunctions);
         drv->mInvokeFunctions = NULL;
-        drv->mInvokeFunctionCount = 0;
     }
+
+    bcinfoReleaseScriptMetadata(&drv->mScriptMetadata);
+
     free(drv);
     script->mHal.drv = NULL;
 
