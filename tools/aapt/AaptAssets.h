@@ -130,6 +130,7 @@ inline int strictly_order_type(const AaptGroupEntry& lhs, const AaptGroupEntry& 
 }
 
 class AaptGroup;
+class FilePathStore;
 
 /**
  * A single asset file we know about.
@@ -259,7 +260,8 @@ public:
     virtual ssize_t slurpFullTree(Bundle* bundle,
                                   const String8& srcDir,
                                   const AaptGroupEntry& kind,
-                                  const String8& resType);
+                                  const String8& resType,
+                                  sp<FilePathStore>& fullResPaths);
 
     /*
      * Perform some sanity checks on the names of files and directories here.
@@ -474,6 +476,14 @@ public:
     ResourceTypeSet();
 };
 
+// Storage for lists of fully qualified paths for
+// resources encountered during slurping.
+class FilePathStore : public RefBase,
+                      public Vector<String8>
+{
+public:
+    FilePathStore();
+};
 
 /**
  * Asset hierarchy being operated on.
@@ -507,7 +517,8 @@ public:
     virtual ssize_t slurpFullTree(Bundle* bundle,
                                   const String8& srcDir,
                                   const AaptGroupEntry& kind,
-                                  const String8& resType);
+                                  const String8& resType,
+                                  sp<FilePathStore>& fullResPaths);
 
     ssize_t slurpResourceTree(Bundle* bundle, const String8& srcDir);
     ssize_t slurpResourceZip(Bundle* bundle, const char* filename);
@@ -535,6 +546,10 @@ public:
     inline void 
         setResources(KeyedVector<String8, sp<ResourceTypeSet> >* res) { delete mRes; mRes = res; }
 
+    inline sp<FilePathStore>& getFullResPaths() { return mFullResPaths; }
+    inline void
+        setFullResPaths(sp<FilePathStore>& res) { mFullResPaths = res; }
+
 private:
     String8 mPackage;
     SortedVector<AaptGroupEntry> mGroupEntries;
@@ -548,6 +563,8 @@ private:
 
     sp<AaptAssets> mOverlay;
     KeyedVector<String8, sp<ResourceTypeSet> >* mRes;
+
+    sp<FilePathStore> mFullResPaths;
 };
 
 #endif // __AAPT_ASSETS_H

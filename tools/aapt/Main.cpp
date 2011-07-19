@@ -146,7 +146,9 @@ void usage(void)
         "   --custom-package\n"
         "       generates R.java into a different package.\n"
         "   --extra-packages\n"
-        "       generate R.java for libraries. Separate libraries with ';'.\n"
+        "       generate R.java for libraries. Separate libraries with ':'.\n"
+        "   --generate-dependencies\n"
+        "       generate a dependency file for R.java.\n"
         "   --auto-add-overlay\n"
         "       Automatically add resources that are only in overlays.\n"
         "   --rename-manifest-package\n"
@@ -486,6 +488,8 @@ int main(int argc, char* const argv[])
                         goto bail;
                     }
                     bundle.setExtraPackages(argv[0]);
+                } else if (strcmp(cp, "-generate-dependencies") == 0) {
+                    bundle.setGenDependencies(true);
                 } else if (strcmp(cp, "-utf16") == 0) {
                     bundle.setWantUTF16(true);
                 } else if (strcmp(cp, "-rename-manifest-package") == 0) {
