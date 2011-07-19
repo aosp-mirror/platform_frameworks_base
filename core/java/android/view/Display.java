@@ -118,6 +118,7 @@ public class Display {
             } else {
                 // This is just for boot-strapping, initializing the
                 // system process before the window manager is up.
+                outSize.x = getRealWidth();
                 outSize.y = getRealHeight();
             }
             if (DEBUG_COMPAT && doCompat) Slog.v(TAG, "Returning display size: " + outSize);
