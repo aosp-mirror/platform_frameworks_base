@@ -36,7 +36,6 @@ import android.net.LinkProperties;
 import android.net.NetworkInfo;
 import android.net.NetworkUtils;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -75,10 +74,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     private Context mContext;
     private final static String TAG = "Tethering";
     private final static boolean DEBUG = true;
-
-    private boolean mBooted = false;
-    //used to remember if we got connected before boot finished
-    private boolean mDeferedUsbConnection = false;
 
     // TODO - remove both of these - should be part of interface inspection/selection stuff
     private String[] mTetherableUsbRegexs;
@@ -126,10 +121,9 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     private Notification mTetheredNotification;
 
-    // whether we can tether is the && of these two - they come in as separate
-    // broadcasts so track them so we can decide what to do when either changes
-    private boolean mUsbMassStorageOff;  // track the status of USB Mass Storage
-    private boolean mUsbConnected;       // track the status of USB connection
+    private boolean mRndisEnabled;       // track the RNDIS function enabled state
+    private boolean mUsbTetherRequested; // true if USB tethering should be started
+                                         // when RNDIS is enabled
 
     public Tethering(Context context, INetworkManagementService nmService, Looper looper) {
         mContext = context;
@@ -149,7 +143,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(UsbManager.ACTION_USB_STATE);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        filter.addAction(Intent.ACTION_BOOT_COMPLETED);
         mContext.registerReceiver(mStateReceiver, filter);
 
         filter = new IntentFilter();
@@ -157,9 +150,6 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         filter.addAction(Intent.ACTION_MEDIA_UNSHARED);
         filter.addDataScheme("file");
         mContext.registerReceiver(mStateReceiver, filter);
-
-        mUsbMassStorageOff = !Environment.MEDIA_SHARED.equals(
-                Environment.getExternalStorageState());
 
         mDhcpRange = context.getResources().getStringArray(
                 com.android.internal.R.array.config_tether_dhcp_range);
@@ -243,6 +233,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
         return false;
     }
+
     public void interfaceAdded(String iface) {
         boolean found = false;
         boolean usb = false;
@@ -456,47 +447,28 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
     }
 
-    private void updateUsbStatus() {
-        boolean enable = mUsbConnected && mUsbMassStorageOff;
-
-        if (mBooted) {
-            enableUsbIfaces(enable);
-        }
-    }
-
     private class StateReceiver extends BroadcastReceiver {
         public void onReceive(Context content, Intent intent) {
             String action = intent.getAction();
             if (action.equals(UsbManager.ACTION_USB_STATE)) {
-                mUsbConnected = intent.getExtras().getBoolean(UsbManager.USB_CONNECTED);
-                updateUsbStatus();
-            } else if (action.equals(Intent.ACTION_MEDIA_SHARED)) {
-                mUsbMassStorageOff = false;
-                updateUsbStatus();
-            }
-            else if (action.equals(Intent.ACTION_MEDIA_UNSHARED)) {
-                mUsbMassStorageOff = true;
-                updateUsbStatus();
+                synchronized (Tethering.this) {
+                    boolean usbConnected = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
+                    mRndisEnabled = intent.getBooleanExtra(UsbManager.USB_FUNCTION_RNDIS, false);
+                    // start tethering if we have a request pending
+                    if (usbConnected && mRndisEnabled && mUsbTetherRequested) {
+                        tetherUsb(true);
+                    }
+                    mUsbTetherRequested = false;
+                }
             } else if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 if (DEBUG) Log.d(TAG, "Tethering got CONNECTIVITY_ACTION");
                 mTetherMasterSM.sendMessage(TetherMasterSM.CMD_UPSTREAM_CHANGED);
-            } else if (action.equals(Intent.ACTION_BOOT_COMPLETED)) {
-                mBooted = true;
-                updateUsbStatus();
             }
         }
     }
 
-    // used on cable insert/remove
-    private void enableUsbIfaces(boolean enable) {
-        // add/remove USB interfaces when USB is connected/disconnected
-        for (String intf : mTetherableUsbRegexs) {
-            if (enable) {
-                interfaceAdded(intf);
-            } else {
-                interfaceRemoved(intf);
-            }
-        }
+    private void tetherUsb(boolean enable) {
+        if (DEBUG) Log.d(TAG, "tetherUsb " + enable);
 
         String[] ifaces = new String[0];
         try {
@@ -507,83 +479,50 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
         }
         for (String iface : ifaces) {
             if (isUsb(iface)) {
-                if (enable) {
-                    interfaceAdded(iface);
-                } else {
-                    interfaceRemoved(iface);
+                int result = (enable ? tether(iface) : untether(iface));
+                if (result == ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+                    return;
                 }
             }
         }
-    }
-
-    // toggled when we enter/leave the fully tethered state
-    private boolean enableUsbRndis(boolean enabled) {
-        if (DEBUG) Log.d(TAG, "enableUsbRndis(" + enabled + ")");
-
-        UsbManager usbManager = (UsbManager)mContext.getSystemService(Context.USB_SERVICE);
-        if (usbManager == null) {
-            Log.d(TAG, "could not get UsbManager");
-            return false;
-        }
-        try {
-            if (enabled) {
-                usbManager.setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS, false);
-            } else {
-                usbManager.setCurrentFunction(null, false);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error toggling usb RNDIS", e);
-            return false;
-        }
-        return true;
+        Log.e(TAG, "unable start or stop USB tethering");
     }
 
     // configured when we start tethering and unconfig'd on error or conclusion
     private boolean configureUsbIface(boolean enabled) {
         if (DEBUG) Log.d(TAG, "configureUsbIface(" + enabled + ")");
 
-        if (enabled) {
-            // must enable RNDIS first to create the interface
-            enableUsbRndis(enabled);
-        }
-
+        // toggle the USB interfaces
+        String[] ifaces = new String[0];
         try {
-            // bring toggle the interfaces
-            String[] ifaces = new String[0];
-            try {
-                ifaces = mNMService.listInterfaces();
-            } catch (Exception e) {
-                Log.e(TAG, "Error listing Interfaces", e);
-                return false;
-            }
-            for (String iface : ifaces) {
-                if (isUsb(iface)) {
-                    InterfaceConfiguration ifcg = null;
-                    try {
-                        ifcg = mNMService.getInterfaceConfig(iface);
-                        if (ifcg != null) {
-                            InetAddress addr = NetworkUtils.numericToInetAddress(USB_NEAR_IFACE_ADDR);
-                            ifcg.addr = new LinkAddress(addr, USB_PREFIX_LENGTH);
-                            if (enabled) {
-                                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
-                            } else {
-                                ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
-                            }
-                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
-                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
-                            mNMService.setInterfaceConfig(iface, ifcg);
-                        }
-                    } catch (Exception e) {
-                        Log.e(TAG, "Error configuring interface " + iface, e);
-                        return false;
-                    }
-                }
-             }
-        } finally {
-            if (!enabled) {
-                enableUsbRndis(false);
-            }
+            ifaces = mNMService.listInterfaces();
+        } catch (Exception e) {
+            Log.e(TAG, "Error listing Interfaces", e);
+            return false;
         }
+        for (String iface : ifaces) {
+            if (isUsb(iface)) {
+                InterfaceConfiguration ifcg = null;
+                try {
+                    ifcg = mNMService.getInterfaceConfig(iface);
+                    if (ifcg != null) {
+                        InetAddress addr = NetworkUtils.numericToInetAddress(USB_NEAR_IFACE_ADDR);
+                        ifcg.addr = new LinkAddress(addr, USB_PREFIX_LENGTH);
+                        if (enabled) {
+                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
+                        } else {
+                            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
+                        }
+                        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("running", "");
+                        ifcg.interfaceFlags = ifcg.interfaceFlags.replace("  "," ");
+                        mNMService.setInterfaceConfig(iface, ifcg);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error configuring interface " + iface, e);
+                    return false;
+                }
+            }
+         }
 
         return true;
     }
@@ -598,6 +537,28 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
 
     public String[] getTetherableBluetoothRegexs() {
         return mTetherableBluetoothRegexs;
+    }
+
+    public int setUsbTethering(boolean enable) {
+        UsbManager usbManager = (UsbManager)mContext.getSystemService(Context.USB_SERVICE);
+
+        synchronized (this) {
+            if (enable) {
+                if (mRndisEnabled) {
+                    tetherUsb(true);
+                } else {
+                    mUsbTetherRequested = true;
+                    usbManager.setCurrentFunction(UsbManager.USB_FUNCTION_RNDIS, false);
+                }
+            } else {
+                tetherUsb(false);
+                if (mRndisEnabled) {
+                    usbManager.setCurrentFunction(null, false);
+                }
+                mUsbTetherRequested = false;
+            }
+        }
+        return ConnectivityManager.TETHER_ERROR_NO_ERROR;
     }
 
     public int[] getUpstreamIfaceTypes() {

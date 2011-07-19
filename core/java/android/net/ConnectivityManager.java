@@ -653,6 +653,17 @@ public class ConnectivityManager {
         }
     }
 
+    /**
+     * {@hide}
+     */
+    public int setUsbTethering(boolean enable) {
+        try {
+            return mService.setUsbTethering(enable);
+        } catch (RemoteException e) {
+            return TETHER_ERROR_SERVICE_UNAVAIL;
+        }
+    }
+
     /** {@hide} */
     public static final int TETHER_ERROR_NO_ERROR           = 0;
     /** {@hide} */
