@@ -23,7 +23,6 @@ import android.os.Registrant;
 import android.os.Handler;
 import android.os.AsyncResult;
 import android.os.SystemProperties;
-import android.util.Config;
 import android.util.Log;
 
 import java.io.FileInputStream;
@@ -691,7 +690,7 @@ public abstract class BaseCommands implements CommandsInterface {
         RadioState oldState;
 
         synchronized (mStateMonitor) {
-            if (Config.LOGV) {
+            if (false) {
                 Log.v(LOG_TAG, "setRadioState old: " + mState
                     + " new " + newState);
             }
@@ -858,22 +857,28 @@ public abstract class BaseCommands implements CommandsInterface {
      */
     public static int getLteOnCdmaModeStatic() {
         int retVal;
-        String productType;
+        int curVal;
+        String productType = "";
 
-        Matcher matcher = sProductTypePattern.matcher(sKernelCmdLine);
-        if (matcher.find()) {
-            productType = matcher.group(1);
-            if (sLteOnCdmaProductType.equals(productType)) {
-                retVal = Phone.LTE_ON_CDMA_TRUE;
+        curVal = SystemProperties.getInt(TelephonyProperties.PROPERTY_LTE_ON_CDMA_DEVICE,
+                    Phone.LTE_ON_CDMA_UNKNOWN);
+        retVal = curVal;
+        if (retVal == Phone.LTE_ON_CDMA_UNKNOWN) {
+            Matcher matcher = sProductTypePattern.matcher(sKernelCmdLine);
+            if (matcher.find()) {
+                productType = matcher.group(1);
+                if (sLteOnCdmaProductType.equals(productType)) {
+                    retVal = Phone.LTE_ON_CDMA_TRUE;
+                } else {
+                    retVal = Phone.LTE_ON_CDMA_FALSE;
+                }
             } else {
                 retVal = Phone.LTE_ON_CDMA_FALSE;
             }
-        } else {
-            retVal = Phone.LTE_ON_CDMA_FALSE;
-            productType = "";
         }
 
-        Log.d(LOG_TAG, "getLteOnCdmaMode=" + retVal + " product_type='" + productType +
+        Log.d(LOG_TAG, "getLteOnCdmaMode=" + retVal + " curVal=" + curVal +
+                " product_type='" + productType +
                 "' lteOnCdmaProductType='" + sLteOnCdmaProductType + "'");
         return retVal;
     }
