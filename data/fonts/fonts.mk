@@ -18,6 +18,7 @@ PRODUCT_COPY_FILES := \
     frameworks/base/data/fonts/DroidSans.ttf:system/fonts/DroidSans.ttf \
     frameworks/base/data/fonts/DroidSans-Bold.ttf:system/fonts/DroidSans-Bold.ttf \
     frameworks/base/data/fonts/DroidSansArabic.ttf:system/fonts/DroidSansArabic.ttf \
+    frameworks/base/data/fonts/DroidSansEthiopic-Regular.ttf:system/fonts/DroidSansEthiopic-Regular.ttf \
     frameworks/base/data/fonts/DroidSansHebrew-Regular.ttf:system/fonts/DroidSansHebrew-Regular.ttf \
     frameworks/base/data/fonts/DroidSansHebrew-Bold.ttf:system/fonts/DroidSansHebrew-Bold.ttf \
     frameworks/base/data/fonts/DroidSansThai.ttf:system/fonts/DroidSansThai.ttf \
