@@ -26,6 +26,7 @@ import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
@@ -1580,16 +1581,16 @@ public final class InputMethodManager {
     }
 
     /**
-     * Set additional input method subtypes.
-     * @param imeToken Supplies the identifying token given to an input method.
+     * Set additional input method subtypes. Only a process which shares the same uid with the IME
+     * can add additional input method subtypes to the IME.
+     * @param imiId Id of InputMethodInfo which additional input method subtypes will be added to.
      * @param subtypes subtypes will be added as additional subtypes of the current input method.
      * @return true if the additional input method subtypes are successfully added.
      */
-    public boolean setAdditionalInputMethodSubtypes(
-            IBinder imeToken, InputMethodSubtype[] subtypes) {
+    public boolean setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
         synchronized (mH) {
             try {
-                return mService.setAdditionalInputMethodSubtypes(imeToken, subtypes);
+                return mService.setAdditionalInputMethodSubtypes(imiId, subtypes);
             } catch (RemoteException e) {
                 Log.w(TAG, "IME died: " + mCurId, e);
                 return false;
