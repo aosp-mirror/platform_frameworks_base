@@ -786,11 +786,6 @@ void SurfaceTexture::setFrameAvailableListener(
     mFrameAvailableListener = listener;
 }
 
-sp<IBinder> SurfaceTexture::getAllocator() {
-    LOGV("SurfaceTexture::getAllocator");
-    return mGraphicBufferAlloc->asBinder();
-}
-
 void SurfaceTexture::freeAllBuffers() {
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         mSlots[i].mGraphicBuffer = 0;

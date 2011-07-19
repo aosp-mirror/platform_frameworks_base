@@ -106,10 +106,6 @@ private:
     // interactions with the server using this interface.
     sp<ISurfaceTexture> mSurfaceTexture;
 
-    // mAllocator is the binder object that is referenced to prevent the
-    // dequeued buffers from being freed prematurely.
-    sp<IBinder> mAllocator;
-
     // mSlots stores the buffers that have been allocated for each buffer slot.
     // It is initialized to null pointers, and gets filled in with the result of
     // ISurfaceTexture::requestBuffer when the client dequeues a buffer from a
