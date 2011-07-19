@@ -518,7 +518,7 @@ final class ActivityStack {
             Configuration config = mService.mWindowManager.updateOrientationFromAppTokens(
                     mService.mConfiguration,
                     r.mayFreezeScreenLocked(app) ? r : null);
-            mService.updateConfigurationLocked(config, r);
+            mService.updateConfigurationLocked(config, r, false);
         }
 
         r.app = app;
@@ -1424,7 +1424,7 @@ final class ActivityStack {
                     if (config != null) {
                         next.frozenBeforeDestroy = true;
                     }
-                    updated = mService.updateConfigurationLocked(config, next);
+                    updated = mService.updateConfigurationLocked(config, next, false);
                 }
             }
             if (!updated) {
@@ -2817,7 +2817,7 @@ final class ActivityStack {
                 mConfigWillChange = false;
                 if (DEBUG_CONFIGURATION) Slog.v(TAG,
                         "Updating to new configuration after starting activity.");
-                mService.updateConfigurationLocked(config, null);
+                mService.updateConfigurationLocked(config, null, false);
             }
             
             Binder.restoreCallingIdentity(origId);
