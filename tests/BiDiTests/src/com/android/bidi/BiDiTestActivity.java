@@ -137,6 +137,8 @@ public class BiDiTestActivity extends Activity {
 
         addItem(result, "TextView Drawables LTR", BiDiTestTextViewDrawablesLtr.class, R.id.textview_drawables_ltr);
         addItem(result, "TextView Drawables RTL", BiDiTestTextViewDrawablesRtl.class, R.id.textview_drawables_rtl);
+        addItem(result, "Gallery LTR", BiDiTestGalleryLtr.class, R.id.gallery_ltr);
+        addItem(result, "Gallery RTL", BiDiTestGalleryRtl.class, R.id.gallery_rtl);
 
         return result;
     }
