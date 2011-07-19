@@ -858,7 +858,7 @@ public final class JsonReaderTest extends TestCase {
     }
 
     public void testFailWithPosition() throws IOException {
-        testFailWithPosition("Expected literal value at line 6 column   3",
+        testFailWithPosition("Expected literal value at line 6 column 3",
                 "[\n\n\n\n\n0,}]");
     }
 
