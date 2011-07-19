@@ -758,38 +758,14 @@ public class GridLayout extends ViewGroup {
     // Add/remove
 
     @Override
-    public void addView(View child, int index, ViewGroup.LayoutParams params) {
-        super.addView(child, index, params);
+    protected void onViewAdded(View child) {
+        super.onViewAdded(child);
         invalidateStructure();
     }
 
     @Override
-    public void removeView(View view) {
-        super.removeView(view);
-        invalidateStructure();
-    }
-
-    @Override
-    public void removeViewInLayout(View view) {
-        super.removeViewInLayout(view);
-        invalidateStructure();
-    }
-
-    @Override
-    public void removeViewsInLayout(int start, int count) {
-        super.removeViewsInLayout(start, count);
-        invalidateStructure();
-    }
-
-    @Override
-    public void removeViewAt(int index) {
-        super.removeViewAt(index);
-        invalidateStructure();
-    }
-
-    @Override
-    public void removeAllViews() {
-        super.removeAllViews();
+    protected void onViewRemoved(View child) {
+        super.onViewRemoved(child);
         invalidateStructure();
     }
 
@@ -2297,25 +2273,6 @@ public class GridLayout extends ViewGroup {
             int result = span.hashCode();
             result = 31 * result + alignment.hashCode();
             return result;
-        }
-    }
-
-    /**
-     * Temporary backward compatibility class for Launcher - to avoid
-     * dependent multi-project commit. This class will be deleted after
-     * AppsCustomizePagedView is updated to new API.
-     *
-     * @hide
-     */
-    @Deprecated
-    public static class Group extends Spec {
-        /**
-         * @deprecated Please replace with {@link #spec(int, int, Alignment)}
-         * @hide
-         */
-        @Deprecated
-        public Group(int start, int size, Alignment alignment) {
-            super(start, size, alignment, UNDEFINED_FLEXIBILITY);
         }
     }
 
