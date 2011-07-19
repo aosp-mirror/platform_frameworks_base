@@ -30,6 +30,11 @@
     </family>
     <family>
         <fileset>
+            <file>DroidSansEthiopic-Regular.ttf</file>
+        </fileset>
+    </family>
+    <family>
+        <fileset>
             <file>DroidSansHebrew-Regular.ttf</file>
             <file>DroidSansHebrew-Bold.ttf</file>
         </fileset>
