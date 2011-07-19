@@ -236,6 +236,7 @@ public class NotificationRowLayout extends ViewGroup {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mAppearingViews.remove(childF);
+                    requestLayout(); // pick up any final changes in position
                 }
             });
             a.start();
@@ -274,6 +275,7 @@ public class NotificationRowLayout extends ViewGroup {
                     NotificationRowLayout.super.removeView(childF);
                     childF.setAlpha(1f);
                     mDisappearingViews.remove(childF);
+                    requestLayout(); // pick up any final changes in position
                 }
             });
 
@@ -372,7 +374,7 @@ public class NotificationRowLayout extends ViewGroup {
         final int width = right - left;
         final int height = bottom - top;
 
-        //if (DEBUG) Slog.d(TAG, "onLayout: height=" + height);
+        if (DEBUG) Slog.d(TAG, "onLayout: height=" + height);
 
         final int count = getChildCount();
         int y = 0;
@@ -381,20 +383,22 @@ public class NotificationRowLayout extends ViewGroup {
             if (child.getVisibility() == GONE) {
                 continue;
             }
-//            final int thisRowHeight = (int)(
-//                ((mAppearingViews.contains(child) || mDisappearingViews.contains(child))
-//                        ? child.getScaleY()
-//                        : 1.0f)
-//                * mRowHeight);
             final int thisRowHeight = (int)(child.getAlpha() * mRowHeight);
-//            child.layout(0, y, width, y + thisRowHeight);
-            child.layout(0, y, width, y + mRowHeight);
+            if (DEBUG) {
+                Slog.d(TAG, String.format(
+                            "laying out child #%d: (0, %d, %d, %d) h=%d",
+                            i, y, width, y + thisRowHeight, thisRowHeight));
+            }
+            child.layout(0, y, width, y + thisRowHeight);
             y += thisRowHeight;
+        }
+        if (DEBUG) {
+            Slog.d(TAG, "onLayout: final y=" + y);
         }
     }
 
     public void setForcedHeight(int h) {
-        //if (DEBUG) Slog.d(TAG, "forcedHeight: " + h);
+        if (DEBUG) Slog.d(TAG, "forcedHeight: " + h);
         if (h != mHeight) {
             mHeight = h;
             requestLayout();
