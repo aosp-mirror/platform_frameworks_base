@@ -141,6 +141,11 @@ public class CDMALTEPhone extends CDMAPhone {
     }
 
     @Override
+    public String getDeviceSvn() {
+        return mImeiSv;
+    }
+
+    @Override
     protected void log(String s) {
         if (DBG)
             Log.d(LOG_TAG, "[CDMALTEPhone] " + s);
