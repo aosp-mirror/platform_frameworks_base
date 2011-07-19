@@ -120,6 +120,7 @@ public final class BluetoothDeviceProfileState extends StateMachine {
     private Pair<Integer, String> mIncomingConnections;
     private PowerManager.WakeLock mWakeLock;
     private PowerManager mPowerManager;
+    private boolean mPairingRequestRcvd = false;
 
     private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -187,27 +188,38 @@ public final class BluetoothDeviceProfileState extends StateMachine {
                 Message msg = obtainMessage(CONNECTION_ACCESS_REQUEST_REPLY);
                 msg.arg1 = val;
                 sendMessage(msg);
+            } else if (action.equals(BluetoothDevice.ACTION_PAIRING_REQUEST)) {
+                mPairingRequestRcvd = true;
+            } else if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)) {
+                int state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,
+                        BluetoothDevice.ERROR);
+                if (state == BluetoothDevice.BOND_BONDED && mPairingRequestRcvd) {
+                    setTrust(BluetoothDevice.CONNECTION_ACCESS_YES);
+                    mPairingRequestRcvd = false;
+                } else if (state == BluetoothDevice.BOND_NONE) {
+                    mPairingRequestRcvd = false;
+                }
             }
         }
     };
 
     private boolean isPhoneDocked(BluetoothDevice autoConnectDevice) {
-      // This works only because these broadcast intents are "sticky"
-      Intent i = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_DOCK_EVENT));
-      if (i != null) {
-          int state = i.getIntExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_UNDOCKED);
-          if (state != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
-              BluetoothDevice device = i.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-              if (device != null && autoConnectDevice.equals(device)) {
-                  return true;
-              }
-          }
-      }
-      return false;
-  }
+        // This works only because these broadcast intents are "sticky"
+        Intent i = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_DOCK_EVENT));
+        if (i != null) {
+            int state = i.getIntExtra(Intent.EXTRA_DOCK_STATE, Intent.EXTRA_DOCK_STATE_UNDOCKED);
+            if (state != Intent.EXTRA_DOCK_STATE_UNDOCKED) {
+                BluetoothDevice device = i.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                if (device != null && autoConnectDevice.equals(device)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public BluetoothDeviceProfileState(Context context, String address,
-          BluetoothService service, BluetoothA2dpService a2dpService) {
+          BluetoothService service, BluetoothA2dpService a2dpService, boolean setTrust) {
         super(address);
         mContext = context;
         mDevice = new BluetoothDevice(address);
@@ -231,6 +243,8 @@ public final class BluetoothDeviceProfileState extends StateMachine {
         filter.addAction(BluetoothInputDevice.ACTION_CONNECTION_STATE_CHANGED);
         filter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
         filter.addAction(BluetoothDevice.ACTION_CONNECTION_ACCESS_REPLY);
+        filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
+        filter.addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
 
         mContext.registerReceiver(mBroadcastReceiver, filter);
 
@@ -247,6 +261,10 @@ public final class BluetoothDeviceProfileState extends StateMachine {
                                               PowerManager.ACQUIRE_CAUSES_WAKEUP |
                                               PowerManager.ON_AFTER_RELEASE, TAG);
         mWakeLock.setReferenceCounted(false);
+
+        if (setTrust) {
+            setTrust(BluetoothDevice.CONNECTION_ACCESS_YES);
+        }
     }
 
     private BluetoothProfile.ServiceListener mBluetoothProfileServiceListener =
