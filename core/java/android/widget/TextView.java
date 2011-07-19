@@ -5062,6 +5062,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return getExtendedPaddingTop() + voffset + mLayout.getLineBaseline(0);
     }
 
+    /**
+     * @hide
+     * @param offsetRequired
+     */
+    @Override
+    protected int getFadeTop(boolean offsetRequired) {
+        int voffset = 0;
+        if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != Gravity.TOP) {
+            voffset = getVerticalOffset(true);
+        }
+        
+        if (offsetRequired) voffset += getTopPaddingOffset();
+
+        return getExtendedPaddingTop() + voffset;
+    }
+
+    /**
+     * @hide
+     * @param offsetRequired
+     */
+    protected int getFadeHeight(boolean offsetRequired) {
+        return mLayout != null ? mLayout.getHeight() : 0;
+    }
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         int which = doKeyDown(keyCode, event, null);

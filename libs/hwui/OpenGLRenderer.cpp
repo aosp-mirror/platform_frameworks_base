@@ -125,6 +125,7 @@ OpenGLRenderer::~OpenGLRenderer() {
 ///////////////////////////////////////////////////////////////////////////////
 
 void OpenGLRenderer::setViewport(int width, int height) {
+    glDisable(GL_DITHER);
     glViewport(0, 0, width, height);
     mOrthoMatrix.loadOrtho(0, width, height, 0, -1, 1);
 
@@ -151,7 +152,6 @@ void OpenGLRenderer::prepareDirty(float left, float top, float right, float bott
     mSaveCount = 1;
 
     glViewport(0, 0, mWidth, mHeight);
-    glDisable(GL_DITHER);
 
     glEnable(GL_SCISSOR_TEST);
     glScissor(left, mSnapshot->height - bottom, right - left, bottom - top);

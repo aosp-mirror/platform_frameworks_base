@@ -10317,6 +10317,26 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
+     * @hide
+     * @param offsetRequired
+     */
+    protected int getFadeTop(boolean offsetRequired) {
+        int top = mPaddingTop;
+        if (offsetRequired) top += getTopPaddingOffset();
+        return top;
+    }
+    
+    /**
+     * @hide
+     * @param offsetRequired
+     */
+    protected int getFadeHeight(boolean offsetRequired) {
+        int padding = mPaddingTop;
+        if (offsetRequired) padding += getTopPaddingOffset();        
+        return mBottom - mTop - mPaddingBottom - padding;
+    }
+    
+    /**
      * <p>Indicates whether this view is attached to an hardware accelerated
      * window or not.</p>
      *
@@ -10427,18 +10447,16 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
         // Step 2, save the canvas' layers
         int paddingLeft = mPaddingLeft;
-        int paddingTop = mPaddingTop;
 
         final boolean offsetRequired = isPaddingOffsetRequired();
         if (offsetRequired) {
             paddingLeft += getLeftPaddingOffset();
-            paddingTop += getTopPaddingOffset();
         }
 
         int left = mScrollX + paddingLeft;
         int right = left + mRight - mLeft - mPaddingRight - paddingLeft;
-        int top = mScrollY + paddingTop;
-        int bottom = top + mBottom - mTop - mPaddingBottom - paddingTop;
+        int top = mScrollY + getFadeTop(offsetRequired);
+        int bottom = top + getFadeHeight(offsetRequired);
 
         if (offsetRequired) {
             right += getRightPaddingOffset();
