@@ -2344,7 +2344,9 @@ public final class WebViewCore {
             webViewWidth = mWebView.getViewWidth();
             viewportWidth = (int) (webViewWidth / adjust);
             if (viewportWidth == 0) {
-                Log.w(LOGTAG, "Can't get the viewWidth after the first layout");
+                if (DebugFlags.WEB_VIEW_CORE) {
+                    Log.v(LOGTAG, "Can't get the viewWidth yet");
+                }
             }
         } else {
             webViewWidth = Math.round(viewportWidth * mCurrentViewScale);
