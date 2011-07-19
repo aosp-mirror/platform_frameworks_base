@@ -46,4 +46,5 @@ int dumpResources(Bundle* bundle);
 String8 getAttribute(const ResXMLTree& tree, const char* ns,
                             const char* attr, String8* outError);
 
+status_t writeDependencyPreReqs(Bundle* bundle, const sp<AaptAssets>& assets, FILE* fp);
 #endif // __MAIN_H

@@ -41,7 +41,8 @@ public:
           mCompressionMethod(0), mOutputAPKFile(NULL),
           mManifestPackageNameOverride(NULL), mInstrumentationPackageNameOverride(NULL),
           mIsOverlayPackage(false),
-          mAutoAddOverlay(false), mAssetSourceDir(NULL), mProguardFile(NULL),
+          mAutoAddOverlay(false), mGenDependencies(false),
+          mAssetSourceDir(NULL), mProguardFile(NULL),
           mAndroidManifestFile(NULL), mPublicOutputFile(NULL),
           mRClassDir(NULL), mResourceIntermediatesDir(NULL), mManifestMinSdkVersion(NULL),
           mMinSdkVersion(NULL), mTargetSdkVersion(NULL), mMaxSdkVersion(NULL),
@@ -97,6 +98,8 @@ public:
     void setIsOverlayPackage(bool val) { mIsOverlayPackage = val; }
     bool getAutoAddOverlay() { return mAutoAddOverlay; }
     void setAutoAddOverlay(bool val) { mAutoAddOverlay = val; }
+    bool getGenDependencies() { return mGenDependencies; }
+    void setGenDependencies(bool val) { mGenDependencies = val; }
 
     /*
      * Input options.
@@ -226,6 +229,7 @@ private:
     const char* mInstrumentationPackageNameOverride;
     bool        mIsOverlayPackage;
     bool        mAutoAddOverlay;
+    bool        mGenDependencies;
     const char* mAssetSourceDir;
     const char* mProguardFile;
     const char* mAndroidManifestFile;
