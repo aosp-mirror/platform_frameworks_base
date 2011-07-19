@@ -325,12 +325,15 @@ public abstract class HardwareRenderer {
         private static final int SURFACE_STATE_SUCCESS = 1;
         private static final int SURFACE_STATE_UPDATED = 2;
         
-        static EGLContext sEglContext;
         static EGL10 sEgl;
         static EGLDisplay sEglDisplay;
         static EGLConfig sEglConfig;
+        static final Object[] sEglLock = new Object[0];
 
-        private static Thread sEglThread;
+        static final ThreadLocal<EGLContext> sEglContextStorage = new ThreadLocal<EGLContext>();
+
+        EGLContext mEglContext;
+        Thread mEglThread;
 
         EGLSurface mEglSurface;
         
@@ -355,7 +358,7 @@ public abstract class HardwareRenderer {
         final boolean mTranslucent;
 
         private boolean mDestroyed;
-        
+
         private final Rect mRedrawClip = new Rect();
 
         GlRenderer(int glVersion, boolean translucent) {
@@ -487,45 +490,48 @@ public abstract class HardwareRenderer {
         abstract GLES20Canvas createCanvas();
 
         void initializeEgl() {
-            if (sEglContext != null) return;
-
-            sEglThread = Thread.currentThread();
-            sEgl = (EGL10) EGLContext.getEGL();
-            
-            // Get to the default display.
-            sEglDisplay = sEgl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
-            
-            if (sEglDisplay == EGL10.EGL_NO_DISPLAY) {
-                throw new RuntimeException("eglGetDisplay failed "
-                        + getEGLErrorString(sEgl.eglGetError()));
-            }
-            
-            // We can now initialize EGL for that display
-            int[] version = new int[2];
-            if (!sEgl.eglInitialize(sEglDisplay, version)) {
-                throw new RuntimeException("eglInitialize failed " +
-                        getEGLErrorString(sEgl.eglGetError()));
-            }
-
-            sEglConfig = chooseEglConfig();
-            if (sEglConfig == null) {
-                // We tried to use EGL_SWAP_BEHAVIOR_PRESERVED_BIT, try again without
-                if (sDirtyRegions) {
-                    sDirtyRegions = false;
+            synchronized (sEglLock) {
+                if (sEgl == null && sEglConfig == null) {
+                    sEgl = (EGL10) EGLContext.getEGL();
+                    
+                    // Get to the default display.
+                    sEglDisplay = sEgl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
+                    
+                    if (sEglDisplay == EGL10.EGL_NO_DISPLAY) {
+                        throw new RuntimeException("eglGetDisplay failed "
+                                + getEGLErrorString(sEgl.eglGetError()));
+                    }
+                    
+                    // We can now initialize EGL for that display
+                    int[] version = new int[2];
+                    if (!sEgl.eglInitialize(sEglDisplay, version)) {
+                        throw new RuntimeException("eglInitialize failed " +
+                                getEGLErrorString(sEgl.eglGetError()));
+                    }
+        
                     sEglConfig = chooseEglConfig();
                     if (sEglConfig == null) {
-                        throw new RuntimeException("eglConfig not initialized");
+                        // We tried to use EGL_SWAP_BEHAVIOR_PRESERVED_BIT, try again without
+                        if (sDirtyRegions) {
+                            sDirtyRegions = false;
+                            sEglConfig = chooseEglConfig();
+                            if (sEglConfig == null) {
+                                throw new RuntimeException("eglConfig not initialized");
+                            }
+                        } else {
+                            throw new RuntimeException("eglConfig not initialized");
+                        }
                     }
-                } else {
-                    throw new RuntimeException("eglConfig not initialized");
                 }
             }
-            
-            /*
-            * Create an EGL context. We want to do this as rarely as we can, because an
-            * EGL context is a somewhat heavy object.
-            */
-            sEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
+
+            mEglContext = sEglContextStorage.get();
+            mEglThread = Thread.currentThread();
+
+            if (mEglContext == null) {
+                mEglContext = createContext(sEgl, sEglDisplay, sEglConfig);
+                sEglContextStorage.set(mEglContext);
+            }
         }
 
         private EGLConfig chooseEglConfig() {
@@ -554,7 +560,7 @@ public abstract class HardwareRenderer {
             if (sEglConfig == null) {
                 throw new RuntimeException("eglConfig not initialized");
             }
-            if (Thread.currentThread() != sEglThread) {
+            if (Thread.currentThread() != mEglThread) {
                 throw new IllegalStateException("HardwareRenderer cannot be used " 
                         + "from multiple threads");
             }
@@ -590,7 +596,7 @@ public abstract class HardwareRenderer {
              * Before we can issue GL commands, we need to make sure
              * the context is current and bound to a surface.
              */
-            if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, sEglContext)) {
+            if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
                 throw new Surface.OutOfResourcesException("eglMakeCurrent failed "
                         + getEGLErrorString(sEgl.eglGetError()));
             }
@@ -611,7 +617,7 @@ public abstract class HardwareRenderer {
                 mDirtyRegionsEnabled = GLES20Canvas.isBackBufferPreserved();
             }
 
-            return sEglContext.getGL();
+            return mEglContext.getGL();
         }
 
         EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
@@ -752,22 +758,22 @@ public abstract class HardwareRenderer {
         }
 
         /**
-         * Ensures the currnet EGL context is the one we expect.
+         * Ensures the current EGL context is the one we expect.
          * 
          * @return {@link #SURFACE_STATE_ERROR} if the correct EGL context cannot be made current,
          *         {@link #SURFACE_STATE_UPDATED} if the EGL context was changed or
          *         {@link #SURFACE_STATE_SUCCESS} if the EGL context was the correct one
          */
         private int checkCurrent() {
-            if (sEglThread != Thread.currentThread()) {
+            if (mEglThread != Thread.currentThread()) {
                 throw new IllegalStateException("Hardware acceleration can only be used with a " +
-                        "single UI thread.\nOriginal thread: " + sEglThread + "\n" +
+                        "single UI thread.\nOriginal thread: " + mEglThread + "\n" +
                         "Current thread: " + Thread.currentThread());
             }
 
-            if (!sEglContext.equals(sEgl.eglGetCurrentContext()) ||
+            if (!mEglContext.equals(sEgl.eglGetCurrentContext()) ||
                     !mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL10.EGL_DRAW))) {
-                if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, sEglContext)) {
+                if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
                     fallback(true);
                     Log.e(LOG_TAG, "eglMakeCurrent failed " +
                             getEGLErrorString(sEgl.eglGetError()));
