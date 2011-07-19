@@ -843,7 +843,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * @param child
      * @param visibility
      */
-    void onChildVisibilityChanged(View child, int visibility) {
+    protected void onChildVisibilityChanged(View child, int visibility) {
         if (mTransition != null) {
             if (visibility == VISIBLE) {
                 mTransition.showChild(this, child);
