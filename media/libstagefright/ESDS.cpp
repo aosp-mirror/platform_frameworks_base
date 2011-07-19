@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+//#define LOG_NDEBUG 0
+#define LOG_TAG "ESDS"
+#include <utils/Log.h>
+
 #include "include/ESDS.h"
 
 #include <string.h>
@@ -87,6 +91,8 @@ status_t ESDS::skipDescriptorHeader(
     }
     while (more);
 
+    LOGV("tag=0x%02x data_size=%d", *tag, *data_size);
+
     if (*data_size > size) {
         return ERROR_MALFORMED;
     }
@@ -146,8 +152,20 @@ status_t ESDS::parseESDescriptor(size_t offset, size_t size) {
     if (OCRstreamFlag) {
         offset += 2;
         size -= 2;
+
+        if ((offset >= size || mData[offset] != kTag_DecoderConfigDescriptor)
+                && offset - 2 < size
+                && mData[offset - 2] == kTag_DecoderConfigDescriptor) {
+            // Content found "in the wild" had OCRstreamFlag set but was
+            // missing OCR_ES_Id, the decoder config descriptor immediately
+            // followed instead.
+            offset -= 2;
+            size += 2;
+
+            LOGW("Found malformed 'esds' atom, ignoring missing OCR_ES_Id.");
+        }
     }
-    
+
     if (offset >= size) {
         return ERROR_MALFORMED;
     }
