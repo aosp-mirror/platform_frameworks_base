@@ -362,7 +362,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         INHERIT, GRAVITY, TEXT_START, TEXT_END, CENTER, VIEW_START, VIEW_END;
     }
 
-    private boolean bResolvedDrawables = false;
+    private boolean mResolvedDrawables = false;
 
     /*
      * Kick-start the font cache for the zygote process (to pay the cost of
@@ -10511,7 +10511,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     protected void resolveDrawables() {
         // No need to resolve twice
-        if (bResolvedDrawables) {
+        if (mResolvedDrawables) {
             return;
         }
         // No drawable to resolve
@@ -10520,7 +10520,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
         // No relative drawable to resolve
         if (mDrawables.mDrawableStart == null && mDrawables.mDrawableEnd == null) {
-            bResolvedDrawables = true;
+            mResolvedDrawables = true;
             return;
         }
 
@@ -10557,11 +10557,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
                 break;
         }
-        bResolvedDrawables = true;
+        mResolvedDrawables = true;
     }
 
     protected void resetResolvedDrawables() {
-        bResolvedDrawables = false;
+        mResolvedDrawables = false;
     }
 
     @ViewDebug.ExportedProperty(category = "text")
