@@ -757,12 +757,18 @@ public class GridLayout extends ViewGroup {
 
     // Add/remove
 
+    /**
+     * @hide
+     */
     @Override
     protected void onViewAdded(View child) {
         super.onViewAdded(child);
         invalidateStructure();
     }
 
+    /**
+     * @hide
+     */
     @Override
     protected void onViewRemoved(View child) {
         super.onViewRemoved(child);
