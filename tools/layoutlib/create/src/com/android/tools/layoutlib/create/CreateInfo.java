@@ -155,6 +155,7 @@ public final class CreateInfo implements ICreateInfo {
         "android.graphics.Typeface",
         "android.graphics.Xfermode",
         "android.os.SystemClock",
+        "android.text.AndroidBidi",
         "android.util.FloatMath",
         "android.view.Display",
         "libcore.icu.ICU",
