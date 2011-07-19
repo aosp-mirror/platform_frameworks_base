@@ -175,8 +175,8 @@ The global reference is guaranteed to be valid until you call
 
 <p>This pattern is commonly used when caching copies of class objects obtained
 from <code>FindClass</code>, e.g.:</p>
-<pre>jclass* localClass = env-&gt;FindClass("MyClass");
-jclass* globalClass = (jclass*) env-&gt;NewGlobalRef(localClass);</pre>
+<pre>jclass localClass = env-&gt;FindClass("MyClass");
+jclass globalClass = reinterpret_cast&lt;jclass&gt;(env-&gt;NewGlobalRef(localClass));</pre>
 
 <p>All JNI methods accept both local and global references as arguments.
 It's possible for references to the same object to have different values;
@@ -215,10 +215,9 @@ to detach the thread soon.</p>
 <a name="UTF_8_and_UTF_16_strings" id="UTF_8_and_UTF_16_strings"></a>
 <h2>UTF-8 and UTF-16 Strings</h2>
 
-<p>The Java programming language uses UTF-16.  For convenience, JNI provides methods that work with "modified UTF-8" encoding
-as well.  (Some VMs use the modified UTF-8 internally to store strings; ours do not.)  The
-modified encoding only supports the 8- and 16-bit forms, and stores ASCII NUL values in a 16-bit encoding.
-The nice thing about it is that you can count on having C-style zero-terminated strings,
+<p>The Java programming language uses UTF-16.  For convenience, JNI provides methods that work with <a href="http://en.wikipedia.org/wiki/UTF-8#Modified_UTF-8">Modified UTF-8</a> as well.  The
+modified encoding is useful for C code because it encodes \u0000 as 0xc0 0x80 instead of 0x00.
+The nice thing about this is that you can count on having C-style zero-terminated strings,
 suitable for use with standard libc string functions.  The down side is that you cannot pass
 arbitrary UTF-8 data into the VM and expect it to work correctly.</p>
 
@@ -235,11 +234,11 @@ are C-style pointers to primitive data rather than local references.  They
 are guaranteed valid until Release is called, which means they are not
 released when the native method returns.</p>
 
-<p><strong>Data passed to NewStringUTF must be in "modified" UTF-8 format</strong>.  A
+<p><strong>Data passed to NewStringUTF must be in Modified UTF-8 format</strong>.  A
 common mistake is reading character data from a file or network stream
 and handing it to <code>NewStringUTF</code> without filtering it.
 Unless you know the data is 7-bit ASCII, you need to strip out high-ASCII
-characters or convert them to proper "modified" UTF-8 form.  If you don't,
+characters or convert them to proper Modified UTF-8 form.  If you don't,
 the UTF-16 conversion will likely not be what you expect.  The extended
 JNI checks will scan strings and warn you about invalid data, but they
 won't catch everything.</p>
@@ -321,10 +320,10 @@ and <code>GetStringChars</code> that may be very helpful when all you want
 to do is copy data in or out.  Consider the following:</p>
 
 <pre>
-    jbyte* data = env->GetByteArrayElements(array, NULL);
+    jbyte* data = env-&gt;GetByteArrayElements(array, NULL);
     if (data != NULL) {
         memcpy(buffer, data, len);
-        env->ReleaseByteArrayElements(array, data, JNI_ABORT);
+        env-&gt;ReleaseByteArrayElements(array, data, JNI_ABORT);
     }</pre>
 
 <p>This grabs the array, copies the first <code>len</code> byte
@@ -335,7 +334,7 @@ we use <code>JNI_ABORT</code> so there's no chance of a third copy.</p>
 
 <p>We can accomplish the same thing with this:</p>
 <pre>
-    env->GetByteArrayRegion(array, 0, len, buffer);</pre>
+    env-&gt;GetByteArrayRegion(array, 0, len, buffer);</pre>
 
 <p>This has several advantages:</p>
 <ul>
@@ -433,7 +432,7 @@ method call.</li>
 <li> Check for calls to inappropriate functions between Critical get/release calls.</li>
 <li> Check that JNIEnv structs aren't being shared between threads.</li>
 <li> Make sure local references aren't used outside their allowed lifespan.</li>
-<li> UTF-8 strings contain only valid "modified UTF-8" data.</li>
+<li> UTF-8 strings contain only valid <a href="http://en.wikipedia.org/wiki/UTF-8#Modified_UTF-8">Modified UTF-8</a> data.</li>
 </ul>
 
 <p>Accessibility of methods and fields (i.e. public vs. private) is not
@@ -476,20 +475,21 @@ library name, e.g. to load "libfubar.so" you would pass in "fubar".</li>
 <li> Provide a native function: <code><strong>jint JNI_OnLoad(JavaVM* vm, void* reserved)</strong></code></li>
 <li>In <code>JNI_OnLoad</code>, register all of your native methods.  You
 should declare
-the methods "static" so the names don't take up space in the symbol table
+the functions <code>static</code> so the names don't take up space in the symbol table
 on the device.</li>
 </ul>
 
 <p>The <code>JNI_OnLoad</code> function should look something like this if
-written in C:</p>
+written in C++:</p>
 <pre>jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
     JNIEnv* env;
-    if ((*vm)->GetEnv(vm, (void**) &env, JNI_VERSION_1_6) != JNI_OK)
+    if (vm-&gt;GetEnv(reinterpret_cast&lt;void**&gt;(&env), JNI_VERSION_1_6) != JNI_OK) {
         return -1;
+    }
 
-    /* get class with (*env)->FindClass */
-    /* register methods with (*env)->RegisterNatives */
+    // Get jclass with env-&gt;FindClass.
+    // Register methods with env-&gt;RegisterNatives.
 
     return JNI_VERSION_1_6;
 }</pre>
@@ -603,7 +603,7 @@ Some common reasons for this are:</p>
     is commonly caused by:
     <ul>
         <li>For lazy method lookup, failing to declare C++ functions
-        with <code>extern C</code>.  You can use <code>arm-eabi-nm</code>
+        with <code>extern "C"</code>.  You can use <code>arm-eabi-nm</code>
         to see the symbols as they appear in the library; if they look
         mangled (e.g. <code>_Z15Java_Foo_myfuncP7_JNIEnvP7_jclass</code>
         rather than <code>Java_Foo_myfunc</code>) then you need to
