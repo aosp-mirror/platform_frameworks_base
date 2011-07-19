@@ -775,6 +775,18 @@ public class GridLayout extends ViewGroup {
         invalidateStructure();
     }
 
+    /**
+     * We need to call invalidateStructure() when a child's GONE flag changes state.
+     * This implementation is a catch-all, invalidating on any change in the visibility flags.
+     *
+     * @hide
+     */
+    @Override
+    protected void onChildVisibilityChanged(View child, int visibility) {
+        super.onChildVisibilityChanged(child, visibility);
+        invalidateStructure();
+    }
+
     // Measurement
 
     private boolean isGone(View c) {
