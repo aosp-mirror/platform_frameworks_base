@@ -42,5 +42,8 @@
     <string name="textview_hebrew_text">&#x05DD;&#x05DE;ab?!</string>
     <string name="textview_latin_text">ab&#x05DD;&#x05DE;?!</string>
     <string name="textview_multiline_text">&#x05DD;&#x05DE;?!\nab?!\n?!</string>
+    <string name="ltr">Left to right text"</string>
+    <string name="rtl">"والحق أن تترك ونص"</string>
+    <string name="composing">"\u0644\u0627"</string>
 </resources>
 

@@ -22,6 +22,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -37,7 +38,7 @@ public class BiDiTestView extends View {
 
     private static final float DEFAULT_ITALIC_SKEW_X = -0.25f;
 
-    private Paint paint = new Paint();
+    private TextPaint paint = new TextPaint();
     private Rect rect = new Rect();
 
     private String NORMAL_TEXT;
@@ -51,6 +52,7 @@ public class BiDiTestView extends View {
     private String CHINESE_TEXT;
     private String MIXED_TEXT_1;
     private String HEBREW_TEXT;
+    private String RTL_TEXT;
 
     private Typeface typeface;
 
@@ -83,9 +85,10 @@ public class BiDiTestView extends View {
         CHINESE_TEXT = context.getString(R.string.chinese_text);
         MIXED_TEXT_1 = context.getString(R.string.mixed_text_1);
         HEBREW_TEXT = context.getString(R.string.hebrew_text);
+        RTL_TEXT = context.getString(R.string.rtl);
 
         typeface = paint.getTypeface();
-        paint.setAntiAlias(true);
+//        paint.setAntiAlias(true);
     }
 
     public void setCurrentTextSize(int size) {
@@ -136,7 +139,7 @@ public class BiDiTestView extends View {
                 paint, typeface, false, false,  Paint.DIRECTION_LTR, currentTextSize);
 
         // Test Hebrew
-        deltaX = testString(canvas, HEBREW_TEXT, ORIGIN, ORIGIN + 14 * currentTextSize,
+        deltaX = testString(canvas, RTL_TEXT, ORIGIN, ORIGIN + 14 * currentTextSize,
                 paint, typeface, false, false,  Paint.DIRECTION_RTL, currentTextSize);
     }
 
@@ -170,7 +173,6 @@ public class BiDiTestView extends View {
         paint.setColor(Color.WHITE);
 
         Log.v(TAG, "START -- drawText");
-        setPaintDir(paint, dir);
         canvas.drawText(text, x, y + currentTextSize, this.paint);
         Log.v(TAG, "END   -- drawText");
 

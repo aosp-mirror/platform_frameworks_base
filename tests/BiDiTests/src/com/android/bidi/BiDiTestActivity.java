@@ -102,6 +102,7 @@ public class BiDiTestActivity extends Activity {
         addItem(result, "Basic", BiDiTestBasic.class, R.id.basic);
 
         addItem(result, "Canvas", BiDiTestCanvas.class, R.id.canvas);
+        addItem(result, "Canvas2", BiDiTestCanvas2.class, R.id.canvas2);
 
         addItem(result, "Linear LTR", BiDiTestLinearLayoutLtr.class, R.id.linear_layout_ltr);
         addItem(result, "Linear RTL", BiDiTestLinearLayoutRtl.class, R.id.linear_layout_rtl);
