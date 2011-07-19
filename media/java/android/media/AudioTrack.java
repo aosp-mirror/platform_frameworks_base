@@ -551,7 +551,9 @@ public class AudioTrack
      * @see #PLAYSTATE_PLAYING
      */
     public int getPlayState() {
-        return mPlayState;
+        synchronized (mPlayStateLock) {
+            return mPlayState;
+        }
     }
 
     /**
