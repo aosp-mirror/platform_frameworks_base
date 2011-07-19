@@ -81,7 +81,7 @@ public:
     // SurfaceMediaSource object (i.e. they are not owned by the client).
     virtual status_t setBufferCount(int bufferCount);
 
-    virtual sp<GraphicBuffer> requestBuffer(int buf);
+    virtual status_t requestBuffer(int slot, sp<GraphicBuffer>* buf);
 
     // dequeueBuffer gets the next buffer slot index for the client to use. If a
     // buffer slot is available then that slot index is written to the location

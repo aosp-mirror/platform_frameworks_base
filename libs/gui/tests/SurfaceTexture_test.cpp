@@ -1018,6 +1018,83 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromGLFilledRGBABufferPow2) {
     EXPECT_TRUE(checkPixel( 3, 52, 153, 153, 153, 153));
 }
 
+TEST_F(SurfaceTextureGLTest, AbandonUnblocksDequeueBuffer) {
+    class ProducerThread : public Thread {
+    public:
+        ProducerThread(const sp<ANativeWindow>& anw):
+                mANW(anw),
+                mDequeueError(NO_ERROR) {
+        }
+
+        virtual ~ProducerThread() {
+        }
+
+        virtual bool threadLoop() {
+            Mutex::Autolock lock(mMutex);
+            ANativeWindowBuffer* anb;
+
+            // Frame 1
+            if (mANW->dequeueBuffer(mANW.get(), &anb) != NO_ERROR) {
+                return false;
+            }
+            if (anb == NULL) {
+                return false;
+            }
+            if (mANW->queueBuffer(mANW.get(), anb)
+                    != NO_ERROR) {
+                return false;
+            }
+
+            // Frame 2
+            if (mANW->dequeueBuffer(mANW.get(), &anb) != NO_ERROR) {
+                return false;
+            }
+            if (anb == NULL) {
+                return false;
+            }
+            if (mANW->queueBuffer(mANW.get(), anb)
+                    != NO_ERROR) {
+                return false;
+            }
+
+            // Frame 3 - error expected
+            mDequeueError = mANW->dequeueBuffer(mANW.get(), &anb);
+            return false;
+        }
+
+        status_t getDequeueError() {
+            Mutex::Autolock lock(mMutex);
+            return mDequeueError;
+        }
+
+    private:
+        sp<ANativeWindow> mANW;
+        status_t mDequeueError;
+        Mutex mMutex;
+    };
+
+    sp<FrameWaiter> fw(new FrameWaiter);
+    mST->setFrameAvailableListener(fw);
+    ASSERT_EQ(OK, mST->setSynchronousMode(true));
+    ASSERT_EQ(OK, mST->setBufferCountServer(2));
+
+    sp<Thread> pt(new ProducerThread(mANW));
+    pt->run();
+
+    fw->waitForFrame();
+    fw->waitForFrame();
+
+    // Sleep for 100ms to allow the producer thread's dequeueBuffer call to
+    // block waiting for a buffer to become available.
+    usleep(100000);
+
+    mST->abandon();
+
+    pt->requestExitAndWait();
+    ASSERT_EQ(NO_INIT,
+            reinterpret_cast<ProducerThread*>(pt.get())->getDequeueError());
+}
+
 /*
  * This test is for testing GL -> GL texture streaming via SurfaceTexture.  It
  * contains functionality to create a producer thread that will perform GL

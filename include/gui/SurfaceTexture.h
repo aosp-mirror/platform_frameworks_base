@@ -69,7 +69,7 @@ public:
     // SurfaceTexture object (i.e. they are not owned by the client).
     virtual status_t setBufferCount(int bufferCount);
 
-    virtual sp<GraphicBuffer> requestBuffer(int buf);
+    virtual status_t requestBuffer(int slot, sp<GraphicBuffer>* buf);
 
     // dequeueBuffer gets the next buffer slot index for the client to use. If a
     // buffer slot is available then that slot index is written to the location
@@ -189,6 +189,17 @@ public:
 
     // getCurrentScalingMode returns the scaling mode of the current buffer
     uint32_t getCurrentScalingMode() const;
+
+    // abandon frees all the buffers and puts the SurfaceTexture into the
+    // 'abandoned' state.  Once put in this state the SurfaceTexture can never
+    // leave it.  When in the 'abandoned' state, all methods of the
+    // ISurfaceTexture interface will fail with the NO_INIT error.
+    //
+    // Note that while calling this method causes all the buffers to be freed
+    // from the perspective of the the SurfaceTexture, if there are additional
+    // references on the buffers (e.g. if a buffer is referenced by a client or
+    // by OpenGL ES as a texture) then those buffer will remain allocated.
+    void abandon();
 
     // dump our state in a String
     void dump(String8& result) const;
@@ -410,6 +421,13 @@ private:
     // mQueue is a FIFO of queued buffers used in synchronous mode
     typedef Vector<int> Fifo;
     Fifo mQueue;
+
+    // mAbandoned indicates that the SurfaceTexture will no longer be used to
+    // consume images buffers pushed to it using the ISurfaceTexture interface.
+    // It is initialized to false, and set to true in the abandon method.  A
+    // SurfaceTexture that has been abandoned will return the NO_INIT error from
+    // all ISurfaceTexture methods capable of returning an error.
+    bool mAbandoned;
 
     // mMutex is the mutex used to prevent concurrent access to the member
     // variables of SurfaceTexture objects. It must be locked whenever the

@@ -147,16 +147,17 @@ status_t SurfaceMediaSource::setBufferCount(int bufferCount) {
     return OK;
 }
 
-sp<GraphicBuffer> SurfaceMediaSource::requestBuffer(int buf) {
+status_t SurfaceMediaSource::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
     LOGV("SurfaceMediaSource::requestBuffer");
     Mutex::Autolock lock(mMutex);
-    if (buf < 0 || mBufferCount <= buf) {
+    if (slot < 0 || mBufferCount <= slot) {
         LOGE("requestBuffer: slot index out of range [0, %d]: %d",
-                mBufferCount, buf);
-        return 0;
+                mBufferCount, slot);
+        return BAD_VALUE;
     }
-    mSlots[buf].mRequestBufferCalled = true;
-    return mSlots[buf].mGraphicBuffer;
+    mSlots[slot].mRequestBufferCalled = true;
+    *buf = mSlots[slot].mGraphicBuffer;
+    return NO_ERROR;
 }
 
 status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,

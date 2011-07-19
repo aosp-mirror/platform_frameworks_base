@@ -148,10 +148,11 @@ int SurfaceTextureClient::dequeueBuffer(android_native_buffer_t** buffer) {
     }
 
     if ((result & ISurfaceTexture::BUFFER_NEEDS_REALLOCATION) || gbuf == 0) {
-        gbuf = mSurfaceTexture->requestBuffer(buf);
-        if (gbuf == 0) {
-            LOGE("dequeueBuffer: ISurfaceTexture::requestBuffer failed");
-            return NO_MEMORY;
+        result = mSurfaceTexture->requestBuffer(buf, &gbuf);
+        if (result != NO_ERROR) {
+            LOGE("dequeueBuffer: ISurfaceTexture::requestBuffer failed: %d",
+                    result);
+            return result;
         }
         mQueryWidth  = gbuf->width;
         mQueryHeight = gbuf->height;

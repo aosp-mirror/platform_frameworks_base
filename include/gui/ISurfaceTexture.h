@@ -51,7 +51,7 @@ protected:
     // the given slot index, and the client is expected to mirror the
     // slot->buffer mapping so that it's not necessary to transfer a
     // GraphicBuffer for every dequeue operation.
-    virtual sp<GraphicBuffer> requestBuffer(int slot) = 0;
+    virtual status_t requestBuffer(int slot, sp<GraphicBuffer>* buf) = 0;
 
     // setBufferCount sets the number of buffer slots available. Calling this
     // will also cause all buffer slots to be emptied. The caller should empty

@@ -94,7 +94,8 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode) :
     mTexName(tex),
     mSynchronousMode(false),
     mAllowSynchronousMode(allowSynchronousMode),
-    mConnectedApi(NO_CONNECTED_API) {
+    mConnectedApi(NO_CONNECTED_API),
+    mAbandoned(false) {
     LOGV("SurfaceTexture::SurfaceTexture");
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
@@ -150,6 +151,11 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
     LOGV("SurfaceTexture::setBufferCount");
     Mutex::Autolock lock(mMutex);
 
+    if (mAbandoned) {
+        LOGE("setBufferCount: SurfaceTexture has been abandoned!");
+        return NO_INIT;
+    }
+
     if (bufferCount > NUM_BUFFER_SLOTS) {
         LOGE("setBufferCount: bufferCount larger than slots available");
         return BAD_VALUE;
@@ -199,21 +205,31 @@ status_t SurfaceTexture::setDefaultBufferSize(uint32_t w, uint32_t h)
     return OK;
 }
 
-sp<GraphicBuffer> SurfaceTexture::requestBuffer(int buf) {
+status_t SurfaceTexture::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
     LOGV("SurfaceTexture::requestBuffer");
     Mutex::Autolock lock(mMutex);
-    if (buf < 0 || mBufferCount <= buf) {
-        LOGE("requestBuffer: slot index out of range [0, %d]: %d",
-                mBufferCount, buf);
-        return 0;
+    if (mAbandoned) {
+        LOGE("requestBuffer: SurfaceTexture has been abandoned!");
+        return NO_INIT;
     }
-    mSlots[buf].mRequestBufferCalled = true;
-    return mSlots[buf].mGraphicBuffer;
+    if (slot < 0 || mBufferCount <= slot) {
+        LOGE("requestBuffer: slot index out of range [0, %d]: %d",
+                mBufferCount, slot);
+        return BAD_VALUE;
+    }
+    mSlots[slot].mRequestBufferCalled = true;
+    *buf = mSlots[slot].mGraphicBuffer;
+    return NO_ERROR;
 }
 
 status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         uint32_t format, uint32_t usage) {
     LOGV("SurfaceTexture::dequeueBuffer");
+
+    if (mAbandoned) {
+        LOGE("dequeueBuffer: SurfaceTexture has been abandoned!");
+        return NO_INIT;
+    }
 
     if ((w && !h) || (!w && h)) {
         LOGE("dequeueBuffer: invalid size: w=%u, h=%u", w, h);
@@ -252,6 +268,11 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             // wait for the FIFO to drain
             while (!mQueue.isEmpty()) {
                 mDequeueCondition.wait(mMutex);
+                if (mAbandoned) {
+                    LOGE("dequeueBuffer: SurfaceTexture was abandoned while "
+                            "blocked!");
+                    return NO_INIT;
+                }
             }
             minBufferCountNeeded = mSynchronousMode ?
                     MIN_SYNC_BUFFER_SLOTS : MIN_ASYNC_BUFFER_SLOTS;
@@ -380,6 +401,11 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
 status_t SurfaceTexture::setSynchronousMode(bool enabled) {
     Mutex::Autolock lock(mMutex);
 
+    if (mAbandoned) {
+        LOGE("setSynchronousMode: SurfaceTexture has been abandoned!");
+        return NO_INIT;
+    }
+
     status_t err = OK;
     if (!mAllowSynchronousMode && enabled)
         return err;
@@ -410,6 +436,10 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp,
 
     { // scope for the lock
         Mutex::Autolock lock(mMutex);
+        if (mAbandoned) {
+            LOGE("queueBuffer: SurfaceTexture has been abandoned!");
+            return NO_INIT;
+        }
         if (buf < 0 || buf >= mBufferCount) {
             LOGE("queueBuffer: slot index out of range [0, %d]: %d",
                     mBufferCount, buf);
@@ -475,6 +505,12 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp,
 void SurfaceTexture::cancelBuffer(int buf) {
     LOGV("SurfaceTexture::cancelBuffer");
     Mutex::Autolock lock(mMutex);
+
+    if (mAbandoned) {
+        LOGW("cancelBuffer: SurfaceTexture has been abandoned!");
+        return;
+    }
+
     if (buf < 0 || buf >= mBufferCount) {
         LOGE("cancelBuffer: slot index out of range [0, %d]: %d",
                 mBufferCount, buf);
@@ -491,6 +527,10 @@ void SurfaceTexture::cancelBuffer(int buf) {
 status_t SurfaceTexture::setCrop(const Rect& crop) {
     LOGV("SurfaceTexture::setCrop");
     Mutex::Autolock lock(mMutex);
+    if (mAbandoned) {
+        LOGE("setCrop: SurfaceTexture has been abandoned!");
+        return NO_INIT;
+    }
     mNextCrop = crop;
     return OK;
 }
@@ -498,6 +538,10 @@ status_t SurfaceTexture::setCrop(const Rect& crop) {
 status_t SurfaceTexture::setTransform(uint32_t transform) {
     LOGV("SurfaceTexture::setTransform");
     Mutex::Autolock lock(mMutex);
+    if (mAbandoned) {
+        LOGE("setTransform: SurfaceTexture has been abandoned!");
+        return NO_INIT;
+    }
     mNextTransform = transform;
     return OK;
 }
@@ -505,6 +549,12 @@ status_t SurfaceTexture::setTransform(uint32_t transform) {
 status_t SurfaceTexture::connect(int api) {
     LOGV("SurfaceTexture::connect(this=%p, %d)", this, api);
     Mutex::Autolock lock(mMutex);
+
+    if (mAbandoned) {
+        LOGE("connect: SurfaceTexture has been abandoned!");
+        return NO_INIT;
+    }
+
     int err = NO_ERROR;
     switch (api) {
         case NATIVE_WINDOW_API_EGL:
@@ -529,6 +579,12 @@ status_t SurfaceTexture::connect(int api) {
 status_t SurfaceTexture::disconnect(int api) {
     LOGV("SurfaceTexture::disconnect(this=%p, %d)", this, api);
     Mutex::Autolock lock(mMutex);
+
+    if (mAbandoned) {
+        LOGE("connect: SurfaceTexture has been abandoned!");
+        return NO_INIT;
+    }
+
     int err = NO_ERROR;
     switch (api) {
         case NATIVE_WINDOW_API_EGL:
@@ -837,6 +893,12 @@ uint32_t SurfaceTexture::getCurrentScalingMode() const {
 int SurfaceTexture::query(int what, int* outValue)
 {
     Mutex::Autolock lock(mMutex);
+
+    if (mAbandoned) {
+        LOGE("query: SurfaceTexture has been abandoned!");
+        return NO_INIT;
+    }
+
     int value;
     switch (what) {
     case NATIVE_WINDOW_WIDTH:
@@ -861,6 +923,13 @@ int SurfaceTexture::query(int what, int* outValue)
     }
     outValue[0] = value;
     return NO_ERROR;
+}
+
+void SurfaceTexture::abandon() {
+    Mutex::Autolock lock(mMutex);
+    freeAllBuffers();
+    mAbandoned = true;
+    mDequeueCondition.signal();
 }
 
 void SurfaceTexture::dump(String8& result) const
