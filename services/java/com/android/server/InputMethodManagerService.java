@@ -35,6 +35,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import android.app.ActivityManagerNative;
 import android.app.AlertDialog;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -160,6 +161,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // Ongoing notification
     private final NotificationManager mNotificationManager;
+    private final KeyguardManager mKeyguardManager;
     private final Notification mImeSwitcherNotification;
     private final PendingIntent mImeSwitchPendingIntent;
     private final boolean mShowOngoingImeSwitcherForPhones;
@@ -520,6 +522,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         });
 
+        mKeyguardManager = (KeyguardManager)
+                mContext.getSystemService(Context.KEYGUARD_SERVICE);
         mNotificationManager = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
         mImeSwitcherNotification = new Notification();
@@ -2118,7 +2122,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         }
                     });
 
-            if (showSubtypes) {
+            if (showSubtypes && !(mKeyguardManager.isKeyguardLocked()
+                    && mKeyguardManager.isKeyguardSecure())) {
                 mDialogBuilder.setPositiveButton(
                         com.android.internal.R.string.configure_input_methods,
                         new DialogInterface.OnClickListener() {
