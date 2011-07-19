@@ -64,9 +64,6 @@ status_t SurfaceTextureLayer::dequeueBuffer(int *buf,
         //LOGD("%s, w=%u, h=%u, format=%u, usage=%08x, effectiveUsage=%08x",
         //        __PRETTY_FUNCTION__, w, h, format, usage, effectiveUsage);
         res = SurfaceTexture::dequeueBuffer(buf, w, h, format, effectiveUsage);
-        if (res == NO_ERROR) {
-            layer->setFixedSize(w && h);
-        }
     }
     return res;
 }

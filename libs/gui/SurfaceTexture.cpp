@@ -90,6 +90,7 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode) :
     mCurrentTransform(0),
     mCurrentTimestamp(0),
     mNextTransform(0),
+    mNextScalingMode(NATIVE_WINDOW_SCALING_MODE_FREEZE),
     mTexName(tex),
     mSynchronousMode(false),
     mAllowSynchronousMode(allowSynchronousMode),
@@ -453,6 +454,7 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp) {
         mSlots[buf].mBufferState = BufferSlot::QUEUED;
         mSlots[buf].mCrop = mNextCrop;
         mSlots[buf].mTransform = mNextTransform;
+        mSlots[buf].mScalingMode = mNextScalingMode;
         mSlots[buf].mTimestamp = timestamp;
         mDequeueCondition.signal();
     } // scope for the lock
@@ -542,6 +544,22 @@ status_t SurfaceTexture::disconnect(int api) {
     return err;
 }
 
+status_t SurfaceTexture::setScalingMode(int mode) {
+    LOGV("SurfaceTexture::setScalingMode(%d)", mode);
+
+    switch (mode) {
+        case NATIVE_WINDOW_SCALING_MODE_FREEZE:
+        case NATIVE_WINDOW_SCALING_MODE_SCALE_TO_WINDOW:
+            break;
+        default:
+            return BAD_VALUE;
+    }
+
+    Mutex::Autolock lock(mMutex);
+    mNextScalingMode = mode;
+    return OK;
+}
+
 status_t SurfaceTexture::updateTexImage() {
     LOGV("SurfaceTexture::updateTexImage");
     Mutex::Autolock lock(mMutex);
@@ -602,6 +620,7 @@ status_t SurfaceTexture::updateTexImage() {
         mCurrentTextureBuf = mSlots[buf].mGraphicBuffer;
         mCurrentCrop = mSlots[buf].mCrop;
         mCurrentTransform = mSlots[buf].mTransform;
+        mCurrentScalingMode = mSlots[buf].mScalingMode;
         mCurrentTimestamp = mSlots[buf].mTimestamp;
         computeCurrentTransformMatrix();
 
@@ -807,6 +826,11 @@ Rect SurfaceTexture::getCurrentCrop() const {
 uint32_t SurfaceTexture::getCurrentTransform() const {
     Mutex::Autolock lock(mMutex);
     return mCurrentTransform;
+}
+
+uint32_t SurfaceTexture::getCurrentScalingMode() const {
+    Mutex::Autolock lock(mMutex);
+    return mCurrentScalingMode;
 }
 
 int SurfaceTexture::query(int what, int* outValue)

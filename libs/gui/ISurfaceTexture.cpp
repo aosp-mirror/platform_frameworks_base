@@ -43,6 +43,7 @@ enum {
     SET_SYNCHRONOUS_MODE,
     CONNECT,
     DISCONNECT,
+    SET_SCALING_MODE,
 };
 
 
@@ -126,6 +127,15 @@ public:
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(transform);
         remote()->transact(SET_TRANSFORM, data, &reply);
+        status_t result = reply.readInt32();
+        return result;
+    }
+
+    virtual status_t setScalingMode(int mode) {
+        Parcel data, reply;
+        data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
+        data.writeInt32(mode);
+        remote()->transact(SET_SCALING_MODE, data, &reply);
         status_t result = reply.readInt32();
         return result;
     }
@@ -241,6 +251,13 @@ status_t BnSurfaceTexture::onTransact(
             CHECK_INTERFACE(ISurfaceTexture, data, reply);
             uint32_t transform = data.readInt32();
             status_t result = setTransform(transform);
+            reply->writeInt32(result);
+            return NO_ERROR;
+        } break;
+        case SET_SCALING_MODE: {
+            CHECK_INTERFACE(ISurfaceTexture, data, reply);
+            int mode = data.readInt32();
+            status_t result = setScalingMode(mode);
             reply->writeInt32(result);
             return NO_ERROR;
         } break;

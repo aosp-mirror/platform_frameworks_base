@@ -59,7 +59,6 @@ public:
     status_t setBuffers(uint32_t w, uint32_t h, 
             PixelFormat format, uint32_t flags=0);
 
-    // Set this Layer's buffers size
     bool isFixedSize() const;
 
     // LayerBase interface
@@ -88,7 +87,6 @@ private:
     void onFrameQueued();
     virtual sp<ISurface> createSurface();
     uint32_t getEffectiveUsage(uint32_t usage) const;
-    void setFixedSize(bool fixedSize);
     bool isCropped() const;
     static bool getOpacityForFormat(uint32_t format);
 
@@ -106,6 +104,7 @@ private:
     GLfloat mTextureMatrix[16];
     Rect mCurrentCrop;
     uint32_t mCurrentTransform;
+    uint32_t mCurrentScalingMode;
     bool mCurrentOpacity;
 
     // constants
@@ -124,7 +123,6 @@ private:
 
     // binder thread, transaction thread
     mutable Mutex mLock;
-    bool mFixedSize;
 };
 
 // ---------------------------------------------------------------------------

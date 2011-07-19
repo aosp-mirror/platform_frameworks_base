@@ -286,6 +286,9 @@ int SurfaceTextureClient::perform(int operation, va_list args)
     case NATIVE_WINDOW_UNLOCK_AND_POST:
         res = dispatchUnlockAndPost(args);
         break;
+    case NATIVE_WINDOW_SET_SCALING_MODE:
+        res = dispatchSetScalingMode(args);
+        break;
     default:
         res = NAME_NOT_FOUND;
         break;
@@ -338,6 +341,11 @@ int SurfaceTextureClient::dispatchSetBuffersDimensions(va_list args) {
 int SurfaceTextureClient::dispatchSetBuffersFormat(va_list args) {
     int f = va_arg(args, int);
     return setBuffersFormat(f);
+}
+
+int SurfaceTextureClient::dispatchSetScalingMode(va_list args) {
+    int m = va_arg(args, int);
+    return setScalingMode(m);
 }
 
 int SurfaceTextureClient::dispatchSetBuffersTransform(va_list args) {
@@ -454,6 +462,18 @@ int SurfaceTextureClient::setBuffersFormat(int format)
     mReqFormat = format;
 
     return NO_ERROR;
+}
+
+int SurfaceTextureClient::setScalingMode(int mode)
+{
+    LOGV("SurfaceTextureClient::setScalingMode(%d)", mode);
+    Mutex::Autolock lock(mMutex);
+    // mode is validated on the server
+    status_t err = mSurfaceTexture->setScalingMode(mode);
+    LOGE_IF(err, "ISurfaceTexture::setScalingMode(%d) returned %s",
+            mode, strerror(-err));
+
+    return err;
 }
 
 int SurfaceTextureClient::setBuffersTransform(int transform)

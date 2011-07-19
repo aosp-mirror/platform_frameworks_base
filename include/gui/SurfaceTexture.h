@@ -88,6 +88,7 @@ public:
     virtual void cancelBuffer(int buf);
     virtual status_t setCrop(const Rect& reg);
     virtual status_t setTransform(uint32_t transform);
+    virtual status_t setScalingMode(int mode);
 
     virtual int query(int what, int* value);
 
@@ -185,6 +186,9 @@ public:
     // getCurrentTransform returns the transform of the current buffer
     uint32_t getCurrentTransform() const;
 
+    // getCurrentScalingMode returns the scaling mode of the current buffer
+    uint32_t getCurrentScalingMode() const;
+
     // dump our state in a String
     void dump(String8& result) const;
     void dump(String8& result, const char* prefix, char* buffer, size_t SIZE) const;
@@ -220,6 +224,7 @@ private:
               mBufferState(BufferSlot::FREE),
               mRequestBufferCalled(false),
               mTransform(0),
+              mScalingMode(NATIVE_WINDOW_SCALING_MODE_FREEZE),
               mTimestamp(0) {
             mCrop.makeInvalid();
         }
@@ -281,6 +286,11 @@ private:
         // slot.
         uint32_t mTransform;
 
+        // mScalingMode is the current scaling mode for this buffer slot. This
+        // gets set to mNextScalingMode each time queueBuffer gets called for
+        // this slot.
+        uint32_t mScalingMode;
+
         // mTimestamp is the current timestamp for this buffer slot. This gets
         // to set by queueBuffer each time this slot is queued.
         int64_t mTimestamp;
@@ -337,12 +347,16 @@ private:
     sp<GraphicBuffer> mCurrentTextureBuf;
 
     // mCurrentCrop is the crop rectangle that applies to the current texture.
-    // It gets set to mLastQueuedCrop each time updateTexImage is called.
+    // It gets set each time updateTexImage is called.
     Rect mCurrentCrop;
 
     // mCurrentTransform is the transform identifier for the current texture. It
-    // gets set to mLastQueuedTransform each time updateTexImage is called.
+    // gets set each time updateTexImage is called.
     uint32_t mCurrentTransform;
+
+    // mCurrentScalingMode is the scaling mode for the current texture. It gets
+    // set to each time updateTexImage is called.
+    uint32_t mCurrentScalingMode;
 
     // mCurrentTransformMatrix is the transform matrix for the current texture.
     // It gets computed by computeTransformMatrix each time updateTexImage is
@@ -350,7 +364,7 @@ private:
     float mCurrentTransformMatrix[16];
 
     // mCurrentTimestamp is the timestamp for the current texture. It
-    // gets set to mLastQueuedTimestamp each time updateTexImage is called.
+    // gets set each time updateTexImage is called.
     int64_t mCurrentTimestamp;
 
     // mNextCrop is the crop rectangle that will be used for the next buffer
@@ -360,6 +374,10 @@ private:
     // mNextTransform is the transform identifier that will be used for the next
     // buffer that gets queued. It is set by calling setTransform.
     uint32_t mNextTransform;
+
+    // mNextScalingMode is the scaling mode that will be used for the next
+    // buffers that get queued. It is set by calling setScalingMode.
+    int mNextScalingMode;
 
     // mTexName is the name of the OpenGL texture to which streamed images will
     // be bound when updateTexImage is called. It is set at construction time
