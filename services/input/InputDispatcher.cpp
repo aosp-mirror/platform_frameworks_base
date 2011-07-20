@@ -215,14 +215,6 @@ InputDispatcher::InputDispatcher(const sp<InputDispatcherPolicyInterface>& polic
     mInputTargetWaitCause(INPUT_TARGET_WAIT_CAUSE_NONE) {
     mLooper = new Looper(false);
 
-    mInboundQueue.headSentinel.refCount = -1;
-    mInboundQueue.headSentinel.type = EventEntry::TYPE_SENTINEL;
-    mInboundQueue.headSentinel.eventTime = LONG_LONG_MIN;
-
-    mInboundQueue.tailSentinel.refCount = -1;
-    mInboundQueue.tailSentinel.type = EventEntry::TYPE_SENTINEL;
-    mInboundQueue.tailSentinel.eventTime = LONG_LONG_MAX;
-
     mKeyRepeatState.lastKeyEntry = NULL;
 
     policy->getDispatcherConfiguration(&mConfig);
@@ -319,7 +311,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
             }
         } else {
             // Inbound queue has at least one entry.
-            EventEntry* entry = mInboundQueue.headSentinel.next;
+            EventEntry* entry = mInboundQueue.head;
 
             // Throttle the entry if it is a move event and there are no
             // other events behind it in the queue.  Due to movement batching, additional
@@ -335,7 +327,7 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
                 int32_t deviceId = motionEntry->deviceId;
                 uint32_t source = motionEntry->source;
                 if (! isAppSwitchDue
-                        && motionEntry->next == & mInboundQueue.tailSentinel // exactly one event
+                        && !motionEntry->next // exactly one event, no successors
                         && (motionEntry->action == AMOTION_EVENT_ACTION_MOVE
                                 || motionEntry->action == AMOTION_EVENT_ACTION_HOVER_MOVE)
                         && deviceId == mThrottleState.lastDeviceId
@@ -641,13 +633,13 @@ bool InputDispatcher::runCommandsLockedInterruptible() {
         (this->*command)(commandEntry); // commands are implicitly 'LockedInterruptible'
 
         commandEntry->connection.clear();
-        mAllocator.releaseCommandEntry(commandEntry);
+        delete commandEntry;
     } while (! mCommandQueue.isEmpty());
     return true;
 }
 
 InputDispatcher::CommandEntry* InputDispatcher::postCommandLocked(Command command) {
-    CommandEntry* commandEntry = mAllocator.obtainCommandEntry(command);
+    CommandEntry* commandEntry = new CommandEntry(command);
     mCommandQueue.enqueueAtTail(commandEntry);
     return commandEntry;
 }
@@ -674,12 +666,12 @@ void InputDispatcher::releaseInboundEventLocked(EventEntry* entry) {
 #endif
         setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_FAILED);
     }
-    mAllocator.releaseEventEntry(entry);
+    entry->release();
 }
 
 void InputDispatcher::resetKeyRepeatLocked() {
     if (mKeyRepeatState.lastKeyEntry) {
-        mAllocator.releaseKeyEntry(mKeyRepeatState.lastKeyEntry);
+        mKeyRepeatState.lastKeyEntry->release();
         mKeyRepeatState.lastKeyEntry = NULL;
     }
 }
@@ -691,18 +683,18 @@ InputDispatcher::KeyEntry* InputDispatcher::synthesizeKeyRepeatLocked(nsecs_t cu
     uint32_t policyFlags = (entry->policyFlags & POLICY_FLAG_RAW_MASK)
             | POLICY_FLAG_PASS_TO_USER | POLICY_FLAG_TRUSTED;
     if (entry->refCount == 1) {
-        mAllocator.recycleKeyEntry(entry);
+        entry->recycle();
         entry->eventTime = currentTime;
         entry->policyFlags = policyFlags;
         entry->repeatCount += 1;
     } else {
-        KeyEntry* newEntry = mAllocator.obtainKeyEntry(currentTime,
+        KeyEntry* newEntry = new KeyEntry(currentTime,
                 entry->deviceId, entry->source, policyFlags,
                 entry->action, entry->flags, entry->keyCode, entry->scanCode,
                 entry->metaState, entry->repeatCount + 1, entry->downTime);
 
         mKeyRepeatState.lastKeyEntry = newEntry;
-        mAllocator.releaseKeyEntry(entry);
+        entry->release();
 
         entry = newEntry;
     }
@@ -887,7 +879,7 @@ bool InputDispatcher::dispatchMotionLocked(
             uint32_t originalSampleCount = entry->countSamples();
 #endif
             MotionSample* nextSample = splitBatchAfterSample->next;
-            MotionEntry* nextEntry = mAllocator.obtainMotionEntry(nextSample->eventTime,
+            MotionEntry* nextEntry = new MotionEntry(nextSample->eventTime,
                     entry->deviceId, entry->source, entry->policyFlags,
                     entry->action, entry->flags,
                     entry->metaState, entry->buttonState, entry->edgeFlags,
@@ -897,7 +889,7 @@ bool InputDispatcher::dispatchMotionLocked(
                 nextEntry->firstSample.next = nextSample->next;
                 nextEntry->lastSample = entry->lastSample;
             }
-            mAllocator.freeMotionSample(nextSample);
+            delete nextSample;
 
             entry->lastSample = const_cast<MotionSample*>(splitBatchAfterSample);
             entry->lastSample->next = NULL;
@@ -1992,7 +1984,7 @@ void InputDispatcher::enqueueDispatchEntryLocked(
 
     // This is a new event.
     // Enqueue a new dispatch entry onto the outbound queue for this connection.
-    DispatchEntry* dispatchEntry = mAllocator.obtainDispatchEntry(eventEntry, // increments ref
+    DispatchEntry* dispatchEntry = new DispatchEntry(eventEntry, // increments ref
             inputTargetFlags, inputTarget->xOffset, inputTarget->yOffset,
             inputTarget->scaleFactor);
     if (dispatchEntry->hasForegroundTarget()) {
@@ -2087,7 +2079,7 @@ void InputDispatcher::startDispatchCycleLocked(nsecs_t currentTime,
     LOG_ASSERT(connection->status == Connection::STATUS_NORMAL);
     LOG_ASSERT(! connection->outboundQueue.isEmpty());
 
-    DispatchEntry* dispatchEntry = connection->outboundQueue.headSentinel.next;
+    DispatchEntry* dispatchEntry = connection->outboundQueue.head;
     LOG_ASSERT(! dispatchEntry->inProgress);
 
     // Mark the dispatch entry as in progress.
@@ -2276,7 +2268,7 @@ void InputDispatcher::startNextDispatchCycleLocked(nsecs_t currentTime,
         const sp<Connection>& connection) {
     // Start the next dispatch cycle for this connection.
     while (! connection->outboundQueue.isEmpty()) {
-        DispatchEntry* dispatchEntry = connection->outboundQueue.headSentinel.next;
+        DispatchEntry* dispatchEntry = connection->outboundQueue.head;
         if (dispatchEntry->inProgress) {
              // Finish or resume current event in progress.
             if (dispatchEntry->tailMotionSample) {
@@ -2293,7 +2285,7 @@ void InputDispatcher::startNextDispatchCycleLocked(nsecs_t currentTime,
             if (dispatchEntry->hasForegroundTarget()) {
                 decrementPendingForegroundDispatchesLocked(dispatchEntry->eventEntry);
             }
-            mAllocator.releaseDispatchEntry(dispatchEntry);
+            delete dispatchEntry;
         } else {
             // If the head is not in progress, then we must have already dequeued the in
             // progress event, which means we actually aborted it.
@@ -2333,7 +2325,7 @@ void InputDispatcher::drainOutboundQueueLocked(Connection* connection) {
         if (dispatchEntry->hasForegroundTarget()) {
             decrementPendingForegroundDispatchesLocked(dispatchEntry->eventEntry);
         }
-        mAllocator.releaseDispatchEntry(dispatchEntry);
+        delete dispatchEntry;
     }
 
     deactivateConnectionLocked(connection);
@@ -2407,7 +2399,7 @@ void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
     nsecs_t currentTime = now();
 
     mTempCancelationEvents.clear();
-    connection->inputState.synthesizeCancelationEvents(currentTime, & mAllocator,
+    connection->inputState.synthesizeCancelationEvents(currentTime,
             mTempCancelationEvents, options);
 
     if (! mTempCancelationEvents.isEmpty()
@@ -2448,10 +2440,10 @@ void InputDispatcher::synthesizeCancelationEventsForConnectionLocked(
             enqueueDispatchEntryLocked(connection, cancelationEventEntry, // increments ref
                     &target, false, InputTarget::FLAG_DISPATCH_AS_IS);
 
-            mAllocator.releaseEventEntry(cancelationEventEntry);
+            cancelationEventEntry->release();
         }
 
-        if (!connection->outboundQueue.headSentinel.next->inProgress) {
+        if (!connection->outboundQueue.head->inProgress) {
             startDispatchCycleLocked(currentTime, connection);
         }
     }
@@ -2523,7 +2515,7 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
         }
     }
 
-    MotionEntry* splitMotionEntry = mAllocator.obtainMotionEntry(
+    MotionEntry* splitMotionEntry = new MotionEntry(
             originalMotionEntry->eventTime,
             originalMotionEntry->deviceId,
             originalMotionEntry->source,
@@ -2547,8 +2539,7 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
                     originalMotionSample->pointerCoords[originalPointerIndex]);
         }
 
-        mAllocator.appendMotionSample(splitMotionEntry, originalMotionSample->eventTime,
-                splitPointerCoords);
+        splitMotionEntry->appendSample(originalMotionSample->eventTime, splitPointerCoords);
     }
 
     if (originalMotionEntry->injectionState) {
@@ -2568,7 +2559,7 @@ void InputDispatcher::notifyConfigurationChanged(nsecs_t eventTime) {
     { // acquire lock
         AutoMutex _l(mLock);
 
-        ConfigurationChangedEntry* newEntry = mAllocator.obtainConfigurationChangedEntry(eventTime);
+        ConfigurationChangedEntry* newEntry = new ConfigurationChangedEntry(eventTime);
         needWake = enqueueInboundEventLocked(newEntry);
     } // release lock
 
@@ -2638,7 +2629,7 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t so
         }
 
         int32_t repeatCount = 0;
-        KeyEntry* newEntry = mAllocator.obtainKeyEntry(eventTime,
+        KeyEntry* newEntry = new KeyEntry(eventTime,
                 deviceId, source, policyFlags, action, flags, keyCode, scanCode,
                 metaState, repeatCount, downTime);
 
@@ -2718,8 +2709,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
             // Try to append a move sample to the tail of the inbound queue for this device.
             // Give up if we encounter a non-move motion event for this device since that
             // means we cannot append any new samples until a new motion event has started.
-            for (EventEntry* entry = mInboundQueue.tailSentinel.prev;
-                    entry != & mInboundQueue.headSentinel; entry = entry->prev) {
+            for (EventEntry* entry = mInboundQueue.tail; entry; entry = entry->prev) {
                 if (entry->type != EventEntry::TYPE_MOTION) {
                     // Keep looking for motion events.
                     continue;
@@ -2798,7 +2788,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                         continue;
                     }
 
-                    DispatchEntry* dispatchEntry = connection->outboundQueue.headSentinel.next;
+                    DispatchEntry* dispatchEntry = connection->outboundQueue.head;
                     if (! dispatchEntry->inProgress
                             || dispatchEntry->eventEntry->type != EventEntry::TYPE_MOTION
                             || dispatchEntry->isSplit()) {
@@ -2844,7 +2834,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
 
                     // Hurray!  This foreground target is currently dispatching a move event
                     // that we can stream onto.  Append the motion sample and resume dispatch.
-                    mAllocator.appendMotionSample(motionEntry, eventTime, pointerCoords);
+                    motionEntry->appendSample(eventTime, pointerCoords);
 #if DEBUG_BATCHING
                     LOGD("Appended motion sample onto batch for most recently dispatched "
                             "motion event for this device and source in the outbound queues.  "
@@ -2864,7 +2854,7 @@ NoBatchingOrStreaming:;
         }
 
         // Just enqueue a new motion event.
-        MotionEntry* newEntry = mAllocator.obtainMotionEntry(eventTime,
+        MotionEntry* newEntry = new MotionEntry(eventTime,
                 deviceId, source, policyFlags, action, flags, metaState, buttonState, edgeFlags,
                 xPrecision, yPrecision, downTime,
                 pointerCount, pointerProperties, pointerCoords);
@@ -2901,7 +2891,7 @@ void InputDispatcher::batchMotionLocked(MotionEntry* entry, nsecs_t eventTime,
     }
 
     // Append the sample.
-    mAllocator.appendMotionSample(entry, eventTime, pointerCoords);
+    entry->appendSample(eventTime, pointerCoords);
 #if DEBUG_BATCHING
     LOGD("Appended motion sample onto batch for %s, events were %0.3f ms apart",
             eventDescription, interval * 0.000001f);
@@ -2958,7 +2948,7 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         }
 
         mLock.lock();
-        injectedEntry = mAllocator.obtainKeyEntry(keyEvent->getEventTime(),
+        injectedEntry = new KeyEntry(keyEvent->getEventTime(),
                 keyEvent->getDeviceId(), keyEvent->getSource(),
                 policyFlags, action, flags,
                 keyEvent->getKeyCode(), keyEvent->getScanCode(), keyEvent->getMetaState(),
@@ -2983,7 +2973,7 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         mLock.lock();
         const nsecs_t* sampleEventTimes = motionEvent->getSampleEventTimes();
         const PointerCoords* samplePointerCoords = motionEvent->getSamplePointerCoords();
-        MotionEntry* motionEntry = mAllocator.obtainMotionEntry(*sampleEventTimes,
+        MotionEntry* motionEntry = new MotionEntry(*sampleEventTimes,
                 motionEvent->getDeviceId(), motionEvent->getSource(), policyFlags,
                 action, motionEvent->getFlags(),
                 motionEvent->getMetaState(), motionEvent->getButtonState(),
@@ -2994,7 +2984,7 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         for (size_t i = motionEvent->getHistorySize(); i > 0; i--) {
             sampleEventTimes += 1;
             samplePointerCoords += pointerCount;
-            mAllocator.appendMotionSample(motionEntry, *sampleEventTimes, samplePointerCoords);
+            motionEntry->appendSample(*sampleEventTimes, samplePointerCoords);
         }
         injectedEntry = motionEntry;
         break;
@@ -3005,7 +2995,7 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         return INPUT_EVENT_INJECTION_FAILED;
     }
 
-    InjectionState* injectionState = mAllocator.obtainInjectionState(injectorPid, injectorUid);
+    InjectionState* injectionState = new InjectionState(injectorPid, injectorUid);
     if (syncMode == INPUT_EVENT_INJECTION_SYNC_NONE) {
         injectionState->injectionIsAsync = true;
     }
@@ -3068,7 +3058,7 @@ int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
             }
         }
 
-        mAllocator.releaseInjectionState(injectionState);
+        injectionState->release();
     } // release lock
 
 #if DEBUG_INJECTION
@@ -3704,7 +3694,7 @@ void InputDispatcher::doInterceptKeyBeforeDispatchingLockedInterruptible(
     entry->interceptKeyResult = consumed
             ? KeyEntry::INTERCEPT_KEY_RESULT_SKIP
             : KeyEntry::INTERCEPT_KEY_RESULT_CONTINUE;
-    mAllocator.releaseKeyEntry(entry);
+    entry->release();
 }
 
 void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
@@ -3714,7 +3704,7 @@ void InputDispatcher::doDispatchCycleFinishedLockedInterruptible(
 
     bool skipNext = false;
     if (!connection->outboundQueue.isEmpty()) {
-        DispatchEntry* dispatchEntry = connection->outboundQueue.headSentinel.next;
+        DispatchEntry* dispatchEntry = connection->outboundQueue.head;
         if (dispatchEntry->inProgress) {
             if (dispatchEntry->eventEntry->type == EventEntry::TYPE_KEY) {
                 KeyEntry* keyEntry = static_cast<KeyEntry*>(dispatchEntry->eventEntry);
@@ -3796,7 +3786,7 @@ bool InputDispatcher::afterKeyEventLockedInterruptible(const sp<Connection>& con
                 return true; // skip next cycle
             }
 
-            LOG_ASSERT(connection->outboundQueue.headSentinel.next == dispatchEntry);
+            LOG_ASSERT(connection->outboundQueue.head == dispatchEntry);
 
             // Latch the fallback keycode for this key on an initial down.
             // The fallback keycode cannot change at any other point in the lifecycle.
@@ -3929,229 +3919,136 @@ void InputDispatcher::dump(String8& dump) {
 template <typename T>
 uint32_t InputDispatcher::Queue<T>::count() const {
     uint32_t result = 0;
-    for (const T* entry = headSentinel.next; entry != & tailSentinel; entry = entry->next) {
+    for (const T* entry = head; entry; entry = entry->next) {
         result += 1;
     }
     return result;
 }
 
 
-// --- InputDispatcher::Allocator ---
+// --- InputDispatcher::InjectionState ---
 
-InputDispatcher::Allocator::Allocator() {
+InputDispatcher::InjectionState::InjectionState(int32_t injectorPid, int32_t injectorUid) :
+        refCount(1),
+        injectorPid(injectorPid), injectorUid(injectorUid),
+        injectionResult(INPUT_EVENT_INJECTION_PENDING), injectionIsAsync(false),
+        pendingForegroundDispatches(0) {
 }
 
-InputDispatcher::InjectionState*
-InputDispatcher::Allocator::obtainInjectionState(int32_t injectorPid, int32_t injectorUid) {
-    InjectionState* injectionState = mInjectionStatePool.alloc();
-    injectionState->refCount = 1;
-    injectionState->injectorPid = injectorPid;
-    injectionState->injectorUid = injectorUid;
-    injectionState->injectionIsAsync = false;
-    injectionState->injectionResult = INPUT_EVENT_INJECTION_PENDING;
-    injectionState->pendingForegroundDispatches = 0;
-    return injectionState;
+InputDispatcher::InjectionState::~InjectionState() {
 }
 
-void InputDispatcher::Allocator::initializeEventEntry(EventEntry* entry, int32_t type,
-        nsecs_t eventTime, uint32_t policyFlags) {
-    entry->type = type;
-    entry->refCount = 1;
-    entry->dispatchInProgress = false;
-    entry->eventTime = eventTime;
-    entry->policyFlags = policyFlags;
-    entry->injectionState = NULL;
-}
-
-void InputDispatcher::Allocator::releaseEventEntryInjectionState(EventEntry* entry) {
-    if (entry->injectionState) {
-        releaseInjectionState(entry->injectionState);
-        entry->injectionState = NULL;
+void InputDispatcher::InjectionState::release() {
+    refCount -= 1;
+    if (refCount == 0) {
+        delete this;
+    } else {
+        LOG_ASSERT(refCount > 0);
     }
 }
 
-InputDispatcher::ConfigurationChangedEntry*
-InputDispatcher::Allocator::obtainConfigurationChangedEntry(nsecs_t eventTime) {
-    ConfigurationChangedEntry* entry = mConfigurationChangeEntryPool.alloc();
-    initializeEventEntry(entry, EventEntry::TYPE_CONFIGURATION_CHANGED, eventTime, 0);
-    return entry;
+
+// --- InputDispatcher::EventEntry ---
+
+InputDispatcher::EventEntry::EventEntry(int32_t type, nsecs_t eventTime, uint32_t policyFlags) :
+        refCount(1), type(type), eventTime(eventTime), policyFlags(policyFlags),
+        injectionState(NULL), dispatchInProgress(false) {
 }
 
-InputDispatcher::KeyEntry* InputDispatcher::Allocator::obtainKeyEntry(nsecs_t eventTime,
+InputDispatcher::EventEntry::~EventEntry() {
+    releaseInjectionState();
+}
+
+void InputDispatcher::EventEntry::release() {
+    refCount -= 1;
+    if (refCount == 0) {
+        delete this;
+    } else {
+        LOG_ASSERT(refCount > 0);
+    }
+}
+
+void InputDispatcher::EventEntry::releaseInjectionState() {
+    if (injectionState) {
+        injectionState->release();
+        injectionState = NULL;
+    }
+}
+
+
+// --- InputDispatcher::ConfigurationChangedEntry ---
+
+InputDispatcher::ConfigurationChangedEntry::ConfigurationChangedEntry(nsecs_t eventTime) :
+        EventEntry(TYPE_CONFIGURATION_CHANGED, eventTime, 0) {
+}
+
+InputDispatcher::ConfigurationChangedEntry::~ConfigurationChangedEntry() {
+}
+
+
+// --- InputDispatcher::KeyEntry ---
+
+InputDispatcher::KeyEntry::KeyEntry(nsecs_t eventTime,
         int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
         int32_t flags, int32_t keyCode, int32_t scanCode, int32_t metaState,
-        int32_t repeatCount, nsecs_t downTime) {
-    KeyEntry* entry = mKeyEntryPool.alloc();
-    initializeEventEntry(entry, EventEntry::TYPE_KEY, eventTime, policyFlags);
-
-    entry->deviceId = deviceId;
-    entry->source = source;
-    entry->action = action;
-    entry->flags = flags;
-    entry->keyCode = keyCode;
-    entry->scanCode = scanCode;
-    entry->metaState = metaState;
-    entry->repeatCount = repeatCount;
-    entry->downTime = downTime;
-    entry->syntheticRepeat = false;
-    entry->interceptKeyResult = KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN;
-    return entry;
+        int32_t repeatCount, nsecs_t downTime) :
+        EventEntry(TYPE_KEY, eventTime, policyFlags),
+        deviceId(deviceId), source(source), action(action), flags(flags),
+        keyCode(keyCode), scanCode(scanCode), metaState(metaState),
+        repeatCount(repeatCount), downTime(downTime),
+        syntheticRepeat(false), interceptKeyResult(KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN) {
 }
 
-InputDispatcher::MotionEntry* InputDispatcher::Allocator::obtainMotionEntry(nsecs_t eventTime,
-        int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action, int32_t flags,
-        int32_t metaState, int32_t buttonState,
-        int32_t edgeFlags, float xPrecision, float yPrecision,
-        nsecs_t downTime, uint32_t pointerCount,
-        const PointerProperties* pointerProperties, const PointerCoords* pointerCoords) {
-    MotionEntry* entry = mMotionEntryPool.alloc();
-    initializeEventEntry(entry, EventEntry::TYPE_MOTION, eventTime, policyFlags);
+InputDispatcher::KeyEntry::~KeyEntry() {
+}
 
-    entry->eventTime = eventTime;
-    entry->deviceId = deviceId;
-    entry->source = source;
-    entry->action = action;
-    entry->flags = flags;
-    entry->metaState = metaState;
-    entry->buttonState = buttonState;
-    entry->edgeFlags = edgeFlags;
-    entry->xPrecision = xPrecision;
-    entry->yPrecision = yPrecision;
-    entry->downTime = downTime;
-    entry->pointerCount = pointerCount;
-    entry->firstSample.eventTime = eventTime;
-    entry->firstSample.eventTimeBeforeCoalescing = eventTime;
-    entry->firstSample.next = NULL;
-    entry->lastSample = & entry->firstSample;
+void InputDispatcher::KeyEntry::recycle() {
+    releaseInjectionState();
+
+    dispatchInProgress = false;
+    syntheticRepeat = false;
+    interceptKeyResult = KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN;
+}
+
+
+// --- InputDispatcher::MotionSample ---
+
+InputDispatcher::MotionSample::MotionSample(nsecs_t eventTime,
+        const PointerCoords* pointerCoords, uint32_t pointerCount) :
+        next(NULL), eventTime(eventTime), eventTimeBeforeCoalescing(eventTime) {
     for (uint32_t i = 0; i < pointerCount; i++) {
-        entry->pointerProperties[i].copyFrom(pointerProperties[i]);
-        entry->firstSample.pointerCoords[i].copyFrom(pointerCoords[i]);
+        this->pointerCoords[i].copyFrom(pointerCoords[i]);
     }
-    return entry;
-}
-
-InputDispatcher::DispatchEntry* InputDispatcher::Allocator::obtainDispatchEntry(
-        EventEntry* eventEntry,
-        int32_t targetFlags, float xOffset, float yOffset, float scaleFactor) {
-    DispatchEntry* entry = mDispatchEntryPool.alloc();
-    entry->eventEntry = eventEntry;
-    eventEntry->refCount += 1;
-    entry->targetFlags = targetFlags;
-    entry->xOffset = xOffset;
-    entry->yOffset = yOffset;
-    entry->scaleFactor = scaleFactor;
-    entry->inProgress = false;
-    entry->headMotionSample = NULL;
-    entry->tailMotionSample = NULL;
-    return entry;
-}
-
-InputDispatcher::CommandEntry* InputDispatcher::Allocator::obtainCommandEntry(Command command) {
-    CommandEntry* entry = mCommandEntryPool.alloc();
-    entry->command = command;
-    return entry;
-}
-
-void InputDispatcher::Allocator::releaseInjectionState(InjectionState* injectionState) {
-    injectionState->refCount -= 1;
-    if (injectionState->refCount == 0) {
-        mInjectionStatePool.free(injectionState);
-    } else {
-        LOG_ASSERT(injectionState->refCount > 0);
-    }
-}
-
-void InputDispatcher::Allocator::releaseEventEntry(EventEntry* entry) {
-    switch (entry->type) {
-    case EventEntry::TYPE_CONFIGURATION_CHANGED:
-        releaseConfigurationChangedEntry(static_cast<ConfigurationChangedEntry*>(entry));
-        break;
-    case EventEntry::TYPE_KEY:
-        releaseKeyEntry(static_cast<KeyEntry*>(entry));
-        break;
-    case EventEntry::TYPE_MOTION:
-        releaseMotionEntry(static_cast<MotionEntry*>(entry));
-        break;
-    default:
-        LOG_ASSERT(false);
-        break;
-    }
-}
-
-void InputDispatcher::Allocator::releaseConfigurationChangedEntry(
-        ConfigurationChangedEntry* entry) {
-    entry->refCount -= 1;
-    if (entry->refCount == 0) {
-        releaseEventEntryInjectionState(entry);
-        mConfigurationChangeEntryPool.free(entry);
-    } else {
-        LOG_ASSERT(entry->refCount > 0);
-    }
-}
-
-void InputDispatcher::Allocator::releaseKeyEntry(KeyEntry* entry) {
-    entry->refCount -= 1;
-    if (entry->refCount == 0) {
-        releaseEventEntryInjectionState(entry);
-        mKeyEntryPool.free(entry);
-    } else {
-        LOG_ASSERT(entry->refCount > 0);
-    }
-}
-
-void InputDispatcher::Allocator::releaseMotionEntry(MotionEntry* entry) {
-    entry->refCount -= 1;
-    if (entry->refCount == 0) {
-        releaseEventEntryInjectionState(entry);
-        for (MotionSample* sample = entry->firstSample.next; sample != NULL; ) {
-            MotionSample* next = sample->next;
-            mMotionSamplePool.free(sample);
-            sample = next;
-        }
-        mMotionEntryPool.free(entry);
-    } else {
-        LOG_ASSERT(entry->refCount > 0);
-    }
-}
-
-void InputDispatcher::Allocator::freeMotionSample(MotionSample* sample) {
-    mMotionSamplePool.free(sample);
-}
-
-void InputDispatcher::Allocator::releaseDispatchEntry(DispatchEntry* entry) {
-    releaseEventEntry(entry->eventEntry);
-    mDispatchEntryPool.free(entry);
-}
-
-void InputDispatcher::Allocator::releaseCommandEntry(CommandEntry* entry) {
-    mCommandEntryPool.free(entry);
-}
-
-void InputDispatcher::Allocator::appendMotionSample(MotionEntry* motionEntry,
-        nsecs_t eventTime, const PointerCoords* pointerCoords) {
-    MotionSample* sample = mMotionSamplePool.alloc();
-    sample->eventTime = eventTime;
-    sample->eventTimeBeforeCoalescing = eventTime;
-    uint32_t pointerCount = motionEntry->pointerCount;
-    for (uint32_t i = 0; i < pointerCount; i++) {
-        sample->pointerCoords[i].copyFrom(pointerCoords[i]);
-    }
-
-    sample->next = NULL;
-    motionEntry->lastSample->next = sample;
-    motionEntry->lastSample = sample;
-}
-
-void InputDispatcher::Allocator::recycleKeyEntry(KeyEntry* keyEntry) {
-    releaseEventEntryInjectionState(keyEntry);
-
-    keyEntry->dispatchInProgress = false;
-    keyEntry->syntheticRepeat = false;
-    keyEntry->interceptKeyResult = KeyEntry::INTERCEPT_KEY_RESULT_UNKNOWN;
 }
 
 
 // --- InputDispatcher::MotionEntry ---
+
+InputDispatcher::MotionEntry::MotionEntry(nsecs_t eventTime,
+        int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action, int32_t flags,
+        int32_t metaState, int32_t buttonState,
+        int32_t edgeFlags, float xPrecision, float yPrecision,
+        nsecs_t downTime, uint32_t pointerCount,
+        const PointerProperties* pointerProperties, const PointerCoords* pointerCoords) :
+        EventEntry(TYPE_MOTION, eventTime, policyFlags),
+        deviceId(deviceId), source(source), action(action), flags(flags),
+        metaState(metaState), buttonState(buttonState), edgeFlags(edgeFlags),
+        xPrecision(xPrecision), yPrecision(yPrecision),
+        downTime(downTime), pointerCount(pointerCount),
+        firstSample(eventTime, pointerCoords, pointerCount),
+        lastSample(&firstSample) {
+    for (uint32_t i = 0; i < pointerCount; i++) {
+        this->pointerProperties[i].copyFrom(pointerProperties[i]);
+    }
+}
+
+InputDispatcher::MotionEntry::~MotionEntry() {
+    for (MotionSample* sample = firstSample.next; sample != NULL; ) {
+        MotionSample* next = sample->next;
+        delete sample;
+        sample = next;
+    }
+}
 
 uint32_t InputDispatcher::MotionEntry::countSamples() const {
     uint32_t count = 1;
@@ -4174,6 +4071,31 @@ bool InputDispatcher::MotionEntry::canAppendSamples(int32_t action, uint32_t poi
         }
     }
     return true;
+}
+
+void InputDispatcher::MotionEntry::appendSample(
+        nsecs_t eventTime, const PointerCoords* pointerCoords) {
+    MotionSample* sample = new MotionSample(eventTime, pointerCoords, pointerCount);
+
+    lastSample->next = sample;
+    lastSample = sample;
+}
+
+
+// --- InputDispatcher::DispatchEntry ---
+
+InputDispatcher::DispatchEntry::DispatchEntry(EventEntry* eventEntry,
+        int32_t targetFlags, float xOffset, float yOffset, float scaleFactor) :
+        eventEntry(eventEntry), targetFlags(targetFlags),
+        xOffset(xOffset), yOffset(yOffset), scaleFactor(scaleFactor),
+        inProgress(false),
+        resolvedAction(0), resolvedFlags(0),
+        headMotionSample(NULL), tailMotionSample(NULL) {
+    eventEntry->refCount += 1;
+}
+
+InputDispatcher::DispatchEntry::~DispatchEntry() {
+    eventEntry->release();
 }
 
 
@@ -4380,12 +4302,11 @@ void InputDispatcher::InputState::MotionMemento::setPointers(const MotionEntry* 
 }
 
 void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTime,
-        Allocator* allocator, Vector<EventEntry*>& outEvents,
-        const CancelationOptions& options) {
+        Vector<EventEntry*>& outEvents, const CancelationOptions& options) {
     for (size_t i = 0; i < mKeyMementos.size(); i++) {
         const KeyMemento& memento = mKeyMementos.itemAt(i);
         if (shouldCancelKey(memento, options)) {
-            outEvents.push(allocator->obtainKeyEntry(currentTime,
+            outEvents.push(new KeyEntry(currentTime,
                     memento.deviceId, memento.source, 0,
                     AKEY_EVENT_ACTION_UP, memento.flags | AKEY_EVENT_FLAG_CANCELED,
                     memento.keyCode, memento.scanCode, 0, 0, memento.downTime));
@@ -4395,7 +4316,7 @@ void InputDispatcher::InputState::synthesizeCancelationEvents(nsecs_t currentTim
     for (size_t i = 0; i < mMotionMementos.size(); i++) {
         const MotionMemento& memento = mMotionMementos.itemAt(i);
         if (shouldCancelMotion(memento, options)) {
-            outEvents.push(allocator->obtainMotionEntry(currentTime,
+            outEvents.push(new MotionEntry(currentTime,
                     memento.deviceId, memento.source, 0,
                     memento.hovering
                             ? AMOTION_EVENT_ACTION_HOVER_EXIT
@@ -4516,8 +4437,8 @@ const char* InputDispatcher::Connection::getStatusLabel() const {
 
 InputDispatcher::DispatchEntry* InputDispatcher::Connection::findQueuedDispatchEntryForEvent(
         const EventEntry* eventEntry) const {
-    for (DispatchEntry* dispatchEntry = outboundQueue.tailSentinel.prev;
-            dispatchEntry != & outboundQueue.headSentinel; dispatchEntry = dispatchEntry->prev) {
+    for (DispatchEntry* dispatchEntry = outboundQueue.tail; dispatchEntry;
+            dispatchEntry = dispatchEntry->prev) {
         if (dispatchEntry->eventEntry == eventEntry) {
             return dispatchEntry;
         }
@@ -4528,8 +4449,8 @@ InputDispatcher::DispatchEntry* InputDispatcher::Connection::findQueuedDispatchE
 
 // --- InputDispatcher::CommandEntry ---
 
-InputDispatcher::CommandEntry::CommandEntry() :
-    keyEntry(NULL) {
+InputDispatcher::CommandEntry::CommandEntry(Command command) :
+    command(command), eventTime(0), keyEntry(NULL), userActivityEventType(0), handled(false) {
 }
 
 InputDispatcher::CommandEntry::~CommandEntry() {

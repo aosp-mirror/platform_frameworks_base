@@ -26,7 +26,6 @@
 #include <utils/RefBase.h>
 #include <utils/String8.h>
 #include <utils/Looper.h>
-#include <utils/Pool.h>
 #include <utils/BitSet.h>
 
 #include <stddef.h>
@@ -434,11 +433,16 @@ private:
         int32_t injectionResult;  // initially INPUT_EVENT_INJECTION_PENDING
         bool injectionIsAsync; // set to true if injection is not waiting for the result
         int32_t pendingForegroundDispatches; // the number of foreground dispatches in progress
+
+        InjectionState(int32_t injectorPid, int32_t injectorUid);
+        void release();
+
+    private:
+        ~InjectionState();
     };
 
     struct EventEntry : Link<EventEntry> {
         enum {
-            TYPE_SENTINEL,
             TYPE_CONFIGURATION_CHANGED,
             TYPE_KEY,
             TYPE_MOTION
@@ -453,9 +457,20 @@ private:
         bool dispatchInProgress; // initially false, set to true while dispatching
 
         inline bool isInjected() const { return injectionState != NULL; }
+
+        void release();
+
+    protected:
+        EventEntry(int32_t type, nsecs_t eventTime, uint32_t policyFlags);
+        virtual ~EventEntry();
+        void releaseInjectionState();
     };
 
     struct ConfigurationChangedEntry : EventEntry {
+        ConfigurationChangedEntry(nsecs_t eventTime);
+
+    protected:
+        virtual ~ConfigurationChangedEntry();
     };
 
     struct KeyEntry : EventEntry {
@@ -477,6 +492,15 @@ private:
             INTERCEPT_KEY_RESULT_CONTINUE,
         };
         InterceptKeyResult interceptKeyResult; // set based on the interception result
+
+        KeyEntry(nsecs_t eventTime,
+                int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
+                int32_t flags, int32_t keyCode, int32_t scanCode, int32_t metaState,
+                int32_t repeatCount, nsecs_t downTime);
+        void recycle();
+
+    protected:
+        virtual ~KeyEntry();
     };
 
     struct MotionSample {
@@ -485,6 +509,9 @@ private:
         nsecs_t eventTime; // may be updated during coalescing
         nsecs_t eventTimeBeforeCoalescing; // not updated during coalescing
         PointerCoords pointerCoords[MAX_POINTERS];
+
+        MotionSample(nsecs_t eventTime, const PointerCoords* pointerCoords,
+                uint32_t pointerCount);
     };
 
     struct MotionEntry : EventEntry {
@@ -505,11 +532,23 @@ private:
         MotionSample firstSample;
         MotionSample* lastSample;
 
+        MotionEntry(nsecs_t eventTime,
+                int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
+                int32_t flags, int32_t metaState, int32_t buttonState, int32_t edgeFlags,
+                float xPrecision, float yPrecision,
+                nsecs_t downTime, uint32_t pointerCount,
+                const PointerProperties* pointerProperties, const PointerCoords* pointerCoords);
+
         uint32_t countSamples() const;
 
         // Checks whether we can append samples, assuming the device id and source are the same.
         bool canAppendSamples(int32_t action, uint32_t pointerCount,
                 const PointerProperties* pointerProperties) const;
+
+        void appendSample(nsecs_t eventTime, const PointerCoords* pointerCoords);
+
+    protected:
+        virtual ~MotionEntry();
     };
 
     // Tracks the progress of dispatching a particular event to a particular connection.
@@ -539,6 +578,10 @@ private:
         //   headMotionSample will be initialized to tailMotionSample and tailMotionSample
         //   will be set to NULL.
         MotionSample* tailMotionSample;
+
+        DispatchEntry(EventEntry* eventEntry,
+                int32_t targetFlags, float xOffset, float yOffset, float scaleFactor);
+        ~DispatchEntry();
 
         inline bool hasForegroundTarget() const {
             return targetFlags & InputTarget::FLAG_FOREGROUND;
@@ -570,7 +613,7 @@ private:
 
     class Connection;
     struct CommandEntry : Link<CommandEntry> {
-        CommandEntry();
+        CommandEntry(Command command);
         ~CommandEntry();
 
         Command command;
@@ -588,97 +631,63 @@ private:
     // Generic queue implementation.
     template <typename T>
     struct Queue {
-        T headSentinel;
-        T tailSentinel;
+        T* head;
+        T* tail;
 
-        inline Queue() {
-            headSentinel.prev = NULL;
-            headSentinel.next = & tailSentinel;
-            tailSentinel.prev = & headSentinel;
-            tailSentinel.next = NULL;
+        inline Queue() : head(NULL), tail(NULL) {
         }
 
         inline bool isEmpty() const {
-            return headSentinel.next == & tailSentinel;
+            return !head;
         }
 
         inline void enqueueAtTail(T* entry) {
-            T* last = tailSentinel.prev;
-            last->next = entry;
-            entry->prev = last;
-            entry->next = & tailSentinel;
-            tailSentinel.prev = entry;
+            entry->prev = tail;
+            if (tail) {
+                tail->next = entry;
+            } else {
+                head = entry;
+            }
+            entry->next = NULL;
+            tail = entry;
         }
 
         inline void enqueueAtHead(T* entry) {
-            T* first = headSentinel.next;
-            headSentinel.next = entry;
-            entry->prev = & headSentinel;
-            entry->next = first;
-            first->prev = entry;
+            entry->next = head;
+            if (head) {
+                head->prev = entry;
+            } else {
+                tail = entry;
+            }
+            entry->prev = NULL;
+            head = entry;
         }
 
         inline void dequeue(T* entry) {
-            entry->prev->next = entry->next;
-            entry->next->prev = entry->prev;
+            if (entry->prev) {
+                entry->prev->next = entry->next;
+            } else {
+                head = entry->next;
+            }
+            if (entry->next) {
+                entry->next->prev = entry->prev;
+            } else {
+                tail = entry->prev;
+            }
         }
 
         inline T* dequeueAtHead() {
-            T* first = headSentinel.next;
-            dequeue(first);
-            return first;
+            T* entry = head;
+            head = entry->next;
+            if (head) {
+                head->prev = NULL;
+            } else {
+                tail = NULL;
+            }
+            return entry;
         }
 
         uint32_t count() const;
-    };
-
-    /* Allocates queue entries and performs reference counting as needed. */
-    class Allocator {
-    public:
-        Allocator();
-
-        InjectionState* obtainInjectionState(int32_t injectorPid, int32_t injectorUid);
-        ConfigurationChangedEntry* obtainConfigurationChangedEntry(nsecs_t eventTime);
-        KeyEntry* obtainKeyEntry(nsecs_t eventTime,
-                int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
-                int32_t flags, int32_t keyCode, int32_t scanCode, int32_t metaState,
-                int32_t repeatCount, nsecs_t downTime);
-        MotionEntry* obtainMotionEntry(nsecs_t eventTime,
-                int32_t deviceId, uint32_t source, uint32_t policyFlags, int32_t action,
-                int32_t flags, int32_t metaState, int32_t buttonState, int32_t edgeFlags,
-                float xPrecision, float yPrecision,
-                nsecs_t downTime, uint32_t pointerCount,
-                const PointerProperties* pointerProperties, const PointerCoords* pointerCoords);
-        DispatchEntry* obtainDispatchEntry(EventEntry* eventEntry,
-                int32_t targetFlags, float xOffset, float yOffset, float scaleFactor);
-        CommandEntry* obtainCommandEntry(Command command);
-
-        void releaseInjectionState(InjectionState* injectionState);
-        void releaseEventEntry(EventEntry* entry);
-        void releaseConfigurationChangedEntry(ConfigurationChangedEntry* entry);
-        void releaseKeyEntry(KeyEntry* entry);
-        void releaseMotionEntry(MotionEntry* entry);
-        void freeMotionSample(MotionSample* sample);
-        void releaseDispatchEntry(DispatchEntry* entry);
-        void releaseCommandEntry(CommandEntry* entry);
-
-        void recycleKeyEntry(KeyEntry* entry);
-
-        void appendMotionSample(MotionEntry* motionEntry,
-                nsecs_t eventTime, const PointerCoords* pointerCoords);
-
-    private:
-        Pool<InjectionState> mInjectionStatePool;
-        Pool<ConfigurationChangedEntry> mConfigurationChangeEntryPool;
-        Pool<KeyEntry> mKeyEntryPool;
-        Pool<MotionEntry> mMotionEntryPool;
-        Pool<MotionSample> mMotionSamplePool;
-        Pool<DispatchEntry> mDispatchEntryPool;
-        Pool<CommandEntry> mCommandEntryPool;
-
-        void initializeEventEntry(EventEntry* entry, int32_t type, nsecs_t eventTime,
-                uint32_t policyFlags);
-        void releaseEventEntryInjectionState(EventEntry* entry);
     };
 
     /* Specifies which events are to be canceled and why. */
@@ -728,7 +737,7 @@ private:
         bool trackMotion(const MotionEntry* entry, int32_t action, int32_t flags);
 
         // Synthesizes cancelation events for the current state and resets the tracked state.
-        void synthesizeCancelationEvents(nsecs_t currentTime, Allocator* allocator,
+        void synthesizeCancelationEvents(nsecs_t currentTime,
                 Vector<EventEntry*>& outEvents, const CancelationOptions& options);
 
         // Clears the current state.
@@ -856,7 +865,6 @@ private:
 
     Mutex mLock;
 
-    Allocator mAllocator;
     sp<Looper> mLooper;
 
     EventEntry* mPendingEvent;
