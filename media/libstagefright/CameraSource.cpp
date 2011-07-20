@@ -179,9 +179,6 @@ status_t CameraSource::isCameraAvailable(
     if (camera == 0) {
         mCamera = Camera::connect(cameraId);
         if (mCamera == 0) return -EBUSY;
-        // If proxy is not passed in by applications, still use the proxy of
-        // our own Camera to simplify the code.
-        mCameraRecordingProxy = mCamera->getRecordingProxy();
         mCameraFlags &= ~FLAGS_HOT_CAMERA;
     } else {
         // We get the proxy from Camera, not ICamera. We need to get the proxy
@@ -192,12 +189,12 @@ status_t CameraSource::isCameraAvailable(
         if (mCamera == 0) return -EBUSY;
         mCameraRecordingProxy = proxy;
         mCameraFlags |= FLAGS_HOT_CAMERA;
+        mDeathNotifier = new DeathNotifier();
+        // isBinderAlive needs linkToDeath to work.
+        mCameraRecordingProxy->asBinder()->linkToDeath(mDeathNotifier);
     }
 
     mCamera->lock();
-    mDeathNotifier = new DeathNotifier();
-    // isBinderAlive needs linkToDeath to work.
-    mCameraRecordingProxy->asBinder()->linkToDeath(mDeathNotifier);
 
     return OK;
 }
@@ -292,7 +289,7 @@ status_t CameraSource::configureCamera(
         CameraParameters* params,
         int32_t width, int32_t height,
         int32_t frameRate) {
-
+    LOGV("configureCamera");
     Vector<Size> sizes;
     bool isSetVideoSizeSupportedByCamera = true;
     getSupportedVideoSizes(*params, &isSetVideoSizeSupportedByCamera, sizes);
@@ -368,6 +365,7 @@ status_t CameraSource::checkVideoSize(
         const CameraParameters& params,
         int32_t width, int32_t height) {
 
+    LOGV("checkVideoSize");
     // The actual video size is the same as the preview size
     // if the camera hal does not support separate video and
     // preview output. In this case, we retrieve the video
@@ -419,6 +417,7 @@ status_t CameraSource::checkFrameRate(
         const CameraParameters& params,
         int32_t frameRate) {
 
+    LOGV("checkFrameRate");
     int32_t frameRateActual = params.getPreviewFrameRate();
     if (frameRateActual < 0) {
         LOGE("Failed to retrieve preview frame rate (%d)", frameRateActual);
@@ -464,6 +463,7 @@ status_t CameraSource::init(
         int32_t frameRate,
         bool storeMetaDataInVideoBuffers) {
 
+    LOGV("init");
     status_t err = OK;
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
     err = initWithCameraAccess(camera, proxy, cameraId,
@@ -480,6 +480,7 @@ status_t CameraSource::initWithCameraAccess(
         Size videoSize,
         int32_t frameRate,
         bool storeMetaDataInVideoBuffers) {
+    LOGV("initWithCameraAccess");
     status_t err = OK;
 
     if ((err = isCameraAvailable(camera, proxy, cameraId)) != OK) {
@@ -552,17 +553,25 @@ CameraSource::~CameraSource() {
 }
 
 void CameraSource::startCameraRecording() {
+    LOGV("startCameraRecording");
     // Reset the identity to the current thread because media server owns the
     // camera and recording is started by the applications. The applications
     // will connect to the camera in ICameraRecordingProxy::startRecording.
     int64_t token = IPCThreadState::self()->clearCallingIdentity();
-    mCamera->unlock();
-    mCamera.clear();
+    if (mCameraFlags & FLAGS_HOT_CAMERA) {
+        mCamera->unlock();
+        mCamera.clear();
+        CHECK_EQ(OK, mCameraRecordingProxy->startRecording(new ProxyListener(this)));
+    } else {
+        mCamera->setListener(new CameraSourceListener(this));
+        mCamera->startRecording();
+        CHECK(mCamera->recordingEnabled());
+    }
     IPCThreadState::self()->restoreCallingIdentity(token);
-    CHECK_EQ(OK, mCameraRecordingProxy->startRecording(new ProxyListener(this)));
 }
 
 status_t CameraSource::start(MetaData *meta) {
+    LOGV("start");
     CHECK(!mStarted);
     if (mInitCheck != OK) {
         LOGE("CameraSource is not initialized yet");
@@ -588,7 +597,13 @@ status_t CameraSource::start(MetaData *meta) {
 }
 
 void CameraSource::stopCameraRecording() {
-    mCameraRecordingProxy->stopRecording();
+    LOGV("stopCameraRecording");
+    if (mCameraFlags & FLAGS_HOT_CAMERA) {
+        mCameraRecordingProxy->stopRecording();
+    } else {
+        mCamera->setListener(NULL);
+        mCamera->stopRecording();
+    }
 }
 
 void CameraSource::releaseCamera() {
@@ -599,11 +614,10 @@ void CameraSource::releaseCamera() {
             LOGV("Camera was cold when we started, stopping preview");
             mCamera->stopPreview();
             mCamera->disconnect();
-        } else {
-            // Unlock the camera so the application can lock it back.
-            mCamera->unlock();
         }
+        mCamera->unlock();
         mCamera.clear();
+        mCamera = 0;
         IPCThreadState::self()->restoreCallingIdentity(token);
     }
     if (mCameraRecordingProxy != 0) {
@@ -646,8 +660,13 @@ status_t CameraSource::stop() {
 }
 
 void CameraSource::releaseRecordingFrame(const sp<IMemory>& frame) {
+    LOGV("releaseRecordingFrame");
     if (mCameraRecordingProxy != NULL) {
         mCameraRecordingProxy->releaseRecordingFrame(frame);
+    } else {
+        int64_t token = IPCThreadState::self()->clearCallingIdentity();
+        mCamera->releaseRecordingFrame(frame);
+        IPCThreadState::self()->restoreCallingIdentity(token);
     }
 }
 
@@ -707,7 +726,8 @@ status_t CameraSource::read(
         while (mStarted && mFramesReceived.empty()) {
             if (NO_ERROR !=
                 mFrameAvailableCondition.waitRelative(mLock, 1000000000LL)) {
-                if (!mCameraRecordingProxy->asBinder()->isBinderAlive()) {
+                if (mCameraRecordingProxy != 0 &&
+                    !mCameraRecordingProxy->asBinder()->isBinderAlive()) {
                     LOGW("camera recording proxy is gone");
                     return ERROR_END_OF_STREAM;
                 }
