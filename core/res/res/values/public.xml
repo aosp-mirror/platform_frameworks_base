@@ -1719,8 +1719,6 @@
   <public type="attr" name="textEditSuggestionsTopWindowLayout" />
   <public type="attr" name="textEditSuggestionItemLayout" />
 
-  <public type="attr" name="layoutDirection" />
-
   <public type="attr" name="suggestionsEnabled" />
 
   <public type="attr" name="rowCount" />
@@ -1765,14 +1763,7 @@
   <public type="attr" name="listPreferredItemHeightLarge" />
   <public type="attr" name="listPreferredItemHeightSmall" />
 
-  <public type="attr" name="paddingStart"/>
-  <public type="attr" name="paddingEnd"/>
-  <public type="attr" name="layout_marginStart"/>
-  <public type="attr" name="layout_marginEnd"/>
-
   <public type="attr" name="actionBarSplitStyle" />
-
-  <public type="attr" name="textDirection"/>
 
   <public type="attr" name="actionProviderClass" />
 

@@ -1,0 +1,9 @@
+  <public type="attr" name="layoutDirection" />
+
+  <public type="attr" name="layout_marginStart"/>
+  <public type="attr" name="layout_marginEnd"/>
+
+  <public type="attr" name="paddingStart"/>
+  <public type="attr" name="paddingEnd"/>
+
+  <public type="attr" name="textDirection"/>

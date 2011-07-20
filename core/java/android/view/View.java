@@ -607,8 +607,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @attr ref android.R.styleable#View_paddingLeft
  * @attr ref android.R.styleable#View_paddingRight
  * @attr ref android.R.styleable#View_paddingTop
- * @attr ref android.R.styleable#View_paddingStart
- * @attr ref android.R.styleable#View_paddingEnd
  * @attr ref android.R.styleable#View_saveEnabled
  * @attr ref android.R.styleable#View_rotation
  * @attr ref android.R.styleable#View_rotationX
