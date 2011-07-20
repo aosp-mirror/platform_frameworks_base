@@ -363,6 +363,8 @@ public interface IActivityManager extends IInterface {
 
     public boolean isIntentSenderTargetedToPackage(IIntentSender sender) throws RemoteException;
 
+    public void updatePersistentConfiguration(Configuration values) throws RemoteException;
+    
     /*
      * Private non-Binder interfaces
      */
@@ -590,4 +592,5 @@ public interface IActivityManager extends IInterface {
     int REGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+132;
     int UNREGISTER_PROCESS_OBSERVER_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+133;
     int IS_INTENT_SENDER_TARGETED_TO_PACKAGE_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+134;
+    int UPDATE_PERSISTENT_CONFIGURATION_TRANSACTION = IBinder.FIRST_CALL_TRANSACTION+135;
 }

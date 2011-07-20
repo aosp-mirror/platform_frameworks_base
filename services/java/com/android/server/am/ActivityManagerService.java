@@ -2439,7 +2439,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     r.mayFreezeScreenLocked(r.app) ? r : null);
             if (config != null) {
                 r.frozenBeforeDestroy = true;
-                if (!updateConfigurationLocked(config, r)) {
+                if (!updateConfigurationLocked(config, r, false)) {
                     mMainStack.resumeTopActivityLocked(null);
                 }
             }
@@ -12398,6 +12398,22 @@ public final class ActivityManagerService extends ActivityManagerNative
         return ci;
     }
 
+    public void updatePersistentConfiguration(Configuration values) {
+        enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
+                "updateConfiguration()");
+        enforceCallingPermission(android.Manifest.permission.WRITE_SETTINGS,
+                "updateConfiguration()");
+        if (values == null) {
+            throw new NullPointerException("Configuration must not be null");
+        }
+
+        synchronized(this) {
+            final long origId = Binder.clearCallingIdentity();
+            updateConfigurationLocked(values, null, true);
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     public void updateConfiguration(Configuration values) {
         enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,
                 "updateConfiguration()");
@@ -12409,7 +12425,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             
             final long origId = Binder.clearCallingIdentity();
-            updateConfigurationLocked(values, null);
+            if (values != null) {
+                Settings.System.clearConfiguration(values);
+            }
+            updateConfigurationLocked(values, null, false);
             Binder.restoreCallingIdentity(origId);
         }
     }
@@ -12420,9 +12439,10 @@ public final class ActivityManagerService extends ActivityManagerNative
      * configuration.  Returns true if the activity has been left running, or
      * false if <var>starting</var> is being destroyed to match the new
      * configuration.
+     * @param persistent TODO
      */
     public boolean updateConfigurationLocked(Configuration values,
-            ActivityRecord starting) {
+            ActivityRecord starting, boolean persistent) {
         int changes = 0;
         
         boolean kept = true;
@@ -12465,7 +12485,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // code is executed.
                 mSystemThread.applyConfigurationToResources(newConfig);
 
-                if (Settings.System.hasInterestingConfigurationChanges(changes)) {
+                if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
                     Message msg = mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
                     msg.obj = new Configuration(mConfiguration);
                     mHandler.sendMessage(msg);
