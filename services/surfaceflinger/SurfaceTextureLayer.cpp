@@ -52,6 +52,20 @@ status_t SurfaceTextureLayer::setBufferCount(int bufferCount) {
     return res;
 }
 
+status_t SurfaceTextureLayer::queueBuffer(int buf, int64_t timestamp,
+        uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
+
+    status_t res = SurfaceTexture::queueBuffer(buf, timestamp,
+            outWidth, outHeight, outTransform);
+
+    sp<Layer> layer(mLayer.promote());
+    if (layer != NULL) {
+        *outTransform = layer->getOrientation();
+    }
+
+    return res;
+}
+
 status_t SurfaceTextureLayer::dequeueBuffer(int *buf,
         uint32_t w, uint32_t h, uint32_t format, uint32_t usage) {
 

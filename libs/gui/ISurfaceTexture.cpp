@@ -93,12 +93,16 @@ public:
         return result;
     }
 
-    virtual status_t queueBuffer(int buf, int64_t timestamp) {
+    virtual status_t queueBuffer(int buf, int64_t timestamp,
+            uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(buf);
         data.writeInt64(timestamp);
         remote()->transact(QUEUE_BUFFER, data, &reply);
+        *outWidth = reply.readInt32();
+        *outHeight = reply.readInt32();
+        *outTransform = reply.readInt32();
         status_t result = reply.readInt32();
         return result;
     }
@@ -226,7 +230,12 @@ status_t BnSurfaceTexture::onTransact(
             CHECK_INTERFACE(ISurfaceTexture, data, reply);
             int buf = data.readInt32();
             int64_t timestamp = data.readInt64();
-            status_t result = queueBuffer(buf, timestamp);
+            uint32_t outWidth, outHeight, outTransform;
+            status_t result = queueBuffer(buf, timestamp,
+                    &outWidth, &outHeight, &outTransform);
+            reply->writeInt32(outWidth);
+            reply->writeInt32(outHeight);
+            reply->writeInt32(outTransform);
             reply->writeInt32(result);
             return NO_ERROR;
         } break;
