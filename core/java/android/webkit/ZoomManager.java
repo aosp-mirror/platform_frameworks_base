@@ -794,6 +794,8 @@ class ZoomManager {
             mInitialZoomOverview = false;
             dismissZoomPicker();
             mFocusMovementQueue.clear();
+            mFocusX = detector.getFocusX();
+            mFocusY = detector.getFocusY();
             mWebView.mViewManager.startZoom();
             mWebView.onPinchToZoomAnimationStart();
             mAccumulatedSpan = 0;
