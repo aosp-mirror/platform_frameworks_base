@@ -1504,3 +1504,25 @@ bail:
     }
     return retVal;
 }
+
+/*
+ * Do PNG Crunching
+ * PRECONDITIONS
+ *  -S flag points to a source directory containing drawable* folders
+ *  -C flag points to destination directory. The folder structure in the
+ *     source directory will be mirrored to the destination (cache) directory
+ *
+ * POSTCONDITIONS
+ *  Destination directory will be updated to match the PNG files in
+ *  the source directory. 
+ */
+int doCrunch(Bundle* bundle)
+{
+    fprintf(stdout, "Crunching PNG Files in ");
+    fprintf(stdout, "source dir: %s\n", bundle->getResourceSourceDirs()[0]);
+    fprintf(stdout, "To destination dir: %s\n", bundle->getCrunchedOutputDir());
+
+    updatePreProcessedCache(bundle);
+
+    return NO_ERROR;
+}

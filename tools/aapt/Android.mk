@@ -13,6 +13,8 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := \
 	AaptAssets.cpp \
 	Command.cpp \
+	CrunchCache.cpp \
+	FileFinder.cpp \
 	Main.cpp \
 	Package.cpp \
 	StringPool.cpp \
