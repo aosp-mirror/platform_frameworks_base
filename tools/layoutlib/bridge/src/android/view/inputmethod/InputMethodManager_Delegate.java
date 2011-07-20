@@ -19,6 +19,7 @@ package android.view.inputmethod;
 import com.android.layoutlib.bridge.android.BridgeIInputMethodManager;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.content.Context;
 import android.os.Looper;
 
 
@@ -44,6 +45,18 @@ public class InputMethodManager_Delegate {
                     mainLooper);
         }
         return InputMethodManager.mInstance;
+    }
 
+    @LayoutlibDelegate
+    /*package*/ static InputMethodManager getInstance(Context context) {
+        synchronized (InputMethodManager.mInstanceSync) {
+            if (InputMethodManager.mInstance != null) {
+                return InputMethodManager.mInstance;
+            }
+
+            InputMethodManager.mInstance = new InputMethodManager(new BridgeIInputMethodManager(),
+                    Looper.myLooper());
+        }
+        return InputMethodManager.mInstance;
     }
 }

@@ -1093,33 +1093,6 @@ public final class Canvas_Delegate {
     }
 
     @LayoutlibDelegate
-    /*package*/ static void native_drawTextWithGlyphs(int nativeCanvas, char[] text,
-            int index, int count, float x,
-            float y, int flags, int paint) {
-        native_drawText(nativeCanvas, text, index, count, x, y, flags, paint);
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void native_drawTextWithGlyphs(int nativeCanvas, String text,
-            int start, int end, float x,
-            float y, int flags, int paint) {
-        int count = end - start;
-        char[] buffer = TemporaryBuffer.obtain(count);
-        TextUtils.getChars(text, start, end, buffer, 0);
-
-        native_drawText(nativeCanvas, text, 0, count, x, y, flags, paint);
-    }
-
-    @LayoutlibDelegate
-    /*package*/ static void native_drawGlyphs(int nativeCanvas, char[] glyphs,
-            int index, int count, float x,
-            float y, int flags, int paint) {
-        // FIXME
-        Bridge.getLog().fidelityWarning(LayoutLog.TAG_UNSUPPORTED,
-                "Canvas.drawGlyphs is not supported.", null, null /*data*/);
-    }
-
-    @LayoutlibDelegate
     /*package*/ static void native_drawPosText(int nativeCanvas,
                                                   char[] text, int index,
                                                   int count, float[] pos,

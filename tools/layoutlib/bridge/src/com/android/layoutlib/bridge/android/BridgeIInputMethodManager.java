@@ -188,4 +188,10 @@ public class BridgeIInputMethodManager implements IInputMethodManager {
         return null;
     }
 
+    public boolean setAdditionalInputMethodSubtypes(IBinder arg0, InputMethodSubtype[] arg1)
+            throws RemoteException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }
