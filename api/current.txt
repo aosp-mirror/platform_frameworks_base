@@ -82,6 +82,8 @@ package android {
     field public static final java.lang.String READ_SMS = "android.permission.READ_SMS";
     field public static final java.lang.String READ_SYNC_SETTINGS = "android.permission.READ_SYNC_SETTINGS";
     field public static final java.lang.String READ_SYNC_STATS = "android.permission.READ_SYNC_STATS";
+    field public static final java.lang.String READ_WRITE_ALL_VOICEMAIL = "com.android.voicemail.permission.READ_WRITE_ALL_VOICEMAIL";
+    field public static final java.lang.String READ_WRITE_OWN_VOICEMAIL = "com.android.voicemail.permission.READ_WRITE_OWN_VOICEMAIL";
     field public static final java.lang.String REBOOT = "android.permission.REBOOT";
     field public static final java.lang.String RECEIVE_BOOT_COMPLETED = "android.permission.RECEIVE_BOOT_COMPLETED";
     field public static final java.lang.String RECEIVE_MMS = "android.permission.RECEIVE_MMS";
@@ -16921,6 +16923,49 @@ package android.provider {
     field public static final int LOCALE_TYPE_CURRENT = 1; // 0x1
     field public static final java.lang.String WORD = "word";
     field public static final java.lang.String _ID = "_id";
+  }
+
+  public class VoicemailContract {
+    field public static final java.lang.String ACTION_NEW_VOICEMAIL = "android.intent.action.NEW_VOICEMAIL";
+    field public static final java.lang.String AUTHORITY = "com.android.voicemail";
+    field public static final java.lang.String EXTRA_SELF_CHANGE = "com.android.voicemail.extra.SELF_CHANGE";
+    field public static final java.lang.String PARAM_KEY_SOURCE_PACKAGE = "source_package";
+  }
+
+  public static final class VoicemailContract.Status implements android.provider.BaseColumns {
+    method public static android.net.Uri buildSourceUri(java.lang.String);
+    field public static final java.lang.String CONFIGURATION_STATE = "configuration_state";
+    field public static final int CONFIGURATION_STATE_CAN_BE_CONFIGURED = 2; // 0x2
+    field public static final int CONFIGURATION_STATE_NOT_CONFIGURED = 1; // 0x1
+    field public static final int CONFIGURATION_STATE_OK = 0; // 0x0
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DATA_CHANNEL_STATE = "data_channel_state";
+    field public static final int DATA_CHANNEL_STATE_NO_CONNECTION = 1; // 0x1
+    field public static final int DATA_CHANNEL_STATE_OK = 0; // 0x0
+    field public static final java.lang.String DIR_TYPE = "vnd.android.cursor.dir/voicemail.source.status";
+    field public static final java.lang.String ITEM_TYPE = "vnd.android.cursor.item/voicemail.source.status";
+    field public static final java.lang.String NOTIFICATION_CHANNEL_STATE = "notification_channel_state";
+    field public static final int NOTIFICATION_CHANNEL_STATE_MESSAGE_WAITING = 2; // 0x2
+    field public static final int NOTIFICATION_CHANNEL_STATE_NO_CONNECTION = 1; // 0x1
+    field public static final int NOTIFICATION_CHANNEL_STATE_OK = 0; // 0x0
+    field public static final java.lang.String SETTINGS_URI = "settings_uri";
+    field public static final java.lang.String SOURCE_PACKAGE = "source_package";
+    field public static final java.lang.String VOICEMAIL_ACCESS_URI = "voicemail_access_uri";
+  }
+
+  public static final class VoicemailContract.Voicemails implements android.provider.BaseColumns {
+    method public static android.net.Uri buildSourceUri(java.lang.String);
+    field public static final android.net.Uri CONTENT_URI;
+    field public static final java.lang.String DATE = "date";
+    field public static final java.lang.String DIR_TYPE = "vnd.android.cursor.dir/voicemails";
+    field public static final java.lang.String DURATION = "duration";
+    field public static final java.lang.String HAS_CONTENT = "has_content";
+    field public static final java.lang.String ITEM_TYPE = "vnd.android.cursor.item/voicemail";
+    field public static final java.lang.String MIME_TYPE = "mime_type";
+    field public static final java.lang.String NEW = "new";
+    field public static final java.lang.String NUMBER = "number";
+    field public static final java.lang.String SOURCE_DATA = "source_data";
+    field public static final java.lang.String SOURCE_PACKAGE = "source_package";
   }
 
 }
