@@ -832,9 +832,7 @@ TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledYV12BuffersRepeatedly) {
     pt->requestExitAndWait();
 }
 
-// XXX: This test is disabled because there are currently no drivers that can
-// handle RGBA textures with the GL_TEXTURE_EXTERNAL_OES target.
-TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledRGBABufferNpot) {
+TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledRGBABufferNpot) {
     const int texWidth = 64;
     const int texHeight = 66;
 
@@ -871,26 +869,24 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledRGBABufferNpot) {
     EXPECT_TRUE(checkPixel( 0, 65,  35,  35,  35,  35));
 
     EXPECT_TRUE(checkPixel(15, 10,  35, 231, 231, 231));
-    EXPECT_TRUE(checkPixel(24, 63,  38, 228, 231,  35));
+    EXPECT_TRUE(checkPixel(23, 65, 231,  35, 231,  35));
     EXPECT_TRUE(checkPixel(19, 40,  35, 231,  35,  35));
     EXPECT_TRUE(checkPixel(38, 30, 231,  35,  35,  35));
     EXPECT_TRUE(checkPixel(42, 54,  35,  35,  35, 231));
-    EXPECT_TRUE(checkPixel(37, 33, 228,  38,  38,  38));
+    EXPECT_TRUE(checkPixel(37, 34,  35, 231, 231, 231));
     EXPECT_TRUE(checkPixel(31,  8, 231,  35,  35, 231));
-    EXPECT_TRUE(checkPixel(36, 47, 228,  35, 231, 231));
-    EXPECT_TRUE(checkPixel(24, 63,  38, 228, 231,  35));
-    EXPECT_TRUE(checkPixel(48,  3, 228, 228,  38,  35));
+    EXPECT_TRUE(checkPixel(37, 47, 231,  35, 231, 231));
+    EXPECT_TRUE(checkPixel(25, 38,  35,  35,  35,  35));
+    EXPECT_TRUE(checkPixel(49,  6,  35, 231,  35,  35));
     EXPECT_TRUE(checkPixel(54, 50,  35, 231, 231, 231));
-    EXPECT_TRUE(checkPixel(24, 25,  41,  41, 231, 231));
-    EXPECT_TRUE(checkPixel(10,  9,  38,  38, 231, 231));
+    EXPECT_TRUE(checkPixel(27, 26, 231, 231, 231, 231));
+    EXPECT_TRUE(checkPixel(10,  6,  35,  35, 231, 231));
     EXPECT_TRUE(checkPixel(29,  4,  35,  35,  35, 231));
-    EXPECT_TRUE(checkPixel(56, 31,  38, 228, 231,  35));
+    EXPECT_TRUE(checkPixel(55, 28,  35,  35, 231,  35));
     EXPECT_TRUE(checkPixel(58, 55,  35,  35, 231, 231));
 }
 
-// XXX: This test is disabled because there are currently no drivers that can
-// handle RGBA textures with the GL_TEXTURE_EXTERNAL_OES target.
-TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledRGBABufferPow2) {
+TEST_F(SurfaceTextureGLTest, TexturingFromCpuFilledRGBABufferPow2) {
     const int texWidth = 64;
     const int texHeight = 64;
 
@@ -944,9 +940,7 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromCpuFilledRGBABufferPow2) {
     EXPECT_TRUE(checkPixel( 3, 52,  35, 231,  35,  35));
 }
 
-// XXX: This test is disabled because there are currently no drivers that can
-// handle RGBA textures with the GL_TEXTURE_EXTERNAL_OES target.
-TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromGLFilledRGBABufferPow2) {
+TEST_F(SurfaceTextureGLTest, TexturingFromGLFilledRGBABufferPow2) {
     const int texWidth = 64;
     const int texHeight = 64;
 
@@ -956,7 +950,7 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromGLFilledRGBABufferPow2) {
     EGLSurface stcEglSurface = eglCreateWindowSurface(mEglDisplay, mGlConfig,
             mANW.get(), NULL);
     ASSERT_EQ(EGL_SUCCESS, eglGetError());
-    ASSERT_NE(EGL_NO_SURFACE, mEglSurface);
+    ASSERT_NE(EGL_NO_SURFACE, stcEglSurface);
 
     EXPECT_TRUE(eglMakeCurrent(mEglDisplay, stcEglSurface, stcEglSurface,
             mEglContext));
@@ -979,6 +973,8 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromGLFilledRGBABufferPow2) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     eglSwapBuffers(mEglDisplay, stcEglSurface);
+
+    eglDestroySurface(mEglDisplay, stcEglSurface);
 
     // Do the consumer side of things
     EXPECT_TRUE(eglMakeCurrent(mEglDisplay, mEglSurface, mEglSurface,

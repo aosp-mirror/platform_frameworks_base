@@ -86,7 +86,6 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode) :
     mClientBufferCount(0),
     mServerBufferCount(MIN_ASYNC_BUFFER_SLOTS),
     mCurrentTexture(INVALID_BUFFER_SLOT),
-    mCurrentTextureTarget(GL_TEXTURE_EXTERNAL_OES),
     mCurrentTransform(0),
     mCurrentTimestamp(0),
     mNextTransform(0),
@@ -595,12 +594,8 @@ status_t SurfaceTexture::updateTexImage() {
             LOGW("updateTexImage: clearing GL error: %#04x", error);
         }
 
-        GLenum target = getTextureTarget(mSlots[buf].mGraphicBuffer->format);
-        if (target != mCurrentTextureTarget) {
-            glDeleteTextures(1, &mTexName);
-        }
-        glBindTexture(target, mTexName);
-        glEGLImageTargetTexture2DOES(target, (GLeglImageOES)image);
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTexName);
+        glEGLImageTargetTexture2DOES(GL_TEXTURE_EXTERNAL_OES, (GLeglImageOES)image);
 
         bool failed = false;
         while ((error = glGetError()) != GL_NO_ERROR) {
@@ -622,7 +617,6 @@ status_t SurfaceTexture::updateTexImage() {
 
         // Update the SurfaceTexture state.
         mCurrentTexture = buf;
-        mCurrentTextureTarget = target;
         mCurrentTextureBuf = mSlots[buf].mGraphicBuffer;
         mCurrentCrop = mSlots[buf].mCrop;
         mCurrentTransform = mSlots[buf].mTransform;
@@ -636,7 +630,7 @@ status_t SurfaceTexture::updateTexImage() {
         mDequeueCondition.signal();
     } else {
         // We always bind the texture even if we don't update its contents.
-        glBindTexture(mCurrentTextureTarget, mTexName);
+        glBindTexture(GL_TEXTURE_EXTERNAL_OES, mTexName);
     }
 
     return OK;
@@ -661,20 +655,8 @@ bool SurfaceTexture::isExternalFormat(uint32_t format)
     return false;
 }
 
-GLenum SurfaceTexture::getTextureTarget(uint32_t format)
-{
-    GLenum target = GL_TEXTURE_2D;
-#if defined(GL_OES_EGL_image_external)
-    if (isExternalFormat(format)) {
-        target = GL_TEXTURE_EXTERNAL_OES;
-    }
-#endif
-    return target;
-}
-
 GLenum SurfaceTexture::getCurrentTextureTarget() const {
-    Mutex::Autolock lock(mMutex);
-    return mCurrentTextureTarget;
+    return GL_TEXTURE_EXTERNAL_OES;
 }
 
 void SurfaceTexture::getTransformMatrix(float mtx[16]) {
@@ -890,12 +872,12 @@ void SurfaceTexture::dump(String8& result, const char* prefix,
     }
 
     snprintf(buffer, SIZE,
-            "%scurrent: {crop=[%d,%d,%d,%d], transform=0x%02x, current=%d, target=0x%04x}\n"
+            "%scurrent: {crop=[%d,%d,%d,%d], transform=0x%02x, current=%d}\n"
             "%snext   : {crop=[%d,%d,%d,%d], transform=0x%02x, FIFO(%d)={%s}}\n"
             ,
             prefix, mCurrentCrop.left,
             mCurrentCrop.top, mCurrentCrop.right, mCurrentCrop.bottom,
-            mCurrentTransform, mCurrentTexture, mCurrentTextureTarget,
+            mCurrentTransform, mCurrentTexture,
             prefix, mNextCrop.left, mNextCrop.top, mNextCrop.right, mNextCrop.bottom,
             mCurrentTransform, fifoSize, fifo.string()
     );

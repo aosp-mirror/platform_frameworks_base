@@ -200,7 +200,6 @@ protected:
     // all slots.
     void freeAllBuffers();
     static bool isExternalFormat(uint32_t format);
-    static GLenum getTextureTarget(uint32_t format);
 
 private:
 
@@ -336,10 +335,6 @@ private:
     // that no buffer is bound to the texture. A call to setBufferCount will
     // reset mCurrentTexture to INVALID_BUFFER_SLOT.
     int mCurrentTexture;
-
-    // mCurrentTextureTarget is the GLES texture target to be used with the
-    // current texture.
-    GLenum mCurrentTextureTarget;
 
     // mCurrentTextureBuf is the graphic buffer of the current texture. It's
     // possible that this buffer is not associated with any buffer slot, so we
