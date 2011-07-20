@@ -76,7 +76,9 @@ public class ActionBarImpl extends ActionBar {
     private TabImpl mSelectedTab;
     private int mSavedTabPosition = INVALID_POSITION;
     
-    private ActionMode mActionMode;
+    ActionModeImpl mActionMode;
+    ActionMode mDeferredDestroyActionMode;
+    ActionMode.Callback mDeferredModeDestroyCallback;
     
     private boolean mLastMenuVisibility;
     private ArrayList<OnMenuVisibilityListener> mMenuVisibilityListeners =
@@ -104,10 +106,12 @@ public class ActionBarImpl extends ActionBar {
         public void onAnimationEnd(Animator animation) {
             if (mContentView != null) {
                 mContentView.setTranslationY(0);
+                mContainerView.setTranslationY(0);
             }
             mContainerView.setVisibility(View.GONE);
             mContainerView.setTransitioning(false);
             mCurrentShowAnim = null;
+            completeDeferredDestroyActionMode();
         }
     };
 
@@ -205,6 +209,14 @@ public class ActionBarImpl extends ActionBar {
             mContainerView.setTabContainer(tabScroller);
         }
         mTabScrollView = tabScroller;
+    }
+
+    void completeDeferredDestroyActionMode() {
+        if (mDeferredModeDestroyCallback != null) {
+            mDeferredModeDestroyCallback.onDestroyActionMode(mDeferredDestroyActionMode);
+            mDeferredDestroyActionMode = null;
+            mDeferredModeDestroyCallback = null;
+        }
     }
 
     /**
@@ -357,14 +369,16 @@ public class ActionBarImpl extends ActionBar {
     }
 
     public ActionMode startActionMode(ActionMode.Callback callback) {
+        boolean wasHidden = false;
         if (mActionMode != null) {
+            wasHidden = mWasHiddenBeforeMode;
             mActionMode.finish();
         }
 
         mContextView.killMode();
         ActionModeImpl mode = new ActionModeImpl(callback);
         if (mode.dispatchOnCreate()) {
-            mWasHiddenBeforeMode = !isShowing();
+            mWasHiddenBeforeMode = !isShowing() || wasHidden;
             mode.invalidate();
             mContextView.initForMode(mode);
             animateToMode(true);
@@ -577,7 +591,9 @@ public class ActionBarImpl extends ActionBar {
     }
 
     void animateToMode(boolean toActionMode) {
-        show(false);
+        if (toActionMode) {
+            show(false);
+        }
         if (mCurrentModeAnim != null) {
             mCurrentModeAnim.end();
         }
@@ -621,7 +637,16 @@ public class ActionBarImpl extends ActionBar {
                 return;
             }
 
-            mCallback.onDestroyActionMode(this);
+            // If we were hidden before the mode was shown, defer the onDestroy
+            // callback until the animation is finished and associated relayout
+            // is about to happen. This lets apps better anticipate visibility
+            // and layout behavior.
+            if (mWasHiddenBeforeMode) {
+                mDeferredDestroyActionMode = this;
+                mDeferredModeDestroyCallback = mCallback;
+            } else {
+                mCallback.onDestroyActionMode(this);
+            }
             mCallback = null;
             animateToMode(false);
 
