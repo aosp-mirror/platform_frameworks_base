@@ -1022,6 +1022,12 @@ class AppWidgetService extends IAppWidgetService.Stub
             info.minWidth = value != null ? value.data : 0; 
             value = sa.peekValue(com.android.internal.R.styleable.AppWidgetProviderInfo_minHeight);
             info.minHeight = value != null ? value.data : 0;
+            value = sa.peekValue(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_minResizeWidth);
+            info.minResizeWidth = value != null ? value.data : info.minWidth;
+            value = sa.peekValue(
+                    com.android.internal.R.styleable.AppWidgetProviderInfo_minResizeHeight);
+            info.minResizeHeight = value != null ? value.data : info.minHeight;
 
             info.updatePeriodMillis = sa.getInt(
                     com.android.internal.R.styleable.AppWidgetProviderInfo_updatePeriodMillis, 0);

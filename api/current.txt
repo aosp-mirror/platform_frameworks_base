@@ -673,6 +673,8 @@ package android {
     field public static final int minHeight = 16843072; // 0x1010140
     field public static final int minLevel = 16843185; // 0x10101b1
     field public static final int minLines = 16843094; // 0x1010156
+    field public static final int minResizeHeight = 16843690; // 0x10103aa
+    field public static final int minResizeWidth = 16843689; // 0x10103a9
     field public static final int minSdkVersion = 16843276; // 0x101020c
     field public static final int minWidth = 16843071; // 0x101013f
     field public static final int mode = 16843134; // 0x101017e
@@ -3929,6 +3931,8 @@ package android.appwidget {
     field public int initialLayout;
     field public java.lang.String label;
     field public int minHeight;
+    field public int minResizeHeight;
+    field public int minResizeWidth;
     field public int minWidth;
     field public int previewImage;
     field public android.content.ComponentName provider;

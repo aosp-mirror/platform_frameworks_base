@@ -4913,6 +4913,10 @@
         <attr name="minWidth"/>
         <!-- Minimum height of the AppWidget. -->
         <attr name="minHeight"/>
+        <!-- Minimum width that the AppWidget can be resized to. -->
+        <attr name="minResizeWidth" format="dimension"/>
+        <!-- Minimum height that the AppWidget can be resized to. -->
+        <attr name="minResizeHeight" format="dimension"/>
         <!-- Update period in milliseconds, or 0 if the AppWidget will update itself. -->
         <attr name="updatePeriodMillis" format="integer" />
         <!-- A resource id of a layout. -->
