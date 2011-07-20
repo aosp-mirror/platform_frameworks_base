@@ -261,6 +261,10 @@ public class AppWidgetHost {
             TypedValue.complexToDimensionPixelSize(appWidget.minWidth, mDisplayMetrics);
         appWidget.minHeight =
             TypedValue.complexToDimensionPixelSize(appWidget.minHeight, mDisplayMetrics);
+        appWidget.minResizeWidth =
+            TypedValue.complexToDimensionPixelSize(appWidget.minResizeWidth, mDisplayMetrics);
+        appWidget.minResizeHeight =
+            TypedValue.complexToDimensionPixelSize(appWidget.minResizeHeight, mDisplayMetrics);
 
         synchronized (mViews) {
             v = mViews.get(appWidgetId);

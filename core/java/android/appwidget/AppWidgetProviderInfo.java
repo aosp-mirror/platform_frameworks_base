@@ -54,7 +54,8 @@ public class AppWidgetProviderInfo implements Parcelable {
     public ComponentName provider;
 
     /**
-     * Minimum width of the AppWidget, in dp.
+     * The default height of the widget when added to a host, in dp. The widget will get
+     * at least this width, and will often be given more, depending on the host.
      *
      * <p>This field corresponds to the <code>android:minWidth</code> attribute in
      * the AppWidget meta-data file.
@@ -62,12 +63,31 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int minWidth;
 
     /**
-     * Minimum height of the AppWidget, in dp.
+     * The default height of the widget when added to a host, in dp. The widget will get
+     * at least this height, and will often be given more, depending on the host.
      *
      * <p>This field corresponds to the <code>android:minHeight</code> attribute in
      * the AppWidget meta-data file.
      */
     public int minHeight;
+
+    /**
+     * Minimum width (in dp) which the widget can be resized to. This field has no effect if it
+     * is greater than minWidth or if horizontal resizing isn't enabled (see {@link #resizeMode}).
+     *
+     * <p>This field corresponds to the <code>android:minResizeWidth</code> attribute in
+     * the AppWidget meta-data file.
+     */
+    public int minResizeWidth;
+
+    /**
+     * Minimum height (in dp) which the widget can be resized to. This field has no effect if it
+     * is greater than minHeight or if vertical resizing isn't enabled (see {@link #resizeMode}).
+     *
+     * <p>This field corresponds to the <code>android:minResizeHeight</code> attribute in
+     * the AppWidget meta-data file.
+     */
+    public int minResizeHeight;
 
     /**
      * How often, in milliseconds, that this AppWidget wants to be updated.

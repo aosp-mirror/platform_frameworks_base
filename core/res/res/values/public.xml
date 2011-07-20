@@ -1831,4 +1831,6 @@
   <public type="color" name="holo_purple" />
   <public type="color" name="holo_blue_bright" />
 
+  <public type="attr" name="minResizeWidth" />
+  <public type="attr" name="minResizeHeight" />
 </resources>
