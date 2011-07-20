@@ -101,6 +101,24 @@ public final class IsoDep extends BasicTagTechnology {
     }
 
     /**
+     * Gets the currently set timeout of {@link #transceive} in milliseconds.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @return timeout value in milliseconds
+     * @hide
+     */
+    // TODO Unhide for ICS
+    public int getTimeout() {
+        try {
+            return mTag.getTagService().getTimeout(TagTechnology.ISO_DEP);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service dead", e);
+            return 0;
+        }
+    }
+
+    /**
      * Return the ISO-DEP historical bytes for {@link NfcA} tags.
      * <p>Does not cause any RF activity and does not block.
      * <p>The historical bytes can be used to help identify a tag. They are present

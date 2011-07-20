@@ -44,5 +44,6 @@ interface INfcTag
     Tag rediscover(int nativehandle);
 
     int setTimeout(int technology, int timeout);
+    int getTimeout(int technology);
     void resetTimeouts();
 }

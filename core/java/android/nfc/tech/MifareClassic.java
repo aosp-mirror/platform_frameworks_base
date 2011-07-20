@@ -597,6 +597,24 @@ public final class MifareClassic extends BasicTagTechnology {
         }
     }
 
+    /**
+     * Gets the currently set timeout of {@link #transceive} in milliseconds.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @return timeout value in milliseconds
+     * @hide
+     */
+    // TODO Unhide for ICS
+    public int getTimeout() {
+        try {
+            return mTag.getTagService().getTimeout(TagTechnology.MIFARE_CLASSIC);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service dead", e);
+            return 0;
+        }
+    }
+
     private static void validateSector(int sector) {
         // Do not be too strict on upper bounds checking, since some cards
         // have more addressable memory than they report. For example,

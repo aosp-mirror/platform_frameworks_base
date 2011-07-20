@@ -238,6 +238,24 @@ public final class MifareUltralight extends BasicTagTechnology {
         }
     }
 
+    /**
+     * Gets the currently set timeout of {@link #transceive} in milliseconds.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @return timeout value in milliseconds
+     * @hide
+     */
+    // TODO Unhide for ICS
+    public int getTimeout() {
+        try {
+            return mTag.getTagService().getTimeout(TagTechnology.MIFARE_ULTRALIGHT);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service dead", e);
+            return 0;
+        }
+    }
+
     private static void validatePageIndex(int pageIndex) {
         // Do not be too strict on upper bounds checking, since some cards
         // may have more addressable memory than they report.
