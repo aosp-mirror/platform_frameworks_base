@@ -550,6 +550,10 @@ public:
     inline void
         setFullResPaths(sp<FilePathStore>& res) { mFullResPaths = res; }
 
+    inline sp<FilePathStore>& getFullAssetPaths() { return mFullAssetPaths; }
+    inline void
+        setFullAssetPaths(sp<FilePathStore>& res) { mFullAssetPaths = res; }
+
 private:
     String8 mPackage;
     SortedVector<AaptGroupEntry> mGroupEntries;
@@ -565,6 +569,7 @@ private:
     KeyedVector<String8, sp<ResourceTypeSet> >* mRes;
 
     sp<FilePathStore> mFullResPaths;
+    sp<FilePathStore> mFullAssetPaths;
 };
 
 #endif // __AAPT_ASSETS_H

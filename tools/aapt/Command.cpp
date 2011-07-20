@@ -1390,10 +1390,13 @@ int doPackage(Bundle* bundle)
     // Load the assets.
     assets = new AaptAssets();
 
-    // Set up the resource gathering in assets if we're trying to make R.java
+    // Set up the resource gathering in assets if we're going to generate
+    // dependency files
     if (bundle->getGenDependencies()) {
-        sp<FilePathStore> pathStore = new FilePathStore;
-        assets->setFullResPaths(pathStore);
+        sp<FilePathStore> resPathStore = new FilePathStore;
+        assets->setFullResPaths(resPathStore);
+        sp<FilePathStore> assetPathStore = new FilePathStore;
+        assets->setFullAssetPaths(assetPathStore);
     }
 
     err = assets->slurpFromArgs(bundle);
@@ -1420,9 +1423,16 @@ int doPackage(Bundle* bundle)
     }
 
     if (bundle->getGenDependencies()) {
-        dependencyFile = String8(bundle->getRClassDir());
+        if (outputAPKFile) {
+            dependencyFile = String8(outputAPKFile);
+            // Strip the extension and add new one
+            dependencyFile = dependencyFile.getBasePath();
+            dependencyFile.append(".d");
+        } else {
+            dependencyFile = String8(bundle->getRClassDir());
+            dependencyFile.appendPath("R.d");
+        }
         // Make sure we have a clean dependency file to start with
-        dependencyFile.appendPath("R.d");
         fp = fopen(dependencyFile, "w");
         fclose(fp);
     }
@@ -1460,19 +1470,6 @@ int doPackage(Bundle* bundle)
         }
     }
 
-    if (bundle->getGenDependencies()) {
-        // Now that writeResourceSymbols has taken care of writing the
-        // dependency targets to the dependencyFile, we'll write the
-        // pre-requisites.
-        fp = fopen(dependencyFile, "a+");
-        fprintf(fp, " : ");
-        err = writeDependencyPreReqs(bundle, assets, fp);
-
-        // Also manually add the AndroidManifeset since it's a non-asset
-        fprintf(fp, "%s \\\n", bundle->getAndroidManifestFile());
-        fclose(fp);
-    }
-
     // Write out the ProGuard file
     err = writeProguardFile(bundle, assets);
     if (err < 0) {
@@ -1486,6 +1483,18 @@ int doPackage(Bundle* bundle)
             fprintf(stderr, "ERROR: packaging of '%s' failed\n", outputAPKFile);
             goto bail;
         }
+    }
+
+    if (bundle->getGenDependencies()) {
+        // Now that writeResourceSymbols or writeAPK has taken care of writing
+        // the targets to our dependency file, we'll write the prereqs
+        fp = fopen(dependencyFile, "a+");
+        fprintf(fp, " : ");
+        bool includeRaw = (outputAPKFile != NULL);
+        err = writeDependencyPreReqs(bundle, assets, fp, includeRaw);
+        // Also manually add the AndroidManifeset since it's a non-asset
+        fprintf(fp, "%s \\\n", bundle->getAndroidManifestFile());
+        fclose(fp);
     }
 
     retVal = 0;
