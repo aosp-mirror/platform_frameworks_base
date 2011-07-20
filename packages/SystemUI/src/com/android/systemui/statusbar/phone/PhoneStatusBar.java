@@ -565,27 +565,33 @@ public class PhoneStatusBar extends StatusBar {
 
         final RemoteViews contentView = notification.notification.contentView;
 
-        if (false) {
+        if (DEBUG) {
             Slog.d(TAG, "old notification: when=" + oldNotification.notification.when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " expanded=" + oldEntry.expanded
-                    + " contentView=" + oldContentView);
+                    + " contentView=" + oldContentView
+                    + " rowParent=" + oldEntry.row.getParent());
             Slog.d(TAG, "new notification: when=" + notification.notification.when
                     + " ongoing=" + oldNotification.isOngoing()
                     + " contentView=" + contentView);
         }
 
+
         // Can we just reapply the RemoteViews in place?  If when didn't change, the order
         // didn't change.
-        if (notification.notification.when == oldNotification.notification.when
-                && notification.isOngoing() == oldNotification.isOngoing()
-                && oldEntry.expanded != null
+        boolean contentsUnchanged = oldEntry.expanded != null
                 && contentView != null && oldContentView != null
                 && contentView.getPackage() != null
                 && oldContentView.getPackage() != null
                 && oldContentView.getPackage().equals(contentView.getPackage())
-                && oldContentView.getLayoutId() == contentView.getLayoutId()) {
-            if (SPEW) Slog.d(TAG, "reusing notification");
+                && oldContentView.getLayoutId() == contentView.getLayoutId();
+        ViewGroup rowParent = (ViewGroup) oldEntry.row.getParent();
+        boolean orderUnchanged = notification.notification.when==oldNotification.notification.when
+                && notification.priority == oldNotification.priority;
+                // priority now encompasses isOngoing()
+        boolean isLastAnyway = rowParent.indexOfChild(oldEntry.row) == rowParent.getChildCount()-1;
+        if (contentsUnchanged && (orderUnchanged || isLastAnyway)) {
+            if (DEBUG) Slog.d(TAG, "reusing notification for key: " + key);
             oldEntry.notification = notification;
             try {
                 // Reapply the RemoteViews
