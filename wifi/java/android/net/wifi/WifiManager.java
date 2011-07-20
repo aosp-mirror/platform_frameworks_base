@@ -230,11 +230,13 @@ public class WifiManager {
     /**
      * Broadcast intent action indicating that the state of Wi-Fi connectivity
      * has changed. One extra provides the new state
-     * in the form of a {@link android.net.NetworkInfo} object. If the new state is
-     * CONNECTED, a second extra may provide the BSSID of the access point,
+     * in the form of a {@link android.net.NetworkInfo} object. If the new
+     * state is CONNECTED, additional extras may provide the BSSID and WifiInfo of
+     * the access point.
      * as a {@code String}.
      * @see #EXTRA_NETWORK_INFO
      * @see #EXTRA_BSSID
+     * @see #EXTRA_WIFI_INFO
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String NETWORK_STATE_CHANGED_ACTION = "android.net.wifi.STATE_CHANGE";
@@ -251,6 +253,13 @@ public class WifiManager {
      * {@link android.content.Intent#getStringExtra(String)}.
      */
     public static final String EXTRA_BSSID = "bssid";
+    /**
+     * The lookup key for a {@link android.net.wifi.WifiInfo} object giving the
+     * information about the access point to which we are connected. Only present
+     * when the new state is CONNECTED.  Retrieve with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
+     */
+    public static final String EXTRA_WIFI_INFO = "wifiInfo";
     /**
      * Broadcast intent action indicating that the state of establishing a connection to
      * an access point has changed.One extra provides the new
