@@ -50,6 +50,11 @@ ssize_t processJarFiles(Bundle* bundle, ZipFile* zip);
 status_t writeAPK(Bundle* bundle, const sp<AaptAssets>& assets,
                        const String8& outputFile)
 {
+    #if BENCHMARK
+    fprintf(stdout, "BENCHMARK: Starting APK Bundling \n");
+    long startAPKTime = clock();
+    #endif /* BENCHMARK */
+
     status_t result = NO_ERROR;
     ZipFile* zip = NULL;
     int count;
@@ -197,6 +202,10 @@ bail:
 
     if (result == NO_ERROR && bundle->getVerbose())
         printf("Done!\n");
+
+    #if BENCHMARK
+    fprintf(stdout, "BENCHMARK: End APK Bundling. Time Elapsed: %f ms \n",(clock() - startAPKTime)/1000.0);
+    #endif /* BENCHMARK */
     return result;
 }
 
