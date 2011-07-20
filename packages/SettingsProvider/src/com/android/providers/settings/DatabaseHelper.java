@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 66;
+    private static final int DATABASE_VERSION = 67;
 
     private Context mContext;
 
@@ -861,6 +861,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 66;
         }
 
+        if (upgradeVersion == 66) {
+            // This upgrade makes sure that MODE_RINGER_STREAMS_AFFECTED and
+            // NOTIFICATIONS_USE_RING_VOLUME settings are set according to device voice capability
+             db.beginTransaction();
+             try {
+                 int ringerModeAffectedStreams = (1 << AudioManager.STREAM_RING) |
+                                                 (1 << AudioManager.STREAM_NOTIFICATION) |
+                                                 (1 << AudioManager.STREAM_SYSTEM) |
+                                                 (1 << AudioManager.STREAM_SYSTEM_ENFORCED);
+                 if (!mContext.getResources().getBoolean(
+                         com.android.internal.R.bool.config_voice_capable)) {
+                     ringerModeAffectedStreams |= (1 << AudioManager.STREAM_MUSIC);
+
+                     db.execSQL("DELETE FROM system WHERE name='"
+                             + Settings.System.NOTIFICATIONS_USE_RING_VOLUME + "'");
+                     db.execSQL("INSERT INTO system ('name', 'value') values ('"
+                             + Settings.System.NOTIFICATIONS_USE_RING_VOLUME + "', '1')");
+                 }
+                 db.execSQL("DELETE FROM system WHERE name='"
+                         + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "'");
+                 db.execSQL("INSERT INTO system ('name', 'value') values ('"
+                         + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "', '"
+                         + String.valueOf(ringerModeAffectedStreams) + "')");
+                 db.setTransactionSuccessful();
+             } finally {
+                 db.endTransaction();
+             }
+             upgradeVersion = 67;
+         }
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1121,12 +1151,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     
             loadVibrateSetting(db, false);
     
-            // By default, only the ring/notification, system and music streams are affected
+            // By default:
+            // - ringtones, notification, system and music streams are affected by ringer mode
+            // on non voice capable devices (tablets)
+            // - ringtones, notification and system streams are affected by ringer mode
+            // on voice capable devices (phones)
+            int ringerModeAffectedStreams = (1 << AudioManager.STREAM_RING) |
+                                            (1 << AudioManager.STREAM_NOTIFICATION) |
+                                            (1 << AudioManager.STREAM_SYSTEM) |
+                                            (1 << AudioManager.STREAM_SYSTEM_ENFORCED);
+            if (!mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_voice_capable)) {
+                ringerModeAffectedStreams |= (1 << AudioManager.STREAM_MUSIC);
+            }
             loadSetting(stmt, Settings.System.MODE_RINGER_STREAMS_AFFECTED,
-                    (1 << AudioManager.STREAM_RING) | (1 << AudioManager.STREAM_NOTIFICATION) |
-                    (1 << AudioManager.STREAM_SYSTEM) | (1 << AudioManager.STREAM_SYSTEM_ENFORCED) |
-                    (1 << AudioManager.STREAM_MUSIC));
-    
+                    ringerModeAffectedStreams);
+
             loadSetting(stmt, Settings.System.MUTE_STREAMS_AFFECTED,
                     ((1 << AudioManager.STREAM_MUSIC) |
                      (1 << AudioManager.STREAM_RING) |
@@ -1232,8 +1272,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     R.bool.def_vibrate_in_silent);
 
             // Set notification volume to follow ringer volume by default
-            loadBooleanSetting(stmt, Settings.System.NOTIFICATIONS_USE_RING_VOLUME,
-                    R.bool.def_notifications_use_ring_volume);
+            if (mContext.getResources().getBoolean(
+                    com.android.internal.R.bool.config_voice_capable)) {
+                loadBooleanSetting(stmt, Settings.System.NOTIFICATIONS_USE_RING_VOLUME,
+                        R.bool.def_notifications_use_ring_volume);
+            } else {
+                loadSetting(stmt, Settings.System.NOTIFICATIONS_USE_RING_VOLUME, "1");
+            }
 
             loadIntegerSetting(stmt, Settings.System.POINTER_SPEED,
                     R.integer.def_pointer_speed);
