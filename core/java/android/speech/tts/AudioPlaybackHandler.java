@@ -356,9 +356,7 @@ class AudioPlaybackHandler {
         mLastSynthesisRequest = param;
 
         // Create the audio track.
-        final AudioTrack audioTrack = createStreamingAudioTrack(
-                param.mStreamType, param.mSampleRateInHz, param.mAudioFormat,
-                param.mChannelCount, param.mVolume, param.mPan);
+        final AudioTrack audioTrack = createStreamingAudioTrack(param);
 
         if (DBG) Log.d(TAG, "Created audio track [" + audioTrack.hashCode() + "]");
 
@@ -405,21 +403,19 @@ class AudioPlaybackHandler {
         param.mLogger.onPlaybackStart();
     }
 
+    // Wait for the audio track to stop playing, and then release its resources.
     private void handleSynthesisDone(MessageParams msg) {
         final SynthesisMessageParams params = (SynthesisMessageParams) msg;
-        handleSynthesisDone(params);
-        // This call is delayed more than it should be, but we are
-        // certain at this point that we have all the data we want.
-        params.mLogger.onWriteData();
-    }
 
-    // Wait for the audio track to stop playing, and then release it's resources.
-    private void handleSynthesisDone(SynthesisMessageParams params) {
         if (DBG) Log.d(TAG, "handleSynthesisDone()");
         final AudioTrack audioTrack = params.getAudioTrack();
 
         if (audioTrack == null) {
             return;
+        }
+
+        if (params.mBytesWritten < params.mAudioBufferSize) {
+            audioTrack.stop();
         }
 
         if (DBG) Log.d(TAG, "Waiting for audio track to complete : " +
@@ -442,7 +438,14 @@ class AudioPlaybackHandler {
         }
         params.getDispatcher().dispatchUtteranceCompleted();
         mLastSynthesisRequest = null;
+        params.mLogger.onWriteData();
     }
+
+    /**
+     * The minimum increment of time to wait for an audiotrack to finish
+     * playing.
+     */
+    private static final long MIN_SLEEP_TIME_MS = 20;
 
     private static void blockUntilDone(SynthesisMessageParams params) {
         if (params.mAudioTrack == null || params.mBytesWritten <= 0) {
@@ -460,36 +463,41 @@ class AudioPlaybackHandler {
                 break;
             }
 
-            long estimatedTimeMs = ((lengthInFrames - currentPosition) * 1000) /
+            final long estimatedTimeMs = ((lengthInFrames - currentPosition) * 1000) /
                     audioTrack.getSampleRate();
 
-            if (DBG) Log.d(TAG, "About to sleep for : " + estimatedTimeMs + " ms," +
-                    " Playback position : " + currentPosition);
+            final long sleepTimeMs = Math.max(estimatedTimeMs, MIN_SLEEP_TIME_MS);
+
+            if (DBG) Log.d(TAG, "About to sleep for : " + sleepTimeMs + " ms," +
+                    " Playback position : " + currentPosition + ", Length in frames : "
+                    + lengthInFrames);
             try {
-                Thread.sleep(estimatedTimeMs);
+                Thread.sleep(sleepTimeMs);
             } catch (InterruptedException ie) {
                 break;
             }
         }
     }
 
-    private static AudioTrack createStreamingAudioTrack(int streamType, int sampleRateInHz,
-            int audioFormat, int channelCount, float volume, float pan) {
-        int channelConfig = getChannelConfig(channelCount);
+    private static AudioTrack createStreamingAudioTrack(SynthesisMessageParams params) {
+        final int channelConfig = getChannelConfig(params.mChannelCount);
+        final int sampleRateInHz = params.mSampleRateInHz;
+        final int audioFormat = params.mAudioFormat;
 
         int minBufferSizeInBytes
                 = AudioTrack.getMinBufferSize(sampleRateInHz, channelConfig, audioFormat);
         int bufferSizeInBytes = Math.max(MIN_AUDIO_BUFFER_SIZE, minBufferSizeInBytes);
 
-        AudioTrack audioTrack = new AudioTrack(streamType, sampleRateInHz, channelConfig,
+        AudioTrack audioTrack = new AudioTrack(params.mStreamType, sampleRateInHz, channelConfig,
                 audioFormat, bufferSizeInBytes, AudioTrack.MODE_STREAM);
         if (audioTrack.getState() != AudioTrack.STATE_INITIALIZED) {
             Log.w(TAG, "Unable to create audio track.");
             audioTrack.release();
             return null;
         }
+        params.mAudioBufferSize = bufferSizeInBytes;
 
-        setupVolume(audioTrack, volume, pan);
+        setupVolume(audioTrack, params.mVolume, params.mPan);
         return audioTrack;
     }
 
