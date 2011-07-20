@@ -11291,6 +11291,7 @@ package android.net {
     method public static long getMobileRxPackets();
     method public static long getMobileTxBytes();
     method public static long getMobileTxPackets();
+    method public static int getThreadStatsTag();
     method public static long getTotalRxBytes();
     method public static long getTotalRxPackets();
     method public static long getTotalTxBytes();

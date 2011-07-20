@@ -97,6 +97,15 @@ public class TrafficStats {
     }
 
     /**
+     * Get the active tag used when accounting {@link Socket} traffic originating
+     * from the current thread. Only one active tag per thread is supported.
+     * {@link #tagSocket(Socket)}.
+     */
+    public static int getThreadStatsTag() {
+        return NetworkManagementSocketTagger.getThreadSocketStatsTag();
+    }
+
+    /**
      * @deprecated unsupported, will eventually be removed
      */
     @Deprecated
