@@ -325,7 +325,7 @@ public class GpsNetInitiatedHandler {
         }
         catch (UnsupportedEncodingException e)
         {
-            Log.e(TAG, e.getMessage());
+            throw new AssertionError();
         }
         return decoded;
     }
@@ -338,7 +338,7 @@ public class GpsNetInitiatedHandler {
         }
         catch (UnsupportedEncodingException e)
         {
-            Log.e(TAG, e.getMessage());
+            throw new AssertionError();
         }
         return decoded;
     }
