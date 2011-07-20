@@ -38,6 +38,7 @@ public:
     void resetAll(Context *);
 
     void setup(Context *);
+    void updateSize() { mDirty = true; }
 
     struct Hal {
         mutable void *drv;
