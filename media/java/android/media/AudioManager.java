@@ -297,6 +297,9 @@ public class AudioManager {
      */
     public static final int RINGER_MODE_NORMAL = 2;
 
+    // maximum valid ringer mode value. Values must start from 0 and be contiguous.
+    private static final int RINGER_MODE_MAX = RINGER_MODE_NORMAL;
+
     /**
      * Vibrate type that corresponds to the ringer.
      *
@@ -540,6 +543,21 @@ public class AudioManager {
     }
 
     /**
+     * Checks valid ringer mode values.
+     *
+     * @return true if the ringer mode indicated is valid, false otherwise.
+     *
+     * @see #setRingerMode(int)
+     * @hide
+     */
+    public static boolean isValidRingerMode(int ringerMode) {
+        if (ringerMode < 0 || ringerMode > RINGER_MODE_MAX) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Returns the maximum volume index for a particular stream.
      *
      * @param streamType The stream type whose maximum volume index is returned.
@@ -601,6 +619,9 @@ public class AudioManager {
      * @see #getRingerMode()
      */
     public void setRingerMode(int ringerMode) {
+        if (!isValidRingerMode(ringerMode)) {
+            return;
+        }
         IAudioService service = getService();
         try {
             service.setRingerMode(ringerMode);

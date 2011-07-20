@@ -424,6 +424,12 @@ public class AudioService extends IAudioService.Stub {
         final ContentResolver cr = mContentResolver;
 
         mRingerMode = System.getInt(cr, System.MODE_RINGER, AudioManager.RINGER_MODE_NORMAL);
+        // sanity check in case the settings are restored from a device with incompatible
+        // ringer modes
+        if (!AudioManager.isValidRingerMode(mRingerMode)) {
+            mRingerMode = AudioManager.RINGER_MODE_NORMAL;
+            System.putInt(cr, System.MODE_RINGER, mRingerMode);
+        }
 
         mVibrateSetting = System.getInt(cr, System.VIBRATE_ON, 0);
 
