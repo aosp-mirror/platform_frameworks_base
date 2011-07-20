@@ -446,6 +446,7 @@ void Context::setSurface(uint32_t w, uint32_t h, RsNativeWindow sur) {
 
     if (mWidth && mHeight) {
         mStateVertex.updateSize(this);
+        mFBOCache.updateSize();
     }
 }
 
