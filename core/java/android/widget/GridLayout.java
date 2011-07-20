@@ -596,7 +596,6 @@ public class GridLayout extends ViewGroup {
                 int col = 0;
                 for (int i = 0, N = getChildCount(); i < N; i++) {
                     View c = getChildAt(i);
-                    if (isGone(c)) continue;
                     LayoutParams lp = getLayoutParams1(c);
 
                     final Spec colSpec = lp.columnSpec;
@@ -1002,7 +1001,6 @@ public class GridLayout extends ViewGroup {
             int count = -1;
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
-                if (isGone(c)) continue;
                 LayoutParams params = getLayoutParams(c);
                 Spec spec = horizontal ? params.columnSpec : params.rowSpec;
                 count = max(count, spec.span.min);
