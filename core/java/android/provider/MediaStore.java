@@ -283,13 +283,6 @@ public final class MediaStore {
          */
         public static final String IS_DRM = "is_drm";
 
-        /**
-         * Used by the media scanner to suppress files from being processed as media files.
-         *
-         * <P>Type: INTEGER (boolean)</P>
-         * @hide
-         */
-        public static final String NO_MEDIA = "no_media";
      }
 
     /**

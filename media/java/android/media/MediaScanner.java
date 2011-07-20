@@ -372,8 +372,14 @@ public class MediaScanner
 
     private class FileInserter {
 
-        ContentValues[] mValues = new ContentValues[1000];
-        int mIndex = 0;
+        private final Uri mUri;
+        private final ContentValues[] mValues;
+        private int mIndex;
+
+        public FileInserter(Uri uri, int count) {
+            mUri = uri;
+            mValues = new ContentValues[count];
+        }
 
         public Uri insert(ContentValues values) {
             if (mIndex == mValues.length) {
@@ -389,13 +395,17 @@ public class MediaScanner
                 mValues[mIndex++] = null;
             }
             try {
-                mMediaProvider.bulkInsert(mFilesUri, mValues);
+                mMediaProvider.bulkInsert(mUri, mValues);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in FileInserter.flush()", e);
             }
             mIndex = 0;
         }
     }
+
+    private FileInserter mAudioInserter;
+    private FileInserter mVideoInserter;
+    private FileInserter mImageInserter;
     private FileInserter mFileInserter;
 
     // hashes file path to FileCacheEntry.
@@ -707,9 +717,7 @@ public class MediaScanner
             map.put(MediaStore.MediaColumns.MIME_TYPE, mMimeType);
             map.put(MediaStore.MediaColumns.IS_DRM, mIsDrm);
 
-            if (mNoMedia) {
-                map.put(MediaStore.MediaColumns.NO_MEDIA, true);
-            } else {
+            if (!mNoMedia) {
                 if (MediaFile.isVideoFileType(mFileType)) {
                     map.put(Video.Media.ARTIST, (mArtist != null && mArtist.length() > 0
                             ? mArtist : MediaStore.UNKNOWN_STRING));
@@ -837,23 +845,35 @@ public class MediaScanner
                 }
             }
 
-            // For inserts we always use the file URI so we can insert in bulk.
-            // For updates we compute the URI based on the media type.
             Uri tableUri = mFilesUri;
+            FileInserter inserter = mFileInserter;
+            if (!mNoMedia) {
+                if (MediaFile.isVideoFileType(mFileType)) {
+                    tableUri = mVideoUri;
+                    inserter = mVideoInserter;
+                } else if (MediaFile.isImageFileType(mFileType)) {
+                    tableUri = mImagesUri;
+                    inserter = mImageInserter;
+                } else if (MediaFile.isAudioFileType(mFileType)) {
+                    tableUri = mAudioUri;
+                    inserter = mAudioInserter;
+                }
+            }
             Uri result = null;
             if (rowId == 0) {
                 if (mMtpObjectHandle != 0) {
                     values.put(MediaStore.MediaColumns.MEDIA_SCANNER_NEW_OBJECT_ID, mMtpObjectHandle);
                 }
-                int format = entry.mFormat;
-                if (format == 0) {
-                    format = MediaFile.getFormatCode(entry.mPath, mMimeType);
+                if (tableUri == mFilesUri) {
+                    int format = entry.mFormat;
+                    if (format == 0) {
+                        format = MediaFile.getFormatCode(entry.mPath, mMimeType);
+                    }
+                    values.put(Files.FileColumns.FORMAT, format);
                 }
-                values.put(Files.FileColumns.FORMAT, format);
-
                 // new file, insert it
-                if (mFileInserter != null) {
-                    result = mFileInserter.insert(values);
+                if (inserter != null) {
+                    result = inserter.insert(values);
                 } else {
                     result = mMediaProvider.insert(tableUri, values);
                 }
@@ -863,16 +883,6 @@ public class MediaScanner
                     entry.mRowId = rowId;
                 }
             } else {
-                if (!mNoMedia) {
-                    if (MediaFile.isVideoFileType(mFileType)) {
-                        tableUri = mVideoUri;
-                    } else if (MediaFile.isImageFileType(mFileType)) {
-                        tableUri = mImagesUri;
-                    } else if (MediaFile.isAudioFileType(mFileType)) {
-                        tableUri = mAudioUri;
-                    }
-                }
-
                 // updated file
                 result = ContentUris.withAppendedId(tableUri, rowId);
                 // path should never change, and we want to avoid replacing mixed cased paths
@@ -1200,12 +1210,25 @@ public class MediaScanner
             initialize(volumeName);
             prescan(null, true);
             long prescan = System.currentTimeMillis();
-            mFileInserter = new FileInserter();
+
+            // create FileInserters for bulk inserts
+            mAudioInserter = new FileInserter(mAudioUri, 500);
+            mVideoInserter = new FileInserter(mVideoUri, 500);
+            mImageInserter = new FileInserter(mImagesUri, 500);
+            mFileInserter = new FileInserter(mFilesUri, 500);
 
             for (int i = 0; i < directories.length; i++) {
                 processDirectory(directories[i], mClient);
             }
+
+            // flush remaining inserts
+            mAudioInserter.flush();
+            mVideoInserter.flush();
+            mImageInserter.flush();
             mFileInserter.flush();
+            mAudioInserter = null;
+            mVideoInserter = null;
+            mImageInserter = null;
             mFileInserter = null;
 
             long scan = System.currentTimeMillis();
