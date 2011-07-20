@@ -300,15 +300,6 @@
         android:label="@string/permlab_readWriteOwnVoicemail"
         android:description="@string/permdesc_readWriteOwnVoicemail" />
 
-   <!-- Allows an application to read/write all voicemails. In order to be able
-        access all voicemails, this permission is needed in *addition* to
-        READ_WRITE_OWN_VOICEMAIL. -->
-    <permission android:name="com.android.voicemail.permission.READ_WRITE_ALL_VOICEMAIL"
-        android:permissionGroup="android.permission-group.PERSONAL_INFO"
-        android:protectionLevel="signature"
-        android:label="@string/permlab_readWriteAllVoicemail"
-        android:description="@string/permdesc_readWriteAllVoicemail" />
-
     <!-- ======================================= -->
     <!-- Permissions for accessing location info -->
     <!-- ======================================= -->
