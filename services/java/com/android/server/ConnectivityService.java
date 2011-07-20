@@ -484,6 +484,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 continue;
             }
             mCurrentLinkProperties[netType] = null;
+            if (mNetConfigs[netType].isDefault()) mNetTrackers[netType].reconnect();
         }
 
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
