@@ -62,7 +62,7 @@ void MediaScannerClient::beginFile()
     mValues = new StringArray;
 }
 
-bool MediaScannerClient::addStringTag(const char* name, const char* value)
+status_t MediaScannerClient::addStringTag(const char* name, const char* value)
 {
     if (mLocaleEncoding != kEncodingNone) {
         // don't bother caching strings that are all ASCII.
@@ -212,8 +212,10 @@ void MediaScannerClient::endFile()
 
         // finally, push all name/value pairs to the client
         for (int i = 0; i < mNames->size(); i++) {
-            if (!handleStringTag(mNames->getEntry(i), mValues->getEntry(i)))
+            status_t status = handleStringTag(mNames->getEntry(i), mValues->getEntry(i));
+            if (status) {
                 break;
+            }
         }
     }
     // else addStringTag() has done all the work so we have nothing to do
