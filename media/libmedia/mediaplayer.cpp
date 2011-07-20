@@ -84,6 +84,8 @@ void MediaPlayer::disconnect()
     if (p != 0) {
         p->disconnect();
     }
+
+    disconnectNativeWindow();
 }
 
 // always call with lock held
