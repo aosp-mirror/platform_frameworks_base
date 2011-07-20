@@ -1318,9 +1318,6 @@ sp<ISurface> SurfaceFlinger::createSurface(
         if (surfaceHandle != 0) {
             params->token = token;
             params->identity = layer->getIdentity();
-            params->width = w;
-            params->height = h;
-            params->format = format;
             if (normalLayer != 0) {
                 Mutex::Autolock _l(mStateLock);
                 mLayerMap.add(layer->getSurfaceBinder(), normalLayer);
