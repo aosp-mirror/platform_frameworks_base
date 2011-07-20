@@ -29790,7 +29790,7 @@ package java.lang.ref {
     ctor public ReferenceQueue();
     method public synchronized java.lang.ref.Reference<? extends T> poll();
     method public java.lang.ref.Reference<? extends T> remove() throws java.lang.InterruptedException;
-    method public synchronized java.lang.ref.Reference<? extends T> remove(long) throws java.lang.IllegalArgumentException, java.lang.InterruptedException;
+    method public synchronized java.lang.ref.Reference<? extends T> remove(long) throws java.lang.InterruptedException;
   }
 
   public class SoftReference extends java.lang.ref.Reference {
