@@ -5068,6 +5068,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      */
     @Override
     protected int getFadeTop(boolean offsetRequired) {
+        if (mLayout == null) return 0;
+
         int voffset = 0;
         if ((mGravity & Gravity.VERTICAL_GRAVITY_MASK) != Gravity.TOP) {
             voffset = getVerticalOffset(true);
