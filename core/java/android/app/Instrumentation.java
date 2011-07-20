@@ -536,9 +536,11 @@ public class Instrumentation {
          */
         public final Activity waitForActivityWithTimeout(long timeOut) {
             synchronized (this) {
-                try {
-                    wait(timeOut);
-                } catch (InterruptedException e) {
+                if (mLastActivity == null) {
+                    try {
+                        wait(timeOut);
+                    } catch (InterruptedException e) {
+                    }
                 }
                 if (mLastActivity == null) {
                     return null;
