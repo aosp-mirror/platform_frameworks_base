@@ -738,6 +738,14 @@ public final class JsonReader implements Closeable {
         int total;
         while ((total = in.read(buffer, limit, buffer.length - limit)) != -1) {
             limit += total;
+
+            // if this is the first read, consume an optional byte order mark (BOM) if it exists
+            if (bufferStartLine == 1 && bufferStartColumn == 1
+                    && limit > 0 && buffer[0] == '\ufeff') {
+                pos++;
+                bufferStartColumn--;
+            }
+
             if (limit >= minimum) {
                 return true;
             }
