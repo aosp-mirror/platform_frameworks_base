@@ -19,4 +19,5 @@
     <bool name="split_action_bar_is_narrow">true</bool>
     <bool name="preferences_prefer_dual_pane">false</bool>
     <bool name="show_ongoing_ime_switcher">true</bool>
+    <bool name="action_bar_expanded_action_views_exclusive">true</bool>
 </resources>

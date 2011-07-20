@@ -345,11 +345,15 @@ public class ActionBarView extends AbsActionBarView {
         final LayoutParams layoutParams = new LayoutParams(LayoutParams.WRAP_CONTENT,
                 LayoutParams.MATCH_PARENT);
         if (!mSplitActionBar) {
+            mActionMenuPresenter.setExpandedActionViewsExclusive(
+                    getResources().getBoolean(
+                    com.android.internal.R.bool.action_bar_expanded_action_views_exclusive));
             builder.addMenuPresenter(mActionMenuPresenter);
             builder.addMenuPresenter(mExpandedMenuPresenter);
             menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             addView(menuView, layoutParams);
         } else {
+            mActionMenuPresenter.setExpandedActionViewsExclusive(false);
             // Allow full screen width in split mode.
             mActionMenuPresenter.setWidthLimit(
                     getContext().getResources().getDisplayMetrics().widthPixels, true);

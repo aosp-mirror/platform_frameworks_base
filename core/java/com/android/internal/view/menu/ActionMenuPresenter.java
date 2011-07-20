@@ -48,6 +48,7 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
     private boolean mMaxItemsSet;
     private boolean mStrictWidthLimit;
     private boolean mWidthLimitSet;
+    private boolean mExpandedActionViewsExclusive;
 
     private int mMinCellSize;
 
@@ -122,6 +123,10 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
     public void setItemLimit(int itemCount) {
         mMaxItems = itemCount;
         mMaxItemsSet = true;
+    }
+
+    public void setExpandedActionViewsExclusive(boolean isExclusive) {
+        mExpandedActionViewsExclusive = isExclusive;
     }
 
     @Override
@@ -325,6 +330,11 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
                 requestedItems++;
             } else {
                 hasOverflow = true;
+            }
+            if (mExpandedActionViewsExclusive && item.isActionViewExpanded()) {
+                // Overflow everything if we have an expanded action view and we're
+                // space constrained.
+                maxActions = 0;
             }
         }
 
