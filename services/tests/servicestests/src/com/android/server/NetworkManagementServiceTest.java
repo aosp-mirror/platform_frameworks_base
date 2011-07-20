@@ -50,10 +50,9 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
     public void setUp() throws Exception {
         super.setUp();
 
-        final File canonicalFilesDir = getContext().getFilesDir().getCanonicalFile();
-        mTestProc = new File(canonicalFilesDir, "proc");
+        mTestProc = new File(getContext().getFilesDir(), "proc");
         if (mTestProc.exists()) {
-            Files.deleteRecursively(mTestProc);
+            IoUtils.deleteContents(mTestProc);
         }
 
         mService = NetworkManagementService.createForTest(mContext, mTestProc, true);
@@ -64,7 +63,7 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         mService = null;
 
         if (mTestProc.exists()) {
-            Files.deleteRecursively(mTestProc);
+            IoUtils.deleteContents(mTestProc);
         }
 
         super.tearDown();

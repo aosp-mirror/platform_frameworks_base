@@ -23,15 +23,20 @@ import android.net.NetworkTemplate;
 /** {@hide} */
 interface INetworkStatsService {
 
-    /** Return historical stats for traffic that matches template. */
+    /** Return historical network layer stats for traffic that matches template. */
     NetworkStatsHistory getHistoryForNetwork(in NetworkTemplate template);
-    /** Return historical stats for specific UID traffic that matches template. */
+    /** Return historical network layer stats for specific UID traffic that matches template. */
     NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid, int tag);
 
-    /** Return usage summary for traffic that matches template. */
+    /** Return network layer usage summary for traffic that matches template. */
     NetworkStats getSummaryForNetwork(in NetworkTemplate template, long start, long end);
-    /** Return usage summary per UID for traffic that matches template. */
+    /** Return network layer usage summary per UID for traffic that matches template. */
     NetworkStats getSummaryForAllUid(in NetworkTemplate template, long start, long end, boolean includeTags);
+
+    /** Return data layer snapshot of UID network usage. */
+    NetworkStats getDataLayerSnapshotForUid(int uid);
+    /** Increment data layer count of operations performed for UID and tag. */
+    void incrementOperationCount(int uid, int tag, int operationCount);
 
     /** Force update of statistics. */
     void forceUpdate();

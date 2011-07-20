@@ -289,7 +289,7 @@ public class ThrottleServiceTest extends AndroidTestCase {
     public void expectGetInterfaceCounter(long rx, long tx) throws Exception {
         // TODO: provide elapsedRealtime mock to match TimeAuthority
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
-        stats.addValues(TEST_IFACE, NetworkStats.UID_ALL, NetworkStats.TAG_NONE, rx, 0L, tx, 0L);
+        stats.addValues(TEST_IFACE, NetworkStats.UID_ALL, NetworkStats.TAG_NONE, rx, 0L, tx, 0L, 0);
 
         expect(mMockNMService.getNetworkStatsSummary()).andReturn(stats).atLeastOnce();
     }

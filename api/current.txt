@@ -11307,6 +11307,7 @@ package android.net {
     method public static long getUidUdpRxPackets(int);
     method public static long getUidUdpTxBytes(int);
     method public static long getUidUdpTxPackets(int);
+    method public static void incrementOperationCount(int, int);
     method public static void setThreadStatsTag(int);
     method public static deprecated void setThreadStatsTag(java.lang.String);
     method public static void tagSocket(java.net.Socket) throws java.net.SocketException;
