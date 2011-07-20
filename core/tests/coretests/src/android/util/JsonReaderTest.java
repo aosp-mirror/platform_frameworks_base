@@ -857,9 +857,30 @@ public final class JsonReaderTest extends TestCase {
         }
     }
 
+    public void testBomIgnoredAsFirstCharacterOfDocument() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("\ufeff[]"));
+        reader.beginArray();
+        reader.endArray();
+    }
+
+    public void testBomForbiddenAsOtherCharacterInDocument() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[\ufeff]"));
+        reader.beginArray();
+        try {
+            reader.endArray();
+            fail();
+        } catch (IOException expected) {
+        }
+    }
+
     public void testFailWithPosition() throws IOException {
         testFailWithPosition("Expected literal value at line 6 column 3",
                 "[\n\n\n\n\n0,}]");
+    }
+
+    public void testFailWithPositionIsOffsetByBom() throws IOException {
+        testFailWithPosition("Expected literal value at line 1 column 4",
+                "\ufeff[0,}]");
     }
 
     public void testFailWithPositionGreaterThanBufferSize() throws IOException {
