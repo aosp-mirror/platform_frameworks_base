@@ -2160,14 +2160,6 @@
       voicemails that its associated service can access.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether
-        they want to allow the application to do this.  [CHAR LIMIT=NONE] -->
-    <string name="permlab_readWriteAllVoicemail">Access all voicemails</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_readWriteAllVoicemail">Allows the application to store and retrieve all
-      voicemails that this device can access.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. -->
     <string name="permlab_writeGeolocationPermissions">Modify Browser geolocation permissions</string>
     <!-- Description of an application permission, listed so the user can choose whether
