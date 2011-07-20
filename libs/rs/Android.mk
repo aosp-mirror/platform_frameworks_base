@@ -128,7 +128,7 @@ LOCAL_SRC_FILES:= \
 	driver/rsdShaderCache.cpp \
 	driver/rsdVertexArray.cpp
 
-LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc
+LOCAL_SHARED_LIBRARIES += libz libcutils libutils libEGL libGLESv1_CM libGLESv2 libui libbcc libbcinfo
 
 LOCAL_STATIC_LIBRARIES := libdex libft2
 
