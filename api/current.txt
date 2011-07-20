@@ -16231,12 +16231,14 @@ package android.provider {
   }
 
   public static final class ContactsContract.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
+    field public static final java.lang.String PHOTO = "photo";
   }
 
   protected static abstract interface ContactsContract.StreamItemPhotosColumns {
     field public static final java.lang.String ACTION = "action";
     field public static final java.lang.String ACTION_URI = "action_uri";
-    field public static final java.lang.String PICTURE = "picture";
+    field public static final java.lang.String PHOTO_FILE_ID = "photo_file_id";
+    field public static final java.lang.String PHOTO_URI = "photo_uri";
     field public static final java.lang.String SORT_INDEX = "sort_index";
     field public static final java.lang.String STREAM_ITEM_ID = "stream_item_id";
   }
@@ -16246,7 +16248,6 @@ package android.provider {
     field public static final android.net.Uri CONTENT_PHOTO_URI;
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String MAX_ITEMS = "max_items";
-    field public static final java.lang.String PHOTO_MAX_BYTES = "photo_max_bytes";
   }
 
   public static final class ContactsContract.StreamItems.StreamItemPhotos implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemPhotosColumns {
