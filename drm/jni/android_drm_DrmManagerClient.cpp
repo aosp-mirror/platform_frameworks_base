@@ -224,11 +224,12 @@ static sp<DrmManagerClientImpl> getDrmManagerClientImpl(JNIEnv* env, jobject thi
     return sp<DrmManagerClientImpl>(client);
 }
 
-static void android_drm_DrmManagerClient_initialize(
-        JNIEnv* env, jobject thiz, jint uniqueId, jobject weak_thiz) {
+static jint android_drm_DrmManagerClient_initialize(
+        JNIEnv* env, jobject thiz, jobject weak_thiz) {
     LOGV("initialize - Enter");
 
-    sp<DrmManagerClientImpl> drmManager = DrmManagerClientImpl::create(&uniqueId);
+    int uniqueId = 0;
+    sp<DrmManagerClientImpl> drmManager = DrmManagerClientImpl::create(&uniqueId, false);
     drmManager->addClient(uniqueId);
 
     // Set the listener to DrmManager
@@ -237,6 +238,8 @@ static void android_drm_DrmManagerClient_initialize(
 
     setDrmManagerClientImpl(env, thiz, drmManager);
     LOGV("initialize - Exit");
+
+    return uniqueId;
 }
 
 static void android_drm_DrmManagerClient_finalize(JNIEnv* env, jobject thiz, jint uniqueId) {
@@ -711,7 +714,7 @@ static jobject android_drm_DrmManagerClient_closeConvertSession(
 
 static JNINativeMethod nativeMethods[] = {
 
-    {"_initialize", "(ILjava/lang/Object;)V",
+    {"_initialize", "(Ljava/lang/Object;)I",
                                     (void*)android_drm_DrmManagerClient_initialize},
 
     {"_finalize", "(I)V",

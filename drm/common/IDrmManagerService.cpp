@@ -110,11 +110,11 @@ static void clearDecryptHandle(DecryptHandle* handle) {
     handle->extendedData.clear();
 }
 
-int BpDrmManagerService::addUniqueId(int uniqueId) {
+int BpDrmManagerService::addUniqueId(bool isNative) {
     LOGV("add uniqueid");
     Parcel data, reply;
     data.writeInterfaceToken(IDrmManagerService::getInterfaceDescriptor());
-    data.writeInt32(uniqueId);
+    data.writeInt32(isNative);
     remote()->transact(ADD_UNIQUEID, data, &reply);
     return reply.readInt32();
 }
