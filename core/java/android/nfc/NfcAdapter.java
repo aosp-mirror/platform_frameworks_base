@@ -684,6 +684,48 @@ public final class NfcAdapter {
     }
 
     /**
+     * Enable zero-click sharing.
+     *
+     * @hide
+     */
+    public boolean enableZeroClick() {
+        try {
+            return sService.enableZeroClick();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
+     * Disable zero-click sharing.
+     *
+     * @hide
+     */
+    public boolean disableZeroClick() {
+        try {
+            return sService.disableZeroClick();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
+     * Return true if zero-click sharing is enabled.
+     *
+     * @return true if zero-click sharing is enabled
+     */
+    public boolean zeroClickEnabled() {
+        try {
+            return sService.zeroClickEnabled();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return false;
+        }
+    }
+
+    /**
      * @hide
      */
     public INfcAdapterExtras getNfcAdapterExtrasInterface() {
