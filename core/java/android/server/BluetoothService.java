@@ -527,10 +527,19 @@ public class BluetoothService extends IBluetooth.Stub {
                 break;
             case MESSAGE_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY:
                 address = (String)msg.obj;
-                if (address != null) {
+                if (address == null) return;
+                int attempt = mBondState.getAttempt(address);
+
+                // Try only if attemps are in progress and cap it 2 attempts
+                // The 2 attempts cap is a fail safe if the stack returns
+                // an incorrect error code for bonding failures and if the pin
+                // is entered wrongly twice we should abort.
+                if (attempt > 0 && attempt <= 2) {
+                    mBondState.attempt(address);
                     createBond(address);
                     return;
                 }
+                if (attempt > 0) mBondState.clearPinAttempts(address);
                 break;
             }
         }
@@ -741,7 +750,6 @@ public class BluetoothService extends IBluetooth.Stub {
                     BluetoothDevice.BOND_NONE, result);
             return;
         }
-        mBondState.attempt(address);
     }
 
     /*package*/ BluetoothDevice getRemoteDevice(String address) {
