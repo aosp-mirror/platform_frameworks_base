@@ -6330,8 +6330,8 @@ public class WebView extends AbsoluteLayout
         if (action == MotionEvent.ACTION_POINTER_DOWN) {
             cancelTouch();
             action = MotionEvent.ACTION_DOWN;
-        } else if (action == MotionEvent.ACTION_POINTER_UP && ev.getPointerCount() == 2) {
-            // set mLastTouchX/Y to the remaining point
+        } else if (action == MotionEvent.ACTION_POINTER_UP && ev.getPointerCount() >= 2) {
+            // set mLastTouchX/Y to the remaining points for multi-touch.
             mLastTouchX = Math.round(x);
             mLastTouchY = Math.round(y);
         } else if (action == MotionEvent.ACTION_MOVE) {
