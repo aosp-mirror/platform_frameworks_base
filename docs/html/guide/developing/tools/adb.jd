@@ -280,7 +280,7 @@ instance, see <a href="{@docRoot}guide/developing/building/index.html">Building 
 <td>Run PPP over USB.
 <ul>
 <li><code>&lt;tty&gt;</code> &mdash; the tty for PPP stream. For example <code>dev:/dev/omap_csmi_ttyl</code>. </li>
-<li><code>[parm]... </code> &mdash zero or more PPP/PPPD options, such as <code>defaultroute</code>, <code>local</code>, <code>notty</code>, etc.</li></ul>
+<li><code>[parm]... </code> &mdash; zero or more PPP/PPPD options, such as <code>defaultroute</code>, <code>local</code>, <code>notty</code>, etc.</li></ul>
 
 <p>Note that you should not automatically start a PPP connection. </p></td>
 <td></td>

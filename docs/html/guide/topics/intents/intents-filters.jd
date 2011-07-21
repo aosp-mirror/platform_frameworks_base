@@ -927,7 +927,7 @@ as described by its two intent filters:
 
 <p>
 The first, primary, purpose of this activity is to enable the user to 
-interact with a single note &mdash to either {@code VIEW} the note or 
+interact with a single note &mdash; to either {@code VIEW} the note or 
 {@code EDIT} it.  (The {@code EDIT_NOTE} category is a synonym for 
 {@code EDIT}.)  The intent would contain the URI for data matching the 
 MIME type <code>vnd.android.cursor.item/vnd.google.note</code> &mdash;
