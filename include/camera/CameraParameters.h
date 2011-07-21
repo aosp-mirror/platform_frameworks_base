@@ -455,6 +455,16 @@ public:
     // Example: "176x144,1280x720". Read only.
     static const char KEY_SUPPORTED_VIDEO_SIZES[];
 
+    // The maximum number of detected faces supported by hardware face
+    // detection. If the value is 0, hardware face detection is not supported.
+    // Example: "5". Read only
+    static const char KEY_MAX_NUM_DETECTED_FACES_HW[];
+
+    // The maximum number of detected faces supported by software face
+    // detection. If the value is 0, software face detection is not supported.
+    // Example: "5". Read only
+    static const char KEY_MAX_NUM_DETECTED_FACES_SW[];
+
     // Preferred preview frame size in pixels for video recording.
     // The width and height must be one of the supported sizes retrieved
     // via KEY_SUPPORTED_PREVIEW_SIZES. This key can be used only when

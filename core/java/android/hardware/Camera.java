@@ -19,6 +19,7 @@ package android.hardware;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.graphics.ImageFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.os.Handler;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.StringTokenizer;
+
 
 /**
  * The Camera class is used to set image capture settings, start/stop preview,
@@ -128,7 +130,9 @@ public class Camera {
     private static final int CAMERA_MSG_POSTVIEW_FRAME   = 0x040;
     private static final int CAMERA_MSG_RAW_IMAGE        = 0x080;
     private static final int CAMERA_MSG_COMPRESSED_IMAGE = 0x100;
-    private static final int CAMERA_MSG_ALL_MSGS         = 0x1FF;
+    private static final int CAMERA_MSG_RAW_IMAGE_NOTIFY = 0x200;
+    private static final int CAMERA_MSG_FACE             = 0x400;
+    private static final int CAMERA_MSG_ALL_MSGS         = 0x4FF;
 
     private int mNativeContext; // accessed by native methods
     private EventHandler mEventHandler;
@@ -139,9 +143,11 @@ public class Camera {
     private PictureCallback mPostviewCallback;
     private AutoFocusCallback mAutoFocusCallback;
     private OnZoomChangeListener mZoomListener;
+    private FaceDetectionListener mFaceListener;
     private ErrorCallback mErrorCallback;
     private boolean mOneShot;
     private boolean mWithBuffer;
+    private boolean mFaceDetectionRunning = false;
 
     /**
      * Broadcast Action:  A new picture is taken by the camera, and the entry of
@@ -158,6 +164,25 @@ public class Camera {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NEW_VIDEO = "android.hardware.action.NEW_VIDEO";
+
+    /**
+     * Hardware face detection. It does not use much CPU.
+     *
+     * @see #startFaceDetection(int)
+     * @see Parameters#getMaxNumDetectedFaces(int)
+     * @see #CAMERA_FACE_DETECTION_SW
+     * @hide
+     */
+    public static final int CAMERA_FACE_DETECTION_HW = 0;
+
+    /**
+     * Software face detection. It uses some CPU. Applications must use
+     * {@link #setPreviewTexture(SurfaceTexture)} for preview in this mode.
+     *
+     * @see #CAMERA_FACE_DETECTION_HW
+     * @hide
+     */
+    public static final int CAMERA_FACE_DETECTION_SW = 1;
 
     /**
      * Returns the number of physical cameras available on this device.
@@ -295,6 +320,7 @@ public class Camera {
      */
     public final void release() {
         native_release();
+        mFaceDetectionRunning = false;
     }
 
     /**
@@ -460,7 +486,12 @@ public class Camera {
      * Stops capturing and drawing preview frames to the surface, and
      * resets the camera for a future call to {@link #startPreview()}.
      */
-    public native final void stopPreview();
+    public final void stopPreview() {
+        _stopPreview();
+        mFaceDetectionRunning = false;
+    }
+
+    private native final void _stopPreview();
 
     /**
      * Return current preview state.
@@ -687,6 +718,12 @@ public class Camera {
             case CAMERA_MSG_ZOOM:
                 if (mZoomListener != null) {
                     mZoomListener.onZoomChange(msg.arg1, msg.arg2 != 0, mCamera);
+                }
+                return;
+
+            case CAMERA_MSG_FACE:
+                if (mFaceListener != null) {
+                    mFaceListener.onFaceDetection((FaceMetadata[])msg.obj, mCamera);
                 }
                 return;
 
@@ -1031,6 +1068,139 @@ public class Camera {
         mZoomListener = listener;
     }
 
+    /**
+     * Callback interface for face detected in the preview frame.
+     *
+     * @hide
+     */
+    public interface FaceDetectionListener
+    {
+        /**
+         * Notify the listener of the detected faces in the preview frame.
+         *
+         * @param faceMetadata the face information. The list is sorted by the
+         *        score. The highest score is the first element.
+         * @param camera  the Camera service object
+         */
+        void onFaceDetection(FaceMetadata[] faceMetadata, Camera camera);
+    }
+
+    /**
+     * Registers a listener to be notified about the face detected of the
+     * preview frame.
+     *
+     * @param listener the listener to notify
+     * @see #startFaceDetection(int)
+     * @hide
+     */
+    public final void setFaceDetectionListener(FaceDetectionListener listener)
+    {
+        mFaceListener = listener;
+    }
+
+    /**
+     * Start the face detection. This should be called after preview is started.
+     * The camera will notify {@link FaceDetectionListener} of the detected
+     * faces in the preview frame. The detected faces may be the same as the
+     * previous ones. Applications should call {@link #stopFaceDetection} to
+     * stop the face detection. This method is supported if {@link
+     * Parameters#getMaxNumDetectedFaces(int)} returns a number larger than 0.
+     * Hardware and software face detection cannot be used at the same time.
+     * If the face detection has started, apps should not call this again.
+     *
+     * In hardware face detection mode, {@link Parameters#setWhiteBalance(String)},
+     * {@link Parameters#setFocusAreas(List)}, and {@link Parameters#setMeteringAreas(List)}
+     * have no effect.
+     *
+     * @param type face detection type. This can be either {@link
+     *        #CAMERA_FACE_DETECTION_HW} or {@link #CAMERA_FACE_DETECTION_SW}
+     * @throws IllegalArgumentException if the face detection type is
+     *         unsupported or invalid.
+     * @throws RuntimeException if the method fails or the face detection is
+     *         already running.
+     * @see #CAMERA_FACE_DETECTION_HW
+     * @see #CAMERA_FACE_DETECTION_SW
+     * @see FaceDetectionListener
+     * @see #stopFaceDetection()
+     * @see Parameters#getMaxNumDetectedFaces(int)
+     * @hide
+     */
+    public final void startFaceDetection(int type) {
+        if (type != CAMERA_FACE_DETECTION_HW && type != CAMERA_FACE_DETECTION_SW) {
+            throw new IllegalArgumentException("Invalid face detection type " + type);
+        }
+        if (mFaceDetectionRunning) {
+            throw new RuntimeException("Face detection is already running");
+        }
+        _startFaceDetection(type);
+        mFaceDetectionRunning = true;
+    }
+
+    /**
+     * Stop the face detection.
+     *
+     * @see #startFaceDetection(int)
+     * @hide
+     */
+    public final void stopFaceDetection() {
+        _stopFaceDetection();
+        mFaceDetectionRunning = false;
+    }
+
+    private native final void _startFaceDetection(int type);
+    private native final void _stopFaceDetection();
+
+    /**
+     * The information of a face.
+     *
+     * @hide
+     */
+    public static class FaceMetadata {
+        /**
+         * Bounds of the face. (-1000, -1000) represents the top-left of the
+         * camera field of view, and (1000, 1000) represents the bottom-right of
+         * the field of view. This is supported by both hardware and software
+         * face detection.
+         *
+         * @see #startFaceDetection(int)
+         */
+        Rect face;
+
+        /**
+         * The confidence level of the face. The range is 1 to 100. 100 is the
+         * highest confidence. This is supported by both hardware and software
+         * face detction.
+         *
+         * @see #startFaceDetection(int)
+         */
+        int score;
+
+        /**
+         * An unique id per face while the face is visible to the tracker. If
+         * the face leaves the field-of-view and comes back, it will get a new
+         * id. If the value is 0, id is not supported.
+         */
+        int id;
+
+        /**
+         * The coordinates of the center of the left eye. null if this is not
+         * supported.
+         */
+        Point leftEye;
+
+        /**
+         * The coordinates of the center of the right eye. null if this is not
+         * supported.
+         */
+        Point rightEye;
+
+        /**
+         * The coordinates of the center of the mouth. null if this is not
+         * supported.
+         */
+        Point mouth;
+    }
+
     // Error codes match the enum in include/ui/Camera.h
 
     /**
@@ -1295,6 +1465,8 @@ public class Camera {
         private static final String KEY_VIDEO_SIZE = "video-size";
         private static final String KEY_PREFERRED_PREVIEW_SIZE_FOR_VIDEO =
                                             "preferred-preview-size-for-video";
+        private static final String KEY_MAX_NUM_DETECTED_FACES_HW = "max-num-detected-faces-hw";
+        private static final String KEY_MAX_NUM_DETECTED_FACES_SW = "max-num-detected-faces-sw";
 
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
@@ -2975,6 +3147,25 @@ public class Camera {
          */
         public void setMeteringAreas(List<Area> meteringAreas) {
             set(KEY_METERING_AREAS, meteringAreas);
+        }
+
+        /**
+         * Gets the maximum number of detected faces supported. This is the
+         * maximum length of the list returned from {@link FaceDetectionListener}.
+         * If the return value is 0, face detection of the specified type is not
+         * supported.
+         *
+         * @return the maximum number of detected face supported by the camera.
+         * @see #startFaceDetection(int)
+         * @hide
+         */
+        public int getMaxNumDetectedFaces(int type) {
+            if (type == CAMERA_FACE_DETECTION_HW) {
+                return getInt(KEY_MAX_NUM_DETECTED_FACES_HW, 0);
+            } else if (type == CAMERA_FACE_DETECTION_SW){
+                return getInt(KEY_MAX_NUM_DETECTED_FACES_SW, 0);
+            }
+            throw new IllegalArgumentException("Invalid face detection type " + type);
         }
 
         // Splits a comma delimited string to an ArrayList of String.
