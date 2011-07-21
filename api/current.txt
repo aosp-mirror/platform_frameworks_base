@@ -10405,8 +10405,8 @@ package android.media {
     method public void setAudioEncodingBitRate(int);
     method public void setAudioSamplingRate(int);
     method public void setAudioSource(int) throws java.lang.IllegalStateException;
-    method public void setAuxiliaryOutputFile(java.io.FileDescriptor);
-    method public void setAuxiliaryOutputFile(java.lang.String);
+    method public deprecated void setAuxiliaryOutputFile(java.io.FileDescriptor);
+    method public deprecated void setAuxiliaryOutputFile(java.lang.String);
     method public void setCamera(android.hardware.Camera);
     method public void setCaptureRate(double);
     method public void setLocation(float, float);
