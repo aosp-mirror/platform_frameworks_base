@@ -9,8 +9,9 @@
 #include <utils/String8.h>
 #include <utils/KeyedVector.h>
 
-
 #include <iostream>
+#include <dirent.h>
+#include <sys/stat.h>
 
 #include "DirectoryWalker.h"
 #include "FileFinder.h"
@@ -20,6 +21,25 @@
 using android::String8;
 using std::cout;
 using std::endl;
+
+// Private function to check whether a file is a directory or not
+bool isDirectory(const char* filename) {
+    struct stat fileStat;
+    if (stat(filename, &fileStat) == -1) {
+        return false;
+    }
+    return(S_ISDIR(fileStat.st_mode));
+}
+
+
+// Private function to check whether a file is a regular file or not
+bool isFile(const char* filename) {
+    struct stat fileStat;
+    if (stat(filename, &fileStat) == -1) {
+        return false;
+    }
+    return(S_ISREG(fileStat.st_mode));
+}
 
 bool SystemFileFinder::findFiles(String8 basePath, Vector<String8>& extensions,
                                  KeyedVector<String8,time_t>& fileStore,
@@ -45,14 +65,14 @@ bool SystemFileFinder::findFiles(String8 basePath, Vector<String8>& extensions,
 
         String8 fullPath = basePath.appendPathCopy(entryName);
         // If this entry is a directory we'll recurse into it
-        if (entry->d_type == DT_DIR) {
+        if (isDirectory(fullPath.string()) ) {
             DirectoryWalker* copy = dw->clone();
             findFiles(fullPath, extensions, fileStore,copy);
             delete copy;
         }
 
         // If this entry is a file, we'll pass it over to checkAndAddFile
-        if (entry->d_type == DT_REG) {
+        if (isFile(fullPath.string()) ) {
             checkAndAddFile(fullPath,dw->entryStats(),extensions,fileStore);
         }
     }
@@ -90,3 +110,4 @@ void SystemFileFinder::checkAndAddFile(String8 path, const struct stat* stats,
     cout << endl;
 #endif //DEBUG
 }
+
