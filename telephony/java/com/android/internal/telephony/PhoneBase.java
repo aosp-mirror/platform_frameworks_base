@@ -806,10 +806,10 @@ public abstract class PhoneBase extends Handler implements Phone {
         mNotifier.notifyDataConnection(this, reason, apnType, getDataConnectionState(apnType));
     }
 
-    public void notifyDataConnection() {
+    public void notifyDataConnection(String reason) {
         String types[] = getActiveApnTypes();
         for (String apnType : types) {
-            mNotifier.notifyDataConnection(this, null, apnType, getDataConnectionState(apnType));
+            mNotifier.notifyDataConnection(this, reason, apnType, getDataConnectionState(apnType));
         }
     }
 

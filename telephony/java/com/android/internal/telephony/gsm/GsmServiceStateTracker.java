@@ -915,7 +915,7 @@ final class GsmServiceStateTracker extends ServiceStateTracker {
         }
 
         if (hasRadioTechnologyChanged) {
-            phone.notifyDataConnection(Phone.REASON_NW_TYPE_CHANGED, Phone.APN_TYPE_ALL);
+            phone.notifyDataConnection(Phone.REASON_NW_TYPE_CHANGED);
         }
 
         if (hasRoamingOn) {
