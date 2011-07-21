@@ -46,8 +46,6 @@ interface INfcAdapter
 
     // NfcAdapter-class related methods
     boolean isEnabled();
-    NdefMessage localGet();
-    void localSet(in NdefMessage message);
     void enableForegroundDispatch(in ComponentName activity, in PendingIntent intent,
             in IntentFilter[] filters, in TechListParcel techLists);
     void disableForegroundDispatch(in ComponentName activity);
