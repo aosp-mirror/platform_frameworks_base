@@ -214,18 +214,6 @@ jobject videoEditProp_getProperties(
                             "Invalid File or File not found ");
                 }
 
-                /**
-                 * Max resolution supported is 1280 x 720.
-                 */
-                if ( (pClipProperties->uiVideoWidth > 1280)
-                    || (pClipProperties->uiVideoHeight > 720) )
-                {
-                    result = M4MCS_ERR_INVALID_INPUT_VIDEO_FRAME_SIZE;
-                    videoEditJava_checkAndThrowIllegalArgumentException(
-                            &gotten, pEnv, (M4NO_ERROR != result),
-                            "Unsupported input video frame size");
-                }
-
 #ifdef USE_SOFTWARE_DECODER
                 /**
                  * Input clip with non-multiples of 16 is not supported.

@@ -912,11 +912,14 @@ class MediaArtistNativeHelper {
         /** 720p 1280 X 720 */
         public static final int V720p = 10;
 
-        /** 1080 x 720 */
+        /** W720p 1080 x 720 */
         public static final int W720p = 11;
 
-        /** 1080 960 x 720 */
+        /** S720p 960 x 720 */
         public static final int S720p = 12;
+
+        /** 1080p 1920 x 1080 */
+        public static final int V1080p = 13;
     }
 
     /**
@@ -3548,6 +3551,8 @@ class MediaArtistNativeHelper {
                     retValue = VideoFrameSize.WVGA16x9;
                 else if (height == MediaProperties.HEIGHT_720)
                     retValue = VideoFrameSize.V720p;
+                else if (height == MediaProperties.HEIGHT_1080)
+                    retValue = VideoFrameSize.V1080p;
                 break;
             case MediaProperties.ASPECT_RATIO_4_3:
                 if (height == MediaProperties.HEIGHT_480)

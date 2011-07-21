@@ -45,6 +45,18 @@ enum camcorder_quality {
     CAMCORDER_QUALITY_TIME_LAPSE_LIST_END = 1006,
 };
 
+/**
+ *Set CIF as default maximum import and export resolution of video editor.
+ *The maximum import and export resolutions are platform specific,
+ *which should be defined in media_profiles.xml.
+ */
+enum videoeditor_capability {
+    VIDEOEDITOR_DEFAULT_MAX_INPUT_FRAME_WIDTH = 352,
+    VIDEOEDITOR_DEFUALT_MAX_INPUT_FRAME_HEIGHT = 288,
+    VIDEOEDITOR_DEFAULT_MAX_OUTPUT_FRAME_WIDTH = 352,
+    VIDEOEDITOR_DEFUALT_MAX_OUTPUT_FRAME_HEIGHT = 288,
+};
+
 enum video_decoder {
     VIDEO_DECODER_WMV,
 };
@@ -117,6 +129,17 @@ public:
     int getVideoEncoderParamByName(const char *name, video_encoder codec) const;
 
     /**
+     * Returns the value for the given param name for the video editor cap
+     * param or -1 if error.
+     * Supported param name are:
+     * videoeditor.input.width.max - max input video frame width
+     * videoeditor.input.height.max - max input video frame height
+     * videoeditor.output.width.max - max output video frame width
+     * videoeditor.output.height.max - max output video frame height
+     */
+    int getVideoEditorCapParamByName(const char *name) const;
+
+    /**
      * Returns the audio encoders supported.
      */
     Vector<audio_encoder> getAudioEncoders() const;
@@ -164,7 +187,7 @@ private:
 
     MediaProfiles& operator=(const MediaProfiles&);  // Don't call me
     MediaProfiles(const MediaProfiles&);             // Don't call me
-    MediaProfiles() {}                               // Dummy default constructor
+    MediaProfiles() { mVideoEditorCap = NULL; }        // Dummy default constructor
     ~MediaProfiles();                                // Don't delete me
 
     struct VideoCodec {
@@ -310,6 +333,22 @@ private:
         Vector<int> mLevels;
     };
 
+    struct VideoEditorCap {
+        VideoEditorCap(int inFrameWidth, int inFrameHeight,
+            int outFrameWidth, int outFrameHeight)
+            : mMaxInputFrameWidth(inFrameWidth),
+              mMaxInputFrameHeight(inFrameHeight),
+              mMaxOutputFrameWidth(outFrameWidth),
+              mMaxOutputFrameHeight(outFrameHeight) {}
+
+        ~VideoEditorCap() {}
+
+        int mMaxInputFrameWidth;
+        int mMaxInputFrameHeight;
+        int mMaxOutputFrameWidth;
+        int mMaxOutputFrameHeight;
+    };
+
     int getCamcorderProfileIndex(int cameraId, camcorder_quality quality) const;
     void initRequiredProfileRefs(const Vector<int>& cameraIds);
     int getRequiredProfileRefIndex(int cameraId);
@@ -321,6 +360,7 @@ private:
     static void logAudioEncoderCap(const AudioEncoderCap& cap);
     static void logVideoDecoderCap(const VideoDecoderCap& cap);
     static void logAudioDecoderCap(const AudioDecoderCap& cap);
+    static void logVideoEditorCap(const VideoEditorCap& cap);
 
     // If the xml configuration file does exist, use the settings
     // from the xml
@@ -332,6 +372,8 @@ private:
     static VideoDecoderCap* createVideoDecoderCap(const char **atts);
     static VideoEncoderCap* createVideoEncoderCap(const char **atts);
     static AudioEncoderCap* createAudioEncoderCap(const char **atts);
+    static VideoEditorCap* createVideoEditorCap(
+                const char **atts, MediaProfiles *profiles);
 
     static CamcorderProfile* createCamcorderProfile(
                 int cameraId, const char **atts, Vector<int>& cameraIds);
@@ -375,6 +417,7 @@ private:
     static void createDefaultEncoderOutputFileFormats(MediaProfiles *profiles);
     static void createDefaultImageEncodingQualityLevels(MediaProfiles *profiles);
     static void createDefaultImageDecodingMaxMemory(MediaProfiles *profiles);
+    static void createDefaultVideoEditorCap(MediaProfiles *profiles);
     static VideoEncoderCap* createDefaultH263VideoEncoderCap();
     static VideoEncoderCap* createDefaultM4vVideoEncoderCap();
     static AudioEncoderCap* createDefaultAmrNBEncoderCap();
@@ -431,6 +474,7 @@ private:
 
     RequiredProfiles *mRequiredProfileRefs;
     Vector<int>              mCameraIds;
+    VideoEditorCap* mVideoEditorCap;
 };
 
 }; // namespace android

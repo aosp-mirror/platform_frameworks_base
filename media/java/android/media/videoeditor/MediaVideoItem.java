@@ -23,6 +23,7 @@ import java.lang.ref.SoftReference;
 import android.graphics.Bitmap;
 import android.media.videoeditor.MediaArtistNativeHelper.ClipSettings;
 import android.media.videoeditor.MediaArtistNativeHelper.Properties;
+import android.media.videoeditor.VideoEditorProfile;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -118,6 +119,21 @@ public class MediaVideoItem extends MediaItem {
             throw new IllegalArgumentException(e.getMessage() + " : " + filename);
         }
 
+        /** Check the platform specific maximum import resolution */
+        VideoEditorProfile veProfile = VideoEditorProfile.get();
+        if (veProfile == null) {
+            throw new RuntimeException("Can't get the video editor profile");
+        }
+        final int maxInputWidth = veProfile.maxInputVideoFrameWidth;
+        final int maxInputHeight = veProfile.maxInputVideoFrameHeight;
+        if ((properties.width > maxInputWidth) ||
+            (properties.height > maxInputHeight)) {
+            throw new IllegalArgumentException(
+                "Unsupported import resolution. Supported maximum width:" +
+                maxInputWidth + " height:" + maxInputHeight +
+                ", current width:" + properties.width +
+                " height:" + properties.height);
+        }
         switch (mMANativeHelper.getFileType(properties.fileType)) {
             case MediaProperties.FILE_3GP:
             case MediaProperties.FILE_MP4:
