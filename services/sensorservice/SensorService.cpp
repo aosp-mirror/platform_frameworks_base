@@ -586,12 +586,12 @@ status_t SensorService::SensorEventConnection::sendEvents(
     if (size == -EAGAIN) {
         // the destination doesn't accept events anymore, it's probably
         // full. For now, we just drop the events on the floor.
-        LOGW("dropping %d events on the floor", count);
+        //LOGW("dropping %d events on the floor", count);
         return size;
     }
 
-    LOGE_IF(size<0, "dropping %d events on the floor (%s)",
-            count, strerror(-size));
+    //LOGE_IF(size<0, "dropping %d events on the floor (%s)",
+    //        count, strerror(-size));
 
     return size < 0 ? status_t(size) : status_t(NO_ERROR);
 }
