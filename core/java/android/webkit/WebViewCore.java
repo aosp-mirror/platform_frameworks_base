@@ -1069,6 +1069,15 @@ public final class WebViewCore {
                                 + " arg1=" + msg.arg1 + " arg2=" + msg.arg2
                                 + " obj=" + msg.obj);
                     }
+                    if (mWebView == null
+                            && msg.what != EventHub.RESUME_TIMERS
+                            && msg.what != EventHub.PAUSE_TIMERS) {
+                        if (DebugFlags.WEB_VIEW_CORE) {
+                            Log.v(LOGTAG, "Rejecting message " + msg.what
+                                    + " because we are destroyed");
+                        }
+                        return;
+                    }
                     switch (msg.what) {
                         case WEBKIT_DRAW:
                             webkitDraw();
@@ -1757,30 +1766,17 @@ public final class WebViewCore {
     }
 
     /**
-     * Removes pending messages and trigger a DESTROY message to send to
-     * WebCore.
+     * Sends a DESTROY message to WebCore.
      * Called from UI thread.
      */
     void destroy() {
-        // We don't want anyone to post a message between removing pending
-        // messages and sending the destroy message.
         synchronized (mEventHub) {
-            // RESUME_TIMERS and PAUSE_TIMERS are per process base. They need to
-            // be preserved even the WebView is destroyed.
-            // Note: we should not have more than one RESUME_TIMERS/PAUSE_TIMERS
-            boolean hasResume = mEventHub.hasMessages(EventHub.RESUME_TIMERS);
-            boolean hasPause = mEventHub.hasMessages(EventHub.PAUSE_TIMERS);
-            mEventHub.removeMessages();
+            // Do not call removeMessages as then we risk removing PAUSE_TIMERS
+            // or RESUME_TIMERS messages, which we must still handle as they
+            // are per process. DESTROY will instead trigger a white list in
+            // mEventHub, skipping any remaining messages in the queue
             mEventHub.sendMessageAtFrontOfQueue(
                     Message.obtain(null, EventHub.DESTROY));
-            if (hasPause) {
-                mEventHub.sendMessageAtFrontOfQueue(
-                        Message.obtain(null, EventHub.PAUSE_TIMERS));
-            }
-            if (hasResume) {
-                mEventHub.sendMessageAtFrontOfQueue(
-                        Message.obtain(null, EventHub.RESUME_TIMERS));
-            }
             mEventHub.blockMessages();
         }
     }
@@ -2113,13 +2109,17 @@ public final class WebViewCore {
 
     // called from JNI or WebView thread
     /* package */ void contentDraw() {
-        // don't update the Picture until we have an initial width and finish
-        // the first layout
-        if (mCurrentViewWidth == 0 || !mBrowserFrame.firstLayoutDone()) {
-            return;
-        }
-        // only fire an event if this is our first request
         synchronized (this) {
+            if (mWebView == null || mBrowserFrame == null) {
+                // We were destroyed
+                return;
+            }
+            // don't update the Picture until we have an initial width and finish
+            // the first layout
+            if (mCurrentViewWidth == 0 || !mBrowserFrame.firstLayoutDone()) {
+                return;
+            }
+            // only fire an event if this is our first request
             if (mDrawIsScheduled) return;
             mDrawIsScheduled = true;
             if (mDrawIsPaused) return;
