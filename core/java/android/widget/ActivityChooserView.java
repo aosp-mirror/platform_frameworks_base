@@ -307,7 +307,6 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         ActivityChooserModel dataModel = mAdapter.getDataModel();
         if (dataModel != null) {
             dataModel.registerObserver(mModelDataSetOberver);
-            dataModel.readHistoricalData();
         }
         mIsAttachedToWindow = true;
     }
@@ -318,7 +317,6 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         ActivityChooserModel dataModel = mAdapter.getDataModel();
         if (dataModel != null) {
             dataModel.unregisterObserver(mModelDataSetOberver);
-            dataModel.persistHistoricalData();
         }
         mIsAttachedToWindow = false;
     }
