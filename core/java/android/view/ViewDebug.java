@@ -26,6 +26,7 @@ import android.os.Environment;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Printer;
@@ -53,6 +54,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -455,11 +457,19 @@ public class ViewDebug {
 
         private static final String LOG_TAG = "LooperProfiler";
 
+        private final long mTraceWallStart;
+        private final long mTraceThreadStart;
+        
         private final ArrayList<Entry> mTraces = new ArrayList<Entry>(512);
         private final File mTraceFile;
 
-        public LooperProfiler(File traceFile) {
+        private final HashMap<String, Short> mTraceNames = new HashMap<String, Short>(32);
+        private short mTraceId = 0;
+
+        LooperProfiler(File traceFile) {
             mTraceFile = traceFile;
+            mTraceWallStart = SystemClock.currentTimeMicro();
+            mTraceThreadStart = SystemClock.currentThreadTimeMicro();            
         }
 
         @Override
@@ -468,15 +478,26 @@ public class ViewDebug {
         }
 
         @Override
-        public void profile(Message message, long wallStart, long wallTime, long threadTime) {
+        public void profile(Message message, long wallStart, long wallTime,
+                long threadStart, long threadTime) {
             Entry entry = new Entry();
-            entry.messageId = message.what;
-            entry.name = message.getTarget().getMessageName(message);
+            entry.traceId = getTraceId(message);
             entry.wallStart = wallStart;
             entry.wallTime = wallTime;
+            entry.threadStart = threadStart;
             entry.threadTime = threadTime;
 
             mTraces.add(entry);
+        }
+
+        private short getTraceId(Message message) {
+            String name = message.getTarget().getMessageName(message);
+            Short traceId = mTraceNames.get(name);
+            if (traceId == null) {
+                traceId = mTraceId++;
+                mTraceNames.put(name, traceId);
+            }
+            return traceId;
         }
 
         void save() {
@@ -502,6 +523,14 @@ public class ViewDebug {
 
             try {
                 out.writeInt(LOOPER_PROFILER_VERSION);
+                out.writeLong(mTraceWallStart);
+                out.writeLong(mTraceThreadStart);
+
+                out.writeInt(mTraceNames.size());
+                for (Map.Entry<String, Short> entry : mTraceNames.entrySet()) {
+                    saveTraceName(entry.getKey(), entry.getValue(), out);
+                }
+
                 out.writeInt(mTraces.size());
                 for (Entry entry : mTraces) {
                     saveTrace(entry, out);
@@ -519,19 +548,24 @@ public class ViewDebug {
             }
         }
 
+        private void saveTraceName(String name, short id, DataOutputStream out) throws IOException {
+            out.writeShort(id);
+            out.writeUTF(name);
+        }
+
         private void saveTrace(Entry entry, DataOutputStream out) throws IOException {
-            out.writeInt(entry.messageId);
-            out.writeUTF(entry.name);
+            out.writeShort(entry.traceId);
             out.writeLong(entry.wallStart);
             out.writeLong(entry.wallTime);
+            out.writeLong(entry.threadStart);
             out.writeLong(entry.threadTime);
         }
 
         static class Entry {
-            int messageId;
-            String name;
+            short traceId;
             long wallStart;
             long wallTime;
+            long threadStart;
             long threadTime;
         }
     }

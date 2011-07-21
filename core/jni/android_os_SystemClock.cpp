@@ -80,6 +80,38 @@ static jlong android_os_SystemClock_currentThreadTimeMillis(JNIEnv* env,
 }
 
 /*
+ * native public static long currentThreadTimeMicro();
+ */
+static jlong android_os_SystemClock_currentThreadTimeMicro(JNIEnv* env,
+        jobject clazz)
+{
+#if defined(HAVE_POSIX_CLOCKS)
+    struct timespec tm;
+
+    clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tm);
+
+    return tm.tv_sec * 1000000LL + tm.tv_nsec / 1000;
+#else
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec * 1000000LL + tv.tv_nsec / 1000;
+#endif
+}
+
+/*
+ * native public static long currentTimeMicro();
+ */
+static jlong android_os_SystemClock_currentTimeMicro(JNIEnv* env,
+        jobject clazz)
+{
+    struct timeval tv;
+
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec * 1000000LL + tv.tv_usec;
+}
+
+/*
  * JNI registration.
  */
 static JNINativeMethod gMethods[] = {
@@ -92,6 +124,10 @@ static JNINativeMethod gMethods[] = {
             (void*) android_os_SystemClock_elapsedRealtime },
     { "currentThreadTimeMillis",      "()J",
             (void*) android_os_SystemClock_currentThreadTimeMillis },
+    { "currentThreadTimeMicro",       "()J",
+            (void*) android_os_SystemClock_currentThreadTimeMicro },
+    { "currentTimeMicro",             "()J",
+            (void*) android_os_SystemClock_currentTimeMicro },
 };
 int register_android_os_SystemClock(JNIEnv* env)
 {

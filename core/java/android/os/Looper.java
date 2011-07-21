@@ -130,19 +130,20 @@ public class Looper {
                 if (logging != null) {
                     logging.println(">>>>> Dispatching to " + msg.target + " " +
                             msg.callback + ": " + msg.what);
-                    wallStart = System.currentTimeMillis();
-                    threadStart = SystemClock.currentThreadTimeMillis();
+                    wallStart = SystemClock.currentTimeMicro();
+                    threadStart = SystemClock.currentThreadTimeMicro();
                 }
 
                 msg.target.dispatchMessage(msg);
 
                 if (logging != null) {
-                    long wallTime = System.currentTimeMillis() - wallStart;
-                    long threadTime = SystemClock.currentThreadTimeMillis() - threadStart;
+                    long wallTime = SystemClock.currentTimeMicro() - wallStart;
+                    long threadTime = SystemClock.currentThreadTimeMicro() - threadStart;
 
                     logging.println("<<<<< Finished to " + msg.target + " " + msg.callback);
                     if (logging instanceof Profiler) {
-                        ((Profiler) logging).profile(msg, wallStart, wallTime, threadTime);
+                        ((Profiler) logging).profile(msg, wallStart, wallTime,
+                                threadStart, threadTime);
                     }
                 }
 
@@ -247,6 +248,7 @@ public class Looper {
      * @hide
      */
     public static interface Profiler {
-        void profile(Message message, long wallStart, long wallTime, long threadTime);
+        void profile(Message message, long wallStart, long wallTime,
+                long threadStart, long threadTime);
     }
 }

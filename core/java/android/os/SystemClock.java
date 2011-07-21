@@ -157,4 +157,22 @@ public final class SystemClock {
      * @return elapsed milliseconds in the thread
      */
     public static native long currentThreadTimeMillis();
+
+    /**
+     * Returns microseconds running in the current thread.
+     * 
+     * @return elapsed microseconds in the thread
+     * 
+     * @hide
+     */
+    public static native long currentThreadTimeMicro();
+
+    /**
+     * Returns current wall time in  microseconds.
+     * 
+     * @return elapsed microseconds in wall time
+     * 
+     * @hide
+     */
+    public static native long currentTimeMicro();
 }
