@@ -284,7 +284,7 @@ public interface IActivityManager extends IInterface {
     
     // Turn on/off profiling in a particular process.
     public boolean profileControl(String process, boolean start,
-            String path, ParcelFileDescriptor fd) throws RemoteException;
+            String path, ParcelFileDescriptor fd, int profileType) throws RemoteException;
     
     public boolean shutdown(int timeout) throws RemoteException;
     

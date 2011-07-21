@@ -676,11 +676,12 @@ public final class ActivityThread {
             queueOrSendMessage(H.ACTIVITY_CONFIGURATION_CHANGED, token);
         }
 
-        public void profilerControl(boolean start, String path, ParcelFileDescriptor fd) {
+        public void profilerControl(boolean start, String path, ParcelFileDescriptor fd,
+                int profileType) {
             ProfilerControlData pcd = new ProfilerControlData();
             pcd.path = path;
             pcd.fd = fd;
-            queueOrSendMessage(H.PROFILER_CONTROL, pcd, start ? 1 : 0);
+            queueOrSendMessage(H.PROFILER_CONTROL, pcd, start ? 1 : 0, profileType);
         }
 
         public void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd) {
@@ -1148,7 +1149,7 @@ public final class ActivityThread {
                     handleActivityConfigurationChanged((IBinder)msg.obj);
                     break;
                 case PROFILER_CONTROL:
-                    handleProfilerControl(msg.arg1 != 0, (ProfilerControlData)msg.obj);
+                    handleProfilerControl(msg.arg1 != 0, (ProfilerControlData)msg.obj, msg.arg2);
                     break;
                 case CREATE_BACKUP_AGENT:
                     handleCreateBackupAgent((CreateBackupAgentData)msg.obj);
@@ -3469,11 +3470,18 @@ public final class ActivityThread {
         performConfigurationChanged(r.activity, mCompatConfiguration);
     }
 
-    final void handleProfilerControl(boolean start, ProfilerControlData pcd) {
+    final void handleProfilerControl(boolean start, ProfilerControlData pcd, int profileType) {
         if (start) {
             try {
-                Debug.startMethodTracing(pcd.path, pcd.fd.getFileDescriptor(),
-                        8 * 1024 * 1024, 0);
+                switch (profileType) {
+                    case 1:
+                        ViewDebug.startLooperProfiling(pcd.path, pcd.fd.getFileDescriptor());
+                        break;
+                    default:
+                        Debug.startMethodTracing(pcd.path, pcd.fd.getFileDescriptor(),
+                                8 * 1024 * 1024, 0);
+                        break;
+                }
             } catch (RuntimeException e) {
                 Slog.w(TAG, "Profiling failed on path " + pcd.path
                         + " -- can the process access this path?");
@@ -3485,7 +3493,15 @@ public final class ActivityThread {
                 }
             }
         } else {
-            Debug.stopMethodTracing();
+            switch (profileType) {
+                case 1:
+                    ViewDebug.stopLooperProfiling();
+                    break;
+                default:
+                    Debug.stopMethodTracing();
+                    break;
+                    
+            }
         }
     }
 

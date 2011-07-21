@@ -93,12 +93,9 @@ public class ListActivity extends Activity {
     }
     
     public void startProfiling(View v) {
-        ViewDebug.startLooperProfiling(new File(Environment.getExternalStorageDirectory(),
-                "looper.trace"));
     }
     
     public void stopProfiling(View v) {
-        ViewDebug.stopLooperProfiling();
     }
 
     @Override

@@ -1107,7 +1107,8 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             String path = data.readString();
             ParcelFileDescriptor fd = data.readInt() != 0
                     ? data.readFileDescriptor() : null;
-            boolean res = profileControl(process, start, path, fd);
+            int profileType = data.readInt();
+            boolean res = profileControl(process, start, path, fd, profileType);
             reply.writeNoException();
             reply.writeInt(res ? 1 : 0);
             return true;
@@ -2888,7 +2889,7 @@ class ActivityManagerProxy implements IActivityManager
     }
     
     public boolean profileControl(String process, boolean start,
-            String path, ParcelFileDescriptor fd) throws RemoteException
+            String path, ParcelFileDescriptor fd, int profileType) throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -2902,6 +2903,7 @@ class ActivityManagerProxy implements IActivityManager
         } else {
             data.writeInt(0);
         }
+        data.writeInt(profileType);
         mRemote.transact(PROFILE_CONTROL_TRANSACTION, data, reply, 0);
         reply.readException();
         boolean res = reply.readInt() != 0;
