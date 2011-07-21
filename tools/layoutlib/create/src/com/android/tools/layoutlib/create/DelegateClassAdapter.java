@@ -117,8 +117,10 @@ public class DelegateClassAdapter extends ClassAdapter {
 
         int accessDelegate = access;
         // change access to public for the original one
-        access &= ~(Opcodes.ACC_PROTECTED | Opcodes.ACC_PRIVATE);
-        access |= Opcodes.ACC_PUBLIC;
+        if (Main.sOptions.generatePublicAccess) {
+            access &= ~(Opcodes.ACC_PROTECTED | Opcodes.ACC_PRIVATE);
+            access |= Opcodes.ACC_PUBLIC;
+        }
 
         MethodVisitor mwOriginal = super.visitMethod(access, name + ORIGINAL_SUFFIX,
                                                      desc, signature, exceptions);

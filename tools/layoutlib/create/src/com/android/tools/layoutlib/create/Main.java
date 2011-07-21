@@ -37,13 +37,19 @@ import java.util.Set;
  * which does:
  * <pre>
  * $ make layoutlib_create &lt;bunch of framework jars&gt;
- * $ out/host/linux-x86/framework/bin/layoutlib_create \
+ * $ java -jar out/host/linux-x86/framework/layoutlib_create.jar \
  *        out/host/common/obj/JAVA_LIBRARIES/temp_layoutlib_intermediates/javalib.jar \
  *        out/target/common/obj/JAVA_LIBRARIES/core_intermediates/classes.jar \
  *        out/target/common/obj/JAVA_LIBRARIES/framework_intermediates/classes.jar
  * </pre>
  */
 public class Main {
+
+    public static class Options {
+        public boolean generatePublicAccess = true;
+    }
+
+    public static final Options sOptions = new Options();
 
     public static void main(String[] args) {
 
@@ -53,7 +59,7 @@ public class Main {
         String[] osDestJar = { null };
 
         if (!processArgs(log, args, osJarPath, osDestJar)) {
-            log.error("Usage: layoutlib_create [-v] output.jar input.jar ...");
+            log.error("Usage: layoutlib_create [-v] [-p] output.jar input.jar ...");
             System.exit(1);
         }
 
@@ -135,6 +141,8 @@ public class Main {
             String s = args[i];
             if (s.equals("-v")) {
                 log.setVerbose(true);
+            } else if (s.equals("-p")) {
+                sOptions.generatePublicAccess = false;
             } else if (!s.startsWith("-")) {
                 if (osDestJar[0] == null) {
                     osDestJar[0] = s;
