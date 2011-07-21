@@ -127,7 +127,7 @@ static void recorderCallback(int event, void* user, void *info) {
 static int
 android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         jint source, jint sampleRateInHertz, jint channels,
-        jint audioFormat, jint buffSizeInBytes)
+        jint audioFormat, jint buffSizeInBytes, jintArray jSession)
 {
     //LOGV(">> Entering android_media_AudioRecord_setup");
     //LOGV("sampleRate=%d, audioFormat=%d, channels=%x, buffSizeInBytes=%d",
@@ -162,6 +162,20 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         return AUDIORECORD_ERROR_SETUP_INVALIDSOURCE;
     }
 
+    if (jSession == NULL) {
+        LOGE("Error creating AudioRecord: invalid session ID pointer");
+        return AUDIORECORD_ERROR;
+    }
+
+    jint* nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    if (nSession == NULL) {
+        LOGE("Error creating AudioRecord: Error retrieving session id pointer");
+        return AUDIORECORD_ERROR;
+    }
+    int sessionId = nSession[0];
+    env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+    nSession = NULL;
+
     audiorecord_callback_cookie *lpCallbackData = NULL;
     AudioRecord* lpRecorder = NULL;
 
@@ -193,12 +207,23 @@ android_media_AudioRecord_setup(JNIEnv *env, jobject thiz, jobject weak_this,
         recorderCallback,// callback_t
         lpCallbackData,// void* user
         0,             // notificationFrames,
-        true);         // threadCanCallJava)
+        true,          // threadCanCallJava)
+        sessionId);
 
     if(lpRecorder->initCheck() != NO_ERROR) {
         LOGE("Error creating AudioRecord instance: initialization check failed.");
         goto native_init_failure;
     }
+
+    nSession = (jint *) env->GetPrimitiveArrayCritical(jSession, NULL);
+    if (nSession == NULL) {
+        LOGE("Error creating AudioRecord: Error retrieving session id pointer");
+        goto native_init_failure;
+    }
+    // read the audio session ID back from AudioTrack in case a new session was created during set()
+    nSession[0] = lpRecorder->getSessionId();
+    env->ReleasePrimitiveArrayCritical(jSession, nSession, 0);
+    nSession = NULL;
 
     // save our newly created C++ AudioRecord in the "nativeRecorderInJavaObj" field 
     // of the Java object
@@ -485,7 +510,7 @@ static JNINativeMethod gMethods[] = {
     // name,               signature,  funcPtr
     {"native_start",         "()I",    (void *)android_media_AudioRecord_start},
     {"native_stop",          "()V",    (void *)android_media_AudioRecord_stop},
-    {"native_setup",         "(Ljava/lang/Object;IIIII)I",
+    {"native_setup",         "(Ljava/lang/Object;IIIII[I)I",
                                        (void *)android_media_AudioRecord_setup},
     {"native_finalize",      "()V",    (void *)android_media_AudioRecord_finalize},
     {"native_release",       "()V",    (void *)android_media_AudioRecord_release},
