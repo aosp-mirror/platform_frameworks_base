@@ -10,6 +10,10 @@
 #include "ResourceTable.h"
 #include "Images.h"
 
+#include "CrunchCache.h"
+#include "FileFinder.h"
+#include "CacheUpdater.h"
+
 #define NOISY(x) // x
 
 // ==========================================================================
@@ -293,18 +297,19 @@ static status_t makeFileResources(Bundle* bundle, const sp<AaptAssets>& assets,
 static status_t preProcessImages(Bundle* bundle, const sp<AaptAssets>& assets,
                           const sp<ResourceTypeSet>& set, const char* type)
 {
-    ResourceDirIterator it(set, String8(type));
-    Vector<sp<AaptFile> > newNameFiles;
-    Vector<String8> newNamePaths;
     bool hasErrors = false;
-    ssize_t res;
-    while ((res=it.next()) == NO_ERROR) {
-        res = preProcessImage(bundle, assets, it.getFile(), NULL);
-        if (res < NO_ERROR) {
-            hasErrors = true;
+    ssize_t res = NO_ERROR;
+    if (bundle->getUseCrunchCache() == false) {
+        ResourceDirIterator it(set, String8(type));
+        Vector<sp<AaptFile> > newNameFiles;
+        Vector<String8> newNamePaths;
+        while ((res=it.next()) == NO_ERROR) {
+            res = preProcessImage(bundle, assets, it.getFile(), NULL);
+            if (res < NO_ERROR) {
+                hasErrors = true;
+            }
         }
     }
-
     return (hasErrors || (res < NO_ERROR)) ? UNKNOWN_ERROR : NO_ERROR;
 }
 
@@ -753,6 +758,35 @@ status_t massageManifest(Bundle* bundle, sp<XMLNode> root)
                 n ## s = resources->valueAt(index); \
             } \
         } while (0)
+
+status_t updatePreProcessedCache(Bundle* bundle)
+{
+    #if BENCHMARK
+    fprintf(stdout, "BENCHMARK: Starting PNG PreProcessing \n");
+    long startPNGTime = clock();
+    #endif /* BENCHMARK */
+
+    String8 source(bundle->getResourceSourceDirs()[0]);
+    String8 dest(bundle->getCrunchedOutputDir());
+
+    FileFinder* ff = new SystemFileFinder();
+    CrunchCache cc(source,dest,ff);
+
+    CacheUpdater* cu = new SystemCacheUpdater(bundle);
+    size_t numFiles = cc.crunch(cu);
+
+    if (bundle->getVerbose())
+        fprintf(stdout, "Crunched %d PNG files to update cache\n", (int)numFiles);
+
+    delete ff;
+    delete cu;
+
+    #if BENCHMARK
+    fprintf(stdout, "BENCHMARK: End PNG PreProcessing. Time Elapsed: %f ms \n"
+            ,(clock() - startPNGTime)/1000.0);
+    #endif /* BENCHMARK */
+    return 0;
+}
 
 status_t buildResources(Bundle* bundle, const sp<AaptAssets>& assets)
 {
