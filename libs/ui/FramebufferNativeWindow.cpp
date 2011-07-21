@@ -310,35 +310,21 @@ int FramebufferNativeWindow::perform(ANativeWindow* window,
         int operation, ...)
 {
     switch (operation) {
-        case NATIVE_WINDOW_SET_USAGE:
-            // TODO: we should implement this
-            return NO_ERROR;
         case NATIVE_WINDOW_CONNECT:
-            // TODO: we should implement this
-            return NO_ERROR;
         case NATIVE_WINDOW_DISCONNECT:
-            // TODO: we should implement this
-            return NO_ERROR;
-        case NATIVE_WINDOW_LOCK:
-            return INVALID_OPERATION;
-        case NATIVE_WINDOW_UNLOCK_AND_POST:
-            return INVALID_OPERATION;
-        case NATIVE_WINDOW_SET_CROP:
-            return INVALID_OPERATION;
-        case NATIVE_WINDOW_SET_BUFFER_COUNT:
-            // TODO: we should implement this
-            return INVALID_OPERATION;
+        case NATIVE_WINDOW_SET_USAGE:
         case NATIVE_WINDOW_SET_BUFFERS_GEOMETRY:
-            return INVALID_OPERATION;
-        case NATIVE_WINDOW_SET_BUFFERS_TRANSFORM:
-            return INVALID_OPERATION;
-        case NATIVE_WINDOW_SET_BUFFERS_TIMESTAMP:
-            return INVALID_OPERATION;
         case NATIVE_WINDOW_SET_BUFFERS_DIMENSIONS:
-            return INVALID_OPERATION;
         case NATIVE_WINDOW_SET_BUFFERS_FORMAT:
-            // TODO: we should implement this
+        case NATIVE_WINDOW_SET_BUFFERS_TRANSFORM:
+            // TODO: we should implement these
             return NO_ERROR;
+
+        case NATIVE_WINDOW_LOCK:
+        case NATIVE_WINDOW_UNLOCK_AND_POST:
+        case NATIVE_WINDOW_SET_CROP:
+        case NATIVE_WINDOW_SET_BUFFER_COUNT:
+        case NATIVE_WINDOW_SET_BUFFERS_TIMESTAMP:
         case NATIVE_WINDOW_SET_SCALING_MODE:
             return INVALID_OPERATION;
     }
