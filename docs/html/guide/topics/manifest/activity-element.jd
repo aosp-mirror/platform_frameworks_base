@@ -28,7 +28,9 @@ parent.link=manifest-intro.html
           android:<a href="#proc">process</a>="<i>string</i>"
           android:<a href="#screen">screenOrientation</a>=["unspecified" | "user" | "behind" |
                                      "landscape" | "portrait" |
-                                     "sensor" | "nosensor"]
+                                     "reverseLandscape" | "reversePortrait" |
+                                     "sensorLandscape" | "sensorPortrait" |
+                                     "sensor" | "fullSensor" | "nosensor"]
           android:<a href="#state">stateNotNeeded</a>=["true" | "false"]
           android:<a href="#aff">taskAffinity</a>="<i>string</i>"
           android:<a href="#theme">theme</a>="<i>resource or theme</i>"
@@ -589,12 +591,6 @@ The value can be any one of the following strings:
        uses, and therefore the choices made in specific contexts, may differ 
        from device to device.</td>
 </tr><tr>
-   <td>"{@code landscape}"</td>
-   <td>Landscape orientation (the display is wider than it is tall).</td>
-</tr><tr>
-   <td>"{@code portrait}"</td>
-   <td>Portrait orientation (the display is taller than it is wide).</td>
-</tr><tr>
    <td>"{@code user}"</td>
    <td>The user's current preferred orientation.</td>
 </tr><tr>
@@ -602,16 +598,47 @@ The value can be any one of the following strings:
    <td>The same orientation as the activity that's immediately beneath it in 
        the activity stack.</td>
 </tr><tr>
+   <td>"{@code landscape}"</td>
+   <td>Landscape orientation (the display is wider than it is tall).</td>
+</tr><tr>
+   <td>"{@code portrait}"</td>
+   <td>Portrait orientation (the display is taller than it is wide).</td>
+</tr><tr>
+   <td>"{@code reverseLandscape}"</td>
+   <td>Landscape orientation in the opposite direction from normal landscape.
+<em>Added in API level 9.</em></td>
+</tr><tr>
+   <td>"{@code reversePortrait}"</td>
+   <td>Portrait orientation in the opposite direction from normal portrait.
+<em>Added in API level 9.</em></td>
+</tr><tr>
+   <td>"{@code sensorLandscape}"</td>
+   <td>Landscape orientation, but can be either normal or reverse landscape based on the device
+sensor.
+<em>Added in API level 9.</em></td>
+</tr><tr>
+   <td>"{@code sensorPortrait}"</td>
+   <td>Portrait orientation, but can be either normal or reverse portrait based on the device
+sensor.
+<em>Added in API level 9.</em></td>
+</tr><tr>
    <td>"{@code sensor}"</td>
-   <td>The orientation determined by a physical orientation sensor.  The 
-       orientation of the display depends on how the user is holding the device; 
-       it changes when the user rotates the device.</td>
+   <td>The orientation is determined by the device orientation sensor.  The orientation of the
+display depends on how the user is holding the device; it changes when the user rotates the
+device. Some devices, though, will not rotate to all four possible orientations, by default. To
+allow all four orientations, use {@code "fullSensor"}.</td>
+</tr><tr>
+   <td>"{@code fullSensor}"</td>
+   <td>The orientation is determined by the device orientation sensor for any of the 4 orientations.
+This is similar to {@code "sensor"} except this allows any of the 4 possible screen orientations,
+regardless of what the device will normally do (for example, some devices won't normally use reverse
+portrait or reverse landscape, but this enables those). <em>Added in API level 9.</em></td>
 </tr><tr>
    <td>"{@code nosensor}"</td>
-   <td>An orientation determined without reference to a physical orientation sensor.  
-       The sensor is ignored, so the display will not rotate based on how the user 
-       moves the device.  Except for this distinction, the system chooses the 
-       orientation using the same policy as for the "{@code unspecified}" setting.</td>
+   <td>The orientation is determined without reference to a physical orientation sensor.  The sensor
+is ignored, so the display will not rotate based on how the user moves the device.  Except for this
+distinction, the system chooses the orientation using the same policy as for the "{@code
+unspecified}" setting.</td>
 </tr>
 </table></dd>
 
