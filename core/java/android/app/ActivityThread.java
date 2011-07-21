@@ -954,7 +954,7 @@ public final class ActivityThread {
         }
 
         public void scheduleTrimMemory(int level) {
-            queueOrSendMessage(H.TRIM_MEMORY, level);
+            queueOrSendMessage(H.TRIM_MEMORY, null, level);
         }
     }
 
@@ -1184,8 +1184,10 @@ public final class ActivityThread {
                     break;
                 case UPDATE_PACKAGE_COMPATIBILITY_INFO:
                     handleUpdatePackageCompatibilityInfo((UpdateCompatibilityData)msg.obj);
+                    break;
                 case TRIM_MEMORY:
                     handleTrimMemory(msg.arg1);
+                    break;
             }
             if (DEBUG_MESSAGES) Slog.v(TAG, "<<< done: " + msg.what);
         }

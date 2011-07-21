@@ -66,6 +66,7 @@ class ProcessRecord {
     boolean setIsForeground;    // Running foreground UI when last set?
     boolean foregroundServices; // Running any services that are foreground?
     boolean foregroundActivities; // Running any activities that are foreground?
+    boolean hasShownUi;         // Has UI been shown in this process since it was started?
     boolean bad;                // True if disabled in the bad process list
     boolean killedBackground;   // True when proc has been killed due to too many bg
     String waitingToKill;       // Process is waiting to be killed when in the bg; reason
@@ -185,6 +186,7 @@ class ProcessRecord {
         pw.print(prefix); pw.print("curSchedGroup="); pw.print(curSchedGroup);
                 pw.print(" setSchedGroup="); pw.print(setSchedGroup);
                 pw.print(" trimMemoryLevel="); pw.println(trimMemoryLevel);
+                pw.print(" hasShownUi="); pw.println(hasShownUi);
         pw.print(prefix); pw.print("setIsForeground="); pw.print(setIsForeground);
                 pw.print(" foregroundServices="); pw.print(foregroundServices);
                 pw.print(" forcingToForeground="); pw.println(forcingToForeground);

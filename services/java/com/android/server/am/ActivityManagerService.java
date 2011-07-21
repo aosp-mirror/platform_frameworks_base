@@ -3628,6 +3628,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.setSchedGroup = Process.THREAD_GROUP_BG_NONINTERACTIVE;
         app.forcingToForeground = null;
         app.foregroundServices = false;
+        app.hasShownUi = false;
         app.debugging = false;
 
         mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
@@ -9218,6 +9219,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.forcingToForeground = null;
         app.foregroundServices = false;
         app.foregroundActivities = false;
+        app.hasShownUi = false;
 
         killServicesLocked(app, true);
 
@@ -9331,8 +9333,6 @@ public final class ActivityManagerService extends ActivityManagerNative
             // This app is persistent, so we need to keep its record around.
             // If it is not already on the pending app list, add it there
             // and start a new process for it.
-            app.forcingToForeground = null;
-            app.foregroundServices = false;
             if (mPersistentStartingProcesses.indexOf(app) < 0) {
                 mPersistentStartingProcesses.add(app);
                 restart = true;
@@ -12728,21 +12728,31 @@ public final class ActivityManagerService extends ActivityManagerNative
             while (jt.hasNext() && adj > FOREGROUND_APP_ADJ) {
                 ServiceRecord s = jt.next();
                 if (s.startRequested) {
-                    if (now < (s.lastActivity+MAX_SERVICE_INACTIVITY)) {
-                        // This service has seen some activity within
-                        // recent memory, so we will keep its process ahead
-                        // of the background processes.
+                    if (app.hasShownUi) {
+                        // If this process has shown some UI, let it immediately
+                        // go to the LRU list because it may be pretty heavy with
+                        // UI stuff.  We'll tag it with a label just to help
+                        // debug and understand what is going on.
                         if (adj > SECONDARY_SERVER_ADJ) {
-                            adj = SECONDARY_SERVER_ADJ;
-                            app.adjType = "started-services";
-                            app.hidden = false;
+                            app.adjType = "started-bg-ui-services";
                         }
-                    }
-                    // If we have let the service slide into the background
-                    // state, still have some text describing what it is doing
-                    // even though the service no longer has an impact.
-                    if (adj > SECONDARY_SERVER_ADJ) {
-                        app.adjType = "started-bg-services";
+                    } else {
+                        if (now < (s.lastActivity+MAX_SERVICE_INACTIVITY)) {
+                            // This service has seen some activity within
+                            // recent memory, so we will keep its process ahead
+                            // of the background processes.
+                            if (adj > SECONDARY_SERVER_ADJ) {
+                                adj = SECONDARY_SERVER_ADJ;
+                                app.adjType = "started-services";
+                                app.hidden = false;
+                            }
+                        }
+                        // If we have let the service slide into the background
+                        // state, still have some text describing what it is doing
+                        // even though the service no longer has an impact.
+                        if (adj > SECONDARY_SERVER_ADJ) {
+                            app.adjType = "started-bg-services";
+                        }
                     }
                     // Don't kill this process because it is doing work; it
                     // has said it is doing work.
@@ -13351,15 +13361,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                                 break;
                         }
                     }
-                } else if (app.curAdj >= PERCEPTIBLE_APP_ADJ) {
-                    if (app.trimMemoryLevel < ComponentCallbacks.TRIM_MEMORY_INVISIBLE
+                } else if (app.curAdj == HEAVY_WEIGHT_APP_ADJ) {
+                    if (app.trimMemoryLevel < ComponentCallbacks.TRIM_MEMORY_BACKGROUND
                             && app.thread != null) {
                         try {
-                            app.thread.scheduleTrimMemory(ComponentCallbacks.TRIM_MEMORY_INVISIBLE);
+                            app.thread.scheduleTrimMemory(ComponentCallbacks.TRIM_MEMORY_BACKGROUND);
                         } catch (RemoteException e) {
                         }
                     }
-                    app.trimMemoryLevel = ComponentCallbacks.TRIM_MEMORY_INVISIBLE;
+                    app.trimMemoryLevel = ComponentCallbacks.TRIM_MEMORY_BACKGROUND;
                 } else {
                     app.trimMemoryLevel = 0;
                 }

@@ -559,6 +559,7 @@ final class ActivityStack {
             r.forceNewConfig = false;
             showAskCompatModeDialogLocked(r);
             r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
+            app.hasShownUi = true;
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
                     System.identityHashCode(r),
                     r.info, r.compat, r.icicle, results, newIntents, !andResume,
