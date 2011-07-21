@@ -715,6 +715,7 @@ public final class NfcAdapter {
      * Return true if zero-click sharing is enabled.
      *
      * @return true if zero-click sharing is enabled
+     * @hide
      */
     public boolean zeroClickEnabled() {
         try {
