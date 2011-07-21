@@ -25,6 +25,8 @@ public:
     virtual bool findFiles(String8 basePath, Vector<String8>& extensions,
                            KeyedVector<String8,time_t>& fileStore,
                            DirectoryWalker* dw) = 0;
+
+    virtual ~FileFinder() {};
 };
 
 class SystemFileFinder : public FileFinder {
