@@ -56,11 +56,8 @@ public interface ComponentCallbacks {
     static final int TRIM_MEMORY_COMPLETE = 80;
 
     /** @hide */
-    static final int TRIM_MEMORY_MODERATE = 60;
+    static final int TRIM_MEMORY_MODERATE = 50;
 
     /** @hide */
-    static final int TRIM_MEMORY_BACKGROUND = 40;
-
-    /** @hide */
-    static final int TRIM_MEMORY_INVISIBLE = 20;
+    static final int TRIM_MEMORY_BACKGROUND = 20;
 }
