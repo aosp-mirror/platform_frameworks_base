@@ -9119,20 +9119,12 @@ public class WebView extends AbsoluteLayout
         return nativeTileProfilingNumTilesInFrame(frame);
     }
     /** @hide only used by profiling tests */
-    public int tileProfilingGetX(int frame, int tile) {
-        return nativeTileProfilingGetX(frame, tile);
+    public int tileProfilingGetInt(int frame, int tile, String key) {
+        return nativeTileProfilingGetInt(frame, tile, key);
     }
     /** @hide only used by profiling tests */
-    public int tileProfilingGetY(int frame, int tile) {
-        return nativeTileProfilingGetY(frame, tile);
-    }
-    /** @hide only used by profiling tests */
-    public boolean tileProfilingGetReady(int frame, int tile) {
-        return nativeTileProfilingGetReady(frame, tile);
-    }
-    /** @hide only used by profiling tests */
-    public int tileProfilingGetLevel(int frame, int tile) {
-        return nativeTileProfilingGetLevel(frame, tile);
+    public float tileProfilingGetFloat(int frame, int tile, String key) {
+        return nativeTileProfilingGetFloat(frame, tile, key);
     }
 
     private native int nativeCacheHitFramePointer();
@@ -9262,10 +9254,8 @@ public class WebView extends AbsoluteLayout
     private native void     nativeTileProfilingClear();
     private native int      nativeTileProfilingNumFrames();
     private native int      nativeTileProfilingNumTilesInFrame(int frame);
-    private native int      nativeTileProfilingGetX(int frame, int tile);
-    private native int      nativeTileProfilingGetY(int frame, int tile);
-    private native boolean  nativeTileProfilingGetReady(int frame, int tile);
-    private native int      nativeTileProfilingGetLevel(int frame, int tile);
+    private native int      nativeTileProfilingGetInt(int frame, int tile, String key);
+    private native float    nativeTileProfilingGetFloat(int frame, int tile, String key);
     // Never call this version except by updateCachedTextfield(String) -
     // we always want to pass in our generation number.
     private native void     nativeUpdateCachedTextfield(String updatedText,

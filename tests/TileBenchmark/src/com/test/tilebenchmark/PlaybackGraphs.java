@@ -28,19 +28,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class PlaybackGraphs {
-    private static final int BAR_WIDTH = PlaybackView.TILEX * 3;
+    private static final int BAR_WIDTH = PlaybackView.TILE_SCALE * 3;
     private static final float CANVAS_SCALE = 0.2f;
     private static final double IDEAL_FRAMES = 60;
     private static final int LABELOFFSET = 100;
     private static Paint whiteLabels;
 
-    private static double viewportCoverage(int l, int b, int r, int t,
-            int tileIndexX,
-            int tileIndexY) {
-        if (tileIndexX * PlaybackView.TILEX < r
-                && (tileIndexX + 1) * PlaybackView.TILEX >= l
-                && tileIndexY * PlaybackView.TILEY < t
-                && (tileIndexY + 1) * PlaybackView.TILEY >= b) {
+    private static double viewportCoverage(TileData view, TileData tile) {
+        if (tile.left < view.right
+                && tile.right >= view.left
+                && tile.top < view.bottom
+                && tile.bottom >= view.top) {
             return 1.0f;
         }
         return 0.0f;
@@ -76,13 +74,10 @@ public class PlaybackGraphs {
                 // coverage graph
                 @Override
                 public double getValue(TileData[] frame) {
-                    int l = frame[0].x, b = frame[0].y;
-                    int r = frame[1].x, t = frame[1].y;
                     double total = 0, totalCount = 0;
-                    for (int tileID = 2; tileID < frame.length; tileID++) {
+                    for (int tileID = 1; tileID < frame.length; tileID++) {
                         TileData data = frame[tileID];
-                        double coverage = viewportCoverage(l, b, r, t, data.x,
-                                data.y);
+                        double coverage = viewportCoverage(frame[0], data);
                         total += coverage * (data.isReady ? 1 : 0);
                         totalCount += coverage;
                     }
@@ -158,7 +153,7 @@ public class PlaybackGraphs {
     public PlaybackGraphs() {
         whiteLabels = new Paint();
         whiteLabels.setColor(Color.WHITE);
-        whiteLabels.setTextSize(PlaybackView.TILEY / 3);
+        whiteLabels.setTextSize(PlaybackView.TILE_SCALE / 3);
     }
 
     private ArrayList<ShapeDrawable> mShapes = new ArrayList<ShapeDrawable>();
@@ -177,11 +172,13 @@ public class PlaybackGraphs {
             int lastBar = 0;
             for (int frameIndex = 0; frameIndex < tileProfilingData.length; frameIndex++) {
                 TileData frame[] = tileProfilingData[frameIndex];
-                int newBar = (frame[0].y + frame[1].y) / 2;
+                int newBar = (frame[0].top + frame[0].bottom) / 2;
 
                 MetricGen s = Metrics[metricIndex];
                 double absoluteValue = s.getValue(frame);
                 double relativeValue = absoluteValue / s.getMax();
+                relativeValue = Math.min(1,relativeValue);
+                relativeValue = Math.max(0,relativeValue);
                 int rightPos = (int) (-BAR_WIDTH * metricIndex);
                 int leftPos = (int) (-BAR_WIDTH * (metricIndex + relativeValue));
 
@@ -207,7 +204,7 @@ public class PlaybackGraphs {
             ArrayList<ShapeDrawable> shapes) {
         // Shapes drawn here are drawn relative to the viewRect
         Rect viewRect = shapes.get(shapes.size() - 1).getBounds();
-        canvas.translate(0, 5 * PlaybackView.TILEY - viewRect.top);
+        canvas.translate(0, 5 * PlaybackView.TILE_SCALE - viewRect.top);
 
         for (ShapeDrawable shape : mShapes) {
             shape.draw(canvas);
@@ -234,13 +231,15 @@ public class PlaybackGraphs {
             int yPos = LABELOFFSET;
             canvas.drawText(label, xPos, yPos, whiteLabels);
             for (int statIndex = 0; statIndex < Stats.length; statIndex++) {
-                label = resources.getString(R.string.format_stat, mStats[metricIndex][statIndex]);
-                yPos = LABELOFFSET + (1 + statIndex) * PlaybackView.TILEY / 2;
+                label = resources.getString(R.string.format_stat,
+                        mStats[metricIndex][statIndex]);
+                yPos = LABELOFFSET + (1 + statIndex) * PlaybackView.TILE_SCALE
+                        / 2;
                 canvas.drawText(label, xPos, yPos, whiteLabels);
             }
         }
         for (int stringIndex = 0; stringIndex < strings.length; stringIndex++) {
-            int yPos = LABELOFFSET + stringIndex * PlaybackView.TILEY / 2;
+            int yPos = LABELOFFSET + stringIndex * PlaybackView.TILE_SCALE / 2;
             canvas.drawText(strings[stringIndex], 0, yPos, whiteLabels);
         }
     }

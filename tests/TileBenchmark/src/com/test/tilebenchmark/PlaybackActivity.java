@@ -27,6 +27,7 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -102,7 +103,10 @@ public class PlaybackActivity extends Activity {
         @Override
         protected void onPostExecute(TileData data[][]) {
             if (data == null) {
-                data = genTestPattern();
+                Toast.makeText(getApplicationContext(),
+                        getResources().getString(R.string.error_no_data),
+                        Toast.LENGTH_LONG).show();
+                return;
             }
             mPlaybackView.setData(data);
 
@@ -165,24 +169,5 @@ public class PlaybackActivity extends Activity {
         mPlaybackView.setOnGestureListener(new TouchFrameChangeListener());
 
         new LoadFileTask().execute(ProfileActivity.TEMP_FILENAME);
-    }
-
-    private TileData[][] genTestPattern() {
-        final int XMAX = 5;
-        final int FRAMEMAX = 99;
-
-        TileData example[][] = new TileData[FRAMEMAX][];
-        for (int frame = 0; frame < FRAMEMAX; frame++) {
-            int numTiles = frame + 10;
-
-            example[frame] = new TileData[numTiles];
-            for (int t = 0; t < numTiles; t++) {
-                int x = t % XMAX;
-                int y = t / XMAX;
-                boolean isReady = y * 10 < frame;
-                example[frame][t] = new TileData(x, y, isReady, 0);
-            }
-        }
-        return example;
     }
 }

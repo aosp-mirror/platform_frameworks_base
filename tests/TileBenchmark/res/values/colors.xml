@@ -18,8 +18,17 @@
     <color name="ready_tile">#ff4ac230</color>
     <!-- The color of tiles with stale / invalid textures -->
     <color name="unready_tile">#ff744400</color>
-    <!-- Background color for logged URLs -->
-    <color name="finished_url">#ff004000</color>
-    <!-- Background color for URLs with logging in progress -->
-    <color name="unfinished_url">#ff400000</color>
+    <!-- Viewport overlay in playback -->
+    <color name="view">#50000050</color>
+    <!-- Invalidated region overlay in playback - start color -->
+    <color name="inval_region_start">#80ff0000</color>
+    <!-- Invalidated region overlay in playback - stop color-->
+    <color name="inval_region_stop">#80ffffff</color>
+
+    <!-- Background color for not testing -->
+    <color name="background_not_testing">#ff000000</color>
+    <!-- Background color for during testing -->
+    <color name="background_start_testing">#ff400000</color>
+    <!-- Background color for testing complete -->
+    <color name="background_stop_testing">#ff004000</color>
 </resources>

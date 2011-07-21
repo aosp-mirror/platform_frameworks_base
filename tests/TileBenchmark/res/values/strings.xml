@@ -28,6 +28,10 @@
     <string name="loadbutton">Load</string>
     <!-- Button, opens the playback activity [CHAR LIMIT=20] -->
     <string name="inspect_log">Inspect Log</string>
+    <!-- ToggleButton label when pressing starts capture [CHAR LIMIT=15] -->
+    <string name="capture_start">Start Capture</string>
+    <!-- ToggleButton label when pressing stops capture [CHAR LIMIT=15] -->
+    <string name="capture_stop">Stop Capture</string>
     <!-- The speed of auto-scrolling [CHAR LIMIT=30] -->
     <string name="desired_scroll_velocity">Choose Scroll Velocity</string>
     <!-- Pixels moved per frame [CHAR LIMIT=10] -->
@@ -39,6 +43,21 @@
         <item>200</item>
         <item>400</item>
     </string-array>
+    <!-- Drop down menu for selecting scrolling vs manual navigation for
+    capturing [CHAR LIMIT=15] -->
+    <string name="movement_method">Movement Method</string>
+    <!-- Drop down menu entry - automatically scroll to the end of the page
+    with scrollBy() [CHAR LIMIT=15] -->
+    <string name="movement_auto_scroll">Auto-scroll</string>
+    <!-- Drop down menu entry -  [CHAR LIMIT=15] -->
+    <string name="movement_auto_fling">Auto-fling</string>
+    <!-- Drop down menu entry - manually navigate the page(s), hit 'capture'
+    button [CHAR LIMIT=15] -->
+    <string name="movement_manual">Manual</string>
+
+    <!-- Error popup indicating log data couldn't be loaded [CHAR LIMIT=60] -->
+    <string name="error_no_data">Error: log data could not be loaded.</string>
+
     <!-- 25th percentile - 25% of frames fall below this value [CHAR LIMIT=12]
     -->
     <string name="percentile_25">25%ile</string>
@@ -56,7 +75,7 @@
     <string name="format_stat">%4.4f</string>
     <!-- Format string for displaying aggregate stats+values (nr of valid tiles,
     etc.) [CHAR LIMIT=20] -->
-    <string name="format_stat_name">%1$9s %2$3d</string>
+    <string name="format_stat_name">%1$-20s %2$3d</string>
     <!-- Text hovering over canvas, number of tiles ready [CHAR LIMIT=15] -->
     <string name="ready_tiles">Ready Tiles</string>
     <!-- Text hovering over canvas, number tiles not ready [CHAR LIMIT=15] -->
@@ -64,4 +83,7 @@
     <!-- Text hovering over canvas, number of tiles that haven't been
     allocated to a place on the page [CHAR LIMIT=15] -->
     <string name="unplaced_tiles">Unplaced Tiles</string>
+    <!-- Text hovering over canvas, number of invalidated regions this frame
+    [CHAR LIMIT=15] -->
+    <string name="number_invalidates">Invalidates</string>
 </resources>
