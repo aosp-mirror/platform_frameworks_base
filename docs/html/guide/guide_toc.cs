@@ -733,9 +733,16 @@
       <li><a href="<?cs var:toroot ?>guide/practices/design/accessibility.html">
             <span class="en">Designing for Accessibility</span>
           </a></li>
-      <li><a href="<?cs var:toroot ?>guide/practices/design/performance.html">
+      <li class="toggle-list">
+        <div><a href="<?cs var:toroot ?>guide/practices/design/performance.html">
             <span class="en">Designing for Performance</span>
-          </a></li>
+          </a> <span class="new-child">new!</span></div>
+        <ul>
+          <li><a href="<?cs var:toroot ?>guide/practices/design/jni.html">
+                <span class="en">JNI Tips</span>
+              </a> <span class="new">new!</span></li>
+        </ul>
+      </li>
       <li><a href="<?cs var:toroot ?>guide/practices/design/responsiveness.html">
             <span class="en">Designing for Responsiveness</span>
           </a></li>

@@ -6,7 +6,6 @@ page.title=JNI Tips
 
 <h2>In this document</h2>
 <ol>
-  <li><a href="#what">What is JNI?</a></li>
   <li><a href="#JavaVM_and_JNIEnv">JavaVM and JNIEnv</a></li>
   <li><a href="#threads">Threads</a></li>
   <li><a href="#jclass_jmethodID_and_jfieldID">jclass, jmethodID, and jfieldID</a></li>
@@ -26,9 +25,6 @@ page.title=JNI Tips
 
 </div>
 </div>
-
-<a name="what_is_jni" id="what_is_jni"></a>
-<h2>What is JNI?</h2>
 
 <p>JNI is the Java Native Interface.  It defines a way for code written in the
 Java programming language to interact with native
