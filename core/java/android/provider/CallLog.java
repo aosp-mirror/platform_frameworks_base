@@ -184,6 +184,16 @@ public class CallLog {
         public static final String VOICEMAIL_URI = "voicemail_uri";
 
         /**
+         * Whether this item has been read or otherwise consumed by the user.
+         * <p>
+         * Unlike the {@link #NEW} field, which requires the user to have acknowledged the
+         * existence of the entry, this implies the user has interacted with the entry.
+         * <P>Type: INTEGER (boolean)</P>
+         * @hide
+         */
+        public static final String IS_READ = "is_read";
+
+        /**
          * Adds a call to the call log.
          *
          * @param ci the CallerInfo object to get the target contact from.  Can be null
