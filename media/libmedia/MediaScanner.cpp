@@ -47,16 +47,15 @@ const char *MediaScanner::locale() const {
     return mLocale;
 }
 
-status_t MediaScanner::processDirectory(
-        const char *path, MediaScannerClient &client,
-        ExceptionCheck exceptionCheck, void *exceptionEnv) {
+MediaScanResult MediaScanner::processDirectory(
+        const char *path, MediaScannerClient &client) {
     int pathLength = strlen(path);
     if (pathLength >= PATH_MAX) {
-        return UNKNOWN_ERROR;
+        return MEDIA_SCAN_RESULT_SKIPPED;
     }
     char* pathBuffer = (char *)malloc(PATH_MAX + 1);
     if (!pathBuffer) {
-        return UNKNOWN_ERROR;
+        return MEDIA_SCAN_RESULT_ERROR;
     }
 
     int pathRemaining = PATH_MAX - pathLength;
@@ -69,21 +68,18 @@ status_t MediaScanner::processDirectory(
 
     client.setLocale(locale());
 
-    status_t result =
-        doProcessDirectory(pathBuffer, pathRemaining, client, false, exceptionCheck, exceptionEnv);
+    MediaScanResult result = doProcessDirectory(pathBuffer, pathRemaining, client, false);
 
     free(pathBuffer);
 
     return result;
 }
 
-status_t MediaScanner::doProcessDirectory(
-        char *path, int pathRemaining, MediaScannerClient &client,
-        bool noMedia, ExceptionCheck exceptionCheck, void *exceptionEnv) {
+MediaScanResult MediaScanner::doProcessDirectory(
+        char *path, int pathRemaining, MediaScannerClient &client, bool noMedia) {
     // place to copy file or directory name
     char* fileSpot = path + strlen(path);
     struct dirent* entry;
-    struct stat statbuf;
 
     // Treat all files as non-media in directories that contain a  ".nomedia" file
     if (pathRemaining >= 8 /* strlen(".nomedia") */ ) {
@@ -99,76 +95,88 @@ status_t MediaScanner::doProcessDirectory(
 
     DIR* dir = opendir(path);
     if (!dir) {
-        LOGD("opendir %s failed, errno: %d", path, errno);
-        return UNKNOWN_ERROR;
+        LOGW("Error opening directory '%s', skipping: %s.", path, strerror(errno));
+        return MEDIA_SCAN_RESULT_SKIPPED;
     }
 
+    MediaScanResult result = MEDIA_SCAN_RESULT_OK;
     while ((entry = readdir(dir))) {
-        const char* name = entry->d_name;
-
-        // ignore "." and ".."
-        if (name[0] == '.' && (name[1] == 0 || (name[1] == '.' && name[2] == 0))) {
-            continue;
+        if (doProcessDirectoryEntry(path, pathRemaining, client, noMedia, entry, fileSpot)
+                == MEDIA_SCAN_RESULT_ERROR) {
+            result = MEDIA_SCAN_RESULT_ERROR;
+            break;
         }
+    }
+    closedir(dir);
+    return result;
+}
 
-        int nameLength = strlen(name);
-        if (nameLength + 1 > pathRemaining) {
-            // path too long!
-            continue;
+MediaScanResult MediaScanner::doProcessDirectoryEntry(
+        char *path, int pathRemaining, MediaScannerClient &client, bool noMedia,
+        struct dirent* entry, char* fileSpot) {
+    struct stat statbuf;
+    const char* name = entry->d_name;
+
+    // ignore "." and ".."
+    if (name[0] == '.' && (name[1] == 0 || (name[1] == '.' && name[2] == 0))) {
+        return MEDIA_SCAN_RESULT_SKIPPED;
+    }
+
+    int nameLength = strlen(name);
+    if (nameLength + 1 > pathRemaining) {
+        // path too long!
+        return MEDIA_SCAN_RESULT_SKIPPED;
+    }
+    strcpy(fileSpot, name);
+
+    int type = entry->d_type;
+    if (type == DT_UNKNOWN) {
+        // If the type is unknown, stat() the file instead.
+        // This is sometimes necessary when accessing NFS mounted filesystems, but
+        // could be needed in other cases well.
+        if (stat(path, &statbuf) == 0) {
+            if (S_ISREG(statbuf.st_mode)) {
+                type = DT_REG;
+            } else if (S_ISDIR(statbuf.st_mode)) {
+                type = DT_DIR;
+            }
+        } else {
+            LOGD("stat() failed for %s: %s", path, strerror(errno) );
         }
-        strcpy(fileSpot, name);
+    }
+    if (type == DT_DIR) {
+        bool childNoMedia = noMedia;
+        // set noMedia flag on directories with a name that starts with '.'
+        // for example, the Mac ".Trashes" directory
+        if (name[0] == '.')
+            childNoMedia = true;
 
-        int type = entry->d_type;
-        if (type == DT_UNKNOWN) {
-            // If the type is unknown, stat() the file instead.
-            // This is sometimes necessary when accessing NFS mounted filesystems, but
-            // could be needed in other cases well.
-            if (stat(path, &statbuf) == 0) {
-                if (S_ISREG(statbuf.st_mode)) {
-                    type = DT_REG;
-                } else if (S_ISDIR(statbuf.st_mode)) {
-                    type = DT_DIR;
-                }
-            } else {
-                LOGD("stat() failed for %s: %s", path, strerror(errno) );
+        // report the directory to the client
+        if (stat(path, &statbuf) == 0) {
+            status_t status = client.scanFile(path, statbuf.st_mtime, 0,
+                    true /*isDirectory*/, childNoMedia);
+            if (status) {
+                return MEDIA_SCAN_RESULT_ERROR;
             }
         }
-        if (type == DT_REG || type == DT_DIR) {
-            if (type == DT_DIR) {
-                bool childNoMedia = noMedia;
-                // set noMedia flag on directories with a name that starts with '.'
-                // for example, the Mac ".Trashes" directory
-                if (name[0] == '.')
-                    childNoMedia = true;
 
-                // report the directory to the client
-                if (stat(path, &statbuf) == 0) {
-                    client.scanFile(path, statbuf.st_mtime, 0, true, childNoMedia);
-                }
-
-                // and now process its contents
-                strcat(fileSpot, "/");
-                int err = doProcessDirectory(path, pathRemaining - nameLength - 1, client,
-                        childNoMedia, exceptionCheck, exceptionEnv);
-                if (err) {
-                    // pass exceptions up - ignore other errors
-                    if (exceptionCheck && exceptionCheck(exceptionEnv)) goto failure;
-                    LOGE("Error processing '%s' - skipping\n", path);
-                    continue;
-                }
-            } else {
-                stat(path, &statbuf);
-                client.scanFile(path, statbuf.st_mtime, statbuf.st_size, false, noMedia);
-                if (exceptionCheck && exceptionCheck(exceptionEnv)) goto failure;
-            }
+        // and now process its contents
+        strcat(fileSpot, "/");
+        MediaScanResult result = doProcessDirectory(path, pathRemaining - nameLength - 1,
+                client, childNoMedia);
+        if (result == MEDIA_SCAN_RESULT_ERROR) {
+            return MEDIA_SCAN_RESULT_ERROR;
+        }
+    } else if (type == DT_REG) {
+        stat(path, &statbuf);
+        status_t status = client.scanFile(path, statbuf.st_mtime, statbuf.st_size,
+                false /*isDirectory*/, noMedia);
+        if (status) {
+            return MEDIA_SCAN_RESULT_ERROR;
         }
     }
 
-    closedir(dir);
-    return OK;
-failure:
-    closedir(dir);
-    return -1;
+    return MEDIA_SCAN_RESULT_OK;
 }
 
 }  // namespace android

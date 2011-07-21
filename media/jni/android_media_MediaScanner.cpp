@@ -46,6 +46,16 @@ struct fields_t {
 };
 static fields_t fields;
 
+static status_t checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName) {
+    if (env->ExceptionCheck()) {
+        LOGE("An exception was thrown by callback '%s'.", methodName);
+        LOGE_EX(env);
+        env->ExceptionClear();
+        return UNKNOWN_ERROR;
+    }
+    return OK;
+}
+
 class MyMediaScannerClient : public MediaScannerClient
 {
 public:
@@ -86,9 +96,7 @@ public:
         mEnv->DeleteGlobalRef(mClient);
     }
 
-    // Returns true if it succeeded, false if an exception occured
-    // in the Java code
-    virtual bool scanFile(const char* path, long long lastModified,
+    virtual status_t scanFile(const char* path, long long lastModified,
             long long fileSize, bool isDirectory, bool noMedia)
     {
         LOGV("scanFile: path(%s), time(%lld), size(%lld) and isDir(%d)",
@@ -96,27 +104,29 @@ public:
 
         jstring pathStr;
         if ((pathStr = mEnv->NewStringUTF(path)) == NULL) {
-            return false;
+            mEnv->ExceptionClear();
+            return NO_MEMORY;
         }
 
         mEnv->CallVoidMethod(mClient, mScanFileMethodID, pathStr, lastModified,
                 fileSize, isDirectory, noMedia);
 
         mEnv->DeleteLocalRef(pathStr);
-        return (!mEnv->ExceptionCheck());
+        return checkAndClearExceptionFromCallback(mEnv, "scanFile");
     }
 
-    // Returns true if it succeeded, false if an exception occured
-    // in the Java code
-    virtual bool handleStringTag(const char* name, const char* value)
+    virtual status_t handleStringTag(const char* name, const char* value)
     {
         LOGV("handleStringTag: name(%s) and value(%s)", name, value);
         jstring nameStr, valueStr;
         if ((nameStr = mEnv->NewStringUTF(name)) == NULL) {
-            return false;
+            mEnv->ExceptionClear();
+            return NO_MEMORY;
         }
         if ((valueStr = mEnv->NewStringUTF(value)) == NULL) {
-            return false;
+            mEnv->DeleteLocalRef(nameStr);
+            mEnv->ExceptionClear();
+            return NO_MEMORY;
         }
 
         mEnv->CallVoidMethod(
@@ -124,23 +134,22 @@ public:
 
         mEnv->DeleteLocalRef(nameStr);
         mEnv->DeleteLocalRef(valueStr);
-        return (!mEnv->ExceptionCheck());
+        return checkAndClearExceptionFromCallback(mEnv, "handleStringTag");
     }
 
-    // Returns true if it succeeded, false if an exception occured
-    // in the Java code
-    virtual bool setMimeType(const char* mimeType)
+    virtual status_t setMimeType(const char* mimeType)
     {
         LOGV("setMimeType: %s", mimeType);
         jstring mimeTypeStr;
         if ((mimeTypeStr = mEnv->NewStringUTF(mimeType)) == NULL) {
-            return false;
+            mEnv->ExceptionClear();
+            return NO_MEMORY;
         }
 
         mEnv->CallVoidMethod(mClient, mSetMimeTypeMethodID, mimeTypeStr);
 
         mEnv->DeleteLocalRef(mimeTypeStr);
-        return (!mEnv->ExceptionCheck());
+        return checkAndClearExceptionFromCallback(mEnv, "setMimeType");
     }
 
 private:
@@ -151,12 +160,6 @@ private:
     jmethodID mSetMimeTypeMethodID;
 };
 
-
-static bool ExceptionCheck(void* env)
-{
-    LOGV("ExceptionCheck");
-    return ((JNIEnv *)env)->ExceptionCheck();
-}
 
 static MediaScanner *getNativeScanner_l(JNIEnv* env, jobject thiz)
 {
@@ -190,7 +193,10 @@ android_media_MediaScanner_processDirectory(
     }
 
     MyMediaScannerClient myClient(env, client);
-    mp->processDirectory(pathStr, myClient, ExceptionCheck, env);
+    MediaScanResult result = mp->processDirectory(pathStr, myClient);
+    if (result == MEDIA_SCAN_RESULT_ERROR) {
+        LOGE("An error occurred while scanning directory '%s'.", pathStr);
+    }
     env->ReleaseStringUTFChars(path, pathStr);
 }
 
@@ -227,7 +233,10 @@ android_media_MediaScanner_processFile(
     }
 
     MyMediaScannerClient myClient(env, client);
-    mp->processFile(pathStr, mimeTypeStr, myClient);
+    MediaScanResult result = mp->processFile(pathStr, mimeTypeStr, myClient);
+    if (result == MEDIA_SCAN_RESULT_ERROR) {
+        LOGE("An error occurred while scanning file '%s'.", pathStr);
+    }
     env->ReleaseStringUTFChars(path, pathStr);
     if (mimeType) {
         env->ReleaseStringUTFChars(mimeType, mimeTypeStr);

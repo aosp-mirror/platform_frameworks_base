@@ -52,13 +52,13 @@ static bool FileHasAcceptableExtension(const char *extension) {
     return false;
 }
 
-static status_t HandleMIDI(
+static MediaScanResult HandleMIDI(
         const char *filename, MediaScannerClient *client) {
     // get the library configuration and do sanity check
     const S_EAS_LIB_CONFIG* pLibConfig = EAS_Config();
     if ((pLibConfig == NULL) || (LIB_VERSION != pLibConfig->libVersion)) {
         LOGE("EAS library/header mismatch\n");
-        return UNKNOWN_ERROR;
+        return MEDIA_SCAN_RESULT_ERROR;
     }
     EAS_I32 temp;
 
@@ -88,34 +88,41 @@ static status_t HandleMIDI(
     }
 
     if (result != EAS_SUCCESS) {
-        return UNKNOWN_ERROR;
+        return MEDIA_SCAN_RESULT_SKIPPED;
     }
 
     char buffer[20];
     sprintf(buffer, "%ld", temp);
-    if (!client->addStringTag("duration", buffer)) return UNKNOWN_ERROR;
-
-    return OK;
+    status_t status = client->addStringTag("duration", buffer);
+    if (status) {
+        return MEDIA_SCAN_RESULT_ERROR;
+    }
+    return MEDIA_SCAN_RESULT_OK;
 }
 
-status_t StagefrightMediaScanner::processFile(
+MediaScanResult StagefrightMediaScanner::processFile(
         const char *path, const char *mimeType,
         MediaScannerClient &client) {
     LOGV("processFile '%s'.", path);
 
     client.setLocale(locale());
     client.beginFile();
+    MediaScanResult result = processFileInternal(path, mimeType, client);
+    client.endFile();
+    return result;
+}
 
+MediaScanResult StagefrightMediaScanner::processFileInternal(
+        const char *path, const char *mimeType,
+        MediaScannerClient &client) {
     const char *extension = strrchr(path, '.');
 
     if (!extension) {
-        return UNKNOWN_ERROR;
+        return MEDIA_SCAN_RESULT_SKIPPED;
     }
 
     if (!FileHasAcceptableExtension(extension)) {
-        client.endFile();
-
-        return UNKNOWN_ERROR;
+        return MEDIA_SCAN_RESULT_SKIPPED;
     }
 
     if (!strcasecmp(extension, ".mid")
@@ -127,53 +134,57 @@ status_t StagefrightMediaScanner::processFile(
             || !strcasecmp(extension, ".rtx")
             || !strcasecmp(extension, ".ota")
             || !strcasecmp(extension, ".mxmf")) {
-        status_t status = HandleMIDI(path, &client);
-        if (status != OK) {
-            return status;
+        return HandleMIDI(path, &client);
+    }
+
+    sp<MediaMetadataRetriever> mRetriever(new MediaMetadataRetriever);
+
+    status_t status = mRetriever->setDataSource(path);
+    if (status) {
+        return MEDIA_SCAN_RESULT_ERROR;
+    }
+
+    const char *value;
+    if ((value = mRetriever->extractMetadata(
+                    METADATA_KEY_MIMETYPE)) != NULL) {
+        status = client.setMimeType(value);
+        if (status) {
+            return MEDIA_SCAN_RESULT_ERROR;
         }
-    } else {
-        sp<MediaMetadataRetriever> mRetriever(new MediaMetadataRetriever);
+    }
 
-         if (mRetriever->setDataSource(path) == OK) {
-            const char *value;
-            if ((value = mRetriever->extractMetadata(
-                            METADATA_KEY_MIMETYPE)) != NULL) {
-                client.setMimeType(value);
-            }
+    struct KeyMap {
+        const char *tag;
+        int key;
+    };
+    static const KeyMap kKeyMap[] = {
+        { "tracknumber", METADATA_KEY_CD_TRACK_NUMBER },
+        { "discnumber", METADATA_KEY_DISC_NUMBER },
+        { "album", METADATA_KEY_ALBUM },
+        { "artist", METADATA_KEY_ARTIST },
+        { "albumartist", METADATA_KEY_ALBUMARTIST },
+        { "composer", METADATA_KEY_COMPOSER },
+        { "genre", METADATA_KEY_GENRE },
+        { "title", METADATA_KEY_TITLE },
+        { "year", METADATA_KEY_YEAR },
+        { "duration", METADATA_KEY_DURATION },
+        { "writer", METADATA_KEY_WRITER },
+        { "compilation", METADATA_KEY_COMPILATION },
+        { "isdrm", METADATA_KEY_IS_DRM },
+    };
+    static const size_t kNumEntries = sizeof(kKeyMap) / sizeof(kKeyMap[0]);
 
-            struct KeyMap {
-                const char *tag;
-                int key;
-            };
-            static const KeyMap kKeyMap[] = {
-                { "tracknumber", METADATA_KEY_CD_TRACK_NUMBER },
-                { "discnumber", METADATA_KEY_DISC_NUMBER },
-                { "album", METADATA_KEY_ALBUM },
-                { "artist", METADATA_KEY_ARTIST },
-                { "albumartist", METADATA_KEY_ALBUMARTIST },
-                { "composer", METADATA_KEY_COMPOSER },
-                { "genre", METADATA_KEY_GENRE },
-                { "title", METADATA_KEY_TITLE },
-                { "year", METADATA_KEY_YEAR },
-                { "duration", METADATA_KEY_DURATION },
-                { "writer", METADATA_KEY_WRITER },
-                { "compilation", METADATA_KEY_COMPILATION },
-                { "isdrm", METADATA_KEY_IS_DRM },
-            };
-            static const size_t kNumEntries = sizeof(kKeyMap) / sizeof(kKeyMap[0]);
-
-            for (size_t i = 0; i < kNumEntries; ++i) {
-                const char *value;
-                if ((value = mRetriever->extractMetadata(kKeyMap[i].key)) != NULL) {
-                    client.addStringTag(kKeyMap[i].tag, value);
-                }
+    for (size_t i = 0; i < kNumEntries; ++i) {
+        const char *value;
+        if ((value = mRetriever->extractMetadata(kKeyMap[i].key)) != NULL) {
+            status = client.addStringTag(kKeyMap[i].tag, value);
+            if (status) {
+                return MEDIA_SCAN_RESULT_ERROR;
             }
         }
     }
 
-    client.endFile();
-
-    return OK;
+    return MEDIA_SCAN_RESULT_OK;
 }
 
 char *StagefrightMediaScanner::extractAlbumArt(int fd) {
