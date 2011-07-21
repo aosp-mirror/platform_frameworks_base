@@ -661,7 +661,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      */
     public boolean disconnectHeadsetInternal(BluetoothDevice device) {
         if (DBG) log("disconnectHeadsetInternal");
-        if (mService != null && isEnabled()) {
+        if (mService != null && !isDisabled()) {
             try {
                  return mService.disconnectHeadsetInternal(device);
             } catch (RemoteException e) {Log.e(TAG, e.toString());}
