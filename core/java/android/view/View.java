@@ -9099,7 +9099,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         mPrivateFlags2 |= LAYOUT_DIRECTION_RESOLVED;
     }
 
-    private void resolvePadding() {
+    /**
+     * @hide
+     */
+    protected void resolvePadding() {
         // If the user specified the absolute padding (either with android:padding or
         // android:paddingLeft/Top/Right/Bottom), use this padding, otherwise
         // use the default padding or the padding from the background drawable
