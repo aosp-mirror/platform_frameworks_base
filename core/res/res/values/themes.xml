@@ -190,8 +190,7 @@
         <item name="textEditSidePasteWindowLayout">@android:layout/text_edit_side_paste_window</item>
         <item name="textEditSideNoPasteWindowLayout">@android:layout/text_edit_side_no_paste_window</item>
         <item name="textSuggestionsWindowStyle">@android:style/Widget.TextSuggestions</item>
-        <item name="textEditSuggestionsBottomWindowLayout">@android:layout/text_edit_suggestions_bottom_window</item>
-        <item name="textEditSuggestionsTopWindowLayout">@android:layout/text_edit_suggestions_top_window</item>
+        <item name="textEditSuggestionsWindowLayout">@android:layout/text_edit_suggestions_window</item>
         <item name="textEditSuggestionItemLayout">@android:layout/text_edit_suggestion_item</item>
         <item name="textCursorDrawable">@null</item>
 

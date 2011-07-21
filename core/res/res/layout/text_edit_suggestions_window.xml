@@ -18,6 +18,6 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@android:drawable/text_edit_suggestions_bottom_window">
+    android:background="@android:drawable/text_edit_suggestions_window">
 
 </LinearLayout>

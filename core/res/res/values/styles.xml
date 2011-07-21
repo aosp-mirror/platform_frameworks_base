@@ -423,8 +423,7 @@
         <item name="android:textEditNoPasteWindowLayout">?android:attr/textEditNoPasteWindowLayout</item>
         <item name="android:textEditSidePasteWindowLayout">?android:attr/textEditSidePasteWindowLayout</item>
         <item name="android:textEditSideNoPasteWindowLayout">?android:attr/textEditSideNoPasteWindowLayout</item>
-        <item name="android:textEditSuggestionsBottomWindowLayout">?android:attr/textEditSuggestionsBottomWindowLayout</item>
-        <item name="android:textEditSuggestionsTopWindowLayout">?android:attr/textEditSuggestionsTopWindowLayout</item>
+        <item name="android:textEditSuggestionsWindowLayout">?android:attr/textEditSuggestionsWindowLayout</item>
         <item name="android:textEditSuggestionItemLayout">?android:attr/textEditSuggestionItemLayout</item>
         <item name="android:textCursorDrawable">?android:attr/textCursorDrawable</item>
     </style>

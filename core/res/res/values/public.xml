@@ -1715,8 +1715,7 @@
   <public type="attr" name="switchPreferenceStyle" />
 
   <public type="attr" name="textSuggestionsWindowStyle" />
-  <public type="attr" name="textEditSuggestionsBottomWindowLayout" />
-  <public type="attr" name="textEditSuggestionsTopWindowLayout" />
+  <public type="attr" name="textEditSuggestionsWindowLayout" />
   <public type="attr" name="textEditSuggestionItemLayout" />
 
   <public type="attr" name="suggestionsEnabled" />

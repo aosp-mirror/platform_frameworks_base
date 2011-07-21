@@ -22,6 +22,8 @@
           android:paddingTop="8dip"
           android:paddingBottom="8dip"
           android:layout_gravity="left|center_vertical"
+          android:singleLine="true"
+          android:ellipsize="marquee"
           android:textAppearance="?android:attr/textAppearanceMedium"
           android:textColor="@android:color/dim_foreground_light" />
 

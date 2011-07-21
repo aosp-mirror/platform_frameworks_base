@@ -329,7 +329,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mTextEditPasteWindowLayout, mTextEditSidePasteWindowLayout;
     private int mTextEditNoPasteWindowLayout, mTextEditSideNoPasteWindowLayout;
 
-    private int mTextEditSuggestionsBottomWindowLayout, mTextEditSuggestionsTopWindowLayout;
+    private int mTextEditSuggestionsWindowLayout;
     private int mTextEditSuggestionItemLayout;
     private SuggestionsPopupWindow mSuggestionsPopupWindow;
     private SuggestionRangeSpan mSuggestionRangeSpan;
@@ -830,12 +830,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mTextEditSideNoPasteWindowLayout = a.getResourceId(attr, 0);
                 break;
 
-            case com.android.internal.R.styleable.TextView_textEditSuggestionsBottomWindowLayout:
-                mTextEditSuggestionsBottomWindowLayout = a.getResourceId(attr, 0);
-                break;
-
-            case com.android.internal.R.styleable.TextView_textEditSuggestionsTopWindowLayout:
-                mTextEditSuggestionsTopWindowLayout = a.getResourceId(attr, 0);
+            case com.android.internal.R.styleable.TextView_textEditSuggestionsWindowLayout:
+                mTextEditSuggestionsWindowLayout = a.getResourceId(attr, 0);
                 break;
 
             case com.android.internal.R.styleable.TextView_textEditSuggestionItemLayout:
@@ -8785,9 +8781,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private static final int MAX_NUMBER_SUGGESTIONS = 5;
         private static final int NO_SUGGESTIONS = -1;
         private final PopupWindow mContainer;
-        private final ViewGroup[] mSuggestionViews = new ViewGroup[2];
-        private final int[] mSuggestionViewLayouts = new int[] {
-                mTextEditSuggestionsBottomWindowLayout, mTextEditSuggestionsTopWindowLayout};
+        private ViewGroup mSuggestionViewGroup;
         private WordIterator mSuggestionWordIterator;
         private TextAppearanceSpan[] mHighlightSpans = new TextAppearanceSpan[0];
 
@@ -8809,12 +8803,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int suggestionIndex; // the index of the suggestion inside suggestionSpan
         }
 
-        private ViewGroup getViewGroup(boolean under) {
-            final int viewIndex = under ? 0 : 1;
-            ViewGroup viewGroup = mSuggestionViews[viewIndex];
-
-            if (viewGroup == null) {
-                final int layout = mSuggestionViewLayouts[viewIndex];
+        private void initSuggestionViewGroup() {
+            if (mSuggestionViewGroup == null) {
                 LayoutInflater inflater = (LayoutInflater) TextView.this.mContext.
                         getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -8823,19 +8813,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             "Unable to create TextEdit suggestion window inflater");
                 }
 
-                View view = inflater.inflate(layout, null);
+                View view = inflater.inflate(mTextEditSuggestionsWindowLayout, null);
 
                 if (! (view instanceof ViewGroup)) {
                     throw new IllegalArgumentException(
                             "Inflated TextEdit suggestion window is not a ViewGroup: " + view);
                 }
 
-                viewGroup = (ViewGroup) view;
+                mSuggestionViewGroup = (ViewGroup) view;
 
                 // Inflate the suggestion items once and for all.
                 for (int i = 0; i < MAX_NUMBER_SUGGESTIONS; i++) {
-                    View childView = inflater.inflate(mTextEditSuggestionItemLayout, viewGroup,
-                            false);
+                    View childView = inflater.inflate(mTextEditSuggestionItemLayout,
+                            mSuggestionViewGroup, false);
 
                     if (! (childView instanceof TextView)) {
                         throw new IllegalArgumentException(
@@ -8843,14 +8833,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
 
                     childView.setTag(new SuggestionInfo());
-                    viewGroup.addView(childView);
+                    mSuggestionViewGroup.addView(childView);
                     childView.setOnClickListener(this);
                 }
 
-                mSuggestionViews[viewIndex] = viewGroup;
+                mContainer.setContentView(mSuggestionViewGroup);
             }
-
-            return viewGroup;
         }
 
         public void show() {
@@ -8861,8 +8849,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             SuggestionSpan[] suggestionSpans = spannable.getSpans(pos, pos, SuggestionSpan.class);
             final int nbSpans = suggestionSpans.length;
 
-            ViewGroup viewGroup = getViewGroup(true);
-            mContainer.setContentView(viewGroup);
+            initSuggestionViewGroup();
 
             int totalNbSuggestions = 0;
             int spanUnionStart = mText.length();
@@ -8878,7 +8865,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 String[] suggestions = suggestionSpan.getSuggestions();
                 int nbSuggestions = suggestions.length;
                 for (int suggestionIndex = 0; suggestionIndex < nbSuggestions; suggestionIndex++) {
-                    TextView textView = (TextView) viewGroup.getChildAt(totalNbSuggestions);
+                    TextView textView = (TextView) mSuggestionViewGroup.getChildAt(
+                            totalNbSuggestions);
                     textView.setText(suggestions[suggestionIndex]);
                     SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
                     suggestionInfo.spanStart = spanStart;
@@ -8897,7 +8885,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (totalNbSuggestions == 0) {
                 // TODO Replace by final text, use a dedicated layout, add a fade out timer...
-                TextView textView = (TextView) viewGroup.getChildAt(0);
+                TextView textView = (TextView) mSuggestionViewGroup.getChildAt(0);
                 textView.setText("No suggestions available");
                 SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
                 suggestionInfo.spanStart = NO_SUGGESTIONS;
@@ -8908,17 +8896,24 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                 for (int i = 0; i < totalNbSuggestions; i++) {
-                    final TextView textView = (TextView) viewGroup.getChildAt(i);
+                    final TextView textView = (TextView) mSuggestionViewGroup.getChildAt(i);
                     highlightTextDifferences(textView, spanUnionStart, spanUnionEnd);
                 }
             }
 
-            for (int i = 0; i < MAX_NUMBER_SUGGESTIONS; i++) {
-                viewGroup.getChildAt(i).setVisibility(i < totalNbSuggestions ? VISIBLE : GONE);
+            for (int i = 0; i < totalNbSuggestions; i++) {
+                mSuggestionViewGroup.getChildAt(i).setVisibility(VISIBLE);
+            }
+            for (int i = totalNbSuggestions; i < MAX_NUMBER_SUGGESTIONS; i++) {
+                mSuggestionViewGroup.getChildAt(i).setVisibility(GONE);
             }
 
-            final int size = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-            viewGroup.measure(size, size);
+            final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+            final int screenWidth = displayMetrics.widthPixels;
+            final int screenHeight = displayMetrics.heightPixels;
+            mSuggestionViewGroup.measure(
+                    View.MeasureSpec.makeMeasureSpec(screenWidth, View.MeasureSpec.AT_MOST),
+                    View.MeasureSpec.makeMeasureSpec(screenHeight, View.MeasureSpec.AT_MOST));
 
             positionAtCursor();
         }
@@ -9171,23 +9166,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             // Vertical clipping
             if (coords[1] + height > screenHeight) {
-                // Try to position above current line instead
-                // TODO use top layout instead, reverse suggestion order,
-                // try full screen vertical down if it still does not fit. TBD with designers.
-
-                // Update dimensions from new view
-                contentView = mContainer.getContentView();
-                width = contentView.getMeasuredWidth();
-                height = contentView.getMeasuredHeight();
-
-                final int lineTop = mLayout.getLineTop(line);
-                final int lineHeight = lineBottom - lineTop;
-                coords[1] -= height + lineHeight;
+                coords[1] = screenHeight - height;
             }
 
             // Horizontal clipping
-            coords[0] = Math.max(0, coords[0]);
             coords[0] = Math.min(displayMetrics.widthPixels - width, coords[0]);
+            coords[0] = Math.max(0, coords[0]);
 
             mContainer.showAtLocation(TextView.this, Gravity.NO_GRAVITY, coords[0], coords[1]);
         }
