@@ -79,8 +79,8 @@ protected:
     // must be monotonically increasing. Its other properties (zero point, etc)
     // are client-dependent, and should be documented by the client.
     //
-    // outWidth, outHeight and outTransform are filed with the default width
-    // default height of the window and current transform applied to buffers,
+    // outWidth, outHeight and outTransform are filled with the default width
+    // and height of the window and current transform applied to buffers,
     // respectively.
     virtual status_t queueBuffer(int slot, int64_t timestamp,
             uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) = 0;

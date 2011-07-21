@@ -57,7 +57,6 @@ public:
     static bool isSameSurface(
             const sp<SurfaceControl>& lhs, const sp<SurfaceControl>& rhs);
         
-    uint32_t    getFlags() const { return mFlags; }
     uint32_t    getIdentity() const { return mIdentity; }
 
     // release surface data from java
@@ -86,25 +85,13 @@ private:
     SurfaceControl& operator = (SurfaceControl& rhs);
     SurfaceControl(const SurfaceControl& rhs);
 
-    
     friend class SurfaceComposerClient;
-
-    // camera and camcorder need access to the ISurface binder interface for preview
-    friend class CameraService;
-    friend class MediaRecorder;
-    // mediaplayer needs access to ISurface for display
-    friend class MediaPlayer;
-    // for testing
-    friend class Test;
-    // videoEditor preview classes
-    friend class VideoEditorPreviewController;
     friend class Surface;
 
     SurfaceControl(
             const sp<SurfaceComposerClient>& client,
             const sp<ISurface>& surface,
-            const ISurfaceComposerClient::surface_data_t& data,
-            uint32_t w, uint32_t h, PixelFormat format, uint32_t flags);
+            const ISurfaceComposerClient::surface_data_t& data);
 
     ~SurfaceControl();
 
@@ -115,10 +102,6 @@ private:
     sp<ISurface>                mSurface;
     SurfaceID                   mToken;
     uint32_t                    mIdentity;
-    uint32_t                    mWidth;
-    uint32_t                    mHeight;
-    PixelFormat                 mFormat;
-    uint32_t                    mFlags;
     mutable Mutex               mLock;
     
     mutable sp<Surface>         mSurfaceData;
@@ -139,17 +122,13 @@ public:
         uint32_t    reserved[2];
     };
 
-    static status_t writeToParcel(
-            const sp<Surface>& control, Parcel* parcel);
-
+    static status_t writeToParcel(const sp<Surface>& control, Parcel* parcel);
     static sp<Surface> readFromParcel(const Parcel& data);
-
     static bool isValid(const sp<Surface>& surface) {
         return (surface != 0) && surface->isValid();
     }
 
     bool        isValid();
-    uint32_t    getFlags() const    { return mFlags; }
     uint32_t    getIdentity() const { return mIdentity; }
     sp<ISurfaceTexture> getSurfaceTexture();
 
@@ -176,22 +155,14 @@ private:
      *  private stuff...
      */
     void init();
-    status_t validate(bool inCancelBuffer = false) const;
 
     static void cleanCachedSurfacesLocked();
 
     virtual int query(int what, int* value) const;
 
     // constants
-    status_t                    mInitCheck;
     sp<ISurface>                mSurface;
     uint32_t                    mIdentity;
-    PixelFormat                 mFormat;
-    uint32_t                    mFlags;
-
-    // query() must be called from dequeueBuffer() thread
-    uint32_t                    mWidth;
-    uint32_t                    mHeight;
 
     // A cache of Surface objects that have been deserialized into this process.
     static Mutex sCachedSurfacesLock;

@@ -26,23 +26,18 @@
 #include <utils/Log.h>
 #include <utils/threads.h>
 
-#include <binder/IMemory.h>
 #include <binder/IPCThreadState.h>
 
 #include <gui/SurfaceTextureClient.h>
 
 #include <ui/DisplayInfo.h>
 #include <ui/GraphicBuffer.h>
-#include <ui/GraphicBufferMapper.h>
-#include <ui/GraphicLog.h>
 #include <ui/Rect.h>
 
 #include <surfaceflinger/ISurface.h>
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/Surface.h>
 #include <surfaceflinger/SurfaceComposerClient.h>
-
-#include <private/surfaceflinger/LayerState.h>
 
 namespace android {
 
@@ -53,12 +48,9 @@ namespace android {
 SurfaceControl::SurfaceControl(
         const sp<SurfaceComposerClient>& client, 
         const sp<ISurface>& surface,
-        const ISurfaceComposerClient::surface_data_t& data,
-        uint32_t w, uint32_t h, PixelFormat format, uint32_t flags)
+        const ISurfaceComposerClient::surface_data_t& data)
     : mClient(client), mSurface(surface),
-      mToken(data.token), mIdentity(data.identity),
-      mWidth(data.width), mHeight(data.height), mFormat(data.format),
-      mFlags(flags)
+      mToken(data.token), mIdentity(data.identity)
 {
 }
         
@@ -187,24 +179,12 @@ status_t SurfaceControl::writeSurfaceToParcel(
 {
     sp<ISurface> sur;
     uint32_t identity = 0;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    uint32_t format = 0;
-    uint32_t flags = 0;
     if (SurfaceControl::isValid(control)) {
         sur      = control->mSurface;
         identity = control->mIdentity;
-        width    = control->mWidth;
-        height   = control->mHeight;
-        format   = control->mFormat;
-        flags    = control->mFlags;
     }
     parcel->writeStrongBinder(sur!=0 ? sur->asBinder() : NULL);
     parcel->writeInt32(identity);
-    parcel->writeInt32(width);
-    parcel->writeInt32(height);
-    parcel->writeInt32(format);
-    parcel->writeInt32(flags);
     return NO_ERROR;
 }
 
@@ -225,25 +205,17 @@ sp<Surface> SurfaceControl::getSurface() const
 
 Surface::Surface(const sp<SurfaceControl>& surface)
     : SurfaceTextureClient(),
-      mInitCheck(NO_INIT),
       mSurface(surface->mSurface),
-      mIdentity(surface->mIdentity),
-      mFormat(surface->mFormat), mFlags(surface->mFlags),
-      mWidth(surface->mWidth), mHeight(surface->mHeight)
+      mIdentity(surface->mIdentity)
 {
     init();
 }
 
 Surface::Surface(const Parcel& parcel, const sp<IBinder>& ref)
-    : SurfaceTextureClient(),
-      mInitCheck(NO_INIT)
+    : SurfaceTextureClient()
 {
     mSurface    = interface_cast<ISurface>(ref);
     mIdentity   = parcel.readInt32();
-    mWidth      = parcel.readInt32();
-    mHeight     = parcel.readInt32();
-    mFormat     = parcel.readInt32();
-    mFlags      = parcel.readInt32();
     init();
 }
 
@@ -252,31 +224,16 @@ status_t Surface::writeToParcel(
 {
     sp<ISurface> sur;
     uint32_t identity = 0;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    uint32_t format = 0;
-    uint32_t flags = 0;
     if (Surface::isValid(surface)) {
         sur      = surface->mSurface;
         identity = surface->mIdentity;
-        width    = surface->mWidth;
-        height   = surface->mHeight;
-        format   = surface->mFormat;
-        flags    = surface->mFlags;
     } else if (surface != 0 && surface->mSurface != 0) {
         LOGW("Parceling invalid surface with non-NULL ISurface as NULL: "
-             "mSurface = %p, mIdentity = %d, mWidth = %d, mHeight = %d, "
-             "mFormat = %d, mFlags = 0x%08x, mInitCheck = %d",
-             surface->mSurface.get(), surface->mIdentity, surface->mWidth,
-             surface->mHeight, surface->mFormat, surface->mFlags,
-             surface->mInitCheck);
+             "mSurface = %p, mIdentity = %d",
+             surface->mSurface.get(), surface->mIdentity);
     }
     parcel->writeStrongBinder(sur!=0 ? sur->asBinder() : NULL);
     parcel->writeInt32(identity);
-    parcel->writeInt32(width);
-    parcel->writeInt32(height);
-    parcel->writeInt32(format);
-    parcel->writeInt32(flags);
     return NO_ERROR;
 
 }
@@ -325,10 +282,6 @@ void Surface::init()
         const_cast<float&>(ANativeWindow::xdpi) = dinfo.xdpi;
         const_cast<float&>(ANativeWindow::ydpi) = dinfo.ydpi;
         const_cast<uint32_t&>(ANativeWindow::flags) = 0;
-
-        if (surfaceTexture != NULL) {
-            mInitCheck = NO_ERROR;
-        }
     }
 }
 
@@ -341,21 +294,11 @@ Surface::~Surface()
 }
 
 bool Surface::isValid() {
-    return mInitCheck == NO_ERROR;
-}
-
-status_t Surface::validate(bool inCancelBuffer) const
-{
-    // check that we initialized ourself properly
-    if (mInitCheck != NO_ERROR) {
-        LOGE("invalid token (identity=%u)", mIdentity);
-        return mInitCheck;
-    }
-    return NO_ERROR;
+    return getISurfaceTexture() != NULL;
 }
 
 sp<ISurfaceTexture> Surface::getSurfaceTexture() {
-    return mSurface != NULL ? mSurface->getSurfaceTexture() : NULL;
+    return getISurfaceTexture();
 }
 
 sp<IBinder> Surface::asBinder() const {
@@ -367,7 +310,6 @@ sp<IBinder> Surface::asBinder() const {
 int Surface::query(int what, int* value) const {
     switch (what) {
     case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
-        // TODO: this is not needed anymore
         *value = 1;
         return NO_ERROR;
     case NATIVE_WINDOW_CONCRETE_TYPE:

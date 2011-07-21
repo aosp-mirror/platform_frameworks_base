@@ -45,9 +45,6 @@ public:
     struct surface_data_t {
         int32_t             token;
         int32_t             identity;
-        uint32_t            width;
-        uint32_t            height;
-        uint32_t            format;
         status_t readFromParcel(const Parcel& parcel);
         status_t writeToParcel(Parcel* parcel) const;
     };

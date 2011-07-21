@@ -116,11 +116,6 @@ TEST_F(SurfaceTextureClientTest, ConcreteTypeIsSurfaceTextureClient) {
     EXPECT_EQ(NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT, result);
 }
 
-TEST_F(SurfaceTextureClientTest, ANativeWindowLockFails) {
-    ANativeWindow_Buffer buf;
-    ASSERT_EQ(BAD_VALUE, ANativeWindow_lock(mANW.get(), &buf, NULL));
-}
-
 TEST_F(SurfaceTextureClientTest, EglCreateWindowSurfaceSucceeds) {
     EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     ASSERT_EQ(EGL_SUCCESS, eglGetError());
