@@ -257,7 +257,8 @@ public class UsbDeviceManager {
         private static final int NOTIFICATION_MTP = 1;
         private static final int NOTIFICATION_PTP = 2;
         private static final int NOTIFICATION_INSTALLER = 3;
-        private static final int NOTIFICATION_ADB = 4;
+        private static final int NOTIFICATION_ACCESSORY = 4;
+        private static final int NOTIFICATION_ADB = 5;
 
         public UsbHandler(Looper looper) {
             super(looper);
@@ -544,6 +545,10 @@ public class UsbDeviceManager {
                     title = r.getText(
                         com.android.internal.R.string.usb_cd_installer_notification_title);
                     id = NOTIFICATION_INSTALLER;
+                } else if (containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ACCESSORY)) {
+                    title = r.getText(
+                        com.android.internal.R.string.usb_accessory_notification_title);
+                    id = NOTIFICATION_ACCESSORY;
                 } else {
                     Slog.e(TAG, "No known USB function in updateUsbNotification");
                 }
