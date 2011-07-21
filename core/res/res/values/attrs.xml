@@ -2632,12 +2632,12 @@
         <attr name="alignmentMode" />
         <!-- When set to true, forces row boundaries to appear in the same order
         as row indices.
-        The default is false.
+        The default is true.
         See {@link android.widget.GridLayout#setRowOrderPreserved(boolean)}.-->
         <attr name="rowOrderPreserved" format="boolean" />
         <!-- When set to true, forces column boundaries to appear in the same order
         as column indices.
-        The default is false.
+        The default is true.
         See {@link android.widget.GridLayout#setColumnOrderPreserved(boolean)}.-->
         <attr name="columnOrderPreserved" format="boolean" />
     </declare-styleable>
@@ -3363,18 +3363,6 @@
         The default is LEFT | BASELINE.
         See {@link android.widget.GridLayout.LayoutParams#setGravity(int)}. -->
         <attr name="layout_gravity" />
-        <!-- {@deprecated To make a column group lexible, ensure that every component in the
-         group defines a horizontal gravity.} -->
-        <attr name="layout_columnFlexibility" >
-            <enum name="inflexible" value="0" />
-            <enum name="canStretch" value="2" />
-        </attr>
-        <!-- {@deprecated To make a row group flexible, ensure that every component in the
-         group defines a vertical gravity.} -->
-        <attr name="layout_rowFlexibility" >
-            <enum name="inflexible" value="0" />
-            <enum name="canStretch" value="2" />
-        </attr>
     </declare-styleable>
     <declare-styleable name="FrameLayout_Layout">
         <attr name="layout_gravity" />
