@@ -29,7 +29,6 @@ commonSources:= \
 	Flattenable.cpp \
 	LinearTransform.cpp \
 	ObbFile.cpp \
-	Pool.cpp \
 	PropertyMap.cpp \
 	RefBase.cpp \
 	ResourceTypes.cpp \
