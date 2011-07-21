@@ -141,4 +141,22 @@ public final class NfcA extends BasicTagTechnology {
             Log.e(TAG, "NFC service dead", e);
         }
     }
+
+    /**
+     * Gets the currently set timeout of {@link #transceive} in milliseconds.
+     *
+     * <p class="note">Requires the {@link android.Manifest.permission#NFC} permission.
+     *
+     * @return timeout value in milliseconds
+     * @hide
+     */
+    // TODO Unhide for ICS
+    public int getTimeout() {
+        try {
+            return mTag.getTagService().getTimeout(TagTechnology.NFC_A);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service dead", e);
+            return 0;
+        }
+    }
 }
