@@ -36,7 +36,7 @@ import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -426,22 +426,22 @@ public class ViewDebug {
      * and obtain the traces. Both methods must be invoked on the
      * same thread.
      * 
-     * @param traceFile The path where to write the looper traces
-     * 
-     * @see #stopLooperProfiling() 
+     * @hide
      */
-    public static void startLooperProfiling(File traceFile) {
+    public static void startLooperProfiling(String path, FileDescriptor fileDescriptor) {
         if (sLooperProfilerStorage.get() == null) {
-            LooperProfiler profiler = new LooperProfiler(traceFile);
+            LooperProfiler profiler = new LooperProfiler(path, fileDescriptor);
             sLooperProfilerStorage.set(profiler);
             Looper.myLooper().setMessageLogging(profiler);
         }
-    }
+    }    
 
     /**
      * Stops profiling the looper associated with the current thread.
      * 
-     * @see #startLooperProfiling(java.io.File) 
+     * @see #startLooperProfiling(String, java.io.FileDescriptor) 
+     * 
+     * @hide
      */
     public static void stopLooperProfiling() {
         LooperProfiler profiler = sLooperProfilerStorage.get();
@@ -461,13 +461,16 @@ public class ViewDebug {
         private final long mTraceThreadStart;
         
         private final ArrayList<Entry> mTraces = new ArrayList<Entry>(512);
-        private final File mTraceFile;
 
         private final HashMap<String, Short> mTraceNames = new HashMap<String, Short>(32);
         private short mTraceId = 0;
 
-        LooperProfiler(File traceFile) {
-            mTraceFile = traceFile;
+        private final String mPath;
+        private final FileDescriptor mFileDescriptor;
+
+        LooperProfiler(String path, FileDescriptor fileDescriptor) {
+            mPath = path;
+            mFileDescriptor = fileDescriptor;
             mTraceWallStart = SystemClock.currentTimeMicro();
             mTraceThreadStart = SystemClock.currentThreadTimeMicro();            
         }
@@ -507,18 +510,11 @@ public class ViewDebug {
                 public void run() {
                     saveTraces();
                 }
-            }, "LooperProfiler[" + mTraceFile + "]").start();
+            }, "LooperProfiler[" + mPath + "]").start();
         }
 
         private void saveTraces() {
-            FileOutputStream fos;
-            try {
-                fos = new FileOutputStream(mTraceFile);
-            } catch (FileNotFoundException e) {
-                Log.e(LOG_TAG, "Could not open trace file: " + mTraceFile);
-                return;
-            }
-
+            FileOutputStream fos = new FileOutputStream(mFileDescriptor);
             DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fos));
 
             try {
@@ -536,7 +532,7 @@ public class ViewDebug {
                     saveTrace(entry, out);
                 }
 
-                Log.d(LOG_TAG, "Looper traces ready: " + mTraceFile);
+                Log.d(LOG_TAG, "Looper traces ready: " + mPath);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Could not write trace file: ", e);
             } finally {

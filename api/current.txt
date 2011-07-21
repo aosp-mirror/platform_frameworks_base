@@ -22714,10 +22714,8 @@ package android.view {
     ctor public ViewDebug();
     method public static void dumpCapturedView(java.lang.String, java.lang.Object);
     method public static void startHierarchyTracing(java.lang.String, android.view.View);
-    method public static void startLooperProfiling(java.io.File);
     method public static void startRecyclerTracing(java.lang.String, android.view.View);
     method public static void stopHierarchyTracing();
-    method public static void stopLooperProfiling();
     method public static void stopRecyclerTracing();
     method public static void trace(android.view.View, android.view.ViewDebug.RecyclerTraceType, int...);
     method public static void trace(android.view.View, android.view.ViewDebug.HierarchyTraceType);

@@ -13442,7 +13442,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     public boolean profileControl(String process, boolean start,
-            String path, ParcelFileDescriptor fd) throws RemoteException {
+            String path, ParcelFileDescriptor fd, int profileType) throws RemoteException {
 
         try {
             synchronized (this) {
@@ -13487,7 +13487,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
             
-                proc.thread.profilerControl(start, path, fd);
+                proc.thread.profilerControl(start, path, fd, profileType);
                 fd = null;
                 return true;
             }

@@ -379,7 +379,8 @@ public abstract class ApplicationThreadNative extends Binder
             String path = data.readString();
             ParcelFileDescriptor fd = data.readInt() != 0
                     ? data.readFileDescriptor() : null;
-            profilerControl(start, path, fd);
+            int profileType = data.readInt();
+            profilerControl(start, path, fd, profileType);
             return true;
         }
         
@@ -936,7 +937,7 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
     
     public void profilerControl(boolean start, String path,
-            ParcelFileDescriptor fd) throws RemoteException {
+            ParcelFileDescriptor fd, int profileType) throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeInt(start ? 1 : 0);
@@ -947,6 +948,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         } else {
             data.writeInt(0);
         }
+        data.writeInt(profileType);
         mRemote.transact(PROFILER_CONTROL_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();

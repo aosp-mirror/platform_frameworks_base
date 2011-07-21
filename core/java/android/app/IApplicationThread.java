@@ -105,7 +105,7 @@ public interface IApplicationThread extends IInterface {
             throws RemoteException;
     void scheduleLowMemory() throws RemoteException;
     void scheduleActivityConfigurationChanged(IBinder token) throws RemoteException;
-    void profilerControl(boolean start, String path, ParcelFileDescriptor fd)
+    void profilerControl(boolean start, String path, ParcelFileDescriptor fd, int profileType)
             throws RemoteException;
     void dumpHeap(boolean managed, String path, ParcelFileDescriptor fd)
             throws RemoteException;

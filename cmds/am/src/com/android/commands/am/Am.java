@@ -468,10 +468,16 @@ public class Am {
         String profileFile = null;
         boolean start = false;
         boolean wall = false;
+        int profileType = 0;
         
         String process = null;
         
         String cmd = nextArgRequired();
+        if ("looper".equals(cmd)) {
+            cmd = nextArgRequired();
+            profileType = 1;
+        }
+
         if ("start".equals(cmd)) {
             start = true;
             wall = "--wall".equals(nextOption());
@@ -516,7 +522,7 @@ public class Am {
             } else if (start) {
                 //removeWallOption();
             }
-            if (!mAm.profileControl(process, start, profileFile, fd)) {
+            if (!mAm.profileControl(process, start, profileFile, fd, profileType)) {
                 wall = false;
                 throw new AndroidException("PROFILE FAILED on process " + process);
             }
@@ -1076,8 +1082,8 @@ public class Am {
                 "       am broadcast <INTENT>\n" +
                 "       am instrument [-r] [-e <NAME> <VALUE>] [-p] [-w]\n" +
                 "               [--no-window-animation] <COMPONENT>\n" +
-                "       am profile start <PROCESS> <FILE>\n" +
-                "       am profile stop <PROCESS>\n" +
+                "       am profile [looper] start <PROCESS> <FILE>\n" +
+                "       am profile [looper] stop <PROCESS>\n" +
                 "       am dumpheap [flags] <PROCESS> <FILE>\n" +
                 "       am monitor [--gdb <port>]\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
