@@ -1646,7 +1646,8 @@ public class AudioManager {
         IAudioService service = getService();
         try {
             status = service.requestAudioFocus(streamType, durationHint, mICallBack,
-                    mAudioFocusDispatcher, getIdForAudioFocusListener(l));
+                    mAudioFocusDispatcher, getIdForAudioFocusListener(l),
+                    mContext.getPackageName() /* package name */);
         } catch (RemoteException e) {
             Log.e(TAG, "Can't call requestAudioFocus() from AudioService due to "+e);
         }
@@ -1682,7 +1683,9 @@ public class AudioManager {
      *      in the application manifest.
      */
     public void registerMediaButtonEventReceiver(ComponentName eventReceiver) {
-        //TODO enforce the rule about the receiver being declared in the manifest
+        if (eventReceiver == null) {
+            return;
+        }
         IAudioService service = getService();
         try {
             service.registerMediaButtonEventReceiver(eventReceiver);
@@ -1697,12 +1700,135 @@ public class AudioManager {
      *      that was registered with {@link #registerMediaButtonEventReceiver(ComponentName)}.
      */
     public void unregisterMediaButtonEventReceiver(ComponentName eventReceiver) {
+        if (eventReceiver == null) {
+            return;
+        }
         IAudioService service = getService();
         try {
             service.unregisterMediaButtonEventReceiver(eventReceiver);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in unregisterMediaButtonEventReceiver"+e);
         }
+    }
+
+    /**
+     * @hide
+     * Registers the remote control client for providing information to display on the remotes.
+     * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
+     *      that will receive the media button intent, and associated with the remote control
+     *      client. This method has no effect if
+     *      {@link #registerMediaButtonEventReceiver(ComponentName)} hasn't been called
+     *      with the same eventReceiver, or if
+     *      {@link #unregisterMediaButtonEventReceiver(ComponentName)} has been called.
+     * @param rcClient the client associated with the event receiver, responsible for providing
+     *      the information to display on the remote control.
+     */
+    public void registerRemoteControlClient(ComponentName eventReceiver,
+            IRemoteControlClient rcClient) {
+        if (eventReceiver == null) {
+            return;
+        }
+        IAudioService service = getService();
+        try {
+            service.registerRemoteControlClient(eventReceiver, rcClient,
+                    // used to match media button event receiver and audio focus
+                    mContext.getPackageName());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in registerRemoteControlClient"+e);
+        }
+    }
+
+    /**
+     * @hide
+     * @param eventReceiver
+     */
+    public void unregisterRemoteControlClient(ComponentName eventReceiver) {
+        if (eventReceiver == null) {
+            return;
+        }
+        IAudioService service = getService();
+        try {
+            // unregistering a IRemoteControlClient is equivalent to setting it to null
+            service.registerRemoteControlClient(eventReceiver, null, mContext.getPackageName());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in unregisterRemoteControlClient"+e);
+        }
+    }
+
+    /**
+     * @hide
+     * Definitions of constants to be used in {@link android.media.IRemoteControlClient}.
+     */
+    public final class RemoteControlParameters {
+        public final static int PLAYSTATE_STOPPED            = 1;
+        public final static int PLAYSTATE_PAUSED             = 2;
+        public final static int PLAYSTATE_PLAYING            = 3;
+        public final static int PLAYSTATE_FAST_FORWARDING    = 4;
+        public final static int PLAYSTATE_REWINDING          = 5;
+        public final static int PLAYSTATE_SKIPPING_FORWARDS  = 6;
+        public final static int PLAYSTATE_SKIPPING_BACKWARDS = 7;
+        public final static int PLAYSTATE_BUFFERING          = 8;
+
+        public final static int FLAG_KEY_MEDIA_PREVIOUS = 1 << 0;
+        public final static int FLAG_KEY_MEDIA_REWIND = 1 << 1;
+        public final static int FLAG_KEY_MEDIA_PLAY = 1 << 2;
+        public final static int FLAG_KEY_MEDIA_PLAY_PAUSE = 1 << 3;
+        public final static int FLAG_KEY_MEDIA_PAUSE = 1 << 4;
+        public final static int FLAG_KEY_MEDIA_STOP = 1 << 5;
+        public final static int FLAG_KEY_MEDIA_FAST_FORWARD = 1 << 6;
+        public final static int FLAG_KEY_MEDIA_NEXT = 1 << 7;
+    }
+
+    /**
+     * @hide
+     * Broadcast intent action indicating that the displays on the remote controls
+     * should be updated because a new remote control client is now active. If there is no
+     * {@link #EXTRA_REMOTE_CONTROL_CLIENT}, the remote control display should be cleared
+     * because there is no valid client to supply it with information.
+     *
+     * @see #EXTRA_REMOTE_CONTROL_CLIENT
+     */
+    public static final String REMOTE_CONTROL_CLIENT_CHANGED =
+            "android.media.REMOTE_CONTROL_CLIENT_CHANGED";
+
+    /**
+     * @hide
+     * The IRemoteControlClient monotonically increasing generation counter.
+     *
+     * @see #REMOTE_CONTROL_CLIENT_CHANGED_ACTION
+     */
+    public static final String EXTRA_REMOTE_CONTROL_CLIENT =
+            "android.media.EXTRA_REMOTE_CONTROL_CLIENT";
+
+    /**
+     * @hide
+     * FIXME to be changed to address Neel's comments
+     * Force a refresh of the remote control client associated with the event receiver.
+     * @param eventReceiver
+     */
+    public void refreshRemoteControlDisplay(ComponentName eventReceiver) {
+        IAudioService service = getService();
+        try {
+            service.refreshRemoteControlDisplay(eventReceiver);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in refreshRemoteControlDisplay"+e);
+        }
+    }
+
+    /**
+     * @hide
+     * FIXME API to be used by implementors of remote controls, not a candidate for SDK
+     */
+    public void registerRemoteControlObserver() {
+
+    }
+
+    /**
+     * @hide
+     * FIXME API to be used by implementors of remote controls, not a candidate for SDK
+     */
+    public void unregisterRemoteControlObserver() {
+
     }
 
     /**
