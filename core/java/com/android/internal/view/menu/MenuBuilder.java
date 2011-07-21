@@ -50,6 +50,8 @@ public class MenuBuilder implements Menu {
     private static final String LOGTAG = "MenuBuilder";
 
     private static final String PRESENTER_KEY = "android:menu:presenters";
+    private static final String ACTION_VIEW_STATES_KEY = "android:menu:actionviewstates";
+    private static final String EXPANDED_ACTION_VIEW_ID = "android:menu:expandedactionview";
 
     private static final int[]  sCategoryToOrder = new int[] {
         1, /* No category */
@@ -306,6 +308,67 @@ public class MenuBuilder implements Menu {
 
     public void restorePresenterStates(Bundle state) {
         dispatchRestoreInstanceState(state);
+    }
+
+    public void saveActionViewStates(Bundle outStates) {
+        SparseArray<Parcelable> viewStates = null;
+
+        final int itemCount = size();
+        for (int i = 0; i < itemCount; i++) {
+            final MenuItem item = getItem(i);
+            final View v = item.getActionView();
+            if (v != null && v.getId() != View.NO_ID) {
+                if (viewStates == null) {
+                    viewStates = new SparseArray<Parcelable>();
+                }
+                v.saveHierarchyState(viewStates);
+                if (item.isActionViewExpanded()) {
+                    outStates.putInt(EXPANDED_ACTION_VIEW_ID, item.getItemId());
+                }
+            }
+            if (item.hasSubMenu()) {
+                final SubMenuBuilder subMenu = (SubMenuBuilder) item.getSubMenu();
+                subMenu.saveActionViewStates(outStates);
+            }
+        }
+
+        if (viewStates != null) {
+            outStates.putSparseParcelableArray(getActionViewStatesKey(), viewStates);
+        }
+    }
+
+    public void restoreActionViewStates(Bundle states) {
+        if (states == null) {
+            return;
+        }
+
+        SparseArray<Parcelable> viewStates = states.getSparseParcelableArray(
+                getActionViewStatesKey());
+
+        final int itemCount = size();
+        for (int i = 0; i < itemCount; i++) {
+            final MenuItem item = getItem(i);
+            final View v = item.getActionView();
+            if (v != null && v.getId() != View.NO_ID) {
+                v.restoreHierarchyState(viewStates);
+            }
+            if (item.hasSubMenu()) {
+                final SubMenuBuilder subMenu = (SubMenuBuilder) item.getSubMenu();
+                subMenu.restoreActionViewStates(states);
+            }
+        }
+
+        final int expandedId = states.getInt(EXPANDED_ACTION_VIEW_ID);
+        if (expandedId > 0) {
+            MenuItem itemToExpand = findItem(expandedId);
+            if (itemToExpand != null) {
+                itemToExpand.expandActionView();
+            }
+        }
+    }
+
+    protected String getActionViewStatesKey() {
+        return ACTION_VIEW_STATES_KEY;
     }
 
     public void setCallback(Callback cb) {

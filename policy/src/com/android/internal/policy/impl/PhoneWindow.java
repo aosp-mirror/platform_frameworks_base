@@ -388,6 +388,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         st.isHandled = false;
         mPreparedPanel = st;
 
+        if (st.frozenActionViewState != null) {
+            st.menu.restoreActionViewStates(st.frozenActionViewState);
+            st.frozenActionViewState = null;
+        }
+
         return true;
     }
 
@@ -652,7 +657,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     @Override
     public void invalidatePanelMenu(int featureId) {
         PanelFeatureState st = getPanelState(featureId, true);
+        Bundle savedActionViewStates = null;
         if (st.menu != null) {
+            savedActionViewStates = new Bundle();
+            st.menu.saveActionViewStates(savedActionViewStates);
+            if (savedActionViewStates.size() > 0) {
+                st.frozenActionViewState = savedActionViewStates;
+            }
             st.menu.clear();
         }
         st.refreshMenuContent = true;
@@ -3023,6 +3034,12 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
          * Contains the state of the menu when told to freeze.
          */
         Bundle frozenMenuState;
+
+        /**
+         * Contains the state of associated action views when told to freeze.
+         * These are saved across invalidations.
+         */
+        Bundle frozenActionViewState;
 
         PanelFeatureState(int featureId) {
             this.featureId = featureId;
