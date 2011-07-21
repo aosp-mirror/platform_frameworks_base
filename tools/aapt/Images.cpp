@@ -1080,7 +1080,128 @@ bail:
     return error;
 }
 
+status_t preProcessImageToCache(Bundle* bundle, String8 source, String8 dest)
+{
+    png_structp read_ptr = NULL;
+    png_infop read_info = NULL;
 
+    FILE* fp;
+
+    image_info imageInfo;
+
+    png_structp write_ptr = NULL;
+    png_infop write_info = NULL;
+
+    status_t error = UNKNOWN_ERROR;
+
+    // Get a file handler to read from
+    fp = fopen(source.string(),"rb");
+    if (fp == NULL) {
+        fprintf(stderr, "%s ERROR: Unable to open PNG file\n", source.string());
+        return error;
+    }
+
+    // Call libpng to get a struct to read image data into
+    read_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!read_ptr) {
+        fclose(fp);
+        png_destroy_read_struct(&read_ptr, &read_info,NULL);
+        return error;
+    }
+
+    // Call libpng to get a struct to read image info into
+    read_info = png_create_info_struct(read_ptr);
+    if (!read_info) {
+        fclose(fp);
+        png_destroy_read_struct(&read_ptr, &read_info,NULL);
+        return error;
+    }
+
+    // Set a jump point for libpng to long jump back to on error
+    if (setjmp(png_jmpbuf(read_ptr))) {
+        fclose(fp);
+        png_destroy_read_struct(&read_ptr, &read_info,NULL);
+        return error;
+    }
+
+    // Set up libpng to read from our file.
+    png_init_io(read_ptr,fp);
+
+    // Actually read data from the file
+    read_png(source.string(), read_ptr, read_info, &imageInfo);
+
+    // We're done reading so we can clean up
+    // Find old file size before releasing handle
+    fseek(fp, 0, SEEK_END);
+    size_t oldSize = (size_t)ftell(fp);
+    fclose(fp);
+    png_destroy_read_struct(&read_ptr, &read_info,NULL);
+
+    // Check to see if we're dealing with a 9-patch
+    // If we are, process appropriately
+    if (source.getBasePath().getPathExtension() == ".9")  {
+        if (do_9patch(source.string(), &imageInfo) != NO_ERROR) {
+            return error;
+        }
+    }
+
+    // Call libpng to create a structure to hold the processed image data
+    // that can be written to disk
+    write_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    if (!write_ptr) {
+        png_destroy_write_struct(&write_ptr, &write_info);
+        return error;
+    }
+
+    // Call libpng to create a structure to hold processed image info that can
+    // be written to disk
+    write_info = png_create_info_struct(write_ptr);
+    if (!write_info) {
+        png_destroy_write_struct(&write_ptr, &write_info);
+        return error;
+    }
+
+    // Open up our destination file for writing
+    fp = fopen(dest.string(), "wb");
+    if (!fp) {
+        fprintf(stderr, "%s ERROR: Unable to open PNG file\n", dest.string());
+        png_destroy_write_struct(&write_ptr, &write_info);
+        return error;
+    }
+
+    // Set up libpng to write to our file
+    png_init_io(write_ptr, fp);
+
+    // Set up a jump for libpng to long jump back on on errors
+    if (setjmp(png_jmpbuf(write_ptr))) {
+        fclose(fp);
+        png_destroy_write_struct(&write_ptr, &write_info);
+        return error;
+    }
+
+    // Actually write out to the new png
+    write_png(dest.string(), write_ptr, write_info, imageInfo,
+              bundle->getGrayscaleTolerance());
+
+    if (bundle->getVerbose()) {
+        // Find the size of our new file
+        FILE* reader = fopen(dest.string(), "rb");
+        fseek(reader, 0, SEEK_END);
+        size_t newSize = (size_t)ftell(reader);
+        fclose(reader);
+
+        float factor = ((float)newSize)/oldSize;
+        int percent = (int)(factor*100);
+        printf("  (processed image to cache entry %s: %d%% size of source)\n",
+               dest.string(), percent);
+    }
+
+    //Clean up
+    fclose(fp);
+    png_destroy_write_struct(&write_ptr, &write_info);
+
+    return NO_ERROR;
+}
 
 status_t postProcessImage(const sp<AaptAssets>& assets,
                           ResourceTable* table, const sp<AaptFile>& file)
