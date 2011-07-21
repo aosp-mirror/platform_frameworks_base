@@ -262,7 +262,7 @@ public class NotificationManagerService extends INotificationManager.Stub
 
         public void onNotificationClick(String pkg, String tag, int id) {
             cancelNotification(pkg, tag, id, Notification.FLAG_AUTO_CANCEL,
-                    Notification.FLAG_FOREGROUND_SERVICE, true);
+                    Notification.FLAG_FOREGROUND_SERVICE, false);
         }
 
         public void onNotificationClear(String pkg, String tag, int id) {
