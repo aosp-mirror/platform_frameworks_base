@@ -684,48 +684,6 @@ public final class NfcAdapter {
     }
 
     /**
-     * Set the NDEF Message that this NFC adapter should appear as to Tag
-     * readers.
-     * <p>
-     * Any Tag reader can read the contents of the local tag when it is in
-     * proximity, without any further user confirmation.
-     * <p>
-     * The implementation of this method must either
-     * <ul>
-     * <li>act as a passive tag containing this NDEF message
-     * <li>provide the NDEF message on over LLCP to peer NFC adapters
-     * </ul>
-     * The NDEF message is preserved across reboot.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     *
-     * @param message NDEF message to make public
-     * @hide
-     */
-    public void setLocalNdefMessage(NdefMessage message) {
-        try {
-            sService.localSet(message);
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-        }
-    }
-
-    /**
-     * Get the NDEF Message that this adapter appears as to Tag readers.
-     * <p>Requires {@link android.Manifest.permission#NFC} permission.
-     *
-     * @return NDEF Message that is publicly readable
-     * @hide
-     */
-    public NdefMessage getLocalNdefMessage() {
-        try {
-            return sService.localGet();
-        } catch (RemoteException e) {
-            attemptDeadServiceRecovery(e);
-            return null;
-        }
-    }
-
-    /**
      * @hide
      */
     public INfcAdapterExtras getNfcAdapterExtrasInterface() {
