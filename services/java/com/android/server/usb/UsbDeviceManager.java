@@ -19,6 +19,7 @@ package com.android.server.usb;
 import android.app.PendingIntent;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -80,6 +81,7 @@ public class UsbDeviceManager {
     private static final int MSG_ENABLE_ADB = 1;
     private static final int MSG_SET_CURRENT_FUNCTION = 2;
     private static final int MSG_SYSTEM_READY = 3;
+    private static final int MSG_BOOT_COMPLETED = 4;
 
     // Delay for debouncing USB disconnects.
     // We often get rapid connect/disconnect events when enabling USB functions,
@@ -87,7 +89,7 @@ public class UsbDeviceManager {
     private static final int UPDATE_DELAY = 1000;
 
     private UsbHandler mHandler;
-    private boolean mSystemReady;
+    private boolean mBootCompleted;
 
     private final Context mContext;
     private final ContentResolver mContentResolver;
@@ -141,10 +143,15 @@ public class UsbDeviceManager {
                 Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
         mHandler = new UsbHandler(thread.getLooper());
+
+        if (nativeIsStartRequested()) {
+            if (DEBUG) Slog.d(TAG, "accessory attached at boot");
+            setCurrentFunction(UsbManager.USB_FUNCTION_ACCESSORY, false);
+        }
     }
 
     public void systemReady() {
-        mSystemReady = true;
+        if (DEBUG) Slog.d(TAG, "systemReady");
 
         mNotificationManager = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -236,9 +243,15 @@ public class UsbDeviceManager {
         private String mCurrentFunctions;
         private String mDefaultFunctions;
         private UsbAccessory mCurrentAccessory;
-        private boolean mDeferAccessoryAttached;
         private int mUsbNotificationId;
         private boolean mAdbNotificationShown;
+
+        private final BroadcastReceiver mBootCompletedReceiver = new BroadcastReceiver() {
+            public void onReceive(Context context, Intent intent) {
+                if (DEBUG) Slog.d(TAG, "boot completed");
+                mHandler.sendEmptyMessage(MSG_BOOT_COMPLETED);
+            }
+        };
 
         private static final int NOTIFICATION_NONE = 0;
         private static final int NOTIFICATION_MTP = 1;
@@ -285,6 +298,9 @@ public class UsbDeviceManager {
                 // Watch for USB configuration changes
                 mUEventObserver.startObserving(USB_STATE_MATCH);
                 mUEventObserver.startObserving(ACCESSORY_START_MATCH);
+
+                mContext.registerReceiver(mBootCompletedReceiver,
+                        new IntentFilter(Intent.ACTION_BOOT_COMPLETED));
             } catch (Exception e) {
                 Slog.e(TAG, "Error initializing UsbHandler", e);
             }
@@ -406,11 +422,9 @@ public class UsbDeviceManager {
                     mCurrentAccessory = new UsbAccessory(strings);
                     Slog.d(TAG, "entering USB accessory mode: " + mCurrentAccessory);
                     // defer accessoryAttached if system is not ready
-                    if (mSystemReady) {
+                    if (mBootCompleted) {
                         mSettingsManager.accessoryAttached(mCurrentAccessory);
-                    } else {
-                        mDeferAccessoryAttached = true;
-                    }
+                    } // else handle in mBootCompletedReceiver
                 } else {
                     Slog.e(TAG, "nativeGetAccessoryStrings failed");
                 }
@@ -421,7 +435,7 @@ public class UsbDeviceManager {
                 setEnabledFunctions(mDefaultFunctions);
 
                 if (mCurrentAccessory != null) {
-                    if (mSystemReady) {
+                    if (mBootCompleted) {
                         mSettingsManager.accessoryDetached(mCurrentAccessory);
                     }
                     mCurrentAccessory = null;
@@ -463,7 +477,7 @@ public class UsbDeviceManager {
                         // restore defaults when USB is disconnected
                         doSetCurrentFunctions(mDefaultFunctions);
                     }
-                    if (mSystemReady) {
+                    if (mBootCompleted) {
                         updateUsbState();
                     }
                     break;
@@ -497,7 +511,10 @@ public class UsbDeviceManager {
                     updateUsbNotification();
                     updateAdbNotification();
                     updateUsbState();
-                    if (mCurrentAccessory != null && mDeferAccessoryAttached) {
+                    break;
+                case MSG_BOOT_COMPLETED:
+                    mBootCompleted = true;
+                    if (mCurrentAccessory != null) {
                         mSettingsManager.accessoryAttached(mCurrentAccessory);
                     }
                     break;
@@ -671,4 +688,5 @@ public class UsbDeviceManager {
 
     private native String[] nativeGetAccessoryStrings();
     private native ParcelFileDescriptor nativeOpenAccessory();
+    private native boolean nativeIsStartRequested();
 }
