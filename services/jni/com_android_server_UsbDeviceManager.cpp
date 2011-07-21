@@ -99,11 +99,26 @@ static jobject android_server_UsbDeviceManager_openAccessory(JNIEnv *env, jobjec
         gParcelFileDescriptorOffsets.mConstructor, fileDescriptor);
 }
 
+static jboolean android_server_UsbDeviceManager_isStartRequested(JNIEnv *env, jobject thiz)
+{
+    int fd = open(DRIVER_NAME, O_RDWR);
+    if (fd < 0) {
+        LOGE("could not open %s", DRIVER_NAME);
+        return false;
+    }
+    int result = ioctl(fd, ACCESSORY_IS_START_REQUESTED);
+    close(fd);
+    return (result == 1);
+}
+
+
 static JNINativeMethod method_table[] = {
     { "nativeGetAccessoryStrings",  "()[Ljava/lang/String;",
                                     (void*)android_server_UsbDeviceManager_getAccessoryStrings },
     { "nativeOpenAccessory",        "()Landroid/os/ParcelFileDescriptor;",
                                     (void*)android_server_UsbDeviceManager_openAccessory },
+    { "nativeIsStartRequested",     "()Z",
+                                    (void*)android_server_UsbDeviceManager_isStartRequested },
 };
 
 int register_android_server_UsbDeviceManager(JNIEnv *env)
