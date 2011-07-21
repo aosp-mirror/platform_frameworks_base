@@ -1852,7 +1852,7 @@ ssize_t AaptAssets::slurpFromArgs(Bundle* bundle)
         sp<AaptDir> assetAaptDir = makeDir(String8(kAssetDir));
         AaptGroupEntry group;
         count = assetAaptDir->slurpFullTree(bundle, assetRoot, group,
-                                            String8(), mFullResPaths);
+                                            String8(), mFullAssetPaths);
         if (count < 0) {
             totalCount = count;
             goto bail;
@@ -1926,7 +1926,7 @@ ssize_t AaptAssets::slurpFromArgs(Bundle* bundle)
          * guarantees about ordering, so we're okay with an inorder search
          * using whatever order the OS happens to hand back to us.
          */
-        count = slurpFullTree(bundle, assetRoot, AaptGroupEntry(), String8(), mFullResPaths);
+        count = slurpFullTree(bundle, assetRoot, AaptGroupEntry(), String8(), mFullAssetPaths);
         if (count < 0) {
             /* failure; report error and remove archive */
             totalCount = count;
