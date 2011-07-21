@@ -2568,6 +2568,12 @@
         <item quantity="one">Open Wi-Fi network available</item>
         <item quantity="other">Open Wi-Fi networks available</item>
     </plurals>
+
+     <!-- A notification is shown the first time a wireless network is disabled due to bad connectivity.  This is the notification's title / ticker. -->
+    <string name="wifi_watchdog_network_disabled">A Wi-Fi network was disabled</string>
+    <!--  A notification is shown the first time a wireless network is disabled due to bad connectivity.  This is the notification's message which leads to the settings pane -->
+    <string name="wifi_watchdog_network_disabled_detailed">A Wi-Fi network was temporarily disabled due to bad connectivity.</string>
+
     <!-- Do not translate. Default access point SSID used for tethering -->
     <string name="wifi_tether_configure_ssid_default" translatable="false">AndroidAP</string>
 
