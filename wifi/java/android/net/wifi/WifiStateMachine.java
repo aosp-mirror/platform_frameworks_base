@@ -82,6 +82,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
 /**
@@ -159,6 +160,9 @@ public class WifiStateMachine extends StateMachine {
     private PendingIntent mScanIntent;
     /* Tracks current frequency mode */
     private AtomicInteger mFrequencyBand = new AtomicInteger(WifiManager.WIFI_FREQUENCY_BAND_AUTO);
+
+    /* Tracks if we are filtering Multicast v4 packets. Default is to filter. */
+    private AtomicBoolean mFilteringMulticastV4Packets = new AtomicBoolean(true);
 
     // Channel for sending replies.
     private AsyncChannel mReplyChannel = new AsyncChannel();
@@ -285,6 +289,11 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_START_PACKET_FILTERING           = BASE + 84;
     /* Clear packet filter */
     static final int CMD_STOP_PACKET_FILTERING            = BASE + 85;
+
+    /* arg1 values to CMD_STOP_PACKET_FILTERING and CMD_START_PACKET_FILTERING */
+    static final int MULTICAST_V6  = 1;
+    static final int MULTICAST_V4  = 0;
+
     /* Connect to a specified network (network id
      * or WifiConfiguration) This involves increasing
      * the priority of the network, enabling the network
@@ -868,17 +877,33 @@ public class WifiStateMachine extends StateMachine {
     }
 
     /**
-     * Start packet filtering
+     * Start filtering Multicast v4 packets
      */
-    public void startPacketFiltering() {
-        sendMessage(CMD_START_PACKET_FILTERING);
+    public void startFilteringMulticastV4Packets() {
+        mFilteringMulticastV4Packets.set(true);
+        sendMessage(obtainMessage(CMD_START_PACKET_FILTERING, MULTICAST_V4, 0));
     }
 
     /**
-     * Stop packet filtering
+     * Stop filtering Multicast v4 packets
      */
-    public void stopPacketFiltering() {
-        sendMessage(CMD_STOP_PACKET_FILTERING);
+    public void stopFilteringMulticastV4Packets() {
+        mFilteringMulticastV4Packets.set(false);
+        sendMessage(obtainMessage(CMD_STOP_PACKET_FILTERING, MULTICAST_V4, 0));
+    }
+
+    /**
+     * Start filtering Multicast v4 packets
+     */
+    public void startFilteringMulticastV6Packets() {
+        sendMessage(obtainMessage(CMD_START_PACKET_FILTERING, MULTICAST_V6, 0));
+    }
+
+    /**
+     * Stop filtering Multicast v4 packets
+     */
+    public void stopFilteringMulticastV6Packets() {
+        sendMessage(obtainMessage(CMD_STOP_PACKET_FILTERING, MULTICAST_V6, 0));
     }
 
     /**
@@ -2074,9 +2099,6 @@ public class WifiStateMachine extends StateMachine {
 
                     WifiConfigStore.initialize(mContext);
 
-                    //TODO: initialize and fix multicast filtering
-                    //mWM.initializeMulticastFiltering();
-
                     sendSupplicantConnectionChangedBroadcast(true);
                     transitionTo(mDriverStartedState);
                     break;
@@ -2359,6 +2381,16 @@ public class WifiStateMachine extends StateMachine {
             /* initialize network state */
             setNetworkDetailedState(DetailedState.DISCONNECTED);
 
+            /* Remove any filtering on Multicast v6 at start */
+            WifiNative.stopFilteringMulticastV6Packets();
+
+            /* Reset Multicast v4 filtering state */
+            if (mFilteringMulticastV4Packets.get()) {
+                WifiNative.startFilteringMulticastV4Packets();
+            } else {
+                WifiNative.stopFilteringMulticastV4Packets();
+            }
+
             if (mIsScanMode) {
                 WifiNative.setScanResultHandlingCommand(SCAN_ONLY_MODE);
                 WifiNative.disconnectCommand();
@@ -2419,10 +2451,22 @@ public class WifiStateMachine extends StateMachine {
                     mWakeLock.release();
                     break;
                 case CMD_START_PACKET_FILTERING:
-                    WifiNative.startPacketFiltering();
+                    if (message.arg1 == MULTICAST_V6) {
+                        WifiNative.startFilteringMulticastV6Packets();
+                    } else if (message.arg1 == MULTICAST_V4) {
+                        WifiNative.startFilteringMulticastV4Packets();
+                    } else {
+                        Log.e(TAG, "Illegal arugments to CMD_START_PACKET_FILTERING");
+                    }
                     break;
                 case CMD_STOP_PACKET_FILTERING:
-                    WifiNative.stopPacketFiltering();
+                    if (message.arg1 == MULTICAST_V6) {
+                        WifiNative.stopFilteringMulticastV6Packets();
+                    } else if (message.arg1 == MULTICAST_V4) {
+                        WifiNative.stopFilteringMulticastV4Packets();
+                    } else {
+                        Log.e(TAG, "Illegal arugments to CMD_STOP_PACKET_FILTERING");
+                    }
                     break;
                 default:
                     return NOT_HANDLED;

@@ -315,25 +315,55 @@ static jboolean android_net_wifi_stopDriverCommand(JNIEnv* env, jobject)
     return doBooleanCommand("OK", "DRIVER STOP");
 }
 
-static jboolean android_net_wifi_startPacketFiltering(JNIEnv* env, jobject)
+/*
+    Multicast filtering rules work as follows:
+
+    The driver can filter multicast (v4 and/or v6) and broadcast packets when in
+    a power optimized mode (typically when screen goes off).
+
+    In order to prevent the driver from filtering the multicast/broadcast packets, we have to
+    add a DRIVER RXFILTER-ADD rule followed by DRIVER RXFILTER-START to make the rule effective
+
+    DRIVER RXFILTER-ADD Num
+        where Num = 0 - Unicast, 1 - Broadcast, 2 - Mutil4 or 3 - Multi6
+
+    and DRIVER RXFILTER-START
+
+    In order to stop the usage of these rules, we do
+
+    DRIVER RXFILTER-STOP
+    DRIVER RXFILTER-REMOVE Num
+        where Num is as described for RXFILTER-ADD
+
+    The  SETSUSPENDOPT driver command overrides the filtering rules
+*/
+
+static jboolean android_net_wifi_startMultiV4Filtering(JNIEnv* env, jobject)
 {
-    return doBooleanCommand("OK", "DRIVER RXFILTER-ADD 0")
-            && doBooleanCommand("OK", "DRIVER RXFILTER-ADD 1")
-            && doBooleanCommand("OK", "DRIVER RXFILTER-ADD 3")
+    return doBooleanCommand("OK", "DRIVER RXFILTER-STOP")
+            && doBooleanCommand("OK", "DRIVER RXFILTER-REMOVE 2")
             && doBooleanCommand("OK", "DRIVER RXFILTER-START");
 }
 
-static jboolean android_net_wifi_stopPacketFiltering(JNIEnv* env, jobject)
+static jboolean android_net_wifi_stopMultiV4Filtering(JNIEnv* env, jobject)
 {
-    jboolean result = doBooleanCommand("OK", "DRIVER RXFILTER-STOP");
-    if (result) {
-        (void)doBooleanCommand("OK", "DRIVER RXFILTER-REMOVE 3");
-        (void)doBooleanCommand("OK", "DRIVER RXFILTER-REMOVE 1");
-        (void)doBooleanCommand("OK", "DRIVER RXFILTER-REMOVE 0");
-    }
-
-    return result;
+    return doBooleanCommand("OK", "DRIVER RXFILTER-ADD 2")
+            && doBooleanCommand("OK", "DRIVER RXFILTER-START");
 }
+
+static jboolean android_net_wifi_startMultiV6Filtering(JNIEnv* env, jobject)
+{
+    return doBooleanCommand("OK", "DRIVER RXFILTER-STOP")
+            && doBooleanCommand("OK", "DRIVER RXFILTER-REMOVE 3")
+            && doBooleanCommand("OK", "DRIVER RXFILTER-START");
+}
+
+static jboolean android_net_wifi_stopMultiV6Filtering(JNIEnv* env, jobject)
+{
+    return doBooleanCommand("OK", "DRIVER RXFILTER-ADD 3")
+        && doBooleanCommand("OK", "DRIVER RXFILTER-START");
+}
+
 
 static jint android_net_wifi_getRssiHelper(const char *cmd)
 {
@@ -545,8 +575,10 @@ static JNINativeMethod gWifiMethods[] = {
     { "setScanModeCommand", "(Z)Z", (void*) android_net_wifi_setScanModeCommand },
     { "startDriverCommand", "()Z", (void*) android_net_wifi_startDriverCommand },
     { "stopDriverCommand", "()Z", (void*) android_net_wifi_stopDriverCommand },
-    { "startPacketFiltering", "()Z", (void*) android_net_wifi_startPacketFiltering },
-    { "stopPacketFiltering", "()Z", (void*) android_net_wifi_stopPacketFiltering },
+    { "startFilteringMulticastV4Packets", "()Z", (void*) android_net_wifi_startMultiV4Filtering},
+    { "stopFilteringMulticastV4Packets", "()Z", (void*) android_net_wifi_stopMultiV4Filtering},
+    { "startFilteringMulticastV6Packets", "()Z", (void*) android_net_wifi_startMultiV6Filtering},
+    { "stopFilteringMulticastV6Packets", "()Z", (void*) android_net_wifi_stopMultiV6Filtering},
     { "setPowerModeCommand", "(I)Z", (void*) android_net_wifi_setPowerModeCommand },
     { "getPowerModeCommand", "()I", (void*) android_net_wifi_getPowerModeCommand },
     { "setBandCommand", "(I)Z", (void*) android_net_wifi_setBandCommand},
