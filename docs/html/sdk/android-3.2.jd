@@ -544,7 +544,7 @@ href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code
 android.hardware.screen.landscape} &mdash; The application requires display in
 landscape orientation.</li>
   <li>{@link android.content.pm.PackageManager#FEATURE_SCREEN_PORTRAIT
-android.hardware.screen.landscape} &mdash; The application requires display in
+android.hardware.screen.portrait} &mdash; The application requires display in
 portrait orientation.</li>
 </ul>
 
