@@ -317,6 +317,7 @@ public class ActivityChooserModel extends DataSetObservable {
                 dataModel = new ActivityChooserModel(context, historyFileName);
                 sDataModelRegistry.put(historyFileName, dataModel);
             }
+            dataModel.readHistoricalData();
             return dataModel;
         }
     }
@@ -505,7 +506,7 @@ public class ActivityChooserModel extends DataSetObservable {
      *       data is read until this method is invoked.
      * <p>
      */
-    public void readHistoricalData() {
+    private void readHistoricalData() {
         synchronized (mInstanceLock) {
             if (!mCanReadHistoricalData || !mHistoricalRecordsChanged) {
                 return;
@@ -527,7 +528,7 @@ public class ActivityChooserModel extends DataSetObservable {
      * @throws IllegalStateException If this method is called before a call to
      *         {@link #readHistoricalData()}.
      */
-    public void persistHistoricalData() {
+    private void persistHistoricalData() {
         synchronized (mInstanceLock) {
             if (!mReadShareHistoryCalled) {
                 throw new IllegalStateException("No preceding call to #readHistoricalData");
@@ -629,6 +630,7 @@ public class ActivityChooserModel extends DataSetObservable {
             if (added) {
                 mHistoricalRecordsChanged = true;
                 pruneExcessiveHistoricalRecordsLocked();
+                persistHistoricalData();
                 sortActivities();
             }
             return added;
