@@ -160,7 +160,8 @@ public:
                                     uint32_t samplingRate = 0,
                                     uint32_t format = AUDIO_FORMAT_DEFAULT,
                                     uint32_t channels = AUDIO_CHANNEL_IN_MONO,
-                                    audio_in_acoustics_t acoustics = (audio_in_acoustics_t)0);
+                                    audio_in_acoustics_t acoustics = (audio_in_acoustics_t)0,
+                                    int sessionId = 0);
     static status_t startInput(audio_io_handle_t input);
     static status_t stopInput(audio_io_handle_t input);
     static void releaseInput(audio_io_handle_t input);
@@ -175,7 +176,7 @@ public:
 
     static audio_io_handle_t getOutputForEffect(effect_descriptor_t *desc);
     static status_t registerEffect(effect_descriptor_t *desc,
-                                    audio_io_handle_t output,
+                                    audio_io_handle_t io,
                                     uint32_t strategy,
                                     int session,
                                     int id);

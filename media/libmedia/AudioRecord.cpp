@@ -162,8 +162,19 @@ status_t AudioRecord::set(
 
     int channelCount = popcount(channelMask);
 
+    if (sessionId == 0 ) {
+        mSessionId = AudioSystem::newAudioSessionId();
+    } else {
+        mSessionId = sessionId;
+    }
+    LOGV("set(): mSessionId %d", mSessionId);
+
     audio_io_handle_t input = AudioSystem::getInput(inputSource,
-                                    sampleRate, format, channelMask, (audio_in_acoustics_t)flags);
+                                                    sampleRate,
+                                                    format,
+                                                    channelMask,
+                                                    (audio_in_acoustics_t)flags,
+                                                    mSessionId);
     if (input == 0) {
         LOGE("Could not get audio input for record source %d", inputSource);
         return BAD_VALUE;
@@ -186,8 +197,6 @@ status_t AudioRecord::set(
     if (notificationFrames == 0) {
         notificationFrames = frameCount/2;
     }
-
-    mSessionId = sessionId;
 
     // create the IAudioRecord
     status = openRecord_l(sampleRate, format, channelMask,
@@ -589,8 +598,10 @@ audio_io_handle_t AudioRecord::getInput_l()
 {
     mInput = AudioSystem::getInput(mInputSource,
                                 mCblk->sampleRate,
-                                mFormat, mChannelMask,
-                                (audio_in_acoustics_t)mFlags);
+                                mFormat,
+                                mChannelMask,
+                                (audio_in_acoustics_t)mFlags,
+                                mSessionId);
     return mInput;
 }
 

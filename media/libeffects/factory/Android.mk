@@ -14,4 +14,7 @@ LOCAL_MODULE:= libeffects
 
 LOCAL_SHARED_LIBRARIES += libdl
 
+LOCAL_C_INCLUDES := \
+    system/media/audio_effects/include
+
 include $(BUILD_SHARED_LIBRARY)

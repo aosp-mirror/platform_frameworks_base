@@ -26,13 +26,6 @@
 extern "C" {
 #endif
 
-#define AUDIO_EFFECT_DEFAULT_CONFIG_FILE "/system/etc/audio_effects.conf"
-#define AUDIO_EFFECT_VENDOR_CONFIG_FILE "/vendor/etc/audio_effects.conf"
-#define EFFECTS_TAG "effects"
-#define LIBRARIES_TAG "libraries"
-#define PATH_TAG "path"
-#define LIBRARY_TAG "library"
-#define UUID_TAG "uuid"
 
 typedef struct list_elem_s {
     void *object;

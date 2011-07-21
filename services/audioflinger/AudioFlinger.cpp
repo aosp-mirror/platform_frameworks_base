@@ -81,6 +81,8 @@ static const int kDumpLockSleep = 20000;
 
 static const nsecs_t kWarningThrottle = seconds(5);
 
+// RecordThread loop sleep time upon application overrun or audio HAL read error
+static const int kRecordThreadSleepUs = 5000;
 
 // ----------------------------------------------------------------------------
 
@@ -417,7 +419,7 @@ sp<IAudioTrack> AudioFlinger::createTrack(
             lSessionId = *sessionId;
         } else {
             // if no audio session id is provided, create one here
-            lSessionId = nextUniqueId_l();
+            lSessionId = nextUniqueId();
             if (sessionId != NULL) {
                 *sessionId = lSessionId;
             }
@@ -725,6 +727,15 @@ status_t AudioFlinger::setParameters(int ioHandle, const String8& keyValuePairs)
         thread = checkPlaybackThread_l(ioHandle);
         if (thread == NULL) {
             thread = checkRecordThread_l(ioHandle);
+        } else if (thread.get() == primaryPlaybackThread_l()) {
+            // indicate output device change to all input threads for pre processing
+            AudioParameter param = AudioParameter(keyValuePairs);
+            int value;
+            if (param.getInt(String8(AudioParameter::keyRouting), value) == NO_ERROR) {
+                for (size_t i = 0; i < mRecordThreads.size(); i++) {
+                    mRecordThreads.valueAt(i)->setParameters(keyValuePairs);
+                }
+            }
         }
     }
     if (thread != NULL) {
@@ -873,10 +884,10 @@ void AudioFlinger::removeClient_l(pid_t pid)
 
 // ----------------------------------------------------------------------------
 
-AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger, int id)
+AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger, int id, uint32_t device)
     :   Thread(false),
         mAudioFlinger(audioFlinger), mSampleRate(0), mFrameCount(0), mChannelCount(0),
-        mFrameSize(1), mFormat(0), mStandby(false), mId(id), mExiting(false)
+        mFrameSize(1), mFormat(0), mStandby(false), mId(id), mExiting(false), mDevice(device)
 {
 }
 
@@ -1032,14 +1043,15 @@ status_t AudioFlinger::ThreadBase::dumpBase(int fd, const Vector<String16>& args
     return NO_ERROR;
 }
 
-
 // ----------------------------------------------------------------------------
 
-AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device)
-    :   ThreadBase(audioFlinger, id),
+AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinger,
+                                             AudioStreamOut* output,
+                                             int id,
+                                             uint32_t device)
+    :   ThreadBase(audioFlinger, id, device),
         mMixBuffer(0), mSuspended(0), mBytesWritten(0), mOutput(output),
-        mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false),
-        mDevice(device)
+        mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false)
 {
     readOutputParameters();
 
@@ -1199,9 +1211,9 @@ sp<AudioFlinger::PlaybackThread::Track>  AudioFlinger::PlaybackThread::createTra
         }
     }
 
-    if (mOutput == 0) {
+    lStatus = initCheck();
+    if (lStatus != NO_ERROR) {
         LOGE("Audio driver not initialized.");
-        lStatus = NO_INIT;
         goto Exit;
     }
 
@@ -1423,7 +1435,7 @@ status_t AudioFlinger::PlaybackThread::getRenderPosition(uint32_t *halFrames, ui
     if (halFrames == 0 || dspFrames == 0) {
         return BAD_VALUE;
     }
-    if (mOutput == 0) {
+    if (initCheck() != NO_ERROR) {
         return INVALID_OPERATION;
     }
     *halFrames = mBytesWritten / audio_stream_frame_size(&mOutput->stream->common);
@@ -1468,34 +1480,6 @@ uint32_t AudioFlinger::PlaybackThread::getStrategyForSession_l(int sessionId)
     return AudioSystem::getStrategyForStream(AUDIO_STREAM_MUSIC);
 }
 
-sp<AudioFlinger::EffectChain> AudioFlinger::PlaybackThread::getEffectChain(int sessionId)
-{
-    Mutex::Autolock _l(mLock);
-    return getEffectChain_l(sessionId);
-}
-
-sp<AudioFlinger::EffectChain> AudioFlinger::PlaybackThread::getEffectChain_l(int sessionId)
-{
-    sp<EffectChain> chain;
-
-    size_t size = mEffectChains.size();
-    for (size_t i = 0; i < size; i++) {
-        if (mEffectChains[i]->sessionId() == sessionId) {
-            chain = mEffectChains[i];
-            break;
-        }
-    }
-    return chain;
-}
-
-void AudioFlinger::PlaybackThread::setMode(uint32_t mode)
-{
-    Mutex::Autolock _l(mLock);
-    size_t size = mEffectChains.size();
-    for (size_t i = 0; i < size; i++) {
-        mEffectChains[i]->setMode_l(mode);
-    }
-}
 
 // ----------------------------------------------------------------------------
 
@@ -1503,7 +1487,7 @@ AudioFlinger::MixerThread::MixerThread(const sp<AudioFlinger>& audioFlinger, Aud
     :   PlaybackThread(audioFlinger, output, id, device),
         mAudioMixer(0)
 {
-    mType = PlaybackThread::MIXER;
+    mType = ThreadBase::MIXER;
     mAudioMixer = new AudioMixer(mFrameCount, mSampleRate);
 
     // FIXME - Current mixer implementation only supports stereo output
@@ -2072,7 +2056,7 @@ uint32_t AudioFlinger::MixerThread::suspendSleepTimeUs()
 AudioFlinger::DirectOutputThread::DirectOutputThread(const sp<AudioFlinger>& audioFlinger, AudioStreamOut* output, int id, uint32_t device)
     :   PlaybackThread(audioFlinger, output, id, device)
 {
-    mType = PlaybackThread::DIRECT;
+    mType = ThreadBase::DIRECT;
 }
 
 AudioFlinger::DirectOutputThread::~DirectOutputThread()
@@ -2551,7 +2535,7 @@ uint32_t AudioFlinger::DirectOutputThread::suspendSleepTimeUs()
 AudioFlinger::DuplicatingThread::DuplicatingThread(const sp<AudioFlinger>& audioFlinger, AudioFlinger::MixerThread* mainThread, int id)
     :   MixerThread(audioFlinger, mainThread->getOutput(), id, mainThread->device()), mWaitTimeMs(UINT_MAX)
 {
-    mType = PlaybackThread::DUPLICATING;
+    mType = ThreadBase::DUPLICATING;
     addOutputTrack(mainThread);
 }
 
@@ -3751,21 +3735,26 @@ sp<IAudioRecord> AudioFlinger::openRecord(
         if (sessionId != NULL && *sessionId != AUDIO_SESSION_OUTPUT_MIX) {
             lSessionId = *sessionId;
         } else {
-            lSessionId = nextUniqueId_l();
+            lSessionId = nextUniqueId();
             if (sessionId != NULL) {
                 *sessionId = lSessionId;
             }
         }
         // create new record track. The record track uses one track in mHardwareMixerThread by convention.
-        recordTrack = new RecordThread::RecordTrack(thread, client, sampleRate,
-                                                   format, channelMask, frameCount, flags, lSessionId);
+        recordTrack = thread->createRecordTrack_l(client,
+                                                sampleRate,
+                                                format,
+                                                channelMask,
+                                                frameCount,
+                                                flags,
+                                                lSessionId,
+                                                &lStatus);
     }
-    if (recordTrack->getCblk() == NULL) {
+    if (lStatus != NO_ERROR) {
         // remove local strong reference to Client before deleting the RecordTrack so that the Client
         // destructor is called by the TrackBase destructor with mLock held
         client.clear();
         recordTrack.clear();
-        lStatus = NO_MEMORY;
         goto Exit;
     }
 
@@ -3814,10 +3803,16 @@ status_t AudioFlinger::RecordHandle::onTransact(
 
 // ----------------------------------------------------------------------------
 
-AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger, AudioStreamIn *input, uint32_t sampleRate, uint32_t channels, int id) :
-    ThreadBase(audioFlinger, id),
-    mInput(input), mResampler(0), mRsmpOutBuffer(0), mRsmpInBuffer(0)
+AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger,
+                                         AudioStreamIn *input,
+                                         uint32_t sampleRate,
+                                         uint32_t channels,
+                                         int id,
+                                         uint32_t device) :
+    ThreadBase(audioFlinger, id, device),
+    mInput(input), mTrack(NULL), mResampler(0), mRsmpOutBuffer(0), mRsmpInBuffer(0)
 {
+    mType = ThreadBase::RECORD;
     mReqChannelCount = popcount(channels);
     mReqSampleRate = sampleRate;
     readInputParameters();
@@ -3847,6 +3842,7 @@ bool AudioFlinger::RecordThread::threadLoop()
 {
     AudioBufferProvider::Buffer buffer;
     sp<RecordTrack> activeTrack;
+    Vector< sp<EffectChain> > effectChains;
 
     nsecs_t lastWarning = 0;
 
@@ -3897,14 +3893,22 @@ bool AudioFlinger::RecordThread::threadLoop()
                     mStandby = false;
                 }
             }
+            lockEffectChains_l(effectChains);
         }
 
         if (mActiveTrack != 0) {
             if (mActiveTrack->mState != TrackBase::ACTIVE &&
                 mActiveTrack->mState != TrackBase::RESUMING) {
-                usleep(5000);
+                unlockEffectChains(effectChains);
+                usleep(kRecordThreadSleepUs);
                 continue;
             }
+            for (size_t i = 0; i < effectChains.size(); i ++) {
+                effectChains[i]->process_l();
+            }
+            // enable changes in effect chain
+            unlockEffectChains(effectChains);
+
             buffer.frameCount = mFrameCount;
             if (LIKELY(mActiveTrack->getNextBuffer(&buffer) == NO_ERROR)) {
                 size_t framesOut = buffer.frameCount;
@@ -3953,7 +3957,7 @@ bool AudioFlinger::RecordThread::threadLoop()
                                     // Force input into standby so that it tries to
                                     // recover at next read attempt
                                     mInput->stream->common.standby(&mInput->stream->common);
-                                    usleep(5000);
+                                    usleep(kRecordThreadSleepUs);
                                 }
                                 mRsmpInIndex = mFrameCount;
                                 framesOut = 0;
@@ -4001,9 +4005,12 @@ bool AudioFlinger::RecordThread::threadLoop()
                 // Release the processor for a while before asking for a new buffer.
                 // This will give the application more chance to read from the buffer and
                 // clear the overflow.
-                usleep(5000);
+                usleep(kRecordThreadSleepUs);
             }
+        } else {
+            unlockEffectChains(effectChains);
         }
+        effectChains.clear();
     }
 
     if (!mStandby) {
@@ -4015,6 +4022,49 @@ bool AudioFlinger::RecordThread::threadLoop()
 
     LOGV("RecordThread %p exiting", this);
     return false;
+}
+
+
+sp<AudioFlinger::RecordThread::RecordTrack>  AudioFlinger::RecordThread::createRecordTrack_l(
+        const sp<AudioFlinger::Client>& client,
+        uint32_t sampleRate,
+        int format,
+        int channelMask,
+        int frameCount,
+        uint32_t flags,
+        int sessionId,
+        status_t *status)
+{
+    sp<RecordTrack> track;
+    status_t lStatus;
+
+    lStatus = initCheck();
+    if (lStatus != NO_ERROR) {
+        LOGE("Audio driver not initialized.");
+        goto Exit;
+    }
+
+    { // scope for mLock
+        Mutex::Autolock _l(mLock);
+
+        track = new RecordTrack(this, client, sampleRate,
+                      format, channelMask, frameCount, flags, sessionId);
+
+        if (track->getCblk() == NULL) {
+            lStatus = NO_MEMORY;
+            goto Exit;
+        }
+
+        mTrack = track.get();
+
+    }
+    lStatus = NO_ERROR;
+
+Exit:
+    if (status) {
+        *status = lStatus;
+    }
+    return track;
 }
 
 status_t AudioFlinger::RecordThread::start(RecordThread::RecordTrack* recordTrack)
@@ -4146,7 +4196,7 @@ status_t AudioFlinger::RecordThread::getNextBuffer(AudioBufferProvider::Buffer* 
                 // Force input into standby so that it tries to
                 // recover at next read attempt
                 mInput->stream->common.standby(&mInput->stream->common);
-                usleep(5000);
+                usleep(kRecordThreadSleepUs);
             }
             buffer->raw = 0;
             buffer->frameCount = 0;
@@ -4210,6 +4260,23 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
             } else {
                 reconfig = true;
             }
+        }
+        if (param.getInt(String8(AudioParameter::keyRouting), value) == NO_ERROR) {
+            // forward device change to effects that have requested to be
+            // aware of attached audio device.
+            for (size_t i = 0; i < mEffectChains.size(); i++) {
+                mEffectChains[i]->setDevice_l(value);
+            }
+            // store input device and output device but do not forward output device to audio HAL.
+            // Note that status is ignored by the caller for output device
+            // (see AudioFlinger::setParameters()
+            if (value & AUDIO_DEVICE_OUT_ALL) {
+                mDevice &= (uint32_t)~(value & AUDIO_DEVICE_OUT_ALL);
+                status = BAD_VALUE;
+            } else {
+                mDevice &= (uint32_t)~(value & AUDIO_DEVICE_IN_ALL);
+            }
+            mDevice |= (uint32_t)value;
         }
         if (status == NO_ERROR) {
             status = mInput->stream->common.set_parameters(&mInput->stream->common, keyValuePair.string());
@@ -4320,6 +4387,21 @@ unsigned int AudioFlinger::RecordThread::getInputFramesLost()
     return mInput->stream->get_input_frames_lost(mInput->stream);
 }
 
+uint32_t AudioFlinger::RecordThread::hasAudioSession(int sessionId)
+{
+    Mutex::Autolock _l(mLock);
+    uint32_t result = 0;
+    if (getEffectChain_l(sessionId) != 0) {
+        result = EFFECT_SESSION;
+    }
+
+    if (mTrack != NULL && sessionId == mTrack->sessionId()) {
+        result |= TRACK_SESSION;
+    }
+
+    return result;
+}
+
 // ----------------------------------------------------------------------------
 
 int AudioFlinger::openOutput(uint32_t *pDevices,
@@ -4368,7 +4450,7 @@ int AudioFlinger::openOutput(uint32_t *pDevices,
     mHardwareStatus = AUDIO_HW_IDLE;
     if (outStream != NULL) {
         AudioStreamOut *output = new AudioStreamOut(outHwDev, outStream);
-        int id = nextUniqueId_l();
+        int id = nextUniqueId();
 
         if ((flags & AUDIO_POLICY_OUTPUT_FLAG_DIRECT) ||
             (format != AUDIO_FORMAT_PCM_16_BIT) ||
@@ -4405,7 +4487,7 @@ int AudioFlinger::openDuplicateOutput(int output1, int output2)
         return 0;
     }
 
-    int id = nextUniqueId_l();
+    int id = nextUniqueId();
     DuplicatingThread *thread = new DuplicatingThread(this, thread1, id);
     thread->addOutputTrack(thread2);
     mPlaybackThreads.add(id, thread);
@@ -4428,9 +4510,9 @@ status_t AudioFlinger::closeOutput(int output)
 
         LOGV("closeOutput() %d", output);
 
-        if (thread->type() == PlaybackThread::MIXER) {
+        if (thread->type() == ThreadBase::MIXER) {
             for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
-                if (mPlaybackThreads.valueAt(i)->type() == PlaybackThread::DUPLICATING) {
+                if (mPlaybackThreads.valueAt(i)->type() == ThreadBase::DUPLICATING) {
                     DuplicatingThread *dupThread = (DuplicatingThread *)mPlaybackThreads.valueAt(i).get();
                     dupThread->removeOutputTrack((MixerThread *)thread.get());
                 }
@@ -4442,7 +4524,7 @@ status_t AudioFlinger::closeOutput(int output)
     }
     thread->exit();
 
-    if (thread->type() != PlaybackThread::DUPLICATING) {
+    if (thread->type() != ThreadBase::DUPLICATING) {
         AudioStreamOut *out = thread->getOutput();
         out->hwDev->close_output_stream(out->hwDev, out->stream);
         delete out;
@@ -4537,9 +4619,17 @@ int AudioFlinger::openInput(uint32_t *pDevices,
     if (inStream != NULL) {
         AudioStreamIn *input = new AudioStreamIn(inHwDev, inStream);
 
-        int id = nextUniqueId_l();
-         // Start record thread
-        thread = new RecordThread(this, input, reqSamplingRate, reqChannels, id);
+        int id = nextUniqueId();
+        // Start record thread
+        // RecorThread require both input and output device indication to forward to audio
+        // pre processing modules
+        uint32_t device = (*pDevices) | primaryOutputDevice_l();
+        thread = new RecordThread(this,
+                                  input,
+                                  reqSamplingRate,
+                                  reqChannels,
+                                  id,
+                                  device);
         mRecordThreads.add(id, thread);
         LOGV("openInput() created record thread: ID %d thread %p", id, thread);
         if (pSamplingRate) *pSamplingRate = reqSamplingRate;
@@ -4597,7 +4687,7 @@ status_t AudioFlinger::setStreamOutput(uint32_t stream, int output)
     for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
         PlaybackThread *thread = mPlaybackThreads.valueAt(i).get();
         if (thread != dstThread &&
-            thread->type() != PlaybackThread::DIRECT) {
+            thread->type() != ThreadBase::DIRECT) {
             MixerThread *srcThread = (MixerThread *)thread;
             srcThread->invalidateTracks(stream);
         }
@@ -4609,8 +4699,7 @@ status_t AudioFlinger::setStreamOutput(uint32_t stream, int output)
 
 int AudioFlinger::newAudioSessionId()
 {
-    AutoMutex _l(mLock);
-    return nextUniqueId_l();
+    return nextUniqueId();
 }
 
 // checkPlaybackThread_l() must be called with AudioFlinger::mLock held
@@ -4628,7 +4717,7 @@ AudioFlinger::MixerThread *AudioFlinger::checkMixerThread_l(int output) const
 {
     PlaybackThread *thread = checkPlaybackThread_l(output);
     if (thread != NULL) {
-        if (thread->type() == PlaybackThread::DIRECT) {
+        if (thread->type() == ThreadBase::DIRECT) {
             thread = NULL;
         }
     }
@@ -4645,11 +4734,33 @@ AudioFlinger::RecordThread *AudioFlinger::checkRecordThread_l(int input) const
     return thread;
 }
 
-// nextUniqueId_l() must be called with AudioFlinger::mLock held
-int AudioFlinger::nextUniqueId_l()
+uint32_t AudioFlinger::nextUniqueId()
 {
-    return mNextUniqueId++;
+    return android_atomic_inc(&mNextUniqueId);
 }
+
+AudioFlinger::PlaybackThread *AudioFlinger::primaryPlaybackThread_l()
+{
+    for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
+        PlaybackThread *thread = mPlaybackThreads.valueAt(i).get();
+        if (thread->getOutput()->hwDev == mPrimaryHardwareDev) {
+            return thread;
+        }
+    }
+    return NULL;
+}
+
+uint32_t AudioFlinger::primaryOutputDevice_l()
+{
+    PlaybackThread *thread = primaryPlaybackThread_l();
+
+    if (thread == NULL) {
+        return 0;
+    }
+
+    return thread->device();
+}
+
 
 // ----------------------------------------------------------------------------
 //  Effect management
@@ -4683,7 +4794,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         effect_descriptor_t *pDesc,
         const sp<IEffectClient>& effectClient,
         int32_t priority,
-        int output,
+        int io,
         int sessionId,
         status_t *status,
         int *id,
@@ -4695,8 +4806,8 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
     sp<Client> client;
     wp<Client> wclient;
 
-    LOGV("createEffect pid %d, client %p, priority %d, sessionId %d, output %d",
-            pid, effectClient.get(), priority, sessionId, output);
+    LOGV("createEffect pid %d, client %p, priority %d, sessionId %d, io %d",
+            pid, effectClient.get(), priority, sessionId, io);
 
     if (pDesc == NULL) {
         lStatus = BAD_VALUE;
@@ -4724,7 +4835,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         goto Exit;
     }
 
-    if (output == 0) {
+    if (io == 0) {
         if (sessionId == AUDIO_SESSION_OUTPUT_STAGE) {
             // output must be specified by AudioPolicyManager when using session
             // AUDIO_SESSION_OUTPUT_STAGE
@@ -4732,9 +4843,9 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
             goto Exit;
         } else if (sessionId == AUDIO_SESSION_OUTPUT_MIX) {
             // if the output returned by getOutputForEffect() is removed before we lock the
-            // mutex below, the call to checkPlaybackThread_l(output) below will detect it
+            // mutex below, the call to checkPlaybackThread_l(io) below will detect it
             // and we will exit safely
-            output = AudioSystem::getOutputForEffect(&desc);
+            io = AudioSystem::getOutputForEffect(&desc);
         }
     }
 
@@ -4811,30 +4922,40 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
         // output threads.
         // If output is 0 here, sessionId is neither SESSION_OUTPUT_STAGE nor SESSION_OUTPUT_MIX
         // because of code checking output when entering the function.
-        if (output == 0) {
+        // Note: io is never 0 when creating an effect on an input
+        if (io == 0) {
              // look for the thread where the specified audio session is present
             for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
                 if (mPlaybackThreads.valueAt(i)->hasAudioSession(sessionId) != 0) {
-                    output = mPlaybackThreads.keyAt(i);
+                    io = mPlaybackThreads.keyAt(i);
                     break;
                 }
+            }
+            if (io == 0) {
+               for (size_t i = 0; i < mRecordThreads.size(); i++) {
+                   if (mRecordThreads.valueAt(i)->hasAudioSession(sessionId) != 0) {
+                       io = mRecordThreads.keyAt(i);
+                       break;
+                   }
+               }
             }
             // If no output thread contains the requested session ID, default to
             // first output. The effect chain will be moved to the correct output
             // thread when a track with the same session ID is created
-            if (output == 0 && mPlaybackThreads.size()) {
-                output = mPlaybackThreads.keyAt(0);
+            if (io == 0 && mPlaybackThreads.size()) {
+                io = mPlaybackThreads.keyAt(0);
+            }
+            LOGV("createEffect() got io %d for effect %s", io, desc.name);
+        }
+        ThreadBase *thread = checkRecordThread_l(io);
+        if (thread == NULL) {
+            thread = checkPlaybackThread_l(io);
+            if (thread == NULL) {
+                LOGE("createEffect() unknown output thread");
+                lStatus = BAD_VALUE;
+                goto Exit;
             }
         }
-        LOGV("createEffect() got output %d for effect %s", output, desc.name);
-        PlaybackThread *thread = checkPlaybackThread_l(output);
-        if (thread == NULL) {
-            LOGE("createEffect() unknown output thread");
-            lStatus = BAD_VALUE;
-            goto Exit;
-        }
-
-        // TODO: allow attachment of effect to inputs
 
         wclient = mClients.valueFor(pid);
 
@@ -4943,8 +5064,9 @@ status_t AudioFlinger::moveEffectChain_l(int session,
     return NO_ERROR;
 }
 
+
 // PlaybackThread::createEffect_l() must be called with AudioFlinger::mLock held
-sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
+sp<AudioFlinger::EffectHandle> AudioFlinger::ThreadBase::createEffect_l(
         const sp<AudioFlinger::Client>& client,
         const sp<IEffectClient>& effectClient,
         int32_t priority,
@@ -4957,24 +5079,14 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
     sp<EffectModule> effect;
     sp<EffectHandle> handle;
     status_t lStatus;
-    sp<Track> track;
     sp<EffectChain> chain;
     bool chainCreated = false;
     bool effectCreated = false;
     bool effectRegistered = false;
 
-    if (mOutput == 0) {
+    lStatus = initCheck();
+    if (lStatus != NO_ERROR) {
         LOGW("createEffect_l() Audio driver not initialized.");
-        lStatus = NO_INIT;
-        goto Exit;
-    }
-
-    // Do not allow auxiliary effect on session other than 0
-    if ((desc->flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY &&
-        sessionId != AUDIO_SESSION_OUTPUT_MIX) {
-        LOGW("createEffect_l() Cannot add auxiliary effect %s to session %d",
-                desc->name, sessionId);
-        lStatus = BAD_VALUE;
         goto Exit;
     }
 
@@ -4983,6 +5095,16 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
     if (sessionId == AUDIO_SESSION_OUTPUT_MIX && mType != MIXER) {
         LOGW("createEffect_l() Cannot add auxiliary effect %s to session %d",
                 desc->name, sessionId);
+        lStatus = BAD_VALUE;
+        goto Exit;
+    }
+    // Only Pre processor effects are allowed on input threads and only on input threads
+    if ((mType == RECORD &&
+            (desc->flags & EFFECT_FLAG_TYPE_MASK) != EFFECT_FLAG_TYPE_PRE_PROC) ||
+            (mType != RECORD &&
+                    (desc->flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_PRE_PROC)) {
+        LOGW("createEffect_l() effect %s (flags %08x) created on wrong thread type %d",
+                desc->name, desc->flags, mType);
         lStatus = BAD_VALUE;
         goto Exit;
     }
@@ -5008,7 +5130,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::PlaybackThread::createEffect_l(
         LOGV("createEffect_l() got effect %p on chain %p", effect == 0 ? 0 : effect.get(), chain.get());
 
         if (effect == 0) {
-            int id = mAudioFlinger->nextUniqueId_l();
+            int id = mAudioFlinger->nextUniqueId();
             // Check CPU and memory usage
             lStatus = AudioSystem::registerEffect(desc, mId, chain->strategy(), sessionId, id);
             if (lStatus != NO_ERROR) {
@@ -5059,9 +5181,20 @@ Exit:
     return handle;
 }
 
+sp<AudioFlinger::EffectModule> AudioFlinger::ThreadBase::getEffect_l(int sessionId, int effectId)
+{
+    sp<EffectModule> effect;
+
+    sp<EffectChain> chain = getEffectChain_l(sessionId);
+    if (chain != 0) {
+        effect = chain->getEffectFromId_l(effectId);
+    }
+    return effect;
+}
+
 // PlaybackThread::addEffect_l() must be called with AudioFlinger::mLock and
 // PlaybackThread::mLock held
-status_t AudioFlinger::PlaybackThread::addEffect_l(const sp<EffectModule>& effect)
+status_t AudioFlinger::ThreadBase::addEffect_l(const sp<EffectModule>& effect)
 {
     // check for existing effect chain with the requested audio session
     int sessionId = effect->sessionId();
@@ -5097,7 +5230,7 @@ status_t AudioFlinger::PlaybackThread::addEffect_l(const sp<EffectModule>& effec
     return NO_ERROR;
 }
 
-void AudioFlinger::PlaybackThread::removeEffect_l(const sp<EffectModule>& effect) {
+void AudioFlinger::ThreadBase::removeEffect_l(const sp<EffectModule>& effect) {
 
     LOGV("removeEffect_l() %p effect %p", this, effect.get());
     effect_descriptor_t desc = effect->desc();
@@ -5116,7 +5249,53 @@ void AudioFlinger::PlaybackThread::removeEffect_l(const sp<EffectModule>& effect
     }
 }
 
-void AudioFlinger::PlaybackThread::disconnectEffect(const sp<EffectModule>& effect,
+void AudioFlinger::ThreadBase::lockEffectChains_l(
+        Vector<sp <AudioFlinger::EffectChain> >& effectChains)
+{
+    effectChains = mEffectChains;
+    for (size_t i = 0; i < mEffectChains.size(); i++) {
+        mEffectChains[i]->lock();
+    }
+}
+
+void AudioFlinger::ThreadBase::unlockEffectChains(
+        Vector<sp <AudioFlinger::EffectChain> >& effectChains)
+{
+    for (size_t i = 0; i < effectChains.size(); i++) {
+        effectChains[i]->unlock();
+    }
+}
+
+sp<AudioFlinger::EffectChain> AudioFlinger::ThreadBase::getEffectChain(int sessionId)
+{
+    Mutex::Autolock _l(mLock);
+    return getEffectChain_l(sessionId);
+}
+
+sp<AudioFlinger::EffectChain> AudioFlinger::ThreadBase::getEffectChain_l(int sessionId)
+{
+    sp<EffectChain> chain;
+
+    size_t size = mEffectChains.size();
+    for (size_t i = 0; i < size; i++) {
+        if (mEffectChains[i]->sessionId() == sessionId) {
+            chain = mEffectChains[i];
+            break;
+        }
+    }
+    return chain;
+}
+
+void AudioFlinger::ThreadBase::setMode(uint32_t mode)
+{
+    Mutex::Autolock _l(mLock);
+    size_t size = mEffectChains.size();
+    for (size_t i = 0; i < size; i++) {
+        mEffectChains[i]->setMode_l(mode);
+    }
+}
+
+void AudioFlinger::ThreadBase::disconnectEffect(const sp<EffectModule>& effect,
                                                     const wp<EffectHandle>& handle) {
     Mutex::Autolock _l(mLock);
     LOGV("disconnectEffect() %p effect %p", this, effect.get());
@@ -5222,35 +5401,6 @@ size_t AudioFlinger::PlaybackThread::removeEffectChain_l(const sp<EffectChain>& 
     return mEffectChains.size();
 }
 
-void AudioFlinger::PlaybackThread::lockEffectChains_l(
-        Vector<sp <AudioFlinger::EffectChain> >& effectChains)
-{
-    effectChains = mEffectChains;
-    for (size_t i = 0; i < mEffectChains.size(); i++) {
-        mEffectChains[i]->lock();
-    }
-}
-
-void AudioFlinger::PlaybackThread::unlockEffectChains(
-        Vector<sp <AudioFlinger::EffectChain> >& effectChains)
-{
-    for (size_t i = 0; i < effectChains.size(); i++) {
-        effectChains[i]->unlock();
-    }
-}
-
-
-sp<AudioFlinger::EffectModule> AudioFlinger::PlaybackThread::getEffect_l(int sessionId, int effectId)
-{
-    sp<EffectModule> effect;
-
-    sp<EffectChain> chain = getEffectChain_l(sessionId);
-    if (chain != 0) {
-        effect = chain->getEffectFromId_l(effectId);
-    }
-    return effect;
-}
-
 status_t AudioFlinger::PlaybackThread::attachAuxEffect(
         const sp<AudioFlinger::PlaybackThread::Track> track, int EffectId)
 {
@@ -5291,6 +5441,34 @@ void AudioFlinger::PlaybackThread::detachAuxEffect_l(int effectId)
     }
 }
 
+status_t AudioFlinger::RecordThread::addEffectChain_l(const sp<EffectChain>& chain)
+{
+    // only one chain per input thread
+    if (mEffectChains.size() != 0) {
+        return INVALID_OPERATION;
+    }
+    LOGV("addEffectChain_l() %p on thread %p", chain.get(), this);
+
+    chain->setInBuffer(NULL);
+    chain->setOutBuffer(NULL);
+
+    mEffectChains.add(chain);
+
+    return NO_ERROR;
+}
+
+size_t AudioFlinger::RecordThread::removeEffectChain_l(const sp<EffectChain>& chain)
+{
+    LOGV("removeEffectChain_l() %p from thread %p", chain.get(), this);
+    LOGW_IF(mEffectChains.size() != 1,
+            "removeEffectChain_l() %p invalid chain size %d on thread %p",
+            chain.get(), mEffectChains.size(), this);
+    if (mEffectChains.size() == 1) {
+        mEffectChains.removeAt(0);
+    }
+    return 0;
+}
+
 // ----------------------------------------------------------------------------
 //  EffectModule implementation
 // ----------------------------------------------------------------------------
@@ -5312,12 +5490,11 @@ AudioFlinger::EffectModule::EffectModule(const wp<ThreadBase>& wThread,
     if (thread == 0) {
         return;
     }
-    PlaybackThread *p = (PlaybackThread *)thread.get();
 
     memcpy(&mDescriptor, desc, sizeof(effect_descriptor_t));
 
     // create effect engine from effect factory
-    mStatus = EffectCreate(&desc->uuid, sessionId, p->id(), &mEffectInterface);
+    mStatus = EffectCreate(&desc->uuid, sessionId, thread->id(), &mEffectInterface);
 
     if (mStatus != NO_ERROR) {
         return;
@@ -5340,6 +5517,13 @@ AudioFlinger::EffectModule::~EffectModule()
 {
     LOGV("Destructor %p", this);
     if (mEffectInterface != NULL) {
+        if ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_PRE_PROC ||
+                (mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_POST_PROC) {
+            sp<ThreadBase> thread = mThread.promote();
+            if (thread != 0) {
+                thread->stream()->remove_audio_effect(thread->stream(), mEffectInterface);
+            }
+        }
         // release effect engine
         EffectRelease(mEffectInterface);
     }
@@ -5415,8 +5599,7 @@ void AudioFlinger::EffectModule::disconnect(const wp<EffectHandle>& handle)
     {
         sp<ThreadBase> thread = mThread.promote();
         if (thread != 0) {
-            PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
-            playbackThread->disconnectEffect(keep, handle);
+            thread->disconnectEffect(keep, handle);
         }
     }
 }
@@ -5626,6 +5809,14 @@ status_t AudioFlinger::EffectModule::start_l()
     if (status == 0) {
         status = cmdStatus;
     }
+    if (status == 0 &&
+            ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_PRE_PROC ||
+             (mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_POST_PROC)) {
+        sp<ThreadBase> thread = mThread.promote();
+        if (thread != 0) {
+            thread->stream()->add_audio_effect(thread->stream(), mEffectInterface);
+        }
+    }
     return status;
 }
 
@@ -5644,6 +5835,14 @@ status_t AudioFlinger::EffectModule::stop_l()
                                                    &cmdStatus);
     if (status == 0) {
         status = cmdStatus;
+    }
+    if (status == 0 &&
+            ((mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_PRE_PROC ||
+             (mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_POST_PROC)) {
+        sp<ThreadBase> thread = mThread.promote();
+        if (thread != 0) {
+            thread->stream()->remove_audio_effect(thread->stream(), mEffectInterface);
+        }
     }
     return status;
 }
@@ -5784,17 +5983,41 @@ status_t AudioFlinger::EffectModule::setDevice(uint32_t device)
 {
     Mutex::Autolock _l(mLock);
     status_t status = NO_ERROR;
-    if ((mDescriptor.flags & EFFECT_FLAG_DEVICE_MASK) == EFFECT_FLAG_DEVICE_IND) {
-        status_t cmdStatus;
-        uint32_t size = sizeof(status_t);
-        status = (*mEffectInterface)->command(mEffectInterface,
-                                              EFFECT_CMD_SET_DEVICE,
-                                              sizeof(uint32_t),
-                                              &device,
-                                              &size,
-                                              &cmdStatus);
-        if (status == NO_ERROR) {
-            status = cmdStatus;
+    if (device && (mDescriptor.flags & EFFECT_FLAG_DEVICE_MASK) == EFFECT_FLAG_DEVICE_IND) {
+        // audio pre processing modules on RecordThread can receive both output and
+        // input device indication in the same call
+        uint32_t dev = device & AUDIO_DEVICE_OUT_ALL;
+        if (dev) {
+            status_t cmdStatus;
+            uint32_t size = sizeof(status_t);
+
+            status = (*mEffectInterface)->command(mEffectInterface,
+                                                  EFFECT_CMD_SET_DEVICE,
+                                                  sizeof(uint32_t),
+                                                  &dev,
+                                                  &size,
+                                                  &cmdStatus);
+            if (status == NO_ERROR) {
+                status = cmdStatus;
+            }
+        }
+        dev = device & AUDIO_DEVICE_IN_ALL;
+        if (dev) {
+            status_t cmdStatus;
+            uint32_t size = sizeof(status_t);
+
+            status_t status2 = (*mEffectInterface)->command(mEffectInterface,
+                                                  EFFECT_CMD_SET_INPUT_DEVICE,
+                                                  sizeof(uint32_t),
+                                                  &dev,
+                                                  &size,
+                                                  &cmdStatus);
+            if (status2 == NO_ERROR) {
+                status2 = cmdStatus;
+            }
+            if (status == NO_ERROR) {
+                status = status2;
+            }
         }
     }
     return status;
@@ -6168,7 +6391,6 @@ void AudioFlinger::EffectChain::process_l()
         LOGW("process_l(): cannot promote mixer thread");
         return;
     }
-    PlaybackThread *playbackThread = (PlaybackThread *)thread.get();
     bool isGlobalSession = (mSessionId == AUDIO_SESSION_OUTPUT_MIX) ||
             (mSessionId == AUDIO_SESSION_OUTPUT_STAGE);
     bool tracksOnSession = false;
@@ -6180,7 +6402,7 @@ void AudioFlinger::EffectChain::process_l()
     // will not do it
     if (tracksOnSession &&
             activeTrackCnt() == 0) {
-        size_t numSamples = playbackThread->frameCount() * playbackThread->channelCount();
+        size_t numSamples = thread->frameCount() * thread->channelCount();
         memset(mInBuffer, 0, numSamples * sizeof(int16_t));
     }
 
