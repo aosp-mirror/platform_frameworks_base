@@ -23,11 +23,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         >
-        <Button
-            android:id="@+id/inspect"
+        <Spinner
+            android:id="@+id/movement"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/inspect_log"
+            android:prompt="@string/movement_method"
             />
         <Spinner
             android:id="@+id/velocity"
@@ -36,6 +36,13 @@
             android:gravity="center_horizontal"
             android:prompt="@string/desired_scroll_velocity"
             />
+        <ToggleButton
+            android:id="@+id/capture"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textOn="@string/capture_stop"
+            android:textOff="@string/capture_start"
+            />
         <EditText
             android:id="@+id/url"
             android:layout_width="0dip"
@@ -43,6 +50,12 @@
             android:inputType="textUri"
             android:imeOptions="actionGo"
             android:layout_weight="1"
+            />
+        <Button
+            android:id="@+id/inspect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/inspect_log"
             />
     </LinearLayout>
     <com.test.tilebenchmark.ProfiledWebView

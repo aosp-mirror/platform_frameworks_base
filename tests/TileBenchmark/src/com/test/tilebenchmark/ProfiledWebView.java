@@ -59,12 +59,13 @@ public class ProfiledWebView extends WebView {
     }
 
     /*
-     * Called once the page is loaded to start scrolling for evaluating tiles
+     * Called once the page is loaded to start scrolling for evaluating tiles.
+     * If autoScrolling isn't set, stop must be called manually.
      */
-    public void startScrollTest(ProfileCallback callback) {
-        isScrolling = true;
+    public void startScrollTest(ProfileCallback callback, boolean autoScrolling) {
+        isScrolling = autoScrolling;
         mCallback = callback;
-        super.tileProfilingStart();
+        tileProfilingStart();
         invalidate();
     }
 
@@ -72,19 +73,31 @@ public class ProfiledWebView extends WebView {
      * Called once the page has stopped scrolling
      */
     public void stopScrollTest() {
-        float testRatio = super.tileProfilingStop();
+        super.tileProfilingStop();
+
+        if (mCallback == null) {
+            tileProfilingClear();
+            return;
+        }
 
         TileData data[][] = new TileData[super.tileProfilingNumFrames()][];
         for (int frame = 0; frame < data.length; frame++) {
             data[frame] = new TileData[
-                    super.tileProfilingNumTilesInFrame(frame)];
+                    tileProfilingNumTilesInFrame(frame)];
             for (int tile = 0; tile < data[frame].length; tile++) {
-                int x = super.tileProfilingGetX(frame, tile);
-                int y = super.tileProfilingGetY(frame, tile);
-                boolean isReady = super.tileProfilingGetReady(frame, tile);
-                int level = super.tileProfilingGetLevel(frame, tile);
+                int left = tileProfilingGetInt(frame, tile, "left");
+                int top = tileProfilingGetInt(frame, tile, "top");
+                int right = tileProfilingGetInt(frame, tile, "right");
+                int bottom = tileProfilingGetInt(frame, tile, "bottom");
 
-                data[frame][tile] = new TileData(x, y, isReady, level);
+                boolean isReady = super.tileProfilingGetInt(
+                        frame, tile, "isReady") == 1;
+                int level = tileProfilingGetInt(frame, tile, "level");
+
+                float scale = tileProfilingGetFloat(frame, tile, "scale");
+
+                data[frame][tile] = new TileData(left, top, right, bottom,
+                        isReady, level, scale);
             }
         }
         super.tileProfilingClear();

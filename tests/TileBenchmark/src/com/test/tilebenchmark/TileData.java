@@ -19,14 +19,24 @@ package com.test.tilebenchmark;
 import java.io.Serializable;
 
 public class TileData implements Serializable {
-    public int x, y;
+    int left, top, right, bottom;
     public boolean isReady;
     public int level;
+    public float scale;
 
-    public TileData(int x, int y, boolean isReady, int level) {
-        this.x = x;
-        this.y = y;
+    public TileData(int left, int top, int right, int bottom, boolean isReady,
+            int level, float scale) {
+        this.left = left;
+        this.right = right;
+        this.top = top;
+        this.bottom = bottom;
         this.isReady = isReady;
         this.level = level;
+        this.scale = scale;
+    }
+
+    public String toString() {
+        return "Tile (" + left + "," + top + ")->("
+                + right + "," + bottom + ")";
     }
 }

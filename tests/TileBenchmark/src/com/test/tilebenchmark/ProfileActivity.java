@@ -38,6 +38,7 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TextView.OnEditorActionListener;
+import android.widget.ToggleButton;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -58,10 +59,23 @@ public class ProfileActivity extends Activity {
                                                      // before test
 
     Button mInspectButton;
+    ToggleButton mCaptureButton;
     Spinner mVelocitySpinner;
+    Spinner mMovementSpinner;
     EditText mUrl;
     ProfiledWebView mWeb;
     ProfileCallback mCallback;
+
+    LoggingWebViewClient mLoggingWebViewClient = new LoggingWebViewClient();
+    AutoLoggingWebViewClient mAutoLoggingWebViewClient = new AutoLoggingWebViewClient();
+
+    private enum TestingState {
+        NOT_TESTING,
+        PRE_TESTING,
+        START_TESTING,
+        STOP_TESTING,
+        SAVED_TESTING
+    };
 
     private class VelocitySelectedListener implements OnItemSelectedListener {
         @Override
@@ -70,6 +84,31 @@ public class ProfileActivity extends Activity {
             String speedStr = parent.getItemAtPosition(position).toString();
             int speedInt = Integer.parseInt(speedStr);
             mWeb.setAutoScrollSpeed(speedInt);
+        }
+
+        @Override
+        public void onNothingSelected(AdapterView<?> parent) {
+        }
+    }
+
+    private class MovementSelectedListener implements OnItemSelectedListener {
+        @Override
+        public void onItemSelected(AdapterView<?> parent, View view,
+                int position, long id) {
+            String movementStr = parent.getItemAtPosition(position).toString();
+            if (movementStr == getResources().getString(
+                    R.string.movement_auto_scroll)
+                    || movementStr == getResources().getString(
+                            R.string.movement_auto_fling)) {
+                mWeb.setWebViewClient(mAutoLoggingWebViewClient);
+                mCaptureButton.setEnabled(false);
+                mVelocitySpinner.setEnabled(true);
+            } else if (movementStr == getResources().getString(
+                    R.string.movement_manual)) {
+                mWeb.setWebViewClient(mLoggingWebViewClient);
+                mCaptureButton.setEnabled(true);
+                mVelocitySpinner.setEnabled(false);
+            }
         }
 
         @Override
@@ -88,6 +127,9 @@ public class ProfileActivity extends Activity {
             super.onPageStarted(view, url, favicon);
             mUrl.setText(url);
         }
+    }
+
+    private class AutoLoggingWebViewClient extends LoggingWebViewClient {
 
         @Override
         public void onPageFinished(WebView view, String url) {
@@ -100,9 +142,15 @@ public class ProfileActivity extends Activity {
 
                 @Override
                 public void onFinish() {
-                    mWeb.startScrollTest(mCallback);
+                    startViewProfiling(true);
                 }
             }.start();
+        }
+
+        @Override
+        public void onPageStarted(WebView view, String url, Bitmap favicon) {
+            super.onPageStarted(view, url, favicon);
+            setTestingState(TestingState.PRE_TESTING);
         }
     }
 
@@ -125,8 +173,44 @@ public class ProfileActivity extends Activity {
 
         @Override
         protected void onPostExecute(Void v) {
-            mUrl.setBackgroundResource(R.color.finished_url);
+            setTestingState(TestingState.SAVED_TESTING);
         }
+    }
+
+    public void setTestingState(TestingState state) {
+        switch (state) {
+            case NOT_TESTING:
+                mUrl.setBackgroundResource(R.color.background_not_testing);
+                mInspectButton.setEnabled(true);
+                mMovementSpinner.setEnabled(true);
+                break;
+            case PRE_TESTING:
+                mInspectButton.setEnabled(false);
+                mMovementSpinner.setEnabled(false);
+                break;
+            case START_TESTING:
+                mUrl.setBackgroundResource(R.color.background_start_testing);
+                mInspectButton.setEnabled(false);
+                mMovementSpinner.setEnabled(false);
+                break;
+            case STOP_TESTING:
+                mUrl.setBackgroundResource(R.color.background_stop_testing);
+                break;
+            case SAVED_TESTING:
+                mInspectButton.setEnabled(true);
+                mMovementSpinner.setEnabled(true);
+                break;
+        }
+    }
+
+    /** auto - automatically scroll. */
+    private void startViewProfiling(boolean auto) {
+        if (!auto) {
+            // manual, toggle capture button to indicate capture state to user
+            mCaptureButton.setChecked(true);
+        }
+        mWeb.startScrollTest(mCallback, auto);
+        setTestingState(TestingState.START_TESTING);
     }
 
     /** Called when the activity is first created. */
@@ -135,14 +219,19 @@ public class ProfileActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         mInspectButton = (Button) findViewById(R.id.inspect);
+        mCaptureButton = (ToggleButton) findViewById(R.id.capture);
         mVelocitySpinner = (Spinner) findViewById(R.id.velocity);
+        mMovementSpinner = (Spinner) findViewById(R.id.movement);
         mUrl = (EditText) findViewById(R.id.url);
         mWeb = (ProfiledWebView) findViewById(R.id.web);
         mCallback = new ProfileCallback() {
             @SuppressWarnings("unchecked")
             @Override
             public void profileCallback(TileData[][] data) {
-                new StoreFileTask().execute(new Pair<String, TileData[][]>(TEMP_FILENAME, data));
+                new StoreFileTask().execute(new Pair<String, TileData[][]>(
+                        TEMP_FILENAME, data));
+                mCaptureButton.setChecked(false);
+                setTestingState(TestingState.STOP_TESTING);
             }
         };
 
@@ -166,6 +255,33 @@ public class ProfileActivity extends Activity {
                 new VelocitySelectedListener());
         mVelocitySpinner.setSelection(3);
 
+        // Movement spinner
+        String content[] = {
+                getResources().getString(R.string.movement_auto_scroll),
+                getResources().getString(R.string.movement_auto_fling),
+                getResources().getString(R.string.movement_manual)
+        };
+        adapter = new ArrayAdapter<CharSequence>(this,
+                android.R.layout.simple_spinner_item, content);
+        adapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        mMovementSpinner.setAdapter(adapter);
+        mMovementSpinner.setOnItemSelectedListener(
+                new MovementSelectedListener());
+        mMovementSpinner.setSelection(0);
+
+        // Capture toggle button
+        mCaptureButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mCaptureButton.isChecked()) {
+                    startViewProfiling(false);
+                } else {
+                    mWeb.stopScrollTest();
+                }
+            }
+        });
+
         // Custom profiling WebView
         WebSettings settings = mWeb.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -180,12 +296,13 @@ public class ProfileActivity extends Activity {
             public boolean onEditorAction(TextView v, int actionId,
                     KeyEvent event) {
                 String url = mUrl.getText().toString();
-                mUrl.setBackgroundResource(R.color.unfinished_url);
                 mWeb.loadUrl(url);
                 mWeb.requestFocus();
                 return true;
             }
         });
+
+        setTestingState(TestingState.NOT_TESTING);
     }
 
     public void setCallback(ProfileCallback callback) {
