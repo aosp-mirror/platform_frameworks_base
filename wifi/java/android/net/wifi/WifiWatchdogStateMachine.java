@@ -16,11 +16,15 @@
 
 package android.net.wifi;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.ConnectivityManager;
 import android.net.DnsPinger;
@@ -29,7 +33,7 @@ import android.net.Uri;
 import android.os.Message;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.text.TextUtils;
+import android.provider.Settings.Secure;
 import android.util.Slog;
 
 import com.android.internal.util.Protocol;
@@ -45,6 +49,7 @@ import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
 
 /**
  * {@link WifiWatchdogStateMachine} monitors the initial connection to a Wi-Fi
@@ -62,7 +67,8 @@ import java.util.Scanner;
  */
 public class WifiWatchdogStateMachine extends StateMachine {
 
-    private static final boolean VDBG = false;
+
+    private static final boolean VDBG = true;  //TODO : Remove this before merge
     private static final boolean DBG = true;
     private static final String WWSM_TAG = "WifiWatchdogStateMachine";
 
@@ -72,18 +78,22 @@ public class WifiWatchdogStateMachine extends StateMachine {
      */
     private static final int LOW_SIGNAL_CUTOFF = 1;
 
-    private static final long MIN_LOW_SIGNAL_CHECK_INTERVAL_MS = 2 * 60 * 1000;
-    private static final long MIN_SINGLE_DNS_CHECK_INTERVAL_MS = 10 * 60 * 1000;
-    private static final long MIN_WALLED_GARDEN_INTERVAL_MS = 30 * 60 * 1000;
+    private static final long DEFAULT_DNS_CHECK_SHORT_INTERVAL_MS = 2 * 60 * 1000;
+    private static final long DEFAULT_DNS_CHECK_LONG_INTERVAL_MS = 10 * 60 * 1000;
+    private static final long DEFAULT_WALLED_GARDEN_INTERVAL_MS = 30 * 60 * 1000;
 
-    private static final int MAX_CHECKS_PER_SSID = 7;
-    private static final int NUM_DNS_PINGS = 5;
-    private static final double MIN_DNS_RESPONSE_RATE = 0.50;
-
-    private static final int DNS_PING_TIMEOUT_MS = 800;
+    private static final int DEFAULT_MAX_SSID_BLACKLISTS = 7;
+    private static final int DEFAULT_NUM_DNS_PINGS = 5;
+    private static final int DEFAULT_MIN_DNS_RESPONSES = 3;
     private static final long DNS_PING_INTERVAL_MS = 100;
 
-    private static final long BLACKLIST_FOLLOWUP_INTERVAL_MS = 15 * 1000;
+    private static final int DEFAULT_DNS_PING_TIMEOUT_MS = 1500;
+
+    private static final long DEFAULT_BLACKLIST_FOLLOWUP_INTERVAL_MS = 15 * 1000;
+
+    private static final String DEFAULT_WALLED_GARDEN_URL = "http://www.google.com/";
+    private static final String DEFAULT_WALLED_GARDEN_PATTERN = "<title>.*Google.*</title>";
+
 
     private static final int BASE = Protocol.BASE_WIFI_WATCHDOG;
 
@@ -104,6 +114,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final int EVENT_RSSI_CHANGE = BASE + 3;
     private static final int EVENT_SCAN_RESULTS_AVAILABLE = BASE + 4;
     private static final int EVENT_WIFI_RADIO_STATE_CHANGE = BASE + 5;
+    private static final int EVENT_WATCHDOG_SETTINGS_CHANGE = BASE + 6;
 
     private static final int MESSAGE_CHECK_STEP = BASE + 100;
     private static final int MESSAGE_HANDLE_WALLED_GARDEN = BASE + 101;
@@ -132,6 +143,19 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private WalledGardenState mWalledGardenState = new WalledGardenState();
     private BlacklistedApState mBlacklistedApState = new BlacklistedApState();
 
+    private long mDnsCheckShortIntervalMs;
+    private long mDnsCheckLongIntervalMs;
+    private long mWalledGardenIntervalMs;
+    private int mMaxSsidBlacklists;
+    private int mNumDnsPings;
+    private int mMinDnsResponses;
+    private int mDnsPingTimeoutMs;
+    private long mBlacklistFollowupIntervalMs;
+    private boolean mWalledGardenTestEnabled;
+    private String mWalledGardenUrl;
+    private Pattern mWalledGardenPattern;
+
+    private boolean mShowDisabledNotification;
     /**
      * The {@link WifiInfo} object passed to WWSM on network broadcasts
      */
@@ -142,7 +166,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
      * Currently maintained but not used, TODO
      */
     private HashSet<String> mBssids = new HashSet<String>();
-    private int mNumFullDNSchecks = 0;
+    private int mNumCheckFailures = 0;
 
     private Long mLastWalledGardenCheckTime = null;
 
@@ -158,7 +182,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
      *         /       \
      * Disabled     Enabled
      *             /       \
-     * Disconnected      Connected
+     * NotConnected      Connected
      *                  /---------\
      *               (all other states)
      */
@@ -174,6 +198,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
         // The content observer to listen needs a handler
         registerForSettingsChanges();
+        registerForWatchdogToggle();
         addState(mDefaultState);
             addState(mWatchdogDisabledState, mDefaultState);
             addState(mWatchdogEnabledState, mDefaultState);
@@ -186,6 +211,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     addState(mOnlineWatchState, mConnectedState);
 
         setInitialState(mWatchdogDisabledState);
+        updateSettings();
+        mShowDisabledNotification = getSettingsBoolean(mContentResolver,
+                Settings.Secure.WIFI_WATCHDOG_SHOW_DISABLED_NETWORK_POPUP, true);
     }
 
     public static WifiWatchdogStateMachine makeWifiWatchdogStateMachine(Context context) {
@@ -228,7 +256,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     /**
      * Observes the watchdog on/off setting, and takes action when changed.
      */
-    private void registerForSettingsChanges() {
+    private void registerForWatchdogToggle() {
         ContentObserver contentObserver = new ContentObserver(this.getHandler()) {
             @Override
             public void onChange(boolean selfChange) {
@@ -242,6 +270,54 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     /**
+     * Observes watchdogs secure setting changes.
+     */
+    private void registerForSettingsChanges() {
+        ContentObserver contentObserver = new ContentObserver(this.getHandler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                sendMessage(EVENT_WATCHDOG_SETTINGS_CHANGE);
+            }
+        };
+
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(
+                        Settings.Secure.WIFI_WATCHDOG_DNS_CHECK_SHORT_INTERVAL_MS),
+                        false, contentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_DNS_CHECK_LONG_INTERVAL_MS),
+                false, contentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_INTERVAL_MS),
+                false, contentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_MAX_SSID_BLACKLISTS),
+                false, contentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_NUM_DNS_PINGS),
+                false, contentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_MIN_DNS_RESPONSES),
+                false, contentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_DNS_PING_TIMEOUT_MS),
+                false, contentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(
+                        Settings.Secure.WIFI_WATCHDOG_BLACKLIST_FOLLOWUP_INTERVAL_MS),
+                        false, contentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_TEST_ENABLED),
+                false, contentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_URL),
+                false, contentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_PATTERN),
+                false, contentObserver);
+    }
+
+    /**
      * DNS based detection techniques do not work at all hotspots. The one sure
      * way to check a walled garden is to see if a URL fetch on a known address
      * fetches the data we expect
@@ -250,11 +326,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
         InputStream in = null;
         HttpURLConnection urlConnection = null;
         try {
-            URL url = new URL(getWalledGardenUrl());
+            URL url = new URL(mWalledGardenUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
             in = new BufferedInputStream(urlConnection.getInputStream());
             Scanner scanner = new Scanner(in);
-            if (scanner.findInLine(getWalledGardenPattern()) != null) {
+            if (scanner.findInLine(mWalledGardenPattern) != null) {
                 return false;
             } else {
                 return true;
@@ -281,49 +357,49 @@ public class WifiWatchdogStateMachine extends StateMachine {
         pw.print("WatchdogStatus: ");
         pw.print("State " + getCurrentState());
         pw.println(", network [" + mInitialConnInfo + "]");
-        pw.print("checkCount " + mNumFullDNSchecks);
+        pw.print("checkFailures   " + mNumCheckFailures);
         pw.println(", bssids: " + mBssids);
         pw.println("lastSingleCheck: " + mOnlineWatchState.lastCheckTime);
     }
 
-    /**
-     * @see android.provider.Settings.Secure#WIFI_WATCHDOG_WALLED_GARDEN_TEST_ENABLED
-     */
-    private Boolean isWalledGardenTestEnabled() {
-        return Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_TEST_ENABLED, 1) == 1;
-    }
-
-    /**
-     * @see android.provider.Settings.Secure#WIFI_WATCHDOG_WALLED_GARDEN_URL
-     */
-    private String getWalledGardenUrl() {
-        String url = Settings.Secure.getString(mContentResolver,
-                Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_URL);
-        if (TextUtils.isEmpty(url))
-            return "http://www.google.com/";
-        return url;
-    }
-
-    /**
-     * @see android.provider.Settings.Secure#WIFI_WATCHDOG_WALLED_GARDEN_PATTERN
-     */
-    private String getWalledGardenPattern() {
-        String pattern = Settings.Secure.getString(mContentResolver,
-                Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_PATTERN);
-        if (TextUtils.isEmpty(pattern))
-            return "<title>.*Google.*</title>";
-        return pattern;
-    }
-
-    /**
-     * @see android.provider.Settings.Secure#WIFI_WATCHDOG_ON
-     */
     private boolean isWatchdogEnabled() {
-        return Settings.Secure.getInt(mContentResolver,
-                Settings.Secure.WIFI_WATCHDOG_ON, 1) == 1;
+        return getSettingsBoolean(mContentResolver, Settings.Secure.WIFI_WATCHDOG_ON, true);
     }
 
+    private void updateSettings() {
+        mDnsCheckShortIntervalMs = Secure.getLong(mContentResolver,
+                Secure.WIFI_WATCHDOG_DNS_CHECK_SHORT_INTERVAL_MS,
+                DEFAULT_DNS_CHECK_SHORT_INTERVAL_MS);
+        mDnsCheckLongIntervalMs = Secure.getLong(mContentResolver,
+                Secure.WIFI_WATCHDOG_DNS_CHECK_LONG_INTERVAL_MS,
+                DEFAULT_DNS_CHECK_LONG_INTERVAL_MS);
+        mMaxSsidBlacklists = Secure.getInt(mContentResolver,
+                Secure.WIFI_WATCHDOG_MAX_SSID_BLACKLISTS,
+                DEFAULT_MAX_SSID_BLACKLISTS);
+        mNumDnsPings = Secure.getInt(mContentResolver,
+                Secure.WIFI_WATCHDOG_NUM_DNS_PINGS,
+                DEFAULT_NUM_DNS_PINGS);
+        mMinDnsResponses = Secure.getInt(mContentResolver,
+                Secure.WIFI_WATCHDOG_MIN_DNS_RESPONSES,
+                DEFAULT_MIN_DNS_RESPONSES);
+        mDnsPingTimeoutMs = Secure.getInt(mContentResolver,
+                Secure.WIFI_WATCHDOG_DNS_PING_TIMEOUT_MS,
+                DEFAULT_DNS_PING_TIMEOUT_MS);
+        mBlacklistFollowupIntervalMs = Secure.getLong(mContentResolver,
+                Settings.Secure.WIFI_WATCHDOG_BLACKLIST_FOLLOWUP_INTERVAL_MS,
+                DEFAULT_BLACKLIST_FOLLOWUP_INTERVAL_MS);
+        mWalledGardenTestEnabled = getSettingsBoolean(mContentResolver,
+                Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_TEST_ENABLED, true);
+        mWalledGardenUrl = getSettingsStr(mContentResolver,
+                Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_URL,
+                DEFAULT_WALLED_GARDEN_URL);
+        mWalledGardenPattern = Pattern.compile(getSettingsStr(mContentResolver,
+                Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_PATTERN,
+                DEFAULT_WALLED_GARDEN_PATTERN));
+        mWalledGardenIntervalMs = Secure.getLong(mContentResolver,
+                Secure.WIFI_WATCHDOG_WALLED_GARDEN_INTERVAL_MS,
+                DEFAULT_WALLED_GARDEN_INTERVAL_MS);
+    }
 
     /**
      * Helper to return wait time left given a min interval and last run
@@ -353,7 +429,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         mInitialConnInfo = null;
         mDisableAPNextFailure = false;
         mLastWalledGardenCheckTime = null;
-        mNumFullDNSchecks = 0;
+        mNumCheckFailures = 0;
         mBssids.clear();
     }
 
@@ -365,13 +441,43 @@ public class WifiWatchdogStateMachine extends StateMachine {
         mContext.startActivity(intent);
     }
 
-    private void sendCheckStepMessage(long delay) {
-        sendMessageDelayed(obtainMessage(MESSAGE_CHECK_STEP, mNetEventCounter, 0), delay);
+    private void displayDisabledNetworkNotification() {
+        Resources r = Resources.getSystem();
+        CharSequence title =
+                r.getText(com.android.internal.R.string.wifi_watchdog_network_disabled);
+        CharSequence msg =
+                r.getText(com.android.internal.R.string.wifi_watchdog_network_disabled_detailed);
+
+        Notification wifiDisabledWarning = new Notification.Builder(mContext)
+            .setSmallIcon(com.android.internal.R.drawable.stat_sys_warning)
+            .setDefaults(Notification.DEFAULT_ALL)
+            .setTicker(title)
+            .setContentTitle(title)
+            .setContentText(msg)
+            .setContentIntent(PendingIntent.getActivity(mContext, 0,
+                    new Intent(Settings.ACTION_WIFI_IP_SETTINGS)
+                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0))
+            .setWhen(System.currentTimeMillis())
+            .setAutoCancel(true)
+            .getNotification();
+
+        NotificationManager notificationManager = (NotificationManager) mContext
+                .getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notificationManager.notify("WifiWatchdog", wifiDisabledWarning.icon, wifiDisabledWarning);
     }
 
     class DefaultState extends State {
         @Override
         public boolean processMessage(Message msg) {
+            switch (msg.what) {
+                case EVENT_WATCHDOG_SETTINGS_CHANGE:
+                    updateSettings();
+                    if (VDBG) {
+                        Slog.d(WWSM_TAG, "Updating wifi-watchdog secure settings");
+                    }
+                    return HANDLED;
+            }
             if (VDBG) {
                 Slog.v(WWSM_TAG, "Caught message " + msg.what + " in state " +
                         getCurrentState().getName());
@@ -509,6 +615,10 @@ public class WifiWatchdogStateMachine extends StateMachine {
                             mBssids.add(result.BSSID);
                     }
                     return HANDLED;
+                case EVENT_WATCHDOG_SETTINGS_CHANGE:
+                    // Stop current checks, but let state update
+                    transitionTo(mOnlineWatchState);
+                    return NOT_HANDLED;
             }
             return NOT_HANDLED;
         }
@@ -522,13 +632,12 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
         @Override
         public void enter() {
-            mNumFullDNSchecks++;
             dnsCheckSuccesses = 0;
             dnsCheckTries = 0;
             if (DBG) {
                 Slog.d(WWSM_TAG, "Starting DNS pings at " + SystemClock.elapsedRealtime());
-                dnsCheckLogStr = String.format("Dns Check %d.  Pinging %s on ssid [%s]: ",
-                        mNumFullDNSchecks, mDnsPinger.getDns(), mInitialConnInfo.getSSID());
+                dnsCheckLogStr = String.format("Pinging %s on ssid [%s]: ",
+                        mDnsPinger.getDns(), mInitialConnInfo.getSSID());
             }
 
             sendCheckStepMessage(0);
@@ -545,7 +654,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
             }
 
             long pingResponseTime = mDnsPinger.pingDns(mDnsPinger.getDns(),
-                    DNS_PING_TIMEOUT_MS);
+                    mDnsPingTimeoutMs);
 
             dnsCheckTries++;
             if (pingResponseTime >= 0)
@@ -567,14 +676,12 @@ public class WifiWatchdogStateMachine extends StateMachine {
              * After a full ping count, if we have more responses than this
              * cutoff, the outcome is success; else it is 'failure'.
              */
-            double pingResponseCutoff = MIN_DNS_RESPONSE_RATE * NUM_DNS_PINGS;
-            int remainingChecks = NUM_DNS_PINGS - dnsCheckTries;
 
             /**
              * Our final success count will be at least this big, so we're
              * guaranteed to succeed.
              */
-            if (dnsCheckSuccesses >= pingResponseCutoff) {
+            if (dnsCheckSuccesses >= mMinDnsResponses) {
                 // DNS CHECKS OK, NOW WALLED GARDEN
                 if (DBG) {
                     Slog.d(WWSM_TAG, dnsCheckLogStr + "|  SUCCESS");
@@ -603,7 +710,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
              * Our final count will be at most the current count plus the
              * remaining pings - we're guaranteed to fail.
              */
-            if (remainingChecks + dnsCheckSuccesses < pingResponseCutoff) {
+            int remainingChecks = mNumDnsPings - dnsCheckTries;
+            if (remainingChecks + dnsCheckSuccesses < mMinDnsResponses) {
                 if (DBG) {
                     Slog.d(WWSM_TAG, dnsCheckLogStr + "|  FAILURE");
                 }
@@ -617,12 +725,12 @@ public class WifiWatchdogStateMachine extends StateMachine {
         }
 
         private boolean shouldCheckWalledGarden() {
-            if (!isWalledGardenTestEnabled()) {
+            if (!mWalledGardenTestEnabled) {
                 if (VDBG)
                     Slog.v(WWSM_TAG, "Skipping walled garden check - disabled");
                 return false;
             }
-            long waitTime = waitTime(MIN_WALLED_GARDEN_INTERVAL_MS,
+            long waitTime = waitTime(mWalledGardenIntervalMs,
                     mLastWalledGardenCheckTime);
             if (waitTime > 0) {
                 if (DBG) {
@@ -632,6 +740,10 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 return false;
             }
             return true;
+        }
+
+        private void sendCheckStepMessage(long delay) {
+            sendMessageDelayed(obtainMessage(MESSAGE_CHECK_STEP, mNetEventCounter, 0), delay);
         }
 
     }
@@ -698,7 +810,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     }
                     lastCheckTime = SystemClock.elapsedRealtime();
                     long responseTime = mDnsPinger.pingDns(mDnsPinger.getDns(),
-                            DNS_PING_TIMEOUT_MS);
+                            mDnsPingTimeoutMs);
                     if (responseTime >= 0) {
                         if (VDBG) {
                             Slog.v(WWSM_TAG, "Ran a single DNS ping. Response time: "
@@ -720,15 +832,15 @@ public class WifiWatchdogStateMachine extends StateMachine {
         }
 
         /**
-         * Times a dns check with an interval based on {@link #curSignalStable}
+         * Times a dns check with an interval based on {@link #signalUnstable}
          */
         private void triggerSingleDnsCheck() {
             long waitInterval;
             if (signalUnstable) {
-                waitInterval = MIN_LOW_SIGNAL_CHECK_INTERVAL_MS;
+                waitInterval = mDnsCheckShortIntervalMs;
                 unstableSignalChecks = true;
             } else {
-                waitInterval = MIN_SINGLE_DNS_CHECK_INTERVAL_MS;
+                waitInterval = mDnsCheckLongIntervalMs;
             }
             sendMessageDelayed(obtainMessage(MESSAGE_SINGLE_DNS_CHECK, checkGuard, 0),
                     waitTime(waitInterval, lastCheckTime));
@@ -738,6 +850,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     class DnsCheckFailureState extends State {
         @Override
         public void enter() {
+            mNumCheckFailures++;
             obtainMessage(MESSAGE_HANDLE_BAD_AP, mNetEventCounter, 0).sendToTarget();
         }
 
@@ -754,16 +867,22 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 return HANDLED;
             }
 
-            if (mDisableAPNextFailure || mNumFullDNSchecks >= MAX_CHECKS_PER_SSID) {
+            if (mDisableAPNextFailure || mNumCheckFailures >= mMaxSsidBlacklists) {
                 // TODO : Unban networks if they had low signal ?
                 Slog.i(WWSM_TAG, "Disabling current SSID " + wifiInfoToStr(mInitialConnInfo)
-                        + ".  " +
-                        "numChecks " + mNumFullDNSchecks + ", numAPs " + mBssids.size());
+                        + ".  " + "numCheckFailures " + mNumCheckFailures
+                        + ", numAPs " + mBssids.size());
                 mWifiManager.disableNetwork(mInitialConnInfo.getNetworkId());
+                if (mShowDisabledNotification) {
+                    displayDisabledNetworkNotification();
+                    mShowDisabledNotification = false;
+                    putSettingsBoolean(mContentResolver,
+                            Settings.Secure.WIFI_WATCHDOG_SHOW_DISABLED_NETWORK_POPUP, false);
+                }
                 transitionTo(mNotConnectedState);
             } else {
-                Slog.i(WWSM_TAG, "Blacklisting current BSSID.  " + wifiInfoToStr(mInitialConnInfo) +
-                        "numChecks " + mNumFullDNSchecks + ", numAPs " + mBssids.size());
+                Slog.i(WWSM_TAG, "Blacklisting current BSSID.  " + wifiInfoToStr(mInitialConnInfo)
+                       + "numCheckFailures " + mNumCheckFailures + ", numAPs " + mBssids.size());
 
                 mWifiManager.addToBlacklist(mInitialConnInfo.getBSSID());
                 mWifiManager.reassociate();
@@ -802,7 +921,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         public void enter() {
             mDisableAPNextFailure = true;
             sendMessageDelayed(obtainMessage(MESSAGE_NETWORK_FOLLOWUP, mNetEventCounter, 0),
-                    BLACKLIST_FOLLOWUP_INTERVAL_MS);
+                    mBlacklistFollowupIntervalMs);
         }
 
         @Override
@@ -822,4 +941,57 @@ public class WifiWatchdogStateMachine extends StateMachine {
             return HANDLED;
         }
     }
+
+
+    /**
+     * Convenience function for retrieving a single secure settings value
+     * as a string with a default value.
+     *
+     * @param cr The ContentResolver to access.
+     * @param name The name of the setting to retrieve.
+     * @param def Value to return if the setting is not defined.
+     *
+     * @return The setting's current value, or 'def' if it is not defined
+     */
+    private static String getSettingsStr(ContentResolver cr, String name, String def) {
+        String v = Settings.Secure.getString(cr, name);
+        return v != null ? v : def;
+    }
+
+    /**
+     * Convenience function for retrieving a single secure settings value
+     * as a boolean.  Note that internally setting values are always
+     * stored as strings; this function converts the string to a boolean
+     * for you.  The default value will be returned if the setting is
+     * not defined or not a valid boolean.
+     *
+     * @param cr The ContentResolver to access.
+     * @param name The name of the setting to retrieve.
+     * @param def Value to return if the setting is not defined.
+     *
+     * @return The setting's current value, or 'def' if it is not defined
+     * or not a valid boolean.
+     */
+    private static boolean getSettingsBoolean(ContentResolver cr, String name, boolean def) {
+        return Settings.Secure.getInt(cr, name, def ? 1 : 0) == 1;
+    }
+
+    /**
+     * Convenience function for updating a single settings value as an
+     * integer. This will either create a new entry in the table if the
+     * given name does not exist, or modify the value of the existing row
+     * with that name.  Note that internally setting values are always
+     * stored as strings, so this function converts the given value to a
+     * string before storing it.
+     *
+     * @param cr The ContentResolver to access.
+     * @param name The name of the setting to modify.
+     * @param value The new value for the setting.
+     * @return true if the value was set, false on database errors
+     */
+    private static boolean putSettingsBoolean(ContentResolver cr, String name, boolean value) {
+        return Settings.Secure.putInt(cr, name, value ? 1 : 0);
+    }
+
+
 }

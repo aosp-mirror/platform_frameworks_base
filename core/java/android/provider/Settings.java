@@ -2877,6 +2877,7 @@ public final class Settings {
          * The acceptable packet loss percentage (range 0 - 100) before trying
          * another AP on the same network.
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_ACCEPTABLE_PACKET_LOSS_PERCENTAGE =
                 "wifi_watchdog_acceptable_packet_loss_percentage";
 
@@ -2884,11 +2885,13 @@ public final class Settings {
          * The number of access points required for a network in order for the
          * watchdog to monitor it.
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_AP_COUNT = "wifi_watchdog_ap_count";
 
         /**
          * The delay between background checks.
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_DELAY_MS =
                 "wifi_watchdog_background_check_delay_ms";
 
@@ -2896,12 +2899,14 @@ public final class Settings {
          * Whether the Wi-Fi watchdog is enabled for background checking even
          * after it thinks the user has connected to a good access point.
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_ENABLED =
                 "wifi_watchdog_background_check_enabled";
 
         /**
          * The timeout for a background ping
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_BACKGROUND_CHECK_TIMEOUT_MS =
                 "wifi_watchdog_background_check_timeout_ms";
 
@@ -2911,6 +2916,7 @@ public final class Settings {
          * calculation. For example, one network always seemed to time out for
          * the first couple pings, so this is set to 3 by default.
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_INITIAL_IGNORED_PING_COUNT =
             "wifi_watchdog_initial_ignored_ping_count";
 
@@ -2920,6 +2926,7 @@ public final class Settings {
          * initial connection state for the network. This is a safeguard for
          * networks containing multiple APs whose DNS does not respond to pings.
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_MAX_AP_CHECKS = "wifi_watchdog_max_ap_checks";
 
         /**
@@ -2930,22 +2937,83 @@ public final class Settings {
         /**
          * A comma-separated list of SSIDs for which the Wi-Fi watchdog should be enabled.
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_WATCH_LIST = "wifi_watchdog_watch_list";
 
         /**
          * The number of pings to test if an access point is a good connection.
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_PING_COUNT = "wifi_watchdog_ping_count";
 
         /**
          * The delay between pings.
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_PING_DELAY_MS = "wifi_watchdog_ping_delay_ms";
 
         /**
          * The timeout per ping.
          */
+        @Deprecated
         public static final String WIFI_WATCHDOG_PING_TIMEOUT_MS = "wifi_watchdog_ping_timeout_ms";
+
+        /**
+         * ms delay before rechecking an 'online' wifi connection when it is thought to be unstable.
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_DNS_CHECK_SHORT_INTERVAL_MS =
+                "wifi_watchdog_dns_check_short_interval_ms";
+
+        /**
+         * ms delay before rechecking an 'online' wifi connection when it is thought to be stable.
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_DNS_CHECK_LONG_INTERVAL_MS =
+                "wifi_watchdog_dns_check_long_interval_ms";
+
+        /**
+         * ms delay before rechecking a connect SSID for walled garden with a http download.
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_WALLED_GARDEN_INTERVAL_MS =
+                "wifi_watchdog_walled_garden_interval_ms";
+
+        /**
+         * max blacklist calls on an SSID before full dns check failures disable the network.
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_MAX_SSID_BLACKLISTS =
+                "wifi_watchdog_max_ssid_blacklists";
+
+        /**
+         * Number of dns pings per check.
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_NUM_DNS_PINGS = "wifi_watchdog_num_dns_pings";
+
+        /**
+         * Minimum number of responses to the dns pings to consider the test 'successful'.
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_MIN_DNS_RESPONSES =
+                "wifi_watchdog_min_dns_responses";
+
+        /**
+         * Timeout on dns pings
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_DNS_PING_TIMEOUT_MS =
+                "wifi_watchdog_dns_ping_timeout_ms";
+
+        /**
+         * We consider action from a 'blacklist' call to have finished by the end of
+         * this interval.  If we are connected to the same AP with no network connection,
+         * we are likely stuck on an SSID with no external connectivity.
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_BLACKLIST_FOLLOWUP_INTERVAL_MS =
+                "wifi_watchdog_blacklist_followup_interval_ms";
 
         /**
          * Setting to turn off walled garden test on Wi-Fi. Feature is enabled by default and
@@ -2970,6 +3038,14 @@ public final class Settings {
          */
         public static final String WIFI_WATCHDOG_WALLED_GARDEN_PATTERN =
                 "wifi_watchdog_walled_garden_pattern";
+
+        /**
+         * Boolean to determine whether to notify on disabling a network.  Secure setting used
+         * to notify user only once.  This setting is not monitored continuously.
+         * @hide
+         */
+        public static final String WIFI_WATCHDOG_SHOW_DISABLED_NETWORK_POPUP =
+                "wifi_watchdog_show_disabled_network_popup";
 
         /**
          * The maximum number of times we will retry a connection to an access
