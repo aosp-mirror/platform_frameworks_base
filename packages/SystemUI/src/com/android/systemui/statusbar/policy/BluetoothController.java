@@ -19,12 +19,10 @@ package com.android.systemui.statusbar.policy;
 import java.util.ArrayList;
 
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Slog;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -54,26 +52,24 @@ public class BluetoothController extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
-            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-            mEnabled = state == BluetoothAdapter.STATE_ON;
-        } else if (action.equals(BluetoothAdapter.ACTION_CONNECTION_STATE_CHANGED)) {
-            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
+        int state = intent.getIntExtra(BluetoothAdapter.EXTRA_CONNECTION_STATE,
                 BluetoothAdapter.STATE_DISCONNECTED);
-            if (state == BluetoothAdapter.STATE_CONNECTED) {
-                mIconId = R.drawable.stat_sys_data_bluetooth_connected;
-            } else {
-                mIconId = R.drawable.stat_sys_data_bluetooth;
-            }
-        }
+        int contentDescriptionResId = 0;
 
+        if (state == BluetoothAdapter.STATE_CONNECTED) {
+            mIconId = R.drawable.stat_sys_data_bluetooth_connected;
+            contentDescriptionResId = R.string.accessibility_bluetooth_connected;
+        } else {
+            mIconId = R.drawable.stat_sys_data_bluetooth;
+            contentDescriptionResId = R.string.accessibility_bluetooth_disconnected;
+        }
 
         int N = mIconViews.size();
         for (int i=0; i<N; i++) {
             ImageView v = mIconViews.get(i);
             v.setImageResource(mIconId);
             v.setVisibility(mEnabled ? View.VISIBLE : View.GONE);
+            v.setContentDescription(mContext.getString(contentDescriptionResId));
         }
     }
 }

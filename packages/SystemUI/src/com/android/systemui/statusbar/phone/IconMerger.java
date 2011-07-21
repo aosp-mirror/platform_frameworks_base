@@ -33,7 +33,8 @@ public class IconMerger extends LinearLayout {
 
     private int mIconSize;
     private StatusBarIconView mMoreView;
-    private StatusBarIcon mMoreIcon = new StatusBarIcon(null, R.drawable.stat_notify_more, 0);
+    private StatusBarIcon mMoreIcon = new StatusBarIcon(null, R.drawable.stat_notify_more, 0, 0,
+            null);
 
     public IconMerger(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -41,7 +42,7 @@ public class IconMerger extends LinearLayout {
         mIconSize = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.status_bar_icon_size);
 
-        mMoreView = new StatusBarIconView(context, "more");
+        mMoreView = new StatusBarIconView(context, "more", null);
         mMoreView.set(mMoreIcon);
         addView(mMoreView, 0, new LinearLayout.LayoutParams(mIconSize, mIconSize));
     }

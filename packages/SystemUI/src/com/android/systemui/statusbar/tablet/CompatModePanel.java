@@ -22,6 +22,7 @@ import android.content.res.TypedArray;
 import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Slog;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -88,6 +89,19 @@ public class CompatModePanel extends FrameLayout implements StatusBarPanel,
     @Override
     public boolean isInContentArea(int x, int y) {
         return false;
+    }
+
+    @Override
+    public boolean dispatchHoverEvent(MotionEvent event) {
+        // Ignore hover events outside of this panel bounds since such events
+        // generate spurious accessibility events with the panel content when
+        // tapping outside of it, thus confusing the user.
+        final int x = (int) event.getX();
+        final int y = (int) event.getY();
+        if (x >= 0 && x < getWidth() && y >= 0 && y < getHeight()) {
+            return super.dispatchHoverEvent(event);
+        }
+        return true;
     }
 
     public void setTrigger(View v) {

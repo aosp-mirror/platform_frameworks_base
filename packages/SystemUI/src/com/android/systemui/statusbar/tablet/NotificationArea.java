@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,29 +14,26 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar;
+package com.android.systemui.statusbar.tablet;
 
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
-public class LatestItemView extends FrameLayout {
-    public LatestItemView(Context context, AttributeSet attrs) {
+public class NotificationArea extends LinearLayout {
+
+    public NotificationArea(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    @Override
-    public void setOnClickListener(OnClickListener l) {
-        super.setOnClickListener(l);
     }
 
     @Override
     public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
         if (super.onRequestSendAccessibilityEvent(child, event)) {
-            // Add a record for the entire layout since its content is somehow small.
-            // The event comes from a leaf view that is interacted with.
+            // The event is coming from a descendant like battery but append
+            // the content of the entire notification area so accessibility
+            // services can choose how to present the content to the user.
             AccessibilityEvent record = AccessibilityEvent.obtain();
             onInitializeAccessibilityEvent(record);
             dispatchPopulateAccessibilityEvent(record);

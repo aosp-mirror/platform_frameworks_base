@@ -18,11 +18,8 @@ package com.android.systemui.statusbar.tablet;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.util.Slog;
 import android.view.MotionEvent;
 import android.widget.RelativeLayout;
-
-import com.android.systemui.R;
 
 public class NotificationPeekPanel extends RelativeLayout implements StatusBarPanel {
     TabletStatusBar mBar;
@@ -54,5 +51,17 @@ public class NotificationPeekPanel extends RelativeLayout implements StatusBarPa
         mBar.resetNotificationPeekFadeTimer();
         return false;
     }
-}
 
+    @Override
+    public boolean dispatchHoverEvent(MotionEvent event) {
+        // Ignore hover events outside of this panel bounds since such events
+        // generate spurious accessibility events with the panel content when
+        // tapping outside of it, thus confusing the user.
+        final int x = (int) event.getX();
+        final int y = (int) event.getY();
+        if (x >= 0 && x < getWidth() && y >= 0 && y < getHeight()) {
+            return super.dispatchHoverEvent(event);
+        }
+        return true;
+    }
+}

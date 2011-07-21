@@ -27,7 +27,7 @@ interface IStatusBarService
     void expand();
     void collapse();
     void disable(int what, IBinder token, String pkg);
-    void setIcon(String slot, String iconPackage, int iconId, int iconLevel);
+    void setIcon(String slot, String iconPackage, int iconId, int iconLevel, String contentDescription);
     void setIconVisibility(String slot, boolean visible);
     void removeIcon(String slot);
     void topAppWindowChanged(boolean menuVisible);

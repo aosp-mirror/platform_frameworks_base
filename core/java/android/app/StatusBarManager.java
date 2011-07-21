@@ -97,9 +97,10 @@ public class StatusBarManager {
         }
     }
 
-    public void setIcon(String slot, int iconId, int iconLevel) {
+    public void setIcon(String slot, int iconId, int iconLevel, String contentDescription) {
         try {
-            mService.setIcon(slot, mContext.getPackageName(), iconId, iconLevel);
+            mService.setIcon(slot, mContext.getPackageName(), iconId, iconLevel,
+                    contentDescription);
         } catch (RemoteException ex) {
             // system process is dead anyway.
             throw new RuntimeException(ex);

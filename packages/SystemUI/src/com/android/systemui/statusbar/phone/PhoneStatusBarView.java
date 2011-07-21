@@ -26,6 +26,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
 
 import com.android.systemui.R;
@@ -203,5 +204,19 @@ public class PhoneStatusBarView extends FrameLayout {
         return mService.interceptTouchEvent(event)
                 ? true : super.onInterceptTouchEvent(event);
     }
-}
 
+    @Override
+    public boolean onRequestSendAccessibilityEvent(View child, AccessibilityEvent event) {
+        if (super.onRequestSendAccessibilityEvent(child, event)) {
+            // The status bar is very small so augment the view that the user is touching
+            // with the content of the status bar a whole. This way an accessibility service
+            // may announce the current item as well as the entire content if appropriate.
+            AccessibilityEvent record = AccessibilityEvent.obtain();
+            onInitializeAccessibilityEvent(record);
+            dispatchPopulateAccessibilityEvent(record);
+            event.appendRecord(record);
+            return true;
+        }
+        return false;
+    }
+}

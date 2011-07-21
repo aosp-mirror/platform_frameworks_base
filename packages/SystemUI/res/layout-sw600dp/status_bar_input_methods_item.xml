@@ -53,7 +53,8 @@
                 android:id="@+id/item_icon"
                 android:layout_width="@android:dimen/app_icon_size"
                 android:layout_height="wrap_content"
-                android:scaleType="fitCenter" />
+                android:scaleType="fitCenter"
+                android:contentDescription="@null" />
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="0px"
@@ -94,7 +95,8 @@
             android:visibility="visible"
             android:clickable="true"
             android:focusable="true"
-            android:background="?android:attr/selectableItemBackground" />
+            android:background="?android:attr/selectableItemBackground"
+            android:contentDescription="@string/accessibility_settings_button" />
     </LinearLayout>
     <View
         android:layout_width="match_parent"

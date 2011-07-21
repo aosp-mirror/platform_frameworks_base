@@ -49,6 +49,7 @@
                 android:src="@drawable/ic_sysbar_back"
                 android:layout_alignParentLeft="true"
                 systemui:keyCode="4"
+                android:contentDescription="@string/accessibility_back"
                 />
             <LinearLayout
                 android:id="@+id/navigationArea"
@@ -62,11 +63,13 @@
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_home"
                     systemui:keyCode="3"
+                    android:contentDescription="@string/accessibility_home"
                     />
                 <ImageView android:id="@+id/recent_apps"
                     android:layout_width="80dip"
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_sysbar_recent"
+                    android:contentDescription="@string/accessibility_menu"
                     />
                 <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
                     android:layout_width="80dip"
@@ -74,6 +77,7 @@
                     android:src="@drawable/ic_sysbar_menu"
                     systemui:keyCode="82"
                     android:visibility="invisible"
+                    android:contentDescription="@string/accessibility_menu"
                     />
             </LinearLayout>
 

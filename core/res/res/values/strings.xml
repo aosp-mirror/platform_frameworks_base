@@ -3056,4 +3056,9 @@
     <!-- Title for a dialog showing possible activities for sharing in ShareActionProvider [CHAR LIMIT=25] -->
     <string name="share_action_provider_share_with">Share with...</string>
 
+    <!-- Status Bar icon descriptions -->
+
+    <!-- Description of for the status bar's icon that the device is locked for accessibility. [CHAR LIMIT=NONE] -->
+    <string name="status_bar_device_locked">Device locked.</string>
+
 </resources>

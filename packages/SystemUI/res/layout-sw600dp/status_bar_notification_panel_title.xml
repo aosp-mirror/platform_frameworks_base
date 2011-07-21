@@ -14,15 +14,17 @@
   limitations under the License.
 -->
 
-<RelativeLayout
+<com.android.systemui.statusbar.tablet.NotificationPanelTitle
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:systemui="http://schemas.android.com/apk/res/com.android.systemui"
     android:id="@+id/title_area"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:clickable="true"
     android:orientation="vertical"
     android:background="@drawable/notify_panel_clock_bg"
     >
+
     <LinearLayout
         android:id="@+id/icons"
         android:layout_width="wrap_content"
@@ -34,6 +36,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         >
+
         <ImageView
             android:id="@+id/bluetooth"
             android:layout_height="32dp"
@@ -41,6 +44,7 @@
             android:scaleType="centerInside"
             android:baseline="22dp"
             android:visibility="gone"
+            android:contentDescription="@null"
             />
 
         <FrameLayout
@@ -49,21 +53,28 @@
             android:layout_width="32dp"
             android:layout_marginRight="4dp"
             >
+
             <ImageView
                 android:id="@+id/network_signal"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
+                android:contentDescription="@null"
                 />
+
             <ImageView
                 android:id="@+id/network_type"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
+                android:contentDescription="@null"
                 />
+
             <ImageView
                 android:id="@+id/network_direction"
                 android:layout_height="match_parent"
                 android:layout_width="match_parent"
+                android:contentDescription="@null"
                 />
+
         </FrameLayout>
             
         <TextView
@@ -86,6 +97,7 @@
             android:layout_toRightOf="@id/network_text"
             android:layout_alignBaseline="@id/network_signal"
             android:baseline="22dp"
+            android:contentDescription="@null"
             />
 
         <TextView
@@ -110,6 +122,7 @@
         android:paddingRight="16dp"
         android:src="@drawable/ic_sysbar_quicksettings"
         android:baseline="21dp"
+        android:contentDescription="@string/accessibility_settings_button"
         />
 
     <ImageView
@@ -122,6 +135,7 @@
         android:src="@drawable/ic_notification_open"
         android:baseline="21dp"
         android:visibility="invisible"
+        android:contentDescription="@string/accessibility_notifications_button"
         />
 
     <View
@@ -138,7 +152,7 @@
     <com.android.systemui.statusbar.tablet.HoloClock
         android:id="@+id/clock"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_above="@id/title_divider"
         android:layout_marginRight="6dip"
@@ -164,19 +178,11 @@
         android:id="@+id/date"
         style="@style/StatusBarNotificationText"
         android:layout_height="wrap_content"
-        android:layout_width="120dp"
+        android:layout_width="wrap_content"
         android:layout_alignBottom="@id/clock"
         android:layout_alignParentLeft="true"
         android:gravity="left"
         android:layout_marginLeft="32dp"
         />
 
-    <view
-        class="com.android.systemui.statusbar.tablet.NotificationPanel$ModeToggle"
-        android:id="@+id/mode_toggle"
-        android:background="@null"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clickable="true"
-        />
-</RelativeLayout>
+</com.android.systemui.statusbar.tablet.NotificationPanelTitle>

@@ -2148,9 +2148,12 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         onPopulateAccessibilityEvent(event);
         // Let our children have a shot in populating the event.
         for (int i = 0, count = getChildCount(); i < count; i++) {
-            boolean handled = getChildAt(i).dispatchPopulateAccessibilityEvent(event);
-            if (handled) {
-                return handled;
+            View child = getChildAt(i);
+            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
+                boolean handled = getChildAt(i).dispatchPopulateAccessibilityEvent(event);
+                if (handled) {
+                    return handled;
+                }
             }
         }
         return false;

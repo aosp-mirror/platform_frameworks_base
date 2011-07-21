@@ -100,22 +100,22 @@ public class StatusBarTest extends TestActivity
         new Test("Double Remove") {
             public void run() {
                 Log.d(TAG, "set 0");
-                mStatusBarManager.setIcon("speakerphone", R.drawable.stat_sys_phone, 0);
+                mStatusBarManager.setIcon("speakerphone", R.drawable.stat_sys_phone, 0, null);
                 Log.d(TAG, "remove 1");
                 mStatusBarManager.removeIcon("tty");
 
                 SystemClock.sleep(1000);
 
                 Log.d(TAG, "set 1");
-                mStatusBarManager.setIcon("tty", R.drawable.stat_sys_phone, 0);
+                mStatusBarManager.setIcon("tty", R.drawable.stat_sys_phone, 0, null);
                 if (false) {
                     Log.d(TAG, "set 2");
-                    mStatusBarManager.setIcon("tty", R.drawable.stat_sys_phone, 0);
+                    mStatusBarManager.setIcon("tty", R.drawable.stat_sys_phone, 0, null);
                 }
                 Log.d(TAG, "remove 2");
                 mStatusBarManager.removeIcon("tty");
                 Log.d(TAG, "set 3");
-                mStatusBarManager.setIcon("speakerphone", R.drawable.stat_sys_phone, 0);
+                mStatusBarManager.setIcon("speakerphone", R.drawable.stat_sys_phone, 0, null);
             }
         },
         new Test("Hide (FLAG_FULLSCREEN)") {

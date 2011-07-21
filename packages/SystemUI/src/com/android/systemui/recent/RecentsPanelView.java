@@ -22,7 +22,6 @@ import java.util.List;
 import android.animation.Animator;
 import android.animation.LayoutTransition;
 import android.app.ActivityManager;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -48,6 +47,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -112,7 +112,7 @@ public class RecentsPanelView extends RelativeLayout
             position = _pos;
             packageName = _packageName;
         }
-    };
+    }
 
     private final class OnLongClickDelegate implements View.OnLongClickListener {
         View mOtherView;
@@ -252,6 +252,19 @@ public class RecentsPanelView extends RelativeLayout
         mChoreo.setPanelHeight(mRecentsContainer.getHeight());
     }
 
+    @Override
+    public boolean dispatchHoverEvent(MotionEvent event) {
+        // Ignore hover events outside of this panel bounds since such events
+        // generate spurious accessibility events with the panel content when
+        // tapping outside of it, thus confusing the user.
+        final int x = (int) event.getX();
+        final int y = (int) event.getY();
+        if (x >= 0 && x < getWidth() && y >= 0 && y < getHeight()) {
+            return super.dispatchHoverEvent(event);
+        }
+        return true;
+    }
+
     /**
      * Whether the panel is showing, or, if it's animating, whether it will be
      * when the animation is done.
@@ -316,7 +329,6 @@ public class RecentsPanelView extends RelativeLayout
 
 
         mRecentsGlowView = findViewById(R.id.recents_glow);
-        mRecentsScrim = (View) findViewById(R.id.recents_bg_protect);
         mChoreo = new Choreographer(this, mRecentsScrim, mRecentsGlowView, this);
         mRecentsDismissButton = findViewById(R.id.recents_dismiss_button);
         mRecentsDismissButton.setOnClickListener(new OnClickListener() {

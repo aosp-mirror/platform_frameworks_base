@@ -50,6 +50,7 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.res.Configuration;
@@ -1046,7 +1047,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mStatusBar.setIconVisibility("ime", false);
                 } else if (packageName != null) {
                     if (DEBUG) Slog.d(TAG, "show a small icon for the input method");
-                    mStatusBar.setIcon("ime", packageName, iconId, 0);
+                    CharSequence contentDescription = null;
+                    try {
+                        PackageManager packageManager = mContext.getPackageManager();
+                        contentDescription = packageManager.getApplicationLabel(
+                                packageManager.getApplicationInfo(packageName, 0));
+                    } catch (NameNotFoundException nnfe) {
+                        /* ignore */
+                    }
+                    mStatusBar.setIcon("ime", packageName, iconId, 0,
+                            contentDescription  != null ? contentDescription.toString() : null);
                     mStatusBar.setIconVisibility("ime", true);
                 }
             }
