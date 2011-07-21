@@ -2277,11 +2277,11 @@ public class BluetoothService extends IBluetooth.Stub {
         return false;
     }
 
-    BluetoothDeviceProfileState addProfileState(String address) {
+    BluetoothDeviceProfileState addProfileState(String address, boolean setTrust) {
         BluetoothDeviceProfileState state = mDeviceProfileState.get(address);
         if (state != null) return state;
 
-        state = new BluetoothDeviceProfileState(mContext, address, this, mA2dpService);
+        state = new BluetoothDeviceProfileState(mContext, address, this, mA2dpService, setTrust);
         mDeviceProfileState.put(address, state);
         state.start();
         return state;
@@ -2311,7 +2311,7 @@ public class BluetoothService extends IBluetooth.Stub {
         }
         for (String path : bonds) {
             String address = getAddressFromObjectPath(path);
-            BluetoothDeviceProfileState state = addProfileState(address);
+            BluetoothDeviceProfileState state = addProfileState(address, false);
         }
     }
 

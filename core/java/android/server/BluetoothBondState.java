@@ -21,8 +21,13 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothHeadset;
+import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.provider.Settings;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -74,11 +79,17 @@ class BluetoothBondState {
     private BluetoothA2dp mA2dpProxy;
     private BluetoothHeadset mHeadsetProxy;
 
+    private ArrayList<String> mPairingRequestRcvd = new ArrayList<String>();
+
     BluetoothBondState(Context context, BluetoothService service) {
         mContext = context;
         mService = service;
         mBluetoothInputProfileHandler =
             BluetoothInputProfileHandler.getInstance(mContext, mService);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
+        mContext.registerReceiver(mReceiver, filter);
     }
 
     synchronized void setPendingOutgoingBonding(String address) {
@@ -137,11 +148,18 @@ class BluetoothBondState {
         }
 
         if (state == BluetoothDevice.BOND_BONDED) {
-            mService.addProfileState(address);
+            boolean setTrust = false;
+            if (mPairingRequestRcvd.contains(address)) setTrust = true;
+
+            mService.addProfileState(address, setTrust);
+            mPairingRequestRcvd.remove(address);
+
         } else if (state == BluetoothDevice.BOND_BONDING) {
             if (mA2dpProxy == null || mHeadsetProxy == null) {
                 getProfileProxy();
             }
+        } else if (state == BluetoothDevice.BOND_NONE) {
+            mPairingRequestRcvd.remove(address);
         }
 
         setProfilePriorities(address, state);
@@ -452,4 +470,17 @@ class BluetoothBondState {
         }
     }
 
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent == null) return;
+
+            String action = intent.getAction();
+            if (action.equals(BluetoothDevice.ACTION_PAIRING_REQUEST)) {
+                BluetoothDevice dev = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                String address = dev.getAddress();
+                mPairingRequestRcvd.add(address);
+            }
+        }
+    };
 }
