@@ -49,6 +49,7 @@ import android.util.SparseArray;
 import android.view.IWindow;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.IAccessibilityInteractionConnection;
 import android.view.accessibility.IAccessibilityInteractionConnectionCallback;
@@ -129,9 +130,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private boolean mIsAccessibilityEnabled;
 
-    private boolean mIsTouchExplorationRequested;
-
     private AccessibilityInputFilter mInputFilter;
+
+    private boolean mHasInputFilter;
 
     private final List<AccessibilityServiceInfo> mEnabledServicesForFeedbackTempList = new ArrayList<AccessibilityServiceInfo>();
 
@@ -189,7 +190,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     manageServicesLocked();
                 }
             }
-            
+
             @Override
             public boolean onHandleForceStop(Intent intent, String[] packages,
                     int uid, boolean doit) {
@@ -236,17 +237,16 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         mIsAccessibilityEnabled = Settings.Secure.getInt(
                                 mContext.getContentResolver(),
                                 Settings.Secure.ACCESSIBILITY_ENABLED, 0) == 1;
-                        // if accessibility is enabled inform our clients we are on
-                        if (mIsAccessibilityEnabled) {
-                            sendAccessibilityEnabledToClientsLocked();
-                        }
+
                         manageServicesLocked();
 
                         // get touch exploration enabled setting on boot
-                        mIsTouchExplorationRequested = Settings.Secure.getInt(
+                        mIsTouchExplorationEnabled = Settings.Secure.getInt(
                                 mContext.getContentResolver(),
-                                Settings.Secure.TOUCH_EXPLORATION_REQUESTED, 0) == 1;
-                        updateTouchExplorationEnabledLocked();
+                                Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0) == 1;
+                        updateInputFilterLocked();
+
+                        sendStateToClientsLocked();
                     }
                     
                     return;
@@ -288,13 +288,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         } else {
                             unbindAllServicesLocked();
                         }
-                        sendAccessibilityEnabledToClientsLocked();
+                        sendStateToClientsLocked();
                     }
                 }
             });
 
         Uri touchExplorationRequestedUri = Settings.Secure.getUriFor(
-                Settings.Secure.TOUCH_EXPLORATION_REQUESTED);
+                Settings.Secure.TOUCH_EXPLORATION_ENABLED);
         contentResolver.registerContentObserver(touchExplorationRequestedUri, false,
                 new ContentObserver(new Handler()) {
                     @Override
@@ -302,10 +302,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         super.onChange(selfChange);
 
                         synchronized (mLock) {
-                            mIsTouchExplorationRequested = Settings.Secure.getInt(
+                            mIsTouchExplorationEnabled = Settings.Secure.getInt(
                                     mContext.getContentResolver(),
-                                    Settings.Secure.TOUCH_EXPLORATION_REQUESTED, 0) == 1;
-                            updateTouchExplorationEnabledLocked();
+                                    Settings.Secure.TOUCH_EXPLORATION_ENABLED, 0) == 1;
+                            updateInputFilterLocked();
+                            sendStateToClientsLocked();
                         }
                     }
                 });
@@ -325,7 +326,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             });
     }
 
-    public boolean addClient(IAccessibilityManagerClient client) throws RemoteException {
+    public int addClient(IAccessibilityManagerClient client) throws RemoteException {
         synchronized (mLock) {
             final IAccessibilityManagerClient addedClient = client;
             mClients.add(addedClient);
@@ -338,7 +339,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                     }
                 }
             }, 0);
-            return mIsAccessibilityEnabled;
+            return getState();
         }
     }
 
@@ -628,7 +629,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             service.linkToOwnDeath();
             mServices.add(service);
             mComponentNameToServiceMap.put(service.mComponentName, service);
-            updateTouchExplorationEnabledLocked();
+            updateInputFilterLocked();
         } catch (RemoteException e) {
             /* do nothing */
         }
@@ -648,7 +649,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mComponentNameToServiceMap.remove(service.mComponentName);
         mHandler.removeMessages(service.mId);
         service.unlinkToOwnDeath();
-        updateTouchExplorationEnabledLocked();
+        updateInputFilterLocked();
         return removed;
     }
 
@@ -781,12 +782,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
-     * Updates the state of {@link android.view.accessibility.AccessibilityManager} clients.
+     * Sends the state to the clients.
      */
-    private void sendAccessibilityEnabledToClientsLocked() {
+    private void sendStateToClientsLocked() {
+        final int state = getState();
         for (int i = 0, count = mClients.size(); i < count; i++) {
             try {
-                mClients.get(i).setEnabled(mIsAccessibilityEnabled);
+                mClients.get(i).setState(state);
             } catch (RemoteException re) {
                 mClients.remove(i);
                 count--;
@@ -796,48 +798,39 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     /**
-     * Sends the touch exploration state to clients.
+     * Gets the current state as a set of flags.
+     *
+     * @return The state.
      */
-    private void sendTouchExplorationEnabledToClientsLocked() {
-        for (int i = 0, count = mClients.size(); i < count; i++) {
-            try {
-                mClients.get(i).setTouchExplorationEnabled(mIsTouchExplorationEnabled);
-            } catch (RemoteException re) {
-                mClients.remove(i);
-                count--;
-                i--;
-            }
+    private int getState() {
+        int state = 0;
+        if (mIsAccessibilityEnabled) {
+            state |= AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED;
         }
+        // Touch exploration relies on enabled accessibility.
+        if (mIsAccessibilityEnabled && mIsTouchExplorationEnabled) {
+            state |= AccessibilityManager.STATE_FLAG_TOUCH_EXPLORATION_ENABLED;
+        }
+        return state;
     }
 
     /**
-     * Updates the touch exploration state. Touch exploration is enabled if it
-     * is requested, accessibility is on and there is at least one enabled
-     * accessibility service providing spoken feedback.
+     * Updates the touch exploration state.
      */
-    private void updateTouchExplorationEnabledLocked() {
-        if (mIsAccessibilityEnabled && mIsTouchExplorationRequested) {
-            final boolean hasSpeakingServicesEnabled = !getEnabledAccessibilityServiceList(
-                     AccessibilityServiceInfo.FEEDBACK_SPOKEN).isEmpty();
-            if (!mIsTouchExplorationEnabled) {
-                if (!hasSpeakingServicesEnabled) {
-                     return;
-                }
+    private void updateInputFilterLocked() {
+        if (mIsAccessibilityEnabled && mIsTouchExplorationEnabled) {
+            if (!mHasInputFilter) {
+                mHasInputFilter = true;
                 if (mInputFilter == null) {
                     mInputFilter = new AccessibilityInputFilter(mContext);
                 }
                 mWindowManagerService.setInputFilter(mInputFilter);
-                mIsTouchExplorationEnabled = true;
-                sendTouchExplorationEnabledToClientsLocked();
-                return;
-            } else if (hasSpeakingServicesEnabled) {
-                return;
             }
+            return;
         }
-        if (mIsTouchExplorationEnabled) {
+        if (mHasInputFilter) {
+            mHasInputFilter = false;
             mWindowManagerService.setInputFilter(null);
-            mIsTouchExplorationEnabled = false;
-            sendTouchExplorationEnabledToClientsLocked();
         }
     }
 

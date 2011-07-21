@@ -70,7 +70,8 @@ public class AccessibilityManagerTest extends AndroidTestCase {
 
         // configure the mock service behavior
         IAccessibilityManager mockServiceInterface = mMockServiceInterface;
-        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient())).andReturn(true);
+        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient())).andReturn(
+                AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED);
         expect(mockServiceInterface.getInstalledAccessibilityServiceList()).andReturn(
                 expectedServices);
         replay(mockServiceInterface);
@@ -91,7 +92,8 @@ public class AccessibilityManagerTest extends AndroidTestCase {
     public void testInterrupt() throws Exception {
         // configure the mock service behavior
         IAccessibilityManager mockServiceInterface = mMockServiceInterface;
-        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient())).andReturn(true);
+        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient())).andReturn(
+                AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED);
         mockServiceInterface.interrupt();
         replay(mockServiceInterface);
 
@@ -107,7 +109,8 @@ public class AccessibilityManagerTest extends AndroidTestCase {
     public void testIsEnabled() throws Exception {
         // configure the mock service behavior
         IAccessibilityManager mockServiceInterface = mMockServiceInterface;
-        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient())).andReturn(true);
+        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient())).andReturn(
+                AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED);
         replay(mockServiceInterface);
 
         // invoke the method under test
@@ -118,7 +121,7 @@ public class AccessibilityManagerTest extends AndroidTestCase {
         assertTrue("Must be enabled since the mock service is enabled", isEnabledServiceEnabled);
 
         // disable accessibility
-        manager.getClient().setEnabled(false);
+        manager.getClient().setState(0);
 
         // wait for the asynchronous IBinder call to complete
         Thread.sleep(TIMEOUT_BINDER_CALL);
@@ -141,7 +144,8 @@ public class AccessibilityManagerTest extends AndroidTestCase {
 
         // configure the mock service behavior
         IAccessibilityManager mockServiceInterface = mMockServiceInterface;
-        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient())).andReturn(true);
+        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient())).andReturn(
+                AccessibilityManager.STATE_FLAG_ACCESSIBILITY_ENABLED);
         expect(mockServiceInterface.sendAccessibilityEvent(eqAccessibilityEvent(sentEvent)))
                 .andReturn(true);
         expect(mockServiceInterface.sendAccessibilityEvent(eqAccessibilityEvent(sentEvent)))
@@ -176,7 +180,7 @@ public class AccessibilityManagerTest extends AndroidTestCase {
 
         // configure the mock service behavior
         IAccessibilityManager mockServiceInterface = mMockServiceInterface;
-        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient())).andReturn(false);
+        expect(mockServiceInterface.addClient(anyIAccessibilityManagerClient())).andReturn(0);
         replay(mockServiceInterface);
 
         // invoke the method under test (accessibility disabled)

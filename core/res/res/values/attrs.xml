@@ -2281,6 +2281,8 @@
             <flag name="feedbackVisual" value="0x00000008" />
             <!-- Provides {@link android.accessibilityservice.AccessibilityServiceInfo#FEEDBACK_GENERIC} feedback. -->
             <flag name="feedbackGeneric" value="0x00000010" />
+            <!-- Provides {@link android.accessibilityservice.AccessibilityServiceInfo#FEEDBACK_ALL_MASK} feedback. -->
+            <flag name="feedbackAllMask" value="0xffffffff" />
         </attr>
         <!-- The minimal period in milliseconds between two accessibility events of the same type
              are sent to this serivce. This setting can be changed at runtime by calling

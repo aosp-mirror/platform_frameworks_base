@@ -1828,6 +1828,7 @@ package android.accessibilityservice {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int DEFAULT = 1; // 0x1
+    field public static final int FEEDBACK_ALL_MASK = -1; // 0xffffffff
     field public static final int FEEDBACK_AUDIBLE = 4; // 0x4
     field public static final int FEEDBACK_GENERIC = 16; // 0x10
     field public static final int FEEDBACK_HAPTIC = 2; // 0x2
@@ -16709,7 +16710,7 @@ package android.provider {
     field public static final java.lang.String SELECTED_INPUT_METHOD_SUBTYPE = "selected_input_method_subtype";
     field public static final java.lang.String SETTINGS_CLASSNAME = "settings_classname";
     field public static final java.lang.String SYS_PROP_SETTING_VERSION = "sys.settings_secure_version";
-    field public static final java.lang.String TOUCH_EXPLORATION_REQUESTED = "touch_exploration_requested";
+    field public static final java.lang.String TOUCH_EXPLORATION_ENABLED = "touch_exploration_enabled";
     field public static final java.lang.String TTS_DEFAULT_COUNTRY = "tts_default_country";
     field public static final java.lang.String TTS_DEFAULT_LANG = "tts_default_lang";
     field public static final java.lang.String TTS_DEFAULT_PITCH = "tts_default_pitch";
