@@ -7380,6 +7380,16 @@ public final class ContactsContract {
                 "com.android.contacts.action.ATTACH_IMAGE";
 
         /**
+         * This is the intent that is fired when the user clicks the "invite to the network" button
+         * on a contact.  Only sent to an activity which is explicitly registered by a contact
+         * provider which supports the "invite to the network" feature.
+         * <p>
+         * {@link Intent#getData()} contains the lookup URI for the contact.
+         */
+        public static final String INVITE_CONTACT =
+                "com.android.contacts.action.INVITE_CONTACT";
+
+        /**
          * Takes as input a data URI with a mailto: or tel: scheme. If a single
          * contact exists with the given data it will be shown. If no contact
          * exists, a dialog will ask the user if they want to create a new
