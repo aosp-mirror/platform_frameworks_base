@@ -16,11 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.util.FastMath;
-import com.android.internal.widget.EditableInputConnection;
-
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.R;
 import android.content.ClipData;
 import android.content.ClipData.Item;
@@ -138,6 +133,11 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RemoteViews.RemoteView;
+
+import com.android.internal.util.FastMath;
+import com.android.internal.widget.EditableInputConnection;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -5090,6 +5090,40 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     @Override
+    public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            boolean areSuggestionsShown = areSuggestionsShown();
+            boolean isInSelectionMode = mSelectionActionMode != null;
+
+            if (areSuggestionsShown || isInSelectionMode) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
+                    KeyEvent.DispatcherState state = getKeyDispatcherState();
+                    if (state != null) {
+                        state.startTracking(event, this);
+                    }
+                    return true;
+                } else if (event.getAction() == KeyEvent.ACTION_UP) {
+                    KeyEvent.DispatcherState state = getKeyDispatcherState();
+                    if (state != null) {
+                        state.handleUpEvent(event);
+                    }
+                    if (event.isTracking() && !event.isCanceled()) {
+                        if (areSuggestionsShown) {
+                            hideSuggestions();
+                            return true;
+                        }
+                        if (isInSelectionMode) {
+                            stopSelectionActionMode();
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        return super.onKeyPreIme(keyCode, event);
+    }
+
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         int which = doKeyDown(keyCode, event, null);
         if (which == 0) {
@@ -5241,6 +5275,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
                 // Has to be done on key down (and not on key up) to correctly be intercepted.
             case KeyEvent.KEYCODE_BACK:
+                if (areSuggestionsShown()) {
+                    hideSuggestions();
+                    return -1;
+                }
                 if (mSelectionActionMode != null) {
                     stopSelectionActionMode();
                     return -1;
@@ -7617,7 +7655,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // Because of View recycling in ListView, there is no easy way to know when a TextView with
         // selection becomes visible again. Until a better solution is found, stop text selection
         // mode (if any) as soon as this TextView is recycled.
-        stopSelectionActionMode();
+        hideControllers();
     }
 
     @Override
@@ -7889,8 +7927,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 if (!selectAllGotFocus && hasSelection()) {
                     startSelectionActionMode();
                 } else {
-                    stopSelectionActionMode();
-                    hideSuggestions();
+                    hideControllers();
                     if (hasInsertionController() && !selectAllGotFocus && mText.length() > 0) {
                         getInsertionController().show();
                     }
@@ -9042,6 +9079,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mContainer.dismiss();
         }
 
+        public boolean isShowing() {
+            return mContainer.isShowing();
+        }
+
         @Override
         public void onClick(View view) {
             if (view instanceof TextView) {
@@ -9167,6 +9208,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mSuggestionsPopupWindow.hide();
         }
     }
+
+    boolean areSuggestionsShown() {
+        return mSuggestionsPopupWindow != null && mSuggestionsPopupWindow.isShowing();
+    } 
 
     /**
      * Some parts of the text can have alternate suggestion text attached. This is typically done by
