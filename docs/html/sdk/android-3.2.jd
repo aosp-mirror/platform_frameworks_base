@@ -41,7 +41,7 @@ Apps for Android 3.x</a></li>
 <p>Welcome to Android 3.2!</p>
 
 <p>Android 3.2 is an incremental platform release that adds new
-capabilities for users and developers. This sections below provide an overview
+capabilities for users and developers. The sections below provide an overview
 of the new features and developer APIs.</p>
 
 <p>For developers, the Android {@sdkPlatformVersion} platform is available as a
@@ -155,7 +155,7 @@ characteristics: <em>smallestWidth</em>, <em>width</em>, and
 <em>height</em>.</p>
 
 <ul>
-<li>A screen's <em>smallestWidth</em> is it's fundamental minimum size,
+<li>A screen's <em>smallestWidth</em> is its fundamental minimum size,
 measured in density-independent pixel ("dp") units. Of the screen's height or
 width, it is the shorter of the two. For a screen in portrait orientation, the
 smallestWidth is normally based on its width, while in landscape orientation it is based
@@ -383,7 +383,7 @@ automatically by the platform.</p>
     sets the initial saved state for a Fragment when first constructed.</li>
     <li>New {@link android.app.Fragment#onViewCreated(android.view.View, android.os.Bundle)
     onViewCreated()} callback method notifies the Fragment that
-    {@link android.app.Fragment#onCreateView(LayoutInflater, ViewGroup, Bundle)
+    {@link android.app.Fragment#onCreateView(LayoutInflater, ViewGroup, Bundle) onCreateView()}
     has returned, but before any saved state has been restored in to the View.</li>
     <li>{@link android.app.Fragment#isDetached()} method determines whether
     the Fragment has been explicitly detached from the UI.</li>
@@ -392,20 +392,20 @@ automatically by the platform.</p>
     methods let an application re-attach or detach fragments in the UI.</li>
     <li>A new {@link android.app.FragmentTransaction#setCustomAnimations(int, int, int, int)
     setCustomAnimations()} overload method lets you set specific animation
-    resources to run during for enter/exit operations and specifically when
+    resources to run for enter/exit operations and specifically when
     popping the back stack. The existing implementation does not account
     for the different behavior of fragments when popping the back stack.</li>
   </ul>
 </li>
 <li>Screen size information in ActivityInfo and ApplicationInfo
   <ul>
-    <li>{@link android.content.pm.ActivityInfo} adds {android.content.pm.ActivityInfo#CONFIG_SCREEN_SIZE}
-    and {android.content.pm.ActivityInfo#CONFIG_SMALLEST_SCREEN_SIZE} as bit masks
+    <li>{@link android.content.pm.ActivityInfo} adds {@link android.content.pm.ActivityInfo#CONFIG_SCREEN_SIZE}
+    and {@link android.content.pm.ActivityInfo#CONFIG_SMALLEST_SCREEN_SIZE} as bit masks
     in {@link android.R.attr#configChanges}. The bits indicate whether an Activity can
     itself handle the screen size and smallest screen size.</li>
     <li>{@link android.content.pm.ApplicationInfo} adds
-    {android.content.pm.ApplicationInfo#largestWidthLimitDp}, {android.content.pm.ApplicationInfo#compatibleWidthLimitDp},
-    and {android.content.pm.ApplicationInfo#requiresSmallestWidthLimitDp} fields,
+    {@link android.content.pm.ApplicationInfo#largestWidthLimitDp}, {@link android.content.pm.ApplicationInfo#compatibleWidthLimitDp},
+    and {@link android.content.pm.ApplicationInfo#requiresSmallestWidthDp} fields,
     derived from the corresponding <code>&lt;supports-screens&gt;</code> attributes
     in the application manifest file.</li>
   </ul>
