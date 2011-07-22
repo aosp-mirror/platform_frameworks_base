@@ -376,10 +376,10 @@ public abstract class ApplicationThreadNative extends Binder
         {
             data.enforceInterface(IApplicationThread.descriptor);
             boolean start = data.readInt() != 0;
+            int profileType = data.readInt();
             String path = data.readString();
             ParcelFileDescriptor fd = data.readInt() != 0
                     ? data.readFileDescriptor() : null;
-            int profileType = data.readInt();
             profilerControl(start, path, fd, profileType);
             return true;
         }
@@ -941,6 +941,7 @@ class ApplicationThreadProxy implements IApplicationThread {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeInt(start ? 1 : 0);
+        data.writeInt(profileType);
         data.writeString(path);
         if (fd != null) {
             data.writeInt(1);
@@ -948,7 +949,6 @@ class ApplicationThreadProxy implements IApplicationThread {
         } else {
             data.writeInt(0);
         }
-        data.writeInt(profileType);
         mRemote.transact(PROFILER_CONTROL_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
