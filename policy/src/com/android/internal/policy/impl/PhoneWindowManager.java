@@ -1703,7 +1703,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     }
                 }
             }
-            if (DEBUG_LAYOUT) Log.i(TAG, "mNavigationBar frame: " + navr);
+            if (DEBUG_LAYOUT) {
+                Log.i(TAG, "mNavigationBar frame: " + navr);
+                Log.i(TAG, String.format("mDock rect: (%d,%d - %d,%d)",
+                            mDockLeft, mDockTop, mDockRight, mDockBottom));
+            }
 
             // apply navigation bar insets
             pf.left = df.left = vf.left = mDockLeft;
@@ -1712,6 +1716,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             pf.bottom = df.bottom = vf.bottom = mDockBottom;
 
             mStatusBar.computeFrameLw(pf, df, vf, vf);
+
+            // now, let's consider the navigation bar; if it exists, it must be removed from the
+            // available screen real estate (like an un-hideable status bar)
+            if (navr != null) {
+                if (navr.top == 0) {
+                    // Navigation bar is vertical
+                    if (mRestrictedScreenLeft == navr.left) {
+                        mRestrictedScreenLeft = navr.right;
+                        mRestrictedScreenWidth -= (navr.right - navr.left);
+                    } else if ((mRestrictedScreenLeft+mRestrictedScreenWidth) == navr.right) {
+                        mRestrictedScreenWidth -= (navr.right - navr.left);
+                    }
+                } else {
+                    // Navigation bar horizontal, at bottom
+                    if ((mRestrictedScreenHeight+mRestrictedScreenTop) == navr.bottom) {
+                        mRestrictedScreenHeight -= (navr.bottom-navr.top);
+                    }
+                }
+            }
 
             if (mStatusBar.isVisibleLw()) {
                 // If the status bar is hidden, we don't want to cause
@@ -1743,23 +1766,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mRestrictedScreenHeight -= (r.bottom-r.top);
                     } else if ((mRestrictedScreenHeight-mRestrictedScreenTop) == r.bottom) {
                         mRestrictedScreenHeight -= (r.bottom-r.top);
-                    }
-
-                    if (navr != null) {
-                        if (navr.top == 0) {
-                            // Navigation bar is vertical
-                            if (mRestrictedScreenLeft == navr.left) {
-                                mRestrictedScreenLeft = navr.right;
-                                mRestrictedScreenWidth -= (navr.right - navr.left);
-                            } else if ((mRestrictedScreenLeft+mRestrictedScreenWidth) == navr.right) {
-                                mRestrictedScreenWidth -= (navr.right - navr.left);
-                            }
-                        } else {
-                            // Navigation bar horizontal, at bottom
-                            if ((mRestrictedScreenHeight-mRestrictedScreenTop) == r.bottom) {
-                                mRestrictedScreenHeight -= (navr.bottom-navr.top);
-                            }
-                        }
                     }
 
                     mContentTop = mCurTop = mDockTop = mRestrictedScreenTop;
@@ -1873,19 +1879,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         // permission, so they have the same privileges as the status
                         // bar itself.
                         //
-                        // However, they should still dodge the navigation bar if it exists. A
-                        // straightforward way to do this is to only allow the status bar panels to
-                        // extend to the extrema of the allowable region for the IME dock.
+                        // However, they should still dodge the navigation bar if it exists.
 
                         pf.left = df.left = hasNavBar ? mDockLeft : mUnrestrictedScreenLeft;
                         pf.top = df.top = mUnrestrictedScreenTop;
                         pf.right = df.right = hasNavBar
-                                            ? mDockRight
+                                            ? mRestrictedScreenLeft+mRestrictedScreenWidth
                                             : mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
                         pf.bottom = df.bottom = hasNavBar
-                                              ? mDockBottom
+                                              ? mRestrictedScreenTop+mRestrictedScreenHeight
                                               : mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
 
+                        if (DEBUG_LAYOUT) {
+                            Log.v(TAG, String.format(
+                                        "Laying out status bar window: (%d,%d - %d,%d)",
+                                        pf.left, pf.top, pf.right, pf.bottom));
+                        }
                     } else {
                         pf.left = df.left = mRestrictedScreenLeft;
                         pf.top = df.top = mRestrictedScreenTop;
@@ -1922,12 +1931,23 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     pf.left = df.left = cf.left = hasNavBar ? mDockLeft : mUnrestrictedScreenLeft;
                     pf.top = df.top = cf.top = mUnrestrictedScreenTop;
                     pf.right = df.right = cf.right = hasNavBar
-                                        ? mDockRight
+                                        ? mRestrictedScreenLeft+mRestrictedScreenWidth
                                         : mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
                     pf.bottom = df.bottom = cf.bottom = hasNavBar
-                                          ? mDockBottom
+                                          ? mRestrictedScreenTop+mRestrictedScreenHeight
                                           : mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
 
+                } else if (attrs.type == TYPE_NAVIGATION_BAR) {
+                    // The navigation bar has Real Ultimate Power.
+                    pf.left = df.left = mUnrestrictedScreenLeft;
+                    pf.top = df.top = mUnrestrictedScreenTop;
+                    pf.right = df.right = mUnrestrictedScreenLeft+mUnrestrictedScreenWidth;
+                    pf.bottom = df.bottom = mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
+                    if (DEBUG_LAYOUT) {
+                        Log.v(TAG, String.format(
+                                    "Laying out navigation bar window: (%d,%d - %d,%d)",
+                                    pf.left, pf.top, pf.right, pf.bottom));
+                    }
                 } else {
                     pf.left = df.left = cf.left = mRestrictedScreenLeft;
                     pf.top = df.top = cf.top = mRestrictedScreenTop;
