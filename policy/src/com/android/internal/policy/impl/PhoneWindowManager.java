@@ -166,22 +166,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int SYSTEM_DIALOG_LAYER = 6;
     // toasts and the plugged-in battery thing
     static final int TOAST_LAYER = 7;
-    static final int STATUS_BAR_LAYER = 8;
-    static final int STATUS_BAR_PANEL_LAYER = 9;
     // SIM errors and unlock.  Not sure if this really should be in a high layer.
-    static final int PRIORITY_PHONE_LAYER = 10;
+    static final int PRIORITY_PHONE_LAYER = 8;
     // like the ANR / app crashed dialogs
-    static final int SYSTEM_ALERT_LAYER = 11;
+    static final int SYSTEM_ALERT_LAYER = 9;
     // system-level error dialogs
-    static final int SYSTEM_ERROR_LAYER = 12;
+    static final int SYSTEM_ERROR_LAYER = 10;
     // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_LAYER = 13;
+    static final int INPUT_METHOD_LAYER = 11;
     // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_DIALOG_LAYER = 14;
+    static final int INPUT_METHOD_DIALOG_LAYER = 12;
     // the keyguard; nothing on top of these can take focus, since they are
     // responsible for power management when displayed.
-    static final int KEYGUARD_LAYER = 15;
-    static final int KEYGUARD_DIALOG_LAYER = 16;
+    static final int KEYGUARD_LAYER = 13;
+    static final int KEYGUARD_DIALOG_LAYER = 14;
+    static final int STATUS_BAR_LAYER = 15;
+    static final int STATUS_BAR_PANEL_LAYER = 16;
     // the navigation bar, if available, shows atop most things
     static final int NAVIGATION_BAR_LAYER = 17;
     // the drag layer: input for drag-and-drop is associated with this window,
