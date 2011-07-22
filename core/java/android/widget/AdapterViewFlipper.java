@@ -62,15 +62,14 @@ public class AdapterViewFlipper extends AdapterViewAnimator {
         super(context, attrs);
 
         TypedArray a = context.obtainStyledAttributes(attrs,
-                com.android.internal.R.styleable.ViewFlipper);
+                com.android.internal.R.styleable.AdapterViewFlipper);
         mFlipInterval = a.getInt(
-                com.android.internal.R.styleable.ViewFlipper_flipInterval, DEFAULT_INTERVAL);
+                com.android.internal.R.styleable.AdapterViewFlipper_flipInterval, DEFAULT_INTERVAL);
         mAutoStart = a.getBoolean(
-                com.android.internal.R.styleable.ViewFlipper_autoStart, false);
+                com.android.internal.R.styleable.AdapterViewFlipper_autoStart, false);
 
-        // By default we want the flipper to loop
-        mLoopViews = a.getBoolean(
-                com.android.internal.R.styleable.AdapterViewAnimator_loopViews, true);
+        // A view flipper should cycle through the views
+        mLoopViews = true;
 
         a.recycle();
     }
