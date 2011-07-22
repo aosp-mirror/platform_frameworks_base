@@ -5082,11 +5082,6 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
         }
 
         if (fields & Accumulator::FIELD_ABS_MT_TOUCH_MAJOR) {
-            if (inSlot.absMTTouchMajor <= 0) {
-                // Some devices send sync packets with X / Y but with a 0 touch major to indicate
-                // a pointer going up.  Drop this finger.
-                continue;
-            }
             outPointer.touchMajor = inSlot.absMTTouchMajor;
         } else {
             // Default touch area to 0 if absent.
