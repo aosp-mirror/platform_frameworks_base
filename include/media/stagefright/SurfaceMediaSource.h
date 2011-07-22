@@ -81,7 +81,7 @@ public:
     // SurfaceMediaSource object (i.e. they are not owned by the client).
     virtual status_t setBufferCount(int bufferCount);
 
-    virtual sp<GraphicBuffer> requestBuffer(int buf);
+    virtual status_t requestBuffer(int slot, sp<GraphicBuffer>* buf);
 
     // dequeueBuffer gets the next buffer slot index for the client to use. If a
     // buffer slot is available then that slot index is written to the location
@@ -162,13 +162,6 @@ public:
     // setFrameAvailableListener sets the listener object that will be notified
     // when a new frame becomes available.
     void setFrameAvailableListener(const sp<FrameAvailableListener>& listener);
-
-    // getAllocator retrieves the binder object that must be referenced as long
-    // as the GraphicBuffers dequeued from this SurfaceMediaSource are referenced.
-    // Holding this binder reference prevents SurfaceFlinger from freeing the
-    // buffers before the client is done with them.
-    sp<IBinder> getAllocator();
-
 
     // getCurrentBuffer returns the buffer associated with the current image.
     sp<GraphicBuffer> getCurrentBuffer() const;

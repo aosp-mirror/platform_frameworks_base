@@ -54,18 +54,18 @@ public:
     {
     }
 
-    virtual sp<GraphicBuffer> requestBuffer(int bufferIdx) {
+    virtual status_t requestBuffer(int bufferIdx, sp<GraphicBuffer>* buf) {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(bufferIdx);
         remote()->transact(REQUEST_BUFFER, data, &reply);
-        sp<GraphicBuffer> buffer;
         bool nonNull = reply.readInt32();
         if (nonNull) {
-            buffer = new GraphicBuffer();
-            reply.read(*buffer);
+            *buf = new GraphicBuffer();
+            reply.read(**buf);
         }
-        return buffer;
+        status_t result = reply.readInt32();
+        return result;
     }
 
     virtual status_t setBufferCount(int bufferCount)
@@ -192,11 +192,13 @@ status_t BnSurfaceTexture::onTransact(
         case REQUEST_BUFFER: {
             CHECK_INTERFACE(ISurfaceTexture, data, reply);
             int bufferIdx   = data.readInt32();
-            sp<GraphicBuffer> buffer(requestBuffer(bufferIdx));
+            sp<GraphicBuffer> buffer;
+            int result = requestBuffer(bufferIdx, &buffer);
             reply->writeInt32(buffer != 0);
             if (buffer != 0) {
                 reply->write(*buffer);
             }
+            reply->writeInt32(result);
             return NO_ERROR;
         } break;
         case SET_BUFFER_COUNT: {

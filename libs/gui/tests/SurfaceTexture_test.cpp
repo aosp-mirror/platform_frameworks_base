@@ -1018,6 +1018,83 @@ TEST_F(SurfaceTextureGLTest, DISABLED_TexturingFromGLFilledRGBABufferPow2) {
     EXPECT_TRUE(checkPixel( 3, 52, 153, 153, 153, 153));
 }
 
+TEST_F(SurfaceTextureGLTest, AbandonUnblocksDequeueBuffer) {
+    class ProducerThread : public Thread {
+    public:
+        ProducerThread(const sp<ANativeWindow>& anw):
+                mANW(anw),
+                mDequeueError(NO_ERROR) {
+        }
+
+        virtual ~ProducerThread() {
+        }
+
+        virtual bool threadLoop() {
+            Mutex::Autolock lock(mMutex);
+            ANativeWindowBuffer* anb;
+
+            // Frame 1
+            if (mANW->dequeueBuffer(mANW.get(), &anb) != NO_ERROR) {
+                return false;
+            }
+            if (anb == NULL) {
+                return false;
+            }
+            if (mANW->queueBuffer(mANW.get(), anb)
+                    != NO_ERROR) {
+                return false;
+            }
+
+            // Frame 2
+            if (mANW->dequeueBuffer(mANW.get(), &anb) != NO_ERROR) {
+                return false;
+            }
+            if (anb == NULL) {
+                return false;
+            }
+            if (mANW->queueBuffer(mANW.get(), anb)
+                    != NO_ERROR) {
+                return false;
+            }
+
+            // Frame 3 - error expected
+            mDequeueError = mANW->dequeueBuffer(mANW.get(), &anb);
+            return false;
+        }
+
+        status_t getDequeueError() {
+            Mutex::Autolock lock(mMutex);
+            return mDequeueError;
+        }
+
+    private:
+        sp<ANativeWindow> mANW;
+        status_t mDequeueError;
+        Mutex mMutex;
+    };
+
+    sp<FrameWaiter> fw(new FrameWaiter);
+    mST->setFrameAvailableListener(fw);
+    ASSERT_EQ(OK, mST->setSynchronousMode(true));
+    ASSERT_EQ(OK, mST->setBufferCountServer(2));
+
+    sp<Thread> pt(new ProducerThread(mANW));
+    pt->run();
+
+    fw->waitForFrame();
+    fw->waitForFrame();
+
+    // Sleep for 100ms to allow the producer thread's dequeueBuffer call to
+    // block waiting for a buffer to become available.
+    usleep(100000);
+
+    mST->abandon();
+
+    pt->requestExitAndWait();
+    ASSERT_EQ(NO_INIT,
+            reinterpret_cast<ProducerThread*>(pt.get())->getDequeueError());
+}
+
 /*
  * This test is for testing GL -> GL texture streaming via SurfaceTexture.  It
  * contains functionality to create a producer thread that will perform GL
@@ -1205,7 +1282,7 @@ protected:
     sp<FrameCondition> mFC;
 };
 
-TEST_F(SurfaceTextureGLToGLTest, UpdateTexImageBeforeFrameFinishedWorks) {
+TEST_F(SurfaceTextureGLToGLTest, UpdateTexImageBeforeFrameFinishedCompletes) {
     class PT : public ProducerThread {
         virtual void render() {
             glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
@@ -1223,7 +1300,7 @@ TEST_F(SurfaceTextureGLToGLTest, UpdateTexImageBeforeFrameFinishedWorks) {
     // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
 }
 
-TEST_F(SurfaceTextureGLToGLTest, UpdateTexImageAfterFrameFinishedWorks) {
+TEST_F(SurfaceTextureGLToGLTest, UpdateTexImageAfterFrameFinishedCompletes) {
     class PT : public ProducerThread {
         virtual void render() {
             glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
@@ -1241,7 +1318,7 @@ TEST_F(SurfaceTextureGLToGLTest, UpdateTexImageAfterFrameFinishedWorks) {
     // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
 }
 
-TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageBeforeFrameFinishedWorks) {
+TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageBeforeFrameFinishedCompletes) {
     enum { NUM_ITERATIONS = 1024 };
 
     class PT : public ProducerThread {
@@ -1269,7 +1346,7 @@ TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageBeforeFrameFinishedWorks)
     }
 }
 
-TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageAfterFrameFinishedWorks) {
+TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageAfterFrameFinishedCompletes) {
     enum { NUM_ITERATIONS = 1024 };
 
     class PT : public ProducerThread {
@@ -1294,6 +1371,72 @@ TEST_F(SurfaceTextureGLToGLTest, RepeatedUpdateTexImageAfterFrameFinishedWorks) 
         LOGV("-updateTexImage");
 
         // TODO: Add frame verification once RGB TEX_EXTERNAL_OES is supported!
+    }
+}
+
+// XXX: This test is disabled because it is currently hanging on some devices.
+TEST_F(SurfaceTextureGLToGLTest, DISABLED_RepeatedSwapBuffersWhileDequeueStalledCompletes) {
+    enum { NUM_ITERATIONS = 64 };
+
+    class PT : public ProducerThread {
+        virtual void render() {
+            for (int i = 0; i < NUM_ITERATIONS; i++) {
+                glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+                glClear(GL_COLOR_BUFFER_BIT);
+                LOGV("+swapBuffers");
+                swapBuffers();
+                LOGV("-swapBuffers");
+            }
+        }
+    };
+
+    ASSERT_EQ(OK, mST->setSynchronousMode(true));
+    ASSERT_EQ(OK, mST->setBufferCountServer(2));
+
+    runProducerThread(new PT());
+
+    // Allow three frames to be rendered and queued before starting the
+    // rendering in this thread.  For the latter two frames we don't call
+    // updateTexImage so the next dequeue from the producer thread will block
+    // waiting for a frame to become available.
+    mFC->waitForFrame();
+    mFC->finishFrame();
+
+    // We must call updateTexImage to consume the first frame so that the
+    // SurfaceTexture is able to reduce the buffer count to 2.  This is because
+    // the GL driver may dequeue a buffer when the EGLSurface is created, and
+    // that happens before we call setBufferCountServer.  It's possible that the
+    // driver does not dequeue a buffer at EGLSurface creation time, so we
+    // cannot rely on this to cause the second dequeueBuffer call to block.
+    mST->updateTexImage();
+
+    mFC->waitForFrame();
+    mFC->finishFrame();
+    mFC->waitForFrame();
+    mFC->finishFrame();
+
+    // Sleep for 100ms to allow the producer thread's dequeueBuffer call to
+    // block waiting for a buffer to become available.
+    usleep(100000);
+
+    // Render and present a number of images.  This thread should not be blocked
+    // by the fact that the producer thread is blocking in dequeue.
+    for (int i = 0; i < NUM_ITERATIONS; i++) {
+        glClear(GL_COLOR_BUFFER_BIT);
+        eglSwapBuffers(mEglDisplay, mEglSurface);
+    }
+
+    // Consume the two pending buffers to unblock the producer thread.
+    mST->updateTexImage();
+    mST->updateTexImage();
+
+    // Consume the remaining buffers from the producer thread.
+    for (int i = 0; i < NUM_ITERATIONS-3; i++) {
+        mFC->waitForFrame();
+        mFC->finishFrame();
+        LOGV("+updateTexImage");
+        mST->updateTexImage();
+        LOGV("-updateTexImage");
     }
 }
 
