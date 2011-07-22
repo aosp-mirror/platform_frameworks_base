@@ -134,8 +134,6 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 }
             }
 
-            // Not sure if this is needed in CDMALTE phone.
-            // mDataRoaming = regCodeIsRoaming(regState);
             mLteSS.setRadioTechnology(type);
             mLteSS.setState(regCodeToServiceState(regState));
         } else {
@@ -345,13 +343,14 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             }
 
             if (cm.getSimState().isSIMReady()) {
-                // SIM is found on the device. If ERI roaming is OFF, use operator name
-                // from CSIM record.
+                // SIM is found on the device. If ERI roaming is OFF and SID/NID matches
+                // one configfured in SIM, use operator name from CSIM record.
                 boolean showSpn =
                     ((CdmaLteUiccRecords)phone.mIccRecords).getCsimSpnDisplayCondition();
                 int iconIndex = ss.getCdmaEriIconIndex();
 
-                if (showSpn && (iconIndex == EriInfo.ROAMING_INDICATOR_OFF)) {
+                if (showSpn && (iconIndex == EriInfo.ROAMING_INDICATOR_OFF) &&
+                    isInHomeSidNid(ss.getSystemId(), ss.getNetworkId())) {
                     ss.setOperatorAlphaLong(phone.mIccRecords.getServiceProviderName());
                 }
             }
@@ -465,6 +464,34 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         // can support voice and data calls concurrently.
         // For the time-being, the return value will be false.
         // return (networkType >= ServiceState.RADIO_TECHNOLOGY_LTE);
+        return false;
+    }
+
+    /**
+     * Check whether the specified SID and NID pair appears in the HOME SID/NID list
+     * read from NV or SIM.
+     *
+     * @return true if provided sid/nid pair belongs to operator's home network.
+     */
+    private boolean isInHomeSidNid(int sid, int nid) {
+        // if SID/NID is not available, assume this is home network.
+        if (isSidsAllZeros()) return true;
+
+        // length of SID/NID shold be same
+        if (mHomeSystemId.length != mHomeNetworkId.length) return true;
+
+        if (sid == 0) return true;
+
+        for (int i = 0; i < mHomeSystemId.length; i++) {
+            // Use SID only if NID is a reserved value.
+            // SID 0 and NID 0 and 65535 are reserved. (C.0005 2.6.5.2)
+            if ((mHomeSystemId[i] == sid) &&
+                ((mHomeNetworkId[i] == 0) || (mHomeNetworkId[i] == 65535) ||
+                 (nid == 0) || (nid == 65535) || (mHomeNetworkId[i] == nid))) {
+                return true;
+            }
+        }
+        // SID/NID are not in the list. So device is not in home network
         return false;
     }
 
