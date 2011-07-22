@@ -1439,6 +1439,13 @@ public final class ContactsContract {
                 CONTENT_URI, "strequent");
 
         /**
+         * The content:// style URI for showing frequently contacted person listing.
+         * @hide
+         */
+        public static final Uri CONTENT_FREQUENT_URI = Uri.withAppendedPath(
+                CONTENT_URI, "frequent");
+
+        /**
          * The content:// style URI used for "type-to-filter" functionality on the
          * {@link #CONTENT_STREQUENT_URI} URI. The filter string will be used to match
          * various parts of the contact name. The filter argument should be passed
