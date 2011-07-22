@@ -64,8 +64,8 @@ public:
     virtual sp<MetaData> getFormat();
 
     // Get / Set the frame rate used for encoding. Default fps = 30
-    void setFrameRate(uint32_t fps) ;
-    uint32_t getFrameRate( ) const;
+    status_t setFrameRate(int32_t fps) ;
+    int32_t getFrameRate( ) const;
 
     // The call for the StageFrightRecorder to tell us that
     // it is done using the MediaBuffer data so that its state
@@ -171,7 +171,11 @@ public:
     void dump(String8& result, const char* prefix, char* buffer,
                                                     size_t SIZE) const;
 
-    protected:
+    // isMetaDataStoredInVideoBuffers tells the encoder whether we will
+    // pass metadata through the buffers. Currently, it is force set to true
+    bool isMetaDataStoredInVideoBuffers() const;
+
+protected:
 
     // freeAllBuffers frees the resources (both GraphicBuffer and EGLImage) for
     // all slots.

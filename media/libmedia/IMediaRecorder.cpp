@@ -23,7 +23,9 @@
 #include <camera/ICamera.h>
 #include <media/IMediaRecorderClient.h>
 #include <media/IMediaRecorder.h>
+#include <gui/ISurfaceTexture.h>
 #include <unistd.h>
+
 
 namespace android {
 
@@ -31,6 +33,7 @@ enum {
     RELEASE = IBinder::FIRST_CALL_TRANSACTION,
     INIT,
     CLOSE,
+    QUERY_SURFACE_MEDIASOURCE,
     RESET,
     STOP,
     START,
@@ -69,6 +72,19 @@ public:
         data.writeStrongBinder(proxy->asBinder());
         remote()->transact(SET_CAMERA, data, &reply);
         return reply.readInt32();
+    }
+
+    sp<ISurfaceTexture> querySurfaceMediaSource()
+    {
+        LOGV("Query SurfaceMediaSource");
+        Parcel data, reply;
+        data.writeInterfaceToken(IMediaRecorder::getInterfaceDescriptor());
+        remote()->transact(QUERY_SURFACE_MEDIASOURCE, data, &reply);
+        int returnedNull = reply.readInt32();
+        if (returnedNull) {
+            return NULL;
+        }
+        return interface_cast<ISurfaceTexture>(reply.readStrongBinder());
     }
 
     status_t setPreviewSurface(const sp<Surface>& surface)
@@ -438,6 +454,20 @@ status_t BnMediaRecorder::onTransact(
             sp<ICameraRecordingProxy> proxy =
                 interface_cast<ICameraRecordingProxy>(data.readStrongBinder());
             reply->writeInt32(setCamera(camera, proxy));
+            return NO_ERROR;
+        } break;
+        case QUERY_SURFACE_MEDIASOURCE: {
+            LOGV("QUERY_SURFACE_MEDIASOURCE");
+            CHECK_INTERFACE(IMediaRecorder, data, reply);
+            // call the mediaserver side to create
+            // a surfacemediasource
+            sp<ISurfaceTexture> surfaceMediaSource = querySurfaceMediaSource();
+            // The mediaserver might have failed to create a source
+            int returnedNull= (surfaceMediaSource == NULL) ? 1 : 0 ;
+            reply->writeInt32(returnedNull);
+            if (!returnedNull) {
+                reply->writeStrongBinder(surfaceMediaSource->asBinder());
+            }
             return NO_ERROR;
         } break;
         default:

@@ -127,7 +127,7 @@ static bool process_media_recorder_call(JNIEnv *env, status_t opStatus, const ch
     return false;
 }
 
-static sp<MediaRecorder> getMediaRecorder(JNIEnv* env, jobject thiz)
+sp<MediaRecorder> getMediaRecorder(JNIEnv* env, jobject thiz)
 {
     Mutex::Autolock l(sLock);
     MediaRecorder* const p = (MediaRecorder*)env->GetIntField(thiz, fields.context);

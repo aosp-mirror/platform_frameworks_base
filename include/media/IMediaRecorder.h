@@ -26,6 +26,7 @@ class Surface;
 class ICamera;
 class ICameraRecordingProxy;
 class IMediaRecorderClient;
+class ISurfaceTexture;
 
 class IMediaRecorder: public IInterface
 {
@@ -55,6 +56,7 @@ public:
     virtual status_t init() = 0;
     virtual status_t close() = 0;
     virtual status_t release() = 0;
+    virtual sp<ISurfaceTexture> querySurfaceMediaSource() = 0;
 };
 
 // ----------------------------------------------------------------------------
