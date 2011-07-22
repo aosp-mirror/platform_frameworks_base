@@ -16,8 +16,6 @@
 
 package android.provider;
 
-
-
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.app.SearchManager;
@@ -47,7 +45,6 @@ import android.util.Log;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
-
 
 /**
  * The Settings provider contains global system-level device preferences.
@@ -3736,6 +3733,15 @@ public final class Settings {
          * @hide
          */
         public static final String VOICE_RECOGNITION_SERVICE = "voice_recognition_service";
+
+
+        /**
+         * The {@link ComponentName} string of the service to be used as the spell checker
+         * service which is one of the services managed by the text service manager.
+         *
+         * @hide
+         */
+        public static final String SPELL_CHECKER_SERVICE = "spell_checker_service";
 
         /**
          * What happens when the user presses the Power button while in-call

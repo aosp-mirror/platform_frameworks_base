@@ -83,6 +83,7 @@ import android.view.ContextThemeWrapper;
 import android.view.WindowManagerImpl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.inputmethod.InputMethodManager;
+import android.view.textservice.TextServicesManager;
 import android.accounts.AccountManager;
 import android.accounts.IAccountManager;
 import android.app.admin.DevicePolicyManager;
@@ -318,6 +319,11 @@ class ContextImpl extends Context {
         registerService(INPUT_METHOD_SERVICE, new ServiceFetcher() {
                 public Object createService(ContextImpl ctx) {
                     return InputMethodManager.getInstance(ctx);
+                }});
+
+        registerService(TEXT_SERVICES_MANAGER_SERVICE, new ServiceFetcher() {
+                public Object createService(ContextImpl ctx) {
+                    return TextServicesManager.getInstance();
                 }});
 
         registerService(KEYGUARD_SERVICE, new ServiceFetcher() {
