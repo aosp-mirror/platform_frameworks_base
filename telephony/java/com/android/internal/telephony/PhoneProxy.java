@@ -32,6 +32,7 @@ import android.util.Log;
 
 import com.android.internal.telephony.cdma.CDMAPhone;
 import com.android.internal.telephony.gsm.GSMPhone;
+import com.android.internal.telephony.ims.IsimRecords;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 
 import java.util.List;
@@ -839,6 +840,14 @@ public class PhoneProxy extends Handler implements Phone {
 
     public boolean isCspPlmnEnabled() {
         return mActivePhone.isCspPlmnEnabled();
+    }
+
+    public IsimRecords getIsimRecords() {
+        return mActivePhone.getIsimRecords();
+    }
+
+    public void requestIsimAuthentication(String nonce, Message response) {
+        mActivePhone.requestIsimAuthentication(nonce, response);
     }
 
     /**

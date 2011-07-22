@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006 The Android Open Source Project
+ * Copyright (C) 2011 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,19 @@
 
 package com.android.internal.telephony.cdma;
 
-import android.os.SystemProperties;
-import android.content.Context;
-import android.net.Uri;
-import android.content.Context;
-import android.provider.Telephony;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.SQLException;
-import android.telephony.ServiceState;
-import android.telephony.SignalStrength;
+import android.net.Uri;
+import android.os.Message;
+import android.provider.Telephony;
+import android.util.Log;
 
-import com.android.internal.telephony.gsm.SIMRecords;
-import com.android.internal.telephony.gsm.SimCard;
-import com.android.internal.telephony.ServiceStateTracker;
-import com.android.internal.telephony.DataConnectionTracker;
 import com.android.internal.telephony.CommandsInterface;
 import com.android.internal.telephony.Phone;
-import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.PhoneNotifier;
-import com.android.internal.telephony.PhoneProxy;
-import com.android.internal.telephony.IccCard;
-import com.android.internal.telephony.gsm.GsmDataConnectionTracker;
-
-import android.util.Log;
+import com.android.internal.telephony.gsm.SimCard;
+import com.android.internal.telephony.ims.IsimRecords;
 
 public class CDMALTEPhone extends CDMAPhone {
     static final String LOG_TAG = "CDMA";
@@ -68,7 +58,7 @@ public class CDMALTEPhone extends CDMAPhone {
         DataState ret = DataState.DISCONNECTED;
 
         if (mSST == null) {
-            // Radio Technology Change is ongoning, dispose() and
+            // Radio Technology Change is ongoing, dispose() and
             // removeReferences() have already been called
 
             ret = DataState.DISCONNECTED;
@@ -143,6 +133,16 @@ public class CDMALTEPhone extends CDMAPhone {
     @Override
     public String getDeviceSvn() {
         return mImeiSv;
+    }
+
+    @Override
+    public IsimRecords getIsimRecords() {
+        return mIccRecords.getIsimRecords();
+    }
+
+    @Override
+    public void requestIsimAuthentication(String nonce, Message result) {
+        mCM.requestIsimAuthentication(nonce, result);
     }
 
     @Override

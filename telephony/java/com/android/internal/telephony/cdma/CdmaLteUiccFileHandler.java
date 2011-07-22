@@ -42,6 +42,10 @@ public final class CdmaLteUiccFileHandler extends IccFileHandler {
             return MF_SIM + DF_CDMA;
         case EF_AD:
             return MF_SIM + DF_GSM;
+        case EF_IMPI:
+        case EF_DOMAIN:
+        case EF_IMPU:
+            return MF_SIM + DF_ADFISIM;
         }
         return getCommonIccEFPath(efid);
     }

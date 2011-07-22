@@ -15,8 +15,10 @@
  */
 package com.android.internal.telephony.cdma;
 
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
-import static com.android.internal.telephony.TelephonyProperties.PROPERTY_TEST_CSIM;
+import android.os.AsyncResult;
+import android.os.SystemProperties;
+import android.util.Log;
+
 import com.android.internal.telephony.GsmAlphabet;
 import com.android.internal.telephony.IccCardApplication.AppType;
 import com.android.internal.telephony.IccFileHandler;
@@ -25,12 +27,14 @@ import com.android.internal.telephony.MccTable;
 import com.android.internal.telephony.PhoneBase;
 import com.android.internal.telephony.cdma.sms.UserData;
 import com.android.internal.telephony.gsm.SIMRecords;
-import android.os.AsyncResult;
-import android.os.Message;
-import android.os.SystemProperties;
-import android.util.Log;
-import java.util.Locale;
+import com.android.internal.telephony.ims.IsimRecords;
+import com.android.internal.telephony.ims.IsimUiccRecords;
+
 import java.util.ArrayList;
+import java.util.Locale;
+
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_ICC_OPERATOR_ALPHA;
+import static com.android.internal.telephony.TelephonyProperties.PROPERTY_TEST_CSIM;
 
 /**
  * {@hide}
@@ -46,130 +50,191 @@ public final class CdmaLteUiccRecords extends SIMRecords {
     private String mHomeSystemId;
     private String mHomeNetworkId;
 
-    private static final int EVENT_GET_PL_DONE = CSIM_EVENT_BASE;
-    private static final int EVENT_GET_CSIM_LI_DONE = CSIM_EVENT_BASE + 1;
-    private static final int EVENT_GET_CSIM_SPN_DONE = CSIM_EVENT_BASE + 2;
-    private static final int EVENT_GET_CSIM_MDN_DONE = CSIM_EVENT_BASE + 3;
-    private static final int EVENT_GET_CSIM_IMSIM_DONE = CSIM_EVENT_BASE + 4;
-    private static final int EVENT_GET_CSIM_CDMAHOME_DONE = CSIM_EVENT_BASE + 5;
-    private static final int EVENT_GET_CSIM_EPRL_DONE = CSIM_EVENT_BASE + 6;
+    private final IsimUiccRecords mIsimUiccRecords = new IsimUiccRecords();
 
     public CdmaLteUiccRecords(PhoneBase p) {
         super(p);
     }
 
-    @Override
-    public void handleMessage(Message msg) {
-        AsyncResult ar;
-        byte data[];
+    // Refer to ETSI TS 102.221
+    private class EfPlLoaded implements IccRecordLoaded {
+        public String getEfName() {
+            return "EF_PL";
+        }
 
-        boolean isCsimRecordLoadResponse = false;
+        public void onRecordLoaded(AsyncResult ar) {
+            mEFpl = (byte[]) ar.result;
+            if (DBG) log("EF_PL=" + IccUtils.bytesToHexString(mEFpl));
+        }
+    }
 
-        try { switch (msg.what) {
-            case EVENT_GET_PL_DONE:
-                // Refer to ETSI TS.102.221
-                if (DBG) log("EF_GET_EF_PL_DONE");
-                isCsimRecordLoadResponse = true;
+    // Refer to C.S0065 5.2.26
+    private class EfCsimLiLoaded implements IccRecordLoaded {
+        public String getEfName() {
+            return "EF_CSIM_LI";
+        }
 
-                ar = (AsyncResult) msg.obj;
-
-                if (ar.exception != null) {
-                    Log.e(LOG_TAG, "ar.exception = " + ar.exception);
-                    break;
+        public void onRecordLoaded(AsyncResult ar) {
+            mEFli = (byte[]) ar.result;
+            // convert csim efli data to iso 639 format
+            for (int i = 0; i < mEFli.length; i+=2) {
+                switch(mEFli[i+1]) {
+                case 0x01: mEFli[i] = 'e'; mEFli[i+1] = 'n';break;
+                case 0x02: mEFli[i] = 'f'; mEFli[i+1] = 'r';break;
+                case 0x03: mEFli[i] = 'e'; mEFli[i+1] = 's';break;
+                case 0x04: mEFli[i] = 'j'; mEFli[i+1] = 'a';break;
+                case 0x05: mEFli[i] = 'k'; mEFli[i+1] = 'o';break;
+                case 0x06: mEFli[i] = 'z'; mEFli[i+1] = 'h';break;
+                case 0x07: mEFli[i] = 'h'; mEFli[i+1] = 'e';break;
+                default: mEFli[i] = ' '; mEFli[i+1] = ' ';
                 }
-
-                mEFpl = (byte[]) ar.result;
-                if (DBG) log("EF_PL=" + IccUtils.bytesToHexString(mEFpl));
-                break;
-
-            case EVENT_GET_CSIM_LI_DONE:
-                // Refer to C.S0065 5.2.26
-                if (DBG) log("EVENT_GET_CSIM_LI_DONE");
-                isCsimRecordLoadResponse = true;
-
-                ar = (AsyncResult) msg.obj;
-                if (ar.exception != null) {
-                    Log.e(LOG_TAG, "ar.exception = " + ar.exception);
-                    break;
-                }
-
-                mEFli = (byte[]) ar.result;
-                // convert csim efli data to iso 639 format
-                for (int i = 0; i < mEFli.length; i+=2) {
-                    switch(mEFli[i+1]) {
-                    case 0x01: mEFli[i] = 'e'; mEFli[i+1] = 'n';break;
-                    case 0x02: mEFli[i] = 'f'; mEFli[i+1] = 'r';break;
-                    case 0x03: mEFli[i] = 'e'; mEFli[i+1] = 's';break;
-                    case 0x04: mEFli[i] = 'j'; mEFli[i+1] = 'a';break;
-                    case 0x05: mEFli[i] = 'k'; mEFli[i+1] = 'o';break;
-                    case 0x06: mEFli[i] = 'z'; mEFli[i+1] = 'h';break;
-                    case 0x07: mEFli[i] = 'h'; mEFli[i+1] = 'e';break;
-                    default: mEFli[i] = ' '; mEFli[i+1] = ' ';
-                    }
-                }
-
-                if (DBG) log("EF_LI=" + IccUtils.bytesToHexString(mEFli));
-                break;
-            case EVENT_GET_CSIM_SPN_DONE:
-                // Refer to C.S0065 5.2.32
-                if (DBG) log("EVENT_GET_CSIM_SPN_DONE");
-                isCsimRecordLoadResponse = true;
-                ar = (AsyncResult) msg.obj;
-
-                if (ar.exception != null) {
-                    Log.e(LOG_TAG, "ar.exception=" + ar.exception);
-                    break;
-                }
-                onGetCSimSpnDone(ar);
-                break;
-            case EVENT_GET_CSIM_MDN_DONE:
-                if (DBG) log("EVENT_GET_CSIM_MDN_DONE");
-                isCsimRecordLoadResponse = true;
-                ar = (AsyncResult) msg.obj;
-                if (ar.exception != null) {
-                    Log.e(LOG_TAG, "ar.exception=" + ar.exception);
-                    break;
-                }
-                onGetCSimMdnDone(ar);
-                break;
-            case EVENT_GET_CSIM_IMSIM_DONE:
-                if (DBG) log("EVENT_GET_CSIM_IMSIM_DONE");
-                isCsimRecordLoadResponse = true;
-                ar = (AsyncResult) msg.obj;
-                if (ar.exception != null) {
-                    Log.e(LOG_TAG, "ar.exception=" + ar.exception);
-                    break;
-                }
-                onGetCSimImsimDone(ar);
-                break;
-            case EVENT_GET_CSIM_CDMAHOME_DONE:
-                if (DBG) log("EVENT_GET_CSIM_CDMAHOME_DONE");
-                isCsimRecordLoadResponse = true;
-                ar = (AsyncResult) msg.obj;
-                if (ar.exception != null) {
-                    Log.e(LOG_TAG, "ar.exception=" + ar.exception);
-                    break;
-                }
-                onGetCSimCdmaHomeDone(ar);
-                break;
-            case EVENT_GET_CSIM_EPRL_DONE:
-                if (DBG) log("EVENT_GET_CSIM_EPRL_DONE");
-                isCsimRecordLoadResponse = true;
-                ar = (AsyncResult) msg.obj;
-                if (ar.exception != null) {
-                    Log.e(LOG_TAG, "ar.exception=" + ar.exception);
-                    break;
-                }
-                onGetCSimEprlDone(ar);
-                break;
-            default:
-                super.handleMessage(msg);
-        }}catch (RuntimeException exc) {
-            Log.w(LOG_TAG, "Exception parsing SIM record", exc);
-        } finally {
-            if (isCsimRecordLoadResponse) {
-                onRecordLoaded();
             }
+
+            if (DBG) log("EF_LI=" + IccUtils.bytesToHexString(mEFli));
+        }
+    }
+
+    // Refer to C.S0065 5.2.32
+    private class EfCsimSpnLoaded implements IccRecordLoaded {
+        public String getEfName() {
+            return "EF_CSIM_SPN";
+        }
+
+        public void onRecordLoaded(AsyncResult ar) {
+            byte[] data = (byte[]) ar.result;
+            if (DBG) log("CSIM_SPN=" +
+                         IccUtils.bytesToHexString(data));
+
+            // C.S0065 for EF_SPN decoding
+            mCsimSpnDisplayCondition = ((0x01 & data[0]) != 0);
+
+            int encoding = data[1];
+            int language = data[2];
+            byte[] spnData = new byte[32];
+            System.arraycopy(data, 3, spnData, 0, (data.length < 32) ? data.length : 32);
+
+            int numBytes;
+            for (numBytes = 0; numBytes < spnData.length; numBytes++) {
+                if ((spnData[numBytes] & 0xFF) == 0xFF) break;
+            }
+
+            if (numBytes == 0) {
+                spn = "";
+                return;
+            }
+            try {
+                switch (encoding) {
+                case UserData.ENCODING_OCTET:
+                case UserData.ENCODING_LATIN:
+                    spn = new String(spnData, 0, numBytes, "ISO-8859-1");
+                    break;
+                case UserData.ENCODING_IA5:
+                case UserData.ENCODING_GSM_7BIT_ALPHABET:
+                case UserData.ENCODING_7BIT_ASCII:
+                    spn = GsmAlphabet.gsm7BitPackedToString(spnData, 0, (numBytes*8)/7);
+                    break;
+                case UserData.ENCODING_UNICODE_16:
+                    spn =  new String(spnData, 0, numBytes, "utf-16");
+                    break;
+                default:
+                    log("SPN encoding not supported");
+                }
+            } catch(Exception e) {
+                log("spn decode error: " + e);
+            }
+            if (DBG) log("spn=" + spn);
+            if (DBG) log("spnCondition=" + mCsimSpnDisplayCondition);
+            phone.setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, spn);
+        }
+    }
+
+    private class EfCsimMdnLoaded implements IccRecordLoaded {
+        public String getEfName() {
+            return "EF_CSIM_MDN";
+        }
+
+        public void onRecordLoaded(AsyncResult ar) {
+            byte[] data = (byte[]) ar.result;
+            if (DBG) log("CSIM_MDN=" + IccUtils.bytesToHexString(data));
+            int mdnDigitsNum = 0x0F & data[0];
+            mMdn = IccUtils.cdmaBcdToString(data, 1, mdnDigitsNum);
+            if (DBG) log("CSIM MDN=" + mMdn);
+        }
+    }
+
+    private class EfCsimImsimLoaded implements IccRecordLoaded {
+        public String getEfName() {
+            return "EF_CSIM_IMSIM";
+        }
+
+        public void onRecordLoaded(AsyncResult ar) {
+            byte[] data = (byte[]) ar.result;
+            if (DBG) log("CSIM_IMSIM=" + IccUtils.bytesToHexString(data));
+            // C.S0065 section 5.2.2 for IMSI_M encoding
+            // C.S0005 section 2.3.1 for MIN encoding in IMSI_M.
+            boolean provisioned = ((data[7] & 0x80) == 0x80);
+
+            if (provisioned) {
+                int first3digits = ((0x03 & data[2]) << 8) + (0xFF & data[1]);
+                int second3digits = (((0xFF & data[5]) << 8) | (0xFF & data[4])) >> 6;
+                int digit7 = 0x0F & (data[4] >> 2);
+                if (digit7 > 0x09) digit7 = 0;
+                int last3digits = ((0x03 & data[4]) << 8) | (0xFF & data[3]);
+                first3digits = adjstMinDigits(first3digits);
+                second3digits = adjstMinDigits(second3digits);
+                last3digits = adjstMinDigits(last3digits);
+
+                StringBuilder builder = new StringBuilder();
+                builder.append(String.format(Locale.US, "%03d", first3digits));
+                builder.append(String.format(Locale.US, "%03d", second3digits));
+                builder.append(String.format(Locale.US, "%d", digit7));
+                builder.append(String.format(Locale.US, "%03d", last3digits));
+                mMin = builder.toString();
+                if (DBG) log("min present=" + mMin);
+            } else {
+                if (DBG) log("min not present");
+            }
+        }
+    }
+
+    private class EfCsimCdmaHomeLoaded implements IccRecordLoaded {
+        public String getEfName() {
+            return "EF_CSIM_CDMAHOME";
+        }
+
+        public void onRecordLoaded(AsyncResult ar) {
+            // Per C.S0065 section 5.2.8
+            ArrayList<byte[]> dataList = (ArrayList<byte[]>) ar.result;
+            if (DBG) log("CSIM_CDMAHOME data size=" + dataList.size());
+            if (dataList.isEmpty()) {
+                return;
+            }
+            StringBuilder sidBuf = new StringBuilder();
+            StringBuilder nidBuf = new StringBuilder();
+
+            for (byte[] data : dataList) {
+                if (data.length == 5) {
+                    int sid = ((data[1] & 0xFF) << 8) | (data[0] & 0xFF);
+                    int nid = ((data[3] & 0xFF) << 8) | (data[2] & 0xFF);
+                    sidBuf.append(sid).append(',');
+                    nidBuf.append(nid).append(',');
+                }
+            }
+            // remove trailing ","
+            sidBuf.setLength(sidBuf.length()-1);
+            nidBuf.setLength(nidBuf.length()-1);
+
+            mHomeSystemId = sidBuf.toString();
+            mHomeNetworkId = nidBuf.toString();
+        }
+    }
+
+    private class EfCsimEprlLoaded implements IccRecordLoaded {
+        public String getEfName() {
+            return "EF_CSIM_EPRL";
+        }
+        public void onRecordLoaded(AsyncResult ar) {
+            onGetCSimEprlDone(ar);
         }
     }
 
@@ -189,8 +254,8 @@ public final class CdmaLteUiccRecords extends SIMRecords {
 
     @Override
     protected void onAllRecordsLoaded() {
-        super.onAllRecordsLoaded();
         setLocaleFromCsim();
+        super.onAllRecordsLoaded();     // broadcasts ICC state change to "LOADED"
     }
 
     @Override
@@ -207,112 +272,36 @@ public final class CdmaLteUiccRecords extends SIMRecords {
         iccFh.loadEFTransparent(EF_AD, obtainMessage(EVENT_GET_AD_DONE));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_PL, obtainMessage(EVENT_GET_PL_DONE));
+        iccFh.loadEFTransparent(EF_PL,
+                obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfPlLoaded()));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_CSIM_LI, obtainMessage(EVENT_GET_CSIM_LI_DONE));
+        iccFh.loadEFTransparent(EF_CSIM_LI,
+                obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimLiLoaded()));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_CSIM_SPN, obtainMessage(EVENT_GET_CSIM_SPN_DONE));
+        iccFh.loadEFTransparent(EF_CSIM_SPN,
+                obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimSpnLoaded()));
         recordsToLoad++;
 
-        iccFh.loadEFLinearFixed(EF_CSIM_MDN, 1, obtainMessage(EVENT_GET_CSIM_MDN_DONE));
+        iccFh.loadEFLinearFixed(EF_CSIM_MDN, 1,
+                obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimMdnLoaded()));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_CSIM_IMSIM, obtainMessage(EVENT_GET_CSIM_IMSIM_DONE));
+        iccFh.loadEFTransparent(EF_CSIM_IMSIM,
+                obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimImsimLoaded()));
         recordsToLoad++;
 
         iccFh.loadEFLinearFixedAll(EF_CSIM_CDMAHOME,
-                                   obtainMessage(EVENT_GET_CSIM_CDMAHOME_DONE));
+                obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimCdmaHomeLoaded()));
         recordsToLoad++;
 
-        iccFh.loadEFTransparent(EF_CSIM_EPRL, obtainMessage(EVENT_GET_CSIM_EPRL_DONE));
+        iccFh.loadEFTransparent(EF_CSIM_EPRL,
+                obtainMessage(EVENT_GET_ICC_RECORD_DONE, new EfCsimEprlLoaded()));
         recordsToLoad++;
-    }
 
-    private void onGetCSimSpnDone(AsyncResult ar) {
-        byte[] data = (byte[]) ar.result;
-        if (DBG) log("CSIM_SPN=" +
-                     IccUtils.bytesToHexString(data));
-
-        // C.S0065 for EF_SPN decoding
-        mCsimSpnDisplayCondition = ((0x01 & data[0]) != 0) ? true : false;
-
-        int encoding = data[1];
-        int language = data[2];
-        byte[] spnData = new byte[32];
-        System.arraycopy(data, 3, spnData, 0, (data.length < 32)?data.length:32);
-
-        int numBytes;
-        for (numBytes = 0; numBytes < spnData.length; numBytes++) {
-            if ((spnData[numBytes] & 0xFF) == 0xFF) break;
-        }
-
-        if (numBytes == 0) {
-            spn = "";
-            return;
-        }
-        try {
-            switch (encoding) {
-            case UserData.ENCODING_OCTET:
-            case UserData.ENCODING_LATIN:
-                spn = new String(spnData, 0, numBytes, "ISO-8859-1");
-                break;
-            case UserData.ENCODING_IA5:
-            case UserData.ENCODING_GSM_7BIT_ALPHABET:
-            case UserData.ENCODING_7BIT_ASCII:
-                spn = GsmAlphabet.gsm7BitPackedToString(spnData, 0, (numBytes*8)/7);
-                break;
-            case UserData.ENCODING_UNICODE_16:
-                spn =  new String(spnData, 0, numBytes, "utf-16");
-                break;
-            default:
-                log("SPN encoding not supported");
-            }
-        } catch(Exception e) {
-            log("spn decode error: " + e);
-        }
-        if (DBG) log("spn=" + spn);
-        if (DBG) log("spnCondition=" + mCsimSpnDisplayCondition);
-        phone.setSystemProperty(PROPERTY_ICC_OPERATOR_ALPHA, spn);
-    }
-
-    private void onGetCSimMdnDone(AsyncResult ar) {
-        byte[] data = (byte[]) ar.result;
-        if (DBG) log("CSIM_MDN=" + IccUtils.bytesToHexString(data));
-        int mdnDigitsNum = 0x0F & data[0];
-        mMdn = IccUtils.cdmaBcdToString(data, 1, mdnDigitsNum);
-        if (DBG) log("CSIM MDN=" + mMdn);
-    }
-
-    private void onGetCSimImsimDone(AsyncResult ar) {
-        byte[] data = (byte[]) ar.result;
-        if (DBG) log("CSIM_IMSIM=" + IccUtils.bytesToHexString(data));
-        // C.S0065 section 5.2.2 for IMSI_M encoding
-        // C.S0005 section 2.3.1 for MIN encoding in IMSI_M.
-        boolean provisioned = ((data[7] & 0x80) == 0x80);
-
-        if (provisioned) {
-            int first3digits = ((0x03 & data[2]) << 8) + (0xFF & data[1]);
-            int second3digits = (((0xFF & data[5]) << 8) | (0xFF & data[4])) >> 6;
-            int digit7 = 0x0F & (data[4] >> 2);
-            if (digit7 > 0x09) digit7 = 0;
-            int last3digits = ((0x03 & data[4]) << 8) | (0xFF & data[3]);
-            first3digits = adjstMinDigits(first3digits);
-            second3digits = adjstMinDigits(second3digits);
-            last3digits = adjstMinDigits(last3digits);
-
-            StringBuilder builder = new StringBuilder();
-            builder.append(String.format(Locale.US, "%03d", first3digits));
-            builder.append(String.format(Locale.US, "%03d", second3digits));
-            builder.append(String.format(Locale.US, "%d", digit7));
-            builder.append(String.format(Locale.US, "%03d", last3digits));
-            if (DBG) log("min present=" + builder.toString());
-
-            mMin = builder.toString();
-        } else {
-            if (DBG) log("min not present");
-        }
+        // load ISIM records
+        recordsToLoad += mIsimUiccRecords.fetchIsimRecords(iccFh, this);
     }
 
     private int adjstMinDigits (int digits) {
@@ -322,32 +311,6 @@ public final class CdmaLteUiccRecords extends SIMRecords {
         digits = ((digits / 10) % 10 == 0)?(digits - 100):digits;
         digits = ((digits / 100) % 10 == 0)?(digits - 1000):digits;
         return digits;
-    }
-
-    private void onGetCSimCdmaHomeDone(AsyncResult ar) {
-        // Per C.S0065 section 5.2.8
-        ArrayList<byte[]> dataList = (ArrayList<byte[]>) ar.result;
-        if (DBG) log("CSIM_CDMAHOME data size=" + dataList.size());
-        if (dataList.isEmpty()) {
-            return;
-        }
-        StringBuilder sidBuf = new StringBuilder();
-        StringBuilder nidBuf = new StringBuilder();
-
-        for (byte[] data : dataList) {
-            if (data.length == 5) {
-                int sid = ((data[1] & 0xFF) << 8) | (data[0] & 0xFF);
-                int nid = ((data[3] & 0xFF) << 8) | (data[2] & 0xFF);
-                sidBuf.append(sid).append(",");
-                nidBuf.append(nid).append(",");
-            }
-        }
-        // remove trailing ","
-        sidBuf.setLength(sidBuf.length()-1);
-        nidBuf.setLength(nidBuf.length()-1);
-
-        mHomeSystemId = sidBuf.toString();
-        mHomeNetworkId = nidBuf.toString();
     }
 
     private void onGetCSimEprlDone(AsyncResult ar) {
@@ -418,6 +381,11 @@ public final class CdmaLteUiccRecords extends SIMRecords {
         if (DBG) Log.d(LOG_TAG, "[CSIM] " + s);
     }
 
+    @Override
+    protected void loge(String s) {
+        if (DBG) Log.e(LOG_TAG, "[CSIM] " + s);
+    }
+
     public String getMdn() {
         return mMdn;
     }
@@ -440,6 +408,11 @@ public final class CdmaLteUiccRecords extends SIMRecords {
 
     public boolean getCsimSpnDisplayCondition() {
         return mCsimSpnDisplayCondition;
+    }
+
+    @Override
+    public IsimRecords getIsimRecords() {
+        return mIsimUiccRecords;
     }
 
     @Override

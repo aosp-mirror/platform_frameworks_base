@@ -22,6 +22,8 @@ import android.os.Message;
 import android.os.Registrant;
 import android.os.RegistrantList;
 
+import com.android.internal.telephony.ims.IsimRecords;
+
 /**
  * {@hide}
  */
@@ -69,6 +71,24 @@ public abstract class IccRecords extends Handler implements IccConstants {
 
     // ***** Event Constants
     protected static final int EVENT_SET_MSISDN_DONE = 30;
+
+    public static final int EVENT_GET_ICC_RECORD_DONE = 100;
+
+    /**
+     * Generic ICC record loaded callback. Subclasses can call EF load methods on
+     * {@link IccFileHandler} passing a Message for onLoaded with the what field set to
+     * {@link #EVENT_GET_ICC_RECORD_DONE} and the obj field set to an instance
+     * of this interface. The {@link #handleMessage} method in this class will print a
+     * log message using {@link #getEfName()} and decrement {@link #recordsToLoad}.
+     *
+     * If the record load was successful, {@link #onRecordLoaded} will be called with the result.
+     * Otherwise, an error log message will be output by {@link #handleMessage} and
+     * {@link #onRecordLoaded} will not be called.
+     */
+    public interface IccRecordLoaded {
+        String getEfName();
+        void onRecordLoaded(AsyncResult ar);
+    }
 
     // ***** Constructor
 
@@ -234,7 +254,32 @@ public abstract class IccRecords extends Handler implements IccConstants {
 
     //***** Overridden from Handler
     @Override
-    public abstract void handleMessage(Message msg);
+    public void handleMessage(Message msg) {
+        switch (msg.what) {
+            case EVENT_GET_ICC_RECORD_DONE:
+                try {
+                    AsyncResult ar = (AsyncResult) msg.obj;
+                    IccRecordLoaded recordLoaded = (IccRecordLoaded) ar.userObj;
+                    if (DBG) log(recordLoaded.getEfName() + " LOADED");
+
+                    if (ar.exception != null) {
+                        loge("Record Load Exception: " + ar.exception);
+                    } else {
+                        recordLoaded.onRecordLoaded(ar);
+                    }
+                }catch (RuntimeException exc) {
+                    // I don't want these exceptions to be fatal
+                    loge("Exception parsing SIM record: " + exc);
+                } finally {
+                    // Count up record load responses even if they are fails
+                    onRecordLoaded();
+                }
+                break;
+
+            default:
+                super.handleMessage(msg);
+        }
+    }
 
     protected abstract void onRecordLoaded();
 
@@ -303,4 +348,19 @@ public abstract class IccRecords extends Handler implements IccConstants {
      * @param s is the string to write
      */
     protected abstract void log(String s);
+
+    /**
+     * Write error string to log file.
+     *
+     * @param s is the string to write
+     */
+    protected abstract void loge(String s);
+
+    /**
+     * Return an interface to retrieve the ISIM records for IMS, if available.
+     * @return the interface to retrieve the ISIM records, or null if not supported
+     */
+    public IsimRecords getIsimRecords() {
+        return null;
+    }
 }

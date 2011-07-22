@@ -37,6 +37,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.internal.R;
+import com.android.internal.telephony.ims.IsimRecords;
 import com.android.internal.telephony.test.SimulatedRadioControl;
 import com.android.internal.telephony.gsm.SIMRecords;
 import com.android.internal.telephony.gsm.SimCard;
@@ -1112,6 +1113,15 @@ public abstract class PhoneBase extends Handler implements Phone {
         // Not implemented in CDMAPhone.
         logUnexpectedGsmMethodCall("isCspPlmnEnabled");
         return false;
+    }
+
+    public IsimRecords getIsimRecords() {
+        Log.e(LOG_TAG, "getIsimRecords() is only supported on LTE devices");
+        return null;
+    }
+
+    public void requestIsimAuthentication(String nonce, Message result) {
+        Log.e(LOG_TAG, "requestIsimAuthentication() is only supported on LTE devices");
     }
 
     /**

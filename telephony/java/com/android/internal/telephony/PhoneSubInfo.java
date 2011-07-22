@@ -24,15 +24,19 @@ import android.os.Binder;
 import android.telephony.PhoneNumberUtils;
 import android.util.Log;
 
+import com.android.internal.telephony.ims.IsimRecords;
+
 public class PhoneSubInfo extends IPhoneSubInfo.Stub {
     static final String LOG_TAG = "PHONE";
     private Phone mPhone;
     private Context mContext;
     private static final String READ_PHONE_STATE =
         android.Manifest.permission.READ_PHONE_STATE;
+    // TODO: change getCompleteVoiceMailNumber() to require READ_PRIVILEGED_PHONE_STATE
     private static final String CALL_PRIVILEGED =
-        // TODO Add core/res/AndriodManifest.xml#READ_PRIVILEGED_PHONE_STATE
         android.Manifest.permission.CALL_PRIVILEGED;
+    private static final String READ_PRIVILEGED_PHONE_STATE =
+        android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE;
 
     public PhoneSubInfo(Phone phone) {
         mPhone = phone;
@@ -129,6 +133,52 @@ public class PhoneSubInfo extends IPhoneSubInfo.Stub {
     public String getVoiceMailAlphaTag() {
         mContext.enforceCallingOrSelfPermission(READ_PHONE_STATE, "Requires READ_PHONE_STATE");
         return (String) mPhone.getVoiceMailAlphaTag();
+    }
+
+    /**
+     * Returns the IMS private user identity (IMPI) that was loaded from the ISIM.
+     * @return the IMPI, or null if not present or not loaded
+     */
+    public String getIsimImpi() {
+        mContext.enforceCallingOrSelfPermission(READ_PRIVILEGED_PHONE_STATE,
+                "Requires READ_PRIVILEGED_PHONE_STATE");
+        IsimRecords isim = mPhone.getIsimRecords();
+        if (isim != null) {
+            return isim.getIsimImpi();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the IMS home network domain name that was loaded from the ISIM.
+     * @return the IMS domain name, or null if not present or not loaded
+     */
+    public String getIsimDomain() {
+        mContext.enforceCallingOrSelfPermission(READ_PRIVILEGED_PHONE_STATE,
+                "Requires READ_PRIVILEGED_PHONE_STATE");
+        IsimRecords isim = mPhone.getIsimRecords();
+        if (isim != null) {
+            return isim.getIsimDomain();
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the IMS public user identities (IMPU) that were loaded from the ISIM.
+     * @return an array of IMPU strings, with one IMPU per string, or null if
+     *      not present or not loaded
+     */
+    public String[] getIsimImpu() {
+        mContext.enforceCallingOrSelfPermission(READ_PRIVILEGED_PHONE_STATE,
+                "Requires READ_PRIVILEGED_PHONE_STATE");
+        IsimRecords isim = mPhone.getIsimRecords();
+        if (isim != null) {
+            return isim.getIsimImpu();
+        } else {
+            return null;
+        }
     }
 
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
