@@ -361,7 +361,8 @@ public class Handler {
 
     /**
      * Remove any pending posts of Runnable <var>r</var> with Object
-     * <var>token</var> that are in the message queue.
+     * <var>token</var> that are in the message queue.  If <var>token</var> is null,
+     * all callbacks will be removed.
      */
     public final void removeCallbacks(Runnable r, Object token)
     {
@@ -517,7 +518,8 @@ public class Handler {
 
     /**
      * Remove any pending posts of messages with code 'what' and whose obj is
-     * 'object' that are in the message queue.
+     * 'object' that are in the message queue.  If <var>token</var> is null,
+     * all messages will be removed.
      */
     public final void removeMessages(int what, Object object) {
         mQueue.removeMessages(this, what, object, true);
@@ -525,7 +527,8 @@ public class Handler {
 
     /**
      * Remove any pending posts of callbacks and sent messages whose
-     * <var>obj</var> is <var>token</var>.
+     * <var>obj</var> is <var>token</var>.  If <var>token</var> is null,
+     * all callbacks and messages will be removed.
      */
     public final void removeCallbacksAndMessages(Object token) {
         mQueue.removeCallbacksAndMessages(this, token);
