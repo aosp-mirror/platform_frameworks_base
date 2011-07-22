@@ -32,10 +32,12 @@ public class BlackFrame {
         final int top;
         final Surface surface;
 
-        BlackSurface(SurfaceSession session, int layer, int l, int t, int w, int h)
+        BlackSurface(SurfaceSession session, int layer, int l, int t, int r, int b)
                 throws Surface.OutOfResourcesException {
             left = l;
             top = t;
+            int w = r-l;
+            int h = b-t;
             surface = new Surface(session, 0, "BlackSurface",
                     -1, w, h, PixelFormat.OPAQUE, Surface.FX_SURFACE_DIM);
             if (WindowManagerService.SHOW_TRANSACTIONS ||
