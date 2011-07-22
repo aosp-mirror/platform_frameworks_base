@@ -55,6 +55,9 @@ void SurfaceTextureClient::init() {
     mQueryWidth = 0;
     mQueryHeight = 0;
     mQueryFormat = 0;
+    mDefaultWidth = 0;
+    mDefaultHeight = 0;
+    mTransformHint = 0;
     mConnectedToCpu = false;
 }
 
