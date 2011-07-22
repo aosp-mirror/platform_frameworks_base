@@ -34,7 +34,7 @@
     <string name="config_systemBarComponent" translatable="false">com.android.systemui.statusbar.tablet.TabletStatusBar</string>
 
     <!-- Whether or not we show the number in the bar. -->
-    <bool name="config_statusBarShowNumber">true</bool>
+    <bool name="config_statusBarShowNumber">false</bool>
 
     <!-- How many icons may be shown at once in the system bar. Includes any
          slots that may be reused for things like IME control. -->
