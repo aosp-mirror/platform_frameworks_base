@@ -166,7 +166,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private final KeyguardManager mKeyguardManager;
     private final Notification mImeSwitcherNotification;
     private final PendingIntent mImeSwitchPendingIntent;
-    private final boolean mShowOngoingImeSwitcherForPhones;
+    private boolean mShowOngoingImeSwitcherForPhones;
     private boolean mNotificationShown;
 
     class SessionState {
@@ -538,8 +538,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mImeSwitcherNotification.vibrate = null;
         Intent intent = new Intent(Settings.ACTION_SHOW_INPUT_METHOD_PICKER);
         mImeSwitchPendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
-        mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
-                com.android.internal.R.bool.show_ongoing_ime_switcher);
+
+        mShowOngoingImeSwitcherForPhones = false;
 
         synchronized (mMethodMap) {
             mFileManager = new InputMethodFileManager(mMethodMap);
@@ -612,6 +612,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         synchronized (mMethodMap) {
             if (!mSystemReady) {
                 mSystemReady = true;
+                mShowOngoingImeSwitcherForPhones = mRes.getBoolean(
+                        com.android.internal.R.bool.show_ongoing_ime_switcher);
                 try {
                     startInputInnerLocked();
                 } catch (RuntimeException e) {
