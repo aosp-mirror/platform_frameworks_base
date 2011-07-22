@@ -45,6 +45,7 @@ import android.text.style.ImageSpan;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.CollapsibleActionView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -58,18 +59,30 @@ import com.android.internal.R;
 import java.util.WeakHashMap;
 
 /**
- * A widget that provides a user interface for the user to enter a search query and submit a
- * request to a search provider. Shows a list of query suggestions or results, if
- * available, and allows the user to pick a suggestion or result to launch into.
+ * A widget that provides a user interface for the user to enter a search query and submit a request
+ * to a search provider. Shows a list of query suggestions or results, if available, and allows the
+ * user to pick a suggestion or result to launch into.
  *
- * <p>For more information, see the <a href="{@docRoot}guide/topics/search/index.html">Search</a>
- * documentation.<p>
+ * <p>
+ * When the SearchView is used in an ActionBar as an action view for a collapsible menu item, it
+ * needs to be set to iconified by default using {@link #setIconifiedByDefault(boolean)
+ * setIconifiedByDefault(true)}. This is the default, so nothing needs to be done.
+ * </p>
+ * <p>
+ * If you want the search field to always be visible, then call setIconifiedByDefault(false).
+ * </p>
  *
+ * <p>
+ * For more information, see the <a href="{@docRoot}guide/topics/search/index.html">Search</a>
+ * documentation.
+ * <p>
+ *
+ * @see android.view.MenuItem#SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW
  * @attr ref android.R.styleable#SearchView_iconifiedByDefault
  * @attr ref android.R.styleable#SearchView_maxWidth
  * @attr ref android.R.styleable#SearchView_queryHint
  */
-public class SearchView extends LinearLayout {
+public class SearchView extends LinearLayout implements CollapsibleActionView {
 
     private static final boolean DBG = false;
     private static final String LOG_TAG = "SearchView";
@@ -100,6 +113,7 @@ public class SearchView extends LinearLayout {
     private int mMaxWidth;
     private boolean mVoiceButtonEnabled;
     private CharSequence mUserQuery;
+    private boolean mExpandedInActionView;
 
     private SearchableInfo mSearchable;
     private Bundle mAppSearchData;
@@ -623,7 +637,7 @@ public class SearchView extends LinearLayout {
         final boolean hasText = !TextUtils.isEmpty(mQueryTextView.getText());
         // Should we show the close button? It is not shown if there's no focus,
         // field is not iconified by default and there is no text in it.
-        final boolean showClose = hasText || mIconifiedByDefault;
+        final boolean showClose = hasText || (mIconifiedByDefault && !mExpandedInActionView);
         mCloseButton.setVisibility(showClose ? VISIBLE : INVISIBLE);
         mCloseButton.getDrawable().setState(hasText ? ENABLED_STATE_SET : EMPTY_STATE_SET);
     }
@@ -1020,6 +1034,25 @@ public class SearchView extends LinearLayout {
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onActionViewCollapsed() {
+        mQueryTextView.setText("");
+        setIconified(true);
+        mExpandedInActionView = false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onActionViewExpanded() {
+        mExpandedInActionView = true;
+        setIconified(false);
     }
 
     private void adjustDropDownSizeAndPosition() {
