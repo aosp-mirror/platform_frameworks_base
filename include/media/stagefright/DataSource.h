@@ -20,6 +20,7 @@
 
 #include <sys/types.h>
 
+#include <media/stagefright/MediaErrors.h>
 #include <utils/Errors.h>
 #include <utils/KeyedVector.h>
 #include <utils/List.h>
@@ -59,6 +60,10 @@ public:
 
     virtual uint32_t flags() {
         return 0;
+    }
+
+    virtual status_t reconnectAtOffset(off64_t offset) {
+        return ERROR_UNSUPPORTED;
     }
 
     ////////////////////////////////////////////////////////////////////////////

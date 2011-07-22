@@ -25,6 +25,8 @@
 
 #include "support.h"
 
+#include <cutils/properties.h> // for property_get
+
 namespace android {
 
 ChromiumHTTPDataSource::ChromiumHTTPDataSource(uint32_t flags)
@@ -111,7 +113,7 @@ void ChromiumHTTPDataSource::onConnectionFailed(status_t err) {
     mState = DISCONNECTED;
     mCondition.broadcast();
 
-    mURI.clear();
+    // mURI.clear();
 
     mIOResult = err;
 
@@ -150,8 +152,18 @@ ssize_t ChromiumHTTPDataSource::readAt(off64_t offset, void *data, size_t size) 
     Mutex::Autolock autoLock(mLock);
 
     if (mState != CONNECTED) {
-        return ERROR_NOT_CONNECTED;
+        return INVALID_OPERATION;
     }
+
+#if 0
+    char value[PROPERTY_VALUE_MAX];
+    if (property_get("media.stagefright.disable-net", value, 0)
+            && (!strcasecmp(value, "true") || !strcmp(value, "1"))) {
+        LOG_PRI(ANDROID_LOG_INFO, LOG_TAG, "Simulating that the network is down.");
+        disconnect_l();
+        return ERROR_IO;
+    }
+#endif
 
     if (offset != mCurrentOffset) {
         AString tmp = mURI;
@@ -236,7 +248,7 @@ void ChromiumHTTPDataSource::onDisconnectComplete() {
     CHECK_EQ((int)mState, (int)DISCONNECTING);
 
     mState = DISCONNECTED;
-    mURI.clear();
+    // mURI.clear();
 
     mCondition.broadcast();
 
@@ -297,6 +309,22 @@ void ChromiumHTTPDataSource::clearDRMState_l() {
         mDrmManagerClient->closeDecryptSession(mDecryptHandle);
         mDecryptHandle = NULL;
     }
+}
+
+status_t ChromiumHTTPDataSource::reconnectAtOffset(off64_t offset) {
+    Mutex::Autolock autoLock(mLock);
+
+    if (mURI.empty()) {
+        return INVALID_OPERATION;
+    }
+
+    LOG_PRI(ANDROID_LOG_INFO, LOG_TAG, "Reconnecting...");
+    status_t err = connect_l(mURI.c_str(), &mHeaders, offset);
+    if (err != OK) {
+        LOG_PRI(ANDROID_LOG_INFO, LOG_TAG, "Reconnect failed w/ err 0x%08x", err);
+    }
+
+    return err;
 }
 
 }  // namespace android

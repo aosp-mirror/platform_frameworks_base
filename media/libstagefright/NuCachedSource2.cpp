@@ -185,7 +185,8 @@ NuCachedSource2::NuCachedSource2(const sp<DataSource> &source)
       mFinalStatus(OK),
       mLastAccessPos(0),
       mFetching(true),
-      mLastFetchTimeUs(-1) {
+      mLastFetchTimeUs(-1),
+      mNumRetriesLeft(kMaxNumRetries) {
     mLooper->setName("NuCachedSource2");
     mLooper->registerHandler(mReflector);
     mLooper->start();
@@ -254,7 +255,27 @@ void NuCachedSource2::onMessageReceived(const sp<AMessage> &msg) {
 void NuCachedSource2::fetchInternal() {
     LOGV("fetchInternal");
 
-    CHECK_EQ(mFinalStatus, (status_t)OK);
+    {
+        Mutex::Autolock autoLock(mLock);
+        CHECK(mFinalStatus == OK || mNumRetriesLeft > 0);
+
+        if (mFinalStatus != OK) {
+            --mNumRetriesLeft;
+
+            status_t err =
+                mSource->reconnectAtOffset(mCacheOffset + mCache->totalSize());
+
+            if (err == ERROR_UNSUPPORTED) {
+                mNumRetriesLeft = 0;
+                return;
+            } else if (err != OK) {
+                LOGI("The attempt to reconnect failed, %d retries remaining",
+                     mNumRetriesLeft);
+
+                return;
+            }
+        }
+    }
 
     PageCache::Page *page = mCache->acquirePage();
 
@@ -264,14 +285,23 @@ void NuCachedSource2::fetchInternal() {
     Mutex::Autolock autoLock(mLock);
 
     if (n < 0) {
-        LOGE("source returned error %ld", n);
+        LOGE("source returned error %ld, %d retries left", n, mNumRetriesLeft);
         mFinalStatus = n;
         mCache->releasePage(page);
     } else if (n == 0) {
         LOGI("ERROR_END_OF_STREAM");
+
+        mNumRetriesLeft = 0;
         mFinalStatus = ERROR_END_OF_STREAM;
+
         mCache->releasePage(page);
     } else {
+        if (mFinalStatus != OK) {
+            LOGI("retrying a previously failed read succeeded.");
+        }
+        mNumRetriesLeft = kMaxNumRetries;
+        mFinalStatus = OK;
+
         page->mSize = n;
         mCache->appendPage(page);
     }
@@ -280,7 +310,7 @@ void NuCachedSource2::fetchInternal() {
 void NuCachedSource2::onFetch() {
     LOGV("onFetch");
 
-    if (mFinalStatus != OK) {
+    if (mFinalStatus != OK && mNumRetriesLeft == 0) {
         LOGV("EOS reached, done prefetching for now");
         mFetching = false;
     }
@@ -308,8 +338,19 @@ void NuCachedSource2::onFetch() {
         restartPrefetcherIfNecessary_l();
     }
 
-    (new AMessage(kWhatFetchMore, mReflector->id()))->post(
-            mFetching ? 0 : 100000ll);
+    int64_t delayUs;
+    if (mFetching) {
+        if (mFinalStatus != OK && mNumRetriesLeft > 0) {
+            // We failed this time and will try again in 3 seconds.
+            delayUs = 3000000ll;
+        } else {
+            delayUs = 0;
+        }
+    } else {
+        delayUs = 100000ll;
+    }
+
+    (new AMessage(kWhatFetchMore, mReflector->id()))->post(delayUs);
 }
 
 void NuCachedSource2::onRead(const sp<AMessage> &msg) {
@@ -345,7 +386,7 @@ void NuCachedSource2::restartPrefetcherIfNecessary_l(
         bool ignoreLowWaterThreshold, bool force) {
     static const size_t kGrayArea = 1024 * 1024;
 
-    if (mFetching || mFinalStatus != OK) {
+    if (mFetching || (mFinalStatus != OK && mNumRetriesLeft == 0)) {
         return;
     }
 
@@ -427,6 +468,12 @@ size_t NuCachedSource2::approxDataRemaining(status_t *finalStatus) {
 
 size_t NuCachedSource2::approxDataRemaining_l(status_t *finalStatus) {
     *finalStatus = mFinalStatus;
+
+    if (mFinalStatus != OK && mNumRetriesLeft > 0) {
+        // Pretend that everything is fine until we're out of retries.
+        *finalStatus = OK;
+    }
+
     off64_t lastBytePosCached = mCacheOffset + mCache->totalSize();
     if (mLastAccessPos < lastBytePosCached) {
         return lastBytePosCached - mLastAccessPos;
