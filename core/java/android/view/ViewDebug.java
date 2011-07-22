@@ -25,6 +25,7 @@ import android.os.Debug;
 import android.os.Environment;
 import android.os.Looper;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
@@ -50,6 +51,9 @@ import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -453,24 +457,33 @@ public class ViewDebug {
     }
 
     private static class LooperProfiler implements Looper.Profiler, Printer {
-        private static final int LOOPER_PROFILER_VERSION = 1;
-
         private static final String LOG_TAG = "LooperProfiler";
+
+        private static final int TRACE_VERSION_NUMBER = 3;
+        private static final int ACTION_EXIT_METHOD = 0x1;
+        private static final int HEADER_SIZE = 32;
+        private static final String HEADER_MAGIC = "SLOW";
+        private static final short HEADER_RECORD_SIZE = (short) 14;
 
         private final long mTraceWallStart;
         private final long mTraceThreadStart;
         
         private final ArrayList<Entry> mTraces = new ArrayList<Entry>(512);
 
-        private final HashMap<String, Short> mTraceNames = new HashMap<String, Short>(32);
-        private short mTraceId = 0;
+        private final HashMap<String, Integer> mTraceNames = new HashMap<String, Integer>(32);
+        private int mTraceId = 0;
 
         private final String mPath;
-        private final FileDescriptor mFileDescriptor;
+        private ParcelFileDescriptor mFileDescriptor;
 
         LooperProfiler(String path, FileDescriptor fileDescriptor) {
             mPath = path;
-            mFileDescriptor = fileDescriptor;
+            try {
+                mFileDescriptor = ParcelFileDescriptor.dup(fileDescriptor);
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Could not write trace file " + mPath, e);
+                throw new RuntimeException(e);
+            }
             mTraceWallStart = SystemClock.currentTimeMicro();
             mTraceThreadStart = SystemClock.currentThreadTimeMicro();            
         }
@@ -493,11 +506,11 @@ public class ViewDebug {
             mTraces.add(entry);
         }
 
-        private short getTraceId(Message message) {
+        private int getTraceId(Message message) {
             String name = message.getTarget().getMessageName(message);
-            Short traceId = mTraceNames.get(name);
+            Integer traceId = mTraceNames.get(name);
             if (traceId == null) {
-                traceId = mTraceId++;
+                traceId = mTraceId++ << 4;
                 mTraceNames.put(name, traceId);
             }
             return traceId;
@@ -514,51 +527,131 @@ public class ViewDebug {
         }
 
         private void saveTraces() {
-            FileOutputStream fos = new FileOutputStream(mFileDescriptor);
+            FileOutputStream fos = new FileOutputStream(mFileDescriptor.getFileDescriptor());
             DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fos));
 
             try {
-                out.writeInt(LOOPER_PROFILER_VERSION);
-                out.writeLong(mTraceWallStart);
-                out.writeLong(mTraceThreadStart);
+                writeHeader(out, mTraceWallStart, mTraceNames, mTraces);
+                out.flush();
 
-                out.writeInt(mTraceNames.size());
-                for (Map.Entry<String, Short> entry : mTraceNames.entrySet()) {
-                    saveTraceName(entry.getKey(), entry.getValue(), out);
-                }
-
-                out.writeInt(mTraces.size());
-                for (Entry entry : mTraces) {
-                    saveTrace(entry, out);
-                }
+                writeTraces(fos, out.size(), mTraceWallStart, mTraceThreadStart, mTraces);
 
                 Log.d(LOG_TAG, "Looper traces ready: " + mPath);
             } catch (IOException e) {
-                Log.e(LOG_TAG, "Could not write trace file: ", e);
+                Log.e(LOG_TAG, "Could not write trace file " + mPath, e);
             } finally {
                 try {
                     out.close();
                 } catch (IOException e) {
-                    // Ignore
+                    Log.e(LOG_TAG, "Could not write trace file " + mPath, e);
+                }
+                try {
+                    mFileDescriptor.close();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Could not write trace file " + mPath, e);
                 }
             }
         }
-
-        private void saveTraceName(String name, short id, DataOutputStream out) throws IOException {
-            out.writeShort(id);
-            out.writeUTF(name);
+        
+        private static void writeTraces(FileOutputStream out, long offset, long wallStart,
+                long threadStart, ArrayList<Entry> entries) throws IOException {
+    
+            FileChannel channel = out.getChannel();
+    
+            // Header
+            ByteBuffer buffer = ByteBuffer.allocateDirect(HEADER_SIZE);
+            buffer.put(HEADER_MAGIC.getBytes());
+            buffer = buffer.order(ByteOrder.LITTLE_ENDIAN);
+            buffer.putShort((short) TRACE_VERSION_NUMBER);    // version
+            buffer.putShort((short) HEADER_SIZE);             // offset to data
+            buffer.putLong(wallStart);                        // start time in usec
+            buffer.putShort(HEADER_RECORD_SIZE);              // size of a record in bytes
+            // padding to 32 bytes
+            for (int i = 0; i < HEADER_SIZE - 18; i++) {
+                buffer.put((byte) 0);
+            }
+    
+            buffer.flip();
+            channel.position(offset).write(buffer);
+            
+            buffer = ByteBuffer.allocateDirect(14).order(ByteOrder.LITTLE_ENDIAN);
+            for (Entry entry : entries) {
+                buffer.putShort((short) 1);   // we simulate only one thread
+                buffer.putInt(entry.traceId); // entering method
+                buffer.putInt((int) (entry.threadStart - threadStart));
+                buffer.putInt((int) (entry.wallStart - wallStart));
+    
+                buffer.flip();
+                channel.write(buffer);
+                buffer.clear();
+    
+                buffer.putShort((short) 1);
+                buffer.putInt(entry.traceId | ACTION_EXIT_METHOD); // exiting method
+                buffer.putInt((int) (entry.threadStart + entry.threadTime - threadStart));
+                buffer.putInt((int) (entry.wallStart + entry.wallTime - wallStart));
+    
+                buffer.flip();
+                channel.write(buffer);
+                buffer.clear();
+            }
+    
+            channel.close();
         }
+    
+        private static void writeHeader(DataOutputStream out, long start,
+                HashMap<String, Integer> names, ArrayList<Entry> entries) throws IOException {
+    
+            Entry last = entries.get(entries.size() - 1);
+            long wallTotal = (last.wallStart + last.wallTime) - start;
+    
+            startSection("version", out);
+            addValue(null, Integer.toString(TRACE_VERSION_NUMBER), out);
+            addValue("data-file-overflow", "false", out);
+            addValue("clock", "dual", out);
+            addValue("elapsed-time-usec", Long.toString(wallTotal), out);
+            addValue("num-method-calls", Integer.toString(entries.size()), out);
+            addValue("clock-call-overhead-nsec", "1", out);
+            addValue("vm", "dalvik", out);
+    
+            startSection("threads", out);
+            addThreadId(1, "main", out);
+    
+            startSection("methods", out);
+            addMethods(names, out);
+    
+            startSection("end", out);
+        }
+    
+        private static void addMethods(HashMap<String, Integer> names, DataOutputStream out)
+                throws IOException {
+    
+            for (Map.Entry<String, Integer> name : names.entrySet()) {
+                out.writeBytes(String.format("0x%08x\tEventQueue\t%s\t()V\tLooper\t-2\n",
+                        name.getValue(), name.getKey()));
+            }
+        }
+    
+        private static void addThreadId(int id, String name, DataOutputStream out)
+                throws IOException {
 
-        private void saveTrace(Entry entry, DataOutputStream out) throws IOException {
-            out.writeShort(entry.traceId);
-            out.writeLong(entry.wallStart);
-            out.writeLong(entry.wallTime);
-            out.writeLong(entry.threadStart);
-            out.writeLong(entry.threadTime);
+            out.writeBytes(Integer.toString(id) + '\t' + name + '\n');
+        }
+    
+        private static void addValue(String name, String value, DataOutputStream out)
+                throws IOException {
+    
+            if (name != null) {
+                out.writeBytes(name + "=");
+            }
+            out.writeBytes(value + '\n');
+        }
+    
+        private static void startSection(String name, DataOutputStream out) throws IOException {
+            out.writeBytes("*" + name + '\n');
         }
 
         static class Entry {
-            short traceId;
+            int traceId;
             long wallStart;
             long wallTime;
             long threadStart;
