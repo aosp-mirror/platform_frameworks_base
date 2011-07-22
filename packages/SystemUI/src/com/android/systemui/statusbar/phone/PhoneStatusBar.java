@@ -82,7 +82,9 @@ import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBar;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.policy.DateView;
-
+import com.android.systemui.statusbar.policy.BatteryController;
+import com.android.systemui.statusbar.policy.LocationController;
+import com.android.systemui.statusbar.policy.NetworkController;
 
 public class PhoneStatusBar extends StatusBar {
     static final String TAG = "PhoneStatusBar";
@@ -107,6 +109,11 @@ public class PhoneStatusBar extends StatusBar {
 
     PhoneStatusBarPolicy mIconPolicy;
 
+    // These are no longer handled by the policy, because we need custom strategies for them
+    BatteryController mBatteryController;
+    LocationController mLocationController;
+    NetworkController mNetworkController;
+    
     int mIconSize;
     Display mDisplay;
 
@@ -305,6 +312,32 @@ public class PhoneStatusBar extends StatusBar {
         // set the inital view visibility
         setAreThereNotifications();
         mDateView.setVisibility(View.INVISIBLE);
+
+        // Other icons
+        mLocationController = new LocationController(mContext); // will post a notification
+        mBatteryController = new BatteryController(mContext);
+        mBatteryController.addIconView((ImageView)sb.findViewById(R.id.battery));
+        mNetworkController = new NetworkController(mContext);
+        final ImageView comboRSSI = 
+                (ImageView)sb.findViewById(R.id.network_signal);
+        if (comboRSSI != null) {
+            mNetworkController.addCombinedSignalIconView(comboRSSI);
+        }
+        final ImageView mobileRSSI = 
+                (ImageView)sb.findViewById(R.id.mobile_signal);
+        if (mobileRSSI != null) {
+            mNetworkController.addPhoneSignalIconView(mobileRSSI);
+        }
+        final ImageView wifiRSSI = 
+                (ImageView)sb.findViewById(R.id.wifi_signal);
+        if (wifiRSSI != null) {
+            mNetworkController.addWifiIconView(wifiRSSI);
+        }
+        mNetworkController.addDataTypeIconView(
+                (ImageView)sb.findViewById(R.id.network_type));
+        mNetworkController.addDataDirectionOverlayIconView(
+                (ImageView)sb.findViewById(R.id.network_direction));
+        mNetworkController.setStackedMode(true);
 
         // Recents Panel
         updateRecentsPanel();

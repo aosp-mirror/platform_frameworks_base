@@ -50,19 +50,6 @@ class TelephonyIcons {
 
     static final int[][] DATA_SIGNAL_STRENGTH = TELEPHONY_SIGNAL_STRENGTH;
 
-    static final int[][] DATA_SIGNAL_STRENGTH_ACTIVE = {
-        { R.drawable.stat_sys_signal_0,
-          R.drawable.stat_sys_signal_1_flowing,
-          R.drawable.stat_sys_signal_2_flowing,
-          R.drawable.stat_sys_signal_3_flowing,
-          R.drawable.stat_sys_signal_4_flowing },
-        { R.drawable.stat_sys_signal_0_fully,
-          R.drawable.stat_sys_signal_1_fully_flowing,
-          R.drawable.stat_sys_signal_2_fully_flowing,
-          R.drawable.stat_sys_signal_3_fully_flowing,
-          R.drawable.stat_sys_signal_4_fully_flowing }
-    };
-
     //***** Data connection icons
 
     //GSM/UMTS

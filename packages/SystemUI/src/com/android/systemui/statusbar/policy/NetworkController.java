@@ -127,6 +127,8 @@ public class NetworkController extends BroadcastReceiver {
     int mLastDataTypeIconId = -1;
     String mLastLabel = "";
 
+    boolean mDataAndWifiStacked = false;
+
     // yuck -- stop doing this here and put it in the framework
     IBatteryStats mBatteryStats;
 
@@ -209,6 +211,10 @@ public class NetworkController extends BroadcastReceiver {
 
     public void addLabelView(TextView v) {
         mLabelViews.add(v);
+    }
+
+    public void setStackedMode(boolean stacked) {
+        mDataAndWifiStacked = true;
     }
 
     @Override
@@ -648,7 +654,11 @@ public class NetworkController extends BroadcastReceiver {
             mContentDescriptionWifi = mContext.getString(
                     AccessibilityContentDescriptions.WIFI_CONNECTION_STRENGTH[mWifiLevel]);
         } else {
-            mWifiIconId = WifiIcons.WIFI_SIGNAL_STRENGTH[0][0];
+            if (mDataAndWifiStacked) {
+                mWifiIconId = 0;
+            } else {
+                mWifiIconId = WifiIcons.WIFI_SIGNAL_STRENGTH[0][0];
+            }
             mContentDescriptionWifi = mContext.getString(R.string.accessibility_no_wifi);
         }
     }
@@ -823,8 +833,13 @@ public class NetworkController extends BroadcastReceiver {
             N = mWifiIconViews.size();
             for (int i=0; i<N; i++) {
                 final ImageView v = mWifiIconViews.get(i);
-                v.setImageResource(mWifiIconId);
-                v.setContentDescription(mContentDescriptionWifi);
+                if (mWifiIconId == 0) {
+                    v.setVisibility(View.INVISIBLE);
+                } else {
+                    v.setVisibility(View.VISIBLE);
+                    v.setImageResource(mWifiIconId);
+                    v.setContentDescription(mContentDescriptionWifi);
+                }
             }
         }
 

@@ -46,9 +46,28 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
-            android:paddingRight="6dip"
             android:gravity="center_vertical"
             android:orientation="horizontal"/>    
+
+        <LinearLayout
+            android:id="@+id/signal_battery_cluster"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginRight="6dp"
+            android:orientation="horizontal"
+            android:gravity="center"
+            >
+            <include layout="@layout/stacked_signal_icons" 
+                android:layout_width="24dp"
+                android:layout_height="match_parent"
+                />
+            <ImageView
+                android:id="@+id/battery"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:paddingLeft="6dip"
+                />
+        </LinearLayout>
 
         <com.android.systemui.statusbar.policy.Clock
             android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"

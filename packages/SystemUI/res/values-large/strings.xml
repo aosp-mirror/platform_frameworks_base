@@ -21,28 +21,8 @@
          all of the currently visible notifications. [CHAR LIMIT=10]-->
     <string name="status_bar_clear_all_button">Clear all</string>
 
-    <!-- System panel ("Quick Settings") -->
-
-    <!-- Text to display underneath the graphical signal strength meter when
-         no connection is available. [CHAR LIMIT=20] -->
-    <string name="status_bar_settings_signal_meter_disconnected">
-        No Internet connection
-    </string>
-
-    <!-- Text to display underneath the graphical signal strength meter when
-         it is displaying Wi-Fi status and Wi-Fi is connected to a network
-         whose SSID is not available.
-         [CHAR LIMIT=20] -->
-    <string name="status_bar_settings_signal_meter_wifi_nossid">Wi-Fi connected</string>
-
     <!-- Separator for PLMN and SPN in network name. -->
     <string name="status_bar_network_name_separator" translatable="false">" – "</string>
-
-    <!-- Notification text: when GPS is getting a fix [CHAR LIMIT=50] -->
-    <string name="gps_notification_searching_text">Searching for GPS</string>
-
-    <!-- Notification text: when GPS has found a fix [CHAR LIMIT=50] -->
-    <string name="gps_notification_found_text">Location set by GPS</string>
 
     <!-- Title for the pseudo-notification shown when notifications are disabled (do-not-disturb
          mode) -->
