@@ -189,7 +189,7 @@ public abstract class HardwareRenderer {
      * 
      * @return A new display list.
      */
-    abstract DisplayList createDisplayList(View v);
+    abstract DisplayList createDisplayList();
 
     /**
      * Creates a new hardware layer. A hardware layer built by calling this
@@ -852,8 +852,8 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        DisplayList createDisplayList(View v) {
-            return new GLES20DisplayList(v);
+        DisplayList createDisplayList() {
+            return new GLES20DisplayList();
         }
 
         @Override

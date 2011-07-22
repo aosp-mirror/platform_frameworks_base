@@ -51,6 +51,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     // The native renderer will be destroyed when this object dies.
     // DO NOT overwrite this reference once it is set.
+    @SuppressWarnings("unused")
     private CanvasFinalizer mFinalizer;
 
     private int mWidth;
@@ -97,12 +98,8 @@ class GLES20Canvas extends HardwareCanvas {
     protected GLES20Canvas(boolean record, boolean translucent) {
         mOpaque = !translucent;
 
-        setupRenderer(record);
-    }
-
-    protected void setupRenderer(boolean record) {
         if (record) {
-            mRenderer = nGetDisplayListRenderer(mRenderer);
+            mRenderer = nCreateDisplayListRenderer();
         } else {
             mRenderer = nCreateRenderer();
         }
@@ -114,43 +111,31 @@ class GLES20Canvas extends HardwareCanvas {
         if (mRenderer == 0) {
             throw new IllegalStateException("Could not create GLES20Canvas renderer");
         } else {
-            mFinalizer = CanvasFinalizer.getFinalizer(mFinalizer, mRenderer);
+            mFinalizer = new CanvasFinalizer(mRenderer);
         }
+    }
+
+    protected void resetDisplayListRenderer() {
+        nResetDisplayListRenderer(mRenderer);
     }
 
     private static native int nCreateRenderer();
     private static native int nCreateLayerRenderer(int layer);
-    private static native int nGetDisplayListRenderer(int renderer);
+    private static native int nCreateDisplayListRenderer();
+    private static native void nResetDisplayListRenderer(int renderer);
     private static native void nDestroyRenderer(int renderer);
 
-    private static class CanvasFinalizer {
-        int mRenderer;
+    private static final class CanvasFinalizer {
+        private final int mRenderer;
 
-        // Factory method returns new instance if old one is null, or old instance
-        // otherwise, destroying native renderer along the way as necessary
-        static CanvasFinalizer getFinalizer(CanvasFinalizer oldFinalizer, int renderer) {
-            if (oldFinalizer == null) {
-                return new CanvasFinalizer(renderer);
-            }
-            oldFinalizer.replaceNativeObject(renderer);
-            return oldFinalizer;
-        }
-
-        private CanvasFinalizer(int renderer) {
+        public CanvasFinalizer(int renderer) {
             mRenderer = renderer;
-        }
-
-        private void replaceNativeObject(int newRenderer) {
-            if (mRenderer != 0 && newRenderer != mRenderer) {
-                nDestroyRenderer(mRenderer);
-            }
-            mRenderer = newRenderer;
         }
 
         @Override
         protected void finalize() throws Throwable {
             try {
-                replaceNativeObject(0);
+                nDestroyRenderer(mRenderer);
             } finally {
                 super.finalize();
             }
@@ -322,11 +307,11 @@ class GLES20Canvas extends HardwareCanvas {
     // Display list
     ///////////////////////////////////////////////////////////////////////////
 
-    int getDisplayList() {
-        return nGetDisplayList(mRenderer);
+    int getDisplayList(int displayList) {
+        return nGetDisplayList(mRenderer, displayList);
     }
 
-    private static native int nGetDisplayList(int renderer);
+    private static native int nGetDisplayList(int renderer, int displayList);
     
     static void destroyDisplayList(int displayList) {
         nDestroyDisplayList(displayList);
@@ -337,7 +322,7 @@ class GLES20Canvas extends HardwareCanvas {
     @Override
     public boolean drawDisplayList(DisplayList displayList, int width, int height, Rect dirty) {
         return nDrawDisplayList(mRenderer,
-                ((GLES20DisplayList) displayList).mNativeDisplayList, width, height, dirty);
+                ((GLES20DisplayList) displayList).getNativeDisplayList(), width, height, dirty);
     }
 
     private static native boolean nDrawDisplayList(int renderer, int displayList,
@@ -345,7 +330,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     @Override
     void outputDisplayList(DisplayList displayList) {
-        nOutputDisplayList(mRenderer, ((GLES20DisplayList) displayList).mNativeDisplayList);
+        nOutputDisplayList(mRenderer, ((GLES20DisplayList) displayList).getNativeDisplayList());
     }
 
     private static native void nOutputDisplayList(int renderer, int displayList);

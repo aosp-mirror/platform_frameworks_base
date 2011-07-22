@@ -883,7 +883,6 @@ bool DisplayList::replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level) 
 ///////////////////////////////////////////////////////////////////////////////
 
 DisplayListRenderer::DisplayListRenderer(): mWriter(MIN_WRITER_SIZE) {
-    mDisplayList = NULL;
 }
 
 DisplayListRenderer::~DisplayListRenderer() {
@@ -923,13 +922,13 @@ void DisplayListRenderer::reset() {
 // Operations
 ///////////////////////////////////////////////////////////////////////////////
 
-DisplayList* DisplayListRenderer::getDisplayList() {
-    if (mDisplayList == NULL) {
-        mDisplayList = new DisplayList(*this);
+DisplayList* DisplayListRenderer::getDisplayList(DisplayList* displayList) {
+    if (!displayList) {
+        displayList = new DisplayList(*this);
     } else {
-        mDisplayList->initFromDisplayListRenderer(*this, true);
+        displayList->initFromDisplayListRenderer(*this, true);
     }
-    return mDisplayList;
+    return displayList;
 }
 
 void DisplayListRenderer::setViewport(int width, int height) {

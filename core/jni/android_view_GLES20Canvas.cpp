@@ -576,18 +576,18 @@ static void android_view_GLES20Canvas_drawTextRun(JNIEnv* env, jobject clazz,
 // ----------------------------------------------------------------------------
 
 static DisplayList* android_view_GLES20Canvas_getDisplayList(JNIEnv* env,
-        jobject clazz, DisplayListRenderer* renderer) {
-    return renderer->getDisplayList();
+        jobject clazz, DisplayListRenderer* renderer, DisplayList* displayList) {
+    return renderer->getDisplayList(displayList);
 }
 
-static OpenGLRenderer* android_view_GLES20Canvas_getDisplayListRenderer(JNIEnv* env,
+static OpenGLRenderer* android_view_GLES20Canvas_createDisplayListRenderer(JNIEnv* env,
+        jobject clazz) {
+    return new DisplayListRenderer;
+}
+
+static void android_view_GLES20Canvas_resetDisplayListRenderer(JNIEnv* env,
         jobject clazz, DisplayListRenderer* renderer) {
-    if (renderer == NULL) {
-        renderer = new DisplayListRenderer;
-    } else {
-        renderer->reset();
-    }
-    return renderer;
+    renderer->reset();
 }
 
 static void android_view_GLES20Canvas_destroyDisplayList(JNIEnv* env,
@@ -812,9 +812,10 @@ static JNINativeMethod gMethods[] = {
     { "nGetClipBounds",     "(ILandroid/graphics/Rect;)Z",
             (void*) android_view_GLES20Canvas_getClipBounds },
 
-    { "nGetDisplayList",         "(I)I",       (void*) android_view_GLES20Canvas_getDisplayList },
+    { "nGetDisplayList",         "(II)I",      (void*) android_view_GLES20Canvas_getDisplayList },
     { "nDestroyDisplayList",     "(I)V",       (void*) android_view_GLES20Canvas_destroyDisplayList },
-    { "nGetDisplayListRenderer", "(I)I",       (void*) android_view_GLES20Canvas_getDisplayListRenderer },
+    { "nCreateDisplayListRenderer", "()I",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
+    { "nResetDisplayListRenderer", "(I)V",     (void*) android_view_GLES20Canvas_resetDisplayListRenderer },
     { "nDrawDisplayList",        "(IIIILandroid/graphics/Rect;)Z",
                                                (void*) android_view_GLES20Canvas_drawDisplayList },
     { "nOutputDisplayList",      "(II)V",      (void*) android_view_GLES20Canvas_outputDisplayList },

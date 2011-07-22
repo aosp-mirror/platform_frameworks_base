@@ -16,52 +16,50 @@
 
 package android.view;
 
-import java.lang.ref.WeakReference;
+import android.graphics.Bitmap;
+
+import java.util.ArrayList;
 
 /**
  * An implementation of display list for OpenGL ES 2.0.
  */
 class GLES20DisplayList extends DisplayList {
-    private GLES20Canvas mCanvas;
+    // These lists ensure that any Bitmaps recorded by a DisplayList are kept alive as long
+    // as the DisplayList is alive.  The Bitmaps are populated by the GLES20RecordingCanvas.
+    final ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(5);
 
-    private boolean mStarted = false;
-    private boolean mRecorded = false;
-    private boolean mValid = false;
-
-    int mNativeDisplayList;
-    WeakReference<View> hostView;
+    private GLES20RecordingCanvas mCanvas;
+    private boolean mValid;
 
     // The native display list will be destroyed when this object dies.
     // DO NOT overwrite this reference once it is set.
-    @SuppressWarnings("unused")
     private DisplayListFinalizer mFinalizer;
 
-    public GLES20DisplayList(View view) {
-        hostView = new WeakReference<View>(view);
+    int getNativeDisplayList() {
+        if (!mValid || mFinalizer == null) {
+            throw new IllegalStateException("The display list is not valid.");
+        }
+        return mFinalizer.mNativeDisplayList;
     }
 
     @Override
     HardwareCanvas start() {
-        if (mStarted) {
+        if (mCanvas != null) {
             throw new IllegalStateException("Recording has already started");
         }
 
-        if (mCanvas != null) {
-            ((GLES20RecordingCanvas) mCanvas).reset();
-        } else {
-            mCanvas = new GLES20RecordingCanvas(true);
-        }
-        mStarted = true;
-        mRecorded = false;
-        mValid = true;
-
+        mValid = false;
+        mCanvas = GLES20RecordingCanvas.obtain(this);
+        mCanvas.start();
         return mCanvas;
     }
 
     @Override
     void invalidate() {
-        mStarted = false;
-        mRecorded = false;
+        if (mCanvas != null) {
+            mCanvas.recycle();
+            mCanvas = null;
+        }
         mValid = false;
     }
 
@@ -73,48 +71,28 @@ class GLES20DisplayList extends DisplayList {
     @Override
     void end() {
         if (mCanvas != null) {
-            mStarted = false;
-            mRecorded = true;
-
-            mNativeDisplayList = mCanvas.getDisplayList();
-            mFinalizer = DisplayListFinalizer.getFinalizer(mFinalizer, mNativeDisplayList);
+            if (mFinalizer != null) {
+                mCanvas.end(mFinalizer.mNativeDisplayList);
+            } else {
+                mFinalizer = new DisplayListFinalizer(mCanvas.end(0));
+            }
+            mCanvas.recycle();
+            mCanvas = null;
+            mValid = true;
         }
-    }
-
-    @Override
-    boolean isReady() {
-        return !mStarted && mRecorded;
     }
 
     private static class DisplayListFinalizer {
-        int mNativeDisplayList;
+        final int mNativeDisplayList;
 
-        // Factory method returns new instance if old one is null, or old instance
-        // otherwise, destroying native display list along the way as necessary
-        static DisplayListFinalizer getFinalizer(DisplayListFinalizer oldFinalizer,
-                int nativeDisplayList) {
-            if (oldFinalizer == null) {
-                return new DisplayListFinalizer(nativeDisplayList);
-            }
-            oldFinalizer.replaceNativeObject(nativeDisplayList);
-            return oldFinalizer;
-        }
-
-        private DisplayListFinalizer(int nativeDisplayList) {
+        public DisplayListFinalizer(int nativeDisplayList) {
             mNativeDisplayList = nativeDisplayList;
-        }
-
-        private void replaceNativeObject(int newNativeDisplayList) {
-            if (mNativeDisplayList != 0 && mNativeDisplayList != newNativeDisplayList) {
-                GLES20Canvas.destroyDisplayList(mNativeDisplayList);
-            }
-            mNativeDisplayList = newNativeDisplayList;
         }
 
         @Override
         protected void finalize() throws Throwable {
             try {
-                replaceNativeObject(0);
+                GLES20Canvas.destroyDisplayList(mNativeDisplayList);
             } finally {
                 super.finalize();
             }

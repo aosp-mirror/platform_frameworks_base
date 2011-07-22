@@ -217,7 +217,7 @@ public:
     DisplayListRenderer();
     ~DisplayListRenderer();
 
-    DisplayList* getDisplayList();
+    DisplayList* getDisplayList(DisplayList* displayList);
 
     void setViewport(int width, int height);
     void prepareDirty(float left, float top, float right, float bottom, bool opaque);
@@ -473,8 +473,6 @@ private:
     Vector<SkMatrix*> mMatrices;
 
     SkWriter32 mWriter;
-
-    DisplayList *mDisplayList;
 
     int mRestoreSaveCount;
 

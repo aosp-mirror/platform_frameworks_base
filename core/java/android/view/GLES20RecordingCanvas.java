@@ -24,8 +24,10 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
-
-import java.util.ArrayList;
+import android.util.Pool;
+import android.util.Poolable;
+import android.util.PoolableManager;
+import android.util.Pools;
 
 /**
  * An implementation of a GL canvas that records drawing operations.
@@ -33,62 +35,94 @@ import java.util.ArrayList;
  * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being freed while
  * the DisplayList is still holding a native reference to the memory.
  */
-class GLES20RecordingCanvas extends GLES20Canvas {
-    // These lists ensure that any Bitmaps recorded by a DisplayList are kept alive as long
-    // as the DisplayList is alive.
-    @SuppressWarnings({"MismatchedQueryAndUpdateOfCollection"})
-    private final ArrayList<Bitmap> mBitmaps = new ArrayList<Bitmap>(5);
+class GLES20RecordingCanvas extends GLES20Canvas implements Poolable<GLES20RecordingCanvas> {
+    // The recording canvas pool should be large enough to handle a deeply nested
+    // view hierarchy because display lists are generated recursively.
+    private static final int POOL_LIMIT = 50;
 
-    GLES20RecordingCanvas(boolean translucent) {
-        super(true, translucent);
+    private static final Pool<GLES20RecordingCanvas> sPool = Pools.synchronizedPool(
+            Pools.finitePool(new PoolableManager<GLES20RecordingCanvas>() {
+                public GLES20RecordingCanvas newInstance() {
+                    return new GLES20RecordingCanvas();
+                }
+                @Override
+                public void onAcquired(GLES20RecordingCanvas element) {
+                }
+                @Override
+                public void onReleased(GLES20RecordingCanvas element) {
+                }
+            }, POOL_LIMIT));
+
+    private GLES20RecordingCanvas mNextPoolable;
+    private boolean mIsPooled;
+
+    private GLES20DisplayList mDisplayList;
+
+    private GLES20RecordingCanvas() {
+        super(true /*record*/, true /*translucent*/);
+    }
+
+    static GLES20RecordingCanvas obtain(GLES20DisplayList displayList) {
+        GLES20RecordingCanvas canvas = sPool.acquire();
+        canvas.mDisplayList = displayList;
+        return canvas;
+    }
+
+    void recycle() {
+        mDisplayList = null;
+        resetDisplayListRenderer();
+        sPool.release(this);
+    }
+
+    void start() {
+        mDisplayList.mBitmaps.clear();
+    }
+
+    int end(int nativeDisplayList) {
+        return getDisplayList(nativeDisplayList);
     }
 
     private void recordShaderBitmap(Paint paint) {
         if (paint != null) {
             final Shader shader = paint.getShader();
             if (shader instanceof BitmapShader) {
-                mBitmaps.add(((BitmapShader) shader).mBitmap);
+                mDisplayList.mBitmaps.add(((BitmapShader) shader).mBitmap);
             }
         }
-    }
-
-    void reset() {
-        mBitmaps.clear();
-        setupRenderer(true);
     }
 
     @Override
     public void drawPatch(Bitmap bitmap, byte[] chunks, RectF dst, Paint paint) {
         super.drawPatch(bitmap, chunks, dst, paint);
-        mBitmaps.add(bitmap);
+        mDisplayList.mBitmaps.add(bitmap);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, float left, float top, Paint paint) {
         super.drawBitmap(bitmap, left, top, paint);
-        mBitmaps.add(bitmap);
+        mDisplayList.mBitmaps.add(bitmap);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, Matrix matrix, Paint paint) {
         super.drawBitmap(bitmap, matrix, paint);
-        mBitmaps.add(bitmap);
+        mDisplayList.mBitmaps.add(bitmap);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, Rect dst, Paint paint) {
         super.drawBitmap(bitmap, src, dst, paint);
-        mBitmaps.add(bitmap);
+        mDisplayList.mBitmaps.add(bitmap);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
     @Override
     public void drawBitmap(Bitmap bitmap, Rect src, RectF dst, Paint paint) {
         super.drawBitmap(bitmap, src, dst, paint);
-        mBitmaps.add(bitmap);
+        mDisplayList.mBitmaps.add(bitmap);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
@@ -111,7 +145,7 @@ class GLES20RecordingCanvas extends GLES20Canvas {
             int vertOffset, int[] colors, int colorOffset, Paint paint) {
         super.drawBitmapMesh(bitmap, meshWidth, meshHeight, verts, vertOffset, colors, colorOffset,
                 paint);
-        mBitmaps.add(bitmap);
+        mDisplayList.mBitmaps.add(bitmap);
         // Shaders in the Paint are ignored when drawing a Bitmap
     }
 
@@ -269,5 +303,25 @@ class GLES20RecordingCanvas extends GLES20Canvas {
         super.drawVertices(mode, vertexCount, verts, vertOffset, texs, texOffset, colors,
                 colorOffset, indices, indexOffset, indexCount, paint);
         recordShaderBitmap(paint);
+    }
+
+    @Override
+    public GLES20RecordingCanvas getNextPoolable() {
+        return mNextPoolable;
+    }
+
+    @Override
+    public void setNextPoolable(GLES20RecordingCanvas element) {
+        mNextPoolable = element;
+    }
+
+    @Override
+    public boolean isPooled() {
+        return mIsPooled;
+    }
+
+    @Override
+    public void setPooled(boolean isPooled) {
+        mIsPooled = isPooled;
     }
 }
