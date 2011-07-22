@@ -148,6 +148,11 @@ public class NotificationRowLayout extends ViewGroup {
                                 "now sliding child %d: %s (touchY=%.1f, rowHeight=%d, count=%d)",
                                 childIdx, mSlidingChild, mInitialTouchY, mRowHeight, count));
                         }
+
+
+                        // We need to prevent the surrounding ScrollView from intercepting us now;
+                        // the scroll position will be locked while we swipe
+                        requestDisallowInterceptTouchEvent(true);
                     }
                 }
                 break;
