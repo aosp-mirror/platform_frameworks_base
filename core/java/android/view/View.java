@@ -3903,6 +3903,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
         int[] locationOnScreen = mAttachInfo.mInvalidateChildLocation;
         getLocationOnScreen(locationOnScreen);
+        bounds.offsetTo(0, 0);
         bounds.offset(locationOnScreen[0], locationOnScreen[1]);
         info.setBoundsInScreen(bounds);
 
