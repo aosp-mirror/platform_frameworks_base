@@ -277,7 +277,7 @@ are returned.  All the content providers that come with the platform define
 constants for their columns.  For example, the 
 {@link android.provider.Contacts.Phones android.provider.Contacts.Phones} class 
 defines constants for the names of the columns in the phone table illustrated 
-earlier &mdash {@code _ID}, {@code NUMBER}, {@code NUMBER_KEY}, {@code NAME},
+earlier &mdash; {@code _ID}, {@code NUMBER}, {@code NUMBER_KEY}, {@code NAME},
 and so on.</li>
 
 <li><p>A filter detailing which rows to return, formatted as an SQL {@code WHERE} 

@@ -710,7 +710,7 @@ the soft keyboard.</li>
 The setting must be one of the values listed in the following table, or a 
 combination of one "{@code state...}" value plus one "{@code adjust...}" 
 value.  Setting multiple values in either group &mdash; multiple 
-"{@code state...}" values, for example &mdash has undefined results.  
+"{@code state...}" values, for example &mdash; has undefined results.  
 Individual values are separated by a vertical bar ({@code |}).  For example:
 </p>
 
