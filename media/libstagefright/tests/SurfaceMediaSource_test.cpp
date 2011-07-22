@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-#define LOG_TAG "SurfaceEncoder_test"
+#define LOG_TAG "SurfaceMediaSource_test"
 // #define LOG_NDEBUG 0
 
 #include <gtest/gtest.h>
 #include <utils/String8.h>
 #include <utils/Errors.h>
 
-#include <media/stagefright/SurfaceEncoder.h>
+#include <media/stagefright/SurfaceMediaSource.h>
 
 #include <gui/SurfaceTextureClient.h>
 #include <ui/GraphicBuffer.h>
@@ -45,10 +45,10 @@
 namespace android {
 
 
-class SurfaceEncoderTest : public ::testing::Test {
+class SurfaceMediaSourceTest : public ::testing::Test {
 public:
 
-    SurfaceEncoderTest( ): mYuvTexWidth(64), mYuvTexHeight(66) { }
+    SurfaceMediaSourceTest( ): mYuvTexWidth(64), mYuvTexHeight(66) { }
     sp<MPEG4Writer>  setUpWriter(OMXClient &client );
     void oneBufferPass(int width, int height );
     static void fillYV12Buffer(uint8_t* buf, int w, int h, int stride) ;
@@ -57,16 +57,16 @@ public:
 protected:
 
     virtual void SetUp() {
-        mSE = new SurfaceEncoder(mYuvTexWidth, mYuvTexHeight);
-        mSE->setSynchronousMode(true);
-        mSTC = new SurfaceTextureClient(mSE);
+        mSMS = new SurfaceMediaSource(mYuvTexWidth, mYuvTexHeight);
+        mSMS->setSynchronousMode(true);
+        mSTC = new SurfaceTextureClient(mSMS);
         mANW = mSTC;
 
     }
 
 
     virtual void TearDown() {
-        mSE.clear();
+        mSMS.clear();
         mSTC.clear();
         mANW.clear();
     }
@@ -74,13 +74,13 @@ protected:
     const int mYuvTexWidth;//  = 64;
     const int mYuvTexHeight;// = 66;
 
-    sp<SurfaceEncoder> mSE;
+    sp<SurfaceMediaSource> mSMS;
     sp<SurfaceTextureClient> mSTC;
     sp<ANativeWindow> mANW;
 
 };
 
-void SurfaceEncoderTest::oneBufferPass(int width, int height ) {
+void SurfaceMediaSourceTest::oneBufferPass(int width, int height ) {
     LOGV("One Buffer Pass");
     ANativeWindowBuffer* anb;
     ASSERT_EQ(NO_ERROR, mANW->dequeueBuffer(mANW.get(), &anb));
@@ -92,13 +92,13 @@ void SurfaceEncoderTest::oneBufferPass(int width, int height ) {
     // Fill the buffer with the a checkerboard pattern
     uint8_t* img = NULL;
     buf->lock(GRALLOC_USAGE_SW_WRITE_OFTEN, (void**)(&img));
-    SurfaceEncoderTest::fillYV12Buffer(img, width, height, buf->getStride());
+    SurfaceMediaSourceTest::fillYV12Buffer(img, width, height, buf->getStride());
     buf->unlock();
 
     ASSERT_EQ(NO_ERROR, mANW->queueBuffer(mANW.get(), buf->getNativeBuffer()));
 }
 
-sp<MPEG4Writer> SurfaceEncoderTest::setUpWriter(OMXClient &client ) {
+sp<MPEG4Writer> SurfaceMediaSourceTest::setUpWriter(OMXClient &client ) {
     // Writing to a file
     const char *fileName = "/sdcard/outputSurfEnc.mp4";
     sp<MetaData> enc_meta = new MetaData;
@@ -107,7 +107,7 @@ sp<MPEG4Writer> SurfaceEncoderTest::setUpWriter(OMXClient &client ) {
 
     enc_meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG4);
 
-    sp<MetaData> meta = mSE->getFormat();
+    sp<MetaData> meta = mSMS->getFormat();
 
     int32_t width, height, stride, sliceHeight, colorFormat;
     CHECK(meta->findInt32(kKeyWidth, &width));
@@ -129,7 +129,7 @@ sp<MPEG4Writer> SurfaceEncoderTest::setUpWriter(OMXClient &client ) {
 
     sp<MediaSource> encoder =
         OMXCodec::Create(
-                client.interface(), enc_meta, true /* createEncoder */, mSE);
+                client.interface(), enc_meta, true /* createEncoder */, mSMS);
 
     sp<MPEG4Writer> writer = new MPEG4Writer(fileName);
     writer->addSource(encoder);
@@ -138,7 +138,7 @@ sp<MPEG4Writer> SurfaceEncoderTest::setUpWriter(OMXClient &client ) {
 }
 
 // Fill a YV12 buffer with a multi-colored checkerboard pattern
-void SurfaceEncoderTest::fillYV12Buffer(uint8_t* buf, int w, int h, int stride) {
+void SurfaceMediaSourceTest::fillYV12Buffer(uint8_t* buf, int w, int h, int stride) {
     const int blockWidth = w > 16 ? w / 16 : 1;
     const int blockHeight = h > 16 ? h / 16 : 1;
     const int yuvTexOffsetY = 0;
@@ -168,7 +168,7 @@ void SurfaceEncoderTest::fillYV12Buffer(uint8_t* buf, int w, int h, int stride) 
 }
 
 // Fill a YV12 buffer with red outside a given rectangle and green inside it.
-void SurfaceEncoderTest::fillYV12BufferRect(uint8_t* buf, int w,
+void SurfaceMediaSourceTest::fillYV12BufferRect(uint8_t* buf, int w,
                   int h, int stride, const android_native_rect_t& rect) {
     const int yuvTexOffsetY = 0;
     int yuvTexStrideY = stride;
@@ -190,7 +190,7 @@ void SurfaceEncoderTest::fillYV12BufferRect(uint8_t* buf, int w,
             }
         }
     }
-}  ///////// End of class SurfaceEncoderTest
+}  ///////// End of class SurfaceMediaSourceTest
 
 ///////////////////////////////////////////////////////////////////
 // Class to imitate the recording     /////////////////////////////
@@ -219,8 +219,8 @@ struct SimpleDummyRecorder {
 
 ///////////////////////////////////////////////////////////////////
 //           TESTS
-// Just pass one buffer from the native_window to the SurfaceEncoder
-TEST_F(SurfaceEncoderTest, EncodingFromCpuFilledYV12BufferNpotOneBufferPass) {
+// Just pass one buffer from the native_window to the SurfaceMediaSource
+TEST_F(SurfaceMediaSourceTest, EncodingFromCpuFilledYV12BufferNpotOneBufferPass) {
     LOGV("Testing OneBufferPass ******************************");
 
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
@@ -233,7 +233,7 @@ TEST_F(SurfaceEncoderTest, EncodingFromCpuFilledYV12BufferNpotOneBufferPass) {
 }
 
 // Pass the buffer with the wrong height and weight and should not be accepted
-TEST_F(SurfaceEncoderTest, EncodingFromCpuFilledYV12BufferNpotWrongSizeBufferPass) {
+TEST_F(SurfaceMediaSourceTest, EncodingFromCpuFilledYV12BufferNpotWrongSizeBufferPass) {
     LOGV("Testing Wrong size BufferPass ******************************");
 
     // setting the client side buffer size different than the server size
@@ -250,16 +250,15 @@ TEST_F(SurfaceEncoderTest, EncodingFromCpuFilledYV12BufferNpotWrongSizeBufferPas
 }
 
 
-// pass multiple buffers from the native_window the SurfaceEncoder
+// pass multiple buffers from the native_window the SurfaceMediaSource
 // A dummy writer is used to simulate actual MPEG4Writer
-TEST_F(SurfaceEncoderTest,  EncodingFromCpuFilledYV12BufferNpotMultiBufferPass) {
+TEST_F(SurfaceMediaSourceTest,  EncodingFromCpuFilledYV12BufferNpotMultiBufferPass) {
     LOGV("Testing MultiBufferPass, Dummy Recorder *********************");
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
             0, 0, HAL_PIXEL_FORMAT_YV12));
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
-
-    SimpleDummyRecorder writer(mSE);
+    SimpleDummyRecorder writer(mSMS);
     writer.start();
 
     int32_t nFramesCount = 0;
@@ -273,20 +272,19 @@ TEST_F(SurfaceEncoderTest,  EncodingFromCpuFilledYV12BufferNpotMultiBufferPass) 
     writer.stop();
 }
 
-// Delayed pass of multiple buffers from the native_window the SurfaceEncoder
+// Delayed pass of multiple buffers from the native_window the SurfaceMediaSource
 // A dummy writer is used to simulate actual MPEG4Writer
-TEST_F(SurfaceEncoderTest,  EncodingFromCpuFilledYV12BufferNpotMultiBufferPassLag) {
+TEST_F(SurfaceMediaSourceTest,  EncodingFromCpuFilledYV12BufferNpotMultiBufferPassLag) {
     LOGV("Testing MultiBufferPass, Dummy Recorder Lagging **************");
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
             0, 0, HAL_PIXEL_FORMAT_YV12));
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
-
-    SimpleDummyRecorder writer(mSE);
+    SimpleDummyRecorder writer(mSMS);
     writer.start();
 
     int32_t nFramesCount = 1;
-    const int FRAMES_LAG = mSE->getBufferCount() - 1;
+    const int FRAMES_LAG = mSMS->getBufferCount() - 1;
     while (nFramesCount <= 300) {
         oneBufferPass(mYuvTexWidth, mYuvTexHeight);
         // Forcing the writer to lag behind a few frames
@@ -298,16 +296,16 @@ TEST_F(SurfaceEncoderTest,  EncodingFromCpuFilledYV12BufferNpotMultiBufferPassLa
     writer.stop();
 }
 
-// pass multiple buffers from the native_window the SurfaceEncoder
+// pass multiple buffers from the native_window the SurfaceMediaSource
 // A dummy writer (MULTITHREADED) is used to simulate actual MPEG4Writer
-TEST_F(SurfaceEncoderTest, EncodingFromCpuFilledYV12BufferNpotMultiBufferPassThreaded) {
+TEST_F(SurfaceMediaSourceTest, EncodingFromCpuFilledYV12BufferNpotMultiBufferPassThreaded) {
     LOGV("Testing MultiBufferPass, Dummy Recorder Multi-Threaded **********");
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
             0, 0, HAL_PIXEL_FORMAT_YV12));
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
 
-    DummyRecorder writer(mSE);
+    DummyRecorder writer(mSMS);
     writer.start();
 
     int32_t nFramesCount = 0;
@@ -321,7 +319,7 @@ TEST_F(SurfaceEncoderTest, EncodingFromCpuFilledYV12BufferNpotMultiBufferPassThr
 
 // Test to examine the actual encoding. Temporarily disabled till the
 // colorformat and encoding from GRAlloc data is resolved
-TEST_F(SurfaceEncoderTest, DISABLED_EncodingFromCpuFilledYV12BufferNpotWrite) {
+TEST_F(SurfaceMediaSourceTest, DISABLED_EncodingFromCpuFilledYV12BufferNpotWrite) {
     LOGV("Testing the whole pipeline with actual Recorder");
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
             0, 0, HAL_PIXEL_FORMAT_YV12)); // OMX_COLOR_FormatYUV420Planar)); // ));

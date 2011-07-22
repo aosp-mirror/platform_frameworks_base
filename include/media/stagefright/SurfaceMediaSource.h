@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_GUI_SURFACEENCODER_H
-#define ANDROID_GUI_SURFACEENCODER_H
+#ifndef ANDROID_GUI_SURFACEMEDIASOURCE_H
+#define ANDROID_GUI_SURFACEMEDIASOURCE_H
 
 #include <gui/ISurfaceTexture.h>
 
@@ -31,7 +31,7 @@ class IGraphicBufferAlloc;
 class String8;
 class GraphicBuffer;
 
-class SurfaceEncoder : public BnSurfaceTexture, public MediaSource,
+class SurfaceMediaSource : public BnSurfaceTexture, public MediaSource,
                                             public MediaBufferObserver {
 public:
     enum { MIN_UNDEQUEUED_BUFFERS = 3 };
@@ -44,16 +44,16 @@ public:
 
     struct FrameAvailableListener : public virtual RefBase {
         // onFrameAvailable() is called from queueBuffer() is the FIFO is
-        // empty. You can use SurfaceEncoder::getQueuedCount() to
+        // empty. You can use SurfaceMediaSource::getQueuedCount() to
         // figure out if there are more frames waiting.
         // This is called without any lock held can be called concurrently by
         // multiple threads.
         virtual void onFrameAvailable() = 0;
     };
 
-    SurfaceEncoder(uint32_t bufW, uint32_t bufH);
+    SurfaceMediaSource(uint32_t bufW, uint32_t bufH);
 
-    virtual ~SurfaceEncoder();
+    virtual ~SurfaceMediaSource();
 
 
     // For the MediaSource interface for use by StageFrightRecorder:
@@ -78,7 +78,7 @@ public:
 
     // setBufferCount updates the number of available buffer slots.  After
     // calling this all buffer slots are both unallocated and owned by the
-    // SurfaceEncoder object (i.e. they are not owned by the client).
+    // SurfaceMediaSource object (i.e. they are not owned by the client).
     virtual status_t setBufferCount(int bufferCount);
 
     virtual sp<GraphicBuffer> requestBuffer(int buf);
@@ -91,7 +91,7 @@ public:
     virtual status_t dequeueBuffer(int *buf, uint32_t w, uint32_t h,
             uint32_t format, uint32_t usage);
 
-    // queueBuffer returns a filled buffer to the SurfaceEncoder. In addition, a
+    // queueBuffer returns a filled buffer to the SurfaceMediaSource. In addition, a
     // timestamp must be provided for the buffer. The timestamp is in
     // nanoseconds, and must be monotonically increasing. Its other semantics
     // (zero point, etc) are client-dependent and should be documented by the
@@ -123,21 +123,21 @@ public:
     // modes (S.Encoder vis-a-vis SurfaceTexture)
     virtual status_t setSynchronousMode(bool enabled);
 
-    // connect attempts to connect a client API to the SurfaceEncoder.  This
+    // connect attempts to connect a client API to the SurfaceMediaSource.  This
     // must be called before any other ISurfaceTexture methods are called except
     // for getAllocator.
     //
     // This method will fail if the connect was previously called on the
-    // SurfaceEncoder and no corresponding disconnect call was made.
+    // SurfaceMediaSource and no corresponding disconnect call was made.
     virtual status_t connect(int api);
 
-    // disconnect attempts to disconnect a client API from the SurfaceEncoder.
+    // disconnect attempts to disconnect a client API from the SurfaceMediaSource.
     // Calling this method will cause any subsequent calls to other
     // ISurfaceTexture methods to fail except for getAllocator and connect.
     // Successfully calling connect after this will allow the other methods to
     // succeed again.
     //
-    // This method will fail if the the SurfaceEncoder is not currently
+    // This method will fail if the the SurfaceMediaSource is not currently
     // connected to the specified client API.
     virtual status_t disconnect(int api);
 
@@ -164,7 +164,7 @@ public:
     void setFrameAvailableListener(const sp<FrameAvailableListener>& listener);
 
     // getAllocator retrieves the binder object that must be referenced as long
-    // as the GraphicBuffers dequeued from this SurfaceEncoder are referenced.
+    // as the GraphicBuffers dequeued from this SurfaceMediaSource are referenced.
     // Holding this binder reference prevents SurfaceFlinger from freeing the
     // buffers before the client is done with them.
     sp<IBinder> getAllocator();
@@ -280,7 +280,7 @@ private:
 
     // mCurrentSlot is the buffer slot index of the buffer that is currently
     // being used by buffer consumer
-    // (e.g. StageFrightRecorder in the case of SurfaceEncoder or GLTexture
+    // (e.g. StageFrightRecorder in the case of SurfaceMediaSource or GLTexture
     // in the case of SurfaceTexture).
     // It is initialized to INVALID_BUFFER_SLOT,
     // indicating that no buffer slot is currently bound to the texture. Note,
@@ -327,7 +327,7 @@ private:
     Fifo mQueue;
 
     // mMutex is the mutex used to prevent concurrent access to the member
-    // variables of SurfaceEncoder objects. It must be locked whenever the
+    // variables of SurfaceMediaSource objects. It must be locked whenever the
     // member variables are accessed.
     mutable Mutex mMutex;
 
@@ -344,11 +344,10 @@ private:
     Condition mFrameCompleteCondition;
 
     // Avoid copying and equating and default constructor
-    DISALLOW_IMPLICIT_CONSTRUCTORS(SurfaceEncoder);
-
+    DISALLOW_IMPLICIT_CONSTRUCTORS(SurfaceMediaSource);
 };
 
 // ----------------------------------------------------------------------------
 }; // namespace android
 
-#endif // ANDROID_GUI_SURFACETEXTURE_H
+#endif // ANDROID_GUI_SURFACEMEDIASOURCE_H

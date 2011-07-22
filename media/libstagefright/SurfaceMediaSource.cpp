@@ -15,9 +15,9 @@
  */
 
 // #define LOG_NDEBUG 0
-#define LOG_TAG "SurfaceEncoder"
+#define LOG_TAG "SurfaceMediaSource"
 
-#include <media/stagefright/SurfaceEncoder.h>
+#include <media/stagefright/SurfaceMediaSource.h>
 #include <ui/GraphicBuffer.h>
 #include <media/stagefright/MetaData.h>
 #include <media/stagefright/MediaDefs.h>
@@ -34,7 +34,7 @@
 
 namespace android {
 
-SurfaceEncoder::SurfaceEncoder(uint32_t bufW, uint32_t bufH) :
+SurfaceMediaSource::SurfaceMediaSource(uint32_t bufW, uint32_t bufH) :
     mDefaultWidth(bufW),
     mDefaultHeight(bufH),
     mPixelFormat(0),
@@ -46,26 +46,26 @@ SurfaceEncoder::SurfaceEncoder(uint32_t bufW, uint32_t bufH) :
     mSynchronousMode(true),
     mConnectedApi(NO_CONNECTED_API),
     mFrameRate(30),
-    mStarted(false)   {
-    LOGV("SurfaceEncoder::SurfaceEncoder");
+    mStarted(false)     {
+    LOGV("SurfaceMediaSource::SurfaceMediaSource");
     sp<ISurfaceComposer> composer(ComposerService::getComposerService());
     mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
 }
 
-SurfaceEncoder::~SurfaceEncoder() {
-    LOGV("SurfaceEncoder::~SurfaceEncoder");
+SurfaceMediaSource::~SurfaceMediaSource() {
+    LOGV("SurfaceMediaSource::~SurfaceMediaSource");
     if (mStarted) {
         stop();
     }
     freeAllBuffers();
 }
 
-size_t SurfaceEncoder::getQueuedCount() const {
+size_t SurfaceMediaSource::getQueuedCount() const {
     Mutex::Autolock lock(mMutex);
     return mQueue.size();
 }
 
-status_t SurfaceEncoder::setBufferCountServerLocked(int bufferCount) {
+status_t SurfaceMediaSource::setBufferCountServerLocked(int bufferCount) {
     if (bufferCount > NUM_BUFFER_SLOTS)
         return BAD_VALUE;
 
@@ -100,13 +100,13 @@ status_t SurfaceEncoder::setBufferCountServerLocked(int bufferCount) {
 }
 
 // Called from the consumer side
-status_t SurfaceEncoder::setBufferCountServer(int bufferCount) {
+status_t SurfaceMediaSource::setBufferCountServer(int bufferCount) {
     Mutex::Autolock lock(mMutex);
     return setBufferCountServerLocked(bufferCount);
 }
 
-status_t SurfaceEncoder::setBufferCount(int bufferCount) {
-    LOGV("SurfaceEncoder::setBufferCount");
+status_t SurfaceMediaSource::setBufferCount(int bufferCount) {
+    LOGV("SurfaceMediaSource::setBufferCount");
     if (bufferCount > NUM_BUFFER_SLOTS) {
         LOGE("setBufferCount: bufferCount is larger than the number of buffer slots");
         return BAD_VALUE;
@@ -147,8 +147,8 @@ status_t SurfaceEncoder::setBufferCount(int bufferCount) {
     return OK;
 }
 
-sp<GraphicBuffer> SurfaceEncoder::requestBuffer(int buf) {
-    LOGV("SurfaceEncoder::requestBuffer");
+sp<GraphicBuffer> SurfaceMediaSource::requestBuffer(int buf) {
+    LOGV("SurfaceMediaSource::requestBuffer");
     Mutex::Autolock lock(mMutex);
     if (buf < 0 || mBufferCount <= buf) {
         LOGE("requestBuffer: slot index out of range [0, %d]: %d",
@@ -159,7 +159,7 @@ sp<GraphicBuffer> SurfaceEncoder::requestBuffer(int buf) {
     return mSlots[buf].mGraphicBuffer;
 }
 
-status_t SurfaceEncoder::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
+status_t SurfaceMediaSource::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
                                             uint32_t format, uint32_t usage) {
     LOGV("dequeueBuffer");
 
@@ -347,7 +347,7 @@ status_t SurfaceEncoder::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
     return returnFlags;
 }
 
-status_t SurfaceEncoder::setSynchronousMode(bool enabled) {
+status_t SurfaceMediaSource::setSynchronousMode(bool enabled) {
     Mutex::Autolock lock(mMutex);
 
     status_t err = OK;
@@ -369,8 +369,8 @@ status_t SurfaceEncoder::setSynchronousMode(bool enabled) {
     return err;
 }
 
-status_t SurfaceEncoder::connect(int api) {
-    LOGV("SurfaceEncoder::connect");
+status_t SurfaceMediaSource::connect(int api) {
+    LOGV("SurfaceMediaSource::connect");
     Mutex::Autolock lock(mMutex);
     int err = NO_ERROR;
     switch (api) {
@@ -391,8 +391,8 @@ status_t SurfaceEncoder::connect(int api) {
     return err;
 }
 
-status_t SurfaceEncoder::disconnect(int api) {
-    LOGV("SurfaceEncoder::disconnect");
+status_t SurfaceMediaSource::disconnect(int api) {
+    LOGV("SurfaceMediaSource::disconnect");
     Mutex::Autolock lock(mMutex);
     int err = NO_ERROR;
     switch (api) {
@@ -413,7 +413,7 @@ status_t SurfaceEncoder::disconnect(int api) {
     return err;
 }
 
-status_t SurfaceEncoder::queueBuffer(int buf, int64_t timestamp,
+status_t SurfaceMediaSource::queueBuffer(int buf, int64_t timestamp,
         uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
     LOGV("queueBuffer");
 
@@ -475,13 +475,13 @@ status_t SurfaceEncoder::queueBuffer(int buf, int64_t timestamp,
 // The buffer is NOT made available for dequeueing immediately. We need to
 // wait to hear from StageFrightRecorder to set the buffer FREE
 // Make sure this is called when the mutex is locked
-status_t SurfaceEncoder::onFrameReceivedLocked() {
+status_t SurfaceMediaSource::onFrameReceivedLocked() {
     LOGV("On Frame Received");
     // Signal the encoder that a new frame has arrived
     mFrameAvailableCondition.signal();
 
     // call back the listener
-    // TODO: The listener may not be needed in SurfaceEncoder at all.
+    // TODO: The listener may not be needed in SurfaceMediaSource at all.
     // This can be made a SurfaceTexture specific thing
     sp<FrameAvailableListener> listener;
     if (mSynchronousMode || mQueue.empty()) {
@@ -495,8 +495,8 @@ status_t SurfaceEncoder::onFrameReceivedLocked() {
 }
 
 
-void SurfaceEncoder::cancelBuffer(int buf) {
-    LOGV("SurfaceEncoder::cancelBuffer");
+void SurfaceMediaSource::cancelBuffer(int buf) {
+    LOGV("SurfaceMediaSource::cancelBuffer");
     Mutex::Autolock lock(mMutex);
     if (buf < 0 || buf >= mBufferCount) {
         LOGE("cancelBuffer: slot index out of range [0, %d]: %d",
@@ -511,27 +511,27 @@ void SurfaceEncoder::cancelBuffer(int buf) {
     mDequeueCondition.signal();
 }
 
-nsecs_t SurfaceEncoder::getTimestamp() {
-    LOGV("SurfaceEncoder::getTimestamp");
+nsecs_t SurfaceMediaSource::getTimestamp() {
+    LOGV("SurfaceMediaSource::getTimestamp");
     Mutex::Autolock lock(mMutex);
     return mCurrentTimestamp;
 }
 
 
-void SurfaceEncoder::setFrameAvailableListener(
+void SurfaceMediaSource::setFrameAvailableListener(
         const sp<FrameAvailableListener>& listener) {
-    LOGV("SurfaceEncoder::setFrameAvailableListener");
+    LOGV("SurfaceMediaSource::setFrameAvailableListener");
     Mutex::Autolock lock(mMutex);
     mFrameAvailableListener = listener;
 }
 
-sp<IBinder> SurfaceEncoder::getAllocator() {
+sp<IBinder> SurfaceMediaSource::getAllocator() {
     LOGV("getAllocator");
     return mGraphicBufferAlloc->asBinder();
 }
 
 
-void SurfaceEncoder::freeAllBuffers() {
+void SurfaceMediaSource::freeAllBuffers() {
     LOGV("freeAllBuffers");
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         mSlots[i].mGraphicBuffer = 0;
@@ -539,12 +539,12 @@ void SurfaceEncoder::freeAllBuffers() {
     }
 }
 
-sp<GraphicBuffer> SurfaceEncoder::getCurrentBuffer() const {
+sp<GraphicBuffer> SurfaceMediaSource::getCurrentBuffer() const {
     Mutex::Autolock lock(mMutex);
     return mCurrentBuf;
 }
 
-int SurfaceEncoder::query(int what, int* outValue)
+int SurfaceMediaSource::query(int what, int* outValue)
 {
     LOGV("query");
     Mutex::Autolock lock(mMutex);
@@ -574,13 +574,13 @@ int SurfaceEncoder::query(int what, int* outValue)
     return NO_ERROR;
 }
 
-void SurfaceEncoder::dump(String8& result) const
+void SurfaceMediaSource::dump(String8& result) const
 {
     char buffer[1024];
     dump(result, "", buffer, 1024);
 }
 
-void SurfaceEncoder::dump(String8& result, const char* prefix,
+void SurfaceMediaSource::dump(String8& result, const char* prefix,
         char* buffer, size_t SIZE) const
 {
     Mutex::Autolock _l(mMutex);
@@ -625,18 +625,18 @@ void SurfaceEncoder::dump(String8& result, const char* prefix,
     }
 }
 
-void SurfaceEncoder::setFrameRate(uint32_t fps)
+void SurfaceMediaSource::setFrameRate(uint32_t fps)
 {
     Mutex::Autolock lock(mMutex);
     mFrameRate = fps;
 }
 
-uint32_t SurfaceEncoder::getFrameRate( ) const {
+uint32_t SurfaceMediaSource::getFrameRate( ) const {
     Mutex::Autolock lock(mMutex);
     return mFrameRate;
 }
 
-status_t SurfaceEncoder::start(MetaData *params)
+status_t SurfaceMediaSource::start(MetaData *params)
 {
     LOGV("start");
     Mutex::Autolock lock(mMutex);
@@ -646,7 +646,7 @@ status_t SurfaceEncoder::start(MetaData *params)
 }
 
 
-status_t SurfaceEncoder::stop()
+status_t SurfaceMediaSource::stop()
 {
     LOGV("Stop");
 
@@ -658,7 +658,7 @@ status_t SurfaceEncoder::stop()
     return OK;
 }
 
-sp<MetaData> SurfaceEncoder::getFormat()
+sp<MetaData> SurfaceMediaSource::getFormat()
 {
     LOGV("getFormat");
     Mutex::Autolock autoLock(mMutex);
@@ -678,7 +678,7 @@ sp<MetaData> SurfaceEncoder::getFormat()
     return meta;
 }
 
-status_t SurfaceEncoder::read( MediaBuffer **buffer,
+status_t SurfaceMediaSource::read( MediaBuffer **buffer,
                                 const ReadOptions *options)
 {
     LOGV("Read. Size of queued buffer: %d", mQueue.size());
@@ -716,7 +716,7 @@ status_t SurfaceEncoder::read( MediaBuffer **buffer,
     return OK;
 }
 
-void SurfaceEncoder::signalBufferReturned(MediaBuffer *buffer) {
+void SurfaceMediaSource::signalBufferReturned(MediaBuffer *buffer) {
     LOGV("signalBufferReturned");
 
     bool foundBuffer = false;

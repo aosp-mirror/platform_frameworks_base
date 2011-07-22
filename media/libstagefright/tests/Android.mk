@@ -4,12 +4,12 @@ include $(CLEAR_VARS)
 
 ifneq ($(TARGET_SIMULATOR),true)
 
-LOCAL_MODULE := SurfaceEncoder_test
+LOCAL_MODULE := SurfaceMediaSource_test
 
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_SRC_FILES := \
-    SurfaceEncoder_test.cpp \
+    SurfaceMediaSource_test.cpp \
 	DummyRecorder.cpp \
 
 LOCAL_SHARED_LIBRARIES := \
