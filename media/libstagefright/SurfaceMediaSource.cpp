@@ -525,12 +525,6 @@ void SurfaceMediaSource::setFrameAvailableListener(
     mFrameAvailableListener = listener;
 }
 
-sp<IBinder> SurfaceMediaSource::getAllocator() {
-    LOGV("getAllocator");
-    return mGraphicBufferAlloc->asBinder();
-}
-
-
 void SurfaceMediaSource::freeAllBuffers() {
     LOGV("freeAllBuffers");
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {

@@ -163,13 +163,6 @@ public:
     // when a new frame becomes available.
     void setFrameAvailableListener(const sp<FrameAvailableListener>& listener);
 
-    // getAllocator retrieves the binder object that must be referenced as long
-    // as the GraphicBuffers dequeued from this SurfaceMediaSource are referenced.
-    // Holding this binder reference prevents SurfaceFlinger from freeing the
-    // buffers before the client is done with them.
-    sp<IBinder> getAllocator();
-
-
     // getCurrentBuffer returns the buffer associated with the current image.
     sp<GraphicBuffer> getCurrentBuffer() const;
 
