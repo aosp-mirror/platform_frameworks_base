@@ -504,6 +504,7 @@ nAllocationCopyToBitmap(JNIEnv *_env, jobject _this, RsContext con, jint alloc, 
     void* ptr = bitmap.getPixels();
     rsAllocationCopyToBitmap(con, (RsAllocation)alloc, ptr, bitmap.getSize());
     bitmap.unlockPixels();
+    bitmap.notifyPixelsChanged();
 }
 
 static void ReleaseBitmapCallback(void *bmp)
