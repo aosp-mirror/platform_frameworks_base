@@ -230,8 +230,14 @@ class AppWidgetService extends IAppWidgetService.Stub
                         pw.println(':');
                 pw.print("    min=("); pw.print(info.minWidth);
                         pw.print("x"); pw.print(info.minHeight);
+                pw.print(")   minResize=("); pw.print(info.minResizeWidth);
+                        pw.print("x"); pw.print(info.minResizeHeight);
                         pw.print(") updatePeriodMillis=");
                         pw.print(info.updatePeriodMillis);
+                        pw.print(" resizeMode=");
+                        pw.print(info.resizeMode);
+                        pw.print(" autoAdvanceViewId=");
+                        pw.print(info.autoAdvanceViewId);
                         pw.print(" initialLayout=#");
                         pw.print(Integer.toHexString(info.initialLayout));
                         pw.print(" zombie="); pw.println(p.zombie);

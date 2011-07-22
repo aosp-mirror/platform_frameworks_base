@@ -187,6 +187,8 @@ public class AppWidgetProviderInfo implements Parcelable {
         }
         this.minWidth = in.readInt();
         this.minHeight = in.readInt();
+        this.minResizeWidth = in.readInt();
+        this.minResizeHeight = in.readInt();
         this.updatePeriodMillis = in.readInt();
         this.initialLayout = in.readInt();
         if (0 != in.readInt()) {
@@ -208,6 +210,8 @@ public class AppWidgetProviderInfo implements Parcelable {
         }
         out.writeInt(this.minWidth);
         out.writeInt(this.minHeight);
+        out.writeInt(this.minResizeWidth);
+        out.writeInt(this.minResizeHeight);
         out.writeInt(this.updatePeriodMillis);
         out.writeInt(this.initialLayout);
         if (this.configure != null) {
