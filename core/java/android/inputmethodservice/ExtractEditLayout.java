@@ -172,7 +172,10 @@ public class ExtractEditLayout extends LinearLayout {
 
         @Override
         public boolean onMenuItemSelected(MenuBuilder menu, MenuItem item) {
-            return mCallback.onActionItemClicked(this, item);
+            if (mCallback != null) {
+                return mCallback.onActionItemClicked(this, item);
+            }
+            return false;
         }
 
         @Override
