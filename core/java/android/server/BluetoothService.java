@@ -39,6 +39,7 @@ import android.bluetooth.BluetoothUuid;
 import android.bluetooth.IBluetooth;
 import android.bluetooth.IBluetoothCallback;
 import android.bluetooth.IBluetoothHealthCallback;
+import android.bluetooth.IBluetoothStateChangeCallback;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -68,13 +69,15 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -101,6 +104,8 @@ public class BluetoothService extends IBluetooth.Stub {
     private final BluetoothBondState mBondState;  // local cache of bondings
     private final IBatteryStats mBatteryStats;
     private final Context mContext;
+    private Map<Integer, IBluetoothStateChangeCallback> mStateChangeTracker =
+        Collections.synchronizedMap(new HashMap<Integer, IBluetoothStateChangeCallback>());
 
     private static final String BLUETOOTH_ADMIN_PERM = android.Manifest.permission.BLUETOOTH_ADMIN;
     static final String BLUETOOTH_PERM = android.Manifest.permission.BLUETOOTH;
@@ -113,6 +118,9 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private static final int MESSAGE_UUID_INTENT = 1;
     private static final int MESSAGE_AUTO_PAIRING_FAILURE_ATTEMPT_DELAY = 2;
+
+    private static final int RFCOMM_RECORD_REAPER = 10;
+    private static final int STATE_CHANGE_REAPER = 11;
 
     // The time (in millisecs) to delay the pairing attempt after the first
     // auto pairing attempt fails. We use an exponential delay with
@@ -1466,7 +1474,7 @@ public class BluetoothService extends IBluetooth.Stub {
         int pid = Binder.getCallingPid();
         mServiceRecordToPid.put(new Integer(handle), new Integer(pid));
         try {
-            b.linkToDeath(new Reaper(handle, pid), 0);
+            b.linkToDeath(new Reaper(handle, pid, RFCOMM_RECORD_REAPER), 0);
         } catch (RemoteException e) {}
         return handle;
     }
@@ -1489,18 +1497,83 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     private class Reaper implements IBinder.DeathRecipient {
-        int pid;
-        int handle;
-        Reaper(int handle, int pid) {
-            this.pid = pid;
-            this.handle = handle;
+        int mPid;
+        int mHandle;
+        int mType;
+
+        Reaper(int handle, int pid, int type) {
+            mPid = pid;
+            mHandle = handle;
+            mType = type;
         }
+
+        Reaper(int pid, int type) {
+            mPid = pid;
+            mType = type;
+        }
+
+        @Override
         public void binderDied() {
             synchronized (BluetoothService.this) {
-                if (DBG) Log.d(TAG, "Tracked app " + pid + " died");
-                checkAndRemoveRecord(handle, pid);
+                if (DBG) Log.d(TAG, "Tracked app " + mPid + " died" + "Type:" + mType);
+                if (mType == RFCOMM_RECORD_REAPER) {
+                    checkAndRemoveRecord(mHandle, mPid);
+                } else if (mType == STATE_CHANGE_REAPER) {
+                    mStateChangeTracker.remove(mPid);
+                }
             }
         }
+    }
+
+
+    @Override
+    public boolean changeApplicationBluetoothState(boolean on,
+            IBluetoothStateChangeCallback callback, IBinder binder) {
+        int pid = Binder.getCallingPid();
+        //mStateChangeTracker is a synchronized map
+        if (!mStateChangeTracker.containsKey(pid)) {
+            if (on) {
+                mStateChangeTracker.put(pid, callback);
+            } else {
+                return false;
+            }
+        } else if (!on) {
+            mStateChangeTracker.remove(pid);
+        }
+
+        if (binder != null) {
+            try {
+                binder.linkToDeath(new Reaper(pid, STATE_CHANGE_REAPER), 0);
+            } catch (RemoteException e) {
+                return false;
+            }
+        }
+
+        int type;
+        if (on) {
+            type = BluetoothAdapterStateMachine.PER_PROCESS_TURN_ON;
+        } else {
+            type = BluetoothAdapterStateMachine.PER_PROCESS_TURN_OFF;
+        }
+
+        mBluetoothState.sendMessage(type, callback);
+        return true;
+    }
+
+    boolean isApplicationStateChangeTrackerEmpty() {
+        return mStateChangeTracker.isEmpty();
+    }
+
+    void clearApplicationStateChangeTracker() {
+        mStateChangeTracker.clear();
+    }
+
+    Collection<IBluetoothStateChangeCallback> getApplicationStateChangeCallbacks() {
+        return mStateChangeTracker.values();
+    }
+
+    int getNumberOfApplicationStateChangeTrackers() {
+        return mStateChangeTracker.size();
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {

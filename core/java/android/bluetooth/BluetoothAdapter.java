@@ -1143,6 +1143,69 @@ public final class BluetoothAdapter {
         }
     }
 
+    /**
+     * Enable control of the Bluetooth Adapter for a single application.
+     *
+     * <p>Some applications need to use Bluetooth for short periods of time to
+     * transfer data but don't want all the associated implications like
+     * automatic connection to headsets etc.
+     *
+     * <p> Multiple applications can call this. This is reference counted and
+     * Bluetooth disabled only when no one else is using it. There will be no UI
+     * shown to the user while bluetooth is being enabled. Any user action will
+     * override this call. For example, if user wants Bluetooth on and the last
+     * user of this API wanted to disable Bluetooth, Bluetooth will not be
+     * turned off.
+     *
+     * <p> This API is only meant to be used by internal applications. Third
+     * party applications but use {@link #enable} and {@link #disable} APIs.
+     *
+     * <p> If this API returns true, it means the callback will be called.
+     * The callback will be called with the current state of Bluetooth.
+     * If the state is not what was requested, an internal error would be the
+     * reason.
+     *
+     * @param on True for on, false for off.
+     * @param callback The callback to notify changes to the state.
+     * @hide
+     */
+    public boolean changeApplicationBluetoothState(boolean on,
+                                                   BluetoothStateChangeCallback callback) {
+        if (callback == null) return false;
+
+        try {
+            return mService.changeApplicationBluetoothState(on, new
+                    StateChangeCallbackWrapper(callback), new Binder());
+        } catch (RemoteException e) {
+            Log.e(TAG, "changeBluetoothState", e);
+        }
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    public interface BluetoothStateChangeCallback {
+        public void onBluetoothStateChange(boolean on);
+    }
+
+    /**
+     * @hide
+     */
+    public class StateChangeCallbackWrapper extends IBluetoothStateChangeCallback.Stub {
+        private BluetoothStateChangeCallback mCallback;
+
+        StateChangeCallbackWrapper(BluetoothStateChangeCallback
+                callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void onBluetoothStateChange(boolean on) {
+            mCallback.onBluetoothStateChange(on);
+        }
+    }
+
     private Set<BluetoothDevice> toDeviceSet(String[] addresses) {
         Set<BluetoothDevice> devices = new HashSet<BluetoothDevice>(addresses.length);
         for (int i = 0; i < addresses.length; i++) {
