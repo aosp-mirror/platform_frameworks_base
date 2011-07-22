@@ -68,7 +68,7 @@ import java.util.regex.Pattern;
 public class WifiWatchdogStateMachine extends StateMachine {
 
 
-    private static final boolean VDBG = true;  //TODO : Remove this before merge
+    private static final boolean VDBG = false;
     private static final boolean DBG = true;
     private static final String WWSM_TAG = "WifiWatchdogStateMachine";
 
