@@ -43,6 +43,8 @@ public class AnimationSet extends Animation {
     private static final int PROPERTY_CHANGE_BOUNDS_MASK      = 0x80;
 
     private int mFlags = 0;
+    private boolean mDirty;
+    private boolean mHasAlpha;
 
     private ArrayList<Animation> mAnimations = new ArrayList<Animation>();
 
@@ -137,6 +139,25 @@ public class AnimationSet extends Animation {
         super.setStartOffset(startOffset);
     }
 
+    @Override
+    public boolean hasAlpha() {
+        if (mDirty) {
+            mDirty = mHasAlpha = false;
+
+            final int count = mAnimations.size();
+            final ArrayList<Animation> animations = mAnimations;
+
+            for (int i = 0; i < count; i++) {
+                if (animations.get(i).hasAlpha()) {
+                    mHasAlpha = true;
+                    break;
+                }
+            }
+        }
+
+        return mHasAlpha;
+    }
+
     /**
      * <p>Sets the duration of every child animation.</p>
      *
@@ -175,6 +196,8 @@ public class AnimationSet extends Animation {
             mLastEnd = Math.max(mLastEnd, a.getStartOffset() + a.getDuration());
             mDuration = mLastEnd - mStartOffset;
         }
+
+        mDirty = true;
     }
     
     /**

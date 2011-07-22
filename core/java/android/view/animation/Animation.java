@@ -1001,6 +1001,15 @@ public abstract class Animation implements Cloneable {
     }
 
     /**
+     * Return true if this animation changes the view's alpha property.
+     * 
+     * @hide
+     */
+    public boolean hasAlpha() {
+        return false;
+    }
+
+    /**
      * Utility class to parse a string description of a size.
      */
     protected static class Description {
