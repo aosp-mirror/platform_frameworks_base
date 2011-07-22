@@ -329,6 +329,7 @@ public class RecentsPanelView extends RelativeLayout
 
 
         mRecentsGlowView = findViewById(R.id.recents_glow);
+        mRecentsScrim = (View) findViewById(R.id.recents_bg_protect);
         mChoreo = new Choreographer(this, mRecentsScrim, mRecentsGlowView, this);
         mRecentsDismissButton = findViewById(R.id.recents_dismiss_button);
         mRecentsDismissButton.setOnClickListener(new OnClickListener() {
