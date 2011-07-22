@@ -388,6 +388,10 @@ public class AppWidgetManager {
                         TypedValue.complexToDimensionPixelSize(info.minWidth, mDisplayMetrics);
                 info.minHeight =
                         TypedValue.complexToDimensionPixelSize(info.minHeight, mDisplayMetrics);
+                info.minResizeWidth =
+                    TypedValue.complexToDimensionPixelSize(info.minResizeWidth, mDisplayMetrics);
+                info.minResizeHeight =
+                    TypedValue.complexToDimensionPixelSize(info.minResizeHeight, mDisplayMetrics);
             }
             return providers;
         }
@@ -411,6 +415,10 @@ public class AppWidgetManager {
                         TypedValue.complexToDimensionPixelSize(info.minWidth, mDisplayMetrics);
                 info.minHeight =
                         TypedValue.complexToDimensionPixelSize(info.minHeight, mDisplayMetrics);
+                info.minResizeWidth =
+                    TypedValue.complexToDimensionPixelSize(info.minResizeWidth, mDisplayMetrics);
+                info.minResizeHeight =
+                    TypedValue.complexToDimensionPixelSize(info.minResizeHeight, mDisplayMetrics);
             }
             return info;
         }
