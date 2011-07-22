@@ -286,8 +286,11 @@ public class ActionBarView extends AbsActionBarView {
     public void setSplitActionBar(boolean splitActionBar) {
         if (mSplitActionBar != splitActionBar) {
             if (mMenuView != null) {
+                final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
+                if (oldParent != null) {
+                    oldParent.removeView(mMenuView);
+                }
                 if (splitActionBar) {
-                    removeView(mMenuView);
                     if (mSplitView != null) {
                         mSplitView.addView(mMenuView);
                     }
@@ -333,7 +336,10 @@ public class ActionBarView extends AbsActionBarView {
         MenuBuilder builder = (MenuBuilder) menu;
         mOptionsMenu = builder;
         if (mMenuView != null) {
-            removeView(mMenuView);
+            final ViewGroup oldParent = (ViewGroup) mMenuView.getParent();
+            if (oldParent != null) {
+                oldParent.removeView(mMenuView);
+            }
         }
         if (mActionMenuPresenter == null) {
             mActionMenuPresenter = new ActionMenuPresenter();
@@ -352,6 +358,10 @@ public class ActionBarView extends AbsActionBarView {
             builder.addMenuPresenter(mActionMenuPresenter);
             builder.addMenuPresenter(mExpandedMenuPresenter);
             menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
+            final ViewGroup oldParent = (ViewGroup) menuView.getParent();
+            if (oldParent != null && oldParent != this) {
+                oldParent.removeView(menuView);
+            }
             addView(menuView, layoutParams);
         } else {
             mActionMenuPresenter.setExpandedActionViewsExclusive(false);
@@ -366,6 +376,10 @@ public class ActionBarView extends AbsActionBarView {
             builder.addMenuPresenter(mExpandedMenuPresenter);
             menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             if (mSplitView != null) {
+                final ViewGroup oldParent = (ViewGroup) menuView.getParent();
+                if (oldParent != null && oldParent != mSplitView) {
+                    oldParent.removeView(menuView);
+                }
                 mSplitView.addView(menuView, layoutParams);
             } else {
                 // We'll add this later if we missed it this time.
