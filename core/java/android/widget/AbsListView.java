@@ -4638,9 +4638,6 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                             childrenTop += getVerticalFadingEdgeLength();
                         }
                     }
-                    // Don't ever focus a disabled item.
-                    if (!mAdapter.isEnabled(i)) continue;
-
                     if (top >= childrenTop) {
                         // Found a view whose top is fully visisble
                         selectedPos = firstPosition + i;
