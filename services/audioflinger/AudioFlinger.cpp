@@ -2954,7 +2954,7 @@ AudioFlinger::PlaybackThread::Track::Track(
         mStreamType = streamType;
         // NOTE: audio_track_cblk_t::frameSize for 8 bit PCM data is based on a sample size of
         // 16 bit because data is converted to 16 bit before being stored in buffer by AudioTrack
-        mCblk->frameSize = audio_is_linear_pcm(format) ? mChannelCount * audio_bytes_per_sample(format) : sizeof(uint8_t);
+        mCblk->frameSize = audio_is_linear_pcm(format) ? mChannelCount * sizeof(int16_t) : sizeof(uint8_t);
     }
 }
 
