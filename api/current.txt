@@ -116,6 +116,7 @@ package android {
     field public static final java.lang.String USE_CREDENTIALS = "android.permission.USE_CREDENTIALS";
     field public static final java.lang.String USE_SIP = "android.permission.USE_SIP";
     field public static final java.lang.String VIBRATE = "android.permission.VIBRATE";
+    field public static final java.lang.String VPN = "android.permission.VPN";
     field public static final java.lang.String WAKE_LOCK = "android.permission.WAKE_LOCK";
     field public static final java.lang.String WRITE_APN_SETTINGS = "android.permission.WRITE_APN_SETTINGS";
     field public static final java.lang.String WRITE_CALENDAR = "android.permission.WRITE_CALENDAR";
@@ -11441,6 +11442,26 @@ package android.net {
 
   public static abstract interface UrlQuerySanitizer.ValueSanitizer {
     method public abstract java.lang.String sanitize(java.lang.String);
+  }
+
+  public class VpnBuilder {
+    ctor public VpnBuilder();
+    method public android.net.VpnBuilder addAddress(java.lang.String, int);
+    method public android.net.VpnBuilder addAddress(java.net.InetAddress, int);
+    method public android.net.VpnBuilder addDnsServer(java.lang.String);
+    method public android.net.VpnBuilder addDnsServer(java.net.InetAddress);
+    method public android.net.VpnBuilder addRoute(java.lang.String, int);
+    method public android.net.VpnBuilder addRoute(java.net.InetAddress, int);
+    method public android.net.VpnBuilder addSearchDomain(java.lang.String);
+    method public android.os.ParcelFileDescriptor establish();
+    method public static android.content.Intent prepare(android.content.Context);
+    method public static boolean protect(int);
+    method public static boolean protect(java.net.Socket);
+    method public static boolean protect(java.net.DatagramSocket);
+    method public android.net.VpnBuilder setConfigureIntent(android.app.PendingIntent);
+    method public android.net.VpnBuilder setMtu(int);
+    method public android.net.VpnBuilder setSession(java.lang.String);
+    field public static final java.lang.String ACTION_VPN_REVOKED = "android.net.vpn.action.REVOKED";
   }
 
 }
