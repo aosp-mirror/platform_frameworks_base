@@ -25,21 +25,21 @@ import android.os.Parcelable;
 public final class SuggestionsInfo implements Parcelable {
     /**
      * Flag of the attributes of the suggestions that can be obtained by
-     * {@link getSuggestionsAttibutes}: this tells that the requested word was found
+     * {@link #getSuggestionsAttributes}: this tells that the requested word was found
      * in the dictionary in the text service.
      */
     public static final int RESULT_ATTR_IN_THE_DICTIONARY = 0x0001;
     /** Flag of the attributes of the suggestions that can be obtained by
-     * {@link getSuggestionsAttibutes}: this tells that there are one or more suggestions available
-     * for the requested word.  This doesn't necessarily mean that the suggestions are actually in
-     * this SuggestionsInfo.  For instance, the caller could have been asked to limit the maximum
-     * number of suggestions returned.
+     * {@link #getSuggestionsAttributes}: this tells that there are one or more suggestions
+     * available for the requested word.  This doesn't necessarily mean that the suggestions
+     * are actually in this SuggestionsInfo.  For instance, the caller could have been asked to
+     * limit the maximum number of suggestions returned.
      */
     public static final int RESULT_ATTR_SUGGESTIONS_AVAILABLE = 0x0002;
     /**
      * Flag of the attributes of the suggestions that can be obtained by
-     * {@link getSuggestionsAttibutes}: this tells that the text service thinks the requested word
-     * looks a typo.
+     * {@link #getSuggestionsAttributes}: this tells that the text service thinks the requested
+     * word looks a typo.
      */
     public static final int RESULT_ATTR_LOOKS_TYPO = 0x0004;
     private final int mSuggestionsAttributes;
