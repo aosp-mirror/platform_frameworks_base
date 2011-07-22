@@ -53,6 +53,7 @@
 #include <audio_effects/effect_visualizer.h>
 
 #include <cpustats/ThreadCpuUsage.h>
+#include <powermanager/PowerManager.h>
 // #define DEBUG_CPU_USAGE 10  // log statistics every n wall clock seconds
 
 // ----------------------------------------------------------------------------
@@ -887,14 +888,18 @@ void AudioFlinger::removeClient_l(pid_t pid)
 AudioFlinger::ThreadBase::ThreadBase(const sp<AudioFlinger>& audioFlinger, int id, uint32_t device)
     :   Thread(false),
         mAudioFlinger(audioFlinger), mSampleRate(0), mFrameCount(0), mChannelCount(0),
-        mFrameSize(1), mFormat(0), mStandby(false), mId(id), mExiting(false), mDevice(device)
+        mFrameSize(1), mFormat(0), mStandby(false), mId(id), mExiting(false),
+        mDevice(device)
 {
+    mDeathRecipient = new PMDeathRecipient(this);
 }
 
 AudioFlinger::ThreadBase::~ThreadBase()
 {
     mParamCond.broadcast();
     mNewParameters.clear();
+    // do not lock the mutex in destructor
+    releaseWakeLock_l();
 }
 
 void AudioFlinger::ThreadBase::exit()
@@ -1061,6 +1066,69 @@ status_t AudioFlinger::ThreadBase::dumpEffectChains(int fd, const Vector<String1
     return NO_ERROR;
 }
 
+void AudioFlinger::ThreadBase::acquireWakeLock()
+{
+    Mutex::Autolock _l(mLock);
+    acquireWakeLock_l();
+}
+
+void AudioFlinger::ThreadBase::acquireWakeLock_l()
+{
+    if (mPowerManager == 0) {
+        // use checkService() to avoid blocking if power service is not up yet
+        sp<IBinder> binder =
+            defaultServiceManager()->checkService(String16("power"));
+        if (binder == 0) {
+            LOGW("Thread %s cannot connect to the power manager service", mName);
+        } else {
+            mPowerManager = interface_cast<IPowerManager>(binder);
+            binder->linkToDeath(mDeathRecipient);
+        }
+    }
+    if (mPowerManager != 0) {
+        sp<IBinder> binder = new BBinder();
+        status_t status = mPowerManager->acquireWakeLock(POWERMANAGER_PARTIAL_WAKE_LOCK,
+                                                         binder,
+                                                         String16(mName));
+        if (status == NO_ERROR) {
+            mWakeLockToken = binder;
+        }
+        LOGV("acquireWakeLock_l() %s status %d", mName, status);
+    }
+}
+
+void AudioFlinger::ThreadBase::releaseWakeLock()
+{
+    Mutex::Autolock _l(mLock);
+    releaseWakeLock();
+}
+
+void AudioFlinger::ThreadBase::releaseWakeLock_l()
+{
+    if (mWakeLockToken != 0) {
+        LOGV("releaseWakeLock_l() %s", mName);
+        if (mPowerManager != 0) {
+            mPowerManager->releaseWakeLock(mWakeLockToken, 0);
+        }
+        mWakeLockToken.clear();
+    }
+}
+
+void AudioFlinger::ThreadBase::clearPowerManager()
+{
+    Mutex::Autolock _l(mLock);
+    releaseWakeLock_l();
+    mPowerManager.clear();
+}
+
+void AudioFlinger::ThreadBase::PMDeathRecipient::binderDied(const wp<IBinder>& who)
+{
+    sp<ThreadBase> thread = mThread.promote();
+    if (thread != 0) {
+        thread->clearPowerManager();
+    }
+    LOGW("power manager service died !!!");
+}
 
 // ----------------------------------------------------------------------------
 
@@ -1072,6 +1140,8 @@ AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinge
         mMixBuffer(0), mSuspended(0), mBytesWritten(0), mOutput(output),
         mLastWriteTime(0), mNumWrites(0), mNumDelayedWrites(0), mInWrite(false)
 {
+    snprintf(mName, kNameLength, "AudioOut_%d", id);
+
     readOutputParameters();
 
     mMasterVolume = mAudioFlinger->masterVolume();
@@ -1170,12 +1240,7 @@ status_t AudioFlinger::PlaybackThread::readyToRun()
 
 void AudioFlinger::PlaybackThread::onFirstRef()
 {
-    const size_t SIZE = 256;
-    char buffer[SIZE];
-
-    snprintf(buffer, SIZE, "Playback Thread %p", this);
-
-    run(buffer, ANDROID_PRIORITY_URGENT_AUDIO);
+    run(mName, ANDROID_PRIORITY_URGENT_AUDIO);
 }
 
 // PlaybackThread::createTrack_l() must be called with AudioFlinger::mLock held
@@ -1522,6 +1587,8 @@ bool AudioFlinger::MixerThread::threadLoop()
     const CentralTendencyStatistics& stats = cpu.statistics();
 #endif
 
+    acquireWakeLock();
+
     while (!exitPending())
     {
 #ifdef DEBUG_CPU_USAGE
@@ -1585,10 +1652,12 @@ bool AudioFlinger::MixerThread::threadLoop()
 
                     if (exitPending()) break;
 
+                    releaseWakeLock_l();
                     // wait until we have something to do...
                     LOGV("MixerThread %p TID %d going to sleep\n", this, gettid());
                     mWaitWorkCV.wait(mLock);
                     LOGV("MixerThread %p TID %d waking up\n", this, gettid());
+                    acquireWakeLock_l();
 
                     if (mMasterMute == false) {
                         char value[PROPERTY_VALUE_MAX];
@@ -1688,6 +1757,8 @@ bool AudioFlinger::MixerThread::threadLoop()
     if (!mStandby) {
         mOutput->stream->common.standby(&mOutput->stream->common);
     }
+
+    releaseWakeLock();
 
     LOGV("MixerThread %p exiting", this);
     return false;
@@ -2176,6 +2247,8 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
     // hardware resources as soon as possible
     nsecs_t standbyDelay = microseconds(activeSleepTime*2);
 
+    acquireWakeLock();
+
     while (!exitPending())
     {
         bool rampVolume;
@@ -2215,9 +2288,11 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
 
                     if (exitPending()) break;
 
+                    releaseWakeLock_l();
                     LOGV("DirectOutputThread %p TID %d going to sleep\n", this, gettid());
                     mWaitWorkCV.wait(mLock);
                     LOGV("DirectOutputThread %p TID %d waking up in active mode\n", this, gettid());
+                    acquireWakeLock_l();
 
                     if (mMasterMute == false) {
                         char value[PROPERTY_VALUE_MAX];
@@ -2436,6 +2511,8 @@ bool AudioFlinger::DirectOutputThread::threadLoop()
         mOutput->stream->common.standby(&mOutput->stream->common);
     }
 
+    releaseWakeLock();
+
     LOGV("DirectOutputThread %p exiting", this);
     return false;
 }
@@ -2561,6 +2638,8 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
     uint32_t sleepTime = idleSleepTime;
     Vector< sp<EffectChain> > effectChains;
 
+    acquireWakeLock();
+
     while (!exitPending())
     {
         processConfigEvents();
@@ -2601,9 +2680,12 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
 
                     if (exitPending()) break;
 
+                    releaseWakeLock_l();
                     LOGV("DuplicatingThread %p TID %d going to sleep\n", this, gettid());
                     mWaitWorkCV.wait(mLock);
                     LOGV("DuplicatingThread %p TID %d waking up\n", this, gettid());
+                    acquireWakeLock_l();
+
                     if (mMasterMute == false) {
                         char value[PROPERTY_VALUE_MAX];
                         property_get("ro.audio.silent", value, "0");
@@ -2689,6 +2771,8 @@ bool AudioFlinger::DuplicatingThread::threadLoop()
         // mEffectChains list during mixing or effects processing
         effectChains.clear();
     }
+
+    releaseWakeLock();
 
     return false;
 }
@@ -3814,6 +3898,9 @@ AudioFlinger::RecordThread::RecordThread(const sp<AudioFlinger>& audioFlinger,
     mInput(input), mTrack(NULL), mResampler(0), mRsmpOutBuffer(0), mRsmpInBuffer(0)
 {
     mType = ThreadBase::RECORD;
+
+    snprintf(mName, kNameLength, "AudioIn_%d", id);
+
     mReqChannelCount = popcount(channels);
     mReqSampleRate = sampleRate;
     readInputParameters();
@@ -3831,12 +3918,7 @@ AudioFlinger::RecordThread::~RecordThread()
 
 void AudioFlinger::RecordThread::onFirstRef()
 {
-    const size_t SIZE = 256;
-    char buffer[SIZE];
-
-    snprintf(buffer, SIZE, "Record Thread %p", this);
-
-    run(buffer, PRIORITY_URGENT_AUDIO);
+    run(mName, PRIORITY_URGENT_AUDIO);
 }
 
 bool AudioFlinger::RecordThread::threadLoop()
@@ -3846,6 +3928,8 @@ bool AudioFlinger::RecordThread::threadLoop()
     Vector< sp<EffectChain> > effectChains;
 
     nsecs_t lastWarning = 0;
+
+    acquireWakeLock();
 
     // start recording
     while (!exitPending()) {
@@ -3863,10 +3947,12 @@ bool AudioFlinger::RecordThread::threadLoop()
 
                 if (exitPending()) break;
 
+                releaseWakeLock_l();
                 LOGV("RecordThread: loop stopping");
                 // go to sleep
                 mWaitWorkCV.wait(mLock);
                 LOGV("RecordThread: loop starting");
+                acquireWakeLock_l();
                 continue;
             }
             if (mActiveTrack != 0) {
@@ -4020,6 +4106,8 @@ bool AudioFlinger::RecordThread::threadLoop()
     mActiveTrack.clear();
 
     mStartStopCond.broadcast();
+
+    releaseWakeLock();
 
     LOGV("RecordThread %p exiting", this);
     return false;

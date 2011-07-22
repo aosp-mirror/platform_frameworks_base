@@ -43,6 +43,8 @@
 
 #include "AudioBufferProvider.h"
 
+#include <powermanager/IPowerManager.h>
+
 namespace android {
 
 class audio_track_cblk_t;
@@ -287,6 +289,8 @@ private:
         status_t dumpBase(int fd, const Vector<String16>& args);
         status_t dumpEffectChains(int fd, const Vector<String16>& args);
 
+        void clearPowerManager();
+
         // base for record and playback
         class TrackBase : public AudioBufferProvider, public RefBase {
 
@@ -386,6 +390,21 @@ private:
             int mParam;
         };
 
+        class PMDeathRecipient : public IBinder::DeathRecipient {
+        public:
+                        PMDeathRecipient(const wp<ThreadBase>& thread) : mThread(thread) {}
+            virtual     ~PMDeathRecipient() {}
+
+            // IBinder::DeathRecipient
+            virtual     void        binderDied(const wp<IBinder>& who);
+
+        private:
+                        PMDeathRecipient(const PMDeathRecipient&);
+                        PMDeathRecipient& operator = (const PMDeathRecipient&);
+
+            wp<ThreadBase> mThread;
+        };
+
         virtual     status_t    initCheck() const = 0;
                     int         type() const { return mType; }
                     uint32_t    sampleRate() const;
@@ -462,6 +481,11 @@ private:
 
     protected:
 
+                    void        acquireWakeLock();
+                    void        acquireWakeLock_l();
+                    void        releaseWakeLock();
+                    void        releaseWakeLock_l();
+
         friend class Track;
         friend class TrackBase;
         friend class PlaybackThread;
@@ -490,6 +514,11 @@ private:
                     Vector< sp<EffectChain> > mEffectChains;
                     uint32_t                mDevice;    // output device for PlaybackThread
                                                         // input + output devices for RecordThread
+                    static const int        kNameLength = 32;
+                    char                    mName[kNameLength];
+                    sp<IPowerManager>       mPowerManager;
+                    sp<IBinder>             mWakeLockToken;
+                    sp<PMDeathRecipient>    mDeathRecipient;
     };
 
     // --- PlaybackThread ---
