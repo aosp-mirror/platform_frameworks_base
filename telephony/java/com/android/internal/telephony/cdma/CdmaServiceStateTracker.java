@@ -130,8 +130,8 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
     protected String mCurPlmn = null;
 
     protected String mMdn;
-    private int mHomeSystemId[] = null;
-    private int mHomeNetworkId[] = null;
+    protected int mHomeSystemId[] = null;
+    protected int mHomeNetworkId[] = null;
     protected String mMin;
     protected String mPrlVersion;
     protected boolean mIsMinInfoReady = false;
@@ -1481,7 +1481,7 @@ public class CdmaServiceStateTracker extends ServiceStateTracker {
         }
     }
 
-    private boolean isSidsAllZeros() {
+    protected boolean isSidsAllZeros() {
         if (mHomeSystemId != null) {
             for (int i=0; i < mHomeSystemId.length; i++) {
                 if (mHomeSystemId[i] != 0) {
