@@ -158,7 +158,7 @@
     <!-- Checkbox label for application compatibility mode OFF (normal mode on tablets).
          [CHAR LIMIT=25] -->
     <string name="compat_mode_off">Stretch to fill screen</string>
-    
+
     <!-- Compatibility mode help screen: header text. [CHAR LIMIT=50] -->
     <string name="compat_mode_help_header">Compatibility Zoom</string>
 
@@ -168,7 +168,7 @@
     <!-- toast message displayed when a screenshot is saved to the Gallery. -->
     <string name="screenshot_saving_toast">Screenshot saved to Gallery</string>
     <!-- toast message displayed when we fail to take a screenshot. -->
-    <string name="screenshot_failed_toast">Could not save screenshot</string>
+    <string name="screenshot_failed_toast">Could not save screenshot. External storage may be in use.</string>
 
     <!-- Title for the USB function chooser in UsbPreferenceActivity. [CHAR LIMIT=30] -->
     <string name="usb_preference_title">USB file transfer options</string>
@@ -299,5 +299,4 @@
 
     <!-- Content description of the ringer silent icon in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_ringer_silent">Ringer silent.</string>
-
 </resources>

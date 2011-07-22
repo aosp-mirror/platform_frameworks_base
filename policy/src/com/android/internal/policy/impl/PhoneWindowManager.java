@@ -2444,20 +2444,22 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 if (down) {
-                    // If the power key down was already triggered, take the screenshot
-                    if (mPowerDownTriggered) {
-                        // Dismiss the power-key longpress
-                        mHandler.removeCallbacks(mPowerLongPress);
-                        mPowerKeyHandled = true;
+                    if (isScreenOn) {
+                        // If the power key down was already triggered, take the screenshot
+                        if (mPowerDownTriggered) {
+                            // Dismiss the power-key longpress
+                            mHandler.removeCallbacks(mPowerLongPress);
+                            mPowerKeyHandled = true;
 
-                        // Take the screenshot
-                        takeScreenshot();
+                            // Take the screenshot
+                            takeScreenshot();
 
-                        // Prevent the event from being passed through to the current activity
-                        result &= ~ACTION_PASS_TO_USER;
-                        break;
+                            // Prevent the event from being passed through to the current activity
+                            result &= ~ACTION_PASS_TO_USER;
+                            break;
+                        }
+                        mVolumeDownTriggered = true;
                     }
-                    mVolumeDownTriggered = true;
                 } else {
                     mVolumeDownTriggered = false;
                 }
@@ -2541,17 +2543,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case KeyEvent.KEYCODE_POWER: {
                 result &= ~ACTION_PASS_TO_USER;
                 if (down) {
-                    // If the volume down key has been triggered, then just take the screenshot
-                    if (mVolumeDownTriggered) {
-                        // Take the screenshot
-                        takeScreenshot();
-                        mPowerKeyHandled = true;
+                    if (isScreenOn) {
+                        // If the volume down key has been triggered, then just take the screenshot
+                        if (mVolumeDownTriggered) {
+                            // Take the screenshot
+                            takeScreenshot();
+                            mPowerKeyHandled = true;
 
-                        // Prevent the event from being passed through to the current activity
-                        break;
+                            // Prevent the event from being passed through to the current activity
+                            break;
+                        }
+                        mPowerDownTriggered = true;
                     }
-                    mPowerDownTriggered = true;
-
 
                     ITelephony telephonyService = getTelephonyService();
                     boolean hungUp = false;
