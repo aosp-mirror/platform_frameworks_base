@@ -29,7 +29,7 @@ namespace android {
 class MediaBuffer;
 class MetaData;
 
-struct MediaSource : public RefBase {
+struct MediaSource : public virtual RefBase {
     MediaSource();
 
     // To be called before any other methods on this object, except

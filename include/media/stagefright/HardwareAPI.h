@@ -99,6 +99,13 @@ struct GetAndroidNativeBufferUsageParams {
     OMX_U32 nUsage;             // OUT
 };
 
+// An enum OMX_COLOR_FormatAndroidOpaque to indicate an opaque colorformat
+// is declared in media/stagefright/openmax/OMX_IVCommon.h
+// This will inform the encoder that the actual
+// colorformat will be relayed by the GRalloc Buffers.
+// OMX_COLOR_FormatAndroidOpaque  = 0x7F000001,
+
+
 }  // namespace android
 
 extern android::OMXPluginBase *createOMXPlugin();
