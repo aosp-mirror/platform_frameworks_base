@@ -58,8 +58,8 @@ public class LinkProperties implements Parcelable {
     private ProxyProperties mHttpProxy;
 
     public static class CompareResult<T> {
-        public ArrayList<T> removed = new ArrayList<T>();
-        public ArrayList<T> added = new ArrayList<T>();
+        public Collection<T> removed = new ArrayList<T>();
+        public Collection<T> added = new ArrayList<T>();
 
         @Override
         public String toString() {

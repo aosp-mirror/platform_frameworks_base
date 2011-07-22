@@ -1090,7 +1090,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         try {
             InetAddress addr = InetAddress.getByAddress(hostAddress);
             LinkProperties lp = tracker.getLinkProperties();
-            return addRoute(lp, RouteInfo.makeHostRoute(addr));
+            return addRouteToAddress(lp, addr);
         } catch (UnknownHostException e) {}
         return false;
     }
@@ -1101,6 +1101,31 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private boolean removeRoute(LinkProperties p, RouteInfo r) {
         return modifyRoute(p.getInterfaceName(), p, r, 0, false);
+    }
+
+    private boolean addRouteToAddress(LinkProperties lp, InetAddress addr) {
+        return modifyRouteToAddress(lp, addr, true);
+    }
+
+    private boolean removeRouteToAddress(LinkProperties lp, InetAddress addr) {
+        return modifyRouteToAddress(lp, addr, false);
+    }
+
+    private boolean modifyRouteToAddress(LinkProperties lp, InetAddress addr, boolean doAdd) {
+        RouteInfo bestRoute = RouteInfo.selectBestRoute(lp.getRoutes(), addr);
+        if (bestRoute == null) {
+            bestRoute = RouteInfo.makeHostRoute(addr);
+        } else {
+            if (bestRoute.getGateway().equals(addr)) {
+                // if there is no better route, add the implied hostroute for our gateway
+                bestRoute = RouteInfo.makeHostRoute(addr);
+            } else {
+                // if we will connect to this through another route, add a direct route
+                // to it's gateway
+                bestRoute = RouteInfo.makeHostRoute(addr, bestRoute.getGateway());
+            }
+        }
+        return modifyRoute(lp.getInterfaceName(), lp, bestRoute, 0, doAdd);
     }
 
     private boolean modifyRoute(String ifaceName, LinkProperties lp, RouteInfo r, int cycleCount,
@@ -1713,49 +1738,50 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private void updateRoutes(LinkProperties newLp, LinkProperties curLp, boolean isLinkDefault) {
         Collection<RouteInfo> routesToAdd = null;
-        CompareResult<InetAddress> dnsDiff = null;
-
+        CompareResult<InetAddress> dnsDiff = new CompareResult<InetAddress>();
+        CompareResult<RouteInfo> routeDiff = new CompareResult<RouteInfo>();
         if (curLp != null) {
             // check for the delta between the current set and the new
-            CompareResult<RouteInfo> routeDiff = curLp.compareRoutes(newLp);
+            routeDiff = curLp.compareRoutes(newLp);
             dnsDiff = curLp.compareDnses(newLp);
-
-            for (RouteInfo r : routeDiff.removed) {
-                if (isLinkDefault || ! r.isDefaultRoute()) {
-                    removeRoute(curLp, r);
-                }
-            }
-            routesToAdd = routeDiff.added;
+        } else if (newLp != null) {
+            routeDiff.added = newLp.getRoutes();
+            dnsDiff.added = newLp.getDnses();
         }
 
-        if (newLp != null) {
-            // if we didn't get a diff from cur -> new, then just use the new
-            if (routesToAdd == null) {
-                routesToAdd = newLp.getRoutes();
+        for (RouteInfo r : routeDiff.removed) {
+            if (isLinkDefault || ! r.isDefaultRoute()) {
+                removeRoute(curLp, r);
             }
+        }
 
-            for (RouteInfo r :  routesToAdd) {
-                if (isLinkDefault || ! r.isDefaultRoute()) {
-                    addRoute(newLp, r);
-                }
+        for (RouteInfo r :  routeDiff.added) {
+            if (isLinkDefault || ! r.isDefaultRoute()) {
+                addRoute(newLp, r);
             }
         }
 
         if (!isLinkDefault) {
             // handle DNS routes
-            Collection<InetAddress> dnsToAdd = null;
-            if (dnsDiff != null) {
-                dnsToAdd = dnsDiff.added;
-                for (InetAddress dnsAddress : dnsDiff.removed) {
-                    removeRoute(curLp, RouteInfo.makeHostRoute(dnsAddress));
+            if (routeDiff.removed.size() == 0 && routeDiff.added.size() == 0) {
+                // no change in routes, check for change in dns themselves
+                for (InetAddress oldDns : dnsDiff.removed) {
+                    removeRouteToAddress(curLp, oldDns);
                 }
-            }
-            if (newLp != null) {
-                if (dnsToAdd == null) {
-                    dnsToAdd = newLp.getDnses();
+                for (InetAddress newDns : dnsDiff.added) {
+                    addRouteToAddress(newLp, newDns);
                 }
-                for(InetAddress dnsAddress : dnsToAdd) {
-                    addRoute(newLp, RouteInfo.makeHostRoute(dnsAddress));
+            } else {
+                // routes changed - remove all old dns entries and add new
+                if (curLp != null) {
+                    for (InetAddress oldDns : curLp.getDnses()) {
+                        removeRouteToAddress(curLp, oldDns);
+                    }
+                }
+                if (newLp != null) {
+                    for (InetAddress newDns : newLp.getDnses()) {
+                        addRouteToAddress(newLp, newDns);
+                    }
                 }
             }
         }
