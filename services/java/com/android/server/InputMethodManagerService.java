@@ -1127,13 +1127,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mBackDisposition = backDisposition;
                 mStatusBar.setImeWindowStatus(token, vis, backDisposition);
                 final boolean iconVisibility = (vis & InputMethodService.IME_ACTIVE) != 0;
-                if (iconVisibility && needsToShowImeSwitchOngoingNotification()) {
+                final InputMethodInfo imi = mMethodMap.get(mCurMethodId);
+                if (imi != null && iconVisibility && needsToShowImeSwitchOngoingNotification()) {
                     final PackageManager pm = mContext.getPackageManager();
-                    final CharSequence label = mMethodMap.get(mCurMethodId).loadLabel(pm);
                     final CharSequence title = mRes.getText(
                             com.android.internal.R.string.select_input_method);
+                    final CharSequence imiLabel = imi.loadLabel(pm);
+                    final CharSequence summary = mCurrentSubtype != null
+                            ? TextUtils.concat(mCurrentSubtype.getDisplayName(mContext,
+                                        imi.getPackageName(), imi.getServiceInfo().applicationInfo),
+                                                (TextUtils.isEmpty(imiLabel) ?
+                                                        "" : " (" + imiLabel + ")"))
+                            : imiLabel;
+
                     mImeSwitcherNotification.setLatestEventInfo(
-                            mContext, title, label, mImeSwitchPendingIntent);
+                            mContext, title, summary, mImeSwitchPendingIntent);
                     mNotificationManager.notify(
                             com.android.internal.R.string.select_input_method,
                             mImeSwitcherNotification);
