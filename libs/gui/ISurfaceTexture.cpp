@@ -38,7 +38,6 @@ enum {
     CANCEL_BUFFER,
     SET_CROP,
     SET_TRANSFORM,
-    GET_ALLOCATOR,
     QUERY,
     SET_SYNCHRONOUS_MODE,
     CONNECT,
@@ -142,13 +141,6 @@ public:
         remote()->transact(SET_SCALING_MODE, data, &reply);
         status_t result = reply.readInt32();
         return result;
-    }
-
-    virtual sp<IBinder> getAllocator() {
-        Parcel data, reply;
-        data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
-        remote()->transact(GET_ALLOCATOR, data, &reply);
-        return reply.readStrongBinder();
     }
 
     virtual int query(int what, int* value) {
@@ -268,12 +260,6 @@ status_t BnSurfaceTexture::onTransact(
             int mode = data.readInt32();
             status_t result = setScalingMode(mode);
             reply->writeInt32(result);
-            return NO_ERROR;
-        } break;
-        case GET_ALLOCATOR: {
-            CHECK_INTERFACE(ISurfaceTexture, data, reply);
-            sp<IBinder> result = getAllocator();
-            reply->writeStrongBinder(result);
             return NO_ERROR;
         } break;
         case QUERY: {

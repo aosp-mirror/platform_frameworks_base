@@ -65,9 +65,6 @@ void SurfaceTextureClient::setISurfaceTexture(
         const sp<ISurfaceTexture>& surfaceTexture)
 {
     mSurfaceTexture = surfaceTexture;
-
-    // Get a reference to the allocator.
-    mAllocator = mSurfaceTexture->getAllocator();
 }
 
 sp<ISurfaceTexture> SurfaceTextureClient::getISurfaceTexture() const {

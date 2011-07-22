@@ -343,8 +343,7 @@ private:
 
     // mCurrentTextureBuf is the graphic buffer of the current texture. It's
     // possible that this buffer is not associated with any buffer slot, so we
-    // must track it separately in order to properly use
-    // IGraphicBufferAlloc::freeAllGraphicBuffersExcept.
+    // must track it separately in order to support the getCurrentBuffer method.
     sp<GraphicBuffer> mCurrentTextureBuf;
 
     // mCurrentCrop is the crop rectangle that applies to the current texture.
