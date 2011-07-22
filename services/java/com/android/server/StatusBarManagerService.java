@@ -69,8 +69,8 @@ public class StatusBarManagerService extends IStatusBarService.Stub
     int mDisabled = 0;
 
     Object mLock = new Object();
-    // We usually call it lights out mode, but double negatives are annoying
-    boolean mLightsOn = true;
+    // encompasses lights-out mode and other flags defined on View
+    int mSystemUiVisibility = 0;
     boolean mMenuVisible = false;
     int mImeWindowVis = 0;
     int mImeBackDisposition;
@@ -301,22 +301,23 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         // also allows calls from window manager which is in this process.
         enforceStatusBarService();
 
+        if (SPEW) Slog.d(TAG, "setSystemUiVisibility(" + vis + ")");
+
         synchronized (mLock) {
-            final boolean lightsOn = (vis & View.STATUS_BAR_HIDDEN) == 0;
-            updateLightsOnLocked(lightsOn);
+            updateUiVisibilityLocked(vis);
             disableLocked(vis & StatusBarManager.DISABLE_MASK, mSysUiVisToken,
                     "WindowManager.LayoutParams");
         }
     }
 
-    private void updateLightsOnLocked(final boolean lightsOn) {
-        if (mLightsOn != lightsOn) {
-            mLightsOn = lightsOn;
+    private void updateUiVisibilityLocked(final int vis) {
+        if (mSystemUiVisibility != vis) {
+            mSystemUiVisibility = vis;
             mHandler.post(new Runnable() {
                     public void run() {
                         if (mBar != null) {
                             try {
-                                mBar.setLightsOn(lightsOn);
+                                mBar.setSystemUiVisibility(vis);
                             } catch (RemoteException ex) {
                             }
                         }
@@ -392,7 +393,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub
         }
         synchronized (mLock) {
             switches[0] = gatherDisableActionsLocked();
-            switches[1] = mLightsOn ? 1 : 0;
+            switches[1] = mSystemUiVisibility;
             switches[2] = mMenuVisible ? 1 : 0;
             switches[3] = mImeWindowVis;
             switches[4] = mImeBackDisposition;

@@ -78,7 +78,7 @@ public abstract class StatusBar extends SystemUI implements CommandQueue.Callbac
         }
 
         disable(switches[0]);
-        setLightsOn(switches[1] != 0);
+        setSystemUiVisibility(switches[1]);
         topAppWindowChanged(switches[2] != 0);
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(binders.get(0), switches[3], switches[4]);

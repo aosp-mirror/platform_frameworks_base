@@ -1784,18 +1784,51 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     public static final int OVER_SCROLL_NEVER = 2;
 
     /**
-     * View has requested the status bar to be visible (the default).
+     * View has requested the system UI (status bar) to be visible (the default).
      *
      * @see #setSystemUiVisibility(int)
      */
-    public static final int STATUS_BAR_VISIBLE = 0;
+    public static final int SYSTEM_UI_FLAG_VISIBLE = 0;
 
     /**
-     * View has requested the status bar to be hidden.
+     * View has requested the system UI to enter an unobtrusive "low profile" mode.
+     *
+     * This is for use in games, book readers, video players, or any other "immersive" application
+     * where the usual system chrome is deemed too distracting. 
+     *
+     * In low profile mode, the status bar and/or navigation icons may dim.
      *
      * @see #setSystemUiVisibility(int)
      */
-    public static final int STATUS_BAR_HIDDEN = 0x00000001;
+    public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 0x00000001;
+
+    /**
+     * View has requested that the system navigation be temporarily hidden.
+     *
+     * This is an even less obtrusive state than that called for by
+     * {@link #SYSTEM_UI_FLAG_LOW_PROFILE}; on devices that draw essential navigation controls
+     * (Home, Back, and the like) on screen, <code>SYSTEM_UI_FLAG_HIDE_NAVIGATION</code> will cause
+     * those to disappear. This is useful (in conjunction with the
+     * {@link android.view.WindowManager.LayoutParams#FLAG_FULLSCREEN FLAG_FULLSCREEN} and 
+     * {@link android.view.WindowManager.LayoutParams#FLAG_LAYOUT_IN_SCREEN FLAG_LAYOUT_IN_SCREEN}
+     * window flags) for displaying content using every last pixel on the display.
+     *
+     * There is a limitation: because navigation controls are so important, the least user
+     * interaction will cause them to reappear immediately.
+     *
+     * @see #setSystemUiVisibility(int)
+     */
+    public static final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = 0x00000002;
+
+    /**
+     * @deprecated Use {@link #SYSTEM_UI_FLAG_LOW_PROFILE} instead.
+     */
+    public static final int STATUS_BAR_HIDDEN = SYSTEM_UI_FLAG_LOW_PROFILE;
+
+    /**
+     * @deprecated Use {@link #SYSTEM_UI_FLAG_VISIBLE} instead.
+     */
+    public static final int STATUS_BAR_VISIBLE = SYSTEM_UI_FLAG_VISIBLE;
 
     /**
      * @hide
@@ -1889,7 +1922,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     /**
      * @hide
      */
-    public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = STATUS_BAR_HIDDEN;
+    public static final int PUBLIC_STATUS_BAR_VISIBILITY_MASK = 0x0000FFFF;
 
     /**
      * Controls the over-scroll mode for this view.
@@ -1934,7 +1967,17 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * This view's request for the visibility of the status bar.
      * @hide
      */
-    @ViewDebug.ExportedProperty()
+    @ViewDebug.ExportedProperty(flagMapping = {
+        @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_LOW_PROFILE,
+                                equals = SYSTEM_UI_FLAG_LOW_PROFILE,
+                                name = "SYSTEM_UI_FLAG_LOW_PROFILE", outputIf = true),
+        @ViewDebug.FlagToString(mask = SYSTEM_UI_FLAG_HIDE_NAVIGATION,
+                                equals = SYSTEM_UI_FLAG_HIDE_NAVIGATION,
+                                name = "SYSTEM_UI_FLAG_HIDE_NAVIGATION", outputIf = true),
+        @ViewDebug.FlagToString(mask = PUBLIC_STATUS_BAR_VISIBILITY_MASK,
+                                equals = SYSTEM_UI_FLAG_VISIBLE,
+                                name = "SYSTEM_UI_FLAG_VISIBLE", outputIf = true)
+    })
     int mSystemUiVisibility;
 
     /**
@@ -12537,7 +12580,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
     /**
      * Request that the visibility of the status bar be changed.
-     * @param visibility  Either {@link #STATUS_BAR_VISIBLE} or {@link #STATUS_BAR_HIDDEN}.
+     * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE} or
+     * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.
      */
     public void setSystemUiVisibility(int visibility) {
         if (visibility != mSystemUiVisibility) {
@@ -12550,7 +12594,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
     /**
      * Returns the status bar visibility that this view has requested.
-     * @return Either {@link #STATUS_BAR_VISIBLE} or {@link #STATUS_BAR_HIDDEN}.
+     * @return  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE} or
+     * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.
      */
     public int getSystemUiVisibility() {
         return mSystemUiVisibility;
@@ -13653,7 +13698,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
          * Called when the status bar changes visibility because of a call to
          * {@link View#setSystemUiVisibility(int)}.
          *
-         * @param visibility {@link #STATUS_BAR_VISIBLE} or {@link #STATUS_BAR_HIDDEN}.
+         * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE} or
+         * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.
          */
         public void onSystemUiVisibilityChange(int visibility);
     }
