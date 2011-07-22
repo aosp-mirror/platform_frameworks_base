@@ -563,6 +563,12 @@ public abstract class PreferenceActivity extends ListActivity implements
             // Single pane, showing just a prefs fragment.
             findViewById(com.android.internal.R.id.headers).setVisibility(View.GONE);
             mPrefsContainer.setVisibility(View.VISIBLE);
+            if (initialTitle != 0) {
+                CharSequence initialTitleStr = getText(initialTitle);
+                CharSequence initialShortTitleStr = initialShortTitle != 0
+                        ? getText(initialShortTitle) : null;
+                showBreadCrumbs(initialTitleStr, initialShortTitleStr);
+            }
         } else if (mHeaders.size() > 0) {
             setListAdapter(new HeaderAdapter(this, mHeaders));
             if (!mSinglePane) {
@@ -1093,6 +1099,10 @@ public abstract class PreferenceActivity extends ListActivity implements
         } else {
             getListView().clearChoices();
         }
+        showBreadCrumbs(header);
+    }
+
+    void showBreadCrumbs(Header header) {
         if (header != null) {
             CharSequence title = header.getBreadCrumbTitle(getResources());
             if (title == null) title = header.getTitle(getResources());
