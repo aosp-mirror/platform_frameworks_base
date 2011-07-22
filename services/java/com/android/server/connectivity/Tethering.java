@@ -221,6 +221,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     public void interfaceLinkStateChanged(String iface, boolean up) {
+        if (DEBUG) Log.d(TAG, "interfaceLinkStateChanged " + iface + ", " + up);
+        interfaceStatusChanged(iface, up);
     }
 
     private boolean isUsb(String iface) {

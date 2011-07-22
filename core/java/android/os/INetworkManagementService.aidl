@@ -180,7 +180,7 @@ interface INetworkManagementService
     /**
      * Stop Wifi Access Point
      */
-    void stopAccessPoint();
+    void stopAccessPoint(String wlanIface);
 
     /**
      * Set Access Point config
