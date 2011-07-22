@@ -226,6 +226,7 @@ status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
                 NATIVE_WINDOW_API_MEDIA);
 
         if (err != OK) {
+            LOGE("setVideoSurface failed: %d", err);
             // Note that we must do the reset before disconnecting from the ANW.
             // Otherwise queue/dequeue calls could be made on the disconnected
             // ANW, which may result in errors.
@@ -275,6 +276,7 @@ status_t MediaPlayer::setVideoSurfaceTexture(
                 NATIVE_WINDOW_API_MEDIA);
 
         if (err != OK) {
+            LOGE("setVideoSurfaceTexture failed: %d", err);
             // Note that we must do the reset before disconnecting from the ANW.
             // Otherwise queue/dequeue calls could be made on the disconnected
             // ANW, which may result in errors.
