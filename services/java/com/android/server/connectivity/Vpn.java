@@ -248,6 +248,8 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
     }
 
+    public void limitReached(String limitName, String iface) {}
+
     private void showNotification(VpnConfig config, String label, Bitmap icon) {
         NotificationManager nm = (NotificationManager)
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);

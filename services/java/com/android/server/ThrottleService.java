@@ -194,6 +194,7 @@ public class ThrottleService extends IThrottleManager.Stub {
         }
 
         public void interfaceRemoved(String iface) {}
+        public void limitReached(String limitName, String iface) {}
     }
 
 

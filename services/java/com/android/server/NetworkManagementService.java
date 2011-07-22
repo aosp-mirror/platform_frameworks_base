@@ -93,6 +93,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     private static final String KEY_TX = "tx_bytes";
 
     class NetdResponseCode {
+        /* Keep in sync with system/netd/ResponseCode.h */
         public static final int InterfaceListResult       = 110;
         public static final int TetherInterfaceListResult = 111;
         public static final int TetherDnsFwdTgtListResult = 112;
@@ -108,6 +109,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         public static final int InterfaceTxThrottleResult = 219;
 
         public static final int InterfaceChange           = 600;
+        public static final int BandwidthControl          = 601;
     }
 
     /**
@@ -265,6 +267,20 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     /**
+     * Notify our observers of a limit reached.
+     */
+    private void notifyLimitReached(String limitName, String iface) {
+        for (INetworkManagementEventObserver obs : mObservers) {
+            try {
+                obs.limitReached(limitName, iface);
+                Slog.d(TAG, "Observer notified limit reached for " + limitName + " " + iface);
+            } catch (Exception ex) {
+                Slog.w(TAG, "Observer notifier failed", ex);
+            }
+        }
+    }
+
+    /**
      * Let us know the daemon is connected
      */
     protected void onConnected() {
@@ -286,33 +302,52 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             }.start();
         }
         public boolean onEvent(int code, String raw, String[] cooked) {
-            if (code == NetdResponseCode.InterfaceChange) {
-                /*
-                 * a network interface change occured
-                 * Format: "NNN Iface added <name>"
-                 *         "NNN Iface removed <name>"
-                 *         "NNN Iface changed <name> <up/down>"
-                 *         "NNN Iface linkstatus <name> <up/down>"
-                 */
-                if (cooked.length < 4 || !cooked[1].equals("Iface")) {
+            switch (code) {
+            case NetdResponseCode.InterfaceChange:
+                    /*
+                     * a network interface change occured
+                     * Format: "NNN Iface added <name>"
+                     *         "NNN Iface removed <name>"
+                     *         "NNN Iface changed <name> <up/down>"
+                     *         "NNN Iface linkstatus <name> <up/down>"
+                     */
+                    if (cooked.length < 4 || !cooked[1].equals("Iface")) {
+                        throw new IllegalStateException(
+                                String.format("Invalid event from daemon (%s)", raw));
+                    }
+                    if (cooked[2].equals("added")) {
+                        notifyInterfaceAdded(cooked[3]);
+                        return true;
+                    } else if (cooked[2].equals("removed")) {
+                        notifyInterfaceRemoved(cooked[3]);
+                        return true;
+                    } else if (cooked[2].equals("changed") && cooked.length == 5) {
+                        notifyInterfaceStatusChanged(cooked[3], cooked[4].equals("up"));
+                        return true;
+                    } else if (cooked[2].equals("linkstate") && cooked.length == 5) {
+                        notifyInterfaceLinkStateChanged(cooked[3], cooked[4].equals("up"));
+                        return true;
+                    }
                     throw new IllegalStateException(
                             String.format("Invalid event from daemon (%s)", raw));
-                }
-                if (cooked[2].equals("added")) {
-                    notifyInterfaceAdded(cooked[3]);
-                    return true;
-                } else if (cooked[2].equals("removed")) {
-                    notifyInterfaceRemoved(cooked[3]);
-                    return true;
-                } else if (cooked[2].equals("changed") && cooked.length == 5) {
-                    notifyInterfaceStatusChanged(cooked[3], cooked[4].equals("up"));
-                    return true;
-                } else if (cooked[2].equals("linkstate") && cooked.length == 5) {
-                    notifyInterfaceLinkStateChanged(cooked[3], cooked[4].equals("up"));
-                    return true;
-                }
-                throw new IllegalStateException(
-                        String.format("Invalid event from daemon (%s)", raw));
+                    // break;
+            case NetdResponseCode.BandwidthControl:
+                    /*
+                     * Bandwidth control needs some attention
+                     * Format: "NNN limit alert <alertName> <ifaceName>"
+                     */
+                    if (cooked.length < 5 || !cooked[1].equals("limit")) {
+                        throw new IllegalStateException(
+                                String.format("Invalid event from daemon (%s)", raw));
+                    }
+                    if (cooked[2].equals("alert")) {
+                        notifyLimitReached(cooked[3], cooked[4]);
+                        return true;
+                    }
+                    throw new IllegalStateException(
+                            String.format("Invalid event from daemon (%s)", raw));
+                    // break;
+            default: break;
             }
             return false;
         }
