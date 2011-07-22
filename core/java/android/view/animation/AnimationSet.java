@@ -139,6 +139,9 @@ public class AnimationSet extends Animation {
         super.setStartOffset(startOffset);
     }
 
+    /**
+     * @hide
+     */
     @Override
     public boolean hasAlpha() {
         if (mDirty) {
