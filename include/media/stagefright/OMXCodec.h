@@ -348,6 +348,8 @@ struct CodecCapabilities {
 // that encode content of the given type.
 // profile and level indications only make sense for h.263, mpeg4 and avc
 // video.
+// If hwCodecOnly==true, only returns hardware-based components, software and
+// hardware otherwise.
 // The profile/level values correspond to
 // OMX_VIDEO_H263PROFILETYPE, OMX_VIDEO_MPEG4PROFILETYPE,
 // OMX_VIDEO_AVCPROFILETYPE, OMX_VIDEO_H263LEVELTYPE, OMX_VIDEO_MPEG4LEVELTYPE
@@ -356,6 +358,11 @@ struct CodecCapabilities {
 status_t QueryCodecs(
         const sp<IOMX> &omx,
         const char *mimeType, bool queryDecoders, bool hwCodecOnly,
+        Vector<CodecCapabilities> *results);
+
+status_t QueryCodecs(
+        const sp<IOMX> &omx,
+        const char *mimeType, bool queryDecoders,
         Vector<CodecCapabilities> *results);
 
 }  // namespace android

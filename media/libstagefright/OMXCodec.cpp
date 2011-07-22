@@ -4415,6 +4415,13 @@ status_t QueryCodecs(
     return OK;
 }
 
+status_t QueryCodecs(
+        const sp<IOMX> &omx,
+        const char *mimeType, bool queryDecoders,
+        Vector<CodecCapabilities> *results) {
+    return QueryCodecs(omx, mimeType, queryDecoders, false /*hwCodecOnly*/, results);
+}
+
 void OMXCodec::restorePatchedDataPointer(BufferInfo *info) {
     CHECK(mIsEncoder && (mQuirks & kAvoidMemcopyInputRecordingFrames));
     CHECK(mOMXLivesLocally);
