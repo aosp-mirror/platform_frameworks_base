@@ -21004,6 +21004,11 @@ package android.view {
     method public void onPrepareSubMenu(android.view.SubMenu);
   }
 
+  public abstract interface CollapsibleActionView {
+    method public abstract void onActionViewCollapsed();
+    method public abstract void onActionViewExpanded();
+  }
+
   public abstract interface ContextMenu implements android.view.Menu {
     method public abstract void clearHeader();
     method public abstract android.view.ContextMenu setHeaderIcon(int);

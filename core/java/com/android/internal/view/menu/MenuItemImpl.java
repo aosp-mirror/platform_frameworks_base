@@ -553,6 +553,9 @@ public final class MenuItemImpl implements MenuItem {
     public MenuItem setActionView(View view) {
         mActionView = view;
         mActionProvider = null;
+        if (view != null && view.getId() == View.NO_ID && mId > 0) {
+            view.setId(mId);
+        }
         mMenu.onItemActionRequestChanged(this);
         return this;
     }

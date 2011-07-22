@@ -42,6 +42,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.CollapsibleActionView;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -1304,6 +1305,10 @@ public class ActionBarView extends AbsActionBarView {
             if (mCustomNavView != null) mCustomNavView.setVisibility(GONE);
             requestLayout();
             item.setActionViewExpanded(true);
+
+            if (mExpandedActionView instanceof CollapsibleActionView) {
+                ((CollapsibleActionView) mExpandedActionView).onActionViewExpanded();
+            }
             return true;
         }
 
@@ -1330,11 +1335,16 @@ public class ActionBarView extends AbsActionBarView {
             if (mCustomNavView != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0) {
                 mCustomNavView.setVisibility(VISIBLE);
             }
+            View collapsedView = mExpandedActionView;
             mExpandedActionView = null;
             mExpandedHomeLayout.setIcon(null);
             mCurrentExpandedItem = null;
             requestLayout();
             item.setActionViewExpanded(false);
+
+            if (collapsedView instanceof CollapsibleActionView) {
+                ((CollapsibleActionView) collapsedView).onActionViewCollapsed();
+            }
             return true;
         }
 

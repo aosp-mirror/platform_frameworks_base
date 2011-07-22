@@ -121,4 +121,13 @@ public class SubMenuBuilder extends MenuBuilder implements SubMenu {
     public boolean collapseItemActionView(MenuItemImpl item) {
         return mParentMenu.collapseItemActionView(item);
     }
+
+    @Override
+    public String getActionViewStatesKey() {
+        final int itemId = mItem != null ? mItem.getItemId() : 0;
+        if (itemId == 0) {
+            return null;
+        }
+        return super.getActionViewStatesKey() + ":" + itemId;
+    }
 }
