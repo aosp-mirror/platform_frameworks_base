@@ -6514,6 +6514,32 @@ public final class ContactsContract {
         public static final String SUMMARY_COUNT = "summ_count";
 
         /**
+         * A boolean query parameter that can be used with {@link Groups#CONTENT_SUMMARY_URI}.
+         * It will additionally return {@link #SUMMARY_GROUP_COUNT_PER_ACCOUNT}.
+         *
+         * @hide
+         */
+        public static final String PARAM_RETURN_GROUP_COUNT_PER_ACCOUNT =
+                "return_group_count_per_account";
+
+        /**
+         * The total number of groups of the account that a group belongs to.
+         * This column is available only when the parameter
+         * {@link #PARAM_RETURN_GROUP_COUNT_PER_ACCOUNT} is specified in
+         * {@link Groups#CONTENT_SUMMARY_URI}.
+         *
+         * For example, when the account "A" has two groups "group1" and "group2", and the account
+         * "B" has a group "group3", the rows for "group1" and "group2" return "2" and the row for
+         * "group3" returns "1" for this column.
+         *
+         * Note: This counts only non-favorites, non-auto-add, and not deleted groups.
+         *
+         * Type: INTEGER
+         * @hide
+         */
+        public static final String SUMMARY_GROUP_COUNT_PER_ACCOUNT = "group_count_per_account";
+
+        /**
          * The total number of {@link Contacts} that have both
          * {@link CommonDataKinds.GroupMembership} in this group, and also have phone numbers.
          * Read-only value that is only present when querying
