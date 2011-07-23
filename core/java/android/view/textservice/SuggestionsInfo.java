@@ -23,27 +23,23 @@ import android.os.Parcelable;
  * This class contains a metadata of suggestions from the text service
  */
 public final class SuggestionsInfo implements Parcelable {
+    private static final String[] EMPTY = new String[0];
+
     /**
      * Flag of the attributes of the suggestions that can be obtained by
      * {@link #getSuggestionsAttributes}: this tells that the requested word was found
      * in the dictionary in the text service.
      */
     public static final int RESULT_ATTR_IN_THE_DICTIONARY = 0x0001;
-    /** Flag of the attributes of the suggestions that can be obtained by
-     * {@link #getSuggestionsAttributes}: this tells that there are one or more suggestions
-     * available for the requested word.  This doesn't necessarily mean that the suggestions
-     * are actually in this SuggestionsInfo.  For instance, the caller could have been asked to
-     * limit the maximum number of suggestions returned.
-     */
-    public static final int RESULT_ATTR_SUGGESTIONS_AVAILABLE = 0x0002;
     /**
      * Flag of the attributes of the suggestions that can be obtained by
      * {@link #getSuggestionsAttributes}: this tells that the text service thinks the requested
      * word looks a typo.
      */
-    public static final int RESULT_ATTR_LOOKS_TYPO = 0x0004;
+    public static final int RESULT_ATTR_LOOKS_TYPO = 0x0002;
     private final int mSuggestionsAttributes;
     private final String[] mSuggestions;
+    private final boolean mSuggestionsAvailable;
     private int mCookie;
     private int mSequence;
 
@@ -53,11 +49,14 @@ public final class SuggestionsInfo implements Parcelable {
      * @param suggestions from the text service
      */
     public SuggestionsInfo(int suggestionsAttributes, String[] suggestions) {
-        if (suggestions == null) {
-            throw new NullPointerException();
-        }
         mSuggestionsAttributes = suggestionsAttributes;
-        mSuggestions = suggestions;
+        if (suggestions == null) {
+            mSuggestions = EMPTY;
+            mSuggestionsAvailable = false;
+        } else {
+            mSuggestions = suggestions;
+            mSuggestionsAvailable = true;
+        }
         mCookie = 0;
         mSequence = 0;
     }
@@ -72,10 +71,13 @@ public final class SuggestionsInfo implements Parcelable {
     public SuggestionsInfo(
             int suggestionsAttributes, String[] suggestions, int cookie, int sequence) {
         if (suggestions == null) {
-            throw new NullPointerException();
+            mSuggestions = EMPTY;
+            mSuggestionsAvailable = false;
+        } else {
+            mSuggestions = suggestions;
+            mSuggestionsAvailable = true;
         }
         mSuggestionsAttributes = suggestionsAttributes;
-        mSuggestions = suggestions;
         mCookie = cookie;
         mSequence = sequence;
     }
@@ -85,6 +87,7 @@ public final class SuggestionsInfo implements Parcelable {
         mSuggestions = source.readStringArray();
         mCookie = source.readInt();
         mSequence = source.readInt();
+        mSuggestionsAvailable = source.readInt() == 1;
     }
 
     /**
@@ -99,6 +102,7 @@ public final class SuggestionsInfo implements Parcelable {
         dest.writeStringArray(mSuggestions);
         dest.writeInt(mCookie);
         dest.writeInt(mSequence);
+        dest.writeInt(mSuggestionsAvailable ? 1 : 0);
     }
 
     /**
@@ -136,9 +140,15 @@ public final class SuggestionsInfo implements Parcelable {
     }
 
     /**
-     * @return the count of suggestions
+     * @return the count of the suggestions. If there's no suggestions at all, this method returns
+     * -1. Even if this method returns 0, it doesn't necessarily mean that there are no suggestions
+     * for the requested word. For instance, the caller could have been asked to limit the maximum
+     * number of suggestions returned.
      */
     public int getSuggestionsCount() {
+        if (!mSuggestionsAvailable) {
+            return -1;
+        }
         return mSuggestions.length;
     }
 

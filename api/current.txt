@@ -17956,6 +17956,7 @@ package android.service.textservice {
 
   public class SpellCheckerSession {
     method public void close();
+    method public android.view.textservice.SpellCheckerInfo getSpellChecker();
     method public void getSuggestions(android.view.textservice.TextInfo, int);
     method public void getSuggestions(android.view.textservice.TextInfo[], int, boolean);
     method public boolean isSessionDisconnected();
@@ -24072,8 +24073,7 @@ package android.view.textservice {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int RESULT_ATTR_IN_THE_DICTIONARY = 1; // 0x1
-    field public static final int RESULT_ATTR_LOOKS_TYPO = 4; // 0x4
-    field public static final int RESULT_ATTR_SUGGESTIONS_AVAILABLE = 2; // 0x2
+    field public static final int RESULT_ATTR_LOOKS_TYPO = 2; // 0x2
   }
 
   public final class TextInfo implements android.os.Parcelable {
@@ -24089,8 +24089,7 @@ package android.view.textservice {
   }
 
   public final class TextServicesManager {
-    method public android.view.textservice.SpellCheckerInfo getCurrentSpellChecker(java.util.Locale);
-    method public android.service.textservice.SpellCheckerSession newSpellCheckerSession(android.view.textservice.SpellCheckerInfo, java.util.Locale, android.service.textservice.SpellCheckerSession.SpellCheckerSessionListener);
+    method public android.service.textservice.SpellCheckerSession newSpellCheckerSession(java.util.Locale, android.service.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
   }
 
 }

@@ -63,37 +63,31 @@ public final class TextServicesManager {
         return sInstance;
     }
 
-
     /**
-     * Get the current spell checker service info for the specified locale.
-     * @param locale locale of a spell checker
-     * @return SpellCheckerInfo for the specified locale.
+     * Get a spell checker session for the specified spell checker
+     * @param locale the locale for the spell checker
+     * @param listener a spell checker session lister for getting results from a spell checker.
+     * @param referToSpellCheckerLanguageSettings if true, the session for one of enabled
+     * languages in settings will be returned.
+     * @return the spell checker session of the spell checker
      */
     // TODO: Add a method to get enabled spell checkers.
-    public SpellCheckerInfo getCurrentSpellChecker(Locale locale) {
-        if (locale == null) {
-            throw new NullPointerException("locale is null");
+    // TODO: Handle referToSpellCheckerLanguageSettings
+    public SpellCheckerSession newSpellCheckerSession(Locale locale,
+            SpellCheckerSessionListener listener, boolean referToSpellCheckerLanguageSettings) {
+        if (locale == null || listener == null) {
+            throw new NullPointerException();
         }
+        final SpellCheckerInfo info;
         try {
-            return sService.getCurrentSpellChecker(locale.toString());
+            info = sService.getCurrentSpellChecker(locale.toString());
         } catch (RemoteException e) {
             return null;
         }
-    }
-
-    /**
-     * Get a spell checker session for a specified spell checker
-     * @param info SpellCheckerInfo of the spell checker
-     * @param locale the locale for the spell checker
-     * @param listener a spell checker session lister for getting results from a spell checker.
-     * @return the spell checker session of the spell checker
-     */
-    public SpellCheckerSession newSpellCheckerSession(
-            SpellCheckerInfo info, Locale locale, SpellCheckerSessionListener listener) {
-        if (info == null || locale == null || listener == null) {
-            throw new NullPointerException();
+        if (info == null) {
+            return null;
         }
-        final SpellCheckerSession session = new SpellCheckerSession(sService, listener);
+        final SpellCheckerSession session = new SpellCheckerSession(info, sService, listener);
         try {
             sService.getSpellCheckerService(
                     info, locale.toString(), session.getTextServicesSessionListener(),
