@@ -396,7 +396,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             if (mTimer == -1) {
                 mTimer = now;
                 Thread.sleep(1);
-            } else if (now - mTimer <= 30000) {
+            } else if (now - mTimer <= 60000) {
                 Thread.sleep(yield ? 200 : 1);
             } else {
                 mInfo.state = LegacyVpnInfo.STATE_TIMEOUT;
