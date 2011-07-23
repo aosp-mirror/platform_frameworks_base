@@ -2040,13 +2040,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         mActionModePopup = new PopupWindow(mContext, null,
                                 com.android.internal.R.attr.actionModePopupWindowStyle);
                         mActionModePopup.setLayoutInScreenEnabled(true);
+                        mActionModePopup.setLayoutInsetDecor(true);
                         mActionModePopup.setClippingEnabled(false);
                         mActionModePopup.setContentView(mActionModeView);
                         mActionModePopup.setWidth(MATCH_PARENT);
 
                         TypedValue heightValue = new TypedValue();
                         mContext.getTheme().resolveAttribute(
-                                com.android.internal.R.attr.actionBarSize, heightValue, false);
+                                com.android.internal.R.attr.actionBarSize, heightValue, true);
                         final int height = TypedValue.complexToDimensionPixelSize(heightValue.data,
                                 mContext.getResources().getDisplayMetrics());
                         mActionModePopup.setHeight(height);

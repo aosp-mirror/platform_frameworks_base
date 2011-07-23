@@ -91,6 +91,7 @@ public class PopupWindow {
     private boolean mLayoutInScreen;
     private boolean mClipToScreen;
     private boolean mAllowScrollingAnchorParent = true;
+    private boolean mLayoutInsetDecor = false;
 
     private OnTouchListener mTouchInterceptor;
     
@@ -658,6 +659,22 @@ public class PopupWindow {
     }
 
     /**
+     * Allows the popup window to force the flag
+     * {@link WindowManager.LayoutParams#FLAG_LAYOUT_INSET_DECOR}, overriding default behavior.
+     * This will cause the popup to inset its content to account for system windows overlaying
+     * the screen, such as the status bar.
+     *
+     * <p>This will often be combined with {@link #setLayoutInScreenEnabled(boolean)}.
+     *
+     * @param enabled true if the popup's views should inset content to account for system windows,
+     *                the way that decor views behave for full-screen windows.
+     * @hide
+     */
+    public void setLayoutInsetDecor(boolean enabled) {
+        mLayoutInsetDecor = enabled;
+    }
+
+    /**
      * Set the layout type for this window. Should be one of the TYPE constants defined in
      * {@link WindowManager.LayoutParams}.
      *
@@ -942,6 +959,7 @@ public class PopupWindow {
         if (mContext != null) {
             p.packageName = mContext.getPackageName();
         }
+        mPopupView.setFitsSystemWindows(mLayoutInsetDecor);
         mWindowManager.addView(mPopupView, p);
     }
 
@@ -1011,6 +1029,9 @@ public class PopupWindow {
         }
         if (mLayoutInScreen) {
             curFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+        }
+        if (mLayoutInsetDecor) {
+            curFlags |= WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR;
         }
         return curFlags;
     }
