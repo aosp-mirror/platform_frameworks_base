@@ -16,7 +16,6 @@
 
 package android.preference;
 
-import android.app.Service;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
@@ -39,28 +38,20 @@ public abstract class TwoStatePreference extends Preference {
     private CharSequence mSummaryOff;
     boolean mChecked;
     private boolean mSendAccessibilityEventViewClickedType;
-    private AccessibilityManager mAccessibilityManager;
     private boolean mDisableDependentsState;
+
+    private SendAccessibilityEventTypeViewClicked mSendAccessibilityEventTypeViewClicked;
 
     public TwoStatePreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
-        mAccessibilityManager =
-                (AccessibilityManager) getContext().getSystemService(Service.ACCESSIBILITY_SERVICE);
     }
 
     public TwoStatePreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
-
-        mAccessibilityManager =
-                (AccessibilityManager) getContext().getSystemService(Service.ACCESSIBILITY_SERVICE);
+        this(context, attrs, 0);
     }
 
     public TwoStatePreference(Context context) {
-        super(context);
-
-        mAccessibilityManager =
-                (AccessibilityManager) getContext().getSystemService(Service.ACCESSIBILITY_SERVICE);
+        this(context, null);
     }
 
     @Override
@@ -198,20 +189,23 @@ public abstract class TwoStatePreference extends Preference {
     }
 
     /**
-     * Send an accessibility event for the given view if appropriate
+     * Post send an accessibility event for the given view if appropriate.
+     *
      * @param view View that should send the event
      */
-    void sendAccessibilityEventForView(View view) {
+    void postSendAccessibilityEventForView(View view) {
         // send an event to announce the value change of the state. It is done here
         // because clicking a preference does not immediately change the checked state
         // for example when enabling the WiFi
-        if (mSendAccessibilityEventViewClickedType &&
-                mAccessibilityManager.isEnabled() &&
-                view.isEnabled()) {
+        if (mSendAccessibilityEventViewClickedType
+                && AccessibilityManager.getInstance(getContext()).isEnabled()
+                && view.isEnabled()) {
             mSendAccessibilityEventViewClickedType = false;
-
-            int eventType = AccessibilityEvent.TYPE_VIEW_CLICKED;
-            view.sendAccessibilityEventUnchecked(AccessibilityEvent.obtain(eventType));
+            if (mSendAccessibilityEventTypeViewClicked == null) {
+                mSendAccessibilityEventTypeViewClicked = new SendAccessibilityEventTypeViewClicked();
+            }
+            mSendAccessibilityEventTypeViewClicked.mView = view;
+            view.post(mSendAccessibilityEventTypeViewClicked);
         }
     }
 
@@ -305,5 +299,14 @@ public abstract class TwoStatePreference extends Preference {
                 return new SavedState[size];
             }
         };
+    }
+
+    private final class SendAccessibilityEventTypeViewClicked implements Runnable {
+        private View mView;
+
+        @Override
+        public void run() {
+            mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+        }
     }
 }
