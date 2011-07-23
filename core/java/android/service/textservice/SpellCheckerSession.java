@@ -25,10 +25,12 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.textservice.SpellCheckerInfo;
 import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
 
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Queue;
 
 /**
@@ -42,6 +44,7 @@ public class SpellCheckerSession {
 
     private final InternalListener mInternalListener;
     private final ITextServicesManager mTextServicesManager;
+    private final SpellCheckerInfo mSpellCheckerInfo;
     private final SpellCheckerSessionListenerImpl mSpellCheckerSessionListenerImpl;
 
     private boolean mIsUsed;
@@ -63,10 +66,12 @@ public class SpellCheckerSession {
      * Constructor
      * @hide
      */
-    public SpellCheckerSession(ITextServicesManager tsm, SpellCheckerSessionListener listener) {
-        if (listener == null || tsm == null) {
+    public SpellCheckerSession(
+            SpellCheckerInfo info, ITextServicesManager tsm, SpellCheckerSessionListener listener) {
+        if (info == null || listener == null || tsm == null) {
             throw new NullPointerException();
         }
+        mSpellCheckerInfo = info;
         mSpellCheckerSessionListenerImpl = new SpellCheckerSessionListenerImpl(mHandler);
         mInternalListener = new InternalListener();
         mTextServicesManager = tsm;
@@ -80,6 +85,14 @@ public class SpellCheckerSession {
      */
     public boolean isSessionDisconnected() {
         return mSpellCheckerSessionListenerImpl.isDisconnected();
+    }
+
+    /**
+     * Get the spell checker service info this spell checker session has.
+     * @return SpellCheckerInfo for the specified locale.
+     */
+    public SpellCheckerInfo getSpellChecker() {
+        return mSpellCheckerInfo;
     }
 
     /**
