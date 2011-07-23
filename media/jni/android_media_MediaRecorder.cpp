@@ -261,20 +261,6 @@ android_media_MediaRecorder_setOutputFileFD(JNIEnv *env, jobject thiz, jobject f
 }
 
 static void
-android_media_MediaRecorder_setOutputFileAuxFD(JNIEnv *env, jobject thiz, jobject fileDescriptor)
-{
-    LOGV("setOutputFile");
-    if (fileDescriptor == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return;
-    }
-    int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    sp<MediaRecorder> mr = getMediaRecorder(env, thiz);
-    status_t opStatus = mr->setOutputFileAuxiliary(fd);
-    process_media_recorder_call(env, opStatus, "java/io/IOException", "setOutputFile failed.");
-}
-
-static void
 android_media_MediaRecorder_setVideoSize(JNIEnv *env, jobject thiz, jint width, jint height)
 {
     LOGV("setVideoSize(%d, %d)", width, height);
@@ -475,7 +461,6 @@ static JNINativeMethod gMethods[] = {
     {"setAudioEncoder",      "(I)V",                            (void *)android_media_MediaRecorder_setAudioEncoder},
     {"setParameter",         "(Ljava/lang/String;)V",           (void *)android_media_MediaRecorder_setParameter},
     {"_setOutputFile",       "(Ljava/io/FileDescriptor;JJ)V",   (void *)android_media_MediaRecorder_setOutputFileFD},
-    {"_setOutputFileAux",    "(Ljava/io/FileDescriptor;)V",     (void *)android_media_MediaRecorder_setOutputFileAuxFD},
     {"setVideoSize",         "(II)V",                           (void *)android_media_MediaRecorder_setVideoSize},
     {"setVideoFrameRate",    "(I)V",                            (void *)android_media_MediaRecorder_setVideoFrameRate},
     {"setMaxDuration",       "(I)V",                            (void *)android_media_MediaRecorder_setMaxDuration},

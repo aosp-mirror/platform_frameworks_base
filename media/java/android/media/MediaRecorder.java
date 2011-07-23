@@ -81,9 +81,6 @@ public class MediaRecorder
 
     private String mPath;
     private FileDescriptor mFd;
-    private boolean mPrepareAuxiliaryFile = false;
-    private String mPathAux;
-    private FileDescriptor mFdAux;
     private EventHandler mEventHandler;
     private OnErrorListener mOnErrorListener;
     private OnInfoListener mOnInfoListener;
@@ -557,84 +554,23 @@ public class MediaRecorder
     }
 
     /**
-     * Sets the auxiliary time lapse video's resolution and bitrate.
-     *
-     * The auxiliary video's resolution and bitrate are determined by the CamcorderProfile
-     * quality level {@link android.media.CamcorderProfile#QUALITY_HIGH}.
-     */
-    private void setAuxVideoParameters() {
-        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
-        setParameter(String.format("video-aux-param-width=%d", profile.videoFrameWidth));
-        setParameter(String.format("video-aux-param-height=%d", profile.videoFrameHeight));
-        setParameter(String.format("video-aux-param-encoding-bitrate=%d", profile.videoBitRate));
-    }
-
-    /**
-     * Pass in the file descriptor for the auxiliary time lapse video. Call this before
-     * prepare().
-     *
-     * Sets file descriptor and parameters for auxiliary time lapse video. Time lapse mode
-     * can capture video (using the still camera) at resolutions higher than that can be
-     * played back on the device. This function or
-     * {@link #setAuxiliaryOutputFile(String)} enable capture of a smaller video in
-     * parallel with the main time lapse video, which can be used to play back on the
-     * device. The smaller video is created by downsampling the main video. This call is
-     * optional and does not have to be called if parallel capture of a downsampled video
-     * is not desired.
-     *
-     * Note that while the main video resolution and bitrate is determined from the
-     * CamcorderProfile in {@link #setProfile(CamcorderProfile)}, the auxiliary video's
-     * resolution and bitrate are determined by the CamcorderProfile quality level
-     * {@link android.media.CamcorderProfile#QUALITY_HIGH}. All other encoding parameters
-     * remain the same for the main video and the auxiliary video.
-     *
-     * E.g. if the device supports the time lapse profile quality level
-     * {@link android.media.CamcorderProfile#QUALITY_TIME_LAPSE_1080P} but can playback at
-     * most 480p, the application might want to capture an auxiliary video of resolution
-     * 480p using this call.
-     *
-     * @param fd an open file descriptor to be written into.
+     * Currently not implemented. It does nothing.
+     * @deprecated Time lapse mode video recording using camera still image capture
+     * is not desirable, and will not be supported.
      */
     public void setAuxiliaryOutputFile(FileDescriptor fd)
     {
-        mPrepareAuxiliaryFile = true;
-        mPathAux = null;
-        mFdAux = fd;
-        setAuxVideoParameters();
+        Log.w(TAG, "setAuxiliaryOutputFile(FileDescriptor) is no longer supported.");
     }
 
     /**
-     * Pass in the file path for the auxiliary time lapse video. Call this before
-     * prepare().
-     *
-     * Sets file path and parameters for auxiliary time lapse video. Time lapse mode can
-     * capture video (using the still camera) at resolutions higher than that can be
-     * played back on the device. This function or
-     * {@link #setAuxiliaryOutputFile(FileDescriptor)} enable capture of a smaller
-     * video in parallel with the main time lapse video, which can be used to play back on
-     * the device. The smaller video is created by downsampling the main video. This call
-     * is optional and does not have to be called if parallel capture of a downsampled
-     * video is not desired.
-     *
-     * Note that while the main video resolution and bitrate is determined from the
-     * CamcorderProfile in {@link #setProfile(CamcorderProfile)}, the auxiliary video's
-     * resolution and bitrate are determined by the CamcorderProfile quality level
-     * {@link android.media.CamcorderProfile#QUALITY_HIGH}. All other encoding parameters
-     * remain the same for the main video and the auxiliary video.
-     *
-     * E.g. if the device supports the time lapse profile quality level
-     * {@link android.media.CamcorderProfile#QUALITY_TIME_LAPSE_1080P} but can playback at
-     * most 480p, the application might want to capture an auxiliary video of resolution
-     * 480p using this call.
-     *
-     * @param path The pathname to use.
+     * Currently not implemented. It does nothing.
+     * @deprecated Time lapse mode video recording using camera still image capture
+     * is not desirable, and will not be supported.
      */
     public void setAuxiliaryOutputFile(String path)
     {
-        mPrepareAuxiliaryFile = true;
-        mFdAux = null;
-        mPathAux = path;
-        setAuxVideoParameters();
+        Log.w(TAG, "setAuxiliaryOutputFile(String) is no longer supported.");
     }
 
     /**
@@ -668,8 +604,6 @@ public class MediaRecorder
     // native implementation
     private native void _setOutputFile(FileDescriptor fd, long offset, long length)
         throws IllegalStateException, IOException;
-    private native void _setOutputFileAux(FileDescriptor fd)
-        throws IllegalStateException, IOException;
     private native void _prepare() throws IllegalStateException, IOException;
 
     /**
@@ -694,21 +628,6 @@ public class MediaRecorder
             _setOutputFile(mFd, 0, 0);
         } else {
             throw new IOException("No valid output file");
-        }
-
-        if (mPrepareAuxiliaryFile) {
-            if (mPathAux != null) {
-                FileOutputStream fos = new FileOutputStream(mPathAux);
-                try {
-                    _setOutputFileAux(fos.getFD());
-                } finally {
-                    fos.close();
-                }
-            } else if (mFdAux != null) {
-                _setOutputFileAux(mFdAux);
-            } else {
-                throw new IOException("No valid output file");
-            }
         }
 
         _prepare();
