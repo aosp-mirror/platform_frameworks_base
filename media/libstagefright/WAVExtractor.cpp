@@ -370,7 +370,9 @@ status_t WAVSource::read(
 
             int16_t *dst = (int16_t *)tmp->data();
             const uint8_t *src = (const uint8_t *)buffer->data();
-            while (n-- > 0) {
+            ssize_t numBytes = n;
+
+            while (numBytes-- > 0) {
                 *dst++ = ((int16_t)(*src) - 128) * 256;
                 ++src;
             }
