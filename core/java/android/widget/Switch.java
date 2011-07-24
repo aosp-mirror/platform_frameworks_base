@@ -34,6 +34,7 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
+import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.R;
 
@@ -358,6 +359,13 @@ public class Switch extends CompoundButton {
         if (measuredHeight < switchHeight) {
             setMeasuredDimension(getMeasuredWidthAndState(), switchHeight);
         }
+    }
+
+    @Override
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
+        Layout switchText = getTargetCheckedState() ? mOnLayout : mOffLayout;
+        event.getText().add(switchText.getText());
     }
 
     private Layout makeLayout(CharSequence text) {
