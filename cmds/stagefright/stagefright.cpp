@@ -803,9 +803,9 @@ int main(int argc, char **argv) {
             printf("type '%s':\n", kMimeTypes[k]);
 
             Vector<CodecCapabilities> results;
+            // will retrieve hardware and software codecs
             CHECK_EQ(QueryCodecs(omx, kMimeTypes[k],
                                  true, // queryDecoders
-                                 false, // hwCodecOnly
                                  &results), (status_t)OK);
 
             for (size_t i = 0; i < results.size(); ++i) {
