@@ -849,7 +849,6 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
         try {
-            mConnector.doCommand(String.format("softap stop " + wlanIface));
             mConnector.doCommand(String.format("softap fwreload " + wlanIface + " AP"));
             mConnector.doCommand(String.format("softap start " + wlanIface));
             if (wifiConfig == null) {
@@ -897,13 +896,15 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    public void stopAccessPoint() throws IllegalStateException {
+    public void stopAccessPoint(String wlanIface) throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
         try {
             mConnector.doCommand("softap stopap");
+            mConnector.doCommand("softap stop " + wlanIface);
+            mConnector.doCommand(String.format("softap fwreload " + wlanIface + " STA"));
         } catch (NativeDaemonConnectorException e) {
             throw new IllegalStateException("Error communicating to native daemon to stop soft AP",
                     e);

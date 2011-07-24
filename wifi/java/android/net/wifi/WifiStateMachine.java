@@ -97,7 +97,7 @@ public class WifiStateMachine extends StateMachine {
     private static final String NETWORKTYPE = "WIFI";
     private static final boolean DBG = false;
 
-    /* TODO: fetch a configurable interface */
+    /* TODO: This is no more used with the hostapd code. Clean up */
     private static final String SOFTAP_IFACE = "wl0.1";
 
     private WifiMonitor mWifiMonitor;
@@ -208,8 +208,10 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_SET_AP_CONFIG                    = BASE + 23;
     /* Get the soft access point configuration */
     static final int CMD_GET_AP_CONFIG                    = BASE + 24;
+    /* Set configuration on tether interface */
+    static final int CMD_TETHER_INTERFACE                 = BASE + 25;
 
-    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 25;
+    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 26;
 
     /* Supplicant events */
     /* Connection to supplicant established */
@@ -421,8 +423,10 @@ public class WifiStateMachine extends StateMachine {
     /* Waiting for WPS to be completed*/
     private State mWaitForWpsCompletionState = new WaitForWpsCompletionState();
 
-    /* Soft Ap is running */
+    /* Soft ap is running */
     private State mSoftApStartedState = new SoftApStartedState();
+    /* Soft ap is running and we are tethered through connectivity service */
+    private State mTetheredState = new TetheredState();
 
 
     /**
@@ -513,13 +517,9 @@ public class WifiStateMachine extends StateMachine {
             new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-
                     ArrayList<String> available = intent.getStringArrayListExtra(
                             ConnectivityManager.EXTRA_AVAILABLE_TETHER);
-                    ArrayList<String> active = intent.getStringArrayListExtra(
-                            ConnectivityManager.EXTRA_ACTIVE_TETHER);
-                    updateTetherState(available, active);
-
+                    sendMessage(CMD_TETHER_INTERFACE, available);
                 }
             },new IntentFilter(ConnectivityManager.ACTION_TETHER_STATE_CHANGED));
 
@@ -559,6 +559,7 @@ public class WifiStateMachine extends StateMachine {
                 addState(mDriverStoppedState, mSupplicantStartedState);
             addState(mSupplicantStoppingState, mDefaultState);
             addState(mSoftApStartedState, mDefaultState);
+                addState(mTetheredState, mSoftApStartedState);
 
         setInitialState(mInitialState);
 
@@ -1048,14 +1049,17 @@ public class WifiStateMachine extends StateMachine {
      * Internal private functions
      ********************************************************/
 
-    private void updateTetherState(ArrayList<String> available, ArrayList<String> tethered) {
-
-        boolean wifiTethered = false;
-        boolean wifiAvailable = false;
-
+    private void checkAndSetConnectivityInstance() {
         if (mCm == null) {
             mCm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         }
+    }
+
+    private void startTethering(ArrayList<String> available) {
+
+        boolean wifiAvailable = false;
+
+        checkAndSetConnectivityInstance();
 
         String[] wifiRegexs = mCm.getTetherableWifiRegexs();
 
@@ -1088,6 +1092,29 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 }
             }
+        }
+    }
+
+    private void stopTethering() {
+
+        checkAndSetConnectivityInstance();
+
+        /* Clear the interface config to allow dhcp correctly configure new
+           ip settings */
+        InterfaceConfiguration ifcg = null;
+        try {
+            ifcg = nwService.getInterfaceConfig(mInterfaceName);
+            if (ifcg != null) {
+                ifcg.addr = new LinkAddress(NetworkUtils.numericToInetAddress(
+                            "0.0.0.0"), 0);
+                nwService.setInterfaceConfig(mInterfaceName, ifcg);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error resetting interface " + mInterfaceName + ", :" + e);
+        }
+
+        if (mCm.untether(mInterfaceName) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
+            Log.e(TAG, "Untether initiate failed!");
         }
     }
 
@@ -1616,12 +1643,15 @@ public class WifiStateMachine extends StateMachine {
             if (currentStatus == SOFT_AP_STOPPED) {
                 nwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
             } else if (currentStatus == SOFT_AP_RUNNING) {
-                nwService.setAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
+                //nwService.setAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
+                //TODO: when we have a control channel to hostapd, we should not need to do this
+                nwService.stopAccessPoint(mInterfaceName);
+                nwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
             }
         } catch (Exception e) {
             Log.e(TAG, "Exception in softap start " + e);
             try {
-                nwService.stopAccessPoint();
+                nwService.stopAccessPoint(mInterfaceName);
                 nwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
             } catch (Exception ee) {
                 Log.e(TAG, "Exception during softap restart : " + ee);
@@ -1774,6 +1804,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_DRIVER:
                 case CMD_START_AP:
                 case CMD_STOP_AP:
+                case CMD_TETHER_INTERFACE:
                 case CMD_START_SCAN:
                 case CMD_DISCONNECT:
                 case CMD_RECONNECT:
@@ -2828,10 +2859,7 @@ public class WifiStateMachine extends StateMachine {
                     deferMessage(message);
                     break;
                 case CMD_REQUEST_CM_WAKELOCK:
-                    if (mCm == null) {
-                        mCm = (ConnectivityManager)mContext.getSystemService(
-                                Context.CONNECTIVITY_SERVICE);
-                    }
+                    checkAndSetConnectivityInstance();
                     mCm.requestNetworkTransitionWakelock(TAG);
                     break;
                 case CMD_SET_SCAN_MODE:
@@ -3109,16 +3137,9 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_AP:
                     Log.d(TAG,"Stopping Soft AP");
                     setWifiApState(WIFI_AP_STATE_DISABLING);
-
-                    if (mCm == null) {
-                        mCm = (ConnectivityManager) mContext.getSystemService(
-                                Context.CONNECTIVITY_SERVICE);
-                    }
-                    if (mCm.untether(SOFTAP_IFACE) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
-                        Log.e(TAG, "Untether initiate failed!");
-                    }
+                    stopTethering();
                     try {
-                        nwService.stopAccessPoint();
+                        nwService.stopAccessPoint(mInterfaceName);
                     } catch(Exception e) {
                         Log.e(TAG, "Exception in stopAccessPoint()");
                     }
@@ -3140,11 +3161,36 @@ public class WifiStateMachine extends StateMachine {
                     Log.e(TAG,"Cannot start supplicant with a running soft AP");
                     setWifiState(WIFI_STATE_UNKNOWN);
                     break;
+                case CMD_TETHER_INTERFACE:
+                    ArrayList<String> available = (ArrayList<String>) message.obj;
+                    startTethering(available);
+                    transitionTo(mTetheredState);
+                    break;
                 default:
                     return NOT_HANDLED;
             }
             EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
             return HANDLED;
+        }
+    }
+
+    class TetheredState extends State {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch(message.what) {
+               case CMD_TETHER_INTERFACE:
+                    // Ignore any duplicate interface available notifications
+                    // when in tethered state
+                    return HANDLED;
+                default:
+                    return NOT_HANDLED;
+            }
         }
     }
 }
