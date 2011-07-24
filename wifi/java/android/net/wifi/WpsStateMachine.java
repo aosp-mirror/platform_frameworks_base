@@ -22,7 +22,7 @@ import com.android.internal.util.StateMachine;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.wifi.WifiStateMachine.StateChangeResult;
+import android.net.wifi.StateChangeResult;
 import android.net.wifi.WpsResult.Status;
 import android.os.Handler;
 import android.os.Message;
@@ -99,10 +99,10 @@ class WpsStateMachine extends StateMachine {
                         case PBC:
                             result = WifiConfigStore.startWpsPbc(mWpsConfig);
                             break;
-                        case PIN_FROM_ACCESS_POINT:
+                        case KEYPAD:
                             result = WifiConfigStore.startWpsWithPinFromAccessPoint(mWpsConfig);
                             break;
-                        case PIN_FROM_DEVICE:
+                        case DISPLAY:
                             result = WifiConfigStore.startWpsWithPinFromDevice(mWpsConfig);
                             break;
                         default:
@@ -139,7 +139,7 @@ class WpsStateMachine extends StateMachine {
             boolean retValue = HANDLED;
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
-                case WifiStateMachine.SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
                     SupplicantState supState = (SupplicantState) stateChangeResult.state;
                     switch (supState) {
@@ -194,7 +194,7 @@ class WpsStateMachine extends StateMachine {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
                 //Ignore supplicant state changes
-                case WifiStateMachine.SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     break;
                 default:
                     retValue = NOT_HANDLED;

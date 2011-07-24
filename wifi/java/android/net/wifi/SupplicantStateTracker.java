@@ -19,7 +19,7 @@ package android.net.wifi;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
-import android.net.wifi.WifiStateMachine.StateChangeResult;
+import android.net.wifi.StateChangeResult;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -159,11 +159,11 @@ class SupplicantStateTracker extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
-                case WifiStateMachine.AUTHENTICATION_FAILURE_EVENT:
+                case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
                     mAuthenticationFailuresCount++;
                     mAuthFailureInSupplicantBroadcast = true;
                     break;
-                case WifiStateMachine.SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
                     SupplicantState state = stateChangeResult.state;
                     sendSupplicantStateChangedBroadcast(state, mAuthFailureInSupplicantBroadcast);
@@ -251,7 +251,7 @@ class SupplicantStateTracker extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
-                case WifiStateMachine.SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
                     SupplicantState state = stateChangeResult.state;
                     if (SupplicantState.isHandshakeState(state)) {
@@ -293,7 +293,7 @@ class SupplicantStateTracker extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch(message.what) {
-                case WifiStateMachine.SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
                     SupplicantState state = stateChangeResult.state;
                     sendSupplicantStateChangedBroadcast(state, mAuthFailureInSupplicantBroadcast);

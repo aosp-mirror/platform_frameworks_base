@@ -1572,6 +1572,17 @@ public abstract class Context {
     public static final String WIFI_SERVICE = "wifi";
 
     /**
+     * Use with {@link #getSystemService} to retrieve a {@link
+     * android.net.wifi.p2p.WifiP2pManager} for handling management of
+     * Wi-Fi p2p.
+     *
+     * @see #getSystemService
+     * @see android.net.wifi.p2p.WifiP2pManager
+     * @hide
+     */
+    public static final String WIFI_P2P_SERVICE = "wifip2p";
+
+    /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.media.AudioManager} for handling management of volume,
      * ringer modes and audio routing.

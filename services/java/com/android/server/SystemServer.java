@@ -37,6 +37,7 @@ import android.provider.Settings;
 import android.server.BluetoothA2dpService;
 import android.server.BluetoothService;
 import android.server.search.SearchManagerService;
+import android.server.WifiP2pService;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Slog;
@@ -108,6 +109,7 @@ class ServerThread extends Thread {
         NetworkStatsService networkStats = null;
         NetworkPolicyManagerService networkPolicy = null;
         ConnectivityService connectivity = null;
+        WifiP2pService wifiP2p = null;
         IPackageManager pm = null;
         Context context = null;
         WindowManagerService wm = null;
@@ -297,6 +299,14 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.NETWORK_POLICY_SERVICE, networkPolicy);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting NetworkPolicy Service", e);
+            }
+
+           try {
+                Slog.i(TAG, "Wi-Fi P2pService");
+                wifiP2p = new WifiP2pService(context);
+                ServiceManager.addService(Context.WIFI_P2P_SERVICE, wifiP2p);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting Wi-Fi P2pService", e);
             }
 
             try {

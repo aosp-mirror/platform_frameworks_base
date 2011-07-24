@@ -56,6 +56,8 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkUtils;
 import android.net.wifi.WpsResult.Status;
+import android.net.wifi.p2p.WifiP2pManager;
+import android.net.wifi.StateChangeResult;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -67,6 +69,7 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
 import android.os.WorkSource;
+import android.server.WifiP2pService;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
@@ -88,6 +91,14 @@ import java.util.regex.Pattern;
 /**
  * Track the state of Wifi connectivity. All event handling is done here,
  * and all changes in connectivity state are initiated here.
+ *
+ * Wi-Fi now supports three modes of operation: Client, Soft Ap and Direct
+ * In the current implementation, we do not support any concurrency and thus only
+ * one of Client, Soft Ap or Direct operation is supported at any time.
+ *
+ * The WifiStateMachine supports Soft Ap and Client operations while WifiP2pService
+ * handles Direct. WifiP2pService and WifiStateMachine co-ordinate to ensure only
+ * one exists at a certain time.
  *
  * @hide
  */
@@ -167,6 +178,10 @@ public class WifiStateMachine extends StateMachine {
     // Channel for sending replies.
     private AsyncChannel mReplyChannel = new AsyncChannel();
 
+    private WifiP2pManager mWifiP2pManager;
+    //Used to initiate a connection with WifiP2pService
+    private AsyncChannel mWifiP2pChannel = new AsyncChannel();
+
     // Event log tags (must be in sync with event-log-tags)
     private static final int EVENTLOG_WIFI_STATE_CHANGED        = 50021;
     private static final int EVENTLOG_WIFI_EVENT_HANDLED        = 50022;
@@ -212,25 +227,6 @@ public class WifiStateMachine extends StateMachine {
     static final int CMD_TETHER_INTERFACE                 = BASE + 25;
 
     static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 26;
-
-    /* Supplicant events */
-    /* Connection to supplicant established */
-    static final int SUP_CONNECTION_EVENT                 = BASE + 31;
-    /* Connection to supplicant lost */
-    static final int SUP_DISCONNECTION_EVENT              = BASE + 32;
-   /* Network connection completed */
-    static final int NETWORK_CONNECTION_EVENT             = BASE + 33;
-    /* Network disconnection completed */
-    static final int NETWORK_DISCONNECTION_EVENT          = BASE + 34;
-    /* Scan results are available */
-    static final int SCAN_RESULTS_EVENT                   = BASE + 35;
-    /* Supplicate state changed */
-    static final int SUPPLICANT_STATE_CHANGE_EVENT        = BASE + 36;
-    /* Password failure and EAP authentication failure */
-    static final int AUTHENTICATION_FAILURE_EVENT         = BASE + 37;
-    /* WPS overlap detected */
-    static final int WPS_OVERLAP_EVENT                    = BASE + 38;
-
 
     /* Supplicant commands */
     /* Is supplicant alive ? */
@@ -332,6 +328,10 @@ public class WifiStateMachine extends StateMachine {
     /* Reset the WPS state machine */
     static final int CMD_RESET_WPS_STATE                  = BASE + 122;
 
+    /* Interaction with WifiP2pService */
+    public static final int WIFI_ENABLE_PENDING           = BASE + 131;
+    public static final int P2P_ENABLE_PROCEED            = BASE + 132;
+
     private static final int CONNECT_MODE   = 1;
     private static final int SCAN_ONLY_MODE = 2;
 
@@ -427,6 +427,9 @@ public class WifiStateMachine extends StateMachine {
     private State mSoftApStartedState = new SoftApStartedState();
     /* Soft ap is running and we are tethered through connectivity service */
     private State mTetheredState = new TetheredState();
+
+    /* Wait till p2p is disabled */
+    private State mWaitForP2pDisableState = new WaitForP2pDisableState();
 
 
     /**
@@ -560,6 +563,7 @@ public class WifiStateMachine extends StateMachine {
             addState(mSupplicantStoppingState, mDefaultState);
             addState(mSoftApStartedState, mDefaultState);
                 addState(mTetheredState, mSoftApStartedState);
+            addState(mWaitForP2pDisableState, mDefaultState);
 
         setInitialState(mInitialState);
 
@@ -1661,105 +1665,6 @@ public class WifiStateMachine extends StateMachine {
         return true;
     }
 
-
-    /*********************************************************
-     * Notifications from WifiMonitor
-     ********************************************************/
-
-    /**
-     * Stores supplicant state change information passed from WifiMonitor
-     */
-    static class StateChangeResult {
-        StateChangeResult(int networkId, String BSSID, SupplicantState state) {
-            this.state = state;
-            this.BSSID = BSSID;
-            this.networkId = networkId;
-        }
-        int networkId;
-        String BSSID;
-        SupplicantState state;
-    }
-
-    /**
-     * Send the tracker a notification that a user provided
-     * configuration caused authentication failure - this could
-     * be a password failure or a EAP authentication failure
-     */
-    void notifyAuthenticationFailure() {
-        sendMessage(AUTHENTICATION_FAILURE_EVENT);
-    }
-
-    /**
-     * Send a notification that the supplicant has detected overlapped
-     * WPS sessions
-     */
-    void notifyWpsOverlap() {
-        sendMessage(WPS_OVERLAP_EVENT);
-    }
-
-    /**
-     * Send the tracker a notification that a connection to the supplicant
-     * daemon has been established.
-     */
-    void notifySupplicantConnection() {
-        sendMessage(SUP_CONNECTION_EVENT);
-    }
-
-    /**
-     * Send the tracker a notification that connection to the supplicant
-     * daemon is lost
-     */
-    void notifySupplicantLost() {
-        sendMessage(SUP_DISCONNECTION_EVENT);
-    }
-
-    /**
-     * Send the tracker a notification that the state of Wifi connectivity
-     * has changed.
-     * @param networkId the configured network on which the state change occurred
-     * @param newState the new network state
-     * @param BSSID when the new state is {@link DetailedState#CONNECTED
-     * NetworkInfo.DetailedState.CONNECTED},
-     * this is the MAC address of the access point. Otherwise, it
-     * is {@code null}.
-     */
-    void notifyNetworkStateChange(DetailedState newState, String BSSID, int networkId) {
-        if (newState == NetworkInfo.DetailedState.CONNECTED) {
-            sendMessage(obtainMessage(NETWORK_CONNECTION_EVENT, networkId, 0, BSSID));
-        } else {
-            sendMessage(obtainMessage(NETWORK_DISCONNECTION_EVENT, networkId, 0, BSSID));
-        }
-    }
-
-    /**
-     * Send the tracker a notification that the state of the supplicant
-     * has changed.
-     * @param networkId the configured network on which the state change occurred
-     * @param newState the new {@code SupplicantState}
-     */
-    void notifySupplicantStateChange(int networkId, String BSSID, SupplicantState newState) {
-        sendMessage(obtainMessage(SUPPLICANT_STATE_CHANGE_EVENT,
-                new StateChangeResult(networkId, BSSID, newState)));
-    }
-
-    /**
-     * Send the tracker a notification that a scan has completed, and results
-     * are available.
-     */
-    void notifyScanResultsAvailable() {
-        /**
-         * Switch scan mode over to passive.
-         * Turning off scan-only mode happens only in "Connect" mode
-         */
-        setScanType(false);
-        sendMessage(SCAN_RESULTS_EVENT);
-    }
-
-    void notifyDriverHung() {
-        setWifiEnabled(false);
-        setWifiEnabled(true);
-    }
-
     /********************************************************
      * HSM states
      *******************************************************/
@@ -1769,6 +1674,18 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
+                case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
+                    if (message.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
+                        mWifiP2pChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
+                    } else {
+                        Log.e(TAG, "WifiP2pService connection failure, error=" + message.arg1);
+                    }
+                    break;
+                case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
+                    Log.e(TAG, "WifiP2pService channel lost, message.arg1 =" + message.arg1);
+                    //TODO: Re-establish connection to state machine after a delay
+                    //mWifiP2pChannel.connect(mContext, getHandler(), mWifiP2pManager.getMessenger());
+                    break;
                 case CMD_BLUETOOTH_ADAPTER_STATE_CHANGE:
                     mBluetoothConnectionActive = (message.arg1 !=
                             BluetoothAdapter.STATE_DISCONNECTED);
@@ -1809,14 +1726,14 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_DISCONNECT:
                 case CMD_RECONNECT:
                 case CMD_REASSOCIATE:
-                case SUP_CONNECTION_EVENT:
-                case SUP_DISCONNECTION_EVENT:
-                case NETWORK_CONNECTION_EVENT:
-                case NETWORK_DISCONNECTION_EVENT:
-                case SCAN_RESULTS_EVENT:
-                case SUPPLICANT_STATE_CHANGE_EVENT:
-                case AUTHENTICATION_FAILURE_EVENT:
-                case WPS_OVERLAP_EVENT:
+                case WifiMonitor.SUP_CONNECTION_EVENT:
+                case WifiMonitor.SUP_DISCONNECTION_EVENT:
+                case WifiMonitor.NETWORK_CONNECTION_EVENT:
+                case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
+                case WifiMonitor.SCAN_RESULTS_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
+                case WifiMonitor.WPS_OVERLAP_EVENT:
                 case CMD_BLACKLIST_NETWORK:
                 case CMD_CLEAR_BLACKLIST:
                 case CMD_SET_SCAN_MODE:
@@ -1833,10 +1750,19 @@ public class WifiStateMachine extends StateMachine {
                 case DhcpStateMachine.CMD_PRE_DHCP_ACTION:
                 case DhcpStateMachine.CMD_POST_DHCP_ACTION:
                     break;
+                case WifiMonitor.DRIVER_HUNG_EVENT:
+                    setWifiEnabled(false);
+                    setWifiEnabled(true);
+                    break;
                 case CMD_START_WPS:
                     /* Return failure when the state machine cannot handle WPS initiation*/
                     mReplyChannel.replyToMessage(message, WifiManager.CMD_WPS_COMPLETED,
                                 new WpsResult(Status.FAILURE));
+                    break;
+                case WifiP2pService.P2P_ENABLE_PENDING:
+                    // turn off wifi and defer to be handled in DriverUnloadedState
+                    setWifiEnabled(false);
+                    deferMessage(message);
                     break;
                 default:
                     Log.e(TAG, "Error! unhandled message" + message);
@@ -1864,6 +1790,11 @@ public class WifiStateMachine extends StateMachine {
             else {
                 transitionTo(mDriverUnloadedState);
             }
+
+            //Connect to WifiP2pService
+            mWifiP2pManager = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
+            mWifiP2pChannel.connect(mContext, getHandler(), mWifiP2pManager.getMessenger());
+
         }
     }
 
@@ -2079,7 +2010,11 @@ public class WifiStateMachine extends StateMachine {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch (message.what) {
                 case CMD_LOAD_DRIVER:
-                    transitionTo(mDriverLoadingState);
+                    mWifiP2pChannel.sendMessage(WIFI_ENABLE_PENDING);
+                    transitionTo(mWaitForP2pDisableState);
+                    break;
+                case WifiP2pService.P2P_ENABLE_PENDING:
+                    mReplyChannel.replyToMessage(message, P2P_ENABLE_PROCEED);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2113,7 +2048,7 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch(message.what) {
-                case SUP_CONNECTION_EVENT:
+                case WifiMonitor.SUP_CONNECTION_EVENT:
                     Log.d(TAG, "Supplicant connection established");
                     setWifiState(WIFI_STATE_ENABLED);
                     mSupplicantRestartCount = 0;
@@ -2133,7 +2068,7 @@ public class WifiStateMachine extends StateMachine {
                     sendSupplicantConnectionChangedBroadcast(true);
                     transitionTo(mDriverStartedState);
                     break;
-                case SUP_DISCONNECTION_EVENT:
+                case WifiMonitor.SUP_DISCONNECTION_EVENT:
                     if (++mSupplicantRestartCount <= SUPPLICANT_RESTART_TRIES) {
                         Log.e(TAG, "Failed to setup control channel, restart supplicant");
                         WifiNative.killSupplicant();
@@ -2196,7 +2131,7 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_STOP_SUPPLICANT:   /* Supplicant stopped by user */
                     transitionTo(mSupplicantStoppingState);
                     break;
-                case SUP_DISCONNECTION_EVENT:  /* Supplicant connection lost */
+                case WifiMonitor.SUP_DISCONNECTION_EVENT:  /* Supplicant connection lost */
                     Log.e(TAG, "Connection lost, restart supplicant");
                     WifiNative.killSupplicant();
                     WifiNative.closeSupplicantConnection();
@@ -2208,7 +2143,7 @@ public class WifiStateMachine extends StateMachine {
                     transitionTo(mDriverLoadedState);
                     sendMessageDelayed(CMD_START_SUPPLICANT, SUPPLICANT_RESTART_INTERVAL_MSECS);
                     break;
-                case SCAN_RESULTS_EVENT:
+                case WifiMonitor.SCAN_RESULTS_EVENT:
                     eventLoggingEnabled = false;
                     setScanResults(WifiNative.scanResultsCommand());
                     sendScanResultsAvailableBroadcast();
@@ -2310,10 +2245,10 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch(message.what) {
-                case SUP_CONNECTION_EVENT:
+                case WifiMonitor.SUP_CONNECTION_EVENT:
                     Log.e(TAG, "Supplicant connection received while stopping");
                     break;
-                case SUP_DISCONNECTION_EVENT:
+                case WifiMonitor.SUP_DISCONNECTION_EVENT:
                     Log.d(TAG, "Supplicant connection lost");
                     WifiNative.closeSupplicantConnection();
                     transitionTo(mDriverLoadedState);
@@ -2353,7 +2288,7 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch(message.what) {
-               case SUPPLICANT_STATE_CHANGE_EVENT:
+               case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     SupplicantState state = handleSupplicantStateChange(message);
                     /* If suplicant is exiting out of INTERFACE_DISABLED state into
                      * a state that indicates driver has started, it is ready to
@@ -2366,10 +2301,10 @@ public class WifiStateMachine extends StateMachine {
                     /* Queue driver commands & connection events */
                 case CMD_START_DRIVER:
                 case CMD_STOP_DRIVER:
-                case NETWORK_CONNECTION_EVENT:
-                case NETWORK_DISCONNECTION_EVENT:
-                case AUTHENTICATION_FAILURE_EVENT:
-                case WPS_OVERLAP_EVENT:
+                case WifiMonitor.NETWORK_CONNECTION_EVENT:
+                case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
+                case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
+                case WifiMonitor.WPS_OVERLAP_EVENT:
                 case CMD_SET_SCAN_TYPE:
                 case CMD_SET_HIGH_PERF_MODE:
                 case CMD_SET_COUNTRY_CODE:
@@ -2526,7 +2461,7 @@ public class WifiStateMachine extends StateMachine {
         public boolean processMessage(Message message) {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             switch(message.what) {
-                case SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     SupplicantState state = handleSupplicantStateChange(message);
                     if (state == SupplicantState.INTERFACE_DISABLED) {
                         transitionTo(mDriverStoppedState);
@@ -2570,7 +2505,7 @@ public class WifiStateMachine extends StateMachine {
                    WifiNative.startDriverCommand();
                    mWakeLock.release();
                    break;
-                case SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     SupplicantState state = handleSupplicantStateChange(message);
                     /* A driver start causes supplicant to first report an INTERFACE_DISABLED
                      * state before transitioning out of it for connection. Stay in
@@ -2616,9 +2551,9 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_DISCONNECT:
                 case CMD_RECONNECT:
                 case CMD_REASSOCIATE:
-                case SUPPLICANT_STATE_CHANGE_EVENT:
-                case NETWORK_CONNECTION_EVENT:
-                case NETWORK_DISCONNECTION_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.NETWORK_CONNECTION_EVENT:
+                case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                     break;
                 default:
                     return NOT_HANDLED;
@@ -2639,14 +2574,14 @@ public class WifiStateMachine extends StateMachine {
             if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
             StateChangeResult stateChangeResult;
             switch(message.what) {
-                case AUTHENTICATION_FAILURE_EVENT:
-                    mSupplicantStateTracker.sendMessage(AUTHENTICATION_FAILURE_EVENT);
+                case WifiMonitor.AUTHENTICATION_FAILURE_EVENT:
+                    mSupplicantStateTracker.sendMessage(WifiMonitor.AUTHENTICATION_FAILURE_EVENT);
                     break;
-                case WPS_OVERLAP_EVENT:
+                case WifiMonitor.WPS_OVERLAP_EVENT:
                     /* We just need to broadcast the error */
                     sendErrorBroadcast(WifiManager.WPS_OVERLAP_ERROR);
                     break;
-                case SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     handleSupplicantStateChange(message);
                    break;
                     /* Do a redundant disconnect without transition */
@@ -2688,12 +2623,12 @@ public class WifiStateMachine extends StateMachine {
                     mWpsStateMachine.sendMessage(Message.obtain(message));
                     transitionTo(mWaitForWpsCompletionState);
                     break;
-                case SCAN_RESULTS_EVENT:
+                case WifiMonitor.SCAN_RESULTS_EVENT:
                     /* Set the scan setting back to "connect" mode */
                     WifiNative.setScanResultHandlingCommand(CONNECT_MODE);
                     /* Handle scan results */
                     return NOT_HANDLED;
-                case NETWORK_CONNECTION_EVENT:
+                case WifiMonitor.NETWORK_CONNECTION_EVENT:
                     Log.d(TAG,"Network connection established");
                     mLastNetworkId = message.arg1;
                     mLastBssid = (String) message.obj;
@@ -2707,7 +2642,7 @@ public class WifiStateMachine extends StateMachine {
                     sendNetworkStateChangeBroadcast(mLastBssid);
                     transitionTo(mConnectingState);
                     break;
-                case NETWORK_DISCONNECTION_EVENT:
+                case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                     Log.d(TAG,"Network connection lost");
                     handleNetworkDisconnect();
                     transitionTo(mDisconnectedState);
@@ -2794,7 +2729,7 @@ public class WifiStateMachine extends StateMachine {
                   deferMessage(message);
                   break;
                   /* Ignore */
-              case NETWORK_CONNECTION_EVENT:
+              case WifiMonitor.NETWORK_CONNECTION_EVENT:
                   break;
               case CMD_STOP_DRIVER:
                   sendMessage(CMD_DISCONNECT);
@@ -2901,7 +2836,7 @@ public class WifiStateMachine extends StateMachine {
                     }
                     break;
                     /* Ignore */
-                case NETWORK_CONNECTION_EVENT:
+                case WifiMonitor.NETWORK_CONNECTION_EVENT:
                     break;
                 case CMD_RSSI_POLL:
                     eventLoggingEnabled = false;
@@ -2962,7 +2897,7 @@ public class WifiStateMachine extends StateMachine {
                     }
                     break;
                     /* Handle in  DisconnectedState */
-                case SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     deferMessage(message);
                     break;
                 default:
@@ -3047,9 +2982,9 @@ public class WifiStateMachine extends StateMachine {
                     }
                     break;
                     /* Ignore network disconnect */
-                case NETWORK_DISCONNECTION_EVENT:
+                case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                     break;
-                case SUPPLICANT_STATE_CHANGE_EVENT:
+                case WifiMonitor.SUPPLICANT_STATE_CHANGE_EVENT:
                     StateChangeResult stateChangeResult = (StateChangeResult) message.obj;
                     setNetworkDetailedState(WifiInfo.getDetailedStateOf(stateChangeResult.state));
                     /* ConnectModeState does the rest of the handling */
@@ -3061,7 +2996,7 @@ public class WifiStateMachine extends StateMachine {
                     }
                     /* Handled in parent state */
                     return NOT_HANDLED;
-                case SCAN_RESULTS_EVENT:
+                case WifiMonitor.SCAN_RESULTS_EVENT:
                     /* Re-enable background scan when a pending scan result is received */
                     if (mEnableBackgroundScan && mScanResultIsPending) {
                         WifiNative.enableBackgroundScanCommand(true);
@@ -3104,10 +3039,10 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_ENABLE_NETWORK:
                 case CMD_RECONNECT:
                 case CMD_REASSOCIATE:
-                case NETWORK_CONNECTION_EVENT: /* Handled after IP & proxy update */
+                case WifiMonitor.NETWORK_CONNECTION_EVENT: /* Handled after IP & proxy update */
                     deferMessage(message);
                     break;
-                case NETWORK_DISCONNECTION_EVENT:
+                case WifiMonitor.NETWORK_DISCONNECTION_EVENT:
                     Log.d(TAG,"Network connection lost");
                     handleNetworkDisconnect();
                     break;
@@ -3165,6 +3100,55 @@ public class WifiStateMachine extends StateMachine {
                     ArrayList<String> available = (ArrayList<String>) message.obj;
                     startTethering(available);
                     transitionTo(mTetheredState);
+                    break;
+                case WifiP2pService.P2P_ENABLE_PENDING:
+                    // turn of soft Ap and defer to be handled in DriverUnloadedState
+                    setWifiApEnabled(null, false);
+                    deferMessage(message);
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
+    class WaitForP2pDisableState extends State {
+        private int mSavedArg;
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            //Preserve the argument arg1 that has information used in DriverLoadingState
+            mSavedArg = getCurrentMessage().arg1;
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch(message.what) {
+                case WifiP2pService.WIFI_ENABLE_PROCEED:
+                    //restore argument from original message (CMD_LOAD_DRIVER)
+                    message.arg1 = mSavedArg;
+                    transitionTo(mDriverLoadingState);
+                    break;
+                case CMD_LOAD_DRIVER:
+                case CMD_UNLOAD_DRIVER:
+                case CMD_START_SUPPLICANT:
+                case CMD_STOP_SUPPLICANT:
+                case CMD_START_AP:
+                case CMD_STOP_AP:
+                case CMD_START_DRIVER:
+                case CMD_STOP_DRIVER:
+                case CMD_SET_SCAN_MODE:
+                case CMD_SET_SCAN_TYPE:
+                case CMD_SET_HIGH_PERF_MODE:
+                case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
+                case CMD_START_PACKET_FILTERING:
+                case CMD_STOP_PACKET_FILTERING:
+                    deferMessage(message);
                     break;
                 default:
                     return NOT_HANDLED;
