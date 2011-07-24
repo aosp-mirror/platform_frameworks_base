@@ -247,10 +247,11 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         boolean hasLocationChanged = !newCellLoc.equals(cellLoc);
 
         boolean has4gHandoff =
-                ((networkType == ServiceState.RADIO_TECHNOLOGY_LTE) &&
-                 (newNetworkType == ServiceState.RADIO_TECHNOLOGY_EHRPD)) ||
-                ((networkType == ServiceState.RADIO_TECHNOLOGY_EHRPD) &&
-                 (newNetworkType == ServiceState.RADIO_TECHNOLOGY_LTE));
+                mNewDataConnectionState == ServiceState.STATE_IN_SERVICE &&
+                (((networkType == ServiceState.RADIO_TECHNOLOGY_LTE) &&
+                  (newNetworkType == ServiceState.RADIO_TECHNOLOGY_EHRPD)) ||
+                 ((networkType == ServiceState.RADIO_TECHNOLOGY_EHRPD) &&
+                  (newNetworkType == ServiceState.RADIO_TECHNOLOGY_LTE)));
 
         boolean hasMultiApnSupport =
                 (((newNetworkType == ServiceState.RADIO_TECHNOLOGY_LTE) ||
@@ -391,7 +392,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
             phone.notifyServiceStateChanged(ss);
         }
 
-        if (hasCdmaDataConnectionAttached) {
+        if (hasCdmaDataConnectionAttached || has4gHandoff) {
             mAttachedRegistrants.notifyRegistrants();
         }
 

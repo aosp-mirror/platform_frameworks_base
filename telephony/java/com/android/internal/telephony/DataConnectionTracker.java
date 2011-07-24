@@ -36,6 +36,7 @@ import android.os.Messenger;
 import android.os.SystemProperties;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.telephony.ServiceState;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
@@ -1031,6 +1032,27 @@ public abstract class DataConnectionTracker extends Handler {
     protected void onSetDependencyMet(String apnType, boolean met) {
     }
 
+    protected String getReryConfig(boolean forDefault) {
+        int rt = mPhone.getServiceState().getRadioTechnology();
+
+        if ((rt == ServiceState.RADIO_TECHNOLOGY_IS95A) ||
+            (rt == ServiceState.RADIO_TECHNOLOGY_IS95B) ||
+            (rt == ServiceState.RADIO_TECHNOLOGY_1xRTT) ||
+            (rt == ServiceState.RADIO_TECHNOLOGY_EVDO_0) ||
+            (rt == ServiceState.RADIO_TECHNOLOGY_EVDO_A) ||
+            (rt == ServiceState.RADIO_TECHNOLOGY_EVDO_B) ||
+            (rt == ServiceState.RADIO_TECHNOLOGY_EHRPD)) {
+            // CDMA variant
+            return SystemProperties.get("ro.cdma.data_retry_config");
+        } else {
+            // Use GSM varient for all others.
+            if (forDefault) {
+                return SystemProperties.get("ro.gsm.data_retry_config");
+            } else {
+                return SystemProperties.get("ro.gsm.2nd_data_retry_config");
+            }
+        }
+    }
 
     protected void resetAllRetryCounts() {
         for (DataConnection dc : mDataConnections.values()) {
