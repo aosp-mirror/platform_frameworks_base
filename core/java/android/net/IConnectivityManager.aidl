@@ -88,6 +88,8 @@ interface IConnectivityManager
 
     String[] getTetherableBluetoothRegexs();
 
+    int setUsbTethering(boolean enable);
+
     void requestNetworkTransitionWakelock(in String forWhom);
 
     void reportInetCondition(int networkType, int percentage);

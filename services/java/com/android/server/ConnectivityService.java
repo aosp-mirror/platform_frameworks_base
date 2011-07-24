@@ -2262,6 +2262,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
     }
 
+    public int setUsbTethering(boolean enable) {
+        enforceTetherAccessPermission();
+        if (isTetheringSupported()) {
+            return mTethering.setUsbTethering(enable);
+        } else {
+            return ConnectivityManager.TETHER_ERROR_UNSUPPORTED;
+        }
+    }
+
     // TODO - move iface listing, queries, etc to new module
     // javadoc from interface
     public String[] getTetherableIfaces() {
