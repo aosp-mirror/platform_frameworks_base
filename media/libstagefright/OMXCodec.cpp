@@ -48,6 +48,10 @@
 
 namespace android {
 
+// Treat time out as an error if we have not received any output
+// buffers after 3 seconds.
+const static int64_t kBufferFilledEventTimeOutUs = 3000000000LL;
+
 struct CodecInfo {
     const char *mime;
     const char *codec;
@@ -3191,6 +3195,16 @@ void OMXCodec::setState(State newState) {
     mBufferFilled.signal();
 }
 
+status_t OMXCodec::waitForBufferFilled_l() {
+    status_t err = mBufferFilled.waitRelative(mLock, kBufferFilledEventTimeOutUs);
+    if (err != OK) {
+        LOGE("Timed out waiting for buffers from video encoder: %d/%d",
+            countBuffersWeOwn(mPortBuffers[kPortIndexInput]),
+            countBuffersWeOwn(mPortBuffers[kPortIndexOutput]));
+    }
+    return err;
+}
+
 void OMXCodec::setRawAudioFormat(
         OMX_U32 portIndex, int32_t sampleRate, int32_t numChannels) {
 
@@ -3623,6 +3637,7 @@ sp<MetaData> OMXCodec::getFormat() {
 
 status_t OMXCodec::read(
         MediaBuffer **buffer, const ReadOptions *options) {
+    status_t err = OK;
     *buffer = NULL;
 
     Mutex::Autolock autoLock(mLock);
@@ -3663,7 +3678,9 @@ status_t OMXCodec::read(
 
     if (seeking) {
         while (mState == RECONFIGURING) {
-            mBufferFilled.wait(mLock);
+            if ((err = waitForBufferFilled_l()) != OK) {
+                return err;
+            }
         }
 
         if (mState != EXECUTING) {
@@ -3694,19 +3711,15 @@ status_t OMXCodec::read(
         }
 
         while (mSeekTimeUs >= 0) {
-            mBufferFilled.wait(mLock);
+            if ((err = waitForBufferFilled_l()) != OK) {
+                return err;
+            }
         }
     }
 
     while (mState != ERROR && !mNoMoreOutputData && mFilledBuffers.empty()) {
-        if (mIsEncoder) {
-            if (NO_ERROR != mBufferFilled.waitRelative(mLock, 3000000000LL)) {
-                LOGW("Timed out waiting for buffers from video encoder: %d/%d",
-                    countBuffersWeOwn(mPortBuffers[kPortIndexInput]),
-                    countBuffersWeOwn(mPortBuffers[kPortIndexOutput]));
-            }
-        } else {
-            mBufferFilled.wait(mLock);
+        if ((err = waitForBufferFilled_l()) != OK) {
+            return err;
         }
     }
 
