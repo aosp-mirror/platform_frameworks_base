@@ -609,9 +609,20 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         for (DataConnectionAc dcac : mDataConnectionAsyncChannels.values()) {
             if (dcac.getReconnectIntentSync() != null) {
                 cancelReconnectAlarm(dcac);
-                if (dcac.dataConnection != null) {
-                    dcac.dataConnection.resetRetryCount();
+            }
+            // update retry config for existing calls to match up
+            // ones for the new RAT.
+            if (dcac.dataConnection != null) {
+                Collection<ApnContext> apns = dcac.getApnListSync();
+
+                boolean hasDefault = false;
+                for (ApnContext apnContext : apns) {
+                    if (apnContext.getApnType().equals(Phone.APN_TYPE_DEFAULT)) {
+                        hasDefault = true;
+                        break;
+                    }
                 }
+                configureRetry(dcac.dataConnection, hasDefault);
             }
         }
 
@@ -973,7 +984,7 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
 
             // configure retry count if no other Apn is using the same connection.
             if (refCount == 0) {
-                configureRetry(dc, apnContext.getApnType());
+                configureRetry(dc, apn.canHandleType(Phone.APN_TYPE_DEFAULT));
             }
             apnContext.setDataConnectionAc(dcac);
             apnContext.setDataConnection(dc);
@@ -2026,20 +2037,18 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         return conn;
     }
 
-    private void configureRetry(DataConnection dc, String apnType) {
-        if ((dc == null) || (apnType == null)) return;
+    private void configureRetry(DataConnection dc, boolean forDefault) {
+        if (dc == null) return;
 
-        if (apnType.equals(Phone.APN_TYPE_DEFAULT)) {
-            if (!dc.configureRetry(SystemProperties.get("ro.gsm.data_retry_config"))) {
+        if (!dc.configureRetry(getReryConfig(forDefault))) {
+            if (forDefault) {
                 if (!dc.configureRetry(DEFAULT_DATA_RETRY_CONFIG)) {
                     // Should never happen, log an error and default to a simple linear sequence.
                     loge("configureRetry: Could not configure using " +
                             "DEFAULT_DATA_RETRY_CONFIG=" + DEFAULT_DATA_RETRY_CONFIG);
                     dc.configureRetry(20, 2000, 1000);
                 }
-            }
-        } else {
-            if (!dc.configureRetry(SystemProperties.get("ro.gsm.2nd_data_retry_config"))) {
+            } else {
                 if (!dc.configureRetry(SECONDARY_DATA_RETRY_CONFIG)) {
                     // Should never happen, log an error and default to a simple sequence.
                     loge("configureRetry: Could note configure using " +
