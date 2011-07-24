@@ -31,6 +31,8 @@ public interface RILConstants {
     // From the top of ril.cpp
     int RIL_ERRNO_INVALID_RESPONSE = -1;
 
+    int MAX_INT = 0x7FFFFFFF;
+
     // from RIL_Errno
     int SUCCESS = 0;
     int RADIO_NOT_AVAILABLE = 1;              /* If radio did not start or is resetting */
