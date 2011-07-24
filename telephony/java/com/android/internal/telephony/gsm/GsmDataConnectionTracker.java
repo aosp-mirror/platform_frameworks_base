@@ -1834,7 +1834,11 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                         retryOverride =
                             ((DataConnection.CallSetupException)ar.exception).getRetryOverride();
                     }
-                    startDelayedRetry(cause, apnContext, retryOverride);
+                    if (retryOverride == RILConstants.MAX_INT) {
+                        if (DBG) log("No retry is suggested.");
+                    } else {
+                        startDelayedRetry(cause, apnContext, retryOverride);
+                    }
                 }
             } else {
                 if (DBG) log("onDataSetupComplete: Try next APN");
