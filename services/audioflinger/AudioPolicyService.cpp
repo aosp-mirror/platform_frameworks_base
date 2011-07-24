@@ -497,6 +497,43 @@ bool AudioPolicyService::isStreamActive(int stream, uint32_t inPastMs) const
     return mpAudioPolicy->is_stream_active(mpAudioPolicy, stream, inPastMs);
 }
 
+status_t AudioPolicyService::queryDefaultPreProcessing(int audioSession,
+                                                       effect_descriptor_t *descriptors,
+                                                       uint32_t *count)
+{
+
+    if (mpAudioPolicy == NULL) {
+        *count = 0;
+        return NO_INIT;
+    }
+    Mutex::Autolock _l(mLock);
+    status_t status = NO_ERROR;
+
+    size_t index;
+    for (index = 0; index < mInputs.size(); index++) {
+        if (mInputs.valueAt(index)->mSessionId == audioSession) {
+            break;
+        }
+    }
+    if (index == mInputs.size()) {
+        *count = 0;
+        return BAD_VALUE;
+    }
+    Vector< sp<AudioEffect> > effects = mInputs.valueAt(index)->mEffects;
+
+    for (size_t i = 0; i < effects.size(); i++) {
+        effect_descriptor_t desc = effects[i]->descriptor();
+        if (i < *count) {
+            memcpy(descriptors + i, &desc, sizeof(effect_descriptor_t));
+        }
+    }
+    if (effects.size() > *count) {
+        status = NO_MEMORY;
+    }
+    *count = effects.size();
+    return status;
+}
+
 void AudioPolicyService::binderDied(const wp<IBinder>& who) {
     LOGW("binderDied() %p, tid %d, calling tid %d", who.unsafe_get(), gettid(),
             IPCThreadState::self()->getCallingPid());
