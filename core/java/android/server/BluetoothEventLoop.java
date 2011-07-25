@@ -52,6 +52,7 @@ class BluetoothEventLoop {
     private final HashMap<String, Integer> mAuthorizationAgentRequestData;
     private final BluetoothService mBluetoothService;
     private final BluetoothAdapter mAdapter;
+    private final BluetoothAdapterStateMachine mBluetoothState;
     private BluetoothA2dp mA2dp;
     private BluetoothInputDevice mInputDevice;
     private final Context mContext;
@@ -107,9 +108,11 @@ class BluetoothEventLoop {
     private static native void classInitNative();
 
     /* package */ BluetoothEventLoop(Context context, BluetoothAdapter adapter,
-            BluetoothService bluetoothService) {
+                                     BluetoothService bluetoothService,
+                                     BluetoothAdapterStateMachine bluetoothState) {
         mBluetoothService = bluetoothService;
         mContext = context;
+        mBluetoothState = bluetoothState;
         mPasskeyAgentRequestData = new HashMap<String, Integer>();
         mAuthorizationAgentRequestData = new HashMap<String, Integer>();
         mAdapter = adapter;
@@ -299,8 +302,8 @@ class BluetoothEventLoop {
 
     /**
      * Called by native code on a PropertyChanged signal from
-     * org.bluez.Adapter. This method is also called from Java at
-     * {@link BluetoothService.EnableThread#run()} to set the "Pairable"
+     * org.bluez.Adapter. This method is also called from
+     * {@link BluetoothAdapterStateMachine} to set the "Pairable"
      * property when Bluetooth is enabled.
      *
      * @param propValues a string array containing the key and one or more
@@ -334,6 +337,15 @@ class BluetoothEventLoop {
                 return;
 
             adapterProperties.setProperty(name, propValues[1]);
+
+            if (name.equals("Pairable")) {
+                if (pairable.equals("true")) {
+                    mBluetoothState.sendMessage(BluetoothAdapterStateMachine.BECOME_PAIRABLE);
+                } else {
+                    mBluetoothState.sendMessage(BluetoothAdapterStateMachine.BECOME_NON_PAIRABLE);
+                }
+            }
+
             int mode = BluetoothService.bluezStringToScanMode(
                     pairable.equals("true"),
                     discoverable.equals("true"));
