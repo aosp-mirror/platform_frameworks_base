@@ -66,6 +66,8 @@ public class AudioEffect {
 
     private final static String TAG = "AudioEffect-JAVA";
 
+    // effect type UUIDs are taken from hardware/libhardware/include/hardware/audio_effect.h
+
     /**
      * The following UUIDs define effect types corresponding to standard audio
      * effects whose implementation and interface conform to the OpenSL ES
@@ -103,6 +105,27 @@ public class AudioEffect {
      */
     public static final UUID EFFECT_TYPE_VIRTUALIZER = UUID
             .fromString("37cc2c00-dddd-11db-8577-0002a5d5c51b");
+
+    /**
+     * UUID for Automatic Gain Control (AGC) audio pre-processing
+     * @hide
+     */
+    public static final UUID EFFECT_TYPE_AGC = UUID
+            .fromString("0a8abfe0-654c-11e0-ba26-0002a5d5c51b");
+
+    /**
+     * UUID for Acoustic Echo Canceler (AEC) audio pre-processing
+     * @hide
+     */
+    public static final UUID EFFECT_TYPE_AEC = UUID
+            .fromString("7b491460-8d4d-11e0-bd61-0002a5d5c51b");
+
+    /**
+     * UUID for Noise Suppressor (NS) audio pre-processing
+     * @hide
+     */
+    public static final UUID EFFECT_TYPE_NS = UUID
+            .fromString("58b4b260-8e06-11e0-aa8e-0002a5d5c51b");
 
     /**
      * Null effect UUID. Used when the UUID for effect type of
@@ -180,7 +203,8 @@ public class AudioEffect {
      * <ul>
      *  <li>type: UUID corresponding to the OpenSL ES interface implemented by this effect</li>
      *  <li>uuid: UUID for this particular implementation</li>
-     *  <li>connectMode: {@link #EFFECT_INSERT} or {@link #EFFECT_AUXILIARY}</li>
+     *  <li>connectMode: {@link #EFFECT_INSERT}, {@link #EFFECT_AUXILIARY} or
+     *  {at_link #EFFECT_PRE_PROCESSING}</li>
      *  <li>name: human readable effect name</li>
      *  <li>implementor: human readable effect implementor name</li>
      * </ul>
@@ -212,11 +236,13 @@ public class AudioEffect {
          */
         public UUID uuid;
         /**
-         *  Indicates if the effect is of insert category {@link #EFFECT_INSERT} or auxiliary
-         *  category {@link #EFFECT_AUXILIARY}. Insert effects (Typically an Equalizer) are applied
+         *  Indicates if the effect is of insert category {@link #EFFECT_INSERT}, auxiliary
+         *  category {@link #EFFECT_AUXILIARY} or pre processing category
+         *  {at_link #EFFECT_PRE_PROCESSING}. Insert effects (Typically an Equalizer) are applied
          *  to the entire audio source and usually not shared by several sources. Auxiliary effects
          *  (typically a reverberator) are applied to part of the signal (wet) and the effect output
          *  is added to the original signal (dry).
+         *  Audio pre processing are applied to audio captured on a particular AudioRecord.
          */
         public String connectMode;
         /**
@@ -243,6 +269,12 @@ public class AudioEffect {
      * attaching it to the MediaPlayer or AudioTrack.
      */
     public static final String EFFECT_AUXILIARY = "Auxiliary";
+    /**
+     * Effect connection mode is pre processing.
+     * The audio pre processing effects are attached to an audio input (AudioRecord).
+     * @hide
+     */
+    public static final String EFFECT_PRE_PROCESSING = "Pre Processing";
 
     // --------------------------------------------------------------------------
     // Member variables
@@ -408,6 +440,19 @@ public class AudioEffect {
 
     static public Descriptor[] queryEffects() {
         return (Descriptor[]) native_query_effects();
+    }
+
+    /**
+     * Query all audio pre processing effects applied to the AudioRecord with the supplied
+     * audio session ID. Returns an array of {@link android.media.audiofx.AudioEffect.Descriptor}
+     * objects.
+     * @param audioSession system wide unique audio session identifier.
+     * @throws IllegalStateException
+     * @hide
+     */
+
+    static public Descriptor[] queryPreProcessings(int audioSession) {
+        return (Descriptor[]) native_query_pre_processing(audioSession);
     }
 
     // --------------------------------------------------------------------------
@@ -1154,6 +1199,8 @@ public class AudioEffect {
             byte[] cmdData, int repSize, byte[] repData);
 
     private static native Object[] native_query_effects();
+
+    private static native Object[] native_query_pre_processing(int audioSession);
 
     // ---------------------------------------------------------
     // Utility methods

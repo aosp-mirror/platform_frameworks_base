@@ -419,6 +419,15 @@ status_t AudioEffect::getEffectDescriptor(effect_uuid_t *uuid, effect_descriptor
     return af->getEffectDescriptor(uuid, descriptor);
 }
 
+
+status_t AudioEffect::queryDefaultPreProcessing(int audioSession,
+                                          effect_descriptor_t *descriptors,
+                                          uint32_t *count)
+{
+    const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
+    if (aps == 0) return PERMISSION_DENIED;
+    return aps->queryDefaultPreProcessing(audioSession, descriptors, count);
+}
 // -------------------------------------------------------------------------
 
 status_t AudioEffect::stringToGuid(const char *str, effect_uuid_t *guid)

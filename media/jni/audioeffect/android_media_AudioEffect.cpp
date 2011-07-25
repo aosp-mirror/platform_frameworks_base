@@ -725,17 +725,21 @@ android_media_AudioEffect_native_queryEffects(JNIEnv *env, jclass clazz)
             goto queryEffects_failure;
         }
 
+        if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
+            jdescConnect = env->NewStringUTF("Auxiliary");
+        } else if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_INSERT) {
+            jdescConnect = env->NewStringUTF("Insert");
+        } else if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_PRE_PROC) {
+            jdescConnect = env->NewStringUTF("Pre Processing");
+        } else {
+            continue;
+        }
+
         AudioEffect::guidToString(&desc.type, str, EFFECT_STRING_LEN_MAX);
         jdescType = env->NewStringUTF(str);
 
         AudioEffect::guidToString(&desc.uuid, str, EFFECT_STRING_LEN_MAX);
         jdescUuid = env->NewStringUTF(str);
-
-        if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
-            jdescConnect = env->NewStringUTF("Auxiliary");
-        } else {
-            jdescConnect = env->NewStringUTF("Insert");
-        }
 
         jdescName = env->NewStringUTF(desc.name);
         jdescImplementor = env->NewStringUTF(desc.implementor);
@@ -771,6 +775,87 @@ queryEffects_failure:
 
 }
 
+
+
+static jobjectArray
+android_media_AudioEffect_native_queryPreProcessings(JNIEnv *env, jclass clazz, jint audioSession)
+{
+    // kDefaultNumEffects is a "reasonable" value ensuring that only one query will be enough on
+    // most devices to get all active audio pre processing on a given session.
+    static const uint32_t kDefaultNumEffects = 5;
+
+    effect_descriptor_t *descriptors = new effect_descriptor_t[kDefaultNumEffects];
+    uint32_t numEffects = kDefaultNumEffects;
+
+    status_t status = AudioEffect::queryDefaultPreProcessing(audioSession,
+                                           descriptors,
+                                           &numEffects);
+    if ((status != NO_ERROR && status != NO_MEMORY) ||
+            numEffects == 0) {
+        delete[] descriptors;
+        return NULL;
+    }
+    if (status == NO_MEMORY) {
+        delete [] descriptors;
+        descriptors = new effect_descriptor_t[numEffects];
+        status = AudioEffect::queryDefaultPreProcessing(audioSession,
+                                               descriptors,
+                                               &numEffects);
+    }
+    if (status != NO_ERROR || numEffects == 0) {
+        delete[] descriptors;
+        return NULL;
+    }
+    LOGV("queryDefaultPreProcessing() got %d effects", numEffects);
+
+    jobjectArray ret = env->NewObjectArray(numEffects, fields.clazzDesc, NULL);
+    if (ret == NULL) {
+        delete[] descriptors;
+        return ret;
+    }
+
+    char str[EFFECT_STRING_LEN_MAX];
+    jstring jdescType;
+    jstring jdescUuid;
+    jstring jdescConnect;
+    jstring jdescName;
+    jstring jdescImplementor;
+    jobject jdesc;
+
+    for (uint32_t i = 0; i < numEffects; i++) {
+
+        AudioEffect::guidToString(&descriptors[i].type, str, EFFECT_STRING_LEN_MAX);
+        jdescType = env->NewStringUTF(str);
+        AudioEffect::guidToString(&descriptors[i].uuid, str, EFFECT_STRING_LEN_MAX);
+        jdescUuid = env->NewStringUTF(str);
+        jdescConnect = env->NewStringUTF("Pre Processing");
+        jdescName = env->NewStringUTF(descriptors[i].name);
+        jdescImplementor = env->NewStringUTF(descriptors[i].implementor);
+
+        jdesc = env->NewObject(fields.clazzDesc,
+                               fields.midDescCstor,
+                               jdescType,
+                               jdescUuid,
+                               jdescConnect,
+                               jdescName,
+                               jdescImplementor);
+        env->DeleteLocalRef(jdescType);
+        env->DeleteLocalRef(jdescUuid);
+        env->DeleteLocalRef(jdescConnect);
+        env->DeleteLocalRef(jdescName);
+        env->DeleteLocalRef(jdescImplementor);
+        if (jdesc == NULL) {
+            LOGE("env->NewObject(fields.clazzDesc, fields.midDescCstor)");
+            env->DeleteLocalRef(ret);
+            return NULL;;
+        }
+
+        env->SetObjectArrayElement(ret, i, jdesc);
+   }
+
+   return ret;
+}
+
 // ----------------------------------------------------------------------------
 
 // Dalvik VM type signatures
@@ -787,6 +872,8 @@ static JNINativeMethod gMethods[] = {
     {"native_getParameter",  "(I[BI[B)I",  (void *)android_media_AudioEffect_native_getParameter},
     {"native_command",       "(II[BI[B)I", (void *)android_media_AudioEffect_native_command},
     {"native_query_effects", "()[Ljava/lang/Object;", (void *)android_media_AudioEffect_native_queryEffects},
+    {"native_query_pre_processing", "(I)[Ljava/lang/Object;",
+            (void *)android_media_AudioEffect_native_queryPreProcessings},
 };
 
 

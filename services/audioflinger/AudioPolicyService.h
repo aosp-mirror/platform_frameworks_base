@@ -104,6 +104,9 @@ public:
     virtual status_t unregisterEffect(int id);
     virtual bool isStreamActive(int stream, uint32_t inPastMs = 0) const;
 
+    virtual status_t queryDefaultPreProcessing(int audioSession,
+                                              effect_descriptor_t *descriptors,
+                                              uint32_t *count);
     virtual     status_t    onTransact(
                                 uint32_t code,
                                 const Parcel& data,

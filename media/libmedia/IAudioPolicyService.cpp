@@ -53,6 +53,7 @@ enum {
     UNREGISTER_EFFECT,
     IS_STREAM_ACTIVE,
     GET_DEVICES_FOR_STREAM,
+    QUERY_DEFAULT_PRE_PROCESSING
 };
 
 class BpAudioPolicyService : public BpInterface<IAudioPolicyService>
@@ -321,6 +322,31 @@ public:
         remote()->transact(IS_STREAM_ACTIVE, data, &reply);
         return reply.readInt32();
     }
+
+    virtual status_t queryDefaultPreProcessing(int audioSession,
+                                               effect_descriptor_t *descriptors,
+                                               uint32_t *count)
+    {
+        if (descriptors == NULL || count == NULL) {
+            return BAD_VALUE;
+        }
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
+        data.writeInt32(audioSession);
+        data.writeInt32(*count);
+        status_t status = remote()->transact(QUERY_DEFAULT_PRE_PROCESSING, data, &reply);
+        if (status != NO_ERROR) {
+            return status;
+        }
+        status = static_cast <status_t> (reply.readInt32());
+        uint32_t retCount = reply.readInt32();
+        if (retCount != 0) {
+            uint32_t numDesc = (retCount < *count) ? retCount : *count;
+            reply.read(descriptors, sizeof(effect_descriptor_t) * numDesc);
+        }
+        *count = retCount;
+        return status;
+    }
 };
 
 IMPLEMENT_META_INTERFACE(AudioPolicyService, "android.media.IAudioPolicyService");
@@ -558,6 +584,29 @@ status_t BnAudioPolicyService::onTransact(
             reply->writeInt32( isStreamActive(stream, inPastMs) );
             return NO_ERROR;
         } break;
+
+        case QUERY_DEFAULT_PRE_PROCESSING: {
+            CHECK_INTERFACE(IAudioPolicyService, data, reply);
+            int audioSession = data.readInt32();
+            uint32_t count = data.readInt32();
+            uint32_t retCount = count;
+            effect_descriptor_t *descriptors =
+                    (effect_descriptor_t *)new char[count * sizeof(effect_descriptor_t)];
+            status_t status = queryDefaultPreProcessing(audioSession, descriptors, &retCount);
+            reply->writeInt32(status);
+            if (status != NO_ERROR && status != NO_MEMORY) {
+                retCount = 0;
+            }
+            reply->writeInt32(retCount);
+            if (retCount) {
+                if (retCount < count) {
+                    count = retCount;
+                }
+                reply->write(descriptors, sizeof(effect_descriptor_t) * count);
+            }
+            delete[] descriptors;
+            return status;
+        }
 
         default:
             return BBinder::onTransact(code, data, reply, flags);

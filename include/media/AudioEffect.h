@@ -21,6 +21,7 @@
 #include <sys/types.h>
 
 #include <media/IAudioFlinger.h>
+#include <media/IAudioPolicyService.h>
 #include <media/IEffect.h>
 #include <media/IEffectClient.h>
 #include <hardware/audio_effect.h>
@@ -109,6 +110,36 @@ public:
      */
     static status_t getEffectDescriptor(effect_uuid_t *uuid, effect_descriptor_t *descriptor);
 
+
+    /*
+     * Returns a list of descriptors corresponding to the pre processings enabled by default
+     * on an AudioRecord with the supplied audio session ID.
+     *
+     * Parameters:
+     *      audioSession:  audio session ID.
+     *      descriptors: address where the effect descriptors should be returned.
+     *      count: as input, the maximum number of descriptor than should be returned
+     *             as output, the number of descriptor returned if status is NO_ERROR or the actual
+     *             number of enabled pre processings if status is NO_MEMORY
+     *
+     * Returned status (from utils/Errors.h) can be:
+     *      NO_ERROR        successful operation.
+     *      NO_MEMORY       the number of descriptor to return is more than the maximum number
+     *                      indicated by count.
+     *      PERMISSION_DENIED could not get AudioFlinger interface
+     *      NO_INIT         effect library failed to initialize
+     *      BAD_VALUE       invalid audio session or descriptor pointers
+     *
+     * Returned value
+     *   *descriptor updated with descriptors of pre processings enabled by default
+     *   *count      number of descriptors returned if returned status is N_ERROR.
+     *               total number of pre processing enabled by default if returned status is
+     *               NO_MEMORY. This happens if the count passed as input is less than the number
+     *               of descriptors to return
+     */
+    static status_t queryDefaultPreProcessing(int audioSession,
+                                              effect_descriptor_t *descriptors,
+                                              uint32_t *count);
 
     /*
      * Events used by callback function (effect_callback_t).
