@@ -82,5 +82,17 @@
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
+
+        <!-- started from NetworkPolicyManagerService -->
+        <activity
+            android:name=".net.NetworkOverLimitActivity"
+            android:exported="true"
+            android:permission="android.permission.MANAGE_NETWORK_POLICY"
+            android:theme="@android:style/Theme.Holo.Panel"
+            android:finishOnCloseSystemDialogs="true"
+            android:launchMode="singleTop"
+            android:taskAffinity="com.android.systemui.net"
+            android:excludeFromRecents="true" />
+
     </application>
 </manifest>

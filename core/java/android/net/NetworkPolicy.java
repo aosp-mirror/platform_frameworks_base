@@ -21,6 +21,8 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.Objects;
+
 /**
  * Policy for networks matching a {@link NetworkTemplate}, including usage cycle
  * and limits to be enforced.
@@ -30,20 +32,21 @@ import android.os.Parcelable;
 public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     public static final long WARNING_DISABLED = -1;
     public static final long LIMIT_DISABLED = -1;
+    public static final long SNOOZE_NEVER = -1;
 
     public final NetworkTemplate template;
     public int cycleDay;
     public long warningBytes;
     public long limitBytes;
+    public long lastSnooze;
 
-    // TODO: teach how to snooze limit for current cycle
-
-    public NetworkPolicy(
-            NetworkTemplate template, int cycleDay, long warningBytes, long limitBytes) {
+    public NetworkPolicy(NetworkTemplate template, int cycleDay, long warningBytes, long limitBytes,
+            long lastSnooze) {
         this.template = checkNotNull(template, "missing NetworkTemplate");
         this.cycleDay = cycleDay;
         this.warningBytes = warningBytes;
         this.limitBytes = limitBytes;
+        this.lastSnooze = lastSnooze;
     }
 
     public NetworkPolicy(Parcel in) {
@@ -51,6 +54,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         cycleDay = in.readInt();
         warningBytes = in.readLong();
         limitBytes = in.readLong();
+        lastSnooze = in.readLong();
     }
 
     /** {@inheritDoc} */
@@ -59,6 +63,7 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
         dest.writeInt(cycleDay);
         dest.writeLong(warningBytes);
         dest.writeLong(limitBytes);
+        dest.writeLong(lastSnooze);
     }
 
     /** {@inheritDoc} */
@@ -80,9 +85,25 @@ public class NetworkPolicy implements Parcelable, Comparable<NetworkPolicy> {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hashCode(template, cycleDay, warningBytes, limitBytes, lastSnooze);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof NetworkPolicy) {
+            final NetworkPolicy other = (NetworkPolicy) obj;
+            return Objects.equal(template, other.template) && cycleDay == other.cycleDay
+                    && warningBytes == other.warningBytes && limitBytes == other.limitBytes
+                    && lastSnooze == other.lastSnooze;
+        }
+        return false;
+    }
+
+    @Override
     public String toString() {
         return "NetworkPolicy[" + template + "]: cycleDay=" + cycleDay + ", warningBytes="
-                + warningBytes + ", limitBytes=" + limitBytes;
+                + warningBytes + ", limitBytes=" + limitBytes + ", lastSnooze=" + lastSnooze;
     }
 
     public static final Creator<NetworkPolicy> CREATOR = new Creator<NetworkPolicy>() {

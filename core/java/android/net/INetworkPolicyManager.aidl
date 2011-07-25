@@ -18,6 +18,7 @@ package android.net;
 
 import android.net.INetworkPolicyListener;
 import android.net.NetworkPolicy;
+import android.net.NetworkTemplate;
 
 /**
  * Interface that creates and modifies network policy rules.
@@ -36,5 +37,7 @@ interface INetworkPolicyManager {
 
     void setNetworkPolicies(in NetworkPolicy[] policies);
     NetworkPolicy[] getNetworkPolicies();
+
+    void snoozePolicy(in NetworkTemplate template);
 
 }
