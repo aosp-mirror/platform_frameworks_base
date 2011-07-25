@@ -4701,6 +4701,7 @@ public class WebView extends AbsoluteLayout
         private Message mUpdateMessage;
         private boolean mAutoFillable;
         private boolean mAutoComplete;
+        private WebSettings mWebSettings;
 
         public RequestFormData(String name, String url, Message msg,
                 boolean autoFillable, boolean autoComplete) {
@@ -4709,6 +4710,7 @@ public class WebView extends AbsoluteLayout
             mUpdateMessage = msg;
             mAutoFillable = autoFillable;
             mAutoComplete = autoComplete;
+            mWebSettings = getSettings();
         }
 
         public void run() {
@@ -4718,8 +4720,7 @@ public class WebView extends AbsoluteLayout
                 // Note that code inside the adapter click handler in WebTextView depends
                 // on the AutoFill item being at the top of the drop down list. If you change
                 // the order, make sure to do it there too!
-                WebSettings settings = getSettings();
-                if (settings != null && settings.getAutoFillProfile() != null) {
+                if (mWebSettings != null && mWebSettings.getAutoFillProfile() != null) {
                     pastEntries.add(getResources().getText(
                             com.android.internal.R.string.autofill_this_form).toString() +
                             " " +
