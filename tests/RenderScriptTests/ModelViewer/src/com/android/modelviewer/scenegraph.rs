@@ -60,7 +60,7 @@ int root(void) {
     robot2Ptr->transforms[1].w += 2.5f;
     robot2Ptr->isDirty = 1;
 
-    rsForEach(gTransformRS, gRootNode->children, gRootNode->children, NULL, 0);
+    rsForEach(gTransformRS, gRootNode->children, gRootNode->children);
 
     rsgClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     rsgClearDepth(1.0f);
