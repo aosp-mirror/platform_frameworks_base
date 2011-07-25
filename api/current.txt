@@ -24055,6 +24055,8 @@ package android.view.textservice {
     method public android.content.ComponentName getComponent();
     method public java.lang.String getId();
     method public java.lang.String getPackageName();
+    method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
+    method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
   }

@@ -18,8 +18,10 @@ package android.view.textservice;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -101,6 +103,24 @@ public final class SpellCheckerInfo implements Parcelable {
             return new SpellCheckerInfo[size];
         }
     };
+
+    /**
+     * Load the user-displayed label for this spell checker.
+     *
+     * @param pm Supply a PackageManager used to load the spell checker's resources.
+     */
+    public CharSequence loadLabel(PackageManager pm) {
+        return mService.loadLabel(pm);
+    }
+
+    /**
+     * Load the user-displayed icon for this spell checker.
+     *
+     * @param pm Supply a PackageManager used to load the spell checker's resources.
+     */
+    public Drawable loadIcon(PackageManager pm) {
+        return mService.loadIcon(pm);
+    }
 
     /**
      * Used to make this class parcelable.
