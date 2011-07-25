@@ -53,7 +53,7 @@ public:
     virtual ~DrmManager();
 
 public:
-    int addUniqueId(int uniqueId);
+    int addUniqueId(bool isNative);
 
     void removeUniqueId(int uniqueId);
 

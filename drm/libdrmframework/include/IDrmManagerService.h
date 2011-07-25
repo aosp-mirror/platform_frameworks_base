@@ -81,7 +81,7 @@ public:
     DECLARE_META_INTERFACE(DrmManagerService);
 
 public:
-    virtual int addUniqueId(int uniqueId) = 0;
+    virtual int addUniqueId(bool isNative) = 0;
 
     virtual void removeUniqueId(int uniqueId) = 0;
 
@@ -167,7 +167,7 @@ public:
     BpDrmManagerService(const sp<IBinder>& impl)
             : BpInterface<IDrmManagerService>(impl) {}
 
-    virtual int addUniqueId(int uniqueId);
+    virtual int addUniqueId(bool isNative);
 
     virtual void removeUniqueId(int uniqueId);
 

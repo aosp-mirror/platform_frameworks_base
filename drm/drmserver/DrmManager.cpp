@@ -49,32 +49,42 @@ DrmManager::~DrmManager() {
 
 }
 
-int DrmManager::addUniqueId(int uniqueId) {
+int DrmManager::addUniqueId(bool isNative) {
     Mutex::Autolock _l(mLock);
-    if (0 == uniqueId) {
-        int temp = 0;
-        bool foundUniqueId = false;
-        srand(time(NULL));
 
-        while (!foundUniqueId) {
-            const int size = mUniqueIdVector.size();
-            temp = rand() % 100;
+    int temp = 0;
+    bool foundUniqueId = false;
+    const int size = mUniqueIdVector.size();
+    const int uniqueIdRange = 0xfff;
+    int maxLoopTimes = (uniqueIdRange - 1) / 2;
+    srand(time(NULL));
 
-            int index = 0;
-            for (; index < size; ++index) {
-                if (mUniqueIdVector.itemAt(index) == temp) {
-                    foundUniqueId = false;
-                    break;
-                }
-            }
-            if (index == size) {
-                foundUniqueId = true;
+    while (!foundUniqueId) {
+        temp = rand() & uniqueIdRange;
+
+        if (isNative) {
+            // set a flag to differentiate DrmManagerClient
+            // created from native side and java side
+            temp |= 0x1000;
+        }
+
+        int index = 0;
+        for (; index < size; ++index) {
+            if (mUniqueIdVector.itemAt(index) == temp) {
+                foundUniqueId = false;
+                break;
             }
         }
-        uniqueId = temp;
+        if (index == size) {
+            foundUniqueId = true;
+        }
+
+        maxLoopTimes --;
+        LOG_FATAL_IF(maxLoopTimes <= 0, "cannot find an unique ID for this session");
     }
-    mUniqueIdVector.push(uniqueId);
-    return uniqueId;
+
+    mUniqueIdVector.push(temp);
+    return temp;
 }
 
 void DrmManager::removeUniqueId(int uniqueId) {

@@ -33,13 +33,10 @@ sp<IDrmManagerService> DrmManagerClientImpl::sDrmManagerService;
 sp<DrmManagerClientImpl::DeathNotifier> DrmManagerClientImpl::sDeathNotifier;
 const String8 DrmManagerClientImpl::EMPTY_STRING("");
 
-DrmManagerClientImpl* DrmManagerClientImpl::create(int* pUniqueId) {
-    if (0 == *pUniqueId) {
-        int uniqueId = getDrmManagerService()->addUniqueId(*pUniqueId);
-        *pUniqueId = uniqueId;
-    } else {
-        getDrmManagerService()->addUniqueId(*pUniqueId);
-    }
+DrmManagerClientImpl* DrmManagerClientImpl::create(
+        int* pUniqueId, bool isNative) {
+    *pUniqueId = getDrmManagerService()->addUniqueId(isNative);
+
     return new DrmManagerClientImpl();
 }
 

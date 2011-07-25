@@ -38,7 +38,7 @@ private:
     DrmManagerClientImpl() { }
 
 public:
-    static DrmManagerClientImpl* create(int* pUniqueId);
+    static DrmManagerClientImpl* create(int* pUniqueId, bool isNative);
 
     static void remove(int uniqueId);
 

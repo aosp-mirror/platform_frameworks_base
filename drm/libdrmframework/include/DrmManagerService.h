@@ -46,7 +46,7 @@ private:
     virtual ~DrmManagerService();
 
 public:
-    int addUniqueId(int uniqueId);
+    int addUniqueId(bool isNative);
 
     void removeUniqueId(int uniqueId);
 

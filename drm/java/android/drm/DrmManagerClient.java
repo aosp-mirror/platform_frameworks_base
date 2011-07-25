@@ -248,9 +248,7 @@ public class DrmManagerClient {
         mEventHandler = new EventHandler(eventThread.getLooper());
 
         // save the unique id
-        mUniqueId = hashCode();
-
-        _initialize(mUniqueId, new WeakReference<DrmManagerClient>(this));
+        mUniqueId = _initialize(new WeakReference<DrmManagerClient>(this));
     }
 
     protected void finalize() {
@@ -794,7 +792,7 @@ public class DrmManagerClient {
     }
 
     // private native interfaces
-    private native void _initialize(int uniqueId, Object weak_this);
+    private native int _initialize(Object weak_this);
 
     private native void _finalize(int uniqueId);
 

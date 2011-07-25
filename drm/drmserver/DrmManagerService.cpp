@@ -78,8 +78,8 @@ DrmManagerService::~DrmManagerService() {
     delete mDrmManager; mDrmManager = NULL;
 }
 
-int DrmManagerService::addUniqueId(int uniqueId) {
-    return mDrmManager->addUniqueId(uniqueId);
+int DrmManagerService::addUniqueId(bool isNative) {
+    return mDrmManager->addUniqueId(isNative);
 }
 
 void DrmManagerService::removeUniqueId(int uniqueId) {
