@@ -465,6 +465,7 @@ public class WindowManagerService extends IWindowManager.Stub
     Display mDisplay;
 
     final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    final DisplayMetrics mRealDisplayMetrics = new DisplayMetrics();
     final DisplayMetrics mTmpDisplayMetrics = new DisplayMetrics();
     final DisplayMetrics mCompatDisplayMetrics = new DisplayMetrics();
 
@@ -5642,15 +5643,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         config.orientation = orientation;
 
-        DisplayMetrics dm = mDisplayMetrics;
-        mDisplay.getRealMetrics(dm);
+        // Update real display metrics.
+        mDisplay.getMetricsWithSize(mRealDisplayMetrics, mCurDisplayWidth, mCurDisplayHeight);
 
-        // Override display width and height with what we are computing,
-        // to be sure they remain consistent.
-        dm.widthPixels = dm.noncompatWidthPixels = mAppDisplayWidth
-                = mPolicy.getNonDecorDisplayWidth(mRotation, dw);
-        dm.heightPixels = dm.noncompatHeightPixels = mAppDisplayHeight
-                = mPolicy.getNonDecorDisplayHeight(mRotation, dh);
+        // Update application display metrics.
+        final DisplayMetrics dm = mDisplayMetrics;
+        mAppDisplayWidth = mPolicy.getNonDecorDisplayWidth(mRotation, dw);
+        mAppDisplayHeight = mPolicy.getNonDecorDisplayHeight(mRotation, dh);
+        mDisplay.getMetricsWithSize(dm, mAppDisplayWidth, mAppDisplayHeight);
 
         mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(dm,
                 mCompatDisplayMetrics);
@@ -6086,8 +6086,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             WindowManager wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);
             mDisplay = wm.getDefaultDisplay();
-            mInitialDisplayWidth = mDisplay.getRealWidth();
-            mInitialDisplayHeight = mDisplay.getRealHeight();
+            mInitialDisplayWidth = mDisplay.getRawWidth();
+            mInitialDisplayHeight = mDisplay.getRawHeight();
             int rot = mDisplay.getRotation();
             if (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270) {
                 // If the screen is currently rotated, we need to swap the
@@ -6098,7 +6098,9 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             mBaseDisplayWidth = mCurDisplayWidth = mAppDisplayWidth = mInitialDisplayWidth;
             mBaseDisplayHeight = mCurDisplayHeight = mAppDisplayHeight = mInitialDisplayHeight;
-            mInputManager.setDisplaySize(0, mDisplay.getRawWidth(), mDisplay.getRawHeight());
+            mInputManager.setDisplaySize(Display.DEFAULT_DISPLAY,
+                    mDisplay.getRawWidth(), mDisplay.getRawHeight(),
+                    mDisplay.getRawExternalWidth(), mDisplay.getRawExternalHeight());
             mPolicy.setInitialDisplaySize(mInitialDisplayWidth, mInitialDisplayHeight);
         }
 
@@ -6599,6 +6601,13 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized(mWindowMap) {
             size.x = mAppDisplayWidth;
             size.y = mAppDisplayHeight;
+        }
+    }
+
+    public void getRealDisplaySize(Point size) {
+        synchronized(mWindowMap) {
+            size.x = mCurDisplayWidth;
+            size.y = mCurDisplayHeight;
         }
     }
 
@@ -8687,7 +8696,8 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (mScreenRotationAnimation == null) {
                 mScreenRotationAnimation = new ScreenRotationAnimation(mContext,
-                        mDisplay, mFxSession, inTransaction);
+                        mFxSession, inTransaction, mCurDisplayWidth, mCurDisplayHeight,
+                        mDisplay.getRotation());
             }
             if (!mScreenRotationAnimation.hasScreenshot()) {
                 Surface.freezeDisplay(0);
@@ -8717,7 +8727,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (CUSTOM_SCREEN_ROTATION && mScreenRotationAnimation != null
                 && mScreenRotationAnimation.hasScreenshot()) {
             if (mScreenRotationAnimation.dismiss(mFxSession, MAX_ANIMATION_DURATION,
-                    mTransitionAnimationScale)) {
+                    mTransitionAnimationScale, mCurDisplayWidth, mCurDisplayHeight)) {
                 requestAnimationLocked(0);
             } else {
                 mScreenRotationAnimation = null;
@@ -8797,7 +8807,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (line != null) {
                 String[] toks = line.split("%");
                 if (toks != null && toks.length > 0) {
-                    mWatermark = new Watermark(mDisplay, mFxSession, toks);
+                    mWatermark = new Watermark(mRealDisplayMetrics, mFxSession, toks);
                 }
             }
         } catch (FileNotFoundException e) {
@@ -9063,8 +9073,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         pw.print(mCurDisplayWidth); pw.print("x"); pw.print(mCurDisplayHeight);
                         pw.print(" app=");
                         pw.print(mAppDisplayWidth); pw.print("x"); pw.print(mAppDisplayHeight);
-                        pw.print(" real="); pw.print(mDisplay.getRealWidth());
-                        pw.print("x"); pw.print(mDisplay.getRealHeight());
                         pw.print(" raw="); pw.print(mDisplay.getRawWidth());
                         pw.print("x"); pw.println(mDisplay.getRawHeight());
             } else {

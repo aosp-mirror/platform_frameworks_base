@@ -38,9 +38,6 @@ class StrictModeFlash {
     final int mThickness = 20;
 
     public StrictModeFlash(Display display, SurfaceSession session) {
-        final DisplayMetrics dm = new DisplayMetrics();
-        display.getRealMetrics(dm);
-
         try {
             mSurface = new Surface(session, 0, "StrictModeFlash", -1, 1, 1, PixelFormat.TRANSLUCENT, 0);
         } catch (Surface.OutOfResourcesException e) {

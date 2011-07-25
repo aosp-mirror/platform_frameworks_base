@@ -1505,7 +1505,10 @@ void KeyboardInputMapper::configureParameters() {
     getDevice()->getConfiguration().tryGetProperty(String8("keyboard.orientationAware"),
             mParameters.orientationAware);
 
-    mParameters.associatedDisplayId = mParameters.orientationAware ? 0 : -1;
+    mParameters.associatedDisplayId = -1;
+    if (mParameters.orientationAware) {
+        mParameters.associatedDisplayId = 0;
+    }
 }
 
 void KeyboardInputMapper::dumpParameters(String8& dump) {
@@ -1577,7 +1580,7 @@ void KeyboardInputMapper::processKey(nsecs_t when, bool down, int32_t keyCode,
             if (mParameters.orientationAware && mParameters.associatedDisplayId >= 0) {
                 int32_t orientation;
                 if (!getPolicy()->getDisplayInfo(mParameters.associatedDisplayId,
-                        NULL, NULL, & orientation)) {
+                        false /*external*/, NULL, NULL, & orientation)) {
                     orientation = DISPLAY_ORIENTATION_0;
                 }
 
@@ -1830,8 +1833,10 @@ void CursorInputMapper::configureParameters() {
     getDevice()->getConfiguration().tryGetProperty(String8("cursor.orientationAware"),
             mParameters.orientationAware);
 
-    mParameters.associatedDisplayId = mParameters.mode == Parameters::MODE_POINTER
-            || mParameters.orientationAware ? 0 : -1;
+    mParameters.associatedDisplayId = -1;
+    if (mParameters.mode == Parameters::MODE_POINTER || mParameters.orientationAware) {
+        mParameters.associatedDisplayId = 0;
+    }
 }
 
 void CursorInputMapper::dumpParameters(String8& dump) {
@@ -1943,7 +1948,7 @@ void CursorInputMapper::sync(nsecs_t when) {
             // Note: getDisplayInfo is non-reentrant so we can continue holding the lock.
             int32_t orientation;
             if (! getPolicy()->getDisplayInfo(mParameters.associatedDisplayId,
-                    NULL, NULL, & orientation)) {
+                    false /*external*/, NULL, NULL, & orientation)) {
                 orientation = DISPLAY_ORIENTATION_0;
             }
 
@@ -2308,10 +2313,16 @@ void TouchInputMapper::configureParameters() {
     getDevice()->getConfiguration().tryGetProperty(String8("touch.orientationAware"),
             mParameters.orientationAware);
 
-    mParameters.associatedDisplayId = mParameters.orientationAware
+    mParameters.associatedDisplayId = -1;
+    mParameters.associatedDisplayIsExternal = false;
+    if (mParameters.orientationAware
             || mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN
-            || mParameters.deviceType == Parameters::DEVICE_TYPE_POINTER
-            ? 0 : -1;
+            || mParameters.deviceType == Parameters::DEVICE_TYPE_POINTER) {
+        mParameters.associatedDisplayIsExternal =
+                mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN
+                        && getDevice()->isExternal();
+        mParameters.associatedDisplayId = 0;
+    }
 }
 
 void TouchInputMapper::dumpParameters(String8& dump) {
@@ -2393,6 +2404,7 @@ bool TouchInputMapper::configureSurfaceLocked() {
     if (mParameters.associatedDisplayId >= 0) {
         // Note: getDisplayInfo is non-reentrant so we can continue holding the lock.
         if (! getPolicy()->getDisplayInfo(mParameters.associatedDisplayId,
+                mParameters.associatedDisplayIsExternal,
                 &mLocked.associatedDisplayWidth, &mLocked.associatedDisplayHeight,
                 &mLocked.associatedDisplayOrientation)) {
             return false;

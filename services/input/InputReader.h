@@ -180,9 +180,11 @@ public:
     };
 
     /* Gets information about the display with the specified id.
+     * If external is true, returns the size of the external mirrored
+     * counterpart of the specified display.
      * Returns true if the display info is available, false otherwise.
      */
-    virtual bool getDisplayInfo(int32_t displayId,
+    virtual bool getDisplayInfo(int32_t displayId, bool external,
             int32_t* width, int32_t* height, int32_t* orientation) = 0;
 
     /* Gets the input reader configuration. */
@@ -944,6 +946,7 @@ protected:
 
         DeviceType deviceType;
         int32_t associatedDisplayId;
+        bool associatedDisplayIsExternal;
         bool orientationAware;
 
         enum GestureMode {

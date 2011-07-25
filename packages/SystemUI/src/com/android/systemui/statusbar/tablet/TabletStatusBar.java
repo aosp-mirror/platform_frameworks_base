@@ -34,6 +34,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.inputmethodservice.InputMethodService;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.drawable.LayerDrawable;
 import android.provider.Settings;
@@ -341,8 +342,9 @@ public class TabletStatusBar extends StatusBar implements
     private int getNotificationPanelHeight() {
         final Resources res = mContext.getResources();
         final Display d = WindowManagerImpl.getDefault().getDefaultDisplay();
-        return Math.max(res.getDimensionPixelSize(R.dimen.notification_panel_min_height),
-                d.getRealHeight());
+        final Point size = new Point();
+        d.getRealSize(size);
+        return Math.max(res.getDimensionPixelSize(R.dimen.notification_panel_min_height), size.y);
     }
 
     @Override
@@ -352,6 +354,7 @@ public class TabletStatusBar extends StatusBar implements
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
+        mHeightReceiver.updateHeight(); // display size may have changed
         loadDimens();
         mNotificationPanelParams.height = getNotificationPanelHeight();
         WindowManagerImpl.getDefault().updateViewLayout(mNotificationPanel,

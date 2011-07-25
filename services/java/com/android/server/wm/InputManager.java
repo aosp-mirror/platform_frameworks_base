@@ -64,7 +64,8 @@ public class InputManager {
     private static native void nativeInit(Context context,
             Callbacks callbacks, MessageQueue messageQueue);
     private static native void nativeStart();
-    private static native void nativeSetDisplaySize(int displayId, int width, int height);
+    private static native void nativeSetDisplaySize(int displayId, int width, int height,
+            int externalWidth, int externalHeight);
     private static native void nativeSetDisplayOrientation(int displayId, int rotation);
     
     private static native int nativeGetScanCodeState(int deviceId, int sourceMask,
@@ -144,15 +145,17 @@ public class InputManager {
         updatePointerSpeedFromSettings();
     }
     
-    public void setDisplaySize(int displayId, int width, int height) {
-        if (width <= 0 || height <= 0) {
+    public void setDisplaySize(int displayId, int width, int height,
+            int externalWidth, int externalHeight) {
+        if (width <= 0 || height <= 0 || externalWidth <= 0 || externalHeight <= 0) {
             throw new IllegalArgumentException("Invalid display id or dimensions.");
         }
         
         if (DEBUG) {
-            Slog.d(TAG, "Setting display #" + displayId + " size to " + width + "x" + height);
+            Slog.d(TAG, "Setting display #" + displayId + " size to " + width + "x" + height
+                    + " external size " + externalWidth + "x" + externalHeight);
         }
-        nativeSetDisplaySize(displayId, width, height);
+        nativeSetDisplaySize(displayId, width, height, externalWidth, externalHeight);
     }
     
     public void setDisplayOrientation(int displayId, int rotation) {
