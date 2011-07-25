@@ -1059,7 +1059,7 @@ public class WifiStateMachine extends StateMachine {
         }
     }
 
-    private void startTethering(ArrayList<String> available) {
+    private boolean startTethering(ArrayList<String> available) {
 
         boolean wifiAvailable = false;
 
@@ -1085,18 +1085,20 @@ public class WifiStateMachine extends StateMachine {
                     } catch (Exception e) {
                         Log.e(TAG, "Error configuring interface " + intf + ", :" + e);
                         setWifiApEnabled(null, false);
-                        return;
+                        return false;
                     }
 
                     if(mCm.tether(intf) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
                         Log.e(TAG, "Error tethering on " + intf);
                         setWifiApEnabled(null, false);
-                        return;
+                        return false;
                     }
-                    break;
+                    return true;
                 }
             }
         }
+        // We found no interfaces to tether
+        return false;
     }
 
     private void stopTethering() {
@@ -3098,8 +3100,9 @@ public class WifiStateMachine extends StateMachine {
                     break;
                 case CMD_TETHER_INTERFACE:
                     ArrayList<String> available = (ArrayList<String>) message.obj;
-                    startTethering(available);
-                    transitionTo(mTetheredState);
+                    if (startTethering(available)) {
+                        transitionTo(mTetheredState);
+                    }
                     break;
                 case WifiP2pService.P2P_ENABLE_PENDING:
                     // turn of soft Ap and defer to be handled in DriverUnloadedState
