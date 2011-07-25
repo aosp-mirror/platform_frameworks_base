@@ -294,14 +294,14 @@ public class AccessibilityNodeInfo implements Parcelable {
     }
 
     /**
-     * Gets the unique id identifying this node's parent.
+     * Gets the parent.
      * <p>
      *   <strong>Note:</strong> It is a client responsibility to recycle the
      *     received info by calling {@link AccessibilityNodeInfo#recycle()}
      *     to avoid creating of multiple instances.
      * </p>
      *
-     * @return The node's patent id.
+     * @return The parent.
      */
     public AccessibilityNodeInfo getParent() {
         enforceSealed();

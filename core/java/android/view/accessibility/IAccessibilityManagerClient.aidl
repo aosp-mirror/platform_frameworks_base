@@ -24,7 +24,5 @@ package android.view.accessibility;
  */
 oneway interface IAccessibilityManagerClient {
 
-    void setEnabled(boolean enabled);
-
-    void setTouchExplorationEnabled(boolean enabled);
+    void setState(int stateFlags);
 }

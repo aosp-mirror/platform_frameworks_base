@@ -75,6 +75,17 @@ public class AccessibilityServiceInfo implements Parcelable {
     public static final int FEEDBACK_GENERIC = 0x0000010;
 
     /**
+     * Mask for all feedback types.
+     *
+     * @see #FEEDBACK_SPOKEN
+     * @see #FEEDBACK_HAPTIC
+     * @see #FEEDBACK_AUDIBLE
+     * @see #FEEDBACK_VISUAL
+     * @see #FEEDBACK_GENERIC
+     */
+    public static final int FEEDBACK_ALL_MASK = 0xFFFFFFFF;
+
+    /**
      * If an {@link AccessibilityService} is the default for a given type.
      * Default service is invoked only if no package specific one exists. In case of
      * more than one package specific service only the earlier registered is notified.

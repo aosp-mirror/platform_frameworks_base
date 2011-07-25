@@ -34,7 +34,7 @@ import android.view.IWindow;
  */
 interface IAccessibilityManager {
 
-    boolean addClient(IAccessibilityManagerClient client);
+    int addClient(IAccessibilityManagerClient client);
 
     boolean sendAccessibilityEvent(in AccessibilityEvent uiEvent);
 

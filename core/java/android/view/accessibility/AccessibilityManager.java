@@ -67,13 +67,17 @@ public final class AccessibilityManager {
 
     private static final String LOG_TAG = "AccessibilityManager";
 
+    /** @hide */
+    public static final int STATE_FLAG_ACCESSIBILITY_ENABLED = 0x00000001;
+
+    /** @hide */
+    public static final int STATE_FLAG_TOUCH_EXPLORATION_ENABLED = 0x00000002;
+
     static final Object sInstanceSync = new Object();
 
     private static AccessibilityManager sInstance;
 
-    private static final int DO_SET_ACCESSIBILITY_ENABLED = 10;
-
-    private static final int DO_SET_TOUCH_EXPLORATION_ENABLED = 20;
+    private static final int DO_SET_STATE = 10;
 
     final IAccessibilityManager mService;
 
@@ -100,13 +104,8 @@ public final class AccessibilityManager {
     }
 
     final IAccessibilityManagerClient.Stub mClient = new IAccessibilityManagerClient.Stub() {
-        public void setEnabled(boolean enabled) {
-            mHandler.obtainMessage(DO_SET_ACCESSIBILITY_ENABLED, enabled ? 1 : 0, 0).sendToTarget();
-        }
-
-        public void setTouchExplorationEnabled(boolean enabled) {
-            mHandler.obtainMessage(DO_SET_TOUCH_EXPLORATION_ENABLED,
-                    enabled ? 1 : 0, 0).sendToTarget();
+        public void setState(int state) {
+            mHandler.obtainMessage(DO_SET_STATE, state, 0).sendToTarget();
         }
     };
 
@@ -119,14 +118,8 @@ public final class AccessibilityManager {
         @Override
         public void handleMessage(Message message) {
             switch (message.what) {
-                case DO_SET_ACCESSIBILITY_ENABLED :
-                    final boolean isAccessibilityEnabled = (message.arg1 == 1);
-                    setAccessibilityState(isAccessibilityEnabled);
-                    return;
-                case DO_SET_TOUCH_EXPLORATION_ENABLED :
-                    synchronized (mHandler) {
-                        mIsTouchExplorationEnabled = (message.arg1 == 1);
-                    }
+                case DO_SET_STATE :
+                    setState(message.arg1);
                     return;
                 default :
                     Log.w(LOG_TAG, "Unknown message type: " + message.what);
@@ -163,8 +156,8 @@ public final class AccessibilityManager {
         mService = service;
 
         try {
-            final boolean isEnabled = mService.addClient(mClient);
-            setAccessibilityState(isEnabled);
+            final int stateFlags = mService.addClient(mClient);
+            setState(stateFlags);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
         }
@@ -338,6 +331,17 @@ public final class AccessibilityManager {
     public boolean removeAccessibilityStateChangeListener(
             AccessibilityStateChangeListener listener) {
         return mAccessibilityStateChangeListeners.remove(listener);
+    }
+
+    /**
+     * Sets the current state.
+     *
+     * @param stateFlags The state flags.
+     */
+    private void setState(int stateFlags) {
+        final boolean accessibilityEnabled = (stateFlags & STATE_FLAG_ACCESSIBILITY_ENABLED) != 0;
+        setAccessibilityState(accessibilityEnabled);
+        mIsTouchExplorationEnabled = (stateFlags & STATE_FLAG_TOUCH_EXPLORATION_ENABLED) != 0;
     }
 
     /**

@@ -65,13 +65,13 @@ public class RecycleAccessibilityEventTest extends TestCase {
         assertEquals(0, first.getText().size());
         assertFalse(first.isChecked());
         assertNull(first.getContentDescription());
-        assertEquals(0, first.getItemCount());
+        assertEquals(-1, first.getItemCount());
         assertEquals(AccessibilityEvent.INVALID_POSITION, first.getCurrentItemIndex());
         assertFalse(first.isEnabled());
         assertFalse(first.isPassword());
-        assertEquals(0, first.getFromIndex());
-        assertEquals(0, first.getAddedCount());
-        assertEquals(0, first.getRemovedCount());
+        assertEquals(-1, first.getFromIndex());
+        assertEquals(-1, first.getAddedCount());
+        assertEquals(-1, first.getRemovedCount());
 
         // get another event from the pool (this must be the recycled first)
         AccessibilityEvent second = AccessibilityEvent.obtain();
