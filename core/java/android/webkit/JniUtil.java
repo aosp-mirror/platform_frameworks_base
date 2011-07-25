@@ -18,6 +18,7 @@ package android.webkit;
 
 import android.content.Context;
 import android.net.Uri;
+import android.provider.Settings;
 import android.util.Log;
 
 import java.io.InputStream;
@@ -38,7 +39,7 @@ class JniUtil {
 
     private static boolean initialized = false;
 
-    private static void checkIntialized() {
+    private static void checkInitialized() {
         if (!initialized) {
             throw new IllegalStateException("Call CookieSyncManager::createInstance() or create a webview before using this class");
         }
@@ -63,7 +64,7 @@ class JniUtil {
      * @return String The application's database directory
      */
     private static synchronized String getDatabaseDirectory() {
-        checkIntialized();
+        checkInitialized();
 
         if (sDatabaseDirectory == null)
             sDatabaseDirectory = sContext.getDatabasePath("dummy").getParent();
@@ -76,7 +77,7 @@ class JniUtil {
      * @return String The application's cache directory
      */
     private static synchronized String getCacheDirectory() {
-        checkIntialized();
+        checkInitialized();
 
         if (sCacheDirectory == null)
             sCacheDirectory = sContext.getCacheDir().getAbsolutePath();
@@ -164,6 +165,14 @@ class JniUtil {
             sUseChromiumHttpStack = nativeUseChromiumHttpStack();
         }
         return sUseChromiumHttpStack;
+    }
+
+    private static synchronized String getAutofillQueryUrl() {
+        checkInitialized();
+        // If the device has not checked in it won't have pulled down the system setting for the
+        // Autofill Url. In that case we will not make autofill server requests.
+        return Settings.Secure.getString(sContext.getContentResolver(),
+                Settings.Secure.WEB_AUTOFILL_QUERY_URL);
     }
 
     private static native boolean nativeUseChromiumHttpStack();
