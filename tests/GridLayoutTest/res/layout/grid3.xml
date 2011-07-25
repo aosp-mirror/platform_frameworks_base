@@ -27,8 +27,8 @@
         >
 
     <TextView
-            android:text="Email account"
-            android:textSize="48dip"
+            android:text="Email setup"
+            android:textSize="32dip"
 
             android:layout_columnSpan="4"
             android:layout_gravity="center_horizontal"
@@ -36,7 +36,7 @@
 
     <TextView
             android:text="You can configure email in just a few steps:"
-            android:textSize="20dip"
+            android:textSize="16dip"
 
             android:layout_columnSpan="4"
             android:layout_gravity="left"
@@ -49,7 +49,7 @@
             />
 
     <EditText
-            android:layout_width="100dip"
+            android:layout_width="64dip"
             />
 
     <TextView
@@ -60,14 +60,14 @@
             />
 
     <EditText
-            android:layout_width="50dip"
+            android:layout_width="32dip"
             />
 
     <Space
             android:layout_row="4"
             android:layout_column="2"
-            android:layout_rowFlexibility="canStretch"
-            android:layout_columnFlexibility="canStretch"
+            android:layout_margin="0dip"
+            android:layout_gravity="fill"
             />
 
     <Button
@@ -75,7 +75,6 @@
 
             android:layout_row="5"
             android:layout_column="3"
-            android:layout_gravity="fill_horizontal"
             />
 
     <Button

@@ -3361,18 +3361,16 @@
         The default is LEFT | BASELINE.
         See {@link android.widget.GridLayout.LayoutParams#setGravity(int)}. -->
         <attr name="layout_gravity" />
-        <!-- A value specifying how much deficit or excess width this component can accomodate.
-        The default is FIXED. -->
+        <!-- {@deprecated To make a column group lexible, ensure that every component in the
+         group defines a horizontal gravity.} -->
         <attr name="layout_columnFlexibility" >
-            <!-- If possible, width should be greater than or equal to the specified width.
-            See {@link android.widget.GridLayout#CAN_STRETCH}. -->
+            <enum name="inflexible" value="0" />
             <enum name="canStretch" value="2" />
         </attr>
-        <!-- A value specifying how much deficit or excess height this component can accomodate.
-        The default is FIXED. -->
+        <!-- {@deprecated To make a row group flexible, ensure that every component in the
+         group defines a vertical gravity.} -->
         <attr name="layout_rowFlexibility" >
-            <!-- If possible, height should be greater than or equal to the specified height.
-            See {@link android.widget.GridLayout#CAN_STRETCH}. -->
+            <enum name="inflexible" value="0" />
             <enum name="canStretch" value="2" />
         </attr>
     </declare-styleable>

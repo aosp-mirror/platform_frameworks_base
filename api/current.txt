@@ -607,7 +607,7 @@ package android {
     field public static final int layout_centerInParent = 16843151; // 0x101018f
     field public static final int layout_centerVertical = 16843153; // 0x1010191
     field public static final int layout_column = 16843084; // 0x101014c
-    field public static final int layout_columnFlexibility = 16843644; // 0x101037c
+    field public static final deprecated int layout_columnFlexibility = 16843644; // 0x101037c
     field public static final int layout_columnSpan = 16843643; // 0x101037b
     field public static final int layout_gravity = 16842931; // 0x10100b3
     field public static final int layout_height = 16842997; // 0x10100f5
@@ -617,7 +617,7 @@ package android {
     field public static final int layout_marginRight = 16843001; // 0x10100f9
     field public static final int layout_marginTop = 16843000; // 0x10100f8
     field public static final int layout_row = 16843640; // 0x1010378
-    field public static final int layout_rowFlexibility = 16843642; // 0x101037a
+    field public static final deprecated int layout_rowFlexibility = 16843642; // 0x101037a
     field public static final int layout_rowSpan = 16843641; // 0x1010379
     field public static final int layout_scale = 16843155; // 0x1010193
     field public static final int layout_span = 16843085; // 0x101014d
@@ -25438,15 +25438,14 @@ package android.widget {
     method public void setRowCount(int);
     method public void setRowOrderPreserved(boolean);
     method public void setUseDefaultMargins(boolean);
-    method public static android.widget.GridLayout.Spec spec(int, int, android.widget.GridLayout.Alignment, int);
-    method public static android.widget.GridLayout.Spec spec(int, android.widget.GridLayout.Alignment, int);
     method public static android.widget.GridLayout.Spec spec(int, int, android.widget.GridLayout.Alignment);
     method public static android.widget.GridLayout.Spec spec(int, android.widget.GridLayout.Alignment);
+    method public static android.widget.GridLayout.Spec spec(int, int);
+    method public static android.widget.GridLayout.Spec spec(int);
     field public static final int ALIGN_BOUNDS = 0; // 0x0
     field public static final int ALIGN_MARGINS = 1; // 0x1
     field public static final android.widget.GridLayout.Alignment BASELINE;
     field public static final android.widget.GridLayout.Alignment BOTTOM;
-    field public static final int CAN_STRETCH = 2; // 0x2
     field public static final android.widget.GridLayout.Alignment CENTER;
     field public static final android.widget.GridLayout.Alignment FILL;
     field public static final int HORIZONTAL = 0; // 0x0

@@ -21,7 +21,6 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
@@ -38,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.view.Gravity.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -167,7 +167,7 @@ public class GridLayout extends ViewGroup {
     // Misc constants
 
     private static final String TAG = GridLayout.class.getName();
-    static boolean DEBUG = false;
+    private static boolean DEBUG = false;
     private static final int PRF = 1;
 
     // Defaults
@@ -198,7 +198,8 @@ public class GridLayout extends ViewGroup {
     private int mOrientation = DEFAULT_ORIENTATION;
     private boolean mUseDefaultMargins = DEFAULT_USE_DEFAULT_MARGINS;
     private int mAlignmentMode = DEFAULT_ALIGNMENT_MODE;
-    private int mDefaultGravity = Gravity.NO_GRAVITY;
+    private Alignment mColumnAlignment = LEFT;
+    private Alignment mRowAlignment = BASELINE;
     private int mDefaultGap;
 
     // Constructors
@@ -216,9 +217,9 @@ public class GridLayout extends ViewGroup {
         try {
             setRowCount(a.getInt(ROW_COUNT, DEFAULT_COUNT));
             setColumnCount(a.getInt(COLUMN_COUNT, DEFAULT_COUNT));
-            mOrientation = a.getInt(ORIENTATION, DEFAULT_ORIENTATION);
-            mUseDefaultMargins = a.getBoolean(USE_DEFAULT_MARGINS, DEFAULT_USE_DEFAULT_MARGINS);
-            mAlignmentMode = a.getInt(ALIGNMENT_MODE, DEFAULT_ALIGNMENT_MODE);
+            setOrientation(a.getInt(ORIENTATION, DEFAULT_ORIENTATION));
+            setUseDefaultMargins(a.getBoolean(USE_DEFAULT_MARGINS, DEFAULT_USE_DEFAULT_MARGINS));
+            setAlignmentMode(a.getInt(ALIGNMENT_MODE, DEFAULT_ALIGNMENT_MODE));
             setRowOrderPreserved(a.getBoolean(ROW_ORDER_PRESERVED, DEFAULT_ORDER_PRESERVED));
             setColumnOrderPreserved(a.getBoolean(COLUMN_ORDER_PRESERVED, DEFAULT_ORDER_PRESERVED));
         } finally {
@@ -514,6 +515,8 @@ public class GridLayout extends ViewGroup {
         requestLayout();
     }
 
+    // Static utility methods
+
     private static int max2(int[] a, int valueIfEmpty) {
         int result = valueIfEmpty;
         for (int i = 0, N = a.length; i < N; i++) {
@@ -535,6 +538,24 @@ public class GridLayout extends ViewGroup {
         System.arraycopy(a, 0, result, 0, a.length);
         System.arraycopy(b, 0, result, a.length, b.length);
         return result;
+    }
+
+    private static Alignment getAlignment(int gravity, boolean horizontal) {
+        int mask = horizontal ? HORIZONTAL_GRAVITY_MASK : VERTICAL_GRAVITY_MASK;
+        int shift = horizontal ? AXIS_X_SHIFT : AXIS_Y_SHIFT;
+        int flags = (gravity & mask) >> shift;
+        switch (flags) {
+            case (AXIS_SPECIFIED | AXIS_PULL_BEFORE):
+                return LEADING;
+            case (AXIS_SPECIFIED | AXIS_PULL_AFTER):
+                return TRAILING;
+            case (AXIS_SPECIFIED | AXIS_PULL_BEFORE | AXIS_PULL_AFTER):
+                return FILL;
+            case AXIS_SPECIFIED:
+                return CENTER;
+            default:
+                return UNDEFINED_ALIGNMENT;
+        }
     }
 
     private int getDefaultMargin(View c, boolean horizontal, boolean leading) {
@@ -678,7 +699,7 @@ public class GridLayout extends ViewGroup {
 
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new LayoutParams(getContext(), attrs, mDefaultGravity);
+        return new LayoutParams(getContext(), attrs);
     }
 
     @Override
@@ -833,6 +854,9 @@ public class GridLayout extends ViewGroup {
     }
 
     private int getMeasurementIncludingMargin(View c, boolean horizontal) {
+        if (isGone(c)) {
+            return 0;
+        }
         int result = getMeasurement(c, horizontal);
         if (mAlignmentMode == ALIGN_MARGINS) {
             return result + getTotalMargin(c, horizontal);
@@ -844,6 +868,11 @@ public class GridLayout extends ViewGroup {
     public void requestLayout() {
         super.requestLayout();
         invalidateValues();
+    }
+
+    private Alignment getAlignment(Alignment alignment, boolean horizontal) {
+        return (alignment != UNDEFINED_ALIGNMENT) ? alignment :
+                (horizontal ? mColumnAlignment : mRowAlignment);
     }
 
     // Layout container
@@ -895,8 +924,8 @@ public class GridLayout extends ViewGroup {
             int pWidth = getMeasurement(c, true);
             int pHeight = getMeasurement(c, false);
 
-            Alignment hAlign = columnSpec.alignment;
-            Alignment vAlign = rowSpec.alignment;
+            Alignment hAlign = getAlignment(columnSpec.alignment, true);
+            Alignment vAlign = getAlignment(rowSpec.alignment, false);
 
             int dx, dy;
 
@@ -1035,14 +1064,10 @@ public class GridLayout extends ViewGroup {
             Assoc<Spec, Bounds> assoc = Assoc.of(Spec.class, Bounds.class);
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
-                if (isGone(c)) {
-                    assoc.put(Spec.GONE, Bounds.GONE);
-                } else {
-                    LayoutParams lp = getLayoutParams(c);
-                    Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
-                    Bounds bounds = spec.alignment.getBounds();
-                    assoc.put(spec, bounds);
-                }
+                LayoutParams lp = getLayoutParams(c);
+                Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
+                Bounds bounds = getAlignment(spec.alignment, horizontal).getBounds();
+                assoc.put(spec, bounds);
             }
             return assoc.pack();
         }
@@ -1054,7 +1079,6 @@ public class GridLayout extends ViewGroup {
             }
             for (int i = 0, N = getChildCount(); i < N; i++) {
                 View c = getChildAt(i);
-                if (isGone(c)) continue;
                 LayoutParams lp = getLayoutParams(c);
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 groupBounds.getValue(i).include(c, spec, GridLayout.this, this);
@@ -1094,11 +1118,8 @@ public class GridLayout extends ViewGroup {
             for (int i = 0; i < bounds.length; i++) {
                 int size = bounds[i].size(min);
                 MutableInt valueHolder = links.getValue(i);
-                if (min) {
-                    valueHolder.value = max(valueHolder.value, size);
-                } else {
-                    valueHolder.value = -max(-valueHolder.value, size);
-                }
+                // this effectively takes the max() of the minima and the min() of the maxima
+                valueHolder.value = max(valueHolder.value, min ? size : -size);
             }
         }
 
@@ -1397,7 +1418,7 @@ public class GridLayout extends ViewGroup {
                 }
                 if (!changed) {
                     if (DEBUG) {
-                        Log.d(TAG, axis + " iteration completed in " + (1 + i) + " steps of " + N);
+                        Log.v(TAG, axis + " iteration completed in " + (1 + i) + " steps of " + N);
                     }
                     return;
                 }
@@ -1654,14 +1675,6 @@ public class GridLayout extends ViewGroup {
         private static final int DEFAULT_COLUMN = UNDEFINED;
         private static final Interval DEFAULT_SPAN = new Interval(UNDEFINED, UNDEFINED + 1);
         private static final int DEFAULT_SPAN_SIZE = DEFAULT_SPAN.size();
-        private static final Alignment DEFAULT_COLUMN_ALIGNMENT = LEFT;
-        private static final Alignment DEFAULT_ROW_ALIGNMENT = BASELINE;
-
-        // Misc
-
-        private static final Rect CONTAINER_BOUNDS = new Rect(0, 0, 2, 2);
-        private static final Alignment[] COLUMN_ALIGNMENTS = { LEFT, CENTER, RIGHT };
-        private static final Alignment[] ROW_ALIGNMENTS = { TOP, CENTER, BOTTOM };
 
         // TypedArray indices
 
@@ -1728,8 +1741,7 @@ public class GridLayout extends ViewGroup {
          * Constructs a new LayoutParams with default values as defined in {@link LayoutParams}.
          */
         public LayoutParams() {
-            this(new Spec(DEFAULT_SPAN, DEFAULT_ROW_ALIGNMENT, Spec.DEFAULT_FLEXIBILITY),
-                    new Spec(DEFAULT_SPAN, DEFAULT_COLUMN_ALIGNMENT, Spec.DEFAULT_FLEXIBILITY));
+            this(spec(UNDEFINED), spec(UNDEFINED));
         }
 
         // Copying constructors
@@ -1753,17 +1765,11 @@ public class GridLayout extends ViewGroup {
          */
         public LayoutParams(LayoutParams that) {
             super(that);
-            this.columnSpec = new Spec(that.columnSpec);
             this.rowSpec = new Spec(that.rowSpec);
+            this.columnSpec = new Spec(that.columnSpec);
         }
 
         // AttributeSet constructors
-
-        private LayoutParams(Context context, AttributeSet attrs, int defaultGravity) {
-            super(context, attrs);
-            reInitSuper(context, attrs);
-            init(context, attrs, defaultGravity);
-        }
 
         /**
          * {@inheritDoc}
@@ -1772,26 +1778,12 @@ public class GridLayout extends ViewGroup {
          * defined in {@link LayoutParams}.
          */
         public LayoutParams(Context context, AttributeSet attrs) {
-            this(context, attrs, Gravity.NO_GRAVITY);
+            super(context, attrs);
+            reInitSuper(context, attrs);
+            init(context, attrs);
         }
 
         // Implementation
-
-        private static boolean definesVertical(int gravity) {
-            return gravity > 0 && (gravity & Gravity.VERTICAL_GRAVITY_MASK) != 0;
-        }
-
-        private static boolean definesHorizontal(int gravity) {
-            return gravity > 0 && (gravity & Gravity.HORIZONTAL_GRAVITY_MASK) != 0;
-        }
-
-        private static <T> T getAlignment(T[] alignments, T fill, int min, int max,
-                boolean isUndefined, T defaultValue) {
-            if (isUndefined) {
-                return defaultValue;
-            }
-            return min != max ? fill : alignments[min];
-        }
 
         // Reinitialise the margins using a different default policy than MarginLayoutParams.
         // Here we use the value UNDEFINED (as distinct from zero) to represent the undefined state
@@ -1817,44 +1809,20 @@ public class GridLayout extends ViewGroup {
             }
         }
 
-        // Gravity. For conversion from the static the integers defined in the Gravity class,
-        // use Gravity.apply() to apply gravity to a view of zero size and see where it ends up.
-        private static Alignment getColAlignment(int gravity, int width) {
-            Rect r = new Rect(0, 0, 0, 0);
-            Gravity.apply(gravity, 0, 0, CONTAINER_BOUNDS, r);
-
-            boolean fill = (width == MATCH_PARENT);
-            Alignment defaultAlignment = fill ? FILL : DEFAULT_COLUMN_ALIGNMENT;
-            return getAlignment(COLUMN_ALIGNMENTS, FILL, r.left, r.right,
-                    !definesHorizontal(gravity), defaultAlignment);
-        }
-
-        private static Alignment getRowAlignment(int gravity, int height) {
-            Rect r = new Rect(0, 0, 0, 0);
-            Gravity.apply(gravity, 0, 0, CONTAINER_BOUNDS, r);
-
-            boolean fill = (height == MATCH_PARENT);
-            Alignment defaultAlignment = fill ? FILL : DEFAULT_ROW_ALIGNMENT;
-            return getAlignment(ROW_ALIGNMENTS, FILL, r.top, r.bottom,
-                    !definesVertical(gravity), defaultAlignment);
-        }
-
-        private void init(Context context, AttributeSet attrs, int defaultGravity) {
+        private void init(Context context, AttributeSet attrs) {
             TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.GridLayout_Layout);
             try {
-                int gravity = a.getInt(GRAVITY, defaultGravity);
+                int gravity = a.getInt(GRAVITY, Gravity.NO_GRAVITY);
 
                 int column = a.getInt(COLUMN, DEFAULT_COLUMN);
-                int columnSpan = a.getInt(COLUMN_SPAN, DEFAULT_SPAN_SIZE);
-                Interval hSpan = new Interval(column, column + columnSpan);
-                int hFlexibility = a.getInt(COLUMN_FLEXIBILITY, Spec.DEFAULT_FLEXIBILITY);
-                this.columnSpec = new Spec(hSpan, getColAlignment(gravity, width), hFlexibility);
+                int colSpan = a.getInt(COLUMN_SPAN, DEFAULT_SPAN_SIZE);
+                int hFlexibility = a.getInt(COLUMN_FLEXIBILITY, Spec.UNDEFINED_FLEXIBILITY);
+                this.columnSpec = spec(column, colSpan, getAlignment(gravity, true), hFlexibility);
 
                 int row = a.getInt(ROW, DEFAULT_ROW);
                 int rowSpan = a.getInt(ROW_SPAN, DEFAULT_SPAN_SIZE);
-                Interval vSpan = new Interval(row, row + rowSpan);
-                int vFlexibility = a.getInt(ROW_FLEXIBILITY, Spec.DEFAULT_FLEXIBILITY);
-                this.rowSpec = new Spec(vSpan, getRowAlignment(gravity, height), vFlexibility);
+                int vFlexibility = a.getInt(ROW_FLEXIBILITY, Spec.UNDEFINED_FLEXIBILITY);
+                this.rowSpec = spec(row, rowSpan, getAlignment(gravity, false), vFlexibility);
             } finally {
                 a.recycle();
             }
@@ -1869,8 +1837,8 @@ public class GridLayout extends ViewGroup {
          * @attr ref android.R.styleable#GridLayout_Layout_layout_gravity
          */
         public void setGravity(int gravity) {
-            columnSpec = columnSpec.copyWriteAlignment(getColAlignment(gravity, width));
-            rowSpec = rowSpec.copyWriteAlignment(getRowAlignment(gravity, height));
+            rowSpec = rowSpec.copyWriteAlignment(getAlignment(gravity, false));
+            columnSpec = columnSpec.copyWriteAlignment(getAlignment(gravity, true));
         }
 
         @Override
@@ -2045,7 +2013,7 @@ public class GridLayout extends ViewGroup {
 
         public int before;
         public int after;
-        public int flexibility;
+        public int flexibility; // we're flexible iff all included specs are flexible
 
         private Bounds() {
             reset();
@@ -2054,7 +2022,7 @@ public class GridLayout extends ViewGroup {
         protected void reset() {
             before = Integer.MIN_VALUE;
             after = Integer.MIN_VALUE;
-            flexibility = UNDEFINED_FLEXIBILITY;
+            flexibility = CAN_STRETCH; // from the above, we're flexible when empty
         }
 
         protected void include(int before, int after) {
@@ -2064,10 +2032,7 @@ public class GridLayout extends ViewGroup {
 
         protected int size(boolean min) {
             if (!min) {
-                // Note in the usual case, components don't define anything
-                // leaving their flexibility is undefined and their stretchability
-                // defined as if the CAN_STRETCH flag was false.
-                if (canStretch(flexibility) && !isUndefined(flexibility)) {
+                if (canStretch(flexibility)) {
                     return MAX_SIZE;
                 }
             }
@@ -2078,11 +2043,12 @@ public class GridLayout extends ViewGroup {
             return before - alignment.getAlignmentValue(c, size);
         }
 
-        protected void include(View c, Spec spec, GridLayout gridLayout, Axis axis) {
-            this.flexibility &= spec.flexibility;
+        protected final void include(View c, Spec spec, GridLayout gridLayout, Axis axis) {
+            this.flexibility &= spec.getFlexibility();
             int size = gridLayout.getMeasurementIncludingMargin(c, axis.horizontal);
             // todo test this works correctly when the returned value is UNDEFINED
-            int before = spec.alignment.getAlignmentValue(c, size);
+            Alignment alignment = gridLayout.getAlignment(spec.alignment, axis.horizontal);
+            int before = alignment.getAlignmentValue(c, size);
             include(before, size - before);
         }
 
@@ -2107,8 +2073,6 @@ public class GridLayout extends ViewGroup {
      * {@code x} such that {@code min <= x < max}.
      */
     static class Interval {
-        private static final Interval GONE = new Interval(UNDEFINED, UNDEFINED);
-
         /**
          * The minimum value.
          */
@@ -2186,40 +2150,38 @@ public class GridLayout extends ViewGroup {
         }
     }
 
-    /**
-     * A spec defines either the horizontal or vertical characteristics of a group of
-     * cells.
-     */
+   /**
+    * A Spec defines the horizontal or vertical characteristics of a group of
+    * cells. Each spec. defines the <em>grid indices</em>, <em>alignment</em> and
+    * <em>flexibility</em> along the appropriate axis.
+    * <p>
+    * The <em>grid indices</em> are the leading and trailing edges of this cell group.
+    * See {@link GridLayout} for a description of the conventions used by GridLayout
+    * for grid indices.
+    * <p>
+    * The <em>alignment</em> property specifies how cells should be aligned in this group.
+    * For row groups, this specifies the vertical alignment.
+    * For column groups, this specifies the horizontal alignment.
+    */
     public static class Spec {
-        private static final int DEFAULT_FLEXIBILITY = UNDEFINED_FLEXIBILITY;
+        private static final int UNDEFINED_FLEXIBILITY = UNDEFINED;
 
-        private static final Spec GONE = new Spec(Interval.GONE, Alignment.GONE);
-
-        /**
-         * The grid indices of the leading and trailing edges of this cell group for the
-         * appropriate axis.
-         * <p>
-         * See {@link GridLayout} for a description of the conventions used by GridLayout
-         * for grid indices.
-         */
         final Interval span;
-        /**
-         * Specifies how cells should be aligned in this group.
-         * For row groups, this specifies the vertical alignment.
-         * For column groups, this specifies the horizontal alignment.
-         */
+
         final Alignment alignment;
 
-        /**
-         * The flexibility field tells GridLayout how to derive minimum and maximum size
-         * values for a component. Specifications are made with respect to a child's
-         * 'measured size'. A child's measured size is, in turn, controlled by its
-         * height and width layout parameters which either specify a size or, in
-         * the case of {@link LayoutParams#WRAP_CONTENT WRAP_CONTENT}, defer to
-         * the computed size of the component.
-         *
-         * @see GridLayout#CAN_STRETCH
-         */
+     /**
+       * The <em>flexibility</em> property tells GridLayout how to derive minimum and maximum size
+       * values for a component. Specifications are made with respect to a child's
+       * 'measured size'. A child's measured size is, in turn, controlled by its
+       * height and width layout parameters which either specify a size or, in
+       * the case of {@link LayoutParams#WRAP_CONTENT WRAP_CONTENT}, defer to
+       * the computed size of the component.
+       * <p>
+       * A cell group is flexible only if <em>all</em> of its components are flexible.
+       * <p>
+       * By default, flexibility is {@link #INFLEXIBLE} only when alignment/gravity is undefined.
+       */
         final int flexibility;
 
         private Spec(Interval span, Alignment alignment, int flexibility) {
@@ -2229,7 +2191,7 @@ public class GridLayout extends ViewGroup {
         }
 
         private Spec(Interval span, Alignment alignment) {
-            this(span, alignment, DEFAULT_FLEXIBILITY);
+            this(span, alignment, UNDEFINED_FLEXIBILITY);
         }
 
         /* Copying constructor */
@@ -2249,8 +2211,14 @@ public class GridLayout extends ViewGroup {
             return new Spec(span, alignment, flexibility);
         }
 
-        private Spec copyWriteFlexibility(int flexibility) {
-            return new Spec(span, alignment, flexibility);
+        private static int defaultFlexibility(Alignment alignment) {
+            return (alignment == UNDEFINED_ALIGNMENT) ? INFLEXIBLE : CAN_STRETCH;
+        }
+
+        int getFlexibility() {
+            return (flexibility != UNDEFINED_FLEXIBILITY) ?
+                    flexibility :
+                    defaultFlexibility(alignment);
         }
 
         /**
@@ -2293,34 +2261,23 @@ public class GridLayout extends ViewGroup {
     }
 
     /**
-     * Return a Spec, {@code spec}, where:
-     * <ul>
-     *     <li> {@code spec.span = [start, start + size]} </li>
-     *     <li> {@code spec.alignment = alignment} </li>
-     *     <li> {@code spec.flexibility = flexibility} </li>
-     * </ul>
+     * @deprecated Please use {@link #spec(int, int, Alignment)} instead,
+     * all spec's that define alignments (gravity) are  assumed to be able to stretch.
      *
-     * @param start         the start
-     * @param size          the size
-     * @param alignment     the alignment
-     * @param flexibility   the flexibility
+     * @hide
      */
+    @Deprecated
     public static Spec spec(int start, int size, Alignment alignment, int flexibility) {
         return new Spec(start, size, alignment, flexibility);
     }
 
     /**
-     * Return a Spec, {@code spec}, where:
-     * <ul>
-     *     <li> {@code spec.span = [start, start + 1]} </li>
-     *     <li> {@code spec.alignment = alignment} </li>
-     *     <li> {@code spec.flexibility = flexibility} </li>
-     * </ul>
+     * @deprecated Please use {@link #spec(int, Alignment)} instead,
+     * all spec's that define alignments (gravity) are assumed to be able to stretch.
      *
-     * @param start         the start
-     * @param alignment     the alignment
-     * @param flexibility   the flexibility
+     * @hide
      */
+    @Deprecated
     public static Spec spec(int start, Alignment alignment, int flexibility) {
         return spec(start, 1, alignment, flexibility);
     }
@@ -2337,7 +2294,7 @@ public class GridLayout extends ViewGroup {
      * @param alignment the alignment
      */
     public static Spec spec(int start, int size, Alignment alignment) {
-        return spec(start, size, alignment, Spec.DEFAULT_FLEXIBILITY);
+        return spec(start, size, alignment, Spec.UNDEFINED_FLEXIBILITY);
     }
 
     /**
@@ -2352,6 +2309,31 @@ public class GridLayout extends ViewGroup {
      */
     public static Spec spec(int start, Alignment alignment) {
         return spec(start, 1, alignment);
+    }
+
+    /**
+     * Return a Spec, {@code spec}, where:
+     * <ul>
+     *     <li> {@code spec.span = [start, start + size]} </li>
+     * </ul>
+     *
+     * @param start     the start
+     * @param size      the size
+     */
+    public static Spec spec(int start, int size) {
+        return spec(start, size, UNDEFINED_ALIGNMENT);
+    }
+
+    /**
+     * Return a Spec, {@code spec}, where:
+     * <ul>
+     *     <li> {@code spec.span = [start, start + 1]} </li>
+     * </ul>
+     *
+     * @param start     the start index
+     */
+    public static Spec spec(int start) {
+        return spec(start, 1);
     }
 
     /**
@@ -2376,13 +2358,6 @@ public class GridLayout extends ViewGroup {
      * <p>
      */
     public static abstract class Alignment {
-        private static final Alignment GONE = new Alignment() {
-            public int getAlignmentValue(View view, int viewSize) {
-                assert false;
-                return 0;
-            }
-        };
-
         Alignment() {
         }
 
@@ -2422,11 +2397,16 @@ public class GridLayout extends ViewGroup {
         }
     }
 
+    private static final Alignment UNDEFINED_ALIGNMENT = new Alignment() {
+        public int getAlignmentValue(View view, int viewSize) {
+            return UNDEFINED;
+        }
+    };
+
     private static final Alignment LEADING = new Alignment() {
         public int getAlignmentValue(View view, int viewSize) {
             return 0;
         }
-
     };
 
     private static final Alignment TRAILING = new Alignment() {
@@ -2542,38 +2522,17 @@ public class GridLayout extends ViewGroup {
         return (flexibility & CAN_STRETCH) != 0;
     }
 
-    private static boolean isUndefined(int flexibility) {
-        return (flexibility & UNDEFINED) != 0;
-    }
-
-    /**
-     * Indicates that a view requests precisely the size specified by its layout parameters.
-     *
-     * @see Spec#flexibility
-     */
-    private static final int NONE = 0;
-
-    /**
-     * Indicates that a view's size should lie between its minimum and the size specified by
-     * its layout parameters.
-     *
-     * @see Spec#flexibility
-     */
-    private static final int CAN_SHRINK = 1;
+    private static final int INFLEXIBLE = 0;
 
     /**
      * Indicates that a view's size should be greater than or equal to the size specified by
      * its layout parameters.
      *
-     * @see Spec#flexibility
-     */
-    public static final int CAN_STRETCH = 2;
-
-    /**
-     * A default value for flexibility.
+     * @deprecated Please use {@link #spec(int, int, Alignment)} instead,
+     * all spec's that define alignment (gravity) are assumed to able to stretch.
      *
-     * @see Spec#flexibility
+     * @hide
      */
-    private static final int UNDEFINED_FLEXIBILITY = UNDEFINED | CAN_SHRINK | CAN_STRETCH;
-
+    @Deprecated
+    public static final int CAN_STRETCH = 2;
 }
