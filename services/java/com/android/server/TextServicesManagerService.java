@@ -156,6 +156,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             final String curSpellCheckerId =
                     Settings.Secure.getString(mContext.getContentResolver(),
                             Settings.Secure.SPELL_CHECKER_SERVICE);
+            if (DBG) {
+                Slog.w(TAG, "getCurrentSpellChecker: " + curSpellCheckerId);
+            }
             if (TextUtils.isEmpty(curSpellCheckerId)) {
                 return null;
             }
@@ -198,6 +201,11 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     @Override
+    public SpellCheckerInfo[] getEnabledSpellCheckers() {
+        return mSpellCheckerList.toArray(new SpellCheckerInfo[mSpellCheckerList.size()]);
+    }
+
+    @Override
     public void finishSpellCheckerService(ISpellCheckerSessionListener listener) {
         synchronized(mSpellCheckerMap) {
             for (SpellCheckerBindGroup group : mSpellCheckerBindGroups.values()) {
@@ -208,6 +216,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     private void setCurrentSpellChecker(SpellCheckerInfo sci) {
+        if (DBG) {
+            Slog.w(TAG, "setCurrentSpellChecker: " + sci.getId());
+        }
         if (sci == null || mSpellCheckerMap.containsKey(sci.getId())) return;
         Settings.Secure.putString(mContext.getContentResolver(),
                 Settings.Secure.SPELL_CHECKER_SERVICE, sci == null ? "" : sci.getId());

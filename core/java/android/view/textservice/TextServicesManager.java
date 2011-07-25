@@ -97,4 +97,27 @@ public final class TextServicesManager {
         }
         return session;
     }
+
+    /**
+     * @hide
+     */
+    public SpellCheckerInfo[] getEnabledSpellCheckers() {
+        try {
+            return sService.getEnabledSpellCheckers();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public SpellCheckerInfo getCurrentSpellChecker() {
+        try {
+            // Passing null as a locale for ICS
+            return sService.getCurrentSpellChecker(null);
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
 }
