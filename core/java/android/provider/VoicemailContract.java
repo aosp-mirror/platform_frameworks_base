@@ -128,6 +128,12 @@ public class VoicemailContract {
          */
         public static final String NEW = Calls.NEW;
         /**
+         * Whether this item has been read or otherwise consumed by the user.
+         * <P>Type: INTEGER (boolean)</P>
+         * @hide
+         */
+        public static final String IS_READ = Calls.IS_READ;
+        /**
          * The mail box state of the voicemail. This field is currently not used by the system.
          * <P> Possible values: {@link #STATE_INBOX}, {@link #STATE_DELETED},
          * {@link #STATE_UNDELETED}.
