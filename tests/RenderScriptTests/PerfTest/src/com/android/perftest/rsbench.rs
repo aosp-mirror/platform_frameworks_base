@@ -280,7 +280,7 @@ static void displayFontSamples(int fillNum) {
     testData.renderSurfaceW = gRenderSurfaceW;
     testData.renderSurfaceH = gRenderSurfaceH;
     testData.user = fillNum;
-    rsForEach(gFontScript, gDummyAlloc, gDummyAlloc, &testData);
+    rsForEach(gFontScript, gDummyAlloc, gDummyAlloc, &testData, sizeof(testData));
 }
 
 static void bindProgramVertexOrtho() {
@@ -520,7 +520,7 @@ static void displaySimpleGeoSamples(bool useTexture, int numMeshes) {
     testData.user = 0;
     testData.user1 = useTexture ? 1 : 0;
     testData.user2 = numMeshes;
-    rsForEach(gTorusScript, gDummyAlloc, gDummyAlloc, &testData);
+    rsForEach(gTorusScript, gDummyAlloc, gDummyAlloc, &testData, sizeof(testData));
 }
 
 static void displayCustomShaderSamples(int numMeshes) {
@@ -530,7 +530,7 @@ static void displayCustomShaderSamples(int numMeshes) {
     testData.dt = gDt;
     testData.user = 1;
     testData.user1 = numMeshes;
-    rsForEach(gTorusScript, gDummyAlloc, gDummyAlloc, &testData);
+    rsForEach(gTorusScript, gDummyAlloc, gDummyAlloc, &testData, sizeof(testData));
 }
 
 static void displayPixelLightSamples(int numMeshes, bool heavyVertex) {
@@ -541,7 +541,7 @@ static void displayPixelLightSamples(int numMeshes, bool heavyVertex) {
     testData.user = 2;
     testData.user1 = numMeshes;
     testData.user2 = heavyVertex ? 1 : 0;
-    rsForEach(gTorusScript, gDummyAlloc, gDummyAlloc, &testData);
+    rsForEach(gTorusScript, gDummyAlloc, gDummyAlloc, &testData, sizeof(testData));
 }
 
 static void displayMultitextureSample(bool blend, int quadCount) {

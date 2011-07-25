@@ -91,6 +91,6 @@ void root(const void *v_in, void *v_out, const void *usrData, uint32_t x, uint32
 
     //rsDebug("Transform calling self with child ", (int)data->children.p);
     if (data->children.p) {
-        rsForEach(transformScript, data->children, data->children, (void*)&toChild);
+        rsForEach(transformScript, data->children, data->children, (void*)&toChild, sizeof(toChild));
     }
 }

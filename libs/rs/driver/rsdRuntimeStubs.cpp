@@ -365,22 +365,47 @@ static const Allocation * SC_GetAllocation(const void *ptr) {
     return rsrGetAllocation(rsc, sc, ptr);
 }
 
-static void SC_ForEach(Script *target,
-                Allocation *in,
-                Allocation *out,
-                const void *usr,
-                const RsScriptCall *call) {
+static void SC_ForEach_SAA(Script *target,
+                            Allocation *in,
+                            Allocation *out) {
+    GET_TLS();
+    rsrForEach(rsc, sc, target, in, out, NULL, 0, NULL);
+}
+
+static void SC_ForEach_SAAU(Script *target,
+                            Allocation *in,
+                            Allocation *out,
+                            const void *usr) {
     GET_TLS();
     rsrForEach(rsc, sc, target, in, out, usr, 0, NULL);
 }
 
-static void SC_ForEach2(Script *target,
-                 Allocation *in,
-                 Allocation *out,
-                 const void *usr,
-                 const RsScriptCall *call) {
+static void SC_ForEach_SAAUS(Script *target,
+                             Allocation *in,
+                             Allocation *out,
+                             const void *usr,
+                             const RsScriptCall *call) {
     GET_TLS();
     rsrForEach(rsc, sc, target, in, out, usr, 0, call);
+}
+
+static void SC_ForEach_SAAUL(Script *target,
+                             Allocation *in,
+                             Allocation *out,
+                             const void *usr,
+                             uint32_t usrLen) {
+    GET_TLS();
+    rsrForEach(rsc, sc, target, in, out, usr, usrLen, NULL);
+}
+
+static void SC_ForEach_SAAULS(Script *target,
+                              Allocation *in,
+                              Allocation *out,
+                              const void *usr,
+                              uint32_t usrLen,
+                              const RsScriptCall *call) {
+    GET_TLS();
+    rsrForEach(rsc, sc, target, in, out, usr, usrLen, call);
 }
 
 
@@ -648,8 +673,11 @@ static RsdSymbolTable gSyms[] = {
     { "_Z19rsgClearDepthTargetv", (void *)&SC_ClearFrameBufferObjectDepthTarget, false },
     { "_Z24rsgClearAllRenderTargetsv", (void *)&SC_ClearFrameBufferObjectTargets, false },
 
-    { "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach, false },
-    { "_Z9rsForEach9rs_script13rs_allocationS0_PKvj", (void *)&SC_ForEach2, false },
+    { "_Z9rsForEach9rs_script13rs_allocationS0_", (void *)&SC_ForEach_SAA, false },
+    { "_Z9rsForEach9rs_script13rs_allocationS0_PKv", (void *)&SC_ForEach_SAAU, false },
+    { "_Z9rsForEach9rs_script13rs_allocationS0_PKvPK16rs_script_call_t", (void *)&SC_ForEach_SAAUS, false },
+    { "_Z9rsForEach9rs_script13rs_allocationS0_PKvj", (void *)&SC_ForEach_SAAUL, false },
+    { "_Z9rsForEach9rs_script13rs_allocationS0_PKvjPK16rs_script_call_t", (void *)&SC_ForEach_SAAULS, false },
 
     // time
     { "_Z6rsTimePi", (void *)&SC_Time, true },
