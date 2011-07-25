@@ -45,16 +45,23 @@ public class Signature implements Parcelable {
      * {@link #toChars} or {@link #toCharsString()}.
      */
     public Signature(String text) {
-        final int N = text.length()/2;
-        byte[] sig = new byte[N];
-        for (int i=0; i<N; i++) {
-            char c = text.charAt(i*2);
-            byte b = (byte)(
-                    (c >= 'a' ? (c - 'a' + 10) : (c - '0'))<<4);
-            c = text.charAt(i*2 + 1);
-            b |= (byte)(c >= 'a' ? (c - 'a' + 10) : (c - '0'));
-            sig[i] = b;
+        final byte[] input = text.getBytes();
+        final int N = input.length;
+        final byte[] sig = new byte[N / 2];
+        int sigIndex = 0;
+
+        for (int i = 0; i < N;) {
+            int b;
+
+            final int hi = input[i++];
+            b = (hi >= 'a' ? (hi - 'a' + 10) : (hi - '0')) << 4;
+
+            final int lo = input[i++];
+            b |= (lo >= 'a' ? (lo - 'a' + 10) : (lo - '0')) & 0x0F;
+
+            sig[sigIndex++] = (byte) (b & 0xFF);
         }
+
         mSignature = sig;
     }
 
