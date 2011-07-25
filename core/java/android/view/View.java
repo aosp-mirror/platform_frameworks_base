@@ -4280,6 +4280,36 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
+     * Set whether or not this view should account for system screen decorations
+     * such as the status bar and inset its content. This allows this view to be
+     * positioned in absolute screen coordinates and remain visible to the user.
+     *
+     * <p>This should only be used by top-level window decor views.
+     *
+     * @param fitSystemWindows true to inset content for system screen decorations, false for
+     *                         default behavior.
+     *
+     * @attr ref android.R.styleable#View_fitsSystemWindows
+     */
+    public void setFitsSystemWindows(boolean fitSystemWindows) {
+        setFlags(fitSystemWindows ? FITS_SYSTEM_WINDOWS : 0, FITS_SYSTEM_WINDOWS);
+    }
+
+    /**
+     * Check for the FITS_SYSTEM_WINDOWS flag. If this method returns true, this view
+     * will account for system screen decorations such as the status bar and inset its
+     * content. This allows the view to be positioned in absolute screen coordinates
+     * and remain visible to the user.
+     *
+     * @return true if this view will adjust its content bounds for system screen decorations.
+     *
+     * @attr ref android.R.styleable#View_fitsSystemWindows
+     */
+    public boolean fitsSystemWindows() {
+        return (mViewFlags & FITS_SYSTEM_WINDOWS) == FITS_SYSTEM_WINDOWS;
+    }
+
+    /**
      * Returns the visibility status for this view.
      *
      * @return One of {@link #VISIBLE}, {@link #INVISIBLE}, or {@link #GONE}.

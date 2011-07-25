@@ -22232,6 +22232,7 @@ package android.view {
     method public final android.view.View findViewWithTag(java.lang.Object);
     method public void findViewsWithText(java.util.ArrayList<android.view.View>, java.lang.CharSequence);
     method protected boolean fitSystemWindows(android.graphics.Rect);
+    method public boolean fitsSystemWindows();
     method public android.view.View focusSearch(int);
     method public void forceLayout();
     method public float getAlpha();
@@ -22473,6 +22474,7 @@ package android.view {
     method public void setEnabled(boolean);
     method public void setFadingEdgeLength(int);
     method public void setFilterTouchesWhenObscured(boolean);
+    method public void setFitsSystemWindows(boolean);
     method public void setFocusable(boolean);
     method public void setFocusableInTouchMode(boolean);
     method public void setHapticFeedbackEnabled(boolean);
