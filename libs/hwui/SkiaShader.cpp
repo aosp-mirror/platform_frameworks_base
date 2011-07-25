@@ -77,14 +77,7 @@ void SkiaShader::setupProgram(Program* program, const mat4& modelView, const Sna
 
 void SkiaShader::bindTexture(Texture* texture, GLenum wrapS, GLenum wrapT) {
     glBindTexture(GL_TEXTURE_2D, texture->id);
-    if (wrapS != texture->wrapS) {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
-        texture->wrapS = wrapS;
-    }
-    if (wrapT != texture->wrapT) {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
-        texture->wrapT = wrapT;
-    }
+    texture->setWrap(wrapS, wrapT);
 }
 
 void SkiaShader::computeScreenSpaceMatrix(mat4& screenSpace, const mat4& modelView) {
@@ -151,6 +144,9 @@ void SkiaBitmapShader::setupProgram(Program* program, const mat4& modelView,
 
     // Uniforms
     bindTexture(texture, mWrapS, mWrapT);
+    GLenum filter = textureTransform.isPureTranslate() ? GL_NEAREST : GL_LINEAR;
+    texture->setFilter(filter, filter);
+
     glUniform1i(program->getUniform("bitmapSampler"), textureSlot);
     glUniformMatrix4fv(program->getUniform("textureTransform"), 1,
             GL_FALSE, &textureTransform.data[0]);

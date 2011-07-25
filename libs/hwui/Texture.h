@@ -35,16 +35,45 @@ struct Texture {
 
         minFilter = GL_NEAREST;
         magFilter = GL_NEAREST;
+
+        firstFilter = true;
+        firstWrap = true;
     }
 
-    void setWrap(GLenum wrapS, GLenum wrapT) {
-        this->wrapS = wrapS;
-        this->wrapT = wrapT;
+    void setWrap(GLenum wrapS, GLenum wrapT, bool bindTexture = false, bool force = false,
+            GLenum renderTarget = GL_TEXTURE_2D) {
+
+        if (firstWrap || force || wrapS != this->wrapS || wrapT != this->wrapT) {
+            firstWrap = true;
+
+            this->wrapS = wrapS;
+            this->wrapT = wrapT;
+
+            if (bindTexture) {
+                glBindTexture(renderTarget, id);
+            }
+
+            glTexParameteri(renderTarget, GL_TEXTURE_WRAP_S, wrapS);
+            glTexParameteri(renderTarget, GL_TEXTURE_WRAP_T, wrapT);
+        }
     }
 
-    void setFilter(GLenum min, GLenum mag) {
-        minFilter = min;
-        magFilter = mag;
+    void setFilter(GLenum min, GLenum mag, bool bindTexture = false, bool force = false,
+            GLenum renderTarget = GL_TEXTURE_2D) {
+
+        if (firstFilter || force || min != minFilter || mag != magFilter) {
+            firstFilter = false;
+
+            minFilter = min;
+            magFilter = mag;
+
+            if (bindTexture) {
+                glBindTexture(renderTarget, id);
+            }
+
+            glTexParameteri(renderTarget, GL_TEXTURE_MIN_FILTER, min);
+            glTexParameteri(renderTarget, GL_TEXTURE_MAG_FILTER, mag);
+        }
     }
 
     /**
@@ -87,6 +116,10 @@ struct Texture {
      */
     GLenum minFilter;
     GLenum magFilter;
+
+private:
+    bool firstFilter;
+    bool firstWrap;
 }; // struct Texture
 
 class AutoTexture {
