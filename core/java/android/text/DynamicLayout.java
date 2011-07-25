@@ -268,10 +268,11 @@ extends Layout
         // generate new layout for affected text
 
         StaticLayout reflowed;
-
+        WeakReference<StaticLayout> layoutRef;
         synchronized (sLock) {
-            reflowed = sStaticLayout;
-            sStaticLayout = null;
+            layoutRef = sStaticLayoutRef;
+            reflowed = sStaticLayoutRef != null ? sStaticLayoutRef.get() : null;
+            sStaticLayoutRef = null;
         }
 
         if (reflowed == null) {
@@ -358,8 +359,12 @@ extends Layout
         }
 
         synchronized (sLock) {
-            sStaticLayout = reflowed;
             reflowed.finish();
+            if (layoutRef == null || layoutRef.get() != reflowed) {
+                sStaticLayoutRef = new WeakReference<StaticLayout>(reflowed);
+            } else {
+                sStaticLayoutRef = layoutRef;
+            }
         }
     }
 
@@ -488,7 +493,8 @@ extends Layout
 
     private int mTopPadding, mBottomPadding;
 
-    private static StaticLayout sStaticLayout = new StaticLayout(true);
+    private static WeakReference<StaticLayout> sStaticLayoutRef = new WeakReference<StaticLayout>(
+            new StaticLayout(true));
     private static final Object[] sLock = new Object[0];
 
     private static final int START = 0;
