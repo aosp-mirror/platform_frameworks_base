@@ -25,7 +25,7 @@ import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -87,7 +87,6 @@ import junit.framework.Assert;
     // Keep track of the text before the change so we know whether we actually
     // need to send down the DOM events.
     private String          mPreChange;
-    private Drawable        mBackground;
     // Variables for keeping track of the touch down, to send to the WebView
     // when a drag starts
     private float           mDragStartX;
@@ -190,6 +189,8 @@ import junit.framework.Assert;
         // that other applications that use embedded WebViews will properly
         // display the text in password textfields.
         setTextColor(DebugFlags.DRAW_WEBTEXTVIEW ? Color.RED : Color.BLACK);
+        setBackgroundDrawable(DebugFlags.DRAW_WEBTEXTVIEW ? null : new ColorDrawable(Color.WHITE));
+
         // This helps to align the text better with the text in the web page.
         setIncludeFontPadding(false);
 
@@ -423,24 +424,6 @@ import junit.framework.Assert;
         // makeNewLayout does.
         super.makeNewLayout(w, hintWidth, boring, hintBoring, ellipsisWidth,
                 bringIntoView);
-
-        // For fields that do not draw, create a layout which is altered so that
-        // the text lines up.
-        if (DebugFlags.DRAW_WEBTEXTVIEW || willNotDraw()) {
-            float lineHeight = -1;
-            if (mWebView != null) {
-                float height = mWebView.nativeFocusCandidateLineHeight();
-                if (height != -1) {
-                    lineHeight = height * mWebView.getScale();
-                }
-            }
-            CharSequence text = getText();
-            // Copy from the existing Layout.
-            mLayout = new WebTextViewLayout(text, text, getPaint(), mLayout.getWidth(),
-                    mLayout.getAlignment(), mLayout.getSpacingMultiplier(),
-                    mLayout.getSpacingAdd(), false, null, ellipsisWidth,
-                    lineHeight);
-        }
         lineUpScroll();
     }
 
@@ -489,51 +472,6 @@ import junit.framework.Assert;
                     + mWebView.getUrl();
         }
         return connection;
-    }
-
-    /**
-     * In general, TextView makes a call to InputMethodManager.updateSelection
-     * in onDraw.  However, in the general case of WebTextView, we do not draw.
-     * This method is called by WebView.onDraw to take care of the part that
-     * needs to be called.
-     */
-    /* package */ void onDrawSubstitute() {
-        if (!willNotDraw()) {
-            // If the WebTextView is set to draw, such as in the case of a
-            // password, onDraw calls updateSelection(), so this code path is
-            // unnecessary.
-            return;
-        }
-        // This code is copied from TextView.onDraw().  That code does not get
-        // executed, however, because the WebTextView does not draw, allowing
-        // webkit's drawing to show through.
-        InputMethodManager imm = InputMethodManager.peekInstance();
-        if (imm != null && imm.isActive(this)) {
-            Spannable sp = (Spannable) getText();
-            int selStart = Selection.getSelectionStart(sp);
-            int selEnd = Selection.getSelectionEnd(sp);
-            int candStart = EditableInputConnection.getComposingSpanStart(sp);
-            int candEnd = EditableInputConnection.getComposingSpanEnd(sp);
-            imm.updateSelection(this, selStart, selEnd, candStart, candEnd);
-        }
-    }
-
-    @Override
-    protected void onDraw(Canvas canvas) {
-        // onDraw should only be called for password fields.  If WebTextView is
-        // still drawing, but is no longer corresponding to a password field,
-        // remove it.
-        if (!DebugFlags.DRAW_WEBTEXTVIEW && (mWebView == null
-                || !mWebView.nativeFocusCandidateIsPassword()
-                || !isSameTextField(mWebView.nativeFocusCandidatePointer()))) {
-            // Although calling remove() would seem to make more sense here,
-            // changing it to not be a password field will make it not draw.
-            // Other code will make sure that it is removed completely, but this
-            // way the user will not see it.
-            setInPassword(false);
-        } else {
-            super.onDraw(canvas);
-        }
     }
 
     @Override
@@ -928,102 +866,6 @@ import junit.framework.Assert;
         if (mWebView != null) mWebView.incrementTextGeneration();
     }
 
-    /**
-     * Determine whether to use the system-wide password disguising method,
-     * or to use none.
-     * @param   inPassword  True if the textfield is a password field.
-     */
-    /* package */ void setInPassword(boolean inPassword) {
-        if (inPassword) {
-            setInputType(InputType.TYPE_CLASS_TEXT | EditorInfo.
-                TYPE_TEXT_VARIATION_WEB_PASSWORD);
-            createBackground();
-        }
-        // For password fields, draw the WebTextView.  For others, just show
-        // webkit's drawing.
-        if (!DebugFlags.DRAW_WEBTEXTVIEW) {
-            setWillNotDraw(!inPassword);
-        }
-        setBackgroundDrawable(inPassword ? mBackground : null);
-    }
-
-    /**
-     * Private class used for the background of a password textfield.
-     */
-    private static class OutlineDrawable extends Drawable {
-        private Paint mBackgroundPaint;
-        private Paint mOutlinePaint;
-        private float[] mLines;
-        public OutlineDrawable() {
-            mBackgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            mBackgroundPaint.setColor(Color.WHITE);
-
-            mOutlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            mOutlinePaint.setColor(Color.BLACK);
-            mOutlinePaint.setStyle(Paint.Style.STROKE);
-
-            mLines = new float[16];
-        }
-        @Override
-        public void setBounds(int left, int top, int right, int bottom) {
-            super.setBounds(left, top, right, bottom);
-            bottom--;
-            right -= 2;
-            // Top line
-            mLines[0] = left;
-            mLines[1] = top + 1;
-            mLines[2] = right;
-            mLines[3] = top + 1;
-            // Right line
-            mLines[4] = right;
-            mLines[5] = top;
-            mLines[6] = right;
-            mLines[7] = bottom;
-            // Bottom line
-            mLines[8] = left;
-            mLines[9] = bottom;
-            mLines[10] = right;
-            mLines[11] = bottom;
-            // Left line
-            mLines[12] = left + 1;
-            mLines[13] = top;
-            mLines[14] = left + 1;
-            mLines[15] = bottom;
-        }
-        @Override
-        public void draw(Canvas canvas) {
-            // Draw the background.
-            canvas.drawRect(getBounds(), mBackgroundPaint);
-            // Draw the outline.
-            canvas.drawLines(mLines, mOutlinePaint);
-        }
-        // Always want it to be opaque.
-        @Override
-        public int getOpacity() {
-            return PixelFormat.OPAQUE;
-        }
-        // These are needed because they are abstract in Drawable.
-        @Override
-        public void setAlpha(int alpha) { }
-        @Override
-        public void setColorFilter(ColorFilter cf) { }
-    }
-
-    /**
-     * Create a background for the WebTextView and set up the paint for drawing
-     * the text.  This way, we can see the password transformation of the
-     * system, which (optionally) shows the actual text before changing to dots.
-     * The background is necessary to hide the webkit-drawn text beneath.
-     */
-    private void createBackground() {
-        if (mBackground != null) {
-            return;
-        }
-        mBackground = new OutlineDrawable();
-
-        setGravity(Gravity.CENTER_VERTICAL);
-    }
-
     @Override
     public void setInputType(int type) {
         mFromSetInputType = true;
@@ -1072,7 +914,8 @@ import junit.framework.Assert;
             lp.height = height;
         }
         if (getParent() == null) {
-            mWebView.addView(this, lp);
+            // Insert the view so that it's drawn first (at index 0)
+            mWebView.addView(this, 0, lp);
         } else {
             setLayoutParams(lp);
         }
@@ -1145,7 +988,6 @@ import junit.framework.Assert;
     /* package */ void setType(int type) {
         if (mWebView == null) return;
         boolean single = true;
-        boolean inPassword = false;
         int maxLength = -1;
         int inputType = InputType.TYPE_CLASS_TEXT
                 | InputType.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT;
@@ -1167,7 +1009,7 @@ import junit.framework.Assert;
                 imeOptions |= EditorInfo.IME_ACTION_NONE;
                 break;
             case PASSWORD:
-                inPassword = true;
+                inputType |= EditorInfo.TYPE_TEXT_VARIATION_WEB_PASSWORD;
                 imeOptions |= EditorInfo.IME_ACTION_GO;
                 break;
             case SEARCH:
@@ -1219,7 +1061,7 @@ import junit.framework.Assert;
         setHorizontallyScrolling(single);
         setInputType(inputType);
         setImeOptions(imeOptions);
-        setInPassword(inPassword);
+        setVisibility(VISIBLE);
         AutoCompleteAdapter adapter = null;
         setAdapterCustom(adapter);
     }

@@ -624,6 +624,7 @@
         <item name="android:completionThreshold">2</item>
         <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
         <item name="android:popupBackground">@android:drawable/spinner_dropdown_background</item>
+        <item name="textCursorDrawable">@android:drawable/text_cursor_holo_light</item>
     </style>
 
     <style name="Widget.TabWidget">
