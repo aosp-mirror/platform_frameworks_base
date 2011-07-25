@@ -281,10 +281,29 @@ public class Time {
     }
 
     /**
-     * return a negative number if a is less than b, a positive number if a is
-     * greater than b, and 0 if they are equal.
+     * Compare two {@code Time} objects and return a negative number if {@code
+     * a} is less than {@code b}, a positive number if {@code a} is greater than
+     * {@code b}, or 0 if they are equal.
+     *
+     * @param a first {@code Time} instance to compare
+     * @param b second {@code Time} instance to compare
+     * @throws NullPointerException if either argument is {@code null}
+     * @throws IllegalArgumentException if {@link #allDay} is true but {@code
+     *             hour}, {@code minute}, and {@code second} are not 0.
+     * @return a negative result if {@code a} is earlier, a positive result if
+     *         {@code a} is earlier, or 0 if they are equal.
      */
-    native public static int compare(Time a, Time b);
+    public static int compare(Time a, Time b) {
+        if (a == null) {
+            throw new NullPointerException("a == null");
+        } else if (b == null) {
+            throw new NullPointerException("b == null");
+        }
+
+        return nativeCompare(a, b);
+    }
+
+    private static native int nativeCompare(Time a, Time b);
 
     /**
      * Print the current value given the format string provided. See man

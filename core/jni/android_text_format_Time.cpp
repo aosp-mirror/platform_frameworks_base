@@ -641,7 +641,7 @@ static JNINativeMethod gMethods[] = {
     /* name, signature, funcPtr */
     { "normalize",               "(Z)J",                                        (void*)android_text_format_Time_normalize },
     { "switchTimezone",          "(Ljava/lang/String;)V",                       (void*)android_text_format_Time_switchTimezone },
-    { "compare",                 "(Landroid/text/format/Time;Landroid/text/format/Time;)I",     (void*)android_text_format_Time_compare },
+    { "nativeCompare",           "(Landroid/text/format/Time;Landroid/text/format/Time;)I",     (void*)android_text_format_Time_compare },
     { "format1",                 "(Ljava/lang/String;)Ljava/lang/String;",      (void*)android_text_format_Time_format },
     { "format2445",              "()Ljava/lang/String;",                        (void*)android_text_format_Time_format2445 },
     { "toString",                "()Ljava/lang/String;",                        (void*)android_text_format_Time_toString },
