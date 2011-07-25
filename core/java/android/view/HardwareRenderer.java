@@ -33,6 +33,8 @@ import javax.microedition.khronos.egl.EGLDisplay;
 import javax.microedition.khronos.egl.EGLSurface;
 import javax.microedition.khronos.opengles.GL;
 
+import static javax.microedition.khronos.egl.EGL10.*;
+
 /**
  * Interface for rendering a ViewAncestor using hardware acceleration.
  * 
@@ -68,6 +70,16 @@ public abstract class HardwareRenderer {
      * "false", to enable vsync
      */
     static final String DISABLE_VSYNC_PROPERTY = "hwui.disable_vsync";
+
+    /**
+     * System property used to debug EGL configuration choice.
+     * 
+     * Possible values:
+     * "false", don't print the configuration
+     * "choice", print the chosen configuration only
+     * "all", print all possible configurations
+     */
+    static final String PRINT_CONFIG_PROPERTY = "hwui.print_config";    
 
     /**
      * Turn on to draw dirty regions every other frame.
@@ -389,33 +401,33 @@ public abstract class HardwareRenderer {
          */
         static String getEGLErrorString(int error) {
             switch (error) {
-                case EGL10.EGL_SUCCESS:
+                case EGL_SUCCESS:
                     return "EGL_SUCCESS";
-                case EGL10.EGL_NOT_INITIALIZED:
+                case EGL_NOT_INITIALIZED:
                     return "EGL_NOT_INITIALIZED";
-                case EGL10.EGL_BAD_ACCESS:
+                case EGL_BAD_ACCESS:
                     return "EGL_BAD_ACCESS";
-                case EGL10.EGL_BAD_ALLOC:
+                case EGL_BAD_ALLOC:
                     return "EGL_BAD_ALLOC";
-                case EGL10.EGL_BAD_ATTRIBUTE:
+                case EGL_BAD_ATTRIBUTE:
                     return "EGL_BAD_ATTRIBUTE";
-                case EGL10.EGL_BAD_CONFIG:
+                case EGL_BAD_CONFIG:
                     return "EGL_BAD_CONFIG";
-                case EGL10.EGL_BAD_CONTEXT:
+                case EGL_BAD_CONTEXT:
                     return "EGL_BAD_CONTEXT";
-                case EGL10.EGL_BAD_CURRENT_SURFACE:
+                case EGL_BAD_CURRENT_SURFACE:
                     return "EGL_BAD_CURRENT_SURFACE";
-                case EGL10.EGL_BAD_DISPLAY:
+                case EGL_BAD_DISPLAY:
                     return "EGL_BAD_DISPLAY";
-                case EGL10.EGL_BAD_MATCH:
+                case EGL_BAD_MATCH:
                     return "EGL_BAD_MATCH";
-                case EGL10.EGL_BAD_NATIVE_PIXMAP:
+                case EGL_BAD_NATIVE_PIXMAP:
                     return "EGL_BAD_NATIVE_PIXMAP";
-                case EGL10.EGL_BAD_NATIVE_WINDOW:
+                case EGL_BAD_NATIVE_WINDOW:
                     return "EGL_BAD_NATIVE_WINDOW";
-                case EGL10.EGL_BAD_PARAMETER:
+                case EGL_BAD_PARAMETER:
                     return "EGL_BAD_PARAMETER";
-                case EGL10.EGL_BAD_SURFACE:
+                case EGL_BAD_SURFACE:
                     return "EGL_BAD_SURFACE";
                 case EGL11.EGL_CONTEXT_LOST:
                     return "EGL_CONTEXT_LOST";
@@ -432,7 +444,7 @@ public abstract class HardwareRenderer {
         void checkEglErrors() {
             if (isEnabled()) {
                 int error = sEgl.eglGetError();
-                if (error != EGL10.EGL_SUCCESS) {
+                if (error != EGL_SUCCESS) {
                     // something bad has happened revert to
                     // normal rendering.
                     fallback(error != EGL11.EGL_CONTEXT_LOST);
@@ -460,7 +472,7 @@ public abstract class HardwareRenderer {
 
                 if (mGl != null) {
                     int err = sEgl.eglGetError();
-                    if (err != EGL10.EGL_SUCCESS) {
+                    if (err != EGL_SUCCESS) {
                         destroy(true);
                         setRequested(false);
                     } else {
@@ -495,9 +507,9 @@ public abstract class HardwareRenderer {
                     sEgl = (EGL10) EGLContext.getEGL();
                     
                     // Get to the default display.
-                    sEglDisplay = sEgl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
+                    sEglDisplay = sEgl.eglGetDisplay(EGL_DEFAULT_DISPLAY);
                     
-                    if (sEglDisplay == EGL10.EGL_NO_DISPLAY) {
+                    if (sEglDisplay == EGL_NO_DISPLAY) {
                         throw new RuntimeException("eglGetDisplay failed "
                                 + getEGLErrorString(sEgl.eglGetError()));
                     }
@@ -535,16 +547,62 @@ public abstract class HardwareRenderer {
         }
 
         private EGLConfig chooseEglConfig() {
-            int[] configsCount = new int[1];
             EGLConfig[] configs = new EGLConfig[1];
+            int[] configsCount = new int[1];
             int[] configSpec = getConfig(sDirtyRegions);
+
+            // Debug
+            final String debug = SystemProperties.get(PRINT_CONFIG_PROPERTY, "false");
+            if ("all".equalsIgnoreCase(debug)) {
+                sEgl.eglChooseConfig(sEglDisplay, configSpec, null, 0, configsCount);
+
+                EGLConfig[] debugConfigs = new EGLConfig[configsCount[0]];
+                sEgl.eglChooseConfig(sEglDisplay, configSpec, debugConfigs,
+                        configsCount[0], configsCount);
+
+                for (EGLConfig config : debugConfigs) {
+                    printConfig(config);
+                }
+            }
+
             if (!sEgl.eglChooseConfig(sEglDisplay, configSpec, configs, 1, configsCount)) {
                 throw new IllegalArgumentException("eglChooseConfig failed " +
                         getEGLErrorString(sEgl.eglGetError()));
             } else if (configsCount[0] > 0) {
+                if ("choice".equalsIgnoreCase(debug)) {
+                    printConfig(configs[0]);
+                }
                 return configs[0];
             }
+
             return null;
+        }
+
+        private void printConfig(EGLConfig config) {
+            int[] value = new int[1];
+
+            Log.d(LOG_TAG, "EGL configuration " + config + ":");
+
+            sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_RED_SIZE, value);
+            Log.d(LOG_TAG, "  RED_SIZE = " + value[0]);
+
+            sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_GREEN_SIZE, value);
+            Log.d(LOG_TAG, "  GREEN_SIZE = " + value[0]);
+
+            sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_BLUE_SIZE, value);
+            Log.d(LOG_TAG, "  BLUE_SIZE = " + value[0]);
+
+            sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_ALPHA_SIZE, value);
+            Log.d(LOG_TAG, "  ALPHA_SIZE = " + value[0]);
+
+            sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_DEPTH_SIZE, value);
+            Log.d(LOG_TAG, "  DEPTH_SIZE = " + value[0]);
+
+            sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_STENCIL_SIZE, value);
+            Log.d(LOG_TAG, "  STENCIL_SIZE = " + value[0]);
+
+            sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_SURFACE_TYPE, value);
+            Log.d(LOG_TAG, "  SURFACE_TYPE = " + value[0]);
         }
 
         abstract int[] getConfig(boolean dirtyRegions);
@@ -569,22 +627,21 @@ public abstract class HardwareRenderer {
              *  The window size has changed, so we need to create a new
              *  surface.
              */
-            if (mEglSurface != null && mEglSurface != EGL10.EGL_NO_SURFACE) {
+            if (mEglSurface != null && mEglSurface != EGL_NO_SURFACE) {
                 /*
                  * Unbind and destroy the old EGL surface, if
                  * there is one.
                  */
-                sEgl.eglMakeCurrent(sEglDisplay, EGL10.EGL_NO_SURFACE,
-                        EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+                sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
                 sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
             }
 
             // Create an EGL surface we can render into.
             mEglSurface = sEgl.eglCreateWindowSurface(sEglDisplay, sEglConfig, holder, null);
 
-            if (mEglSurface == null || mEglSurface == EGL10.EGL_NO_SURFACE) {
+            if (mEglSurface == null || mEglSurface == EGL_NO_SURFACE) {
                 int error = sEgl.eglGetError();
-                if (error == EGL10.EGL_BAD_NATIVE_WINDOW) {
+                if (error == EGL_BAD_NATIVE_WINDOW) {
                     Log.e(LOG_TAG, "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
                     return null;
                 }
@@ -621,9 +678,9 @@ public abstract class HardwareRenderer {
         }
 
         EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
-            int[] attrib_list = { EGL_CONTEXT_CLIENT_VERSION, mGlVersion, EGL10.EGL_NONE };
+            int[] attrib_list = { EGL_CONTEXT_CLIENT_VERSION, mGlVersion, EGL_NONE };
 
-            return egl.eglCreateContext(eglDisplay, eglConfig, EGL10.EGL_NO_CONTEXT,
+            return egl.eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT,
                     mGlVersion != 0 ? attrib_list : null);            
         }
 
@@ -646,8 +703,7 @@ public abstract class HardwareRenderer {
 
             mDestroyed = true;
 
-            sEgl.eglMakeCurrent(sEglDisplay, EGL10.EGL_NO_SURFACE,
-                    EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+            sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
             sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
 
             mEglSurface = null;
@@ -660,8 +716,8 @@ public abstract class HardwareRenderer {
         void invalidate() {
             // Cancels any existing buffer to ensure we'll get a buffer
             // of the right size before we call eglSwapBuffers
-            sEgl.eglMakeCurrent(sEglDisplay, EGL10.EGL_NO_SURFACE,
-                    EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT);
+            sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE,
+                    EGL_NO_SURFACE, EGL_NO_CONTEXT);
         }
         
         @Override
@@ -772,7 +828,7 @@ public abstract class HardwareRenderer {
             }
 
             if (!mEglContext.equals(sEgl.eglGetCurrentContext()) ||
-                    !mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL10.EGL_DRAW))) {
+                    !mEglSurface.equals(sEgl.eglGetCurrentSurface(EGL_DRAW))) {
                 if (!sEgl.eglMakeCurrent(sEglDisplay, mEglSurface, mEglSurface, mEglContext)) {
                     fallback(true);
                     Log.e(LOG_TAG, "eglMakeCurrent failed " +
@@ -804,16 +860,16 @@ public abstract class HardwareRenderer {
         @Override
         int[] getConfig(boolean dirtyRegions) {
             return new int[] {
-                    EGL10.EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
-                    EGL10.EGL_RED_SIZE, 8,
-                    EGL10.EGL_GREEN_SIZE, 8,
-                    EGL10.EGL_BLUE_SIZE, 8,
-                    EGL10.EGL_ALPHA_SIZE, 8,
-                    EGL10.EGL_DEPTH_SIZE, 0,
-                    EGL10.EGL_STENCIL_SIZE, 0,
-                    EGL_SURFACE_TYPE, EGL10.EGL_WINDOW_BIT |
+                    EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                    EGL_RED_SIZE, 8,
+                    EGL_GREEN_SIZE, 8,
+                    EGL_BLUE_SIZE, 8,
+                    EGL_ALPHA_SIZE, 8,
+                    EGL_DEPTH_SIZE, 0,
+                    EGL_STENCIL_SIZE, 0,
+                    EGL_SURFACE_TYPE, EGL_WINDOW_BIT |
                             (dirtyRegions ? EGL_SWAP_BEHAVIOR_PRESERVED_BIT : 0),
-                    EGL10.EGL_NONE
+                    EGL_NONE
             };
         }
 
