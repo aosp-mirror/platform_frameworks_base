@@ -1926,7 +1926,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     }
 
     // Caller must grab mDnsLock.
-    private boolean updateDns(String network, Collection<InetAddress> dnses, String domains) {
+    private boolean updateDns(String network, String iface,
+            Collection<InetAddress> dnses, String domains) {
         boolean changed = false;
         int last = 0;
         if (dnses.size() == 0 && mDefaultDns != null) {
@@ -1962,6 +1963,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         mNumDnsEntries = last;
 
+        if (changed) {
+            try {
+                mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses));
+                mNetd.setDefaultInterfaceForDns(iface);
+            } catch (Exception e) {
+                Slog.e(TAG, "exception setting default dns interface: " + e);
+            }
+        }
         if (!domains.equals(SystemProperties.get("net.dns.search"))) {
             SystemProperties.set("net.dns.search", domains);
             changed = true;
@@ -1981,10 +1990,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 String network = nt.getNetworkInfo().getTypeName();
                 synchronized (mDnsLock) {
                     if (!mDnsOverridden) {
-                        changed = updateDns(network, dnses, "");
+                        changed = updateDns(network, p.getInterfaceName(), dnses, "");
                     }
                 }
             } else {
+                try {
+                    mNetd.setDnsServersForInterface(Integer.toString(netType),
+                            NetworkUtils.makeStrings(dnses));
+                } catch (Exception e) {
+                    Slog.e(TAG, "exception setting dns servers: " + e);
+                }
                 // set per-pid dns for attached secondary nets
                 List pids = mNetRequestersPids[netType];
                 for (int y=0; y< pids.size(); y++) {
@@ -2686,7 +2701,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             // Apply DNS changes.
             boolean changed = false;
             synchronized (mDnsLock) {
-                changed = updateDns("VPN", addresses, domains);
+                changed = updateDns("VPN", "VPN", addresses, domains);
                 mDnsOverridden = true;
             }
             if (changed) {
