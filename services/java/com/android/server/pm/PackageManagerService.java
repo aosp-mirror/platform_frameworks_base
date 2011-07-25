@@ -2860,8 +2860,17 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     private File getDataPathForPackage(String packageName, int userId) {
-        return new File(mUserAppDataDir.getAbsolutePath() + File.separator + userId
+        /*
+         * Until we fully support multiple users, return the directory we
+         * previously would have. The PackageManagerTests will need to be
+         * revised when this is changed back..
+         */
+        if (userId == 0) {
+            return new File(mAppDataDir, packageName);
+        } else {
+            return new File(mUserAppDataDir.getAbsolutePath() + File.separator + userId
                 + File.separator + packageName);
+        }
     }
 
     private PackageParser.Package scanPackageLI(PackageParser.Package pkg,
