@@ -464,12 +464,6 @@ private:
     }
 
     /**
-     * Sets the wrap modes for the specified texture. The wrap modes are modified
-     * only when needed.
-     */
-    inline void setTextureWrapModes(Texture* texture, GLenum wrapS, GLenum wrapT);
-
-    /**
      * Enable or disable blending as necessary. This function sets the appropriate
      * blend function based on the specified xfermode.
      */

@@ -51,8 +51,6 @@ struct Layer {
         texture.width = layerWidth;
         texture.height = layerHeight;
         colorFilter = NULL;
-        firstFilter = true;
-        firstWrap = true;
     }
 
     ~Layer() {
@@ -150,27 +148,11 @@ struct Layer {
     }
 
     void setWrap(GLenum wrapS, GLenum wrapT, bool bindTexture = false, bool force = false) {
-        if (firstWrap || force || wrapS != texture.wrapS || wrapT != texture.wrapT) {
-            firstWrap = true;
-            texture.setWrap(wrapS, wrapT);
-            if (bindTexture) {
-                glBindTexture(renderTarget, texture.id);
-            }
-            glTexParameteri(renderTarget, GL_TEXTURE_WRAP_S, wrapS);
-            glTexParameteri(renderTarget, GL_TEXTURE_WRAP_T, wrapT);
-        }
+        texture.setWrap(wrapS, wrapT, bindTexture, force, renderTarget);
     }
 
     void setFilter(GLenum min, GLenum mag, bool bindTexture = false, bool force = false) {
-        if (firstFilter || force || min != texture.minFilter || mag != texture.magFilter) {
-            firstFilter = false;
-            texture.setFilter(min, mag);
-            if (bindTexture) {
-                glBindTexture(renderTarget, texture.id);
-            }
-            glTexParameteri(renderTarget, GL_TEXTURE_MIN_FILTER, min);
-            glTexParameteri(renderTarget, GL_TEXTURE_MAG_FILTER, mag);
-        }
+        texture.setFilter(min, mag,bindTexture, force, renderTarget);
     }
 
     inline bool isCacheable() {
@@ -296,8 +278,6 @@ private:
      */
     mat4 texTransform;
 
-    bool firstFilter;
-    bool firstWrap;
 }; // struct Layer
 
 }; // namespace uirenderer

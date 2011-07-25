@@ -1293,16 +1293,16 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    setTextureWrapModes(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
-
     float x = left;
     float y = top;
 
+    GLenum filter = GL_LINEAR;
     bool ignoreTransform = false;
     if (mSnapshot->transform->isPureTranslate()) {
         x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
         y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
         ignoreTransform = true;
+        filter = GL_NEAREST;
     }
 
     setupDraw();
@@ -1315,7 +1315,11 @@ void OpenGLRenderer::drawAlphaBitmap(Texture* texture, float left, float top, Sk
     setupDrawBlending(true, mode);
     setupDrawProgram();
     setupDrawModelView(x, y, x + texture->width, y + texture->height, ignoreTransform);
+
     setupDrawTexture(texture->id);
+    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    texture->setFilter(filter, filter);
+
     setupDrawPureColorUniforms();
     setupDrawColorFilterUniforms();
     setupDrawShaderUniforms();
@@ -1379,7 +1383,9 @@ void OpenGLRenderer::drawBitmapMesh(SkBitmap* bitmap, int meshWidth, int meshHei
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
-    setTextureWrapModes(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+
+    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, true);
+    texture->setFilter(GL_LINEAR, GL_LINEAR, true);
 
     int alpha;
     SkXfermode::Mode mode;
@@ -1462,7 +1468,7 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
-    setTextureWrapModes(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, true);
 
     const float width = texture->width;
     const float height = texture->height;
@@ -1483,11 +1489,13 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
         const float x = (int) floorf(dstLeft + mSnapshot->transform->getTranslateX() + 0.5f);
         const float y = (int) floorf(dstTop + mSnapshot->transform->getTranslateY() + 0.5f);
 
+        texture->setFilter(GL_NEAREST, GL_NEAREST, true);
         drawTextureMesh(x, y, x + (dstRight - dstLeft), y + (dstBottom - dstTop),
                 texture->id, alpha / 255.0f, mode, texture->blend,
                 &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
                 GL_TRIANGLE_STRIP, gMeshCount, false, true);
     } else {
+        texture->setFilter(GL_LINEAR, GL_LINEAR, true);
         drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom, texture->id, alpha / 255.0f,
                 mode, texture->blend, &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
                 GL_TRIANGLE_STRIP, gMeshCount);
@@ -1507,7 +1515,8 @@ void OpenGLRenderer::drawPatch(SkBitmap* bitmap, const int32_t* xDivs, const int
     Texture* texture = mCaches.textureCache.get(bitmap);
     if (!texture) return;
     const AutoTexture autoCleanup(texture);
-    setTextureWrapModes(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, true);
+    texture->setFilter(GL_LINEAR, GL_LINEAR, true);
 
     int alpha;
     SkXfermode::Mode mode;
@@ -2411,16 +2420,18 @@ void OpenGLRenderer::drawTextureRect(float left, float top, float right, float b
     SkXfermode::Mode mode;
     getAlphaAndMode(paint, &alpha, &mode);
 
-    setTextureWrapModes(texture, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+    texture->setWrap(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE, true);
 
     if (mSnapshot->transform->isPureTranslate()) {
         const float x = (int) floorf(left + mSnapshot->transform->getTranslateX() + 0.5f);
         const float y = (int) floorf(top + mSnapshot->transform->getTranslateY() + 0.5f);
 
+        texture->setFilter(GL_NEAREST, GL_NEAREST, true);
         drawTextureMesh(x, y, x + texture->width, y + texture->height, texture->id,
                 alpha / 255.0f, mode, texture->blend, (GLvoid*) NULL,
                 (GLvoid*) gMeshTextureOffset, GL_TRIANGLE_STRIP, gMeshCount, false, true);
     } else {
+        texture->setFilter(GL_LINEAR, GL_LINEAR, true);
         drawTextureMesh(left, top, right, bottom, texture->id, alpha / 255.0f, mode,
                 texture->blend, (GLvoid*) NULL, (GLvoid*) gMeshTextureOffset,
                 GL_TRIANGLE_STRIP, gMeshCount);
@@ -2548,23 +2559,6 @@ SkXfermode::Mode OpenGLRenderer::getXfermode(SkXfermode* mode) {
         resultMode = SkXfermode::kSrcOver_Mode;
     }
     return resultMode;
-}
-
-void OpenGLRenderer::setTextureWrapModes(Texture* texture, GLenum wrapS, GLenum wrapT) {
-    bool bound = false;
-    if (wrapS != texture->wrapS) {
-        glBindTexture(GL_TEXTURE_2D, texture->id);
-        bound = true;
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
-        texture->wrapS = wrapS;
-    }
-    if (wrapT != texture->wrapT) {
-        if (!bound) {
-            glBindTexture(GL_TEXTURE_2D, texture->id);
-        }
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
-        texture->wrapT = wrapT;
-    }
 }
 
 }; // namespace uirenderer
