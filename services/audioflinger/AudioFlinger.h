@@ -285,6 +285,7 @@ private:
         };
 
         status_t dumpBase(int fd, const Vector<String16>& args);
+        status_t dumpEffectChains(int fd, const Vector<String16>& args);
 
         // base for record and playback
         class TrackBase : public AudioBufferProvider, public RefBase {
@@ -724,7 +725,6 @@ private:
 
         virtual status_t    dumpInternals(int fd, const Vector<String16>& args);
         status_t    dumpTracks(int fd, const Vector<String16>& args);
-        status_t    dumpEffectChains(int fd, const Vector<String16>& args);
 
         SortedVector< sp<Track> >       mTracks;
         // mStreamTypes[] uses 1 additionnal stream type internally for the OutputTrack used by DuplicatingThread
