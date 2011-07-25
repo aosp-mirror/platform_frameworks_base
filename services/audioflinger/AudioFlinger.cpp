@@ -1043,6 +1043,25 @@ status_t AudioFlinger::ThreadBase::dumpBase(int fd, const Vector<String16>& args
     return NO_ERROR;
 }
 
+status_t AudioFlinger::ThreadBase::dumpEffectChains(int fd, const Vector<String16>& args)
+{
+    const size_t SIZE = 256;
+    char buffer[SIZE];
+    String8 result;
+
+    snprintf(buffer, SIZE, "\n- %d Effect Chains:\n", mEffectChains.size());
+    write(fd, buffer, strlen(buffer));
+
+    for (size_t i = 0; i < mEffectChains.size(); ++i) {
+        sp<EffectChain> chain = mEffectChains[i];
+        if (chain != 0) {
+            chain->dump(fd, args);
+        }
+    }
+    return NO_ERROR;
+}
+
+
 // ----------------------------------------------------------------------------
 
 AudioFlinger::PlaybackThread::PlaybackThread(const sp<AudioFlinger>& audioFlinger,
@@ -1108,24 +1127,6 @@ status_t AudioFlinger::PlaybackThread::dumpTracks(int fd, const Vector<String16>
         }
     }
     write(fd, result.string(), result.size());
-    return NO_ERROR;
-}
-
-status_t AudioFlinger::PlaybackThread::dumpEffectChains(int fd, const Vector<String16>& args)
-{
-    const size_t SIZE = 256;
-    char buffer[SIZE];
-    String8 result;
-
-    snprintf(buffer, SIZE, "\n- %d Effect Chains:\n", mEffectChains.size());
-    write(fd, buffer, strlen(buffer));
-
-    for (size_t i = 0; i < mEffectChains.size(); ++i) {
-        sp<EffectChain> chain = mEffectChains[i];
-        if (chain != 0) {
-            chain->dump(fd, args);
-        }
-    }
     return NO_ERROR;
 }
 
@@ -4178,6 +4179,7 @@ status_t AudioFlinger::RecordThread::dump(int fd, const Vector<String16>& args)
     write(fd, result.string(), result.size());
 
     dumpBase(fd, args);
+    dumpEffectChains(fd, args);
 
     return NO_ERROR;
 }
