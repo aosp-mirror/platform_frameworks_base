@@ -71,8 +71,8 @@ protected:
         mANW.clear();
     }
 
-    const int mYuvTexWidth;//  = 64;
-    const int mYuvTexHeight;// = 66;
+    const int mYuvTexWidth;
+    const int mYuvTexHeight;
 
     sp<SurfaceMediaSource> mSMS;
     sp<SurfaceTextureClient> mSTC;
@@ -124,7 +124,6 @@ sp<MPEG4Writer> SurfaceMediaSourceTest::setUpWriter(OMXClient &client ) {
     // TODO: overwriting the colorformat since the format set by GRAlloc
     // could be wrong or not be read by OMX
     enc_meta->setInt32(kKeyColorFormat, OMX_COLOR_FormatYUV420Planar);
-    // colorFormat);
 
 
     sp<MediaSource> encoder =
@@ -225,7 +224,6 @@ TEST_F(SurfaceMediaSourceTest, EncodingFromCpuFilledYV12BufferNpotOneBufferPass)
 
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
             0, 0, HAL_PIXEL_FORMAT_YV12));
-                                // OMX_COLOR_FormatYUV420Planar)); // ));
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
 
@@ -239,7 +237,6 @@ TEST_F(SurfaceMediaSourceTest, EncodingFromCpuFilledYV12BufferNpotWrongSizeBuffe
     // setting the client side buffer size different than the server size
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
              10, 10, HAL_PIXEL_FORMAT_YV12));
-                                // OMX_COLOR_FormatYUV420Planar)); // ));
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
 
@@ -258,6 +255,7 @@ TEST_F(SurfaceMediaSourceTest,  EncodingFromCpuFilledYV12BufferNpotMultiBufferPa
             0, 0, HAL_PIXEL_FORMAT_YV12));
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
+
     SimpleDummyRecorder writer(mSMS);
     writer.start();
 
@@ -276,10 +274,12 @@ TEST_F(SurfaceMediaSourceTest,  EncodingFromCpuFilledYV12BufferNpotMultiBufferPa
 // A dummy writer is used to simulate actual MPEG4Writer
 TEST_F(SurfaceMediaSourceTest,  EncodingFromCpuFilledYV12BufferNpotMultiBufferPassLag) {
     LOGV("Testing MultiBufferPass, Dummy Recorder Lagging **************");
+
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
             0, 0, HAL_PIXEL_FORMAT_YV12));
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
+
     SimpleDummyRecorder writer(mSMS);
     writer.start();
 
@@ -322,10 +322,9 @@ TEST_F(SurfaceMediaSourceTest, EncodingFromCpuFilledYV12BufferNpotMultiBufferPas
 TEST_F(SurfaceMediaSourceTest, DISABLED_EncodingFromCpuFilledYV12BufferNpotWrite) {
     LOGV("Testing the whole pipeline with actual Recorder");
     ASSERT_EQ(NO_ERROR, native_window_set_buffers_geometry(mANW.get(),
-            0, 0, HAL_PIXEL_FORMAT_YV12)); // OMX_COLOR_FormatYUV420Planar)); // ));
+            0, 0, HAL_PIXEL_FORMAT_YV12));
     ASSERT_EQ(NO_ERROR, native_window_set_usage(mANW.get(),
             GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_OFTEN));
-
     OMXClient client;
     CHECK_EQ(OK, client.connect());
 
