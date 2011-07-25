@@ -75,7 +75,6 @@ public abstract class HardwareRenderer {
      * System property used to debug EGL configuration choice.
      * 
      * Possible values:
-     * "false", don't print the configuration
      * "choice", print the chosen configuration only
      * "all", print all possible configurations
      */
@@ -501,6 +500,8 @@ public abstract class HardwareRenderer {
 
         abstract GLES20Canvas createCanvas();
 
+        abstract int[] getConfig(boolean dirtyRegions);
+
         void initializeEgl() {
             synchronized (sEglLock) {
                 if (sEgl == null && sEglConfig == null) {
@@ -552,7 +553,7 @@ public abstract class HardwareRenderer {
             int[] configSpec = getConfig(sDirtyRegions);
 
             // Debug
-            final String debug = SystemProperties.get(PRINT_CONFIG_PROPERTY, "false");
+            final String debug = SystemProperties.get(PRINT_CONFIG_PROPERTY, "");
             if ("all".equalsIgnoreCase(debug)) {
                 sEgl.eglChooseConfig(sEglDisplay, configSpec, null, 0, configsCount);
 
@@ -602,10 +603,8 @@ public abstract class HardwareRenderer {
             Log.d(LOG_TAG, "  STENCIL_SIZE = " + value[0]);
 
             sEgl.eglGetConfigAttrib(sEglDisplay, config, EGL_SURFACE_TYPE, value);
-            Log.d(LOG_TAG, "  SURFACE_TYPE = " + value[0]);
+            Log.d(LOG_TAG, "  SURFACE_TYPE = 0x" + Integer.toHexString(value[0]));
         }
-
-        abstract int[] getConfig(boolean dirtyRegions);
 
         GL createEglSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException {
             // Check preconditions.

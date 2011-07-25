@@ -2854,7 +2854,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
             // display lists to render, force an invalidate to allow the animation to
             // continue drawing another frame
             invalidate(true);
-            if (a.hasAlpha()) {
+            if (a.hasAlpha() && (child.mPrivateFlags & ALPHA_SET) == ALPHA_SET) {
                 // alpha animations should cause the child to recreate its display list
                 child.invalidate(true);
             }
