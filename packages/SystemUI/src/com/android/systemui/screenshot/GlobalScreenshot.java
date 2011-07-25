@@ -87,7 +87,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         Context context = params[0].context;
         Bitmap image = params[0].image;
 
-        try{
+        try {
             long currentTime = System.currentTimeMillis();
             String date = new SimpleDateFormat("MM-dd-yy-kk-mm-ss").format(new Date(currentTime));
             String imageDir = Environment.getExternalStoragePublicDirectory(
@@ -114,7 +114,9 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             out.close();
 
             params[0].result = 0;
-        }catch(IOException e){
+        } catch (Exception e) {
+            // IOException/UnsupportedOperationException may be thrown if external storage is not
+            // mounted
             params[0].result = 1;
         }
 
