@@ -26200,7 +26200,7 @@ package android.widget {
     method public int timePassed();
   }
 
-  public class SearchView extends android.widget.LinearLayout {
+  public class SearchView extends android.widget.LinearLayout implements android.view.CollapsibleActionView {
     ctor public SearchView(android.content.Context);
     ctor public SearchView(android.content.Context, android.util.AttributeSet);
     method public java.lang.CharSequence getQuery();
@@ -26209,6 +26209,8 @@ package android.widget {
     method public boolean isIconified();
     method public boolean isQueryRefinementEnabled();
     method public boolean isSubmitButtonEnabled();
+    method public void onActionViewCollapsed();
+    method public void onActionViewExpanded();
     method public void setIconified(boolean);
     method public void setIconifiedByDefault(boolean);
     method public void setMaxWidth(int);
