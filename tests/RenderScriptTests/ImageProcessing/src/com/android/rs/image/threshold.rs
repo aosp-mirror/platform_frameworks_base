@@ -84,10 +84,10 @@ void filter() {
     fs.radius = radius;
 
     fs.ain = rsGetAllocation(ScratchPixel1);
-    rsForEach(hBlurScript, fs.ain, rsGetAllocation(ScratchPixel2), &fs);
+    rsForEach(hBlurScript, fs.ain, rsGetAllocation(ScratchPixel2), &fs, sizeof(fs));
 
     fs.ain = rsGetAllocation(ScratchPixel2);
-    rsForEach(vBlurScript, fs.ain, rsGetAllocation(OutPixel), &fs);
+    rsForEach(vBlurScript, fs.ain, rsGetAllocation(OutPixel), &fs, sizeof(fs));
     rsSendToClientBlocking(CMD_FINISHED);
 }
 

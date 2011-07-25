@@ -19,6 +19,9 @@ typedef uint16_t ushort;
 typedef uint32_t uint;
 typedef uint64_t ulong;
 
+typedef uint32_t size_t;
+typedef int32_t ssize_t;
+
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_element;
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_type;
 typedef struct { const int* const p; } __attribute__((packed, aligned(4))) rs_allocation;
@@ -87,6 +90,8 @@ typedef struct {
 typedef float4 rs_quaternion;
 
 #define RS_PACKED __attribute__((packed, aligned(4)))
+
+#define NULL ((const void *)0)
 
 typedef enum {
     RS_ALLOCATION_CUBEMAP_FACE_POSITIVE_X = 0,
