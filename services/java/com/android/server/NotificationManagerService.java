@@ -483,6 +483,24 @@ public class NotificationManagerService extends INotificationManager.Stub
                     record = mToastQueue.get(index);
                     record.update(duration);
                 } else {
+                    // Limit the number of toasts that any given package except the android
+                    // package can enqueue.  Prevents DOS attacks and deals with leaks.
+                    if (!"android".equals(pkg)) {
+                        int count = 0;
+                        final int N = mToastQueue.size();
+                        for (int i=0; i<N; i++) {
+                             final ToastRecord r = mToastQueue.get(i);
+                             if (r.pkg.equals(pkg)) {
+                                 count++;
+                                 if (count >= MAX_PACKAGE_NOTIFICATIONS) {
+                                     Slog.e(TAG, "Package has already posted " + count
+                                            + " toasts. Not showing more. Package=" + pkg);
+                                     return;
+                                 }
+                             }
+                        }
+                    }
+
                     record = new ToastRecord(callingPid, pkg, callback, duration);
                     mToastQueue.add(record);
                     index = mToastQueue.size() - 1;
