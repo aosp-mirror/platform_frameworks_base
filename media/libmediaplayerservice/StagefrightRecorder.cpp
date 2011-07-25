@@ -28,9 +28,7 @@
 #include <media/stagefright/AMRWriter.h>
 #include <media/stagefright/AACWriter.h>
 #include <media/stagefright/CameraSource.h>
-#include <media/stagefright/VideoSourceDownSampler.h>
 #include <media/stagefright/CameraSourceTimeLapse.h>
-#include <media/stagefright/MediaSourceSplitter.h>
 #include <media/stagefright/MPEG2TSWriter.h>
 #include <media/stagefright/MPEG4Writer.h>
 #include <media/stagefright/MediaDebug.h>
@@ -67,8 +65,8 @@ static void addBatteryData(uint32_t params) {
 
 
 StagefrightRecorder::StagefrightRecorder()
-    : mWriter(NULL), mWriterAux(NULL),
-      mOutputFd(-1), mOutputFdAux(-1),
+    : mWriter(NULL),
+      mOutputFd(-1),
       mAudioSource(AUDIO_SOURCE_CNT),
       mVideoSource(VIDEO_SOURCE_LIST_END),
       mStarted(false), mSurfaceMediaSource(NULL) {
@@ -255,24 +253,6 @@ status_t StagefrightRecorder::setOutputFile(int fd, int64_t offset, int64_t leng
         ::close(mOutputFd);
     }
     mOutputFd = dup(fd);
-
-    return OK;
-}
-
-status_t StagefrightRecorder::setOutputFileAuxiliary(int fd) {
-    LOGV("setOutputFileAuxiliary: %d", fd);
-
-    if (fd < 0) {
-        LOGE("Invalid file descriptor: %d", fd);
-        return -EBADF;
-    }
-
-    mCaptureAuxVideo = true;
-
-    if (mOutputFdAux >= 0) {
-        ::close(mOutputFdAux);
-    }
-    mOutputFdAux = dup(fd);
 
     return OK;
 }
@@ -573,42 +553,6 @@ status_t StagefrightRecorder::setParamTimeBetweenTimeLapseFrameCapture(int64_t t
     return OK;
 }
 
-status_t StagefrightRecorder::setParamAuxVideoWidth(int32_t width) {
-    LOGV("setParamAuxVideoWidth : %d", width);
-
-    if (width <= 0) {
-        LOGE("Width (%d) is not positive", width);
-        return BAD_VALUE;
-    }
-
-    mAuxVideoWidth = width;
-    return OK;
-}
-
-status_t StagefrightRecorder::setParamAuxVideoHeight(int32_t height) {
-    LOGV("setParamAuxVideoHeight : %d", height);
-
-    if (height <= 0) {
-        LOGE("Height (%d) is not positive", height);
-        return BAD_VALUE;
-    }
-
-    mAuxVideoHeight = height;
-    return OK;
-}
-
-status_t StagefrightRecorder::setParamAuxVideoEncodingBitRate(int32_t bitRate) {
-    LOGV("StagefrightRecorder::setParamAuxVideoEncodingBitRate: %d", bitRate);
-
-    if (bitRate <= 0) {
-        LOGE("Invalid video encoding bit rate: %d", bitRate);
-        return BAD_VALUE;
-    }
-
-    mAuxVideoBitRate = bitRate;
-    return OK;
-}
-
 status_t StagefrightRecorder::setParamGeoDataLongitude(
     int32_t longitudex10000) {
 
@@ -737,21 +681,6 @@ status_t StagefrightRecorder::setParameter(
         if (safe_strtoi64(value.string(), &timeBetweenTimeLapseFrameCaptureMs)) {
             return setParamTimeBetweenTimeLapseFrameCapture(
                     1000LL * timeBetweenTimeLapseFrameCaptureMs);
-        }
-    } else if (key == "video-aux-param-width") {
-        int32_t auxWidth;
-        if (safe_strtoi32(value.string(), &auxWidth)) {
-            return setParamAuxVideoWidth(auxWidth);
-        }
-    } else if (key == "video-aux-param-height") {
-        int32_t auxHeight;
-        if (safe_strtoi32(value.string(), &auxHeight)) {
-            return setParamAuxVideoHeight(auxHeight);
-        }
-    } else if (key == "video-aux-param-encoding-bitrate") {
-        int32_t auxVideoBitRate;
-        if (safe_strtoi32(value.string(), &auxVideoBitRate)) {
-            return setParamAuxVideoEncodingBitRate(auxVideoBitRate);
         }
     } else {
         LOGE("setParameter: failed to find key %s", key.string());
@@ -1517,7 +1446,6 @@ status_t StagefrightRecorder::setupAudioEncoder(const sp<MediaWriter>& writer) {
 }
 
 status_t StagefrightRecorder::setupMPEG4Recording(
-        bool useSplitCameraSource,
         int outputFd,
         int32_t videoWidth, int32_t videoHeight,
         int32_t videoBitRate,
@@ -1531,28 +1459,7 @@ status_t StagefrightRecorder::setupMPEG4Recording(
     if (mVideoSource < VIDEO_SOURCE_LIST_END) {
 
         sp<MediaSource> mediaSource;
-        if (useSplitCameraSource) {
-            // TODO: Check if there is a better way to handle this
-            if (mVideoSource == VIDEO_SOURCE_GRALLOC_BUFFER) {
-                LOGE("Cannot use split camera when encoding frames");
-                return INVALID_OPERATION;
-            }
-            LOGV("Using Split camera source");
-            mediaSource = mCameraSourceSplitter->createClient();
-        } else {
-           err = setupMediaSource(&mediaSource);
-        }
-
-        if ((videoWidth != mVideoWidth) || (videoHeight != mVideoHeight)) {
-            // TODO: Might be able to handle downsampling even if using GRAlloc
-            if (mVideoSource == VIDEO_SOURCE_GRALLOC_BUFFER) {
-                LOGE("Cannot change size or Downsample when encoding frames");
-                return INVALID_OPERATION;
-            }
-            // Use downsampling from the original source.
-            mediaSource =
-                new VideoSourceDownSampler(mediaSource, videoWidth, videoHeight);
-        }
+        err = setupMediaSource(&mediaSource);
         if (err != OK) {
             return err;
         }
@@ -1620,24 +1527,8 @@ void StagefrightRecorder::setupMPEG4MetaData(int64_t startTimeUs, int32_t totalB
 }
 
 status_t StagefrightRecorder::startMPEG4Recording() {
-    if (mCaptureAuxVideo) {
-        if (!mCaptureTimeLapse) {
-            LOGE("Auxiliary video can be captured only in time lapse mode");
-            return UNKNOWN_ERROR;
-        }
-        LOGV("Creating MediaSourceSplitter");
-        sp<CameraSource> cameraSource;
-        status_t err = setupCameraSource(&cameraSource);
-        if (err != OK) {
-            return err;
-        }
-        mCameraSourceSplitter = new MediaSourceSplitter(cameraSource);
-    } else {
-        mCameraSourceSplitter = NULL;
-    }
-
     int32_t totalBitRate;
-    status_t err = setupMPEG4Recording(mCaptureAuxVideo,
+    status_t err = setupMPEG4Recording(
             mOutputFd, mVideoWidth, mVideoHeight,
             mVideoBitRate, &totalBitRate, &mWriter);
     if (err != OK) {
@@ -1653,33 +1544,6 @@ status_t StagefrightRecorder::startMPEG4Recording() {
         return err;
     }
 
-    if (mCaptureAuxVideo) {
-        CHECK(mOutputFdAux >= 0);
-        if (mWriterAux != NULL) {
-            LOGE("Auxiliary File writer is not avaialble");
-            return UNKNOWN_ERROR;
-        }
-        if ((mAuxVideoWidth > mVideoWidth) || (mAuxVideoHeight > mVideoHeight) ||
-                ((mAuxVideoWidth == mVideoWidth) && mAuxVideoHeight == mVideoHeight)) {
-            LOGE("Auxiliary video size (%d x %d) same or larger than the main video size (%d x %d)",
-                    mAuxVideoWidth, mAuxVideoHeight, mVideoWidth, mVideoHeight);
-            return UNKNOWN_ERROR;
-        }
-
-        int32_t totalBitrateAux;
-        err = setupMPEG4Recording(mCaptureAuxVideo,
-                mOutputFdAux, mAuxVideoWidth, mAuxVideoHeight,
-                mAuxVideoBitRate, &totalBitrateAux, &mWriterAux);
-        if (err != OK) {
-            return err;
-        }
-
-        sp<MetaData> metaAux = new MetaData;
-        setupMPEG4MetaData(startTimeUs, totalBitrateAux, &metaAux);
-
-        return mWriterAux->start(metaAux.get());
-    }
-
     return OK;
 }
 
@@ -1689,13 +1553,6 @@ status_t StagefrightRecorder::pause() {
         return UNKNOWN_ERROR;
     }
     mWriter->pause();
-
-    if (mCaptureAuxVideo) {
-        if (mWriterAux == NULL) {
-            return UNKNOWN_ERROR;
-        }
-        mWriterAux->pause();
-    }
 
     if (mStarted) {
         mStarted = false;
@@ -1724,13 +1581,6 @@ status_t StagefrightRecorder::stop() {
         mCameraSourceTimeLapse = NULL;
     }
 
-    if (mCaptureAuxVideo) {
-        if (mWriterAux != NULL) {
-            mWriterAux->stop();
-            mWriterAux.clear();
-        }
-    }
-
     if (mWriter != NULL) {
         err = mWriter->stop();
         mWriter.clear();
@@ -1739,13 +1589,6 @@ status_t StagefrightRecorder::stop() {
     if (mOutputFd >= 0) {
         ::close(mOutputFd);
         mOutputFd = -1;
-    }
-
-    if (mCaptureAuxVideo) {
-        if (mOutputFdAux >= 0) {
-            ::close(mOutputFdAux);
-            mOutputFdAux = -1;
-        }
     }
 
     if (mStarted) {
@@ -1787,11 +1630,8 @@ status_t StagefrightRecorder::reset() {
     mVideoEncoder  = VIDEO_ENCODER_H263;
     mVideoWidth    = 176;
     mVideoHeight   = 144;
-    mAuxVideoWidth    = 176;
-    mAuxVideoHeight   = 144;
     mFrameRate     = -1;
     mVideoBitRate  = 192000;
-    mAuxVideoBitRate = 192000;
     mSampleRate    = 8000;
     mAudioChannels = 1;
     mAudioBitRate  = 12200;
@@ -1811,8 +1651,6 @@ status_t StagefrightRecorder::reset() {
     mTrackEveryTimeDurationUs = 0;
     mCaptureTimeLapse = false;
     mTimeBetweenTimeLapseFrameCaptureUs = -1;
-    mCaptureAuxVideo = false;
-    mCameraSourceSplitter = NULL;
     mCameraSourceTimeLapse = NULL;
     mIsMetaDataStoredInVideoBuffers = false;
     mEncoderProfiles = MediaProfiles::getInstance();
@@ -1821,7 +1659,6 @@ status_t StagefrightRecorder::reset() {
     mLongitudex10000 = -3600000;
 
     mOutputFd = -1;
-    mOutputFdAux = -1;
 
     return OK;
 }
@@ -1857,8 +1694,6 @@ status_t StagefrightRecorder::dump(
     }
     snprintf(buffer, SIZE, "   Recorder: %p\n", this);
     snprintf(buffer, SIZE, "   Output file (fd %d):\n", mOutputFd);
-    result.append(buffer);
-    snprintf(buffer, SIZE, "   Output file Auxiliary (fd %d):\n", mOutputFdAux);
     result.append(buffer);
     snprintf(buffer, SIZE, "     File format: %d\n", mOutputFormat);
     result.append(buffer);
@@ -1904,13 +1739,9 @@ status_t StagefrightRecorder::dump(
     result.append(buffer);
     snprintf(buffer, SIZE, "     Frame size (pixels): %dx%d\n", mVideoWidth, mVideoHeight);
     result.append(buffer);
-    snprintf(buffer, SIZE, "     Aux Frame size (pixels): %dx%d\n", mAuxVideoWidth, mAuxVideoHeight);
-    result.append(buffer);
     snprintf(buffer, SIZE, "     Frame rate (fps): %d\n", mFrameRate);
     result.append(buffer);
     snprintf(buffer, SIZE, "     Bit rate (bps): %d\n", mVideoBitRate);
-    result.append(buffer);
-    snprintf(buffer, SIZE, "     Aux Bit rate (bps): %d\n", mAuxVideoBitRate);
     result.append(buffer);
     ::write(fd, result.string(), result.size());
     return OK;
