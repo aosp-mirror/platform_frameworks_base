@@ -611,7 +611,7 @@ public class MediaPlayer
      * needed.  Not calling this method when playing back a video will
      * result in only the audio track being played.
      *
-     * Either a surface or surface texture must be set if a display or video sink
+     * Either a surface holder or surface must be set if a display or video sink
      * is needed.  Not calling this method or {@link #setTexture(SurfaceTexture)}
      * when playing back a video will result in only the audio track being played.
      *
@@ -625,6 +625,27 @@ public class MediaPlayer
             mSurface = null;
         }
         mParcelSurfaceTexture = null;
+        _setVideoSurfaceOrSurfaceTexture();
+        updateSurfaceScreenOn();
+    }
+
+    /**
+     * Sets the {@link Surface} to be used as the sink for the video portion of
+     * the media. This is similar to {@link #setDisplay(SurfaceHolder)}, but does not
+     * support {@link #setScreenOnWhilePlaying(boolean)} or {@link #updateSurfaceScreenOn()}.
+     * Setting a Surface will un-set any Surface or SurfaceHolder that was previously set.
+     *
+     * @param surface The {@link Surface} to be used for the video portion of the media.
+     *
+     * @hide Pending review by API council.
+     */
+    public void setSurface(Surface surface) {
+        if (mScreenOnWhilePlaying && surface != null && mSurface != null) {
+            Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective for Surface");
+        }
+        mSurfaceHolder = null;
+        mSurface = surface;
+        mParcelSurfaceTexture = null;  // TODO(tedbo): Remove.
         _setVideoSurfaceOrSurfaceTexture();
         updateSurfaceScreenOn();
     }
@@ -665,7 +686,7 @@ public class MediaPlayer
      * @param pst The {@link ParcelSurfaceTexture} to be used as the sink for
      * the video portion of the media.
      *
-     * @hide Pending review by API council.
+     * @hide Pending removal when there are no more callers.
      */
     public void setParcelSurfaceTexture(ParcelSurfaceTexture pst) {
         if (mScreenOnWhilePlaying && pst != null && mParcelSurfaceTexture == null) {
@@ -1000,8 +1021,8 @@ public class MediaPlayer
      */
     public void setScreenOnWhilePlaying(boolean screenOn) {
         if (mScreenOnWhilePlaying != screenOn) {
-            if (screenOn && mParcelSurfaceTexture != null) {
-                Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective for SurfaceTexture");
+            if (screenOn && mSurfaceHolder == null) {
+                Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective without a SurfaceHolder");
             }
             mScreenOnWhilePlaying = screenOn;
             updateSurfaceScreenOn();
