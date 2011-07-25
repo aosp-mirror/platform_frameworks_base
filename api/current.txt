@@ -17951,7 +17951,7 @@ package android.service.textservice {
     method public abstract android.view.textservice.SuggestionsInfo getSuggestions(android.view.textservice.TextInfo, int, java.lang.String);
     method public android.view.textservice.SuggestionsInfo[] getSuggestionsMultiple(android.view.textservice.TextInfo[], java.lang.String, int, boolean);
     method public final android.os.IBinder onBind(android.content.Intent);
-    field public static final java.lang.String SERVICE_INTERFACE;
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.textservice.SpellCheckerService";
   }
 
   public class SpellCheckerSession {

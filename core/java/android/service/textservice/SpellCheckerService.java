@@ -36,7 +36,8 @@ import java.lang.ref.WeakReference;
  */
 public abstract class SpellCheckerService extends Service {
     private static final String TAG = SpellCheckerService.class.getSimpleName();
-    public static final String SERVICE_INTERFACE = SpellCheckerService.class.getName();
+    public static final String SERVICE_INTERFACE =
+            "android.service.textservice.SpellCheckerService";
 
     private final SpellCheckerServiceBinder mBinder = new SpellCheckerServiceBinder(this);
 
