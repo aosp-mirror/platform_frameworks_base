@@ -351,26 +351,47 @@ typedef struct
     jmethodID methodIds[];
 } VideoEditJava_MethodIds;
 
-void
-videoEditJava_checkAndThrowIllegalArgumentException(
-                bool*                               pResult,
-                JNIEnv*                             pEnv,
-                bool                                condition,
-                const char*                         pMessage);
+#define videoEditJava_checkAndThrowIllegalArgumentException(\
+    a, b, c, d) videoEditJava_checkAndThrowIllegalArgumentExceptionFunc(\
+    a, b, c, d, __FILE__, __LINE__)
+
+#define videoEditJava_checkAndThrowRuntimeException(\
+    a, b, c, d) videoEditJava_checkAndThrowRuntimeExceptionFunc(\
+    a, b, c, d, __FILE__, __LINE__)
+
+#define videoEditJava_checkAndThrowIllegalStateException(\
+    a, b, c, d) videoEditJava_checkAndThrowIllegalStateExceptionFunc(\
+    a, b, c, d, __FILE__, __LINE__)
 
 void
-videoEditJava_checkAndThrowRuntimeException(
+videoEditJava_checkAndThrowIllegalArgumentExceptionFunc(
                 bool*                               pResult,
                 JNIEnv*                             pEnv,
                 bool                                condition,
-                M4OSA_ERR                           result);
+                const char*                         pMessage,
+                const char*                         pFile,
+                int                                 lineNo
+                );
 
 void
-videoEditJava_checkAndThrowIllegalStateException(
+videoEditJava_checkAndThrowRuntimeExceptionFunc(
                 bool*                               pResult,
                 JNIEnv*                             pEnv,
                 bool                                condition,
-                const char*                         pMessage);
+                M4OSA_ERR                           result,
+                const char*                         pFile,
+                int                                 lineNo
+                );
+
+void
+videoEditJava_checkAndThrowIllegalStateExceptionFunc(
+                bool*                               pResult,
+                JNIEnv*                             pEnv,
+                bool                                condition,
+                const char*                         pMessage,
+                const char*                         pFile,
+                int                                 lineNo
+                );
 
 void
 videoEditJava_getClass(

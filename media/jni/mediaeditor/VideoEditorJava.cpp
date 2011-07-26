@@ -25,11 +25,13 @@ extern "C" {
 
 
 void
-videoEditJava_checkAndThrowIllegalArgumentException(
+videoEditJava_checkAndThrowIllegalArgumentExceptionFunc(
                 bool*                               pResult,
                 JNIEnv*                             pEnv,
                 bool                                condition,
-                const char*                         pMessage)
+                const char*                         pMessage,
+                const char*                         pFile,
+                int                                 lineNo)
 {
     // Check if the previous action succeeded.
     if (*pResult)
@@ -39,7 +41,8 @@ videoEditJava_checkAndThrowIllegalArgumentException(
         {
             // Log the exception.
             VIDEOEDIT_LOG_EXCEPTION(ANDROID_LOG_ERROR, "VIDEO_EDITOR_JAVA",\
-                    "videoEditJava_checkAndThrowIllegalArgumentException, %s", pMessage);
+                    "videoEditJava_checkAndThrowIllegalArgumentException, %s (%s:%d)",
+                    pMessage, pFile, lineNo);
 
             // Reset the result flag.
             (*pResult) = false;
@@ -51,11 +54,14 @@ videoEditJava_checkAndThrowIllegalArgumentException(
 }
 
 void
-videoEditJava_checkAndThrowRuntimeException(
+videoEditJava_checkAndThrowRuntimeExceptionFunc(
                 bool*                               pResult,
                 JNIEnv*                             pEnv,
                 bool                                condition,
-                M4OSA_ERR                           result)
+                M4OSA_ERR                           result,
+                const char*                         pFile,
+                int                                 lineNo
+                )
 {
     const char* pMessage = NULL;
 
@@ -70,7 +76,8 @@ videoEditJava_checkAndThrowRuntimeException(
 
             // Log the exception.
             VIDEOEDIT_LOG_EXCEPTION(ANDROID_LOG_ERROR, "VIDEO_EDITOR_JAVA",
-                    "videoEditJava_checkAndThrowRuntimeException, %s", pMessage);
+                    "videoEditJava_checkAndThrowRuntimeException, %s (%s:%d)",
+                    pMessage, pFile, lineNo);
 
             // Reset the result flag.
             (*pResult) = false;
@@ -82,11 +89,14 @@ videoEditJava_checkAndThrowRuntimeException(
 }
 
 void
-videoEditJava_checkAndThrowIllegalStateException(
+videoEditJava_checkAndThrowIllegalStateExceptionFunc(
                 bool*                               pResult,
                 JNIEnv*                             pEnv,
                 bool                                condition,
-                const char*                         pMessage)
+                const char*                         pMessage,
+                const char*                         pFile,
+                int                                 lineNo
+                )
 {
     // Check if the previous action succeeded.
     if (*pResult)
@@ -96,7 +106,8 @@ videoEditJava_checkAndThrowIllegalStateException(
         {
             // Log the exception.
             VIDEOEDIT_LOG_EXCEPTION(ANDROID_LOG_ERROR, "VIDEO_EDITOR_JAVA",
-                    "videoEditJava_checkAndThrowIllegalStateException, %s", pMessage);
+                    "videoEditJava_checkAndThrowIllegalStateException, %s (%s:%d)",
+                    pMessage, pFile, lineNo);
 
             // Reset the result flag.
             (*pResult) = false;
