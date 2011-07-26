@@ -38,6 +38,12 @@ struct fields_t {
     jfieldID    surfaceTexture;
     jfieldID    facing;
     jfieldID    orientation;
+    jfieldID    face_rectangle;
+    jfieldID    face_score;
+    jfieldID    rect_left;
+    jfieldID    rect_top;
+    jfieldID    rect_right;
+    jfieldID    rect_bottom;
     jmethodID   post_event;
 };
 
@@ -708,6 +714,35 @@ static void android_hardware_Camera_setDisplayOrientation(JNIEnv *env, jobject t
     }
 }
 
+static void android_hardware_Camera_startFaceDetection(JNIEnv *env, jobject thiz,
+        jint type, jobjectArray face)
+{
+    LOGV("startFaceDetection");
+    JNICameraContext* context;
+    sp<Camera> camera = get_native_camera(env, thiz, &context);
+    if (camera == 0) return;
+
+    status_t rc = camera->sendCommand(CAMERA_CMD_START_FACE_DETECTION, type, 0);
+    if (rc == BAD_VALUE) {
+        char msg[64];
+        snprintf(msg, sizeof(msg), "invalid face detection type=%d", type);
+        jniThrowException(env, "java/lang/IllegalArgumentException", msg);
+    } else if (rc != NO_ERROR) {
+        jniThrowRuntimeException(env, "start face detection failed");
+    }
+}
+
+static void android_hardware_Camera_stopFaceDetection(JNIEnv *env, jobject thiz)
+{
+    LOGV("stopFaceDetection");
+    sp<Camera> camera = get_native_camera(env, thiz, NULL);
+    if (camera == 0) return;
+
+    if (camera->sendCommand(CAMERA_CMD_STOP_FACE_DETECTION, 0, 0) != NO_ERROR) {
+        jniThrowRuntimeException(env, "stop face detection failed");
+    }
+}
+
 //-------------------------------------------------
 
 static JNINativeMethod camMethods[] = {
@@ -732,7 +767,7 @@ static JNINativeMethod camMethods[] = {
   { "startPreview",
     "()V",
     (void *)android_hardware_Camera_startPreview },
-  { "stopPreview",
+  { "_stopPreview",
     "()V",
     (void *)android_hardware_Camera_stopPreview },
   { "previewEnabled",
@@ -777,6 +812,12 @@ static JNINativeMethod camMethods[] = {
   { "setDisplayOrientation",
     "(I)V",
     (void *)android_hardware_Camera_setDisplayOrientation },
+  { "_startFaceDetection",
+    "(I)V",
+    (void *)android_hardware_Camera_startFaceDetection },
+  { "_stopFaceDetection",
+    "()V",
+    (void *)android_hardware_Camera_stopFaceDetection},
 };
 
 struct field {
@@ -818,6 +859,12 @@ int register_android_hardware_Camera(JNIEnv *env)
           ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID, "I", &fields.surfaceTexture },
         { "android/hardware/Camera$CameraInfo", "facing",   "I", &fields.facing },
         { "android/hardware/Camera$CameraInfo", "orientation",   "I", &fields.orientation },
+        { "android/hardware/Camera$FaceMetadata", "face", "Landroid/graphics/Rect;", &fields.face_rectangle },
+        { "android/hardware/Camera$FaceMetadata", "score", "I", &fields.face_score },
+        { "android/graphics/Rect", "left", "I", &fields.rect_left },
+        { "android/graphics/Rect", "top", "I", &fields.rect_top },
+        { "android/graphics/Rect", "right", "I", &fields.rect_right },
+        { "android/graphics/Rect", "bottom", "I", &fields.rect_bottom },
     };
 
     if (find_fields(env, fields_to_find, NELEM(fields_to_find)) < 0)
