@@ -30,7 +30,7 @@
 #include "jni.h"
 #include "JNIHelp.h"
 #include "android_runtime/AndroidRuntime.h"
-#include "android_runtime/android_graphics_ParcelSurfaceTexture.h"
+#include "android_runtime/android_view_Surface.h"
 #include "utils/Errors.h"  // for status_t
 #include "utils/KeyedVector.h"
 #include "utils/String8.h"
@@ -51,10 +51,7 @@ using namespace android;
 
 struct fields_t {
     jfieldID    context;
-    jfieldID    surface;
-    jfieldID    parcelSurfaceTexture;
-    /* actually in android.view.Surface XXX */
-    jfieldID    surface_native;
+    jfieldID    surface_texture;
 
     jmethodID   post_event;
 };
@@ -122,11 +119,6 @@ void JNIMediaPlayerListener::notify(int msg, int ext1, int ext2, const Parcel *o
 }
 
 // ----------------------------------------------------------------------------
-
-static Surface* get_surface(JNIEnv* env, jobject clazz)
-{
-    return (Surface*)env->GetIntField(clazz, fields.surface_native);
-}
 
 static sp<MediaPlayer> getMediaPlayer(JNIEnv* env, jobject thiz)
 {
@@ -244,40 +236,38 @@ android_media_MediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fil
     process_media_player_call( env, thiz, mp->setDataSource(fd, offset, length), "java/io/IOException", "setDataSourceFD failed." );
 }
 
-static void setVideoSurfaceOrSurfaceTexture(
-        const sp<MediaPlayer>& mp, JNIEnv *env, jobject thiz, const char *prefix)
-{
-    // Both mSurface and mParcelSurfaceTexture could be null.
-    // We give priority to mSurface over mParcelSurfaceTexture.
-    jobject surface = env->GetObjectField(thiz, fields.surface);
-    if (surface != NULL) {
-        sp<Surface> native_surface(get_surface(env, surface));
-        LOGV("%s: surface=%p (id=%d)", prefix,
-             native_surface.get(), native_surface->getIdentity());
-        mp->setVideoSurface(native_surface);
-    } else {
-        jobject parcelSurfaceTexture = env->GetObjectField(thiz, fields.parcelSurfaceTexture);
-        if (parcelSurfaceTexture != NULL) {
-            sp<ISurfaceTexture> native_surfaceTexture(
-                    ParcelSurfaceTexture_getISurfaceTexture(env, parcelSurfaceTexture));
-            LOGV("%s: texture=%p", prefix, native_surfaceTexture.get());
-            mp->setVideoSurfaceTexture(native_surfaceTexture);
-        } else {
-            mp->setVideoSurfaceTexture(NULL);
-        }
-    }
+static sp<ISurfaceTexture>
+getVideoSurfaceTexture(JNIEnv* env, jobject thiz) {
+    ISurfaceTexture * const p = (ISurfaceTexture*)env->GetIntField(thiz, fields.surface_texture);
+    return sp<ISurfaceTexture>(p);
 }
 
 static void
-android_media_MediaPlayer_setVideoSurfaceOrSurfaceTexture(JNIEnv *env, jobject thiz)
+android_media_MediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    setVideoSurfaceOrSurfaceTexture(mp, env, thiz,
-            "_setVideoSurfaceOrSurfaceTexture");
+
+    sp<ISurfaceTexture> old_st = getVideoSurfaceTexture(env, thiz);
+    sp<ISurfaceTexture> new_st;
+    if (jsurface) {
+        sp<Surface> surface(Surface_getSurface(env, jsurface));
+        new_st = surface->getSurfaceTexture();
+        new_st->incStrong(thiz);
+    }
+    if (old_st != NULL) {
+        old_st->decStrong(thiz);
+    }
+    env->SetIntField(thiz, fields.surface_texture, (int)new_st.get());
+
+    // This will fail if the media player has not been initialized yet. This
+    // can be the case if setDisplay() on MediaPlayer.java has been called
+    // before setDataSource(). The redundant call to setVideoSurfaceTexture()
+    // in prepare/prepareAsync covers for this case.
+    mp->setVideoSurfaceTexture(new_st);
 }
 
 static void
@@ -288,7 +278,12 @@ android_media_MediaPlayer_prepare(JNIEnv *env, jobject thiz)
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    setVideoSurfaceOrSurfaceTexture(mp, env, thiz, "prepare");
+
+    // Handle the case where the display surface was set before the mp was
+    // initialized. We try again to make it stick.
+    sp<ISurfaceTexture> st = getVideoSurfaceTexture(env, thiz);
+    mp->setVideoSurfaceTexture(st);
+
     process_media_player_call( env, thiz, mp->prepare(), "java/io/IOException", "Prepare failed." );
 }
 
@@ -300,7 +295,12 @@ android_media_MediaPlayer_prepareAsync(JNIEnv *env, jobject thiz)
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    setVideoSurfaceOrSurfaceTexture(mp, env, thiz, "prepareAsync");
+
+    // Handle the case where the display surface was set before the mp was
+    // initialized. We try again to make it stick.
+    sp<ISurfaceTexture> st = getVideoSurfaceTexture(env, thiz);
+    mp->setVideoSurfaceTexture(st);
+
     process_media_player_call( env, thiz, mp->prepareAsync(), "java/io/IOException", "Prepare Async failed." );
 }
 
@@ -587,24 +587,8 @@ android_media_MediaPlayer_native_init(JNIEnv *env)
         return;
     }
 
-    fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
-    if (fields.surface == NULL) {
-        return;
-    }
-
-    jclass surface = env->FindClass("android/view/Surface");
-    if (surface == NULL) {
-        return;
-    }
-
-    fields.surface_native = env->GetFieldID(surface, ANDROID_VIEW_SURFACE_JNI_ID, "I");
-    if (fields.surface_native == NULL) {
-        return;
-    }
-
-    fields.parcelSurfaceTexture = env->GetFieldID(clazz, "mParcelSurfaceTexture",
-            "Landroid/graphics/ParcelSurfaceTexture;");
-    if (fields.parcelSurfaceTexture == NULL) {
+    fields.surface_texture = env->GetFieldID(clazz, "mNativeSurfaceTexture", "I");
+    if (fields.surface_texture == NULL) {
         return;
     }
 }
@@ -643,6 +627,7 @@ static void
 android_media_MediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 {
     LOGV("native_finalize");
+    android_media_MediaPlayer_setVideoSurface(env, thiz, NULL);
     android_media_MediaPlayer_release(env, thiz);
 }
 
@@ -749,7 +734,7 @@ static JNINativeMethod gMethods[] = {
     },
 
     {"setDataSource",       "(Ljava/io/FileDescriptor;JJ)V",    (void *)android_media_MediaPlayer_setDataSourceFD},
-    {"_setVideoSurfaceOrSurfaceTexture", "()V",                 (void *)android_media_MediaPlayer_setVideoSurfaceOrSurfaceTexture},
+    {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer_setVideoSurface},
     {"prepare",             "()V",                              (void *)android_media_MediaPlayer_prepare},
     {"prepareAsync",        "()V",                              (void *)android_media_MediaPlayer_prepareAsync},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer_start},
