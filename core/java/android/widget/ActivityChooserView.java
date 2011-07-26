@@ -29,16 +29,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ActivityChooserModel;
 import android.widget.ActivityChooserModel.ActivityChooserModelClient;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListPopupWindow;
-import android.widget.PopupWindow;
-import android.widget.TextView;
 
 import com.android.internal.R;
 
@@ -85,12 +76,22 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     /**
      * The expand activities action button;
      */
-    private final ImageButton mExpandActivityOverflowButton;
+    private final FrameLayout mExpandActivityOverflowButton;
+
+    /**
+     * The image for the expand activities action button;
+     */
+    private final ImageView mExpandActivityOverflowButtonImage;
 
     /**
      * The default activities action button;
      */
-    private final ImageButton mDefaultActionButton;
+    private final FrameLayout mDefaultActivityButton;
+
+    /**
+     * The image for the default activities action button;
+     */
+    private final ImageView mDefaultActivityButtonImage;
 
     /**
      * The maximal width of the list popup.
@@ -185,13 +186,16 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         mActivityChooserContent = (LinearLayout) findViewById(R.id.activity_chooser_view_content);
 
-        mDefaultActionButton = (ImageButton) findViewById(R.id.default_activity_button);
-        mDefaultActionButton.setOnClickListener(mCallbacks);
-        mDefaultActionButton.setOnLongClickListener(mCallbacks);
+        mDefaultActivityButton = (FrameLayout) findViewById(R.id.default_activity_button);
+        mDefaultActivityButton.setOnClickListener(mCallbacks);
+        mDefaultActivityButton.setOnLongClickListener(mCallbacks);
+        mDefaultActivityButtonImage = (ImageView) mDefaultActivityButton.findViewById(R.id.image);
 
-        mExpandActivityOverflowButton = (ImageButton) findViewById(R.id.expand_activities_button);
+        mExpandActivityOverflowButton = (FrameLayout) findViewById(R.id.expand_activities_button);
         mExpandActivityOverflowButton.setOnClickListener(mCallbacks);
-        mExpandActivityOverflowButton.setImageDrawable(expandActivityOverflowButtonDrawable);
+        mExpandActivityOverflowButtonImage =
+            (ImageView) mExpandActivityOverflowButton.findViewById(R.id.image);
+        mExpandActivityOverflowButtonImage.setImageDrawable(expandActivityOverflowButtonDrawable);
 
         mAdapter = new ActivityChooserViewAdapter();
         mAdapter.registerDataSetObserver(new DataSetObserver() {
@@ -230,7 +234,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      * @param drawable The drawable.
      */
     public void setExpandActivityOverflowButtonDrawable(Drawable drawable) {
-        mExpandActivityOverflowButton.setImageDrawable(drawable);
+        mExpandActivityOverflowButtonImage.setImageDrawable(drawable);
     }
 
     /**
@@ -391,7 +395,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     private void updateButtons() {
         final int activityCount = mAdapter.getActivityCount();
         if (activityCount > 0) {
-            mDefaultActionButton.setVisibility(VISIBLE);
+            mDefaultActivityButton.setVisibility(VISIBLE);
             if (mAdapter.getCount() > 0) {
                 mExpandActivityOverflowButton.setEnabled(true);
             } else {
@@ -399,9 +403,9 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             }
             ResolveInfo activity = mAdapter.getDefaultActivity();
             PackageManager packageManager = mContext.getPackageManager();
-            mDefaultActionButton.setImageDrawable(activity.loadIcon(packageManager));
+            mDefaultActivityButtonImage.setImageDrawable(activity.loadIcon(packageManager));
         } else {
-            mDefaultActionButton.setVisibility(View.INVISIBLE);
+            mDefaultActivityButton.setVisibility(View.INVISIBLE);
             mExpandActivityOverflowButton.setEnabled(false);
         }
     }
@@ -440,7 +444,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
 
         // View.OnClickListener
         public void onClick(View view) {
-            if (view == mDefaultActionButton) {
+            if (view == mDefaultActivityButton) {
                 dismissPopup();
                 ResolveInfo defaultActivity = mAdapter.getDefaultActivity();
                 final int index = mAdapter.getDataModel().getActivityIndex(defaultActivity);
@@ -457,7 +461,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         // OnLongClickListener#onLongClick
         @Override
         public boolean onLongClick(View view) {
-            if (view == mDefaultActionButton) {
+            if (view == mDefaultActivityButton) {
                 if (mAdapter.getCount() > 0) {
                     mIsSelectingDefaultActivity = true;
                     showPopupUnchecked(mInitialActivityCount);

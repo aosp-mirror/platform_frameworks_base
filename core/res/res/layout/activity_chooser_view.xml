@@ -20,12 +20,52 @@
     android:id="@+id/activity_chooser_view_content"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:gravity="center"
     style="?android:attr/actionButtonStyle">
 
-    <ImageButton android:id="@+id/default_activity_button"
-        style="@style/Widget.ActivityChooserViewButton" />
+    <FrameLayout
+        android:id="@+id/default_activity_button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:focusable="true"
+        android:addStatesFromChildren="true"
+        android:background="?android:attr/selectableItemBackground">
 
-    <ImageButton android:id="@+id/expand_activities_button"
-        style="@style/Widget.ActivityChooserViewButton" />
+        <ImageView android:id="@+id/image"
+            android:layout_width="32dip"
+            android:layout_height="32dip"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dip"
+            android:layout_marginBottom="4dip"
+            android:layout_marginLeft="8dip"
+            android:layout_marginRight="8dip"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/expand_activities_button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:focusable="true"
+        android:addStatesFromChildren="true"
+        android:background="?android:attr/selectableItemBackground">
+
+        <ImageView android:id="@+id/image"
+            android:layout_width="32dip"
+            android:layout_height="32dip"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dip"
+            android:layout_marginBottom="4dip"
+            android:layout_marginLeft="8dip"
+            android:layout_marginRight="8dip"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true" />
+
+    </FrameLayout>
 
 </LinearLayout>
