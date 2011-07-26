@@ -1375,18 +1375,17 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         try {
             String cmd = "resolver setifdns " + iface;
             for (String s : servers) {
-                if (s != null && !"0.0.0.0".equals(s) &&
-                        !"::".equals(s) && !"0:0:0:0:0:0:0:0".equals(s)) {
-                    cmd += " " + InetAddress.getByName(s).getHostAddress();
+                InetAddress a = NetworkUtils.numericToInetAddress(s);
+                if (a.isAnyLocalAddress() == false) {
+                    cmd += " " + a.getHostAddress();
                 }
             }
-
             mConnector.doCommand(cmd);
-        } catch (UnknownHostException e) {
-            throw new IllegalStateException("failed to resolve dns address.", e);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Error setting dnsn for interface", e);
         } catch (NativeDaemonConnectorException e) {
             throw new IllegalStateException(
-                    "Error communicating with native deamon to set dns for interface", e);
+                    "Error communicating with native daemon to set dns for interface", e);
         }
     }
 
@@ -1412,7 +1411,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             mConnector.doCommand(cmd);
         } catch (NativeDaemonConnectorException e) {
             throw new IllegalStateException(
-                    "Error communicating with native deamon to flush interface " + iface, e);
+                    "Error communicating with native daemon to flush interface " + iface, e);
         }
     }
 }

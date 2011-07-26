@@ -142,13 +142,15 @@ public class DataCallState {
                         } catch (IllegalArgumentException e) {
                             throw new UnknownHostException("Non-numeric ip addr=" + addr);
                         }
-                        if (addrPrefixLen == 0) {
-                            // Assume point to point
-                            addrPrefixLen = (ia instanceof Inet4Address) ? 32 : 128;
+                        if (! ia.isAnyLocalAddress()) {
+                            if (addrPrefixLen == 0) {
+                                // Assume point to point
+                                addrPrefixLen = (ia instanceof Inet4Address) ? 32 : 128;
+                            }
+                            if (DBG) Log.d(LOG_TAG, "addr/pl=" + addr + "/" + addrPrefixLen);
+                            la = new LinkAddress(ia, addrPrefixLen);
+                            linkProperties.addLinkAddress(la);
                         }
-                        if (DBG) Log.d(LOG_TAG, "addr/pl=" + addr + "/" + addrPrefixLen);
-                        la = new LinkAddress(ia, addrPrefixLen);
-                        linkProperties.addLinkAddress(la);
                     }
                 } else {
                     throw new UnknownHostException("no address for ifname=" + ifname);
@@ -163,21 +165,24 @@ public class DataCallState {
                         } catch (IllegalArgumentException e) {
                             throw new UnknownHostException("Non-numeric dns addr=" + addr);
                         }
-                        linkProperties.addDns(ia);
+                        if (! ia.isAnyLocalAddress()) {
+                            linkProperties.addDns(ia);
+                        }
                     }
                 } else if (okToUseSystemPropertyDns){
                     String dnsServers[] = new String[2];
                     dnsServers[0] = SystemProperties.get(propertyPrefix + "dns1");
                     dnsServers[1] = SystemProperties.get(propertyPrefix + "dns2");
                     for (String dnsAddr : dnsServers) {
-                            InetAddress ia;
-                            try {
-                                ia = NetworkUtils.numericToInetAddress(dnsAddr);
-                            } catch (IllegalArgumentException e) {
-                                throw new UnknownHostException("Non-numeric dns addr="
-                                            + dnsAddr);
-                            }
+                        InetAddress ia;
+                        try {
+                            ia = NetworkUtils.numericToInetAddress(dnsAddr);
+                        } catch (IllegalArgumentException e) {
+                            throw new UnknownHostException("Non-numeric dns addr=" + dnsAddr);
+                        }
+                        if (! ia.isAnyLocalAddress()) {
                             linkProperties.addDns(ia);
+                        }
                     }
                 } else {
                     throw new UnknownHostException("Empty dns response and no system default dns");
@@ -199,7 +204,9 @@ public class DataCallState {
                     } catch (IllegalArgumentException e) {
                         throw new UnknownHostException("Non-numeric gateway addr=" + addr);
                     }
-                    linkProperties.addRoute(new RouteInfo(ia));
+                    if (! ia.isAnyLocalAddress()) {
+                        linkProperties.addRoute(new RouteInfo(ia));
+                    }
                 }
 
                 result = SetupResult.SUCCESS;

@@ -1985,6 +1985,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             LinkProperties p = nt.getLinkProperties();
             if (p == null) return;
             Collection<InetAddress> dnses = p.getDnses();
+            try {
+                mNetd.setDnsServersForInterface(p.getInterfaceName(),
+                        NetworkUtils.makeStrings(dnses));
+            } catch (Exception e) {
+                Slog.e(TAG, "exception setting dns servers: " + e);
+            }
             boolean changed = false;
             if (mNetConfigs[netType].isDefault()) {
                 String network = nt.getNetworkInfo().getTypeName();

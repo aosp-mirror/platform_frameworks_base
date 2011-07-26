@@ -252,12 +252,12 @@ interface INetworkManagementService
     void setDnsServersForInterface(String iface, in String[] servers);
 
     /**
-     * Flush the DNS cache associated with the default interface
+     * Flush the DNS cache associated with the default interface.
      */
     void flushDefaultDnsCache();
 
     /**
-     * Flush the DNS cache associated with the specified interface
+     * Flush the DNS cache associated with the specified interface.
      */
     void flushInterfaceDnsCache(String iface);
 }
