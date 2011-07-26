@@ -17699,6 +17699,21 @@ package android.renderscript {
     method public void surfaceDestroyed(android.view.SurfaceHolder);
   }
 
+  public class RSTextureView extends android.view.TextureView implements android.view.TextureView.SurfaceTextureListener {
+    ctor public RSTextureView(android.content.Context);
+    ctor public RSTextureView(android.content.Context, android.util.AttributeSet);
+    method public android.renderscript.RenderScriptGL createRenderScriptGL(android.renderscript.RenderScriptGL.SurfaceConfig);
+    method public void destroyRenderScriptGL();
+    method public android.renderscript.RenderScriptGL getRenderScriptGL();
+    method public void onSurfaceTextureAvailable(android.graphics.SurfaceTexture, int, int);
+    method public void onSurfaceTextureDestroyed(android.graphics.SurfaceTexture);
+    method public void onSurfaceTextureSizeChanged(android.graphics.SurfaceTexture, int, int);
+    method public void onSurfaceTextureUpdated(android.graphics.SurfaceTexture);
+    method public void pause();
+    method public void resume();
+    method public void setRenderScriptGL(android.renderscript.RenderScriptGL);
+  }
+
   public class RenderScript {
     method public void contextDump();
     method public static android.renderscript.RenderScript create(android.content.Context);
@@ -17746,6 +17761,7 @@ package android.renderscript {
     method public void pause();
     method public void resume();
     method public void setSurface(android.view.SurfaceHolder, int, int);
+    method public void setSurfaceTexture(android.graphics.SurfaceTexture, int, int);
   }
 
   public static class RenderScriptGL.SurfaceConfig {
@@ -17789,6 +17805,7 @@ package android.renderscript {
 
   public class Script extends android.renderscript.BaseObj {
     method public void bindAllocation(android.renderscript.Allocation, int);
+    method protected void forEach(int, android.renderscript.Allocation, android.renderscript.Allocation, android.renderscript.FieldPacker);
     method protected void invoke(int);
     method protected void invoke(int, android.renderscript.FieldPacker);
     method public void setTimeZone(java.lang.String);

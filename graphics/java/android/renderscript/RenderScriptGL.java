@@ -200,8 +200,6 @@ public class RenderScriptGL extends RenderScript {
     /**
      * Bind an os surface
      *
-     * @hide
-     *
      * @param w
      * @param h
      * @param sur

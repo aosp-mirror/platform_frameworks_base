@@ -44,7 +44,6 @@ public class Script extends BaseObj {
     }
 
     /**
-     * @hide
      * Only intended for use by generated reflected code.
      *
      * @param slot
