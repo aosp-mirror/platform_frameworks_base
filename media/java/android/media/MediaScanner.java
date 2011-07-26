@@ -872,10 +872,14 @@ public class MediaScanner
                     values.put(Files.FileColumns.FORMAT, format);
                 }
                 // new file, insert it
-                if (inserter != null) {
-                    result = inserter.insert(values);
-                } else {
+                // We insert directories immediately to ensure they are in the database
+                // before the files they contain.
+                // Otherwise we can get duplicate directory entries in the database
+                // if one of the media FileInserters is flushed before the files table FileInserter
+                if (inserter == null || entry.mFormat == MtpConstants.FORMAT_ASSOCIATION) {
                     result = mMediaProvider.insert(tableUri, values);
+                } else {
+                    result = inserter.insert(values);
                 }
 
                 if (result != null) {
