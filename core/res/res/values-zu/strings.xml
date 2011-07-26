@@ -191,8 +191,8 @@
     <!-- no translation found for contentServiceSyncNotificationTitle (397743349191901458) -->
     <skip />
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"Kunokususa <xliff:g id="CONTENT_TYPE">%s</xliff:g> okuningi kakhulu."</string>
-    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Isilondolozi sethebhulethi sigcwele! Susa amanye amafayela ukukhulula isikhala."</string>
-    <!-- outdated translation 2292820184396262278 -->     <string name="low_memory" product="default" msgid="6632412458436461203">"Isilondolozi sethebhulethi sigcwele! Susa amanye amafayela ukukhulula isikhala."</string>
+    <string name="low_memory" product="tablet" msgid="2292820184396262278">"Isitoreji sethebhulethi sigcwele! Susa amanye amafayela ukukhulula isikhala."</string>
+    <!-- outdated translation 2292820184396262278 -->     <string name="low_memory" product="default" msgid="6632412458436461203">"Isitoreji sethebhulethi sigcwele! Susa amanye amafayela ukukhulula isikhala."</string>
     <!-- no translation found for me (6545696007631404292) -->
     <skip />
     <string name="power_dialog" product="tablet" msgid="8545351420865202853">"Okukhethwa kukho kwethebhulethi"</string>
@@ -265,8 +265,8 @@
     <!-- no translation found for permgrouplab_developmentTools (3446164584710596513) -->
     <skip />
     <string name="permgroupdesc_developmentTools" msgid="9056431193893809814">"Izici zidingeka kuphela konjiniyela bohlelo lokusebenza."</string>
-    <string name="permgrouplab_storage" msgid="1971118770546336966">"Ukugcina"</string>
-    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Finyelela kukugcina nge-USB."</string>
+    <string name="permgrouplab_storage" msgid="1971118770546336966">"Isitoreji"</string>
+    <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Finyelela kwisitoreji se-USB."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Finyelela ikhadi le-SD."</string>
     <!-- no translation found for permlab_statusBar (7417192629601890791) -->
     <skip />
@@ -322,7 +322,7 @@
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"vumela imodi yemoto"</string>
     <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Ivumela uhlelo lokusebenza ukuvumela imodi yemoto."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"bulala izinqubo zasemuva"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Ivumela uhlelo lokusebenza ukubulala izinqubo zasemuva zezinye izinhlelo zokusebenza, ngisho noma inkumbulo iphansi kakhulu."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Ivumela uhlelo lokusebenza ukubulala izinqubo zasemuva zezinye izinhlelo zokusebenza, ngisho noma imemori iphansi kakhulu."</string>
     <string name="permlab_forceStopPackages" msgid="1447830113260156236">"phoqelela ukumisa ezinye izinhlelo zokusebenza"</string>
     <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Ivumela uhlelo lokusebenza ukumisa ngokuphoqelela ezinye izinhlelo zokusebenza."</string>
     <!-- no translation found for permlab_forceBack (1804196839880393631) -->
@@ -385,6 +385,10 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Ivumela izinhlelo zokusebenza ukufunda izinkinobho ozicindezela ngisho noma uxhumana nolunye uhlelo lokusebenza (njengokufaka iphasiwedi). Akusoze kwadingeka ezinhlelweni zokusebenza ezivamile."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"hlanganisa indlela yokufakwayo"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Ivumela isimeli ukuhlanganisa uxhumano nomsebenzisi wezinga eliphezulu lendlela yokufaka. Ayisoze yadingeka kwizinhlelo ezivamile."</string>
+    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
+    <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"hlanganisa kwiphephadonga"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Ivumela umbambi ukuhlanganisa uxhumano nomsebenzisi kwezinga eliphezulu lwephephadonga. Akusoze kwadingeka kwezinhlelo zokusebenza ezivamile."</string>
     <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
@@ -422,8 +426,8 @@
     <string name="permdesc_installPackages" msgid="526669220850066132">"Ivumela uhlelo lokusebenza ukufaka amaphakheji amasha noma abuyekeziwe. Izinhlelo ezinonya zingasebenzisa lokhu ukufaka izinhelo zokusebenza ezintsha ngezimvume zomthetho onamandla."</string>
     <!-- no translation found for permlab_clearAppCache (4747698311163766540) -->
     <skip />
-    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Ivumela uhlelo lokusebenza ukukhulula ukugcina kwethebhulethii ngokususa amafayela kwisiqondiso sesilondolozi sesikhashana sohlelo lokusebenza. Ukufinyelele ngokuvamile kuvinjelwe enqubweni yohlelo."</string>
-    <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Ivumela uhlelo lokusebenza ukukhulula ukugcina kwefoni ngokususa amafayela kwisiqondiso sesilondolozi sesikhashana sohlelo lokusebenza. Ukufinyelele ngokuvamile kuvinjelwe enqubweni yohlelo."</string>
+    <string name="permdesc_clearAppCache" product="tablet" msgid="3097119797652477973">"Ivumela uhlelo lokusebenza ukukhulula isitoreji sethebhulethi ngokususa amafayela kwisiqondiso sesilondolozi sesikhashana sohlelo lokusebenza. Ukufinyelele ngokuvamile kuvinjelwe enqubweni yesistimu."</string>
+    <string name="permdesc_clearAppCache" product="default" msgid="7740465694193671402">"Ivumela uhlelo lokusebenza ukukhulula isitoreji sefoni ngokususa amafayela kwisiqondiso sesilondolozi sesikhashana sohlelo lokusebenza. Ukufinyelele ngokuvamile kuvinjelwe enqutshweni yesitimu."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Hambisa izinsiza zohlelo lokusebenza"</string>
     <string name="permdesc_movePackage" msgid="6323049291923925277">"Ivumela uhlelo lokusebenza ukukhipha izinsiza zohlelo lokusebenza kwimidiya yangaphakathi iziyisa kweyangaphandle nangokuguquka."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"funda idatha yefayela lokungena ebucayi"</string>
@@ -454,7 +458,7 @@
     <!-- no translation found for permlab_broadcastSticky (7919126372606881614) -->
     <skip />
     <string name="permdesc_broadcastSticky" product="tablet" msgid="6322249605930062595">"Ivumela uhlelo lokusebenza ukuthumela imisakazo enamathelayo, esala emva kokuba ukusakaza kuphelile. Izinhlelo zokusebenza ezinonya zingenza ithebhulethii ingasheshi futhi ingahlaliseki ngokuyibangela ukuba isebenzise inkumbulo eningi kakhulu."</string>
-    <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Ivumela uhlelo lokusebenza ukuthumela imisakazo enamathelayo, esala emva kokuba ukusakaza kuphelile. Izinhlelo zokusebenza ezinonya zingenza ifoni ingasheshi futhi ingahlaliseki ngokuyibangela ukuba isebenzise inkumbulo eningi kakhulu."</string>
+    <string name="permdesc_broadcastSticky" product="default" msgid="1920045289234052219">"Ivumela uhlelo lokusebenza ukuthumela imisakazo engazwakali kahle, esala emuva kokuthi ukusakaza kuphelile. Izinhlelo zokusebenza ezinonya zingenza ifoni ingasheshi futhi ingasebenzi kahle ngokuyibangela ukuthi isebenzise imemori eningi kakhulu."</string>
     <!-- no translation found for permlab_readContacts (6219652189510218240) -->
     <skip />
     <string name="permdesc_readContacts" product="tablet" msgid="7596158687301157686">"Ivumela uhlelo lokusebenza ukufunda yonke idatha yothintana naye (ikheli) egcinwe kwithebhulethi yakho. Izinhlelo zokusebenza ezinonya zingase zisebenzise lokhu ukuthumela idatha yakho kwabanye abantu."</string>
@@ -516,19 +520,19 @@
     <string name="permdesc_reboot" product="default" msgid="7914933292815491782">"Ivumela uhlelo lokusebenza ukuphoqelela ifoni ukuqalisa phansi."</string>
     <!-- no translation found for permlab_mount_unmount_filesystems (1761023272170956541) -->
     <skip />
-    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Ivumela izinhlelo ukukhweza nokukwehlisa izinhlelo zefayela zokugcina okukhiphekayo."</string>
-    <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"fometha ukugcina kwangaphandle"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Ivumela uhlelo lokusebenza ukufometha ukugcina okukhiphekayo."</string>
-    <string name="permlab_asec_access" msgid="3411338632002193846">"thola ukwaziswa ekugcineni kwangaphakathi"</string>
-    <string name="permdesc_asec_access" msgid="8820326551687285439">"Ivumela uhlelo lokusebenza ukuthola ukwaziswa ekugcineni kwangaphakathi."</string>
-    <string name="permlab_asec_create" msgid="6414757234789336327">"dala ukugcina kwangaphakathi"</string>
-    <string name="permdesc_asec_create" msgid="2621346764995731250">"Ivumela uhlelo lokusebenza ukwenza ukugcina kwangaphakathi."</string>
-    <string name="permlab_asec_destroy" msgid="526928328301618022">"yonakalisa ukugcina kwanaphakathi"</string>
-    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Ivumela uhlelo lokusebenza ukonakalisa ukugcina kwangaphakathi."</string>
-    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"khweza / yehlisa ukugcina kwangaphakathi"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Ivumela uhlelo lokusebenza ukukhuphula / ukwehlisa ukugcina kwangaphakathi."</string>
-    <string name="permlab_asec_rename" msgid="7496633954080472417">"qamba kabusha ukugcina kwangaphakathi"</string>
-    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Ivumela uhlelo lokusebenza ukuqamba kabusha ukugcina kwangaphakathi."</string>
+    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Ivumela izinhlelo ukukhweza nokukwehlisa amasistimu wefayela lesitoreji esikhiphekayo."</string>
+    <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"fometha isitoreji sangaphandle"</string>
+    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Ivumela uhlelo lokusebenza ukufometha isitoreji esikhiphekayo."</string>
+    <string name="permlab_asec_access" msgid="3411338632002193846">"thola ulwazi ngesitoreji sangaphakathi"</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"Ivumela uhlelo lokusebenza ukuthola ulwazi ngesitoreji sangaphakathi."</string>
+    <string name="permlab_asec_create" msgid="6414757234789336327">"dala isitoreji sangaphakathi"</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"Ivumela uhlelo lokusebenza ukudala isitoreji sangaphakathi."</string>
+    <string name="permlab_asec_destroy" msgid="526928328301618022">"yonakalisa isitoreji sangaphakathi"</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Ivumela uhlelo lokusebenza ukonakalisa isitoreji sangaphakathi."</string>
+    <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"khweza / yehlisa isitoreji sangaphakathi"</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Ivumela uhlelo lokusebenza ukukhweza / ukwehlisa isitoreji sangaphakathi."</string>
+    <string name="permlab_asec_rename" msgid="7496633954080472417">"yetha kabusha isitoreji sangaphakathi"</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Ivumela uhlelo lokusebenza ukwetha kabusha isitoreji sangaphakathi."</string>
     <!-- no translation found for permlab_vibrate (7768356019980849603) -->
     <skip />
     <string name="permdesc_vibrate" msgid="2886677177257789187">"Ivumela uhlelo lokusebenza ukulawula isidlidlizi."</string>
@@ -550,8 +554,8 @@
     <!-- no translation found for permlab_callPrivileged (4198349211108497879) -->
     <skip />
     <string name="permdesc_callPrivileged" msgid="244405067160028452">"Ivumela uhlelo lokusebenza ukushayela noma iyiphi inombolo yocingo, kuhlanganise izinombolo eziphuthumayo, ngaphandle kokungenela kwakho. Izinhlelo zokusebenza ezinonya zingase zenze izincingo ezingadingeki nezingekho ezimthethweni kwizinsizakalo eziphuthumayo."</string>
-    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"ngokuqondile qalisa ukuhlela ithebhulethi nge-CDMA"</string>
-    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"ngokuqondile qalisa ukuhlela ifoni nge-CDMA"</string>
+    <string name="permlab_performCdmaProvisioning" product="tablet" msgid="4842576994144604821">"ngokuqondile qalisa ukumisa ithebhulethi nge-CDMA"</string>
+    <string name="permlab_performCdmaProvisioning" product="default" msgid="5604848095315421425">"ngokuqondile qalisa ukumisa ifoni nge-CDMA"</string>
     <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Ivumela uhlelo lokusebenza ukuqalisa amalungiselelo e-CDMA. Izinhlelo ezinonya ngokungadingekile zingaqalisa amalungiselelo e-CDMA."</string>
     <!-- no translation found for permlab_locationUpdates (7785408253364335740) -->
     <skip />
@@ -667,12 +671,12 @@
     <string name="permdesc_readDictionary" msgid="1082972603576360690">"Ivumela uhlelo lokusebenza ukufunda noma yimaphi amagama ayimfihlo, amagama nemisho leyo umsebenzisi ayigcine kwisichazamazwi somsebenzisi."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"bhala kwisichazamazwi esicacisiwe somsebenzisi"</string>
     <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Ivumela uhlelo lokusebenza ukubhala amagama amasha kwisichazamazwi somsebenzisi."</string>
-    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"guqula/susa okuqukethwe kokugcina nge-USB"</string>
+    <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"guqula/susa okuqukethwe isitoreji se-USB"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"guqula/susa okuqukethwe kwekhadi le-SD"</string>
-    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Ivumela uhlelo lokusebenza ukubhala ekugcineni nge-USB."</string>
+    <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Ivumela uhlelo lokusebenza ukubhala kwisitoreji se-USB."</string>
     <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Ivumela uhlelo lokusebenza ukubhala ekhadini le-SD."</string>
-    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"guqula/susa okuqukethwe kokugcina imidiya yangaphakathi"</string>
-    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Ivumela uhlelo lokusebenza ukuguqula okuqukethwe kokugcina kwemidiya yangaphakathi."</string>
+    <string name="permlab_mediaStorageWrite" product="default" msgid="6859839199706879015">"guqula/susa okuqukethwe kwisitoreji semidiya yangaphakathi"</string>
+    <string name="permdesc_mediaStorageWrite" product="default" msgid="8232008512478316233">"Ivumela uhlelo lokusebenza ukuguqula okuqukethwe kwisitoreji semidiya yangaphakathi."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"finyelela kunqolobane yesistimu yefayela"</string>
     <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Ivumela uhlelo lokusebenza ukufunda nokubhala uhlelo lwesistimu lwenqolobane."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"yena/thola amakholi e-Inthanethi"</string>
@@ -705,7 +709,7 @@
     <string name="policydesc_setGlobalProxy" msgid="6387497466660154931">"Misa iphrokzi jikelele yedivaysi ukusebenzisa ngenkathi inqumbomgomo ivunyelwa. Idivaysi yokuqala kuphela yokuphatha emisa ummeleli jikelele esebenzayo."</string>
     <!-- outdated translation 2314569545488269564 -->     <string name="policylab_expirePassword" msgid="885279151847254056">"Hlela ukuphelelwa isikhathi kwephasiwedi."</string>
     <!-- outdated translation 7276906351852798814 -->     <string name="policydesc_expirePassword" msgid="4844430354224822074">"Lawula ukuthi iphasiwedi yokuvala isikrini kumele ishintshwe nini"</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Setha umbhalo wemfihlo wokugcina"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Setha umbhalo wemfihlo yesitoreji"</string>
     <string name="policydesc_encryptedStorage" msgid="2504984732631479399">"Idinga ukuba idatha yohlelo lokusebenza olugciniwe ibhalwe ngokufihlekileyo"</string>
     <!-- no translation found for policylab_disableCamera (6395301023152297826) -->
     <skip />
@@ -962,6 +966,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Ivumela izinhlelo zokusebenza ukuguqula umlando Wesiphequluli noma amabhukimakhi agcinwe efonini yakho. Izinhlelo zokusebenza ezinonya zingase zisebenzise lokhu ukwesula noma ukuguqula idatha yakho Yesiphequluli."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"misa i-alamu ewashini le-alamu"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Ivumela uhlelo lokusebenza ukumisa i-alamu kuhlelo lokusebenza lewashi le-alawmu elifakiwe. Ezinye izinhlelo zokusebenza zewashi le-alamu zingase zingasebenzisi lesi sici."</string>
+    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <skip />
+    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Gugula izimvume zendawo Yesiphequluli"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Ivumela uhlelo lokusebenza ukuguqula izimvume zendawo Yesiphequluli. Izinhlelo ezinonya zingase zisebenzise lokhu ukuvumela ukuthumela ukwaziswa kwendawo kwamanye amasayithi ewebhu."</string>
     <!-- no translation found for save_password_message (767344687139195790) -->
@@ -1118,8 +1126,8 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"Izenzo zombhalo"</string>
     <!-- no translation found for low_internal_storage_view_title (1399732408701697546) -->
     <skip />
-    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Isikhala sokugcina sethebhulethi siya ngokuphela."</string>
-    <!-- outdated translation 4231085657068852042 -->     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Isikhala sokugcina sethebhulethi siya ngokuphela."</string>
+    <string name="low_internal_storage_view_text" product="tablet" msgid="4231085657068852042">"Isitoreji sethebhulethi siya ngokuphela."</string>
+    <!-- outdated translation 4231085657068852042 -->     <string name="low_internal_storage_view_text" product="default" msgid="635106544616378836">"Isitoreji sethebhulethi siya ngokuphela."</string>
     <!-- no translation found for ok (5970060430562524910) -->
     <skip />
     <!-- no translation found for cancel (6442560571259935130) -->
@@ -1216,6 +1224,22 @@
     <item quantity="one" msgid="1634101450343277345">"Vula inethiwekhi ye-Wi-Fi etholakalayo"</item>
     <item quantity="other" msgid="7915895323644292768">"Vula amanethiwekhi we-Wi-Fi atholakalayo"</item>
   </plurals>
+    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
+    <skip />
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Faka uhlamvu"</string>
     <!-- no translation found for sms_control_default_app_name (7630529934366549163) -->
     <skip />
@@ -1248,27 +1272,27 @@
     <skip />
     <string name="perms_hide" msgid="7283915391320676226"><b>"Fihla "</b></string>
     <string name="perms_show_all" msgid="2671791163933091180"><b>"Bonisa konke"</b></string>
-    <string name="usb_storage_activity_title" msgid="2399289999608900443">"Ukugcina Okukhulu nge-USB"</string>
+    <string name="usb_storage_activity_title" msgid="2399289999608900443">"Isitoreji Sokukhulu se-USB"</string>
     <!-- no translation found for usb_storage_title (5901459041398751495) -->
     <skip />
-    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Uxhumeke kwikhompyutha yakho nge-USB. Thinta inkinobho engenzansi uma ufuna ukukopisha amafayela phakathi kwekhompyutha yakho nokugcina nge-Android USB yakho."</string>
+    <string name="usb_storage_message" product="nosdcard" msgid="6631094834151575841">"Uxhumeke kwikhompyutha yakho nge-USB. Thinta inkinobho engenzansi uma ufuna ukukopisha amafayela phakathi kwekhompyutha yakho nesitoreji se-Android USB yakho."</string>
     <string name="usb_storage_message" product="default" msgid="4510858346516069238">"Uxhume kwikhompyutha yakho nge-USB. Thinta inkinobho engenzansi uma ufuna ukukopisha amafayela phakathi kwekhompyutha yakho nekhadi lakho le-SD."</string>
-    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Vula ukuginca nge-USB"</string>
-    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Kunenkinga yokusebenzisa ikhadi lakho le-SD lokugcina nge-USB."</string>
-    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Kunenkinga yokusebenzisa ikhadi lakho le-SD lokugcina nge-USB."</string>
+    <string name="usb_storage_button_mount" msgid="1052259930369508235">"Vula isitoreji se-USB"</string>
+    <string name="usb_storage_error_message" product="nosdcard" msgid="3276413764430468454">"Kunenkinga yokusebenzisa ikhadi lakho le-SD njengesitoreji se-USB."</string>
+    <string name="usb_storage_error_message" product="default" msgid="120810397713773275">"Kunenkinga yokusebenzisa ikhadi lakho le-SD njengesitoreji se-USB."</string>
     <!-- no translation found for usb_storage_notification_title (8175892554757216525) -->
     <skip />
     <!-- no translation found for usb_storage_notification_message (7380082404288219341) -->
     <skip />
-    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Vala ukugcina nge-USB"</string>
-    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Khetha ukuvala ukugcina nge-USB."</string>
-    <string name="usb_storage_stop_title" msgid="660129851708775853">"Ukugcina nge-USB kuyasebenza"</string>
-    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Ngaphambi kokuvala ukugcina nge-USB, qiniseka ukuthi wehlise (\"ukhiphe\") ukugcina nge-USB ye-Android yakho kwikhompyutha yakho."</string>
-    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Ngaphambi kokuvala ukugcina nge-USB, qiniseka ukuthi wehlise (\"ukhiphe\" ikhadi lakho le-Android SD kwikhompyutha yakho."</string>
-    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Vala ukugcina nge-USB"</string>
-    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Kube nenkinga yokuvala ukugcina nge-USB. Hlola ukuqiniseka ukuthi wehlise isikhungo se-USB, bese uzama futhi."</string>
-    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Vula ukugcina nge-USB"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Uma uvula ukugcina nge-USB, ezinye izinhlelo zokusebenza ozisebenzisayo zizoma futhi zingase zingatholakali kuze kube yilapho uvala ukugcina nge-USB."</string>
+    <string name="usb_storage_stop_notification_title" msgid="2336058396663516017">"Vala isitoreji se-USB"</string>
+    <string name="usb_storage_stop_notification_message" msgid="2591813490269841539">"Khetha ukuvala isitoreji se-USB."</string>
+    <string name="usb_storage_stop_title" msgid="660129851708775853">"Isitoreji se-USB siyasebenza"</string>
+    <string name="usb_storage_stop_message" product="nosdcard" msgid="1368842269463745067">"Ngaphambi kokuvala kwisitoreji se-USB, qiniseka ukuthi wehlise (\"ukhiphe\") isitoreji se-USB se-Android yakho kwikhompyutha yakho."</string>
+    <string name="usb_storage_stop_message" product="default" msgid="3613713396426604104">"Ngaphambi kokuvala isitoreji se-USB, qiniseka ukuthi wehlise (\"ukhiphe\" ikhadi lakho le-Android SD kwikhompyutha yakho."</string>
+    <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Vala isitoreji se-USB"</string>
+    <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Kube nenkinga yokuvala isitoreji se-USB. Hlola ukuqiniseka ukuthi wehlise isikhungo se-USB, bese uzama futhi."</string>
+    <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Vula isitoreji se-USB"</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Uma uvula isitoreji se-USB, ezinye izinhlelo zokusebenza ozisebenzisayo zizoma futhi zingase zingatholakali kuze kube yilapho uvala isitoreji se-USB."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"Umsebenzi we-USB wehlulekile"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"KULUNGILE"</string>
     <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
@@ -1277,11 +1301,13 @@
     <skip />
     <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
     <skip />
+    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
+    <skip />
     <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
-    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Fometha ukugcina nge-USB"</string>
+    <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Fometha isitoreji se-USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Fometha ikhadi le=SD"</string>
-    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Fometha ukugcina nge-USB, usule wonke amafayela agcinwe lapho? Isinyathelo asikwazi ukuguqulwa?"</string>
+    <string name="extmedia_format_message" product="nosdcard" msgid="8296908079722897772">"Fometha isitoreji se-USB, usule wonke amafayela agcinwe lapho? Isinyathelo asikwazi ukuguqulwa?"</string>
     <string name="extmedia_format_message" product="default" msgid="3621369962433523619">"Uqinisekile ukuthi ufuna ukufometha ikhadi le-SD? Yonke idatha esekhadini lakho izolahleka."</string>
     <string name="extmedia_format_button_format" msgid="4131064560127478695">"Ifomethi"</string>
     <string name="adb_active_notification_title" msgid="6729044778949189918">"Ukulungisa iphutha le-USB kuxhunyiwe"</string>
@@ -1292,28 +1318,28 @@
     <string name="fast_scroll_alphabet" msgid="5433275485499039199">" ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="fast_scroll_numeric_alphabet" msgid="4030170524595123610">" 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"</string>
     <string name="candidates_style" msgid="4333913089637062257"><u>"abahlanganyeli"</u></string>
-    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Ilungiselela ukugcina nge-USB"</string>
+    <string name="ext_media_checking_notification_title" product="nosdcard" msgid="3449816005351468560">"Ilungiselela isitoreji se-USB"</string>
     <string name="ext_media_checking_notification_title" product="default" msgid="5457603418970994050">"Ilungisa ikhadi le-SD"</string>
     <string name="ext_media_checking_notification_message" msgid="8287319882926737053">"Ihlola amaphutha"</string>
-    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Ukugcina nge-USB okungenalutho"</string>
+    <string name="ext_media_nofs_notification_title" product="nosdcard" msgid="7788040745686229307">"Isitoreji se-USB esingenalutho"</string>
     <string name="ext_media_nofs_notification_title" product="default" msgid="780477838241212997">"Ikhadi le-SD elingenalutho"</string>
-    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311">"Ukugcina nge-USB akunalutho noma kunohlelo lwefayela olungasekelwa."</string>
+    <string name="ext_media_nofs_notification_message" product="nosdcard" msgid="8623130522556087311"></string>
     <string name="ext_media_nofs_notification_message" product="default" msgid="3817704088027829380">"Ikhadi le-SD alinalutho noma lunohlelo lwesistimu olungasekelwa."</string>
-    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Ukugcina nge-USB okonakele"</string>
+    <string name="ext_media_unmountable_notification_title" product="nosdcard" msgid="2090046769532713563">"Isitoreji se-USB esonakele"</string>
     <string name="ext_media_unmountable_notification_title" product="default" msgid="6410723906019100189">"Ikhadi le-SD elonakele"</string>
-    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Ukugcina nge-USB konakele. Kungase kudingeke ukufa ulifomethe futhi."</string>
+    <string name="ext_media_unmountable_notification_message" product="nosdcard" msgid="529021299294450667">"Isitoreji se-USB konakele. Kungase kudingeke ulifomethe kabusha."</string>
     <string name="ext_media_unmountable_notification_message" product="default" msgid="6902531775948238989">"Ikhadi le-SD lonakele. Kungase kudingeke ukuba uyifomethe futhi."</string>
-    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Ukugcina nge-USB kukhishwe ngokungalindelekile"</string>
+    <string name="ext_media_badremoval_notification_title" product="nosdcard" msgid="1661683031330951073">"Isitoreji se-USB sikhishwe ngokungalindelekile"</string>
     <string name="ext_media_badremoval_notification_title" product="default" msgid="6872152882604407837">"Ikhadi le-SD likhishwe ngokungalindelekile"</string>
-    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Yehlisa ikhadi le-SD ngaphambi kokukhipha ukugwema ukulahleka kwedatha."</string>
+    <string name="ext_media_badremoval_notification_message" product="nosdcard" msgid="4329848819865594241">"Yehlisa ikhadi le-SD ngaphambi kokukhipha isitoreji se-USB ukugwema ukulahleka kwedatha."</string>
     <string name="ext_media_badremoval_notification_message" product="default" msgid="7260183293747448241">"Yehlisa ikhadi le-SD ngaphambi kokukhipha ukugwema ukulahleka kwedatha."</string>
-    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Kuvikelekile ukukhipha ukugcina nge-USB"</string>
+    <string name="ext_media_safe_unmount_notification_title" product="nosdcard" msgid="3967973893270360230">"Sekuphephile ukukhipha isitoreji se-USB"</string>
     <string name="ext_media_safe_unmount_notification_title" product="default" msgid="6729801130790616200">"Kuphephile ukukhipha ikhadi le-SD"</string>
-    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Ungakhipha ngokuvikelekile ukugcina nge-USB."</string>
+    <string name="ext_media_safe_unmount_notification_message" product="nosdcard" msgid="6142195361606493530">"Ungakhipha ngokuvikelekile isitoreji se-USB."</string>
     <string name="ext_media_safe_unmount_notification_message" product="default" msgid="568841278138377604">"Ungakhipha ngokuphephile ikhadi le-SD."</string>
-    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Ukugcina nge-USB kukhishiwe"</string>
+    <string name="ext_media_nomedia_notification_title" product="nosdcard" msgid="4486377230140227651">"Isitoreji se-USB sikhishiwe"</string>
     <string name="ext_media_nomedia_notification_title" product="default" msgid="8902518030404381318">"Ikhadi le-SD elikhishiwe"</string>
-    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Ukugcina nge-USB kukhishiwe. Faka imidiya entsha."</string>
+    <string name="ext_media_nomedia_notification_message" product="nosdcard" msgid="6921126162580574143">"Isitoreji se-USB sikhishiwe. Faka imidiya entsha."</string>
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"Ikhadi le-SD likhishiwe. Faka elisha."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Ayikho imisebenzi efanayo etholakele"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"buyekeza izibalo zokusebenzisa ingxenye"</string>
@@ -1321,7 +1347,7 @@
     <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Ivumela uhlelo lokusebenza ukucelela insizakalo yesiqukathi esimisiwe ukukopisha kokuqukethwe. Ayisebenziswa izinhlelo zokusebenza ezivamile."</string>
     <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Ivumela ukucelela insizakalo yesiqukathi esimisiwe ukukopisha kokuqukethwe. Ayisebenziselwa izinhlelo zokusebenza ezivamile."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Thepha kabili ukuthola ukulawula ukusondeza"</string>
-    <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Iphutha lesinqunjwana"</string>
+    <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Iphutha lewijethi"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Iya"</string>
     <string name="ime_action_search" msgid="658110271822807811">"Sesha"</string>
     <string name="ime_action_send" msgid="2316166556349314424">"Thumela"</string>
@@ -1341,7 +1367,7 @@
     <string name="input_method_binding_label" msgid="1283557179944992649">"Indlela yokufakwayo"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"Vumelanisaa"</string>
     <string name="accessibility_binding_label" msgid="4148120742096474641">"Ukufinyeleleka"</string>
-    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Iphepha donga"</string>
+    <string name="wallpaper_binding_label" msgid="1240087844304687662">"Iphephadonga"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Shintsha iphephadonga"</string>
     <!-- no translation found for vpn_title (8219003246858087489) -->
     <skip />
@@ -1373,17 +1399,17 @@
     <item quantity="other" msgid="4641872797067609177">"<xliff:g id="INDEX">%d</xliff:g> ku-<xliff:g id="TOTAL">%d</xliff:g>"</item>
   </plurals>
     <string name="action_mode_done" msgid="7217581640461922289">"Kwenziwe"</string>
-    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Yehlisa ukugcina nge-USB..."</string>
+    <string name="progress_unmounting" product="nosdcard" msgid="535863554318797377">"Yehlisa isitoreji se-USB..."</string>
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Yehlisa ikhadi le-SD..."</string>
-    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Isula ukugcina nge-USB."</string>
+    <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Isula isitoreji se-USB."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Isula ikhadi le-SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Yehlulekile ukusula ukugcina nge-USB"</string>
+    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Yehlulekile ukusula isitoreji se-USB"</string>
     <string name="format_error" product="default" msgid="1343380371925238343">"Yehlulekile ukususa ikhadi le-SD."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"Ikhadi le-SD likhishwe ngaphambi kokuba lehliswe."</string>
-    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Ukugcina nge-USB okwamanje kusahlolwa."</string>
+    <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Isitoreji se-USB sisahlolwa."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Ikhadi le-SD okwamanje liyahlolwa."</string>
     <string name="media_removed" msgid="7001526905057952097">"Ikhadi le-SD likhishiwe."</string>
-    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Ukugcina nge-USB okwamanje kusetshenziswa ikhompyutha."</string>
+    <string name="media_shared" product="nosdcard" msgid="5830814349250834225">"Isitoreji se-USB sisasetshenziswa yikhompyutha."</string>
     <string name="media_shared" product="default" msgid="5706130568133540435">"Ikhadi le-SD okwamanje lisetshenziswa ikhompyutha."</string>
     <string name="media_unknown_state" msgid="729192782197290385">"Imidiya yangaphakathi kwisimo esingaziwa."</string>
     <string name="share" msgid="1778686618230011964">"Yabelana"</string>
@@ -1464,5 +1490,7 @@
     <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
     <skip />
     <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
+    <skip />
+    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
     <skip />
 </resources>

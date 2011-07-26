@@ -262,6 +262,10 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Allows applications to watch the keys that you press even when interacting with another application (such as entering a password). Should never be needed for normal applications."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"bind to an input method"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Allows the holder to bind to the top-level interface of an input method. Should never be needed for normal applications."</string>
+    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
+    <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"bind to wallpaper"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Allows the holder to bind to the top-level interface of wallpaper. Should never be needed for normal applications."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"bind to a widget service"</string>
@@ -720,6 +724,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Allows an application to modify the browser\'s history or bookmarks stored on your phone. Malicious applications can use this to erase or modify your browser\'s data."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"set alarm in alarm clock"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Allows the application to set an alarm in an installed alarm clock application. Some alarm clock applications may not implement this feature."</string>
+    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <skip />
+    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modify Browser geo-location permissions"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Allows an application to modify the browser\'s geo-location permissions. Malicious applications can use this to allow the sending of location information to arbitrary websites."</string>
     <string name="save_password_message" msgid="767344687139195790">"Do you want the browser to remember this password?"</string>
@@ -872,12 +880,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Application redirected"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> is now running."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> was originally launched."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Scale"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"Always show"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Reenable this with Settings &gt; Applications &gt; Manage applications."</string>
     <string name="smv_application" msgid="295583804361236288">"The application <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) has violated its self-enforced StrictMode policy."</string>
     <string name="smv_process" msgid="5120397012047462446">"The process <xliff:g id="PROCESS">%1$s</xliff:g> has violated its self-enforced StrictMode policy."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> running"</string>
@@ -911,24 +916,34 @@
     <item quantity="one" msgid="1634101450343277345">"Open available Wi-Fi network"</item>
     <item quantity="other" msgid="7915895323644292768">"Open Wi-Fi networks available"</item>
   </plurals>
+    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
+    <skip />
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Insert character"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Unknown application"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Sending SMS messages"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"A large number of SMS messages are being sent. Select \"OK\" to continue or \"Cancel\" to stop sending."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Cancel"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM card removed"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"The mobile network will be unavailable until you replace the SIM card."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Done"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIM card added"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"You must restart your device to access the mobile network."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Restart"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Set time"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Set date"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Set"</string>
@@ -959,6 +974,8 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Connected as a media device"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Connected as a camera"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connected as an installer"</string>
+    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
+    <skip />
     <string name="usb_notification_message" msgid="4447869605109736382">"Touch for other USB options"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Format USB storage"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Format SD card"</string>
@@ -1106,8 +1123,8 @@
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 fingerprint"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 fingerprint"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"See all..."</string>
-    <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
-    <skip />
-    <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
+    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Select activity"</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Share with..."</string>
+    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
     <skip />
 </resources>

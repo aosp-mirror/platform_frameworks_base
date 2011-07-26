@@ -23,6 +23,10 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Futa"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Usisumbue"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Onyesha arifa"</string>
+    <!-- no translation found for status_bar_recent_remove_item_title (6561944127804037619) -->
+    <skip />
+    <!-- no translation found for status_bar_recent_inspect_item_title (4906947311448880529) -->
+    <skip />
     <!-- no translation found for status_bar_no_notifications_title (4755261167193833213) -->
     <skip />
     <!-- no translation found for status_bar_ongoing_events_title (1682504513316879202) -->
@@ -80,5 +84,107 @@
     <!-- no translation found for screenshot_saving_toast (8592630119048713208) -->
     <skip />
     <!-- no translation found for screenshot_failed_toast (655180965533683356) -->
+    <skip />
+    <!-- no translation found for usb_preference_title (6551050377388882787) -->
+    <skip />
+    <!-- no translation found for use_mtp_button_title (4333504413563023626) -->
+    <skip />
+    <!-- no translation found for use_ptp_button_title (7517127540301625751) -->
+    <skip />
+    <!-- no translation found for installer_cd_button_title (8485631662288445893) -->
+    <skip />
+    <!-- no translation found for accessibility_back (567011538994429120) -->
+    <skip />
+    <!-- no translation found for accessibility_home (8217216074895377641) -->
+    <skip />
+    <!-- no translation found for accessibility_menu (316839303324695949) -->
+    <skip />
+    <!-- no translation found for accessibility_ime_switch_button (5032926134740456424) -->
+    <skip />
+    <!-- no translation found for accessibility_compatibility_zoom_button (8461115318742350699) -->
+    <skip />
+    <!-- no translation found for accessibility_compatibility_zoom_example (4220687294564945780) -->
+    <skip />
+    <!-- no translation found for accessibility_bluetooth_connected (2707027633242983370) -->
+    <skip />
+    <!-- no translation found for accessibility_bluetooth_disconnected (7416648669976870175) -->
+    <skip />
+    <!-- no translation found for accessibility_no_battery (358343022352820946) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_one_bar (7774887721891057523) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_two_bars (8500650438735009973) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_three_bars (2302983330865040446) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_full (8909122401720158582) -->
+    <skip />
+    <!-- no translation found for accessibility_no_phone (4894708937052611281) -->
+    <skip />
+    <!-- no translation found for accessibility_phone_one_bar (687699278132664115) -->
+    <skip />
+    <!-- no translation found for accessibility_phone_two_bars (8384905382804815201) -->
+    <skip />
+    <!-- no translation found for accessibility_phone_three_bars (8521904843919971885) -->
+    <skip />
+    <!-- no translation found for accessibility_phone_signal_full (6471834868580757898) -->
+    <skip />
+    <!-- no translation found for accessibility_no_data (4791966295096867555) -->
+    <skip />
+    <!-- no translation found for accessibility_data_one_bar (1415625833238273628) -->
+    <skip />
+    <!-- no translation found for accessibility_data_two_bars (6166018492360432091) -->
+    <skip />
+    <!-- no translation found for accessibility_data_three_bars (9167670452395038520) -->
+    <skip />
+    <!-- no translation found for accessibility_data_signal_full (2708384608124519369) -->
+    <skip />
+    <!-- no translation found for accessibility_no_wifi (4017628918351949575) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_one_bar (1914343229091303434) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_two_bars (7869150535859760698) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_three_bars (2665319332961356254) -->
+    <skip />
+    <!-- no translation found for accessibility_wifi_signal_full (1275764416228473932) -->
+    <skip />
+    <!-- no translation found for accessibility_data_connection_gprs (1606477224486747751) -->
+    <skip />
+    <!-- no translation found for accessibility_data_connection_3g (8628562305003568260) -->
+    <skip />
+    <!-- no translation found for accessibility_data_connection_3.5g (8664845609981692001) -->
+    <skip />
+    <!-- no translation found for accessibility_data_connection_4g (7741000750630089612) -->
+    <skip />
+    <!-- no translation found for accessibility_data_connection_cdma (6132648193978823023) -->
+    <skip />
+    <!-- no translation found for accessibility_data_connection_edge (4477457051631979278) -->
+    <skip />
+    <!-- no translation found for accessibility_data_connection_wifi (1127208787254436420) -->
+    <skip />
+    <!-- no translation found for accessibility_no_sim (8274017118472455155) -->
+    <skip />
+    <!-- no translation found for accessibility_bluetooth_tether (4102784498140271969) -->
+    <skip />
+    <!-- no translation found for accessibility_airplane_mode (834748999790763092) -->
+    <skip />
+    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
+    <skip />
+    <!-- no translation found for accessibility_settings_button (7913780116850379698) -->
+    <skip />
+    <!-- no translation found for accessibility_notifications_button (2933903195211483438) -->
+    <skip />
+    <!-- no translation found for accessibility_remove_notification (4883990503785778699) -->
+    <skip />
+    <!-- no translation found for accessibility_gps_enabled (3511469499240123019) -->
+    <skip />
+    <!-- no translation found for accessibility_gps_acquiring (8959333351058967158) -->
+    <skip />
+    <!-- no translation found for accessibility_tty_enabled (4613200365379426561) -->
+    <skip />
+    <!-- no translation found for accessibility_ringer_vibrate (666585363364155055) -->
+    <skip />
+    <!-- no translation found for accessibility_ringer_silent (9061243307939135383) -->
     <skip />
 </resources>
