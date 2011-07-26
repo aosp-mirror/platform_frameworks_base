@@ -386,7 +386,10 @@ public:
         if (mDevice->ops->get_parameters) {
             char *temp = mDevice->ops->get_parameters(mDevice);
             String8 str_parms(temp);
-            free(temp);
+            if (mDevice->ops->put_parameters)
+                mDevice->ops->put_parameters(mDevice, temp);
+            else
+                free(temp);
             parms.unflatten(str_parms);
         }
         return parms;
