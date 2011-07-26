@@ -15307,6 +15307,7 @@ package android.provider {
     field public static final java.lang.String DEFAULT_SORT_ORDER = "date DESC";
     field public static final java.lang.String DURATION = "duration";
     field public static final int INCOMING_TYPE = 1; // 0x1
+    field public static final java.lang.String IS_READ = "is_read";
     field public static final int MISSED_TYPE = 3; // 0x3
     field public static final java.lang.String NEW = "new";
     field public static final java.lang.String NUMBER = "number";
@@ -16957,9 +16958,9 @@ package android.provider {
     field public static final java.lang.String DIR_TYPE = "vnd.android.cursor.dir/voicemails";
     field public static final java.lang.String DURATION = "duration";
     field public static final java.lang.String HAS_CONTENT = "has_content";
+    field public static final java.lang.String IS_READ = "is_read";
     field public static final java.lang.String ITEM_TYPE = "vnd.android.cursor.item/voicemail";
     field public static final java.lang.String MIME_TYPE = "mime_type";
-    field public static final java.lang.String NEW = "new";
     field public static final java.lang.String NUMBER = "number";
     field public static final java.lang.String SOURCE_DATA = "source_data";
     field public static final java.lang.String SOURCE_PACKAGE = "source_package";

@@ -189,7 +189,6 @@ public class CallLog {
          * Unlike the {@link #NEW} field, which requires the user to have acknowledged the
          * existence of the entry, this implies the user has interacted with the entry.
          * <P>Type: INTEGER (boolean)</P>
-         * @hide
          */
         public static final String IS_READ = "is_read";
 
