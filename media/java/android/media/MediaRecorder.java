@@ -176,6 +176,8 @@ public class MediaRecorder
         public static final int DEFAULT = 0;
         /** Camera video source */
         public static final int CAMERA = 1;
+        /** @hide */
+        public static final int GRALLOC_BUFFER = 2;
     }
 
     /**
