@@ -78,7 +78,8 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
         SaveImageInBackgroundData> {
     private static final String TAG = "SaveImageInBackgroundTask";
     private static final String SCREENSHOTS_DIR_NAME = "Screenshots";
-    private static final String SCREENSHOT_FILE_PATH_TEMPLATE = "%s/%s/Screenshot_%s-%d.png";
+    private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
+    private static final String SCREENSHOT_FILE_PATH_TEMPLATE = "%s/%s/%s";
 
     @Override
     protected SaveImageInBackgroundData doInBackground(SaveImageInBackgroundData... params) {
@@ -89,18 +90,18 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 
         try{
             long currentTime = System.currentTimeMillis();
-            String date = new SimpleDateFormat("MM-dd-yy-kk-mm-ss").format(new Date(currentTime));
+            String date = new SimpleDateFormat("yyyy-MM-dd-kk-mm-ss").format(new Date(currentTime));
             String imageDir = Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_PICTURES).getAbsolutePath();
-            String imageFilePath = String.format(SCREENSHOT_FILE_PATH_TEMPLATE,
-                    imageDir, SCREENSHOTS_DIR_NAME,
-                    date, currentTime % 1000);
+            String imageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, date);
+            String imageFilePath = String.format(SCREENSHOT_FILE_PATH_TEMPLATE, imageDir,
+                    SCREENSHOTS_DIR_NAME, imageFileName);
 
             // Save the screenshot to the MediaStore
             ContentValues values = new ContentValues();
             values.put(MediaStore.Images.ImageColumns.DATA, imageFilePath);
-            values.put(MediaStore.Images.ImageColumns.TITLE, "Screenshot");
-            values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, "Screenshot");
+            values.put(MediaStore.Images.ImageColumns.TITLE, imageFileName);
+            values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, imageFileName);
             values.put(MediaStore.Images.ImageColumns.DATE_TAKEN, currentTime);
             values.put(MediaStore.Images.ImageColumns.DATE_ADDED, currentTime);
             values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, currentTime);
