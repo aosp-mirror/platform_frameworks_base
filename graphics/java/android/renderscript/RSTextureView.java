@@ -29,9 +29,9 @@ import android.util.Log;
 import android.view.TextureView;
 
 /**
- * The Surface View for a graphics renderscript (RenderScriptGL) to draw on.
+ * The Texture View for a graphics renderscript (RenderScriptGL)
+ * to draw on.
  *
- * @hide
  */
 public class RSTextureView extends TextureView implements TextureView.SurfaceTextureListener {
     private RenderScriptGL mRS;
