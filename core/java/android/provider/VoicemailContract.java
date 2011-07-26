@@ -123,14 +123,8 @@ public class VoicemailContract {
          */
         public static final String DURATION = Calls.DURATION;
         /**
-         * Whether this is a new voicemail (i.e. has not been heard).
-         * <P>Type: INTEGER (boolean)</P>
-         */
-        public static final String NEW = Calls.NEW;
-        /**
          * Whether this item has been read or otherwise consumed by the user.
          * <P>Type: INTEGER (boolean)</P>
-         * @hide
          */
         public static final String IS_READ = Calls.IS_READ;
         /**
