@@ -188,14 +188,33 @@ public class TabletStatusBar extends StatusBar implements
         mNotificationPanel.setOnTouchListener(
                 new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL, mNotificationPanel));
 
-        // the battery and network icons
+        // the battery icon
         mBatteryController.addIconView((ImageView)mNotificationPanel.findViewById(R.id.battery));
         mBatteryController.addLabelView(
                 (TextView)mNotificationPanel.findViewById(R.id.battery_text));
+
+        // Bt
         mBluetoothController.addIconView(
                 (ImageView)mNotificationPanel.findViewById(R.id.bluetooth));
-        mNetworkController.addCombinedSignalIconView(
-                (ImageView)mNotificationPanel.findViewById(R.id.network_signal));
+
+        // network icons: either a combo icon that switches between mobile and data, or distinct
+        // mobile and data icons
+        final ImageView comboRSSI = 
+                (ImageView)mNotificationPanel.findViewById(R.id.network_signal);
+        if (comboRSSI != null) {
+            mNetworkController.addCombinedSignalIconView(comboRSSI);
+        }
+        final ImageView mobileRSSI = 
+                (ImageView)mNotificationPanel.findViewById(R.id.mobile_signal);
+        if (mobileRSSI != null) {
+            mNetworkController.addPhoneSignalIconView(mobileRSSI);
+        }
+        final ImageView wifiRSSI = 
+                (ImageView)mNotificationPanel.findViewById(R.id.wifi_signal);
+        if (wifiRSSI != null) {
+            mNetworkController.addWifiIconView(wifiRSSI);
+        }
+
         mNetworkController.addDataTypeIconView(
                 (ImageView)mNotificationPanel.findViewById(R.id.network_type));
         mNetworkController.addDataDirectionOverlayIconView(
@@ -444,9 +463,23 @@ public class TabletStatusBar extends StatusBar implements
         mBatteryController.addIconView((ImageView)sb.findViewById(R.id.battery));
         mBluetoothController = new BluetoothController(mContext);
         mBluetoothController.addIconView((ImageView)sb.findViewById(R.id.bluetooth));
+
         mNetworkController = new NetworkController(mContext);
-        mNetworkController.addCombinedSignalIconView(
-                (ImageView)sb.findViewById(R.id.network_signal));
+        final ImageView comboRSSI = 
+                (ImageView)sb.findViewById(R.id.network_signal);
+        if (comboRSSI != null) {
+            mNetworkController.addCombinedSignalIconView(comboRSSI);
+        }
+        final ImageView mobileRSSI = 
+                (ImageView)sb.findViewById(R.id.mobile_signal);
+        if (mobileRSSI != null) {
+            mNetworkController.addPhoneSignalIconView(mobileRSSI);
+        }
+        final ImageView wifiRSSI = 
+                (ImageView)sb.findViewById(R.id.wifi_signal);
+        if (wifiRSSI != null) {
+            mNetworkController.addWifiIconView(wifiRSSI);
+        }
         mNetworkController.addDataTypeIconView(
                 (ImageView)sb.findViewById(R.id.network_type));
         mNetworkController.addDataDirectionOverlayIconView(

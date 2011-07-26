@@ -56,9 +56,11 @@ public class BatteryController extends BroadcastReceiver {
         final String action = intent.getAction();
         if (action.equals(Intent.ACTION_BATTERY_CHANGED)) {
             final int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0);
+            final boolean plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
+            final int icon = plugged ? R.drawable.stat_sys_battery_charge 
+                                     : R.drawable.stat_sys_battery;
             int N = mIconViews.size();
             for (int i=0; i<N; i++) {
-                final int icon = intent.getIntExtra(BatteryManager.EXTRA_ICON_SMALL, 0);
                 ImageView v = mIconViews.get(i);
                 v.setImageResource(icon);
                 v.setImageLevel(level);
@@ -67,7 +69,6 @@ public class BatteryController extends BroadcastReceiver {
             }
             N = mLabelViews.size();
             for (int i=0; i<N; i++) {
-                //final boolean plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0;
                 TextView v = mLabelViews.get(i);
                 v.setText(mContext.getString(R.string.status_bar_settings_battery_meter_format,
                         level));

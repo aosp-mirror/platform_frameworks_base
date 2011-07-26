@@ -299,4 +299,23 @@
 
     <!-- Content description of the ringer silent icon in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_ringer_silent">Ringer silent.</string>
+
+    <!-- Text to display underneath the graphical signal strength meter when
+         no connection is available. [CHAR LIMIT=20] -->
+    <string name="status_bar_settings_signal_meter_disconnected">
+        No Internet connection
+    </string>
+
+    <!-- Text to display underneath the graphical signal strength meter when
+         it is displaying Wi-Fi status and Wi-Fi is connected to a network
+         whose SSID is not available.
+         [CHAR LIMIT=20] -->
+    <string name="status_bar_settings_signal_meter_wifi_nossid">Wi-Fi connected</string>
+
+    <!-- Notification text: when GPS is getting a fix [CHAR LIMIT=50] -->
+    <string name="gps_notification_searching_text">Searching for GPS</string>
+
+    <!-- Notification text: when GPS has found a fix [CHAR LIMIT=50] -->
+    <string name="gps_notification_found_text">Location set by GPS</string>
+
 </resources>
