@@ -167,11 +167,11 @@ static void audioCallback(int event, void* user, void *info) {
 // ----------------------------------------------------------------------------
 static int
 android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_this,
-        jint streamType, jint sampleRateInHertz, jint channels,
+        jint streamType, jint sampleRateInHertz, jint javaChannelMask,
         jint audioFormat, jint buffSizeInBytes, jint memoryMode, jintArray jSession)
 {
-    LOGV("sampleRate=%d, audioFormat(from Java)=%d, channels=%x, buffSize=%d",
-        sampleRateInHertz, audioFormat, channels, buffSizeInBytes);
+    LOGV("sampleRate=%d, audioFormat(from Java)=%d, channel mask=%x, buffSize=%d",
+        sampleRateInHertz, audioFormat, javaChannelMask, buffSizeInBytes);
     int afSampleRate;
     int afFrameCount;
 
@@ -184,11 +184,16 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
         return AUDIOTRACK_ERROR_SETUP_AUDIOSYSTEM;
     }
 
-    if (!audio_is_output_channel(channels)) {
+    // Java channel masks don't map directly to the native definition, but it's a simple shift
+    // to skip the two deprecated channel configurations "default" and "mono".
+    uint32_t nativeChannelMask = ((uint32_t)javaChannelMask) >> 2;
+
+    if (!audio_is_output_channel(nativeChannelMask)) {
         LOGE("Error creating AudioTrack: invalid channel mask.");
         return AUDIOTRACK_ERROR_SETUP_INVALIDCHANNELMASK;
     }
-    int nbChannels = popcount(channels);
+
+    int nbChannels = popcount(nativeChannelMask);
     
     // check the stream type
     audio_stream_type_t atStreamType;
@@ -285,7 +290,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             atStreamType,// stream type
             sampleRateInHertz,
             format,// word length, PCM
-            channels,
+            nativeChannelMask,
             frameCount,
             0,// flags
             audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user)
@@ -306,7 +311,7 @@ android_media_AudioTrack_native_setup(JNIEnv *env, jobject thiz, jobject weak_th
             atStreamType,// stream type
             sampleRateInHertz,
             format,// word length, PCM
-            channels,
+            nativeChannelMask,
             frameCount,
             0,// flags
             audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user));
