@@ -612,6 +612,14 @@ public class PhoneStatusBar extends StatusBar {
                     handleNotificationError(key, notification, "Couldn't update icon: " + ic);
                     return;
                 }
+                // Update the large icon
+                if (notification.notification.largeIcon != null) {
+                    oldEntry.largeIcon.setImageBitmap(notification.notification.largeIcon);
+                } else {
+                    oldEntry.largeIcon.getLayoutParams().width = 0;
+                    oldEntry.largeIcon.setVisibility(View.INVISIBLE);
+                }
+
             }
             catch (RuntimeException e) {
                 // It failed to add cleanly.  Log, and remove the view from the panel.
