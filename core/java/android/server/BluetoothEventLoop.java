@@ -340,9 +340,9 @@ class BluetoothEventLoop {
 
             if (name.equals("Pairable")) {
                 if (pairable.equals("true")) {
-                    mBluetoothState.sendMessage(BluetoothAdapterStateMachine.BECOME_PAIRABLE);
+                    mBluetoothState.sendMessage(BluetoothAdapterStateMachine.BECAME_PAIRABLE);
                 } else {
-                    mBluetoothState.sendMessage(BluetoothAdapterStateMachine.BECOME_NON_PAIRABLE);
+                    mBluetoothState.sendMessage(BluetoothAdapterStateMachine.BECAME_NON_PAIRABLE);
                 }
             }
 

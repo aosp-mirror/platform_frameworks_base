@@ -17,11 +17,13 @@
 package android.server;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.IBluetoothStateChangeCallback;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.Message;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -34,17 +36,18 @@ import java.io.PrintWriter;
 /**
  * Bluetooth Adapter StateMachine
  * All the states are at the same level, ie, no hierarchy.
- *                         (BluetootOn)
- *                           |    ^
- *                 TURN_OFF  |    |  BECOME_PAIRABLE
- *         AIRPLANE_MODE_ON  |    |
- *                           V    |
- *                         (Switching)
- *                           |    ^
- *     BECOME_NON_PAIRABLE&  |    | TURN_ON(_CONTINUE)/TURN_ON_FOR_PRIVILEGED
- * ALL_DEVICES_DISCONNECTED  |    |
- *                           V    |
- *                          (HotOff)
+ *                         (BluetootOn)<----------------------<-
+ *                           |    ^    -------------------->-  |
+ *                           |    |                         |  |
+ *                 TURN_OFF  |    | BECAME_PAIRABLE     m1 |  | USER_TURN_ON
+ *         AIRPLANE_MODE_ON  |    |                         |  |
+ *                           V    |                         |  |
+ *                         (Switching)                   (PerProcessState)
+ *                           |    ^                         |  |
+ *     BECAME_NON_PAIRABLE&  |    | TURN_ON(_CONTINUE)      |  |
+ * ALL_DEVICES_DISCONNECTED  |    |                     m2  |  |
+ *                           V    |------------------------<   | BECAME_PAIRABLE
+ *                          (HotOff)---------------------------- PER_PROCESS_TURN_ON
  *                           /    ^
  *                          /     |  SERVICE_RECORD_LOADED
  *                         |      |
@@ -55,6 +58,10 @@ import java.io.PrintWriter;
  *                           V    |
  *                           (PowerOff)   <----- initial state
  *
+ * Legend:
+ * m1 = USER_TURN_OFF
+ * m2 = Transition to HotOff when number of process wanting BT on is 0.
+ *      BECAME_NON_PAIRABLE will make the transition.
  */
 final class BluetoothAdapterStateMachine extends StateMachine {
     private static final String TAG = "BluetoothAdapterStateMachine";
@@ -63,24 +70,24 @@ final class BluetoothAdapterStateMachine extends StateMachine {
     // Message(what) to take an action
     //
     // We get this message when user tries to turn on BT
-    public static final int USER_TURN_ON = 1;
+    static final int USER_TURN_ON = 1;
     // We get this message when user tries to turn off BT
-    public static final int USER_TURN_OFF = 2;
+    static final int USER_TURN_OFF = 2;
 
     // Message(what) to report a event that the state machine need to respond to
     //
     // Event indicates sevice records have been loaded
-    public static final int SERVICE_RECORD_LOADED = 51;
+    static final int SERVICE_RECORD_LOADED = 51;
     // Event indicates all the remote Bluetooth devices has been disconnected
-    public static final int ALL_DEVICES_DISCONNECTED = 52;
+    static final int ALL_DEVICES_DISCONNECTED = 52;
     // Event indicates the Bluetooth is connectable
-    public static final int BECOME_PAIRABLE = 53;
+    static final int BECAME_PAIRABLE = 53;
     // Event indicates the Bluetooth is non-connectable.
-    public static final int BECOME_NON_PAIRABLE = 54;
+    static final int BECAME_NON_PAIRABLE = 54;
     // Event indicates airplane mode is turned on
-    public static final int AIRPLANE_MODE_ON = 55;
+    static final int AIRPLANE_MODE_ON = 55;
     // Event indicates airplane mode is turned off
-    public static final int AIRPLANE_MODE_OFF = 56;
+    static final int AIRPLANE_MODE_OFF = 56;
 
     // private internal messages
     //
@@ -95,8 +102,9 @@ final class BluetoothAdapterStateMachine extends StateMachine {
     private static final int TURN_ON_CONTINUE = 102;
     // Unload firmware, turning off Bluetooth module power
     private static final int TURN_COLD = 103;
-    // For NFC, turn on bluetooth for certain process
-    private static final int TURN_ON_FOR_PRIVILEGED = 104;
+    // Per process enable / disable messages
+    static final int PER_PROCESS_TURN_ON = 104;
+    static final int PER_PROCESS_TURN_OFF = 105;
 
     private Context mContext;
     private BluetoothService mBluetoothService;
@@ -107,6 +115,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
     private HotOff mHotOff;
     private WarmUp mWarmUp;
     private PowerOff mPowerOff;
+    private PerProcessState mPerProcessState;
 
     // this is the BluetoothAdapter state that reported externally
     private int mPublicState;
@@ -123,12 +132,15 @@ final class BluetoothAdapterStateMachine extends StateMachine {
         mHotOff = new HotOff();
         mWarmUp = new WarmUp();
         mPowerOff = new PowerOff();
+        mPerProcessState = new PerProcessState();
 
         addState(mBluetoothOn);
         addState(mSwitching);
         addState(mHotOff);
         addState(mWarmUp);
         addState(mPowerOff);
+        addState(mPerProcessState);
+
         setInitialState(mPowerOff);
         mPublicState = BluetoothAdapter.STATE_OFF;
 
@@ -142,12 +154,9 @@ final class BluetoothAdapterStateMachine extends StateMachine {
      * Bluetooth module's power is off, firmware is not loaded.
      */
     private class PowerOff extends State {
-        private boolean mPersistSwitchOn = false;
-
         @Override
         public void enter() {
-            if (DBG) log("Enter PowerOff: " + mPersistSwitchOn);
-            mPersistSwitchOn = false;
+            if (DBG) log("Enter PowerOff: ");
         }
         @Override
         public boolean processMessage(Message message) {
@@ -162,7 +171,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                     if (prepareBluetooth()) {
                         // this is user request, save the setting
                         if ((Boolean) message.obj) {
-                            mPersistSwitchOn = true;
+                            persistSwitchSetting(true);
                         }
                         // We will continue turn the BT on all the way to the BluetoothOn state
                         deferMessage(obtainMessage(TURN_ON_CONTINUE));
@@ -191,9 +200,21 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                             transitionTo(mPowerOff);
                             broadcastState(BluetoothAdapter.STATE_OFF);
                         }
+                    } else if (mContext.getResources().getBoolean
+                            (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
+                        sendMessage(TURN_HOT);
                     }
                     break;
-                case AIRPLANE_MODE_ON: // ignore
+                case PER_PROCESS_TURN_ON:
+                    if (prepareBluetooth()) {
+                        transitionTo(mWarmUp);
+                    }
+                    deferMessage(obtainMessage(PER_PROCESS_TURN_ON));
+                    break;
+                case PER_PROCESS_TURN_OFF:
+                    perProcessCallback(false, (IBluetoothStateChangeCallback) message.obj);
+                    break;
+                case AIRPLANE_MODE_ON:
                 case USER_TURN_OFF: // ignore
                     break;
                 default:
@@ -276,6 +297,8 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                                        // on to the BluetoothOn state
                 case AIRPLANE_MODE_ON:
                 case AIRPLANE_MODE_OFF:
+                case PER_PROCESS_TURN_ON:
+                case PER_PROCESS_TURN_OFF:
                     deferMessage(message);
                     break;
                 case USER_TURN_OFF: // ignore
@@ -294,12 +317,9 @@ final class BluetoothAdapterStateMachine extends StateMachine {
      * non-connectable.
      */
     private class HotOff extends State {
-        private boolean mPersistSwitchOn = false;
-
         @Override
         public void enter() {
-            if (DBG) log("Enter HotOff: " + mPersistSwitchOn);
-            mPersistSwitchOn = false;
+            if (DBG) log("Enter HotOff:");
         }
 
         @Override
@@ -310,9 +330,10 @@ final class BluetoothAdapterStateMachine extends StateMachine {
             switch(message.what) {
                 case USER_TURN_ON:
                     if ((Boolean) message.obj) {
-                        mPersistSwitchOn = true;
+                        persistSwitchSetting(true);
                     }
                     // let it fall to TURN_ON_CONTINUE:
+                    //$FALL-THROUGH$
                 case TURN_ON_CONTINUE:
                     mBluetoothService.switchConnectable(true);
                     transitionTo(mSwitching);
@@ -328,12 +349,24 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                     break;
                 case AIRPLANE_MODE_OFF:
                     if (getBluetoothPersistedSetting()) {
-                        mBluetoothService.switchConnectable(true);
                         transitionTo(mSwitching);
+                        mBluetoothService.switchConnectable(true);
                         broadcastState(BluetoothAdapter.STATE_TURNING_ON);
                     }
                     break;
                 case USER_TURN_OFF: // ignore
+                    break;
+                case PER_PROCESS_TURN_ON:
+                    transitionTo(mPerProcessState);
+
+                    // Resend the PER_PROCESS_TURN_ON message so that the callback
+                    // can be sent through.
+                    deferMessage(message);
+
+                    mBluetoothService.switchConnectable(true);
+                    break;
+                case PER_PROCESS_TURN_OFF:
+                    perProcessCallback(false, (IBluetoothStateChangeCallback)message.obj);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -356,11 +389,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
 
             boolean retValue = HANDLED;
             switch(message.what) {
-                case BECOME_PAIRABLE:
-                    if (mPowerOff.mPersistSwitchOn || mHotOff.mPersistSwitchOn) {
-                        persistSwitchSetting(true);
-                        mPowerOff.mPersistSwitchOn = mHotOff.mPersistSwitchOn = false;
-                    }
+                case BECAME_PAIRABLE:
                     String[] propVal = {"Pairable", mBluetoothService.getProperty("Pairable")};
                     mEventLoop.onPropertyChanged(propVal);
 
@@ -369,7 +398,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                     transitionTo(mBluetoothOn);
                     broadcastState(BluetoothAdapter.STATE_ON);
                     break;
-                case BECOME_NON_PAIRABLE:
+                case BECAME_NON_PAIRABLE:
                     if (mBluetoothService.getAdapterConnectionState() ==
                         BluetoothAdapter.STATE_DISCONNECTED) {
                         transitionTo(mHotOff);
@@ -385,9 +414,12 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                 case USER_TURN_ON:
                 case AIRPLANE_MODE_OFF:
                 case AIRPLANE_MODE_ON:
+                case PER_PROCESS_TURN_ON:
+                case PER_PROCESS_TURN_OFF:
                 case USER_TURN_OFF:
                     deferMessage(message);
                     break;
+
                 default:
                     return NOT_HANDLED;
             }
@@ -395,10 +427,6 @@ final class BluetoothAdapterStateMachine extends StateMachine {
         }
 
         private void finishSwitchingOff() {
-            if (mBluetoothOn.mPersistBluetoothOff) {
-                persistSwitchSetting(false);
-                mBluetoothOn.mPersistBluetoothOff = false;
-            }
             mBluetoothService.finishDisable();
             if (mContext.getResources().getBoolean
                 (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
@@ -415,7 +443,6 @@ final class BluetoothAdapterStateMachine extends StateMachine {
         @Override
         public void enter() {
             if (DBG) log("Enter BluetoothOn: " + mPersistBluetoothOff);
-            mPersistBluetoothOff = false;
         }
         @Override
         public boolean processMessage(Message message) {
@@ -425,21 +452,39 @@ final class BluetoothAdapterStateMachine extends StateMachine {
             switch(message.what) {
                 case USER_TURN_OFF:
                     if ((Boolean) message.obj) {
-                        mPersistBluetoothOff = true;
+                        persistSwitchSetting(false);
                     }
-                    // let it fall through to AIRPLANE_MODE_ON
+
+                    if (mBluetoothService.isDiscovering()) {
+                        mBluetoothService.cancelDiscovery();
+                    }
+                    if (!mBluetoothService.isApplicationStateChangeTrackerEmpty()) {
+                        transitionTo(mPerProcessState);
+                        deferMessage(obtainMessage(USER_TURN_OFF));
+                        break;
+                    }
+                    //$FALL-THROUGH$ to AIRPLANE_MODE_ON
                 case AIRPLANE_MODE_ON:
                     transitionTo(mSwitching);
                     broadcastState(BluetoothAdapter.STATE_TURNING_OFF);
                     mBluetoothService.switchConnectable(false);
                     mBluetoothService.disconnectDevices();
+
                     // we turn all the way to PowerOff with AIRPLANE_MODE_ON
                     if (message.what == AIRPLANE_MODE_ON) {
+                        // We inform all the per process callbacks
+                        allProcessesCallback(false);
                         deferMessage(obtainMessage(AIRPLANE_MODE_ON));
                     }
                     break;
                 case AIRPLANE_MODE_OFF: // ignore
                 case USER_TURN_ON: // ignore
+                    break;
+                case PER_PROCESS_TURN_ON:
+                    perProcessCallback(true, (IBluetoothStateChangeCallback)message.obj);
+                    break;
+                case PER_PROCESS_TURN_OFF:
+                    perProcessCallback(false, (IBluetoothStateChangeCallback)message.obj);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -447,6 +492,101 @@ final class BluetoothAdapterStateMachine extends StateMachine {
             return retValue;
         }
 
+    }
+
+
+    private class PerProcessState extends State {
+        IBluetoothStateChangeCallback mCallback = null;
+
+        @Override
+        public void enter() {
+            if (DBG) log("Enter PerProcessState");
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) log("PerProcessState process message: " + message.what);
+
+            boolean retValue = HANDLED;
+            switch (message.what) {
+                case PER_PROCESS_TURN_ON:
+                    mCallback = (IBluetoothStateChangeCallback)getCurrentMessage().obj;
+
+                    // If this is not the first application call the callback.
+                    if (mBluetoothService.getNumberOfApplicationStateChangeTrackers() > 1) {
+                        perProcessCallback(true, mCallback);
+                    }
+                    break;
+                case BECAME_PAIRABLE:
+                    perProcessCallback(true, mCallback);
+                    break;
+                case USER_TURN_ON:
+                    broadcastState(BluetoothAdapter.STATE_TURNING_ON);
+                    persistSwitchSetting(true);
+
+                    String[] propVal = {"Pairable", mBluetoothService.getProperty("Pairable")};
+                    mEventLoop.onPropertyChanged(propVal);
+
+                    // run bluetooth now that it's turned on
+                    mBluetoothService.runBluetooth();
+                    transitionTo(mBluetoothOn);
+                    broadcastState(BluetoothAdapter.STATE_ON);
+                    break;
+               case USER_TURN_OFF:
+                    broadcastState(BluetoothAdapter.STATE_TURNING_OFF);
+                    if (mBluetoothService.getAdapterConnectionState() !=
+                        BluetoothAdapter.STATE_DISCONNECTED) {
+                        mBluetoothService.disconnectDevices();
+                        break;
+                    }
+                    //$FALL-THROUGH$ all devices are already disconnected
+                case ALL_DEVICES_DISCONNECTED:
+                    mBluetoothService.finishDisable();
+                    broadcastState(BluetoothAdapter.STATE_OFF);
+                    break;
+               case PER_PROCESS_TURN_OFF:
+                    perProcessCallback(false, (IBluetoothStateChangeCallback)message.obj);
+                    if (mBluetoothService.isApplicationStateChangeTrackerEmpty()) {
+                        mBluetoothService.switchConnectable(false);
+                    }
+                    break;
+                case BECAME_NON_PAIRABLE:
+                    transitionTo(mHotOff);
+                    if (!mContext.getResources().getBoolean
+                        (com.android.internal.R.bool.config_bluetooth_adapter_quick_switch)) {
+                        deferMessage(obtainMessage(TURN_COLD));
+                    }
+                    break;
+                case AIRPLANE_MODE_ON:
+                    mBluetoothService.switchConnectable(false);
+                    allProcessesCallback(false);
+                    // we turn all the way to PowerOff with AIRPLANE_MODE_ON
+                    deferMessage(obtainMessage(AIRPLANE_MODE_ON));
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            return retValue;
+        }
+    }
+
+
+    private void perProcessCallback(boolean on, IBluetoothStateChangeCallback c) {
+        if (c == null) return;
+
+        try {
+            c.onBluetoothStateChange(on);
+        } catch (RemoteException e) {}
+    }
+
+    private void allProcessesCallback(boolean on) {
+        for (IBluetoothStateChangeCallback c:
+             mBluetoothService.getApplicationStateChangeCallbacks()) {
+            perProcessCallback(on, c);
+        }
+        if (!on) {
+            mBluetoothService.clearApplicationStateChangeTracker();
+        }
     }
 
     /**
@@ -476,7 +616,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
 
     private void broadcastState(int newState) {
 
-        if (DBG) log("Bluetooth state " + mPublicState + " -> " + newState);
+        log("Bluetooth state " + mPublicState + " -> " + newState);
         if (mPublicState == newState) {
             return;
         }

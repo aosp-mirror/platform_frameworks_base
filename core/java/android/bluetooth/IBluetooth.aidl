@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.bluetooth.IBluetoothCallback;
+import android.bluetooth.IBluetoothStateChangeCallback;
 import android.bluetooth.IBluetoothHealthCallback;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHealthAppConfiguration;
@@ -52,6 +53,9 @@ interface IBluetooth
     byte[] readOutOfBandData();
 
     int getAdapterConnectionState();
+    boolean changeApplicationBluetoothState(boolean on,
+                                in IBluetoothStateChangeCallback callback, in
+                                IBinder b);
 
     boolean createBond(in String address);
     boolean createBondOutOfBand(in String address, in byte[] hash, in byte[] randomizer);
