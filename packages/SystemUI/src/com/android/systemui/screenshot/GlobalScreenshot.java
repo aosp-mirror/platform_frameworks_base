@@ -24,6 +24,7 @@ import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -99,6 +100,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 
             // Save the screenshot to the MediaStore
             ContentValues values = new ContentValues();
+            ContentResolver resolver = context.getContentResolver();
             values.put(MediaStore.Images.ImageColumns.DATA, imageFilePath);
             values.put(MediaStore.Images.ImageColumns.TITLE, imageFileName);
             values.put(MediaStore.Images.ImageColumns.DISPLAY_NAME, imageFileName);
@@ -106,13 +108,17 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             values.put(MediaStore.Images.ImageColumns.DATE_ADDED, currentTime);
             values.put(MediaStore.Images.ImageColumns.DATE_MODIFIED, currentTime);
             values.put(MediaStore.Images.ImageColumns.MIME_TYPE, "image/png");
-            Uri uri = context.getContentResolver().insert(
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
 
-            OutputStream out = context.getContentResolver().openOutputStream(uri);
+            OutputStream out = resolver.openOutputStream(uri);
             image.compress(Bitmap.CompressFormat.PNG, 100, out);
             out.flush();
             out.close();
+
+            // update file size in the database
+            values.clear();
+            values.put(MediaStore.Images.ImageColumns.SIZE, new File(imageFilePath).length());
+            resolver.update(uri, values, null, null);
 
             params[0].result = 0;
         } catch (Exception e) {
