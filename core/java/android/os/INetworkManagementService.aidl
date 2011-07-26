@@ -224,4 +224,23 @@ interface INetworkManagementService
      */
     int getInterfaceTxThrottle(String iface);
 
+    /**
+     * Sets the name fo the default interface in the DNS resolver.
+     */
+    void setDefaultInterfaceForDns(String iface);
+
+    /**
+     * Bind name servers to an interface in the DNS resolver.
+     */
+    void setDnsServersForInterface(String iface, in String[] servers);
+
+    /**
+     * Flush the DNS cache associated with the default interface.
+     */
+    void flushDefaultDnsCache();
+
+    /**
+     * Flush the DNS cache associated with the specified interface.
+     */
+    void flushInterfaceDnsCache(String iface);
 }
