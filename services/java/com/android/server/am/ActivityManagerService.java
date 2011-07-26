@@ -3369,6 +3369,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             final int NA = apps.size();
             for (int ia=0; ia<NA; ia++) {
                 ProcessRecord app = apps.valueAt(ia);
+                if (app.persistent) {
+                    // we don't kill persistent processes
+                    continue;
+                }
                 if (app.removed) {
                     if (doit) {
                         procs.add(app);
@@ -3423,7 +3427,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         for (i=mMainStack.mHistory.size()-1; i>=0; i--) {
             ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
-            if (r.packageName.equals(name)) {
+            if (r.packageName.equals(name)
+                    && (r.app == null || !r.app.persistent)) {
                 if (!doit) {
                     return true;
                 }
@@ -3439,7 +3444,8 @@ public final class ActivityManagerService extends ActivityManagerNative
 
         ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
         for (ServiceRecord service : mServices.values()) {
-            if (service.packageName.equals(name)) {
+            if (service.packageName.equals(name)
+                    && (service.app == null || !service.app.persistent)) {
                 if (!doit) {
                     return true;
                 }
