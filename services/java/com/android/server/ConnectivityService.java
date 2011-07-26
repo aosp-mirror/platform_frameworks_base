@@ -1783,8 +1783,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             LinkProperties p = nt.getLinkProperties();
             if (p == null) return;
             Collection<InetAddress> dnses = p.getDnses();
+            try {
+                mNetd.setDnsServersForInterface(p.getInterfaceName(),
+                        NetworkUtils.makeStrings(dnses));
+            } catch (Exception e) {
+                Slog.e(TAG, "exception setting dns servers: " + e);
+            }
             boolean changed = false;
             if (mNetConfigs[netType].isDefault()) {
+                try {
+                    mNetd.setDefaultInterfaceForDns(p.getInterfaceName());
+                } catch (Exception e) {
+                    Slog.e(TAG, "exception setting default dns interface: " + e);
+                }
                 int j = 1;
                 if (dnses.size() == 0 && mDefaultDns != null) {
                     String dnsString = mDefaultDns.getHostAddress();

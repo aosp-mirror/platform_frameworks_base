@@ -949,4 +949,64 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     public int getInterfaceTxThrottle(String iface) {
         return getInterfaceThrottle(iface, false);
     }
+
+    public void setDefaultInterfaceForDns(String iface) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        try {
+            String cmd = "resolver setdefaultif " + iface;
+
+            mConnector.doCommand(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Error communicating with native daemon to set default interface", e);
+        }
+    }
+
+    public void setDnsServersForInterface(String iface, String[] servers)
+            throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.CHANGE_NETWORK_STATE,
+                "NetworkManagementService");
+        try {
+            String cmd = "resolver setifdns " + iface;
+            for (String s : servers) {
+                InetAddress a = NetworkUtils.numericToInetAddress(s);
+                if (a.isAnyLocalAddress() == false) {
+                    cmd += " " + a.getHostAddress();
+                }
+            }
+            mConnector.doCommand(cmd);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("Error setting dnsn for interface", e);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Error communicating with native daemon to set dns for interface", e);
+        }
+    }
+
+    public void flushDefaultDnsCache() throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        try {
+            String cmd = "resolver flushdefaultif";
+
+            mConnector.doCommand(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                   "Error communicating with native daemon to flush default interface", e);
+        }
+    }
+
+    public void flushInterfaceDnsCache(String iface) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        try {
+            String cmd = "resolver flushif " + iface;
+
+            mConnector.doCommand(cmd);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Error communicating with native daemon to flush interface " + iface, e);
+        }
+    }
 }
