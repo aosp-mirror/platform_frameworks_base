@@ -52,9 +52,6 @@ void SurfaceTextureClient::init() {
     mReqFormat = 0;
     mReqUsage = 0;
     mTimestamp = NATIVE_WINDOW_TIMESTAMP_AUTO;
-    mQueryWidth = 0;
-    mQueryHeight = 0;
-    mQueryFormat = 0;
     mDefaultWidth = 0;
     mDefaultHeight = 0;
     mTransformHint = 0;
@@ -154,9 +151,6 @@ int SurfaceTextureClient::dequeueBuffer(android_native_buffer_t** buffer) {
                     result);
             return result;
         }
-        mQueryWidth  = gbuf->width;
-        mQueryHeight = gbuf->height;
-        mQueryFormat = gbuf->format;
     }
     *buffer = gbuf.get();
     return OK;

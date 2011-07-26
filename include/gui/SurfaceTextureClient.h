@@ -135,24 +135,12 @@ private:
     // a timestamp is auto-generated when queueBuffer is called.
     int64_t mTimestamp;
 
-    // mQueryWidth is the width returned by query(). It is set to width
-    // of the last dequeued buffer or to mReqWidth if no buffer was dequeued.
-    uint32_t mQueryWidth;
-
-    // mQueryHeight is the height returned by query(). It is set to height
-    // of the last dequeued buffer or to mReqHeight if no buffer was dequeued.
-    uint32_t mQueryHeight;
-
-    // mQueryFormat is the format returned by query(). It is set to the last
-    // dequeued format or to mReqFormat if no buffer was dequeued.
-    uint32_t mQueryFormat;
-
     // mDefaultWidth is default width of the window, regardless of the
-    // set_dimension call
+    // native_window_set_buffers_dimensions call
     uint32_t mDefaultWidth;
 
     // mDefaultHeight is default width of the window, regardless of the
-    // set_dimension call
+    // native_window_set_buffers_dimensions call
     uint32_t mDefaultHeight;
 
     // mTransformHint is the transform probably applied to buffers of this

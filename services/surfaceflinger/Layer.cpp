@@ -352,12 +352,13 @@ uint32_t Layer::doTransaction(uint32_t flags)
     if (sizeChanged) {
         // the size changed, we need to ask our client to request a new buffer
         LOGD_IF(DEBUG_RESIZE,
+                "doTransaction: "
                 "resize (layer=%p), requested (%dx%d), drawing (%d,%d), "
-                "fixedSize=%d",
+                "scalingMode=%d",
                 this,
                 int(temp.requested_w), int(temp.requested_h),
                 int(front.requested_w), int(front.requested_h),
-                isFixedSize());
+                mCurrentScalingMode);
 
         if (!isFixedSize()) {
             // we're being resized and there is a freeze display request,
@@ -492,6 +493,14 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
                 // we now have the correct size, unfreeze the screen
                 mFreezeLock.clear();
             }
+
+            LOGD_IF(DEBUG_RESIZE,
+                    "lockPageFlip : "
+                    "       (layer=%p), buffer (%ux%u, tr=%02x), "
+                    "requested (%dx%d)",
+                    this,
+                    bufWidth, bufHeight, mCurrentTransform,
+                    front.requested_w, front.requested_h);
         }
     }
 }

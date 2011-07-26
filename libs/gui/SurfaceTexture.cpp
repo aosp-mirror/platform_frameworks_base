@@ -196,11 +196,14 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
 
 status_t SurfaceTexture::setDefaultBufferSize(uint32_t w, uint32_t h)
 {
-    Mutex::Autolock lock(mMutex);
-    if ((w != mDefaultWidth) || (h != mDefaultHeight)) {
-        mDefaultWidth = w;
-        mDefaultHeight = h;
+    if (!w || !h) {
+        LOGE("setDefaultBufferSize: dimensions cannot be 0 (w=%d, h=%d)", w, h);
+        return BAD_VALUE;
     }
+
+    Mutex::Autolock lock(mMutex);
+    mDefaultWidth = w;
+    mDefaultHeight = h;
     return OK;
 }
 
@@ -885,13 +888,9 @@ int SurfaceTexture::query(int what, int* outValue)
     switch (what) {
     case NATIVE_WINDOW_WIDTH:
         value = mDefaultWidth;
-        if (!mDefaultWidth && !mDefaultHeight && mCurrentTextureBuf!=0)
-            value = mCurrentTextureBuf->width;
         break;
     case NATIVE_WINDOW_HEIGHT:
         value = mDefaultHeight;
-        if (!mDefaultWidth && !mDefaultHeight && mCurrentTextureBuf!=0)
-            value = mCurrentTextureBuf->height;
         break;
     case NATIVE_WINDOW_FORMAT:
         value = mPixelFormat;
