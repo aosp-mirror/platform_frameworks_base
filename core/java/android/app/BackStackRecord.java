@@ -224,6 +224,12 @@ final class BackStackRecord extends FragmentTransaction implements
                     writer.print(" mExitAnim=#");
                     writer.println(Integer.toHexString(mExitAnim));
         }
+        if (mPopEnterAnim != 0 || mPopExitAnim !=0) {
+            writer.print(prefix); writer.print("mPopEnterAnim=#");
+                    writer.print(Integer.toHexString(mPopEnterAnim));
+                    writer.print(" mPopExitAnim=#");
+                    writer.println(Integer.toHexString(mPopExitAnim));
+        }
         if (mBreadCrumbTitleRes != 0 || mBreadCrumbTitleText != null) {
             writer.print(prefix); writer.print("mBreadCrumbTitleRes=#");
                     writer.print(Integer.toHexString(mBreadCrumbTitleRes));
@@ -248,13 +254,16 @@ final class BackStackRecord extends FragmentTransaction implements
                 writer.print(innerPrefix); writer.print("cmd="); writer.print(op.cmd);
                         writer.print(" fragment="); writer.println(op.fragment);
                 if (op.enterAnim != 0 || op.exitAnim != 0) {
-                    writer.print(prefix); writer.print("enterAnim="); writer.print(op.enterAnim);
-                            writer.print(" exitAnim="); writer.println(op.exitAnim);
+                    writer.print(prefix); writer.print("enterAnim=#");
+                            writer.print(Integer.toHexString(op.enterAnim));
+                            writer.print(" exitAnim=#");
+                            writer.println(Integer.toHexString(op.exitAnim));
                 }
                 if (op.popEnterAnim != 0 || op.popExitAnim != 0) {
-                    writer.print(prefix);
-                            writer.print("popEnterAnim="); writer.print(op.popEnterAnim);
-                            writer.print(" popExitAnim="); writer.println(op.popExitAnim);
+                    writer.print(prefix); writer.print("popEnterAnim=#");
+                            writer.print(Integer.toHexString(op.popEnterAnim));
+                            writer.print(" popExitAnim=#");
+                            writer.println(Integer.toHexString(op.popExitAnim));
                 }
                 if (op.removed != null && op.removed.size() > 0) {
                     for (int i=0; i<op.removed.size(); i++) {
@@ -695,11 +704,13 @@ final class BackStackRecord extends FragmentTransaction implements
                 } break;
                 case OP_DETACH: {
                     Fragment f = op.fragment;
+                    f.mNextAnim = op.popEnterAnim;
                     mManager.attachFragment(f,
                             FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
                 } break;
                 case OP_ATTACH: {
                     Fragment f = op.fragment;
+                    f.mNextAnim = op.popExitAnim;
                     mManager.detachFragment(f,
                             FragmentManagerImpl.reverseTransit(mTransition), mTransitionStyle);
                 } break;

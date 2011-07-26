@@ -1593,10 +1593,10 @@ public class Activity extends ContextThemeWrapper
         //Log.v(TAG, "invalidateFragmentIndex: index=" + index);
         if (mAllLoaderManagers != null) {
             LoaderManagerImpl lm = mAllLoaderManagers.get(index);
-            if (lm != null) {
+            if (lm != null && !lm.mRetaining) {
                 lm.doDestroy();
+                mAllLoaderManagers.remove(index);
             }
-            mAllLoaderManagers.remove(index);
         }
     }
     
