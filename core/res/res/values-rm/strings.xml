@@ -275,6 +275,10 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"\"Permetta ad ina applicaziun dad identifitgar las tastas che Vus smatgais, era durant l\'utilisaziun dad in auter program (durant l\'endataziun dad in pled-clav, per exempel). Applicaziuns normalas na duessan betg avair access a questa funcziun.\""</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"associar cun ina metoda d\'endataziun"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permetta da sa fixar al nivel d\'interfatscha pli aut dad ina metoda d\'endataziun. Betg previs per applicaziuns normalas."</string>
+    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
+    <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"sa fixar vid in fund davos"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permetta da sa fixar al nivel d\'interfatscha pli aut dad ina metoda d\'endataziun. Betg previs per applicaziuns normalas."</string>
     <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
@@ -814,6 +818,10 @@
     <skip />
     <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
     <skip />
+    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <skip />
+    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modifitgar las autorisaziuns da geolocalisaziun dal navigatur"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permetta ad ina applicaziun da modifitgar las permissiuns da geolocalisaziun dal navigatur. Applicaziuns donnegiusas pon utilisar questa funcziun per trametter datas da posiziun a websites arbitraras."</string>
     <string name="save_password_message" msgid="767344687139195790">"Vulais Vus ch\'il navigatur memorisescha quest pled-clav?"</string>
@@ -1010,6 +1018,22 @@
     <item quantity="one" msgid="1634101450343277345">"Rait WLAN averta disponibla"</item>
     <item quantity="other" msgid="7915895323644292768">"Raits WLAN avertas disponiblas"</item>
   </plurals>
+    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
+    <skip />
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Inserir in caracter"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Applicaziun nunenconuschenta"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Trametter messadis SMS"</string>
@@ -1062,6 +1086,8 @@
     <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
     <skip />
     <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
+    <skip />
+    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
     <skip />
     <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
@@ -1278,5 +1304,7 @@
     <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
     <skip />
     <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
+    <skip />
+    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
     <skip />
 </resources>

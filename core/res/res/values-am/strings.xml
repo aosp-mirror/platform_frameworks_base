@@ -385,6 +385,10 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"ትግበራዎች ከሌላ ትግበራዎች ጋር እንኳ ሲገናኙ የሚጫኑትን ቁልፎች ለመመልከት ይፈቅዳሉ።ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"በግቤት ሜተድ ጠርዝ"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"ያዡ ግቤት ሜተዱን ወደ ከፍተኛ-ደረጃ በይነገጽ ለመጠረዝ ይፈቅዳል። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
+    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
+    <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"በልጣፍ ጠርዝ"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"ያዡ ግቤት ሜተዱን ወደ ከፍተኛ-ደረጃ ልጣፍ ለመጠረዝ ይፈቅዳል። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
@@ -962,6 +966,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"ትግበራ በስልክዎ ላይ የተከማቹትንታሪኮች እና ዕልባቶች ለመቀየር ይፈቅዳል። ተንኮል አዘል ትግበራዎች የቀን መቁጠሪያዎን ለማጥፋት ወይም ለመቀየር ይህን መጠቀም ይችላሉ።"</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"በማንቂያ ሰዓት ውስጥ ማንቂያ አዘጋጅ"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"ትግበራ በተጫነ የማንቂያ ሰዓት ትግበራ ማንቂያ ለማዘጋጀትይፈቅዳል። አንዳንድ የማንቂያ ሰዓት ትግበራዎች ይህን ገፅታ ላይተገብሩ ይችላሉ።"</string>
+    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <skip />
+    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"የአሳሽ ገፀ ሥፍራ ፍቃዶችን ቀይር"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"ትግበራ የአሳሹን ገፀ ሥፍራ ፈቃዶች ለመቀየር ይፈቅዳል። ተንኮል አዘል ትግበራዎች ይህን በመጠቀም የሥፍራ መረጃን ወደ ድረ ገፆች ለመላክ ይችላሉ።"</string>
     <!-- no translation found for save_password_message (767344687139195790) -->
@@ -1216,6 +1224,22 @@
     <item quantity="one" msgid="1634101450343277345">"አውታረ መረብ ሲኖር Wi-Fi ክፈት"</item>
     <item quantity="other" msgid="7915895323644292768">"አውታረ መረቦች ሲኖሩ Wi-Fi ክፈት"</item>
   </plurals>
+    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
+    <skip />
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"ቁምፊ አስገባ"</string>
     <!-- no translation found for sms_control_default_app_name (7630529934366549163) -->
     <skip />
@@ -1276,6 +1300,8 @@
     <!-- no translation found for usb_ptp_notification_title (1960817192216064833) -->
     <skip />
     <!-- no translation found for usb_cd_installer_notification_title (6774712827892090754) -->
+    <skip />
+    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
     <skip />
     <!-- no translation found for usb_notification_message (4447869605109736382) -->
     <skip />
@@ -1464,5 +1490,7 @@
     <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
     <skip />
     <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
+    <skip />
+    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
     <skip />
 </resources>

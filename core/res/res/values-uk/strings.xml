@@ -262,6 +262,10 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Дозволяє програмі переглядати клавіші, які ви натискаєте, навіть під час роботи з іншою програмою (наприклад, під час вводу пароля). Ніколи не потрібний для звичайних програм."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"прив\'яз. до методу введ."</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Дозволяє власнику прив\'язувати до інтерфейсу верхнього рівня методу введення. Ніколи не потрібний для звичайних програм."</string>
+    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
+    <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"прив\'зати до фон. мал."</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Дозволяє власнику прив\'язувати до інтерфейсу верхнього рівня фон. малюнка. Ніколи не потрібний для звичайних програм."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"прив\'язувати до служби віджетів"</string>
@@ -720,6 +724,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Дозволяє програмі змінювати історію чи закладки переглядача, збережені у вашому тел. Шкідливі програми можуть викор. це, щоб видаляти чи змінювати дані переглядача."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"налашт. сигнал у будильн."</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Дозволяє програмі налаштовувати сигнал у встановленій програмі будильника. У деяких програмах будильника ця функція може не застосовуватися."</string>
+    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <skip />
+    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Змін. дозволи геогр. місцезн. перегладача"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Дозволяє програмі змін. дозволи географ. місцезн. переглядача. Шкідливі програми можуть використ. це, щоб дозволяти надсилати інф-ю про місцезн. випадковим веб-сайтам."</string>
     <string name="save_password_message" msgid="767344687139195790">"Хочете, щоб переглядач запам\'ятав цей пароль?"</string>
@@ -911,6 +919,22 @@
     <item quantity="one" msgid="1634101450343277345">"Відкрита Wi-Fi мережа доступна"</item>
     <item quantity="other" msgid="7915895323644292768">"Відкриті Wi-Fi мережі доступні"</item>
   </plurals>
+    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
+    <skip />
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"Вставл-ня символу"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Невідома програма"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Надсил. SMS повідомлень"</string>
@@ -959,6 +983,8 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Під’єднано як носій"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Під’єднано як камеру"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Під’єднано як програму встановлення"</string>
+    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
+    <skip />
     <string name="usb_notification_message" msgid="4447869605109736382">"Торкніться, щоб побачити інші параметри USB"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Форматув. носій USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Формат. карти SD"</string>
@@ -1106,8 +1132,8 @@
     <string name="sha256_fingerprint" msgid="4391271286477279263">"Відбиток SHA-256"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Відбиток SHA-1"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Показати всі..."</string>
-    <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
-    <skip />
-    <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
+    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Вибрати дію"</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Надіслати..."</string>
+    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
     <skip />
 </resources>

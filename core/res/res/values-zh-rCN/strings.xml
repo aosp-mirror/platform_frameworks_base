@@ -262,6 +262,10 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"允许应用程序查看您按的键，即使在与其他应用程序交互（例如输入密码）时也不例外。普通应用程序从不需要使用此权限。"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"绑定至输入法"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"允许手机用户绑定至输入法的顶级界面。普通应用程序从不需要使用此权限。"</string>
+    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
+    <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"绑定到壁纸"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"允许手机用户绑定到壁纸的顶级界面。应该从不需要将此权限授予普通应用程序。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"绑定到窗口小部件服务"</string>
@@ -701,30 +705,18 @@
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"， "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
-    <!-- no translation found for autofill_province (2231806553863422300) -->
-    <skip />
-    <!-- no translation found for autofill_postal_code (4696430407689377108) -->
-    <skip />
-    <!-- no translation found for autofill_state (6988894195520044613) -->
-    <skip />
-    <!-- no translation found for autofill_zip_code (8697544592627322946) -->
-    <skip />
-    <!-- no translation found for autofill_county (237073771020362891) -->
-    <skip />
-    <!-- no translation found for autofill_island (4020100875984667025) -->
-    <skip />
-    <!-- no translation found for autofill_district (8400735073392267672) -->
-    <skip />
-    <!-- no translation found for autofill_department (5343279462564453309) -->
-    <skip />
-    <!-- no translation found for autofill_prefecture (2028499485065800419) -->
-    <skip />
-    <!-- no translation found for autofill_parish (8202206105468820057) -->
-    <skip />
-    <!-- no translation found for autofill_area (3547409050889952423) -->
-    <skip />
-    <!-- no translation found for autofill_emirate (2893880978835698818) -->
-    <skip />
+    <string name="autofill_province" msgid="2231806553863422300">"省/直辖市/自治区"</string>
+    <string name="autofill_postal_code" msgid="4696430407689377108">"邮政编码"</string>
+    <string name="autofill_state" msgid="6988894195520044613">"州"</string>
+    <string name="autofill_zip_code" msgid="8697544592627322946">"邮政编码"</string>
+    <string name="autofill_county" msgid="237073771020362891">"郡"</string>
+    <string name="autofill_island" msgid="4020100875984667025">"岛"</string>
+    <string name="autofill_district" msgid="8400735073392267672">"地区"</string>
+    <string name="autofill_department" msgid="5343279462564453309">"省"</string>
+    <string name="autofill_prefecture" msgid="2028499485065800419">"县/府/都/道"</string>
+    <string name="autofill_parish" msgid="8202206105468820057">"行政区"</string>
+    <string name="autofill_area" msgid="3547409050889952423">"区域"</string>
+    <string name="autofill_emirate" msgid="2893880978835698818">"酋长国"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"读取浏览器的历史记录和书签"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"允许应用程序读取用浏览器访问过的所有网址，以及浏览器的所有书签。"</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"写入浏览器的历史记录和书签"</string>
@@ -732,6 +724,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"允许应用程序修改存储在手机中的浏览器历史记录或书签。恶意应用程序可借此清除或修改浏览器数据。"</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"在闹钟中设置警报"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"允许应用程序在安装的闹钟应用程序中设置警报。某些闹钟应用程序没有实现此功能。"</string>
+    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <skip />
+    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"修改浏览器的地理位置权限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"允许应用程序修改浏览器的地理位置权限。恶意应用程序会利用这一点将位置信息发送到任意网站。"</string>
     <string name="save_password_message" msgid="767344687139195790">"是否希望浏览器记住此密码？"</string>
@@ -923,6 +919,22 @@
     <item quantity="one" msgid="1634101450343277345">"打开可用的 Wi-Fi 网络"</item>
     <item quantity="other" msgid="7915895323644292768">"打开可用的 Wi-Fi 网络"</item>
   </plurals>
+    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
+    <skip />
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"插入字符"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"未知的应用程序"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"正在发送短信"</string>
@@ -971,6 +983,8 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"作为媒体设备连接"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"作为相机连接"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"作为安装程序连接"</string>
+    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
+    <skip />
     <string name="usb_notification_message" msgid="4447869605109736382">"触摸可显示其他 USB 选项"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"格式化 USB 存储设备"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"格式化 SD 卡"</string>
@@ -1121,5 +1135,7 @@
     <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
     <skip />
     <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
+    <skip />
+    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
     <skip />
 </resources>

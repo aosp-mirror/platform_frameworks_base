@@ -262,6 +262,10 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"به برنامه های کاربردی اجازه می دهد حتی زمانی که با برنامه دیگری در حال ارتباط هستید (مانند وارد کردن یک رمز ورود)، بتوانند کلیدهایی را که فشار می دهید ببینند. هرگز برای برنامه های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"پیوند شده به روش ورودی"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"به نگهدارنده اجازه می دهد به رابط سطح بالای یک روش ورودی متصل شود. هرگز برای برنامه های معمولی مورد نیاز نیست."</string>
+    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
+    <skip />
+    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
+    <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"پیوند شده به تصویر زمینه"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"به نگهدارنده اجازه می دهد که به رابط سطح بالای تصویر زمینه متصل شود. هرگز برای برنامه های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"اتصال به یک سرویس ابزارک"</string>
@@ -701,30 +705,18 @@
     <string name="autofill_address_summary_name_format" msgid="3268041054899214945">"$1$2$3"</string>
     <string name="autofill_address_summary_separator" msgid="7483307893170324129">"، "</string>
     <string name="autofill_address_summary_format" msgid="4874459455786827344">"$1$2$3"</string>
-    <!-- no translation found for autofill_province (2231806553863422300) -->
-    <skip />
-    <!-- no translation found for autofill_postal_code (4696430407689377108) -->
-    <skip />
-    <!-- no translation found for autofill_state (6988894195520044613) -->
-    <skip />
-    <!-- no translation found for autofill_zip_code (8697544592627322946) -->
-    <skip />
-    <!-- no translation found for autofill_county (237073771020362891) -->
-    <skip />
-    <!-- no translation found for autofill_island (4020100875984667025) -->
-    <skip />
-    <!-- no translation found for autofill_district (8400735073392267672) -->
-    <skip />
-    <!-- no translation found for autofill_department (5343279462564453309) -->
-    <skip />
-    <!-- no translation found for autofill_prefecture (2028499485065800419) -->
-    <skip />
-    <!-- no translation found for autofill_parish (8202206105468820057) -->
-    <skip />
-    <!-- no translation found for autofill_area (3547409050889952423) -->
-    <skip />
-    <!-- no translation found for autofill_emirate (2893880978835698818) -->
-    <skip />
+    <string name="autofill_province" msgid="2231806553863422300">"استان"</string>
+    <string name="autofill_postal_code" msgid="4696430407689377108">"کد پستی"</string>
+    <string name="autofill_state" msgid="6988894195520044613">"ایالت"</string>
+    <string name="autofill_zip_code" msgid="8697544592627322946">"کد پستی"</string>
+    <string name="autofill_county" msgid="237073771020362891">"بخش"</string>
+    <string name="autofill_island" msgid="4020100875984667025">"جزیره"</string>
+    <string name="autofill_district" msgid="8400735073392267672">"حوزه"</string>
+    <string name="autofill_department" msgid="5343279462564453309">"اداره"</string>
+    <string name="autofill_prefecture" msgid="2028499485065800419">"حوزه اداری"</string>
+    <string name="autofill_parish" msgid="8202206105468820057">"ناحیه"</string>
+    <string name="autofill_area" msgid="3547409050889952423">"منطقه"</string>
+    <string name="autofill_emirate" msgid="2893880978835698818">"امارات"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"خواندن سابقه و نشانک های مرورگر"</string>
     <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"به برنامه کاربردی اجازه می دهد تا تمام URL های بازدید شده توسط مرورگر و تمام نشانک های آن را بخواند."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"نوشتن سابقه مرورگر و نشانک ها"</string>
@@ -732,6 +724,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"به یک برنامه کاربردی اجازه می دهد سابقه مرورگر یا نشانک ذخیره شده در گوشی شما را تغییر دهد. برنامه های مضر می توانند از این امکان برای حذف یا تغییر داده های مرورگر شما استفاده کنند."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"تنظیم هشدار در ساعت زنگ دار"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"به برنامه کاربردی برای تنظیم یک هشدار در یک برنامه ساعت زنگ دار نصب شده اجازه می دهد. در برخی از برنامه های ساعت زنگ دار ممکن است این ویژگی اجرا نشود."</string>
+    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <skip />
+    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"اصلاح کردن مجوزهای مکان جغرافیایی مرورگر"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"به یک برنامه کاربردی اجازه می دهد مجوزهای مکان جغرافیایی مرورگر را تغییر دهد. برنامه های مضر می توانند از این گزینه استفاده کرده و اطلاعات مربوط به مکان را به وب سایت های غیر قانونی ارسال کنند."</string>
     <string name="save_password_message" msgid="767344687139195790">"می خواهید مرورگر این رمز ورود را به خاطر داشته باشد؟"</string>
@@ -923,6 +919,22 @@
     <item quantity="one" msgid="1634101450343277345">"شبکه Wi-Fi موجود را باز کنید"</item>
     <item quantity="other" msgid="7915895323644292768">"شبکه های Wi-Fi موجود را باز کنید"</item>
   </plurals>
+    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
+    <skip />
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
+    <skip />
+    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
+    <skip />
     <string name="select_character" msgid="3365550120617701745">"درج نویسه"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"برنامه ناشناس"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"ارسال پیامک ها"</string>
@@ -971,6 +983,8 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"متصل شده به عنوان دستگاه رسانه ای"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"متصل شده به عنوان دوربین"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"متصل شده به عنوان نصب کننده"</string>
+    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
+    <skip />
     <string name="usb_notification_message" msgid="4447869605109736382">"برای سایر گزینه های USB لمس کنید"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"فرمت کردن حافظه USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"فرمت کردن کارت SD"</string>
@@ -1085,7 +1099,7 @@
     <string name="sync_too_many_deletes" msgid="5296321850662746890">"از حد مجاز حذف فراتر رفت"</string>
     <string name="sync_too_many_deletes_desc" msgid="7030265992955132593">"<xliff:g id="NUMBER_OF_DELETED_ITEMS">%1$d</xliff:g> مورد حذف شده برای <xliff:g id="TYPE_OF_SYNC">%2$s</xliff:g>، حساب <xliff:g id="ACCOUNT_NAME">%3$s</xliff:g> وجود دارد. می خواهید چه کاری انجام دهید؟"</string>
     <string name="sync_really_delete" msgid="8933566316059338692">"موارد را حذف کنید."</string>
-    <string name="sync_undo_deletes" msgid="8610996708225006328">"واگرد موارد حذف شده."</string>
+    <string name="sync_undo_deletes" msgid="8610996708225006328">"لغو موارد حذف شده."</string>
     <string name="sync_do_nothing" msgid="8717589462945226869">"اکنون هیچ کاری انجام نشود."</string>
     <string name="choose_account_label" msgid="4191313562041125787">"انتخاب یک حساب"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"افزایش"</string>
@@ -1118,8 +1132,8 @@
     <string name="sha256_fingerprint" msgid="4391271286477279263">"اثر انگشت SHA-256:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"اثر انگشت SHA-1"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"مشاهده همه..."</string>
-    <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
-    <skip />
-    <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
+    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"انتخاب فعالیت"</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"اشتراک گذاری با..."</string>
+    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
     <skip />
 </resources>
