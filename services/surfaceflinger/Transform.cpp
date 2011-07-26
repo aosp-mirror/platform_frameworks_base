@@ -308,7 +308,7 @@ uint32_t Transform::getOrientation() const
 
 bool Transform::preserveRects() const
 {
-    return (type() & ROT_INVALID) ? false : true;
+    return (getOrientation() & ROT_INVALID) ? false : true;
 }
 
 void Transform::dump(const char* name) const
