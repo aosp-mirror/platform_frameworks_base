@@ -711,9 +711,6 @@
         <!-- Variation of textEditSidePasteWindowLayout displayed when the clipboard is empty. -->
         <attr name="textEditSideNoPasteWindowLayout" format="reference" />
 
-        <!-- Layout of a the view that is used to create the text suggestions popup window in an
-             EditText. This window will be displayed below the text line. -->
-        <attr name="textEditSuggestionsWindowLayout" format="reference" />
         <!-- Layout of the TextView item that will populate the suggestion popup window. -->
         <attr name="textEditSuggestionItemLayout" format="reference" />
 
@@ -3079,9 +3076,6 @@
         <!-- Variation of textEditSidePasteWindowLayout displayed when the clipboard is empty. -->
         <attr name="textEditSideNoPasteWindowLayout" />
 
-        <!-- Layout of a the view that is used to create the text suggestions popup window in an
-             EditText. This window will be displayed below the text line. -->
-        <attr name="textEditSuggestionsWindowLayout" />
         <!-- Layout of the TextView item that will populate the suggestion popup window. -->
         <attr name="textEditSuggestionItemLayout" />
 
