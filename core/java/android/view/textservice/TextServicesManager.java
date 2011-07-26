@@ -22,9 +22,9 @@ import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.view.textservice.SpellCheckerInfo;
 import android.service.textservice.SpellCheckerSession;
 import android.service.textservice.SpellCheckerSession.SpellCheckerSessionListener;
+import android.util.Log;
 
 import java.util.Locale;
 
@@ -38,6 +38,7 @@ import java.util.Locale;
  */
 public final class TextServicesManager {
     private static final String TAG = TextServicesManager.class.getSimpleName();
+    private static final boolean DBG = false;
 
     private static TextServicesManager sInstance;
     private static ITextServicesManager sService;
@@ -75,12 +76,14 @@ public final class TextServicesManager {
     // TODO: Handle referToSpellCheckerLanguageSettings
     public SpellCheckerSession newSpellCheckerSession(Locale locale,
             SpellCheckerSessionListener listener, boolean referToSpellCheckerLanguageSettings) {
-        if (locale == null || listener == null) {
+        if (listener == null) {
             throw new NullPointerException();
         }
+        // TODO: set a proper locale instead of the dummy locale
+        final String localeString = locale == null ? "en" : locale.toString();
         final SpellCheckerInfo info;
         try {
-            info = sService.getCurrentSpellChecker(locale.toString());
+            info = sService.getCurrentSpellChecker(localeString);
         } catch (RemoteException e) {
             return null;
         }
@@ -89,8 +92,8 @@ public final class TextServicesManager {
         }
         final SpellCheckerSession session = new SpellCheckerSession(info, sService, listener);
         try {
-            sService.getSpellCheckerService(
-                    info, locale.toString(), session.getTextServicesSessionListener(),
+            sService.getSpellCheckerService(info, localeString,
+                    session.getTextServicesSessionListener(),
                     session.getSpellCheckerSessionListener());
         } catch (RemoteException e) {
             return null;
@@ -103,8 +106,13 @@ public final class TextServicesManager {
      */
     public SpellCheckerInfo[] getEnabledSpellCheckers() {
         try {
-            return sService.getEnabledSpellCheckers();
+            final SpellCheckerInfo[] retval = sService.getEnabledSpellCheckers();
+            if (DBG) {
+                Log.d(TAG, "getEnabledSpellCheckers: " + (retval != null ? retval.length : "null"));
+            }
+            return retval;
         } catch (RemoteException e) {
+            Log.e(TAG, "Error in getEnabledSpellCheckers: " + e);
             return null;
         }
     }

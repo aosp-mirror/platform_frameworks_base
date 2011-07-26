@@ -81,14 +81,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 buildSpellCheckerMapLocked(mContext, mSpellCheckerList, mSpellCheckerMap);
                 // TODO: Update for each locale
                 SpellCheckerInfo sci = getCurrentSpellChecker(null);
-                if (sci == null) {
-                    sci = findAvailSpellCheckerLocked(null, null);
-                    if (sci == null) return;
-                    // Set the current spell checker if there is one or more spell checkers
-                    // available. In this case, "sci" is the first one in the available spell
-                    // checkers.
-                    setCurrentSpellChecker(sci);
-                }
+                if (sci == null) return;
                 final String packageName = sci.getPackageName();
                 final int change = isPackageDisappearing(packageName);
                 if (change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE) {
@@ -125,6 +118,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             list.add(sci);
             map.put(sci.getId(), sci);
         }
+        if (DBG) {
+            Slog.d(TAG, "buildSpellCheckerMapLocked: " + list.size() + "," + map.size());
+        }
     }
 
     // TODO: find an appropriate spell checker for specified locale
@@ -138,6 +134,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             for (int i = 0; i < spellCheckersCount; ++i) {
                 final SpellCheckerInfo sci = mSpellCheckerList.get(i);
                 if (prefPackage.equals(sci.getPackageName())) {
+                    if (DBG) {
+                        Slog.d(TAG, "findAvailSpellCheckerLocked: " + sci.getPackageName());
+                    }
                     return sci;
                 }
             }
@@ -153,14 +152,20 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     @Override
     public SpellCheckerInfo getCurrentSpellChecker(String locale) {
         synchronized (mSpellCheckerMap) {
-            final String curSpellCheckerId =
+            String curSpellCheckerId =
                     Settings.Secure.getString(mContext.getContentResolver(),
                             Settings.Secure.SPELL_CHECKER_SERVICE);
             if (DBG) {
                 Slog.w(TAG, "getCurrentSpellChecker: " + curSpellCheckerId);
             }
             if (TextUtils.isEmpty(curSpellCheckerId)) {
-                return null;
+                final SpellCheckerInfo sci = findAvailSpellCheckerLocked(null, null);
+                if (sci == null) return null;
+                // Set the current spell checker if there is one or more spell checkers
+                // available. In this case, "sci" is the first one in the available spell
+                // checkers.
+                setCurrentSpellChecker(sci);
+                return sci;
             }
             return mSpellCheckerMap.get(curSpellCheckerId);
         }
@@ -202,11 +207,20 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
     @Override
     public SpellCheckerInfo[] getEnabledSpellCheckers() {
+        if (DBG) {
+            Slog.d(TAG, "getEnabledSpellCheckers: " + mSpellCheckerList.size());
+            for (int i = 0; i < mSpellCheckerList.size(); ++i) {
+                Slog.d(TAG, "EnabledSpellCheckers: " + mSpellCheckerList.get(i).getPackageName());
+            }
+        }
         return mSpellCheckerList.toArray(new SpellCheckerInfo[mSpellCheckerList.size()]);
     }
 
     @Override
     public void finishSpellCheckerService(ISpellCheckerSessionListener listener) {
+        if (DBG) {
+            Slog.d(TAG, "FinishSpellCheckerService");
+        }
         synchronized(mSpellCheckerMap) {
             for (SpellCheckerBindGroup group : mSpellCheckerBindGroups.values()) {
                 if (group == null) continue;
@@ -240,6 +254,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
 
         public void onServiceConnected(ISpellCheckerService spellChecker) {
+            if (DBG) {
+                Slog.d(TAG, "onServiceConnected");
+            }
             synchronized(mSpellCheckerMap) {
                 for (InternalDeathRecipient listener : mListeners) {
                     try {
@@ -254,6 +271,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         public void addListener(ITextServicesSessionListener tsListener, String locale,
                 ISpellCheckerSessionListener scListener) {
+            if (DBG) {
+                Slog.d(TAG, "addListener: " + locale);
+            }
             synchronized(mSpellCheckerMap) {
                 try {
                     final int size = mListeners.size();
@@ -276,6 +296,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
 
         public void removeListener(ISpellCheckerSessionListener listener) {
+            if (DBG) {
+                Slog.d(TAG, "remove listener");
+            }
             synchronized(mSpellCheckerMap) {
                 final int size = mListeners.size();
                 final ArrayList<InternalDeathRecipient> removeList =
@@ -295,6 +318,9 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
 
         private void cleanLocked() {
+            if (DBG) {
+                Slog.d(TAG, "cleanLocked");
+            }
             if (mListeners.isEmpty()) {
                 mSpellCheckerBindGroups.remove(this);
                 // Unbind service when there is no active clients.
