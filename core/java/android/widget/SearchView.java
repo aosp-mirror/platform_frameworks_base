@@ -330,9 +330,9 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     @Override
     public void clearFocus() {
         mClearingFocus = true;
+        setImeVisibility(false);
         super.clearFocus();
         mQueryTextView.clearFocus();
-        setImeVisibility(false);
         mClearingFocus = false;
     }
 
@@ -1041,8 +1041,9 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      */
     @Override
     public void onActionViewCollapsed() {
+        clearFocus();
+        updateViewsVisibility(true);
         mQueryTextView.setText("");
-        setIconified(true);
         mExpandedInActionView = false;
     }
 

@@ -563,7 +563,7 @@ public final class MenuItemImpl implements MenuItem {
     public MenuItem setActionView(int resId) {
         final Context context = mMenu.getContext();
         final LayoutInflater inflater = LayoutInflater.from(context);
-        setActionView(inflater.inflate(resId, new LinearLayout(context)));
+        setActionView(inflater.inflate(resId, new LinearLayout(context), false));
         return this;
     }
 
