@@ -541,6 +541,13 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         }
     }
 
+    private void destroyHardwareResources() {
+        if (mAttachInfo.mHardwareRenderer.isEnabled()) {
+            mAttachInfo.mHardwareRenderer.destroyLayers(mView);
+        }
+        mAttachInfo.mHardwareRenderer.destroy(false);
+    }
+
     private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
         mAttachInfo.mHardwareAccelerated = false;
         mAttachInfo.mHardwareAccelerationRequested = false;
@@ -872,7 +879,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             host.dispatchWindowVisibilityChanged(viewVisibility);
             if (viewVisibility != View.VISIBLE || mNewSurfaceNeeded) {
                 if (mAttachInfo.mHardwareRenderer != null) {
-                    mAttachInfo.mHardwareRenderer.destroy(false);
+                    destroyHardwareResources();
                 }                
             }
             if (viewVisibility == View.GONE) {

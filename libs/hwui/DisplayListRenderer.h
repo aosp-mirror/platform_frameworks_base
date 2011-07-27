@@ -37,7 +37,7 @@ namespace uirenderer {
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
 
-#define MIN_WRITER_SIZE 16384
+#define MIN_WRITER_SIZE 4096
 
 // Debug
 #if DEBUG_DISPLAY_LIST

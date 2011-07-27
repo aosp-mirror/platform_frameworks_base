@@ -9230,10 +9230,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
         destroyDrawingCache();
 
-        if (mHardwareLayer != null) {
-            mHardwareLayer.destroy();
-            mHardwareLayer = null;
-        }
+        destroyLayer();
 
         if (mDisplayList != null) {
             mDisplayList.invalidate();
@@ -9605,21 +9602,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         // Destroy any previous software drawing cache if needed
         switch (mLayerType) {
             case LAYER_TYPE_HARDWARE:
-                if (mHardwareLayer != null) {
-                    mHardwareLayer.destroy();
-                    mHardwareLayer = null;
-                }
+                destroyLayer();
                 // fall through - unaccelerated views may use software layer mechanism instead
             case LAYER_TYPE_SOFTWARE:
-                if (mDrawingCache != null) {
-                    mDrawingCache.recycle();
-                    mDrawingCache = null;
-                }
-
-                if (mUnscaledDrawingCache != null) {
-                    mUnscaledDrawingCache.recycle();
-                    mUnscaledDrawingCache = null;
-                }
+                destroyDrawingCache();
                 break;
             default:
                 break;
@@ -9743,6 +9729,13 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         }
 
         return mHardwareLayer;
+    }
+
+    void destroyLayer() {
+        if (mHardwareLayer != null) {
+            mHardwareLayer.destroy();
+            mHardwareLayer = null;
+        }
     }
 
     /**
