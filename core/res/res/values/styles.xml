@@ -423,7 +423,6 @@
         <item name="android:textEditNoPasteWindowLayout">?android:attr/textEditNoPasteWindowLayout</item>
         <item name="android:textEditSidePasteWindowLayout">?android:attr/textEditSidePasteWindowLayout</item>
         <item name="android:textEditSideNoPasteWindowLayout">?android:attr/textEditSideNoPasteWindowLayout</item>
-        <item name="android:textEditSuggestionsWindowLayout">?android:attr/textEditSuggestionsWindowLayout</item>
         <item name="android:textEditSuggestionItemLayout">?android:attr/textEditSuggestionItemLayout</item>
         <item name="android:textCursorDrawable">?android:attr/textCursorDrawable</item>
     </style>
@@ -1065,14 +1064,10 @@
     </style>
 
     <!-- Style for the popup window that contains text suggestions. -->
-    <style name="Widget.TextSuggestions">
-        <item name="android:popupAnimationStyle">@android:style/Animation.TextSuggestions</item>
-    </style>
-
-    <!-- Animation effects when showing/hiding the text suggestions popup window. -->
-    <style name="Animation.TextSuggestions">
-        <item name="windowEnterAnimation">@android:anim/fade_in</item>
-        <item name="windowExitAnimation">@android:anim/fade_out</item>
+    <style name="Widget.TextSuggestionsPopupWindow">
+        <item name="android:dropDownSelector">@android:drawable/list_selector_background</item>
+        <item name="android:popupBackground">@android:drawable/text_edit_suggestions_window</item>
+        <item name="android:dropDownWidth">wrap_content</item>
     </style>
 
     <style name="Widget.ActionBar">
@@ -1542,7 +1537,7 @@
     <style name="Widget.Holo.TextSelectHandle" parent="Widget.TextSelectHandle">
     </style>
 
-    <style name="Widget.Holo.TextSuggestions" parent="Widget.TextSuggestions">
+    <style name="Widget.Holo.TextSuggestionsPopupWindow" parent="Widget.TextSuggestionsPopupWindow">
     </style>
 
     <style name="Widget.Holo.AbsListView" parent="Widget.AbsListView">
@@ -1971,6 +1966,9 @@
     </style>
 
     <style name="Widget.Holo.Light.TextSelectHandle" parent="Widget.TextSelectHandle">
+    </style>
+
+   <style name="Widget.Holo.Light.TextSuggestionsPopupWindow" parent="Widget.TextSuggestionsPopupWindow">
     </style>
 
     <style name="Widget.Holo.Light.AbsListView" parent="Widget.AbsListView">
