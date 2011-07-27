@@ -38,6 +38,7 @@ typedef void (*notify_callback)(int32_t msgType,
 
 typedef void (*data_callback)(int32_t msgType,
                             const sp<IMemory> &dataPtr,
+                            camera_frame_metadata_t *metadata,
                             void* user);
 
 typedef void (*data_callback_timestamp)(nsecs_t timestamp,
@@ -442,6 +443,7 @@ private:
 
     static void __data_cb(int32_t msg_type,
                           const camera_memory_t *data, unsigned int index,
+                          camera_frame_metadata_t *metadata,
                           void *user)
     {
         LOGV("%s", __FUNCTION__);
@@ -453,7 +455,7 @@ private:
                  index, mem->mNumBufs);
             return;
         }
-        __this->mDataCb(msg_type, mem->mBuffers[index], __this->mCbUser);
+        __this->mDataCb(msg_type, mem->mBuffers[index], metadata, __this->mCbUser);
     }
 
     static void __data_cb_timestamp(nsecs_t timestamp, int32_t msg_type,

@@ -140,7 +140,8 @@ private:
 
         // these are static callback functions
         static void             notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2, void* user);
-        static void             dataCallback(int32_t msgType, const sp<IMemory>& dataPtr, void* user);
+        static void             dataCallback(int32_t msgType, const sp<IMemory>& dataPtr,
+                                             camera_frame_metadata_t *metadata, void* user);
         static void             dataCallbackTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr, void* user);
         // convert client from cookie
         static sp<Client>       getClientFromCookie(void* user);
