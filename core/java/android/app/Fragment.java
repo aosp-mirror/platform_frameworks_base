@@ -883,7 +883,7 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
     public void setHasOptionsMenu(boolean hasMenu) {
         if (mHasMenu != hasMenu) {
             mHasMenu = hasMenu;
-            if (isAdded() && !isHidden()) {
+            if (isAdded() && !isHidden() && isResumed()) {
                 mActivity.invalidateOptionsMenu();
             }
         }

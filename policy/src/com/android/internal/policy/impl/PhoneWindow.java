@@ -374,13 +374,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 st.menu.startDispatchingItemsChanged();
                 return false;
             }
-            st.menu.startDispatchingItemsChanged();
 
             // Set the proper keymap
             KeyCharacterMap kmap = KeyCharacterMap.load(
                     event != null ? event.getDeviceId() : KeyCharacterMap.VIRTUAL_KEYBOARD);
             st.qwertyMode = kmap.getKeyboardType() != KeyCharacterMap.NUMERIC;
             st.menu.setQwertyMode(st.qwertyMode);
+            st.menu.startDispatchingItemsChanged();
         }
 
         // Set other state
@@ -454,8 +454,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (featureId == FEATURE_OPTIONS_PANEL && mActionBar != null &&
                 mActionBar.isOverflowReserved()) {
             if (mActionBar.getVisibility() == View.VISIBLE) {
-                // Invalidate the options menu, we want a prepare event that the app can respond to.
-                invalidatePanelMenu(FEATURE_OPTIONS_PANEL);
                 mActionBar.showOverflowMenu();
             }
         } else {
@@ -664,6 +662,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (savedActionViewStates.size() > 0) {
                 st.frozenActionViewState = savedActionViewStates;
             }
+            // This will be started again when the panel is prepared.
+            st.menu.stopDispatchingItemsChanged();
             st.menu.clear();
         }
         st.refreshMenuContent = true;
@@ -2657,7 +2657,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     // being called in the middle of onCreate or similar.
                     mDecor.post(new Runnable() {
                         public void run() {
-                            if (!isDestroyed()) {
+                            // Invalidate if the panel menu hasn't been created before this.
+                            PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+                            if (!isDestroyed() && (st == null || st.menu == null)) {
                                 invalidatePanelMenu(FEATURE_ACTION_BAR);
                             }
                         }
