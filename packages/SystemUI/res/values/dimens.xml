@@ -48,5 +48,13 @@
 
     <!-- thickness (height) of each notification row, including any separators or padding -->
     <dimen name="notification_height">65dp</dimen>
-</resources>
 
+    <!-- Height of notification icons in the status bar -->
+    <dimen name="status_bar_icon_size">@*android:dimen/status_bar_icon_size</dimen>
+
+    <!-- size at which Notification icons will be drawn in the status bar -->
+    <dimen name="status_bar_icon_drawing_size">18dip</dimen>
+
+    <!-- opacity at which Notification icons will be drawn in the status bar -->
+    <item type="dimen" name="status_bar_icon_drawing_alpha">40%</item>
+</resources>

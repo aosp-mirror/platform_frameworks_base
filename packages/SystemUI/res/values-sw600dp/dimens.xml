@@ -64,4 +64,7 @@
     <!-- Where to place the app icon over the thumbnail -->
     <dimen name="status_bar_recents_app_icon_left_margin">13dp</dimen>
     <dimen name="status_bar_recents_app_icon_top_margin">13dp</dimen>
+
+    <!-- size at which Notification icons will be drawn in the status bar -->
+    <dimen name="status_bar_icon_drawing_size">24dip</dimen>
 </resources>
