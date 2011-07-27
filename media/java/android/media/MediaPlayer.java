@@ -1333,6 +1333,10 @@ public class MediaPlayer
      */
     private static final int KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE = 1001;
 
+    // There are currently no defined keys usable from Java with get*Parameter.
+    // But if any keys are defined, the order must be kept in sync with include/media/mediaplayer.h.
+    // private static final int KEY_PARAMETER_... = ...;
+
     /**
      * Sets the parameter indicated by key.
      * @param key key indicates the parameter to be set.
@@ -1352,7 +1356,9 @@ public class MediaPlayer
     public boolean setParameter(int key, String value) {
         Parcel p = Parcel.obtain();
         p.writeString(value);
-        return setParameter(key, p);
+        boolean ret = setParameter(key, p);
+        p.recycle();
+        return ret;
     }
 
     /**
@@ -1365,7 +1371,9 @@ public class MediaPlayer
     public boolean setParameter(int key, int value) {
         Parcel p = Parcel.obtain();
         p.writeInt(value);
-        return setParameter(key, p);
+        boolean ret = setParameter(key, p);
+        p.recycle();
+        return ret;
     }
 
     /**
@@ -1377,6 +1385,7 @@ public class MediaPlayer
 
     /**
      * Gets the value of the parameter indicated by key.
+     * The caller is responsible for recycling the returned parcel.
      * @param key key indicates the parameter to get.
      * @return value of the parameter.
      * {@hide}
@@ -1396,7 +1405,9 @@ public class MediaPlayer
     public String getStringParameter(int key) {
         Parcel p = Parcel.obtain();
         getParameter(key, p);
-        return p.readString();
+        String ret = p.readString();
+        p.recycle();
+        return ret;
     }
 
     /**
@@ -1408,7 +1419,9 @@ public class MediaPlayer
     public int getIntParameter(int key) {
         Parcel p = Parcel.obtain();
         getParameter(key, p);
-        return p.readInt();
+        int ret = p.readInt();
+        p.recycle();
+        return ret;
     }
 
     /**
