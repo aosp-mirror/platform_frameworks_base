@@ -202,7 +202,11 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
                     sm.start();
                 }
             } else {
-                if (sm != null) {
+                if (isUsb(iface)) {
+                    // ignore usb0 down after enabling RNDIS
+                    // we will handle disconnect in interfaceRemoved instead
+                    Log.d(TAG, "ignoring interface down for " + iface);
+                } else if (sm != null) {
                     sm.sendMessage(TetherInterfaceSM.CMD_INTERFACE_DOWN);
                     mIfaces.remove(iface);
                 }
@@ -237,6 +241,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     public void interfaceAdded(String iface) {
+        if (DEBUG) Log.d(TAG, "interfaceAdded " + iface);
         boolean found = false;
         boolean usb = false;
         if (isWifi(iface)) {
@@ -268,6 +273,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     public void interfaceRemoved(String iface) {
+        if (DEBUG) Log.d(TAG, "interfaceRemoved " + iface);
         synchronized (mIfaces) {
             TetherInterfaceSM sm = mIfaces.get(iface);
             if (sm == null) {
@@ -542,6 +548,7 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
     }
 
     public int setUsbTethering(boolean enable) {
+        if (DEBUG) Log.d(TAG, "setUsbTethering(" + enable + ")");
         UsbManager usbManager = (UsbManager)mContext.getSystemService(Context.USB_SERVICE);
 
         synchronized (this) {
