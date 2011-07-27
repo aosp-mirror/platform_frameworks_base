@@ -447,6 +447,7 @@ public abstract class DataConnection extends StateMachine {
         lastFailCause = FailCause.NONE;
         mRetryOverride = -1;
         mRefCount = 0;
+        cid = -1;
 
         mLinkProperties = new LinkProperties();
         mApn = null;
