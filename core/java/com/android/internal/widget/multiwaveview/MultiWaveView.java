@@ -45,7 +45,7 @@ import com.android.internal.R;
  */
 public class MultiWaveView extends View {
     private static final String TAG = "MultiWaveView";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
 
     // Wave state machine
     private static final int STATE_IDLE = 0;
