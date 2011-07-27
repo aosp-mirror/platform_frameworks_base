@@ -97,6 +97,13 @@ public class BaseObj {
         }
     }
 
+    /**
+     * @return name of the renderscript object
+     */
+    public String getName() {
+        return mName;
+    }
+
     protected void finalize() throws Throwable {
         if (!mDestroyed) {
             if(mID != 0 && mRS.isAlive()) {

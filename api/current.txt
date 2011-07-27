@@ -17046,6 +17046,7 @@ package android.renderscript {
 
   public class BaseObj {
     method public synchronized void destroy();
+    method public java.lang.String getName();
     method public void setName(java.lang.String);
   }
 
