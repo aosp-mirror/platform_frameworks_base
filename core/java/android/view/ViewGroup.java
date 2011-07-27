@@ -788,7 +788,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         final View[] children = mChildren;
         for (int i = 0; i < childrenCount; i++) {
             View child = children[i];
-            if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
+            if ((child.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
                 child.findViewsWithText(outViews, text);
             }
         }
@@ -2162,6 +2162,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
+        if ((mPrivateFlags & IS_ROOT_NAMESPACE) != 0) {
+            return;
+        }
         for (int i = 0, count = mChildrenCount; i < count; i++) {
             View child = mChildren[i];
             if ((child.mViewFlags & VISIBILITY_MASK) == VISIBLE) {
