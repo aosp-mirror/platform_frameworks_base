@@ -358,10 +358,10 @@ values, with non-exhaustive examples in parentheses:
 <pre>
 int count = getNumberOfsongsAvailable();
 Resources res = {@link android.content.Context#getResources()};
-String songsFound = res.{@link android.content.res.Resources#getQuantityString(int,int,int)
+String songsFound = res.{@link android.content.res.Resources#getQuantityString(int,int)
 getQuantityString}(R.plurals.numberOfSongsAvailable, count, count);
 </pre>
-<p>When using the {@link android.content.res.Resources#getQuantityString(int,int,int)
+<p>When using the {@link android.content.res.Resources#getQuantityString(int,int)
 getQuantityString()} method, you need to pass the {@code count} twice if your string includes
 <a href="#FormattingAndStyling">string formatting</a> with a number. For example, for the string
 {@code %d songs found}, the first {@code count} parameter selects the appropriate plural string and
