@@ -140,6 +140,13 @@ public abstract class HardwareRenderer {
     abstract void updateSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException;
 
     /**
+     * Destoys the layers used by the specified view hierarchy.
+     * 
+     * @param view The root of the view hierarchy
+     */
+    abstract void destroyLayers(View view);
+
+    /**
      * This method should be invoked whenever the current hardware renderer
      * context should be reset. 
      */
@@ -622,18 +629,8 @@ public abstract class HardwareRenderer {
                         + "from multiple threads");
             }
 
-            /*
-             *  The window size has changed, so we need to create a new
-             *  surface.
-             */
-            if (mEglSurface != null && mEglSurface != EGL_NO_SURFACE) {
-                /*
-                 * Unbind and destroy the old EGL surface, if
-                 * there is one.
-                 */
-                sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-                sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
-            }
+            // In case we need to destroy an existing surface
+            destroySurface();
 
             // Create an EGL surface we can render into.
             mEglSurface = sEgl.eglCreateWindowSurface(sEglDisplay, sEglConfig, holder, null);
@@ -693,13 +690,19 @@ public abstract class HardwareRenderer {
 
             mDestroyed = true;
 
-            sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-            sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
+            destroySurface();
 
-            mEglSurface = null;
             mGl = null;
 
             setEnabled(false);
+        }
+
+        void destroySurface() {
+            if (mEglSurface != null && mEglSurface != EGL_NO_SURFACE) {
+                sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+                sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
+                mEglSurface = null;
+            }
         }
 
         @Override
@@ -921,6 +924,34 @@ public abstract class HardwareRenderer {
             return ((GLES20TextureLayer) layer).getSurfaceTexture();
         }
 
+        @Override
+        void destroyLayers(View view) {
+            if (view != null && isEnabled()) {
+                checkCurrent();
+                destroyHardwareLayer(view);
+                GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_LAYERS);
+            }
+        }
+
+        private void destroyHardwareLayer(View view) {
+            view.destroyLayer();
+            if (view instanceof ViewGroup) {
+                ViewGroup group = (ViewGroup) view;
+
+                int count = group.getChildCount();
+                for (int i = 0; i < count; i++) {
+                    destroyHardwareLayer(group.getChildAt(i));
+                }
+            }
+        }
+
+        static HardwareRenderer create(boolean translucent) {
+            if (GLES20Canvas.isAvailable()) {
+                return new Gl20Renderer(translucent);
+            }
+            return null;
+        }
+
         static void trimMemory(int level) {
             if (sEgl == null || sEglConfig == null) return;
 
@@ -949,13 +980,6 @@ public abstract class HardwareRenderer {
                     GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_FULL);
                     break;
             }
-        }
-
-        static HardwareRenderer create(boolean translucent) {
-            if (GLES20Canvas.isAvailable()) {
-                return new Gl20Renderer(translucent);
-            }
-            return null;
         }
     }
 }

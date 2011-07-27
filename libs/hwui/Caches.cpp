@@ -173,13 +173,15 @@ void Caches::flush(FlushMode mode) {
             gradientCache.clear();
             // fall through
         case kFlushMode_Moderate:
-            layerCache.clear();
             pathCache.clear();
             roundRectShapeCache.clear();
             circleShapeCache.clear();
             ovalShapeCache.clear();
             rectShapeCache.clear();
             arcShapeCache.clear();
+            // fall through
+        case kFlushMode_Layers:
+            layerCache.clear();
             break;
     }
 }

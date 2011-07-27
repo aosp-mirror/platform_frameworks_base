@@ -38,7 +38,7 @@ import android.util.Pools;
 class GLES20RecordingCanvas extends GLES20Canvas implements Poolable<GLES20RecordingCanvas> {
     // The recording canvas pool should be large enough to handle a deeply nested
     // view hierarchy because display lists are generated recursively.
-    private static final int POOL_LIMIT = 50;
+    private static final int POOL_LIMIT = 25;
 
     private static final Pool<GLES20RecordingCanvas> sPool = Pools.synchronizedPool(
             Pools.finitePool(new PoolableManager<GLES20RecordingCanvas>() {

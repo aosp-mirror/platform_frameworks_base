@@ -101,7 +101,8 @@ class Caches: public Singleton<Caches> {
 
 public:
     enum FlushMode {
-        kFlushMode_Moderate = 0,
+        kFlushMode_Layers = 0,
+        kFlushMode_Moderate,
         kFlushMode_Full
     };
 
