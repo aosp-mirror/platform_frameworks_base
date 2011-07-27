@@ -112,15 +112,19 @@ Layer* LayerCache::get(const uint32_t width, const uint32_t height) {
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
 #if DEBUG_LAYERS
-        size_t size = mCache.size();
-        for (size_t i = 0; i < size; i++) {
-            const LayerEntry& entry = mCache.itemAt(i);
-            LAYER_LOGD("  Layer size %dx%d", entry.mWidth, entry.mHeight);
-        }
+        dump();
 #endif
     }
 
     return layer;
+}
+
+void LayerCache::dump() {
+    size_t size = mCache.size();
+    for (size_t i = 0; i < size; i++) {
+        const LayerEntry& entry = mCache.itemAt(i);
+        LAYER_LOGD("  Layer size %dx%d", entry.mWidth, entry.mHeight);
+    }
 }
 
 bool LayerCache::resize(Layer* layer, const uint32_t width, const uint32_t height) {

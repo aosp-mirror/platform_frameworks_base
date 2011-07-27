@@ -24,7 +24,6 @@ import android.graphics.Canvas;
  * {@link Canvas} that can be used to render into an FBO using OpenGL.
  */
 class GLES20RenderLayer extends GLES20Layer {
-
     private int mLayerWidth;
     private int mLayerHeight;
 

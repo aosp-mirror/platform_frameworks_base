@@ -101,6 +101,11 @@ public:
      */
     uint32_t getSize();
 
+    /**
+     * Prints out the content of the cache.
+     */
+    void dump();
+
 private:
     void deleteLayer(Layer* layer);
 

@@ -51,7 +51,7 @@ class GLES20Canvas extends HardwareCanvas {
 
     // The native renderer will be destroyed when this object dies.
     // DO NOT overwrite this reference once it is set.
-    @SuppressWarnings("unused")
+    @SuppressWarnings({"unused", "FieldCanBeLocal"})
     private CanvasFinalizer mFinalizer;
 
     private int mWidth;
