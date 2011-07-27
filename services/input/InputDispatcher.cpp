@@ -998,8 +998,7 @@ void InputDispatcher::dispatchEventToCurrentInputTargetsLocked(nsecs_t currentTi
 void InputDispatcher::resetTargetsLocked() {
     mCurrentInputTargetsValid = false;
     mCurrentInputTargets.clear();
-    mInputTargetWaitCause = INPUT_TARGET_WAIT_CAUSE_NONE;
-    mInputTargetWaitApplicationHandle.clear();
+    resetANRTimeoutsLocked();
 }
 
 void InputDispatcher::commitTargetsLocked() {
@@ -1110,6 +1109,7 @@ void InputDispatcher::resetANRTimeoutsLocked() {
 
     // Reset input target wait timeout.
     mInputTargetWaitCause = INPUT_TARGET_WAIT_CAUSE_NONE;
+    mInputTargetWaitApplicationHandle.clear();
 }
 
 int32_t InputDispatcher::findFocusedWindowTargetsLocked(nsecs_t currentTime,
@@ -3226,8 +3226,14 @@ void InputDispatcher::setFocusedApplication(
         AutoMutex _l(mLock);
 
         if (inputApplicationHandle != NULL && inputApplicationHandle->update()) {
-            mFocusedApplicationHandle = inputApplicationHandle;
-        } else {
+            if (mFocusedApplicationHandle != inputApplicationHandle) {
+                if (mFocusedApplicationHandle != NULL) {
+                    resetTargetsLocked();
+                }
+                mFocusedApplicationHandle = inputApplicationHandle;
+            }
+        } else if (mFocusedApplicationHandle != NULL) {
+            resetTargetsLocked();
             mFocusedApplicationHandle.clear();
         }
 
