@@ -1418,7 +1418,7 @@ bound. The value's format is XX%. For instance: 100%, 12.5%, etc.</dd>
 The filename is used as the resource ID.</dd>
 
 <dt>compiled resource datatype:</dt>
-<dd>Resource pointer to a {@link android.graphics.drawable.ShapeDrawable}.</dd>
+<dd>Resource pointer to a {@link android.graphics.drawable.GradientDrawable}.</dd>
 
 <dt>resource reference:</dt>
 
@@ -1458,9 +1458,7 @@ In XML: <code>@[<em>package</em>:]drawable/<em>filename</em></code>
         android:bottom="<em>integer</em>" /&gt;
     &lt;<a href="#size-element">size</a>
         android:width="<em>integer</em>"
-        android:color="<em>color</em>"
-        android:dashWidth="<em>integer</em>"
-        android:dashGap="<em>integer</em>" /&gt;
+        android:height="<em>integer</em>" /&gt;
     &lt;<a href="#solid-element">solid</a>
         android:color="<em>color</em>" /&gt;
     &lt;<a href="#stroke-element">stroke</a>
