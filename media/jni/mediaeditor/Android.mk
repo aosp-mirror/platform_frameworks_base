@@ -42,11 +42,13 @@ LOCAL_C_INCLUDES += \
     $(TOP)/frameworks/media/libvideoeditor/vss/common/inc \
     $(TOP)/frameworks/media/libvideoeditor/vss/mcs/inc \
     $(TOP)/frameworks/media/libvideoeditor/vss/stagefrightshells/inc \
+    $(TOP)/frameworks/media/libvideoeditor/include \
     $(TOP)/frameworks/media/libvideoeditor/lvpp \
     $(TOP)/frameworks/media/libvideoeditor/osal/inc
 
 LOCAL_SHARED_LIBRARIES := \
     libcutils \
+    libdl \
     libutils \
     libandroid_runtime \
     libnativehelper \
