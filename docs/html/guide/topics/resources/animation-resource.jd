@@ -10,8 +10,8 @@ parent.link=available-resources.html
       <li><a href="#Property">Property Animation</a></li>
       <li><a href="#View">View Animation</a>
         <ol>
-          <li><a href="Tween">Tween animation</li>
-          <li><a href="Frame">Frame animation</li>
+          <li><a href="Tween">Tween animation</a></li>
+          <li><a href="Frame">Frame animation</a></li>
         </ol>      
       </li>
     </ol>
