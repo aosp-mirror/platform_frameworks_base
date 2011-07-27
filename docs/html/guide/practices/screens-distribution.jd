@@ -144,9 +144,9 @@ href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 with <em>larger</em> screens) and set the larger screen size attributes to {@code "false"}, then
 external services such as Android Market <strong>do not</strong> apply filtering. Your application
 will still be available to larger screens, but when it runs, it will not resize to fit the screen.
-Instead, the system will draw it in a "postage stamp" window that's the same relative size as the
-screen size that your application does support (see <a
-href="screens-support-1.5.html#CompatMode">compatibility mode</a> for more information). If you want
+Instead, the system will emulate a handset screen size (about 320dp x 480dp; see <a
+href="{@docRoot}guide/practices/screen-compat-mode.html">Screen Compatibility Mode</a> for more
+information). If you want
 to prevent your application from being downloaded on larger screens, use <a
 href="{@docRoot}guide/topics/manifest/compatible-screens-element.html">{@code
 &lt;compatible-screens>}</a>, as discussed in the previous section about <a

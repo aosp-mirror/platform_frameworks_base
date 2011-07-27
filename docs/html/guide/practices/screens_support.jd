@@ -25,6 +25,13 @@ page.title=Supporting Multiple Screens
         <li><a href="#qualifiers">Using configuration qualifiers</a></li>
         <li><a href="#DesigningResources">Designing alternative layouts and drawables</a></li>
       </ol></li>
+    <li><a href="#DeclaringTabletLayouts">Declaring Tablet Layouts for Android 3.2</a> <span
+class="new">new!</span>
+      <ol>
+        <li><a href="#NewQualifiers">Using new size qualifiers</a></li>
+        <li><a href="#ConfigurationExamples">Configuration examples</a></li>
+        <li><a href="#DeclaringScreenSizeSupport">Declaring screen size support</a></li>
+      </ol></li>
     <li><a href="#screen-independence">Best Practices</a></li>
     <li><a href="#DensityConsiderations">Additional Density Considerations</a>
       <ol>
@@ -57,15 +64,15 @@ Guidelines</a></li>
 applications, the Android system provides a consistent development environment across devices and
 handles most of the work to adjust each application's user interface to the screen on which it is
 displayed. At the same time, the system provides APIs that allow you to control your
-application's UI on specific screen sizes and densities, in order to modify and optimize your UI
+application's UI for specific screen sizes and densities, in order to optimize your UI
 design for different screen configurations. For example, you might want a UI for tablets
-that's different from the design for handsets.</p>
+that's different from the UI for handsets.</p>
 
-<p>Although the system performs sufficient scaling and resizing to make your application work on
+<p>Although the system performs scaling and resizing to make your application work on
 different screens, you should make the effort to optimize your application for different screen
 sizes and densities. In doing so, you maximize the user experience for all devices and your users
 believe that your application was actually designed for <em>their</em> devices&mdash;rather than
-simply stretched to fit their devices.</p>
+simply stretched to fit the screen on their devices.</p>
 
 <p>By following the practices described in this document, you can create an application that
 displays properly and provides an optimized user experience on all supported screen configurations,
@@ -74,7 +81,14 @@ using a single {@code .apk} file.</p>
 <p class="note"><strong>Note:</strong> The information in this document assumes that your
 application is designed for Android 1.6 (API Level 4) or higher. If your application supports
 Android 1.5 or lower, please first read <a
-href="{@docRoot}guide/practices/screens-support-1.5.html">Strategies for Android 1.5</a>.</p>
+href="{@docRoot}guide/practices/screens-support-1.5.html">Strategies for Android 1.5</a>.
+<br/><br/>
+Also, be aware that <strong>Android 3.2 has introduced new APIs</strong> that allow you to more
+precisely control the layout resources your application uses for different screen sizes. These new
+features are especially important if you're developing an application that's optimized for tablets.
+For details, see the section about <a href="#DeclaringTabletLayouts">Declaring Tablet Layouts for
+Android 3.2</a>.
+</p>
 
 
 
@@ -143,9 +157,16 @@ the range of actual screen sizes and densities into:</p>
 <li>A set of four generalized <strong>sizes</strong>: <em>small</em>, <em>normal</em>,
 <em>large</em>,
 and <em>xlarge</em></em>
+<p class="note"><strong>Note:</strong> Beginning with Android 3.2 (API level 13), these size groups
+are deprecated in favor of a new technique for managing screen sizes based on the available screen
+width. If you're developing for Android 3.2 and greater, see <a
+href="#DeclaringTabletLayouts">Declaring Tablet Layouts for Android 3.2</a> for more
+information.</p>
+</li>
 <li>A set of four generalized <strong>densities</strong>: <em>ldpi</em> (low), <em>mdpi</em>
 (medium),
 <em>hdpi</em> (high), and <em>xhdpi</em> (extra high)
+</li>
 </ul>
 
 <p>The generalized sizes and densities are arranged around a
@@ -154,7 +175,7 @@ baseline is based upon the screen configuration for the first Android-powered de
 G1, which has an HVGA screen (until Android 1.6, this was the only screen configuration that Android
 supported).</p>
 
-<p>Each generalized size or density spans a range of actual screen sizes or density. For example,
+<p>Each generalized size and density spans a range of actual screen sizes and densities. For example,
 two devices that both report a screen size of <em>normal</em> might have actual screen sizes and
 aspect ratios that are slightly different when measured by hand. Similarly, two devices that report
 a screen density of <em>hdpi</em> might have real pixel densities that are slightly different.
@@ -168,11 +189,30 @@ and density groups.</p>
 Illustration of how Android roughly maps actual sizes and densities
 to generalized sizes and densities (figures are not exact).</p>
 
+<p>As you design your UI for different screen sizes, you'll discover that each design requires a
+minimum amount of space. So, each generalized screen size above has an associated minimum
+resolution that's defined by the system. These minimum sizes are in "dp" units&mdash;the same units
+you should use when defining your layouts&mdash;which allows the system to avoid worrying about
+changes in screen density.</p>
+
+<ul>
+  <li><em>xlarge</em> screens are at least 960dp x 720dp</li>
+  <li><em>large</em> screens are at least 640dp x 480dp</li>
+  <li><em>normal</em> screens are at least 470dp x 320dp</li>
+  <li><em>small</em> screens are at least 426dp x 320dp</li>
+</ul>
+
+<p class="note"><strong>Note:</strong> These minimum screen sizes were not as well defined prior to
+Android 3.0, so you may encounter some devices that are mis-classified between normal and large. 
+These are also based on the physical resolution of the screen, so may vary across devices&mdash;for
+example a 1024x720 tablet with a system bar actually has a bit less space available to the
+application due to it being used by the system bar.</p>
+
 <p>To optimize your application's UI for the different screen sizes and densities, you can provide
 <a href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">alternative
 resources</a> for any of the generalized sizes and densities. Typically, you should
 provide alternative layouts for some of the different screen sizes and alternative bitmap images for
-different screen densities. At runtime, the system uses the appropriate size or density resources
+different screen densities. At runtime, the system uses the appropriate resources
 for your application, based on the generalized size or density of the current device screen.</p>
 
 <p>You do not need to provide alternative resources for every combination of screen size and
@@ -221,7 +261,7 @@ density, if necessary</li>
 </ul>
 
 <p>In figure 2, the text view and bitmap drawable have dimensions specified in pixels ({@code px}
-units), so the elements are physically larger on a low density screen and smaller on a high density
+units), so the views are physically larger on a low density screen and smaller on a high density
 screen. This is because although the actual screen sizes may be the same, the high density screen
 has more pixels per inch (the same amount of pixels fit in a smaller area). In figure 3, the layout
 dimensions are specified in density-independent pixels ({@code dp} units). Because the baseline for
@@ -255,6 +295,18 @@ for the screen density, as appropriate. To more gracefully handle different scre
 however, you should also:</p>
 
 <ul>
+  <li><strong>Explicitly declare in the manifest which screen sizes your application
+supports</strong>
+    <p>By declaring which screen sizes your application supports, you can ensure that only
+devices with the screens you support can download your application. Declaring support for
+different screen sizes can also affect how the system draws your application on larger
+screens&mdash;specifically, whether your application runs in <a
+href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mode</a>.</p>
+    <p>To declare the screen sizes your application supports, you should include the
+<a href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
+&lt;supports-screens&gt;}</a> element in your manifest file.</p>
+  </li>
+  
   <li><strong>Provide different layouts for different screen sizes</strong>
     <p>By default, Android resizes your application layout to fit the current device screen. In most
 cases, this works fine. In other cases, your UI might not look as good and might need adjustments
@@ -264,6 +316,12 @@ you might need to adjust sizes so that everything can fit on the screen.</p>
     <p>The configuration qualifiers you can use to provide size-specific resources are
 <code>small</code>, <code>normal</code>, <code>large</code>, and <code>xlarge</code>. For
 example, layouts for an extra large screen should go in {@code layout-xlarge/}.</p>
+    <p>Beginning with Android 3.2 (API level 13), the above size groups are deprecated and you
+should instead use the {@code sw&lt;N&gt;dp} configuration qualifier to define the smallest
+available width required by your layout resources. For example, if your multi-pane tablet layout
+requires at least 600dp of screen width, you should place it in {@code layout-sw600dp/}. Using the
+new techniques for declaring layout resources is discussed further in the section about <a
+href="#DeclaringTabletLayouts">Declaring Tablet Layouts for Android 3.2</a>.</p>
   </li>
   
   <li><strong>Provide different bitmap drawables for different screen densities</strong>
@@ -432,6 +490,12 @@ configuration.</td>
 </tr>
 </table>
 
+<p class="note"><strong>Note:</strong> If you're developing your application for Android 3.2 and
+higher, see the section about <a
+href="#DeclaringTabletLayouts">Declaring Tablet Layouts for Android 3.2</a> for information about
+new configuration qualifiers that you should use when declaring layout resources for specific
+screen sizes (instead of using the size qualifiers in table 1).</p></p>
+
 <p>For more information about how these qualifiers roughly correspond to real screen
 sizes and densities, see <a href="#range">Range of Screens Supported</a>, earlier in this
 document.</p>
@@ -551,6 +615,267 @@ all the different sizes should be:</p>
 href="{@docRoot}guide/practices/ui_guidelines/icon_design.html">Icon Design Guidelines</a>,
 which includes size information for various bitmap drawables, such as launcher icons, menu
 icons, status bar icons, tab icons, and more.</p>
+
+
+
+
+<h2 id="DeclaringTabletLayouts">Declaring Tablet Layouts for Android 3.2</h2>
+
+<p>For the first generation of tablets running Android 3.0, the proper way to declare tablet
+layouts was to put them in a directory with the {@code xlarge} configuration qualifier (for example,
+ {@code res/layout-xlarge/}). In order to accommodate other types of tablets and screen
+sizes&mdash;in particular, 7" tablets&mdash;Android 3.2 introduces a new way to specify resources
+for more discrete screen sizes. The new technique is based on the amount of space your layout needs
+(such as 600dp of width), rather than trying to make your layout fit generalized size groups (such
+as <em>large</em> or <em>xlarge</em>).</p>
+
+<p>The reason designing for 7" tablets is tricky when using the generalized size groups is
+that a 7" tablet is technically in the same group as a 5" handset (the <em>large</em> group). While
+these two devices are seemingly close to each other in size, the amount of space for an
+application's UI is significantly different, as is the style of user interaction. Thus, a 7" and 5"
+screen should not always use the same layout. To make it possible for these two kinds of screens to
+offer different layouts, Android now allows you to specify your layout resources based on the width
+and/or height that's actually available for your application's layout, specified in dp units.</p>
+
+<p>For example, after you've designed the layout you want to use for tablet-style devices, you might
+determine that the layout stops working well when the screen is less than 600dp wide. This threshold
+thus becomes the minimum size that you require for your tablet layout. As
+such, you can now specify that these layout resources should be used only when there is at least
+600dp of width available for your application's UI.</p>
+
+<p>You should either pick a width and design to it as your minimum size, or test what is the
+smallest width your layout supports once it's complete.</p>
+
+
+<h3 id="NewQualifiers">Using new size qualifiers</h3>
+
+<p>The numbers describing the width and height available for your layout are all in dp
+units&mdash;remember that your layout dimensions should always be defined using dp units,
+because what you care about is the amount of space available after the system accounts for screen
+density (as opposed to using raw pixel numbers). The different resource configurations that you can
+specify based on the space available for your layout are summarized in table 2. When building an
+application for Android 3.2 and higher, you should use these new qualifiers instead of those for the
+traditional screen size groups (small, normal, large, and xlarge).</p>
+
+<p class="note"><strong>Note:</strong> The sizes that you specify using these qualifiers are
+<strong>not the actual screen sizes</strong>. Rather, the sizes are for the width or height in dp
+units that are <strong>available to your activity's window</strong>. The Android system
+might use some of the screen for system UI (such as the system bar at the bottom of the screen or
+the status bar at the top), so some of the screen might not be available for your layout. Thus, the
+sizes you declare should be specifically about the sizes needed by your activity&mdash;the system
+accounts for any space used by system UI when declaring how much space it provides for your layout.
+Also beware that the <a href="{@docRoot}guide/topics/ui/actionbar.html">Action Bar</a> is considered
+a part of your application's window space, although your layout does not declare it, so it reduces
+the space available for your layout and you must account for it in your design.</p>
+
+<p class="table-caption"><strong>Table 2.</strong> New configuration qualifers for screen size
+(introduced in Android 3.2).</p>
+<table>
+  <tr><th>Screen configuration</th><th>Qualifier values</th><th>Description</th></tr>
+  <tr><td>Smallest available width</td>
+      <td><code>sw&lt;N&gt;dp</code><br/><br/>
+        Examples:<br/>
+        <code>sw600dp</code><br/>
+        <code>sw720dp</code><br/>
+      </td>
+      <td>
+        <p>Specifies the "smallest width" in dp units that must be available to your
+application in order for the resources to be used&mdash;defined by the <code>&lt;N&gt;</code>
+value&mdash;regardless of the screen's current orientation.
+For example, if your layout requires that its shortest side be at least 600 dp in length at all
+times, then you can put your layout files in <code>res/layout-sw600dp/</code> and
+the system will use them only when the shortest side of available screen space it at least
+600dp.</p>
+  <p>This is the most important size configuration value, because it replaces the old screen size
+buckets with a discrete number that specifies the effective size available for your UI.  This number
+is based on width because that is most often the driving factor in designing a layout.  A UI will
+often scroll vertically, but have fairly hard constraints on the minimum space it needs
+horizontally. The available width is also the key factor in determining whether to use a one-pane
+layout for handsets or multi-pane layout for tablets.</p>
+    </td>
+  </tr>
+    <tr>
+      <td>Available width</td>
+      <td><code>w&lt;N&gt;dp</code><br/><br/>
+        Examples:<br/>
+        <code>w720dp</code><br/>
+        <code>w1024dp</code><br/>
+      </td>
+      <td>
+        <p>Specifies a minimum available width in dp units at which the resources should be
+used&mdash;defined by the <code>&lt;N&gt;</code> value. The system's corresponding value for the
+width changes when the screen's orientation switches between landscape and portrait to
+reflect the current actual width that's available for your UI.</p>
+        <p>This is often useful to determine whether to use a multi-pane layout, because even on a
+tablet device, you often won't want the same multi-pane layout for portrait orientation as you do
+for landscape. Thus, you can use this to specify the minimum width required for the layout, instead
+of using both the screen size and orientation qualifiers together.</p>
+      </td>
+    </tr>
+    <tr>
+      <td>Available height</td>
+      <td><code>h&lt;N&gt;dp</code><br/><br/>
+        Examples:<br/>
+        <code>h720dp</code><br/>
+        <code>h1024dp</code><br/>
+        etc.
+      </td>
+      <td>
+        <p>Specifies a minimum screen height in dp units at which the resources should be
+used&mdash;defined by the <code>&lt;N&gt;</code> value. The system's corresponding value for
+the height changes when the screen's orientation switches between landscape and portrait to
+reflect the current actual height that's available for your UI.</p>
+        <p>Using this to define the
+height required by your layout is useful in the same way as <code>w&lt;N&gt;dp</code> is for
+defining the required width, instead of using both the screen size and orientation qualifiers.
+However, most apps won't need this qualifier, considering that UIs often scroll vertically and are
+thus more flexible with how much height is available, whereas the width is more rigid.</p>
+      </td>
+    </tr>
+</table>
+
+<p>While using these qualifiers might seem more complicated than using screen size groups, it should
+actually be simpler once you determine the requirements for your UI.  When you design your UI,
+the main thing you probably care about is the actual size at which your application switches between
+a handset-style UI and a tablet-style UI that uses multiple panes. The exact point of this switch
+will depend on your particular design&mdash;maybe you need a 720dp width for your tablet layout,
+maybe 600dp is enough, or 480dp, or some number between these. Using these qualifiers in table 2,
+you are in control of the precise size at which your layout changes.</p>
+
+
+<h3 id="ConfigurationExamples">Configuration examples</h3>
+
+<p>To help you target some of your designs for different types of devices, here are some
+numbers for typical screen widths:</p>
+
+<ul>
+  <li>320dp: a typical phone screen (240x320 ldpi, 320x480 mdpi, 480x800 hdpi, etc).</li>
+  <li>480dp: a tweener tablet like the Streak (480x800 mdpi).</li>
+  <li>600dp: a 7” tablet (600x1024 mdpi).</li>
+  <li>720dp: a 10” tablet (720x1280 mdpi, 800x1280 mdpi, etc).</li>
+</ul>
+
+<p>Using the size qualifiers from table 2, your application can switch between your different layout
+resources for handsets and tablets using any number you want for width and/or height.  For example,
+if 600dp is the smallest available width supported by your tablet layout, you can provide these two
+sets of layouts:</p>
+
+<pre class="classic">
+res/layout/main_activity.xml           # For handsets
+res/layout-sw600dp/main_activity.xml   # For tablets
+</pre>
+
+<p>In this case, the smallest width of the available screen space must be 600dp in order for the
+tablet layout to be applied.</p>
+
+<p>For other cases in which you want to further customize your UI to differentiate between sizes
+such as 7” and 10” tablets, you can define additional smallest width layouts:</p>
+
+<pre class="classic">
+res/layout/main_activity.xml           # For handsets (smaller than 600dp available width)
+res/layout-sw600dp/main_activity.xml   # For 7” tablets (600dp wide and bigger)
+res/layout-sw720dp/main_activity.xml   # For 10” tablets (720dp wide and bigger)
+</pre>
+
+<p>Notice that the previous two sets of example resources use the "smallest width" qualifer, {@code
+sw&lt;N&gt;dp}, which specifies the smallest of the screen's two sides, regardless of the
+device's current orientation. Thus, using {@code sw&lt;N&gt;dp} is a simple way to specify the
+overall screen size available for your layout by ignoring the screen's orientation.</p>
+
+<p>However, in some cases, what might be
+important for your layout is exactly how much width or height is <em>currently</em> available. For
+example, if you have a two-pane layout with two fragments side by side, you might want to use it
+whenever the screen provides at least 600dp of width, whether the device is in landscape or
+portrait orientation. In this case, your resources might look like this:</p>
+
+<pre class="classic">
+res/layout/main_activity.xml         # For handsets (smaller than 600dp available width)
+res/layout-w600dp/main_activity.xml  # Multi-pane (any screen with 600dp available width or more)
+</pre>
+
+<p>Notice that the second set is using the "available width" qualifier, {@code w&lt;N&gt;dp}. This
+way, one device may actually use both layouts, depending on the orientation of the screen (if
+the available width is at least 600dp in one orientation and less than 600dp in the other
+orientation).</p>
+
+<p>If the available height is a concern for you, then you can do the same using the {@code
+h&lt;N&gt;dp} qualifier. Or, even combine the {@code w&lt;N&gt;dp} and {@code h&lt;N&gt;dp}
+qualifiers if you need to be really specific.</p>
+
+
+<h3 id="DeclaringScreenSizeSupport">Declaring screen size support</h3>
+
+<p>Once you've implemented your layouts for different screen sizes, it's equally important that you
+declare in your manifest file which screens your application supports.</p>
+
+<p>Along with the new configuration qualifiers for screen size, Android 3.2 introduces new
+attributes for the <a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a>
+manifest element:</p>
+
+<dl>
+  <!-- 
+
+  #### Sorry, Android Market does not yet support filtering based on this element. ####
+
+  <dt><a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html#requiresSmallest">
+{@code android:requiresSmallestWidthDp}</a></dt>
+  <dd>This attribute specifies the minimum "smallest width" with which your
+application is compatible. In order for a device to be considered compatible with your
+application, the shortest side of the available screen space must be equal to or greater than this
+value.
+  <p>For example, if your application is only for tablet-style devices with a 600dp
+smallest available width:</p>
+<pre>
+&lt;manifest ... &gt;
+    &lt;supports-screens android:requiresSmallestWidthDp="600" /&gt;
+    ...
+&lt;/manifest&gt;
+</pre>
+  <p>However, if your application supports all screen sizes supported by Android (as small as
+426dp x 320dp), then you don't need to declare this attribute, because the smallest width your
+application requires is the smallest possible on any device.</p>
+</dd>
+  -->
+
+  <dt><a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html#compatibleWidth">
+{@code android:compatibleWidthLimitDp}</a></dt>
+  <dd>This attribute allows you to enable <a
+href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mode</a> as a
+user-optional feature by specifying the maximum "smallest width" that your application
+supports. If the smallest side of a device's available screen is greater than your value here,
+users can still install your application, but are offered to run it in screen compatibility mode. By
+default, screen compatibility mode is disabled and your layout is resized to fit the screen as
+usual, but a button is available in the system bar that allows users to toggle screen compatibility
+mode on and off.
+  <p class="note"><strong>Note:</strong> If your application's layout properly resizes for large
+screens, you do not need to use this attribute. We recommend that you avoid using this
+attribute and instead ensure your layout resizes for larger screens by following the
+recommendations in this document.</p></dd>
+
+  <dt><a
+href="{@docRoot}guide/topics/manifest/supports-screens-element.html#largestWidth">
+{@code android:largestWidthLimitDp}</a></dt>
+  <dd>This attribute allows you to force-enable <a
+href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mode</a> by specifying
+the maximum "smallest width" that your application supports. If the smallest
+side of a device's available screen is greater than your value here, the application runs in screen
+compatibility mode with no way for the user to disable it.
+  <p class="note"><strong>Note:</strong> If your application's layout properly resizes for large
+screens, you do not need to use this attribute.  We recommend that you avoid using this
+attribute and instead ensure your layout resizes for larger screens by following the
+recommendations in this document.</p></dd>
+</dl>
+
+<p class="caution"><strong>Caution:</strong> When developing for Android 3.2 and higher, you
+should not use the older screen size attributes in combination with the attributes
+listed above. Using both the new attributes and the older size attributes might cause
+unexpected behavior.</p>
+
+<p>For more information about each of these attributes, follow the respective links above.</p>
+
 
 
 
@@ -875,7 +1200,7 @@ SDK Manager.exe} from your Android SDK directory (on Windows only) or execute {@
 the {@code &lt;sdk&gt;/tools/} directory (on all platforms). Figure 6 shows the Android SDK and
 AVD Manager with a selection of AVDs, for testing various screen configurations.</p>
 
-<p>Table 2 shows the various emulator skins that are available in the Android SDK, which you can use
+<p>Table 3 shows the various emulator skins that are available in the Android SDK, which you can use
 to emulate some of the most common screen configurations.</p>
 
 <p>For more information about creating and using AVDs to test your application, see <a
@@ -883,7 +1208,7 @@ href="{@docRoot}guide/developing/devices/managing-avds.html">Managing AVDs with 
 Manager</a>.</p>
 
 
-<p class="table-caption" id="screens-table"><strong>Table 2.</strong> Various screen
+<p class="table-caption" id="screens-table"><strong>Table 3.</strong> Various screen
 configurations available from emulator skins in the Android SDK (indicated in bold) and other
 representative resolutions.</p>
 

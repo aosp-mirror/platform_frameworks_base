@@ -667,11 +667,14 @@
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/practices/screens_support.html">
           <span class="en">Supporting Multiple Screens</span>
-        </a></div>
+        </a> <span class="new">updated</span></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/practices/screens-distribution.html">
             <span class="en">Distributing to Specific Screens</span>
           </a></li>
+          <li><a href="<?cs var:toroot ?>guide/practices/screen-compat-mode.html">
+            <span class="en">Screen Compatibility Mode</span>
+          </a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/practices/screens-support-1.5.html">
             <span class="en">Strategies for Android 1.5</span>
           </a></li>

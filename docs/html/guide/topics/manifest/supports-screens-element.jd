@@ -8,15 +8,15 @@ parent.link=manifest-intro.html
 <dt>syntax:</dt>
 <dd>
 <pre class="stx">
-&lt;supports-screens android:<a href="#requiresSmallest">requiresSmallestWidthDp</a>="<em>integer</em>"
-                  android:<a href="#compatibleWidth">compatibleWidthLimitDp</a>="<em>integer</em>"
-                  android:<a href="#largestWidth">largestWidthLimitDp</a>="<em>integer</em>"
-                  android:<a href="#resizeable">resizeable</a>=["true"| "false"]
+&lt;supports-screens android:<a href="#resizeable">resizeable</a>=["true"| "false"]
                   android:<a href="#small">smallScreens</a>=["true" | "false"]
                   android:<a href="#normal">normalScreens</a>=["true" | "false"]
                   android:<a href="#large">largeScreens</a>=["true" | "false"]
                   android:<a href="#xlarge">xlargeScreens</a>=["true" | "false"]
-                  android:<a href="#any">anyDensity</a>=["true" | "false"]  /&gt;
+                  android:<a href="#any">anyDensity</a>=["true" | "false"]
+                  android:<a href="#requiresSmallest">requiresSmallestWidthDp</a>="<em>integer</em>"
+                  android:<a href="#compatibleWidth">compatibleWidthLimitDp</a>="<em>integer</em>"
+                  android:<a href="#largestWidth">largestWidthLimitDp</a>="<em>integer</em>"/&gt;
 </pre>
 </dd>
 
@@ -24,37 +24,38 @@ parent.link=manifest-intro.html
 <dd><code><a href="{@docRoot}guide/topics/manifest/manifest-element.html">&lt;manifest&gt;</a></code></dd>
 
 <dt>description:</dt>
-<dd>Lets you specify the screen sizes your application supports and enable screen
-compatibility mode for screens larger than what your application supports. By default, a modern
-application (using API Level 4 or higher) supports all screen sizes; older applications are assumed
-to support only the "normal" screen size. Screen size is determined by the number of pixels on the
-screen after the system accounts for screen density scaling.
+<dd>Lets you specify the screen sizes your application supports and enable <a
+href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mode</a> for screens
+larger than what your application supports. It's important that you always use this element in your
+application to specify the screen sizes your application supports.
 
 <p>An application "supports" a given screen size if it resizes properly to fill the entire screen.
-By default, the system resizes your application UI to fill the screen if you have set
-either <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code
-minSdkVersion}</a> or <a href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code
-targetSdkVersion}</a> to {@code "4"} or higher. Normal resizing works well for most applications and
-you don't have to do any extra work to make your application work on screens larger than a
-handset device.</p>
-
-<p>In addition to allowing the system to resize your application to fit the current screen, you can
-optimize your UI for different screen sizes by providing <a
+Normal resizing applied by the system works well for most applications and you don't have to do any
+extra work to make your application work on screens larger than a handset device. However, it's
+often important that you optimize your application's UI for different screen sizes by providing <a
 href="{@docRoot}guide/topics/resources/providing-resources.html#AlternativeResources">alternative
-layout resources</a> for different sizes. For instance, you might want to modify the layout
-of an activity when it is on a tablet or similar device that has an <em>xlarge</em> screen.</p>
+layout resources</a>. For instance, you might want to modify the layout of an activity
+when it is on a tablet compared to when running on a handset device.</p>
 
-<p>However, if your application does not work well when resized to fit different screen sizes,
-you can use the attributes of the {@code &lt;supports-screens&gt;} element to control whether
-your application should be distributed to smaller screens or have its UI scaled up to fit larger
-screens using the system's screen compatibility mode. When you have not designed for larger screen
-sizes and the normal resizing does not achieve the appropriate results, <em>screen compatibility
-mode</em> will scale your UI by emulating a <em>normal</em> size screen and then zooming in on it so
-that it fills the entire screen&mdash;thus achieving the same layout as a normal handset device on
-the large screen (but this usually causes pixelation and blurring of your UI).</p>
+<p>However, if your application does not work well when resized to fit different screen sizes, you
+can use the attributes of the {@code &lt;supports-screens&gt;} element to control whether your
+application should be distributed to smaller screens or have its UI scaled up ("zoomed") to fit
+larger screens using the system's <a
+href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mode</a>. When you
+have not designed for larger screen sizes and the normal resizing does not achieve the appropriate
+results, screen compatibility mode will scale your UI by emulating a <em>normal</em> size
+screen and medium density, then zooming in so that it fills the entire screen. Beware that this
+causes pixelation and blurring of your UI, so it's better if you optimize your UI for large
+screens.</p>
+
+<p class="note"><strong>Note:</strong> Android 3.2 introduces new attributes: {@code
+android:requiresSmallestWidthDp}, {@code android:compatibleWidthLimitDp}, and {@code
+android:largestWidthLimitDp}. If you're developing your application for Android 3.2 and higher,
+you should use these attributes to declare your screen size support, instead of the attributes
+based on generalized screen sizes.</p>
 
 <p>For more information about how to properly support different screen sizes so that you can avoid
-using screen compatibility mode, read
+using screen compatibility mode with your application, read
 <a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
 
 
@@ -62,12 +63,87 @@ using screen compatibility mode, read
 
 <dd>
 <dl class="attr">
+
+  <dt><a name="resizeable"></a>{@code android:resizeable}</dt>
+  <dd>Indicates whether the application is resizeable for different screen sizes. This attribute is
+true, by default. If set false, the system will run your application in <a
+href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mode</a> on large
+screens.</p>
+
+  <p><strong>This attribute is deprecated</strong>. It was introduced to help applications
+transition from Android 1.5 to 1.6, when support for multiple screens was first introduced. You
+should not use it.</p>
+  </dd>
+  
+  <dt><a name="small"></a>{@code android:smallScreens}</dt>
+  <dd>Indicates whether the application supports smaller screen form-factors.
+     A small screen is defined as one with a smaller aspect ratio than
+     the "normal" (traditional HVGA) screen.  An application that does
+     not support small screens <em>will not be available</em> for
+     small screen devices from external services (such as Android Market), because there is little
+the platform can do to make such an application work on a smaller screen. This is {@code "true"} by
+default.
+  </dd>
+  
+  <dt><a name="normal"></a>{@code android:normalScreens}</dt>
+  <dd>Indicates whether an application supports the "normal" screen
+     form-factors.  Traditionally this is an HVGA medium density
+     screen, but WQVGA low density and WVGA high density are also
+     considered to be normal.  This attribute is "true" by default.
+  </dd>
+  
+  <dt><a name="large"></a>{@code android:largeScreens}</dt>
+  <dd>Indicates whether the application supports larger screen form-factors.
+     A large screen is defined as a screen that is significantly larger
+     than a "normal" handset screen, and thus might require some special care
+     on the application's part to make good use of it, though it may rely on resizing by the
+system to fill the screen.
+  <p>The default value for this actually varies between some versions, so it's better if
+you explicitly declare this attribute at all times. Beware that setting it "false" will
+generally enable <a href="{@docRoot}guide/practices/screen-compat-mode.html">screen
+compatibility mode</a>.</p>
+  </dd>
+
+  <dt><a name="xlarge"></a>{@code android:xlargeScreens}</dt>
+  <dd>Indicates whether the application supports extra large screen form-factors.
+     An xlarge screen is defined as a screen that is significantly larger
+     than a "large" screen, such as a tablet (or something larger) and may require special care
+     on the application's part to make good use of it, though it may rely on resizing by the
+system to fill the screen.
+  <p>The default value for this actually varies between some versions, so it's better if
+you explicitly declare this attribute at all times. Beware that setting it "false" will
+generally enable <a href="{@docRoot}guide/practices/screen-compat-mode.html">screen
+compatibility mode</a>.</p>
+     <p>This attribute was introduced in API level 9.</p>
+  </dd>
+  
+  <dt><a name="any"></a>{@code android:anyDensity}</dt>
+  <dd>Indicates whether the application includes resources to accommodate any screen
+     density.
+     <p>For applications that support Android 1.6 (API level 4) and higher, this is "true"
+by default and <strong>you should not set it "false"</strong> unless you're absolutely certain that
+it's necessary for your application to work. The only time it might be necessary to disable this
+is if your app directly manipulates bitmaps (see the <a
+href="{@docRoot}guide/practices/screens_support.html#DensityConsiderations">Supporting Multiple
+Screens</a> document for more information).</p>
+  </dd>
   
   <dt id="requiresSmallest">{@code android:requiresSmallestWidthDp}</dt>
   <dd>This attribute specifies the minimum "smallest screen width" with which your
 application is compatible. In order for a device to be considered compatible with your
 application, the shortest side of the available screen space must be equal to or greater than this
 value.
+
+  <p class="caution"><strong>Caution:</strong> The Android system does not pay attention to this
+attribute, so it does not affect how your application behaves at runtime. Instead, it is used
+to enable filtering for your application on services such as Android Market. However,
+<strong>Android Market currently does not support this attribute</strong> (on Android 3.2), so you
+should continue using the other size attributes if your application does not support
+small screens.</p>
+
+<!-- 
+     #### Android Market does not support this attribute yet. ####
+
 <p>The width against which your value is compared takes into account screen decorations and system
 UI. For example, if the device has some persistent UI elements on the left or right edge of the
 display, the system declares the device's available width as one that is smaller than the actual
@@ -95,29 +171,32 @@ to properly display its UI, rather than relying on the generalized size groups.<
 <code><a href="#small">smallScreens</a></code>, <code><a href="#normal">normalScreens</a></code>,
 <code><a href="#large">largeScreens</a></code>, or <code><a href="#xlarge">xlargeScreens</a></code>
 attributes are used instead to determine the smallest screen required.</p>
+-->
      <p>This attribute was introduced in API level 13.</p>
   </dd>
 
   <dt id="compatibleWidth">{@code android:compatibleWidthLimitDp}</dt>
-  <dd>This attribute allows you to enable screen compatibility mode as a user-optional feature by
-specifying the maximum "smallest screen width" for which your application is designed. If the value
-you supply here is less than the shortest side of the available screen space, users can still
-install your application, but are offered to run it in screen compatibility mode. By default, screen
-compatibility mode is disabled and your layout is resized to fit the screen as usual, but a
-button is available in the system bar that allows the user to toggle screen compatibility mode on
-and off.
+  <dd>This attribute allows you to enable <a
+href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mode</a> as a
+user-optional feature by specifying the maximum "smallest screen width" for which your application
+is designed. If the smallest side of a device's available screen is greater than your value here,
+users can still install your application, but are offered to run it in screen compatibility mode. By
+default, screen compatibility mode is disabled and your layout is resized to fit the screen as
+usual, but a button is available in the system bar that allows the user to toggle screen
+compatibility mode on and off.
   <p>If your application is compatible with all screen sizes and its layout properly resizes, you do
 not need to use this attribute.</p>
-  <p class="note"><strong>Note:</strong> Currently, screen compatibility mode only emulates handset
+  <p class="note"><strong>Note:</strong> Currently, screen compatibility mode emulates only handset
 screens with a 320dp width, so screen compatibility mode is not applied if your value for {@code
 android:compatibleWidthLimitDp} is larger than 320.</p>
      <p>This attribute was introduced in API level 13.</p>
   </dd>
 
   <dt id="largestWidth">{@code android:largestWidthLimitDp}</dt>
-  <dd>This attribute allows you to force enable screen compatibility mode by specifying the maximum
-"smallest screen width" for which your application is designed. If the value you supply here is less
-than the shortest side of the available screen space, the application runs in screen
+  <dd>This attribute allows you to force-enable <a
+href="{@docRoot}guide/practices/screen-compat-mode.html">screen compatibility mode</a> by specifying
+the maximum "smallest screen width" for which your application is designed. If the smallest side of
+a device's available screen is greater than your value here, the application runs in screen
 compatibility mode with no way for the user to disable it.
   <p>If your application is compatible with all screen sizes and its layout properly resizes, you do
 not need to use this attribute. Otherwise, you should first consider using the <a
@@ -125,101 +204,10 @@ href="#compatibleWidth">{@code android:compatibleWidthLimitDp}</a> attribute. Yo
 {@code android:largestWidthLimitDp} attribute only when your application is functionally broken when
 resized for larger screens and screen compatibility mode is the only way that users should use
 your application.</p>
-  <p class="note"><strong>Note:</strong> Currently, screen compatibility mode only emulates handset
+  <p class="note"><strong>Note:</strong> Currently, screen compatibility mode emulates only handset
 screens with a 320dp width, so screen compatibility mode is not applied if your value for {@code
 android:largestWidthLimitDp} is larger than 320.</p>
      <p>This attribute was introduced in API level 13.</p>
-  </dd>
-
-  <dt><a name="resizeable"></a>{@code android:resizeable}</dt>
-  <dd>Indicates whether the application is resizeable for different screen sizes. This attribute is
-true, by default, if you have set either <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
-{@code "4"} or higher. Otherwise, it is false by default. If set false, the system will not resize
-your application when run on <em>large</em> or <em>xlarge</em> screens. Instead, the
-application appears in a "postage stamp" that equals the <em>normal</em> screen size that your
-application does support. This is less than an ideal experience for users, because the
-application appears smaller than the available screen, but it might help your application run
-normally if it were designed only for the <em>normal</em> screen size and some behaviors do not work
-when resized.</p>
-  <p>To provide the best experience on all screen sizes, you should allow resizing and, if your
-application does not work well on larger screens, follow the guide to <a
-href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a> to enable
-additional screen support.</p>
-  <p><strong>This attribute is deprecated</strong> as of API level 13.</p>
-  </dd>
-  
-  
-  <dt><a name="small"></a>{@code android:smallScreens}</dt>
-  <dd>Indicates whether the application supports smaller screen form-factors.
-     A small screen is defined as one with a smaller aspect ratio than
-     the "normal" (traditional HVGA) screen.  An application that does
-     not support small screens <em>will not be available</em> for
-     small screen devices from external services (such as Android Market), because there is little
-the platform can do
-     to make such an application work on a smaller screen. If the application has set either <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
-{@code "4"} or higher,
-the default value for this is {@code "true"}, any value less than {@code "4"} results in this set to
-{@code "false"}.
-  <p><strong>This attribute is deprecated</strong> as of API level 13.</p>
-  </dd>
-  
-  <dt><a name="normal"></a>{@code android:normalScreens}</dt>
-  <dd>Indicates whether an application supports the "normal" screen
-     form-factors.  Traditionally this is an HVGA medium density
-     screen, but WQVGA low density and WVGA high density are also
-     considered to be normal.  This attribute is "true" by default,
-     and applications currently should leave it that way.
-  <p><strong>This attribute is deprecated</strong> as of API level 13.</p>
-  </dd>
-  
-  <dt><a name="large"></a>{@code android:largeScreens}</dt>
-  <dd>Indicates whether the application supports larger screen form-factors.
-     A large screen is defined as a screen that is significantly larger
-     than a "normal" handset screen, and thus might require some special care
-     on the application's part to make good use of it, though it may rely on resizing by the
-system to fill the screen. If the application has set either <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
-{@code "4"} or higher,
-the default value for this is {@code "true"}, any value less than {@code "4"} results in this set to
-{@code "false"}.
-  <p><strong>This attribute is deprecated</strong> as of API level 13.</p>
-  </dd>
-
-  <dt><a name="xlarge"></a>{@code android:xlargeScreens}</dt>
-  <dd>Indicates whether the application supports extra large screen form-factors.
-     An xlarge screen is defined as a screen that is significantly larger
-     than a "large" screen, such as a tablet (or something larger) and may require special care
-     on the application's part to make good use of it, though it may rely on resizing by the
-system to fill the screen. If the application has set either <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
-{@code "4"} or higher,
-the default value for this is {@code "true"}, any value less than {@code "4"} results in this set to
-{@code "false"}.
-     <p>This attribute was introduced in API level 9.</p>
-  <p><strong>This attribute is deprecated</strong> as of API level 13.</p>
-  </dd>
-  
-  <dt><a name="any"></a>{@code android:anyDensity}</dt>
-  <dd>Indicates whether the application includes resources to accommodate any screen
-     density.  Older applications (before API Level 4) are assumed unable to
-     accomodate all densities and this is {@code "false"} by default. If the application has set
-either <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#min">{@code minSdkVersion}</a> or <a
-href="{@docRoot}guide/topics/manifest/uses-sdk-element.html#target">{@code targetSdkVersion}</a> to
-{@code "4"} or higher,
-the default value for this is {@code "true"}. Otherwise, it is {@code "false"}.
-     You can explicitly supply your abilities here.
-     <p>Based on the "standard" device screen density (medium dpi), the Android framework will scale
-down application assets by a factor of 0.75 (low dpi screens) or scale them up by a factor of 1.5
-(high dpi screens), when you don't provide alternative resources for a specifc screen density. The
-screen density is expressed as dots-per-inch (dpi).</p>
-  <p><strong>This attribute is deprecated</strong> as of API level 13.</p>
   </dd>
   
 
