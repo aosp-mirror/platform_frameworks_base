@@ -155,48 +155,43 @@ href="{@docRoot}guide/publishing/licensing.html">Application Licensing</a>.</p>
 
 <p>To help users discover your published applications, you can use two special Android Market URIs
 that direct users to your application's details page or perform a search for all of your published
-applications in Android Market. You can use these URIs to do the following:</p>
+applications in Android Market. You can use these URIs to create a button in your application or a
+link on a web page that:</p>
 
 <ul>
-  <li>Create a button in your application or a link on a web page that opens one of your
-application's details page in the Android Market application or web site.</li>
-  <li>Create a button in your application or a link on a web page that searches for all your
-published applications in the Android Market application or web site.</li>
+  <li>Opens your application's details page in the Android Market application or web site.</li>
+  <li>Searches for all your published applications in the Android Market application or web
+site.</li>
 </ul>
 
 <p>You can launch the Android Market application or web site in the following ways:</p>
 <ul>
   <li>Initiate an {@link android.content.Intent} from your application that launches the
-Android Market application on the user's device. The intent must use the {@link
-android.content.Intent#ACTION_VIEW} action, and include intent data with the appropriate
-Android Market URI scheme.</li>
-  <li>Provide a hyperlink on a web page that opens the Android Market web site.</li>
+Android Market application on the user's device.</li>
+  <li>Provide a link on a web page that opens the Android Market web site (but will also
+open the Android Market application if clicked from a device).</li>
 </ul>
 
-<p>In both cases, you need to create a URI that indicates either the application you'd like to view
-in Android Market or the search you'd like to perform. The URI is quite similar whether you want
-to open the application or open the web site. The only difference is the URI prefix.</p>
+<p>In both cases, whether you want to initiate the action from your application or from a web
+page, the URIs are quite similar. The only difference is the URI prefix.</p>
 
-<p>To open the Android Market application on the device, the prefix for the intent's data URI
-is:</p>
+<p>To open the Android Market application from your application, the prefix for the intent's data
+URI is:</p>
 
 <p style="margin-left:2em"><code>market://</code></p>
 
-<p>To open the Android Market web site, the prefix for the link URI is:</p>
+<p>To open Android Market from your web site, the prefix for the link URI is:</p>
 
 <p style="margin-left:2em"><code>http://market.android.com/</code></p>
 
-<p>To complete each URI, you must append a string that specifies either the
-application for which you want to view or the search to execute. The following sections
-describe how to create a complete URI for each case.</p>
+<p>The following sections describe how to create a complete URI for each action.</p>
 
-<p class="note"><strong>Note:</strong> If you create a link to open the Android Market web site and
-the user selects it from an Android-powered device, the Android Market application will also resolve
-the link so the user can use the native application instead of the web site. Also, because the
-Android Market application also reads the {@code http://} URIs, you can also use them in an intent,
-but you should usually use the {@code market://} URIs for an intent, so that the native application
-is opened by default. You should use {@code http://} URIs only when creating links from a web
-page.</p>
+<p class="note"><strong>Note:</strong> If you create a link to open Android Market from your web
+site and the user selects it from an Android-powered device, the device's Market application will
+resolve the link so the user can use the Market application instead of opening the web
+site. As such, you should always use {@code http://market.android.com/} URIs when creating a link on
+a web page. When pointing to your apps from within your Android app, use the
+{@code market://} URIs in an intent, so that the Market application always opens.</p>
 
 
 <h3 id="OpeningDetails">Opening an app's details page</h3>
@@ -209,22 +204,23 @@ the application description, screenshots, reviews and more, and choose to instal
 
 <p style="margin-left:2em"><code>&lt;URI_prefix&gt;<b>details?id=</b>&lt;package_name&gt;</code></p>
 
-<p>The <code>&lt;package_name&gt;</code> is a placeholder for the target application's fully
-qualified package name, as declared in the <a
+<p>The <code>&lt;package_name&gt;</code> is a placeholder for the target application's
+fully-qualified package name, as declared in the <a
 href="{@docRoot}guide/topics/manifest/manifest-element.html#package">{@code
 package}</a> attribute of the <a href="{@docRoot}guide/topics/manifest/manifest-element.html">{@code
-&lt;manifest&gt;}</a> element in the application's manifest file.</p>
+&lt;manifest&gt;}</a> element.</p>
 
 
-<h4>Opening details in the Android Market application</h4>
+<h4>Opening the app details page from your Android app</h4>
 
-<p>To open the details page in the Android Market application, create an intent with the
-{@link android.content.Intent#ACTION_VIEW} action and include a data URI in this format:</p>
+<p>To open the Android Market details page from your application,
+create an intent with the {@link android.content.Intent#ACTION_VIEW} action and include a data URI
+in this format:</p>
 
 <p style="margin-left:2em"><code>market://details?id=&lt;package_name&gt;</code></p>
 
-<p>For example, here's how you can create an intent and open an application's details page in the
-Android Market application:</p>
+<p>For example, here's how you can create an intent and open an application's details page in
+Android Market:</p>
 
 <pre>
 Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -232,22 +228,29 @@ intent.setData(Uri.parse("market://details?id=com.android.example"));
 startActivity(intent);
 </pre>
 
+<p>This will open the Android Market application on the device to view the {@code
+com.android.example} application.</p>
 
-<h4>Opening details on the Android Market web site</h4>
 
-<p>To open the details page on the Android Market web site, create a link with a URI in this
+<h4>Opening the app details page from a web site</h4>
+
+<p>To open the details page from your web site, create a link with a URI in this
 format:</p>
 
 <p style="margin-left:2em">
   <code>http://market.android.com/details?id=&lt;package_name&gt;</code>
 </p>
 
-<p>For example, here's a link that opens an application's details page on the Android Market web
-site:</p>
+<p>For example, here's a link that opens an application's details page on Android Market:</p>
 
 <pre>
 &lt;a href="http://market.android.com/details?id=com.android.example">App Link&lt;/a>
 </pre>
+
+<p>When clicked from a desktop web browser, this opens the Android Market web site to view the
+{@code com.android.example} application. When clicked from an Android-powered device, users are
+given the option to use either their web browser or the Android Market application to view the
+application.</p>
 
 
 
@@ -274,9 +277,9 @@ by the publisher name:
 </ul>
 
 
-<h4>Searching the Android Market application</h4>
+<h4>Searching from your Android app</h4>
 
-<p>To perform a search in the Android Market application, create an intent with the
+<p>To initiate a search on Android Market from your application, create an intent with the
 {@link android.content.Intent#ACTION_VIEW} action and include a data URI in this format:</p>
 
 <p style="margin-left:2em"><code>market://search?q=&lt;query&gt;</code></p>
@@ -292,13 +295,13 @@ intent.setData(Uri.parse("market://search?q=pub:Your Publisher Name"));
 startActivity(intent);
 </pre>
 
-<p>The search result shows all applications published by the publisher and which are compatible with
-the current device.</p>
+<p>This opens the Android Market application to perform the search. The search result shows all
+applications published by the publisher that are compatible with the current device.</p>
 
 
-<h4>Searching the Android Market web site</h4>
+<h4>Searching from a web site</h4>
 
-<p>To perform a search on the Android Market web site, create a link with a URI in this
+<p>To initiate a search on Android Market from your web site, create a link with a URI in this
 format:</p>
 
 <p style="margin-left:2em">
@@ -307,26 +310,31 @@ format:</p>
 
 <p>The query may include the {@code pub:} parameter described above.</p>
 
-<p>For example, here's a link that initiates a search on the Android Market web site, based on the
+<p>For example, here's a link that initiates a search on Android Market, based on the
 publisher name:</p>
 
 <pre>
 &lt;a href="http://market.android.com/search?q=pub:Your Publisher Name">Search Link&lt;/a>
 </pre>
 
-<p>The search result shows all applications published by the publisher.</p>
+<p>When clicked from a desktop web browser, this opens the Android Market web site and performs the
+search. When clicked from an Android-powered device, users are given the option to use either their
+web browser or the Android Market application to perform the search.</p>
 
 
 
 <h3 id="BuildaButton">Build an Android Market button</h3>
 
-<p>Use the following form to input either your application's package name or your publisher name
-and generate a button that you can use on your web site. The button will take users to Android
-Market to view your application details or view a list of all applications you've published.</p>
+<p>Use the following form to generate an "Available in Android Market" button that you can use on
+your web site. Input either your application's package name or publisher name and the button will
+take users to Android Market to either view your application's information or view a list of
+your published apps. If users click the button while on an Android-powered device, the Android
+Market application will respond to show users your application(s).</p>
 
-<p>This form offers four versions of the official "Available in Android Market" badge at
-recommended sizes. If you would like to create a different size, you can download an EPS file for
-the badges from the <a href="http://www.android.com/branding.html">Android Brand Guidelines</a>.</p>
+<p>This form offers four versions of the official "Available in Android Market" button at
+recommended sizes. If you want to create a different size, you can download an EPS file for
+the button images from the <a href="http://www.android.com/branding.html">Android Brand
+Guidelines</a>.</p>
 
 <style type="text/css">
   
@@ -548,4 +556,3 @@ the web and in the Android application), as discussed in the previous sections.<
 </tr>
 
 </table>
-
