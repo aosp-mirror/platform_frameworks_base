@@ -62,6 +62,8 @@ interface IBluetooth
     boolean setDeviceOutOfBandData(in String address, in byte[] hash, in byte[] randomizer);
 
     String getRemoteName(in String address);
+    String getRemoteAlias(in String address);
+    boolean setRemoteAlias(in String address, in String name);
     int getRemoteClass(in String address);
     ParcelUuid[] getRemoteUuids(in String address);
     boolean fetchRemoteUuids(in String address, in ParcelUuid uuid, in IBluetoothCallback callback);
