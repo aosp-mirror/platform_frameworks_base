@@ -34,10 +34,10 @@ public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
 
-    Gallery g = (Gallery) findViewById(R.id.gallery);
-    g.setAdapter(new ImageAdapter(this));
+    Gallery gallery = (Gallery) findViewById(R.id.gallery);
+    gallery.setAdapter(new ImageAdapter(this));
 
-    g.setOnItemClickListener(new OnItemClickListener() {
+    gallery.setOnItemClickListener(new OnItemClickListener() {
         public void onItemClick(AdapterView parent, View v, int position, long id) {
             Toast.makeText(HelloGallery.this, "" + position, Toast.LENGTH_SHORT).show();
         }
@@ -101,10 +101,10 @@ public class ImageAdapter extends BaseAdapter {
 
     public ImageAdapter(Context c) {
         mContext = c;
-        TypedArray a = obtainStyledAttributes(R.styleable.HelloGallery);
-        mGalleryItemBackground = a.getResourceId(
+        TypedArray attr = mContext.obtainStyledAttributes(R.styleable.HelloGallery);
+        mGalleryItemBackground = attr.getResourceId(
                 R.styleable.HelloGallery_android_galleryItemBackground, 0);
-        a.recycle();
+        attr.recycle();
     }
 
     public int getCount() {
@@ -120,14 +120,14 @@ public class ImageAdapter extends BaseAdapter {
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView i = new ImageView(mContext);
+        ImageView imageView = new ImageView(mContext);
 
-        i.setImageResource(mImageIds[position]);
-        i.setLayoutParams(new Gallery.LayoutParams(150, 100));
-        i.setScaleType(ImageView.ScaleType.FIT_XY);
-        i.setBackgroundResource(mGalleryItemBackground);
+        imageView.setImageResource(mImageIds[position]);
+        imageView.setLayoutParams(new Gallery.LayoutParams(150, 100));
+        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+        imageView.setBackgroundResource(mGalleryItemBackground);
 
-        return i;
+        return imageView;
     }
 }
 </pre>
