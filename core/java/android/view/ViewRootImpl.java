@@ -825,8 +825,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL) {
                 // NOTE -- system code, won't try to do compat mode.
                 Display disp = WindowManagerImpl.getDefault().getDefaultDisplay();
-                desiredWindowWidth = disp.getRealWidth();
-                desiredWindowHeight = disp.getRealHeight();
+                Point size = new Point();
+                disp.getRealSize(size);
+                desiredWindowWidth = size.x;
+                desiredWindowHeight = size.y;
             } else {
                 DisplayMetrics packageMetrics =
                     mView.getContext().getResources().getDisplayMetrics();
@@ -980,8 +982,10 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     if (lp.type == WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL) {
                         // NOTE -- system code, won't try to do compat mode.
                         Display disp = WindowManagerImpl.getDefault().getDefaultDisplay();
-                        desiredWindowWidth = disp.getRealWidth();
-                        desiredWindowHeight = disp.getRealHeight();
+                        Point size = new Point();
+                        disp.getRealSize(size);
+                        desiredWindowWidth = size.x;
+                        desiredWindowHeight = size.y;
                     } else {
                         DisplayMetrics packageMetrics = res.getDisplayMetrics();
                         desiredWindowWidth = packageMetrics.widthPixels;

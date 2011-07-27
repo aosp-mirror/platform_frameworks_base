@@ -25,9 +25,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.util.DisplayMetrics;
 import android.util.Slog;
-import android.view.Display;
 import android.view.Surface;
 import android.view.SurfaceSession;
 import android.view.animation.Animation;
@@ -41,7 +39,6 @@ class ScreenRotationAnimation {
     static final int FREEZE_LAYER = WindowManagerService.TYPE_LAYER_MULTIPLIER * 200;
 
     final Context mContext;
-    final Display mDisplay;
     Surface mSurface;
     BlackFrame mBlackFrame;
     int mWidth, mHeight;
@@ -58,18 +55,14 @@ class ScreenRotationAnimation {
     final Transformation mEnterTransformation = new Transformation();
     boolean mStarted;
 
-    final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
     final Matrix mSnapshotInitialMatrix = new Matrix();
     final Matrix mSnapshotFinalMatrix = new Matrix();
     final Matrix mTmpMatrix = new Matrix();
     final float[] mTmpFloats = new float[9];
 
-    public ScreenRotationAnimation(Context context, Display display, SurfaceSession session,
-            boolean inTransaction) {
+    public ScreenRotationAnimation(Context context, SurfaceSession session,
+            boolean inTransaction, int originalWidth, int originalHeight, int originalRotation) {
         mContext = context;
-        mDisplay = display;
-
-        display.getRealMetrics(mDisplayMetrics);
 
         Bitmap screenshot = Surface.screenshot(0, 0);
 
@@ -83,9 +76,9 @@ class ScreenRotationAnimation {
         mWidth = screenshot.getWidth();
         mHeight = screenshot.getHeight();
 
-        mOriginalRotation = display.getRotation();
-        mOriginalWidth = mDisplayMetrics.widthPixels;
-        mOriginalHeight = mDisplayMetrics.heightPixels;
+        mOriginalRotation = originalRotation;
+        mOriginalWidth = originalWidth;
+        mOriginalHeight = originalHeight;
 
         if (!inTransaction) {
             if (WindowManagerService.SHOW_TRANSACTIONS) Slog.i(WindowManagerService.TAG,
@@ -106,7 +99,7 @@ class ScreenRotationAnimation {
                     WindowManagerService.SHOW_SURFACE_ALLOC) Slog.i(WindowManagerService.TAG,
                             "  FREEZE " + mSurface + ": CREATE");
 
-            setRotation(display.getRotation());
+            setRotation(originalRotation);
 
             if (mSurface != null) {
                 Rect dirty = new Rect(0, 0, mWidth, mHeight);
@@ -212,7 +205,7 @@ class ScreenRotationAnimation {
      * Returns true if animating.
      */
     public boolean dismiss(SurfaceSession session, long maxAnimationDuration,
-            float animationScale) {
+            float animationScale, int finalWidth, int finalHeight) {
         if (mSurface == null) {
             // Can't do animation.
             return false;
@@ -248,16 +241,12 @@ class ScreenRotationAnimation {
                 break;
         }
 
-        mDisplay.getRealMetrics(mDisplayMetrics);
-
         // Initialize the animations.  This is a hack, redefining what "parent"
         // means to allow supplying the last and next size.  In this definition
         // "%p" is the original (let's call it "previous") size, and "%" is the
         // screen's current/new size.
-        mEnterAnimation.initialize(mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,
-                mOriginalWidth, mOriginalHeight);
-        mExitAnimation.initialize(mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels,
-                mOriginalWidth, mOriginalHeight);
+        mEnterAnimation.initialize(finalWidth, finalHeight, mOriginalWidth, mOriginalHeight);
+        mExitAnimation.initialize(finalWidth, finalHeight, mOriginalWidth, mOriginalHeight);
         mStarted = false;
 
         mExitAnimation.restrictDuration(maxAnimationDuration);
@@ -270,10 +259,8 @@ class ScreenRotationAnimation {
         Surface.openTransaction();
 
         try {
-            final int w = mDisplayMetrics.widthPixels;
-            final int h = mDisplayMetrics.heightPixels;
-            Rect outer = new Rect(-w, -h, w*2, h*2);
-            Rect inner = new Rect(0, 0, w, h);
+            Rect outer = new Rect(-finalWidth, -finalHeight, finalWidth * 2, finalHeight * 2);
+            Rect inner = new Rect(0, 0, finalWidth, finalHeight);
             mBlackFrame = new BlackFrame(session, outer, inner, FREEZE_LAYER);
         } catch (Surface.OutOfResourcesException e) {
             Slog.w(TAG, "Unable to allocate black surface", e);

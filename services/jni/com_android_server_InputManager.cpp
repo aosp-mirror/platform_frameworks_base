@@ -166,7 +166,8 @@ public:
 
     void dump(String8& dump);
 
-    void setDisplaySize(int32_t displayId, int32_t width, int32_t height);
+    void setDisplaySize(int32_t displayId, int32_t width, int32_t height,
+            int32_t externalWidth, int32_t externalHeight);
     void setDisplayOrientation(int32_t displayId, int32_t orientation);
 
     status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel,
@@ -181,7 +182,7 @@ public:
 
     /* --- InputReaderPolicyInterface implementation --- */
 
-    virtual bool getDisplayInfo(int32_t displayId,
+    virtual bool getDisplayInfo(int32_t displayId, bool external,
             int32_t* width, int32_t* height, int32_t* orientation);
     virtual void getReaderConfiguration(InputReaderConfiguration* outConfig);
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
@@ -221,7 +222,8 @@ private:
     Mutex mLock;
     struct Locked {
         // Display size information.
-        int32_t displayWidth, displayHeight; // -1 when initialized
+        int32_t displayWidth, displayHeight; // -1 when not initialized
+        int32_t displayExternalWidth, displayExternalHeight; // -1 when not initialized
         int32_t displayOrientation;
 
         // System UI visibility.
@@ -269,6 +271,8 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         AutoMutex _l(mLock);
         mLocked.displayWidth = -1;
         mLocked.displayHeight = -1;
+        mLocked.displayExternalWidth = -1;
+        mLocked.displayExternalHeight = -1;
         mLocked.displayOrientation = ROTATION_0;
 
         mLocked.systemUiVisibility = ASYSTEM_UI_VISIBILITY_STATUS_BAR_VISIBLE;
@@ -305,22 +309,24 @@ bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const c
     return false;
 }
 
-void NativeInputManager::setDisplaySize(int32_t displayId, int32_t width, int32_t height) {
+void NativeInputManager::setDisplaySize(int32_t displayId, int32_t width, int32_t height,
+        int32_t externalWidth, int32_t externalHeight) {
     if (displayId == 0) {
         { // acquire lock
             AutoMutex _l(mLock);
 
-            if (mLocked.displayWidth == width && mLocked.displayHeight == height) {
-                return;
+            if (mLocked.displayWidth != width || mLocked.displayHeight != height) {
+                mLocked.displayWidth = width;
+                mLocked.displayHeight = height;
+
+                sp<PointerController> controller = mLocked.pointerController.promote();
+                if (controller != NULL) {
+                    controller->setDisplaySize(width, height);
+                }
             }
 
-            mLocked.displayWidth = width;
-            mLocked.displayHeight = height;
-
-            sp<PointerController> controller = mLocked.pointerController.promote();
-            if (controller != NULL) {
-                controller->setDisplaySize(width, height);
-            }
+            mLocked.displayExternalWidth = externalWidth;
+            mLocked.displayExternalHeight = externalHeight;
         } // release lock
     }
 }
@@ -352,7 +358,7 @@ status_t NativeInputManager::unregisterInputChannel(JNIEnv* env,
     return mInputManager->getDispatcher()->unregisterInputChannel(inputChannel);
 }
 
-bool NativeInputManager::getDisplayInfo(int32_t displayId,
+bool NativeInputManager::getDisplayInfo(int32_t displayId, bool external,
         int32_t* width, int32_t* height, int32_t* orientation) {
     bool result = false;
     if (displayId == 0) {
@@ -360,10 +366,10 @@ bool NativeInputManager::getDisplayInfo(int32_t displayId,
 
         if (mLocked.displayWidth > 0 && mLocked.displayHeight > 0) {
             if (width) {
-                *width = mLocked.displayWidth;
+                *width = external ? mLocked.displayExternalWidth : mLocked.displayWidth;
             }
             if (height) {
-                *height = mLocked.displayHeight;
+                *height = external ? mLocked.displayExternalHeight : mLocked.displayHeight;
             }
             if (orientation) {
                 *orientation = mLocked.displayOrientation;
@@ -952,7 +958,7 @@ static void android_server_InputManager_nativeStart(JNIEnv* env, jclass clazz) {
 }
 
 static void android_server_InputManager_nativeSetDisplaySize(JNIEnv* env, jclass clazz,
-        jint displayId, jint width, jint height) {
+        jint displayId, jint width, jint height, jint externalWidth, jint externalHeight) {
     if (checkInputManagerUnitialized(env)) {
         return;
     }
@@ -961,7 +967,7 @@ static void android_server_InputManager_nativeSetDisplaySize(JNIEnv* env, jclass
     // to be passed in like this, not sure which is better but leaving it like this
     // keeps the window manager in direct control of when display transitions propagate down
     // to the input dispatcher
-    gNativeInputManager->setDisplaySize(displayId, width, height);
+    gNativeInputManager->setDisplaySize(displayId, width, height, externalWidth, externalHeight);
 }
 
 static void android_server_InputManager_nativeSetDisplayOrientation(JNIEnv* env, jclass clazz,
@@ -1291,7 +1297,7 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeInit },
     { "nativeStart", "()V",
             (void*) android_server_InputManager_nativeStart },
-    { "nativeSetDisplaySize", "(III)V",
+    { "nativeSetDisplaySize", "(IIIII)V",
             (void*) android_server_InputManager_nativeSetDisplaySize },
     { "nativeSetDisplayOrientation", "(II)V",
             (void*) android_server_InputManager_nativeSetDisplayOrientation },

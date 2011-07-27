@@ -25,16 +25,18 @@ import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 
+/**
+ * Provides information about the display size and density.
+ */
 public class Display {
     static final String TAG = "Display";
     static final boolean DEBUG_COMPAT = false;
 
     /**
-     * Specify the default Display
+     * The default Display id.
      */
     public static final int DEFAULT_DISPLAY = 0;
 
-    
     /**
      * Use {@link android.view.WindowManager#getDefaultDisplay()
      * WindowManager.getDefaultDisplay()} to create a Display object.
@@ -55,16 +57,6 @@ public class Display {
         init(display);
     }
 
-    /** @hide */
-    public static void setCompatibilityInfo(CompatibilityInfo compatInfo) {
-        if (compatInfo != null && (compatInfo.isScalingRequired()
-                || !compatInfo.supportsScreen())) {
-            sCompatibilityInfo = compatInfo;
-        } else {
-            sCompatibilityInfo = null;
-        }
-    }
-    
     /**
      * Returns the index of this display.  This is currently undefined; do
      * not use.
@@ -80,25 +72,29 @@ public class Display {
     native static int getDisplayCount();
     
     /**
-     * Returns the raw size of the display, in pixels.  Note that this
-     * should <em>not</em> generally be used for computing layouts, since
-     * a device will typically have screen decoration (such as a status bar)
+     * Gets the size of the display, in pixels.
+     * <p>
+     * Note that this value should <em>not</em> be used for computing layouts,
+     * since a device will typically have screen decoration (such as a status bar)
      * along the edges of the display that reduce the amount of application
-     * space available from the raw size returned here.  This value is
-     * adjusted for you based on the current rotation of the display.
+     * space available from the size returned here.  Layouts should instead use
+     * the window size.
+     * </p><p>
+     * The size is adjusted based on the current rotation of the display.
+     * </p><p>
+     * The size returned by this method does not necessarily represent the
+     * actual raw size (native resolution) of the display.  The returned size may
+     * be adjusted to exclude certain system decor elements that are always visible.
+     * It may also be scaled to provide compatibility with older applications that
+     * were originally designed for smaller displays.
+     * </p>
+     *
+     * @param outSize A {@link Point} object to receive the size information.
      */
     public void getSize(Point outSize) {
         getSizeInternal(outSize, true);
     }
 
-    /**
-     * Returns the raw size of the display, in pixels.  Note that this
-     * should <em>not</em> generally be used for computing layouts, since
-     * a device will typically have screen decoration (such as a status bar)
-     * along the edges of the display that reduce the amount of application
-     * space available from the raw size returned here.  This value is
-     * adjusted for you based on the current rotation of the display.
-     */
     private void getSizeInternal(Point outSize, boolean doCompat) {
         try {
             IWindowManager wm = getWindowManager();
@@ -118,8 +114,8 @@ public class Display {
             } else {
                 // This is just for boot-strapping, initializing the
                 // system process before the window manager is up.
-                outSize.x = getRealWidth();
-                outSize.y = getRealHeight();
+                outSize.x = getRawWidth();
+                outSize.y = getRawHeight();
             }
             if (DEBUG_COMPAT && doCompat) Slog.v(TAG, "Returning display size: " + outSize);
         } catch (RemoteException e) {
@@ -128,7 +124,10 @@ public class Display {
     }
     
     /**
-     * This is just easier for some parts of the framework.
+     * Gets the size of the display as a rectangle, in pixels.
+     *
+     * @param outSize A {@link Rect} object to receive the size information.
+     * @see #getSize(Point)
      */
     public void getRectSize(Rect outSize) {
         synchronized (mTmpPoint) {
@@ -182,14 +181,49 @@ public class Display {
         }
     }
 
-    /** @hide Returns the actual screen size, not including any decor. */
-    native public int getRealWidth();
-    /** @hide Returns the actual screen size, not including any decor. */
-    native public int getRealHeight();
+    /**
+     * Gets the real size of the display without subtracting any window decor or
+     * applying any compatibility scale factors.
+     * <p>
+     * The real size may be smaller than the raw size when the window manager
+     * is emulating a smaller display (using adb shell am display-size).
+     * </p><p>
+     * The size is adjusted based on the current rotation of the display.
+     * </p>
+     * @hide
+     */
+    public void getRealSize(Point outSize) {
+        try {
+            IWindowManager wm = getWindowManager();
+            if (wm != null) {
+                wm.getRealDisplaySize(outSize);
+            } else {
+                // This is just for boot-strapping, initializing the
+                // system process before the window manager is up.
+                outSize.x = getRawWidth();
+                outSize.y = getRawHeight();
+            }
+        } catch (RemoteException e) {
+            Slog.w("Display", "Unable to get real display size", e);
+        }
+    }
 
-    /** @hide special for when we are faking the screen size. */
+    /**
+     * Gets the raw width of the display, in pixels.
+     * <p>
+     * The size is adjusted based on the current rotation of the display.
+     * </p>
+     * @hide
+     */
     native public int getRawWidth();
-    /** @hide special for when we are faking the screen size. */
+
+    /**
+     * Gets the raw height of the display, in pixels.
+     * <p>
+     * The size is adjusted based on the current rotation of the display.
+     * </p>
+     * @hide
+     */
     native public int getRawHeight();
     
     /**
@@ -235,17 +269,24 @@ public class Display {
     }
     
     /**
-     * Initialize a DisplayMetrics object from this display's data.
-     * 
-     * @param outMetrics
+     * Gets display metrics that describe the size and density of this display.
+     * <p>
+     * The size is adjusted based on the current rotation of the display.
+     * </p><p>
+     * The size returned by this method does not necessarily represent the
+     * actual raw size (native resolution) of the display.  The returned size may
+     * be adjusted to exclude certain system decor elements that are always visible.
+     * It may also be scaled to provide compatibility with older applications that
+     * were originally designed for smaller displays.
+     * </p>
+     *
+     * @param outMetrics A {@link DisplayMetrics} object to receive the metrics.
      */
     public void getMetrics(DisplayMetrics outMetrics) {
         synchronized (mTmpPoint) {
             getSizeInternal(mTmpPoint, false);
-            outMetrics.widthPixels = mTmpPoint.x;
-            outMetrics.heightPixels = mTmpPoint.y;
+            getMetricsWithSize(outMetrics, mTmpPoint.x, mTmpPoint.y);
         }
-        getNonSizeMetrics(outMetrics);
 
         CompatibilityInfo ci = mCompatibilityInfo.getIfNeeded();
         if (ci != null) {
@@ -257,22 +298,44 @@ public class Display {
     }
 
     /**
-     * Initialize a DisplayMetrics object from this display's data.
-     *
-     * @param outMetrics
+     * Gets display metrics based on the real size of this display.
      * @hide
      */
     public void getRealMetrics(DisplayMetrics outMetrics) {
-        outMetrics.widthPixels = getRealWidth();
-        outMetrics.heightPixels = getRealHeight();
-        getNonSizeMetrics(outMetrics);
+        synchronized (mTmpPoint) {
+            getRealSize(mTmpPoint);
+            getMetricsWithSize(outMetrics, mTmpPoint.x, mTmpPoint.y);
+        }
     }
 
-    private void getNonSizeMetrics(DisplayMetrics outMetrics) {
+    /**
+     * If the display is mirrored to an external HDMI display, returns the
+     * width of that display.
+     * @hide
+     */
+    public int getRawExternalWidth() {
+        return 1280;
+    }
+
+    /**
+     * If the display is mirrored to an external HDMI display, returns the
+     * height of that display.
+     * @hide
+     */
+    public int getRawExternalHeight() {
+        return 720;
+    }
+
+    /**
+     * Gets display metrics based on an explicit assumed display size.
+     * @hide
+     */
+    public void getMetricsWithSize(DisplayMetrics outMetrics,
+            int width, int height) {
         outMetrics.densityDpi   = (int)((mDensity*DisplayMetrics.DENSITY_DEFAULT)+.5f);
 
-        outMetrics.noncompatWidthPixels  = outMetrics.widthPixels;
-        outMetrics.noncompatHeightPixels = outMetrics.heightPixels;
+        outMetrics.noncompatWidthPixels  = outMetrics.widthPixels = width;
+        outMetrics.noncompatHeightPixels = outMetrics.heightPixels = height;
 
         outMetrics.density = outMetrics.noncompatDensity = mDensity;
         outMetrics.scaledDensity = outMetrics.noncompatScaledDensity = outMetrics.density;
@@ -314,8 +377,6 @@ public class Display {
     private static final Object sStaticInit = new Object();
     private static boolean sInitialized = false;
     private static IWindowManager sWindowManager;
-
-    private static volatile CompatibilityInfo sCompatibilityInfo;
 
     /**
      * Returns a display object which uses the metric's width/height instead.

@@ -25,7 +25,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import android.util.Slog;
-import android.view.View;
+import android.view.Display;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
 import android.view.WindowManagerPolicy;
@@ -41,6 +41,7 @@ public class HeightReceiver extends BroadcastReceiver {
     ArrayList<OnBarHeightChangedListener> mListeners = new ArrayList<OnBarHeightChangedListener>();
     WindowManager mWindowManager;
     int mHeight;
+    boolean mPlugged;
 
     public HeightReceiver(Context context) {
         mContext = context;
@@ -71,15 +72,24 @@ public class HeightReceiver extends BroadcastReceiver {
     }
 
     private void setPlugged(boolean plugged) {
+        mPlugged = plugged;
+        updateHeight();
+    }
+
+    public void updateHeight() {
         final Resources res = mContext.getResources();
 
         int height = -1;
-        if (plugged) {
+        if (mPlugged) {
             final DisplayMetrics metrics = new DisplayMetrics();
-            mWindowManager.getDefaultDisplay().getRealMetrics(metrics);
-            //Slog.i(TAG, "setPlugged: display metrics=" + metrics);
+            Display display = mWindowManager.getDefaultDisplay();
+            display.getRealMetrics(metrics);
+
+            //Slog.i(TAG, "updateHeight: display metrics=" + metrics);
             final int shortSide = Math.min(metrics.widthPixels, metrics.heightPixels);
-            height = shortSide - 720;
+            final int externalShortSide = Math.min(display.getRawExternalWidth(),
+                    display.getRawExternalHeight());
+            height = shortSide - externalShortSide;
         }
 
         final int minHeight
@@ -87,7 +97,7 @@ public class HeightReceiver extends BroadcastReceiver {
         if (height < minHeight) {
             height = minHeight;
         }
-        Slog.i(TAG, "Resizing status bar plugged=" + plugged + " height="
+        Slog.i(TAG, "Resizing status bar plugged=" + mPlugged + " height="
                 + height + " old=" + mHeight);
         mHeight = height;
 

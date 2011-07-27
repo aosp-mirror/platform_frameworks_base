@@ -50,10 +50,7 @@ class Watermark {
     int mLastDH;
     boolean mDrawNeeded;
 
-    Watermark(Display display, SurfaceSession session, String[] tokens) {
-        final DisplayMetrics dm = new DisplayMetrics();
-        display.getRealMetrics(dm);
-
+    Watermark(DisplayMetrics dm, SurfaceSession session, String[] tokens) {
         if (false) {
             Log.i(WindowManagerService.TAG, "*********************** WATERMARK");
             for (int i=0; i<tokens.length; i++) {
