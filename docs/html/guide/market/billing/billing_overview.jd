@@ -257,7 +257,10 @@ broadcast intents that are sent for every request.</p>
   <code>RESPONSE_CODE</code>, <code>PURCHASE_INTENT</code>, and <code>REQUEST_ID</code>. The
   <code>PURCHASE_INTENT</code> key provides a {@link android.app.PendingIntent}, which your
   application uses to start the checkout UI for the given product ID.</li>
-  <li>Your application launches the pending intent, which launches the checkout UI.</li>
+  <li>Your application launches the pending intent, which launches the checkout UI.
+    <p class="note"><strong>Note:</strong> You must launch the pending intent from an activity
+    context and not an application context.</p>
+  </li>
   <li>When the checkout flow finishes (that is, the user successfully purchases the item or cancels
   the purchase), Android Market sends your application a notification message (an
   <code>IN_APP_NOTIFY</code> broadcast intent). The notification message includes a notification ID,
@@ -276,13 +279,20 @@ broadcast intents that are sent for every request.</p>
   <code>RESPONSE_CODE</code> key and a <code>REQUEST_ID</code> key.</li>
 </ol>
 
-<p class="note"><strong>Note:</strong> You must launch the pending intent from an activity context
-and not an application context.</p>
-
 <img src="{@docRoot}images/billing_request_purchase.png" height="231" id="figure2" />
 <p class="img-caption">
   <strong>Figure 2.</strong> Message sequence for a purchase request.
 </p>
+
+<p>Keep in mind, you must send a confirmation when you receive transaction information from Android
+Market (step 8 in figure 2). If you don't send a confirmation message, Android Market will
+continue sending <code>IN_APP_NOTIFY</code> messages for the transactions you have not
+confirmed. As a best practice, you should not send a <code>CONFIRM_NOTIFICATIONS</code> request for
+a purchased item until you have delivered the item to the user. This way, if your application
+crashes or something else prevents your application from delivering the product, your application
+will still receive an <code>IN_APP_NOTIFY</code> broadcast intent from Android Market indicating
+that you need to deliver the product. Also, as a best practice, your application must be able to
+handle <code>IN_APP_NOTIFY</code> messages that contain multiple orders.</p>
 
 <p>The messaging sequence for a restore transaction request is shown in figure 3. Request types for
 each <code>sendBillingRequest()</code> method are shown in <strong>bold</strong>, broadcast intents
@@ -307,6 +317,10 @@ pertains to.</p>
 <code>PURCHASE_STATE_CHANGED</code> broadcast intent, which contains the same type of transaction
 information that is sent during a purchase request, although you do not need to respond to this
 intent with a <code>CONFIRM_NOTIFICATIONS</code> message.</p>
+
+<p class="note"><strong>Note:</strong> You should use the <code>RESTORE_TRANSACTIONS</code> request
+type only when your application is installed for the first time on a device or when your
+application has been removed from a device and reinstalled.</p>
 
 <p>The messaging sequence for checking whether in-app billing is supported is shown in figure 4. The
 request type for the <code>sendBillingRequest()</code> method is shown in <strong>bold</strong>.</p>
@@ -335,21 +349,32 @@ purchase has changed. To retrieve the details of that purchase, your application
 <code>GET_PURCHASE_INFORMATION</code> request. Android Market responds with a
 <code>PURCHASE_STATE_CHANGED</code> broadcast intent, which contains the details of the purchase
 state change. Your application then sends a <code>CONFIRM_NOTIFICATIONS</code> message, informing
-Android Market that you've received the purchase state change information.</p>
+Android Market that you have received the purchase state change information.</p>
 
-<p>When Android Market receives a <code>CONFIRM_NOTIFICATIONS</code> message for a given message, it
-usually stops sending <code>IN_APP_NOTIFY</code> intents for that message. However, there are some
-cases where Android Market may send repeated <code>IN_APP_NOTIFY</code> intents for a message even
-though your application has sent a <code>CONFIRM_NOTIFICATIONS</code> message. This can occur if a
-device loses network connectivity while you are sending the <code>CONFIRM_NOTIFICATIONS</code>
-message. In this case, Android Market might not receive your <code>CONFIRM_NOTIFICATIONS</code>
-message and it could send multiple <code>IN_APP_NOTIFY</code> messages until it receives
-acknowledgement that you received the message. Therefore, your application must be able to recognize
-that the subsequent <code>IN_APP_NOTIFY</code> messages are for a previously processed transaction.
-You can do this by checking the <code>orderID</code> that's contained in the JSON string because
-every transaction has a unique <code>orderId</code>.</p>
+<p>In some special cases, you may receive multiple <code>IN_APP_NOTIFY</code> messages even though
+you have confirmed receipt of the purchase information, or you may receive
+<code>IN_APP_NOTIFY</code> messages for a purchase change even though you never initiated the
+purchase. Your application must handle both of these special cases.</p>
 
-<p>There are two cases where your application may also receive <code>IN_APP_NOTIFY</code> broadcast
+<h4>Handling multiple IN_APP_NOTIFY messages</h4>
+
+<p>When Android Market receives a <code>CONFIRM_NOTIFICATIONS</code> message for a given
+<code>PURCHASE_STATE_CHANGED</code> message, it usually stops sending <code>IN_APP_NOTIFY</code>
+intents for that <code>PURCHASE_STATE_CHANGED</code> message. Sometimes, however, Android
+Market may send repeated <code>IN_APP_NOTIFY</code> intents for a
+<code>PURCHASE_STATE_CHANGED</code> message even though your application has sent a
+<code>CONFIRM_NOTIFICATIONS</code> message. This can occur if a device loses network connectivity
+while you are sending the <code>CONFIRM_NOTIFICATIONS</code> message. In this case, Android Market
+might not receive your <code>CONFIRM_NOTIFICATIONS</code> message and it could send multiple
+<code>IN_APP_NOTIFY</code> messages until it receives acknowledgement that you received the
+transaction message. Therefore, your application must be able to recognize that the subsequent
+<code>IN_APP_NOTIFY</code> messages are for a previously processed transaction. You can do this by
+checking the <code>orderID</code> that's contained in the JSON string because every transaction has
+a unique <code>orderId</code>.</p>
+
+<h4>Handling refunds and other unsolicited IN_APP_NOTIFY messages</h4>
+
+<p>There are two cases where your application may receive <code>IN_APP_NOTIFY</code> broadcast
 intents even though your application has not sent a <code>REQUEST_PURCHASE</code> message. Figure 5
 shows the messaging sequence for both of these cases. Request types for each
 <code>sendBillingRequest()</code> method are shown in <strong>bold</strong>, broadcast intents are
@@ -359,11 +384,11 @@ broadcast intents that are sent for every request.</p>
 <div class="figure" style="width:481px">
 <img src="{@docRoot}images/billing_refund.png" alt="" height="189" />
 <p class="img-caption">
-  <strong>Figure 5.</strong> Message sequence for refunds and other unsolicited IN_APP_NOTIFY messages.
-</p>
+  <strong>Figure 5.</strong> Message sequence for refunds and other unsolicited
+IN_APP_NOTIFY messages.</p>
 </div>
 
-<p>In the first case, your application can receive an <code>IN_APP_NOTIFY</code> broadcast intent
+<p>In the first case, your application may receive an <code>IN_APP_NOTIFY</code> broadcast intent
 when a user has your application installed on two (or more) devices and the user makes an in-app
 purchase from one of the devices. In this case, Android Market sends an <code>IN_APP_NOTIFY</code>
 message to the second device, informing the application that there is a purchase state change. Your
@@ -383,6 +408,11 @@ this message the same way it handles responses from an application-initiated
 refunded. The refund information is included in the JSON string that accompanies the
 <code>PURCHASE_STATE_CHANGED</code> broadcast intent. Also, the <code>purchaseState</code> field in
 the JSON string is set to 2.</p>
+
+<p class="caution"><strong>Important:</strong> You cannot use the Google Checkout API to
+issue refunds or cancel in-app billing transactions. You must do this manually through your
+Google Checkout merchant account. However, you can use the Google Checkout API to retrieve order
+information.</p>
 
 <h2 id="billing-security">Security Controls</h2>
 

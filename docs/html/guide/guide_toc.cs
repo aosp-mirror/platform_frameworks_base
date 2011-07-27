@@ -383,9 +383,6 @@
             <span class="en">In-app Billing</span></a>
         </div>
         <ul>
-          <li><a href="<?cs var:toroot?>guide/market/billing/billing_about.html">
-              <span class="en">About this Release</span></a>
-          </li>
           <li><a href="<?cs var:toroot?>guide/market/billing/billing_overview.html">
               <span class="en">In-app Billing Overview</span></a>
           </li>

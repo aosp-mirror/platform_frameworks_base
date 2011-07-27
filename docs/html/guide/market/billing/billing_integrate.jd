@@ -783,11 +783,17 @@ request identifier for the request.</p>
 <code>RESPONSE_CODE</code> broadcast intent. This broadcast intent provides status and error
 information about the request.</p>
 
-<p class="note"><strong>Note:</strong> As a best practice, you should not send a
-<code>CONFIRM_NOTIFICATIONS</code> request for a purchased item until you have delivered the item to
-the user. This way, if your application crashes or something else prevents your application from
-delivering the product, your application will still receive an <code>IN_APP_NOTIFY</code> broadcast
-intent from Android Market indicating that you need to deliver the product.</p>
+<p>You must send a confirmation when you receive transaction information from Android Market. If you
+don't send a confirmation message, Android Market will continue sending
+<code>IN_APP_NOTIFY</code> messages for the transactions you have not confirmed. Also,
+your application must be able to handle <code>IN_APP_NOTIFY</code> messages that contain multiple
+orders.</p>
+
+<p>In addition, as a best practice, you should not send a <code>CONFIRM_NOTIFICATIONS</code> request
+for a purchased item until you have delivered the item to the user. This way, if your application
+crashes or something else prevents your application from delivering the product, your application
+will still receive an <code>IN_APP_NOTIFY</code> broadcast intent from Android Market indicating
+that you need to deliver the product.</p>
 
 <h4>Restoring transaction information (RESTORE_TRANSACTIONS)</h4>
 
@@ -827,6 +833,10 @@ the Android Market application sends a <code>PURCHASE_STATE_CHANGED</code> broad
 message contains the detailed transaction information. The transaction information is contained in a
 signed JSON string (unencrypted). The message includes the signature so you can verify the integrity
 of the signed string.</p>
+
+<p class="note"><strong>Note:</strong> You should use the <code>RESTORE_TRANSACTIONS</code>
+request type only when your application is installed for the first time on a device or when your
+application has been removed from a device and reinstalled.</p>
 
 <h3>Other service tasks</h3>
 
@@ -1061,7 +1071,12 @@ practices, see <a href="{@docRoot}guide/market/billing/billing_best_practices.ht
 Design</a>.</p>
 
 <p class="note"><strong>Note</strong>: If you store any purchase information on a device, be sure to
-encrypt the data and use a device-specific encryption key.</p>
+encrypt the data and use a device-specific encryption key. Also, if the purchase type for any of
+your items is "unmanaged," we recommend that you back up the purchase information for these items to
+a remote server or use Android's <a href="{@docRoot}guide/topics/data/backup.html">data
+backup</a> framework to back up the purchase information. Backing up purchase information for
+unmanaged items is important because unmanaged items cannot be restored by using the
+<code>RESTORE_TRANSACTIONS</code> request type.</p>
 
 <h3>Creating a user interface for selecting items</h3>
 
