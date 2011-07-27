@@ -57,6 +57,9 @@ void OMXMaster::addPlugin(const char *libname) {
     typedef OMXPluginBase *(*CreateOMXPluginFunc)();
     CreateOMXPluginFunc createOMXPlugin =
         (CreateOMXPluginFunc)dlsym(
+                mVendorLibHandle, "createOMXPlugin");
+    if (!createOMXPlugin)
+        createOMXPlugin = (CreateOMXPluginFunc)dlsym(
                 mVendorLibHandle, "_ZN7android15createOMXPluginEv");
 
     if (createOMXPlugin) {
@@ -96,11 +99,19 @@ void OMXMaster::addPlugin(OMXPluginBase *plugin) {
 void OMXMaster::clearPlugins() {
     Mutex::Autolock autoLock(mLock);
 
+    typedef void (*DestroyOMXPluginFunc)(OMXPluginBase*);
+    DestroyOMXPluginFunc destroyOMXPlugin =
+        (DestroyOMXPluginFunc)dlsym(
+                mVendorLibHandle, "destroyOMXPlugin");
+
     mPluginByComponentName.clear();
 
     for (List<OMXPluginBase *>::iterator it = mPlugins.begin();
-         it != mPlugins.end(); ++it) {
-        delete *it;
+            it != mPlugins.end(); ++it) {
+        if (destroyOMXPlugin)
+            destroyOMXPlugin(*it);
+        else
+            delete *it;
         *it = NULL;
     }
 
