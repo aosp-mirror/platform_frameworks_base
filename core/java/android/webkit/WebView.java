@@ -4068,9 +4068,6 @@ public class WebView extends AbsoluteLayout
         if (AUTO_REDRAW_HACK && mAutoRedraw) {
             invalidate();
         }
-        if (inEditingMode()) {
-            mWebTextView.onDrawSubstitute();
-        }
         mWebViewCore.signalRepaintDone();
 
         if (mOverScrollGlow != null && mOverScrollGlow.drawEdgeGlows(canvas)) {
@@ -4287,18 +4284,18 @@ public class WebView extends AbsoluteLayout
 
     private void onZoomAnimationStart() {
         // If it is in password mode, turn it off so it does not draw misplaced.
-        if (inEditingMode() && nativeFocusCandidateIsPassword()) {
-            mWebTextView.setInPassword(false);
+        if (inEditingMode()) {
+            mWebTextView.setVisibility(INVISIBLE);
         }
     }
 
     private void onZoomAnimationEnd() {
         // adjust the edit text view if needed
-        if (inEditingMode() && didUpdateWebTextViewDimensions(FULLY_ON_SCREEN)
-                && nativeFocusCandidateIsPassword()) {
+        if (inEditingMode()
+                && didUpdateWebTextViewDimensions(FULLY_ON_SCREEN)) {
             // If it is a password field, start drawing the WebTextView once
             // again.
-            mWebTextView.setInPassword(true);
+            mWebTextView.setVisibility(VISIBLE);
         }
     }
 
@@ -4593,37 +4590,23 @@ public class WebView extends AbsoluteLayout
         }
         String text = nativeFocusCandidateText();
         int nodePointer = nativeFocusCandidatePointer();
-        if (alreadyThere && mWebTextView.isSameTextField(nodePointer)) {
-            // It is possible that we have the same textfield, but it has moved,
-            // i.e. In the case of opening/closing the screen.
-            // In that case, we need to set the dimensions, but not the other
-            // aspects.
-            // If the text has been changed by webkit, update it.  However, if
-            // there has been more UI text input, ignore it.  We will receive
-            // another update when that text is recognized.
-            if (text != null && !text.equals(mWebTextView.getText().toString())
-                    && nativeTextGeneration() == mTextGeneration) {
-                mWebTextView.setTextAndKeepSelection(text);
+        mWebTextView.setGravity(nativeFocusCandidateIsRtlText() ?
+                Gravity.RIGHT : Gravity.NO_GRAVITY);
+        // This needs to be called before setType, which may call
+        // requestFormData, and it needs to have the correct nodePointer.
+        mWebTextView.setNodePointer(nodePointer);
+        mWebTextView.setType(nativeFocusCandidateType());
+        updateWebTextViewPadding();
+        if (null == text) {
+            if (DebugFlags.WEB_VIEW) {
+                Log.v(LOGTAG, "rebuildWebTextView null == text");
             }
-        } else {
-            mWebTextView.setGravity(nativeFocusCandidateIsRtlText() ?
-                    Gravity.RIGHT : Gravity.NO_GRAVITY);
-            // This needs to be called before setType, which may call
-            // requestFormData, and it needs to have the correct nodePointer.
-            mWebTextView.setNodePointer(nodePointer);
-            mWebTextView.setType(nativeFocusCandidateType());
-            updateWebTextViewPadding();
-            if (null == text) {
-                if (DebugFlags.WEB_VIEW) {
-                    Log.v(LOGTAG, "rebuildWebTextView null == text");
-                }
-                text = "";
-            }
-            mWebTextView.setTextAndKeepSelection(text);
-            InputMethodManager imm = InputMethodManager.peekInstance();
-            if (imm != null && imm.isActive(mWebTextView)) {
-                imm.restartInput(mWebTextView);
-            }
+            text = "";
+        }
+        mWebTextView.setTextAndKeepSelection(text);
+        InputMethodManager imm = InputMethodManager.peekInstance();
+        if (imm != null && imm.isActive(mWebTextView)) {
+            imm.restartInput(mWebTextView);
         }
         if (isFocused()) {
             mWebTextView.requestFocus();
@@ -8120,19 +8103,7 @@ public class WebView extends AbsoluteLayout
                     // and representing the same node as the pointer.
                     if (inEditingMode() &&
                             mWebTextView.isSameTextField(msg.arg1)) {
-                        if (msg.getData().getBoolean("password")) {
-                            Spannable text = (Spannable) mWebTextView.getText();
-                            int start = Selection.getSelectionStart(text);
-                            int end = Selection.getSelectionEnd(text);
-                            mWebTextView.setInPassword(true);
-                            // Restore the selection, which may have been
-                            // ruined by setInPassword.
-                            Spannable pword =
-                                    (Spannable) mWebTextView.getText();
-                            Selection.setSelection(pword, start, end);
-                        // If the text entry has created more events, ignore
-                        // this one.
-                        } else if (msg.arg2 == mTextGeneration) {
+                        if (msg.arg2 == mTextGeneration) {
                             String text = (String) msg.obj;
                             if (null == text) {
                                 text = "";
