@@ -157,7 +157,7 @@ public:
     }
 
 private:
-    virtual bool getDisplayInfo(int32_t displayId,
+    virtual bool getDisplayInfo(int32_t displayId, bool external /*currently ignored*/,
             int32_t* width, int32_t* height, int32_t* orientation) {
         ssize_t index = mDisplayInfos.indexOfKey(displayId);
         if (index >= 0) {

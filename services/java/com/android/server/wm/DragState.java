@@ -123,8 +123,8 @@ class DragState {
             // The drag window covers the entire display
             mDragWindowHandle.frameLeft = 0;
             mDragWindowHandle.frameTop = 0;
-            mDragWindowHandle.frameRight = mService.mDisplay.getRealWidth();
-            mDragWindowHandle.frameBottom = mService.mDisplay.getRealHeight();
+            mDragWindowHandle.frameRight = mService.mCurDisplayWidth;
+            mDragWindowHandle.frameBottom = mService.mCurDisplayHeight;
         }
     }
 

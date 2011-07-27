@@ -45,11 +45,6 @@ struct offsets_t {
 };
 static offsets_t offsets;
 
-static int gShortSize = -1;
-static int gLongSize = -1;
-static int gOldSize = -1;
-static int gNewSize = -1;
-
 // ----------------------------------------------------------------------------
 
 static void android_view_Display_init(
@@ -66,30 +61,6 @@ static void android_view_Display_init(
     env->SetFloatField(clazz, offsets.density,  info.density);
     env->SetFloatField(clazz, offsets.xdpi,     info.xdpi);
     env->SetFloatField(clazz, offsets.ydpi,     info.ydpi);
-}
-
-static jint android_view_Display_getWidth(
-        JNIEnv* env, jobject clazz)
-{
-    DisplayID dpy = env->GetIntField(clazz, offsets.display);
-    jint w = SurfaceComposerClient::getDisplayWidth(dpy);
-    if (gShortSize > 0) {
-        jint h = SurfaceComposerClient::getDisplayHeight(dpy);
-        return w < h ? gShortSize : gLongSize;
-    }
-    return w == gOldSize ? gNewSize : w;
-}
-
-static jint android_view_Display_getHeight(
-        JNIEnv* env, jobject clazz)
-{
-    DisplayID dpy = env->GetIntField(clazz, offsets.display);
-    int h = SurfaceComposerClient::getDisplayHeight(dpy);
-    if (gShortSize > 0) {
-        jint w = SurfaceComposerClient::getDisplayWidth(dpy);
-        return h < w ? gShortSize : gLongSize;
-    }
-    return h == gOldSize ? gNewSize : h;
 }
 
 static jint android_view_Display_getRawWidth(
@@ -132,10 +103,6 @@ static JNINativeMethod gMethods[] = {
             (void*)android_view_Display_getDisplayCount },
 	{   "init", "(I)V",
             (void*)android_view_Display_init },
-    {   "getRealWidth", "()I",
-            (void*)android_view_Display_getWidth },
-    {   "getRealHeight", "()I",
-            (void*)android_view_Display_getHeight },
     {   "getRawWidth", "()I",
             (void*)android_view_Display_getRawWidth },
     {   "getRawHeight", "()I",
@@ -156,24 +123,6 @@ void nativeClassInit(JNIEnv* env, jclass clazz)
 
 int register_android_view_Display(JNIEnv* env)
 {
-    char buf[PROPERTY_VALUE_MAX];
-    int len = property_get("persist.demo.screensizehack", buf, "");
-    if (len > 0) {
-        int temp1, temp2;
-        if (sscanf(buf, "%dx%d", &temp1, &temp2) == 2) {
-            if (temp1 < temp2) {
-                gShortSize = temp1;
-                gLongSize = temp2;
-            } else {
-                gShortSize = temp2;
-                gLongSize = temp1;
-            }
-        } else if (sscanf(buf, "%d=%d", &temp1, &temp2) == 2) {
-            gOldSize = temp1;
-            gNewSize = temp2;
-        }
-    }
-
     return AndroidRuntime::registerNativeMethods(env,
             kClassPathName, gMethods, NELEM(gMethods));
 }
