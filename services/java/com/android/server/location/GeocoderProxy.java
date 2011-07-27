@@ -47,7 +47,9 @@ public class GeocoderProxy {
     public GeocoderProxy(Context context, String serviceName) {
         mContext = context;
         mIntent = new Intent(serviceName);
-        mContext.bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+        mContext.bindService(mIntent, mServiceConnection,
+                Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                | Context.BIND_ALLOW_OOM_MANAGEMENT);
     }
 
     /**
@@ -58,7 +60,9 @@ public class GeocoderProxy {
         synchronized (mMutex) {
             mContext.unbindService(mServiceConnection);
             mServiceConnection = new Connection();
-            mContext.bindService(mIntent, mServiceConnection, Context.BIND_AUTO_CREATE);
+            mContext.bindService(mIntent, mServiceConnection,
+                    Context.BIND_AUTO_CREATE | Context.BIND_NOT_FOREGROUND
+                    | Context.BIND_ALLOW_OOM_MANAGEMENT);
         }
     }
 
@@ -67,14 +71,12 @@ public class GeocoderProxy {
         private IGeocodeProvider mProvider;
 
         public void onServiceConnected(ComponentName className, IBinder service) {
-            Log.d(TAG, "onServiceConnected " + className);
             synchronized (this) {
                 mProvider = IGeocodeProvider.Stub.asInterface(service);
             }
         }
 
         public void onServiceDisconnected(ComponentName className) {
-            Log.d(TAG, "onServiceDisconnected " + className);
             synchronized (this) {
                 mProvider = null;
             }
