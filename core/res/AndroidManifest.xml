@@ -42,6 +42,7 @@
     <protected-broadcast android:name="android.intent.action.PACKAGE_RESTARTED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_DATA_CLEARED" />
     <protected-broadcast android:name="android.intent.action.PACKAGE_FIRST_LAUNCH" />
+    <protected-broadcast android:name="android.intent.action.PACKAGE_NEEDS_VERIFICATION" />
     <protected-broadcast android:name="android.intent.action.UID_REMOVED" />
     <protected-broadcast android:name="android.intent.action.CONFIGURATION_CHANGED" />
     <protected-broadcast android:name="android.intent.action.LOCALE_CHANGED" />
@@ -1428,6 +1429,24 @@
     <permission android:name="android.intent.category.MASTER_CLEAR.permission.C2D_MESSAGE"
           android:protectionLevel="signature" />
     <uses-permission android:name="android.intent.category.MASTER_CLEAR.permission.C2D_MESSAGE"/>
+
+    <!-- Package verifier needs to have this permission before the PackageManager will
+         trust it to verify packages.
+         @hide
+    -->
+    <permission android:name="android.permission.PACKAGE_VERIFICATION_AGENT"
+        android:label="@string/permlab_packageVerificationAgent"
+        android:description="@string/permdesc_packageVerificationAgent"
+        android:protectionLevel="signatureOrSystem" />
+
+    <!-- Must be required by package verifier receiver, to ensure that only the
+         system can interact with it.
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_PACKAGE_VERIFIER"
+        android:label="@string/permlab_bindPackageVerifier"
+        android:description="@string/permdesc_bindPackageVerifier"
+        android:protectionLevel="signature" />
 
     <!-- The system process is explicitly the only one allowed to launch the
          confirmation UI for full backup/restore -->

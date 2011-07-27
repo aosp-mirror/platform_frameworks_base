@@ -772,18 +772,33 @@ public final class Pm {
             }
         }
 
-        String apkFilePath = nextArg();
+        final Uri apkURI;
+        final Uri verificationURI;
+
+        // Populate apkURI, must be present
+        final String apkFilePath = nextArg();
         System.err.println("\tpkg: " + apkFilePath);
-        if (apkFilePath == null) {
+        if (apkFilePath != null) {
+            apkURI = Uri.fromFile(new File(apkFilePath));
+        } else {
             System.err.println("Error: no package specified");
             showUsage();
             return;
         }
 
+        // Populate verificationURI, optionally present
+        final String verificationFilePath = nextArg();
+        if (verificationFilePath != null) {
+            System.err.println("\tver: " + verificationFilePath);
+            verificationURI = Uri.fromFile(new File(verificationFilePath));
+        } else {
+            verificationURI = null;
+        }
+
         PackageInstallObserver obs = new PackageInstallObserver();
         try {
-            mPm.installPackage(Uri.fromFile(new File(apkFilePath)), obs, installFlags,
-                    installerPackageName);
+            mPm.installPackageWithVerification(apkURI, obs, installFlags, installerPackageName,
+                    verificationURI, null);
 
             synchronized (obs) {
                 while (!obs.finished) {
