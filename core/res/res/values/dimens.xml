@@ -35,7 +35,7 @@
     <!-- Height of the system bar -->
     <dimen name="system_bar_height">48dip</dimen>
     <!-- Height of notification icons in the status bar -->
-    <dimen name="status_bar_icon_size">25dip</dimen>
+    <dimen name="status_bar_icon_size">24dip</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->
     <dimen name="status_bar_content_number_size">48sp</dimen>
     <!-- Height of notification icons in the system bar -->

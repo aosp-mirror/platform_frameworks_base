@@ -58,6 +58,14 @@ public class StatusBarIconView extends AnimatedImageView {
         mNumberPain.setAntiAlias(true);
         mNotification = notification;
         setContentDescription(notification);
+
+        final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
+        final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
+        final float scale = (float)imageBounds / (float)outerBounds;
+        setScaleX(scale);
+        setScaleY(scale);
+        final float alpha = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
+        setAlpha(alpha);
     }
 
     private static boolean streq(String a, String b) {
@@ -99,6 +107,7 @@ public class StatusBarIconView extends AnimatedImageView {
         if (!levelEquals) {
             setImageLevel(icon.iconLevel);
         }
+
         if (!numberEquals) {
             if (icon.number > 0 && mContext.getResources().getBoolean(
                         R.bool.config_statusBarShowNumber)) {
