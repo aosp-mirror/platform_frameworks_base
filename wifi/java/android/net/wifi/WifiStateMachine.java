@@ -217,16 +217,20 @@ public class WifiStateMachine extends StateMachine {
 
     /* Start the soft access point */
     static final int CMD_START_AP                         = BASE + 21;
+    /* Indicates soft ap start succeded */
+    static final int CMD_START_AP_SUCCESS                 = BASE + 22;
+    /* Indicates soft ap start failed */
+    static final int CMD_START_AP_FAILURE                 = BASE + 23;
     /* Stop the soft access point */
-    static final int CMD_STOP_AP                          = BASE + 22;
+    static final int CMD_STOP_AP                          = BASE + 24;
     /* Set the soft access point configuration */
-    static final int CMD_SET_AP_CONFIG                    = BASE + 23;
+    static final int CMD_SET_AP_CONFIG                    = BASE + 25;
     /* Get the soft access point configuration */
-    static final int CMD_GET_AP_CONFIG                    = BASE + 24;
+    static final int CMD_GET_AP_CONFIG                    = BASE + 26;
     /* Set configuration on tether interface */
-    static final int CMD_TETHER_INTERFACE                 = BASE + 25;
+    static final int CMD_TETHER_INTERFACE                 = BASE + 27;
 
-    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 26;
+    static final int CMD_BLUETOOTH_ADAPTER_STATE_CHANGE   = BASE + 28;
 
     /* Supplicant commands */
     /* Is supplicant alive ? */
@@ -376,10 +380,6 @@ public class WifiStateMachine extends StateMachine {
     private static final int MIN_RSSI = -200;
     private static final int MAX_RSSI = 256;
 
-    /* Constants to indicate if soft ap is running or stopped */
-    private static final int SOFT_AP_STOPPED = 0;
-    private static final int SOFT_AP_RUNNING = 1;
-
     /* Default parent state */
     private State mDefaultState = new DefaultState();
     /* Temporary initial state */
@@ -423,6 +423,8 @@ public class WifiStateMachine extends StateMachine {
     /* Waiting for WPS to be completed*/
     private State mWaitForWpsCompletionState = new WaitForWpsCompletionState();
 
+    /* Soft ap is starting up */
+    private State mSoftApStartingState = new SoftApStartingState();
     /* Soft ap is running */
     private State mSoftApStartedState = new SoftApStartedState();
     /* Soft ap is running and we are tethered through connectivity service */
@@ -561,6 +563,7 @@ public class WifiStateMachine extends StateMachine {
                 addState(mDriverStoppingState, mSupplicantStartedState);
                 addState(mDriverStoppedState, mSupplicantStartedState);
             addState(mSupplicantStoppingState, mDefaultState);
+            addState(mSoftApStartingState, mDefaultState);
             addState(mSoftApStartedState, mDefaultState);
                 addState(mTetheredState, mSoftApStartedState);
             addState(mWaitForP2pDisableState, mDefaultState);
@@ -1639,28 +1642,27 @@ public class WifiStateMachine extends StateMachine {
         WifiNative.reconnectCommand();
     }
 
-    private boolean startSoftApWithConfig(WifiConfiguration config, int currentStatus) {
+    /* Current design is to not set the config on a running hostapd but instead
+     * stop and start tethering when user changes config on a running access point
+     *
+     * TODO: Add control channel setup through hostapd that allows changing config
+     * on a running daemon
+     */
+    private boolean startSoftApWithConfig(WifiConfiguration config) {
         if (config == null) {
             config = WifiApConfigStore.getApConfiguration();
         } else {
             WifiApConfigStore.setApConfiguration(config);
         }
         try {
-            if (currentStatus == SOFT_AP_STOPPED) {
-                nwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
-            } else if (currentStatus == SOFT_AP_RUNNING) {
-                //nwService.setAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
-                //TODO: when we have a control channel to hostapd, we should not need to do this
-                nwService.stopAccessPoint(mInterfaceName);
-                nwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
-            }
+            nwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
         } catch (Exception e) {
             Log.e(TAG, "Exception in softap start " + e);
             try {
                 nwService.stopAccessPoint(mInterfaceName);
                 nwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
-            } catch (Exception ee) {
-                Log.e(TAG, "Exception during softap restart : " + ee);
+            } catch (Exception e1) {
+                Log.e(TAG, "Exception in softap re-start " + e1);
                 return false;
             }
         }
@@ -1722,6 +1724,8 @@ public class WifiStateMachine extends StateMachine {
                 case CMD_START_DRIVER:
                 case CMD_STOP_DRIVER:
                 case CMD_START_AP:
+                case CMD_START_AP_SUCCESS:
+                case CMD_START_AP_FAILURE:
                 case CMD_STOP_AP:
                 case CMD_TETHER_INTERFACE:
                 case CMD_START_SCAN:
@@ -1903,14 +1907,7 @@ public class WifiStateMachine extends StateMachine {
                     }
                     break;
                 case CMD_START_AP:
-                    if (startSoftApWithConfig((WifiConfiguration) message.obj, SOFT_AP_STOPPED)) {
-                        Log.d(TAG, "Soft AP start successful");
-                        setWifiApState(WIFI_AP_STATE_ENABLED);
-                        transitionTo(mSoftApStartedState);
-                    } else {
-                        Log.d(TAG, "Soft AP start failed");
-                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
-                    }
+                    transitionTo(mSoftApStartingState);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -3061,6 +3058,67 @@ public class WifiStateMachine extends StateMachine {
         }
     }
 
+    class SoftApStartingState extends State {
+        @Override
+        public void enter() {
+            if (DBG) Log.d(TAG, getName() + "\n");
+            EventLog.writeEvent(EVENTLOG_WIFI_STATE_CHANGED, getName());
+
+            final Message message = Message.obtain(getCurrentMessage());
+            final WifiConfiguration config = (WifiConfiguration) message.obj;
+
+            // start hostapd on a seperate thread
+            new Thread(new Runnable() {
+                public void run() {
+                    if (startSoftApWithConfig(config)) {
+                        Log.d(TAG, "Soft AP start successful");
+                        sendMessage(CMD_START_AP_SUCCESS);
+                    } else {
+                        Log.d(TAG, "Soft AP start failed");
+                        sendMessage(CMD_START_AP_FAILURE);
+                    }
+                }
+            }).start();
+        }
+        @Override
+        public boolean processMessage(Message message) {
+            if (DBG) Log.d(TAG, getName() + message.toString() + "\n");
+            switch(message.what) {
+                case CMD_LOAD_DRIVER:
+                case CMD_UNLOAD_DRIVER:
+                case CMD_START_SUPPLICANT:
+                case CMD_STOP_SUPPLICANT:
+                case CMD_START_AP:
+                case CMD_STOP_AP:
+                case CMD_START_DRIVER:
+                case CMD_STOP_DRIVER:
+                case CMD_SET_SCAN_MODE:
+                case CMD_SET_SCAN_TYPE:
+                case CMD_SET_HIGH_PERF_MODE:
+                case CMD_SET_COUNTRY_CODE:
+                case CMD_SET_FREQUENCY_BAND:
+                case CMD_START_PACKET_FILTERING:
+                case CMD_STOP_PACKET_FILTERING:
+                case CMD_TETHER_INTERFACE:
+                case WifiP2pService.P2P_ENABLE_PENDING:
+                    deferMessage(message);
+                    break;
+                case CMD_START_AP_SUCCESS:
+                    setWifiApState(WIFI_AP_STATE_ENABLED);
+                    transitionTo(mSoftApStartedState);
+                    break;
+                case CMD_START_AP_FAILURE:
+                    // initiate driver unload
+                    sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
+                    break;
+                default:
+                    return NOT_HANDLED;
+            }
+            EventLog.writeEvent(EVENTLOG_WIFI_EVENT_HANDLED, message.what);
+            return HANDLED;
+        }
+    }
+
     class SoftApStartedState extends State {
         @Override
         public void enter() {
@@ -3083,17 +3141,9 @@ public class WifiStateMachine extends StateMachine {
                     transitionTo(mDriverLoadedState);
                     break;
                 case CMD_START_AP:
-                    Log.d(TAG,"SoftAP set on a running access point");
-                    if (startSoftApWithConfig((WifiConfiguration) message.obj, SOFT_AP_RUNNING)) {
-                        Log.d(TAG, "Soft AP start successful");
-                        setWifiApState(WIFI_AP_STATE_ENABLED);
-                        transitionTo(mSoftApStartedState);
-                    } else {
-                        Log.d(TAG, "Soft AP start failed");
-                        sendMessage(obtainMessage(CMD_UNLOAD_DRIVER, WIFI_AP_STATE_FAILED, 0));
-                    }
+                    // Ignore a start on a running access point
                     break;
-                /* Fail client mode operation when soft AP is enabled */
+                    /* Fail client mode operation when soft AP is enabled */
                 case CMD_START_SUPPLICANT:
                     Log.e(TAG,"Cannot start supplicant with a running soft AP");
                     setWifiState(WIFI_STATE_UNKNOWN);
