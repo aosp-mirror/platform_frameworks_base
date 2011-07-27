@@ -3042,13 +3042,6 @@ public final class Settings {
                 "wifi_watchdog_walled_garden_url";
 
         /**
-         * The pattern string in the fetched URL used to detect a walled garden
-         * @hide
-         */
-        public static final String WIFI_WATCHDOG_WALLED_GARDEN_PATTERN =
-                "wifi_watchdog_walled_garden_pattern";
-
-        /**
          * Boolean to determine whether to notify on disabling a network.  Secure setting used
          * to notify user only once.  This setting is not monitored continuously.
          * @hide
