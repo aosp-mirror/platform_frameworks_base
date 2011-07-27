@@ -3993,8 +3993,6 @@ bool AudioFlinger::RecordThread::threadLoop()
             for (size_t i = 0; i < effectChains.size(); i ++) {
                 effectChains[i]->process_l();
             }
-            // enable changes in effect chain
-            unlockEffectChains(effectChains);
 
             buffer.frameCount = mFrameCount;
             if (LIKELY(mActiveTrack->getNextBuffer(&buffer) == NO_ERROR)) {
@@ -4094,9 +4092,9 @@ bool AudioFlinger::RecordThread::threadLoop()
                 // clear the overflow.
                 usleep(kRecordThreadSleepUs);
             }
-        } else {
-            unlockEffectChains(effectChains);
         }
+        // enable changes in effect chain
+        unlockEffectChains(effectChains);
         effectChains.clear();
     }
 
@@ -5669,13 +5667,11 @@ size_t AudioFlinger::EffectModule::removeHandle(const wp<EffectHandle>& handle)
         }
     }
 
-    // Release effect engine here so that it is done immediately. Otherwise it will be released
-    // by the destructor when the last strong reference on the this object is released which can
-    // happen after next process is called on this effect.
-    if (size == 0 && mEffectInterface != NULL) {
-        // release effect engine
-        EffectRelease(mEffectInterface);
-        mEffectInterface = NULL;
+    // Prevent calls to process() and other functions on effect interface from now on.
+    // The effect engine will be released by the destructor when the last strong reference on
+    // this object is released which can happen after next process is called.
+    if (size == 0) {
+        mState = DESTROYED;
     }
 
     return size;
@@ -5725,7 +5721,7 @@ void AudioFlinger::EffectModule::updateState() {
             mState = IDLE;
         }
         break;
-    default: //IDLE , ACTIVE
+    default: //IDLE , ACTIVE, DESTROYED
         break;
     }
 }
@@ -5734,7 +5730,7 @@ void AudioFlinger::EffectModule::process()
 {
     Mutex::Autolock _l(mLock);
 
-    if (mEffectInterface == NULL ||
+    if (mState == DESTROYED || mEffectInterface == NULL ||
             mConfig.inputCfg.buffer.raw == NULL ||
             mConfig.outputCfg.buffer.raw == NULL) {
         return;
@@ -5910,6 +5906,12 @@ status_t AudioFlinger::EffectModule::start_l()
     return status;
 }
 
+status_t AudioFlinger::EffectModule::stop()
+{
+    Mutex::Autolock _l(mLock);
+    return stop_l();
+}
+
 status_t AudioFlinger::EffectModule::stop_l()
 {
     if (mEffectInterface == NULL) {
@@ -5946,7 +5948,7 @@ status_t AudioFlinger::EffectModule::command(uint32_t cmdCode,
     Mutex::Autolock _l(mLock);
 //    LOGV("command(), cmdCode: %d, mEffectInterface: %p", cmdCode, mEffectInterface);
 
-    if (mEffectInterface == NULL) {
+    if (mState == DESTROYED || mEffectInterface == NULL) {
         return NO_INIT;
     }
     status_t status = (*mEffectInterface)->command(mEffectInterface,
@@ -5995,6 +5997,8 @@ status_t AudioFlinger::EffectModule::setEnabled(bool enabled)
         case ACTIVE:
             mState = STOPPING;
             break;
+        case DESTROYED:
+            return NO_ERROR; // simply ignore as we are being destroyed
         }
         for (size_t i = 1; i < mHandles.size(); i++) {
             sp<EffectHandle> h = mHandles[i].promote();
@@ -6016,6 +6020,7 @@ bool AudioFlinger::EffectModule::isEnabled()
     case IDLE:
     case STOPPING:
     case STOPPED:
+    case DESTROYED:
     default:
         return false;
     }
@@ -6031,6 +6036,7 @@ bool AudioFlinger::EffectModule::isProcessEnabled()
         return true;
     case IDLE:
     case STARTING:
+    case DESTROYED:
     default:
         return false;
     }
@@ -6632,6 +6638,10 @@ size_t AudioFlinger::EffectChain::removeEffect_l(const sp<EffectModule>& effect)
 
     for (i = 0; i < size; i++) {
         if (effect == mEffects[i]) {
+            // calling stop here will remove pre-processing effect from the audio HAL.
+            // This is safe as we hold the EffectChain mutex which guarantees that we are not in
+            // the middle of a read from audio HAL
+            mEffects[i]->stop();
             if (type == EFFECT_FLAG_TYPE_AUXILIARY) {
                 delete[] effect->inBuffer();
             } else {

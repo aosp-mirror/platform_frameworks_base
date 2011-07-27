@@ -1024,7 +1024,8 @@ private:
             STARTING,
             ACTIVE,
             STOPPING,
-            STOPPED
+            STOPPED,
+            DESTROYED
         };
 
         int         id() { return mId; }
@@ -1069,6 +1070,7 @@ private:
         status_t         setDevice(uint32_t device);
         status_t         setVolume(uint32_t *left, uint32_t *right, bool controller);
         status_t         setMode(uint32_t mode);
+        status_t         stop();
 
         status_t         dump(int fd, const Vector<String16>& args);
 
