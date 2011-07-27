@@ -148,7 +148,7 @@
               </a></li>
         </ul>
       </li><!-- end of User Interface -->
-      
+
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/resources/index.html">
                <span class="en">Application Resources</span>
@@ -221,7 +221,7 @@
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/provider-element.html">&lt;provider&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/receiver-element.html">&lt;receiver&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/service-element.html">&lt;service&gt;</a></li>
-          <li><a href="<?cs var:toroot ?>guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture&gt;</a></li> 
+          <li><a href="<?cs var:toroot ?>guide/topics/manifest/supports-gl-texture-element.html">&lt;supports-gl-texture&gt;</a></li>
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/supports-screens-element.html">&lt;supports-screens&gt;</a>
               <span class="new">updated</span></li>  <!-- ##api level 4## -->
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-configuration-element.html">&lt;uses-configuration&gt;</a></li>
@@ -231,8 +231,8 @@
           <li><a href="<?cs var:toroot ?>guide/topics/manifest/uses-sdk-element.html">&lt;uses-sdk&gt;</a></li>
         </ul>
       </li><!-- end of the manifest file -->
-    </ul>  
-      
+    </ul>
+
     <ul>
       <li class="toggle-list">
         <div><a href="<?cs var:toroot ?>guide/topics/graphics/index.html">
@@ -265,7 +265,7 @@
 	          <li><a href="<?cs var:toroot ?>guide/topics/renderscript/compute.html">
 	                <span class="en">Compute</span>
 	              </a>
-	          </li>         
+	          </li>
 	        </ul>
   	  </li>
 
@@ -571,8 +571,10 @@
           <li><a href="<?cs var:toroot ?>guide/developing/tools/android.html">android</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/dmtracedump.html">dmtracedump</a></li>
-          <li><a href="<?cs var:toroot ?>guide/developing/tools/draw9patch.html" >Draw 9-Patch</a></li>
+          <li><a href="<?cs var:toroot?>guide/developing/tools/draw9patch.html">Draw
+          9-Patch</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/emulator.html">Emulator</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/etc1tool.html">etc1tool</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/hierarchy-viewer.html">Hierarchy Viewer</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/hprof-conv.html">hprof-conv</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/layoutopt.html">layoutopt</a></li>

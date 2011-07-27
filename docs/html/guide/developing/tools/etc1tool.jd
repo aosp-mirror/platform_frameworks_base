@@ -1,0 +1,68 @@
+page.title=etc1tool
+parent.title=Tools
+parent.link=index.html
+@jd:body
+
+
+ <p><code>etc1tool</code> is a command line utility that lets you encode PNG
+ images to the ETC1 compression standard and decode ETC1 compressed images back to PNG.</p>
+
+  <p>The usage for <code>etc1tool</code> is:</p>
+<pre>etc1tool infile [--help | --encode | --encodeNoHeader | --decode] [--showDifference
+diff-file] [-o outfile]</pre>
+
+  <table>
+    <tr>
+      <th>Option</th>
+
+      <th>Description</th>
+    </tr>
+
+    <tr>
+      <td><code>infile</code></td>
+
+      <td>The input file to compress</td>
+    </tr>
+
+    <tr>
+      <td><code>--help</code></td>
+
+      <td>Print usage information</td>
+    </tr>
+
+    <tr>
+      <td><code>--encode</code></td>
+
+      <td>Create an ETC1 file from a PNG file.
+      This is the default mode for the tool if nothing is specified.</td>
+    </tr>
+
+    <tr>
+      <td><code>--encodeNoHeader</code></td>
+
+      <td>Create a raw ETC1 data file (without a header) from a PNG file.</td>
+    </tr>
+
+    <tr>
+      <td><code>--decode</code></td>
+
+      <td>Create a PNG file from an ETC1 file</td>
+    </tr>
+
+    <tr>
+      <td><code>--showDifference <em>diff-file</em></code></td>
+
+      <td>Write the difference between the original and encoded image to
+      <code><em>diff-file</em></code> (only valid when encoding).</td>
+    </tr>
+
+    <tr>
+      <td><code>-o <em>outfile</em></code></td>
+
+      <td>Specify the name of the output file.
+      If <code><em>outfile</em></code> is not specified, the output file is constructed
+      from the input filename with the appropriate suffix (<code>.pkm</code> or <code>.png</code>).
+      </td>
+    </tr>
+
+  </table>
