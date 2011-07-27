@@ -65,59 +65,52 @@ revision number. To determine what revision(s) of the Android
 {@sdkPlatformVersion} platforms are installed in your SDK environment, refer to
 the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
 
-<script type="text/javascript">
-function toggleDiv(link) {
-  var toggleable = $(link).parent();
-  if (toggleable.hasClass("closed")) {
-    //$(".toggleme", toggleable).slideDown("fast");
-    toggleable.removeClass("closed");
-    toggleable.addClass("open");
-    $(".toggle-img", toggleable).attr("title", "hide").attr("src", (toRoot + "assets/images/triangle-opened.png"));
-  } else {
-    //$(".toggleme", toggleable).slideUp("fast");
-    toggleable.removeClass("open");
-    toggleable.addClass("closed");
-    $(".toggle-img", toggleable).attr("title", "show").attr("src", (toRoot + "assets/images/triangle-closed.png"));
-  }
-  return false;
-}
-</script>
-<style>
-.toggleable {
-  padding: .25em 1em 0em 1em;
-  margin-bottom: 0;
-}
-.toggleme {
-  padding: 1em 1em 0 2em;
-  line-height:1em;
-}
-.toggleable a {
-  text-decoration:none;
-}
-.toggleme a {
-  text-decoration:underline;
-}
-.toggleable.closed .toggleme {
-  display:none;
-}
-#jd-content .toggle-img {
-  margin:0;
-}
-</style>
 
-<div class="toggleable opened">
-  <a href="#" onclick="return toggleDiv(this)">
-        <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-img" height="9px" width="9px" />
-        Android {@sdkPlatformVersion}, Revision 1</a> <em>(February 2011)</em></a>
-  <div class="toggleme">
+<div class="toggle-content opened" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 2</a> <em>(July 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r12</a> or
+higher.</p>
+</dd>
+<dt>Notes:</dt>
+<dd>
+<p>Improvements to the platform's rendering library to support the visual layout editor in the ADT
+Eclipse plugin. This revision allows for more drawing features in ADT and fixes several
+bugs in the previous rendering library. It also unlocks several editor features that were added in
+ADT 12.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 1</a> <em>(February 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
 <dl>
 <dt>Dependencies:</dt>
 <dd>
 <p>Requires SDK Tools r9 or higher.</p>
 </dd>
-
 </dl>
- </div>
+
+</div>
 </div>
 
 

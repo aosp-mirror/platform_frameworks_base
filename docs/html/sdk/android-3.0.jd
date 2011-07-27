@@ -62,25 +62,52 @@ read <a href="{@docRoot}guide/practices/optimizing-for-3.0.html">Optimizing Apps
 refer to the "Installed Packages" listing in the Android SDK and AVD Manager.</p>
 
 
+
 <div class="toggle-content opened" style="padding-left:1em;">
 
-  <p><a href="#" onclick="return toggleContent(this)">
-    <img src="{@docRoot}assets/images/triangle-opened.png" class="toggle-content-img" alt="" />
-    Android {@sdkPlatformVersion}, Revision 1</a> <em>(February 2011)</em>
-  </a></p>
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-opened.png"
+class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 2</a> <em>(July 2011)</em>
+</a></p>
 
-  <div class="toggle-content-toggleme" style="padding-left:2em;">
+<div class="toggle-content-toggleme" style="padding-left:2em;">
+
+<dl>
+<dt>Dependencies:</dt>
+<dd>
+<p>Requires <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r12</a> or
+higher.</p>
+</dd>
+<dt>Notes:</dt>
+<dd>
+<p>Improvements to the platform's rendering library to support the visual layout editor in the ADT
+Eclipse plugin. This revision allows for more drawing features in ADT and fixes several
+bugs in the previous rendering library. It also unlocks several editor features that were added in
+ADT 12.</p>
+</dd>
+</dl>
+
+</div>
+</div>
+
+<div class="toggle-content closed" style="padding-left:1em;">
+
+<p><a href="#" onclick="return toggleContent(this)">
+  <img src="{@docRoot}assets/images/triangle-closed.png" class="toggle-content-img" alt="" />
+  Android {@sdkPlatformVersion}, Revision 1</a> <em>(February 2011)</em>
+</a></p>
+
+<div class="toggle-content-toggleme" style="padding-left:2em;">
     
 <dl>
-  
 <dt>Dependencies:</dt>
 <dd>
 <p>Requires <a href="{@docRoot}sdk/tools-notes.html">SDK Tools r10</a> or higher.</p>
 </dd>
-
 </dl>
 
-  </div>
+</div>
 </div>
 
 
