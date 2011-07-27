@@ -12,28 +12,33 @@ parent.link=index.html
           <ol>
             <li><a href="#how">How property animation works</a></li>
           </ol>
-            </li>
+        </li>
 
-            <li><a href="#value-animator">Animating with ValueAnimator</a></li>
+        <li><a href="#value-animator">Animating with ValueAnimator</a></li>
 
-            <li><a href="#object-animator">Animating with ObjectAnimator</a></li>
+        <li><a href="#object-animator">Animating with ObjectAnimator</a></li>
 
-            <li><a href="#choreography">Choreographing Multiple Animations with
-            AnimatorSet</a></li>            
-            
-            <li><a href="#listeners">Animation Listeners</a></li>
+        <li><a href="#choreography">Choreographing Multiple Animations with
+        AnimatorSet</a></li>
 
-            <li><a href="#type-evaluator">Using a TypeEvaluator</a></li>
+        <li><a href="#listeners">Animation Listeners</a></li>
 
-            <li><a href="#interpolators">Using Interpolators</a></li>
+        <li><a href="#type-evaluator">Using a TypeEvaluator</a></li>
 
-            <li><a href="#keyframes">Specifying Keyframes</a></li>
-            <li><a href="#layout">Animating Layout Changes to ViewGroups</a></li>
+        <li><a href="#interpolators">Using Interpolators</a></li>
 
-            <li><a href="#views">Animating Views</a></li>
+        <li><a href="#keyframes">Specifying Keyframes</a></li>
 
-            <li><a href="#declaring-xml">Declaring Animations in XML</a></li>
-      </ol>     
+        <li><a href="#layout">Animating Layout Changes to ViewGroups</a></li>
+
+        <li><a href="#views">Animating Views</a>
+          <ol>
+            <li><a href="#view-prop-animator">ViewPropertyAnimator</a></li>
+          </ol>
+        </li>
+
+        <li><a href="#declaring-xml">Declaring Animations in XML</a></li>
+      </ol>
 
       <h2>Key classes</h2>
 
@@ -63,13 +68,13 @@ parent.link=index.html
   You can define an animation to change any object property over time, regardless of whether it
   draws to the screen or not.The property animation system also has a few advantages over the view
   animation system, which makes it more flexible to use.</p>
-  
+
   <p>The view animation system provides the capability to only animate View objects, so if
   you wanted to animate non-View objects, you had to implement your own code to do so. The view
   animation system also was constrained in the fact that it only exposed a few aspects of a View
   object to animate, such as the scaling and rotation of a View but not the background color for
   instance.</p>
-  
+
   <p>Another disadvantage of the view animation system is that it only modified where the
   View was drawn, and not the actual View itself. For instance, if you animated a button to move
   across the screen, the button draws correctly, but the actual location where you can click the
@@ -80,7 +85,7 @@ parent.link=index.html
   <p>The view animation system, however, takes less time to setup and requires less code to write.
   If view animation accomplishes everything that you need to do, or if your existing code already
   works the way you want, there is no need to use the property animation system.</p>
-  
+
     <p class="note"><strong>Tip:</strong> To see how the ADT layout editor allows you to develop and
 preview animations in your layout, watch the <a
 href="http://www.youtube.com/watch?v=Oq05KqjXTvs&feature=player_detailpage#t=1709s">Android
@@ -114,7 +119,7 @@ Developer Tools session</a> from Google I/O '11</p>
     default is set to  refresh every 10 ms, but the speed in which your application can refresh frames is
     ultimately dependent on how busy the system is overall and how fast the system can service the underlying timer.</li>
   </ul>
-  
+
 
   <h3 id="how">How the property animation system works</h3>
 
@@ -254,7 +259,7 @@ Developer Tools session</a> from Google I/O '11</p>
         </tr>
       </table>
 
-    
+
       <p>Evaluators tell the property animation system how to calculate values for a given
       property. They take the timing data that is provided by an {@link android.animation.Animator}
       class, the animation's start and end value, and calculate the animated values of the property
@@ -299,9 +304,9 @@ Developer Tools session</a> from Google I/O '11</p>
           information on how to write a custom evaluator.</td>
         </tr>
       </table>
- 
-      
- 
+
+
+
 
       <p>A time interpolator defines how specific values in an animation are calculated as a
       function of time. For example, you can specify animations to happen linearly across the whole
@@ -397,7 +402,7 @@ Developer Tools session</a> from Google I/O '11</p>
   <pre>
 ValueAnimator animation = ValueAnimator.ofFloat(0f, 1f);
 animation.setDuration(1000);
-animation.start();        
+animation.start();
 </pre>
 
   <p>In this code, the {@link android.animation.ValueAnimator} starts calculating the values of the
@@ -408,7 +413,7 @@ animation.start();
   <pre>
 ValueAnimator animation = ValueAnimator.ofObject(new MyTypeEvaluator(), startPropertyValue, endPropertyValue);
 animation.setDuration(1000);
-animation.start();        
+animation.start();
 </pre>
 
   <p>In this code, the {@link android.animation.ValueAnimator} starts calculating the values of the
@@ -483,7 +488,7 @@ ObjectAnimator.ofFloat(targetObject, "propName", 1f)
 
     <li>Depending on what property or object you are animating, you might need to call the {@link
     android.view.View#invalidate invalidate()} method on a View force the screen to redraw itself with the
-    updated animated values. You do this in the 
+    updated animated values. You do this in the
     {@link android.animation.ValueAnimator.AnimatorUpdateListener#onAnimationUpdate onAnimationUpdate()}
     callback. For example, animating the color property of a Drawable object only cause updates to the
     screen when that object redraws itself. All of the property setters on View, such as
@@ -492,7 +497,7 @@ ObjectAnimator.ofFloat(targetObject, "propName", 1f)
     methods with new values. For more information on listeners, see the section about <a href="#listeners">Animation Listeners</a>.
     </li>
   </ul>
-  
+
   <h2 id="choreography">Choreographing Multiple Animations with AnimatorSet</h2>
 
   <p>In many cases, you want to play an animation that depends on when another animation starts or
@@ -576,12 +581,12 @@ You can listen for important events during an animation's duration with the list
           {@link android.view.View#invalidate invalidate()} on a View to force that area of the
           screen to redraw itself with the new animated values. For example, animating the
           color property of a Drawable object only cause updates to the screen when that object
-          redraws itself. All of the property setters on View, 
+          redraws itself. All of the property setters on View,
           such as {@link android.view.View#setAlpha setAlpha()} and
           {@link android.view.View#setTranslationX setTranslationX()} invalidate the View
           properly, so you do not need to invalidate the View when calling these methods with new values.
           </p>
-          
+
         </li>
       </ul>
     </li>
@@ -658,7 +663,7 @@ public void onAnimationEnd(Animator animation) {
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:id="@+id/verticalContainer"
-    android:animateLayoutChanges="true" /&gt;  
+    android:animateLayoutChanges="true" /&gt;
 </pre>
 
   <p>Setting this attribute to true automatically animates Views that are added or removed from the
@@ -872,16 +877,55 @@ rotationAnim.setDuration(5000ms);
 ObjectAnimator.ofFloat(myView, "rotation", 0f, 360f);
 </pre>
 
-For more information on creating animators, see the sections on animating with
-<a href="#value-animator">ValueAnimator</a> and <a href="#object-animator">ObjectAnimator</a>
+<p>For more information on creating animators, see the sections on animating with
+<a href="#value-animator">ValueAnimator</a> and <a href="#object-animator">ObjectAnimator</a>.
+</p>
 
+<h3 id="view-prop-animator">Animating with ViewPropertyAnimator</h3>
+<p>The {@link android.view.ViewPropertyAnimator} provides a simple way to animate several
+properties of a {@link android.view.View} in parallel, using a single underlying {@link
+android.animation.Animator}
+object. It behaves much like an {@link android.animation.ObjectAnimator}, because it modifies the
+actual values of the view's properties, but is more efficient when animating many properties at
+once. In addition, the code for using the {@link android.view.ViewPropertyAnimator} is much
+more concise and easier to read. The following code snippets show the differences in using multiple
+{@link android.animation.ObjectAnimator} objects, a single
+{@link android.animation.ObjectAnimator}, and the {@link android.view.ViewPropertyAnimator} when
+simultaneously animating the <code>x</code> and <code>y</code> property of a view.</p>
+
+<p><strong>Multiple ObjectAnimator objects</strong></p>
+<pre>
+ObjectAnimator animX = ObjectAnimator.ofFloat(myView, "x", 50f);
+ObjectAnimator animY = ObjectAnimator.ofFloat(myView, "y", 100f);
+AnimatorSet animSetXY = new AnimatorSet();
+animSetXY.playTogether(animX, animY);
+animSetXY.start();
+</pre>
+
+<p><strong>One ObjectAnimator</strong></p>
+<pre>
+PropertyValuesHolder pvhX = PropertyValuesHolder.ofFloat("x", 50f);
+PropertyValuesHolder pvhY = PropertyValuesHolder.ofFloat("y", 100f);
+ObjectAnimator.ofPropertyValuesHolder(myView, pvhX, pvyY).start();
+</pre>
+
+<p><strong>ViewPropertyAnimator</strong></p>
+<pre>
+myView.animate().x(50f).y(100f);
+</pre>
+
+<p>
+For more detailed information about {@link
+android.view.ViewPropertyAnimator}, see the corresponding Android Developers
+<a href="http://android-developers.blogspot.com/2011/05/introducing-viewpropertyanimator.html">blog
+post</a>.</p>
 
 <h2 id="declaring-xml">Declaring Animations in XML</h2>
 
   <p>The property animation system lets you declare property animations with XML instead of doing
   it programmatically. By defining your animations in XML, you can easily reuse your animations
 in multiple activities and more easily edit the animation sequence.</p>
-  
+
 <p>To distinguish animation files that use the new property animation APIs from those that use the
 legacy <a href="{@docRoot}guide/topics/graphics/view-animation.html">view animation</a> framework,
 starting with Android 3.1, you should save the XML files for property animations in the {@code
