@@ -130,13 +130,22 @@ enum media_player_states {
     MEDIA_PLAYER_PLAYBACK_COMPLETE  = 1 << 7
 };
 
-enum media_set_parameter_keys {
-    KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX = 1000,
-    KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE = 1001,
+// Keep KEY_PARAMETER_* in sync with MediaPlayer.java.
+// The same enum space is used for both set and get, in case there are future keys that
+// can be both set and get.  But as of now, all parameters are either set only or get only.
+enum media_parameter_keys {
+    KEY_PARAMETER_TIMED_TEXT_TRACK_INDEX = 1000,                // set only
+    KEY_PARAMETER_TIMED_TEXT_ADD_OUT_OF_BAND_SOURCE = 1001,     // set only
 
     // Streaming/buffering parameters
-    KEY_PARAMETER_CACHE_STAT_COLLECT_FREQ_MS = 1100,
+    KEY_PARAMETER_CACHE_STAT_COLLECT_FREQ_MS = 1100,            // set only
+
+    // Return a Parcel containing a single int, which is the channel count of the
+    // audio track, or zero for error (e.g. no audio track) or unknown.
+    KEY_PARAMETER_AUDIO_CHANNEL_COUNT = 1200,                   // get only
+
 };
+
 // ----------------------------------------------------------------------------
 // ref-counted object for callbacks
 class MediaPlayerListener: virtual public RefBase

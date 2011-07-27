@@ -2238,7 +2238,22 @@ status_t AwesomePlayer::setCacheStatCollectFreq(const Parcel &request) {
 }
 
 status_t AwesomePlayer::getParameter(int key, Parcel *reply) {
-    return OK;
+    switch (key) {
+    case KEY_PARAMETER_AUDIO_CHANNEL_COUNT:
+        {
+            int32_t channelCount;
+            if (mAudioTrack == 0 ||
+                    !mAudioTrack->getFormat()->findInt32(kKeyChannelCount, &channelCount)) {
+                channelCount = 0;
+            }
+            reply->writeInt32(channelCount);
+        }
+        return OK;
+    default:
+        {
+            return ERROR_UNSUPPORTED;
+        }
+    }
 }
 
 bool AwesomePlayer::isStreamingHTTP() const {
