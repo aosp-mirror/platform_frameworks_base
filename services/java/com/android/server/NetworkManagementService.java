@@ -125,10 +125,14 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     private Thread mThread;
     private final CountDownLatch mConnectedSignal = new CountDownLatch(1);
 
+    // TODO: replace with RemoteCallbackList
     private ArrayList<INetworkManagementEventObserver> mObservers;
 
+    private Object mQuotaLock = new Object();
     /** Set of interfaces with active quotas. */
-    private HashSet<String> mInterfaceQuota = Sets.newHashSet();
+    private HashSet<String> mActiveQuotaIfaces = Sets.newHashSet();
+    /** Set of interfaces with active alerts. */
+    private HashSet<String> mActiveAlertIfaces = Sets.newHashSet();
     /** Set of UIDs with active reject rules. */
     private SparseBooleanArray mUidRejectOnQuota = new SparseBooleanArray();
 
@@ -1058,26 +1062,25 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void setInterfaceQuota(String iface, long quota) {
+    public void setInterfaceQuota(String iface, long quotaBytes) {
         mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
         // silently discard when control disabled
         // TODO: eventually migrate to be always enabled
         if (!mBandwidthControlEnabled) return;
 
-        synchronized (mInterfaceQuota) {
-            if (mInterfaceQuota.contains(iface)) {
-                // TODO: eventually consider throwing
-                return;
+        synchronized (mQuotaLock) {
+            if (mActiveQuotaIfaces.contains(iface)) {
+                throw new IllegalStateException("iface " + iface + " already has quota");
             }
 
             final StringBuilder command = new StringBuilder();
-            command.append("bandwidth setiquota ").append(iface).append(" ").append(quota);
+            command.append("bandwidth setiquota ").append(iface).append(" ").append(quotaBytes);
 
             try {
-                // TODO: add support for quota shared across interfaces
+                // TODO: support quota shared across interfaces
                 mConnector.doCommand(command.toString());
-                mInterfaceQuota.add(iface);
+                mActiveQuotaIfaces.add(iface);
             } catch (NativeDaemonConnectorException e) {
                 throw new IllegalStateException("Error communicating to native daemon", e);
             }
@@ -1092,8 +1095,8 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         // TODO: eventually migrate to be always enabled
         if (!mBandwidthControlEnabled) return;
 
-        synchronized (mInterfaceQuota) {
-            if (!mInterfaceQuota.contains(iface)) {
+        synchronized (mQuotaLock) {
+            if (!mActiveQuotaIfaces.contains(iface)) {
                 // TODO: eventually consider throwing
                 return;
             }
@@ -1102,12 +1105,90 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             command.append("bandwidth removeiquota ").append(iface);
 
             try {
-                // TODO: add support for quota shared across interfaces
+                // TODO: support quota shared across interfaces
                 mConnector.doCommand(command.toString());
-                mInterfaceQuota.remove(iface);
+                mActiveQuotaIfaces.remove(iface);
+                mActiveAlertIfaces.remove(iface);
             } catch (NativeDaemonConnectorException e) {
                 throw new IllegalStateException("Error communicating to native daemon", e);
             }
+        }
+    }
+
+    @Override
+    public void setInterfaceAlert(String iface, long alertBytes) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        // silently discard when control disabled
+        // TODO: eventually migrate to be always enabled
+        if (!mBandwidthControlEnabled) return;
+
+        // quick sanity check
+        if (!mActiveQuotaIfaces.contains(iface)) {
+            throw new IllegalStateException("setting alert requires existing quota on iface");
+        }
+
+        synchronized (mQuotaLock) {
+            if (mActiveAlertIfaces.contains(iface)) {
+                throw new IllegalStateException("iface " + iface + " already has alert");
+            }
+
+            final StringBuilder command = new StringBuilder();
+            command.append("bandwidth setinterfacealert ").append(iface).append(" ").append(
+                    alertBytes);
+
+            try {
+                // TODO: support alert shared across interfaces
+                mConnector.doCommand(command.toString());
+                mActiveAlertIfaces.add(iface);
+            } catch (NativeDaemonConnectorException e) {
+                throw new IllegalStateException("Error communicating to native daemon", e);
+            }
+        }
+    }
+
+    @Override
+    public void removeInterfaceAlert(String iface) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        // silently discard when control disabled
+        // TODO: eventually migrate to be always enabled
+        if (!mBandwidthControlEnabled) return;
+
+        synchronized (mQuotaLock) {
+            if (!mActiveAlertIfaces.contains(iface)) {
+                // TODO: eventually consider throwing
+                return;
+            }
+
+            final StringBuilder command = new StringBuilder();
+            command.append("bandwidth removeinterfacealert ").append(iface);
+
+            try {
+                // TODO: support alert shared across interfaces
+                mConnector.doCommand(command.toString());
+                mActiveAlertIfaces.remove(iface);
+            } catch (NativeDaemonConnectorException e) {
+                throw new IllegalStateException("Error communicating to native daemon", e);
+            }
+        }
+    }
+
+    @Override
+    public void setGlobalAlert(long alertBytes) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        // silently discard when control disabled
+        // TODO: eventually migrate to be always enabled
+        if (!mBandwidthControlEnabled) return;
+
+        final StringBuilder command = new StringBuilder();
+        command.append("bandwidth setglobalalert ").append(alertBytes);
+
+        try {
+            mConnector.doCommand(command.toString());
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Error communicating to native daemon", e);
         }
     }
 

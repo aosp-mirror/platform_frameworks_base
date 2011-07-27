@@ -212,12 +212,27 @@ interface INetworkManagementService
     /**
      * Set quota for an interface.
      */
-    void setInterfaceQuota(String iface, long quota);
+    void setInterfaceQuota(String iface, long quotaBytes);
 
     /**
      * Remove quota for an interface.
      */
     void removeInterfaceQuota(String iface);
+
+    /**
+     * Set alert for an interface; requires that iface already has quota.
+     */
+    void setInterfaceAlert(String iface, long alertBytes);
+
+    /**
+     * Remove alert for an interface.
+     */
+    void removeInterfaceAlert(String iface);
+
+    /**
+     * Set alert across all interfaces.
+     */
+    void setGlobalAlert(long alertBytes);
 
     /**
      * Control network activity of a UID over interfaces with a quota limit.
