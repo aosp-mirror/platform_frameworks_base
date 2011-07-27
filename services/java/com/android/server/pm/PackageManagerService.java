@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+import static libcore.io.OsConstants.S_ISLNK;
 
 import com.android.internal.app.IMediaContainerService;
 import com.android.internal.app.ResolverActivity;
@@ -76,6 +77,7 @@ import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.FileUtils.FileStatus;
+import android.os.Debug;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -127,6 +129,9 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+
+import libcore.io.ErrnoException;
+import libcore.io.Libcore;
 
 /**
  * Keep track of all those .apks everywhere.
@@ -3338,16 +3343,27 @@ public class PackageManagerService extends IPackageManager.Stub {
                 } else if (nativeLibraryDir.getCanonicalFile().getParent()
                         .equals(dataPathString)) {
                     /*
+                     * Make sure the native library dir isn't a symlink to
+                     * something. If it is, ask installd to remove it and create
+                     * a directory so we can copy to it afterwards.
+                     */
+                    boolean isSymLink;
+                    try {
+                        isSymLink = S_ISLNK(Libcore.os.lstat(nativeLibraryDir.getPath()).st_mode);
+                    } catch (ErrnoException e) {
+                        // This shouldn't happen, but we'll fail-safe.
+                        isSymLink = true;
+                    }
+                    if (isSymLink) {
+                        mInstaller.unlinkNativeLibraryDirectory(dataPathString);
+                    }
+
+                    /*
                      * If this is an internal application or our
                      * nativeLibraryPath points to our data directory, unpack
-                     * the libraries. The native library path pointing to the
-                     * data directory for an application in an ASEC container
-                     * can happen for older apps that existed before an OTA to
-                     * Gingerbread.
+                     * the libraries if necessary.
                      */
-                    Slog.i(TAG, "Unpacking native libraries for " + path);
-                    mInstaller.unlinkNativeLibraryDirectory(dataPathString);
-                    NativeLibraryHelper.copyNativeBinariesLI(scanFile, nativeLibraryDir);
+                    NativeLibraryHelper.copyNativeBinariesIfNeededLI(scanFile, nativeLibraryDir);
                 } else {
                     Slog.i(TAG, "Linking native library dir for " + path);
                     mInstaller.linkNativeLibraryDirectory(dataPathString,
@@ -7930,7 +7946,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                                 .unlinkNativeLibraryDirectory(pkg.applicationInfo.dataDir) < 0) {
                                             returnCode = PackageManager.MOVE_FAILED_INSUFFICIENT_STORAGE;
                                         } else {
-                                            NativeLibraryHelper.copyNativeBinariesLI(new File(
+                                            NativeLibraryHelper.copyNativeBinariesIfNeededLI(new File(
                                                     newCodePath), new File(newNativePath));
                                         }
                                     } else {

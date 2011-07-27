@@ -29,6 +29,7 @@ LOCAL_SRC_FILES:= \
 	ActivityManager.cpp \
 	AndroidRuntime.cpp \
 	Time.cpp \
+	com_android_internal_content_NativeLibraryHelper.cpp \
 	com_google_android_gles_jni_EGLImpl.cpp \
 	com_google_android_gles_jni_GLImpl.cpp.arm \
 	android_app_NativeActivity.cpp \
@@ -178,6 +179,7 @@ LOCAL_C_INCLUDES += \
 	external/icu4c/common \
 	external/jpeg \
 	external/harfbuzz/src \
+	external/zlib \
 	frameworks/opt/emoji \
 	libcore/include
 
@@ -211,6 +213,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libnfc_ndef \
 	libusbhost \
 	libharfbuzz \
+	libz \
 
 ifeq ($(USE_OPENGL_RENDERER),true)
 	LOCAL_SHARED_LIBRARIES += libhwui

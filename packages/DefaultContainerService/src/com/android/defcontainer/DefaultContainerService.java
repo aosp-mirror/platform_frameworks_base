@@ -515,34 +515,7 @@ public class DefaultContainerService extends IntentService {
 
         // Check all the native files that need to be copied and add that to the
         // container size.
-        ZipFile zipFile;
-        final List<Pair<ZipEntry, String>> nativeFiles;
-        try {
-            zipFile = new ZipFile(apkFile);
-
-            if (outFiles != null) {
-                nativeFiles = outFiles;
-            } else {
-                nativeFiles = new ArrayList<Pair<ZipEntry, String>>();
-            }
-
-            NativeLibraryHelper.listPackageNativeBinariesLI(zipFile, nativeFiles);
-
-            final int N = nativeFiles.size();
-            for (int i = 0; i < N; i++) {
-                final Pair<ZipEntry, String> entry = nativeFiles.get(i);
-
-                /*
-                 * Note a 1MB padding is added to the claimed size, so we don't
-                 * have to worry about block alignment here.
-                 */
-                sizeBytes += entry.first.getSize();
-            }
-        } catch (ZipException e) {
-            Log.w(TAG, "Failed to extract data from package file", e);
-        } catch (IOException e) {
-            Log.w(TAG, "Failed to cache package shared libs", e);
-        }
+        sizeBytes += NativeLibraryHelper.sumNativeBinariesLI(apkFile);
 
         int sizeMb = (int) (sizeBytes >> 20);
         if ((sizeBytes - (sizeMb * 1024 * 1024)) > 0) {
