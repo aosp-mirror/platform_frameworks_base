@@ -615,6 +615,17 @@ public class WifiManager {
     }
 
     /**
+     * Disable a configured network asynchronously.  This call is for abnormal network
+     * events, and the user may be notified of network change, if they recently attempted
+     * to connect to the specified network.
+     * @param netId the ID of the network as returned by {@link #addNetwork}.
+     * @hide
+     */
+    public void disableNetwork(int netId, int reason) {
+        mAsyncChannel.sendMessage(CMD_DISABLE_NETWORK, netId, reason);
+    }
+
+    /**
      * Disassociate from the currently active access point. This may result
      * in the asynchronous delivery of state change events.
      * @return {@code true} if the operation succeeded
@@ -1058,6 +1069,8 @@ public class WifiManager {
     public static final int CMD_SAVE_NETWORK                = 3;
     /** @hide */
     public static final int CMD_START_WPS                   = 4;
+    /** @hide */
+    public static final int CMD_DISABLE_NETWORK             = 5;
 
     /* Events from WifiService */
     /** @hide */

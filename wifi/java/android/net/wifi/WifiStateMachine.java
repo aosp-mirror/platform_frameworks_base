@@ -68,12 +68,14 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.LruCache;
+import android.util.Slog;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.AsyncChannel;
@@ -482,6 +484,11 @@ public class WifiStateMachine extends StateMachine {
     private final WorkSource mLastRunningWifiUids = new WorkSource();
 
     private final IBatteryStats mBatteryStats;
+    private boolean mNextWifiActionExplicit = false;
+    private int mLastExplicitNetworkId;
+    private long mLastNetworkChoiceTime;
+    private static final long EXPLICIT_CONNECT_ALLOWED_DELAY_MS = 2 * 60 * 1000;
+
 
     public WifiStateMachine(Context context, String wlanInterface) {
         super(TAG);
@@ -821,7 +828,8 @@ public class WifiStateMachine extends StateMachine {
      * @return {@code true} if the operation succeeds, {@code false} otherwise
      */
     public boolean syncDisableNetwork(AsyncChannel channel, int netId) {
-        Message resultMsg = channel.sendMessageSynchronously(CMD_DISABLE_NETWORK, netId);
+        Message resultMsg = channel.sendMessageSynchronously(CMD_DISABLE_NETWORK, netId,
+                WifiConfiguration.DISABLED_UNKNOWN_REASON);
         boolean result = (resultMsg.arg1 != FAILURE);
         resultMsg.recycle();
         return result;
@@ -864,6 +872,12 @@ public class WifiStateMachine extends StateMachine {
 
     public void forgetNetwork(int netId) {
         sendMessage(obtainMessage(CMD_FORGET_NETWORK, netId, 0));
+    }
+
+    public void disableNetwork(Messenger replyTo, int netId, int reason) {
+        Message message = obtainMessage(CMD_DISABLE_NETWORK, netId, reason);
+        message.replyTo = replyTo;
+        sendMessage(message);
     }
 
     public void startWps(Messenger replyTo, WpsConfiguration config) {
@@ -1534,6 +1548,7 @@ public class WifiStateMachine extends StateMachine {
         mWifiInfo.setNetworkId(WifiConfiguration.INVALID_NETWORK_ID);
         mWifiInfo.setRssi(MIN_RSSI);
         mWifiInfo.setLinkSpeed(-1);
+        mWifiInfo.setExplicitConnect(false);
 
         /* send event to CM & network change broadcast */
         setNetworkDetailedState(DetailedState.DISCONNECTED);
@@ -1631,7 +1646,8 @@ public class WifiStateMachine extends StateMachine {
         if (++mReconnectCount > getMaxDhcpRetries()) {
             Log.e(TAG, "Failed " +
                     mReconnectCount + " times, Disabling " + mLastNetworkId);
-            WifiConfigStore.disableNetwork(mLastNetworkId);
+            WifiConfigStore.disableNetwork(mLastNetworkId,
+                    WifiConfiguration.DISABLED_DHCP_FAILURE);
             mReconnectCount = 0;
         }
 
@@ -2169,7 +2185,7 @@ public class WifiStateMachine extends StateMachine {
                     WifiConfigStore.enableAllNetworks();
                     break;
                 case CMD_DISABLE_NETWORK:
-                    ok = WifiConfigStore.disableNetwork(message.arg1);
+                    ok = WifiConfigStore.disableNetwork(message.arg1, message.arg2);
                     mReplyChannel.replyToMessage(message, message.what, ok ? SUCCESS : FAILURE);
                     break;
                 case CMD_BLACKLIST_NETWORK:
@@ -2605,7 +2621,7 @@ public class WifiStateMachine extends StateMachine {
                      * a connection to the enabled network.
                      */
                     if (config != null) {
-                        WifiConfigStore.selectNetwork(config);
+                        netId = WifiConfigStore.selectNetwork(config);
                     } else {
                         WifiConfigStore.selectNetwork(netId);
                     }
@@ -2614,7 +2630,10 @@ public class WifiStateMachine extends StateMachine {
                     mSupplicantStateTracker.sendMessage(CMD_CONNECT_NETWORK);
 
                     WifiNative.reconnectCommand();
-
+                    mLastExplicitNetworkId = netId;
+                    mLastNetworkChoiceTime  = SystemClock.elapsedRealtime();
+                    mNextWifiActionExplicit = true;
+                    Slog.d(TAG, "Setting wifi connect explicit for netid " + netId);
                     /* Expect a disconnection from the old connection */
                     transitionTo(mDisconnectingState);
                     break;
@@ -2636,6 +2655,13 @@ public class WifiStateMachine extends StateMachine {
                     mWifiInfo.setSSID(fetchSSID());
                     mWifiInfo.setBSSID(mLastBssid);
                     mWifiInfo.setNetworkId(mLastNetworkId);
+                    if (mNextWifiActionExplicit &&
+                        mWifiInfo.getNetworkId() == mLastExplicitNetworkId &&
+                        SystemClock.elapsedRealtime() < mLastNetworkChoiceTime +
+                                                            EXPLICIT_CONNECT_ALLOWED_DELAY_MS) {
+                        mWifiInfo.setExplicitConnect(true);
+                    }
+                    mNextWifiActionExplicit = false;
                     /* send event to CM & network change broadcast */
                     setNetworkDetailedState(DetailedState.OBTAINING_IPADDR);
                     sendNetworkStateChangeBroadcast(mLastBssid);
