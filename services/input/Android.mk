@@ -19,6 +19,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES:= \
     EventHub.cpp \
     InputDispatcher.cpp \
+    InputListener.cpp \
     InputManager.cpp \
     InputReader.cpp \
     InputWindow.cpp \

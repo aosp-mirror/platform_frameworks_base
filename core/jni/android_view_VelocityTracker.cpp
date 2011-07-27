@@ -69,8 +69,7 @@ void VelocityTrackerState::computeCurrentVelocity(int32_t units, float maxVeloci
     mCalculatedIdBits = idBits;
 
     for (uint32_t index = 0; !idBits.isEmpty(); index++) {
-        uint32_t id = idBits.firstMarkedBit();
-        idBits.clearBit(id);
+        uint32_t id = idBits.clearFirstMarkedBit();
 
         float vx, vy;
         mVelocityTracker.getVelocity(id, &vx, &vy);

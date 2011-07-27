@@ -52,9 +52,6 @@ TEST_F(PointerCoordsTest, AxisValues) {
     ASSERT_EQ(0, coords.getAxisValue(1))
             << "getAxisValue should return zero because axis is not present";
 
-    ASSERT_EQ(NULL, coords.editAxisValue(0))
-            << "editAxisValue should return null because axis is not present";
-
     // Set first axis.
     ASSERT_EQ(OK, coords.setAxisValue(1, 5));
     ASSERT_EQ(0x00000002ULL, coords.bits);
@@ -96,26 +93,17 @@ TEST_F(PointerCoordsTest, AxisValues) {
     ASSERT_EQ(2, coords.getAxisValue(3))
             << "getAxisValue should return value of axis";
 
-    // Edit an existing axis value in place.
-    valuePtr = coords.editAxisValue(1);
-    ASSERT_EQ(5, *valuePtr)
-            << "editAxisValue should return pointer to axis value";
-
-    *valuePtr = 7;
-    ASSERT_EQ(7, coords.getAxisValue(1))
-            << "getAxisValue should return value of axis";
-
     // Set an axis with an id between the others.  (inserting value in the middle)
     ASSERT_EQ(OK, coords.setAxisValue(2, 1));
     ASSERT_EQ(0x0000000fULL, coords.bits);
     ASSERT_EQ(4, coords.values[0]);
-    ASSERT_EQ(7, coords.values[1]);
+    ASSERT_EQ(5, coords.values[1]);
     ASSERT_EQ(1, coords.values[2]);
     ASSERT_EQ(2, coords.values[3]);
 
     ASSERT_EQ(4, coords.getAxisValue(0))
             << "getAxisValue should return value of axis";
-    ASSERT_EQ(7, coords.getAxisValue(1))
+    ASSERT_EQ(5, coords.getAxisValue(1))
             << "getAxisValue should return value of axis";
     ASSERT_EQ(1, coords.getAxisValue(2))
             << "getAxisValue should return value of axis";
