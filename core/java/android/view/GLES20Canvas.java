@@ -277,14 +277,25 @@ class GLES20Canvas extends HardwareCanvas {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
+     * Must match Caches::FlushMode values
+     * 
      * @see #flushCaches(int) 
      */
-    public static final int FLUSH_CACHES_MODERATE = 0;
+    public static final int FLUSH_CACHES_LAYERS = 0;
+    
+    /**
+     * Must match Caches::FlushMode values
+     * 
+     * @see #flushCaches(int) 
+     */
+    public static final int FLUSH_CACHES_MODERATE = 1;
 
     /**
+     * Must match Caches::FlushMode values
+     * 
      * @see #flushCaches(int) 
      */
-    public static final int FLUSH_CACHES_FULL = 1;
+    public static final int FLUSH_CACHES_FULL = 2;
 
     /**
      * Flush caches to reclaim as much memory as possible. The amount of memory
