@@ -269,6 +269,7 @@ rsMatrixLoadFrustum(rs_matrix4x4 *m, float left, float right, float bottom, floa
 extern void __attribute__((overloadable))
 rsMatrixLoadPerspective(rs_matrix4x4* m, float fovy, float aspect, float near, float far);
 
+#if !defined(RS_VERSION) || (RS_VERSION < 14)
 _RS_RUNTIME float4 __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix4x4 *m, float4 in);
 
@@ -286,6 +287,25 @@ rsMatrixMultiply(rs_matrix3x3 *m, float2 in);
 
 _RS_RUNTIME float2 __attribute__((overloadable))
 rsMatrixMultiply(rs_matrix2x2 *m, float2 in);
+#else
+_RS_RUNTIME float4 __attribute__((overloadable))
+rsMatrixMultiply(const rs_matrix4x4 *m, float4 in);
+
+_RS_RUNTIME float4 __attribute__((overloadable))
+rsMatrixMultiply(const rs_matrix4x4 *m, float3 in);
+
+_RS_RUNTIME float4 __attribute__((overloadable))
+rsMatrixMultiply(const rs_matrix4x4 *m, float2 in);
+
+_RS_RUNTIME float3 __attribute__((overloadable))
+rsMatrixMultiply(const rs_matrix3x3 *m, float3 in);
+
+_RS_RUNTIME float3 __attribute__((overloadable))
+rsMatrixMultiply(const rs_matrix3x3 *m, float2 in);
+
+_RS_RUNTIME float2 __attribute__((overloadable))
+rsMatrixMultiply(const rs_matrix2x2 *m, float2 in);
+#endif
 
 // Returns true if the matrix was successfully inversed
 extern bool __attribute__((overloadable)) rsMatrixInverse(rs_matrix4x4 *m);

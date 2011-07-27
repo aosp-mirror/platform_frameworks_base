@@ -249,7 +249,16 @@ typedef struct rs_script_call {
     uint32_t arrayEnd;
 } rs_script_call_t;
 
-#if 1//(RS_VERSION >= 14)
+#if !defined(RS_VERSION) || (RS_VERSION < 14)
+extern void __attribute__((overloadable))
+    rsForEach(rs_script script, rs_allocation input,
+              rs_allocation output, const void * usrData,
+              const rs_script_call_t *);
+
+extern void __attribute__((overloadable))
+    rsForEach(rs_script script, rs_allocation input,
+              rs_allocation output, const void * usrData);
+#else
 extern void __attribute__((overloadable))
     rsForEach(rs_script script, rs_allocation input, rs_allocation output);
 
@@ -260,17 +269,7 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsForEach(rs_script script, rs_allocation input, rs_allocation output,
               const void * usrData, size_t usrDataLen, const rs_script_call_t *);
-#else
-extern void __attribute__((overloadable))
-    rsForEach(rs_script script, rs_allocation input,
-              rs_allocation output, const void * usrData,
-              const rs_script_call_t *);
 #endif
-
-// Move me once dependant changes are in.
-extern void __attribute__((overloadable))
-    rsForEach(rs_script script, rs_allocation input,
-              rs_allocation output, const void * usrData);
 
 
 /**
