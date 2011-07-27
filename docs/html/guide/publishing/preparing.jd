@@ -78,9 +78,6 @@ device to the greatest extent possible. You can then test your application's UI
 and performance. However, we strongly recommend that you test your application
 on an actual target device before publishing it. </li>
 
-<li>If you are targeting the <a href="http://www.t-mobileg1.com/">T-Mobile
-G1</a> device for your application, make sure that your UI handles screen
-orientation changes. </li>
 </ul>
 
 <h3 id="eula">2. Consider adding an End User License Agreement in your 
