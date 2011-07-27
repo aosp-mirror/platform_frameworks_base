@@ -21,7 +21,8 @@ LOCAL_SHARED_LIBRARIES := \
     libhardware \
     libhardware_legacy \
     libeffects \
-    libdl
+    libdl \
+    libpowermanager
 
 LOCAL_STATIC_LIBRARIES := \
     libcpustats \
