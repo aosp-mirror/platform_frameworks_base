@@ -430,9 +430,8 @@ public:
 
     void fadePointer();
 
-    inline const PropertyMap& getConfiguration() {
-        return mConfiguration;
-    }
+    inline const PropertyMap& getConfiguration() { return mConfiguration; }
+    inline EventHubInterface* getEventHub() { return mContext->getEventHub(); }
 
 private:
     InputReaderContext* mContext;
@@ -449,6 +448,171 @@ private:
     int32_t getState(uint32_t sourceMask, int32_t code, GetStateFunc getStateFunc);
 
     PropertyMap mConfiguration;
+};
+
+
+/* Keeps track of the state of mouse or touch pad buttons. */
+class CursorButtonAccumulator {
+public:
+    CursorButtonAccumulator();
+
+    void clearButtons();
+    void process(const RawEvent* rawEvent);
+
+    uint32_t getButtonState() const;
+
+private:
+    bool mBtnLeft;
+    bool mBtnRight;
+    bool mBtnMiddle;
+    bool mBtnBack;
+    bool mBtnSide;
+    bool mBtnForward;
+    bool mBtnExtra;
+    bool mBtnTask;
+};
+
+
+/* Keeps track of cursor movements. */
+
+class CursorMotionAccumulator {
+public:
+    CursorMotionAccumulator();
+    void configure(InputDevice* device);
+
+    void clearRelativeAxes();
+    void process(const RawEvent* rawEvent);
+
+    inline bool haveRelativeVWheel() const { return mHaveRelWheel; }
+    inline bool haveRelativeHWheel() const { return mHaveRelHWheel; }
+
+    inline int32_t getRelativeX() const { return mRelX; }
+    inline int32_t getRelativeY() const { return mRelY; }
+    inline int32_t getRelativeVWheel() const { return mRelWheel; }
+    inline int32_t getRelativeHWheel() const { return mRelHWheel; }
+
+private:
+    bool mHaveRelWheel;
+    bool mHaveRelHWheel;
+
+    int32_t mRelX;
+    int32_t mRelY;
+    int32_t mRelWheel;
+    int32_t mRelHWheel;
+};
+
+
+/* Keeps track of the state of touch, stylus and tool buttons. */
+class TouchButtonAccumulator {
+public:
+    TouchButtonAccumulator();
+    void configure(InputDevice* device);
+
+    void clearButtons();
+    void process(const RawEvent* rawEvent);
+
+    uint32_t getButtonState() const;
+    int32_t getToolType() const;
+    bool isActive() const;
+    bool isHovering() const;
+
+private:
+    bool mHaveBtnTouch;
+
+    bool mBtnTouch;
+    bool mBtnStylus;
+    bool mBtnStylus2;
+    bool mBtnToolFinger;
+    bool mBtnToolPen;
+    bool mBtnToolRubber;
+};
+
+
+/* Keeps track of the state of single-touch protocol. */
+class SingleTouchMotionAccumulator {
+public:
+    SingleTouchMotionAccumulator();
+
+    void clearAbsoluteAxes();
+    void process(const RawEvent* rawEvent);
+
+    inline int32_t getAbsoluteX() const { return mAbsX; }
+    inline int32_t getAbsoluteY() const { return mAbsY; }
+    inline int32_t getAbsolutePressure() const { return mAbsPressure; }
+    inline int32_t getAbsoluteToolWidth() const { return mAbsToolWidth; }
+    inline int32_t getAbsoluteDistance() const { return mAbsDistance; }
+
+private:
+    int32_t mAbsX;
+    int32_t mAbsY;
+    int32_t mAbsPressure;
+    int32_t mAbsToolWidth;
+    int32_t mAbsDistance;
+};
+
+
+/* Keeps track of the state of multi-touch protocol. */
+class MultiTouchMotionAccumulator {
+public:
+    class Slot {
+    public:
+        inline bool isInUse() const { return mInUse; }
+        inline int32_t getX() const { return mAbsMTPositionX; }
+        inline int32_t getY() const { return mAbsMTPositionY; }
+        inline int32_t getTouchMajor() const { return mAbsMTTouchMajor; }
+        inline int32_t getTouchMinor() const {
+            return mHaveAbsMTTouchMinor ? mAbsMTTouchMinor : mAbsMTTouchMajor; }
+        inline int32_t getToolMajor() const { return mAbsMTWidthMajor; }
+        inline int32_t getToolMinor() const {
+            return mHaveAbsMTWidthMinor ? mAbsMTWidthMinor : mAbsMTWidthMajor; }
+        inline int32_t getOrientation() const { return mAbsMTOrientation; }
+        inline int32_t getTrackingId() const { return mAbsMTTrackingId; }
+        inline int32_t getPressure() const { return mAbsMTPressure; }
+        inline int32_t getDistance() const { return mAbsMTDistance; }
+        inline int32_t getToolType() const;
+
+    private:
+        friend class MultiTouchMotionAccumulator;
+
+        bool mInUse;
+        bool mHaveAbsMTTouchMinor;
+        bool mHaveAbsMTWidthMinor;
+        bool mHaveAbsMTToolType;
+
+        int32_t mAbsMTPositionX;
+        int32_t mAbsMTPositionY;
+        int32_t mAbsMTTouchMajor;
+        int32_t mAbsMTTouchMinor;
+        int32_t mAbsMTWidthMajor;
+        int32_t mAbsMTWidthMinor;
+        int32_t mAbsMTOrientation;
+        int32_t mAbsMTTrackingId;
+        int32_t mAbsMTPressure;
+        int32_t mAbsMTToolType;
+        int32_t mAbsMTDistance;
+
+        Slot();
+        void clearIfInUse();
+        void clear();
+    };
+
+    MultiTouchMotionAccumulator();
+    ~MultiTouchMotionAccumulator();
+
+    void configure(size_t slotCount, bool usingSlotsProtocol);
+    void process(const RawEvent* rawEvent);
+
+    void clearSlots(int32_t initialSlot);
+
+    inline bool isUsingSlotsProtocol() const { return mUsingSlotsProtocol; }
+    inline size_t getSlotCount() const { return mSlotCount; }
+    inline const Slot* getSlot(size_t index) const { return &mSlots[index]; }
+
+private:
+    int32_t mCurrentSlot;
+    Slot* mSlots;
+    size_t mSlotCount;
+    bool mUsingSlotsProtocol;
 };
 
 
@@ -615,29 +779,8 @@ private:
         bool orientationAware;
     } mParameters;
 
-    struct Accumulator {
-        enum {
-            FIELD_BUTTONS = 1,
-            FIELD_REL_X = 2,
-            FIELD_REL_Y = 4,
-            FIELD_REL_WHEEL = 8,
-            FIELD_REL_HWHEEL = 16,
-        };
-
-        uint32_t fields;
-
-        uint32_t buttonDown;
-        uint32_t buttonUp;
-
-        int32_t relX;
-        int32_t relY;
-        int32_t relWheel;
-        int32_t relHWheel;
-
-        inline void clear() {
-            fields = 0;
-        }
-    } mAccumulator;
+    CursorButtonAccumulator mCursorButtonAccumulator;
+    CursorMotionAccumulator mCursorMotionAccumulator;
 
     int32_t mSource;
     float mXScale;
@@ -645,8 +788,6 @@ private:
     float mXPrecision;
     float mYPrecision;
 
-    bool mHaveVWheel;
-    bool mHaveHWheel;
     float mVWheelScale;
     float mHWheelScale;
 
@@ -722,7 +863,8 @@ protected:
         int32_t toolMinor;
         int32_t orientation;
         int32_t distance;
-        bool isStylus;
+        int32_t toolType; // AMOTION_EVENT_TOOL_TYPE constant
+        bool isHovering;
 
         inline bool operator== (const PointerData& other) const {
             return id == other.id
@@ -734,7 +876,9 @@ protected:
                     && toolMajor == other.toolMajor
                     && toolMinor == other.toolMinor
                     && orientation == other.orientation
-                    && distance == other.distance;
+                    && distance == other.distance
+                    && toolType == other.toolType
+                    && isHovering == other.isHovering;
         }
         inline bool operator!= (const PointerData& other) const {
             return !(*this == other);
@@ -1201,7 +1345,6 @@ private:
 
     void suppressSwipeOntoVirtualKeys(nsecs_t when);
 
-    int32_t getTouchToolType(bool isStylus) const;
     bool isPointInsideSurfaceLocked(int32_t x, int32_t y);
     const VirtualKey* findVirtualKeyHitLocked(int32_t x, int32_t y);
 
@@ -1221,40 +1364,9 @@ protected:
     virtual void configureRawAxes();
 
 private:
-    struct Accumulator {
-        enum {
-            FIELD_BTN_TOUCH = 1,
-            FIELD_ABS_X = 2,
-            FIELD_ABS_Y = 4,
-            FIELD_ABS_PRESSURE = 8,
-            FIELD_ABS_TOOL_WIDTH = 16,
-            FIELD_BUTTONS = 32,
-        };
-
-        uint32_t fields;
-
-        bool btnTouch;
-        int32_t absX;
-        int32_t absY;
-        int32_t absPressure;
-        int32_t absToolWidth;
-
-        uint32_t buttonDown;
-        uint32_t buttonUp;
-
-        inline void clear() {
-            fields = 0;
-            buttonDown = 0;
-            buttonUp = 0;
-        }
-    } mAccumulator;
-
-    bool mDown;
-    int32_t mX;
-    int32_t mY;
-    int32_t mPressure;
-    int32_t mToolWidth;
-    int32_t mButtonState;
+    CursorButtonAccumulator mCursorButtonAccumulator;
+    TouchButtonAccumulator mTouchButtonAccumulator;
+    SingleTouchMotionAccumulator mSingleTouchMotionAccumulator;
 
     void clearState();
 
@@ -1274,83 +1386,9 @@ protected:
     virtual void configureRawAxes();
 
 private:
-    struct Accumulator {
-        enum {
-            FIELD_ABS_MT_POSITION_X = 1 << 0,
-            FIELD_ABS_MT_POSITION_Y = 1 << 1,
-            FIELD_ABS_MT_TOUCH_MAJOR = 1 << 2,
-            FIELD_ABS_MT_TOUCH_MINOR = 1 << 3,
-            FIELD_ABS_MT_WIDTH_MAJOR = 1 << 4,
-            FIELD_ABS_MT_WIDTH_MINOR = 1 << 5,
-            FIELD_ABS_MT_ORIENTATION = 1 << 6,
-            FIELD_ABS_MT_TRACKING_ID = 1 << 7,
-            FIELD_ABS_MT_PRESSURE = 1 << 8,
-            FIELD_ABS_MT_TOOL_TYPE = 1 << 9,
-            FIELD_ABS_MT_DISTANCE = 1 << 10,
-        };
-
-        struct Slot {
-            uint32_t fields; // 0 if slot is unused
-
-            int32_t absMTPositionX;
-            int32_t absMTPositionY;
-            int32_t absMTTouchMajor;
-            int32_t absMTTouchMinor;
-            int32_t absMTWidthMajor;
-            int32_t absMTWidthMinor;
-            int32_t absMTOrientation;
-            int32_t absMTTrackingId;
-            int32_t absMTPressure;
-            int32_t absMTToolType;
-            int32_t absMTDistance;
-
-            inline Slot() {
-                clear();
-            }
-
-            inline void clear() {
-                fields = 0;
-            }
-        };
-
-        // Current slot index.
-        int32_t currentSlot;
-
-        // Array of slots.
-        Slot* slots;
-
-        // Bitfield of buttons that went down or up.
-        uint32_t buttonDown;
-        uint32_t buttonUp;
-
-        Accumulator() : currentSlot(0), slots(NULL), buttonDown(0), buttonUp(0) {
-        }
-
-        ~Accumulator() {
-            delete[] slots;
-        }
-
-        void allocateSlots(size_t slotCount) {
-            slots = new Slot[slotCount];
-        }
-
-        void clearSlots(size_t slotCount) {
-            for (size_t i = 0; i < slotCount; i++) {
-                slots[i].clear();
-            }
-            currentSlot = 0;
-        }
-
-        void clearButtons() {
-            buttonDown = 0;
-            buttonUp = 0;
-        }
-    } mAccumulator;
-
-    size_t mSlotCount;
-    bool mUsingSlotsProtocol;
-
-    int32_t mButtonState;
+    CursorButtonAccumulator mCursorButtonAccumulator;
+    TouchButtonAccumulator mTouchButtonAccumulator;
+    MultiTouchMotionAccumulator mMultiTouchMotionAccumulator;
 
     // Specifies the pointer id bits that are in use, and their associated tracking id.
     BitSet32 mPointerIdBits;
