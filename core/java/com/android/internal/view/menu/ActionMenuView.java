@@ -36,8 +36,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     private boolean mReserveOverflow;
     private ActionMenuPresenter mPresenter;
-    private boolean mUpdateContentsBeforeMeasure;
     private boolean mFormatItems;
+    private int mFormatItemsWidth;
     private int mMinCellSize;
     private int mMeasuredExtraWidth;
 
@@ -71,19 +71,21 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     }
 
     @Override
-    public void requestLayout() {
-        // Layout can influence how many action items fit.
-        mUpdateContentsBeforeMeasure = true;
-        super.requestLayout();
-    }
-
-    @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // If we've been given an exact size to match, apply special formatting during layout.
+        final boolean wasFormatted = mFormatItems;
         mFormatItems = MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.EXACTLY;
-        if (mUpdateContentsBeforeMeasure && mMenu != null) {
+
+        if (wasFormatted != mFormatItems) {
+            mFormatItemsWidth = 0; // Reset this when switching modes
+        }
+
+        // Special formatting can change whether items can fit as action buttons.
+        // Kick the menu and update presenters when this changes.
+        final int widthSize = MeasureSpec.getMode(widthMeasureSpec);
+        if (mFormatItems && mMenu != null && widthSize != mFormatItemsWidth) {
+            mFormatItemsWidth = widthSize;
             mMenu.onItemsChanged(true);
-            mUpdateContentsBeforeMeasure = false;
         }
 
         if (mFormatItems) {
