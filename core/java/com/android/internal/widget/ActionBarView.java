@@ -1323,11 +1323,18 @@ public class ActionBarView extends AbsActionBarView {
             if (mExpandedActionView instanceof CollapsibleActionView) {
                 ((CollapsibleActionView) mExpandedActionView).onActionViewExpanded();
             }
+
             return true;
         }
 
         @Override
         public boolean collapseItemActionView(MenuBuilder menu, MenuItemImpl item) {
+            // Do this before detaching the actionview from the hierarchy, in case
+            // it needs to dismiss the soft keyboard, etc.
+            if (mExpandedActionView instanceof CollapsibleActionView) {
+                ((CollapsibleActionView) mExpandedActionView).onActionViewCollapsed();
+            }
+
             removeView(mExpandedActionView);
             removeView(mExpandedHomeLayout);
             if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_HOME) != 0) {
@@ -1349,16 +1356,12 @@ public class ActionBarView extends AbsActionBarView {
             if (mCustomNavView != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0) {
                 mCustomNavView.setVisibility(VISIBLE);
             }
-            View collapsedView = mExpandedActionView;
             mExpandedActionView = null;
             mExpandedHomeLayout.setIcon(null);
             mCurrentExpandedItem = null;
             requestLayout();
             item.setActionViewExpanded(false);
 
-            if (collapsedView instanceof CollapsibleActionView) {
-                ((CollapsibleActionView) collapsedView).onActionViewCollapsed();
-            }
             return true;
         }
 
