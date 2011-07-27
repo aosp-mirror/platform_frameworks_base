@@ -590,7 +590,7 @@ void AudioRecord::releaseBuffer(Buffer* audioBuffer)
 audio_io_handle_t AudioRecord::getInput()
 {
     AutoMutex lock(mLock);
-    return getInput_l();
+    return mInput;
 }
 
 // must be called with mLock held
