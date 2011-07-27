@@ -69,6 +69,7 @@ void LayerCache::setMaxSize(uint32_t maxSize) {
 void LayerCache::deleteLayer(Layer* layer) {
     if (layer) {
         mSize -= layer->getWidth() * layer->getHeight() * 4;
+        layer->deleteFbo();
         layer->deleteTexture();
         delete layer;
     }

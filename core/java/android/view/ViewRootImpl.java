@@ -235,6 +235,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     final Configuration mLastConfiguration = new Configuration();
     final Configuration mPendingConfiguration = new Configuration();
 
+    
     class ResizedInfo {
         Rect coveredInsets;
         Rect visibleInsets;

@@ -191,6 +191,10 @@ struct Layer {
         if (texture.id) glDeleteTextures(1, &texture.id);
     }
 
+    inline void deleteFbo() {
+        if (fbo) glDeleteFramebuffers(1, &fbo);
+    }
+
     inline void allocateTexture(GLenum format, GLenum storage) {
         glTexImage2D(renderTarget, 0, format, getWidth(), getHeight(), 0, format, storage, NULL);
     }

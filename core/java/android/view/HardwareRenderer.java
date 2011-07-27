@@ -283,7 +283,7 @@ public abstract class HardwareRenderer {
      *              see {@link android.content.ComponentCallbacks}
      */
     static void trimMemory(int level) {
-        Gl20Renderer.flushCaches(level);
+        Gl20Renderer.trimMemory(level);
     }
 
     /**
@@ -677,21 +677,12 @@ public abstract class HardwareRenderer {
         }
 
         EGLContext createContext(EGL10 egl, EGLDisplay eglDisplay, EGLConfig eglConfig) {
-            int[] attrib_list = { EGL_CONTEXT_CLIENT_VERSION, mGlVersion, EGL_NONE };
+            int[] attribs = { EGL_CONTEXT_CLIENT_VERSION, mGlVersion, EGL_NONE };
 
             return egl.eglCreateContext(eglDisplay, eglConfig, EGL_NO_CONTEXT,
-                    mGlVersion != 0 ? attrib_list : null);            
+                    mGlVersion != 0 ? attribs : null);            
         }
 
-        @Override
-        void initializeIfNeeded(int width, int height, View.AttachInfo attachInfo,
-                SurfaceHolder holder) throws Surface.OutOfResourcesException {
-            if (isRequested()) {
-                checkEglErrors();
-                super.initializeIfNeeded(width, height, attachInfo, holder);
-            }
-        }
-        
         @Override
         void destroy(boolean full) {
             if (full && mCanvas != null) {
@@ -726,6 +717,7 @@ public abstract class HardwareRenderer {
 
         @Override
         void setup(int width, int height) {
+            checkCurrent();
             mCanvas.setViewport(width, height);
         }
 
@@ -819,7 +811,7 @@ public abstract class HardwareRenderer {
          *         {@link #SURFACE_STATE_UPDATED} if the EGL context was changed or
          *         {@link #SURFACE_STATE_SUCCESS} if the EGL context was the correct one
          */
-        private int checkCurrent() {
+        int checkCurrent() {
             if (mEglThread != Thread.currentThread()) {
                 throw new IllegalStateException("Hardware acceleration can only be used with a " +
                         "single UI thread.\nOriginal thread: " + mEglThread + "\n" +
@@ -846,6 +838,9 @@ public abstract class HardwareRenderer {
      */
     static class Gl20Renderer extends GlRenderer {
         private GLES20Canvas mGlCanvas;
+
+        private static EGLSurface sPbuffer;
+        private static final Object[] sPbufferLock = new Object[0];
 
         Gl20Renderer(boolean translucent) {
             super(2, translucent);
@@ -926,14 +921,26 @@ public abstract class HardwareRenderer {
             return ((GLES20TextureLayer) layer).getSurfaceTexture();
         }
 
-        static HardwareRenderer create(boolean translucent) {
-            if (GLES20Canvas.isAvailable()) {
-                return new Gl20Renderer(translucent);
+        static void trimMemory(int level) {
+            if (sEgl == null || sEglConfig == null) return;
+
+            EGLContext eglContext = sEglContextStorage.get();
+            // We do not have OpenGL objects
+            if (eglContext == null) {
+                return;
+            } else {
+                synchronized (sPbufferLock) {
+                    // Create a temporary 1x1 pbuffer so we have a context
+                    // to clear our OpenGL objects
+                    if (sPbuffer == null) {
+                        sPbuffer = sEgl.eglCreatePbufferSurface(sEglDisplay, sEglConfig, new int[] {
+                                EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE
+                        });
+                    }
+                }
+                sEgl.eglMakeCurrent(sEglDisplay, sPbuffer, sPbuffer, eglContext);
             }
-            return null;
-        }
-        
-        static void flushCaches(int level) {
+
             switch (level) {
                 case ComponentCallbacks.TRIM_MEMORY_MODERATE:
                     GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_MODERATE);
@@ -942,6 +949,13 @@ public abstract class HardwareRenderer {
                     GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_FULL);
                     break;
             }
+        }
+
+        static HardwareRenderer create(boolean translucent) {
+            if (GLES20Canvas.isAvailable()) {
+                return new Gl20Renderer(translucent);
+            }
+            return null;
         }
     }
 }
