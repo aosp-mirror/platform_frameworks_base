@@ -221,6 +221,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         mCloseButton.setOnClickListener(mOnClickListener);
         mSubmitButton.setOnClickListener(mOnClickListener);
         mVoiceButton.setOnClickListener(mOnClickListener);
+        mQueryTextView.setOnClickListener(mOnClickListener);
 
         mQueryTextView.addTextChangedListener(mTextWatcher);
         mQueryTextView.setOnEditorActionListener(mOnEditorActionListener);
@@ -319,7 +320,9 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         // If it is not iconified, then give the focus to the text field
         if (!isIconified()) {
             boolean result = mQueryTextView.requestFocus(direction, previouslyFocusedRect);
-            if (result) updateViewsVisibility(false);
+            if (result) {
+                updateViewsVisibility(false);
+            }
             return result;
         } else {
             return super.requestFocus(direction, previouslyFocusedRect);
@@ -681,6 +684,8 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
                 onSubmitQuery();
             } else if (v == mVoiceButton) {
                 onVoiceClicked();
+            } else if (v == mQueryTextView) {
+                forceSuggestionQuery();
             }
         }
     };
@@ -1029,6 +1034,9 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     void onTextFocusChanged() {
         updateViewsVisibility(isIconified());
         updateFocusedState(mQueryTextView.hasFocus());
+        if (mQueryTextView.hasFocus()) {
+            forceSuggestionQuery();
+        }
     }
 
     @Override
@@ -1375,6 +1383,11 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
                             " returned exception" + e.toString());
             return null;
         }
+    }
+
+    private void forceSuggestionQuery() {
+        mQueryTextView.doBeforeTextChanged();
+        mQueryTextView.doAfterTextChanged();
     }
 
     static boolean isLandscapeMode(Context context) {
