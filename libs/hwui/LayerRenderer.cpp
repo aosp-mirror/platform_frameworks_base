@@ -167,7 +167,7 @@ void LayerRenderer::generateMesh() {
 ///////////////////////////////////////////////////////////////////////////////
 
 Layer* LayerRenderer::createLayer(uint32_t width, uint32_t height, bool isOpaque) {
-    LAYER_RENDERER_LOGD("Creating new layer %dx%d", width, height);
+    LAYER_RENDERER_LOGD("Requesting new render layer %dx%d", width, height);
 
     GLuint fbo = Caches::getInstance().fboCache.get();
     if (!fbo) {
@@ -288,16 +288,22 @@ void LayerRenderer::updateTextureLayer(Layer* layer, uint32_t width, uint32_t he
 
 void LayerRenderer::destroyLayer(Layer* layer) {
     if (layer) {
-        LAYER_RENDERER_LOGD("Destroying layer, fbo = %d", layer->getFbo());
+        LAYER_RENDERER_LOGD("Recycling layer, %dx%d fbo = %d",
+                layer->getWidth(), layer->getHeight(), layer->getFbo());
 
         if (layer->getFbo()) {
             Caches::getInstance().fboCache.put(layer->getFbo());
         }
 
         if (!Caches::getInstance().layerCache.put(layer)) {
+            LAYER_RENDERER_LOGD("  Destroyed!");
             layer->deleteTexture();
             delete layer;
         } else {
+            LAYER_RENDERER_LOGD("  Cached!");
+#if DEBUG_LAYERS
+            Caches::getInstance().layerCache.dump();
+#endif
             layer->region.clear();
         }
     }
