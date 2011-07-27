@@ -40,7 +40,8 @@
 #include <media/AudioRecord.h>
 #include <media/AudioTrack.h>
 #include <media/mediarecorder.h>
-
+#include <media/AudioEffect.h>
+#include <audio_effects/effect_aec.h>
 #include <system/audio.h>
 
 #include "jni.h"
@@ -481,6 +482,7 @@ public:
     bool sendDtmf(int event);
     bool add(AudioStream *stream);
     bool remove(int socket);
+    bool platformHasAec() { return mPlatformHasAec; }
 
 private:
     enum {
@@ -491,6 +493,8 @@ private:
         LAST_MODE = 3,
     };
 
+    bool checkPlatformAec();
+
     AudioStream *mChain;
     int mEventQueue;
     volatile int mDtmfEvent;
@@ -499,6 +503,7 @@ private:
     int mSampleRate;
     int mSampleCount;
     int mDeviceSocket;
+    bool mPlatformHasAec;
 
     class NetworkThread : public Thread
     {
@@ -550,6 +555,7 @@ AudioGroup::AudioGroup()
     mDeviceSocket = -1;
     mNetworkThread = new NetworkThread(this);
     mDeviceThread = new DeviceThread(this);
+    mPlatformHasAec = checkPlatformAec();
 }
 
 AudioGroup::~AudioGroup()
@@ -629,10 +635,6 @@ bool AudioGroup::setMode(int mode)
     property_get("ro.product.board", value, "");
     if (mode == NORMAL && !strcmp(value, "herring")) {
         mode = ECHO_SUPPRESSION;
-    }
-    if (mode == ECHO_SUPPRESSION && AudioSystem::getParameters(
-        0, String8("ec_supported")) == "ec_supported=yes") {
-        mode = NORMAL;
     }
     if (mMode == mode) {
         return true;
@@ -759,6 +761,25 @@ bool AudioGroup::NetworkThread::threadLoop()
     return true;
 }
 
+bool AudioGroup::checkPlatformAec()
+{
+    effect_descriptor_t fxDesc;
+    uint32_t numFx;
+
+    if (AudioEffect::queryNumberEffects(&numFx) != NO_ERROR) {
+        return false;
+    }
+    for (uint32_t i = 0; i < numFx; i++) {
+        if (AudioEffect::queryEffect(i, &fxDesc) != NO_ERROR) {
+            continue;
+        }
+        if (memcmp(&fxDesc.type, FX_IID_AEC, sizeof(effect_uuid_t)) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool AudioGroup::DeviceThread::threadLoop()
 {
     int mode = mGroup->mMode;
@@ -798,10 +819,6 @@ bool AudioGroup::DeviceThread::threadLoop()
     }
     LOGD("latency: output %d, input %d", track.latency(), record.latency());
 
-    // Initialize echo canceler.
-    EchoSuppressor echo(sampleCount,
-        (track.latency() + record.latency()) * sampleRate / 1000);
-
     // Give device socket a reasonable buffer size.
     setsockopt(deviceSocket, SOL_SOCKET, SO_RCVBUF, &output, sizeof(output));
     setsockopt(deviceSocket, SOL_SOCKET, SO_SNDBUF, &output, sizeof(output));
@@ -810,6 +827,33 @@ bool AudioGroup::DeviceThread::threadLoop()
     char c;
     while (recv(deviceSocket, &c, 1, MSG_DONTWAIT) == 1);
 
+    // check if platform supports echo cancellation and do not active local echo suppression in
+    // this case
+    EchoSuppressor *echo = NULL;
+    AudioEffect *aec = NULL;
+    if (mode == ECHO_SUPPRESSION) {
+        if (mGroup->platformHasAec()) {
+            aec = new AudioEffect(FX_IID_AEC,
+                                    NULL,
+                                    0,
+                                    0,
+                                    0,
+                                    record.getSessionId(),
+                                    record.getInput());
+            status_t status = aec->initCheck();
+            if (status == NO_ERROR || status == ALREADY_EXISTS) {
+                aec->setEnabled(true);
+            } else {
+                delete aec;
+                aec = NULL;
+            }
+        }
+        // Create local echo suppressor if platform AEC cannot be used.
+        if (aec == NULL) {
+             echo = new EchoSuppressor(sampleCount,
+                                       (track.latency() + record.latency()) * sampleRate / 1000);
+        }
+    }
     // Start AudioRecord before AudioTrack. This prevents AudioTrack from being
     // disabled due to buffer underrun while waiting for AudioRecord.
     if (mode != MUTED) {
@@ -843,7 +887,7 @@ bool AudioGroup::DeviceThread::threadLoop()
                     track.releaseBuffer(&buffer);
                 } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
                     LOGE("cannot write to AudioTrack");
-                    return true;
+                    goto exit;
                 }
             }
 
@@ -859,7 +903,7 @@ bool AudioGroup::DeviceThread::threadLoop()
                     record.releaseBuffer(&buffer);
                 } else if (status != TIMED_OUT && status != WOULD_BLOCK) {
                     LOGE("cannot read from AudioRecord");
-                    return true;
+                    goto exit;
                 }
             }
         }
@@ -870,15 +914,18 @@ bool AudioGroup::DeviceThread::threadLoop()
         }
 
         if (mode != MUTED) {
-            if (mode == NORMAL) {
-                send(deviceSocket, input, sizeof(input), MSG_DONTWAIT);
-            } else {
-                echo.run(output, input);
-                send(deviceSocket, input, sizeof(input), MSG_DONTWAIT);
+            if (echo != NULL) {
+                LOGV("echo->run()");
+                echo->run(output, input);
             }
+            send(deviceSocket, input, sizeof(input), MSG_DONTWAIT);
         }
     }
-    return false;
+
+exit:
+    delete echo;
+    delete aec;
+    return true;
 }
 
 //------------------------------------------------------------------------------
