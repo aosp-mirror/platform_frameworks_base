@@ -39,7 +39,7 @@ page.title=Publishing on Android Market
 <div id="qv-extra">
   <img id="rule" src="{@docRoot}assets/images/grad-rule-qv.png">
   <div id="qv-sub-rule">
-    <img src="{@docRoot}assets/images/icon_market.jpg" style="float:left;margin:0;padding:0;">
+    <img src="{@docRoot}assets/images/icon_market.jpg" style="float:left;margin:0;padding:0 5px;">
     <h2 style="color:#669999;">Interested in publishing your app on Android Market?</h2>
     <p><a href="http://market.android.com/publish">Go to Android Market</a> to
 create a developer account and upload your application. For more information about the

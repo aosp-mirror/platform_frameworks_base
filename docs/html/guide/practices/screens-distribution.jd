@@ -17,6 +17,7 @@ screen configuration</li>
   <ol>
     <li><a href="#FilteringHansetApps">Filtering a Handset Application from Tablets</a></li>
     <li><a href="#FilteringTabletApps">Filtering a Tablet Application from Handsets</a></li>
+    <li><a href="#MultiApks">Publishing Multiple APKs for Different Screens</a></li>
   </ol>
 
   <h2>See also</h2>
@@ -43,7 +44,7 @@ application supports.</p>
 should understand the techniques for <a
 href="{@docRoot}guide/practices/screens_support.html">supporting multiple screens</a> and implement
 them to the best of your ability. By supporting multiple screens, your application can be made
-available to the greatest number of users with different devices, using a single {@code .apk}.</p>
+available to the greatest number of users with different devices, using a single APK.</p>
 
 
 
@@ -162,3 +163,24 @@ href="{@docRoot}guide/topics/manifest/supports-screens-element.html">{@code
 or you have decided to provide different versions of your application for different sets of screen
 configurations.</p>
 
+
+
+<h2 id="MultiApks">Publishing Multiple APKs for Different Screens</h2>
+
+<p>Although we recommend that you publish one APK for your application, Android Market allows
+you to publish multiple APKs for the same
+application when each APK supports a different set of screen configurations (as declared in
+the manifest file). For example, if you want to publish both a handset version and a tablet
+version of your application, but you're unable to make the same APK work for both screen sizes,
+you can actually publish two APKs for the same application listing. Depending on each device's
+screen configuration, Android Market will deliver it the APK that you've declared to support that
+device's screen.</p>
+
+<p>Beware, however, that publishing multiple APKs for the same application is
+considered an advanced feature and <strong>most applications should publish only one
+APK that can support a wide range of device configurations</strong>. Supporting multiple screen
+sizes, especially, is within reason using a single APK, as long as you follow the guide to
+<a href="{@docRoot}guide/practices/screens_support.html">Supporting Multiple Screens</a>.</p>
+
+<p>If you need more information about how to publish multiple APKs on Android Market, read <a
+href="{@docRoot}guide/market/publishing/multiple-apks.html">Multiple APK Support</a>.</p>
