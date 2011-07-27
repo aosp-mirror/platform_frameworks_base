@@ -978,7 +978,7 @@ final class FragmentManagerImpl extends FragmentManager {
                 }
             }
 
-            if (mNeedMenuInvalidate && mActivity != null) {
+            if (mNeedMenuInvalidate && mActivity != null && mCurState == Fragment.RESUMED) {
                 mActivity.invalidateOptionsMenu();
                 mNeedMenuInvalidate = false;
             }

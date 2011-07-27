@@ -27,6 +27,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.ActionProvider;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -47,7 +48,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * standard menu UI.
  */
 public class MenuBuilder implements Menu {
-    private static final String LOGTAG = "MenuBuilder";
+    private static final String TAG = "MenuBuilder";
 
     private static final String PRESENTER_KEY = "android:menu:presenters";
     private static final String ACTION_VIEW_STATES_KEY = "android:menu:actionviewstates";
