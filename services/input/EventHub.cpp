@@ -460,6 +460,17 @@ void EventHub::setExcludedDevices(const Vector<String8>& devices) {
     mExcludedDevices = devices;
 }
 
+bool EventHub::hasScanCode(int32_t deviceId, int32_t scanCode) const {
+    AutoMutex _l(mLock);
+    Device* device = getDeviceLocked(deviceId);
+    if (device && scanCode >= 0 && scanCode <= KEY_MAX) {
+        if (test_bit(scanCode, device->keyBitmask)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool EventHub::hasLed(int32_t deviceId, int32_t led) const {
     AutoMutex _l(mLock);
     Device* device = getDeviceLocked(deviceId);

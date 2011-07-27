@@ -1123,7 +1123,10 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Button constant: Primary button (left mouse button, stylus tip).
+     * Button constant: Primary button (left mouse button).
+     *
+     * This button constant is not set in response to simple touches with a finger
+     * or stylus tip.  The user must actually push a button.
      *
      * @see #getButtonState
      */
@@ -1215,55 +1218,32 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     public static final int TOOL_TYPE_UNKNOWN = 0;
 
     /**
-     * Tool type constant: The tool is a finger directly touching the display.
-     *
-     * This is a <em>direct</em> positioning tool.
+     * Tool type constant: The tool is a finger.
      *
      * @see #getToolType
      */
     public static final int TOOL_TYPE_FINGER = 1;
 
     /**
-     * Tool type constant: The tool is a stylus directly touching the display
-     * or hovering slightly above it.
-     *
-     * This is a <em>direct</em> positioning tool.
+     * Tool type constant: The tool is a stylus.
      *
      * @see #getToolType
      */
     public static final int TOOL_TYPE_STYLUS = 2;
 
     /**
-     * Tool type constant: The tool is a mouse or trackpad that translates
-     * relative motions into cursor movements on the display.
-     *
-     * This is an <em>indirect</em> positioning tool.
+     * Tool type constant: The tool is a mouse or trackpad.
      *
      * @see #getToolType
      */
     public static final int TOOL_TYPE_MOUSE = 3;
 
     /**
-     * Tool type constant: The tool is a finger on a touch pad that is not
-     * directly attached to the display.  Finger movements on the touch pad
-     * may be translated into touches on the display, possibly with visual feedback.
-     *
-     * This is an <em>indirect</em> positioning tool.
+     * Tool type constant: The tool is an eraser or a stylus being used in an inverted posture.
      *
      * @see #getToolType
      */
-    public static final int TOOL_TYPE_INDIRECT_FINGER = 4;
-
-    /**
-     * Tool type constant: The tool is a stylus on a digitizer tablet that is not
-     * attached to the display.  Stylus movements on the digitizer may be translated
-     * into touches on the display, possibly with visual feedback.
-     *
-     * This is an <em>indirect</em> positioning tool.
-     *
-     * @see #getToolType
-     */
-    public static final int TOOL_TYPE_INDIRECT_STYLUS = 5;
+    public static final int TOOL_TYPE_ERASER = 4;
 
     // NOTE: If you add a new tool type here you must also add it to:
     //  native/include/android/input.h
@@ -1276,8 +1256,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         names.append(TOOL_TYPE_FINGER, "TOOL_TYPE_FINGER");
         names.append(TOOL_TYPE_STYLUS, "TOOL_TYPE_STYLUS");
         names.append(TOOL_TYPE_MOUSE, "TOOL_TYPE_MOUSE");
-        names.append(TOOL_TYPE_INDIRECT_FINGER, "TOOL_TYPE_INDIRECT_FINGER");
-        names.append(TOOL_TYPE_INDIRECT_STYLUS, "TOOL_TYPE_INDIRECT_STYLUS");
+        names.append(TOOL_TYPE_ERASER, "TOOL_TYPE_ERASER");
     }
 
     // Private value for history pos that obtains the current sample.

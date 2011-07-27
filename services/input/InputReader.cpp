@@ -151,30 +151,6 @@ static inline bool sourcesMatchMask(uint32_t sources, uint32_t sourceMask) {
     return (sources & sourceMask & ~ AINPUT_SOURCE_CLASS_MASK) != 0;
 }
 
-static uint32_t getButtonStateForScanCode(int32_t scanCode) {
-    // Currently all buttons are mapped to the primary button.
-    switch (scanCode) {
-    case BTN_LEFT:
-        return AMOTION_EVENT_BUTTON_PRIMARY;
-    case BTN_RIGHT:
-    case BTN_STYLUS:
-        return AMOTION_EVENT_BUTTON_SECONDARY;
-    case BTN_MIDDLE:
-    case BTN_STYLUS2:
-        return AMOTION_EVENT_BUTTON_TERTIARY;
-    case BTN_SIDE:
-        return AMOTION_EVENT_BUTTON_BACK;
-    case BTN_FORWARD:
-    case BTN_EXTRA:
-        return AMOTION_EVENT_BUTTON_FORWARD;
-    case BTN_BACK:
-        return AMOTION_EVENT_BUTTON_BACK;
-    case BTN_TASK:
-    default:
-        return 0;
-    }
-}
-
 // Returns true if the pointer should be reported as being down given the specified
 // button states.  This determines whether the event is reported as a touch event.
 static bool isPointerDown(int32_t buttonState) {
@@ -1007,6 +983,378 @@ void InputDevice::fadePointer() {
 }
 
 
+// --- CursorButtonAccumulator ---
+
+CursorButtonAccumulator::CursorButtonAccumulator() {
+    clearButtons();
+}
+
+void CursorButtonAccumulator::clearButtons() {
+    mBtnLeft = 0;
+    mBtnRight = 0;
+    mBtnMiddle = 0;
+    mBtnBack = 0;
+    mBtnSide = 0;
+    mBtnForward = 0;
+    mBtnExtra = 0;
+    mBtnTask = 0;
+}
+
+void CursorButtonAccumulator::process(const RawEvent* rawEvent) {
+    if (rawEvent->type == EV_KEY) {
+        switch (rawEvent->scanCode) {
+        case BTN_LEFT:
+            mBtnLeft = rawEvent->value;
+            break;
+        case BTN_RIGHT:
+            mBtnRight = rawEvent->value;
+            break;
+        case BTN_MIDDLE:
+            mBtnMiddle = rawEvent->value;
+            break;
+        case BTN_BACK:
+            mBtnBack = rawEvent->value;
+            break;
+        case BTN_SIDE:
+            mBtnSide = rawEvent->value;
+            break;
+        case BTN_FORWARD:
+            mBtnForward = rawEvent->value;
+            break;
+        case BTN_EXTRA:
+            mBtnExtra = rawEvent->value;
+            break;
+        case BTN_TASK:
+            mBtnTask = rawEvent->value;
+            break;
+        }
+    }
+}
+
+uint32_t CursorButtonAccumulator::getButtonState() const {
+    uint32_t result = 0;
+    if (mBtnLeft) {
+        result |= AMOTION_EVENT_BUTTON_PRIMARY;
+    }
+    if (mBtnRight) {
+        result |= AMOTION_EVENT_BUTTON_SECONDARY;
+    }
+    if (mBtnMiddle) {
+        result |= AMOTION_EVENT_BUTTON_TERTIARY;
+    }
+    if (mBtnBack || mBtnSide) {
+        result |= AMOTION_EVENT_BUTTON_BACK;
+    }
+    if (mBtnForward || mBtnExtra) {
+        result |= AMOTION_EVENT_BUTTON_FORWARD;
+    }
+    return result;
+}
+
+
+// --- CursorMotionAccumulator ---
+
+CursorMotionAccumulator::CursorMotionAccumulator() :
+        mHaveRelWheel(false), mHaveRelHWheel(false) {
+    clearRelativeAxes();
+}
+
+void CursorMotionAccumulator::configure(InputDevice* device) {
+    mHaveRelWheel = device->getEventHub()->hasRelativeAxis(device->getId(), REL_WHEEL);
+    mHaveRelHWheel = device->getEventHub()->hasRelativeAxis(device->getId(), REL_HWHEEL);
+}
+
+void CursorMotionAccumulator::clearRelativeAxes() {
+    mRelX = 0;
+    mRelY = 0;
+    mRelWheel = 0;
+    mRelHWheel = 0;
+}
+
+void CursorMotionAccumulator::process(const RawEvent* rawEvent) {
+    if (rawEvent->type == EV_REL) {
+        switch (rawEvent->scanCode) {
+        case REL_X:
+            mRelX = rawEvent->value;
+            break;
+        case REL_Y:
+            mRelY = rawEvent->value;
+            break;
+        case REL_WHEEL:
+            mRelWheel = rawEvent->value;
+            break;
+        case REL_HWHEEL:
+            mRelHWheel = rawEvent->value;
+            break;
+        }
+    }
+}
+
+
+// --- TouchButtonAccumulator ---
+
+TouchButtonAccumulator::TouchButtonAccumulator() :
+        mHaveBtnTouch(false) {
+    clearButtons();
+}
+
+void TouchButtonAccumulator::configure(InputDevice* device) {
+    mHaveBtnTouch = device->getEventHub()->hasScanCode(device->getId(), BTN_TOUCH);
+}
+
+void TouchButtonAccumulator::clearButtons() {
+    mBtnTouch = 0;
+    mBtnStylus = 0;
+    mBtnStylus2 = 0;
+    mBtnToolFinger = 0;
+    mBtnToolPen = 0;
+    mBtnToolRubber = 0;
+}
+
+void TouchButtonAccumulator::process(const RawEvent* rawEvent) {
+    if (rawEvent->type == EV_KEY) {
+        switch (rawEvent->scanCode) {
+        case BTN_TOUCH:
+            mBtnTouch = rawEvent->value;
+            break;
+        case BTN_STYLUS:
+            mBtnStylus = rawEvent->value;
+            break;
+        case BTN_STYLUS2:
+            mBtnStylus2 = rawEvent->value;
+            break;
+        case BTN_TOOL_FINGER:
+            mBtnToolFinger = rawEvent->value;
+            break;
+        case BTN_TOOL_PEN:
+            mBtnToolPen = rawEvent->value;
+            break;
+        case BTN_TOOL_RUBBER:
+            mBtnToolRubber = rawEvent->value;
+            break;
+        }
+    }
+}
+
+uint32_t TouchButtonAccumulator::getButtonState() const {
+    uint32_t result = 0;
+    if (mBtnStylus) {
+        result |= AMOTION_EVENT_BUTTON_SECONDARY;
+    }
+    if (mBtnStylus2) {
+        result |= AMOTION_EVENT_BUTTON_TERTIARY;
+    }
+    return result;
+}
+
+int32_t TouchButtonAccumulator::getToolType() const {
+    if (mBtnToolRubber) {
+        return AMOTION_EVENT_TOOL_TYPE_ERASER;
+    }
+    if (mBtnToolPen) {
+        return AMOTION_EVENT_TOOL_TYPE_STYLUS;
+    }
+    if (mBtnToolFinger) {
+        return AMOTION_EVENT_TOOL_TYPE_FINGER;
+    }
+    return AMOTION_EVENT_TOOL_TYPE_UNKNOWN;
+}
+
+bool TouchButtonAccumulator::isActive() const {
+    return mBtnTouch || mBtnToolFinger || mBtnToolPen
+            || mBtnToolRubber || mBtnStylus || mBtnStylus2;
+}
+
+bool TouchButtonAccumulator::isHovering() const {
+    return mHaveBtnTouch && !mBtnTouch;
+}
+
+
+// --- SingleTouchMotionAccumulator ---
+
+SingleTouchMotionAccumulator::SingleTouchMotionAccumulator() {
+    clearAbsoluteAxes();
+}
+
+void SingleTouchMotionAccumulator::clearAbsoluteAxes() {
+    mAbsX = 0;
+    mAbsY = 0;
+    mAbsPressure = 0;
+    mAbsToolWidth = 0;
+    mAbsDistance = 0;
+}
+
+void SingleTouchMotionAccumulator::process(const RawEvent* rawEvent) {
+    if (rawEvent->type == EV_ABS) {
+        switch (rawEvent->scanCode) {
+        case ABS_X:
+            mAbsX = rawEvent->value;
+            break;
+        case ABS_Y:
+            mAbsY = rawEvent->value;
+            break;
+        case ABS_PRESSURE:
+            mAbsPressure = rawEvent->value;
+            break;
+        case ABS_TOOL_WIDTH:
+            mAbsToolWidth = rawEvent->value;
+            break;
+        case ABS_DISTANCE:
+            mAbsDistance = rawEvent->value;
+            break;
+        }
+    }
+}
+
+
+// --- MultiTouchMotionAccumulator ---
+
+MultiTouchMotionAccumulator::MultiTouchMotionAccumulator() :
+        mCurrentSlot(-1), mSlots(NULL), mSlotCount(0), mUsingSlotsProtocol(false) {
+}
+
+MultiTouchMotionAccumulator::~MultiTouchMotionAccumulator() {
+    delete[] mSlots;
+}
+
+void MultiTouchMotionAccumulator::configure(size_t slotCount, bool usingSlotsProtocol) {
+    mSlotCount = slotCount;
+    mUsingSlotsProtocol = usingSlotsProtocol;
+
+    delete[] mSlots;
+    mSlots = new Slot[slotCount];
+}
+
+void MultiTouchMotionAccumulator::clearSlots(int32_t initialSlot) {
+    for (size_t i = 0; i < mSlotCount; i++) {
+        mSlots[i].clearIfInUse();
+    }
+    mCurrentSlot = initialSlot;
+}
+
+void MultiTouchMotionAccumulator::process(const RawEvent* rawEvent) {
+    if (rawEvent->type == EV_ABS) {
+        bool newSlot = false;
+        if (mUsingSlotsProtocol) {
+            if (rawEvent->scanCode == ABS_MT_SLOT) {
+                mCurrentSlot = rawEvent->value;
+                newSlot = true;
+            }
+        } else if (mCurrentSlot < 0) {
+            mCurrentSlot = 0;
+        }
+
+        if (mCurrentSlot < 0 || size_t(mCurrentSlot) >= mSlotCount) {
+#if DEBUG_POINTERS
+            if (newSlot) {
+                LOGW("MultiTouch device emitted invalid slot index %d but it "
+                        "should be between 0 and %d; ignoring this slot.",
+                        mCurrentSlot, mSlotCount - 1);
+            }
+#endif
+        } else {
+            Slot* slot = &mSlots[mCurrentSlot];
+
+            switch (rawEvent->scanCode) {
+            case ABS_MT_POSITION_X:
+                slot->mInUse = true;
+                slot->mAbsMTPositionX = rawEvent->value;
+                break;
+            case ABS_MT_POSITION_Y:
+                slot->mInUse = true;
+                slot->mAbsMTPositionY = rawEvent->value;
+                break;
+            case ABS_MT_TOUCH_MAJOR:
+                slot->mInUse = true;
+                slot->mAbsMTTouchMajor = rawEvent->value;
+                break;
+            case ABS_MT_TOUCH_MINOR:
+                slot->mInUse = true;
+                slot->mAbsMTTouchMinor = rawEvent->value;
+                slot->mHaveAbsMTTouchMinor = true;
+                break;
+            case ABS_MT_WIDTH_MAJOR:
+                slot->mInUse = true;
+                slot->mAbsMTWidthMajor = rawEvent->value;
+                break;
+            case ABS_MT_WIDTH_MINOR:
+                slot->mInUse = true;
+                slot->mAbsMTWidthMinor = rawEvent->value;
+                slot->mHaveAbsMTWidthMinor = true;
+                break;
+            case ABS_MT_ORIENTATION:
+                slot->mInUse = true;
+                slot->mAbsMTOrientation = rawEvent->value;
+                break;
+            case ABS_MT_TRACKING_ID:
+                if (mUsingSlotsProtocol && rawEvent->value < 0) {
+                    slot->clearIfInUse();
+                } else {
+                    slot->mInUse = true;
+                    slot->mAbsMTTrackingId = rawEvent->value;
+                }
+                break;
+            case ABS_MT_PRESSURE:
+                slot->mInUse = true;
+                slot->mAbsMTPressure = rawEvent->value;
+                break;
+            case ABS_MT_TOOL_TYPE:
+                slot->mInUse = true;
+                slot->mAbsMTToolType = rawEvent->value;
+                slot->mHaveAbsMTToolType = true;
+                break;
+            }
+        }
+    } else if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_MT_REPORT) {
+        // MultiTouch Sync: The driver has returned all data for *one* of the pointers.
+        mCurrentSlot += 1;
+    }
+}
+
+
+// --- MultiTouchMotionAccumulator::Slot ---
+
+MultiTouchMotionAccumulator::Slot::Slot() {
+    clear();
+}
+
+void MultiTouchMotionAccumulator::Slot::clearIfInUse() {
+    if (mInUse) {
+        clear();
+    }
+}
+
+void MultiTouchMotionAccumulator::Slot::clear() {
+    mInUse = false;
+    mHaveAbsMTTouchMinor = false;
+    mHaveAbsMTWidthMinor = false;
+    mHaveAbsMTToolType = false;
+    mAbsMTPositionX = 0;
+    mAbsMTPositionY = 0;
+    mAbsMTTouchMajor = 0;
+    mAbsMTTouchMinor = 0;
+    mAbsMTWidthMajor = 0;
+    mAbsMTWidthMinor = 0;
+    mAbsMTOrientation = 0;
+    mAbsMTTrackingId = -1;
+    mAbsMTPressure = 0;
+    mAbsMTToolType = 0;
+    mAbsMTDistance = 0;
+}
+
+int32_t MultiTouchMotionAccumulator::Slot::getToolType() const {
+    if (mHaveAbsMTToolType) {
+        switch (mAbsMTToolType) {
+        case MT_TOOL_FINGER:
+            return AMOTION_EVENT_TOOL_TYPE_FINGER;
+        case MT_TOOL_PEN:
+            return AMOTION_EVENT_TOOL_TYPE_STYLUS;
+        }
+    }
+    return AMOTION_EVENT_TOOL_TYPE_UNKNOWN;
+}
+
+
 // --- InputMapper ---
 
 InputMapper::InputMapper(InputDevice* device) :
@@ -1399,10 +1747,10 @@ void CursorInputMapper::populateDeviceInfo(InputDeviceInfo* info) {
     }
     info->addMotionRange(AMOTION_EVENT_AXIS_PRESSURE, mSource, 0.0f, 1.0f, 0.0f, 0.0f);
 
-    if (mHaveVWheel) {
+    if (mCursorMotionAccumulator.haveRelativeVWheel()) {
         info->addMotionRange(AMOTION_EVENT_AXIS_VSCROLL, mSource, -1.0f, 1.0f, 0.0f, 0.0f);
     }
-    if (mHaveHWheel) {
+    if (mCursorMotionAccumulator.haveRelativeHWheel()) {
         info->addMotionRange(AMOTION_EVENT_AXIS_HSCROLL, mSource, -1.0f, 1.0f, 0.0f, 0.0f);
     }
 }
@@ -1416,8 +1764,10 @@ void CursorInputMapper::dump(String8& dump) {
         dump.appendFormat(INDENT3 "YScale: %0.3f\n", mYScale);
         dump.appendFormat(INDENT3 "XPrecision: %0.3f\n", mXPrecision);
         dump.appendFormat(INDENT3 "YPrecision: %0.3f\n", mYPrecision);
-        dump.appendFormat(INDENT3 "HaveVWheel: %s\n", toString(mHaveVWheel));
-        dump.appendFormat(INDENT3 "HaveHWheel: %s\n", toString(mHaveHWheel));
+        dump.appendFormat(INDENT3 "HaveVWheel: %s\n",
+                toString(mCursorMotionAccumulator.haveRelativeVWheel()));
+        dump.appendFormat(INDENT3 "HaveHWheel: %s\n",
+                toString(mCursorMotionAccumulator.haveRelativeHWheel()));
         dump.appendFormat(INDENT3 "VWheelScale: %0.3f\n", mVWheelScale);
         dump.appendFormat(INDENT3 "HWheelScale: %0.3f\n", mHWheelScale);
         dump.appendFormat(INDENT3 "ButtonState: 0x%08x\n", mLocked.buttonState);
@@ -1430,6 +1780,8 @@ void CursorInputMapper::configure(const InputReaderConfiguration* config, uint32
     InputMapper::configure(config, changes);
 
     if (!changes) { // first time only
+        mCursorMotionAccumulator.configure(getDevice());
+
         // Configure basic parameters.
         configureParameters();
 
@@ -1454,9 +1806,6 @@ void CursorInputMapper::configure(const InputReaderConfiguration* config, uint32
 
         mVWheelScale = 1.0f;
         mHWheelScale = 1.0f;
-
-        mHaveVWheel = getEventHub()->hasRelativeAxis(getDeviceId(), REL_WHEEL);
-        mHaveHWheel = getEventHub()->hasRelativeAxis(getDeviceId(), REL_HWHEEL);
     }
 
     if (!changes || (changes & InputReaderConfiguration::CHANGE_POINTER_SPEED)) {
@@ -1506,7 +1855,8 @@ void CursorInputMapper::dumpParameters(String8& dump) {
 }
 
 void CursorInputMapper::initializeLocked() {
-    mAccumulator.clear();
+    mCursorButtonAccumulator.clearButtons();
+    mCursorMotionAccumulator.clearRelativeAxes();
 
     mLocked.buttonState = 0;
     mLocked.downTime = 0;
@@ -1532,10 +1882,8 @@ void CursorInputMapper::reset() {
 
         // Synthesize button up event on reset.
         nsecs_t when = systemTime(SYSTEM_TIME_MONOTONIC);
-        mAccumulator.clear();
-        mAccumulator.buttonDown = 0;
-        mAccumulator.buttonUp = buttonState;
-        mAccumulator.fields = Accumulator::FIELD_BUTTONS;
+        mCursorButtonAccumulator.clearButtons();
+        mCursorMotionAccumulator.clearRelativeAxes();
         sync(when);
     }
 
@@ -1543,64 +1891,15 @@ void CursorInputMapper::reset() {
 }
 
 void CursorInputMapper::process(const RawEvent* rawEvent) {
-    switch (rawEvent->type) {
-    case EV_KEY: {
-        int32_t buttonState = getButtonStateForScanCode(rawEvent->scanCode);
-        if (buttonState) {
-            if (rawEvent->value) {
-                mAccumulator.buttonDown = buttonState;
-                mAccumulator.buttonUp = 0;
-            } else {
-                mAccumulator.buttonDown = 0;
-                mAccumulator.buttonUp = buttonState;
-            }
-            mAccumulator.fields |= Accumulator::FIELD_BUTTONS;
+    mCursorButtonAccumulator.process(rawEvent);
+    mCursorMotionAccumulator.process(rawEvent);
 
-            // Sync now since BTN_MOUSE is not necessarily followed by SYN_REPORT and
-            // we need to ensure that we report the up/down promptly.
-            sync(rawEvent->when);
-            break;
-        }
-        break;
-    }
-
-    case EV_REL:
-        switch (rawEvent->scanCode) {
-        case REL_X:
-            mAccumulator.fields |= Accumulator::FIELD_REL_X;
-            mAccumulator.relX = rawEvent->value;
-            break;
-        case REL_Y:
-            mAccumulator.fields |= Accumulator::FIELD_REL_Y;
-            mAccumulator.relY = rawEvent->value;
-            break;
-        case REL_WHEEL:
-            mAccumulator.fields |= Accumulator::FIELD_REL_WHEEL;
-            mAccumulator.relWheel = rawEvent->value;
-            break;
-        case REL_HWHEEL:
-            mAccumulator.fields |= Accumulator::FIELD_REL_HWHEEL;
-            mAccumulator.relHWheel = rawEvent->value;
-            break;
-        }
-        break;
-
-    case EV_SYN:
-        switch (rawEvent->scanCode) {
-        case SYN_REPORT:
-            sync(rawEvent->when);
-            break;
-        }
-        break;
+    if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_REPORT) {
+        sync(rawEvent->when);
     }
 }
 
 void CursorInputMapper::sync(nsecs_t when) {
-    uint32_t fields = mAccumulator.fields;
-    if (fields == 0) {
-        return; // no new state changes, so nothing to do
-    }
-
     int32_t motionEventAction;
     int32_t lastButtonState, currentButtonState;
     PointerProperties pointerProperties;
@@ -1611,34 +1910,21 @@ void CursorInputMapper::sync(nsecs_t when) {
         AutoMutex _l(mLock);
 
         lastButtonState = mLocked.buttonState;
+        currentButtonState = mCursorButtonAccumulator.getButtonState();
+        mLocked.buttonState = currentButtonState;
 
-        bool down, downChanged;
-        bool wasDown = isPointerDown(mLocked.buttonState);
-        bool buttonsChanged = fields & Accumulator::FIELD_BUTTONS;
-        if (buttonsChanged) {
-            mLocked.buttonState = (mLocked.buttonState | mAccumulator.buttonDown)
-                    & ~mAccumulator.buttonUp;
-
-            down = isPointerDown(mLocked.buttonState);
-
-            if (!wasDown && down) {
-                mLocked.downTime = when;
-                downChanged = true;
-            } else if (wasDown && !down) {
-                downChanged = true;
-            } else {
-                downChanged = false;
-            }
+        bool wasDown = isPointerDown(lastButtonState);
+        bool down = isPointerDown(currentButtonState);
+        bool downChanged;
+        if (!wasDown && down) {
+            mLocked.downTime = when;
+            downChanged = true;
+        } else if (wasDown && !down) {
+            downChanged = true;
         } else {
-            down = wasDown;
             downChanged = false;
         }
-
-        currentButtonState = mLocked.buttonState;
-
         downTime = mLocked.downTime;
-        float deltaX = fields & Accumulator::FIELD_REL_X ? mAccumulator.relX * mXScale : 0.0f;
-        float deltaY = fields & Accumulator::FIELD_REL_Y ? mAccumulator.relY * mYScale : 0.0f;
 
         if (downChanged) {
             motionEventAction = down ? AMOTION_EVENT_ACTION_DOWN : AMOTION_EVENT_ACTION_UP;
@@ -1647,6 +1933,9 @@ void CursorInputMapper::sync(nsecs_t when) {
         } else {
             motionEventAction = AMOTION_EVENT_ACTION_HOVER_MOVE;
         }
+
+        float deltaX = mCursorMotionAccumulator.getRelativeX() * mXScale;
+        float deltaY = mCursorMotionAccumulator.getRelativeY() * mYScale;
 
         if (mParameters.orientationAware && mParameters.associatedDisplayId >= 0
                 && (deltaX != 0.0f || deltaY != 0.0f)) {
@@ -1667,25 +1956,17 @@ void CursorInputMapper::sync(nsecs_t when) {
 
         pointerCoords.clear();
 
-        if (mHaveVWheel && (fields & Accumulator::FIELD_REL_WHEEL)) {
-            vscroll = mAccumulator.relWheel;
-        } else {
-            vscroll = 0;
-        }
-        mWheelYVelocityControl.move(when, NULL, &vscroll);
+        vscroll = mCursorMotionAccumulator.getRelativeVWheel();
+        hscroll = mCursorMotionAccumulator.getRelativeHWheel();
 
-        if (mHaveHWheel && (fields & Accumulator::FIELD_REL_HWHEEL)) {
-            hscroll = mAccumulator.relHWheel;
-        } else {
-            hscroll = 0;
-        }
+        mWheelYVelocityControl.move(when, NULL, &vscroll);
         mWheelXVelocityControl.move(when, &hscroll, NULL);
 
         mPointerVelocityControl.move(when, &deltaX, &deltaY);
 
         if (mPointerController != NULL) {
             if (deltaX != 0 || deltaY != 0 || vscroll != 0 || hscroll != 0
-                    || buttonsChanged) {
+                    || currentButtonState != lastButtonState) {
                 mPointerController->setPresentation(
                         PointerControllerInterface::PRESENTATION_POINTER);
 
@@ -1693,8 +1974,8 @@ void CursorInputMapper::sync(nsecs_t when) {
                     mPointerController->move(deltaX, deltaY);
                 }
 
-                if (buttonsChanged) {
-                    mPointerController->setButtonState(mLocked.buttonState);
+                if (currentButtonState != lastButtonState) {
+                    mPointerController->setButtonState(currentButtonState);
                 }
 
                 mPointerController->unfade(PointerControllerInterface::TRANSITION_IMMEDIATE);
@@ -1755,7 +2036,7 @@ void CursorInputMapper::sync(nsecs_t when) {
     synthesizeButtonKeys(getContext(), AKEY_EVENT_ACTION_UP, when, getDeviceId(), mSource,
             policyFlags, lastButtonState, currentButtonState);
 
-    mAccumulator.clear();
+    mCursorMotionAccumulator.clearRelativeAxes();
 }
 
 int32_t CursorInputMapper::getScanCodeState(uint32_t sourceMask, int32_t scanCode) {
@@ -1881,10 +2162,11 @@ void TouchInputMapper::dump(String8& dump) {
             const PointerData& pointer = mLastTouch.pointers[i];
             dump.appendFormat(INDENT5 "[%d]: id=%d, x=%d, y=%d, pressure=%d, "
                     "touchMajor=%d, touchMinor=%d, toolMajor=%d, toolMinor=%d, "
-                    "orientation=%d, distance=%d, isStylus=%s\n", i,
+                    "orientation=%d, distance=%d, toolType=%d, isHovering=%s\n", i,
                     pointer.id, pointer.x, pointer.y, pointer.pressure,
                     pointer.touchMajor, pointer.touchMinor, pointer.toolMajor, pointer.toolMinor,
-                    pointer.orientation, pointer.distance, toString(pointer.isStylus));
+                    pointer.orientation, pointer.distance,
+                    pointer.toolType, toString(pointer.isHovering));
         }
 
         if (mParameters.deviceType == Parameters::DEVICE_TYPE_POINTER) {
@@ -2924,6 +3206,7 @@ void TouchInputMapper::syncTouch(nsecs_t when, bool havePointerIds) {
         calculatePointerIds();
     }
 
+    // Handle initial down events.
     uint32_t policyFlags = 0;
     if (mLastTouch.pointerCount == 0 && mCurrentTouch.pointerCount != 0) {
         if (mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN) {
@@ -3420,7 +3703,7 @@ void TouchInputMapper::prepareTouches(float* outXPrecision, float* outYPrecision
         PointerProperties& properties = mCurrentTouchProperties[i];
         properties.clear();
         properties.id = mCurrentTouch.pointers[i].id;
-        properties.toolType = getTouchToolType(mCurrentTouch.pointers[i].isStylus);
+        properties.toolType = mCurrentTouch.pointers[i].toolType;
     }
 
     *outXPrecision = mLocked.orientedXPrecision;
@@ -3604,7 +3887,7 @@ void TouchInputMapper::dispatchPointerGestures(nsecs_t when, uint32_t policyFlag
         PointerProperties pointerProperties;
         pointerProperties.clear();
         pointerProperties.id = 0;
-        pointerProperties.toolType = AMOTION_EVENT_TOOL_TYPE_INDIRECT_FINGER;
+        pointerProperties.toolType = AMOTION_EVENT_TOOL_TYPE_FINGER;
 
         PointerCoords pointerCoords;
         pointerCoords.clear();
@@ -3838,8 +4121,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         mPointerGesture.currentGestureIdToIndex[mPointerGesture.activeGestureId] = 0;
         mPointerGesture.currentGestureProperties[0].clear();
         mPointerGesture.currentGestureProperties[0].id = mPointerGesture.activeGestureId;
-        mPointerGesture.currentGestureProperties[0].toolType =
-                AMOTION_EVENT_TOOL_TYPE_INDIRECT_FINGER;
+        mPointerGesture.currentGestureProperties[0].toolType = AMOTION_EVENT_TOOL_TYPE_FINGER;
         mPointerGesture.currentGestureCoords[0].clear();
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_X, x);
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_Y, y);
@@ -3880,7 +4162,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                     mPointerGesture.currentGestureProperties[0].id =
                             mPointerGesture.activeGestureId;
                     mPointerGesture.currentGestureProperties[0].toolType =
-                            AMOTION_EVENT_TOOL_TYPE_INDIRECT_FINGER;
+                            AMOTION_EVENT_TOOL_TYPE_FINGER;
                     mPointerGesture.currentGestureCoords[0].clear();
                     mPointerGesture.currentGestureCoords[0].setAxisValue(
                             AMOTION_EVENT_AXIS_X, mPointerGesture.tapX);
@@ -3993,7 +4275,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
         mPointerGesture.currentGestureProperties[0].clear();
         mPointerGesture.currentGestureProperties[0].id = mPointerGesture.activeGestureId;
         mPointerGesture.currentGestureProperties[0].toolType =
-                AMOTION_EVENT_TOOL_TYPE_INDIRECT_FINGER;
+                AMOTION_EVENT_TOOL_TYPE_FINGER;
         mPointerGesture.currentGestureCoords[0].clear();
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_X, x);
         mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_Y, y);
@@ -4240,7 +4522,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
             mPointerGesture.currentGestureProperties[0].clear();
             mPointerGesture.currentGestureProperties[0].id = mPointerGesture.activeGestureId;
             mPointerGesture.currentGestureProperties[0].toolType =
-                    AMOTION_EVENT_TOOL_TYPE_INDIRECT_FINGER;
+                    AMOTION_EVENT_TOOL_TYPE_FINGER;
             mPointerGesture.currentGestureCoords[0].clear();
             mPointerGesture.currentGestureCoords[0].setAxisValue(AMOTION_EVENT_AXIS_X,
                     mPointerGesture.referenceGestureX);
@@ -4331,7 +4613,7 @@ bool TouchInputMapper::preparePointerGestures(nsecs_t when,
                 mPointerGesture.currentGestureProperties[i].clear();
                 mPointerGesture.currentGestureProperties[i].id = gestureId;
                 mPointerGesture.currentGestureProperties[i].toolType =
-                        AMOTION_EVENT_TOOL_TYPE_INDIRECT_FINGER;
+                        AMOTION_EVENT_TOOL_TYPE_FINGER;
                 mPointerGesture.currentGestureCoords[i].clear();
                 mPointerGesture.currentGestureCoords[i].setAxisValue(
                         AMOTION_EVENT_AXIS_X, mPointerGesture.referenceGestureX + deltaX);
@@ -4471,15 +4753,6 @@ void TouchInputMapper::fadePointer() {
             mPointerController->fade(PointerControllerInterface::TRANSITION_GRADUAL);
         }
     } // release lock
-}
-
-int32_t TouchInputMapper::getTouchToolType(bool isStylus) const {
-    if (mParameters.deviceType == Parameters::DEVICE_TYPE_TOUCH_SCREEN) {
-        return isStylus ? AMOTION_EVENT_TOOL_TYPE_STYLUS : AMOTION_EVENT_TOOL_TYPE_FINGER;
-    } else {
-        return isStylus ? AMOTION_EVENT_TOOL_TYPE_INDIRECT_STYLUS
-                : AMOTION_EVENT_TOOL_TYPE_INDIRECT_FINGER;
-    }
 }
 
 bool TouchInputMapper::isPointInsideSurfaceLocked(int32_t x, int32_t y) {
@@ -4760,14 +5033,9 @@ SingleTouchInputMapper::~SingleTouchInputMapper() {
 }
 
 void SingleTouchInputMapper::clearState() {
-    mAccumulator.clear();
-
-    mDown = false;
-    mX = 0;
-    mY = 0;
-    mPressure = 0; // default to 0 for devices that don't report pressure
-    mToolWidth = 0; // default to 0 for devices that don't report tool width
-    mButtonState = 0;
+    mCursorButtonAccumulator.clearButtons();
+    mTouchButtonAccumulator.clearButtons();
+    mSingleTouchMotionAccumulator.clearAbsoluteAxes();
 }
 
 void SingleTouchInputMapper::reset() {
@@ -4777,144 +5045,79 @@ void SingleTouchInputMapper::reset() {
  }
 
 void SingleTouchInputMapper::process(const RawEvent* rawEvent) {
-    switch (rawEvent->type) {
-    case EV_KEY:
-        switch (rawEvent->scanCode) {
-        case BTN_TOUCH:
-            mAccumulator.fields |= Accumulator::FIELD_BTN_TOUCH;
-            mAccumulator.btnTouch = rawEvent->value != 0;
-            // Don't sync immediately.  Wait until the next SYN_REPORT since we might
-            // not have received valid position information yet.  This logic assumes that
-            // BTN_TOUCH is always followed by SYN_REPORT as part of a complete packet.
-            break;
-        default:
-            if (mParameters.deviceType == Parameters::DEVICE_TYPE_POINTER) {
-                int32_t buttonState = getButtonStateForScanCode(rawEvent->scanCode);
-                if (buttonState) {
-                    if (rawEvent->value) {
-                        mAccumulator.buttonDown |= buttonState;
-                    } else {
-                        mAccumulator.buttonUp |= buttonState;
-                    }
-                    mAccumulator.fields |= Accumulator::FIELD_BUTTONS;
-                }
-            }
-            break;
-        }
-        break;
+    mCursorButtonAccumulator.process(rawEvent);
+    mTouchButtonAccumulator.process(rawEvent);
+    mSingleTouchMotionAccumulator.process(rawEvent);
 
-    case EV_ABS:
-        switch (rawEvent->scanCode) {
-        case ABS_X:
-            mAccumulator.fields |= Accumulator::FIELD_ABS_X;
-            mAccumulator.absX = rawEvent->value;
-            break;
-        case ABS_Y:
-            mAccumulator.fields |= Accumulator::FIELD_ABS_Y;
-            mAccumulator.absY = rawEvent->value;
-            break;
-        case ABS_PRESSURE:
-            mAccumulator.fields |= Accumulator::FIELD_ABS_PRESSURE;
-            mAccumulator.absPressure = rawEvent->value;
-            break;
-        case ABS_TOOL_WIDTH:
-            mAccumulator.fields |= Accumulator::FIELD_ABS_TOOL_WIDTH;
-            mAccumulator.absToolWidth = rawEvent->value;
-            break;
-        }
-        break;
-
-    case EV_SYN:
-        switch (rawEvent->scanCode) {
-        case SYN_REPORT:
-            sync(rawEvent->when);
-            break;
-        }
-        break;
+    if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_REPORT) {
+        sync(rawEvent->when);
     }
 }
 
 void SingleTouchInputMapper::sync(nsecs_t when) {
-    uint32_t fields = mAccumulator.fields;
-    if (fields == 0) {
-        return; // no new state changes, so nothing to do
-    }
-
-    if (fields & Accumulator::FIELD_BTN_TOUCH) {
-        mDown = mAccumulator.btnTouch;
-    }
-
-    if (fields & Accumulator::FIELD_ABS_X) {
-        mX = mAccumulator.absX;
-    }
-
-    if (fields & Accumulator::FIELD_ABS_Y) {
-        mY = mAccumulator.absY;
-    }
-
-    if (fields & Accumulator::FIELD_ABS_PRESSURE) {
-        mPressure = mAccumulator.absPressure;
-    }
-
-    if (fields & Accumulator::FIELD_ABS_TOOL_WIDTH) {
-        mToolWidth = mAccumulator.absToolWidth;
-    }
-
-    if (fields & Accumulator::FIELD_BUTTONS) {
-        mButtonState = (mButtonState | mAccumulator.buttonDown) & ~mAccumulator.buttonUp;
-    }
-
     mCurrentTouch.clear();
 
-    if (mDown) {
+    if (mTouchButtonAccumulator.isActive()) {
+        uint32_t buttonState = mTouchButtonAccumulator.getButtonState();
+        bool isHovering = mTouchButtonAccumulator.isHovering();
+        if (mSingleTouchMotionAccumulator.getAbsoluteDistance() > 0) {
+            isHovering = true;
+        }
+
         mCurrentTouch.pointerCount = 1;
-        mCurrentTouch.pointers[0].id = 0;
-        mCurrentTouch.pointers[0].x = mX;
-        mCurrentTouch.pointers[0].y = mY;
-        mCurrentTouch.pointers[0].pressure = mPressure;
-        mCurrentTouch.pointers[0].touchMajor = 0;
-        mCurrentTouch.pointers[0].touchMinor = 0;
-        mCurrentTouch.pointers[0].toolMajor = mToolWidth;
-        mCurrentTouch.pointers[0].toolMinor = mToolWidth;
-        mCurrentTouch.pointers[0].orientation = 0;
-        mCurrentTouch.pointers[0].distance = 0;
-        mCurrentTouch.pointers[0].isStylus = false; // TODO: Set stylus
         mCurrentTouch.idToIndex[0] = 0;
         mCurrentTouch.idBits.markBit(0);
-        mCurrentTouch.buttonState = mButtonState;
+        mCurrentTouch.buttonState = buttonState;
+
+        PointerData& outPointer = mCurrentTouch.pointers[0];
+        outPointer.id = 0;
+        outPointer.x = mSingleTouchMotionAccumulator.getAbsoluteX();
+        outPointer.y = mSingleTouchMotionAccumulator.getAbsoluteY();
+        outPointer.pressure = mSingleTouchMotionAccumulator.getAbsolutePressure();
+        outPointer.touchMajor = 0;
+        outPointer.touchMinor = 0;
+        outPointer.toolMajor = mSingleTouchMotionAccumulator.getAbsoluteToolWidth();
+        outPointer.toolMinor = mSingleTouchMotionAccumulator.getAbsoluteToolWidth();
+        outPointer.orientation = 0;
+        outPointer.distance = mSingleTouchMotionAccumulator.getAbsoluteDistance();
+        outPointer.toolType = mTouchButtonAccumulator.getToolType();
+        if (outPointer.toolType == AMOTION_EVENT_TOOL_TYPE_UNKNOWN) {
+            outPointer.toolType = AMOTION_EVENT_TOOL_TYPE_FINGER;
+        }
+        outPointer.isHovering = isHovering;
     }
 
     syncTouch(when, true);
-
-    mAccumulator.clear();
 }
 
 void SingleTouchInputMapper::configureRawAxes() {
     TouchInputMapper::configureRawAxes();
 
+    mTouchButtonAccumulator.configure(getDevice());
+
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_X, & mRawAxes.x);
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_Y, & mRawAxes.y);
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_PRESSURE, & mRawAxes.pressure);
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_TOOL_WIDTH, & mRawAxes.toolMajor);
+    getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_DISTANCE, & mRawAxes.distance);
 }
 
 
 // --- MultiTouchInputMapper ---
 
 MultiTouchInputMapper::MultiTouchInputMapper(InputDevice* device) :
-        TouchInputMapper(device), mSlotCount(0), mUsingSlotsProtocol(false) {
+        TouchInputMapper(device) {
 }
 
 MultiTouchInputMapper::~MultiTouchInputMapper() {
 }
 
 void MultiTouchInputMapper::clearState() {
-    mAccumulator.clearSlots(mSlotCount);
-    mAccumulator.clearButtons();
-    mButtonState = 0;
+    mCursorButtonAccumulator.clearButtons();
+    mTouchButtonAccumulator.clearButtons();
     mPointerIdBits.clear();
 
-    if (mUsingSlotsProtocol) {
+    if (mMultiTouchMotionAccumulator.isUsingSlotsProtocol()) {
         // Query the driver for the current slot index and use it as the initial slot
         // before we start reading events from the device.  It is possible that the
         // current slot index will not be the same as it was when the first event was
@@ -4924,12 +5127,16 @@ void MultiTouchInputMapper::clearState() {
         // two slots will be confused until the next ABS_MT_SLOT event is received.
         // This can cause the touch point to "jump", but at least there will be
         // no stuck touches.
+        int32_t initialSlot;
         status_t status = getEventHub()->getAbsoluteAxisValue(getDeviceId(), ABS_MT_SLOT,
-                &mAccumulator.currentSlot);
+                &initialSlot);
         if (status) {
             LOGW("Could not retrieve current multitouch slot index.  status=%d", status);
-            mAccumulator.currentSlot = -1;
+            initialSlot = -1;
         }
+        mMultiTouchMotionAccumulator.clearSlots(initialSlot);
+    } else {
+        mMultiTouchMotionAccumulator.clearSlots(-1);
     }
 }
 
@@ -4940,124 +5147,26 @@ void MultiTouchInputMapper::reset() {
 }
 
 void MultiTouchInputMapper::process(const RawEvent* rawEvent) {
-    switch (rawEvent->type) {
-    case EV_KEY: {
-        if (mParameters.deviceType == Parameters::DEVICE_TYPE_POINTER) {
-            int32_t buttonState = getButtonStateForScanCode(rawEvent->scanCode);
-            if (buttonState) {
-                if (rawEvent->value) {
-                    mAccumulator.buttonDown |= buttonState;
-                } else {
-                    mAccumulator.buttonUp |= buttonState;
-                }
-            }
-        }
-        break;
-    }
+    mCursorButtonAccumulator.process(rawEvent);
+    mTouchButtonAccumulator.process(rawEvent);
+    mMultiTouchMotionAccumulator.process(rawEvent);
 
-    case EV_ABS: {
-        bool newSlot = false;
-        if (mUsingSlotsProtocol && rawEvent->scanCode == ABS_MT_SLOT) {
-            mAccumulator.currentSlot = rawEvent->value;
-            newSlot = true;
-        }
-
-        if (mAccumulator.currentSlot < 0 || size_t(mAccumulator.currentSlot) >= mSlotCount) {
-#if DEBUG_POINTERS
-            if (newSlot) {
-                LOGW("MultiTouch device %s emitted invalid slot index %d but it "
-                        "should be between 0 and %d; ignoring this slot.",
-                        getDeviceName().string(), mAccumulator.currentSlot, mSlotCount);
-            }
-#endif
-            break;
-        }
-
-        Accumulator::Slot* slot = &mAccumulator.slots[mAccumulator.currentSlot];
-
-        switch (rawEvent->scanCode) {
-        case ABS_MT_POSITION_X:
-            slot->fields |= Accumulator::FIELD_ABS_MT_POSITION_X;
-            slot->absMTPositionX = rawEvent->value;
-            break;
-        case ABS_MT_POSITION_Y:
-            slot->fields |= Accumulator::FIELD_ABS_MT_POSITION_Y;
-            slot->absMTPositionY = rawEvent->value;
-            break;
-        case ABS_MT_TOUCH_MAJOR:
-            slot->fields |= Accumulator::FIELD_ABS_MT_TOUCH_MAJOR;
-            slot->absMTTouchMajor = rawEvent->value;
-            break;
-        case ABS_MT_TOUCH_MINOR:
-            slot->fields |= Accumulator::FIELD_ABS_MT_TOUCH_MINOR;
-            slot->absMTTouchMinor = rawEvent->value;
-            break;
-        case ABS_MT_WIDTH_MAJOR:
-            slot->fields |= Accumulator::FIELD_ABS_MT_WIDTH_MAJOR;
-            slot->absMTWidthMajor = rawEvent->value;
-            break;
-        case ABS_MT_WIDTH_MINOR:
-            slot->fields |= Accumulator::FIELD_ABS_MT_WIDTH_MINOR;
-            slot->absMTWidthMinor = rawEvent->value;
-            break;
-        case ABS_MT_ORIENTATION:
-            slot->fields |= Accumulator::FIELD_ABS_MT_ORIENTATION;
-            slot->absMTOrientation = rawEvent->value;
-            break;
-        case ABS_MT_TRACKING_ID:
-            if (mUsingSlotsProtocol && rawEvent->value < 0) {
-                slot->clear();
-            } else {
-                slot->fields |= Accumulator::FIELD_ABS_MT_TRACKING_ID;
-                slot->absMTTrackingId = rawEvent->value;
-            }
-            break;
-        case ABS_MT_PRESSURE:
-            slot->fields |= Accumulator::FIELD_ABS_MT_PRESSURE;
-            slot->absMTPressure = rawEvent->value;
-            break;
-        case ABS_MT_TOOL_TYPE:
-            slot->fields |= Accumulator::FIELD_ABS_MT_TOOL_TYPE;
-            slot->absMTToolType = rawEvent->value;
-            break;
-        }
-        break;
-    }
-
-    case EV_SYN:
-        switch (rawEvent->scanCode) {
-        case SYN_MT_REPORT: {
-            // MultiTouch Sync: The driver has returned all data for *one* of the pointers.
-            mAccumulator.currentSlot += 1;
-            break;
-        }
-
-        case SYN_REPORT:
-            sync(rawEvent->when);
-            break;
-        }
-        break;
+    if (rawEvent->type == EV_SYN && rawEvent->scanCode == SYN_REPORT) {
+        sync(rawEvent->when);
     }
 }
 
 void MultiTouchInputMapper::sync(nsecs_t when) {
-    static const uint32_t REQUIRED_FIELDS =
-            Accumulator::FIELD_ABS_MT_POSITION_X | Accumulator::FIELD_ABS_MT_POSITION_Y;
-
-    size_t inCount = mSlotCount;
+    size_t inCount = mMultiTouchMotionAccumulator.getSlotCount();
     size_t outCount = 0;
     bool havePointerIds = true;
 
     mCurrentTouch.clear();
 
     for (size_t inIndex = 0; inIndex < inCount; inIndex++) {
-        const Accumulator::Slot& inSlot = mAccumulator.slots[inIndex];
-        uint32_t fields = inSlot.fields;
-
-        if ((fields & REQUIRED_FIELDS) != REQUIRED_FIELDS) {
-            // Some drivers send empty MT sync packets without X / Y to indicate a pointer up.
-            // This may also indicate an unused slot.
-            // Drop this finger.
+        const MultiTouchMotionAccumulator::Slot* inSlot =
+                mMultiTouchMotionAccumulator.getSlot(inIndex);
+        if (!inSlot->isInUse()) {
             continue;
         }
 
@@ -5071,71 +5180,32 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
         }
 
         PointerData& outPointer = mCurrentTouch.pointers[outCount];
-        outPointer.x = inSlot.absMTPositionX;
-        outPointer.y = inSlot.absMTPositionY;
+        outPointer.x = inSlot->getX();
+        outPointer.y = inSlot->getY();
+        outPointer.pressure = inSlot->getPressure();
+        outPointer.touchMajor = inSlot->getTouchMajor();
+        outPointer.touchMinor = inSlot->getTouchMinor();
+        outPointer.toolMajor = inSlot->getToolMajor();
+        outPointer.toolMinor = inSlot->getToolMinor();
+        outPointer.orientation = inSlot->getOrientation();
+        outPointer.distance = inSlot->getDistance();
 
-        if (fields & Accumulator::FIELD_ABS_MT_PRESSURE) {
-            outPointer.pressure = inSlot.absMTPressure;
-        } else {
-            // Default pressure to 0 if absent.
-            outPointer.pressure = 0;
+        outPointer.toolType = inSlot->getToolType();
+        if (outPointer.toolType == AMOTION_EVENT_TOOL_TYPE_UNKNOWN) {
+            outPointer.toolType = mTouchButtonAccumulator.getToolType();
+            if (outPointer.toolType == AMOTION_EVENT_TOOL_TYPE_UNKNOWN) {
+                outPointer.toolType = AMOTION_EVENT_TOOL_TYPE_FINGER;
+            }
         }
 
-        if (fields & Accumulator::FIELD_ABS_MT_TOUCH_MAJOR) {
-            outPointer.touchMajor = inSlot.absMTTouchMajor;
-        } else {
-            // Default touch area to 0 if absent.
-            outPointer.touchMajor = 0;
-        }
-
-        if (fields & Accumulator::FIELD_ABS_MT_TOUCH_MINOR) {
-            outPointer.touchMinor = inSlot.absMTTouchMinor;
-        } else {
-            // Assume touch area is circular.
-            outPointer.touchMinor = outPointer.touchMajor;
-        }
-
-        if (fields & Accumulator::FIELD_ABS_MT_WIDTH_MAJOR) {
-            outPointer.toolMajor = inSlot.absMTWidthMajor;
-        } else {
-            // Default tool area to 0 if absent.
-            outPointer.toolMajor = 0;
-        }
-
-        if (fields & Accumulator::FIELD_ABS_MT_WIDTH_MINOR) {
-            outPointer.toolMinor = inSlot.absMTWidthMinor;
-        } else {
-            // Assume tool area is circular.
-            outPointer.toolMinor = outPointer.toolMajor;
-        }
-
-        if (fields & Accumulator::FIELD_ABS_MT_ORIENTATION) {
-            outPointer.orientation = inSlot.absMTOrientation;
-        } else {
-            // Default orientation to vertical if absent.
-            outPointer.orientation = 0;
-        }
-
-        if (fields & Accumulator::FIELD_ABS_MT_DISTANCE) {
-            outPointer.distance = inSlot.absMTDistance;
-        } else {
-            // Default distance is 0 (direct contact).
-            outPointer.distance = 0;
-        }
-
-        if (fields & Accumulator::FIELD_ABS_MT_TOOL_TYPE) {
-            outPointer.isStylus = (inSlot.absMTToolType == MT_TOOL_PEN);
-        } else {
-            // Assume this is not a stylus.
-            outPointer.isStylus = false;
-        }
+        outPointer.isHovering = mTouchButtonAccumulator.isHovering()
+                || inSlot->getDistance() > 0;
 
         // Assign pointer id using tracking id if available.
         if (havePointerIds) {
+            int32_t trackingId = inSlot->getTrackingId();
             int32_t id = -1;
-            if (fields & Accumulator::FIELD_ABS_MT_TRACKING_ID) {
-                int32_t trackingId = inSlot.absMTTrackingId;
-
+            if (trackingId >= 0) {
                 for (BitSet32 idBits(mPointerIdBits); !idBits.isEmpty(); ) {
                     uint32_t n = idBits.firstMarkedBit();
                     idBits.clearBit(n);
@@ -5165,22 +5235,21 @@ void MultiTouchInputMapper::sync(nsecs_t when) {
     }
 
     mCurrentTouch.pointerCount = outCount;
-
-    mButtonState = (mButtonState | mAccumulator.buttonDown) & ~mAccumulator.buttonUp;
-    mCurrentTouch.buttonState = mButtonState;
+    mCurrentTouch.buttonState = mTouchButtonAccumulator.getButtonState();
 
     mPointerIdBits = mCurrentTouch.idBits;
 
     syncTouch(when, havePointerIds);
 
-    if (!mUsingSlotsProtocol) {
-        mAccumulator.clearSlots(mSlotCount);
+    if (!mMultiTouchMotionAccumulator.isUsingSlotsProtocol()) {
+        mMultiTouchMotionAccumulator.clearSlots(-1);
     }
-    mAccumulator.clearButtons();
 }
 
 void MultiTouchInputMapper::configureRawAxes() {
     TouchInputMapper::configureRawAxes();
+
+    mTouchButtonAccumulator.configure(getDevice());
 
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_POSITION_X, &mRawAxes.x);
     getEventHub()->getAbsoluteAxisInfo(getDeviceId(), ABS_MT_POSITION_Y, &mRawAxes.y);
@@ -5196,20 +5265,17 @@ void MultiTouchInputMapper::configureRawAxes() {
 
     if (mRawAxes.trackingId.valid
             && mRawAxes.slot.valid && mRawAxes.slot.minValue == 0 && mRawAxes.slot.maxValue > 0) {
-        mSlotCount = mRawAxes.slot.maxValue + 1;
-        if (mSlotCount > MAX_SLOTS) {
+        size_t slotCount = mRawAxes.slot.maxValue + 1;
+        if (slotCount > MAX_SLOTS) {
             LOGW("MultiTouch Device %s reported %d slots but the framework "
                     "only supports a maximum of %d slots at this time.",
-                    getDeviceName().string(), mSlotCount, MAX_SLOTS);
-            mSlotCount = MAX_SLOTS;
+                    getDeviceName().string(), slotCount, MAX_SLOTS);
+            slotCount = MAX_SLOTS;
         }
-        mUsingSlotsProtocol = true;
+        mMultiTouchMotionAccumulator.configure(slotCount, true /*usingSlotsProtocol*/);
     } else {
-        mSlotCount = MAX_POINTERS;
-        mUsingSlotsProtocol = false;
+        mMultiTouchMotionAccumulator.configure(MAX_POINTERS, false /*usingSlotsProtocol*/);
     }
-
-    mAccumulator.allocateSlots(mSlotCount);
 
     clearState();
 }

@@ -195,6 +195,7 @@ public:
     virtual bool markSupportedKeyCodes(int32_t deviceId, size_t numCodes, const int32_t* keyCodes,
             uint8_t* outFlags) const = 0;
 
+    virtual bool hasScanCode(int32_t deviceId, int32_t scanCode) const = 0;
     virtual bool hasLed(int32_t deviceId, int32_t led) const = 0;
     virtual void setLedState(int32_t deviceId, int32_t led, bool on) = 0;
 
@@ -246,6 +247,7 @@ public:
 
     virtual size_t getEvents(int timeoutMillis, RawEvent* buffer, size_t bufferSize);
 
+    virtual bool hasScanCode(int32_t deviceId, int32_t scanCode) const;
     virtual bool hasLed(int32_t deviceId, int32_t led) const;
     virtual void setLedState(int32_t deviceId, int32_t led, bool on);
 
