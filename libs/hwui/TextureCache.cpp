@@ -165,7 +165,7 @@ void TextureCache::clearGarbage() {
 
 void TextureCache::clear() {
     mCache.clear();
-    TEXTURE_LOGD("TextureCache:clear(), miSize = %d", mSize);
+    TEXTURE_LOGD("TextureCache:clear(), mSize = %d", mSize);
 }
 
 void TextureCache::generateTexture(SkBitmap* bitmap, Texture* texture, bool regenerate) {
