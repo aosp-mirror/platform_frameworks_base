@@ -25,6 +25,7 @@
 #include "android/net/android_network_library_impl.h"
 #include "base/threading/thread.h"
 #include "net/base/cert_verifier.h"
+#include "net/base/cookie_monster.h"
 #include "net/base/host_resolver.h"
 #include "net/base/ssl_config_service.h"
 #include "net/http/http_auth_handler_factory.h"
@@ -140,6 +141,8 @@ SfRequestContext::SfRequestContext() {
             network_delegate(),
             net_log(),
             NULL));  // backend_factory
+
+    set_cookie_store(new net::CookieMonster(NULL, NULL));
 }
 
 const std::string &SfRequestContext::GetUserAgent(const GURL &url) const {
