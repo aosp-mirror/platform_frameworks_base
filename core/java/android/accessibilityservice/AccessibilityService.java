@@ -130,20 +130,11 @@ import android.view.accessibility.AccessibilityNodeInfo;
  * For security purposes an accessibility service can retrieve only the content of the
  * currently active window. The currently active window is defined as the window from
  * which was fired the last event of the following types:
- * {@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_START},
- * {@link AccessibilityEvent#TYPE_TOUCH_EXPLORATION_GESTURE_END},
- * {@link AccessibilityEvent#TYPE_VIEW_CLICKED},
- * {@link AccessibilityEvent#TYPE_VIEW_FOCUSED},
+ * {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED},
  * {@link AccessibilityEvent#TYPE_VIEW_HOVER_ENTER},
  * {@link AccessibilityEvent#TYPE_VIEW_HOVER_EXIT},
- * {@link AccessibilityEvent#TYPE_VIEW_LONG_CLICKED},
- * {@link AccessibilityEvent#TYPE_VIEW_SELECTED},
- * {@link AccessibilityEvent#TYPE_VIEW_TEXT_CHANGED},
- * {@link AccessibilityEvent#TYPE_WINDOW_STATE_CHANGED},
- * {@link AccessibilityEvent#TYPE_VIEW_SCROLLED},
- * {@link AccessibilityEvent#TYPE_VIEW_TEXT_SELECTION_CHANGED},
- * {@link AccessibilityEvent#TYPE_WINDOW_CONTENT_CHANGED}.
- * In other words, the active window is the one where the user interaction is taking place.
+ * In other words, the last window that was shown or the last window that the user has touched
+ * during touch exploration.
  * </p>
  * <p>
  * The entry point for retrieving window content is through calling

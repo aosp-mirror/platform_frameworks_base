@@ -1205,6 +1205,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             | AccessibilityEvent.TYPE_VIEW_TEXT_SELECTION_CHANGED
             | AccessibilityEvent.TYPE_VIEW_SCROLLED;
 
+        private static final int RETRIEVAL_ALLOWING_WINDOW_CHANGE_EVENT_TYPES =
+            AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED | AccessibilityEvent.TYPE_VIEW_HOVER_ENTER
+            | AccessibilityEvent.TYPE_VIEW_HOVER_EXIT;
+
         private int mRetrievalAlowingWindowId;
 
         private boolean canDispatchAccessibilityEvent(AccessibilityEvent event) {
@@ -1216,9 +1220,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public void updateRetrievalAllowingWindowAndEventSourceLocked(AccessibilityEvent event) {
             final int windowId = event.getWindowId();
             final int eventType = event.getEventType();
-            if ((eventType & RETRIEVAL_ALLOWING_EVENT_TYPES) != 0) {
+            if ((eventType & RETRIEVAL_ALLOWING_WINDOW_CHANGE_EVENT_TYPES) != 0) {
                 mRetrievalAlowingWindowId = windowId;
-            } else { 
+            }
+            if ((eventType & RETRIEVAL_ALLOWING_EVENT_TYPES) == 0) {
                 event.setSource(null);
             }
         }
