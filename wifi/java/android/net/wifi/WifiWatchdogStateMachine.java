@@ -32,6 +32,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Message;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.util.Slog;
@@ -175,6 +176,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
      * It triggers a disableNetwork call if a DNS check fails.
      */
     public boolean mDisableAPNextFailure = false;
+    public ConnectivityManager mConnectivityManager;
 
     /**
      * STATE MAP
@@ -217,6 +219,12 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     public static WifiWatchdogStateMachine makeWifiWatchdogStateMachine(Context context) {
+        ContentResolver contentResolver = context.getContentResolver();
+        // Disable for wifi only devices.
+        if (Settings.Secure.getString(contentResolver, Settings.Secure.WIFI_WATCHDOG_ON) == null &&
+                "wifi-only".equals(SystemProperties.get("ro.carrier"))) {
+            putSettingsBoolean(contentResolver, Settings.Secure.WIFI_WATCHDOG_ON, false);
+        }
         WifiWatchdogStateMachine wwsm = new WifiWatchdogStateMachine(context);
         wwsm.start();
         wwsm.sendMessage(EVENT_WATCHDOG_TOGGLED);
@@ -465,6 +473,22 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify("WifiWatchdog", wifiDisabledWarning.icon, wifiDisabledWarning);
+    }
+
+    /**
+     * @return true if there is definitely no mobile data (we'll be less aggressive)
+     */
+    private boolean hasNoMobileData() {
+        if (mConnectivityManager == null) {
+            mConnectivityManager = (ConnectivityManager) mContext.getSystemService(
+                    Context.CONNECTIVITY_SERVICE);
+        }
+        NetworkInfo mobileNetInfo = mConnectivityManager.getNetworkInfo(
+                ConnectivityManager.TYPE_MOBILE);
+        if (mobileNetInfo == null || !mobileNetInfo.isAvailable()) {
+            return true;
+        }
+        return false;
     }
 
     class DefaultState extends State {
@@ -848,6 +872,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     class DnsCheckFailureState extends State {
+
         @Override
         public void enter() {
             mNumCheckFailures++;
@@ -868,6 +893,13 @@ public class WifiWatchdogStateMachine extends StateMachine {
             }
 
             if (mDisableAPNextFailure || mNumCheckFailures >= mMaxSsidBlacklists) {
+                if (hasNoMobileData()) {
+                    Slog.w(WWSM_TAG, "Would disable bad network, but device has no mobile data!" +
+                            "  Going idle...");
+                    // This state should be called idle -- will be changing flow.
+                    transitionTo(mNotConnectedState);
+                    return HANDLED;
+                }
                 // TODO : Unban networks if they had low signal ?
                 Slog.i(WWSM_TAG, "Disabling current SSID " + wifiInfoToStr(mInitialConnInfo)
                         + ".  " + "numCheckFailures " + mNumCheckFailures
