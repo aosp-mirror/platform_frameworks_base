@@ -129,7 +129,7 @@ public abstract class Context {
     /**
      * Flag for {@link #bindService}: don't allow this binding to raise
      * the target service's process to the foreground scheduling priority.
-     * It will still be raised to the at least the same memory priority
+     * It will still be raised to at least the same memory priority
      * as the client (so that its process will not be killable in any
      * situation where the client is not killable), but for CPU scheduling
      * purposes it may be left in the background.  This only has an impact
@@ -137,6 +137,16 @@ public abstract class Context {
      * and the target service is in a background process.
      */
     public static final int BIND_NOT_FOREGROUND = 0x0004;
+
+    /**
+     * Flag for {@link #bindService}: allow the process hosting the bound
+     * service to go through its normal memory management.  It will be
+     * treated more like a running service, allowing the system to
+     * (temporarily) expunge the process if low on memory or for some other
+     * whim it may have.
+     * @hide
+     */
+    public static final int BIND_ALLOW_OOM_MANAGEMENT = 0x0008;
 
     /** Return an AssetManager instance for your application's package. */
     public abstract AssetManager getAssets();

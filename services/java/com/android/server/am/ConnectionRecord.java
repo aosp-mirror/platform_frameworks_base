@@ -32,6 +32,7 @@ class ConnectionRecord {
     final int clientLabel;          // String resource labeling this client.
     final PendingIntent clientIntent; // How to launch the client.
     String stringName;              // Caching of toString.
+    boolean serviceDead;            // Well is it?
     
     void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "binding=" + binding);
@@ -61,6 +62,9 @@ class ConnectionRecord {
         sb.append("ConnectionRecord{");
         sb.append(Integer.toHexString(System.identityHashCode(this)));
         sb.append(' ');
+        if (serviceDead) {
+            sb.append("DEAD ");
+        }
         sb.append(binding.service.shortName);
         sb.append(":@");
         sb.append(Integer.toHexString(System.identityHashCode(conn.asBinder())));
