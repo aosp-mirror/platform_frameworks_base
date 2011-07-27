@@ -52,26 +52,10 @@ public class NetworkPolicyManager {
     private static final boolean ALLOW_PLATFORM_APP_POLICY = true;
 
     /**
-     * {@link Intent} action launched when user selects {@link NetworkPolicy}
-     * warning notification.
+     * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it
+     * applies to.
      */
-    public static final String ACTION_DATA_USAGE_WARNING =
-            "android.intent.action.DATA_USAGE_WARNING";
-
-    /**
-     * {@link Intent} action launched when user selects {@link NetworkPolicy}
-     * limit notification.
-     */
-    public static final String ACTION_DATA_USAGE_LIMIT =
-            "android.intent.action.DATA_USAGE_LIMIT";
-
-    /**
-     * {@link Intent} extra included in {@link #ACTION_DATA_USAGE_WARNING} and
-     * {@link #ACTION_DATA_USAGE_LIMIT} to indicate which
-     * {@link NetworkTemplate} rule it applies to.
-     */
-    public static final String EXTRA_NETWORK_TEMPLATE =
-            "android.intent.extra.NETWORK_TEMPLATE";
+    public static final String EXTRA_NETWORK_TEMPLATE = "android.net.NETWORK_TEMPLATE";
 
     private INetworkPolicyManager mService;
 
