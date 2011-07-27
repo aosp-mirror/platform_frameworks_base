@@ -227,7 +227,7 @@ public abstract class TextToSpeechService extends Service {
         private boolean mFirstIdle = true;
 
         public SynthThread() {
-            super(SYNTH_THREAD_NAME, android.os.Process.THREAD_PRIORITY_AUDIO);
+            super(SYNTH_THREAD_NAME, android.os.Process.THREAD_PRIORITY_DEFAULT);
         }
 
         @Override
