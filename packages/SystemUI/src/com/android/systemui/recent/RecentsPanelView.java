@@ -45,6 +45,7 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -53,7 +54,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
@@ -182,6 +182,15 @@ public class RecentsPanelView extends RelativeLayout
         }
     }
 
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && !event.isCanceled()) {
+            show(false, true);
+            return true;
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
     public boolean isInContentArea(int x, int y) {
         // use mRecentsContainer's exact bounds to determine horizontal position
         final int l = mRecentsContainer.getLeft();
@@ -219,6 +228,11 @@ public class RecentsPanelView extends RelativeLayout
             mShowing = show;
             setVisibility(show ? View.VISIBLE : View.GONE);
             mChoreo.jumpTo(show);
+        }
+        if (show) {
+            setFocusable(true);
+            setFocusableInTouchMode(true);
+            requestFocus();
         }
     }
 
