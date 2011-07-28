@@ -31,6 +31,15 @@
         android:hardwareAccelerated="true">
 
         <activity
+                android:name="TextFadeActivity"
+                android:label="_TextFade">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
                 android:name="MaxBitmapSizeActivity"
                 android:label="_MaxBitmapSize">
             <intent-filter>
