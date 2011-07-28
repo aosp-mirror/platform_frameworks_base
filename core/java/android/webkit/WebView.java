@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
@@ -8104,8 +8103,7 @@ public class WebView extends AbsoluteLayout
                     // nativeCreate sets mNativeClass to a non-zero value
                     String drawableDir = BrowserFrame.getRawResFilename(
                             BrowserFrame.DRAWABLEDIR, mContext);
-                    AssetManager am = mContext.getAssets();
-                    nativeCreate(msg.arg1, drawableDir, am);
+                    nativeCreate(msg.arg1, drawableDir);
                     if (mDelaySetPicture != null) {
                         setNewPicture(mDelaySetPicture, true);
                         mDelaySetPicture = null;
@@ -9140,7 +9138,7 @@ public class WebView extends AbsoluteLayout
     private native Rect nativeCacheHitNodeBounds();
     private native int nativeCacheHitNodePointer();
     /* package */ native void nativeClearCursor();
-    private native void     nativeCreate(int ptr, String drawableDir, AssetManager am);
+    private native void     nativeCreate(int ptr, String drawableDir);
     private native int      nativeCursorFramePointer();
     private native Rect     nativeCursorNodeBounds();
     private native int nativeCursorNodePointer();
