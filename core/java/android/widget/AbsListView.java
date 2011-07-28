@@ -261,6 +261,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private RemoteViewsAdapter mRemoteAdapter;
 
     /**
+     * This flag indicates the a full notify is required when the RemoteViewsAdapter connects
+     */
+    private boolean mDeferNotifyDataSetChanged = false;
+
+    /**
      * Indicates whether the list selector should be drawn on top of the children or behind
      */
     boolean mDrawSelectorOnTop = false;
@@ -5392,9 +5397,17 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                 return;
             }
         }
-
+        mDeferNotifyDataSetChanged = false;
         // Otherwise, create a new RemoteViewsAdapter for binding
         mRemoteAdapter = new RemoteViewsAdapter(getContext(), intent, this);
+    }
+
+    /**
+     * This defers a notifyDataSetChanged on the pending RemoteViewsAdapter if it has not
+     * connected yet.
+     */
+    public void deferNotifyDataSetChanged() {
+        mDeferNotifyDataSetChanged = true;
     }
 
     /**
@@ -5403,6 +5416,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public boolean onRemoteAdapterConnected() {
         if (mRemoteAdapter != mAdapter) {
             setAdapter(mRemoteAdapter);
+            if (mDeferNotifyDataSetChanged) {
+                mRemoteAdapter.notifyDataSetChanged();
+                mDeferNotifyDataSetChanged = false;
+            }
             return false;
         } else if (mRemoteAdapter != null) {
             mRemoteAdapter.superNotifyDataSetChanged();

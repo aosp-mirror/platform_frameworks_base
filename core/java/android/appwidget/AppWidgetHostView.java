@@ -38,6 +38,7 @@ import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
+import android.widget.RemoteViewsAdapter.RemoteAdapterConnectionCallback;
 
 /**
  * Provides the glue to show AppWidget views. This class offers automatic animation
@@ -276,6 +277,11 @@ public class AppWidgetHostView extends FrameLayout {
             if (adapter instanceof BaseAdapter) {
                 BaseAdapter baseAdapter = (BaseAdapter) adapter;
                 baseAdapter.notifyDataSetChanged();
+            }  else if (adapter == null && adapterView instanceof RemoteAdapterConnectionCallback) {
+                // If the adapter is null, it may mean that the RemoteViewsAapter has not yet
+                // connected to its associated service, and hence the adapter hasn't been set.
+                // In this case, we need to defer the notify call until it has been set.
+                ((RemoteAdapterConnectionCallback) adapterView).deferNotifyDataSetChanged();
             }
         }
     }
