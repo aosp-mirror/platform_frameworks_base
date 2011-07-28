@@ -22,10 +22,12 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.ShapeDrawable;
-import android.os.Bundle;
+
+import com.test.tilebenchmark.RunData.TileData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class PlaybackGraphs {
     private static final int BAR_WIDTH = PlaybackView.TILE_SCALE * 3;
@@ -44,7 +46,7 @@ public class PlaybackGraphs {
         return 0.0f;
     }
 
-    private interface MetricGen {
+    protected interface MetricGen {
         public double getValue(TileData[] frame);
 
         public double getMax();
@@ -52,7 +54,7 @@ public class PlaybackGraphs {
         public int getLabelId();
     };
 
-    private static MetricGen[] Metrics = new MetricGen[] {
+    protected static MetricGen[] Metrics = new MetricGen[] {
             new MetricGen() {
                 // framerate graph
                 @Override
@@ -99,7 +101,7 @@ public class PlaybackGraphs {
             }
     };
 
-    private interface StatGen {
+    protected interface StatGen {
         public double getValue(double sortedValues[]);
 
         public int getLabelId();
@@ -116,7 +118,7 @@ public class PlaybackGraphs {
                 + sortedValues[intIndex + 1] * (alpha);
     }
 
-    private static StatGen[] Stats = new StatGen[] {
+    protected static StatGen[] Stats = new StatGen[] {
             new StatGen() {
                 @Override
                 public double getValue(double[] sortedValues) {
@@ -157,21 +159,22 @@ public class PlaybackGraphs {
     }
 
     private ArrayList<ShapeDrawable> mShapes = new ArrayList<ShapeDrawable>();
-    private double[][] mStats = new double[Metrics.length][Stats.length];
+    protected double[][] mStats = new double[Metrics.length][Stats.length];
+    protected HashMap<String, Double> mSingleStats;
 
-    public void setData(TileData[][] tileProfilingData) {
+    public void setData(RunData data) {
         mShapes.clear();
-        double metricValues[] = new double[tileProfilingData.length];
+        double metricValues[] = new double[data.frames.length];
 
-        if (tileProfilingData.length == 0) {
+        if (data.frames.length == 0) {
             return;
         }
 
         for (int metricIndex = 0; metricIndex < Metrics.length; metricIndex++) {
             // create graph out of rectangles, one per frame
             int lastBar = 0;
-            for (int frameIndex = 0; frameIndex < tileProfilingData.length; frameIndex++) {
-                TileData frame[] = tileProfilingData[frameIndex];
+            for (int frameIndex = 0; frameIndex < data.frames.length; frameIndex++) {
+                TileData frame[] = data.frames[frameIndex];
                 int newBar = (frame[0].top + frame[0].bottom) / 2;
 
                 MetricGen s = Metrics[metricIndex];
@@ -194,9 +197,11 @@ public class PlaybackGraphs {
             // store aggregate statistics per metric (median, and similar)
             Arrays.sort(metricValues);
             for (int statIndex = 0; statIndex < Stats.length; statIndex++) {
-                mStats[metricIndex][statIndex] = Stats[statIndex]
-                        .getValue(metricValues);
+                mStats[metricIndex][statIndex] =
+                        Stats[statIndex].getValue(metricValues);
             }
+
+            mSingleStats = data.singleStats;
         }
     }
 
@@ -215,7 +220,7 @@ public class PlaybackGraphs {
     }
 
     public void draw(Canvas canvas, ArrayList<ShapeDrawable> shapes,
-            String[] strings, Resources resources) {
+            ArrayList<String> strings, Resources resources) {
         canvas.scale(CANVAS_SCALE, CANVAS_SCALE);
 
         canvas.translate(BAR_WIDTH * Metrics.length, 0);
@@ -238,26 +243,9 @@ public class PlaybackGraphs {
                 canvas.drawText(label, xPos, yPos, whiteLabels);
             }
         }
-        for (int stringIndex = 0; stringIndex < strings.length; stringIndex++) {
+        for (int stringIndex = 0; stringIndex < strings.size(); stringIndex++) {
             int yPos = LABELOFFSET + stringIndex * PlaybackView.TILE_SCALE / 2;
-            canvas.drawText(strings[stringIndex], 0, yPos, whiteLabels);
+            canvas.drawText(strings.get(stringIndex), 0, yPos, whiteLabels);
         }
-    }
-
-    public Bundle getStatBundle(Resources resources) {
-        Bundle b = new Bundle();
-
-        for (int metricIndex = 0; metricIndex < Metrics.length; metricIndex++) {
-            for (int statIndex = 0; statIndex < Stats.length; statIndex++) {
-                String metricLabel = resources.getString(
-                        Metrics[metricIndex].getLabelId());
-                String statLabel = resources.getString(
-                        Stats[statIndex].getLabelId());
-                double value = mStats[metricIndex][statIndex];
-                b.putDouble(metricLabel + " " + statLabel, value);
-            }
-        }
-
-        return b;
     }
 }

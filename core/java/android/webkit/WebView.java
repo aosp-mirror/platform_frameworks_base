@@ -8405,9 +8405,9 @@ public class WebView extends AbsoluteLayout
         }
     }
 
-    // Called by JNI to invalidate the View, given rectangle coordinates in
-    // content space
-    private void pageSwapCallback() {
+    /** @hide Called by JNI when pages are swapped (only occurs with hardware
+     * acceleration) */
+    protected void pageSwapCallback() {
         if (inEditingMode()) {
             didUpdateWebTextViewDimensions(ANYWHERE);
         }
@@ -8426,11 +8426,11 @@ public class WebView extends AbsoluteLayout
         WebViewCore.ViewState viewState = draw.mViewState;
         boolean isPictureAfterFirstLayout = viewState != null;
 
-        // Request a callback on pageSwap (to reposition the webtextview)
-        boolean registerPageSwapCallback =
-            !mZoomManager.isFixedLengthAnimationInProgress() && inEditingMode();
-
         if (updateBaseLayer) {
+            // Request a callback on pageSwap (to reposition the webtextview)
+            boolean registerPageSwapCallback =
+                !mZoomManager.isFixedLengthAnimationInProgress() && inEditingMode();
+
             setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
                     getSettings().getShowVisualIndicator(),
                     isPictureAfterFirstLayout, registerPageSwapCallback);
@@ -9084,6 +9084,16 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    /** @hide send content invalidate */
+    protected void contentInvalidateAll() {
+        mWebViewCore.sendMessage(EventHub.CONTENT_INVALIDATE_ALL);
+    }
+
+    /** @hide call pageSwapCallback upon next page swap */
+    protected void registerPageSwapCallback() {
+        nativeRegisterPageSwapCallback();
+    }
+
     /**
      * Begin collecting per-tile profiling data
      *
@@ -9245,6 +9255,7 @@ public class WebView extends AbsoluteLayout
     private native void     nativeStopGL();
     private native Rect     nativeSubtractLayers(Rect content);
     private native int      nativeTextGeneration();
+    private native void     nativeRegisterPageSwapCallback();
     private native void     nativeTileProfilingStart();
     private native float    nativeTileProfilingStop();
     private native void     nativeTileProfilingClear();

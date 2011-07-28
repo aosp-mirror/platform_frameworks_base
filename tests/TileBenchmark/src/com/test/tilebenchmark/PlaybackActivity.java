@@ -83,14 +83,14 @@ public class PlaybackActivity extends Activity {
         }
     };
 
-    private class LoadFileTask extends AsyncTask<String, Void, TileData[][]> {
+    private class LoadFileTask extends AsyncTask<String, Void, RunData> {
         @Override
-        protected TileData[][] doInBackground(String... params) {
-            TileData[][] data = null;
+        protected RunData doInBackground(String... params) {
+            RunData data = null;
             try {
                 FileInputStream fis = openFileInput(params[0]);
                 ObjectInputStream in = new ObjectInputStream(fis);
-                data = (TileData[][]) in.readObject();
+                data = (RunData) in.readObject();
                 in.close();
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -101,7 +101,7 @@ public class PlaybackActivity extends Activity {
         }
 
         @Override
-        protected void onPostExecute(TileData data[][]) {
+        protected void onPostExecute(RunData data) {
             if (data == null) {
                 Toast.makeText(getApplicationContext(),
                         getResources().getString(R.string.error_no_data),
@@ -110,7 +110,7 @@ public class PlaybackActivity extends Activity {
             }
             mPlaybackView.setData(data);
 
-            mFrameMax = data.length - 1;
+            mFrameMax = data.frames.length - 1;
             mSeekBar.setMax(mFrameMax);
 
             setFrame(null, 0);

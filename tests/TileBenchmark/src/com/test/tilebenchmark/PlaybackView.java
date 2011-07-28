@@ -30,10 +30,12 @@ import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.test.tilebenchmark.RunData.TileData;
+
 import java.util.ArrayList;
 
 public class PlaybackView extends View {
-    public static final int TILE_SCALE = 300;
+    public static final int TILE_SCALE = 256;
     private static final int INVAL_FLAG = -2;
     private static final int INVAL_CYCLE = 250;
 
@@ -41,9 +43,9 @@ public class PlaybackView extends View {
     private PlaybackGraphs mGraphs;
 
     private ArrayList<ShapeDrawable> mTempShapes = new ArrayList<ShapeDrawable>();
-    private TileData mProfData[][] = null;
+    private RunData mProfData = null;
     private GestureDetector mGestureDetector = null;
-    private String mRenderStrings[] = new String[4];
+    private ArrayList<String> mRenderStrings = new ArrayList<String>();
 
     private class TileDrawable extends ShapeDrawable {
         TileData tile;
@@ -135,17 +137,30 @@ public class PlaybackView extends View {
         invalidate(); // may have animations, force redraw
     }
 
+    private String statString(int labelId, int value) {
+        return getResources().getString(R.string.format_stat_name,
+                getResources().getString(labelId), value);
+    }
+    private String tileString(int formatStringId, TileData t) {
+        return getResources().getString(formatStringId,
+                t.left, t.top, t.right, t.bottom);
+    }
+
     public int setFrame(int frame) {
-        if (mProfData == null || mProfData.length == 0) {
+        if (mProfData == null || mProfData.frames.length == 0) {
             return 0;
         }
 
         int readyTiles = 0, unreadyTiles = 0, unplacedTiles = 0, numInvals = 0;
         mTempShapes.clear();
+        mRenderStrings.clear();
 
         // create tile shapes (as they're drawn on bottom)
-        for (TileData t : mProfData[frame]) {
-            if (t.level != INVAL_FLAG && t != mProfData[frame][0]) {
+        for (TileData t : mProfData.frames[frame]) {
+            if (t == mProfData.frames[frame][0]){
+                // viewport 'tile', add coords to render strings
+                mRenderStrings.add(tileString(R.string.format_view_pos, t));
+            } else  if (t.level != INVAL_FLAG) {
                 int colorId;
                 if (t.isReady) {
                     readyTiles++;
@@ -159,14 +174,16 @@ public class PlaybackView extends View {
                 }
                 mTempShapes.add(new TileDrawable(t, colorId));
             } else {
+                // inval 'tile', count and add coords to render strings
                 numInvals++;
+                mRenderStrings.add(tileString(R.string.format_inval_pos, t));
             }
         }
 
         // create invalidate shapes (drawn above tiles)
         int invalId = 0;
-        for (TileData t : mProfData[frame]) {
-            if (t.level == INVAL_FLAG && t != mProfData[frame][0]) {
+        for (TileData t : mProfData.frames[frame]) {
+            if (t.level == INVAL_FLAG && t != mProfData.frames[frame][0]) {
                 TileDrawable invalShape = new TileDrawable(t,
                         R.color.inval_region_start);
                 ValueAnimator tileAnimator = ObjectAnimator.ofInt(invalShape,
@@ -186,26 +203,20 @@ public class PlaybackView extends View {
             }
         }
 
-        mRenderStrings[0] = getResources().getString(R.string.format_stat_name,
-                getResources().getString(R.string.ready_tiles), readyTiles);
-        mRenderStrings[1] = getResources().getString(R.string.format_stat_name,
-                getResources().getString(R.string.unready_tiles), unreadyTiles);
-        mRenderStrings[2] = getResources().getString(R.string.format_stat_name,
-                getResources().getString(R.string.unplaced_tiles),
-                unplacedTiles);
-        mRenderStrings[3] = getResources().getString(R.string.format_stat_name,
-                getResources().getString(R.string.number_invalidates),
-                numInvals);
+        mRenderStrings.add(statString(R.string.ready_tiles, readyTiles));
+        mRenderStrings.add(statString(R.string.unready_tiles, unreadyTiles));
+        mRenderStrings.add(statString(R.string.unplaced_tiles, unplacedTiles));
+        mRenderStrings.add(statString(R.string.number_invalidates, numInvals));
 
         // draw view rect (using first TileData object, on top)
-        TileDrawable viewShape = new TileDrawable(mProfData[frame][0],
+        TileDrawable viewShape = new TileDrawable(mProfData.frames[frame][0],
                 R.color.view);
         mTempShapes.add(viewShape);
         this.invalidate();
         return frame;
     }
 
-    public void setData(TileData[][] tileProfilingData) {
+    public void setData(RunData tileProfilingData) {
         mProfData = tileProfilingData;
 
         mGraphs.setData(mProfData);
