@@ -32,6 +32,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.res.Resources.Theme;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -54,6 +55,7 @@ import android.util.AttributeSet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -672,6 +674,7 @@ public class Activity extends ContextThemeWrapper
     /*package*/ int mConfigChangeFlags;
     /*package*/ Configuration mCurrentConfig;
     private SearchManager mSearchManager;
+    private MenuInflater mMenuInflater;
 
     static final class NonConfigurationInstances {
         Object activity;
@@ -3083,7 +3086,16 @@ public class Activity extends ContextThemeWrapper
      * Returns a {@link MenuInflater} with this context.
      */
     public MenuInflater getMenuInflater() {
-        return new MenuInflater(this);
+        // Make sure that action views can get an appropriate theme.
+        if (mMenuInflater == null) {
+            initActionBar();
+            if (mActionBar != null) {
+                mMenuInflater = new MenuInflater(mActionBar.getThemedContext());
+            } else {
+                mMenuInflater = new MenuInflater(this);
+            }
+        }
+        return mMenuInflater;
     }
 
     @Override

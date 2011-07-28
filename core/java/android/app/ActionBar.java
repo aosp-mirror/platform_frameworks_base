@@ -627,7 +627,18 @@ public abstract class ActionBar {
      *
      * @param enabled true to enable the home button, false to disable the home button.
      */
-    public abstract void setHomeButtonEnabled(boolean enabled);
+    public void setHomeButtonEnabled(boolean enabled) { }
+
+    /**
+     * Returns a {@link Context} with an appropriate theme for creating views that
+     * will appear in the action bar. If you are inflating or instantiating custom views
+     * that will appear in an action bar, you should use the Context returned by this method.
+     * (This includes adapters used for list navigation mode.)
+     * This will ensure that views contrast properly against the action bar.
+     *
+     * @return A themed Context for creating views
+     */
+    public Context getThemedContext() { return null; }
 
     /**
      * Listener interface for ActionBar navigation events.

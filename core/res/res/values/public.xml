@@ -1781,6 +1781,11 @@
 
   <public type="attr" name="actionModeStyle" />
 
+  <public type="attr" name="minResizeWidth" />
+  <public type="attr" name="minResizeHeight" />
+
+  <public type="attr" name="actionBarWidgetTheme" />
+
   <public type="style" name="TextAppearance.SuggestionHighlight" />
   <public type="style" name="Theme.Holo.SplitActionBarWhenNarrow" />
   <public type="style" name="Theme.Holo.Light.SplitActionBarWhenNarrow" />
@@ -1819,7 +1824,4 @@
   <public type="color" name="holo_orange_dark" />
   <public type="color" name="holo_purple" />
   <public type="color" name="holo_blue_bright" />
-
-  <public type="attr" name="minResizeWidth" />
-  <public type="attr" name="minResizeHeight" />
 </resources>

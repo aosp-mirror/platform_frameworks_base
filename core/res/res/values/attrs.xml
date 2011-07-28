@@ -616,6 +616,14 @@
              buttons. actionBarStyle is still used for the primary
              bar. -->
         <attr name="actionBarSplitStyle" format="reference" />
+        <!-- Reference to a theme that should be used to inflate widgets
+             and layouts destined for the action bar. Most of the time
+             this will be a reference to the current theme, but when
+             the action bar has a significantly different contrast
+             profile than the rest of the activity the difference
+             can become important. If this is set to @null the current
+             theme will be used.-->
+        <attr name="actionBarWidgetTheme" format="reference" />
         <!-- Size of the Action Bar, including the contextual
              bar used to present Action Modes. -->
         <attr name="actionBarSize" format="dimension" >
