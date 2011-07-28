@@ -35,10 +35,13 @@ import android.app.Dialog;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Handler;
+import android.util.TypedValue;
 import android.view.ActionMode;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -61,6 +64,7 @@ public class ActionBarImpl extends ActionBar {
     private static final String TAG = "ActionBarImpl";
 
     private Context mContext;
+    private Context mThemedContext;
     private Activity mActivity;
     private Dialog mDialog;
 
@@ -605,6 +609,23 @@ public class ActionBarImpl extends ActionBar {
         }
     }
 
+    public Context getThemedContext() {
+        if (mThemedContext == null) {
+            TypedValue outValue = new TypedValue();
+            Resources.Theme currentTheme = mContext.getTheme();
+            currentTheme.resolveAttribute(com.android.internal.R.attr.actionBarWidgetTheme,
+                    outValue, true);
+            final int targetThemeRes = outValue.resourceId;
+            
+            if (targetThemeRes != 0 && mContext.getThemeResId() != targetThemeRes) {
+                mThemedContext = new ContextThemeWrapper(mContext, targetThemeRes);
+            } else {
+                mThemedContext = mContext;
+            }
+        }
+        return mThemedContext;
+    }
+    
     /**
      * @hide 
      */

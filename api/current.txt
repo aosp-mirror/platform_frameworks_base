@@ -198,6 +198,7 @@ package android {
     field public static final int actionBarTabBarStyle = 16843508; // 0x10102f4
     field public static final int actionBarTabStyle = 16843507; // 0x10102f3
     field public static final int actionBarTabTextStyle = 16843509; // 0x10102f5
+    field public static final int actionBarWidgetTheme = 16843683; // 0x10103a3
     field public static final int actionButtonStyle = 16843480; // 0x10102d8
     field public static final int actionDropDownStyle = 16843479; // 0x10102d7
     field public static final int actionLayout = 16843515; // 0x10102fb
@@ -2243,6 +2244,7 @@ package android.app {
     method public abstract java.lang.CharSequence getSubtitle();
     method public abstract android.app.ActionBar.Tab getTabAt(int);
     method public abstract int getTabCount();
+    method public android.content.Context getThemedContext();
     method public abstract java.lang.CharSequence getTitle();
     method public abstract void hide();
     method public abstract boolean isShowing();
@@ -2263,7 +2265,7 @@ package android.app {
     method public abstract void setDisplayShowHomeEnabled(boolean);
     method public abstract void setDisplayShowTitleEnabled(boolean);
     method public abstract void setDisplayUseLogoEnabled(boolean);
-    method public abstract void setHomeButtonEnabled(boolean);
+    method public void setHomeButtonEnabled(boolean);
     method public abstract void setIcon(int);
     method public abstract void setIcon(android.graphics.drawable.Drawable);
     method public abstract void setListNavigationCallbacks(android.widget.SpinnerAdapter, android.app.ActionBar.OnNavigationListener);
