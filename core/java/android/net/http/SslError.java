@@ -30,7 +30,7 @@ public class SslError {
     /**
      * The certificate is not yet valid
      */
-  public static final int SSL_NOTYETVALID = 0;
+    public static final int SSL_NOTYETVALID = 0;
     /**
      * The certificate has expired
      */
@@ -43,12 +43,23 @@ public class SslError {
      * The certificate authority is not trusted
      */
     public static final int SSL_UNTRUSTED = 3;
+    /**
+     * The date of the certificate is invalid
+     */
+    public static final int SSL_DATE_INVALID = 4;
+    /**
+     * The certificate is invalid
+     */
+    public static final int SSL_INVALID = 5;
 
 
     /**
      * The number of different SSL errors (update if you add a new SSL error!!!)
+     * @deprecated This constant is not necessary for using the SslError API and
+     *             can change from release to release.
      */
-    public static final int SSL_MAX_ERROR = 4;
+    @Deprecated
+    public static final int SSL_MAX_ERROR = 6;
 
     /**
      * The SSL error set bitfield (each individual error is an bit index;
@@ -114,6 +125,30 @@ public class SslError {
             throw new NullPointerException("url is null.");
         }
         mUrl = url;
+    }
+
+    /**
+     * Creates an SslError object from a chromium error code.
+     * @param error The chromium error code
+     * @param certificate The associated SSL certificate
+     * @param url The associated URL.
+     * @hide  chromium error codes only available inside the framework
+     */
+    public static SslError SslErrorFromChromiumErrorCode(
+            int error, SslCertificate cert, String url) {
+        // The chromium error codes are in:
+        // external/chromium/net/base/net_error_list.h
+        if (error > -200 || error < -299) {
+            throw new NullPointerException("Not a valid chromium SSL error code.");
+        }
+        if (error == -200)
+            return new SslError(SSL_IDMISMATCH, cert, url);
+        if (error == -201)
+            return new SslError(SSL_DATE_INVALID, cert, url);
+        if (error == -202)
+            return new SslError(SSL_UNTRUSTED, cert, url);
+        // Map all other errors to SSL_INVALID
+        return new SslError(SSL_INVALID, cert, url);
     }
 
     /**

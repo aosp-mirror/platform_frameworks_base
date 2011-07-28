@@ -11541,9 +11541,11 @@ package android.net.http {
     method public int getPrimaryError();
     method public java.lang.String getUrl();
     method public boolean hasError(int);
+    field public static final int SSL_DATE_INVALID = 4; // 0x4
     field public static final int SSL_EXPIRED = 1; // 0x1
     field public static final int SSL_IDMISMATCH = 2; // 0x2
-    field public static final int SSL_MAX_ERROR = 4; // 0x4
+    field public static final int SSL_INVALID = 5; // 0x5
+    field public static final deprecated int SSL_MAX_ERROR = 6; // 0x6
     field public static final int SSL_NOTYETVALID = 0; // 0x0
     field public static final int SSL_UNTRUSTED = 3; // 0x3
   }
