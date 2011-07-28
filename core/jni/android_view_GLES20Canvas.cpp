@@ -580,6 +580,11 @@ static DisplayList* android_view_GLES20Canvas_getDisplayList(JNIEnv* env,
     return renderer->getDisplayList(displayList);
 }
 
+static jint android_view_GLES20Canvas_getDisplayListSize(JNIEnv* env,
+        jobject clazz, DisplayList* displayList) {
+    return displayList->getSize();
+}
+
 static OpenGLRenderer* android_view_GLES20Canvas_createDisplayListRenderer(JNIEnv* env,
         jobject clazz) {
     return new DisplayListRenderer;
@@ -721,8 +726,7 @@ static jboolean android_view_GLES20Canvas_isAvailable(JNIEnv* env, jobject clazz
 // ----------------------------------------------------------------------------
 
 static void
-android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor)
-{
+android_app_ActivityThread_dumpGraphics(JNIEnv* env, jobject clazz, jobject javaFileDescriptor) {
 #ifdef USE_OPENGL_RENDERER
     int fd = jniGetFDFromFileDescriptor(env, javaFileDescriptor);
     android::uirenderer::DisplayList::outputLogBuffer(fd);
@@ -814,6 +818,7 @@ static JNINativeMethod gMethods[] = {
 
     { "nGetDisplayList",         "(II)I",      (void*) android_view_GLES20Canvas_getDisplayList },
     { "nDestroyDisplayList",     "(I)V",       (void*) android_view_GLES20Canvas_destroyDisplayList },
+    { "nGetDisplayListSize",     "(I)I",       (void*) android_view_GLES20Canvas_getDisplayListSize },
     { "nCreateDisplayListRenderer", "()I",     (void*) android_view_GLES20Canvas_createDisplayListRenderer },
     { "nResetDisplayListRenderer", "(I)V",     (void*) android_view_GLES20Canvas_resetDisplayListRenderer },
     { "nDrawDisplayList",        "(IIIILandroid/graphics/Rect;)Z",

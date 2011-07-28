@@ -934,7 +934,9 @@ public abstract class HardwareRenderer {
         }
 
         private void destroyHardwareLayer(View view) {
-            view.destroyLayer();
+            if (view.destroyLayer()) {
+                view.invalidate(true);
+            }
             if (view instanceof ViewGroup) {
                 ViewGroup group = (ViewGroup) view;
 

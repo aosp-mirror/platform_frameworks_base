@@ -24,6 +24,9 @@ import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 final class WindowLeaked extends AndroidRuntimeException {
@@ -392,7 +395,7 @@ public class WindowManagerImpl implements WindowManager {
                         leak.setStackTrace(root.getLocation().getStackTrace());
                         Log.e("WindowManager", leak.getMessage(), leak);
                     }
-                    
+
                     removeViewLocked(i);
                     i--;
                     count--;
@@ -408,6 +411,59 @@ public class WindowManagerImpl implements WindowManager {
         if (HardwareRenderer.isAvailable()) {
             HardwareRenderer.trimMemory(level);
         }
+    }
+
+    /**
+     * @hide
+     */
+    public void trimLocalMemory() {
+        synchronized (this) {
+            if (mViews == null) return;
+            int count = mViews.length;
+            for (int i = 0; i < count; i++) {
+                mRoots[i].destroyHardwareLayers();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void dumpGfxInfo(FileDescriptor fd) {
+        FileOutputStream fout = new FileOutputStream(fd);
+        PrintWriter pw = new PrintWriter(fout);
+        try {
+            synchronized (this) {
+                if (mViews != null) {
+                    pw.println("View hierarchy:");
+
+                    final int count = mViews.length;
+
+                    int viewsCount = 0;
+                    int displayListsSize = 0;
+                    int[] info = new int[2];
+
+                    for (int i = 0; i < count; i++) {
+                        ViewRootImpl root = mRoots[i];
+                        root.dumpGfxInfo(pw, info);
+
+                        String name = root.getClass().getName() + '@' +
+                                Integer.toHexString(hashCode());                        
+                        pw.printf("  %s: %d views, %.2f kB (display lists)\n",
+                                name, info[0], info[1] / 1024.0f);
+
+                        viewsCount += info[0];
+                        displayListsSize += info[1];
+                    }
+
+                    pw.printf("\nTotal ViewRootImpl: %d\n", count);
+                    pw.printf("Total Views:        %d\n", viewsCount);                    
+                    pw.printf("Total DisplayList:  %.2f kB\n\n", displayListsSize / 1024.0f);                    
+                }
+            }
+        } finally {
+            pw.flush();
+        }        
     }
 
     public void setStoppedState(IBinder token, boolean stopped) {
