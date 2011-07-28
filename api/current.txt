@@ -24730,6 +24730,7 @@ package android.widget {
     method public void beforeTextChanged(java.lang.CharSequence, int, int, int);
     method public void clearChoices();
     method public void clearTextFilter();
+    method public void deferNotifyDataSetChanged();
     method public int getCacheColorHint();
     method public int getCheckedItemCount();
     method public long[] getCheckedItemIds();
@@ -24945,6 +24946,7 @@ package android.widget {
     ctor public AdapterViewAnimator(android.content.Context, android.util.AttributeSet);
     ctor public AdapterViewAnimator(android.content.Context, android.util.AttributeSet, int);
     method public void advance();
+    method public void deferNotifyDataSetChanged();
     method public void fyiWillBeAdvancedByHostKThx();
     method public android.widget.Adapter getAdapter();
     method public android.view.View getCurrentView();

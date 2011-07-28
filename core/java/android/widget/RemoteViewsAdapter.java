@@ -92,6 +92,12 @@ public class RemoteViewsAdapter extends BaseAdapter implements Handler.Callback 
         public boolean onRemoteAdapterConnected();
 
         public void onRemoteAdapterDisconnected();
+
+        /**
+         * This defers a notifyDataSetChanged on the pending RemoteViewsAdapter if it has not
+         * connected yet.
+         */
+        public void deferNotifyDataSetChanged();
     }
 
     /**
