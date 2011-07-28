@@ -163,8 +163,15 @@ GpsXtraCallbacks sGpsXtraCallbacks = {
 static void agps_status_callback(AGpsStatus* agps_status)
 {
     JNIEnv* env = AndroidRuntime::getJNIEnv();
+
+    uint32_t ipaddr;
+    // ipaddr field was not included in original AGpsStatus
+    if (agps_status->size >= sizeof(AGpsStatus))
+        ipaddr = agps_status->ipaddr;
+    else
+        ipaddr = 0xFFFFFFFF;
     env->CallVoidMethod(mCallbacksObj, method_reportAGpsStatus,
-                        agps_status->type, agps_status->status);
+                        agps_status->type, agps_status->status, ipaddr);
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 }
 
@@ -233,7 +240,7 @@ static void android_location_GpsLocationProvider_class_init_native(JNIEnv* env, 
     method_reportLocation = env->GetMethodID(clazz, "reportLocation", "(IDDDFFFJ)V");
     method_reportStatus = env->GetMethodID(clazz, "reportStatus", "(I)V");
     method_reportSvStatus = env->GetMethodID(clazz, "reportSvStatus", "()V");
-    method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(II)V");
+    method_reportAGpsStatus = env->GetMethodID(clazz, "reportAGpsStatus", "(III)V");
     method_reportNmea = env->GetMethodID(clazz, "reportNmea", "(J)V");
     method_setEngineCapabilities = env->GetMethodID(clazz, "setEngineCapabilities", "(I)V");
     method_xtraDownloadRequest = env->GetMethodID(clazz, "xtraDownloadRequest", "()V");
