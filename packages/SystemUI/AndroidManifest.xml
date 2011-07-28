@@ -13,6 +13,7 @@
     <application
         android:persistent="true"
         android:allowClearUserData="false"
+        android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:label="@string/app_label"
         android:icon="@drawable/ic_launcher_settings">
