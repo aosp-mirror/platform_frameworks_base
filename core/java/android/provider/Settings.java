@@ -549,6 +549,20 @@ public final class Settings {
     public static final String ACTION_DEVICE_INFO_SETTINGS =
         "android.settings.DEVICE_INFO_SETTINGS";
 
+    /**
+     * Activity Action: Show NFC sharing settings.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_NFCSHARING_SETTINGS =
+        "android.settings.NFCSHARING_SETTINGS";
+
     // End of Intent actions for Settings
 
     /**
