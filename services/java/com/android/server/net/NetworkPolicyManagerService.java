@@ -25,7 +25,6 @@ import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
-import static android.net.ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.NetworkPolicy.LIMIT_DISABLED;
@@ -45,6 +44,12 @@ import static android.net.NetworkTemplate.MATCH_MOBILE_4G;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.readBooleanAttribute;
+import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.readIntAttribute;
+import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.readLongAttribute;
+import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeBooleanAttribute;
+import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeIntAttribute;
+import static com.android.server.net.NetworkPolicyManagerService.XmlUtils.writeLongAttribute;
 import static com.android.server.net.NetworkStatsService.ACTION_NETWORK_STATS_UPDATED;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -134,6 +139,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private static final int VERSION_INIT = 1;
     private static final int VERSION_ADDED_SNOOZE = 2;
+    private static final int VERSION_ADDED_RESTRICT_BACKGROUND = 3;
 
     private static final long KB_IN_BYTES = 1024;
     private static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
@@ -149,6 +155,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String TAG_UID_POLICY = "uid-policy";
 
     private static final String ATTR_VERSION = "version";
+    private static final String ATTR_RESTRICT_BACKGROUND = "restrictBackground";
     private static final String ATTR_NETWORK_TEMPLATE = "networkTemplate";
     private static final String ATTR_SUBSCRIBER_ID = "subscriberId";
     private static final String ATTR_CYCLE_DAY = "cycleDay";
@@ -176,7 +183,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private final Object mRulesLock = new Object();
 
     private boolean mScreenOn;
-    private boolean mBackgroundData;
+    private boolean mRestrictBackground;
 
     /** Defined network policies. */
     private HashMap<NetworkTemplate, NetworkPolicy> mNetworkPolicy = Maps.newHashMap();
@@ -252,10 +259,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         synchronized (mRulesLock) {
             // read policy from disk
             readPolicyLocked();
+
+            if (mRestrictBackground) {
+                updateRulesForRestrictBackgroundLocked();
+            }
         }
 
         updateScreenOn();
-        updateBackgroundData(true);
 
         try {
             mActivityManager.registerProcessObserver(mProcessObserver);
@@ -295,10 +305,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final IntentFilter statsFilter = new IntentFilter(ACTION_NETWORK_STATS_UPDATED);
         mContext.registerReceiver(
                 mStatsReceiver, statsFilter, READ_NETWORK_USAGE_HISTORY, mHandler);
-
-        // listen for changes to background data flag
-        final IntentFilter bgFilter = new IntentFilter(ACTION_BACKGROUND_DATA_SETTING_CHANGED);
-        mContext.registerReceiver(mBgReceiver, bgFilter, CONNECTIVITY_INTERNAL, mHandler);
 
     }
 
@@ -388,22 +394,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             synchronized (mRulesLock) {
                 updateNotificationsLocked();
-            }
-        }
-    };
-
-    /**
-     * Receiver that watches for
-     * {@link #ACTION_BACKGROUND_DATA_SETTING_CHANGED}.
-     */
-    private BroadcastReceiver mBgReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // on background handler thread, and verified CONNECTIVITY_INTERNAL
-            // permission above.
-
-            synchronized (mRulesLock) {
-                updateBackgroundData(false);
             }
         }
     };
@@ -842,6 +832,16 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 if (type == START_TAG) {
                     if (TAG_POLICY_LIST.equals(tag)) {
                         version = readIntAttribute(in, ATTR_VERSION);
+                        if (version >= VERSION_ADDED_RESTRICT_BACKGROUND) {
+                            mRestrictBackground = readBooleanAttribute(
+                                    in, ATTR_RESTRICT_BACKGROUND);
+                        } else {
+                            try {
+                                mRestrictBackground = !mConnManager.getBackgroundDataSetting();
+                            } catch (RemoteException e) {
+                                mRestrictBackground = false;
+                            }
+                        }
 
                     } else if (TAG_NETWORK_POLICY.equals(tag)) {
                         final int networkTemplate = readIntAttribute(in, ATTR_NETWORK_TEMPLATE);
@@ -897,7 +897,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             out.startDocument(null, true);
 
             out.startTag(null, TAG_POLICY_LIST);
-            writeIntAttribute(out, ATTR_VERSION, VERSION_ADDED_SNOOZE);
+            writeIntAttribute(out, ATTR_VERSION, VERSION_ADDED_RESTRICT_BACKGROUND);
+            writeBooleanAttribute(out, ATTR_RESTRICT_BACKGROUND, mRestrictBackground);
 
             // write all known network policies
             for (NetworkPolicy policy : mNetworkPolicy.values()) {
@@ -1047,6 +1048,25 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
+    public void setRestrictBackground(boolean restrictBackground) {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        synchronized (mRulesLock) {
+            mRestrictBackground = restrictBackground;
+            updateRulesForRestrictBackgroundLocked();
+        }
+    }
+
+    @Override
+    public boolean getRestrictBackground() {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+
+        synchronized (mRulesLock) {
+            return mRestrictBackground;
+        }
+    }
+
+    @Override
     protected void dump(FileDescriptor fd, PrintWriter fout, String[] args) {
         mContext.enforceCallingOrSelfPermission(DUMP, TAG);
 
@@ -1065,6 +1085,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 return;
             }
 
+            fout.print("Restrict background: "); fout.println(mRestrictBackground);
             fout.println("Network policies:");
             for (NetworkPolicy policy : mNetworkPolicy.values()) {
                 fout.print("  "); fout.println(policy.toString());
@@ -1157,21 +1178,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         }
     }
 
-    private void updateBackgroundData(boolean systemReady) {
-        synchronized (mRulesLock) {
-            try {
-                mBackgroundData = mConnManager.getBackgroundDataSetting();
-            } catch (RemoteException e) {
-            }
-            if (systemReady && mBackgroundData) {
-                // typical behavior of background enabled during systemReady;
-                // no need to clear rules for all UIDs.
-            } else {
-                updateRulesForBackgroundDataLocked();
-            }
-        }
-    }
-
     /**
      * Update rules that might be changed by {@link #mScreenOn} value.
      */
@@ -1187,9 +1193,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Update rules that might be changed by {@link #mBackgroundData} value.
+     * Update rules that might be changed by {@link #mRestrictBackground} value.
      */
-    private void updateRulesForBackgroundDataLocked() {
+    private void updateRulesForRestrictBackgroundLocked() {
         // update rules for all installed applications
         final PackageManager pm = mContext.getPackageManager();
         final List<ApplicationInfo> apps = pm.getInstalledApplications(0);
@@ -1223,7 +1229,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             // uid in background, and policy says to block metered data
             uidRules = RULE_REJECT_METERED;
         }
-        if (!uidForeground && !mBackgroundData) {
+        if (!uidForeground && mRestrictBackground) {
             // uid in background, and global background disabled
             uidRules = RULE_REJECT_METERED;
         }
@@ -1383,32 +1389,43 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         fout.print("]");
     }
 
-    private static int readIntAttribute(XmlPullParser in, String name) throws IOException {
-        final String value = in.getAttributeValue(null, name);
-        try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            throw new ProtocolException("problem parsing " + name + "=" + value + " as int");
+    public static class XmlUtils {
+        public static int readIntAttribute(XmlPullParser in, String name) throws IOException {
+            final String value = in.getAttributeValue(null, name);
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                throw new ProtocolException("problem parsing " + name + "=" + value + " as int");
+            }
+        }
+
+        public static void writeIntAttribute(XmlSerializer out, String name, int value)
+                throws IOException {
+            out.attribute(null, name, Integer.toString(value));
+        }
+
+        public static long readLongAttribute(XmlPullParser in, String name) throws IOException {
+            final String value = in.getAttributeValue(null, name);
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                throw new ProtocolException("problem parsing " + name + "=" + value + " as long");
+            }
+        }
+
+        public static void writeLongAttribute(XmlSerializer out, String name, long value)
+                throws IOException {
+            out.attribute(null, name, Long.toString(value));
+        }
+
+        public static boolean readBooleanAttribute(XmlPullParser in, String name) {
+            final String value = in.getAttributeValue(null, name);
+            return Boolean.parseBoolean(value);
+        }
+
+        public static void writeBooleanAttribute(XmlSerializer out, String name, boolean value)
+                throws IOException {
+            out.attribute(null, name, Boolean.toString(value));
         }
     }
-
-    private static long readLongAttribute(XmlPullParser in, String name) throws IOException {
-        final String value = in.getAttributeValue(null, name);
-        try {
-            return Long.parseLong(value);
-        } catch (NumberFormatException e) {
-            throw new ProtocolException("problem parsing " + name + "=" + value + " as long");
-        }
-    }
-
-    private static void writeIntAttribute(XmlSerializer out, String name, int value)
-            throws IOException {
-        out.attribute(null, name, Integer.toString(value));
-    }
-
-    private static void writeLongAttribute(XmlSerializer out, String name, long value)
-            throws IOException {
-        out.attribute(null, name, Long.toString(value));
-    }
-
 }
