@@ -165,7 +165,7 @@ public:
                         int *id,
                         int *enabled);
 
-    virtual status_t moveEffects(int session, int srcOutput, int dstOutput);
+    virtual status_t moveEffects(int sessionId, int srcOutput, int dstOutput);
 
     enum hardware_call_state {
         AUDIO_HW_IDLE = 0,
@@ -477,14 +477,45 @@ private:
                     // strategy is only meaningful for PlaybackThread which implements this method
                     virtual uint32_t getStrategyForSession_l(int sessionId) { return 0; }
 
+                    // suspend or restore effect according to the type of effect passed. a NULL
+                    // type pointer means suspend all effects in the session
+                    void setEffectSuspended(const effect_uuid_t *type,
+                                            bool suspend,
+                                            int sessionId = AUDIO_SESSION_OUTPUT_MIX);
+                    // check if some effects must be suspended/restored when an effect is enabled
+                    // or disabled
+        virtual     void checkSuspendOnEffectEnabled(const sp<EffectModule>& effect,
+                                                     bool enabled,
+                                                     int sessionId = AUDIO_SESSION_OUTPUT_MIX);
+
         mutable     Mutex                   mLock;
 
     protected:
+
+                    // entry describing an effect being suspended in mSuspendedSessions keyed vector
+                    class SuspendedSessionDesc : public RefBase {
+                    public:
+                        SuspendedSessionDesc() : mRefCount(0) {}
+
+                        int mRefCount;          // number of active suspend requests
+                        effect_uuid_t mType;    // effect type UUID
+                    };
 
                     void        acquireWakeLock();
                     void        acquireWakeLock_l();
                     void        releaseWakeLock();
                     void        releaseWakeLock_l();
+                    void setEffectSuspended_l(const effect_uuid_t *type,
+                                              bool suspend,
+                                              int sessionId = AUDIO_SESSION_OUTPUT_MIX);
+                    // updated mSuspendedSessions when an effect suspended or restored
+                    void        updateSuspendedSessions_l(const effect_uuid_t *type,
+                                                          bool suspend,
+                                                          int sessionId);
+                    // check if some effects must be suspended when an effect chain is added
+                    void checkSuspendOnAddEffectChain_l(const sp<EffectChain>& chain);
+                    // updated mSuspendedSessions when an effect chain is removed
+                    void updateSuspendedSessionsOnRemoveEffectChain_l(const sp<EffectChain>& chain);
 
         friend class Track;
         friend class TrackBase;
@@ -519,6 +550,9 @@ private:
                     sp<IPowerManager>       mPowerManager;
                     sp<IBinder>             mWakeLockToken;
                     sp<PMDeathRecipient>    mDeathRecipient;
+                    // list of suspended effects per session and per type. The first vector is
+                    // keyed by session ID, the second by type UUID timeLow field
+                    KeyedVector< int, KeyedVector< int, sp<SuspendedSessionDesc> > >  mSuspendedSessions;
     };
 
     // --- PlaybackThread ---
@@ -848,7 +882,7 @@ private:
               void audioConfigChanged_l(int event, int ioHandle, void *param2);
 
               uint32_t nextUniqueId();
-              status_t moveEffectChain_l(int session,
+              status_t moveEffectChain_l(int sessionId,
                                      AudioFlinger::PlaybackThread *srcThread,
                                      AudioFlinger::PlaybackThread *dstThread,
                                      bool reRegister);
@@ -908,6 +942,7 @@ private:
                     bool        setOverflow() { bool tmp = mOverflow; mOverflow = true; return tmp; }
 
                     void        dump(char* buffer, size_t size);
+
         private:
             friend class AudioFlinger;
             friend class RecordThread;
@@ -950,8 +985,6 @@ private:
                 AudioStreamIn* getInput() { return mInput; }
                 virtual audio_stream_t* stream() { return &mInput->stream->common; }
 
-
-                void        setTrack(RecordTrack *recordTrack) { mTrack = recordTrack; }
         virtual status_t    getNextBuffer(AudioBufferProvider::Buffer* buffer);
         virtual void        releaseBuffer(AudioBufferProvider::Buffer* buffer);
         virtual bool        checkForNewParameters_l();
@@ -1059,6 +1092,7 @@ private:
         int16_t     *outBuffer() { return mConfig.outputCfg.buffer.s16; }
         void        setChain(const wp<EffectChain>& chain) { mChain = chain; }
         void        setThread(const wp<ThreadBase>& thread) { mThread = thread; }
+        wp<ThreadBase>& thread() { return mThread; }
 
         status_t addHandle(sp<EffectHandle>& handle);
         void disconnect(const wp<EffectHandle>& handle);
@@ -1071,6 +1105,10 @@ private:
         status_t         setVolume(uint32_t *left, uint32_t *right, bool controller);
         status_t         setMode(uint32_t mode);
         status_t         stop();
+        void             setSuspended(bool suspended);
+        bool             suspended();
+
+        sp<EffectHandle> controlHandle();
 
         status_t         dump(int fd, const Vector<String16>& args);
 
@@ -1099,6 +1137,7 @@ private:
         uint32_t mMaxDisableWaitCnt;    // maximum grace period before forcing an effect off after
                                         // sending disable command.
         uint32_t mDisableWaitCnt;       // current process() calls count during disable period.
+        bool     mSuspended;            // effect is suspended: temporarily disabled by framework
     };
 
     // The EffectHandle class implements the IEffect interface. It provides resources
@@ -1131,13 +1170,17 @@ private:
 
 
         // Give or take control of effect module
-        void setControl(bool hasControl, bool signal);
+        // - hasControl: true if control is given, false if removed
+        // - signal: true client app should be signaled of change, false otherwise
+        // - enabled: state of the effect when control is passed
+        void setControl(bool hasControl, bool signal, bool enabled);
         void commandExecuted(uint32_t cmdCode,
                              uint32_t cmdSize,
                              void *pCmdData,
                              uint32_t replySize,
                              void *pReplyData);
         void setEnabled(bool enabled);
+        bool enabled() { return mEnabled; }
 
         // Getters
         int id() { return mEffect->id(); }
@@ -1160,6 +1203,8 @@ private:
         uint8_t*            mBuffer;        // pointer to parameter area in shared memory
         int mPriority;                      // client application priority to control the effect
         bool mHasControl;                   // true if this handle is controlling the effect
+        bool mEnabled;                      // cached enable state: needed when the effect is
+                                            // restored after being suspended
     };
 
     // the EffectChain class represents a group of effects associated to one audio session.
@@ -1173,6 +1218,10 @@ private:
     public:
         EffectChain(const wp<ThreadBase>& wThread, int sessionId);
         ~EffectChain();
+
+        // special key used for an entry in mSuspendedEffects keyed vector
+        // corresponding to a suspend all request.
+        static const int        kKeyForSuspendAll = 0;
 
         void process_l();
 
@@ -1191,6 +1240,7 @@ private:
 
         sp<EffectModule> getEffectFromDesc_l(effect_descriptor_t *descriptor);
         sp<EffectModule> getEffectFromId_l(int id);
+        sp<EffectModule> getEffectFromType_l(const effect_uuid_t *type);
         bool setVolume_l(uint32_t *left, uint32_t *right);
         void setDevice_l(uint32_t device);
         void setMode_l(uint32_t mode);
@@ -1221,12 +1271,36 @@ private:
         void setStrategy(uint32_t strategy)
                  { mStrategy = strategy; }
 
+        // suspend effect of the given type
+        void setEffectSuspended_l(const effect_uuid_t *type,
+                                  bool suspend);
+        // suspend all eligible effects
+        void setEffectSuspendedAll_l(bool suspend);
+        // check if effects should be suspend or restored when a given effect is enable or disabled
+        virtual void checkSuspendOnEffectEnabled(const sp<EffectModule>& effect,
+                                              bool enabled);
+
         status_t dump(int fd, const Vector<String16>& args);
 
     protected:
 
         EffectChain(const EffectChain&);
         EffectChain& operator =(const EffectChain&);
+
+        class SuspendedEffectDesc : public RefBase {
+        public:
+            SuspendedEffectDesc() : mRefCount(0) {}
+
+            int mRefCount;
+            effect_uuid_t mType;
+            wp<EffectModule> mEffect;
+        };
+
+        // get a list of effect modules to suspend when an effect of the type
+        // passed is enabled.
+        Vector< sp<EffectModule> > getSuspendEligibleEffects();
+        // get an effect module if it is currently enable
+        sp<EffectModule> getEffectIfEnabled(const effect_uuid_t *type);
 
         wp<ThreadBase> mThread;     // parent mixer thread
         Mutex mLock;                // mutex protecting effect list
@@ -1243,6 +1317,10 @@ private:
         uint32_t mNewLeftVolume;       // new volume on left channel
         uint32_t mNewRightVolume;      // new volume on right channel
         uint32_t mStrategy; // strategy for this effect chain
+        // mSuspendedEffects lists all effect currently suspended in the chain
+        // use effect type UUID timelow field as key. There is no real risk of identical
+        // timeLow fields among effect type UUIDs.
+        KeyedVector< int, sp<SuspendedEffectDesc> > mSuspendedEffects;
     };
 
     struct AudioStreamOut {
