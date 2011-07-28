@@ -118,6 +118,21 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     private SearchableInfo mSearchable;
     private Bundle mAppSearchData;
 
+    /*
+     * SearchView can be set expanded before the IME is ready to be shown during
+     * initial UI setup. The show operation is asynchronous to account for this.
+     */
+    private Runnable mShowImeRunnable = new Runnable() {
+        public void run() {
+            InputMethodManager imm = (InputMethodManager)
+                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+
+            if (imm != null) {
+                imm.showSoftInputUnchecked(0, null);
+            }
+        }
+    };
+
     // For voice searching
     private final Intent mVoiceWebSearchIntent;
     private final Intent mVoiceAppSearchIntent;
@@ -650,16 +665,15 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         mSubmitArea.getBackground().setState(focused ? FOCUSED_STATE_SET : EMPTY_STATE_SET);
     }
 
-    private void setImeVisibility(boolean visible) {
-        InputMethodManager imm = (InputMethodManager)
-                getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    private void setImeVisibility(final boolean visible) {
+        if (visible) {
+            post(mShowImeRunnable);
+        } else {
+            removeCallbacks(mShowImeRunnable);
+            InputMethodManager imm = (InputMethodManager)
+                    getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        // We made sure the IME was displayed, so also make sure it is closed
-        // when we go away.
-        if (imm != null) {
-            if (visible) {
-                imm.showSoftInputUnchecked(0, null);
-            } else {
+            if (imm != null) {
                 imm.hideSoftInputFromWindow(getWindowToken(), 0);
             }
         }

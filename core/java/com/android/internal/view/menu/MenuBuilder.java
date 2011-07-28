@@ -27,7 +27,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.ActionProvider;
 import android.view.ContextMenu.ContextMenuInfo;
