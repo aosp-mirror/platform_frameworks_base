@@ -87,6 +87,11 @@ public class ScrollingTabContainerView extends HorizontalScrollView {
         }
     }
 
+    public void setContentHeight(int contentHeight) {
+        mTabLayout.getLayoutParams().height = contentHeight;
+        requestLayout();
+    }
+
     public void animateToVisibility(int visibility) {
         if (mVisibilityAnim != null) {
             mVisibilityAnim.cancel();
