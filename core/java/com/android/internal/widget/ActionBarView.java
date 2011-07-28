@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
@@ -172,7 +173,8 @@ public class ActionBarView extends AbsActionBarView {
         // Background is always provided by the container.
         setBackgroundResource(0);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBar);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ActionBar,
+                com.android.internal.R.attr.actionBarStyle, 0);
 
         ApplicationInfo appInfo = context.getApplicationInfo();
         PackageManager pm = context.getPackageManager();
@@ -250,6 +252,18 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Action bar can change size on configuration changes.
+        // Reread the desired height from the theme-specified style.
+        TypedArray a = getContext().obtainStyledAttributes(null, R.styleable.ActionBar,
+                com.android.internal.R.attr.actionBarStyle, 0);
+        setContentHeight(a.getLayoutDimension(R.styleable.ActionBar_height, 0));
+        a.recycle();
+    }
+
+    @Override
     public void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         removeCallbacks(mTabSelector);
@@ -318,6 +332,7 @@ public class ActionBarView extends AbsActionBarView {
         mIncludeTabs = tabs != null;
         if (mIncludeTabs && mNavigationMode == ActionBar.NAVIGATION_MODE_TABS) {
             addView(mTabScrollView);
+            mTabScrollView.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
         }
     }
 
