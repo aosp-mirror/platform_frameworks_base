@@ -377,7 +377,8 @@ public class Tethering extends INetworkManagementEventObserver.Stub {
             }
         }
         Intent broadcast = new Intent(ConnectivityManager.ACTION_TETHER_STATE_CHANGED);
-        broadcast.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        broadcast.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
+                Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         broadcast.putStringArrayListExtra(ConnectivityManager.EXTRA_AVAILABLE_TETHER,
                 availableList);
         broadcast.putStringArrayListExtra(ConnectivityManager.EXTRA_ACTIVE_TETHER, activeList);
