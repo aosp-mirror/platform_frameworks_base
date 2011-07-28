@@ -30,7 +30,6 @@ import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
 
 import java.util.LinkedList;
-import java.util.Locale;
 import java.util.Queue;
 
 /**
@@ -125,6 +124,9 @@ public class SpellCheckerSession {
      */
     public void getSuggestions(
             TextInfo[] textInfos, int suggestionsLimit, boolean sequentialWords) {
+        if (DBG) {
+            Log.w(TAG, "getSuggestions from " + mSpellCheckerInfo.getId());
+        }
         // TODO: Handle multiple words suggestions by using WordBreakIterator
         mSpellCheckerSessionListenerImpl.getSuggestionsMultiple(
                 textInfos, suggestionsLimit, sequentialWords);
@@ -186,6 +188,9 @@ public class SpellCheckerSession {
 
         public void getSuggestionsMultiple(
                 TextInfo[] textInfos, int suggestionsLimit, boolean sequentialWords) {
+            if (DBG) {
+                Log.w(TAG, "getSuggestionsMultiple");
+            }
             processOrEnqueueTask(
                     new SpellCheckerParams(TASK_GET_SUGGESTIONS_MULTIPLE, textInfos,
                             suggestionsLimit, sequentialWords));
@@ -204,6 +209,9 @@ public class SpellCheckerSession {
         }
 
         private void processOrEnqueueTask(SpellCheckerParams scp) {
+            if (DBG) {
+                Log.d(TAG, "process or enqueue task: " + mISpellCheckerSession);
+            }
             if (mISpellCheckerSession == null) {
                 mPendingTasks.offer(scp);
             } else {
@@ -215,6 +223,9 @@ public class SpellCheckerSession {
             if (!checkOpenConnection()) {
                 return;
             }
+            if (DBG) {
+                Log.w(TAG, "Cancel spell checker tasks.");
+            }
             try {
                 mISpellCheckerSession.cancel();
             } catch (RemoteException e) {
@@ -225,6 +236,9 @@ public class SpellCheckerSession {
         private void processGetSuggestionsMultiple(SpellCheckerParams scp) {
             if (!checkOpenConnection()) {
                 return;
+            }
+            if (DBG) {
+                Log.w(TAG, "Get suggestions from the spell checker.");
             }
             try {
                 mISpellCheckerSession.getSuggestionsMultiple(
@@ -254,6 +268,9 @@ public class SpellCheckerSession {
     private class InternalListener extends ITextServicesSessionListener.Stub {
         @Override
         public void onServiceConnected(ISpellCheckerSession session) {
+            if (DBG) {
+                Log.w(TAG, "SpellCheckerSession connected.");
+            }
             mSpellCheckerSessionListenerImpl.onServiceConnected(session);
         }
     }
