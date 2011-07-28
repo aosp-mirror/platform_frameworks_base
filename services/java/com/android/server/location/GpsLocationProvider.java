@@ -496,7 +496,12 @@ public class GpsLocationProvider implements LocationProviderInterface {
         if (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE_SUPL
                 && mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
             String apnName = info.getExtraInfo();
-            if (mNetworkAvailable && apnName != null && apnName.length() > 0) {
+            if (mNetworkAvailable) {
+                if (apnName == null) {
+                    /* Assign a dummy value in the case of C2K as otherwise we will have a runtime 
+                    exception in the following call to native_agps_data_conn_open*/
+                    apnName = "dummy-apn";
+                }
                 mAGpsApn = apnName;
                 if (DEBUG) Log.d(TAG, "call native_agps_data_conn_open");
                 native_agps_data_conn_open(apnName);
