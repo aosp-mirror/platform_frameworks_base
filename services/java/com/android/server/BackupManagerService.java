@@ -3298,6 +3298,8 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
             } catch (NumberFormatException e) {
                 Slog.w(TAG, "Corrupt restore manifest for package " + info.packageName);
+            } catch (IllegalArgumentException e) {
+                Slog.w(TAG, e.getMessage());
             }
 
             return policy;
