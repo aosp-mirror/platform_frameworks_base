@@ -301,7 +301,7 @@ void LayerRenderer::destroyLayer(Layer* layer) {
             delete layer;
         } else {
             LAYER_RENDERER_LOGD("  Cached!");
-#if DEBUG_LAYERS
+#if DEBUG_LAYER_RENDERER
             Caches::getInstance().layerCache.dump();
 #endif
             layer->region.clear();

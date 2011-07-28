@@ -123,7 +123,6 @@ public final class ActivityThread {
     /** @hide */
     public static final String TAG = "ActivityThread";
     private static final android.graphics.Bitmap.Config THUMBNAIL_FORMAT = Bitmap.Config.RGB_565;
-    private static final boolean DEBUG = false;
     static final boolean localLOGV = false;
     static final boolean DEBUG_MESSAGES = false;
     /** @hide */
@@ -163,7 +162,7 @@ public final class ActivityThread {
             = new ArrayList<Application>();
     // set of instantiated backup agents, keyed by package name
     final HashMap<String, BackupAgent> mBackupAgents = new HashMap<String, BackupAgent>();
-    static final ThreadLocal<ActivityThread> sThreadLocal = new ThreadLocal();
+    static final ThreadLocal<ActivityThread> sThreadLocal = new ThreadLocal<ActivityThread>();
     Instrumentation mInstrumentation;
     String mInstrumentationAppDir = null;
     String mInstrumentationAppPackage = null;
@@ -410,9 +409,9 @@ public final class ActivityThread {
         CompatibilityInfo info;
     }
     
-    native private void dumpGraphicsInfo(FileDescriptor fd);
+    private native void dumpGraphicsInfo(FileDescriptor fd);
 
-    private final class ApplicationThread extends ApplicationThreadNative {
+    private class ApplicationThread extends ApplicationThreadNative {
         private static final String HEAP_COLUMN = "%13s %8s %8s %8s %8s %8s %8s";
         private static final String ONE_COUNT_COLUMN = "%21s %8d";
         private static final String TWO_COUNT_COLUMNS = "%21s %8d %21s %8d";
@@ -734,13 +733,13 @@ public final class ActivityThread {
             FileOutputStream fout = new FileOutputStream(fd);
             PrintWriter pw = new PrintWriter(fout);
             try {
-                return dumpMemInfo(fd, pw, args);
+                return dumpMemInfo(pw, args);
             } finally {
                 pw.flush();
             }
         }
 
-        private Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, PrintWriter pw, String[] args) {
+        private Debug.MemoryInfo dumpMemInfo(PrintWriter pw, String[] args) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
             long nativeAllocated = Debug.getNativeHeapAllocatedSize() / 1024;
             long nativeFree = Debug.getNativeHeapFreeSize() / 1024;
@@ -754,7 +753,7 @@ public final class ActivityThread {
             long dalvikFree = runtime.freeMemory() / 1024;
             long dalvikAllocated = dalvikMax - dalvikFree;
             long viewInstanceCount = ViewDebug.getViewInstanceCount();
-            long viewRootInstanceCount = ViewDebug.getViewAncestorInstanceCount();
+            long viewRootInstanceCount = ViewDebug.getViewRootImplCount();
             long appContextInstanceCount = Debug.countInstancesOfClass(ContextImpl.class);
             long activityInstanceCount = Debug.countInstancesOfClass(Activity.class);
             int globalAssetCount = AssetManager.getGlobalAssetCount();
@@ -868,7 +867,7 @@ public final class ActivityThread {
             int otherPrivateDirty = memInfo.otherPrivateDirty;
 
             for (int i=0; i<Debug.MemoryInfo.NUM_OTHER_STATS; i++) {
-                printRow(pw, HEAP_COLUMN, memInfo.getOtherLabel(i),
+                printRow(pw, HEAP_COLUMN, Debug.MemoryInfo.getOtherLabel(i),
                         memInfo.getOtherPss(i), memInfo.getOtherSharedDirty(i),
                         memInfo.getOtherPrivateDirty(i), "", "", "");
                 otherPss -= memInfo.getOtherPss(i);
@@ -885,7 +884,7 @@ public final class ActivityThread {
 
             pw.println(" ");
             pw.println(" Objects");
-            printRow(pw, TWO_COUNT_COLUMNS, "Views:", viewInstanceCount, "ViewAncestors:",
+            printRow(pw, TWO_COUNT_COLUMNS, "Views:", viewInstanceCount, "ViewRootImpl:",
                     viewRootInstanceCount);
 
             printRow(pw, TWO_COUNT_COLUMNS, "AppContexts:", appContextInstanceCount,
@@ -937,6 +936,7 @@ public final class ActivityThread {
         @Override
         public void dumpGfxInfo(FileDescriptor fd, String[] args) {
             dumpGraphicsInfo(fd);
+            WindowManagerImpl.getDefault().dumpGfxInfo(fd);
         }
 
         private void printRow(PrintWriter pw, String format, Object...objs) {
@@ -959,7 +959,7 @@ public final class ActivityThread {
         }
     }
 
-    private final class H extends Handler {
+    private class H extends Handler {
         public static final int LAUNCH_ACTIVITY         = 100;
         public static final int PAUSE_ACTIVITY          = 101;
         public static final int PAUSE_ACTIVITY_FINISHING= 102;
@@ -1220,7 +1220,7 @@ public final class ActivityThread {
         }
     }
 
-    private final class Idler implements MessageQueue.IdleHandler {
+    private class Idler implements MessageQueue.IdleHandler {
         public final boolean queueIdle() {
             ActivityClientRecord a = mNewActivities;
             if (a != null) {
@@ -1231,12 +1231,13 @@ public final class ActivityThread {
                     if (localLOGV) Slog.v(
                         TAG, "Reporting idle of " + a +
                         " finished=" +
-                        (a.activity != null ? a.activity.mFinished : false));
+                        (a.activity != null && a.activity.mFinished));
                     if (a.activity != null && !a.activity.mFinished) {
                         try {
                             am.activityIdle(a.token, a.createdConfig);
                             a.createdConfig = null;
                         } catch (RemoteException ex) {
+                            // Ignore
                         }
                     }
                     prev = a;
@@ -1256,7 +1257,7 @@ public final class ActivityThread {
         }
     }
 
-    private final static class ResourcesKey {
+    private static class ResourcesKey {
         final private String mResDir;
         final private float mScale;
         final private int mHash;
@@ -1282,17 +1283,17 @@ public final class ActivityThread {
         }
     }
 
-    public static final ActivityThread currentActivityThread() {
+    public static ActivityThread currentActivityThread() {
         return sThreadLocal.get();
     }
 
-    public static final String currentPackageName() {
+    public static String currentPackageName() {
         ActivityThread am = currentActivityThread();
         return (am != null && am.mBoundApplication != null)
             ? am.mBoundApplication.processName : null;
     }
 
-    public static final Application currentApplication() {
+    public static Application currentApplication() {
         ActivityThread am = currentActivityThread();
         return am != null ? am.mInitialApplication : null;
     }
@@ -1337,7 +1338,7 @@ public final class ActivityThread {
         return config;
     }
 
-    private final Configuration mMainThreadConfig = new Configuration();
+    private Configuration mMainThreadConfig = new Configuration();
     Configuration applyConfigCompatMainThread(Configuration config, CompatibilityInfo compat) {
         if (config == null) {
             return null;
@@ -1456,6 +1457,7 @@ public final class ActivityThread {
             ai = getPackageManager().getApplicationInfo(packageName,
                     PackageManager.GET_SHARED_LIBRARY_FILES);
         } catch (RemoteException e) {
+            // Ignore
         }
 
         if (ai != null) {
@@ -1505,7 +1507,7 @@ public final class ActivityThread {
         }
     }
 
-    private final LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,
+    private LoadedApk getPackageInfo(ApplicationInfo aInfo, CompatibilityInfo compatInfo,
             ClassLoader baseLoader, boolean securityViolation, boolean includeCode) {
         synchronized (mPackages) {
             WeakReference<LoadedApk> ref;
@@ -1712,15 +1714,15 @@ public final class ActivityThread {
 
     // if the thread hasn't started yet, we don't have the handler, so just
     // save the messages until we're ready.
-    private final void queueOrSendMessage(int what, Object obj) {
+    private void queueOrSendMessage(int what, Object obj) {
         queueOrSendMessage(what, obj, 0, 0);
     }
 
-    private final void queueOrSendMessage(int what, Object obj, int arg1) {
+    private void queueOrSendMessage(int what, Object obj, int arg1) {
         queueOrSendMessage(what, obj, arg1, 0);
     }
 
-    private final void queueOrSendMessage(int what, Object obj, int arg1, int arg2) {
+    private void queueOrSendMessage(int what, Object obj, int arg1, int arg2) {
         synchronized (this) {
             if (DEBUG_MESSAGES) Slog.v(
                 TAG, "SCHEDULE " + what + " " + mH.codeToString(what)
@@ -1743,7 +1745,7 @@ public final class ActivityThread {
         queueOrSendMessage(H.CLEAN_UP_CONTEXT, cci);
     }
 
-    private final Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
+    private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) {
         // System.out.println("##### [" + System.currentTimeMillis() + "] ActivityThread.performLaunchActivity(" + r + ")");
 
         ActivityInfo aInfo = r.activityInfo;
@@ -1861,7 +1863,7 @@ public final class ActivityThread {
         return activity;
     }
 
-    private final void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
+    private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -1917,11 +1919,12 @@ public final class ActivityThread {
                 ActivityManagerNative.getDefault()
                     .finishActivity(r.token, Activity.RESULT_CANCELED, null);
             } catch (RemoteException ex) {
+                // Ignore
             }
         }
     }
 
-    private final void deliverNewIntents(ActivityClientRecord r,
+    private void deliverNewIntents(ActivityClientRecord r,
             List<Intent> intents) {
         final int N = intents.size();
         for (int i=0; i<N; i++) {
@@ -1949,7 +1952,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleNewIntent(NewIntentData data) {
+    private void handleNewIntent(NewIntentData data) {
         performNewIntents(data.token, data.intents);
     }
 
@@ -1964,7 +1967,7 @@ public final class ActivityThread {
         return sCurrentBroadcastIntent.get();
     }
 
-    private final void handleReceiver(ReceiverData data) {
+    private void handleReceiver(ReceiverData data) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -1976,7 +1979,7 @@ public final class ActivityThread {
 
         IActivityManager mgr = ActivityManagerNative.getDefault();
 
-        BroadcastReceiver receiver = null;
+        BroadcastReceiver receiver;
         try {
             java.lang.ClassLoader cl = packageInfo.getClassLoader();
             data.intent.setExtrasClassLoader(cl);
@@ -2026,7 +2029,7 @@ public final class ActivityThread {
     }
 
     // Instantiate a BackupAgent and tell it that it's alive
-    private final void handleCreateBackupAgent(CreateBackupAgentData data) {
+    private void handleCreateBackupAgent(CreateBackupAgentData data) {
         if (DEBUG_BACKUP) Slog.v(TAG, "handleCreateBackupAgent: " + data);
 
         // no longer idle; we have backup work to do
@@ -2091,7 +2094,7 @@ public final class ActivityThread {
     }
 
     // Tear down a BackupAgent
-    private final void handleDestroyBackupAgent(CreateBackupAgentData data) {
+    private void handleDestroyBackupAgent(CreateBackupAgentData data) {
         if (DEBUG_BACKUP) Slog.v(TAG, "handleDestroyBackupAgent: " + data);
 
         LoadedApk packageInfo = getPackageInfoNoCheck(data.appInfo, data.compatInfo);
@@ -2110,7 +2113,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleCreateService(CreateServiceData data) {
+    private void handleCreateService(CreateServiceData data) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -2156,7 +2159,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleBindService(BindServiceData data) {
+    private void handleBindService(BindServiceData data) {
         Service s = mServices.get(data.token);
         if (s != null) {
             try {
@@ -2184,7 +2187,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleUnbindService(BindServiceData data) {
+    private void handleUnbindService(BindServiceData data) {
         Service s = mServices.get(data.token);
         if (s != null) {
             try {
@@ -2236,7 +2239,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleServiceArgs(ServiceArgsData data) {
+    private void handleServiceArgs(ServiceArgsData data) {
         Service s = mServices.get(data.token);
         if (s != null) {
             try {
@@ -2270,7 +2273,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleStopService(IBinder token) {
+    private void handleStopService(IBinder token) {
         Service s = mServices.remove(token);
         if (s != null) {
             try {
@@ -2465,7 +2468,7 @@ public final class ActivityThread {
     private Bitmap mAvailThumbnailBitmap = null;
     private Canvas mThumbnailCanvas = null;
 
-    private final Bitmap createThumbnailBitmap(ActivityClientRecord r) {
+    private Bitmap createThumbnailBitmap(ActivityClientRecord r) {
         Bitmap thumbnail = mAvailThumbnailBitmap;
         try {
             if (thumbnail == null) {
@@ -2515,7 +2518,7 @@ public final class ActivityThread {
         return thumbnail;
     }
 
-    private final void handlePauseActivity(IBinder token, boolean finished,
+    private void handlePauseActivity(IBinder token, boolean finished,
             boolean userLeaving, int configChanges) {
         ActivityClientRecord r = mActivities.get(token);
         if (r != null) {
@@ -2621,7 +2624,7 @@ public final class ActivityThread {
         CharSequence description;
     }
 
-    private final class ProviderRefCount {
+    private class ProviderRefCount {
         public int count;
         ProviderRefCount(int pCount) {
             count = pCount;
@@ -2636,7 +2639,7 @@ public final class ActivityThread {
      * For the client, we want to call onStop()/onStart() to indicate when
      * the activity's UI visibillity changes.
      */
-    private final void performStopActivityInner(ActivityClientRecord r,
+    private void performStopActivityInner(ActivityClientRecord r,
             StopInfo info, boolean keepShown, boolean saveState) {
         if (localLOGV) Slog.v(TAG, "Performing stop of " + r);
         Bundle state = null;
@@ -2699,7 +2702,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void updateVisibility(ActivityClientRecord r, boolean show) {
+    private void updateVisibility(ActivityClientRecord r, boolean show) {
         View v = r.activity.mDecor;
         if (v != null) {
             if (show) {
@@ -2726,7 +2729,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleStopActivity(IBinder token, boolean show, int configChanges) {
+    private void handleStopActivity(IBinder token, boolean show, int configChanges) {
         ActivityClientRecord r = mActivities.get(token);
         r.activity.mConfigChangeFlags |= configChanges;
 
@@ -2760,7 +2763,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleWindowVisibility(IBinder token, boolean show) {
+    private void handleWindowVisibility(IBinder token, boolean show) {
         ActivityClientRecord r = mActivities.get(token);
         
         if (r == null) {
@@ -2785,7 +2788,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleSleeping(IBinder token, boolean sleeping) {
+    private void handleSleeping(IBinder token, boolean sleeping) {
         ActivityClientRecord r = mActivities.get(token);
 
         if (r == null) {
@@ -2846,7 +2849,7 @@ public final class ActivityThread {
         WindowManagerImpl.getDefault().reportNewConfiguration(mConfiguration);
     }
 
-    private final void deliverResults(ActivityClientRecord r, List<ResultInfo> results) {
+    private void deliverResults(ActivityClientRecord r, List<ResultInfo> results) {
         final int N = results.size();
         for (int i=0; i<N; i++) {
             ResultInfo ri = results.get(i);
@@ -2869,7 +2872,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleSendResult(ResultData res) {
+    private void handleSendResult(ResultData res) {
         ActivityClientRecord r = mActivities.get(res.token);
         if (DEBUG_RESULTS) Slog.v(TAG, "Handling send result to " + r);
         if (r != null) {
@@ -2915,7 +2918,7 @@ public final class ActivityThread {
         return performDestroyActivity(token, finishing, 0, false);
     }
 
-    private final ActivityClientRecord performDestroyActivity(IBinder token, boolean finishing,
+    private ActivityClientRecord performDestroyActivity(IBinder token, boolean finishing,
             int configChanges, boolean getNonConfigInstance) {
         ActivityClientRecord r = mActivities.get(token);
         Class activityClass = null;
@@ -3008,7 +3011,7 @@ public final class ActivityThread {
         return component == null ? "[Unknown]" : component.toShortString();
     }
 
-    private final void handleDestroyActivity(IBinder token, boolean finishing,
+    private void handleDestroyActivity(IBinder token, boolean finishing,
             int configChanges, boolean getNonConfigInstance) {
         ActivityClientRecord r = performDestroyActivity(token, finishing,
                 configChanges, getNonConfigInstance);
@@ -3123,7 +3126,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void handleRelaunchActivity(ActivityClientRecord tmp) {
+    private void handleRelaunchActivity(ActivityClientRecord tmp) {
         // If we are getting ready to gc after going to the background, well
         // we are back active so skip it.
         unscheduleGcIdler();
@@ -3233,7 +3236,7 @@ public final class ActivityThread {
         handleLaunchActivity(r, currentIntent);
     }
 
-    private final void handleRequestThumbnail(IBinder token) {
+    private void handleRequestThumbnail(IBinder token) {
         ActivityClientRecord r = mActivities.get(token);
         Bitmap thumbnail = createThumbnailBitmap(r);
         CharSequence description = null;
@@ -3308,7 +3311,7 @@ public final class ActivityThread {
         return callbacks;
     }
 
-    private final void performConfigurationChanged(
+    private void performConfigurationChanged(
             ComponentCallbacks cb, Configuration config) {
         // Only for Activity objects, check that they actually call up to their
         // superclass implementation.  ComponentCallbacks is an interface, so
@@ -3451,6 +3454,9 @@ public final class ActivityThread {
             }
             callbacks = collectComponentCallbacksLocked(false, config);
         }
+        
+        // Cleanup hardware accelerated stuff
+        WindowManagerImpl.getDefault().trimLocalMemory();
 
         if (callbacks != null) {
             final int N = callbacks.size();
@@ -3579,7 +3585,7 @@ public final class ActivityThread {
         WindowManagerImpl.getDefault().trimMemory(level);
     }
 
-    private final void handleBindApplication(AppBindData data) {
+    private void handleBindApplication(AppBindData data) {
         mBoundApplication = data;
         mConfiguration = new Configuration(data.config);
         mCompatConfiguration = new Configuration(data.config);
@@ -3791,7 +3797,7 @@ public final class ActivityThread {
         }
     }
 
-    private final void installContentProviders(
+    private void installContentProviders(
             Context context, List<ProviderInfo> providers) {
         final ArrayList<IActivityManager.ContentProviderHolder> results =
             new ArrayList<IActivityManager.ContentProviderHolder>();
@@ -3825,7 +3831,7 @@ public final class ActivityThread {
         }
     }
 
-    private final IContentProvider getExistingProvider(Context context, String name) {
+    private IContentProvider getExistingProvider(Context context, String name) {
         synchronized(mProviderMap) {
             final ProviderClientRecord pr = mProviderMap.get(name);
             if (pr != null) {
@@ -3835,7 +3841,7 @@ public final class ActivityThread {
         }
     }
 
-    private final IContentProvider getProvider(Context context, String name) {
+    private IContentProvider getProvider(Context context, String name) {
         IContentProvider existing = getExistingProvider(context, name);
         if (existing != null) {
             return existing;
@@ -4007,7 +4013,7 @@ public final class ActivityThread {
         }
     }
 
-    private final IContentProvider installProvider(Context context,
+    private IContentProvider installProvider(Context context,
             IContentProvider provider, ProviderInfo info, boolean noisy) {
         ContentProvider localProvider = null;
         if (provider == null) {
@@ -4027,6 +4033,7 @@ public final class ActivityThread {
                     c = context.createPackageContext(ai.packageName,
                             Context.CONTEXT_INCLUDE_CODE);
                 } catch (PackageManager.NameNotFoundException e) {
+                    // Ignore
                 }
             }
             if (c == null) {
@@ -4086,7 +4093,7 @@ public final class ActivityThread {
         return provider;
     }
 
-    private final void attach(boolean system) {
+    private void attach(boolean system) {
         sThreadLocal.set(this);
         mSystemThread = system;
         if (!system) {
@@ -4101,6 +4108,7 @@ public final class ActivityThread {
             try {
                 mgr.attachApplication(mAppThread);
             } catch (RemoteException ex) {
+                // Ignore
             }
         } else {
             // Don't set application object here -- if the system crashes,
@@ -4166,7 +4174,7 @@ public final class ActivityThread {
         }
     }
 
-    public static final void main(String[] args) {
+    public static void main(String[] args) {
         SamplingProfilerIntegration.start();
 
         // CloseGuard defaults to true and can be quite spammy.  We

@@ -74,12 +74,17 @@ void DisplayList::outputLogBuffer(int fd) {
     if (logBuffer.isEmpty()) {
         return;
     }
-    String8 cachesLog;
-    Caches::getInstance().dumpMemoryUsage(cachesLog);
+
     FILE *file = fdopen(fd, "a");
-    fprintf(file, "\nCaches:\n%s", cachesLog.string());
+
     fprintf(file, "\nRecent DisplayList operations\n");
     logBuffer.outputCommands(file, OP_NAMES);
+
+    String8 cachesLog;
+    Caches::getInstance().dumpMemoryUsage(cachesLog);
+    fprintf(file, "\nCaches:\n%s", cachesLog.string());
+    fprintf(file, "\n");
+
     fflush(file);
 }
 
@@ -143,10 +148,10 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
         clearResources();
     }
 
-    size_t size = writer.size();
-    void* buffer = sk_malloc_throw(size);
+    mSize = writer.size();
+    void* buffer = sk_malloc_throw(mSize);
     writer.flatten(buffer);
-    mReader.setMemory(buffer, size);
+    mReader.setMemory(buffer, mSize);
 
     Caches& caches = Caches::getInstance();
 
@@ -188,6 +193,11 @@ void DisplayList::initFromDisplayListRenderer(const DisplayListRenderer& recorde
 }
 
 void DisplayList::init() {
+    mSize = 0;
+}
+
+size_t DisplayList::getSize() {
+    return mSize;
 }
 
 /**

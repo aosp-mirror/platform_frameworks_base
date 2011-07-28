@@ -54,4 +54,11 @@ public abstract class DisplayList {
      * @return boolean true if the display list is able to be replayed, false otherwise.
      */
     abstract boolean isValid();
+
+    /**
+     * Return the amount of memory used by this display list.
+     * 
+     * @return The size of this display list in bytes
+     */
+    abstract int getSize();
 }

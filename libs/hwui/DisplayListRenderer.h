@@ -105,6 +105,8 @@ public:
 
     void initFromDisplayListRenderer(const DisplayListRenderer& recorder, bool reusing = false);
 
+    size_t getSize();
+
     bool replay(OpenGLRenderer& renderer, Rect& dirty, uint32_t level = 0);
 
     void output(OpenGLRenderer& renderer, uint32_t level = 0);
@@ -203,6 +205,8 @@ private:
     Vector<SkiaShader*> mShaders;
 
     mutable SkFlattenableReadBuffer mReader;
+
+    size_t mSize;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
