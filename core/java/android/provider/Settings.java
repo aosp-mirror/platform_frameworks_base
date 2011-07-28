@@ -3964,6 +3964,7 @@ public final class Settings {
             ACCESSIBILITY_SCRIPT_INJECTION,
             BACKUP_AUTO_RESTORE,
             ENABLED_ACCESSIBILITY_SERVICES,
+            TOUCH_EXPLORATION_ENABLED,
             TTS_USE_DEFAULTS,
             TTS_DEFAULT_RATE,
             TTS_DEFAULT_PITCH,

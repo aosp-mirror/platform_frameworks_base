@@ -891,6 +891,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
              upgradeVersion = 67;
          }
 
+        if (upgradeVersion == 67) {
+            // New setting to enable touch exploration.
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT INTO secure(name,value)"
+                        + " VALUES(?,?);");
+                loadBooleanSetting(stmt, Settings.Secure.TOUCH_EXPLORATION_ENABLED,
+                        R.bool.def_touch_exploration_enabled);
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null) stmt.close();
+            }
+            upgradeVersion = 68;
+        }
+
+
         // *** Remember to update DATABASE_VERSION above!
 
         if (upgradeVersion != currentVersion) {
@@ -1427,6 +1446,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             loadIntegerSetting(stmt, Settings.Secure.LONG_PRESS_TIMEOUT,
                     R.integer.def_long_press_timeout_millis);
+
+            loadBooleanSetting(stmt, Settings.Secure.TOUCH_EXPLORATION_ENABLED,
+                    R.bool.def_touch_exploration_enabled);
         } finally {
             if (stmt != null) stmt.close();
         }
