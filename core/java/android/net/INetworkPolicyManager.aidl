@@ -40,4 +40,7 @@ interface INetworkPolicyManager {
 
     void snoozePolicy(in NetworkTemplate template);
 
+    void setRestrictBackground(boolean restrictBackground);
+    boolean getRestrictBackground();
+
 }
