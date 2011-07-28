@@ -393,8 +393,7 @@
         android:description="@string/permdesc_nfc"
         android:label="@string/permlab_nfc" />
 
-    <!-- Allows applications to provide VPN functionality.
-         @hide Pending API council approval -->
+    <!-- Allows applications to provide VPN functionality -->
     <permission android:name="android.permission.VPN"
         android:permissionGroup="android.permission-group.NETWORK"
         android:protectionLevel="dangerous"
