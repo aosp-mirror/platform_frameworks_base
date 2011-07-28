@@ -41,16 +41,12 @@ import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Scanner;
-import java.util.regex.Pattern;
 
 /**
  * {@link WifiWatchdogStateMachine} monitors the initial connection to a Wi-Fi
@@ -88,13 +84,14 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final int DEFAULT_MIN_DNS_RESPONSES = 3;
     private static final long DNS_PING_INTERVAL_MS = 100;
 
-    private static final int DEFAULT_DNS_PING_TIMEOUT_MS = 1500;
+    private static final int DEFAULT_DNS_PING_TIMEOUT_MS = 2000;
 
     private static final long DEFAULT_BLACKLIST_FOLLOWUP_INTERVAL_MS = 15 * 1000;
 
-    private static final String DEFAULT_WALLED_GARDEN_URL = "http://www.google.com/";
-    private static final String DEFAULT_WALLED_GARDEN_PATTERN = "<title>.*Google.*</title>";
-
+    // See http://go/clientsdns for usage approval
+    private static final String DEFAULT_WALLED_GARDEN_URL =
+            "http://clients3.google.com/generate_204";
+    private static final int WALLED_GARDEN_SOCKET_TIMEOUT_MS = 10000;
 
     private static final int BASE = Protocol.BASE_WIFI_WATCHDOG;
 
@@ -154,7 +151,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private long mBlacklistFollowupIntervalMs;
     private boolean mWalledGardenTestEnabled;
     private String mWalledGardenUrl;
-    private Pattern mWalledGardenPattern;
 
     private boolean mShowDisabledNotification;
     /**
@@ -320,9 +316,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_URL),
                 false, contentObserver);
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_PATTERN),
-                false, contentObserver);
     }
 
     /**
@@ -331,29 +324,26 @@ public class WifiWatchdogStateMachine extends StateMachine {
      * fetches the data we expect
      */
     private boolean isWalledGardenConnection() {
-        InputStream in = null;
         HttpURLConnection urlConnection = null;
         try {
             URL url = new URL(mWalledGardenUrl);
             urlConnection = (HttpURLConnection) url.openConnection();
-            in = new BufferedInputStream(urlConnection.getInputStream());
-            Scanner scanner = new Scanner(in);
-            if (scanner.findInLine(mWalledGardenPattern) != null) {
-                return false;
-            } else {
-                return true;
-            }
+            urlConnection.setInstanceFollowRedirects(false);
+            urlConnection.setConnectTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+            urlConnection.setReadTimeout(WALLED_GARDEN_SOCKET_TIMEOUT_MS);
+            urlConnection.setUseCaches(false);
+            urlConnection.getInputStream();
+            // We got a valid response, but not from the real google
+            return urlConnection.getResponseCode() != 204;
         } catch (IOException e) {
+            if (DBG) {
+                Slog.d(WWSM_TAG, "Walled garden check - probably not a portal: exception ", e);
+            }
             return false;
         } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                }
-            }
-            if (urlConnection != null)
+            if (urlConnection != null) {
                 urlConnection.disconnect();
+            }
         }
     }
 
@@ -401,9 +391,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
         mWalledGardenUrl = getSettingsStr(mContentResolver,
                 Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_URL,
                 DEFAULT_WALLED_GARDEN_URL);
-        mWalledGardenPattern = Pattern.compile(getSettingsStr(mContentResolver,
-                Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_PATTERN,
-                DEFAULT_WALLED_GARDEN_PATTERN));
         mWalledGardenIntervalMs = Secure.getLong(mContentResolver,
                 Secure.WIFI_WATCHDOG_WALLED_GARDEN_INTERVAL_MS,
                 DEFAULT_WALLED_GARDEN_INTERVAL_MS);
@@ -434,6 +421,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
    *
    */
     private void resetWatchdogState() {
+        if (VDBG) {
+            Slog.v(WWSM_TAG, "Resetting watchdog state...");
+        }
         mInitialConnInfo = null;
         mDisableAPNextFailure = false;
         mLastWalledGardenCheckTime = null;
@@ -545,11 +535,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
                     switch (networkInfo.getState()) {
                         case CONNECTED:
-                            // WifiInfo wifiInfo = (WifiInfo)
-                            //         stateChangeIntent
-                            //                 .getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
-                            // TODO : Replace with above code when API is changed
-                            WifiInfo wifiInfo = mWifiManager.getConnectionInfo();
+                            WifiInfo wifiInfo = (WifiInfo)
+                                stateChangeIntent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
                             if (wifiInfo == null) {
                                 Slog.e(WWSM_TAG, "Connected --> WifiInfo object null!");
                                 return HANDLED;
