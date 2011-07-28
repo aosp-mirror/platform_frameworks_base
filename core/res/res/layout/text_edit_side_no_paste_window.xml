@@ -25,7 +25,6 @@
         android:paddingRight="16dip"
         android:paddingTop="8dip"
         android:paddingBottom="8dip"
-        android:drawableLeft="@android:drawable/ic_paste_bubble_disabled_holo"
         android:drawablePadding="8dip"
         android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceMediumInverse"
