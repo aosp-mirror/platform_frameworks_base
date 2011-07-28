@@ -112,6 +112,9 @@
             0x200000038=0x03000701:0x03010701:0x03020701;
     </string>
 
+    <!-- Default for Settings.Secure.TOUCH_EXPLORATION_ENABLED -->
+    <bool name="def_touch_exploration_enabled">false</bool>
+
     <!-- Default for Settings.System.USER_ROTATION -->
     <integer name="def_user_rotation">0</integer>
 
