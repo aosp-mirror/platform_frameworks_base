@@ -2162,7 +2162,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     @Override
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
-        if ((mPrivateFlags & IS_ROOT_NAMESPACE) != 0) {
+        // If the view is not the topmost one in the view hierarchy and it is
+        // marked as the logical root of a view hierarchy, do not go any deeper.
+        if ((!(getParent() instanceof ViewRootImpl)) && (mPrivateFlags & IS_ROOT_NAMESPACE) != 0) {
             return;
         }
         for (int i = 0, count = mChildrenCount; i < count; i++) {
