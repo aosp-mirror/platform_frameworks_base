@@ -16,16 +16,12 @@
 
 package android.widget;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import android.animation.AnimatorInflater;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -33,6 +29,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Base class for a {@link AdapterView} that will perform animations
@@ -116,6 +115,11 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
      * The {@link RemoteViewsAdapter} for this {@link AdapterViewAnimator}
      */
     RemoteViewsAdapter mRemoteViewsAdapter;
+
+    /**
+     * The remote adapter containing the data to be displayed by this view to be set
+     */
+    boolean mDeferNotifyDataSetChanged = false;
 
     /**
      * Specifies whether this is the first time the animator is showing views
@@ -966,7 +970,7 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
                 return;
             }
         }
-
+        mDeferNotifyDataSetChanged = false;
         // Otherwise, create a new RemoteViewsAdapter for binding
         mRemoteViewsAdapter = new RemoteViewsAdapter(getContext(), intent, this);
     }
@@ -982,11 +986,24 @@ public abstract class AdapterViewAnimator extends AdapterView<Adapter>
     }
 
     /**
+     * This defers a notifyDataSetChanged on the pending RemoteViewsAdapter if it has not
+     * connected yet.
+     */
+    public void deferNotifyDataSetChanged() {
+        mDeferNotifyDataSetChanged = true;
+    }
+
+    /**
      * Called back when the adapter connects to the RemoteViewsService.
      */
     public boolean onRemoteAdapterConnected() {
         if (mRemoteViewsAdapter != mAdapter) {
             setAdapter(mRemoteViewsAdapter);
+
+            if (mDeferNotifyDataSetChanged) {
+                mRemoteViewsAdapter.notifyDataSetChanged();
+                mDeferNotifyDataSetChanged = false;
+            }
 
             // Restore the previous position (see onRestoreInstanceState)
             if (mRestoreWhichChild > -1) {
