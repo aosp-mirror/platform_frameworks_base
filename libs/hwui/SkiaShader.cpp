@@ -144,8 +144,11 @@ void SkiaBitmapShader::setupProgram(Program* program, const mat4& modelView,
 
     // Uniforms
     bindTexture(texture, mWrapS, mWrapT);
-    GLenum filter = textureTransform.isPureTranslate() ? GL_NEAREST : GL_LINEAR;
-    texture->setFilter(filter, filter);
+    // Assume linear here; we should really check the transform in
+    // ::updateTransforms() but we don't have the texture object
+    // available at that point. The optimization is not worth the
+    // effort for now.
+    texture->setFilter(GL_LINEAR, GL_LINEAR);
 
     glUniform1i(program->getUniform("bitmapSampler"), textureSlot);
     glUniformMatrix4fv(program->getUniform("textureTransform"), 1,

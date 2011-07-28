@@ -1489,13 +1489,19 @@ void OpenGLRenderer::drawBitmap(SkBitmap* bitmap,
         const float x = (int) floorf(dstLeft + mSnapshot->transform->getTranslateX() + 0.5f);
         const float y = (int) floorf(dstTop + mSnapshot->transform->getTranslateY() + 0.5f);
 
-        texture->setFilter(GL_NEAREST, GL_NEAREST, true);
+        GLenum filter = GL_NEAREST;
+        if (u1 > 0.0f || u2 < 1.0f || v1 > 0.0f || v2 < 1.0f) {
+            filter = GL_LINEAR;
+        }
+        texture->setFilter(filter, filter, true);
+
         drawTextureMesh(x, y, x + (dstRight - dstLeft), y + (dstBottom - dstTop),
                 texture->id, alpha / 255.0f, mode, texture->blend,
                 &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
                 GL_TRIANGLE_STRIP, gMeshCount, false, true);
     } else {
         texture->setFilter(GL_LINEAR, GL_LINEAR, true);
+
         drawTextureMesh(dstLeft, dstTop, dstRight, dstBottom, texture->id, alpha / 255.0f,
                 mode, texture->blend, &mMeshVertices[0].position[0], &mMeshVertices[0].texture[0],
                 GL_TRIANGLE_STRIP, gMeshCount);
