@@ -88,6 +88,12 @@ int AndroidBitmap_unlockPixels(JNIEnv* env, jobject jbitmap) {
         return ANDROID_BITMAP_RESULT_JNI_EXCEPTION;
     }
 
+    // notifyPixelsChanged() needs be called to apply writes to GL-backed
+    // bitmaps.  Note that this will slow down read-only accesses to the
+    // bitmaps, but the NDK methods are primarily intended to be used for
+    // writes.
+    bm->notifyPixelsChanged();
+
     bm->unlockPixels();
     return ANDROID_BITMAP_RESUT_SUCCESS;
 }
