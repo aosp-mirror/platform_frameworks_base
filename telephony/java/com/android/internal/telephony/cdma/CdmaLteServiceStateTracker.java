@@ -217,6 +217,26 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
                 " mNewDataConnectionState = " + mNewDataConnectionState);
         }
 
+        // TODO: Add proper support for LTE Only, we should be looking at
+        //       the preferred network mode, to know when newSS state should
+        //       be coming from mLteSs state. This was needed to pass a VZW
+        //       LTE Only test.
+        //
+        // If CDMA service is OOS, double check if the device is running with LTE only
+        // mode. If that is the case, derive the service state from LTE side.
+        // To set in LTE only mode, sqlite3 /data/data/com.android.providers.settings/
+        // databases/settings.db "update secure set value='11' where name='preferred_network_mode'"
+        if (newSS.getState() == ServiceState.STATE_OUT_OF_SERVICE) {
+            int networkMode = android.provider.Settings.Secure.getInt(phone.getContext()
+                                  .getContentResolver(),
+                                  android.provider.Settings.Secure.PREFERRED_NETWORK_MODE,
+                                  RILConstants.PREFERRED_NETWORK_MODE);
+            if (networkMode == RILConstants.NETWORK_MODE_LTE_ONLY) {
+                if (DBG) log("pollState: LTE Only mode");
+                newSS.setState(mLteSS.getState());
+            }
+        }
+
         if (DBG) log("pollStateDone: oldSS=[" + ss + "] newSS=[" + newSS + "]");
 
         boolean hasRegistered = ss.getState() != ServiceState.STATE_IN_SERVICE
