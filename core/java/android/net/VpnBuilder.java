@@ -91,7 +91,6 @@ import java.util.ArrayList;
  *
  * <p class="note">Using this class requires
  * {@link android.Manifest.permission#VPN} permission.
- * @hide
  */
 public class VpnBuilder {
 
