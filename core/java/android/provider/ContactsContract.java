@@ -1973,6 +1973,16 @@ public final class ContactsContract {
         public static final String DATA_SET = "data_set";
 
         /**
+         * A concatenation of the account type and data set (delimited by a forward
+         * slash) - if the data set is empty, this will be the same as the account
+         * type.  For applications that need to be aware of the data set, this can
+         * be used instead of account type to distinguish sets of data.  This is
+         * never intended to be used for specifying accounts.
+         * @hide
+         */
+        public static final String ACCOUNT_TYPE_AND_DATA_SET = "account_type_and_data_set";
+
+        /**
          * The aggregation mode for this contact.
          * <P>Type: INTEGER</P>
          */
@@ -6444,6 +6454,16 @@ public final class ContactsContract {
         public static final String DATA_SET = "data_set";
 
         /**
+         * A concatenation of the account type and data set (delimited by a forward
+         * slash) - if the data set is empty, this will be the same as the account
+         * type.  For applications that need to be aware of the data set, this can
+         * be used instead of account type to distinguish sets of data.  This is
+         * never intended to be used for specifying accounts.
+         * @hide
+         */
+        public static final String ACCOUNT_TYPE_AND_DATA_SET = "account_type_and_data_set";
+
+        /**
          * The display title of this group.
          * <p>
          * Type: TEXT
@@ -7871,6 +7891,19 @@ public final class ContactsContract {
              * @hide
              */
             public static final String ACCOUNT = "com.android.contacts.extra.ACCOUNT";
+
+            /**
+             * Used to specify the data set within the account in which to create the
+             * new contact.
+             * <p>
+             * This value is optional - if it is not specified, the contact will be
+             * created in the base account, with no data set.
+             * <p>
+             * Type: String
+             *
+             * @hide
+             */
+            public static final String DATA_SET = "com.android.contacts.extra.DATA_SET";
         }
     }
 }
