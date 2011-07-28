@@ -2294,8 +2294,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
     private Bitmap mDrawingCache;
     private Bitmap mUnscaledDrawingCache;
-    private DisplayList mDisplayList;
     private HardwareLayer mHardwareLayer;
+    DisplayList mDisplayList;
 
     /**
      * When this view has focus and the next focus is {@link #FOCUS_LEFT},
@@ -9727,11 +9727,13 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         return mHardwareLayer;
     }
 
-    void destroyLayer() {
+    boolean destroyLayer() {
         if (mHardwareLayer != null) {
             mHardwareLayer.destroy();
             mHardwareLayer = null;
+            return true;
         }
+        return false;
     }
 
     /**

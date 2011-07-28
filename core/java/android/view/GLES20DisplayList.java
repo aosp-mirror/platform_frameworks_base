@@ -82,6 +82,12 @@ class GLES20DisplayList extends DisplayList {
         }
     }
 
+    @Override
+    int getSize() {
+        if (mFinalizer == null) return 0;
+        return GLES20Canvas.getDisplayListSize(mFinalizer.mNativeDisplayList);
+    }
+
     private static class DisplayListFinalizer {
         final int mNativeDisplayList;
 

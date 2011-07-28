@@ -80,6 +80,7 @@ import com.android.internal.view.RootViewSurfaceTaker;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -235,7 +236,6 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     final Configuration mLastConfiguration = new Configuration();
     final Configuration mPendingConfiguration = new Configuration();
 
-    
     class ResizedInfo {
         Rect coveredInsets;
         Rect visibleInsets;
@@ -542,10 +542,26 @@ public final class ViewRootImpl extends Handler implements ViewParent,
     }
 
     private void destroyHardwareResources() {
-        if (mAttachInfo.mHardwareRenderer.isEnabled()) {
-            mAttachInfo.mHardwareRenderer.destroyLayers(mView);
+        if (mAttachInfo.mHardwareRenderer != null) {
+            if (mAttachInfo.mHardwareRenderer.isEnabled()) {
+                mAttachInfo.mHardwareRenderer.destroyLayers(mView);
+            }
+            mAttachInfo.mHardwareRenderer.destroy(false);
         }
-        mAttachInfo.mHardwareRenderer.destroy(false);
+    }
+
+    void destroyHardwareLayers() {
+        if (mThread != Thread.currentThread()) {
+            if (mAttachInfo.mHardwareRenderer != null &&
+                    mAttachInfo.mHardwareRenderer.isEnabled()) {
+                HardwareRenderer.trimMemory(ComponentCallbacks.TRIM_MEMORY_MODERATE);
+            }
+        } else {
+            if (mAttachInfo.mHardwareRenderer != null &&
+                    mAttachInfo.mHardwareRenderer.isEnabled()) {
+                mAttachInfo.mHardwareRenderer.destroyLayers(mView);
+            }
+        }
     }
 
     private void enableHardwareAcceleration(WindowManager.LayoutParams attrs) {
@@ -876,9 +892,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             attachInfo.mWindowVisibility = viewVisibility;
             host.dispatchWindowVisibilityChanged(viewVisibility);
             if (viewVisibility != View.VISIBLE || mNewSurfaceNeeded) {
-                if (mAttachInfo.mHardwareRenderer != null) {
-                    destroyHardwareResources();
-                }                
+                destroyHardwareResources();
             }
             if (viewVisibility == View.GONE) {
                 // After making a window gone, we will count it as being
@@ -3491,6 +3505,31 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
     public void debug() {
         mView.debug();
+    }
+    
+    public void dumpGfxInfo(PrintWriter pw, int[] info) {
+        if (mView != null) {
+            getGfxInfo(mView, info);
+        } else {
+            info[0] = info[1] = 0;
+        }
+    }
+
+    private void getGfxInfo(View view, int[] info) {
+        DisplayList displayList = view.mDisplayList;
+        info[0]++;
+        if (displayList != null) {
+            info[1] += displayList.getSize();
+        }
+
+        if (view instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) view;
+
+            int count = group.getChildCount();
+            for (int i = 0; i < count; i++) {
+                getGfxInfo(group.getChildAt(i), info);
+            }
+        }
     }
 
     public void die(boolean immediate) {

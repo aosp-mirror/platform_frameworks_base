@@ -420,7 +420,7 @@ public class ViewDebug {
      *
      * @hide
      */
-    public static long getViewAncestorInstanceCount() {
+    public static long getViewRootImplCount() {
         return Debug.countInstancesOfClass(ViewRootImpl.class);
     }
 
