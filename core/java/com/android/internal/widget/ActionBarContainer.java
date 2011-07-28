@@ -109,6 +109,7 @@ public class ActionBarContainer extends FrameLayout {
         mTabContainer = tabView;
         if (tabView != null) {
             addView(tabView);
+            tabView.getLayoutParams().width = LayoutParams.MATCH_PARENT;
         }
     }
 

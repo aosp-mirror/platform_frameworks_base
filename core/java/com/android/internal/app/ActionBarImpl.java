@@ -192,8 +192,7 @@ public class ActionBarImpl extends ActionBar {
         mContentHeight = mActionView.getContentHeight();
 
         if (mTabScrollView != null) {
-            mTabScrollView.getLayoutParams().height = mContentHeight;
-            mTabScrollView.requestLayout();
+            mTabScrollView.setContentHeight(mContentHeight);
         }
     }
 
