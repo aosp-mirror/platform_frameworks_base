@@ -343,6 +343,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     }
                 }
 
+                if (mActionBar != null) {
+                    if (mActionMenuPresenterCallback == null) {
+                        mActionMenuPresenterCallback = new ActionMenuPresenterCallback();
+                    }
+                    mActionBar.setMenu(st.menu, mActionMenuPresenterCallback);
+                }
+
                 // Call callback, and return if it doesn't want to display menu.
 
                 // Creating the panel menu will involve a lot of manipulation;
@@ -356,13 +363,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 }
                 
                 st.refreshMenuContent = false;
-
-                if (mActionBar != null) {
-                    if (mActionMenuPresenterCallback == null) {
-                        mActionMenuPresenterCallback = new ActionMenuPresenterCallback();
-                    }
-                    mActionBar.setMenu(st.menu, mActionMenuPresenterCallback);
-                }
             }
 
             // Callback and return if the callback does not want to show the menu
