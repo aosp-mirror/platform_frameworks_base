@@ -1100,7 +1100,7 @@ void AudioFlinger::ThreadBase::acquireWakeLock_l()
 void AudioFlinger::ThreadBase::releaseWakeLock()
 {
     Mutex::Autolock _l(mLock);
-    releaseWakeLock();
+    releaseWakeLock_l();
 }
 
 void AudioFlinger::ThreadBase::releaseWakeLock_l()
