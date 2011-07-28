@@ -31,6 +31,7 @@ PRODUCT_COPY_FILES := \
     frameworks/base/data/fonts/DroidSerif-Italic.ttf:system/fonts/DroidSerif-Italic.ttf \
     frameworks/base/data/fonts/DroidSerif-BoldItalic.ttf:system/fonts/DroidSerif-BoldItalic.ttf \
     frameworks/base/data/fonts/DroidSansMono.ttf:system/fonts/DroidSansMono.ttf \
+    frameworks/base/data/fonts/Lohit_Hindi.ttf:system/fonts/Lohit_Hindi.ttf \
     frameworks/base/data/fonts/Clockopia.ttf:system/fonts/Clockopia.ttf \
     frameworks/base/data/fonts/DroidSansFallback.ttf:system/fonts/DroidSansFallback.ttf \
     frameworks/base/data/fonts/AndroidClock.ttf:system/fonts/AndroidClock.ttf \
