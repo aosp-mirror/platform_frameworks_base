@@ -2,7 +2,8 @@
         package="com.android.vpndialogs"
         android:sharedUserId="android.uid.system">
 
-    <application android:label="VpnDialogs">
+    <application android:label="VpnDialogs"
+            android:allowBackup="false" >
         <activity android:name=".ConfirmDialog"
                 android:permission="android.permission.VPN"
                 android:theme="@style/transparent">

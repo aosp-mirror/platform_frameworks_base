@@ -201,16 +201,22 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             BufferedOutputStream bufstream = new BufferedOutputStream(filestream);
             DataOutputStream out = new DataOutputStream(bufstream);
 
+            if (DEBUG_BACKUP) Log.d(TAG, "Writing flattened data version " + FULL_BACKUP_VERSION);
             out.writeInt(FULL_BACKUP_VERSION);
 
+            if (DEBUG_BACKUP) Log.d(TAG, systemSettingsData.length + " bytes of settings data");
             out.writeInt(systemSettingsData.length);
             out.write(systemSettingsData);
+            if (DEBUG_BACKUP) Log.d(TAG, secureSettingsData.length + " bytes of secure settings data");
             out.writeInt(secureSettingsData.length);
             out.write(secureSettingsData);
+            if (DEBUG_BACKUP) Log.d(TAG, locale.length + " bytes of locale data");
             out.writeInt(locale.length);
             out.write(locale);
+            if (DEBUG_BACKUP) Log.d(TAG, wifiSupplicantData.length + " bytes of wifi supplicant data");
             out.writeInt(wifiSupplicantData.length);
             out.write(wifiSupplicantData);
+            if (DEBUG_BACKUP) Log.d(TAG, wifiConfigData.length + " bytes of wifi config data");
             out.writeInt(wifiConfigData.length);
             out.write(wifiConfigData);
 
@@ -241,28 +247,28 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             int nBytes = in.readInt();
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of settings data");
             byte[] buffer = new byte[nBytes];
-            in.read(buffer, 0, nBytes);
+            in.readFully(buffer, 0, nBytes);
             restoreSettings(buffer, nBytes, Settings.System.CONTENT_URI);
 
             // secure settings
             nBytes = in.readInt();
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of secure settings data");
             if (nBytes > buffer.length) buffer = new byte[nBytes];
-            in.read(buffer, 0, nBytes);
+            in.readFully(buffer, 0, nBytes);
             restoreSettings(buffer, nBytes, Settings.Secure.CONTENT_URI);
 
             // locale
             nBytes = in.readInt();
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of locale data");
             if (nBytes > buffer.length) buffer = new byte[nBytes];
-            in.read(buffer, 0, nBytes);
+            in.readFully(buffer, 0, nBytes);
             mSettingsHelper.setLocaleData(buffer, nBytes);
 
             // wifi supplicant
             nBytes = in.readInt();
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of wifi supplicant data");
             if (nBytes > buffer.length) buffer = new byte[nBytes];
-            in.read(buffer, 0, nBytes);
+            in.readFully(buffer, 0, nBytes);
             int retainedWifiState = enableWifi(false);
             restoreWifiSupplicant(FILE_WIFI_SUPPLICANT, buffer, nBytes);
             FileUtils.setPermissions(FILE_WIFI_SUPPLICANT,
@@ -277,7 +283,7 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             nBytes = in.readInt();
             if (DEBUG_BACKUP) Log.d(TAG, nBytes + " bytes of wifi config data");
             if (nBytes > buffer.length) buffer = new byte[nBytes];
-            in.read(buffer, 0, nBytes);
+            in.readFully(buffer, 0, nBytes);
             restoreFileData(mWifiConfigFile, buffer, nBytes);
 
             if (DEBUG_BACKUP) Log.d(TAG, "Full restore complete.");
