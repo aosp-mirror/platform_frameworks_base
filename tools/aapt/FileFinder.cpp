@@ -9,7 +9,6 @@
 #include <utils/String8.h>
 #include <utils/KeyedVector.h>
 
-#include <iostream>
 #include <dirent.h>
 #include <sys/stat.h>
 
@@ -19,8 +18,6 @@
 //#define DEBUG
 
 using android::String8;
-using std::cout;
-using std::endl;
 
 // Private function to check whether a file is a directory or not
 bool isDirectory(const char* filename) {
@@ -50,9 +47,6 @@ bool SystemFileFinder::findFiles(String8 basePath, Vector<String8>& extensions,
     if (!dw->openDir(basePath)) {
         return false;
     }
-#ifdef DEBUG
-    cout << "FileFinder looking in " << basePath << endl;
-#endif // DEBUG
     /*
      *  Go through all directory entries. Check each file using checkAndAddFile
      *  and recurse into sub-directories.
@@ -87,9 +81,6 @@ void SystemFileFinder::checkAndAddFile(String8 path, const struct stat* stats,
                                        Vector<String8>& extensions,
                                        KeyedVector<String8,time_t>& fileStore)
 {
-#ifdef DEBUG
-    cout << "Checking file " << path << "...";
-#endif // DEBUG
     // Loop over the extensions, checking for a match
     bool done = false;
     String8 ext(path.getPathExtension());
@@ -99,15 +90,9 @@ void SystemFileFinder::checkAndAddFile(String8 path, const struct stat* stats,
         ext2.toLower();
         // Compare the extensions. If a match is found, add to storage.
         if (ext == ext2) {
-#ifdef DEBUG
-            cout << "Match";
-#endif // DEBUG
             done = true;
             fileStore.add(path,stats->st_mtime);
         }
     }
-#ifdef DEBUG
-    cout << endl;
-#endif //DEBUG
 }
 
