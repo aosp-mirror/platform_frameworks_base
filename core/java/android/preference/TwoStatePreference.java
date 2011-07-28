@@ -202,7 +202,8 @@ public abstract class TwoStatePreference extends Preference {
                 && view.isEnabled()) {
             mSendAccessibilityEventViewClickedType = false;
             if (mSendAccessibilityEventTypeViewClicked == null) {
-                mSendAccessibilityEventTypeViewClicked = new SendAccessibilityEventTypeViewClicked();
+                mSendAccessibilityEventTypeViewClicked =
+                    new SendAccessibilityEventTypeViewClicked();
             }
             mSendAccessibilityEventTypeViewClicked.mView = view;
             view.post(mSendAccessibilityEventTypeViewClicked);
