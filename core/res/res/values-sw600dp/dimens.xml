@@ -21,7 +21,7 @@
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">48dip</dimen>
     <!-- Width and height of a single notification icon in the status bar -->
-    <dimen name="status_bar_icon_size">32dip</dimen>
+    <dimen name="status_bar_icon_size">24dip</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->
     <dimen name="status_bar_content_number_size">48sp</dimen>
 
