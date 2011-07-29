@@ -44,14 +44,15 @@ public class IconMerger extends LinearLayout {
 
         mMoreView = new StatusBarIconView(context, "more", null);
         mMoreView.set(mMoreIcon);
-        addView(mMoreView, 0, new LinearLayout.LayoutParams(mIconSize, mIconSize));
+        super.addView(mMoreView, 0, new LinearLayout.LayoutParams(mIconSize, mIconSize));
+    }
+
+    public void addView(StatusBarIconView v, int index, LinearLayout.LayoutParams p) {
+        super.addView(v, index+1, p);
     }
 
     public void addView(StatusBarIconView v, int index) {
-        if (index == 0) {
-            throw new RuntimeException("Attempt to put view before the more view: " + v);
-        }
-        addView(v, index, new LinearLayout.LayoutParams(mIconSize, mIconSize));
+        super.addView(v, index+1, new LinearLayout.LayoutParams(mIconSize, mIconSize));
     }
 
     @Override

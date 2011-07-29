@@ -91,29 +91,6 @@
                     android:text="@string/status_bar_no_notifications_title"
                     />
 
-                <TextView android:id="@+id/ongoingTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/title_bar_portrait"
-                    android:paddingLeft="5dp"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Title"
-                    android:text="@string/status_bar_ongoing_events_title"
-                    />
-                <com.android.systemui.statusbar.policy.NotificationRowLayout
-                    android:id="@+id/ongoingItems"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    systemui:rowHeight="@dimen/notification_height"
-                    />
-
-                <TextView android:id="@+id/latestTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/title_bar_portrait"
-                    android:paddingLeft="5dp"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Title"
-                    android:text="@string/status_bar_latest_events_title"
-                    />
                 <com.android.systemui.statusbar.policy.NotificationRowLayout
                     android:id="@+id/latestItems"
                     android:layout_width="match_parent"
