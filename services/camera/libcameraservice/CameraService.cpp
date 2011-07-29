@@ -350,10 +350,9 @@ CameraService::Client::Client(const sp<CameraService>& cameraService,
                             dataCallbackTimestamp,
                             (void *)cameraId);
 
-    // Enable zoom, error, and focus messages by default
-    enableMsgType(CAMERA_MSG_ERROR |
-                  CAMERA_MSG_ZOOM |
-                  CAMERA_MSG_FOCUS);
+    // Enable zoom, error, focus, and metadata messages by default
+    enableMsgType(CAMERA_MSG_ERROR | CAMERA_MSG_ZOOM | CAMERA_MSG_FOCUS |
+                  CAMERA_MSG_PREVIEW_METADATA);
 
     // Callback is disabled by default
     mPreviewCallbackFlag = CAMERA_FRAME_CALLBACK_FLAG_NOOP;
@@ -995,15 +994,15 @@ void CameraService::Client::dataCallback(int32_t msgType,
     if (client == 0) return;
     if (!client->lockIfMessageWanted(msgType)) return;
 
-    if (dataPtr == 0) {
+    if (dataPtr == 0 && metadata == NULL) {
         LOGE("Null data returned in data callback");
         client->handleGenericNotify(CAMERA_MSG_ERROR, UNKNOWN_ERROR, 0);
         return;
     }
 
-    switch (msgType) {
+    switch (msgType & ~CAMERA_MSG_PREVIEW_METADATA) {
         case CAMERA_MSG_PREVIEW_FRAME:
-            client->handlePreviewData(dataPtr);
+            client->handlePreviewData(msgType, dataPtr, metadata);
             break;
         case CAMERA_MSG_POSTVIEW_FRAME:
             client->handlePostview(dataPtr);
@@ -1015,7 +1014,7 @@ void CameraService::Client::dataCallback(int32_t msgType,
             client->handleCompressedPicture(dataPtr);
             break;
         default:
-            client->handleGenericData(msgType, dataPtr);
+            client->handleGenericData(msgType, dataPtr, metadata);
             break;
     }
 }
@@ -1055,7 +1054,9 @@ void CameraService::Client::handleShutter(void) {
 }
 
 // preview callback - frame buffer update
-void CameraService::Client::handlePreviewData(const sp<IMemory>& mem) {
+void CameraService::Client::handlePreviewData(int32_t msgType,
+                                              const sp<IMemory>& mem,
+                                              camera_frame_metadata_t *metadata) {
     ssize_t offset;
     size_t size;
     sp<IMemoryHeap> heap = mem->getMemory(&offset, &size);
@@ -1087,11 +1088,11 @@ void CameraService::Client::handlePreviewData(const sp<IMemory>& mem) {
         // Is the received frame copied out or not?
         if (flags & CAMERA_FRAME_CALLBACK_FLAG_COPY_OUT_MASK) {
             LOG2("frame is copied");
-            copyFrameAndPostCopiedFrame(c, heap, offset, size);
+            copyFrameAndPostCopiedFrame(msgType, c, heap, offset, size, metadata);
         } else {
             LOG2("frame is forwarded");
             mLock.unlock();
-            c->dataCallback(CAMERA_MSG_PREVIEW_FRAME, mem);
+            c->dataCallback(msgType, mem, metadata);
         }
     } else {
         mLock.unlock();
@@ -1105,7 +1106,7 @@ void CameraService::Client::handlePostview(const sp<IMemory>& mem) {
     sp<ICameraClient> c = mCameraClient;
     mLock.unlock();
     if (c != 0) {
-        c->dataCallback(CAMERA_MSG_POSTVIEW_FRAME, mem);
+        c->dataCallback(CAMERA_MSG_POSTVIEW_FRAME, mem, NULL);
     }
 }
 
@@ -1120,7 +1121,7 @@ void CameraService::Client::handleRawPicture(const sp<IMemory>& mem) {
     sp<ICameraClient> c = mCameraClient;
     mLock.unlock();
     if (c != 0) {
-        c->dataCallback(CAMERA_MSG_RAW_IMAGE, mem);
+        c->dataCallback(CAMERA_MSG_RAW_IMAGE, mem, NULL);
     }
 }
 
@@ -1131,7 +1132,7 @@ void CameraService::Client::handleCompressedPicture(const sp<IMemory>& mem) {
     sp<ICameraClient> c = mCameraClient;
     mLock.unlock();
     if (c != 0) {
-        c->dataCallback(CAMERA_MSG_COMPRESSED_IMAGE, mem);
+        c->dataCallback(CAMERA_MSG_COMPRESSED_IMAGE, mem, NULL);
     }
 }
 
@@ -1146,11 +1147,11 @@ void CameraService::Client::handleGenericNotify(int32_t msgType,
 }
 
 void CameraService::Client::handleGenericData(int32_t msgType,
-    const sp<IMemory>& dataPtr) {
+    const sp<IMemory>& dataPtr, camera_frame_metadata_t *metadata) {
     sp<ICameraClient> c = mCameraClient;
     mLock.unlock();
     if (c != 0) {
-        c->dataCallback(msgType, dataPtr);
+        c->dataCallback(msgType, dataPtr, metadata);
     }
 }
 
@@ -1164,8 +1165,9 @@ void CameraService::Client::handleGenericDataTimestamp(nsecs_t timestamp,
 }
 
 void CameraService::Client::copyFrameAndPostCopiedFrame(
-        const sp<ICameraClient>& client, const sp<IMemoryHeap>& heap,
-        size_t offset, size_t size) {
+        int32_t msgType, const sp<ICameraClient>& client,
+        const sp<IMemoryHeap>& heap, size_t offset, size_t size,
+        camera_frame_metadata_t *metadata) {
     LOG2("copyFrameAndPostCopiedFrame");
     // It is necessary to copy out of pmem before sending this to
     // the callback. For efficiency, reuse the same MemoryHeapBase
@@ -1197,7 +1199,7 @@ void CameraService::Client::copyFrameAndPostCopiedFrame(
     }
 
     mLock.unlock();
-    client->dataCallback(CAMERA_MSG_PREVIEW_FRAME, frame);
+    client->dataCallback(msgType, frame, metadata);
 }
 
 int CameraService::Client::getOrientation(int degrees, bool mirror) {

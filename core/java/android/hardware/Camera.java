@@ -131,7 +131,7 @@ public class Camera {
     private static final int CAMERA_MSG_RAW_IMAGE        = 0x080;
     private static final int CAMERA_MSG_COMPRESSED_IMAGE = 0x100;
     private static final int CAMERA_MSG_RAW_IMAGE_NOTIFY = 0x200;
-    private static final int CAMERA_MSG_METADATA_FACE    = 0x400;
+    private static final int CAMERA_MSG_PREVIEW_METADATA = 0x400;
     private static final int CAMERA_MSG_ALL_MSGS         = 0x4FF;
 
     private int mNativeContext; // accessed by native methods
@@ -721,7 +721,7 @@ public class Camera {
                 }
                 return;
 
-            case CAMERA_MSG_METADATA_FACE:
+            case CAMERA_MSG_PREVIEW_METADATA:
                 if (mFaceListener != null) {
                     mFaceListener.onFaceDetection((Face[])msg.obj, mCamera);
                 }
@@ -1156,6 +1156,9 @@ public class Camera {
      * @hide
      */
     public static class Face {
+        public Face() {
+        }
+
         /**
          * Bounds of the face. (-1000, -1000) represents the top-left of the
          * camera field of view, and (1000, 1000) represents the bottom-right of
@@ -1168,7 +1171,7 @@ public class Camera {
          *
          * @see #startFaceDetection(int)
          */
-        Rect rect;
+        public Rect rect;
 
         /**
          * The confidence level of the face. The range is 1 to 100. 100 is the
@@ -1177,32 +1180,32 @@ public class Camera {
          *
          * @see #startFaceDetection(int)
          */
-        int score;
+        public int score;
 
         /**
          * An unique id per face while the face is visible to the tracker. If
          * the face leaves the field-of-view and comes back, it will get a new
          * id. If the value is 0, id is not supported.
          */
-        int id;
+        public int id;
 
         /**
          * The coordinates of the center of the left eye. The range is -1000 to
          * 1000. null if this is not supported.
          */
-        Point leftEye;
+        public Point leftEye;
 
         /**
          * The coordinates of the center of the right eye. The range is -1000 to
          * 1000. null if this is not supported.
          */
-        Point rightEye;
+        public Point rightEye;
 
         /**
          * The coordinates of the center of the mouth. The range is -1000 to
          * 1000. null if this is not supported.
          */
-        Point mouth;
+        public Point mouth;
     }
 
     // Error codes match the enum in include/ui/Camera.h

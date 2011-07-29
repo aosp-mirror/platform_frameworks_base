@@ -51,13 +51,18 @@ public:
     }
 
     // generic data callback from camera service to app with image data
-    void dataCallback(int32_t msgType, const sp<IMemory>& imageData)
+    void dataCallback(int32_t msgType, const sp<IMemory>& imageData,
+                      camera_frame_metadata_t *metadata)
     {
         LOGV("dataCallback");
         Parcel data, reply;
         data.writeInterfaceToken(ICameraClient::getInterfaceDescriptor());
         data.writeInt32(msgType);
         data.writeStrongBinder(imageData->asBinder());
+        if (metadata) {
+            data.writeInt32(metadata->number_of_faces);
+            data.write(metadata->faces, sizeof(camera_face_t) * metadata->number_of_faces);
+        }
         remote()->transact(DATA_CALLBACK, data, &reply, IBinder::FLAG_ONEWAY);
     }
 
@@ -96,7 +101,15 @@ status_t BnCameraClient::onTransact(
             CHECK_INTERFACE(ICameraClient, data, reply);
             int32_t msgType = data.readInt32();
             sp<IMemory> imageData = interface_cast<IMemory>(data.readStrongBinder());
-            dataCallback(msgType, imageData);
+            camera_frame_metadata_t *metadata = NULL;
+            if (data.dataAvail() > 0) {
+                metadata = new camera_frame_metadata_t;
+                metadata->number_of_faces = data.readInt32();
+                metadata->faces = (camera_face_t *) data.readInplace(
+                        sizeof(camera_face_t) * metadata->number_of_faces);
+            }
+            dataCallback(msgType, imageData, metadata);
+            if (metadata) delete metadata;
             return NO_ERROR;
         } break;
         case DATA_CALLBACK_TIMESTAMP: {
