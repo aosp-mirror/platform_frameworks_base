@@ -61,13 +61,19 @@ void GraphicBufferAllocator::dump(String8& result) const
     const size_t c = list.size();
     for (size_t i=0 ; i<c ; i++) {
         const alloc_rec_t& rec(list.valueAt(i));
-        snprintf(buffer, SIZE, "%10p: %7.2f KiB | %4u (%4u) x %4u | %8X | 0x%08x\n",
-            list.keyAt(i), rec.size/1024.0f, 
-            rec.w, rec.s, rec.h, rec.format, rec.usage);
+        if (rec.size) {
+            snprintf(buffer, SIZE, "%10p: %7.2f KiB | %4u (%4u) x %4u | %8X | 0x%08x\n",
+                    list.keyAt(i), rec.size/1024.0f,
+                    rec.w, rec.s, rec.h, rec.format, rec.usage);
+        } else {
+            snprintf(buffer, SIZE, "%10p: unknown     | %4u (%4u) x %4u | %8X | 0x%08x\n",
+                    list.keyAt(i),
+                    rec.w, rec.s, rec.h, rec.format, rec.usage);
+        }
         result.append(buffer);
         total += rec.size;
     }
-    snprintf(buffer, SIZE, "Total allocated: %.2f KB\n", total/1024.0f);
+    snprintf(buffer, SIZE, "Total allocated (estimate): %.2f KB\n", total/1024.0f);
     result.append(buffer);
     if (mAllocDev->common.version >= 1 && mAllocDev->dump) {
         mAllocDev->dump(mAllocDev, buffer, SIZE);
@@ -101,13 +107,19 @@ status_t GraphicBufferAllocator::alloc(uint32_t w, uint32_t h, PixelFormat forma
     if (err == NO_ERROR) {
         Mutex::Autolock _l(sLock);
         KeyedVector<buffer_handle_t, alloc_rec_t>& list(sAllocList);
+        int bpp = bytesPerPixel(format);
+        if (bpp < 0) {
+            // probably a HAL custom format. in any case, we don't know
+            // what its pixel size is.
+            bpp = 0;
+        }
         alloc_rec_t rec;
         rec.w = w;
         rec.h = h;
         rec.s = *stride;
         rec.format = format;
         rec.usage = usage;
-        rec.size = h * stride[0] * bytesPerPixel(format);
+        rec.size = h * stride[0] * bpp;
         list.add(*handle, rec);
     }
 
