@@ -159,13 +159,14 @@ public class KeyButtonView extends ImageView {
         if (x < 1.0f) {
             invalidate();
         } else {
-            x = (w * (x - 1.0f)) / 2.0f;
+            final float rx = (w * (x - 1.0f)) / 2.0f;
+            final float ry = (h * (x - 1.0f)) / 2.0f;
             com.android.systemui.SwipeHelper.invalidateGlobalRegion(
                     this,
-                    new RectF(getLeft() - x,
-                              getTop() - x,
-                              getRight() + x,
-                              getBottom() + x));
+                    new RectF(getLeft() - rx,
+                              getTop() - ry,
+                              getRight() + rx,
+                              getBottom() + ry));
         }
     }
 
