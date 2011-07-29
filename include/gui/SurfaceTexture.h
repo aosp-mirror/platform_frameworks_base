@@ -22,7 +22,7 @@ namespace android {
 struct SurfaceTexture {
     struct FrameAvailableListener : public virtual RefBase {};
 
-    SurfaceTexture(GLuint) {}
+    SurfaceTexture(GLuint, bool allowSynchronousMode = true) {}
     void updateTexImage() {}
     void decStrong(android::sp<android::SurfaceTexture>* const) {}
     void incStrong(android::sp<android::SurfaceTexture>* const) {}
