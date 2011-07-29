@@ -307,7 +307,8 @@ class BackupManagerService extends IBackupManager.Stub {
         public ParcelFileDescriptor fd;
         public final AtomicBoolean latch;
         public IFullBackupRestoreObserver observer;
-        public String password;     // filled in by the confirmation step
+        public String curPassword;     // filled in by the confirmation step
+        public String encryptPassword;
 
         FullParams() {
             latch = new AtomicBoolean(false);
@@ -458,8 +459,8 @@ class BackupManagerService extends IBackupManager.Stub {
             {
                 FullBackupParams params = (FullBackupParams)msg.obj;
                 (new PerformFullBackupTask(params.fd, params.observer, params.includeApks,
-                        params.includeShared, params.password, params.allApps, params.packages,
-                        params.latch)).run();
+                        params.includeShared, params.curPassword, params.encryptPassword,
+                        params.allApps, params.packages, params.latch)).run();
                 break;
             }
 
@@ -476,7 +477,7 @@ class BackupManagerService extends IBackupManager.Stub {
             case MSG_RUN_FULL_RESTORE:
             {
                 FullRestoreParams params = (FullRestoreParams)msg.obj;
-                (new PerformFullRestoreTask(params.fd, params.password,
+                (new PerformFullRestoreTask(params.fd, params.curPassword, params.encryptPassword,
                         params.observer, params.latch)).run();
                 break;
             }
@@ -1908,7 +1909,8 @@ class BackupManagerService extends IBackupManager.Stub {
         boolean mIncludeShared;
         boolean mAllApps;
         String[] mPackages;
-        String mUserPassword;
+        String mCurrentPassword;
+        String mEncryptPassword;
         AtomicBoolean mLatchObject;
         File mFilesDir;
         File mManifestFile;
@@ -1963,15 +1965,25 @@ class BackupManagerService extends IBackupManager.Stub {
         }
 
         PerformFullBackupTask(ParcelFileDescriptor fd, IFullBackupRestoreObserver observer, 
-                boolean includeApks, boolean includeShared, String password,
-                boolean doAllApps, String[] packages, AtomicBoolean latch) {
+                boolean includeApks, boolean includeShared, String curPassword,
+                String encryptPassword, boolean doAllApps, String[] packages,
+                AtomicBoolean latch) {
             mOutputFile = fd;
             mObserver = observer;
             mIncludeApks = includeApks;
             mIncludeShared = includeShared;
             mAllApps = doAllApps;
             mPackages = packages;
-            mUserPassword = password;
+            mCurrentPassword = curPassword;
+            // when backing up, if there is a current backup password, we require that
+            // the user use a nonempty encryption password as well.  if one is supplied
+            // in the UI we use that, but if the UI was left empty we fall back to the
+            // current backup password (which was supplied by the user as well).
+            if (encryptPassword == null || "".equals(encryptPassword)) {
+                mEncryptPassword = curPassword;
+            } else {
+                mEncryptPassword = encryptPassword;
+            }
             mLatchObject = latch;
 
             mFilesDir = new File("/data/system");
@@ -2016,7 +2028,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
             PackageInfo pkg = null;
             try {
-                boolean encrypting = (mUserPassword != null && mUserPassword.length() > 0);
+                boolean encrypting = (mEncryptPassword != null && mEncryptPassword.length() > 0);
                 boolean compressing = COMPRESS_FULL_BACKUPS;
                 OutputStream finalOutput = ofstream;
 
@@ -2057,7 +2069,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         // Verify that the given password matches the currently-active
                         // backup password, if any
                         if (hasBackupPassword()) {
-                            if (!passwordMatchesSaved(mUserPassword, PBKDF2_HASH_ROUNDS)) {
+                            if (!passwordMatchesSaved(mCurrentPassword, PBKDF2_HASH_ROUNDS)) {
                                 if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
                                 return;
                             }
@@ -2122,7 +2134,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 OutputStream ofstream) throws Exception {
             // User key will be used to encrypt the master key.
             byte[] newUserSalt = randomBytes(PBKDF2_SALT_SIZE);
-            SecretKey userKey = buildPasswordKey(mUserPassword, newUserSalt,
+            SecretKey userKey = buildPasswordKey(mEncryptPassword, newUserSalt,
                     PBKDF2_HASH_ROUNDS);
 
             // the master key is random for each backup
@@ -2445,7 +2457,8 @@ class BackupManagerService extends IBackupManager.Stub {
 
     class PerformFullRestoreTask implements Runnable {
         ParcelFileDescriptor mInputFile;
-        String mUserPassword;
+        String mCurrentPassword;
+        String mDecryptPassword;
         IFullBackupRestoreObserver mObserver;
         AtomicBoolean mLatchObject;
         IBackupAgent mAgent;
@@ -2469,10 +2482,11 @@ class BackupManagerService extends IBackupManager.Stub {
         // Packages we've already wiped data on when restoring their first file
         final HashSet<String> mClearedPackages = new HashSet<String>();
 
-        PerformFullRestoreTask(ParcelFileDescriptor fd, String password,
+        PerformFullRestoreTask(ParcelFileDescriptor fd, String curPassword, String decryptPassword,
                 IFullBackupRestoreObserver observer, AtomicBoolean latch) {
             mInputFile = fd;
-            mUserPassword = password;
+            mCurrentPassword = curPassword;
+            mDecryptPassword = decryptPassword;
             mObserver = observer;
             mLatchObject = latch;
             mAgent = null;
@@ -2531,6 +2545,13 @@ class BackupManagerService extends IBackupManager.Stub {
             FileInputStream rawInStream = null;
             DataInputStream rawDataIn = null;
             try {
+                if (hasBackupPassword()) {
+                    if (!passwordMatchesSaved(mCurrentPassword, PBKDF2_HASH_ROUNDS)) {
+                        if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
+                        return;
+                    }
+                }
+
                 mBytes = 0;
                 byte[] buffer = new byte[32 * 1024];
                 rawInStream = new FileInputStream(mInputFile.getFileDescriptor());
@@ -2557,7 +2578,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         if (s.equals("none")) {
                             // no more header to parse; we're good to go
                             okay = true;
-                        } else if (mUserPassword != null && mUserPassword.length() > 0) {
+                        } else if (mDecryptPassword != null && mDecryptPassword.length() > 0) {
                             preCompressStream = decodeAesHeaderAndInitialize(s, rawInStream);
                             if (preCompressStream != null) {
                                 okay = true;
@@ -2635,7 +2656,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
                     // decrypt the master key blob
                     Cipher c = Cipher.getInstance("AES/CBC/PKCS5Padding");
-                    SecretKey userKey = buildPasswordKey(mUserPassword, userSalt,
+                    SecretKey userKey = buildPasswordKey(mDecryptPassword, userSalt,
                             rounds);
                     byte[] IV = hexToByteArray(userIvHex);
                     IvParameterSpec ivSpec = new IvParameterSpec(IV);
@@ -4453,7 +4474,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // is used to require a user-facing disclosure about the operation.
     @Override
     public void acknowledgeFullBackupOrRestore(int token, boolean allow,
-            String password, IFullBackupRestoreObserver observer) {
+            String curPassword, String encPpassword, IFullBackupRestoreObserver observer) {
         if (DEBUG) Slog.d(TAG, "acknowledgeFullBackupOrRestore : token=" + token
                 + " allow=" + allow);
 
@@ -4472,11 +4493,13 @@ class BackupManagerService extends IBackupManager.Stub {
                     mFullConfirmations.delete(token);
 
                     if (allow) {
-                        params.observer = observer;
-                        params.password = password;
                         final int verb = params instanceof FullBackupParams
                                 ? MSG_RUN_FULL_BACKUP
                                 : MSG_RUN_FULL_RESTORE;
+
+                        params.observer = observer;
+                        params.curPassword = curPassword;
+                        params.encryptPassword = encPpassword;
 
                         if (DEBUG) Slog.d(TAG, "Sending conf message with verb " + verb);
                         mWakelock.acquire();
