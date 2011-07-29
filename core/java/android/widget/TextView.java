@@ -326,8 +326,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int mTextSelectHandleLeftRes;
     private int mTextSelectHandleRightRes;
     private int mTextSelectHandleRes;
-    private int mTextEditPasteWindowLayout, mTextEditSidePasteWindowLayout;
-    private int mTextEditNoPasteWindowLayout, mTextEditSideNoPasteWindowLayout;
 
     private int mTextEditSuggestionItemLayout;
     private SuggestionsPopupWindow mSuggestionsPopupWindow;
@@ -811,22 +809,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             case com.android.internal.R.styleable.TextView_textSelectHandle:
                 mTextSelectHandleRes = a.getResourceId(attr, 0);
-                break;
-
-            case com.android.internal.R.styleable.TextView_textEditPasteWindowLayout:
-                mTextEditPasteWindowLayout = a.getResourceId(attr, 0);
-                break;
-
-            case com.android.internal.R.styleable.TextView_textEditNoPasteWindowLayout:
-                mTextEditNoPasteWindowLayout = a.getResourceId(attr, 0);
-                break;
-
-            case com.android.internal.R.styleable.TextView_textEditSidePasteWindowLayout:
-                mTextEditSidePasteWindowLayout = a.getResourceId(attr, 0);
-                break;
-
-            case com.android.internal.R.styleable.TextView_textEditSideNoPasteWindowLayout:
-                mTextEditSideNoPasteWindowLayout = a.getResourceId(attr, 0);
                 break;
 
             case com.android.internal.R.styleable.TextView_textEditSuggestionItemLayout:
@@ -8714,7 +8696,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             final int offset = getOffsetForPosition(mLastDownPositionX, mLastDownPositionY);
             stopSelectionActionMode();
             Selection.setSelection((Spannable) mText, offset);
-            getInsertionController().showWithPaste();
+            getInsertionController().showImmediately();
             handled = true;
         }
 
@@ -8786,6 +8768,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mPopupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL);
             mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
             mPopupWindow.setOutsideTouchable(true);
+            mPopupWindow.setClippingEnabled(true);
 
             mPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
             mPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -9431,83 +9414,84 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private class PastePopupWindow implements OnClickListener {
-        private final PopupWindow mContainer;
-        private final View[] mPasteViews = new View[4];
-        private final int[] mPasteViewLayouts = new int[] { 
-                mTextEditPasteWindowLayout,  mTextEditNoPasteWindowLayout, 
-                mTextEditSidePasteWindowLayout, mTextEditSideNoPasteWindowLayout };
-        
-        public PastePopupWindow() {
-            mContainer = new PopupWindow(TextView.this.mContext, null,
+    private class ActionPopupWindow implements OnClickListener {
+        private static final int TEXT_EDIT_ACTION_POPUP_TEXT =
+                com.android.internal.R.layout.text_edit_action_popup_text;
+        private final PopupWindow mPopupWindow;
+        private TextView mPasteTextView;
+        private TextView mReplaceTextView;
+        private LinearLayout mContentView;
+        // Whether or not the Paste action should be available when the action popup is displayed
+        private boolean mWithPaste;
+
+        public ActionPopupWindow() {
+            mPopupWindow = new PopupWindow(TextView.this.mContext, null,
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
-            mContainer.setSplitTouchEnabled(true);
-            mContainer.setClippingEnabled(false);
-            mContainer.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL);
+            mPopupWindow.setClippingEnabled(true);
+            mPopupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_PANEL);
 
-            mContainer.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
-            mContainer.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
-        }
+            mPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+            mPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
 
-        private int viewIndex(boolean onTop) {
-            return (onTop ? 0 : 1<<1) + (canPaste() ? 0 : 1<<0);
-        }
+            mContentView = new LinearLayout(TextView.this.getContext());
+            LayoutParams wrapContent = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT);
+            mContentView.setLayoutParams(wrapContent);
+            mContentView.setOrientation(LinearLayout.HORIZONTAL);
+            mContentView.setBackgroundResource(
+                    com.android.internal.R.drawable.text_edit_side_paste_window);
 
-        private void updateContent(boolean onTop) {
-            final int viewIndex = viewIndex(onTop);
-            View view = mPasteViews[viewIndex];
-
-            if (view == null) {
-                final int layout = mPasteViewLayouts[viewIndex];
-                LayoutInflater inflater = (LayoutInflater)TextView.this.mContext.
+            LayoutInflater inflater = (LayoutInflater)TextView.this.mContext.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                if (inflater != null) {
-                    view = inflater.inflate(layout, null);
-                }
 
-                if (view == null) {
-                    throw new IllegalArgumentException("Unable to inflate TextEdit paste window");
-                }
+            mPasteTextView = (TextView) inflater.inflate(TEXT_EDIT_ACTION_POPUP_TEXT, null);
+            mPasteTextView.setLayoutParams(wrapContent);
+            mContentView.addView(mPasteTextView);
+            mPasteTextView.setText(com.android.internal.R.string.paste);
+            mPasteTextView.setOnClickListener(this);
 
-                final int size = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
-                view.setLayoutParams(new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
-                view.measure(size, size);
+            mReplaceTextView = (TextView) inflater.inflate(TEXT_EDIT_ACTION_POPUP_TEXT, null);
+            mReplaceTextView.setLayoutParams(wrapContent);
+            mContentView.addView(mReplaceTextView);
+            mReplaceTextView.setText(com.android.internal.R.string.replace);
+            mReplaceTextView.setOnClickListener(this);
 
-                view.setOnClickListener(this);
-                
-                mPasteViews[viewIndex] = view;
-            }
-
-            mContainer.setContentView(view);
+            mPopupWindow.setContentView(mContentView);
         }
 
         public void show() {
-            updateContent(true);
+            mPasteTextView.setVisibility(mWithPaste && canPaste() ? View.VISIBLE : View.GONE);
+
+            final int size = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            mContentView.measure(size, size);
+
             positionAtCursor();
         }
 
         public void hide() {
-            mContainer.dismiss();
+            mPopupWindow.dismiss();
         }
 
         public boolean isShowing() {
-            return mContainer.isShowing();
+            return mPopupWindow.isShowing();
         }
 
         @Override
-        public void onClick(View v) {
-            if (canPaste()) {
+        public void onClick(View view) {
+            if (view == mPasteTextView && canPaste()) {
                 onTextContextMenuItem(ID_PASTE);
+                hide();
+            } else if (view == mReplaceTextView) {
+                showSuggestions();
             }
-            hide();
         }
 
         void positionAtCursor() {
-            View contentView = mContainer.getContentView();
-            int width = contentView.getMeasuredWidth();
-            int height = contentView.getMeasuredHeight();
-            final int offset = TextView.this.getSelectionStart();
+            int width = mContentView.getMeasuredWidth();
+            int height = mContentView.getMeasuredHeight();
+            final int selectionStart = TextView.this.getSelectionStart();
+            final int selectionEnd = TextView.this.getSelectionEnd();
+            final int offset = (selectionStart + selectionEnd) / 2;
             final int line = mLayout.getLineForOffset(offset);
             final int lineTop = mLayout.getLineTop(line);
             float primaryHorizontal = mLayout.getPrimaryHorizontal(offset);
@@ -9526,37 +9510,28 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             coords[0] += bounds.left;
             coords[1] += bounds.top;
 
-            final int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
+            // Vertical clipping, move under edited line and to the side of insertion cursor
             if (coords[1] < 0) {
-                updateContent(false);
-                // Update dimensions from new view
-                contentView = mContainer.getContentView();
-                width = contentView.getMeasuredWidth();
-                height = contentView.getMeasuredHeight();
-
-                // Vertical clipping, move under edited line and to the side of insertion cursor 
-                // TODO bottom clipping in case there is no system bar
                 coords[1] += height;
                 final int lineBottom = mLayout.getLineBottom(line);
                 final int lineHeight = lineBottom - lineTop;
                 coords[1] += lineHeight;
 
-                // Move to right hand side of insertion cursor by default. TODO RTL text.
+                // Assumes insertion and selection handles share the same height
                 final Drawable handle = mContext.getResources().getDrawable(mTextSelectHandleRes);
-                final int handleHalfWidth = handle.getIntrinsicWidth() / 2;
-
-                if (primaryHorizontal + handleHalfWidth + width < screenWidth) {
-                    coords[0] += handleHalfWidth + width / 2;
-                } else {
-                    coords[0] -= handleHalfWidth + width / 2;                    
-                }
-            } else {
-                // Horizontal clipping
-                coords[0] = Math.max(0, coords[0]);
-                coords[0] = Math.min(screenWidth - width, coords[0]);
+                coords[1] += handle.getIntrinsicHeight();
             }
 
-            mContainer.showAtLocation(TextView.this, Gravity.NO_GRAVITY, coords[0], coords[1]);
+            // Horizontal clipping
+            coords[0] = Math.max(0, coords[0]);
+            final int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
+            coords[0] = Math.min(screenWidth - width, coords[0]);
+
+            mPopupWindow.showAtLocation(TextView.this, Gravity.NO_GRAVITY, coords[0], coords[1]);
+        }
+
+        public void setShowWithPaste(boolean withPaste) {
+            mWithPaste = withPaste;
         }
     }
 
@@ -9581,6 +9556,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private boolean mIsActive = false;
         // Used to detect that setFrame was called
         private boolean mNeedsUpdate = true;
+        // Transient action popup window for Paste and Replace actions
+        protected ActionPopupWindow mActionPopupWindow;
+        // Used to delay the appearance of the action popup window
+        private Runnable mActionPopupShower;
 
         public HandleView() {
             super(TextView.this.mContext);
@@ -9659,31 +9638,58 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         public void show() {
             if (isShowing()) {
-                mContainer.update(mContainerPositionX, mContainerPositionY,
-                        mRight - mLeft, mBottom - mTop);
+                mContainer.update(mContainerPositionX, mContainerPositionY, -1, -1);
             } else {
                 mContainer.showAtLocation(TextView.this, 0,
                         mContainerPositionX, mContainerPositionY);
 
-                mIsActive = true;
-
-                ViewTreeObserver vto = TextView.this.getViewTreeObserver();
-                vto.addOnPreDrawListener(this);
+                if (!mIsActive) {
+                    ViewTreeObserver vto = TextView.this.getViewTreeObserver();
+                    vto.addOnPreDrawListener(this);
+                    mIsActive = true;
+                }
             }
+            hideActionPopupWindow();
         }
 
         protected void dismiss() {
             mIsDragging = false;
             mContainer.dismiss();
+            onDetached();
         }
 
         public void hide() {
             dismiss();
 
-            mIsActive = false;
-
             ViewTreeObserver vto = TextView.this.getViewTreeObserver();
             vto.removeOnPreDrawListener(this);
+            mIsActive = false;
+        }
+
+        void showActionPopupWindow(int delay, boolean withPaste) {
+            if (mActionPopupWindow == null) {
+                mActionPopupWindow = new ActionPopupWindow();
+            }
+            if (mActionPopupShower == null) {
+                mActionPopupShower = new Runnable() {
+                    public void run() {
+                        mActionPopupWindow.show();
+                    }
+                };
+            } else {
+                TextView.this.removeCallbacks(mActionPopupShower);
+            }
+            mActionPopupWindow.setShowWithPaste(withPaste);
+            TextView.this.postDelayed(mActionPopupShower, delay);
+        }
+
+        protected void hideActionPopupWindow() {
+            if (mActionPopupShower != null) {
+                TextView.this.removeCallbacks(mActionPopupShower);
+            }
+            if (mActionPopupWindow != null) {
+                mActionPopupWindow.hide();
+            }
         }
 
         public boolean isShowing() {
@@ -9784,8 +9790,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 if (isPositionVisible()) {
-                    mContainer.update(mContainerPositionX, mContainerPositionY,
-                            mRight - mLeft, mBottom - mTop);
+                    mContainer.update(mContainerPositionX, mContainerPositionY, -1, -1);
 
                     if (mIsActive && !isShowing()) {
                         show();
@@ -9863,57 +9868,39 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         void onHandleMoved() {
-            // Does nothing by default
+            hideActionPopupWindow();
         }
 
         public void onDetached() {
-            // Should be overriden to clean possible Runnable
+            hideActionPopupWindow();
         }
     }
 
     private class InsertionHandleView extends HandleView {
-        private static final int DELAY_BEFORE_FADE_OUT = 4000;
+        private static final int DELAY_BEFORE_HANDLE_FADES_OUT = 4000;
         private static final int RECENT_CUT_COPY_DURATION = 15 * 1000; // seconds
 
-        // Used to detect taps on the insertion handle, which will affect the PastePopupWindow
+        // Used to detect taps on the insertion handle, which will affect the ActionPopupWindow
         private float mDownPositionX, mDownPositionY;
-        private PastePopupWindow mPastePopupWindow;
         private Runnable mHider;
-        private Runnable mPastePopupShower;
 
         @Override
         public void show() {
             super.show();
-            hideDelayed();
-            hidePastePopupWindow();
+            hideAfterDelay();
         }
 
-        public void show(int delayBeforePaste) {
+        public void show(int delayBeforeShowActionPopup) {
             show();
 
             final long durationSinceCutOrCopy = SystemClock.uptimeMillis() - sLastCutOrCopyTime;
             if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION) {
-                delayBeforePaste = 0;
+                delayBeforeShowActionPopup = 0;
             }
-            if (delayBeforePaste == 0 || canPaste()) {
-                if (mPastePopupShower == null) {
-                    mPastePopupShower = new Runnable() {
-                        public void run() {
-                            showPastePopupWindow();
-                        }
-                    };
-                }
-                TextView.this.postDelayed(mPastePopupShower, delayBeforePaste);
-            }
+            showActionPopupWindow(delayBeforeShowActionPopup, true);
         }
 
-        @Override
-        protected void dismiss() {
-            super.dismiss();
-            onDetached();
-        }
-
-        private void hideDelayed() {
+        private void hideAfterDelay() {
             removeHiderCallback();
             if (mHider == null) {
                 mHider = new Runnable() {
@@ -9922,7 +9909,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     }
                 };
             }
-            TextView.this.postDelayed(mHider, DELAY_BEFORE_FADE_OUT);
+            TextView.this.postDelayed(mHider, DELAY_BEFORE_HANDLE_FADES_OUT);
         }
 
         private void removeHiderCallback() {
@@ -9956,18 +9943,18 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     final float deltaY = mDownPositionY - ev.getRawY();
                     final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
                     if (distanceSquared < mSquaredTouchSlopDistance) {
-                        if (mPastePopupWindow != null && mPastePopupWindow.isShowing()) {
-                            // Tapping on the handle dismisses the displayed paste view,
-                            mPastePopupWindow.hide();
+                        if (mActionPopupWindow != null && mActionPopupWindow.isShowing()) {
+                            // Tapping on the handle dismisses the displayed action popup
+                            mActionPopupWindow.hide();
                         } else {
                             show(0);
                         }
                     }
-                    hideDelayed();
+                    hideAfterDelay();
                     break;
 
                 case MotionEvent.ACTION_CANCEL:
-                    hideDelayed();
+                    hideAfterDelay();
                     break;
 
                 default:
@@ -9992,32 +9979,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             updateOffset(getOffsetForPosition(x, y));
         }
 
-        void showPastePopupWindow() {
-            if (mPastePopupWindow == null) {
-                mPastePopupWindow = new PastePopupWindow();
-            }
-            mPastePopupWindow.show();
-        }
-
         @Override
         void onHandleMoved() {
+            super.onHandleMoved();
             removeHiderCallback();
-            hidePastePopupWindow();
-        }
-
-        void hidePastePopupWindow() {
-            if (mPastePopupShower != null) {
-                TextView.this.removeCallbacks(mPastePopupShower);
-            }
-            if (mPastePopupWindow != null) {
-                mPastePopupWindow.hide();
-            }
         }
 
         @Override
         public void onDetached() {
+            super.onDetached();
             removeHiderCallback();
-            hidePastePopupWindow();
         }
     }
 
@@ -10056,6 +10027,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             Selection.setSelection((Spannable) mText, offset, selectionEnd);
         }
+
+        public ActionPopupWindow getActionPopupWindow() {
+            return mActionPopupWindow;
+        }
     }
 
     private class SelectionEndHandleView extends HandleView {
@@ -10093,6 +10068,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             Selection.setSelection((Spannable) mText, selectionStart, offset);
         }
+
+        public void setActionPopupWindow(ActionPopupWindow actionPopupWindow) {
+            mActionPopupWindow = actionPopupWindow;
+        }
     }
 
     /**
@@ -10122,16 +10101,16 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private class InsertionPointCursorController implements CursorController {
-        private static final int DELAY_BEFORE_PASTE = 2000;
+        private static final int DELAY_BEFORE_PASTE_ACTION = 1600;
 
         private InsertionHandleView mHandle;
 
         public void show() {
-            ((InsertionHandleView) getHandle()).show(DELAY_BEFORE_PASTE);
+            getHandle().show(DELAY_BEFORE_PASTE_ACTION);
         }
 
-        public void showWithPaste() {
-            ((InsertionHandleView) getHandle()).show(0);
+        public void showImmediately() {
+            getHandle().show(0);
         }
 
         public void hide() {
@@ -10146,7 +10125,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        private HandleView getHandle() {
+        private InsertionHandleView getHandle() {
             if (mHandle == null) {
                 mHandle = new InsertionHandleView();
             }
@@ -10163,6 +10142,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     private class SelectionModifierCursorController implements CursorController {
+        private static final int DELAY_BEFORE_REPLACE_ACTION = 1200;
         // The cursor controller handles, lazily created when shown.
         private SelectionStartHandleView mStartHandle;
         private SelectionEndHandleView mEndHandle;
@@ -10188,6 +10168,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             mStartHandle.show();
             mEndHandle.show();
+
+            // Make sure both left and right handles share the same ActionPopupWindow (so that
+            // moving any of the handles hides the action popup).
+            mStartHandle.showActionPopupWindow(DELAY_BEFORE_REPLACE_ACTION, false);
+            mEndHandle.setActionPopupWindow(mStartHandle.getActionPopupWindow());
 
             hideInsertionPointCursorController();
             hideSuggestions();
@@ -10217,7 +10202,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         final float deltaY = y - mPreviousTapPositionY;
                         final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
                         if (distanceSquared < mSquaredTouchSlopDistance) {
-                            showSuggestions();
+                            startSelectionActionMode();
                             mDiscardNextActionUp = true;
                         }
                     }
