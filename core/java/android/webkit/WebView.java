@@ -2285,7 +2285,7 @@ public class WebView extends AbsoluteLayout
         checkThread();
         mContentWidth = 0;
         mContentHeight = 0;
-        setBaseLayer(0, null, false, false);
+        setBaseLayer(0, null, false, false, false);
         mWebViewCore.sendMessage(EventHub.CLEAR_CONTENT);
     }
 
@@ -4268,11 +4268,11 @@ public class WebView extends AbsoluteLayout
     }
 
     void setBaseLayer(int layer, Region invalRegion, boolean showVisualIndicator,
-            boolean isPictureAfterFirstLayout) {
+            boolean isPictureAfterFirstLayout, boolean registerPageSwapCallback) {
         if (mNativeClass == 0)
             return;
         nativeSetBaseLayer(layer, invalRegion, showVisualIndicator,
-                isPictureAfterFirstLayout);
+                isPictureAfterFirstLayout, registerPageSwapCallback);
         if (mHTML5VideoViewProxy != null) {
             mHTML5VideoViewProxy.setBaseLayer(layer);
         }
@@ -4420,8 +4420,9 @@ public class WebView extends AbsoluteLayout
             mFocusSizeChanged = false;
             // If we are zooming, this will get handled above, when the zoom
             // finishes.  We also do not need to do this unless the WebTextView
-            // is showing.
-            if (!animateZoom && inEditingMode()) {
+            // is showing. With hardware acceleration, the pageSwapCallback()
+            // updates the WebTextView position in sync with page swapping
+            if (!canvas.isHardwareAccelerated() && !animateZoom && inEditingMode()) {
                 didUpdateWebTextViewDimensions(ANYWHERE);
             }
         }
@@ -8395,6 +8396,14 @@ public class WebView extends AbsoluteLayout
         }
     }
 
+    // Called by JNI to invalidate the View, given rectangle coordinates in
+    // content space
+    private void pageSwapCallback() {
+        if (inEditingMode()) {
+            didUpdateWebTextViewDimensions(ANYWHERE);
+        }
+    }
+
     void setNewPicture(final WebViewCore.DrawData draw, boolean updateBaseLayer) {
         if (mNativeClass == 0) {
             if (mDelaySetPicture != null) {
@@ -8407,10 +8416,15 @@ public class WebView extends AbsoluteLayout
         }
         WebViewCore.ViewState viewState = draw.mViewState;
         boolean isPictureAfterFirstLayout = viewState != null;
+
+        // Request a callback on pageSwap (to reposition the webtextview)
+        boolean registerPageSwapCallback =
+            !mZoomManager.isFixedLengthAnimationInProgress() && inEditingMode();
+
         if (updateBaseLayer) {
             setBaseLayer(draw.mBaseLayer, draw.mInvalRegion,
                     getSettings().getShowVisualIndicator(),
-                    isPictureAfterFirstLayout);
+                    isPictureAfterFirstLayout, registerPageSwapCallback);
         }
         final Point viewSize = draw.mViewSize;
         if (isPictureAfterFirstLayout) {
@@ -9209,7 +9223,8 @@ public class WebView extends AbsoluteLayout
     private native void     nativeSetFindIsUp(boolean isUp);
     private native void     nativeSetHeightCanMeasure(boolean measure);
     private native void     nativeSetBaseLayer(int layer, Region invalRegion,
-            boolean showVisualIndicator, boolean isPictureAfterFirstLayout);
+            boolean showVisualIndicator, boolean isPictureAfterFirstLayout,
+            boolean registerPageSwapCallback);
     private native int      nativeGetBaseLayer();
     private native void     nativeShowCursorTimed();
     private native void     nativeReplaceBaseContent(int content);
