@@ -326,8 +326,9 @@ bool Layer::isOpaque() const
 {
     // if we don't have a buffer yet, we're translucent regardless of the
     // layer's opaque flag.
-    if (mActiveBuffer == 0)
+    if (mActiveBuffer == 0) {
         return false;
+    }
 
     // if the layer has the opaque flag, then we're always opaque,
     // otherwise we use the current buffer's format.
@@ -411,6 +412,8 @@ bool Layer::isCropped() const {
 void Layer::lockPageFlip(bool& recomputeVisibleRegions)
 {
     if (mQueuedFrames > 0) {
+        const bool oldOpacity = isOpaque();
+
         // signal another event if we have more frames pending
         if (android_atomic_dec(&mQueuedFrames) > 1) {
             mFlinger->signalEvent();
@@ -438,9 +441,8 @@ void Layer::lockPageFlip(bool& recomputeVisibleRegions)
             mFlinger->invalidateHwcGeometry();
         }
 
-        const bool opacity(getOpacityForFormat(mActiveBuffer->format));
-        if (opacity != mCurrentOpacity) {
-            mCurrentOpacity = opacity;
+        mCurrentOpacity = getOpacityForFormat(mActiveBuffer->format);
+        if (oldOpacity != isOpaque()) {
             recomputeVisibleRegions = true;
         }
 
