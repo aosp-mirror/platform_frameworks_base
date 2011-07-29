@@ -9676,7 +9676,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @return A HardwareLayer ready to render, or null if an error occurred.
      */
     HardwareLayer getHardwareLayer() {
-        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null) {
+        if (mAttachInfo == null || mAttachInfo.mHardwareRenderer == null ||
+                !mAttachInfo.mHardwareRenderer.isEnabled()) {
             return null;
         }
 
