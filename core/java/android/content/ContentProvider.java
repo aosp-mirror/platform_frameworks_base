@@ -78,7 +78,7 @@ import java.util.ArrayList;
  * ContentProvider instance, so subclasses don't have to worry about the details of
  * cross-process calls.</p>
  */
-public abstract class ContentProvider implements ComponentCallbacks {
+public abstract class ContentProvider implements ComponentCallbacks2 {
     private static final String TAG = "ContentProvider";
 
     /*
@@ -489,6 +489,9 @@ public abstract class ContentProvider implements ComponentCallbacks {
      * Subclasses may override this method to take appropriate action.
      */
     public void onLowMemory() {
+    }
+
+    public void onTrimMemory(int level) {
     }
 
     /**

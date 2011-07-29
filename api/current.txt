@@ -2331,7 +2331,7 @@ package android.app {
     method public abstract void onTabUnselected(android.app.ActionBar.Tab, android.app.FragmentTransaction);
   }
 
-  public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
+  public class Activity extends android.view.ContextThemeWrapper implements android.content.ComponentCallbacks2 android.view.KeyEvent.Callback android.view.LayoutInflater.Factory2 android.view.View.OnCreateContextMenuListener android.view.Window.Callback {
     ctor public Activity();
     method public void addContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method public void closeContextMenu();
@@ -2436,6 +2436,7 @@ package android.app {
     method protected void onTitleChanged(java.lang.CharSequence, int);
     method public boolean onTouchEvent(android.view.MotionEvent);
     method public boolean onTrackballEvent(android.view.MotionEvent);
+    method public void onTrimMemory(int);
     method public void onUserInteraction();
     method protected void onUserLeaveHint();
     method public void onWindowAttributesChanged(android.view.WindowManager.LayoutParams);
@@ -2731,12 +2732,25 @@ package android.app {
     ctor public AliasActivity();
   }
 
-  public class Application extends android.content.ContextWrapper implements android.content.ComponentCallbacks {
+  public class Application extends android.content.ContextWrapper implements android.content.ComponentCallbacks2 {
     ctor public Application();
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public void onCreate();
     method public void onLowMemory();
     method public void onTerminate();
+    method public void onTrimMemory(int);
+    method public void registerActivityLifecycleCallbacks(android.app.Application.ActivityLifecycleCallbacks);
+    method public void unregisterActivityLifecycleCallbacks(android.app.Application.ActivityLifecycleCallbacks);
+  }
+
+  public static abstract interface Application.ActivityLifecycleCallbacks {
+    method public abstract void onActivityCreated(android.app.Activity, android.os.Bundle);
+    method public abstract void onActivityDestroyed(android.app.Activity);
+    method public abstract void onActivityPaused(android.app.Activity);
+    method public abstract void onActivityResumed(android.app.Activity);
+    method public abstract void onActivitySaveInstanceState(android.app.Activity, android.os.Bundle);
+    method public abstract void onActivityStarted(android.app.Activity);
+    method public abstract void onActivityStopped(android.app.Activity);
   }
 
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
@@ -2955,7 +2969,7 @@ package android.app {
     method public void setSelectedGroup(int);
   }
 
-  public class Fragment implements android.content.ComponentCallbacks android.view.View.OnCreateContextMenuListener {
+  public class Fragment implements android.content.ComponentCallbacks2 android.view.View.OnCreateContextMenuListener {
     ctor public Fragment();
     method public void dump(java.lang.String, java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public final boolean equals(java.lang.Object);
@@ -3009,6 +3023,7 @@ package android.app {
     method public void onSaveInstanceState(android.os.Bundle);
     method public void onStart();
     method public void onStop();
+    method public void onTrimMemory(int);
     method public void onViewCreated(android.view.View, android.os.Bundle);
     method public void registerForContextMenu(android.view.View);
     method public void setArguments(android.os.Bundle);
@@ -3545,7 +3560,7 @@ package android.app {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public abstract class Service extends android.content.ContextWrapper implements android.content.ComponentCallbacks {
+  public abstract class Service extends android.content.ContextWrapper implements android.content.ComponentCallbacks2 {
     ctor public Service();
     method protected void dump(java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public final android.app.Application getApplication();
@@ -3558,6 +3573,7 @@ package android.app {
     method public deprecated void onStart(android.content.Intent, int);
     method public int onStartCommand(android.content.Intent, int, int);
     method public void onTaskRemoved(android.content.Intent);
+    method public void onTrimMemory(int);
     method public boolean onUnbind(android.content.Intent);
     method public final void startForeground(int, android.app.Notification);
     method public final void stopForeground(boolean);
@@ -4442,6 +4458,14 @@ package android.content {
     method public abstract void onLowMemory();
   }
 
+  public abstract interface ComponentCallbacks2 implements android.content.ComponentCallbacks {
+    method public abstract void onTrimMemory(int);
+    field public static final int TRIM_MEMORY_BACKGROUND = 40; // 0x28
+    field public static final int TRIM_MEMORY_COMPLETE = 80; // 0x50
+    field public static final int TRIM_MEMORY_MODERATE = 60; // 0x3c
+    field public static final int TRIM_MEMORY_UI_HIDDEN = 20; // 0x14
+  }
+
   public final class ComponentName implements java.lang.Cloneable java.lang.Comparable android.os.Parcelable {
     ctor public ComponentName(java.lang.String, java.lang.String);
     ctor public ComponentName(android.content.Context, java.lang.String);
@@ -4463,7 +4487,7 @@ package android.content {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
-  public abstract class ContentProvider implements android.content.ComponentCallbacks {
+  public abstract class ContentProvider implements android.content.ComponentCallbacks2 {
     ctor public ContentProvider();
     method public android.content.ContentProviderResult[] applyBatch(java.util.ArrayList<android.content.ContentProviderOperation>) throws android.content.OperationApplicationException;
     method public void attachInfo(android.content.Context, android.content.pm.ProviderInfo);
@@ -4481,6 +4505,7 @@ package android.content {
     method public void onConfigurationChanged(android.content.res.Configuration);
     method public abstract boolean onCreate();
     method public void onLowMemory();
+    method public void onTrimMemory(int);
     method public android.content.res.AssetFileDescriptor openAssetFile(android.net.Uri, java.lang.String) throws java.io.FileNotFoundException;
     method public android.os.ParcelFileDescriptor openFile(android.net.Uri, java.lang.String) throws java.io.FileNotFoundException;
     method protected final android.os.ParcelFileDescriptor openFileHelper(android.net.Uri, java.lang.String) throws java.io.FileNotFoundException;
@@ -4734,6 +4759,7 @@ package android.content {
     method public abstract android.database.sqlite.SQLiteDatabase openOrCreateDatabase(java.lang.String, int, android.database.sqlite.SQLiteDatabase.CursorFactory);
     method public abstract android.database.sqlite.SQLiteDatabase openOrCreateDatabase(java.lang.String, int, android.database.sqlite.SQLiteDatabase.CursorFactory, android.database.DatabaseErrorHandler);
     method public abstract deprecated android.graphics.drawable.Drawable peekWallpaper();
+    method public void registerComponentCallbacks(android.content.ComponentCallbacks);
     method public abstract android.content.Intent registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter);
     method public abstract android.content.Intent registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter, java.lang.String, android.os.Handler);
     method public abstract void removeStickyBroadcast(android.content.Intent);
@@ -4754,15 +4780,21 @@ package android.content {
     method public abstract android.content.ComponentName startService(android.content.Intent);
     method public abstract boolean stopService(android.content.Intent);
     method public abstract void unbindService(android.content.ServiceConnection);
+    method public void unregisterComponentCallbacks(android.content.ComponentCallbacks);
     method public abstract void unregisterReceiver(android.content.BroadcastReceiver);
     field public static final java.lang.String ACCESSIBILITY_SERVICE = "accessibility";
     field public static final java.lang.String ACCOUNT_SERVICE = "account";
     field public static final java.lang.String ACTIVITY_SERVICE = "activity";
     field public static final java.lang.String ALARM_SERVICE = "alarm";
     field public static final java.lang.String AUDIO_SERVICE = "audio";
+    field public static final int BIND_ABOVE_CLIENT = 8; // 0x8
+    field public static final int BIND_ADJUST_WITH_ACTIVITY = 64; // 0x40
+    field public static final int BIND_ALLOW_OOM_MANAGEMENT = 16; // 0x10
     field public static final int BIND_AUTO_CREATE = 1; // 0x1
     field public static final int BIND_DEBUG_UNBIND = 2; // 0x2
+    field public static final int BIND_IMPORTANT = 64; // 0x40
     field public static final int BIND_NOT_FOREGROUND = 4; // 0x4
+    field public static final int BIND_WAIVE_PRIORITY = 32; // 0x20
     field public static final java.lang.String CLIPBOARD_SERVICE = "clipboard";
     field public static final java.lang.String CONNECTIVITY_SERVICE = "connectivity";
     field public static final int CONTEXT_IGNORE_SECURITY = 2; // 0x2

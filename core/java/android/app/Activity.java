@@ -19,7 +19,7 @@ package android.app;
 import com.android.internal.app.ActionBarImpl;
 import com.android.internal.policy.PolicyManager;
 
-import android.content.ComponentCallbacks;
+import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -626,7 +626,7 @@ import java.util.HashMap;
 public class Activity extends ContextThemeWrapper
         implements LayoutInflater.Factory2,
         Window.Callback, KeyEvent.Callback,
-        OnCreateContextMenuListener, ComponentCallbacks {
+        OnCreateContextMenuListener, ComponentCallbacks2 {
     private static final String TAG = "Activity";
 
     /** Standard activity result: operation canceled. */
@@ -859,6 +859,7 @@ public class Activity extends ContextThemeWrapper
                     ? mLastNonConfigurationInstances.fragments : null);
         }
         mFragments.dispatchCreate();
+        getApplication().dispatchActivityCreated(this, savedInstanceState);
         mCalled = true;
     }
 
@@ -1001,6 +1002,8 @@ public class Activity extends ContextThemeWrapper
             }
             mCheckedForLoaderManager = true;
         }
+
+        getApplication().dispatchActivityStarted(this);
     }
 
     /**
@@ -1048,6 +1051,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onPause
      */
     protected void onResume() {
+        getApplication().dispatchActivityResumed(this);
         mCalled = true;
     }
 
@@ -1158,6 +1162,7 @@ public class Activity extends ContextThemeWrapper
         if (p != null) {
             outState.putParcelable(FRAGMENTS_TAG, p);
         }
+        getApplication().dispatchActivitySaveInstanceState(this, outState);
     }
 
     /**
@@ -1234,6 +1239,7 @@ public class Activity extends ContextThemeWrapper
      * @see #onStop
      */
     protected void onPause() {
+        getApplication().dispatchActivityPaused(this);
         mCalled = true;
     }
 
@@ -1320,6 +1326,7 @@ public class Activity extends ContextThemeWrapper
      */
     protected void onStop() {
         if (mActionBar != null) mActionBar.setShowHideAnimationEnabled(false);
+        getApplication().dispatchActivityStopped(this);
         mCalled = true;
     }
 
@@ -1382,6 +1389,8 @@ public class Activity extends ContextThemeWrapper
         if (mSearchManager != null) {
             mSearchManager.stopSearch();
         }
+
+        getApplication().dispatchActivityDestroyed(this);
     }
 
     /**
@@ -1580,12 +1589,17 @@ public class Activity extends ContextThemeWrapper
         nci.loaders = mAllLoaderManagers;
         return nci;
     }
-    
+
     public void onLowMemory() {
         mCalled = true;
         mFragments.dispatchLowMemory();
     }
-    
+
+    public void onTrimMemory(int level) {
+        mCalled = true;
+        mFragments.dispatchTrimMemory(level);
+    }
+
     /**
      * Return the FragmentManager for interacting with fragments associated
      * with this activity.
