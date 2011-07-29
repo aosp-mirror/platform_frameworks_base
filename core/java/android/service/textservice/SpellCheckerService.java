@@ -24,6 +24,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
 
@@ -36,6 +37,7 @@ import java.lang.ref.WeakReference;
  */
 public abstract class SpellCheckerService extends Service {
     private static final String TAG = SpellCheckerService.class.getSimpleName();
+    private static final boolean DBG = false;
     public static final String SERVICE_INTERFACE =
             "android.service.textservice.SpellCheckerService";
 
@@ -87,6 +89,9 @@ public abstract class SpellCheckerService extends Service {
      */
     @Override
     public final IBinder onBind(final Intent intent) {
+        if (DBG) {
+            Log.w(TAG, "onBind");
+        }
         return mBinder;
     }
 
