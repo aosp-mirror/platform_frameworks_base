@@ -75,7 +75,7 @@ static float mtxRot270[16] = {
 
 static void mtxMul(float out[16], const float a[16], const float b[16]);
 
-SurfaceTexture::SurfaceTexture(GLuint tex) :
+SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode) :
     mBufferCount(MIN_BUFFER_SLOTS), mCurrentTexture(INVALID_BUFFER_SLOT),
     mCurrentTransform(0), mLastQueued(INVALID_BUFFER_SLOT),
     mLastQueuedTransform(0), mNextTransform(0), mTexName(tex) {

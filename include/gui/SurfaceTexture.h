@@ -47,7 +47,7 @@ public:
 
     // tex indicates the name OpenGL texture to which images are to be streamed.
     // This texture name cannot be changed once the SurfaceTexture is created.
-    SurfaceTexture(GLuint tex);
+    SurfaceTexture(GLuint tex, bool allowSynchronousMode = true);
 
     virtual ~SurfaceTexture();
 
