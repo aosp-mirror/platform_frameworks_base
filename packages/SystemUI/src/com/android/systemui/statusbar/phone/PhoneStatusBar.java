@@ -1742,7 +1742,9 @@ public class PhoneStatusBar extends StatusBar {
     // The user is not allowed to get stuck without navigation UI. Upon the slightest user
     // interaction we bring the navigation back.
     public void userActivity() {
-        mNavigationBarView.setHidden(false);
+        if (mNavigationBarView != null) {
+            mNavigationBarView.setHidden(false);
+        }
     }
 
     public void toggleRecentApps() {
