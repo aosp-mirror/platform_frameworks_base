@@ -185,7 +185,8 @@ interface IBackupManager {
      *
      * <p>Callers must hold the android.permission.BACKUP permission to use this method.
      */
-    void acknowledgeFullBackupOrRestore(int token, boolean allow, in String password,
+    void acknowledgeFullBackupOrRestore(int token, boolean allow,
+            in String curPassword, in String encryptionPassword,
             IFullBackupRestoreObserver observer);
 
     /**

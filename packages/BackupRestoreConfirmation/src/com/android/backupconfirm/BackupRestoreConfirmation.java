@@ -63,6 +63,8 @@ public class BackupRestoreConfirmation extends Activity {
     boolean mDidAcknowledge;
 
     TextView mStatusView;
+    TextView mCurPassword;
+    TextView mEncPassword;
     Button mAllowButton;
     Button mDenyButton;
 
@@ -156,17 +158,17 @@ public class BackupRestoreConfirmation extends Activity {
         mAllowButton = (Button) findViewById(R.id.button_allow);
         mDenyButton = (Button) findViewById(R.id.button_deny);
 
-        // For full backup, we vary the password prompt text depending on whether one is predefined
-        if (layoutId == R.layout.confirm_backup) {
-            TextView pwDesc = (TextView) findViewById(R.id.password_desc); 
-            try {
-                if (mBackupManager.hasBackupPassword()) {
-                    pwDesc.setText(R.string.backup_password_text);
-                } else {
-                    pwDesc.setText(R.string.backup_password_optional);
-                }
-            } catch (RemoteException e) {
-                // TODO: bail gracefully
+        mCurPassword = (TextView) findViewById(R.id.password);
+        mEncPassword = (TextView) findViewById(R.id.enc_password);
+        TextView curPwDesc = (TextView) findViewById(R.id.password_desc);
+
+        // We vary the password prompt depending on whether one is predefined
+        if (!haveBackupPassword()) {
+            curPwDesc.setVisibility(View.GONE);
+            mCurPassword.setVisibility(View.GONE);
+            if (layoutId == R.layout.confirm_backup) {
+                TextView encPwDesc = (TextView) findViewById(R.id.enc_password_desc);
+                encPwDesc.setText(R.string.backup_enc_password_optional);
             }
         }
 
@@ -204,12 +206,22 @@ public class BackupRestoreConfirmation extends Activity {
             mDidAcknowledge = true;
 
             try {
-                TextView pwView = (TextView) findViewById(R.id.password);
-                mBackupManager.acknowledgeFullBackupOrRestore(mToken, allow,
-                        String.valueOf(pwView.getText()), mObserver);
+                mBackupManager.acknowledgeFullBackupOrRestore(mToken,
+                        allow,
+                        String.valueOf(mCurPassword.getText()),
+                        String.valueOf(mEncPassword.getText()),
+                        mObserver);
             } catch (RemoteException e) {
                 // TODO: bail gracefully if we can't contact the backup manager
             }
+        }
+    }
+
+    boolean haveBackupPassword() {
+        try {
+            return mBackupManager.hasBackupPassword();
+        } catch (RemoteException e) {
+            return true;        // in the failure case, assume we need one
         }
     }
 
