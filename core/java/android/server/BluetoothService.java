@@ -851,7 +851,6 @@ public class BluetoothService extends IBluetooth.Stub {
         return uuids;
     }
 
-
     /**
      * Returns the user-friendly name of a remote device.  This value is
      * returned from our local cache, which is updated when onPropertyChange
@@ -869,6 +868,40 @@ public class BluetoothService extends IBluetooth.Stub {
             return null;
         }
         return mDeviceProperties.getProperty(address, "Name");
+    }
+
+    /**
+     * Returns alias of a remote device.  This value is returned from our
+     * local cache, which is updated when onPropertyChange event is received.
+     *
+     * @param address Bluetooth address of remote device.
+     *
+     * @return The alias of the specified remote device.
+     */
+    public synchronized String getRemoteAlias(String address) {
+
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+            return null;
+        }
+        return mDeviceProperties.getProperty(address, "Alias");
+    }
+
+    /**
+     * Set the alias of a remote device.
+     *
+     * @param address Bluetooth address of remote device.
+     * @param alias new alias to change to
+     * @return true on success, false on error
+     */
+    public synchronized boolean setRemoteAlias(String address, String alias) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+        if (!BluetoothAdapter.checkBluetoothAddress(address)) {
+            return false;
+        }
+
+        return setDevicePropertyStringNative(getObjectPathFromAddress(address),
+                                             "Alias", alias);
     }
 
     /**
@@ -2626,6 +2659,8 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private native boolean setDevicePropertyBooleanNative(String objectPath, String key,
             int value);
+    private native boolean setDevicePropertyStringNative(String objectPath, String key,
+            String value);
     private native boolean createDeviceNative(String address);
     /*package*/ native boolean discoverServicesNative(String objectPath, String pattern);
 

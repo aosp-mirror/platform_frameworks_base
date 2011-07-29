@@ -566,6 +566,54 @@ public final class BluetoothDevice implements Parcelable {
     }
 
     /**
+     * Get the Bluetooth alias of the remote device.
+     * <p>Alias is the locally modified name of a remote device.
+     *
+     * @return the Bluetooth alias, or null if no alias or there was a problem
+     * @hide
+     */
+    public String getAlias() {
+        try {
+            return sService.getRemoteAlias(mAddress);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return null;
+    }
+
+    /**
+     * Set the Bluetooth alias of the remote device.
+     * <p>Alias is the locally modified name of a remote device.
+     * <p>This methoid overwrites the alias. The changed
+     * alias is saved in the local storage so that the change
+     * is preserved over power cycle.
+     *
+     * @return true on success, false on error
+     * @hide
+     */
+    public boolean setAlias(String alias) {
+        try {
+            return sService.setRemoteAlias(mAddress, alias);
+        } catch (RemoteException e) {Log.e(TAG, "", e);}
+        return false;
+    }
+
+    /**
+     * Get the Bluetooth alias of the remote device.
+     * If Alias is null, get the Bluetooth name instead.
+     * @see #getAlias()
+     * @see #getName()
+     *
+     * @return the Bluetooth alias, or null if no alias or there was a problem
+     * @hide
+     */
+    public String getAliasName() {
+        String name = getAlias();
+        if (name == null) {
+            name = getName();
+        }
+        return name;
+    }
+
+    /**
      * Start the bonding (pairing) process with the remote device.
      * <p>This is an asynchronous call, it will return immediately. Register
      * for {@link #ACTION_BOND_STATE_CHANGED} intents to be notified when
