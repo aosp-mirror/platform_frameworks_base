@@ -239,6 +239,7 @@ private:
         String8         name;
         uint32_t        classes;
         uint8_t*        keyBitmask;
+        uint8_t*        switchBitmask;
         KeyLayoutMap*   layoutMap;
         String8         keylayoutFilename;
         int             fd;
