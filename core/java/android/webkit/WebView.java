@@ -625,6 +625,9 @@ public class WebView extends AbsoluteLayout
     // If we are using a set picture, don't send view updates to webkit
     private boolean mBlockWebkitViewMessages = false;
 
+    // cached value used to determine if we need to switch drawing models
+    private boolean mHardwareAccelSkia = false;
+
     /*
      * Private message ids
      */
@@ -4394,6 +4397,12 @@ public class WebView extends AbsoluteLayout
             int functor = nativeGetDrawGLFunction(mGLViewportEmpty ? null : mGLRectViewport,
                     mGLViewportEmpty ? null : mViewRectViewport, getScale(), extras);
             ((HardwareCanvas) canvas).callDrawGLFunction(functor);
+
+            if (mHardwareAccelSkia != getSettings().getHardwareAccelSkiaEnabled()) {
+                mHardwareAccelSkia = getSettings().getHardwareAccelSkiaEnabled();
+                nativeUseHardwareAccelSkia(mHardwareAccelSkia);
+            }
+
         } else {
             DrawFilter df = null;
             if (mZoomManager.isZoomAnimating() || UIAnimationsRunning) {
@@ -9252,7 +9261,8 @@ public class WebView extends AbsoluteLayout
     static final int NO_LEFTEDGE = -1;
     native int nativeGetBlockLeftEdge(int x, int y, float scale);
 
-    private native void nativeSetExpandedTileBounds(boolean enabled);
+    private native void     nativeSetExpandedTileBounds(boolean enabled);
+    private native void     nativeUseHardwareAccelSkia(boolean enabled);
 
     // Returns a pointer to the scrollable LayerAndroid at the given point.
     private native int      nativeScrollableLayer(int x, int y, Rect scrollRect,

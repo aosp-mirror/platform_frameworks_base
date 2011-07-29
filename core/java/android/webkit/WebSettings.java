@@ -179,6 +179,7 @@ public class WebSettings {
     private boolean         mBlockNetworkImage = false;
     private boolean         mBlockNetworkLoads;
     private boolean         mJavaScriptEnabled = false;
+    private boolean         mHardwareAccelSkia = false;
     private boolean         mShowVisualIndicator = false;
     private PluginState     mPluginState = PluginState.OFF;
     private boolean         mJavaScriptCanOpenWindowsAutomatically = false;
@@ -1240,6 +1241,26 @@ public class WebSettings {
             mJavaScriptEnabled = flag;
             postSync();
         }
+    }
+
+    /**
+     * Tell the WebView to use Skia's hardware accelerated rendering path
+     * @param flag True if the WebView should use Skia's hw-accel path
+     * @hide
+     */
+    public synchronized void setHardwareAccelSkiaEnabled(boolean flag) {
+        if (mHardwareAccelSkia != flag) {
+            mHardwareAccelSkia = flag;
+            postSync();
+        }
+    }
+
+    /**
+     * @return True if the WebView is using hardware accelerated skia
+     * @hide
+     */
+    public synchronized boolean getHardwareAccelSkiaEnabled() {
+        return mHardwareAccelSkia;
     }
 
     /**
