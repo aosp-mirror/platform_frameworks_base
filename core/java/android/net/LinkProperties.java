@@ -80,9 +80,9 @@ public class LinkProperties implements Parcelable {
     public LinkProperties(LinkProperties source) {
         if (source != null) {
             mIfaceName = source.getInterfaceName();
-            mLinkAddresses = source.getLinkAddresses();
-            mDnses = source.getDnses();
-            mRoutes = source.getRoutes();
+            for (LinkAddress l : source.getLinkAddresses()) mLinkAddresses.add(l);
+            for (InetAddress i : source.getDnses()) mDnses.add(i);
+            for (RouteInfo r : source.getRoutes()) mRoutes.add(r);
             mHttpProxy = (source.getHttpProxy() == null)  ?
                 null : new ProxyProperties(source.getHttpProxy());
         }
