@@ -16,10 +16,15 @@
 
 package com.android.systemui.statusbar.policy;
 
+import android.animation.Animator;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.Canvas;
+import android.graphics.RectF;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.ServiceManager;
@@ -33,7 +38,9 @@ import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SoundEffectConstants;
+import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RemoteViews.RemoteView;
 
@@ -48,18 +55,25 @@ public class KeyButtonView extends ImageView {
     int mCode;
     int mRepeat;
     int mTouchSlop;
+    Drawable mGlowBG;
+    float mGlowAlpha = 0f, mGlowScale = 1f, mDrawingAlpha = 1f;
 
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
-                mRepeat++;
-                sendEvent(KeyEvent.ACTION_DOWN,
-                        KeyEvent.FLAG_FROM_SYSTEM
-                        | KeyEvent.FLAG_VIRTUAL_HARD_KEY
-                        | KeyEvent.FLAG_LONG_PRESS);
 
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
-                //playSoundEffect(SoundEffectConstants.CLICK);
+                if (mCode != 0) {
+                    mRepeat++;
+                    sendEvent(KeyEvent.ACTION_DOWN,
+                            KeyEvent.FLAG_FROM_SYSTEM
+                            | KeyEvent.FLAG_VIRTUAL_HARD_KEY
+                            | KeyEvent.FLAG_LONG_PRESS);
+
+                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_LONG_CLICKED);
+                } else {
+                    // Just an old-fashioned ImageView
+                    performLongClick();
+                }
             }
         }
     };
@@ -75,8 +89,10 @@ public class KeyButtonView extends ImageView {
                 defStyle, 0);
 
         mCode = a.getInteger(R.styleable.KeyButtonView_keyCode, 0);
-        if (mCode == 0) {
-            Slog.w(TAG, "KeyButtonView without key code id=0x" + Integer.toHexString(getId()));
+
+        mGlowBG = a.getDrawable(R.styleable.KeyButtonView_glowBackground);
+        if (mGlowBG != null) {
+            mDrawingAlpha = 0.5f;
         }
         
         a.recycle();
@@ -86,6 +102,98 @@ public class KeyButtonView extends ImageView {
 
         setClickable(true);
         mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        if (mGlowBG != null) {
+            canvas.save();
+            final int w = getWidth();
+            final int h = getHeight();
+            canvas.scale(mGlowScale, mGlowScale, w*0.5f, h*0.5f);
+            mGlowBG.setBounds(0, 0, w, h);
+            mGlowBG.setAlpha((int)(mGlowAlpha * 255));
+            mGlowBG.draw(canvas);
+            canvas.restore();
+
+            canvas.saveLayerAlpha(null, (int)(mDrawingAlpha * 255), Canvas.ALL_SAVE_FLAG);
+        }
+        super.onDraw(canvas);
+        if (mGlowBG != null) {
+            canvas.restore();
+        }
+    }
+
+    public float getDrawingAlpha() {
+        if (mGlowBG == null) return 0;
+        return mDrawingAlpha;
+    }
+
+    public void setDrawingAlpha(float x) {
+        if (mGlowBG == null) return;
+        mDrawingAlpha = x;
+        invalidate();
+    }
+
+    public float getGlowAlpha() {
+        if (mGlowBG == null) return 0;
+        return mGlowAlpha;
+    }
+
+    public void setGlowAlpha(float x) {
+        if (mGlowBG == null) return;
+        mGlowAlpha = x;
+        invalidate();
+    }
+
+    public float getGlowScale() {
+        if (mGlowBG == null) return 0;
+        return mGlowScale;
+    }
+
+    public void setGlowScale(float x) {
+        if (mGlowBG == null) return;
+        mGlowScale = x;
+        final float w = getWidth();
+        final float h = getHeight();
+        if (x < 1.0f) {
+            invalidate();
+        } else {
+            x = (w * (x - 1.0f)) / 2.0f;
+            com.android.systemui.SwipeHelper.invalidateGlobalRegion(
+                    this,
+                    new RectF(getLeft() - x,
+                              getTop() - x,
+                              getRight() + x,
+                              getBottom() + x));
+        }
+    }
+
+    public void setPressed(boolean pressed) {
+        if (mGlowBG != null) {
+            if (pressed != isPressed()) {
+                AnimatorSet as = new AnimatorSet();
+                if (pressed) {
+                    if (mGlowScale < 1.7f) mGlowScale = 1.7f;
+                    if (mGlowAlpha < 0.5f) mGlowAlpha = 0.5f;
+                    setDrawingAlpha(1f);
+                    as.playTogether(
+                        ObjectAnimator.ofFloat(this, "glowAlpha", 1f),
+                        ObjectAnimator.ofFloat(this, "glowScale", 1.8f)
+                    );
+                    as.setDuration(50);
+                } else {
+                    as.playTogether(
+                        ObjectAnimator.ofFloat(this, "glowAlpha", 0f),
+                        ObjectAnimator.ofFloat(this, "glowScale", 1f),
+                        ObjectAnimator.ofFloat(this, "drawingAlpha", 0.5f)
+                    );
+                    as.setDuration(500);
+                }
+                as.start();
+            }
+        }
+        super.setPressed(pressed);
     }
 
     public boolean onTouchEvent(MotionEvent ev) {
@@ -131,12 +239,18 @@ public class KeyButtonView extends ImageView {
                     mSending = false;
                     final int flags = KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY;
                     removeCallbacks(mCheckLongPress);
-                    if (doIt) {
-                        sendEvent(KeyEvent.ACTION_UP, flags);
-                        sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
-                        playSoundEffect(SoundEffectConstants.CLICK);
+
+                    if (mCode != 0) {
+                        if (doIt) {
+                            sendEvent(KeyEvent.ACTION_UP, flags);
+                            sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+                            playSoundEffect(SoundEffectConstants.CLICK);
+                        } else {
+                            sendEvent(KeyEvent.ACTION_UP, flags | KeyEvent.FLAG_CANCELED);
+                        }
                     } else {
-                        sendEvent(KeyEvent.ACTION_UP, flags | KeyEvent.FLAG_CANCELED);
+                        // no key code, just a regular ImageView
+                        if (doIt) performClick();
                     }
                 }
                 break;
