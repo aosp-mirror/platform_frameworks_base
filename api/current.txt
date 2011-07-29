@@ -27557,6 +27557,7 @@ package java.io {
 
   public class DataInputStream extends java.io.FilterInputStream implements java.io.DataInput {
     ctor public DataInputStream(java.io.InputStream);
+    method public final int read(byte[]) throws java.io.IOException;
     method public final int read(byte[], int, int) throws java.io.IOException;
     method public final boolean readBoolean() throws java.io.IOException;
     method public final byte readByte() throws java.io.IOException;
