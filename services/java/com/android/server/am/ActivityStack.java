@@ -560,6 +560,7 @@ final class ActivityStack {
             showAskCompatModeDialogLocked(r);
             r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
             app.hasShownUi = true;
+            app.pendingUiClean = true;
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
                     System.identityHashCode(r),
                     r.info, r.compat, r.icicle, results, newIntents, !andResume,

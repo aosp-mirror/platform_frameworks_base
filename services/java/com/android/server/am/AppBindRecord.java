@@ -26,7 +26,7 @@ import java.util.Iterator;
 class AppBindRecord {
     final ServiceRecord service;    // The running service.
     final IntentBindRecord intent;  // The intent we are bound to.
-    final ProcessRecord client; // Who has started/bound the service.
+    final ProcessRecord client;     // Who has started/bound the service.
 
     final HashSet<ConnectionRecord> connections = new HashSet<ConnectionRecord>();
                                     // All ConnectionRecord for this client.

@@ -16,10 +16,14 @@
 
 package android.app;
 
+import java.util.ArrayList;
+
 import android.content.ComponentCallbacks;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
+import android.os.Bundle;
 
 /**
  * Base class for those who need to maintain global application state. You can
@@ -36,10 +40,25 @@ import android.content.res.Configuration;
  * {@link android.content.Context#getApplicationContext() Context.getApplicationContext()}
  * when first constructing the singleton.</p>
  */
-public class Application extends ContextWrapper implements ComponentCallbacks {
+public class Application extends ContextWrapper implements ComponentCallbacks2 {
+    private ArrayList<ComponentCallbacks> mComponentCallbacks =
+            new ArrayList<ComponentCallbacks>();
+    private ArrayList<ActivityLifecycleCallbacks> mActivityLifecycleCallbacks =
+            new ArrayList<ActivityLifecycleCallbacks>();
+
     /** @hide */
     public LoadedApk mLoadedApk;
-    
+
+    public interface ActivityLifecycleCallbacks {
+        void onActivityCreated(Activity activity, Bundle savedInstanceState);
+        void onActivityStarted(Activity activity);
+        void onActivityResumed(Activity activity);
+        void onActivityPaused(Activity activity);
+        void onActivityStopped(Activity activity);
+        void onActivitySaveInstanceState(Activity activity, Bundle outState);
+        void onActivityDestroyed(Activity activity);
+    }
+
     public Application() {
         super(null);
     }
@@ -63,11 +82,59 @@ public class Application extends ContextWrapper implements ComponentCallbacks {
      */
     public void onTerminate() {
     }
-    
+
     public void onConfigurationChanged(Configuration newConfig) {
+        Object[] callbacks = collectComponentCallbacks();
+        if (callbacks != null) {
+            for (int i=0; i<callbacks.length; i++) {
+                ((ComponentCallbacks)callbacks[i]).onConfigurationChanged(newConfig);
+            }
+        }
     }
-    
+
     public void onLowMemory() {
+        Object[] callbacks = collectComponentCallbacks();
+        if (callbacks != null) {
+            for (int i=0; i<callbacks.length; i++) {
+                ((ComponentCallbacks)callbacks[i]).onLowMemory();
+            }
+        }
+    }
+
+    public void onTrimMemory(int level) {
+        Object[] callbacks = collectComponentCallbacks();
+        if (callbacks != null) {
+            for (int i=0; i<callbacks.length; i++) {
+                Object c = callbacks[i];
+                if (c instanceof ComponentCallbacks2) {
+                    ((ComponentCallbacks2)c).onTrimMemory(level);
+                }
+            }
+        }
+    }
+
+    public void registerComponentCallbacks(ComponentCallbacks callback) {
+        synchronized (mComponentCallbacks) {
+            mComponentCallbacks.add(callback);
+        }
+    }
+
+    public void unregisterComponentCallbacks(ComponentCallbacks callback) {
+        synchronized (mComponentCallbacks) {
+            mComponentCallbacks.remove(callback);
+        }
+    }
+
+    public void registerActivityLifecycleCallbacks(ActivityLifecycleCallbacks callback) {
+        synchronized (mActivityLifecycleCallbacks) {
+            mActivityLifecycleCallbacks.add(callback);
+        }
+    }
+
+    public void unregisterActivityLifecycleCallbacks(ActivityLifecycleCallbacks callback) {
+        synchronized (mActivityLifecycleCallbacks) {
+            mActivityLifecycleCallbacks.remove(callback);
+        }
     }
     
     // ------------------ Internal API ------------------
@@ -78,5 +145,90 @@ public class Application extends ContextWrapper implements ComponentCallbacks {
     /* package */ final void attach(Context context) {
         attachBaseContext(context);
         mLoadedApk = ContextImpl.getImpl(context).mPackageInfo;
+    }
+
+    /* package */ void dispatchActivityCreated(Activity activity, Bundle savedInstanceState) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i=0; i<callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks)callbacks[i]).onActivityCreated(activity,
+                        savedInstanceState);
+            }
+        }
+    }
+
+    /* package */ void dispatchActivityStarted(Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i=0; i<callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks)callbacks[i]).onActivityStarted(activity);
+            }
+        }
+    }
+
+    /* package */ void dispatchActivityResumed(Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i=0; i<callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks)callbacks[i]).onActivityResumed(activity);
+            }
+        }
+    }
+
+    /* package */ void dispatchActivityPaused(Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i=0; i<callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks)callbacks[i]).onActivityPaused(activity);
+            }
+        }
+    }
+
+    /* package */ void dispatchActivityStopped(Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i=0; i<callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks)callbacks[i]).onActivityStopped(activity);
+            }
+        }
+    }
+
+    /* package */ void dispatchActivitySaveInstanceState(Activity activity, Bundle outState) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i=0; i<callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks)callbacks[i]).onActivitySaveInstanceState(activity,
+                        outState);
+            }
+        }
+    }
+
+    /* package */ void dispatchActivityDestroyed(Activity activity) {
+        Object[] callbacks = collectActivityLifecycleCallbacks();
+        if (callbacks != null) {
+            for (int i=0; i<callbacks.length; i++) {
+                ((ActivityLifecycleCallbacks)callbacks[i]).onActivityDestroyed(activity);
+            }
+        }
+    }
+
+    private Object[] collectComponentCallbacks() {
+        Object[] callbacks = null;
+        synchronized (mComponentCallbacks) {
+            if (mComponentCallbacks.size() > 0) {
+                callbacks = mComponentCallbacks.toArray();
+            }
+        }
+        return callbacks;
+    }
+
+    private Object[] collectActivityLifecycleCallbacks() {
+        Object[] callbacks = null;
+        synchronized (mActivityLifecycleCallbacks) {
+            if (mActivityLifecycleCallbacks.size() > 0) {
+                callbacks = mActivityLifecycleCallbacks.toArray();
+            }
+        }
+        return callbacks;
     }
 }

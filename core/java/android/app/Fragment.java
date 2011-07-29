@@ -17,7 +17,7 @@
 package android.app;
 
 import android.animation.Animator;
-import android.content.ComponentCallbacks;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -332,7 +332,7 @@ final class FragmentState implements Parcelable {
  * pressing back will pop it to return the user to whatever previous state
  * the activity UI was in.
  */
-public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener {
+public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListener {
     private static final HashMap<String, Class<?>> sClassMap =
             new HashMap<String, Class<?>>();
     
@@ -1182,6 +1182,10 @@ public class Fragment implements ComponentCallbacks, OnCreateContextMenuListener
         mCalled = true;
     }
     
+    public void onTrimMemory(int level) {
+        mCalled = true;
+    }
+
     /**
      * Called when the view previously created by {@link #onCreateView} has
      * been detached from the fragment.  The next time the fragment needs
