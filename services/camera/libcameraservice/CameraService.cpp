@@ -988,7 +988,7 @@ void CameraService::Client::notifyCallback(int32_t msgType, int32_t ext1,
 }
 
 void CameraService::Client::dataCallback(int32_t msgType,
-        const sp<IMemory>& dataPtr, void* user) {
+        const sp<IMemory>& dataPtr, camera_frame_metadata_t *metadata, void* user) {
     LOG2("dataCallback(%d)", msgType);
 
     sp<Client> client = getClientFromCookie(user);

@@ -131,7 +131,7 @@ public class Camera {
     private static final int CAMERA_MSG_RAW_IMAGE        = 0x080;
     private static final int CAMERA_MSG_COMPRESSED_IMAGE = 0x100;
     private static final int CAMERA_MSG_RAW_IMAGE_NOTIFY = 0x200;
-    private static final int CAMERA_MSG_FACE             = 0x400;
+    private static final int CAMERA_MSG_METADATA_FACE    = 0x400;
     private static final int CAMERA_MSG_ALL_MSGS         = 0x4FF;
 
     private int mNativeContext; // accessed by native methods
@@ -721,9 +721,9 @@ public class Camera {
                 }
                 return;
 
-            case CAMERA_MSG_FACE:
+            case CAMERA_MSG_METADATA_FACE:
                 if (mFaceListener != null) {
-                    mFaceListener.onFaceDetection((FaceMetadata[])msg.obj, mCamera);
+                    mFaceListener.onFaceDetection((Face[])msg.obj, mCamera);
                 }
                 return;
 
@@ -1078,11 +1078,11 @@ public class Camera {
         /**
          * Notify the listener of the detected faces in the preview frame.
          *
-         * @param faceMetadata the face information. The list is sorted by the
-         *        score. The highest score is the first element.
+         * @param faces the detected faces. The list is sorted by the score.
+         *              The highest score is the first element.
          * @param camera  the Camera service object
          */
-        void onFaceDetection(FaceMetadata[] faceMetadata, Camera camera);
+        void onFaceDetection(Face[] faces, Camera camera);
     }
 
     /**
@@ -1151,20 +1151,24 @@ public class Camera {
     private native final void _stopFaceDetection();
 
     /**
-     * The information of a face.
+     * The information of a face from camera face detection.
      *
      * @hide
      */
-    public static class FaceMetadata {
+    public static class Face {
         /**
          * Bounds of the face. (-1000, -1000) represents the top-left of the
          * camera field of view, and (1000, 1000) represents the bottom-right of
-         * the field of view. This is supported by both hardware and software
-         * face detection.
+         * the field of view. The width and height cannot be 0 or negative. This
+         * is supported by both hardware and software face detection.
+         *
+         * <p>The direction is relative to the sensor orientation, that is, what
+         * the sensor sees. The direction is not affected by the rotation or
+         * mirroring of {@link #setDisplayOrientation(int)}.</p>
          *
          * @see #startFaceDetection(int)
          */
-        Rect face;
+        Rect rect;
 
         /**
          * The confidence level of the face. The range is 1 to 100. 100 is the
@@ -1183,20 +1187,20 @@ public class Camera {
         int id;
 
         /**
-         * The coordinates of the center of the left eye. null if this is not
-         * supported.
+         * The coordinates of the center of the left eye. The range is -1000 to
+         * 1000. null if this is not supported.
          */
         Point leftEye;
 
         /**
-         * The coordinates of the center of the right eye. null if this is not
-         * supported.
+         * The coordinates of the center of the right eye. The range is -1000 to
+         * 1000. null if this is not supported.
          */
         Point rightEye;
 
         /**
-         * The coordinates of the center of the mouth. null if this is not
-         * supported.
+         * The coordinates of the center of the mouth. The range is -1000 to
+         * 1000. null if this is not supported.
          */
         Point mouth;
     }

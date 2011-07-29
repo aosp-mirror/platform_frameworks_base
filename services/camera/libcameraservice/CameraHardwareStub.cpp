@@ -180,7 +180,7 @@ int CameraHardwareStub::previewThread()
 
         // Notify the client of a new frame.
         if (mMsgEnabled & CAMERA_MSG_PREVIEW_FRAME)
-            mDataCb(CAMERA_MSG_PREVIEW_FRAME, buffer, mCallbackCookie);
+            mDataCb(CAMERA_MSG_PREVIEW_FRAME, buffer, NULL, mCallbackCookie);
 
         // Advance the buffer pointer.
         mCurrentPreviewFrame = (mCurrentPreviewFrame + 1) % kBufferCount;
@@ -290,14 +290,14 @@ int CameraHardwareStub::pictureThread()
         sp<MemoryBase> mem = new MemoryBase(mRawHeap, 0, w * h * 3 / 2);
         FakeCamera cam(w, h);
         cam.getNextFrameAsYuv420((uint8_t *)mRawHeap->base());
-        mDataCb(CAMERA_MSG_RAW_IMAGE, mem, mCallbackCookie);
+        mDataCb(CAMERA_MSG_RAW_IMAGE, mem, NULL, mCallbackCookie);
     }
 
     if (mMsgEnabled & CAMERA_MSG_COMPRESSED_IMAGE) {
         sp<MemoryHeapBase> heap = new MemoryHeapBase(kCannedJpegSize);
         sp<MemoryBase> mem = new MemoryBase(heap, 0, kCannedJpegSize);
         memcpy(heap->base(), kCannedJpeg, kCannedJpegSize);
-        mDataCb(CAMERA_MSG_COMPRESSED_IMAGE, mem, mCallbackCookie);
+        mDataCb(CAMERA_MSG_COMPRESSED_IMAGE, mem, NULL, mCallbackCookie);
     }
     return NO_ERROR;
 }

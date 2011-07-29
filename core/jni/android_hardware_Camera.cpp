@@ -38,7 +38,7 @@ struct fields_t {
     jfieldID    surfaceTexture;
     jfieldID    facing;
     jfieldID    orientation;
-    jfieldID    face_rectangle;
+    jfieldID    face_rect;
     jfieldID    face_score;
     jfieldID    rect_left;
     jfieldID    rect_top;
@@ -859,8 +859,8 @@ int register_android_hardware_Camera(JNIEnv *env)
           ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID, "I", &fields.surfaceTexture },
         { "android/hardware/Camera$CameraInfo", "facing",   "I", &fields.facing },
         { "android/hardware/Camera$CameraInfo", "orientation",   "I", &fields.orientation },
-        { "android/hardware/Camera$FaceMetadata", "face", "Landroid/graphics/Rect;", &fields.face_rectangle },
-        { "android/hardware/Camera$FaceMetadata", "score", "I", &fields.face_score },
+        { "android/hardware/Camera$Face", "rect", "Landroid/graphics/Rect;", &fields.face_rect },
+        { "android/hardware/Camera$Face", "score", "I", &fields.face_score },
         { "android/graphics/Rect", "left", "I", &fields.rect_left },
         { "android/graphics/Rect", "top", "I", &fields.rect_top },
         { "android/graphics/Rect", "right", "I", &fields.rect_right },
