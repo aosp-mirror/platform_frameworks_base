@@ -32,5 +32,6 @@ interface ITextServicesManager {
             in ITextServicesSessionListener tsListener,
             in ISpellCheckerSessionListener scListener);
     oneway void finishSpellCheckerService(in ISpellCheckerSessionListener listener);
+    oneway void setCurrentSpellChecker(in SpellCheckerInfo info);
     SpellCheckerInfo[] getEnabledSpellCheckers();
 }
