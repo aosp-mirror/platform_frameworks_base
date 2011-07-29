@@ -288,6 +288,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         } else {
                             unbindAllServicesLocked();
                         }
+                        updateInputFilterLocked();
                         sendStateToClientsLocked();
                     }
                 }
