@@ -185,6 +185,8 @@
     <string name="accessibility_home">Home</string>
     <!-- Content description of the menu button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_menu">Menu</string>
+    <!-- Content description of the recents button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_recent">Recent applications</string>
 
     <!-- Content description of the switch input method button for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_ime_switch_button">Switch input method button.</string>
