@@ -17,32 +17,24 @@
 package com.android.internal.policy.impl;
 
 import com.android.internal.R;
-import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.SlidingTab;
 import com.android.internal.widget.WaveView;
-import com.android.internal.widget.WaveView.OnTriggerListener;
 import com.android.internal.widget.multiwaveview.MultiWaveView;
 
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.content.res.ColorStateList;
-import android.text.format.DateFormat;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
-import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.media.AudioManager;
-import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.provider.Settings;
 
-import java.util.Date;
 import java.io.File;
 
 /**
@@ -50,103 +42,29 @@ import java.io.File;
  * information about the device depending on its state, and how to get
  * past it, as applicable.
  */
-class LockScreen extends LinearLayout implements KeyguardScreen,
-        KeyguardUpdateMonitor.InfoCallback,
-        KeyguardUpdateMonitor.SimStateCallback {
+class LockScreen extends LinearLayout implements KeyguardScreen {
 
     private static final boolean DBG = false;
     private static final String TAG = "LockScreen";
     private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
-
-    private Status mStatus = Status.Normal;
+    private static final int WAIT_FOR_ANIMATION_TIMEOUT = 0;
+    private static final int STAY_ON_WHILE_GRABBED_TIMEOUT = 30000;
 
     private LockPatternUtils mLockPatternUtils;
     private KeyguardUpdateMonitor mUpdateMonitor;
     private KeyguardScreenCallback mCallback;
 
-    private TextView mScreenLocked;
-    private TextView mEmergencyCallText;
-    private Button mEmergencyCallButton;
-
     // current configuration state of keyboard and display
     private int mKeyboardHidden;
     private int mCreationOrientation;
 
-    // are we showing battery information?
-    private boolean mShowingBatteryInfo = false;
-
-    // last known plugged in state
-    private boolean mPluggedIn = false;
-
-    // last known battery level
-    private int mBatteryLevel = 100;
-
     private boolean mSilentMode;
     private AudioManager mAudioManager;
-    private String mDateFormatString;
-    private java.text.DateFormat mTimeFormat;
     private boolean mEnableMenuKeyInLockScreen;
 
-    private StatusView mStatusView;
+    private KeyguardStatusViewManager mStatusViewManager;
     private UnlockWidgetCommonMethods mUnlockWidgetMethods;
     private View mUnlockWidget;
-
-
-    /**
-     * The status of this lock screen.
-     */
-    enum Status {
-        /**
-         * Normal case (sim card present, it's not locked)
-         */
-        Normal(true),
-
-        /**
-         * The sim card is 'network locked'.
-         */
-        NetworkLocked(true),
-
-        /**
-         * The sim card is missing.
-         */
-        SimMissing(false),
-
-        /**
-         * The sim card is missing, and this is the device isn't provisioned, so we don't let
-         * them get past the screen.
-         */
-        SimMissingLocked(false),
-
-        /**
-         * The sim card is PUK locked, meaning they've entered the wrong sim unlock code too many
-         * times.
-         */
-        SimPukLocked(false),
-
-        /**
-         * The sim card is locked.
-         */
-        SimLocked(true),
-
-        /**
-         * The sim card is permanently disabled due to puk unlock failure
-         */
-        SimPermDisabled(false);
-
-        private final boolean mShowStatusLines;
-
-        Status(boolean mShowStatusLines) {
-            this.mShowStatusLines = mShowStatusLines;
-        }
-
-        /**
-         * @return Whether the status lines (battery level and / or next alarm) are shown while
-         *         in this state.  Mostly dictated by whether this is room for them.
-         */
-        public boolean showStatusLines() {
-            return mShowStatusLines;
-        }
-    }
 
     private interface UnlockWidgetCommonMethods {
         // Update resources based on phone state
@@ -191,7 +109,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
                 mCallback.goToUnlockScreen();
             } else if (whichHandle == SlidingTab.OnTriggerListener.RIGHT_HANDLE) {
                 toggleRingMode();
-                doSilenceRingToast();
                 mCallback.pokeWakelock();
             }
         }
@@ -222,9 +139,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
         public void ping() {
         }
     }
-
-    private static final int WAIT_FOR_ANIMATION_TIMEOUT = 0;
-    private static final int STAY_ON_WHILE_GRABBED_TIMEOUT = 30000;
 
     class WaveViewMethods implements WaveView.OnTriggerListener, UnlockWidgetCommonMethods {
 
@@ -290,7 +204,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
                 mCallback.goToUnlockScreen();
             } else if (target == 2) {
                 toggleRingMode();
-                doSilenceRingToast();
                 mUnlockWidgetMethods.updateResources();
                 mCallback.pokeWakelock();
             }
@@ -327,27 +240,12 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
         }, WAIT_FOR_ANIMATION_TIMEOUT);
     }
 
-    private void doSilenceRingToast() {
-        String message = mSilentMode ?
-                getContext().getString(R.string.global_action_silent_mode_on_status) :
-                getContext().getString(R.string.global_action_silent_mode_off_status);
-
-        final int toastIcon = mSilentMode
-            ? R.drawable.ic_lock_ringer_off
-            : R.drawable.ic_lock_ringer_on;
-
-        final int toastColor = mSilentMode
-            ? getContext().getResources().getColor(R.color.keyguard_text_color_soundoff)
-            : getContext().getResources().getColor(R.color.keyguard_text_color_soundon);
-        toastMessage(mScreenLocked, message, toastColor, toastIcon);
-    }
-
     private void toggleRingMode() {
         // toggle silent mode
         mSilentMode = !mSilentMode;
         if (mSilentMode) {
             final boolean vibe = (Settings.System.getInt(
-                getContext().getContentResolver(),
+                mContext.getContentResolver(),
                 Settings.System.VIBRATE_IN_SILENT, 1) == 1);
 
             mAudioManager.setRingerMode(vibe
@@ -409,29 +307,17 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
             inflater.inflate(R.layout.keyguard_screen_tab_unlock_land, this, true);
         }
 
-        mStatusView = new StatusView(this, mUpdateMonitor, mLockPatternUtils);
+        mStatusViewManager = new KeyguardStatusViewManager(this, mUpdateMonitor, mLockPatternUtils,
+                mCallback);
 
-        mScreenLocked = (TextView) findViewById(R.id.screenLocked);
-
-        mEmergencyCallText = (TextView) findViewById(R.id.emergencyCallText);
-        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
-        mEmergencyCallButton.setText(R.string.lockscreen_emergency_call);
-
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
-        mEmergencyCallButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                mCallback.takeEmergencyCallAction();
-            }
-        });
+        // LockScreen doesn't show the emergency call button by default
+        mStatusViewManager.hideEmergencyCallButton();
 
         setFocusable(true);
         setFocusableInTouchMode(true);
         setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
 
-        mUpdateMonitor.registerInfoCallback(this);
-        mUpdateMonitor.registerSimStateCallback(this);
-
-        mAudioManager = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
         mSilentMode = isSilentMode();
 
         mUnlockWidget = findViewById(R.id.unlock_widget);
@@ -466,26 +352,10 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
 
         if (DBG) Log.v(TAG, "*** LockScreen accel is "
                 + (mUnlockWidget.isHardwareAccelerated() ? "on":"off"));
-
-        resetStatusInfo(updateMonitor);
     }
 
     private boolean isSilentMode() {
         return mAudioManager.getRingerMode() != AudioManager.RINGER_MODE_NORMAL;
-    }
-
-    private void resetStatusInfo(KeyguardUpdateMonitor updateMonitor) {
-        mShowingBatteryInfo = updateMonitor.shouldShowBatteryInfo();
-        mPluggedIn = updateMonitor.isDevicePluggedIn();
-        mBatteryLevel = updateMonitor.getBatteryLevel();
-
-        mStatus = getCurrentStatus(updateMonitor.getSimState());
-        updateLayout(mStatus);
-
-        mTimeFormat = DateFormat.getTimeFormat(getContext());
-        mDateFormatString = getContext().getString(R.string.full_wday_month_day_no_year);
-        refreshTimeAndDateDisplay();
-        updateStatusLines();
     }
 
     @Override
@@ -494,263 +364,6 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
             mCallback.goToUnlockScreen();
         }
         return false;
-    }
-
-    /**
-     * Displays a message in a text view and then restores the previous text.
-     * @param textView The text view.
-     * @param text The text.
-     * @param color The color to apply to the text, or 0 if the existing color should be used.
-     * @param iconResourceId The left hand icon.
-     */
-    private void toastMessage(final TextView textView, final String text, final int color, final int iconResourceId) {
-        if (mPendingR1 != null) {
-            textView.removeCallbacks(mPendingR1);
-            mPendingR1 = null;
-        }
-        if (mPendingR2 != null) {
-            mPendingR2.run(); // fire immediately, restoring non-toasted appearance
-            textView.removeCallbacks(mPendingR2);
-            mPendingR2 = null;
-        }
-
-        final String oldText = textView.getText().toString();
-        final ColorStateList oldColors = textView.getTextColors();
-
-        mPendingR1 = new Runnable() {
-            public void run() {
-                textView.setText(text);
-                if (color != 0) {
-                    textView.setTextColor(color);
-                }
-                textView.setCompoundDrawablesWithIntrinsicBounds(iconResourceId, 0, 0, 0);
-            }
-        };
-
-        textView.postDelayed(mPendingR1, 0);
-        mPendingR2 = new Runnable() {
-            public void run() {
-                textView.setText(oldText);
-                textView.setTextColor(oldColors);
-                textView.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
-            }
-        };
-        textView.postDelayed(mPendingR2, 3500);
-    }
-    private Runnable mPendingR1;
-    private Runnable mPendingR2;
-
-    /** {@inheritDoc} */
-    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn,
-            int batteryLevel) {
-        if (DBG) Log.d(TAG, "onRefreshBatteryInfo(" + showBatteryInfo + ", " + pluggedIn + ")");
-
-        mStatusView.onRefreshBatteryInfo(showBatteryInfo, pluggedIn, batteryLevel);
-
-        mShowingBatteryInfo = showBatteryInfo;
-        mPluggedIn = pluggedIn;
-        mBatteryLevel = batteryLevel;
-
-        updateStatusLines();
-    }
-
-    /** {@inheritDoc} */
-    public void onTimeChanged() {
-        refreshTimeAndDateDisplay();
-    }
-
-    private void refreshTimeAndDateDisplay() {
-        mStatusView.refreshTimeAndDateDisplay();
-    }
-
-    private void updateStatusLines() {
-        mStatusView.updateStatusLines(mStatus.showStatusLines());
-    }
-
-    /** {@inheritDoc} */
-    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-        if (DBG) Log.d(TAG, "onRefreshCarrierInfo(" + plmn + ", " + spn + ")");
-        updateLayout(mStatus);
-    }
-
-    /**
-     * Determine the current status of the lock screen given the sim state and other stuff.
-     */
-    private Status getCurrentStatus(IccCard.State simState) {
-        boolean missingAndNotProvisioned = (!mUpdateMonitor.isDeviceProvisioned()
-                && (simState == IccCard.State.ABSENT
-                        || simState == IccCard.State.PERM_DISABLED));
-
-        if (missingAndNotProvisioned) {
-            return Status.SimMissingLocked;
-        }
-
-        switch (simState) {
-            case ABSENT:
-                return Status.SimMissing;
-            case NETWORK_LOCKED:
-                return Status.SimMissingLocked;
-            case NOT_READY:
-                return Status.SimMissing;
-            case PIN_REQUIRED:
-                return Status.SimLocked;
-            case PUK_REQUIRED:
-                return Status.SimPukLocked;
-            case READY:
-                return Status.Normal;
-            case PERM_DISABLED:
-                return Status.SimPermDisabled;
-            case UNKNOWN:
-                return Status.SimMissing;
-        }
-        return Status.SimMissing;
-    }
-
-    /**
-     * Enables unlocking of this screen. Typically just shows the unlock widget.
-     */
-    private void enableUnlock() {
-        mUnlockWidgetMethods.getView().setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * Disable unlocking of this screen. Typically just hides the unlock widget.
-     */
-    private void disableUnlock() {
-        mUnlockWidgetMethods.getView().setVisibility(View.GONE);
-    }
-
-    /**
-     * Update the layout to match the current status.
-     */
-    private void updateLayout(Status status) {
-        // The emergency call button no longer appears on this screen.
-        if (DBG) Log.d(TAG, "updateLayout: status=" + status);
-
-        mEmergencyCallButton.setVisibility(View.GONE); // in almost all cases
-
-        switch (status) {
-            case Normal:
-                // text
-                mStatusView.setCarrierText(
-                        getCarrierString(
-                                mUpdateMonitor.getTelephonyPlmn(),
-                                mUpdateMonitor.getTelephonySpn()));
-
-                // Empty now, but used for sliding tab feedback
-                mScreenLocked.setText("");
-
-                // layout
-                mScreenLocked.setVisibility(View.INVISIBLE);
-                mEmergencyCallText.setVisibility(View.GONE);
-                enableUnlock();
-                break;
-
-            case NetworkLocked:
-                // The carrier string shows both sim card status (i.e. No Sim Card) and
-                // carrier's name and/or "Emergency Calls Only" status
-                mStatusView.setCarrierText(
-                        getCarrierString(
-                                mUpdateMonitor.getTelephonyPlmn(),
-                                getContext().getText(R.string.lockscreen_network_locked_message)));
-                mScreenLocked.setText(R.string.lockscreen_instructions_when_pattern_disabled);
-
-                // layout
-                mScreenLocked.setVisibility(View.VISIBLE);
-                mEmergencyCallText.setVisibility(View.GONE);
-                enableUnlock();
-                break;
-
-            case SimMissing:
-                // text
-                mStatusView.setCarrierText(R.string.lockscreen_missing_sim_message_short);
-                mScreenLocked.setText(R.string.lockscreen_missing_sim_instructions_long);
-
-                // layout
-                mScreenLocked.setVisibility(View.VISIBLE);
-                mLockPatternUtils.updateEmergencyCallText(mEmergencyCallText);
-                enableUnlock(); // do not need to show the e-call button; user may unlock
-                break;
-
-            case SimPermDisabled:
-                // text
-                mStatusView.setCarrierText(R.string.lockscreen_missing_sim_message_short);
-                mScreenLocked.setText(
-                        R.string.lockscreen_permanent_disabled_sim_instructions);
-
-                // layout
-                mScreenLocked.setVisibility(View.VISIBLE);
-                mLockPatternUtils.updateEmergencyCallText(mEmergencyCallText);
-                enableUnlock(); // do not need to show the e-call button; user may unlock
-                break;
-
-            case SimMissingLocked:
-                // text
-                mStatusView.setCarrierText(
-                        getCarrierString(
-                                mUpdateMonitor.getTelephonyPlmn(),
-                                getContext().getText(R.string.lockscreen_missing_sim_message_short)));
-                mScreenLocked.setText(R.string.lockscreen_missing_sim_instructions);
-
-                // layout
-                mScreenLocked.setVisibility(View.VISIBLE);
-                mLockPatternUtils.updateEmergencyCallText(mEmergencyCallText);
-                mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
-                disableUnlock();
-                break;
-
-            case SimLocked:
-                // text
-                mStatusView.setCarrierText(
-                        getCarrierString(
-                                mUpdateMonitor.getTelephonyPlmn(),
-                                getContext().getText(R.string.lockscreen_sim_locked_message)));
-
-                // layout
-                mScreenLocked.setVisibility(View.INVISIBLE);
-                mEmergencyCallText.setVisibility(View.GONE);
-                enableUnlock();
-                break;
-
-            case SimPukLocked:
-                // text
-                mStatusView.setCarrierText(
-                        getCarrierString(
-                                mUpdateMonitor.getTelephonyPlmn(),
-                                getContext().getText(R.string.lockscreen_sim_puk_locked_message)));
-                mScreenLocked.setText(R.string.lockscreen_sim_puk_locked_instructions);
-
-                // layout
-                mLockPatternUtils.updateEmergencyCallText(mEmergencyCallText);
-                mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
-                if (mLockPatternUtils.isPukUnlockScreenEnable()) {
-                    mScreenLocked.setVisibility(View.INVISIBLE);
-                    enableUnlock();
-                } else {
-                    mScreenLocked.setVisibility(View.VISIBLE);
-                    disableUnlock();
-                }
-                break;
-        }
-    }
-
-    static CharSequence getCarrierString(CharSequence telephonyPlmn, CharSequence telephonySpn) {
-        if (telephonyPlmn != null && telephonySpn == null) {
-            return telephonyPlmn;
-        } else if (telephonyPlmn != null && telephonySpn != null) {
-            return telephonyPlmn + "|" + telephonySpn;
-        } else if (telephonyPlmn == null && telephonySpn != null) {
-            return telephonySpn;
-        } else {
-            return "";
-        }
-    }
-
-    public void onSimStateChanged(IccCard.State simState) {
-        if (DBG) Log.d(TAG, "onSimStateChanged(" + simState + ")");
-        mStatus = getCurrentStatus(simState);
-        updateLayout(mStatus);
-        updateStatusLines();
     }
 
     void updateConfiguration() {
@@ -796,12 +409,13 @@ class LockScreen extends LinearLayout implements KeyguardScreen,
 
     /** {@inheritDoc} */
     public void onPause() {
+        mStatusViewManager.onPause();
         mUnlockWidgetMethods.reset(false);
     }
 
     /** {@inheritDoc} */
     public void onResume() {
-        resetStatusInfo(mUpdateMonitor);
+        mStatusViewManager.onResume();
         mUnlockWidgetMethods.ping();
     }
 

@@ -39,8 +39,7 @@ import com.android.internal.R;
 /**
  * Displays a dialer like interface to unlock the SIM PIN.
  */
-public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, View.OnClickListener,
-        KeyguardUpdateMonitor.InfoCallback {
+public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, View.OnClickListener {
 
     private static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
 
@@ -51,7 +50,6 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
     private TextView mPinText;
 
     private TextView mOkButton;
-    private Button mEmergencyCallButton;
 
     private View mBackSpaceButton;
 
@@ -65,6 +63,8 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
     private int mCreationOrientation;
 
     private int mKeyboardHidden;
+
+    private KeyguardStatusViewManager mKeyguardStatusViewManager;
 
     private static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
@@ -99,9 +99,8 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
 
         mOkButton.setOnClickListener(this);
 
-        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
-        mEmergencyCallButton.setOnClickListener(this);
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
+        mKeyguardStatusViewManager = new KeyguardStatusViewManager(this, updateMonitor,
+                lockpatternutils, callback);
 
         setFocusableInTouchMode(true);
     }
@@ -113,7 +112,7 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
 
     /** {@inheritDoc} */
     public void onPause() {
-
+        mKeyguardStatusViewManager.onPause();
     }
 
     /** {@inheritDoc} */
@@ -126,7 +125,7 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
         mPinText.setText("");
         mEnteredDigits = 0;
 
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
+        mKeyguardStatusViewManager.onResume();
     }
 
     /** {@inheritDoc} */
@@ -183,8 +182,6 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
                 mEnteredDigits--;
             }
             mCallback.pokeWakelock();
-        } else if (v == mEmergencyCallButton) {
-            mCallback.takeEmergencyCallAction();
         } else if (v == mOkButton) {
             checkPin();
         }
@@ -400,25 +397,5 @@ public class SimUnlockScreen extends LinearLayout implements KeyguardScreen, Vie
             }
             return digit;
         }
-    }
-
-    public void onPhoneStateChanged(String newState) {
-            mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
-    }
-
-    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
-
-    }
-
-    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-
-    }
-
-    public void onRingerModeChanged(int state) {
-
-    }
-
-    public void onTimeChanged() {
-
     }
 }

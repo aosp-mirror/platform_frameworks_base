@@ -90,11 +90,7 @@
         android:layout_gravity="right"
         />
 
-    <!-- TODO: remove hard coded height since layout_rowWeight doesn't seem to be working -->
-    <Space
-        android:layout_rowFlexibility="canStretch"
-        android:layout_columnFlexibility="canStretch"
-        />
+    <Space android:layout_gravity="fill" />
 
     <TextView android:id="@+id/carrier"
         android:layout_gravity="right"
@@ -135,6 +131,7 @@
     </LinearLayout>
 
     <!-- Column 1: lock pattern -->
+
     <com.android.internal.widget.LockPatternView android:id="@+id/lockPattern"
          android:layout_width="match_parent"
          android:layout_height="match_parent"
@@ -143,5 +140,16 @@
          android:layout_marginBottom="8dip"
          android:layout_marginLeft="8dip"
          android:layout_rowSpan="7"/>
+
+
+    <!-- Music transport control -->
+    <include android:id="@+id/transport"
+        layout="@layout/keyguard_transport_control"
+        android:layout_row="0"
+        android:layout_column="0"
+        android:layout_rowSpan="5"
+        android:layout_columnSpan="1"
+        android:layout_gravity="fill"
+        />
 
 </GridLayout>

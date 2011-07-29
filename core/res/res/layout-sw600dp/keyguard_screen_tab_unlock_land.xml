@@ -61,19 +61,6 @@
             android:layout_alignParentTop="true"
             android:drawablePadding="4dip"/>
 
-        <!-- "emergency calls only" shown when sim is missing or PUKd -->
-        <TextView
-            android:id="@+id/emergencyCallText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="12dip"
-            android:text="@string/emergency_calls_only"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="@color/white"/>
-
-
         <com.android.internal.widget.WaveView
             android:id="@+id/unlock_widget"
             android:layout_width="wrap_content"
@@ -81,7 +68,6 @@
             android:layout_gravity="center_vertical|center_horizontal"
             android:layout_marginRight="0dip"
             android:layout_weight="1.0"/>
-
 
         <!-- emergency call button shown when sim is PUKd and tab_selector is hidden -->
         <Button

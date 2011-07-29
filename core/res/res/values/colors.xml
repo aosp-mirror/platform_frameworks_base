@@ -18,8 +18,8 @@
 */
 -->
 <resources>
-	  <drawable name="screen_background_light">#ffffffff</drawable>
-	  <drawable name="screen_background_dark">#ff000000</drawable>
+      <drawable name="screen_background_light">#ffffffff</drawable>
+      <drawable name="screen_background_dark">#ff000000</drawable>
     <drawable name="status_bar_closed_default_background">#ff000000</drawable>
     <drawable name="status_bar_opened_default_background">#ff000000</drawable>
     <drawable name="search_bar_default_color">#ff000000</drawable>
@@ -75,7 +75,7 @@
 
     <drawable name="dialog_holo_dark_frame">@drawable/dialog_full_holo_dark</drawable>
     <drawable name="dialog_holo_light_frame">@drawable/dialog_full_holo_light</drawable>
-    
+
     <drawable name="input_method_fullscreen_background">#fff9f9f9</drawable>
     <drawable name="input_method_fullscreen_background_holo">@drawable/screen_background_holo_dark</drawable>
 
@@ -109,14 +109,14 @@
     <color name="keyguard_text_color_decline">#fe0a5a</color>
 
     <!-- keyguard clock -->
-    <color name="lockscreen_clock_background">#b3ffffff</color>
-    <color name="lockscreen_clock_foreground">#7affffff</color>
+    <color name="lockscreen_clock_background">#e5ffffff</color>
+    <color name="lockscreen_clock_foreground">#e5ffffff</color>
     <color name="lockscreen_clock_am_pm">#ff9a9a9a</color>
     <color name="lockscreen_owner_info">#ff9a9a9a</color>
 
     <!-- For holo theme -->
-	  <drawable name="screen_background_holo_light">#fff3f3f3</drawable>
-	  <drawable name="screen_background_holo_dark">#ff000000</drawable>
+      <drawable name="screen_background_holo_light">#fff3f3f3</drawable>
+      <drawable name="screen_background_holo_dark">#ff000000</drawable>
     <color name="background_holo_dark">#ff000000</color>
     <color name="background_holo_light">#fff3f3f3</color>
     <color name="bright_foreground_holo_dark">@android:color/background_holo_light</color>

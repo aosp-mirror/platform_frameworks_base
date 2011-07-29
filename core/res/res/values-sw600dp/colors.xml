@@ -17,21 +17,12 @@
 ** limitations under the License.
 */
 -->
-<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
-    <!-- Resources for MultiWaveView in LockScreen -->
-    <array name="lockscreen_targets_when_silent">
-        <item>@null</item>"
-        <item>@drawable/ic_lockscreen_unlock</item>
-        <item>@null</item>
-        <item>@drawable/ic_lockscreen_soundon</item>
-    </array>
-
-    <array name="lockscreen_targets_when_soundon">
-        <item>@null</item>"
-        <item>@drawable/ic_lockscreen_unlock</item>
-        <item>@null</item>
-        <item>@drawable/ic_lockscreen_silent</item>
-    </array>
+<resources>
+    <!-- keyguard clock -->
+    <color name="lockscreen_clock_background">#b3ffffff</color>
+    <color name="lockscreen_clock_foreground">#7affffff</color>
+    <color name="lockscreen_clock_am_pm">#ff9a9a9a</color>
+    <color name="lockscreen_owner_info">#ff9a9a9a</color>
 
 </resources>
+
