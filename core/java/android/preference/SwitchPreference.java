@@ -102,8 +102,8 @@ public class SwitchPreference extends TwoStatePreference {
         View checkableView = view.findViewById(com.android.internal.R.id.switchWidget);
         if (checkableView != null && checkableView instanceof Checkable) {
             ((Checkable) checkableView).setChecked(mChecked);
-            // Post this so this view is bound and attached when firing the event.
-            postSendAccessibilityEventForView(checkableView);
+
+            sendAccessibilityEvent(checkableView);
 
             if (checkableView instanceof Switch) {
                 final Switch switchView = (Switch) checkableView;
