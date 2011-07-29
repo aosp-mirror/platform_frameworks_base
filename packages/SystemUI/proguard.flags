@@ -4,3 +4,12 @@
   public void recentButtonClicked(android.view.View);
   public void toggleLightsOut(android.view.View);
 }
+
+-keep class com.android.systemui.statusbar.policy.KeyButtonView {
+  public float getDrawingAlpha();
+  public float getGlowAlpha();
+  public float getGlowScale();
+  public void setDrawingAlpha(float);
+  public void setGlowAlpha(float);
+  public void setGlowScale(float);
+}
