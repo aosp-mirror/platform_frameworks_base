@@ -364,8 +364,19 @@ public class Switch extends CompoundButton {
     @Override
     public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
         super.onPopulateAccessibilityEvent(event);
-        Layout switchText = getTargetCheckedState() ? mOnLayout : mOffLayout;
-        event.getText().add(switchText.getText());
+        if (isChecked()) {
+            CharSequence text = mOnLayout.getText();
+            if (TextUtils.isEmpty(text)) {
+                text = mContext.getString(R.string.switch_on);
+            }
+            event.getText().add(text);
+        } else {
+            CharSequence text = mOffLayout.getText();
+            if (TextUtils.isEmpty(text)) {
+                text = mContext.getString(R.string.switch_off);
+            }
+            event.getText().add(text);
+        }
     }
 
     private Layout makeLayout(CharSequence text) {
