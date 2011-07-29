@@ -22,6 +22,9 @@ import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
+import android.view.accessibility.AccessibilityEvent;
+
+import com.android.internal.R;
 
 /**
  * Displays checked/unchecked states as a button
@@ -146,5 +149,14 @@ public class ToggleButton extends CompoundButton {
             mIndicatorDrawable.setAlpha(isEnabled() ? NO_ALPHA : (int) (NO_ALPHA * mDisabledAlpha));
         }
     }
-    
+
+    @Override
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
+        if (isChecked()) {
+            event.getText().add(mContext.getString(R.string.togglebutton_pressed));
+        } else {
+            event.getText().add(mContext.getString(R.string.togglebutton_not_pressed));
+        }
+    }
 }

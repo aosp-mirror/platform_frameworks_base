@@ -37,10 +37,9 @@ public abstract class TwoStatePreference extends Preference {
     private CharSequence mSummaryOn;
     private CharSequence mSummaryOff;
     boolean mChecked;
-    private boolean mSendAccessibilityEventViewClickedType;
+    private boolean mSendClickAccessibilityEvent;
     private boolean mDisableDependentsState;
 
-    private SendAccessibilityEventTypeViewClicked mSendAccessibilityEventTypeViewClicked;
 
     public TwoStatePreference(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -60,9 +59,7 @@ public abstract class TwoStatePreference extends Preference {
 
         boolean newValue = !isChecked();
 
-        // in onBindView() an AccessibilityEventViewClickedType is sent to announce the change
-        // not sending
-        mSendAccessibilityEventViewClickedType = true;
+        mSendClickAccessibilityEvent = true;
 
         if (!callChangeListener(newValue)) {
             return;
@@ -188,26 +185,19 @@ public abstract class TwoStatePreference extends Preference {
                 : (Boolean) defaultValue);
     }
 
-    /**
-     * Post send an accessibility event for the given view if appropriate.
-     *
-     * @param view View that should send the event
-     */
-    void postSendAccessibilityEventForView(View view) {
-        // send an event to announce the value change of the state. It is done here
-        // because clicking a preference does not immediately change the checked state
-        // for example when enabling the WiFi
-        if (mSendAccessibilityEventViewClickedType
-                && AccessibilityManager.getInstance(getContext()).isEnabled()
-                && view.isEnabled()) {
-            mSendAccessibilityEventViewClickedType = false;
-            if (mSendAccessibilityEventTypeViewClicked == null) {
-                mSendAccessibilityEventTypeViewClicked =
-                    new SendAccessibilityEventTypeViewClicked();
-            }
-            mSendAccessibilityEventTypeViewClicked.mView = view;
-            view.post(mSendAccessibilityEventTypeViewClicked);
+    void sendAccessibilityEvent(View view) {
+        // Since the view is still not attached we create, populate,
+        // and send the event directly since we do not know when it
+        // will be attached and posting commands is not as clean.
+        AccessibilityManager accessibilityManager = AccessibilityManager.getInstance(getContext());
+        if (mSendClickAccessibilityEvent && accessibilityManager.isEnabled()) {
+            AccessibilityEvent event = AccessibilityEvent.obtain();
+            event.setEventType(AccessibilityEvent.TYPE_VIEW_CLICKED);
+            view.onInitializeAccessibilityEvent(event);
+            view.dispatchPopulateAccessibilityEvent(event);
+            accessibilityManager.sendAccessibilityEvent(event);
         }
+        mSendClickAccessibilityEvent = false;
     }
 
     /**
@@ -300,14 +290,5 @@ public abstract class TwoStatePreference extends Preference {
                 return new SavedState[size];
             }
         };
-    }
-
-    private final class SendAccessibilityEventTypeViewClicked implements Runnable {
-        private View mView;
-
-        @Override
-        public void run() {
-            mView.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
-        }
     }
 }

@@ -221,4 +221,14 @@ public class CheckedTextView extends TextView implements Checkable {
         super.onInitializeAccessibilityEvent(event);
         event.setChecked(mChecked);
     }
+
+    @Override
+    public void onPopulateAccessibilityEvent(AccessibilityEvent event) {
+        super.onPopulateAccessibilityEvent(event);
+        if (isChecked()) {
+            event.getText().add(mContext.getString(R.string.radiobutton_selected));
+        } else {
+            event.getText().add(mContext.getString(R.string.radiobutton_not_selected));
+        }
+    }
 }

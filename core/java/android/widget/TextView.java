@@ -8425,6 +8425,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (TextUtils.isEmpty(text)) {
                 text = getHint();
             }
+            if (TextUtils.isEmpty(text)) {
+                text = getContentDescription();
+            }
             if (!TextUtils.isEmpty(text)) {
                 event.getText().add(text);
             }

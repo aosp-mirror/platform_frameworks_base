@@ -3001,6 +3001,30 @@
     <!-- Description of the button to decrement the NumberPicker value. [CHAR LIMIT=NONE] -->
     <string name="number_picker_decrement_button">Decrement</string>
 
+    <!-- CheckBox - accessibility support -->
+    <!-- Description of the checked state of a CheckBox. [CHAR LIMIT=NONE] -->
+    <string name="checkbox_checked">checked</string>
+    <!-- Description of the not checked state of a CheckBox. [CHAR LIMIT=NONE] -->
+    <string name="checkbox_not_checked">not checked</string>
+
+    <!-- RadioButton/CheckedTextView - accessibility support -->
+    <!-- Description of the selected state of a RadioButton. [CHAR LIMIT=NONE] -->
+    <string name="radiobutton_selected">selected</string>
+    <!-- Description of the not selected state of a RadioButton. [CHAR LIMIT=NONE] -->
+    <string name="radiobutton_not_selected">not selected</string>
+
+    <!-- Switch - accessibility support -->
+    <!-- Description of the on state of a Switch. [CHAR LIMIT=NONE] -->
+    <string name="switch_on">on</string>
+    <!-- Description of the off state of a Switch. [CHAR LIMIT=NONE] -->
+    <string name="switch_off">off</string>
+
+    <!-- ToggleButton - accessibility support -->
+    <!-- Description of the pressed state of a ToggleButton. [CHAR LIMIT=NONE] -->
+    <string name="togglebutton_pressed">pressed</string>
+    <!-- Description of the not pressed state of a ToggleButton. [CHAR LIMIT=NONE] -->
+    <string name="togglebutton_not_pressed">not pressed</string>
+
     <!-- Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] -->
     <string name="action_bar_home_description">Navigate home</string>
     <!-- Content description for the action bar "up" affordance. [CHAR LIMIT=NONE] -->
