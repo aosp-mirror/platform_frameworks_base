@@ -1537,7 +1537,8 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             }
         }
 
-        boolean cancelDraw = attachInfo.mTreeObserver.dispatchOnPreDraw();
+        boolean cancelDraw = attachInfo.mTreeObserver.dispatchOnPreDraw() ||
+                viewVisibility != View.VISIBLE;
 
         if (!cancelDraw && !newSurface) {
             if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
@@ -1591,8 +1592,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
             if (fullRedrawNeeded) {
                 mFullRedrawNeeded = true;
             }
-            // Try again
-            scheduleTraversals();
+            
+            if (viewVisibility == View.VISIBLE) {
+                // Try again
+                scheduleTraversals();
+            }
         }
     }
 
