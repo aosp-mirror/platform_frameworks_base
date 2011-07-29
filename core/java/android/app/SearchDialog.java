@@ -172,6 +172,7 @@ public class SearchDialog extends Dialog {
         mSearchView.setOnCloseListener(mOnCloseListener);
         mSearchView.setOnQueryTextListener(mOnQueryChangeListener);
         mSearchView.setOnSuggestionListener(mOnSuggestionSelectionListener);
+        mSearchView.onActionViewExpanded();
 
         mCloseSearch = findViewById(com.android.internal.R.id.closeButton);
         mCloseSearch.setOnClickListener(new View.OnClickListener() {
