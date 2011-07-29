@@ -57,6 +57,9 @@ static const int TYPE_L2CAP = 3;  // TODO: Test l2cap code paths
 
 static const int RFCOMM_SO_SNDBUF = 70 * 1024;  // 70 KB send buffer
 
+static void abortNative(JNIEnv *env, jobject obj);
+static void destroyNative(JNIEnv *env, jobject obj);
+
 static struct asocket *get_socketData(JNIEnv *env, jobject obj) {
     struct asocket *s =
             (struct asocket *) env->GetIntField(obj, field_mSocketData);
@@ -172,6 +175,7 @@ static void connectNative(JNIEnv *env, jobject obj) {
     socklen_t addr_sz;
     struct sockaddr *addr;
     struct asocket *s = get_socketData(env, obj);
+    int retry = 0;
 
     if (!s)
         return;
@@ -226,9 +230,29 @@ static void connectNative(JNIEnv *env, jobject obj) {
         return;
     }
 
+connect:
     ret = asocket_connect(s, addr, addr_sz, -1);
     LOGV("...connect(%d, %s) = %d (errno %d)",
             s->fd, TYPE_AS_STR(type), ret, errno);
+
+    if (ret && errno == EALREADY && retry < 2) {
+        /* workaround for bug 5082381 (EALREADY on ACL collision):
+         * retry the connect. Unfortunately we have to create a new fd.
+         * It's not ideal to switch the fd underneath the object, but
+         * is currently safe */
+        LOGD("Hit bug 5082381 (EALREADY on ACL collision), trying workaround");
+        usleep(100000);
+        retry++;
+        abortNative(env, obj);
+        destroyNative(env, obj);
+        initSocketNative(env, obj);
+        if (env->ExceptionOccurred()) {
+            return;
+        }
+        goto connect;
+    }
+    if (!ret && retry > 0)
+        LOGD("...workaround ok");
 
     if (ret)
         jniThrowIOException(env, errno);
