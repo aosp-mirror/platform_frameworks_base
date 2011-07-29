@@ -22666,8 +22666,11 @@ package android.view {
     field protected static final int[] SELECTED_STATE_SET;
     field protected static final int[] SELECTED_WINDOW_FOCUSED_STATE_SET;
     field public static final int SOUND_EFFECTS_ENABLED = 134217728; // 0x8000000
-    field public static final int STATUS_BAR_HIDDEN = 1; // 0x1
-    field public static final int STATUS_BAR_VISIBLE = 0; // 0x0
+    field public static final deprecated int STATUS_BAR_HIDDEN = 1; // 0x1
+    field public static final deprecated int STATUS_BAR_VISIBLE = 0; // 0x0
+    field public static final int SYSTEM_UI_FLAG_HIDE_NAVIGATION = 2; // 0x2
+    field public static final int SYSTEM_UI_FLAG_LOW_PROFILE = 1; // 0x1
+    field public static final int SYSTEM_UI_FLAG_VISIBLE = 0; // 0x0
     field public static android.util.Property TRANSLATION_X;
     field public static android.util.Property TRANSLATION_Y;
     field protected static final java.lang.String VIEW_LOG_TAG = "View";

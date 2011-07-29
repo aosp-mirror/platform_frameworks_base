@@ -198,6 +198,9 @@ public class PhoneStatusBar extends StatusBar {
     // for disabling the status bar
     int mDisabled = 0;
 
+    // tracking calls to View.setSystemUiVisibility()
+    int mSystemUiVisibility = View.SYSTEM_UI_FLAG_VISIBLE;
+
     private class ExpandedDialog extends Dialog {
         ExpandedDialog(Context context) {
             super(context, com.android.internal.R.style.Theme_Light_NoTitleBar);
@@ -253,19 +256,32 @@ public class PhoneStatusBar extends StatusBar {
         mIntruderAlertView.setVisibility(View.GONE);
         mIntruderAlertView.setClickable(true);
 
+        PhoneStatusBarView sb = (PhoneStatusBarView)View.inflate(context,
+                R.layout.status_bar, null);
+        sb.mService = this;
+        mStatusBarView = sb;
+
         try {
             boolean showNav = res.getBoolean(com.android.internal.R.bool.config_showNavigationBar);
             if (showNav) {
                 mNavigationBarView = 
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
+
+                sb.setOnSystemUiVisibilityChangeListener(
+                    new View.OnSystemUiVisibilityChangeListener() {
+                        @Override
+                        public void onSystemUiVisibilityChange(int visibility) {
+                            if (DEBUG) {
+                                Slog.d(TAG, "systemUi: " + visibility);
+                            }
+                            boolean hide = (0 != (visibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION));
+                            mNavigationBarView.setHidden(hide);
+                        }
+                    });
             }
         } catch (Resources.NotFoundException ex) {
             // no nav bar for you
         }
-
-        PhoneStatusBarView sb = (PhoneStatusBarView)View.inflate(context,
-                R.layout.status_bar, null);
-        sb.mService = this;
 
         // figure out which pixel-format to use for the status bar.
         mPixelFormat = PixelFormat.TRANSLUCENT;
@@ -274,7 +290,6 @@ public class PhoneStatusBar extends StatusBar {
             mPixelFormat = bg.getOpacity();
         }
 
-        mStatusBarView = sb;
         mStatusIcons = (LinearLayout)sb.findViewById(R.id.statusIcons);
         mNotificationIcons = (IconMerger)sb.findViewById(R.id.notificationIcons);
         mIcons = (LinearLayout)sb.findViewById(R.id.icons);
@@ -1275,22 +1290,31 @@ public class PhoneStatusBar extends StatusBar {
         return false;
     }
 
-    public void setLightsOn(boolean on) {
-        Log.v(TAG, "lights " + (on ? "on" : "off"));
-        if (!on) {
-            // All we do for "lights out" mode on a phone is hide the status bar,
-            // which the window manager does.  But we do need to hide the windowshade
-            // on our own.
-            animateCollapse();
+    @Override // CommandQueue
+    public void setSystemUiVisibility(int vis) {
+        if (vis != mSystemUiVisibility) {
+            mSystemUiVisibility = vis;
+
+            if (0 != (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE)) {
+                animateCollapse();
+            }
+
+            notifyUiVisibilityChanged();
         }
-        notifyLightsChanged(on);
     }
 
-    private void notifyLightsChanged(boolean shown) {
+    public void setLightsOn(boolean on) {
+        Log.v(TAG, "setLightsOn(" + on + ")");
+        if (on) {
+            setSystemUiVisibility(mSystemUiVisibility & ~View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        } else {
+            setSystemUiVisibility(mSystemUiVisibility | View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        }
+    }
+
+    private void notifyUiVisibilityChanged() {
         try {
-            Slog.d(TAG, "lights " + (shown?"on":"out"));
-            mWindowManager.statusBarVisibilityChanged(
-                    shown ? View.STATUS_BAR_VISIBLE : View.STATUS_BAR_HIDDEN);
+            mWindowManager.statusBarVisibilityChanged(mSystemUiVisibility);
         } catch (RemoteException ex) {
         }
     }
@@ -1715,10 +1739,10 @@ public class PhoneStatusBar extends StatusBar {
         }
     }
 
+    // The user is not allowed to get stuck without navigation UI. Upon the slightest user
+    // interaction we bring the navigation back.
     public void userActivity() {
-        try {
-            mBarService.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
-        } catch (RemoteException ex) { }
+        mNavigationBarView.setHidden(false);
     }
 
     public void toggleRecentApps() {

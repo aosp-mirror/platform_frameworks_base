@@ -17,11 +17,14 @@
 package com.android.systemui.statusbar.phone;
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.ServiceManager;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -36,6 +39,9 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.R;
 
 public class NavigationBarView extends LinearLayout {
+    final static boolean DEBUG = false;
+    final static String TAG = "NavigationBarView";
+
     final static boolean DEBUG_DEADZONE = false;
 
     final static boolean NAVBAR_ALWAYS_AT_RIGHT = true;
@@ -44,7 +50,12 @@ public class NavigationBarView extends LinearLayout {
     final Display mDisplay;
     View mCurrentView = null;
     View[] mRotatedViews = new View[4];
-    Animator mLastAnimator = null;
+    AnimatorSet mLastAnimator = null;
+
+    int mBarSize;
+    boolean mVertical;
+
+    boolean mHidden;
 
     public View getRecentsButton() {
         return mCurrentView.findViewById(R.id.recent_apps);
@@ -56,37 +67,53 @@ public class NavigationBarView extends LinearLayout {
 
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mHidden = false;
+
         mDisplay = ((WindowManager)context.getSystemService(
                 Context.WINDOW_SERVICE)).getDefaultDisplay();
         mBarService = IStatusBarService.Stub.asInterface(
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
 
-        //setLayerType(View.LAYER_TYPE_HARDWARE, null);
-
-        setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
-            @Override
-            public void onSystemUiVisibilityChange(int visibility) {
-                boolean on = (visibility == View.STATUS_BAR_VISIBLE);
-                android.util.Log.d("NavigationBarView", "LIGHTS " 
-                    + (on ? "ON" : "OUT"));
-                setLights(on);
-            }
-        });
+        final Resources res = mContext.getResources();
+        mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
+        mVertical = false;
     }
 
-    private void setLights(final boolean on) {
+    public void setHidden(final boolean hide) {
+        if (hide == mHidden) return;
+
+        mHidden = hide;
+        Slog.d(TAG,
+            (hide ? "HIDING" : "SHOWING") + " navigation bar");
+
         float oldAlpha = mCurrentView.getAlpha();
-        android.util.Log.d("NavigationBarView", "animating alpha: " + oldAlpha + " -> "
-            + (on ? 1f : 0f));
+        if (DEBUG) {
+            Slog.d(TAG, "animating alpha: " + oldAlpha + " -> "
+                + (!hide ? 1f : 0f));
+        }
 
         if (mLastAnimator != null && mLastAnimator.isRunning()) mLastAnimator.cancel();
 
-        mLastAnimator = ObjectAnimator.ofFloat(mCurrentView, "alpha", oldAlpha, on ? 1f : 0f)
-            .setDuration(on ? 250 : 1500);
+        if (!hide) {
+            setVisibility(View.VISIBLE);
+        }
+
+        // play us off, animatorset
+        mLastAnimator = new AnimatorSet();
+        mLastAnimator.playTogether(
+                ObjectAnimator.ofFloat(mCurrentView, "alpha", hide ? 0f : 1f),
+                ObjectAnimator.ofFloat(mCurrentView,
+                                       mVertical ? "translationX" : "translationY",
+                                       hide ? mBarSize : 0)
+        );
+        mLastAnimator.setDuration(!hide ? 250 : 1000);
         mLastAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator _a) {
                 mLastAnimator = null;
+                if (hide) {
+                    setVisibility(View.INVISIBLE);
+                }
             }
         });
         mLastAnimator.start();
@@ -108,7 +135,7 @@ public class NavigationBarView extends LinearLayout {
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         // immediately bring up the lights
-        setLights(true);
+        setHidden(false);
         return false; // pass it on
     }
 
@@ -119,11 +146,14 @@ public class NavigationBarView extends LinearLayout {
         }
         mCurrentView = mRotatedViews[rot];
         mCurrentView.setVisibility(View.VISIBLE);
+        mVertical = (rot == Surface.ROTATION_90 || rot == Surface.ROTATION_270);
 
         if (DEBUG_DEADZONE) {
             mCurrentView.findViewById(R.id.deadzone).setBackgroundColor(0x808080FF);
         }
 
-        android.util.Log.d("NavigationBarView", "reorient(): rot=" + mDisplay.getRotation());
+        if (DEBUG) {
+            Slog.d(TAG, "reorient(): rot=" + mDisplay.getRotation());
+        }
     }
 }
