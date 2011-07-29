@@ -176,6 +176,8 @@ public class TabletStatusBar extends StatusBar implements
     private InputMethodsPanel mInputMethodsPanel;
     private CompatModePanel mCompatModePanel;
 
+    int mSystemUiVisibility = 0;
+
     public Context getContext() { return mContext; }
 
     protected void addPanelWindows() {
@@ -729,14 +731,16 @@ public class TabletStatusBar extends StatusBar implements
                     if (DEBUG) Slog.d(TAG, "hiding shadows (lights on)");
                     mBarContents.setVisibility(View.VISIBLE);
                     mShadow.setVisibility(View.GONE);
-                    notifyLightsChanged(true);
+                    mSystemUiVisibility &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
+                    notifyUiVisibilityChanged();
                     break;
                 case MSG_HIDE_CHROME:
                     if (DEBUG) Slog.d(TAG, "showing shadows (lights out)");
                     animateCollapse();
                     mBarContents.setVisibility(View.GONE);
                     mShadow.setVisibility(View.VISIBLE);
-                    notifyLightsChanged(false);
+                    mSystemUiVisibility |= View.SYSTEM_UI_FLAG_LOW_PROFILE;
+                    notifyUiVisibilityChanged();
                     break;
                 case MSG_STOP_TICKER:
                     mTicker.halt();
@@ -1025,17 +1029,40 @@ public class TabletStatusBar extends StatusBar implements
         mHandler.sendEmptyMessage(MSG_CLOSE_NOTIFICATION_PEEK);
     }
 
-    // called by StatusBar
-    @Override
+    private void notifyUiVisibilityChanged() {
+        try {
+            mWindowManager.statusBarVisibilityChanged(mSystemUiVisibility);
+        } catch (RemoteException ex) {
+        }
+    }
+
+    @Override // CommandQueue
+    public void setSystemUiVisibility(int vis) {
+        if (vis != mSystemUiVisibility) {
+            mSystemUiVisibility = vis;
+
+            mHandler.removeMessages(MSG_HIDE_CHROME);
+            mHandler.removeMessages(MSG_SHOW_CHROME);
+            mHandler.sendEmptyMessage(0 == (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE) 
+                    ? MSG_SHOW_CHROME : MSG_HIDE_CHROME);
+
+            notifyUiVisibilityChanged();
+        }
+    }
+
     public void setLightsOn(boolean on) {
         // Policy note: if the frontmost activity needs the menu key, we assume it is a legacy app
         // that can't handle lights-out mode.
         if (mMenuButton.getVisibility() == View.VISIBLE) {
             on = true;
         }
-        mHandler.removeMessages(MSG_HIDE_CHROME);
-        mHandler.removeMessages(MSG_SHOW_CHROME);
-        mHandler.sendEmptyMessage(on ? MSG_SHOW_CHROME : MSG_HIDE_CHROME);
+
+        Slog.v(TAG, "setLightsOn(" + on + ")");
+        if (on) {
+            setSystemUiVisibility(mSystemUiVisibility & ~View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        } else {
+            setSystemUiVisibility(mSystemUiVisibility | View.SYSTEM_UI_FLAG_LOW_PROFILE);
+        }
     }
 
     public void topAppWindowChanged(boolean showMenu) {

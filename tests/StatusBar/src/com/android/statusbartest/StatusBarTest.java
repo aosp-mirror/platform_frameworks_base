@@ -48,6 +48,8 @@ public class StatusBarTest extends TestActivity
     StatusBarManager mStatusBarManager;
     NotificationManager mNotificationManager;
     Handler mHandler = new Handler();
+    int mUiVisibility = 0;
+    View mListView;
 
     View.OnSystemUiVisibilityChangeListener mOnSystemUiVisibilityChangeListener
             = new View.OnSystemUiVisibilityChangeListener() {
@@ -69,32 +71,52 @@ public class StatusBarTest extends TestActivity
         return mTests;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        mListView = findViewById(android.R.id.list);
+        mListView.setOnSystemUiVisibilityChangeListener(mOnSystemUiVisibilityChangeListener);
+    }
+
     private Test[] mTests = new Test[] {
+        new Test("toggle LOW_PROFILE (lights out)") {
+            public void run() {
+                if (0 != (mUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE)) {
+                    mUiVisibility &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;
+                } else {
+                    mUiVisibility |= View.SYSTEM_UI_FLAG_LOW_PROFILE;
+                }
+                mListView.setSystemUiVisibility(mUiVisibility);
+            }
+        },
+        new Test("toggle HIDE_NAVIGATION") {
+            public void run() {
+                if (0 != (mUiVisibility & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)) {
+                    mUiVisibility &= ~View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+                } else {
+                    mUiVisibility |= View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+                }
+                mListView.setSystemUiVisibility(mUiVisibility);
+
+            }
+        },
+        new Test("clear SYSTEM_UI_FLAGs") {
+            public void run() {
+                mUiVisibility = 0;
+                mListView.setSystemUiVisibility(mUiVisibility);
+            }
+        },
+//        new Test("no setSystemUiVisibility") {
+//            public void run() {
+//                View v = findViewById(android.R.id.list);
+//                v.setOnSystemUiVisibilityChangeListener(null);
+//                v.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+//            }
+//        },
         new Test("DISABLE_NAVIGATION") {
             public void run() {
-                View v = findViewById(android.R.id.list);
-                v.setSystemUiVisibility(View.STATUS_BAR_DISABLE_NAVIGATION);
-            }
-        },
-        new Test("STATUS_BAR_HIDDEN") {
-            public void run() {
-                View v = findViewById(android.R.id.list);
-                v.setOnSystemUiVisibilityChangeListener(mOnSystemUiVisibilityChangeListener);
-                v.setSystemUiVisibility(View.STATUS_BAR_HIDDEN);
-            }
-        },
-        new Test("STATUS_BAR_VISIBLE") {
-            public void run() {
-                View v = findViewById(android.R.id.list);
-                v.setOnSystemUiVisibilityChangeListener(mOnSystemUiVisibilityChangeListener);
-                v.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
-            }
-        },
-        new Test("no setSystemUiVisibility") {
-            public void run() {
-                View v = findViewById(android.R.id.list);
-                v.setOnSystemUiVisibilityChangeListener(null);
-                v.setSystemUiVisibility(View.STATUS_BAR_VISIBLE);
+                mListView.setSystemUiVisibility(View.STATUS_BAR_DISABLE_NAVIGATION);
             }
         },
         new Test("Double Remove") {

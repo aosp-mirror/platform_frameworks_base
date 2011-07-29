@@ -54,7 +54,7 @@ public class CommandQueue extends IStatusBar.Stub {
     private static final int OP_EXPAND      = 1;
     private static final int OP_COLLAPSE    = 2;
 
-    private static final int MSG_SET_LIGHTS_ON          = 7 << MSG_SHIFT;
+    private static final int MSG_SET_SYSTEMUI_VISIBILITY          = 7 << MSG_SHIFT;
 
     private static final int MSG_TOP_APP_WINDOW_CHANGED = 8 << MSG_SHIFT;
     private static final int MSG_SHOW_IME_BUTTON        = 9 << MSG_SHIFT;
@@ -86,7 +86,7 @@ public class CommandQueue extends IStatusBar.Stub {
         public void disable(int state);
         public void animateExpand();
         public void animateCollapse();
-        public void setLightsOn(boolean on);
+        public void setSystemUiVisibility(int vis);
         public void topAppWindowChanged(boolean visible);
         public void setImeWindowStatus(IBinder token, int vis, int backDisposition);
         public void setHardKeyboardStatus(boolean available, boolean enabled);
@@ -160,10 +160,10 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void setLightsOn(boolean on) {
+    public void setSystemUiVisibility(int vis) {
         synchronized (mList) {
-            mHandler.removeMessages(MSG_SET_LIGHTS_ON);
-            mHandler.obtainMessage(MSG_SET_LIGHTS_ON, on ? 1 : 0, 0, null).sendToTarget();
+            mHandler.removeMessages(MSG_SET_SYSTEMUI_VISIBILITY);
+            mHandler.obtainMessage(MSG_SET_SYSTEMUI_VISIBILITY, vis, 0, null).sendToTarget();
         }
     }
 
@@ -259,8 +259,8 @@ public class CommandQueue extends IStatusBar.Stub {
                         mCallbacks.animateCollapse();
                     }
                     break;
-                case MSG_SET_LIGHTS_ON:
-                    mCallbacks.setLightsOn(msg.arg1 != 0);
+                case MSG_SET_SYSTEMUI_VISIBILITY:
+                    mCallbacks.setSystemUiVisibility(msg.arg1);
                     break;
                 case MSG_TOP_APP_WINDOW_CHANGED:
                     mCallbacks.topAppWindowChanged(msg.arg1 != 0);
