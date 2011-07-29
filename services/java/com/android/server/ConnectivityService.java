@@ -2300,7 +2300,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         synchronized (this) {
             if (mDefaultProxy != null && mDefaultProxy.equals(proxy)) return;
             if (mDefaultProxy == proxy) return;
-            if (!TextUtils.isEmpty(proxy.getHost())) {
+            if (proxy != null && !TextUtils.isEmpty(proxy.getHost())) {
                 mDefaultProxy = proxy;
             } else {
                 mDefaultProxy = null;
