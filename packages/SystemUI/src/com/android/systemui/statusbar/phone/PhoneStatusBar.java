@@ -664,8 +664,10 @@ public class PhoneStatusBar extends StatusBar {
                 if (notification.notification.largeIcon != null) {
                     oldEntry.largeIcon.setImageBitmap(notification.notification.largeIcon);
                 } else {
-                    oldEntry.largeIcon.getLayoutParams().width = 0;
-                    oldEntry.largeIcon.setVisibility(View.INVISIBLE);
+                    if (oldEntry.largeIcon != null) {
+                        oldEntry.largeIcon.getLayoutParams().width = 0;
+                        oldEntry.largeIcon.setVisibility(View.INVISIBLE);
+                    }
                 }
 
             }
