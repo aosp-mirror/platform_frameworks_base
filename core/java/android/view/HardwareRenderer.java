@@ -17,7 +17,7 @@
 
 package android.view;
 
-import android.content.ComponentCallbacks;
+import android.content.ComponentCallbacks2;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -975,10 +975,10 @@ public abstract class HardwareRenderer {
             }
 
             switch (level) {
-                case ComponentCallbacks.TRIM_MEMORY_MODERATE:
+                case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
                     GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_MODERATE);
                     break;
-                case ComponentCallbacks.TRIM_MEMORY_COMPLETE:
+                case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
                     GLES20Canvas.flushCaches(GLES20Canvas.FLUSH_CACHES_FULL);
                     break;
             }

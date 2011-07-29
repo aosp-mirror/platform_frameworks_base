@@ -21,6 +21,7 @@ import android.animation.LayoutTransition;
 import android.app.ActivityManagerNative;
 import android.content.ClipDescription;
 import android.content.ComponentCallbacks;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
@@ -554,7 +555,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
         if (mThread != Thread.currentThread()) {
             if (mAttachInfo.mHardwareRenderer != null &&
                     mAttachInfo.mHardwareRenderer.isEnabled()) {
-                HardwareRenderer.trimMemory(ComponentCallbacks.TRIM_MEMORY_MODERATE);
+                HardwareRenderer.trimMemory(ComponentCallbacks2.TRIM_MEMORY_MODERATE);
             }
         } else {
             if (mAttachInfo.mHardwareRenderer != null &&

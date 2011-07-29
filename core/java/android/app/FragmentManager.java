@@ -1722,6 +1722,17 @@ final class FragmentManagerImpl extends FragmentManager {
         }
     }
 
+    public void dispatchTrimMemory(int level) {
+        if (mActive != null) {
+            for (int i=0; i<mAdded.size(); i++) {
+                Fragment f = mAdded.get(i);
+                if (f != null) {
+                    f.onTrimMemory(level);
+                }
+            }
+        }
+    }
+
     public boolean dispatchCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         boolean show = false;
         ArrayList<Fragment> newMenus = null;

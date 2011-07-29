@@ -18,7 +18,7 @@ package android.app;
 
 import android.app.backup.BackupAgent;
 import android.content.BroadcastReceiver;
-import android.content.ComponentCallbacks;
+import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.ContentProvider;
 import android.content.Context;
@@ -3258,10 +3258,10 @@ public final class ActivityThread {
         }
     }
 
-    ArrayList<ComponentCallbacks> collectComponentCallbacksLocked(
+    ArrayList<ComponentCallbacks2> collectComponentCallbacksLocked(
             boolean allActivities, Configuration newConfig) {
-        ArrayList<ComponentCallbacks> callbacks
-                = new ArrayList<ComponentCallbacks>();
+        ArrayList<ComponentCallbacks2> callbacks
+                = new ArrayList<ComponentCallbacks2>();
 
         if (mActivities.size() > 0) {
             Iterator<ActivityClientRecord> it = mActivities.values().iterator();
@@ -3311,10 +3311,10 @@ public final class ActivityThread {
         return callbacks;
     }
 
-    private void performConfigurationChanged(
-            ComponentCallbacks cb, Configuration config) {
+    private final void performConfigurationChanged(
+            ComponentCallbacks2 cb, Configuration config) {
         // Only for Activity objects, check that they actually call up to their
-        // superclass implementation.  ComponentCallbacks is an interface, so
+        // superclass implementation.  ComponentCallbacks2 is an interface, so
         // we check the runtime type and act accordingly.
         Activity activity = (cb instanceof Activity) ? (Activity) cb : null;
         if (activity != null) {
@@ -3418,7 +3418,7 @@ public final class ActivityThread {
     
     final void handleConfigurationChanged(Configuration config, CompatibilityInfo compat) {
 
-        ArrayList<ComponentCallbacks> callbacks = null;
+        ArrayList<ComponentCallbacks2> callbacks = null;
 
         synchronized (mPackages) {
             if (mPendingConfiguration != null) {
@@ -3558,7 +3558,7 @@ public final class ActivityThread {
     }
         
     final void handleLowMemory() {
-        ArrayList<ComponentCallbacks> callbacks;
+        ArrayList<ComponentCallbacks2> callbacks;
 
         synchronized (mPackages) {
             callbacks = collectComponentCallbacksLocked(true, null);
@@ -3583,6 +3583,16 @@ public final class ActivityThread {
 
     final void handleTrimMemory(int level) {
         WindowManagerImpl.getDefault().trimMemory(level);
+        ArrayList<ComponentCallbacks2> callbacks;
+
+        synchronized (mPackages) {
+            callbacks = collectComponentCallbacksLocked(true, null);
+        }
+
+        final int N = callbacks.size();
+        for (int i=0; i<N; i++) {
+            callbacks.get(i).onTrimMemory(level);
+        }
     }
 
     private void handleBindApplication(AppBindData data) {
@@ -4128,7 +4138,7 @@ public final class ActivityThread {
             }
         }
         
-        ViewRootImpl.addConfigCallback(new ComponentCallbacks() {
+        ViewRootImpl.addConfigCallback(new ComponentCallbacks2() {
             public void onConfigurationChanged(Configuration newConfig) {
                 synchronized (mPackages) {
                     // We need to apply this change to the resources
@@ -4147,6 +4157,8 @@ public final class ActivityThread {
                 }
             }
             public void onLowMemory() {
+            }
+            public void onTrimMemory(int level) {
             }
         });
     }
