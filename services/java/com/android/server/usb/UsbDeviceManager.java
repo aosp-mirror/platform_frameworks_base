@@ -357,7 +357,7 @@ public class UsbDeviceManager {
             // wait for the transition to complete.
             // give up after 1 second.
             for (int i = 0; i < 20; i++) {
-                // State transition is done when sys.usb.conf.done is set to the new configuration
+                // State transition is done when sys.usb.state is set to the new configuration
                 if (state.equals(SystemProperties.get("sys.usb.state"))) return true;
                 try {
                     // try again in 50ms
@@ -376,42 +376,64 @@ public class UsbDeviceManager {
             return waitForState(config);
         }
 
-        private void doSetCurrentFunctions(String functions) {
-            if (!mCurrentFunctions.equals(functions)) {
-                if (!setUsbConfig("none") || !setUsbConfig(functions)) {
-                    Slog.e(TAG, "Failed to switch USB configuration to " + functions);
-                    // revert to previous configuration if we fail
-                    setUsbConfig(mCurrentFunctions);
-                } else {
-                    mCurrentFunctions = functions;
-                }
-            }
-        }
-
         private void setAdbEnabled(boolean enable) {
             if (DEBUG) Slog.d(TAG, "setAdbEnabled: " + enable);
             if (enable != mAdbEnabled) {
                 mAdbEnabled = enable;
-                String functions;
                 // Due to the persist.sys.usb.config property trigger, changing adb state requires
                 // switching to default function
-                if (enable) {
-                    functions = addFunction(mDefaultFunctions, UsbManager.USB_FUNCTION_ADB);
-                } else {
-                    functions = removeFunction(mDefaultFunctions, UsbManager.USB_FUNCTION_ADB);
-                }
-                setCurrentFunction(functions, true);
+                setEnabledFunctions(mDefaultFunctions, false);
                 updateAdbNotification();
             }
         }
 
-        private void setEnabledFunctions(String functionList) {
+        private void setEnabledFunctions(String functions, boolean makeDefault) {
             if (mAdbEnabled) {
-                functionList = addFunction(functionList, UsbManager.USB_FUNCTION_ADB);
+                functions = addFunction(functions, UsbManager.USB_FUNCTION_ADB);
             } else {
-                functionList = removeFunction(functionList, UsbManager.USB_FUNCTION_ADB);
+                functions = removeFunction(functions, UsbManager.USB_FUNCTION_ADB);
             }
-            doSetCurrentFunctions(functionList);
+
+            if (functions != null && makeDefault) {
+                if (!mDefaultFunctions.equals(functions)) {
+                    if (!setUsbConfig("none")) {
+                        Slog.e(TAG, "Failed to disable USB");
+                        // revert to previous configuration if we fail
+                        setUsbConfig(mCurrentFunctions);
+                        return;
+                    }
+                    // setting this property will also change the current USB state
+                    // via a property trigger
+                    SystemProperties.set("persist.sys.usb.config", functions);
+                    if (waitForState(functions)) {
+                        mCurrentFunctions = functions;
+                        mDefaultFunctions = functions;
+                    } else {
+                        Slog.e(TAG, "Failed to switch persistent USB config to " + functions);
+                        // revert to previous configuration if we fail
+                        SystemProperties.set("persist.sys.usb.config", mDefaultFunctions);
+                    }
+                }
+            } else {
+                if (functions == null) {
+                    functions = mDefaultFunctions;
+                }
+                if (!mCurrentFunctions.equals(functions)) {
+                    if (!setUsbConfig("none")) {
+                        Slog.e(TAG, "Failed to disable USB");
+                        // revert to previous configuration if we fail
+                        setUsbConfig(mCurrentFunctions);
+                        return;
+                    }
+                    if (setUsbConfig(functions)) {
+                        mCurrentFunctions = functions;
+                    } else {
+                        Slog.e(TAG, "Failed to switch USB config to " + functions);
+                        // revert to previous configuration if we fail
+                        setUsbConfig(mCurrentFunctions);
+                    }
+                }
+            }
         }
 
         private void updateCurrentAccessory() {
@@ -433,7 +455,7 @@ public class UsbDeviceManager {
                 // make sure accessory mode is off
                 // and restore default functions
                 Slog.d(TAG, "exited USB accessory mode");
-                setEnabledFunctions(mDefaultFunctions);
+                setEnabledFunctions(mDefaultFunctions, false);
 
                 if (mCurrentAccessory != null) {
                     if (mBootCompleted) {
@@ -476,7 +498,7 @@ public class UsbDeviceManager {
 
                     if (!mConnected) {
                         // restore defaults when USB is disconnected
-                        doSetCurrentFunctions(mDefaultFunctions);
+                        setEnabledFunctions(mDefaultFunctions, false);
                     }
                     if (mBootCompleted) {
                         updateUsbState();
@@ -488,25 +510,7 @@ public class UsbDeviceManager {
                 case MSG_SET_CURRENT_FUNCTION:
                     String function = (String)msg.obj;
                     boolean makeDefault = (msg.arg1 == 1);
-                    if (function != null && makeDefault) {
-                        if (mAdbEnabled) {
-                            function = addFunction(function, UsbManager.USB_FUNCTION_ADB);
-                        }
-
-                        setUsbConfig("none");
-                        // setting this property will change the current USB state
-                        // via a property trigger
-                        SystemProperties.set("persist.sys.usb.config", function);
-                        if (waitForState(function)) {
-                            mCurrentFunctions = function;
-                            mDefaultFunctions = function;
-                        }
-                    } else {
-                        if (function == null) {
-                            function = mDefaultFunctions;
-                        }
-                        setEnabledFunctions(function);
-                    }
+                    setEnabledFunctions(function, makeDefault);
                     break;
                 case MSG_SYSTEM_READY:
                     updateUsbNotification();
