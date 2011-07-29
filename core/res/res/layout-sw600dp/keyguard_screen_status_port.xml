@@ -113,19 +113,6 @@
 
     </LinearLayout>
 
-    <!-- used for status such as the next alarm, and charging status.  -->
-    <TextView
-        android:id="@+id/status2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textSize="17sp"
-        android:layout_marginTop="10dip"
-        android:drawablePadding="4dip"
-        android:visibility="gone"
-        />
-
     <TextView
         android:id="@+id/status1"
         android:layout_width="wrap_content"

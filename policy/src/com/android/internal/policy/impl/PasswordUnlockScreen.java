@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 
-import com.android.internal.policy.impl.PatternUnlockScreen.FooterMode;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.PasswordEntryKeyboardView;
 
@@ -38,6 +37,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -53,7 +53,7 @@ import com.android.internal.widget.PasswordEntryKeyboardHelper;
  * an unlock password
  */
 public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen,
-        View.OnClickListener, KeyguardUpdateMonitor.InfoCallback, OnEditorActionListener {
+        OnEditorActionListener {
 
     private static final String TAG = "PasswordUnlockScreen";
     private final KeyguardUpdateMonitor mUpdateMonitor;
@@ -62,19 +62,16 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
     private boolean mIsAlpha;
 
     private EditText mPasswordEntry;
-    private Button mEmergencyCallButton;
     private LockPatternUtils mLockPatternUtils;
     private PasswordEntryKeyboardView mKeyboardView;
-    private PasswordEntryKeyboardView mKeyboardViewAlpha;
     private PasswordEntryKeyboardHelper mKeyboardHelper;
-    private PasswordEntryKeyboardHelper mKeyboardHelperAlpha;
 
     private int mCreationOrientation;
     private int mCreationHardKeyboardHidden;
     private CountDownTimer mCountdownTimer;
 
-    private StatusView mStatusView;
-    private final boolean mUseSystemIME = true; // TODO: Make configurable
+    private KeyguardStatusViewManager mStatusViewManager;
+    private boolean mUseSystemIME = true; // TODO: Make configurable
     private boolean mResuming; // used to prevent poking the wakelock during onResume()
 
     // To avoid accidental lockout due to events while the device in in the pocket, ignore
@@ -99,48 +96,28 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             layoutInflater.inflate(R.layout.keyguard_screen_password_landscape, this, true);
         }
 
-        mStatusView = new StatusView(this, mUpdateMonitor, mLockPatternUtils);
+        mStatusViewManager = new KeyguardStatusViewManager(this, mUpdateMonitor, mLockPatternUtils,
+                mCallback);
 
         final int quality = lockPatternUtils.getKeyguardStoredPasswordQuality();
         mIsAlpha = DevicePolicyManager.PASSWORD_QUALITY_ALPHABETIC == quality
                 || DevicePolicyManager.PASSWORD_QUALITY_ALPHANUMERIC == quality
                 || DevicePolicyManager.PASSWORD_QUALITY_COMPLEX == quality;
 
-        // TODO: re-enable on phones with keyboards
-        final boolean isPhysicalKbShowing = false;
         mKeyboardView = (PasswordEntryKeyboardView) findViewById(R.id.keyboard);
-        mKeyboardViewAlpha = (PasswordEntryKeyboardView) findViewById(R.id.keyboardAlpha);
         mPasswordEntry = (EditText) findViewById(R.id.passwordEntry);
         mPasswordEntry.setOnEditorActionListener(this);
-        mPasswordEntry.setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-                if (mIsAlpha && !isPhysicalKbShowing && !mUseSystemIME) {
-                    // Toggle visibility of alpha keyboard
-                    final boolean visible = mKeyboardViewAlpha.getVisibility() == View.VISIBLE;
-                    mKeyboardViewAlpha.setVisibility(visible ? View.GONE : View.VISIBLE);
-                }
-                mCallback.pokeWakelock();
-            }
-        });
-
-        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
-        mEmergencyCallButton.setOnClickListener(this);
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
 
         mKeyboardHelper = new PasswordEntryKeyboardHelper(context, mKeyboardView, this, false);
-        //mCreationHardKeyboardHidden == Configuration.HARDKEYBOARDHIDDEN_NO;
-        if (mKeyboardViewAlpha == null || !mIsAlpha) {
-            mKeyboardHelper.setKeyboardMode(mIsAlpha ?
-                    PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA
-                    : PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
-            mKeyboardView.setVisibility(isPhysicalKbShowing ? View.INVISIBLE : View.VISIBLE);
-        } else {
-            mKeyboardHelperAlpha = new PasswordEntryKeyboardHelper(context, mKeyboardViewAlpha,
-                    this, false);
-            mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
-            mKeyboardHelperAlpha.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA);
+        if (mIsAlpha) {
+            // We always use the system IME for alpha keyboard, so hide lockscreen's soft keyboard
+            mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_ALPHA);
             mKeyboardView.setVisibility(View.GONE);
-            mPasswordEntry.setWidth(mKeyboardViewAlpha.getLayoutParams().width);
+        } else {
+            // Use lockscreen's numeric keyboard if the physical keyboard isn't showing
+            mKeyboardHelper.setKeyboardMode(PasswordEntryKeyboardHelper.KEYBOARD_MODE_NUMERIC);
+            mKeyboardView.setVisibility(mCreationHardKeyboardHidden
+                    == Configuration.HARDKEYBOARDHIDDEN_NO ? View.INVISIBLE : View.VISIBLE);
         }
 
         mPasswordEntry.requestFocus();
@@ -150,34 +127,25 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
             mPasswordEntry.setKeyListener(TextKeyListener.getInstance());
             mPasswordEntry.setInputType(InputType.TYPE_CLASS_TEXT
                     | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-            // mStatusView.setHelpMessage(R.string.keyguard_password_enter_password_code,
-            //      StatusView.LOCK_ICON);
+            //mStatusViewManager.setHelpMessage(R.string.keyguard_password_enter_password_code,
+                    //KeyguardStatusViewManager.LOCK_ICON);
         } else {
             mPasswordEntry.setKeyListener(DigitsKeyListener.getInstance());
             mPasswordEntry.setInputType(InputType.TYPE_CLASS_NUMBER
                     | InputType.TYPE_NUMBER_VARIATION_PASSWORD);
-            //mStatusView.setHelpMessage(R.string.keyguard_password_enter_pin_code,
-            //      StatusView.LOCK_ICON);
+            //mStatusViewManager.setHelpMessage(R.string.keyguard_password_enter_pin_code,
+                    //KeyguardStatusViewManager.LOCK_ICON);
         }
 
         mKeyboardHelper.setVibratePattern(mLockPatternUtils.isTactileFeedbackEnabled() ?
                 com.android.internal.R.array.config_virtualKeyVibePattern : 0);
-        if (mKeyboardHelperAlpha != null) {
-            mKeyboardHelperAlpha.setVibratePattern(mLockPatternUtils.isTactileFeedbackEnabled() ?
-                    com.android.internal.R.array.config_virtualKeyVibePattern : 0);
-        }
 
-        // until we get an update...
-        mStatusView.setCarrierText(LockScreen.getCarrierString(
-                        mUpdateMonitor.getTelephonyPlmn(),
-                        mUpdateMonitor.getTelephonySpn()));
-
-        mUpdateMonitor.registerInfoCallback(this);
-        //mUpdateMonitor.registerSimStateCallback(this);
-
-        resetStatusInfo();
-
-        // Poke the wakelock any time the text is modified
+        // Poke the wakelock any time the text is selected or modified
+        mPasswordEntry.setOnClickListener(new OnClickListener() {
+            public void onClick(View v) {
+                mCallback.pokeWakelock();
+            }
+        });
         mPasswordEntry.addTextChangedListener(new TextWatcher() {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
@@ -206,20 +174,18 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
 
     /** {@inheritDoc} */
     public void onPause() {
-
+        mStatusViewManager.onPause();
     }
 
     /** {@inheritDoc} */
     public void onResume() {
         mResuming = true;
         // reset status
-        mStatusView.resetStatusInfo(mUpdateMonitor, mLockPatternUtils);
+        mStatusViewManager.onResume();
 
         // start fresh
         mPasswordEntry.setText("");
-        resetStatusInfo();
         mPasswordEntry.requestFocus();
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
 
         // if the user is currently locked out, enforce it.
         long deadline = mLockPatternUtils.getLockoutAttemptDeadline();
@@ -234,19 +200,12 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         mUpdateMonitor.removeCallback(this);
     }
 
-    public void onClick(View v) {
-        if (v == mEmergencyCallButton) {
-            mCallback.takeEmergencyCallAction();
-        }
-        mCallback.pokeWakelock();
-    }
-
     private void verifyPasswordAndUnlock() {
         String entry = mPasswordEntry.getText().toString();
         if (mLockPatternUtils.checkPassword(entry)) {
             mCallback.keyguardDone(true);
             mCallback.reportSuccessfulUnlockAttempt();
-            mStatusView.setInstructionText(null);
+            mStatusViewManager.setInstructionText(null);
             KeyStore.getInstance().password(entry);
         } else if (entry.length() > MINIMUM_PASSWORD_LENGTH_BEFORE_REPORT ) {
             // to avoid accidental lockout, only count attempts that are long enough to be a
@@ -257,9 +216,11 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
                 long deadline = mLockPatternUtils.setLockoutAttemptDeadline();
                 handleAttemptLockout(deadline);
             }
-            mStatusView.setInstructionText(R.string.lockscreen_password_wrong);
+            mStatusViewManager.setInstructionText(
+                    mContext.getString(R.string.lockscreen_password_wrong));
         } else if (entry.length() > 0) {
-            mStatusView.setInstructionText(R.string.lockscreen_password_wrong);
+            mStatusViewManager.setInstructionText(
+                    mContext.getString(R.string.lockscreen_password_wrong));
         }
         mPasswordEntry.setText("");
     }
@@ -277,18 +238,18 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
                 String instructions = getContext().getString(
                         R.string.lockscreen_too_many_failed_attempts_countdown,
                         secondsRemaining);
-                mStatusView.setInstructionText(instructions);
+                mStatusViewManager.setInstructionText(instructions);
             }
 
             @Override
             public void onFinish() {
                 mPasswordEntry.setEnabled(true);
                 mKeyboardView.setEnabled(true);
-                resetStatusInfo();
+                mStatusViewManager.resetStatusInfo();
+                mCountdownTimer = null;
             }
         }.start();
     }
-
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -329,39 +290,4 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
         }
         return false;
     }
-
-    // ---------- InfoCallback
-
-    /** {@inheritDoc} */
-    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
-        mStatusView.onRefreshBatteryInfo(showBatteryInfo, pluggedIn, batteryLevel);
-    }
-
-    /** {@inheritDoc} */
-    public void onTimeChanged() {
-        mStatusView.onTimeChanged();
-    }
-
-    /** {@inheritDoc} */
-    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-        mStatusView.onRefreshCarrierInfo(plmn, spn);
-    }
-
-    /** {@inheritDoc} */
-    public void onRingerModeChanged(int state) {
-        // not currently used
-    }
-
-    // ---------- SimStateCallback
-
-    /** {@inheritDoc} */
-    public void onPhoneStateChanged(String newState) {
-        mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
-    }
-
-    private void resetStatusInfo() {
-        mStatusView.setInstructionText(null);
-        mStatusView.updateStatusLines(true);
-    }
-
 }

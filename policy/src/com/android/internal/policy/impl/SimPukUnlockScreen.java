@@ -24,11 +24,9 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import com.android.internal.telephony.ITelephony;
-import com.android.internal.telephony.IccCard;
 import com.android.internal.widget.LockPatternUtils;
 
 import android.text.Editable;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -42,7 +40,7 @@ import com.android.internal.R;
  * Displays a dialer like interface to unlock the SIM PUK.
  */
 public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
-    View.OnClickListener, KeyguardUpdateMonitor.InfoCallback {
+        View.OnClickListener {
 
     private static final int DIGIT_PRESS_WAKE_MILLIS = 5000;
 
@@ -56,7 +54,6 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
     private TextView mFocusedEntry;
 
     private TextView mOkButton;
-    private Button mEmergencyCallButton;
 
     private View mDelPukButton;
     private View mDelPinButton;
@@ -68,6 +65,8 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
     private int mCreationOrientation;
 
     private int mKeyboardHidden;
+
+    private KeyguardStatusViewManager mKeyguardStatusViewManager;
 
     private static final char[] DIGITS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
@@ -108,8 +107,6 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
         mDelPinButton = findViewById(R.id.pinDel);
         mDelPinButton.setOnClickListener(this);
 
-
-        mEmergencyCallButton = (Button) findViewById(R.id.emergencyCallButton);
         mOkButton = (TextView) findViewById(R.id.ok);
 
         mHeaderText.setText(R.string.keyguard_password_enter_puk_code);
@@ -119,12 +116,8 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
 
         requestFocus(mPukText);
 
-        if (mLockPatternUtils.isEmergencyCallCapable()) {
-            mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
-            mEmergencyCallButton.setOnClickListener(this);
-        } else {
-            mEmergencyCallButton.setVisibility(View.GONE);
-        }
+        mKeyguardStatusViewManager = new KeyguardStatusViewManager(this, updateMonitor,
+                lockpatternutils, callback);
 
         setFocusableInTouchMode(true);
     }
@@ -141,7 +134,7 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
 
     /** {@inheritDoc} */
     public void onPause() {
-
+        mKeyguardStatusViewManager.onPause();
     }
 
     /** {@inheritDoc} */
@@ -151,9 +144,7 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
         requestFocus(mPukText);
         mPinText.setText("");
 
-        if (mLockPatternUtils.isEmergencyCallCapable()) {
-            mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
-        }
+        mKeyguardStatusViewManager.onResume();
     }
 
     /** {@inheritDoc} */
@@ -221,8 +212,6 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
         } else if (v == mPinText) {
             requestFocus(mPinText);
             mCallback.pokeWakelock();
-        } else if (v == mEmergencyCallButton) {
-            mCallback.takeEmergencyCallAction();
         } else if (v == mOkButton) {
             checkPuk();
         }
@@ -446,25 +435,4 @@ public class SimPukUnlockScreen extends LinearLayout implements KeyguardScreen,
         }
     }
 
-    public void onPhoneStateChanged(String newState) {
-        if (mLockPatternUtils.isEmergencyCallCapable()) {
-            mLockPatternUtils.updateEmergencyCallButtonState(mEmergencyCallButton);
-        }
-    }
-
-    public void onRefreshBatteryInfo(boolean showBatteryInfo, boolean pluggedIn, int batteryLevel) {
-
-    }
-
-    public void onRefreshCarrierInfo(CharSequence plmn, CharSequence spn) {
-
-    }
-
-    public void onRingerModeChanged(int state) {
-
-    }
-
-    public void onTimeChanged() {
-
-    }
 }

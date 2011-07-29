@@ -61,7 +61,8 @@ public class KeyguardViewManager implements KeyguardWindowController {
      * @param callback Used to notify of changes.
      */
     public KeyguardViewManager(Context context, ViewManager viewManager,
-            KeyguardViewCallback callback, KeyguardViewProperties keyguardViewProperties, KeyguardUpdateMonitor updateMonitor) {
+            KeyguardViewCallback callback, KeyguardViewProperties keyguardViewProperties,
+            KeyguardUpdateMonitor updateMonitor) {
         mContext = context;
         mViewManager = viewManager;
         mCallback = callback;
@@ -116,7 +117,7 @@ public class KeyguardViewManager implements KeyguardWindowController {
             WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                     stretch, stretch, WindowManager.LayoutParams.TYPE_KEYGUARD,
                     flags, PixelFormat.TRANSLUCENT);
-            lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
+            lp.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
             lp.windowAnimations = com.android.internal.R.style.Animation_LockScreen;
 
             lp.setTitle("Keyguard");

@@ -892,18 +892,6 @@ public class LockPatternUtils {
     }
 
     /**
-     * Sets the visibility of emergency call prompt based on emergency capable
-     * @param emergencyText the emergency call text to be updated
-     */
-    public void updateEmergencyCallText(TextView emergencyText) {
-        if (isEmergencyCallCapable()) {
-            emergencyText.setVisibility(View.VISIBLE);
-        } else {
-            emergencyText.setVisibility(View.GONE);
-        }
-    }
-
-    /**
      * Resumes a call in progress. Typically launched from the EmergencyCall button
      * on various lockscreens.
      *
@@ -919,5 +907,23 @@ public class LockPatternUtils {
             // What can we do?
         }
         return false;
+    }
+
+    /**
+     * Performs concentenation of PLMN/SPN
+     * @param plmn
+     * @param spn
+     * @return
+     */
+    public static CharSequence getCarrierString(CharSequence plmn, CharSequence spn) {
+        if (plmn != null && spn == null) {
+            return plmn;
+        } else if (plmn != null && spn != null) {
+            return plmn + "|" + spn;
+        } else if (plmn == null && spn != null) {
+            return spn;
+        } else {
+            return "";
+        }
     }
 }

@@ -36,6 +36,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.MeasureSpec;
 
 import com.android.internal.R;
 
@@ -195,14 +196,41 @@ public class MultiWaveView extends View {
     protected int getSuggestedMinimumWidth() {
         // View should be large enough to contain the background + target drawable on either edge
         return mOuterRing.getWidth()
-                + (mTargetDrawables.size() > 0 ? (mTargetDrawables.get(0).getWidth()) : 0);
+                + (mTargetDrawables.size() > 0 ? (mTargetDrawables.get(0).getWidth()/2) : 0);
     }
 
     @Override
     protected int getSuggestedMinimumHeight() {
         // View should be large enough to contain the unlock ring + target drawable on either edge
         return mOuterRing.getHeight()
-                + (mTargetDrawables.size() > 0 ? (mTargetDrawables.get(0).getHeight()) : 0);
+                + (mTargetDrawables.size() > 0 ? (mTargetDrawables.get(0).getHeight()/2) : 0);
+    }
+
+    private int resolveMeasured(int measureSpec, int desired)
+    {
+        int result = 0;
+        int specSize = MeasureSpec.getSize(measureSpec);
+        switch (MeasureSpec.getMode(measureSpec)) {
+            case MeasureSpec.UNSPECIFIED:
+                result = desired;
+                break;
+            case MeasureSpec.AT_MOST:
+                result = Math.min(specSize, desired);
+                break;
+            case MeasureSpec.EXACTLY:
+            default:
+                result = specSize;
+        }
+        return result;
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int minimumWidth = getSuggestedMinimumWidth();
+        final int minimumHeight = getSuggestedMinimumHeight();
+        int viewWidth = resolveMeasured(widthMeasureSpec, minimumWidth);
+        int viewHeight = resolveMeasured(heightMeasureSpec, minimumHeight);
+        setMeasuredDimension(viewWidth, viewHeight);
     }
 
     private void switchToState(int state, float x, float y) {

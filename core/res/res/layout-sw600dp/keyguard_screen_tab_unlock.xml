@@ -45,13 +45,12 @@
             android:layout_width="match_parent"
             android:layout_height="0dip"
             android:layout_weight="1"
-            android:orientation="vertical"
-                >
+            android:orientation="vertical">
+
         <TextView
             android:id="@+id/screenLocked"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/status2"
             android:layout_marginLeft="24dip"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginTop="12dip"
@@ -65,23 +64,7 @@
             android:layout_gravity="center"
             />
 
-        <!-- "emergency calls only" shown when sim is missing or PUKd -->
-        <TextView
-            android:id="@+id/emergencyCallText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/carrier"
-            android:layout_alignParentRight="true"
-            android:layout_marginTop="0dip"
-            android:layout_marginRight="8dip"
-            android:text="@string/emergency_calls_only"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:textColor="@color/white"
-            android:visibility="gone"
-           />
-
-        <!-- emergency call button shown when sim is PUKd and tab_selector is
-             hidden -->
+        <!-- emergency call button shown when sim is PUKd and tab_selector is hidden -->
         <Button
             android:id="@+id/emergencyCallButton"
             android:layout_width="wrap_content"
