@@ -846,14 +846,13 @@ static jboolean setDevicePropertyNative(JNIEnv *env, jobject object, jstring pat
     LOGV("%s", __FUNCTION__);
     native_data_t *nat = get_native_data(env, object);
     if (nat) {
-        DBusMessage *reply, *msg;
+        DBusMessage *msg;
         DBusMessageIter iter;
-        DBusError err;
+        dbus_bool_t reply = JNI_FALSE;
 
         const char *c_key = env->GetStringUTFChars(key, NULL);
         const char *c_path = env->GetStringUTFChars(path, NULL);
 
-        dbus_error_init(&err);
         msg = dbus_message_new_method_call(BLUEZ_DBUS_BASE_IFC,
                                           c_path, DBUS_DEVICE_IFACE, "SetProperty");
         if (!msg) {
@@ -867,19 +866,14 @@ static jboolean setDevicePropertyNative(JNIEnv *env, jobject object, jstring pat
         dbus_message_iter_init_append(msg, &iter);
         append_variant(&iter, type, value);
 
-        reply = dbus_connection_send_with_reply_and_block(nat->conn, msg, -1, &err);
+        // Asynchronous call - the callbacks come via Device propertyChange
+        reply = dbus_connection_send_with_reply(nat->conn, msg, NULL, -1);
         dbus_message_unref(msg);
 
-        env->ReleaseStringUTFChars(key, c_key);
         env->ReleaseStringUTFChars(path, c_path);
-        if (!reply) {
-            if (dbus_error_is_set(&err)) {
-                LOG_AND_FREE_DBUS_ERROR(&err);
-            } else
-            LOGE("DBus reply is NULL in function %s", __FUNCTION__);
-            return JNI_FALSE;
-        }
-        return JNI_TRUE;
+        env->ReleaseStringUTFChars(key, c_key);
+
+        return reply ? JNI_TRUE : JNI_FALSE;
     }
 #endif
     return JNI_FALSE;
