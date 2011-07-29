@@ -21,7 +21,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="fill_parent" 
                 android:layout_height="wrap_content"
-                android:padding="10dp" >
+                android:padding="16dp" >
 
     <TextView android:id="@+id/confirm_text"
               android:layout_width="match_parent" 
@@ -34,10 +34,24 @@
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:layout_marginBottom="10dp"
-              android:text="@string/restore_password_text" />
+              android:text="@string/current_password_text" />
 
     <EditText android:id="@+id/password"
               android:layout_below="@id/password_desc"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="30dp"
+              android:password="true" />
+
+    <TextView android:id="@+id/enc_password_desc"
+              android:layout_below="@id/password"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginBottom="10dp"
+              android:text="@string/restore_enc_password_text" />
+
+    <EditText android:id="@+id/enc_password"
+              android:layout_below="@id/enc_password_desc"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:layout_marginBottom="30dp"
@@ -47,7 +61,7 @@
               android:layout_width="match_parent"
               android:layout_height="20dp"
               android:layout_marginLeft="30dp"
-              android:layout_below="@id/password"
+              android:layout_below="@id/enc_password"
               android:layout_marginBottom="30dp" />
 
     <Button android:id="@+id/button_allow"
