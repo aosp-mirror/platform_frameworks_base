@@ -17,6 +17,7 @@
 <resources>
     <declare-styleable name="KeyButtonView">
         <attr name="keyCode" format="integer" />
+        <attr name="glowBackground" format="reference" />
     </declare-styleable>
     <declare-styleable name="ToggleSlider">
         <attr name="text" format="string" />

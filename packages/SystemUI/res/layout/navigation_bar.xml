@@ -46,7 +46,7 @@
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
                 android:layout_width="80dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_sysbar_back_default"
+                android:src="@drawable/ic_sysbar_back"
                 systemui:keyCode="4"
                 android:layout_weight="0"
                 />
@@ -59,7 +59,7 @@
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
                 android:layout_width="80dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_sysbar_home_default"
+                android:src="@drawable/ic_sysbar_home"
                 systemui:keyCode="3"
                 android:layout_weight="0"
                 />
@@ -69,16 +69,16 @@
                 android:layout_weight="1"
                 android:contentDescription="@string/accessibility_home"
                 />
-            <ImageView android:id="@+id/recent_apps"
+            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/recent_apps"
                 android:layout_width="80dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_sysbar_recent_default"
+                android:src="@drawable/ic_sysbar_recent"
                 android:layout_weight="0"
                 />
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
                 android:layout_width="40dp"
                 android:layout_height="match_parent"
-                android:src="@drawable/ic_sysbar_menu_default"
+                android:src="@drawable/ic_sysbar_menu"
                 systemui:keyCode="82"
                 android:layout_weight="0"
                 android:visibility="invisible"
@@ -112,7 +112,7 @@
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/menu"
                 android:layout_height="40dp"
                 android:layout_width="match_parent"
-                android:src="@drawable/ic_sysbar_menu_default_land"
+                android:src="@drawable/ic_sysbar_menu_land"
                 systemui:keyCode="82"
                 android:layout_weight="0"
                 android:visibility="invisible"
@@ -120,7 +120,7 @@
             <ImageView android:id="@+id/recent_apps"
                 android:layout_height="80dp"
                 android:layout_width="match_parent"
-                android:src="@drawable/ic_sysbar_recent_default_land"
+                android:src="@drawable/ic_sysbar_recent_land"
                 android:layout_weight="0"
                 />
             <View 
@@ -132,7 +132,7 @@
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
                 android:layout_height="80dp"
                 android:layout_width="match_parent"
-                android:src="@drawable/ic_sysbar_home_default_land"
+                android:src="@drawable/ic_sysbar_home_land"
                 systemui:keyCode="3"
                 android:layout_weight="0"
                 android:contentDescription="@string/accessibility_home"
@@ -146,7 +146,7 @@
             <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
                 android:layout_height="80dp"
                 android:layout_width="match_parent"
-                android:src="@drawable/ic_sysbar_back_default_land"
+                android:src="@drawable/ic_sysbar_back_land"
                 systemui:keyCode="4"
                 android:layout_weight="0"
                 />

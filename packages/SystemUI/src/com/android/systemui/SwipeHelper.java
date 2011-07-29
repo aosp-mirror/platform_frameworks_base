@@ -131,9 +131,16 @@ public class SwipeHelper {
         return result;
     }
 
-    void invalidateGlobalRegion(View view) {
-        RectF childBounds = new RectF(view.getLeft(), view.getTop(), view.getRight(), view
-                .getBottom());
+    // invalidate the view's own bounds all the way up the view hierarchy
+    public static void invalidateGlobalRegion(View view) {
+        invalidateGlobalRegion(
+            view,
+            new RectF(view.getLeft(), view.getTop(), view.getRight(), view.getBottom()));
+    }
+
+    // invalidate a rectangle relative to the view's coordinate system all the way up the view
+    // hierarchy
+    public static void invalidateGlobalRegion(View view, RectF childBounds) {
         childBounds.offset(view.getX(), view.getY());
         if (DEBUG_INVALIDATE)
             Log.v(TAG, "-------------");
