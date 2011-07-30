@@ -25,6 +25,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.net.IConnectivityManager;
+import android.net.ConnectivityManager;
+import android.net.DhcpInfoInternal;
+import android.net.DhcpStateMachine;
+import android.net.InterfaceConfiguration;
+import android.net.LinkAddress;
+import android.net.LinkProperties;
+import android.net.NetworkInfo;
+import android.net.NetworkUtils;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WifiMonitor;
 import android.net.wifi.WifiNative;
@@ -47,15 +56,15 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.Collection;
-
 import com.android.internal.R;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.util.Collection;
 
 /**
  * WifiP2pService inclues a state machine to perform Wi-Fi p2p operations. Applications
@@ -70,20 +79,25 @@ import com.android.internal.util.StateMachine;
 public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final String TAG = "WifiP2pService";
     private static final boolean DBG = true;
+    private static final String NETWORKTYPE = "WIFI_P2P";
 
     private Context mContext;
     private String mInterface;
 
     INetworkManagementService mNwService;
+    private DhcpStateMachine mDhcpStateMachine;
 
-    // Tracked to notify the user about wifi client/hotspot being shut down
-    // during p2p bring up
+    //Tracked to notify the user about wifi client/hotspot being shut down
+    //during p2p bring up
     private int mWifiState = WifiManager.WIFI_STATE_DISABLED;
     private int mWifiApState = WifiManager.WIFI_AP_STATE_DISABLED;
 
     private P2pStateMachine mP2pStateMachine;
     private AsyncChannel mReplyChannel = new AsyncChannel();;
     private AsyncChannel mWifiChannel;
+
+    private static final int GROUP_NEGOTIATION_WAIT_TIME_MS = 60 * 1000;
+    private static int mGroupNegotiationTimeoutIndex = 0;
 
     private static final int BASE = Protocol.BASE_WIFI_P2P_SERVICE;
 
@@ -92,15 +106,24 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     /* Message sent to WifiStateMachine to indicate Wi-Fi client/hotspot operation can proceed */
     public static final int WIFI_ENABLE_PROCEED             =   BASE + 2;
 
+    /* Delayed message to timeout of group negotiation */
+    public static final int GROUP_NEGOTIATION_TIMED_OUT     =   BASE + 3;
+
     /* User accepted to disable Wi-Fi in order to enable p2p */
     private static final int WIFI_DISABLE_USER_ACCEPT       =   BASE + 11;
 
     private final boolean mP2pSupported;
 
+    private NetworkInfo mNetworkInfo;
+    private LinkProperties mLinkProperties;
+
     public WifiP2pService(Context context) {
         mContext = context;
 
         mInterface = SystemProperties.get("wifi.interface", "wlan0");
+        mNetworkInfo = new NetworkInfo(ConnectivityManager.TYPE_WIFI_P2P, 0, NETWORKTYPE, "");
+        mLinkProperties = new LinkProperties();
+
         mP2pSupported = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_wifi_p2p_support);
 
@@ -113,7 +136,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         filter.addAction(WifiManager.WIFI_AP_STATE_CHANGED_ACTION);
         mContext.registerReceiver(new WifiStateReceiver(), filter);
 
-   }
+    }
 
     public void connectivityServiceReady() {
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
@@ -300,6 +323,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     break;
                 // Ignore
                 case WIFI_DISABLE_USER_ACCEPT:
+                case GROUP_NEGOTIATION_TIMED_OUT:
                     break;
                 default:
                     Slog.e(TAG, "Unhandled message " + message);
@@ -459,6 +483,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             WifiP2pManager.ENABLE_P2P_SUCCEEDED);
                     transitionTo(mInactiveState);
                     break;
+                case WifiP2pManager.DISABLE_P2P:
+                    //TODO: fix
+                    WifiNative.killSupplicant();
+                    transitionTo(mP2pDisabledState);
                 default:
                     return NOT_HANDLED;
             }
@@ -471,6 +499,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         public void enter() {
             if (DBG) Slog.d(TAG, getName());
             sendP2pStateChangedBroadcast(true);
+            mNetworkInfo.setIsAvailable(true);
         }
 
         @Override
@@ -526,6 +555,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         @Override
         public void exit() {
             sendP2pStateChangedBroadcast(false);
+            mNetworkInfo.setIsAvailable(false);
         }
     }
 
@@ -550,6 +580,8 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     WifiP2pGroup group = (WifiP2pGroup) message.obj;
                     notifyP2pInvitationReceived(group);
                     break;
+                case WifiP2pManager.REQUEST_PEERS:
+                    return NOT_HANDLED;
                default:
                     return NOT_HANDLED;
             }
@@ -558,8 +590,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     }
 
     class GroupNegotiationState extends State {
-        @Override public void enter() {
+        @Override
+        public void enter() {
             if (DBG) Slog.d(TAG, getName());
+            sendMessageDelayed(obtainMessage(GROUP_NEGOTIATION_TIMED_OUT,
+                    ++mGroupNegotiationTimeoutIndex, 0), GROUP_NEGOTIATION_WAIT_TIME_MS);
         }
 
         @Override
@@ -582,17 +617,28 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                 case WifiMonitor.P2P_GROUP_STARTED_EVENT:
                     mGroup = (WifiP2pGroup) message.obj;
                     if (DBG) Slog.d(TAG, getName() + " group started");
-                    // If this device is GO, do nothing since there is a follow up
-                    // AP_STA_CONNECTED event
-                    if (!mGroup.isGroupOwner()) {
+                    if (mGroup.isGroupOwner()) {
+                        startDhcpServer(mGroup.getInterface());
+                    } else {
+                        mDhcpStateMachine = DhcpStateMachine.makeDhcpStateMachine(mContext,
+                                P2pStateMachine.this, mGroup.getInterface());
+                        mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_START_DHCP);
                         WifiP2pDevice groupOwner = mGroup.getOwner();
                         updateDeviceStatus(groupOwner.deviceAddress, Status.CONNECTED);
                         sendP2pPeersChangedBroadcast();
                     }
                     transitionTo(mGroupCreatedState);
                     break;
-               case WifiP2pManager.CANCEL_CONNECT:
+                case WifiP2pManager.CANCEL_CONNECT:
                     // TODO: fix
+                    break;
+                case GROUP_NEGOTIATION_TIMED_OUT:
+                    if (mGroupNegotiationTimeoutIndex == message.arg1) {
+                        if (DBG) Slog.d(TAG, "Group negotiation timed out");
+                        updateDeviceStatus(mSavedConnectConfig.deviceAddress, Status.FAILED);
+                        mSavedConnectConfig = null;
+                        transitionTo(mInactiveState);
+                    }
                     break;
                 default:
                     return NOT_HANDLED;
@@ -605,6 +651,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         @Override
         public void enter() {
             if (DBG) Slog.d(TAG, getName());
+            mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.CONNECTED, null, null);
+
+            if (mGroup.isGroupOwner()) {
+                sendP2pConnectionChangedBroadcast();
+            }
         }
 
         @Override
@@ -638,7 +689,16 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     }
                     if (DBG) Slog.e(TAG, getName() + " ap sta disconnected");
                     break;
-                // Disconnect & remove group have same effect when connected
+                case DhcpStateMachine.CMD_POST_DHCP_ACTION:
+                    DhcpInfoInternal dhcpInfo = (DhcpInfoInternal) message.obj;
+                    if (DBG) Slog.d(TAG, "DhcpInfo: " + dhcpInfo);
+                    if (dhcpInfo != null) {
+                        mLinkProperties = dhcpInfo.makeLinkProperties();
+                        mLinkProperties.setInterfaceName(mGroup.getInterface());
+                        sendP2pConnectionChangedBroadcast();
+                    }
+                    break;
+                //disconnect & remove group have same effect when connected
                 case WifiP2pManager.CANCEL_CONNECT:
                 case WifiP2pManager.REMOVE_GROUP:
                     if (DBG) Slog.e(TAG, getName() + " remove group");
@@ -655,6 +715,16 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             changed = true;
                         }
                     }
+
+                    if (mGroup.isGroupOwner()) {
+                        stopDhcpServer();
+                    } else {
+                        if (DBG) Slog.d(TAG, "stop DHCP client");
+                        mDhcpStateMachine.sendMessage(DhcpStateMachine.CMD_STOP_DHCP);
+                        mDhcpStateMachine.quit();
+                        mDhcpStateMachine = null;
+                    }
+
                     mGroup = null;
                     if (changed) sendP2pPeersChangedBroadcast();
                     transitionTo(mInactiveState);
@@ -663,10 +733,12 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     WifiP2pDevice device = (WifiP2pDevice) message.obj;
                     if (device.equals(mGroup.getOwner())) {
                         Slog.d(TAG, "Lost the group owner, killing p2p connection");
-                        sendMessage(WifiP2pManager.REMOVE_GROUP);
+                        WifiNative.p2pFlush();
+                        WifiNative.p2pGroupRemove(mGroup.getInterface());
                     } else if (mGroup.removeClient(device) && mGroup.isClientListEmpty()) {
                         Slog.d(TAG, "Client list empty, killing p2p connection");
-                        sendMessage(WifiP2pManager.REMOVE_GROUP);
+                        WifiNative.p2pFlush();
+                        WifiNative.p2pGroupRemove(mGroup.getInterface());
                     }
                     return NOT_HANDLED; // Do the regular device lost handling
                 case WifiP2pManager.DISABLE_P2P:
@@ -705,6 +777,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             }
             return HANDLED;
         }
+
+        public void exit() {
+            mNetworkInfo.setDetailedState(NetworkInfo.DetailedState.DISCONNECTED, null, null);
+        }
     }
 
     private void sendP2pStateChangedBroadcast(boolean enabled) {
@@ -724,6 +800,55 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         final Intent intent = new Intent(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
         mContext.sendBroadcast(intent);
+    }
+
+    private void sendP2pConnectionChangedBroadcast() {
+        if (DBG) Slog.d(TAG, "sending p2p connection changed broadcast");
+        Intent intent = new Intent(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT
+                | Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        intent.putExtra(WifiP2pManager.EXTRA_NETWORK_INFO, new NetworkInfo(mNetworkInfo));
+        intent.putExtra(WifiP2pManager.EXTRA_LINK_PROPERTIES,
+                new LinkProperties (mLinkProperties));
+        mContext.sendStickyBroadcast(intent);
+    }
+
+    private void startDhcpServer(String intf) {
+        /* Is chosen as a unique range to avoid conflict with
+           the range defined in Tethering.java */
+        String[] dhcp_range = {"192.168.49.2", "192.168.49.254"};
+        String serverAddress = "192.168.49.1";
+
+        mLinkProperties.clear();
+        mLinkProperties.setInterfaceName(mGroup.getInterface());
+
+        InterfaceConfiguration ifcg = null;
+        try {
+            ifcg = mNwService.getInterfaceConfig(intf);
+            ifcg.addr = new LinkAddress(NetworkUtils.numericToInetAddress(
+                        serverAddress), 24);
+            ifcg.interfaceFlags = "[up]";
+            mNwService.setInterfaceConfig(intf, ifcg);
+            /* This starts the dnsmasq server */
+            mNwService.startTethering(dhcp_range);
+        } catch (Exception e) {
+            Slog.e(TAG, "Error configuring interface " + intf + ", :" + e);
+            return;
+        }
+
+        mLinkProperties.addDns(NetworkUtils.numericToInetAddress(serverAddress));
+        Slog.d(TAG, "Started Dhcp server on " + intf);
+    }
+
+    private void stopDhcpServer() {
+        try {
+            mNwService.stopTethering();
+        } catch (Exception e) {
+            Slog.e(TAG, "Error stopping Dhcp server" + e);
+            return;
+        }
+
+        Slog.d(TAG, "Stopped Dhcp server");
     }
 
     private void notifyP2pEnableFailure() {
@@ -760,11 +885,16 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             .setView(textEntryView)
             .setPositiveButton(r.getString(R.string.ok), new OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                                if (DBG) Slog.d(TAG, getName() + " connect " + pin.getText());
+                            if (DBG) Slog.d(TAG, getName() + " connect " + pin.getText());
+
+                            if (pin.getVisibility() == View.GONE) {
+                                mSavedGoNegotiationConfig.wpsConfig.setup = Setup.PBC;
+                            } else {
                                 mSavedGoNegotiationConfig.wpsConfig.setup = Setup.KEYPAD;
                                 mSavedGoNegotiationConfig.wpsConfig.pin = pin.getText().toString();
-                                sendMessage(WifiP2pManager.CONNECT, mSavedGoNegotiationConfig);
-                                mSavedGoNegotiationConfig = null;
+                            }
+                            sendMessage(WifiP2pManager.CONNECT, mSavedGoNegotiationConfig);
+                            mSavedGoNegotiationConfig = null;
                         }
                     })
             .setNegativeButton(r.getString(R.string.cancel), new OnClickListener() {
