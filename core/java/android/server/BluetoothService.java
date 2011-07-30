@@ -96,7 +96,6 @@ public class BluetoothService extends IBluetooth.Stub {
     private boolean mIsAirplaneToggleable;
     private BluetoothAdapterStateMachine mBluetoothState;
     private boolean mRestart = false;  // need to call enable() after disable()
-    private boolean mIsDiscovering;
     private int[] mAdapterSdpHandles;
     private ParcelUuid[] mAdapterUuids;
 
@@ -212,8 +211,6 @@ public class BluetoothService extends IBluetooth.Stub {
             Log.w(TAG, "Bluetooth daemons already running - runtime restart? ");
             disableNative();
         }
-
-        mIsDiscovering = false;
 
         mBondState = new BluetoothBondState(context, this);
         mAdapterProperties = new BluetoothAdapterProperties(context, this);
@@ -411,7 +408,6 @@ public class BluetoothService extends IBluetooth.Stub {
         intent.putExtra(BluetoothAdapter.EXTRA_SCAN_MODE, BluetoothAdapter.SCAN_MODE_NONE);
         mContext.sendBroadcast(intent, BLUETOOTH_PERM);
 
-        mIsDiscovering = false;
         mAdapterProperties.clear();
         mServiceRecordToPid.clear();
 
@@ -482,8 +478,6 @@ public class BluetoothService extends IBluetooth.Stub {
         if (!setupNativeDataNative()) {
             return false;
         }
-        mIsDiscovering = false;
-
         switchConnectable(false);
         updateSdpRecords();
         return true;
@@ -587,16 +581,21 @@ public class BluetoothService extends IBluetooth.Stub {
     }
 
     /**
+     * This method is called immediately before Bluetooth module is turned on after
+     * the adapter became pariable.
+     * It inits bond state and profile state before STATE_ON intent is broadcasted.
+     */
+    /*package*/ void initBluetoothAfterTurningOn() {
+        mBondState.initBondState();
+        initProfileState();
+    }
+
+    /**
      * This method is called immediately after Bluetooth module is turned on.
      * It starts auto-connection and places bluetooth on sign onto the battery
      * stats
      */
     /*package*/ void runBluetooth() {
-        mIsDiscovering = false;
-        mBondState.readAutoPairingData();
-        mBondState.initBondState();
-        initProfileState();
-
         autoConnect();
 
         // Log bluetooth on to battery stats.
@@ -787,12 +786,14 @@ public class BluetoothService extends IBluetooth.Stub {
         }
 
         if (allowOnlyInOnState) {
-            setPropertyBoolean("Pairable", pairable);
             setPropertyBoolean("Discoverable", discoverable);
+            setPropertyBoolean("Pairable", pairable);
         } else {
             // allowed to set the property through native layer directly
-            setAdapterPropertyBooleanNative("Pairable", pairable ? 1 : 0);
             setAdapterPropertyBooleanNative("Discoverable", discoverable ? 1 : 0);
+            // do setting pairable after setting discoverable since the adapter
+            // state machine uses pairable event for state change
+            setAdapterPropertyBooleanNative("Pairable", pairable ? 1 : 0);
         }
         return true;
     }
@@ -949,11 +950,13 @@ public class BluetoothService extends IBluetooth.Stub {
 
     public synchronized boolean isDiscovering() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return mIsDiscovering;
-    }
 
-    /* package */ void setIsDiscovering(boolean isDiscovering) {
-        mIsDiscovering = isDiscovering;
+        String discoveringProperty = mAdapterProperties.getProperty("Discovering");
+        if (discoveringProperty == null) {
+            return false;
+        }
+
+        return discoveringProperty.equals("true");
     }
 
     private boolean isBondingFeasible(String address) {

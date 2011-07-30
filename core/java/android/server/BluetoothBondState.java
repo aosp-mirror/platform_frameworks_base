@@ -90,6 +90,7 @@ class BluetoothBondState {
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothDevice.ACTION_PAIRING_REQUEST);
         mContext.registerReceiver(mReceiver, filter);
+        readAutoPairingData();
     }
 
     synchronized void setPendingOutgoingBonding(String address) {
