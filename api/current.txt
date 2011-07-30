@@ -26480,9 +26480,14 @@ package android.widget {
   public class ShareActionProvider extends android.view.ActionProvider {
     ctor public ShareActionProvider(android.content.Context);
     method public android.view.View onCreateActionView();
+    method public void setOnShareTargetSelectedListener(android.widget.ShareActionProvider.OnShareTargetSelectedListener);
     method public void setShareHistoryFileName(java.lang.String);
     method public void setShareIntent(android.content.Intent);
     field public static final java.lang.String DEFAULT_SHARE_HISTORY_FILE_NAME = "share_history.xml";
+  }
+
+  public static abstract interface ShareActionProvider.OnShareTargetSelectedListener {
+    method public abstract boolean onShareTargetSelected(android.widget.ShareActionProvider, android.content.Intent);
   }
 
   public class SimpleAdapter extends android.widget.BaseAdapter implements android.widget.Filterable {

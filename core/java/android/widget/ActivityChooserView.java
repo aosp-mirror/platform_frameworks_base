@@ -29,6 +29,8 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 import android.widget.ActivityChooserModel.ActivityChooserModelClient;
 
 import com.android.internal.R;
@@ -112,6 +114,19 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         public void onInvalidated() {
             super.onInvalidated();
             mAdapter.notifyDataSetInvalidated();
+        }
+    };
+
+    private final OnGlobalLayoutListener mOnGlobalLayoutListener = new OnGlobalLayoutListener() {
+        @Override
+        public void onGlobalLayout() {
+            if (isShowingPopup()) {
+                if (!isShown()) {
+                    getListPopupWindow().dismiss();
+                } else {
+                    getListPopupWindow().show();
+                }
+            }
         }
     };
 
@@ -261,6 +276,8 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
             throw new IllegalStateException("No data model. Did you call #setDataModel?");
         }
 
+        getViewTreeObserver().addOnGlobalLayoutListener(mOnGlobalLayoutListener);
+
         mAdapter.setMaxActivityCount(maxActivityCount);
 
         final int activityCount = mAdapter.getActivityCount();
@@ -292,6 +309,10 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
     public boolean dismissPopup() {
         if (isShowingPopup()) {
             getListPopupWindow().dismiss();
+            ViewTreeObserver viewTreeObserver = getViewTreeObserver();
+            if (viewTreeObserver.isAlive()) {
+                viewTreeObserver.removeGlobalOnLayoutListener(mOnGlobalLayoutListener);
+            }
         }
         return true;
     }
@@ -321,6 +342,10 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
         ActivityChooserModel dataModel = mAdapter.getDataModel();
         if (dataModel != null) {
             dataModel.unregisterObserver(mModelDataSetOberver);
+        }
+        ViewTreeObserver viewTreeObserver = getViewTreeObserver();
+        if (viewTreeObserver.isAlive()) {
+            viewTreeObserver.removeGlobalOnLayoutListener(mOnGlobalLayoutListener);
         }
         mIsAttachedToWindow = false;
     }
@@ -433,8 +458,10 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                         }
                     } else {
                         // The first item in the model is default action => adjust index
-                        Intent launchIntent = mAdapter.getDataModel().chooseActivity(position + 1);
-                        mContext.startActivity(launchIntent);
+                        Intent launchIntent  = mAdapter.getDataModel().chooseActivity(position + 1);
+                        if (launchIntent != null) {
+                            mContext.startActivity(launchIntent);
+                        }
                     }
                 } break;
                 default:
@@ -449,7 +476,9 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
                 ResolveInfo defaultActivity = mAdapter.getDefaultActivity();
                 final int index = mAdapter.getDataModel().getActivityIndex(defaultActivity);
                 Intent launchIntent = mAdapter.getDataModel().chooseActivity(index);
-                mContext.startActivity(launchIntent);
+                if (launchIntent != null) {
+                    mContext.startActivity(launchIntent);
+                }
             } else if (view == mExpandActivityOverflowButton) {
                 mIsSelectingDefaultActivity = false;
                 showPopupUnchecked(mInitialActivityCount);

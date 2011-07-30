@@ -131,6 +131,30 @@ public class ActivityChooserModel extends DataSetObservable {
     }
 
     /**
+     * Listener for choosing an activity.
+     */
+    public interface OnChooseActivityListener {
+
+        /**
+         * Called when an activity has been chosen. The client can decide whether
+         * an activity can be chosen and if so the caller of
+         * {@link ActivityChooserModel#chooseActivity(int)} will receive and {@link Intent}
+         * for launching it.
+         * <p>
+         * <strong>Note:</strong> Modifying the intent is not permitted and
+         *     any changes to the latter will be ignored.
+         * </p>
+         *
+         * @param host The listener's host model.
+         * @param intent The intent for launching the chosen activity.
+         * @return Whether the intent is handled and should not be delivered to clients.
+         *
+         * @see ActivityChooserModel#chooseActivity(int)
+         */
+        public boolean onChooseActivity(ActivityChooserModel host, Intent intent);
+    }
+
+    /**
      * Flag for selecting debug mode.
      */
     private static final boolean DEBUG = false;
@@ -287,6 +311,11 @@ public class ActivityChooserModel extends DataSetObservable {
     private final Handler mHandler = new Handler();
 
     /**
+     * Policy for controlling how the model handles chosen activities.
+     */
+    private OnChooseActivityListener mActivityChoserModelPolicy;
+
+    /**
      * Gets the data model backed by the contents of the provided file with historical data.
      * Note that only one data model is backed by a given file, thus multiple calls with
      * the same file name will return the same model instance. If no such instance is present
@@ -426,9 +455,11 @@ public class ActivityChooserModel extends DataSetObservable {
      * the client solely to let additional customization before the start.
      * </p>
      *
-     * @return Whether adding succeeded.
+     * @return An {@link Intent} for launching the activity or null if the
+     *         policy has consumed the intent.
      *
      * @see HistoricalRecord
+     * @see OnChooseActivityListener
      */
     public Intent chooseActivity(int index) {
         ActivityResolveInfo chosenActivity = mActivites.get(index);
@@ -436,14 +467,34 @@ public class ActivityChooserModel extends DataSetObservable {
         ComponentName chosenName = new ComponentName(
                 chosenActivity.resolveInfo.activityInfo.packageName,
                 chosenActivity.resolveInfo.activityInfo.name);
-        HistoricalRecord historicalRecord = new HistoricalRecord(chosenName,
-                System.currentTimeMillis(), DEFAULT_HISTORICAL_RECORD_WEIGHT);
-        addHisoricalRecord(historicalRecord);
 
         Intent choiceIntent = new Intent(mIntent);
         choiceIntent.setComponent(chosenName);
 
+        if (mActivityChoserModelPolicy != null) {
+            // Do not allow the policy to change the intent.
+            Intent choiceIntentCopy = new Intent(choiceIntent);
+            final boolean handled = mActivityChoserModelPolicy.onChooseActivity(this,
+                    choiceIntentCopy);
+            if (handled) {
+                return null;
+            }
+        }
+
+        HistoricalRecord historicalRecord = new HistoricalRecord(chosenName,
+                System.currentTimeMillis(), DEFAULT_HISTORICAL_RECORD_WEIGHT);
+        addHisoricalRecord(historicalRecord);
+
         return choiceIntent;
+    }
+
+    /**
+     * Sets the listener for choosing an activity.
+     *
+     * @param listener The listener.
+     */
+    public void setOnChooseActivityListener(OnChooseActivityListener listener) {
+        mActivityChoserModelPolicy = listener;
     }
 
     /**
