@@ -86,6 +86,32 @@ status_t SurfaceTextureLayer::dequeueBuffer(int *buf,
     return res;
 }
 
+status_t SurfaceTextureLayer::connect(int api) {
+    status_t err = SurfaceTexture::connect(api);
+    if (err == NO_ERROR) {
+        switch(api) {
+            case NATIVE_WINDOW_API_MEDIA:
+            case NATIVE_WINDOW_API_CAMERA:
+                // Camera preview and videos are rate-limited on the producer
+                // side.  If enabled for this build, we use async mode to always
+                // show the most recent frame at the cost of requiring an
+                // additional buffer.
+#ifndef NEVER_DEFAULT_TO_ASYNC_MODE
+                err = setSynchronousMode(false);
+                break;
+#endif
+                // fall through to set synchronous mode when not defaulting to
+                // async mode.
+            deafult:
+                err = setSynchronousMode(true);
+                break;
+        }
+        if (err != NO_ERROR) {
+            disconnect(api);
+        }
+    }
+    return err;
+}
 
 // ---------------------------------------------------------------------------
 }; // namespace android

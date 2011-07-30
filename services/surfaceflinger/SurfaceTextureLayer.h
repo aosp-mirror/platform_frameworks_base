@@ -50,6 +50,8 @@ protected:
 
     virtual status_t dequeueBuffer(int *buf, uint32_t w, uint32_t h,
             uint32_t format, uint32_t usage);
+
+    virtual status_t connect(int api);
 };
 
 // ---------------------------------------------------------------------------
