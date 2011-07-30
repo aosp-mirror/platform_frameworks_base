@@ -168,18 +168,18 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
         }
     }
 
+    const int minBufferSlots = mSynchronousMode ?
+            MIN_SYNC_BUFFER_SLOTS : MIN_ASYNC_BUFFER_SLOTS;
     if (bufferCount == 0) {
-        const int minBufferSlots = mSynchronousMode ?
-                MIN_SYNC_BUFFER_SLOTS : MIN_ASYNC_BUFFER_SLOTS;
         mClientBufferCount = 0;
         bufferCount = (mServerBufferCount >= minBufferSlots) ?
                 mServerBufferCount : minBufferSlots;
         return setBufferCountServerLocked(bufferCount);
     }
 
-    // We don't allow the client to set a buffer-count less than
-    // MIN_ASYNC_BUFFER_SLOTS (3), there is no reason for it.
-    if (bufferCount < MIN_ASYNC_BUFFER_SLOTS) {
+    if (bufferCount < minBufferSlots) {
+        LOGE("setBufferCount: requested buffer count (%d) is less than "
+                "minimum (%d)", bufferCount, minBufferSlots);
         return BAD_VALUE;
     }
 
