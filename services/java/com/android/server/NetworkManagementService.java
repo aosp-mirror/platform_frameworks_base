@@ -854,7 +854,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
         try {
-            mConnector.doCommand(String.format("softap fwreload " + wlanIface + " AP"));
+            wifiFirmwareReload(wlanIface, "AP");
             mConnector.doCommand(String.format("softap start " + wlanIface));
             if (wifiConfig == null) {
                 mConnector.doCommand(String.format("softap set " + wlanIface + " " + softapIface));
@@ -901,6 +901,20 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
+    /* @param mode can be "AP", "STA" or "P2P" */
+    public void wifiFirmwareReload(String wlanIface, String mode) throws IllegalStateException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CHANGE_WIFI_STATE, "NetworkManagementService");
+
+        try {
+            mConnector.doCommand(String.format("softap fwreload " + wlanIface + " " + mode));
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException("Error communicating to native daemon ", e);
+        }
+    }
+
     public void stopAccessPoint(String wlanIface) throws IllegalStateException {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CHANGE_NETWORK_STATE, "NetworkManagementService");
@@ -909,7 +923,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         try {
             mConnector.doCommand("softap stopap");
             mConnector.doCommand("softap stop " + wlanIface);
-            mConnector.doCommand(String.format("softap fwreload " + wlanIface + " STA"));
+            wifiFirmwareReload(wlanIface, "STA");
         } catch (NativeDaemonConnectorException e) {
             throw new IllegalStateException("Error communicating to native daemon to stop soft AP",
                     e);
