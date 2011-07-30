@@ -17,12 +17,12 @@
 package android.graphics;
 
 import com.android.layoutlib.bridge.Bridge;
-import com.android.layoutlib.bridge.android.BridgeResources.NinePatchInputStream;
 import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.ninepatch.NinePatchChunk;
 import com.android.resources.Density;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
+import android.content.res.BridgeResources.NinePatchInputStream;
 import android.graphics.BitmapFactory.Options;
 
 import java.io.FileDescriptor;

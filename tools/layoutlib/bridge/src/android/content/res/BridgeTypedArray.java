@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge.android;
+package android.content.res;
 
 import com.android.ide.common.rendering.api.DeclareStyleableResourceValue;
 import com.android.ide.common.rendering.api.LayoutLog;
@@ -24,6 +24,8 @@ import com.android.ide.common.rendering.api.StyleResourceValue;
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.android.BridgeContext;
+import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.resources.ResourceType;
@@ -445,7 +447,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         if (ResourceHelper.parseFloatAttribute(mNames[index], s, mValue, true /*requireUnit*/)) {
-            return mValue.getDimension(mBridgeResources.mMetrics);
+            return mValue.getDimension(mBridgeResources.getDisplayMetrics());
         }
 
         // looks like we were unable to resolve the dimension value
@@ -572,7 +574,7 @@ public final class BridgeTypedArray extends TypedArray {
         }
 
         if (ResourceHelper.parseFloatAttribute(mNames[index], s, mValue, true /*requireUnit*/)) {
-            float f = mValue.getDimension(mBridgeResources.mMetrics);
+            float f = mValue.getDimension(mBridgeResources.getDisplayMetrics());
 
             final int res = (int)(f+0.5f);
             if (res != 0) return res;
