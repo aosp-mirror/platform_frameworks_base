@@ -29,6 +29,7 @@ import android.util.Log;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewRootImpl;
 import com.android.internal.R;
 
@@ -62,7 +63,8 @@ public class PasswordEntryKeyboardHelper implements OnKeyboardActionListener {
         mContext = context;
         mTargetView = targetView;
         mKeyboardView = keyboardView;
-        if (useFullScreenWidth || mKeyboardView.getLayoutParams().width == -1) {
+        if (useFullScreenWidth
+                || mKeyboardView.getLayoutParams().width == ViewGroup.LayoutParams.MATCH_PARENT) {
             createKeyboards();
         } else {
             createKeyboardsWithSpecificSize(mKeyboardView.getLayoutParams().width,
