@@ -808,7 +808,9 @@ status_t BnDrmManagerService::onTransact(
         LOGV("BnDrmManagerService::onTransact :INSTALL_DRM_ENGINE");
         CHECK_INTERFACE(IDrmManagerService, data, reply);
 
-        status_t status = installDrmEngine(data.readInt32(), data.readString8());
+        const int uniqueId = data.readInt32();
+        const String8 engineFile = data.readString8();
+        status_t status = installDrmEngine(uniqueId, engineFile);
 
         reply->writeInt32(status);
         return DRM_NO_ERROR;
@@ -822,7 +824,8 @@ status_t BnDrmManagerService::onTransact(
         const int uniqueId = data.readInt32();
         const String8 path = data.readString8();
 
-        DrmConstraints* drmConstraints = getConstraints(uniqueId, &path, data.readInt32());
+        DrmConstraints* drmConstraints
+            = getConstraints(uniqueId, &path, data.readInt32());
 
         if (NULL != drmConstraints) {
             //Filling DRM Constraints contents
@@ -948,7 +951,9 @@ status_t BnDrmManagerService::onTransact(
         const int uniqueId = data.readInt32();
 
         //Filling DRM info Request
-        DrmInfoRequest* drmInfoRequest = new DrmInfoRequest(data.readInt32(), data.readString8());
+        const int infoType = data.readInt32();
+        const String8 mimeType = data.readString8();
+        DrmInfoRequest* drmInfoRequest = new DrmInfoRequest(infoType, mimeType);
 
         const int size = data.readInt32();
         for (int index = 0; index < size; ++index) {
@@ -1021,7 +1026,9 @@ status_t BnDrmManagerService::onTransact(
         LOGV("BnDrmManagerService::onTransact :GET_ORIGINAL_MIMETYPE");
         CHECK_INTERFACE(IDrmManagerService, data, reply);
 
-        const String8 originalMimeType = getOriginalMimeType(data.readInt32(), data.readString8());
+        const int uniqueId = data.readInt32();
+        const String8 path = data.readString8();
+        const String8 originalMimeType = getOriginalMimeType(uniqueId, path);
 
         reply->writeString8(originalMimeType);
         return DRM_NO_ERROR;
@@ -1032,8 +1039,10 @@ status_t BnDrmManagerService::onTransact(
         LOGV("BnDrmManagerService::onTransact :GET_DRM_OBJECT_TYPE");
         CHECK_INTERFACE(IDrmManagerService, data, reply);
 
-        const int drmObjectType
-            = getDrmObjectType(data.readInt32(), data.readString8(), data.readString8());
+        const int uniqueId = data.readInt32();
+        const String8 path = data.readString8();
+        const String8 mimeType = data.readString8();
+        const int drmObjectType = getDrmObjectType(uniqueId, path, mimeType);
 
         reply->writeInt32(drmObjectType);
         return DRM_NO_ERROR;
@@ -1044,8 +1053,10 @@ status_t BnDrmManagerService::onTransact(
         LOGV("BnDrmManagerService::onTransact :CHECK_RIGHTS_STATUS");
         CHECK_INTERFACE(IDrmManagerService, data, reply);
 
-        const int result
-            = checkRightsStatus(data.readInt32(), data.readString8(), data.readInt32());
+        const int uniqueId = data.readInt32();
+        const String8 path = data.readString8();
+        const int action = data.readInt32();
+        const int result = checkRightsStatus(uniqueId, path, action);
 
         reply->writeInt32(result);
         return DRM_NO_ERROR;
@@ -1061,9 +1072,10 @@ status_t BnDrmManagerService::onTransact(
         DecryptHandle handle;
         readDecryptHandleFromParcelData(&handle, data);
 
+        const int action = data.readInt32();
+        const bool reserve = static_cast<bool>(data.readInt32());
         const status_t status
-            = consumeRights(uniqueId, &handle, data.readInt32(),
-                static_cast<bool>(data.readInt32()));
+            = consumeRights(uniqueId, &handle, action, reserve);
         reply->writeInt32(status);
 
         clearDecryptHandle(&handle);
@@ -1080,8 +1092,10 @@ status_t BnDrmManagerService::onTransact(
         DecryptHandle handle;
         readDecryptHandleFromParcelData(&handle, data);
 
+        const int playbackStatus = data.readInt32();
+        const int64_t position = data.readInt64();
         const status_t status
-            = setPlaybackStatus(uniqueId, &handle, data.readInt32(), data.readInt64());
+            = setPlaybackStatus(uniqueId, &handle, playbackStatus, position);
         reply->writeInt32(status);
 
         clearDecryptHandle(&handle);
@@ -1093,11 +1107,13 @@ status_t BnDrmManagerService::onTransact(
         LOGV("BnDrmManagerService::onTransact :VALIDATE_ACTION");
         CHECK_INTERFACE(IDrmManagerService, data, reply);
 
-        bool result = validateAction(
-                                data.readInt32(),
-                                data.readString8(),
-                                data.readInt32(),
-                                ActionDescription(data.readInt32(), data.readInt32()));
+        const int uniqueId = data.readInt32();
+        const String8 path = data.readString8();
+        const int action = data.readInt32();
+        const int outputType = data.readInt32();
+        const int configuration = data.readInt32();
+        bool result = validateAction(uniqueId, path, action,
+                ActionDescription(outputType, configuration));
 
         reply->writeInt32(result);
         return DRM_NO_ERROR;
@@ -1108,7 +1124,9 @@ status_t BnDrmManagerService::onTransact(
         LOGV("BnDrmManagerService::onTransact :REMOVE_RIGHTS");
         CHECK_INTERFACE(IDrmManagerService, data, reply);
 
-        const status_t status = removeRights(data.readInt32(), data.readString8());
+        int uniqueId = data.readInt32();
+        String8 path = data.readString8();
+        const status_t status = removeRights(uniqueId, path);
         reply->writeInt32(status);
 
         return DRM_NO_ERROR;
@@ -1130,7 +1148,9 @@ status_t BnDrmManagerService::onTransact(
         LOGV("BnDrmManagerService::onTransact :OPEN_CONVERT_SESSION");
         CHECK_INTERFACE(IDrmManagerService, data, reply);
 
-        const int convertId = openConvertSession(data.readInt32(), data.readString8());
+        const int uniqueId = data.readInt32();
+        const String8 mimeType = data.readString8();
+        const int convertId = openConvertSession(uniqueId, mimeType);
 
         reply->writeInt32(convertId);
         return DRM_NO_ERROR;
@@ -1176,8 +1196,10 @@ status_t BnDrmManagerService::onTransact(
         LOGV("BnDrmManagerService::onTransact :CLOSE_CONVERT_SESSION");
         CHECK_INTERFACE(IDrmManagerService, data, reply);
 
-        DrmConvertedStatus*    drmConvertedStatus
-            = closeConvertSession(data.readInt32(), data.readInt32());
+        const int uniqueId = data.readInt32();
+        const int convertId = data.readInt32();
+        DrmConvertedStatus* drmConvertedStatus
+            = closeConvertSession(uniqueId, convertId);
 
         if (NULL != drmConvertedStatus) {
             //Filling Drm Converted Ststus
@@ -1241,8 +1263,10 @@ status_t BnDrmManagerService::onTransact(
         const int uniqueId = data.readInt32();
         const int fd = data.readFileDescriptor();
 
+        const off64_t offset = data.readInt64();
+        const off64_t length = data.readInt64();
         DecryptHandle* handle
-            = openDecryptSession(uniqueId, fd, data.readInt64(), data.readInt64());
+            = openDecryptSession(uniqueId, fd, offset, length);
 
         if (NULL != handle) {
             writeDecryptHandleToParcelData(handle, reply);
