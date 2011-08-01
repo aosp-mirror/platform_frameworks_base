@@ -313,7 +313,7 @@ public class TouchExplorer implements Explorer {
                             if (moveDelta > mTouchExplorationTapSlop) {
                                 mLastTouchExploreEvent = null;
                                 mPerformLongPressDelayed.remove();
-                               break;
+                                break;
                             }
                         }
                     } break;
@@ -388,6 +388,11 @@ public class TouchExplorer implements Explorer {
                             mTouchExploreGestureInProgress = false;
                             mLastTouchExploreEvent = MotionEvent.obtain(event);
                             sendAccessibilityEvent(TYPE_TOUCH_EXPLORATION_GESTURE_END);
+                            final int lastAction = mPointerTracker.getLastInjectedHoverAction();
+                            if (lastAction != MotionEvent.ACTION_HOVER_EXIT) {
+                                sendMotionEvent(event, MotionEvent.ACTION_HOVER_EXIT,
+                                        pointerIdBits, policyFlags);
+                            }
                             break;
                         }
 
