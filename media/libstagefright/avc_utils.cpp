@@ -188,7 +188,7 @@ status_t getNextNALUnit(
     }
 
     size_t endOffset = offset - 2;
-    while (data[endOffset - 1] == 0x00) {
+    while (endOffset > startOffset + 1 && data[endOffset - 1] == 0x00) {
         --endOffset;
     }
 
