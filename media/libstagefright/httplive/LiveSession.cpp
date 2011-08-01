@@ -544,6 +544,7 @@ rinse_repeat:
         firstSeqNumberInPlaylist = 0;
     }
 
+    bool seekDiscontinuity = false;
     bool explicitDiscontinuity = false;
     bool bandwidthChanged = false;
 
@@ -580,10 +581,10 @@ rinse_repeat:
                     // reseting the data source will have had the
                     // side effect of discarding any previously queued
                     // bandwidth change discontinuity.
-                    // Therefore we'll need to treat these explicit
+                    // Therefore we'll need to treat these seek
                     // discontinuities as involving a bandwidth change
                     // even if they aren't directly.
-                    explicitDiscontinuity = true;
+                    seekDiscontinuity = true;
                     bandwidthChanged = true;
                 }
             }
@@ -597,11 +598,7 @@ rinse_repeat:
     }
 
     if (mSeqNumber < 0) {
-        if (mPlaylist->isComplete()) {
-            mSeqNumber = firstSeqNumberInPlaylist;
-        } else {
-            mSeqNumber = firstSeqNumberInPlaylist + mPlaylist->size() / 2;
-        }
+        mSeqNumber = firstSeqNumberInPlaylist;
     }
 
     int32_t lastSeqNumberInPlaylist =
@@ -704,15 +701,17 @@ rinse_repeat:
         bandwidthChanged = false;
     }
 
-    if (explicitDiscontinuity || bandwidthChanged) {
+    if (seekDiscontinuity || explicitDiscontinuity || bandwidthChanged) {
         // Signal discontinuity.
 
-        LOGI("queueing discontinuity (explicit=%d, bandwidthChanged=%d)",
-             explicitDiscontinuity, bandwidthChanged);
+        LOGI("queueing discontinuity (seek=%d, explicit=%d, bandwidthChanged=%d)",
+             seekDiscontinuity, explicitDiscontinuity, bandwidthChanged);
 
         sp<ABuffer> tmp = new ABuffer(188);
         memset(tmp->data(), 0, tmp->size());
-        tmp->data()[1] = bandwidthChanged;
+
+        // signal a 'hard' discontinuity for explicit or bandwidthChanged.
+        tmp->data()[1] = (explicitDiscontinuity || bandwidthChanged) ? 1 : 0;
 
         mDataSource->queueBuffer(tmp);
     }
