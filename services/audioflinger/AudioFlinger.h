@@ -206,6 +206,8 @@ public:
 
                 uint32_t    getMode() { return mMode; }
 
+                bool        btNrec() { return mBtNrec; }
+
 private:
                             AudioFlinger();
     virtual                 ~AudioFlinger();
@@ -996,6 +998,7 @@ private:
         virtual status_t addEffectChain_l(const sp<EffectChain>& chain);
         virtual size_t removeEffectChain_l(const sp<EffectChain>& chain);
         virtual uint32_t hasAudioSession(int sessionId);
+                RecordTrack* track();
 
     private:
                 RecordThread();
@@ -1361,7 +1364,8 @@ private:
 
                 DefaultKeyedVector< pid_t, sp<NotificationClient> >    mNotificationClients;
                 volatile int32_t                    mNextUniqueId;
-                uint32_t mMode;
+                uint32_t                            mMode;
+                bool                                mBtNrec;
 
 };
 
