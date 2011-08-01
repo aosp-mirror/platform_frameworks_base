@@ -90,10 +90,8 @@ package android {
     field public static final java.lang.String RECEIVE_SMS = "android.permission.RECEIVE_SMS";
     field public static final java.lang.String RECEIVE_WAP_PUSH = "android.permission.RECEIVE_WAP_PUSH";
     field public static final java.lang.String RECORD_AUDIO = "android.permission.RECORD_AUDIO";
-    field public static final java.lang.String REMOVE_TASKS = "android.permission.REMOVE_TASKS";
     field public static final java.lang.String REORDER_TASKS = "android.permission.REORDER_TASKS";
     field public static final deprecated java.lang.String RESTART_PACKAGES = "android.permission.RESTART_PACKAGES";
-    field public static final java.lang.String RETRIEVE_WINDOW_CONTENT = "android.permission.RETRIEVE_WINDOW_CONTENT";
     field public static final java.lang.String SEND_SMS = "android.permission.SEND_SMS";
     field public static final java.lang.String SET_ACTIVITY_WATCHER = "android.permission.SET_ACTIVITY_WATCHER";
     field public static final java.lang.String SET_ALARM = "com.android.alarm.permission.SET_ALARM";

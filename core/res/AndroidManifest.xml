@@ -663,7 +663,7 @@
         android:label="@string/permlab_reorderTasks"
         android:description="@string/permdesc_reorderTasks" />
 
-    <!-- Allows an application to change to remove/kill tasks -->
+    <!-- @hide Allows an application to change to remove/kill tasks -->
     <permission android:name="android.permission.REMOVE_TASKS"
         android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
         android:protectionLevel="signature"
@@ -711,7 +711,7 @@
         android:label="@string/permlab_dump"
         android:description="@string/permdesc_dump" />
 
-    <!-- Allows an application to retrieve the content of the active window
+    <!-- @hide Allows an application to retrieve the content of the active window
          An active window is the window that has fired an accessibility event. -->
     <permission android:name="android.permission.RETRIEVE_WINDOW_CONTENT"
         android:permissionGroup="android.permission-group.PERSONAL_INFO"
