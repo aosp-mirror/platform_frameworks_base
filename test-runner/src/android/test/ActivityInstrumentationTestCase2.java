@@ -147,8 +147,8 @@ public abstract class ActivityInstrumentationTestCase2<T extends Activity>
     protected void setUp() throws Exception {
         super.setUp();
         
-        boolean mInitialTouchMode = false;
-        Intent mActivityIntent = null;
+        mInitialTouchMode = false;
+        mActivityIntent = null;
     }
 
     @Override
