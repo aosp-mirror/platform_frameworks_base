@@ -128,4 +128,15 @@ public final class TextServicesManager {
             return null;
         }
     }
+
+    /**
+     * @hide
+     */
+    public void setCurrentSpellChecker(SpellCheckerInfo info) {
+        try {
+            sService.setCurrentSpellChecker(info);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error in setCurrentSpellChecker: " + e);
+        }
+    }
 }
