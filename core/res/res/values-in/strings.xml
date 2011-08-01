@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Mengizinkan aplikasi menerima dan memproses pesan SMS. Aplikasi hasad dapat memonitor pesan Anda atau menghapusnya tanpa menampilkannya kepada Anda."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"menerima MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Mengizinkan aplikasi menerima dan memproses pesan SMS. Aplikasi hasad dapat memonitor pesan atau menghapusnya tanpa menampilkannya kepada Anda."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"terima siaran darurat"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Memungkinkan aplikasi menerima dan memproses pesan siaran darurat. Izin ini hanya tersedia untuk aplikasi sistem."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"kirim pesan SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Mengizinkan aplikasi mengirim pesan SMS. Aplikasi hasad dapat membebankan biaya kepada Anda dengan mengirim pesan tanpa konfirmasi dari Anda."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"baca SMS atau MMS"</string>

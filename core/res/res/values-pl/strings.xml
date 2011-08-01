@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Pozwala aplikacjom na odbieranie i przetwarzanie wiadomości SMS. Szkodliwe aplikacje mogą monitorować wiadomości lub usuwać je bez wyświetlania ich użytkownikowi."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"odbieranie wiadomości MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Pozwala aplikacji na odbieranie i przetwarzanie wiadomości MMS. Szkodliwe aplikacje mogą monitorować wiadomości lub usuwać je bez pokazywania ich użytkownikowi."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"odbiór emisji alarmowych"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Umożliwia aplikacji odbiór i przetwarzanie wiadomości pochodzących z emisji alarmowych. To pozwolenie jest dostępne tylko dla aplikacji systemowych."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"wysyłanie wiadomości SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Pozwól aplikacjom na wysyłanie wiadomości SMS. Szkodliwe aplikacje mogą generować koszty, wysyłając wiadomości bez wiedzy użytkownika."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"czytanie wiadomości SMS lub MMS"</string>

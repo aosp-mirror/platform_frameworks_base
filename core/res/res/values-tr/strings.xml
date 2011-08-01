@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Uygulamanın SMS mesajları alıp işlemesine izin verir. Kötü amaçlı uygulamalar mesajlarınızı izleyebilir veya bunları size göstermeden silebilir."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"MMS al"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Uygulamanın MMS mesajları almasına ve işlemesine izin verir. Kötü amaçlı uygulamalar mesajlarınızı izleyebilir veya size göstermeden silebilir."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"acil durum yayınlarını al"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Uygulamanın acil durum yayını mesajlarını alıp işlemesine izin verir. Bu izin yalnızca sistem uygulamaları için geçerlidir."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS mesajları gönder"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Uygulamaların SMS mesajları göndermesine izin verir. Kötü amaçlı uygulamalar, onayınızı almadan mesaj göndererek size maliyet çıkarabilir."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS veya MMS oku"</string>

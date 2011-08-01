@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"允许应用程序接收和处理短信。恶意应用程序可借此监视您的信息，或者将信息删除而不向您显示。"</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"接收彩信"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"允许应用程序接收和处理彩信。恶意应用程序可借此监视您的信息，或者将信息删除而不向您显示。"</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"接收紧急广播"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"允许应用程序接收和处理紧急广播消息。此权限只适用于系统应用程序。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"发送短信"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"允许应用程序发送短信。恶意应用程序可能会不经您的确认就发送信息，给您带来费用。"</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"读取短信或彩信"</string>

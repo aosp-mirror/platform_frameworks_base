@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"SMSメッセージの受信と処理をアプリケーションに許可します。悪意のあるアプリケーションがメッセージを監視したり、表示せずに削除する恐れがあります。"</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"MMSの受信"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"MMSメッセージの受信と処理をアプリケーションに許可します。悪意のあるアプリケーションがメッセージを監視したり、表示せずに削除する恐れがあります。"</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"緊急放送の受信"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"緊急放送メッセージの取得と処理をアプリケーションに許可します。これはシステムアプリケーションのみ利用できる権限です。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMSメッセージの送信"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"SMSメッセージの送信をアプリケーションに許可します。悪意のあるアプリケーションが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"SMSの読み取り"</string>

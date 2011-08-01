@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Permite que la aplicación reciba y procese mensajes SMS. Las aplicaciones malintencionadas pueden controlar los mensajes o eliminarlos sin mostrarlos al usuario."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"recibir MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Permite que la aplicación reciba y procese mensajes MMS. Las aplicaciones malintencionadas pueden controlar los mensajes o eliminarlos sin mostrarlos al usuario."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"recibir mensajes de emergencia"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Permite que una aplicación reciba y procese mensajes de emergencia. Este permiso solo está disponible para las aplicaciones del sistema."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar mensajes SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Permite que la aplicación envíe mensajes SMS. Es posible que tengas que pagar si las aplicaciones malintencionadas envían mensajes sin tu confirmación."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"leer SMS o MMS"</string>

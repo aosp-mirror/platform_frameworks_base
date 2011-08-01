@@ -184,6 +184,10 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Permetta a l\'applicaziun da retschaiver ed elavurar SMS. Applicaziuns donnegiusas pon uschia survegliar Voss messadis u als stizzar avant ch\'els vegnan mussads."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"retschaiver MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Permetta a l\'applicaziun da retschaiver ed elavurar MMS. Applicaziuns donnegiusas pon uschia survegliar Voss messadis u als stizzar avant ch\'els vegnan mussads."</string>
+    <!-- no translation found for permlab_receiveEmergencyBroadcast (1803477660846288089) -->
+    <skip />
+    <!-- no translation found for permdesc_receiveEmergencyBroadcast (7118393393716546131) -->
+    <skip />
     <string name="permlab_sendSms" msgid="5600830612147671529">"trametter messadis SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Permetta ad applicaziuns da trametter messadis SMS. Applicaziuns donnegiusas pon chaschunar custs cun trametter messadis senza As dumandar."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"leger SMS u MMS"</string>

@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Leidžia programai gauti ir apdoroti SMS pranešimus. Kenkėjiškos programos gali stebėti jūsų pranešimus arba ištrinti juos neparodžiusios jums."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"gauti MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Leidžia programai gauti ir apdoroti MMS pranešimus. Kenkėjiškos programos gali stebėti jūsų pranešimus arba ištrinti juos neparodžiusios jums."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"gauti kritinės padėties transliacijas"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Leidžiama programa gauti ir apdoroti kritinės padėties transliacijos pranešimus. Šis leidimas galimas tik naudojant sistemos programas."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"siųsti SMS pranešimus"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Leidžia programai siųsti SMS pranešimus. Kenkėjiškos programos gali kainuoti jums pinigų, nes gali siųsti SMS pranešimus be jūsų patvirtinimo."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"skaityti SMS ar MMS"</string>

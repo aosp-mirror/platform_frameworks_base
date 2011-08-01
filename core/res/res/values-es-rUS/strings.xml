@@ -107,7 +107,7 @@
     <string name="fcError" msgid="3327560126588500777">"Problema de conexión o código de función no válido."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"Aceptar"</string>
     <string name="httpError" msgid="2567300624552921790">"La página web contiene un error."</string>
-    <string name="httpErrorLookup" msgid="4517085806977851374">"No se ha podido encontrar la URL."</string>
+    <string name="httpErrorLookup" msgid="4517085806977851374">"No se ha podido encontrar la dirección URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"No se admite el programa de autenticación del sitio."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"La autenticación no se ha realizado correctamente."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"La autenticación a través del servidor proxy no se ha realizado correctamente."</string>
@@ -117,7 +117,7 @@
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"La página contiene demasiados redireccionamientos de servidor."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"No se admite el protocolo."</string>
     <string name="httpErrorFailedSslHandshake" msgid="3088290300440289771">"No se ha podido establecer una conexión segura."</string>
-    <string name="httpErrorBadUrl" msgid="6088183159988619736">"No se ha podido abrir la página debido a que la URL es incorrecta."</string>
+    <string name="httpErrorBadUrl" msgid="6088183159988619736">"No se ha podido abrir la página debido a que la dirección URL es incorrecta."</string>
     <string name="httpErrorFile" msgid="8250549644091165175">"No se ha podido acceder al archivo."</string>
     <string name="httpErrorFileNotFound" msgid="5588380756326017105">"No se ha encontrado el archivo solicitado."</string>
     <string name="httpErrorTooManyRequests" msgid="1235396927087188253">"Se están procesando demasiadas solicitudes. Vuelve a intentarlo más tarde."</string>
@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Admite que la aplicación reciba y procese mensajes SMS. Es posible que las aplicaciones maliciosas controlen tus mensajes o los eliminen sin mostrártelos."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"recibir MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Admite que la aplicación reciba y procese mensajes MMS. Es posible que las aplicaciones maliciosas controlen tus mensajes o los eliminen sin mostrártelos."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"recibir mensajes de emergencia"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Permite que una aplicación reciba y procese mensajes de emergencia. Este permiso solo está disponible para las aplicaciones del sistema."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar mensajes SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Admite que la aplicación envíe mensajes SMS. Las aplicaciones maliciosas te pueden costar dinero si envías mensajes sin su confirmación."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"leer SMS o MMS"</string>
@@ -575,7 +577,7 @@
     <string name="lockscreen_forgot_pattern_button_text" msgid="2626999449610695930">"¿Olvidaste el patrón?"</string>
     <string name="lockscreen_glogin_forgot_pattern" msgid="2588521501166032747">"Desbloquear cuenta"</string>
     <string name="lockscreen_glogin_too_many_attempts" msgid="2446246026221678244">"Demasiados intentos de patrón."</string>
-    <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Para desbloquear, regístrate en tu cuenta de Google"</string>
+    <string name="lockscreen_glogin_instructions" msgid="1816635201812207709">"Para desbloquear, regístrate en tu Cuenta de Google"</string>
     <string name="lockscreen_glogin_username_hint" msgid="8846881424106484447">"Nombre de usuario (correo electrónico)"</string>
     <string name="lockscreen_glogin_password_hint" msgid="5958028383954738528">"Contraseña"</string>
     <string name="lockscreen_glogin_submit_button" msgid="7130893694795786300">"Inicia sesión"</string>

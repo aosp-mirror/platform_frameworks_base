@@ -136,7 +136,7 @@
     <string name="shutdown_progress" msgid="2281079257329981203">"Lukker ned ..."</string>
     <string name="shutdown_confirm" msgid="649792175242821353">"Din telefon slukkes nu."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Seneste"</string>
-    <string name="no_recent_tasks" msgid="279702952298056674">"Der er ingen nye programmer."</string>
+    <string name="no_recent_tasks" msgid="279702952298056674">"Der er ingen nye applikationer."</string>
     <string name="global_actions" msgid="2406416831541615258">"Indstillinger for telefon"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Skærmlås"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Sluk"</string>
@@ -149,7 +149,7 @@
     <string name="safeMode" msgid="2788228061547930246">"Sikker tilstand"</string>
     <string name="android_system_label" msgid="6577375335728551336">"Android-system"</string>
     <string name="permgrouplab_costMoney" msgid="5429808217861460401">"Tjenester, der koster dig penge"</string>
-    <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"Tillader, at et program kan gøre ting, som kan koste penge."</string>
+    <string name="permgroupdesc_costMoney" msgid="8193824940620517189">"Tillader, at en applikation kan gøre ting, som kan koste penge."</string>
     <string name="permgrouplab_messages" msgid="7521249148445456662">"Dine beskeder"</string>
     <string name="permgroupdesc_messages" msgid="7045736972019211994">"Læs og skriv dine sms-, e-mail- og andre beskeder."</string>
     <string name="permgrouplab_personalInfo" msgid="3519163141070533474">"Dine personlige oplysninger"</string>
@@ -157,7 +157,7 @@
     <string name="permgrouplab_location" msgid="635149742436692049">"Din placering"</string>
     <string name="permgroupdesc_location" msgid="2430258821648348660">"Overvåg din fysiske placering"</string>
     <string name="permgrouplab_network" msgid="5808983377727109831">"Netværkskommunikation"</string>
-    <string name="permgroupdesc_network" msgid="5035763698958415998">"Tillader, at programmerne får adgang til forskellige netværksfunktioner."</string>
+    <string name="permgroupdesc_network" msgid="5035763698958415998">"Tillader, at applikationerne får adgang til forskellige netværksfunktioner."</string>
     <string name="permgrouplab_accounts" msgid="3359646291125325519">"Dine konti"</string>
     <string name="permgroupdesc_accounts" msgid="4948732641827091312">"Få adgang til de tilgængelige konti."</string>
     <string name="permgrouplab_hardwareControls" msgid="7998214968791599326">"Hardwarekontroller"</string>
@@ -172,267 +172,269 @@
     <string name="permgroupdesc_storage" product="nosdcard" msgid="7442318502446874999">"Få adgang til USB-lager."</string>
     <string name="permgroupdesc_storage" product="default" msgid="9203302214915355774">"Få adgang til SD-kortet."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"deaktiver eller rediger statuslinje"</string>
-    <string name="permdesc_statusBar" msgid="1365473595331989732">"Tillader, at et program deaktiverer statuslinjen eller tilføjer eller fjerner systemikoner."</string>
+    <string name="permdesc_statusBar" msgid="1365473595331989732">"Tillader, at en applikation deaktiverer statuslinjen eller tilføjer eller fjerner systemikoner."</string>
     <string name="permlab_statusBarService" msgid="7247281911387931485">"statusbjælke"</string>
-    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Tillader, at programmet er statusbjælken."</string>
+    <string name="permdesc_statusBarService" msgid="4097605867643520920">"Tillader, at applikationen er statusbjælken."</string>
     <string name="permlab_expandStatusBar" msgid="1148198785937489264">"udvid/skjul statuslinje"</string>
-    <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Tillader, at et program udvider eller skjuler statuslinjen."</string>
+    <string name="permdesc_expandStatusBar" msgid="7088604400110768665">"Tillader, at en applikation udvider eller skjuler statuslinjen."</string>
     <string name="permlab_processOutgoingCalls" msgid="1136262550878335980">"opfang udgående opkald"</string>
-    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"Tillader, at et program behandler udgående opkald og ændrer det nummer, der ringes til. Ondsindede programmer kan overvåge, omdirigere eller forhindre udgående opkald."</string>
+    <string name="permdesc_processOutgoingCalls" msgid="2228988201852654461">"Tillader, at en applikation behandler udgående opkald og ændrer det nummer, der ringes til. Ondsindede applikationer kan overvåge, omdirigere eller forhindre udgående opkald."</string>
     <string name="permlab_receiveSms" msgid="2697628268086208535">"modtag sms"</string>
-    <string name="permdesc_receiveSms" msgid="6298292335965966117">"Tillader, at et program modtager og behandler sms-beskeder. Ondsindede programmer kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
+    <string name="permdesc_receiveSms" msgid="6298292335965966117">"Tillader, at en applikation modtager og behandler sms-beskeder. Ondsindede applikationer kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"modtag mms"</string>
-    <string name="permdesc_receiveMms" msgid="4563346832000174373">"Tillader, at et program modtager og behandler mms-beskeder. Ondsindede programmer kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
+    <string name="permdesc_receiveMms" msgid="4563346832000174373">"Tillader, at en applikation modtager og behandler mms-beskeder. Ondsindede applikationer kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"modtage nødudsendelser"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Tillader, at en applikation kan modtage og behandle nødudsendelser. Denne tilladelse er kun tilgængelig for systemapplikationer."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"send sms-beskeder"</string>
-    <string name="permdesc_sendSms" msgid="1946540351763502120">"Tillader, at et program at sender sms-beskeder. Ondsindede programmer kan eventuelt koste dig penge ved at sende beskeder uden din bekræftelse."</string>
+    <string name="permdesc_sendSms" msgid="1946540351763502120">"Tillader, at en applikation at sender sms-beskeder. Ondsindede applikationer kan eventuelt koste dig penge ved at sende beskeder uden din bekræftelse."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"læs sms eller mms"</string>
-    <string name="permdesc_readSms" msgid="3002170087197294591">"Tillader, at et program læser sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Ondsindede programmer kan eventuelt læse dine fortrolige beskeder."</string>
+    <string name="permdesc_readSms" msgid="3002170087197294591">"Tillader, at en applikation læser sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Ondsindede applikationer kan eventuelt læse dine fortrolige beskeder."</string>
     <string name="permlab_writeSms" msgid="6881122575154940744">"rediger sms eller mms"</string>
-    <string name="permdesc_writeSms" msgid="6299398896177548095">"Tillader, at et program skriver i sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Ondsindede programmer kan eventuelt slette dine beskeder."</string>
+    <string name="permdesc_writeSms" msgid="6299398896177548095">"Tillader, at en applikation skriver i sms-beskeder, der er gemt på din telefon eller dit SIM-kort. Ondsindede applikationer kan eventuelt slette dine beskeder."</string>
     <string name="permlab_receiveWapPush" msgid="8258226427716551388">"modtag WAP"</string>
-    <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Tillader, at et program modtager og behandler WAP-beskeder. Ondsindede programmer kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
-    <string name="permlab_getTasks" msgid="5005277531132573353">"hent kørende programmer"</string>
-    <string name="permdesc_getTasks" msgid="7048711358713443341">"Tillader, at et program henter oplysninger om nuværende og for nyligt kørende opgaver. Tillader, at eventuelt ondsindede programmer finder private oplysninger om andre programmer."</string>
-    <string name="permlab_reorderTasks" msgid="5669588525059921549">"omorganiser kørende programmer"</string>
-    <string name="permdesc_reorderTasks" msgid="126252774270522835">"Tillader, at et program flytter opgaver til forgrunden og baggrunden. Ondsindede programmer kan tvinge dem selv til forgrunden uden din kontrol."</string>
+    <string name="permdesc_receiveWapPush" msgid="5979623826128082171">"Tillader, at en applikation modtager og behandler WAP-beskeder. Ondsindede applikationer kan overvåge dine beskeder eller slette dem uden at vise dem til dig."</string>
+    <string name="permlab_getTasks" msgid="5005277531132573353">"hent kørende applikationer"</string>
+    <string name="permdesc_getTasks" msgid="7048711358713443341">"Tillader, at en applikation henter oplysninger om nuværende og for nyligt kørende opgaver. Tillader, at eventuelt ondsindede applikationer finder private oplysninger om andre applikationer."</string>
+    <string name="permlab_reorderTasks" msgid="5669588525059921549">"omorganiser kørende applikationer"</string>
+    <string name="permdesc_reorderTasks" msgid="126252774270522835">"Tillader, at en applikation flytter opgaver til forgrunden og baggrunden. Ondsindede applikationer kan tvinge dem selv til forgrunden uden din kontrol."</string>
     <string name="permlab_setDebugApp" msgid="4339730312925176742">"aktiver programfejlretning"</string>
-    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Tillader, at et program slår fejlretning af andet program til. Ondsindede programmer kan bruge dette til at standse andre programmer."</string>
+    <string name="permdesc_setDebugApp" msgid="5584310661711990702">"Tillader, at en applikation slår fejlretning af en anden applikation til. Ondsindede applikationer kan bruge dette til at standse andre applikationer."</string>
     <string name="permlab_changeConfiguration" msgid="8214475779521218295">"skift indstillinger for brugergrænsefladen"</string>
-    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Tillader, at et program ændrer den nuværende konfiguration, f.eks. den lokale eller overordnede skrifttypestørrelse."</string>
+    <string name="permdesc_changeConfiguration" msgid="3465121501528064399">"Tillader, at en applikation ændrer den nuværende konfiguration, f.eks. den lokale eller overordnede skrifttypestørrelse."</string>
     <string name="permlab_enableCarMode" msgid="5684504058192921098">"aktivere biltilstand"</string>
-    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Tillader et program at aktivere biltilstand."</string>
+    <string name="permdesc_enableCarMode" msgid="5673461159384850628">"Tillader en applikation at aktivere biltilstand."</string>
     <string name="permlab_killBackgroundProcesses" msgid="8373714752793061963">"standse baggrundsprocesser"</string>
-    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Tillader et program at standse andre programmers baggrundsprocesser, selvom der ikke er mangel på hukommelse."</string>
-    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"tvangsstandse andre programmer"</string>
-    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Tillader, at et program tvangsstopper andre programmer."</string>
-    <string name="permlab_forceBack" msgid="1804196839880393631">"tving programmet til at lukke"</string>
-    <string name="permdesc_forceBack" msgid="6534109744159919013">"Tillader, at et program tvinger alle programmer, der er i forgrunden, til at lukke og køre i baggrunden. Bør aldrig være nødvendigt til normale programmer."</string>
+    <string name="permdesc_killBackgroundProcesses" msgid="2908829602869383753">"Tillader en applikation at standse andre programmers baggrundsprocesser, selvom der ikke er mangel på hukommelse."</string>
+    <string name="permlab_forceStopPackages" msgid="1447830113260156236">"tvangsstandse andre applikationer"</string>
+    <string name="permdesc_forceStopPackages" msgid="7263036616161367402">"Tillader, at en applikation tvangsstopper andre applikationer."</string>
+    <string name="permlab_forceBack" msgid="1804196839880393631">"tving applikationen til at lukke"</string>
+    <string name="permdesc_forceBack" msgid="6534109744159919013">"Tillader, at en applikation tvinger alle applikationer, der er i forgrunden, til at lukke og køre i baggrunden. Bør aldrig være nødvendigt til normale applikationer."</string>
     <string name="permlab_dump" msgid="1681799862438954752">"hent intern systemtilstand"</string>
-    <string name="permdesc_dump" msgid="2198776174276275220">"Tillader, at et program henter systemets interne tilstand. Ondsindede programmer kan hente en række private og sikre oplysninger, som de normalt aldrig bør have brug for."</string>
+    <string name="permdesc_dump" msgid="2198776174276275220">"Tillader, at en applikation henter systemets interne tilstand. Ondsindede applikationer kan hente en række private og sikre oplysninger, som de normalt aldrig bør have brug for."</string>
     <string name="permlab_shutdown" msgid="7185747824038909016">"delvis lukning"</string>
     <string name="permdesc_shutdown" msgid="7046500838746291775">"Sætter aktivitetsadministratoren i lukningstilstand. Lukker ikke helt ned."</string>
     <string name="permlab_stopAppSwitches" msgid="4138608610717425573">"undgå programskift"</string>
-    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Forhindrer brugeren i at skifte til et andet program."</string>
-    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"overvåg og kontroller start af alle programmer"</string>
-    <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"Tillader, at et program overvåger og kontrollerer, hvordan systemet starter aktiviteter. Ondsindede programmer kan fuldstændig kompromittere systemet. Denne tilladelse er kun nødvendig til udvikling, aldrig til normal telefonbrug."</string>
+    <string name="permdesc_stopAppSwitches" msgid="3857886086919033794">"Forhindrer brugeren i at skifte til en anden applikation."</string>
+    <string name="permlab_runSetActivityWatcher" msgid="7811586187574696296">"overvåg og kontroller start af alle applikationer"</string>
+    <string name="permdesc_runSetActivityWatcher" msgid="3228701938345388092">"Tillader, at en applikation overvåger og kontrollerer, hvordan systemet starter aktiviteter. Ondsindede applikationer kan fuldstændig kompromittere systemet. Denne tilladelse er kun nødvendig til udvikling, aldrig til normal telefonbrug."</string>
     <string name="permlab_broadcastPackageRemoved" msgid="2576333434893532475">"send udsendelse om fjernet pakke"</string>
-    <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Tillader, at et program udsender en meddelelse om, at en programpakke er fjernet. Ondsindede programmer kan bruge dette til at afslutte et andet kørende program."</string>
+    <string name="permdesc_broadcastPackageRemoved" msgid="3453286591439891260">"Tillader, at en applikation udsender en meddelelse om, at en applikationspakke er fjernet. Ondsindede applikationer kan bruge dette til at afslutte en anden kørende applikation."</string>
     <string name="permlab_broadcastSmsReceived" msgid="5689095009030336593">"send sms-modtaget udsendelse"</string>
-    <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"Tillader, at et program udsender en meddelelse om, at der er modtaget en sms-besked. Ondsindede programmer kan eventuelt bruge dette til at forfalske indgående sms-beskeder."</string>
+    <string name="permdesc_broadcastSmsReceived" msgid="9122419277306740155">"Tillader, at en applikation udsender en meddelelse om, at der er modtaget en sms-besked. Ondsindede applikationer kan eventuelt bruge dette til at forfalske indgående sms-beskeder."</string>
     <string name="permlab_broadcastWapPush" msgid="3145347413028582371">"send WAP-PUSH-modtaget udsendelse"</string>
-    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Tillader, at et program udsender en meddelelse om, at der er modtaget en WAP PUSH-besked. Ondsindede programmer kan eventuelt bruge dette til at forfalske modtagelse af mms-besked eller i det skjulte erstatte indholdet på alle websider med ondsindede varianter."</string>
+    <string name="permdesc_broadcastWapPush" msgid="3955303669461378091">"Tillader, at en applikation udsender en meddelelse om, at der er modtaget en WAP PUSH-besked. Ondsindede applikationer kan eventuelt bruge dette til at forfalske modtagelse af mms-besked eller i det skjulte erstatte indholdet på alle websider med ondsindede varianter."</string>
     <string name="permlab_setProcessLimit" msgid="2451873664363662666">"begræns antallet af kørende processer"</string>
-    <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Tillader, at et program kontrollerer det maksimale antal processer, der kan køre. Er aldrig nødvendigt til normale programmer."</string>
+    <string name="permdesc_setProcessLimit" msgid="7824786028557379539">"Tillader, at en applikation kontrollerer det maksimale antal processer, der kan køre. Er aldrig nødvendigt til normale applikationer."</string>
     <string name="permlab_setAlwaysFinish" msgid="5342837862439543783">"få alle baggrundsprogrammer til at lukke"</string>
-    <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Tillader, at et program kontrollerer, om aktiviteter altid afsluttes, så snart de går i baggrunden. Aldrig nødvendigt til normale programmer."</string>
+    <string name="permdesc_setAlwaysFinish" msgid="8773936403987091620">"Tillader, at en applikation kontrollerer, om aktiviteter altid afsluttes, så snart de går i baggrunden. Aldrig nødvendigt til normale applikationer."</string>
     <string name="permlab_batteryStats" msgid="7863923071360031652">"rediger batteristatistikker"</string>
-    <string name="permdesc_batteryStats" msgid="5847319823772230560">"Tillader ændring af indsamlede batteristatistikker. Ikke til brug for normale programmer."</string>
+    <string name="permdesc_batteryStats" msgid="5847319823772230560">"Tillader ændring af indsamlede batteristatistikker. Ikke til brug for normale applikationer."</string>
     <string name="permlab_backup" msgid="470013022865453920">"kontroller sikkerhedskopiering af system, og gendan"</string>
-    <string name="permdesc_backup" msgid="4837493065154256525">"Tillader, at et program kontrollerer systemets sikkerhedskopierings- og gendannelsesfunktion. Ikke til brug til normale programmer."</string>
+    <string name="permdesc_backup" msgid="4837493065154256525">"Tillader, at en applikation kontrollerer systemets sikkerhedskopierings- og gendannelsesfunktion. Ikke til brug til normale applikationer."</string>
     <string name="permlab_internalSystemWindow" msgid="2148563628140193231">"vis uautoriserede vinduer"</string>
-    <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Tillader oprettelse af vinduer, der er beregnet til at blive brugt af den interne systembrugergrænseflade. Ikke til brug for normale programmer."</string>
+    <string name="permdesc_internalSystemWindow" msgid="5895082268284998469">"Tillader oprettelse af vinduer, der er beregnet til at blive brugt af den interne systembrugergrænseflade. Ikke til brug for normale applikationer."</string>
     <string name="permlab_systemAlertWindow" msgid="3372321942941168324">"vis underretninger på systemniveau"</string>
-    <string name="permdesc_systemAlertWindow" msgid="5109622689323490558">"Tillader, at et program viser vinduer med systemunderretninger. Ondsindede programmer kan overtage hele telefonens skærm."</string>
+    <string name="permdesc_systemAlertWindow" msgid="5109622689323490558">"Tillader, at en applikation viser vinduer med systemunderretninger. Ondsindede applikationer kan overtage hele telefonens skærm."</string>
     <string name="permlab_setAnimationScale" msgid="2805103241153907174">"rediger global animationshastighed"</string>
-    <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Tillader, at et program altid kan ændre den globale animationshastighed (hurtigere eller langsommere animationer)."</string>
+    <string name="permdesc_setAnimationScale" msgid="7181522138912391988">"Tillader, at en applikation altid kan ændre den globale animationshastighed (hurtigere eller langsommere animationer)."</string>
     <string name="permlab_manageAppTokens" msgid="17124341698093865">"administrer programtokens"</string>
-    <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Tillader, at programmet opretter og administrerer sine egen tokens og gå uden om sin normale Z-rækkefølge. Bør aldrig være nødvendigt til normale programmer."</string>
+    <string name="permdesc_manageAppTokens" msgid="977127907524195988">"Tillader, at applikationen opretter og administrerer sine egen tokens og gå uden om sin normale Z-rækkefølge. Bør aldrig være nødvendigt til normale applikationer."</string>
     <string name="permlab_injectEvents" msgid="1378746584023586600">"tryk på taster og kontrolknapper"</string>
-    <string name="permdesc_injectEvents" msgid="3946098050410874715">"Tillader, at et program leverer sine egne inputbegivenheder (tastetryk osv.) til andre programmer. Ondsindede programmer kan bruge dette til at overtage telefonen."</string>
+    <string name="permdesc_injectEvents" msgid="3946098050410874715">"Tillader, at en applikation leverer sine egne inputbegivenheder (tastetryk osv.) til andre applikationer. Ondsindede applikationer kan bruge dette til at overtage telefonen."</string>
     <string name="permlab_readInputState" msgid="469428900041249234">"registrerer, hvad du indtaster, og hvilke handlinger du foretager dig"</string>
-    <string name="permdesc_readInputState" msgid="5132879321450325445">"Tillader, at et program registrerer taster, du trykker på, selv når du interagerer med andre programmer (f.eks. ved indtastning af adgangskode). Bør aldrig være nødvendigt til normale programmer."</string>
+    <string name="permdesc_readInputState" msgid="5132879321450325445">"Tillader, at en applikation registrerer taster, du trykker på, selv når du interagerer med andre applikationer (f.eks. ved indtastning af adgangskode). Bør aldrig være nødvendigt til normale applikationer."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"forpligt til en inputmetode"</string>
-    <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Tillader, at brugeren forpligter sig til en inputmetodes grænseflade på øverste niveau. Bør aldrig være nødvendig til normale programmer."</string>
+    <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Tillader, at brugeren forpligter sig til en inputmetodes grænseflade på øverste niveau. Bør aldrig være nødvendig til normale applikationer."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"forpligt til et tapet"</string>
-    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Tillader, at brugeren forpligter sig til et tapets grænseflade på øverste niveau. Bør aldrig være nødvendig til normale programmer."</string>
+    <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Tillader, at brugeren forpligter sig til et tapets grænseflade på øverste niveau. Bør aldrig være nødvendig til normale applikationer."</string>
     <string name="permlab_bindDeviceAdmin" msgid="8704986163711455010">"kommunikere med en enhedsadministrator"</string>
-    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillader brugeren at sende hensigter til en enhedsadministrator. Bør aldrig være nødvendigt for almindelige programmer."</string>
+    <string name="permdesc_bindDeviceAdmin" msgid="8714424333082216979">"Tillader brugeren at sende hensigter til en enhedsadministrator. Bør aldrig være nødvendigt for almindelige applikationer."</string>
     <string name="permlab_setOrientation" msgid="3365947717163866844">"skift skærmretning"</string>
-    <string name="permdesc_setOrientation" msgid="6335814461615851863">"Tillader, at et program ændrer rotationen af skærmen når som helst. Bør aldrig være nødvendigt til normale programmer."</string>
-    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"send Linux-signaler til programmer"</string>
-    <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Tillader, at programmet kan anmode om, at det leverede signal sendes til alle vedholdende processer."</string>
-    <string name="permlab_persistentActivity" msgid="8659652042401085862">"lad altid programmet køre"</string>
-    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Tillader, at et program gør dele af sig selv vedholdende, så systemet ikke kan bruge det til andre programmer."</string>
-    <string name="permlab_deletePackages" msgid="3343439331576348805">"slet programmer"</string>
-    <string name="permdesc_deletePackages" msgid="3634943677518723314">"Tillader, at et program sletter Android-pakker. Ondsindede programmer kan bruge dette til at slette vigtige programmer."</string>
+    <string name="permdesc_setOrientation" msgid="6335814461615851863">"Tillader, at en applikation ændrer rotationen af skærmen når som helst. Bør aldrig være nødvendigt til normale applikationer."</string>
+    <string name="permlab_signalPersistentProcesses" msgid="4255467255488653854">"send Linux-signaler til applikationer"</string>
+    <string name="permdesc_signalPersistentProcesses" msgid="3565530463215015289">"Tillader, at applikationen kan anmode om, at det leverede signal sendes til alle vedholdende processer."</string>
+    <string name="permlab_persistentActivity" msgid="8659652042401085862">"lad altid applikationen køre"</string>
+    <string name="permdesc_persistentActivity" msgid="5037199778265006008">"Tillader, at en applikation gør dele af sig selv vedholdende, så systemet ikke kan bruge det til andre applikationer."</string>
+    <string name="permlab_deletePackages" msgid="3343439331576348805">"slet applikationer"</string>
+    <string name="permdesc_deletePackages" msgid="3634943677518723314">"Tillader, at en applikation sletter Android-pakker. Ondsindede applikationer kan bruge dette til at slette vigtige applikationer."</string>
     <string name="permlab_clearAppUserData" msgid="2192134353540277878">"slet andre programmers data"</string>
-    <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"Tillader, at et program rydder brugerdata."</string>
+    <string name="permdesc_clearAppUserData" msgid="7546345080434325456">"Tillader, at en applikation rydder brugerdata."</string>
     <string name="permlab_deleteCacheFiles" msgid="1518556602634276725">"slet andre programmers cacher"</string>
-    <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"Tillader, at et program sletter cachefiler."</string>
+    <string name="permdesc_deleteCacheFiles" msgid="2283074077168165971">"Tillader, at en applikation sletter cachefiler."</string>
     <string name="permlab_getPackageSize" msgid="4799785352306641460">"vis programmets lagerplads"</string>
-    <string name="permdesc_getPackageSize" msgid="5557253039670753437">"Tillader, at et program henter sin kode, data og cachestørrelser"</string>
-    <string name="permlab_installPackages" msgid="335800214119051089">"installer programmer direkte"</string>
-    <string name="permdesc_installPackages" msgid="526669220850066132">"Tillader, at et program installerer nye eller opdaterede Android-pakker. Ondsindede programmer kan bruge dette til at tilføje nye programmer med vilkårlige, effektive tilladelser."</string>
-    <string name="permlab_clearAppCache" msgid="4747698311163766540">"slet alle cachedata for programmet"</string>
-    <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Tillader, at et program frigør plads på telefonen ved at slette filer i programmets cachemappe. Adgang er normalt meget begrænset til systemprocesser."</string>
+    <string name="permdesc_getPackageSize" msgid="5557253039670753437">"Tillader, at en applikation henter sin kode, data og cachestørrelser"</string>
+    <string name="permlab_installPackages" msgid="335800214119051089">"installer applikationer direkte"</string>
+    <string name="permdesc_installPackages" msgid="526669220850066132">"Tillader, at en applikation installerer nye eller opdaterede Android-pakker. Ondsindede applikationer kan bruge dette til at tilføje nye applikationer med vilkårlige, effektive tilladelser."</string>
+    <string name="permlab_clearAppCache" msgid="4747698311163766540">"slet alle cachedata for applikationen"</string>
+    <string name="permdesc_clearAppCache" msgid="7740465694193671402">"Tillader, at en applikation frigør plads på telefonen ved at slette filer i programmets cachemappe. Adgang er normalt meget begrænset til systemprocesser."</string>
     <string name="permlab_movePackage" msgid="728454979946503926">"Flyt programressourcer"</string>
-    <string name="permdesc_movePackage" msgid="6323049291923925277">"Tillader, at et program flytter programressourcer fra interne til eksterne medier og omvendt."</string>
+    <string name="permdesc_movePackage" msgid="6323049291923925277">"Tillader, at en applikation flytter programressourcer fra interne til eksterne medier og omvendt."</string>
     <string name="permlab_readLogs" msgid="6615778543198967614">"læse følsomme logdata"</string>
-    <string name="permdesc_readLogs" msgid="8896449437464867766">"Tillader, at et program læser fra systemets forskellige logfiler. Dermed kan generelle oplysninger om, hvad du laver med telefonen, registreres, også personlige eller private oplysninger."</string>
+    <string name="permdesc_readLogs" msgid="8896449437464867766">"Tillader, at en applikation læser fra systemets forskellige logfiler. Dermed kan generelle oplysninger om, hvad du laver med telefonen, registreres, også personlige eller private oplysninger."</string>
     <string name="permlab_diagnostic" msgid="8076743953908000342">"læs/skriv til ressourcer ejet af diag"</string>
-    <string name="permdesc_diagnostic" msgid="3121238373951637049">"Tillader, at et program læser og skriver til alle ressourcer, der ejes af diag-gruppen, som f.eks. flier i /dev. Dette kan muligvis påvirke systemets stabilitet og sikkerhed. Dette bør KUN bruges til hardwarespecifikke diagnosticeringer foretaget af producent eller udbyder."</string>
+    <string name="permdesc_diagnostic" msgid="3121238373951637049">"Tillader, at en applikation læser og skriver til alle ressourcer, der ejes af diag-gruppen, som f.eks. flier i /dev. Dette kan muligvis påvirke systemets stabilitet og sikkerhed. Dette bør KUN bruges til hardwarespecifikke diagnosticeringer foretaget af producent eller udbyder."</string>
     <string name="permlab_changeComponentState" msgid="79425198834329406">"aktiver eller deaktiver programkomponenter"</string>
-    <string name="permdesc_changeComponentState" msgid="4569107043246700630">"Tillader, at et program ændrer, om en komponent fra et andet program er aktiveret eller ej. Ondsindede programmer kan bruge dette til at deaktivere vigtige telefonfunktioner. Denne tilladelse skal anvendes med forsigtighed, da det kan forårsage ubrugelige, inkonsekvente eller ustabile programkomponenter."</string>
-    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"angiv foretrukne programmer"</string>
-    <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Tillader, at et program ændrer dine foretrukne programmer. Dette kan medføre, at ondsindede programmer ændrer kørende programmer i det skjulte og narrer dine eksisterende programmer til at indsamle personlige oplysninger fra dig."</string>
+    <string name="permdesc_changeComponentState" msgid="4569107043246700630">"Tillader, at en applikation ændrer, om en komponent fra en anden applikation er aktiveret eller ej. Ondsindede applikationer kan bruge dette til at deaktivere vigtige telefonfunktioner. Denne tilladelse skal anvendes med forsigtighed, da det kan forårsage ubrugelige, inkonsekvente eller ustabile programkomponenter."</string>
+    <string name="permlab_setPreferredApplications" msgid="3393305202145172005">"angiv foretrukne applikationer"</string>
+    <string name="permdesc_setPreferredApplications" msgid="760008293501937546">"Tillader, at en applikation ændrer dine foretrukne applikationer. Dette kan medføre, at ondsindede applikationer ændrer kørende applikationer i det skjulte og narrer dine eksisterende applikationer til at indsamle personlige oplysninger fra dig."</string>
     <string name="permlab_writeSettings" msgid="1365523497395143704">"rediger globale systemindstillinger"</string>
-    <string name="permdesc_writeSettings" msgid="838789419871034696">"Tillader, at et program ændrer systemets indstillingsdata. Ondsindede programmer kan skade systemets konfiguration."</string>
+    <string name="permdesc_writeSettings" msgid="838789419871034696">"Tillader, at en applikation ændrer systemets indstillingsdata. Ondsindede applikationer kan skade systemets konfiguration."</string>
     <string name="permlab_writeSecureSettings" msgid="204676251876718288">"rediger sikre systemindstillinger"</string>
-    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Tillader, at et program ændrer systemernes sikre indstillingsdata. Ikke til brug til almindelige programmer."</string>
+    <string name="permdesc_writeSecureSettings" msgid="5497873143539034724">"Tillader, at en applikation ændrer systemernes sikre indstillingsdata. Ikke til brug til almindelige applikationer."</string>
     <string name="permlab_writeGservices" msgid="2149426664226152185">"rediger kortet over Google-tjenester"</string>
-    <string name="permdesc_writeGservices" msgid="6602362746516676175">"Tillader, at et program ændrer kortet over Google-tjenester. Ikke til brug til normale programmer."</string>
+    <string name="permdesc_writeGservices" msgid="6602362746516676175">"Tillader, at en applikation ændrer kortet over Google-tjenester. Ikke til brug til normale applikationer."</string>
     <string name="permlab_receiveBootCompleted" msgid="7776779842866993377">"start automatisk ved opstart"</string>
-    <string name="permdesc_receiveBootCompleted" msgid="698336728415008796">"Tillader, at et program starter selv, når systemet er færdig med at starte. Dette kan gøre startem af telefonen langsommere og generelt gøre telefonen langsommere ved altid at lade programmet køre."</string>
+    <string name="permdesc_receiveBootCompleted" msgid="698336728415008796">"Tillader, at en applikation starter selv, når systemet er færdig med at starte. Dette kan gøre startem af telefonen langsommere og generelt gøre telefonen langsommere ved altid at lade applikationen køre."</string>
     <string name="permlab_broadcastSticky" msgid="7919126372606881614">"send klæbende udsendelse"</string>
-    <string name="permdesc_broadcastSticky" msgid="1920045289234052219">"Tillader, at et program sender klæbende udsendelser, der bliver tilbage, efter udsendelsen er slut. Ondsindede programmer kan gøre telefonen langsom eller ustabil ved at få den til at bruge for meget hukommelse."</string>
+    <string name="permdesc_broadcastSticky" msgid="1920045289234052219">"Tillader, at en applikation sender klæbende udsendelser, der bliver tilbage, efter udsendelsen er slut. Ondsindede applikationer kan gøre telefonen langsom eller ustabil ved at få den til at bruge for meget hukommelse."</string>
     <string name="permlab_readContacts" msgid="6219652189510218240">"læs kontaktdata"</string>
-    <string name="permdesc_readContacts" msgid="3371591512896545975">"Tillader, at et program læser alle kontaktdata (adresser), der er gemt på din telefon. Ondsindede programmer kan bruge dette til at sende dine data til andre mennesker."</string>
+    <string name="permdesc_readContacts" msgid="3371591512896545975">"Tillader, at en applikation læser alle kontaktdata (adresser), der er gemt på din telefon. Ondsindede applikationer kan bruge dette til at sende dine data til andre mennesker."</string>
     <string name="permlab_writeContacts" msgid="644616215860933284">"skriv kontaktdata"</string>
-    <string name="permdesc_writeContacts" msgid="3924383579108183601">"Tillader, at et program ændrer kontaktdata (adresser), der er gemt på din telefon. Ondsindede programmer kan bruge dette til at slette eller ændre kontaktdata."</string>
+    <string name="permdesc_writeContacts" msgid="3924383579108183601">"Tillader, at en applikation ændrer kontaktdata (adresser), der er gemt på din telefon. Ondsindede applikationer kan bruge dette til at slette eller ændre kontaktdata."</string>
     <string name="permlab_readCalendar" msgid="6898987798303840534">"læs kalenderbegivenheder"</string>
-    <string name="permdesc_readCalendar" msgid="5533029139652095734">"Tillader, at et program læser alle kalenderbegivenheder, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at sende dine kalenderbegivenheder til andre mennesker."</string>
+    <string name="permdesc_readCalendar" msgid="5533029139652095734">"Tillader, at en applikation læser alle kalenderbegivenheder, der er gemt på din telefon. Ondsindede applikationer kan bruge dette til at sende dine kalenderbegivenheder til andre mennesker."</string>
     <string name="permlab_writeCalendar" msgid="3894879352594904361">"tilføj eller rediger kalenderbegivenheder, og send e-mail til gæster"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Tillader, at et program tilføjer eller ændrer begivenhederne i din kalender, hvilket kan sende e-mail til gæster. Ondsindede programmer kan bruge dette til at slette eller ændre dine kalenderbegivenheder eller til at sende e-mail til gæster."</string>
+    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Tillader, at en applikation tilføjer eller ændrer begivenhederne i din kalender, hvilket kan sende e-mail til gæster. Ondsindede applikationer kan bruge dette til at slette eller ændre dine kalenderbegivenheder eller til at sende e-mail til gæster."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"imiterede placeringskilder til test"</string>
-    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Opret imiterede placeringskilder til testning. Ondsindede programmer kan bruge dette til at tilsidesætte den returnerede placering og/eller status fra rigtige placeringskilder som f.eks. GPS eller netværksudbydere."</string>
+    <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Opret imiterede placeringskilder til testning. Ondsindede applikationer kan bruge dette til at tilsidesætte den returnerede placering og/eller status fra rigtige placeringskilder som f.eks. GPS eller netværksudbydere."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"få adgang til yderligere kommandoer for placeringsudbyder"</string>
-    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Få adgang til ekstra kommandoer fra placeringsudbyder. Ondsindede programmer kan bruge dette til at gribe ind i driften af GPS\'en eller andre placeringskilder."</string>
+    <string name="permdesc_accessLocationExtraCommands" msgid="1948144701382451721">"Få adgang til ekstra kommandoer fra placeringsudbyder. Ondsindede applikationer kan bruge dette til at gribe ind i driften af GPS\'en eller andre placeringskilder."</string>
     <string name="permlab_installLocationProvider" msgid="6578101199825193873">"tilladelse til at installere en placeringsudbyder"</string>
-    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Opret imiterede placeringskilder til testning. Ondsindede programmer kan bruge dette til at tilsidesætte den returnerede placering og/eller status fra rigtige placeringskilder som f.eks. GPS eller netværksudbydere eller til at overvåge og rapportere din placering til en ekstern kilde."</string>
+    <string name="permdesc_installLocationProvider" msgid="5449175116732002106">"Opret imiterede placeringskilder til testning. Ondsindede applikationer kan bruge dette til at tilsidesætte den returnerede placering og/eller status fra rigtige placeringskilder som f.eks. GPS eller netværksudbydere eller til at overvåge og rapportere din placering til en ekstern kilde."</string>
     <string name="permlab_accessFineLocation" msgid="8116127007541369477">"fin (GPS) placering"</string>
-    <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Få adgang til gode placeringskilder, som f.eks. Global Positioning System på telefonen, når det er tilgængeligt. Ondsindede programmer kan bruge dette til at finde ud af, hvor du er og kan eventuelt bruge yderligere batterikapacitet."</string>
+    <string name="permdesc_accessFineLocation" msgid="7411213317434337331">"Få adgang til gode placeringskilder, som f.eks. Global Positioning System på telefonen, når det er tilgængeligt. Ondsindede applikationer kan bruge dette til at finde ud af, hvor du er og kan eventuelt bruge yderligere batterikapacitet."</string>
     <string name="permlab_accessCoarseLocation" msgid="4642255009181975828">"grov (netværksbaseret) placering"</string>
-    <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"Få adgang til grove placeringskilder som f.eks. den mobile netværksdatabase for at finde en omtrentlig placering for telefonen, hvor det er muligt. Ondsindede programmer kan bruge dette til at finde ud af, hvor du omtrent er."</string>
+    <string name="permdesc_accessCoarseLocation" msgid="8235655958070862293">"Få adgang til grove placeringskilder som f.eks. den mobile netværksdatabase for at finde en omtrentlig placering for telefonen, hvor det er muligt. Ondsindede applikationer kan bruge dette til at finde ud af, hvor du omtrent er."</string>
     <string name="permlab_accessSurfaceFlinger" msgid="2363969641792388947">"få adgang til SurfaceFlinger"</string>
-    <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Tillader, at et program bruger SurfaceFlinger-funktioner på lavt niveau."</string>
+    <string name="permdesc_accessSurfaceFlinger" msgid="6805241830020733025">"Tillader, at en applikation bruger SurfaceFlinger-funktioner på lavt niveau."</string>
     <string name="permlab_readFrameBuffer" msgid="6690504248178498136">"læs rammebuffer"</string>
-    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Tillader, at et program læser indholdet fra rammebufferen."</string>
+    <string name="permdesc_readFrameBuffer" msgid="7530020370469942528">"Tillader, at en applikation læser indholdet fra rammebufferen."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"skift dine lydindstillinger"</string>
-    <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Tillader, at et program ændrer globale lydindstillinger som f.eks. lydstyrke og kanalisering."</string>
+    <string name="permdesc_modifyAudioSettings" msgid="5793461287365991922">"Tillader, at en applikation ændrer globale lydindstillinger som f.eks. lydstyrke og kanalisering."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"optag lyd"</string>
-    <string name="permdesc_recordAudio" msgid="6493228261176552356">"Tillader, at et program får adgang til lydregistreringsstien."</string>
+    <string name="permdesc_recordAudio" msgid="6493228261176552356">"Tillader, at en applikation får adgang til lydregistreringsstien."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tag billeder og optag video"</string>
-    <string name="permdesc_camera" msgid="6004878235852154239">"Tillader, at programmet tager billeder og optager video med kameraet. Dette giver programmet mulighed for altid at indsamle de billeder, kameraet ser."</string>
+    <string name="permdesc_camera" msgid="6004878235852154239">"Tillader, at applikationen tager billeder og optager video med kameraet. Dette giver applikationen mulighed for altid at indsamle de billeder, kameraet ser."</string>
     <string name="permlab_brick" msgid="8337817093326370537">"deaktiver telefonen permanent"</string>
-    <string name="permdesc_brick" msgid="5569526552607599221">"Tillader, at programmet deaktiverer hele telefonen permanent. Dette er meget farligt."</string>
+    <string name="permdesc_brick" msgid="5569526552607599221">"Tillader, at applikationen deaktiverer hele telefonen permanent. Dette er meget farligt."</string>
     <string name="permlab_reboot" msgid="2898560872462638242">"tving telefon til at genstarte"</string>
-    <string name="permdesc_reboot" msgid="7914933292815491782">"Tillader, at programmet tvinger telefonen til at genstarte."</string>
+    <string name="permdesc_reboot" msgid="7914933292815491782">"Tillader, at applikationen tvinger telefonen til at genstarte."</string>
     <string name="permlab_mount_unmount_filesystems" msgid="1761023272170956541">"monter eller demonter filsystemer"</string>
-    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Tillader, at programmet monterer eller demonterer filsystemer til flytbar lagring."</string>
+    <string name="permdesc_mount_unmount_filesystems" msgid="6253263792535859767">"Tillader, at applikationen monterer eller demonterer filsystemer til flytbar lagring."</string>
     <string name="permlab_mount_format_filesystems" msgid="5523285143576718981">"formater ekstern lagring"</string>
-    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Tillader, at et program formaterer flytbart lager."</string>
+    <string name="permdesc_mount_format_filesystems" msgid="574060044906047386">"Tillader, at en applikation formaterer flytbart lager."</string>
     <string name="permlab_asec_access" msgid="3411338632002193846">"hente oplysninger om internt lager"</string>
-    <string name="permdesc_asec_access" msgid="8820326551687285439">"Tillader, at programmet får oplysninger om internt lager."</string>
+    <string name="permdesc_asec_access" msgid="8820326551687285439">"Tillader, at applikationen får oplysninger om internt lager."</string>
     <string name="permlab_asec_create" msgid="6414757234789336327">"oprette internt lager"</string>
-    <string name="permdesc_asec_create" msgid="2621346764995731250">"Tillader, at programmet opretter internt lager."</string>
+    <string name="permdesc_asec_create" msgid="2621346764995731250">"Tillader, at applikationen opretter internt lager."</string>
     <string name="permlab_asec_destroy" msgid="526928328301618022">"ødelægge internt lager"</string>
-    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Tillader, at programmet ødelægger internt lager."</string>
+    <string name="permdesc_asec_destroy" msgid="2746706889208066256">"Tillader, at applikationen ødelægger internt lager."</string>
     <string name="permlab_asec_mount_unmount" msgid="2456287623689029744">"montere/demontere internt lager"</string>
-    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Tillader, at programmet monterer/demonterer internt lager."</string>
+    <string name="permdesc_asec_mount_unmount" msgid="5934375590189368200">"Tillader, at applikationen monterer/demonterer internt lager."</string>
     <string name="permlab_asec_rename" msgid="7496633954080472417">"omdøbe internt lager"</string>
-    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Tillader, at programmet omdøber internt lager."</string>
+    <string name="permdesc_asec_rename" msgid="2152829985238876790">"Tillader, at applikationen omdøber internt lager."</string>
     <string name="permlab_vibrate" msgid="7768356019980849603">"kontroller vibrator"</string>
-    <string name="permdesc_vibrate" msgid="2886677177257789187">"Lader programmet kontrollere vibratoren."</string>
+    <string name="permdesc_vibrate" msgid="2886677177257789187">"Lader applikationen kontrollere vibratoren."</string>
     <string name="permlab_flashlight" msgid="2155920810121984215">"kontroller lommelygte"</string>
-    <string name="permdesc_flashlight" msgid="6433045942283802309">"Tillader, at programmet kontrollerer lommelygten."</string>
+    <string name="permdesc_flashlight" msgid="6433045942283802309">"Tillader, at applikationen kontrollerer lommelygten."</string>
     <string name="permlab_manageUsb" msgid="1113453430645402723">"administrer præferencer og tilladelser for USB-enheder"</string>
-    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Tillader, at programmet administrerer præferencer og tilladelser for USB-enheder."</string>
+    <string name="permdesc_manageUsb" msgid="6148489202092166164">"Tillader, at applikationen administrerer præferencer og tilladelser for USB-enheder."</string>
     <string name="permlab_hardware_test" msgid="4148290860400659146">"test hardware"</string>
-    <string name="permdesc_hardware_test" msgid="3668894686500081699">"Tillader, at et program kontrollerer forskellige perifere enheder for at teste hardwaren."</string>
+    <string name="permdesc_hardware_test" msgid="3668894686500081699">"Tillader, at en applikation kontrollerer forskellige perifere enheder for at teste hardwaren."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"ring direkte op til telefonnumre"</string>
-    <string name="permdesc_callPhone" msgid="3369867353692722456">"Tillader, at programmet ringer til telefonnumre uden din indgriben. Ondsindede programmer kan forårsage uventede opkald på din telefonregning. Vær opmærksom på, at programmet ikke kan ringe til nødnumre."</string>
+    <string name="permdesc_callPhone" msgid="3369867353692722456">"Tillader, at applikationen ringer til telefonnumre uden din indgriben. Ondsindede applikationer kan forårsage uventede opkald på din telefonregning. Vær opmærksom på, at applikationen ikke kan ringe til nødnumre."</string>
     <string name="permlab_callPrivileged" msgid="4198349211108497879">"ring direkte op til alle telefonnumre"</string>
-    <string name="permdesc_callPrivileged" msgid="244405067160028452">"Tillader, at programmet ringer til alle telefonnumre inklusive nødnumre uden din indgriben. Ondsindede programmer kan eventuelt foretage unødvendige og ulovlige opkald til nødtjenester."</string>
+    <string name="permdesc_callPrivileged" msgid="244405067160028452">"Tillader, at applikationen ringer til alle telefonnumre inklusive nødnumre uden din indgriben. Ondsindede applikationer kan eventuelt foretage unødvendige og ulovlige opkald til nødtjenester."</string>
     <string name="permlab_performCdmaProvisioning" msgid="5604848095315421425">"start CDMA-telefonopsætning direkte"</string>
-    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Tillader, at programmet starter CDMA-levering. Ondsindede programmer kan starte unødvendig CDMA-levering"</string>
+    <string name="permdesc_performCdmaProvisioning" msgid="6457447676108355905">"Tillader, at applikationen starter CDMA-levering. Ondsindede applikationer kan starte unødvendig CDMA-levering"</string>
     <string name="permlab_locationUpdates" msgid="7785408253364335740">"kontroller meddelelser om placeringsopdatering"</string>
-    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Tillader aktivering/deaktivering af placeringsdata fra radioen. Ikke til brug til normale programmer."</string>
+    <string name="permdesc_locationUpdates" msgid="2300018303720930256">"Tillader aktivering/deaktivering af placeringsdata fra radioen. Ikke til brug til normale applikationer."</string>
     <string name="permlab_checkinProperties" msgid="7855259461268734914">"egenskaber for adgangskontrol"</string>
-    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Tillader læse/skrive-adgang til egenskaber, der er uploadet af kontroltjenesten. Ikke til brug til normale programmer."</string>
+    <string name="permdesc_checkinProperties" msgid="7150307006141883832">"Tillader læse/skrive-adgang til egenskaber, der er uploadet af kontroltjenesten. Ikke til brug til normale applikationer."</string>
     <string name="permlab_bindGadget" msgid="776905339015863471">"vælg widgets"</string>
-    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Tillader, at programmet fortæller systemet, hvilke widgets der kan bruges af hvilke programmer. Med denne tilladelse kan programmer give adgang til personlige oplysninger til andre programmer. Ikke til brug til normale programmer."</string>
+    <string name="permdesc_bindGadget" msgid="2098697834497452046">"Tillader, at applikationen fortæller systemet, hvilke widgets der kan bruges af hvilke applikationer. Med denne tilladelse kan applikationer give adgang til personlige oplysninger til andre applikationer. Ikke til brug til normale applikationer."</string>
     <string name="permlab_modifyPhoneState" msgid="8423923777659292228">"rediger telefontilstand"</string>
-    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Tillader, at programmet kontrollerer enhedens telefonfunktioner. Et program med denne tilladelse kan skifte netværk, slå telefonens radio til og fra og lignende uden nogensinde at informere dig."</string>
+    <string name="permdesc_modifyPhoneState" msgid="3302284561346956587">"Tillader, at applikationen kontrollerer enhedens telefonfunktioner. En applikation med denne tilladelse kan skifte netværk, slå telefonens radio til og fra og lignende uden nogensinde at informere dig."</string>
     <string name="permlab_readPhoneState" msgid="2326172951448691631">"læs telefontilstand og identitet"</string>
-    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Tillader, at programmet får adgang til enhedens telefonfunktioner. Et program kan med denne tilladelse registrere denne telefons telefon- og serienummer, om et opkald er aktivt, nummeret som det opkald er forbundet til osv."</string>
+    <string name="permdesc_readPhoneState" msgid="188877305147626781">"Tillader, at applikationen får adgang til enhedens telefonfunktioner. En applikation kan med denne tilladelse registrere denne telefons telefon- og serienummer, om et opkald er aktivt, nummeret som det opkald er forbundet til osv."</string>
     <string name="permlab_wakeLock" msgid="573480187941496130">"afhold telefonen fra at gå i dvale"</string>
-    <string name="permdesc_wakeLock" msgid="7584036471227467099">"Tillader, at et program forhindrer telefonen i at gå i dvale."</string>
+    <string name="permdesc_wakeLock" msgid="7584036471227467099">"Tillader, at en applikation forhindrer telefonen i at gå i dvale."</string>
     <string name="permlab_devicePower" msgid="4928622470980943206">"tænd eller sluk for telefonen"</string>
-    <string name="permdesc_devicePower" msgid="4577331933252444818">"Tillader, at programmet slukker og tænder telefonen."</string>
+    <string name="permdesc_devicePower" msgid="4577331933252444818">"Tillader, at applikationen slukker og tænder telefonen."</string>
     <string name="permlab_factoryTest" msgid="3715225492696416187">"kør i fabriksindstillet testtilstand"</string>
     <string name="permdesc_factoryTest" msgid="8136644990319244802">"Kør som en producenttest på lavt niveau. Giver fuld adgang til telefonens hardware. Kun tilgængeligt når en telefon kører i producenttesttilstand."</string>
     <string name="permlab_setWallpaper" msgid="6627192333373465143">"angiv tapet"</string>
-    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Tillader, at programmet opsætter systemets tapet."</string>
+    <string name="permdesc_setWallpaper" msgid="6417041752170585837">"Tillader, at applikationen opsætter systemets tapet."</string>
     <string name="permlab_setWallpaperHints" msgid="3600721069353106851">"opsæt tip til tapetstørrelse"</string>
-    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Tillader, at programmet opsætter størrelsestip for systemets tapet."</string>
+    <string name="permdesc_setWallpaperHints" msgid="6019479164008079626">"Tillader, at applikationen opsætter størrelsestip for systemets tapet."</string>
     <string name="permlab_masterClear" msgid="2315750423139697397">"nulstil system til fabriksstandarder"</string>
-    <string name="permdesc_masterClear" msgid="5033465107545174514">"Tillader, at et program nulstiller systemet fuldstændig til fabriksindstillingerne, sletter alle data, konfigurationer og installerede programmer."</string>
+    <string name="permdesc_masterClear" msgid="5033465107545174514">"Tillader, at en applikation nulstiller systemet fuldstændig til fabriksindstillingerne, sletter alle data, konfigurationer og installerede applikationer."</string>
     <string name="permlab_setTime" msgid="2021614829591775646">"angive tid"</string>
-    <string name="permdesc_setTime" msgid="667294309287080045">"Tillader, at et program ændrer telefonens klokkeslæt."</string>
+    <string name="permdesc_setTime" msgid="667294309287080045">"Tillader, at en applikation ændrer telefonens klokkeslæt."</string>
     <string name="permlab_setTimeZone" msgid="2945079801013077340">"angiv tidszone"</string>
-    <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Tillader, at et program ændrer telefonens tidszone."</string>
+    <string name="permdesc_setTimeZone" msgid="1902540227418179364">"Tillader, at en applikation ændrer telefonens tidszone."</string>
     <string name="permlab_accountManagerService" msgid="4829262349691386986">"fungerer som kontoadministrationstjeneste"</string>
-    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Tillader, at et program foretager opkald til kontogodkendere"</string>
+    <string name="permdesc_accountManagerService" msgid="6056903274106394752">"Tillader, at en applikation foretager opkald til kontogodkendere"</string>
     <string name="permlab_getAccounts" msgid="4549918644233460103">"registrer kendte konti"</string>
-    <string name="permdesc_getAccounts" msgid="6839262446413155394">"Tillader, at et program henter listen over konti, der er kendt af telefonen."</string>
+    <string name="permdesc_getAccounts" msgid="6839262446413155394">"Tillader, at en applikation henter listen over konti, der er kendt af telefonen."</string>
     <string name="permlab_authenticateAccounts" msgid="3940505577982882450">"fungerer som en kontogodkender"</string>
-    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Tillader, at et program bruger kontoadministratorens kontogodkendelsesegenskaber, bl.a. oprettelse af konti samt hentning og indstilling af deres adgangskoder."</string>
+    <string name="permdesc_authenticateAccounts" msgid="4006839406474208874">"Tillader, at en applikation bruger kontoadministratorens kontogodkendelsesegenskaber, bl.a. oprettelse af konti samt hentning og indstilling af deres adgangskoder."</string>
     <string name="permlab_manageAccounts" msgid="4440380488312204365">"administrer kontolisten"</string>
-    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Tillader, at et program foretager handlinger, f.eks. at tilføje og fjerne konti samt slette sin adgangskode."</string>
+    <string name="permdesc_manageAccounts" msgid="8804114016661104517">"Tillader, at en applikation foretager handlinger, f.eks. at tilføje og fjerne konti samt slette sin adgangskode."</string>
     <string name="permlab_useCredentials" msgid="6401886092818819856">"brug en kontos godkendelsesoplysninger"</string>
-    <string name="permdesc_useCredentials" msgid="7416570544619546974">"Tillader, at et program anmoder om godkendelsestokens"</string>
+    <string name="permdesc_useCredentials" msgid="7416570544619546974">"Tillader, at en applikation anmoder om godkendelsestokens"</string>
     <string name="permlab_accessNetworkState" msgid="6865575199464405769">"vis netværkstilstand"</string>
-    <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Tillader, at et program viser tilstanden for alle netværk."</string>
+    <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Tillader, at en applikation viser tilstanden for alle netværk."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"fuld internetadgang"</string>
-    <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Tillader, at et program opretter netværks-sockets."</string>
+    <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Tillader, at en applikation opretter netværks-sockets."</string>
     <string name="permlab_writeApnSettings" msgid="7823599210086622545">"skriv indstillinger for adgangspunktnavn"</string>
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Tillader, at et program ændrer APN-indstillingerne, f.eks. enhver APNs Proxy og Port."</string>
+    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Tillader, at en applikation ændrer APN-indstillingerne, f.eks. enhver APNs Proxy og Port."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"skift netværksforbindelse"</string>
-    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Tillader, at et program ændrer netværksforbindelsens tilstand."</string>
+    <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Tillader, at en applikation ændrer netværksforbindelsens tilstand."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Skift tethering-forbindelse"</string>
-    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Tillader, at et program ændrer tilstand for et bundet netværk."</string>
+    <string name="permdesc_changeTetherState" msgid="8905815579146349568">"Tillader, at en applikation ændrer tilstand for et bundet netværk."</string>
     <string name="permlab_changeBackgroundDataSetting" msgid="1400666012671648741">"skift brugerindstilling for baggrundsdata"</string>
-    <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Tillader, at et program ændrer brugerindstillingerne for baggrundsdata."</string>
+    <string name="permdesc_changeBackgroundDataSetting" msgid="1001482853266638864">"Tillader, at en applikation ændrer brugerindstillingerne for baggrundsdata."</string>
     <string name="permlab_accessWifiState" msgid="8100926650211034400">"vis Wi-Fi-tilstand"</string>
-    <string name="permdesc_accessWifiState" msgid="485796529139236346">"Tillader, at et program viser oplysninger om Wi-Fi-tilstanden."</string>
+    <string name="permdesc_accessWifiState" msgid="485796529139236346">"Tillader, at en applikation viser oplysninger om Wi-Fi-tilstanden."</string>
     <string name="permlab_changeWifiState" msgid="7280632711057112137">"skift Wi-Fi-tilstand"</string>
-    <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Tillader, at et program opretter og afbryder forbindelsen fra Wi-Fi-adgangspunkter og foretager ændringer i konfigurerede Wi-Fi-netværk."</string>
+    <string name="permdesc_changeWifiState" msgid="2950383153656873267">"Tillader, at en applikation opretter og afbryder forbindelsen fra Wi-Fi-adgangspunkter og foretager ændringer i konfigurerede Wi-Fi-netværk."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"tillad Wi-Fi-multicastmodtagelse"</string>
-    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Tillader, at et program modtager pakker, der ikke er direkte adresseret til din enhed. Dette kan være nyttigt, hvis du finder tjenester, der tilbydes i nærheden. Det bruger mere strøm end multicasttilstanden."</string>
+    <string name="permdesc_changeWifiMulticastState" msgid="8199464507656067553">"Tillader, at en applikation modtager pakker, der ikke er direkte adresseret til din enhed. Dette kan være nyttigt, hvis du finder tjenester, der tilbydes i nærheden. Det bruger mere strøm end multicasttilstanden."</string>
     <string name="permlab_accessWimaxState" msgid="2800410363171809280">"vise WiMAX-tilstand"</string>
     <string name="permdesc_accessWimaxState" msgid="8298035866227524023">"Tillader, at en applikation viser oplysninger om WiMAX-tilstanden."</string>
     <string name="permlab_changeWimaxState" msgid="340465839241528618">"skifte WiMAX-tilstand"</string>
     <string name="permdesc_changeWimaxState" msgid="474918005058989421">"Tillader, at en applikation opretter og afbryder forbindelsen til WiMAX-netværk."</string>
     <string name="permlab_bluetoothAdmin" msgid="1092209628459341292">"bluetooth-administration"</string>
-    <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Tillader, at et program konfigurerer den lokale Bluetooth-telefon samt opdager og parrer med fjerne enheder."</string>
+    <string name="permdesc_bluetoothAdmin" msgid="7256289774667054555">"Tillader, at en applikation konfigurerer den lokale Bluetooth-telefon samt opdager og parrer med fjerne enheder."</string>
     <string name="permlab_bluetooth" msgid="8361038707857018732">"opret Bluetooth-forbindelser"</string>
-    <string name="permdesc_bluetooth" msgid="762515380679392945">"Tillader, at et program viser konfigurationen af den lokale Bluetooth-telefon samt opretter og accepterer forbindelse med parrede enheder."</string>
+    <string name="permdesc_bluetooth" msgid="762515380679392945">"Tillader, at en applikation viser konfigurationen af den lokale Bluetooth-telefon samt opretter og accepterer forbindelse med parrede enheder."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontrollere Near Field Communication"</string>
-    <string name="permdesc_nfc" msgid="9171401851954407226">"Tillader, at et program kommunikerer med tags, kort og læsere i Near Field Communication (NFC)."</string>
+    <string name="permdesc_nfc" msgid="9171401851954407226">"Tillader, at en applikation kommunikerer med tags, kort og læsere i Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"deaktiver tastaturlås"</string>
-    <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Tillader, at et program deaktiverer tastaturlåsen og al associeret adgangskodesikkerhed. Et legitimt eksempel på dette er, at telefonen deaktiverer tastaturlåsen, når der modtages et indgående telefonopkald, og genaktiverer tastaturlåsen, når opkaldet er afsluttet."</string>
+    <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Tillader, at en applikation deaktiverer tastaturlåsen og al associeret adgangskodesikkerhed. Et legitimt eksempel på dette er, at telefonen deaktiverer tastaturlåsen, når der modtages et indgående telefonopkald, og genaktiverer tastaturlåsen, når opkaldet er afsluttet."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"læs indstillinger for synkronisering"</string>
-    <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Tillader, at et program læser synkroniseringsindstillingerne, f.eks. om kontakter skal synkroniseres."</string>
+    <string name="permdesc_readSyncSettings" msgid="5315925706353341823">"Tillader, at en applikation læser synkroniseringsindstillingerne, f.eks. om kontakter skal synkroniseres."</string>
     <string name="permlab_writeSyncSettings" msgid="6297138566442486462">"skriv indstillinger for synkronisering"</string>
-    <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Tillader, at et program ændrer indstillingerne for synkronisering, f.eks. kontakter skal synkroniseres."</string>
+    <string name="permdesc_writeSyncSettings" msgid="2498201614431360044">"Tillader, at en applikation ændrer indstillingerne for synkronisering, f.eks. kontakter skal synkroniseres."</string>
     <string name="permlab_readSyncStats" msgid="7396577451360202448">"læs synkroniseringsstatistikker"</string>
-    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Tillader, at et program læser synkroniseringsstatistikker, f.eks. oversigten over forrige synkroniseringer."</string>
+    <string name="permdesc_readSyncStats" msgid="7511448343374465000">"Tillader, at en applikation læser synkroniseringsstatistikker, f.eks. oversigten over forrige synkroniseringer."</string>
     <string name="permlab_subscribedFeedsRead" msgid="4756609637053353318">"læs abonnerede feeds"</string>
-    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Tillader, at et program får detaljer om de aktuelt synkroniserede feeds."</string>
+    <string name="permdesc_subscribedFeedsRead" msgid="3622200625634207660">"Tillader, at en applikation får detaljer om de aktuelt synkroniserede feeds."</string>
     <string name="permlab_subscribedFeedsWrite" msgid="9015246325408209296">"skriv abonnerede feeds"</string>
-    <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Tillader, at et program ændrer dine aktuelle synkroniserede feeds. Dette kan muligvis lade et ondsindet program ændre dine synkroniserede feeds."</string>
+    <string name="permdesc_subscribedFeedsWrite" msgid="8121607099326533878">"Tillader, at en applikation ændrer dine aktuelle synkroniserede feeds. Dette kan muligvis lade et ondsinden applikation ændre dine synkroniserede feeds."</string>
     <string name="permlab_readDictionary" msgid="432535716804748781">"læs brugerdefineret ordbog"</string>
-    <string name="permdesc_readDictionary" msgid="1082972603576360690">"Tillader, at et program læser alle private ord, navne og sætninger, som brugeren eventuelt har gemt i brugerordbogen."</string>
+    <string name="permdesc_readDictionary" msgid="1082972603576360690">"Tillader, at en applikation læser alle private ord, navne og sætninger, som brugeren eventuelt har gemt i brugerordbogen."</string>
     <string name="permlab_writeDictionary" msgid="6703109511836343341">"skriv til den brugerdefinerede ordbog"</string>
-    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Tillader, at et program skriver nye ord i brugerordbogen."</string>
+    <string name="permdesc_writeDictionary" msgid="2241256206524082880">"Tillader, at en applikation skriver nye ord i brugerordbogen."</string>
     <string name="permlab_sdcardWrite" product="nosdcard" msgid="85430876310764752">"rette/slette i USB-lager"</string>
     <string name="permlab_sdcardWrite" product="default" msgid="8079403759001777291">"ret/slet indholdet på SD-kortet"</string>
     <string name="permdesc_sdcardWrite" product="nosdcard" msgid="6594393334785738252">"Tillad skriv til USB-lager."</string>
-    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Tillader, at et program skriver til SD-kortet."</string>
+    <string name="permdesc_sdcardWrite" product="default" msgid="6643963204976471878">"Tillader, at en applikation skriver til SD-kortet."</string>
     <string name="permlab_cache_filesystem" msgid="5656487264819669824">"få adgang til cache-filsystemet"</string>
-    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Tillader, at et program læser og skriver til cache-filsystemet."</string>
+    <string name="permdesc_cache_filesystem" msgid="1624734528435659906">"Tillader, at en applikation læser og skriver til cache-filsystemet."</string>
     <string name="permlab_use_sip" msgid="5986952362795870502">"foretage/modtage internetopkald"</string>
-    <string name="permdesc_use_sip" msgid="6320376185606661843">"Tillader, at et program anvender SIP-tjenesten til at foretage/modtage internetopkald."</string>
+    <string name="permdesc_use_sip" msgid="6320376185606661843">"Tillader, at en applikation anvender SIP-tjenesten til at foretage/modtage internetopkald."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Indstil regler for adgangskode"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Kontroller længden samt tilladte tegn i adgangskoder til oplåsning af skærm"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Overvåg forsøg på oplåsning af skærm"</string>
@@ -599,13 +601,13 @@
     <string name="save_password_label" msgid="6860261758665825069">"Bekræft"</string>
     <string name="double_tap_toast" msgid="1068216937244567247">"Tip: Dobbeltklik for at zoome ind eller ud."</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"læs browserens oversigt og bogmærker"</string>
-    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Tillader, at programmet læser alle de webadresser, browseren har besøgt, og alle browserens bogmærker."</string>
+    <string name="permdesc_readHistoryBookmarks" msgid="4981489815467617191">"Tillader, at applikationen læser alle de webadresser, browseren har besøgt, og alle browserens bogmærker."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="9009434109836280374">"skriv browserens oversigt og bogmærker"</string>
-    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Tillader, at et program ændrer browseroversigten eller bogmærker, der er gemt på din telefon. Ondsindede programmer kan bruge dette til at slette eller ændre din browsers data."</string>
+    <string name="permdesc_writeHistoryBookmarks" msgid="945571990357114950">"Tillader, at en applikation ændrer browseroversigten eller bogmærker, der er gemt på din telefon. Ondsindede applikationer kan bruge dette til at slette eller ændre din browsers data."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"angiv alarm i alarmprogram"</string>
-    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Tillader, at programmet angiver en alarm i et installeret alarmprogram. Nogle alarmprogrammer kan ikke implementere denne funktion."</string>
+    <string name="permdesc_setAlarm" msgid="5966966598149875082">"Tillader, at applikationen angiver en alarm i et installeret alarmprogram. Nogle alarmprogrammer kan ikke implementere denne funktion."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Skift browsertilladelser for geografisk placering"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Giver et program tilladelse til at ændre browserens tilladelser for geografisk placering. Skadelige programmer kan bruge dette til at tillade, at placeringsoplysninger sendes til vilkårlige websteder."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Giver en applikation tilladelse til at ændre browserens tilladelser for geografisk placering. Skadelige applikationer kan bruge dette til at tillade, at placeringsoplysninger sendes til vilkårlige websteder."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du, at browseren skal huske denne adgangskode?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Ikke nu"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Husk"</string>
@@ -735,15 +737,15 @@
     <string name="capital_off" msgid="6815870386972805832">"FRA"</string>
     <string name="whichApplication" msgid="4533185947064773386">"Fuldfør handling ved hjælp af"</string>
     <string name="alwaysUse" msgid="4583018368000610438">"Brug som standard til denne handling."</string>
-    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Ryd standard i Startindstillinger &gt; Programmer &gt; Administrer programmer."</string>
+    <string name="clearDefaultHintMsg" msgid="4815455344600932173">"Ryd standard i Startindstillinger &gt; Applikationer &gt; Administrer applikationer."</string>
     <string name="chooseActivity" msgid="1009246475582238425">"Vælg en handling"</string>
-    <string name="chooseUsbActivity" msgid="7892597146032121735">"Vælg et program for USB-enheden"</string>
-    <string name="noApplications" msgid="1691104391758345586">"Der er ingen programmer, der kan foretage denne handling."</string>
+    <string name="chooseUsbActivity" msgid="7892597146032121735">"Vælg en applikation for USB-enheden"</string>
+    <string name="noApplications" msgid="1691104391758345586">"Der er ingen applikationer, der kan foretage denne handling."</string>
     <string name="aerr_title" msgid="653922989522758100">"Beklager!"</string>
     <string name="aerr_application" msgid="4683614104336409186">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) er standset uventet. Prøv igen."</string>
     <string name="aerr_process" msgid="1551785535966089511">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> er standset uventet. Prøv igen."</string>
     <string name="anr_title" msgid="3100070910664756057">"Beklager!"</string>
-    <string name="anr_activity_application" msgid="3538242413112507636">"Aktivitet <xliff:g id="ACTIVITY">%1$s</xliff:g> (i programmet <xliff:g id="APPLICATION">%2$s</xliff:g>) svarer ikke."</string>
+    <string name="anr_activity_application" msgid="3538242413112507636">"Aktivitet <xliff:g id="ACTIVITY">%1$s</xliff:g> (i applikationen <xliff:g id="APPLICATION">%2$s</xliff:g>) svarer ikke."</string>
     <string name="anr_activity_process" msgid="5420826626009561014">"Aktivitet <xliff:g id="ACTIVITY">%1$s</xliff:g> (igangværende <xliff:g id="PROCESS">%2$s</xliff:g>) svarer ikke."</string>
     <string name="anr_application_process" msgid="4185842666452210193">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (igangværende <xliff:g id="PROCESS">%2$s</xliff:g>) svarer ikke."</string>
     <string name="anr_process" msgid="1246866008169975783">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> svarer ikke."</string>
@@ -756,13 +758,13 @@
     <string name="smv_application" msgid="295583804361236288">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) har overtrådt sin egen StrictMode-politik."</string>
     <string name="smv_process" msgid="5120397012047462446">"Processen <xliff:g id="PROCESS">%1$s</xliff:g> har overtrådt sin egen StrictMode-politik."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> er i gang"</string>
-    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Vælg for at skifte program"</string>
-    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Skift program?"</string>
-    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Der kører et andet program, der skal stoppes, før du kan starte et nyt."</string>
+    <string name="heavy_weight_notification_detail" msgid="2423977499339403402">"Vælg for at skifte applikation"</string>
+    <string name="heavy_weight_switcher_title" msgid="1135403633766694316">"Skift applikation?"</string>
+    <string name="heavy_weight_switcher_text" msgid="4592075610079319667">"Der kører en anden applikation, der skal stoppes, før du kan starte et nyt."</string>
     <string name="old_app_action" msgid="493129172238566282">"Tilbage til <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="old_app_description" msgid="942967900237208466">"Start ikke det nye program."</string>
+    <string name="old_app_description" msgid="942967900237208466">"Start ikke den nye applikation."</string>
     <string name="new_app_action" msgid="5472756926945440706">"Start <xliff:g id="OLD_APP">%1$s</xliff:g>"</string>
-    <string name="new_app_description" msgid="6830398339826789493">"Stop det gamle program uden at gemme."</string>
+    <string name="new_app_description" msgid="6830398339826789493">"Stop den gamle applikation uden at gemme."</string>
     <string name="sendText" msgid="5132506121645618310">"Vælg en handling for teksten"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Lydstyrke for opkald"</string>
     <string name="volume_music" msgid="5421651157138628171">"Lydstyrke for medier"</string>
@@ -787,7 +789,7 @@
     <item quantity="other" msgid="7915895323644292768">"Der er åbne Wi-Fi-netværk tilgængelige"</item>
   </plurals>
     <string name="select_character" msgid="3365550120617701745">"Indsæt tegn"</string>
-    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Ukendt program"</string>
+    <string name="sms_control_default_app_name" msgid="7630529934366549163">"Ukendt applikation"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Sender sms-beskeder"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"Der sendes et stort antal sms-beskeder. Vælg \"OK\" for at fortsætte eller \"Annuller\" for at stoppe afsendelsen."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
@@ -814,7 +816,7 @@
     <string name="usb_storage_stop_button_mount" msgid="7060218034900696029">"Slå USB-lagring fra"</string>
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Der opstod et problem med at slå USB-lagringen fra. Sørg for, at du har demonteret USB-værten, og prøv så igen."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Slå USB-lagring til"</string>
-    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Hvis du slår USB-lagring til, vil nogle af de programmer, som du bruger, stoppe, og de kan være utilgængelige, indtil du slår USB-lagring til igen."</string>
+    <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Hvis du slår USB-lagring til, vil nogle af de applikationer, som du bruger, stoppe, og de kan være utilgængelige, indtil du slår USB-lagring til igen."</string>
     <string name="dlg_error_title" msgid="8048999973837339174">"USB-handlingen mislykkedes"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formater USB-lager"</string>
@@ -853,9 +855,9 @@
     <string name="ext_media_nomedia_notification_message" product="default" msgid="3870120652983659641">"SD-kortet er fjernet. Indsæt et nyt."</string>
     <string name="activity_list_empty" msgid="4168820609403385789">"Der blev ikke fundet nogen matchende aktiviteter"</string>
     <string name="permlab_pkgUsageStats" msgid="8787352074326748892">"opdater brugerstatistikker for komponenter"</string>
-    <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Tillader ændring af indsamlede brugerstatistikker for komponenter. Ikke til brug til normale programmer."</string>
-    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Tillader kald af standardcontainertjeneste for at kopiere indhold. Ikke til brug for almindelige programmer."</string>
-    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Tillader kald af standardcontainertjeneste for at kopiere indhold. Ikke til brug for almindelige programmer."</string>
+    <string name="permdesc_pkgUsageStats" msgid="891553695716752835">"Tillader ændring af indsamlede brugerstatistikker for komponenter. Ikke til brug til normale applikationer."</string>
+    <string name="permlab_copyProtectedData" msgid="1660908117394854464">"Tillader kald af standardcontainertjeneste for at kopiere indhold. Ikke til brug for almindelige applikationer."</string>
+    <string name="permdesc_copyProtectedData" msgid="537780957633976401">"Tillader kald af standardcontainertjeneste for at kopiere indhold. Ikke til brug for almindelige applikationer."</string>
     <string name="tutorial_double_tap_to_zoom_message_short" msgid="1311810005957319690">"Tryk to gange for zoomkontrol"</string>
     <string name="gadget_host_error_inflating" msgid="2613287218853846830">"Der opstod en fejl under forøgelsen af widgetten"</string>
     <string name="ime_action_go" msgid="8320845651737369027">"Gå"</string>
@@ -868,7 +870,7 @@
     <string name="create_contact_using" msgid="4947405226788104538">"Opret kontakt"\n"ved hjælp af <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="accessibility_compound_button_selected" msgid="5612776946036285686">"kontrolleret"</string>
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"ikke kontrolleret"</string>
-    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Følgende programmer anmoder om tilladelse til at få adgang til din konto nu og i fremtiden."</string>
+    <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Følgende applikationer anmoder om tilladelse til at få adgang til din konto nu og i fremtiden."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vil du tillade denne anmodning?"</string>
     <string name="grant_permissions_header_text" msgid="2722567482180797717">"Adgangsanmodning"</string>
     <string name="allow" msgid="7225948811296386551">"Tillad"</string>

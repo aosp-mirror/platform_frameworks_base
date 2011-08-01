@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Tillåter att program tar emot och bearbetar SMS-meddelanden. Skadliga program kan övervaka dina meddelanden eller ta bort dem utan att visa dem för dig."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"ta emot MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Tillåter att program tar emot och bearbetar MMS-meddelanden. Skadliga program kan övervaka dina meddelanden eller ta bort dem innan du har sett dem."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"ta emot sändningar i nödsituationer"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Tillåter att appen tar emot och bearbetar sändningar i nödsituationer. Behörigheten är bara tillgänglig för systemappar."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"skicka SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Tillåter att programmet skickar SMS-meddelanden. Skadliga program kan skicka meddelanden utan ditt godkännande vilket kan kosta pengar."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"läsa SMS eller MMS"</string>
