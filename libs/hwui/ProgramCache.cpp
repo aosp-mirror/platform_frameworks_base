@@ -18,6 +18,7 @@
 
 #include <utils/String8.h>
 
+#include "Caches.h"
 #include "ProgramCache.h"
 
 namespace android {
@@ -64,10 +65,18 @@ const char* gVS_Header_Varyings_HasTexture =
 const char* gVS_Header_Varyings_IsAA =
         "varying float widthProportion;\n"
         "varying float lengthProportion;\n";
-const char* gVS_Header_Varyings_HasBitmap =
-        "varying vec2 outBitmapTexCoords;\n";
-const char* gVS_Header_Varyings_PointHasBitmap =
-        "varying vec2 outPointBitmapTexCoords;\n";
+const char* gVS_Header_Varyings_HasBitmap[2] = {
+        // Default precision
+        "varying vec2 outBitmapTexCoords;\n",
+        // High precision
+        "varying highp vec2 outBitmapTexCoords;\n"
+};
+const char* gVS_Header_Varyings_PointHasBitmap[2] = {
+        // Default precision
+        "varying vec2 outPointBitmapTexCoords;\n",
+        // High precision
+        "varying highp vec2 outPointBitmapTexCoords;\n"
+};
 const char* gVS_Header_Varyings_HasGradient[3] = {
         // Linear
         "varying vec2 linear;\n",
@@ -417,9 +426,10 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
         shader.append(gVS_Header_Varyings_HasGradient[description.gradientType]);
     }
     if (description.hasBitmap) {
+        int index = Caches::getInstance().extensions.needsHighpTexCoords() ? 1 : 0;
         shader.append(description.isPoint ?
-                gVS_Header_Varyings_PointHasBitmap :
-                gVS_Header_Varyings_HasBitmap);
+                gVS_Header_Varyings_PointHasBitmap[index] :
+                gVS_Header_Varyings_HasBitmap[index]);
     }
 
     // Begin the shader
@@ -455,7 +465,6 @@ String8 ProgramCache::generateVertexShader(const ProgramDescription& description
 }
 
 String8 ProgramCache::generateFragmentShader(const ProgramDescription& description) {
-    // Set the default precision
     String8 shader;
 
     const bool blendFramebuffer = description.framebufferMode >= SkXfermode::kPlus_Mode;
@@ -479,9 +488,10 @@ String8 ProgramCache::generateFragmentShader(const ProgramDescription& descripti
         shader.append(gVS_Header_Varyings_HasGradient[description.gradientType]);
     }
     if (description.hasBitmap) {
+        int index = Caches::getInstance().extensions.needsHighpTexCoords() ? 1 : 0;
         shader.append(description.isPoint ?
-                gVS_Header_Varyings_PointHasBitmap :
-                gVS_Header_Varyings_HasBitmap);
+                gVS_Header_Varyings_PointHasBitmap[index] :
+                gVS_Header_Varyings_HasBitmap[index]);
     }
 
     // Uniforms
