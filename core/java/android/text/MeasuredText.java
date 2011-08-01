@@ -29,14 +29,15 @@ import com.android.internal.util.ArrayUtils;
  */
 class MeasuredText {
     private static final boolean localLOGV = false;
-    /* package */ CharSequence mText;
-    /* package */ int mTextStart;
-    /* package */ float[] mWidths;
-    /* package */ char[] mChars;
-    /* package */ byte[] mLevels;
-    /* package */ int mDir;
-    /* package */ boolean mEasy;
-    /* package */ int mLen;
+    CharSequence mText;
+    int mTextStart;
+    float[] mWidths;
+    char[] mChars;
+    byte[] mLevels;
+    int mDir;
+    boolean mEasy;
+    int mLen;
+
     private int mPos;
     private TextPaint mWorkPaint;
 
@@ -44,16 +45,16 @@ class MeasuredText {
         mWorkPaint = new TextPaint();
     }
 
-    private static MeasuredText[] cached = new MeasuredText[3];
+    private static final Object[] sLock = new Object[0];
+    private static MeasuredText[] sCached = new MeasuredText[3];
 
-    /* package */
     static MeasuredText obtain() {
         MeasuredText mt;
-        synchronized (cached) {
-            for (int i = cached.length; --i >= 0;) {
-                if (cached[i] != null) {
-                    mt = cached[i];
-                    cached[i] = null;
+        synchronized (sLock) {
+            for (int i = sCached.length; --i >= 0;) {
+                if (sCached[i] != null) {
+                    mt = sCached[i];
+                    sCached[i] = null;
                     return mt;
                 }
             }
@@ -65,14 +66,14 @@ class MeasuredText {
         return mt;
     }
 
-    /* package */
     static MeasuredText recycle(MeasuredText mt) {
         mt.mText = null;
         if (mt.mLen < 1000) {
-            synchronized(cached) {
-                for (int i = 0; i < cached.length; ++i) {
-                    if (cached[i] == null) {
-                        cached[i] = mt;
+            synchronized(sLock) {
+                for (int i = 0; i < sCached.length; ++i) {
+                    if (sCached[i] == null) {
+                        sCached[i] = mt;
+                        mt.mText = null;
                         break;
                     }
                 }
@@ -84,7 +85,6 @@ class MeasuredText {
     /**
      * Analyzes text for bidirectional runs.  Allocates working buffers.
      */
-    /* package */
     void setPara(CharSequence text, int start, int end, TextDirectionHeuristic textDir) {
         mText = text;
         mTextStart = start;

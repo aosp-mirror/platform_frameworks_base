@@ -923,6 +923,14 @@ public class StaticLayout extends Layout {
     public void setMaximumVisibleLineCount(int lineCount) {
         mMaximumVisibleLineCount = lineCount;
     }
+    
+    void prepare() {
+        mMeasured = MeasuredText.obtain();
+    }
+    
+    void finish() {
+        mMeasured = MeasuredText.recycle(mMeasured);
+    }
 
     private int mLineCount;
     private int mTopPadding, mBottomPadding;
