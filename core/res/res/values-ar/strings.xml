@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"للسماح للتطبيق بتلقي الرسائل القصيرة SMS ومعالجتها. قد تراقب بعض التطبيقات الضارة رسائلك أو تحذفها بدون عرضها لك."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"استلام رسالة وسائط متعددة (MMS)"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"للسماح للتطبيق بتلقي رسائل الوسائط المتعددة (MMS) ومعالجتها. قد تراقب بعض التطبيقات الضارة رسائلك أو تحذفها بدون عرضها لك."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"تلقي بث الطوارئ"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"للسماح للتطبيق بتلقي رسائل بث الطوارئ ومعالجتها. يتاح هذا الإذن لتطبيقات النظام فقط."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"إرسال رسائل قصيرة SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"للسماح للتطبيق بإرسال رسائل قصيرة SMS. قد تكلفك التطبيقات الضارة المال من خلال إرسال رسائل بدون تأكيدك."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"قراءة الرسائل القصيرة SMS أو رسائل الوسائط المتعددة"</string>

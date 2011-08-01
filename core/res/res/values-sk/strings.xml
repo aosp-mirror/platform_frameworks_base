@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Umožňuje aplikácii prijímať a spracovávať správy SMS. Škodlivé aplikácie môžu sledovať vaše správy alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"príjem správ MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Umožňuje aplikácii prijímať a spracovávať správy MMS. Škodlivé aplikácie môžu sledovať vaše správy alebo ich odstrániť bez toho, aby sa vám zobrazili."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"príjem núdzového vysielania"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Umožňuje aplikácii prijímať a spracúvať správy núdzového vysielania. Toto oprávnenie je k dispozícii iba pre systémové aplikácie."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"odosielať správy SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Umožňuje aplikácii odosielať správy SMS. Škodlivé aplikácie môžu bez vášho potvrdenia odosielať spoplatnené správy."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"čítanie správ SMS a MMS"</string>

@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Lar applikasjonen motta og behandle SMS-meldinger. Ondsinnede applikasjoner kan overvåke meldinger eller slette dem uten at de vises."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"motta MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Lar applikasjonen motta og behandle MMS-meldinger. Ondsinnede applikasjoner kan overvåke meldinger eller slette dem uten at de vises."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"motta nødkringkastinger"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Tillater applikasjonen å motta og behandle nødkringkastingsmeldinger. Denne tillatelsen er kun tilgjengelig for systemapplikasjoner."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"sende SMS-meldinger"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Lar applikasjonen sende SMS-meldinger. Ondsinnede applikasjoner kan koste deg penger ved å sende meldinger uten bekreftelse."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"lese SMS- og MMS-meldinger"</string>
@@ -870,7 +872,7 @@
     <string name="accessibility_compound_button_unselected" msgid="8864512895673924091">"ikke valgt"</string>
     <string name="grant_credentials_permission_message_header" msgid="6824538733852821001">"Ett eller flere av de følgende programmene ber om tillatelse til å få tilgang til kontoen din fra nå av."</string>
     <string name="grant_credentials_permission_message_footer" msgid="3125211343379376561">"Vil du tillate dette?"</string>
-    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Få tilgang til forespørsler"</string>
+    <string name="grant_permissions_header_text" msgid="2722567482180797717">"Forespørsel om tilgang"</string>
     <string name="allow" msgid="7225948811296386551">"Tillat"</string>
     <string name="deny" msgid="2081879885755434506">"Avslå"</string>
     <string name="permission_request_notification_title" msgid="5390555465778213840">"Tillatelse forespurt"</string>

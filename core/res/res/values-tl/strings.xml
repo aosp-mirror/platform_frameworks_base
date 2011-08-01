@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Pinapayagan ang application na tumanggap at magproseso ng mga SMS na mensahe. Maaaring subaybayan ng mga nakakahamak na application ang iyong mga mensahe o tanggalin ang mga ito nang hindi ipinapakita sa iyo."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"tumanggap ng MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Pinapayagan ang application na tumanggap at magproseso ng mga MMS na mensahe. Maaaring subaybayan ng mga nakakahamak na application ang iyong mga mensahe o tanggalin ang mga ito nang hindi ipinapakita ang mga ito sa iyo."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"makatanggap ng mga emergency broadcast"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Pinapayagan ang application na mabawi at iproseso ang mga mensahe ng emergency broadcast. Available lang ang pahintulot na ito sa mga system application."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"magpadala ng mga SMS na mensahe"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Pinapayagan ang application na magpadala ng mga SMS na mensahe. Maaaring mapagastos ka ng mga nakakahamak na application sa pamamagitan ng pagpapadala ng mga mensahe nang wala ng iyong kumpirmasyon."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"magbasa ng SMS o MMS"</string>

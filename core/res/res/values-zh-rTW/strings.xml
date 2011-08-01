@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"允許應用程式接收、處理 SMS 簡訊。請注意：惡意程式可能使用此功能監控簡訊或在您讀取前擅自刪除。"</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"接收 MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"允許應用程式接收、處理 MMS 簡訊。請注意：惡意程式可能使用此功能監控簡訊或在您讀取前擅自刪除。"</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"接收緊急廣播"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"允許應用程式接收並處理緊急廣播訊息，只有系統應用程式可以具備這項權限。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"傳送 SMS 簡訊"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"允許應用程式傳送 SMS 簡訊。請注意：惡意程式可能會擅自傳送簡訊，增加您的支出。"</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"讀取 SMS 或 MMS"</string>

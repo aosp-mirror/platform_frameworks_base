@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Permite aplicaţiilor să primească şi să proceseze mesaje SMS. Aplicaţiile rău-intenţionate ar putea să monitorizeze mesajele sau să le şteargă fără să vi le arate."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"primire MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Permite aplicaţiei să primească şi să proceseze mesaje MMS. Aplicaţiile rău-intenţionate ar putea să monitorizeze mesajele sau să le şteargă fără să vi le arate."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"primeşte mesaje difuzate de urgenţă"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Permite aplicaţiei să primească şi să proceseze mesajele difuzate de urgenţă. Această permisiune este disponibil numai pentru aplicaţiile sistemului."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"trimitere mesaje SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Permite aplicaţiei să trimită mesaje SMS. Aplicaţiile rău-intenţionate ar putea să vă genereze costuri, deoarece trimit mesaje fără confirmarea dvs."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"citire mesaje SMS sau MMS"</string>

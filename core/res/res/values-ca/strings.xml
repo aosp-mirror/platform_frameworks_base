@@ -50,7 +50,7 @@
     <string name="needPuk2" msgid="4526033371987193070">"Escriviu el PUK2 per desbloquejar la targeta SIM."</string>
     <string name="ClipMmi" msgid="6952821216480289285">"Identificació de trucada entrant"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Identificació de trucada de sortida"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Desviament de trucades"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Desviació de trucades"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Trucada en espera"</string>
     <string name="BaMmi" msgid="455193067926770581">"Restricció de trucades"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Canvi de contrasenya"</string>
@@ -183,6 +183,8 @@
     <string name="permdesc_receiveSms" msgid="6298292335965966117">"Permet a l\'aplicació rebre i processar missatges SMS. Les aplicacions malicioses poden supervisar els missatges o suprimir-los sense mostrar-vos-els."</string>
     <string name="permlab_receiveMms" msgid="8894700916188083287">"rebre MMS"</string>
     <string name="permdesc_receiveMms" msgid="4563346832000174373">"Permet a l\'aplicació rebre i processar missatges MMS. Les aplicacions malicioses poden supervisar els missatges o suprimir-los sense mostrar-vos-els."</string>
+    <string name="permlab_receiveEmergencyBroadcast" msgid="1803477660846288089">"recepció d\'emissions d\'emergència"</string>
+    <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Permet que l\'aplicació rebi i processi missatges de difusió d\'emergència. Aquest permís només està disponible per a les aplicacions del sistema."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"enviar missatges SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Permet a l\'aplicació enviar missatges SMS. Les aplicacions malicioses poden costar-vos diners en enviar missatges sense la vostra confirmació."</string>
     <string name="permlab_readSms" msgid="4085333708122372256">"llegir SMS o MMS"</string>
