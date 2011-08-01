@@ -363,6 +363,12 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
         EGLConfig iConfig = dp->configs[intptr_t(config)].config;
         EGLint format;
 
+        if (native_window_api_connect(window, NATIVE_WINDOW_API_EGL) != OK) {
+            LOGE("EGLNativeWindowType %p already connected to another API",
+                    window);
+            return setError(EGL_BAD_NATIVE_WINDOW, EGL_NO_SURFACE);
+        }
+
         // set the native window's buffers format to match this config
         if (cnx->egl.eglGetConfigAttrib(iDpy,
                 iConfig, EGL_NATIVE_VISUAL_ID, &format)) {
@@ -371,6 +377,7 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
                 if (err != 0) {
                     LOGE("error setting native window pixel format: %s (%d)",
                             strerror(-err), err);
+                    native_window_api_disconnect(window, NATIVE_WINDOW_API_EGL);
                     return setError(EGL_BAD_NATIVE_WINDOW, EGL_NO_SURFACE);
                 }
             }
@@ -383,6 +390,10 @@ EGLSurface eglCreateWindowSurface(  EGLDisplay dpy, EGLConfig config,
                     dp->configs[intptr_t(config)].impl, cnx);
             return s;
         }
+
+        // EGLSurface creation failed
+        native_window_set_buffers_format(window, 0);
+        native_window_api_disconnect(window, NATIVE_WINDOW_API_EGL);
     }
     return EGL_NO_SURFACE;
 }
@@ -443,8 +454,12 @@ EGLBoolean eglDestroySurface(EGLDisplay dpy, EGLSurface surface)
     EGLBoolean result = s->cnx->egl.eglDestroySurface(
             dp->disp[s->impl].dpy, s->surface);
     if (result == EGL_TRUE) {
-        if (s->win != NULL) {
-            native_window_set_buffers_geometry(s->win.get(), 0, 0, 0);
+        ANativeWindow* const window = s->win.get();
+        if (window != NULL) {
+            native_window_set_buffers_format(window, 0);
+            if (native_window_api_disconnect(window, NATIVE_WINDOW_API_EGL)) {
+                LOGE("EGLNativeWindowType %p disconnected failed", window);
+            }
         }
         _s.terminate();
     }
