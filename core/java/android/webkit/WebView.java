@@ -2003,15 +2003,18 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Load the given url with the extra headers.
-     * @param url The url of the resource to load.
-     * @param extraHeaders The extra headers sent with this url. This should not
-     *            include the common headers like "user-agent". If it does, it
-     *            will be replaced by the intrinsic value of the WebView.
+     * Load the given URL with the specified additional HTTP headers.
+     * @param url The URL of the resource to load.
+     * @param additionalHttpHeaders The additional headers to be used in the
+     *            HTTP request for this URL, specified as a map from name to
+     *            value. Note that if this map contains any of the headers
+     *            that are set by default by the WebView, such as those
+     *            controlling caching, accept types or the User-Agent, their
+     *            values may be overriden by the WebView's defaults.
      */
-    public void loadUrl(String url, Map<String, String> extraHeaders) {
+    public void loadUrl(String url, Map<String, String> additionalHttpHeaders) {
         checkThread();
-        loadUrlImpl(url, extraHeaders);
+        loadUrlImpl(url, additionalHttpHeaders);
     }
 
     private void loadUrlImpl(String url, Map<String, String> extraHeaders) {
@@ -2024,8 +2027,8 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Load the given url.
-     * @param url The url of the resource to load.
+     * Load the given URL.
+     * @param url The URL of the resource to load.
      */
     public void loadUrl(String url) {
         checkThread();
