@@ -3645,6 +3645,7 @@ package android.app {
   public class WallpaperManager {
     method public void clear() throws java.io.IOException;
     method public void clearWallpaperOffsets(android.os.IBinder);
+    method public void forgetLoadedWallpaper();
     method public int getDesiredMinimumHeight();
     method public int getDesiredMinimumWidth();
     method public android.graphics.drawable.Drawable getDrawable();
