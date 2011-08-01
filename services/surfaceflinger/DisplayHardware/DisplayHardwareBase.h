@@ -37,7 +37,7 @@ public:
 
                 ~DisplayHardwareBase();
 
-    // console managment
+    // console management
     void releaseScreen() const;
     void acquireScreen() const;
     bool isScreenAcquired() const;
