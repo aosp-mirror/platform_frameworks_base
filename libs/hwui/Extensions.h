@@ -23,6 +23,8 @@
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
 
+#include "Debug.h"
+
 namespace android {
 namespace uirenderer {
 
@@ -31,14 +33,19 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Debug
-#define DEBUG_EXTENSIONS 0
-
-// Debug
 #if DEBUG_EXTENSIONS
     #define EXT_LOGD(...) LOGD(__VA_ARGS__)
 #else
     #define EXT_LOGD(...)
 #endif
+
+// Vendor strings
+
+#define VENDOR_IMG "Imagination Technologies"
+
+///////////////////////////////////////////////////////////////////////////////
+// Classes
+///////////////////////////////////////////////////////////////////////////////
 
 class Extensions {
 public:
@@ -58,17 +65,21 @@ public:
         } while (head);
 
         mHasNPot = hasExtension("GL_OES_texture_npot");
-        mHasDrawPath = hasExtension("GL_NV_draw_path");
-        mHasCoverageSample = hasExtension("GL_NV_coverage_sample");
         mHasFramebufferFetch = hasExtension("GL_NV_shader_framebuffer_fetch");
 
+        const char* vendor = (const char*) glGetString(GL_VENDOR);
+        EXT_LOGD("Vendor: %s", vendor);
+        mNeedsHighpTexCoords = strcmp(vendor, VENDOR_IMG) == 0;
+
+        // We don't need to copy the string, the OpenGL ES spec
+        // guarantees the result of glGetString to point to a
+        // static string as long as our OpenGL context is valid
         mExtensions = buffer;
     }
 
     inline bool hasNPot() const { return mHasNPot; }
-    inline bool hasDrawPath() const { return mHasDrawPath; }
-    inline bool hasCoverageSample() const { return mHasCoverageSample; }
     inline bool hasFramebufferFetch() const { return mHasFramebufferFetch; }
+    inline bool needsHighpTexCoords() const { return mNeedsHighpTexCoords; }
 
     bool hasExtension(const char* extension) const {
         const String8 s(extension);
@@ -85,8 +96,7 @@ private:
     const char* mExtensions;
 
     bool mHasNPot;
-    bool mHasDrawPath;
-    bool mHasCoverageSample;
+    bool mNeedsHighpTexCoords;
     bool mHasFramebufferFetch;
 }; // class Extensions
 
