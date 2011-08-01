@@ -1148,6 +1148,14 @@ public final class MediaStore {
              * <P>Type: INTEGER (boolean)</P>
              */
             public static final String IS_NOTIFICATION = "is_notification";
+
+            /**
+             * The genre of the audio file, if any
+             * <P>Type: TEXT</P>
+             * Does not exist in the database - only used by the media scanner for inserts.
+             * @hide
+             */
+            public static final String GENRE = "genre";
         }
 
         /**

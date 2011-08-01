@@ -40,7 +40,6 @@ import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Files;
 import android.provider.MediaStore.Images;
 import android.provider.MediaStore.Video;
-import android.provider.MediaStore.Audio.Genres;
 import android.provider.MediaStore.Audio.Playlists;
 import android.sax.Element;
 import android.sax.ElementListener;
@@ -137,11 +136,6 @@ public class MediaScanner
     private static final int ID_PLAYLISTS_COLUMN_INDEX = 0;
     private static final int PATH_PLAYLISTS_COLUMN_INDEX = 1;
     private static final int DATE_MODIFIED_PLAYLISTS_COLUMN_INDEX = 2;
-
-    private static final String[] GENRE_LOOKUP_PROJECTION = new String[] {
-            Audio.Genres._ID, // 0
-            Audio.Genres.NAME, // 1
-    };
 
     private static final String RINGTONES_DIR = "/ringtones/";
     private static final String NOTIFICATIONS_DIR = "/notifications/";
@@ -311,10 +305,9 @@ public class MediaScanner
     private Uri mVideoUri;
     private Uri mImagesUri;
     private Uri mThumbsUri;
-    private Uri mGenresUri;
     private Uri mPlaylistsUri;
     private Uri mFilesUri;
-    private boolean mProcessPlaylists, mProcessGenres;
+    private boolean mProcessPlaylists;
     private int mMtpObjectHandle;
 
     private final String mExternalStoragePath;
@@ -413,7 +406,6 @@ public class MediaScanner
     private HashMap<String, FileCacheEntry> mFileCache;
 
     private ArrayList<FileCacheEntry> mPlayLists;
-    private HashMap<String, Uri> mGenreCache;
 
     private DrmManagerClient mDrmManagerClient = null;
 
@@ -735,6 +727,7 @@ public class MediaScanner
                     map.put(Audio.Media.ALBUM, (mAlbum != null && mAlbum.length() > 0) ?
                             mAlbum : MediaStore.UNKNOWN_STRING);
                     map.put(Audio.Media.COMPOSER, mComposer);
+                    map.put(Audio.Media.GENRE, mGenre);
                     if (mYear != 0) {
                         map.put(Audio.Media.YEAR, mYear);
                     }
@@ -893,46 +886,6 @@ public class MediaScanner
                 // with squashed lower case paths
                 values.remove(MediaStore.MediaColumns.DATA);
                 mMediaProvider.update(result, values, null, null);
-            }
-            if (mProcessGenres && mGenre != null) {
-                String genre = mGenre;
-                Uri uri = mGenreCache.get(genre);
-                if (uri == null) {
-                    Cursor cursor = null;
-                    try {
-                        // see if the genre already exists
-                        cursor = mMediaProvider.query(
-                                mGenresUri,
-                                GENRE_LOOKUP_PROJECTION, MediaStore.Audio.Genres.NAME + "=?",
-                                        new String[] { genre }, null);
-                        if (cursor == null || cursor.getCount() == 0) {
-                            // genre does not exist, so create the genre in the genre table
-                            values = new ContentValues();
-                            values.put(MediaStore.Audio.Genres.NAME, genre);
-                            uri = mMediaProvider.insert(mGenresUri, values);
-                        } else {
-                            // genre already exists, so compute its Uri
-                            cursor.moveToNext();
-                            uri = ContentUris.withAppendedId(mGenresUri, cursor.getLong(0));
-                        }
-                        if (uri != null) {
-                            uri = Uri.withAppendedPath(uri, Genres.Members.CONTENT_DIRECTORY);
-                            mGenreCache.put(genre, uri);
-                        }
-                    } finally {
-                        // release the cursor if it exists
-                        if (cursor != null) {
-                            cursor.close();
-                        }
-                    }
-                }
-
-                if (uri != null) {
-                    // add entry to audio_genre_map
-                    values = new ContentValues();
-                    values.put(MediaStore.Audio.Genres.Members.AUDIO_ID, Long.valueOf(rowId));
-                    mMediaProvider.insert(uri, values);
-                }
             }
 
             if (notifications && !mDefaultNotificationSet) {
@@ -1181,7 +1134,6 @@ public class MediaScanner
             pruneDeadThumbnailFiles();
 
         // allow GC to clean up
-        mGenreCache = null;
         mPlayLists = null;
         mFileCache = null;
         mMediaProvider = null;
@@ -1199,9 +1151,6 @@ public class MediaScanner
         if (!volumeName.equals("internal")) {
             // we only support playlists on external media
             mProcessPlaylists = true;
-            mProcessGenres = true;
-            mGenreCache = new HashMap<String, Uri>();
-            mGenresUri = Genres.getContentUri(volumeName);
             mPlaylistsUri = Playlists.getContentUri(volumeName);
 
             mCaseInsensitivePaths = true;
