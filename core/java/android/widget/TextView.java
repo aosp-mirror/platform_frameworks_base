@@ -143,6 +143,9 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.BreakIterator;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 
 /**
  * Displays text to the user and optionally allows them to edit it.  A TextView
@@ -8812,12 +8815,42 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             int suggestionIndex; // the index of the suggestion inside suggestionSpan
         }
 
+        /**
+         * Returns the suggestion spans that cover the current cursor position. The suggestion
+         * spans are sorted according to the length of text that they are attached to.
+         */
+        private SuggestionSpan[] getSuggestionSpans() {
+            int pos = TextView.this.getSelectionStart();
+            Spannable spannable = (Spannable) TextView.this.mText;
+            SuggestionSpan[] suggestionSpans = spannable.getSpans(pos, pos, SuggestionSpan.class);
+
+            // Cache the span length for performance reason.
+            final HashMap<SuggestionSpan, Integer> spanLengthMap =
+                new HashMap<SuggestionSpan, Integer>();
+
+            for (SuggestionSpan suggestionSpan : suggestionSpans) {
+                int start = spannable.getSpanStart(suggestionSpan);
+                int end = spannable.getSpanEnd(suggestionSpan);
+                spanLengthMap.put(suggestionSpan, end - start);
+            }
+
+            // The suggestions are sorted according to the lenght of the text that they cover
+            // (shorter first)
+            Arrays.sort(suggestionSpans, new Comparator<SuggestionSpan>() {
+                public int compare(SuggestionSpan span1, SuggestionSpan span2) {
+                    return spanLengthMap.get(span1) - spanLengthMap.get(span2);
+                }
+            });
+
+            return suggestionSpans;
+        }
+
         public void show() {
             if (!(mText instanceof Editable)) return;
 
-            final int pos = TextView.this.getSelectionStart();
-            Spannable spannable = (Spannable)TextView.this.mText;
-            SuggestionSpan[] suggestionSpans = spannable.getSpans(pos, pos, SuggestionSpan.class);
+            Spannable spannable = (Spannable) TextView.this.mText;
+            SuggestionSpan[] suggestionSpans = getSuggestionSpans();
+
             final int nbSpans = suggestionSpans.length;
 
             int totalNbSuggestions = 0;
