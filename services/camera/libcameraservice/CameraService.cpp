@@ -460,10 +460,10 @@ status_t CameraService::Client::connect(const sp<ICameraClient>& client) {
 
 static void disconnectWindow(const sp<ANativeWindow>& window) {
     if (window != 0) {
-        status_t result = native_window_disconnect(window.get(),
+        status_t result = native_window_api_disconnect(window.get(),
                 NATIVE_WINDOW_API_CAMERA);
         if (result != NO_ERROR) {
-            LOGW("native_window_disconnect failed: %s (%d)", strerror(-result),
+            LOGW("native_window_api_disconnect failed: %s (%d)", strerror(-result),
                     result);
         }
     }
@@ -526,9 +526,9 @@ status_t CameraService::Client::setPreviewWindow(const sp<IBinder>& binder,
     }
 
     if (window != 0) {
-        result = native_window_connect(window.get(), NATIVE_WINDOW_API_CAMERA);
+        result = native_window_api_connect(window.get(), NATIVE_WINDOW_API_CAMERA);
         if (result != NO_ERROR) {
-            LOGE("native_window_connect failed: %s (%d)", strerror(-result),
+            LOGE("native_window_api_connect failed: %s (%d)", strerror(-result),
                     result);
             return result;
         }

@@ -317,6 +317,8 @@ int FramebufferNativeWindow::perform(ANativeWindow* window,
         case NATIVE_WINDOW_SET_BUFFERS_DIMENSIONS:
         case NATIVE_WINDOW_SET_BUFFERS_FORMAT:
         case NATIVE_WINDOW_SET_BUFFERS_TRANSFORM:
+        case NATIVE_WINDOW_API_CONNECT:
+        case NATIVE_WINDOW_API_DISCONNECT:
             // TODO: we should implement these
             return NO_ERROR;
 

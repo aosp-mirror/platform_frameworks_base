@@ -258,10 +258,10 @@ int SurfaceTextureClient::perform(int operation, va_list args)
     int res = NO_ERROR;
     switch (operation) {
     case NATIVE_WINDOW_CONNECT:
-        res = dispatchConnect(args);
+        // deprecated. must return NO_ERROR.
         break;
     case NATIVE_WINDOW_DISCONNECT:
-        res = dispatchDisconnect(args);
+        // deprecated. must return NO_ERROR.
         break;
     case NATIVE_WINDOW_SET_USAGE:
         res = dispatchSetUsage(args);
@@ -295,6 +295,12 @@ int SurfaceTextureClient::perform(int operation, va_list args)
         break;
     case NATIVE_WINDOW_SET_SCALING_MODE:
         res = dispatchSetScalingMode(args);
+        break;
+    case NATIVE_WINDOW_API_CONNECT:
+        res = dispatchConnect(args);
+        break;
+    case NATIVE_WINDOW_API_DISCONNECT:
+        res = dispatchDisconnect(args);
         break;
     default:
         res = NAME_NOT_FOUND;

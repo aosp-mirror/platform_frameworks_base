@@ -201,11 +201,11 @@ status_t MediaPlayer::getMetadata(bool update_only, bool apply_filter, Parcel *m
 
 void MediaPlayer::disconnectNativeWindow() {
     if (mConnectedWindow != NULL) {
-        status_t err = native_window_disconnect(mConnectedWindow.get(),
+        status_t err = native_window_api_disconnect(mConnectedWindow.get(),
                 NATIVE_WINDOW_API_MEDIA);
 
         if (err != OK) {
-            LOGW("native_window_disconnect returned an error: %s (%d)",
+            LOGW("native_window_api_disconnect returned an error: %s (%d)",
                     strerror(-err), err);
         }
     }
@@ -224,7 +224,7 @@ status_t MediaPlayer::setVideoSurface(const sp<Surface>& surface)
     }
 
     if (surface != NULL) {
-        status_t err = native_window_connect(surface.get(),
+        status_t err = native_window_api_connect(surface.get(),
                 NATIVE_WINDOW_API_MEDIA);
 
         if (err != OK) {
@@ -274,7 +274,7 @@ status_t MediaPlayer::setVideoSurfaceTexture(
     sp<ANativeWindow> anw;
     if (surfaceTexture != NULL) {
         anw = new SurfaceTextureClient(surfaceTexture);
-        status_t err = native_window_connect(anw.get(),
+        status_t err = native_window_api_connect(anw.get(),
                 NATIVE_WINDOW_API_MEDIA);
 
         if (err != OK) {
