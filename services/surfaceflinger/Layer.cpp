@@ -105,6 +105,7 @@ void Layer::onFrameQueued() {
 // in the purgatory list
 void Layer::onRemoved()
 {
+    mSurfaceTexture->abandon();
 }
 
 sp<ISurface> Layer::createSurface()
