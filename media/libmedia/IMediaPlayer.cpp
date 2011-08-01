@@ -352,7 +352,9 @@ status_t BnMediaPlayer::onTransact(
         } break;
         case SET_VOLUME: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
-            reply->writeInt32(setVolume(data.readFloat(), data.readFloat()));
+            float leftVolume = data.readFloat();
+            float rightVolume = data.readFloat();
+            reply->writeInt32(setVolume(leftVolume, rightVolume));
             return NO_ERROR;
         } break;
         case INVOKE: {
@@ -367,7 +369,9 @@ status_t BnMediaPlayer::onTransact(
         } break;
         case GET_METADATA: {
             CHECK_INTERFACE(IMediaPlayer, data, reply);
-            const status_t retcode = getMetadata(data.readInt32(), data.readInt32(), reply);
+            bool update_only = static_cast<bool>(data.readInt32());
+            bool apply_filter = static_cast<bool>(data.readInt32());
+            const status_t retcode = getMetadata(update_only, apply_filter, reply);
             reply->setDataPosition(0);
             reply->writeInt32(retcode);
             reply->setDataPosition(0);
