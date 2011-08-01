@@ -3015,6 +3015,8 @@ sp<MetaData> OMXCodec::getFormat() {
 
 status_t OMXCodec::read(
         MediaBuffer **buffer, const ReadOptions *options) {
+
+    status_t wait_status = 0;
     *buffer = NULL;
 
     Mutex::Autolock autoLock(mLock);
@@ -3084,12 +3086,20 @@ status_t OMXCodec::read(
         }
 
         while (mSeekTimeUs >= 0) {
-            mBufferFilled.wait(mLock);
+            wait_status = mBufferFilled.waitRelative(mLock, 3000000000);
+            if (wait_status) {
+                LOGE("Timed out waiting for the buffer! Line %d", __LINE__);
+                return UNKNOWN_ERROR;
+            }
         }
     }
 
     while (mState != ERROR && !mNoMoreOutputData && mFilledBuffers.empty()) {
-        mBufferFilled.wait(mLock);
+        wait_status = mBufferFilled.waitRelative(mLock, 3000000000);
+        if (wait_status) {
+            LOGE("Timed out waiting for the buffer! Line %d", __LINE__);
+            return UNKNOWN_ERROR;
+        }
     }
 
     if (mState == ERROR) {
