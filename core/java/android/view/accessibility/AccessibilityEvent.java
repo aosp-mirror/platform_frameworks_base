@@ -784,7 +784,7 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 builder.append("\n");
             }
         } else {
-            builder.append("; recordCount: ").append(getAddedCount());
+            builder.append("; recordCount: ").append(getRecordCount());
         }
         return builder.toString();
     }
