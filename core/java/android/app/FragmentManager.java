@@ -315,6 +315,12 @@ public abstract class FragmentManager {
     public static void enableDebugLogging(boolean enabled) {
         FragmentManagerImpl.DEBUG = enabled;
     }
+
+    /**
+     * Invalidate the attached activity's options menu as necessary.
+     * This may end up being deferred until we move to the resumed state.
+     */
+    public void invalidateOptionsMenu() { }
 }
 
 final class FragmentManagerState implements Parcelable {
@@ -1816,7 +1822,16 @@ final class FragmentManagerImpl extends FragmentManager {
             }
         }
     }
-    
+
+    @Override
+    public void invalidateOptionsMenu() {
+        if (mActivity != null && mCurState == Fragment.RESUMED) {
+            mActivity.invalidateOptionsMenu();
+        } else {
+            mNeedMenuInvalidate = true;
+        }
+    }
+
     public static int reverseTransit(int transit) {
         int rev = 0;
         switch (transit) {
