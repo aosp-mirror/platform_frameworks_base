@@ -141,7 +141,7 @@ public class PhoneStatusBar extends StatusBar {
     View mExpandedContents;
     // top bar
     TextView mNoNotificationsTitle;
-    TextView mClearButton;
+    View mClearButton;
     // drag bar
     CloseDragHandle mCloseView;
     
@@ -301,7 +301,7 @@ public class PhoneStatusBar extends StatusBar {
         mExpandedContents = expanded.findViewById(R.id.notificationLinearLayout);
         mPile = (ViewGroup)expanded.findViewById(R.id.latestItems);
         mNoNotificationsTitle = (TextView)expanded.findViewById(R.id.noNotificationsTitle);
-        mClearButton = (TextView)expanded.findViewById(R.id.clear_all_button);
+        mClearButton = expanded.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
         mScrollView = (ScrollView)expanded.findViewById(R.id.scroll);
         mNotificationLinearLayout = expanded.findViewById(R.id.notificationLinearLayout);
@@ -1984,7 +1984,9 @@ public class PhoneStatusBar extends StatusBar {
         final Context context = mContext;
         final Resources res = context.getResources();
 
-        mClearButton.setText(context.getText(R.string.status_bar_clear_all_button));
+        if (mClearButton instanceof TextView) {
+            ((TextView)mClearButton).setText(context.getText(R.string.status_bar_clear_all_button));
+        }
         mNoNotificationsTitle.setText(context.getText(R.string.status_bar_no_notifications_title));
 
         loadDimens();

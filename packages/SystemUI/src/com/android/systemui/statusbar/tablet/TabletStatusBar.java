@@ -122,6 +122,7 @@ public class TabletStatusBar extends StatusBar implements
     View mNotificationTrigger;
     NotificationIconArea mNotificationIconArea;
     ViewGroup mNavigationArea;
+    View mClearButton;
 
     boolean mNotificationDNDMode;
     NotificationData.Entry mNotificationDNDDummyEntry;
@@ -187,6 +188,7 @@ public class TabletStatusBar extends StatusBar implements
         // Notification Panel
         mNotificationPanel = (NotificationPanel)View.inflate(context,
                 R.layout.status_bar_notification_panel, null);
+        mNotificationPanel.setBar(this);
         mNotificationPanel.show(false, false);
         mNotificationPanel.setOnTouchListener(
                 new TouchOutsideListener(MSG_CLOSE_NOTIFICATION_PANEL, mNotificationPanel));
@@ -451,6 +453,10 @@ public class TabletStatusBar extends StatusBar implements
         // the more notifications icon
         mNotificationIconArea = (NotificationIconArea)sb.findViewById(R.id.notificationIcons);
 
+        // the "X" that appears in place of the clock when the panel is showing notifications
+        mClearButton = sb.findViewById(R.id.clear_all_button);
+        mClearButton.setOnClickListener(mClearButtonListener);
+
         // where the icons go
         mIconLayout = (NotificationIconArea.IconLayout) sb.findViewById(R.id.icons);
         mIconLayout.setOnTouchListener(new NotificationIconTouchListener());
@@ -579,6 +585,21 @@ public class TabletStatusBar extends StatusBar implements
         mHeightReceiver.addOnBarHeightChangedListener(this);
 
         return sb;
+    }
+
+    private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            try {
+                mBarService.onClearAllNotifications();
+            } catch (RemoteException ex) {
+                // system process is dead if we're here.
+            }
+            animateCollapse();
+        }
+    };
+
+    public View getClearButton() {
+        return mClearButton;
     }
 
     public int getStatusBarHeight() {
@@ -1183,7 +1204,6 @@ public class TabletStatusBar extends StatusBar implements
     }
 
     private void setAreThereNotifications() {
-        final boolean hasClearable = mNotificationData.hasClearableItems();
     }
 
     /**

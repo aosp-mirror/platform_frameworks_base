@@ -49,6 +49,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     Rect mContentArea = new Rect();
     View mSettingsView;
     ViewGroup mContentParent;
+    TabletStatusBar mBar;
 
     // amount to slide mContentParent down by when mContentFrame is missing
     float mContentFrameMissingTranslation;
@@ -61,6 +62,10 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
     public NotificationPanel(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
+    }
+
+    public void setBar(TabletStatusBar b) {
+        mBar = b;
     }
 
     @Override
@@ -202,15 +207,16 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
               ;
 
         set.setDuration(200);
-        if (!showing) {
-            set.addListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator _a) {
+        set.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator _a) {
+                if (!showing) {
                     mContentFrame.setVisibility(View.GONE);
                     mContentFrame.setAlpha(1f);
                 }
-            });
-        }
+                updateClearButton();
+            }
+        });
         set.start();
     }
 
@@ -247,12 +253,23 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
                         removeSettingsView();
                     }
                 }
+                updateClearButton();
                 updatePanelModeButtons();
             }
         });
         a.start();
     }
  
+    public void updateClearButton() {
+        if (mBar != null) {
+            final boolean showX 
+                = (isShowing()
+                        && mNotificationScroller.getVisibility() == View.VISIBLE 
+                        && mNotificationCount > 0);
+            mBar.getClearButton().setVisibility(showX ? View.VISIBLE : View.INVISIBLE);
+        }
+    }
+
     public void updatePanelModeButtons() {
         final boolean settingsVisible = (mSettingsView != null);
         mSettingsButton.setVisibility(!settingsVisible ? View.VISIBLE : View.INVISIBLE);
@@ -294,11 +311,11 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         AnimatorSet mContentAnim;
 
         // should group this into a multi-property animation
-        final static int OPEN_DURATION = 136;
-        final static int CLOSE_DURATION = 250;
+        final static int OPEN_DURATION = 300;
+        final static int CLOSE_DURATION = 300;
 
         // the panel will start to appear this many px from the end
-        final int HYPERSPACE_OFFRAMP = 100;
+        final int HYPERSPACE_OFFRAMP = 200;
 
         Choreographer() {
         }
@@ -306,10 +323,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         void createAnimation(boolean appearing) {
             // mVisible: previous state; appearing: new state
             
-            View root = findViewById(R.id.panel_root);
-            Animator bgAnim = ObjectAnimator.ofInt(root.getBackground(), "alpha",
-                    mVisible ? 255 : 0, appearing ? 255 : 0);
-
             float start, end;
 
             // 0: on-screen
@@ -347,7 +360,6 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             mContentAnim = new AnimatorSet();
             mContentAnim
                 .play(fadeAnim)
-                .with(bgAnim)
                 .with(posAnim)
                 ;
             mContentAnim.setDuration((DEBUG?10:1)*(appearing ? OPEN_DURATION : CLOSE_DURATION));
@@ -363,6 +375,9 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             mContentAnim.start();
 
             mVisible = appearing;
+
+            // we want to start disappearing promptly
+            if (!mVisible) updateClearButton();
         }
 
         public void onAnimationCancel(Animator animation) {
@@ -376,6 +391,9 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
             }
             mContentParent.setLayerType(View.LAYER_TYPE_NONE, null);
             mContentAnim = null;
+
+            // we want to show the X lazily
+            if (mVisible) updateClearButton();
         }
 
         public void onAnimationRepeat(Animator animation) {
