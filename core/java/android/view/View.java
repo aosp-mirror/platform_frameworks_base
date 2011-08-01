@@ -5347,12 +5347,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                     || action == MotionEvent.ACTION_HOVER_MOVE
                     || action == MotionEvent.ACTION_HOVER_EXIT) {
                 if (dispatchHoverEvent(event)) {
-                    // For compatibility with existing applications that handled HOVER_MOVE
-                    // events in onGenericMotionEvent, dispatch the event there.  The
-                    // onHoverEvent method did not exist at the time.
-                    if (action == MotionEvent.ACTION_HOVER_MOVE) {
-                        dispatchGenericMotionEventInternal(event);
-                    }
                     return true;
                 }
             } else if (dispatchGenericPointerEvent(event)) {
@@ -5400,21 +5394,6 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @return True if the event was handled by the view, false otherwise.
      */
     protected boolean dispatchHoverEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_HOVER_ENTER:
-                if (!hasHoveredChild() && !mSendingHoverAccessibilityEvents) {
-                    mSendingHoverAccessibilityEvents = true;
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
-                }
-                break;
-            case MotionEvent.ACTION_HOVER_EXIT:
-                if (mSendingHoverAccessibilityEvents) {
-                    mSendingHoverAccessibilityEvents = false;
-                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
-                }
-                break;
-        }
-
         //noinspection SimplifiableIfStatement
         if (mOnHoverListener != null && (mViewFlags & ENABLED_MASK) == ENABLED
                 && mOnHoverListener.onHover(this, event)) {
@@ -6055,7 +6034,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * </p><p>
      * The default implementation calls {@link #setHovered} to update the hovered state
      * of the view when a hover enter or hover exit event is received, if the view
-     * is enabled and is clickable.
+     * is enabled and is clickable.  The default implementation also sends hover
+     * accessibility events.
      * </p>
      *
      * @param event The motion event that describes the hover.
@@ -6066,6 +6046,21 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @see #onHoverChanged
      */
     public boolean onHoverEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_HOVER_ENTER:
+                if (!hasHoveredChild() && !mSendingHoverAccessibilityEvents) {
+                    mSendingHoverAccessibilityEvents = true;
+                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+                }
+                break;
+            case MotionEvent.ACTION_HOVER_EXIT:
+                if (mSendingHoverAccessibilityEvents) {
+                    mSendingHoverAccessibilityEvents = false;
+                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT);
+                }
+                break;
+        }
+
         if (isHoverable()) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_HOVER_ENTER:
@@ -6075,6 +6070,15 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                     setHovered(false);
                     break;
             }
+
+            // Dispatch the event to onGenericMotionEvent before returning true.
+            // This is to provide compatibility with existing applications that
+            // handled HOVER_MOVE events in onGenericMotionEvent and that would
+            // break because of the new default handling for hoverable views
+            // in onHoverEvent.
+            // Note that onGenericMotionEvent will be called by default when
+            // onHoverEvent returns false (refer to dispatchGenericMotionEvent).
+            dispatchGenericMotionEventInternal(event);
             return true;
         }
         return false;
