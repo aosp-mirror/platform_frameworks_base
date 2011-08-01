@@ -20,6 +20,9 @@
 // Turn on to check for OpenGL errors on each frame
 #define DEBUG_OPENGL 1
 
+// Turn on to display informations about the GPU
+#define DEBUG_EXTENSIONS 0
+
 // Turn on to enable initialization information
 #define DEBUG_INIT 0
 
