@@ -333,6 +333,7 @@ Context::Context() {
     mPaused = false;
     mObjHead = NULL;
     mError = RS_ERROR_NONE;
+    mTargetSdkVersion = 14;
     mDPI = 96;
     mIsContextLite = false;
 }
@@ -678,19 +679,25 @@ void rsi_ContextDeinitToClient(Context *rsc) {
 }
 }
 
-RsContext rsContextCreate(RsDevice vdev, uint32_t version) {
+RsContext rsContextCreate(RsDevice vdev, uint32_t version,
+                          uint32_t sdkVersion) {
     LOGV("rsContextCreate %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = Context::createContext(dev, NULL);
+    if (rsc) {
+        rsc->setTargetSdkVersion(sdkVersion);
+    }
     return rsc;
 }
 
 RsContext rsContextCreateGL(RsDevice vdev, uint32_t version,
-                            RsSurfaceConfig sc, uint32_t dpi) {
+                            uint32_t sdkVersion, RsSurfaceConfig sc,
+                            uint32_t dpi) {
     LOGV("rsContextCreateGL %p", vdev);
     Device * dev = static_cast<Device *>(vdev);
     Context *rsc = Context::createContext(dev, &sc);
     if (rsc) {
+        rsc->setTargetSdkVersion(sdkVersion);
         rsc->setDPI(dpi);
     }
     LOGV("rsContextCreateGL ret %p ", rsc);

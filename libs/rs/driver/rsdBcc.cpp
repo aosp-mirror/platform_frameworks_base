@@ -19,7 +19,7 @@
 #include "rsdBcc.h"
 #include "rsdRuntime.h"
 
-#include <bcinfo/bcinfo.h>
+#include <bcinfo/MetadataExtractor.h>
 
 #include "rsContext.h"
 #include "rsScriptC.h"
@@ -40,7 +40,7 @@ struct DrvScript {
 
     BCCScriptRef mBccScript;
 
-    struct BCScriptMetadata *mScriptMetadata;
+    bcinfo::MetadataExtractor *ME;
 
     InvokeFunc_t *mInvokeFunctions;
     void ** mFieldAddress;
@@ -71,7 +71,9 @@ bool rsdScriptInit(const Context *rsc,
 
     pthread_mutex_lock(&rsdgInitMutex);
     char *cachePath = NULL;
-    struct BCScriptMetadata *md = NULL;
+    size_t exportFuncCount = 0;
+    size_t exportVarCount = 0;
+    size_t objectSlotCount = 0;
 
     DrvScript *drv = (DrvScript *)calloc(1, sizeof(DrvScript));
     if (drv == NULL) {
@@ -84,13 +86,13 @@ bool rsdScriptInit(const Context *rsc,
     drv->mScriptText = bitcode;
     drv->mScriptTextLength = bitcodeSize;
 
-    md = bcinfoGetScriptMetadata((const char*)drv->mScriptText,
-                                 drv->mScriptTextLength, 0);
-    if (!md) {
+
+    drv->ME = new bcinfo::MetadataExtractor((const char*)drv->mScriptText,
+                                            drv->mScriptTextLength);
+    if (!drv->ME->extract()) {
       LOGE("bcinfo: failed to read script metadata");
       goto error;
     }
-    drv->mScriptMetadata = md;
 
     //LOGE("mBccScript %p", script->mBccScript);
 
@@ -122,40 +124,41 @@ bool rsdScriptInit(const Context *rsc,
     drv->mRoot = reinterpret_cast<int (*)()>(bccGetFuncAddr(drv->mBccScript, "root"));
     drv->mInit = reinterpret_cast<void (*)()>(bccGetFuncAddr(drv->mBccScript, "init"));
 
-    if (md->exportFuncCount > 0) {
-        drv->mInvokeFunctions = (InvokeFunc_t*) calloc(md->exportFuncCount,
+    exportFuncCount = drv->ME->getExportFuncCount();
+    if (exportFuncCount > 0) {
+        drv->mInvokeFunctions = (InvokeFunc_t*) calloc(exportFuncCount,
                                                        sizeof(InvokeFunc_t));
-        bccGetExportFuncList(drv->mBccScript,
-                             md->exportFuncCount,
+        bccGetExportFuncList(drv->mBccScript, exportFuncCount,
                              (void **) drv->mInvokeFunctions);
     } else {
         drv->mInvokeFunctions = NULL;
     }
 
-    if (md->exportVarCount > 0) {
-        drv->mFieldAddress = (void **) calloc(md->exportVarCount,
-                                              sizeof(void*));
-        drv->mFieldIsObject = (bool *) calloc(md->exportVarCount, sizeof(bool));
-        bccGetExportVarList(drv->mBccScript,
-                            md->exportVarCount,
+    exportVarCount = drv->ME->getExportVarCount();
+    if (exportVarCount > 0) {
+        drv->mFieldAddress = (void **) calloc(exportVarCount, sizeof(void*));
+        drv->mFieldIsObject = (bool *) calloc(exportVarCount, sizeof(bool));
+        bccGetExportVarList(drv->mBccScript, exportVarCount,
                             (void **) drv->mFieldAddress);
     } else {
         drv->mFieldAddress = NULL;
         drv->mFieldIsObject = NULL;
     }
 
-    if (md->objectSlotCount) {
-        for (uint32_t ct=0; ct < md->objectSlotCount; ct++) {
-            drv->mFieldIsObject[md->objectSlotList[ct]] = true;
+    objectSlotCount = drv->ME->getObjectSlotCount();
+    if (objectSlotCount > 0) {
+        const uint32_t *objectSlotList = drv->ME->getObjectSlotList();
+        for (uint32_t ct=0; ct < objectSlotCount; ct++) {
+            drv->mFieldIsObject[objectSlotList[ct]] = true;
         }
     }
 
     // Copy info over to runtime
-    script->mHal.info.exportedFunctionCount = md->exportFuncCount;
-    script->mHal.info.exportedVariableCount = md->exportVarCount;
-    script->mHal.info.exportedPragmaCount = md->pragmaCount;
-    script->mHal.info.exportedPragmaKeyList = md->pragmaKeyList;
-    script->mHal.info.exportedPragmaValueList = md->pragmaValueList;
+    script->mHal.info.exportedFunctionCount = drv->ME->getExportFuncCount();
+    script->mHal.info.exportedVariableCount = drv->ME->getExportVarCount();
+    script->mHal.info.exportedPragmaCount = drv->ME->getPragmaCount();
+    script->mHal.info.exportedPragmaKeyList = drv->ME->getPragmaKeyList();
+    script->mHal.info.exportedPragmaValueList = drv->ME->getPragmaValueList();
     script->mHal.info.root = drv->mRoot;
 
     pthread_mutex_unlock(&rsdgInitMutex);
@@ -164,6 +167,10 @@ bool rsdScriptInit(const Context *rsc,
 error:
 
     pthread_mutex_unlock(&rsdgInitMutex);
+    if (drv->ME) {
+        delete drv->ME;
+        drv->ME = NULL;
+    }
     free(drv);
     return false;
 
@@ -445,10 +452,10 @@ void rsdScriptSetGlobalObj(const Context *dc, const Script *script, uint32_t slo
 
 void rsdScriptDestroy(const Context *dc, Script *script) {
     DrvScript *drv = (DrvScript *)script->mHal.drv;
-    struct BCScriptMetadata *md = drv->mScriptMetadata;
 
     if (drv->mFieldAddress) {
-        for (size_t ct = 0; ct < md->exportVarCount; ct++) {
+        size_t exportVarCount = drv->ME->getExportVarCount();
+        for (size_t ct = 0; ct < exportVarCount; ct++) {
             if (drv->mFieldIsObject[ct]) {
                 // The field address can be NULL if the script-side has
                 // optimized the corresponding global variable away.
@@ -467,7 +474,8 @@ void rsdScriptDestroy(const Context *dc, Script *script) {
         drv->mInvokeFunctions = NULL;
     }
 
-    bcinfoReleaseScriptMetadata(&drv->mScriptMetadata);
+    delete drv->ME;
+    drv->ME = NULL;
 
     free(drv);
     script->mHal.drv = NULL;
