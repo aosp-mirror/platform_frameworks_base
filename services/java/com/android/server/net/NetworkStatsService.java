@@ -17,6 +17,8 @@
 package com.android.server.net;
 
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
+import static android.Manifest.permission.ACCESS_NETWORK_STATE;
+import static android.Manifest.permission.MODIFY_NETWORK_ACCOUNTING;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.content.Intent.ACTION_SHUTDOWN;
@@ -56,6 +58,7 @@ import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -65,6 +68,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
@@ -150,9 +154,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     /** Set of currently active ifaces. */
     private HashMap<String, NetworkIdentitySet> mActiveIfaces = Maps.newHashMap();
-    /** Set of historical stats for known networks. */
+    /** Set of historical network layer stats for known networks. */
     private HashMap<NetworkIdentitySet, NetworkStatsHistory> mNetworkStats = Maps.newHashMap();
-    /** Set of historical stats for known UIDs. */
+    /** Set of historical network layer stats for known UIDs. */
     private HashMap<NetworkIdentitySet, LongSparseArray<NetworkStatsHistory>> mUidStats =
             Maps.newHashMap();
 
@@ -163,6 +167,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private NetworkStats mLastPersistNetworkSnapshot;
 
     private NetworkStats mLastUidSnapshot;
+
+    /** Data layer operation counters for splicing into other structures. */
+    private NetworkStats mOperations = new NetworkStats(0L, 10);
+    private NetworkStats mLastOperationsSnapshot;
 
     private final HandlerThread mHandlerThread;
     private final Handler mHandler;
@@ -381,9 +389,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                             entry.uid = uid;
                             entry.tag = tag;
                             entry.rxBytes = historyEntry.rxBytes;
+                            entry.rxPackets = historyEntry.rxPackets;
                             entry.txBytes = historyEntry.txBytes;
+                            entry.txPackets = historyEntry.txPackets;
+                            entry.operations = historyEntry.operations;
 
-                            if (entry.rxBytes > 0 || entry.txBytes > 0) {
+                            if (entry.rxBytes > 0 || entry.rxPackets > 0 || entry.txBytes > 0
+                                    || entry.txPackets > 0 || entry.operations > 0) {
                                 stats.combineValues(entry);
                             }
                         }
@@ -392,6 +404,41 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
 
             return stats;
+        }
+    }
+
+    @Override
+    public NetworkStats getDataLayerSnapshotForUid(int uid) throws RemoteException {
+        if (Binder.getCallingUid() != uid) {
+            mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+        }
+
+        // TODO: switch to data layer stats once kernel exports
+        // for now, read network layer stats and flatten across all ifaces
+        final NetworkStats networkLayer = mNetworkManager.getNetworkStatsUidDetail(uid);
+        final NetworkStats dataLayer = new NetworkStats(
+                networkLayer.getElapsedRealtime(), networkLayer.size());
+
+        NetworkStats.Entry entry = null;
+        for (int i = 0; i < networkLayer.size(); i++) {
+            entry = networkLayer.getValues(i, entry);
+            entry.iface = IFACE_ALL;
+            dataLayer.combineValues(entry);
+        }
+
+        // splice in operation counts
+        dataLayer.spliceOperationsFrom(mOperations);
+        return dataLayer;
+    }
+
+    @Override
+    public void incrementOperationCount(int uid, int tag, int operationCount) {
+        if (Binder.getCallingUid() != uid) {
+            mContext.enforceCallingOrSelfPermission(MODIFY_NETWORK_ACCOUNTING, TAG);
+        }
+
+        synchronized (mStatsLock) {
+            mOperations.combineValues(IFACE_ALL, uid, tag, 0L, 0L, 0L, 0L, operationCount);
         }
     }
 
@@ -533,7 +580,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final NetworkStats uidSnapshot;
         try {
             networkSnapshot = mNetworkManager.getNetworkStatsSummary();
-            uidSnapshot = detailedPoll ? mNetworkManager.getNetworkStatsDetail() : null;
+            uidSnapshot = detailedPoll ? mNetworkManager.getNetworkStatsUidDetail(UID_ALL) : null;
         } catch (IllegalStateException e) {
             Slog.w(TAG, "problem reading network stats: " + e);
             return;
@@ -592,7 +639,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
 
             final NetworkStatsHistory history = findOrCreateNetworkStatsLocked(ident);
-            history.recordData(timeStart, currentTime, entry.rxBytes, entry.txBytes);
+            history.recordData(timeStart, currentTime, entry);
         }
 
         // trim any history beyond max
@@ -615,9 +662,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         ensureUidStatsLoadedLocked();
 
         final NetworkStats delta = computeStatsDelta(mLastUidSnapshot, uidSnapshot);
+        final NetworkStats operationsDelta = computeStatsDelta(
+                mLastOperationsSnapshot, mOperations);
         final long timeStart = currentTime - delta.getElapsedRealtime();
 
         NetworkStats.Entry entry = null;
+        NetworkStats.Entry operationsEntry = null;
         for (int i = 0; i < delta.size(); i++) {
             entry = delta.getValues(i, entry);
             final NetworkIdentitySet ident = mActiveIfaces.get(entry.iface);
@@ -625,9 +675,16 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 continue;
             }
 
+            // splice in operation counts since last poll
+            final int j = operationsDelta.findIndex(IFACE_ALL, entry.uid, entry.tag);
+            if (j != -1) {
+                operationsEntry = operationsDelta.getValues(j, operationsEntry);
+                entry.operations = operationsEntry.operations;
+            }
+
             final NetworkStatsHistory history = findOrCreateUidStatsLocked(
                     ident, entry.uid, entry.tag);
-            history.recordData(timeStart, currentTime, entry.rxBytes, entry.txBytes);
+            history.recordData(timeStart, currentTime, entry);
         }
 
         // trim any history beyond max
@@ -648,6 +705,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         mLastUidSnapshot = uidSnapshot;
+        mLastOperationsSnapshot = mOperations;
+        mOperations = new NetworkStats(0L, 10);
     }
 
     /**
@@ -980,7 +1039,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                         final int tag = unpackTag(packed);
                         final NetworkStatsHistory history = uidStats.valueAt(i);
                         pw.print("    UID="); pw.print(uid);
-                        pw.print(" tag="); pw.println(tag);
+                        pw.print(" tag=0x"); pw.println(Integer.toHexString(tag));
                         history.dump("    ", pw, fullHistory);
                     }
                 }
@@ -1028,7 +1087,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         if (before != null) {
             return current.subtractClamped(before);
         } else {
-            return current;
+            // this is first snapshot; to prevent from double-counting we only
+            // observe traffic occuring between known snapshots.
+            return new NetworkStats(0L, 10);
         }
     }
 
@@ -1114,5 +1175,4 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return DAY_IN_MILLIS;
         }
     }
-
 }

@@ -197,9 +197,6 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         expect(mPowerManager.isScreenOn()).andReturn(true).atLeastOnce();
         expectTime(System.currentTimeMillis());
 
-        // default behavior is background data enabled
-        expect(mConnManager.getBackgroundDataSetting()).andReturn(true);
-
         replay();
         mService.systemReady();
         verifyAndReset();
@@ -471,7 +468,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // pretend that 512 bytes total have happened
         stats = new NetworkStats(elapsedRealtime, 1)
-                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 256L, 2L, 256L, 2L);
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 256L, 2L, 256L, 2L, 11);
         expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, TIME_MAR_10))
                 .andReturn(stats).atLeastOnce();
 
@@ -547,7 +544,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         elapsedRealtime += MINUTE_IN_MILLIS;
         currentTime = TIME_MAR_10 + elapsedRealtime;
         stats = new NetworkStats(elapsedRealtime, 1)
-                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 0L, 0L, 0L, 0L);
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 0L, 0L, 0L, 0L, 0);
         state = new NetworkState[] { buildWifi() };
 
         {
@@ -574,7 +571,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         elapsedRealtime += MINUTE_IN_MILLIS;
         currentTime = TIME_MAR_10 + elapsedRealtime;
         stats = new NetworkStats(elapsedRealtime, 1)
-                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 1536L, 15L, 0L, 0L);
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 1536L, 15L, 0L, 0L, 11);
 
         {
             expectTime(currentTime);
@@ -595,7 +592,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         elapsedRealtime += MINUTE_IN_MILLIS;
         currentTime = TIME_MAR_10 + elapsedRealtime;
         stats = new NetworkStats(elapsedRealtime, 1)
-                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 5120L, 512L, 0L, 0L);
+                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 5120L, 512L, 0L, 0L, 22);
 
         {
             expectTime(currentTime);

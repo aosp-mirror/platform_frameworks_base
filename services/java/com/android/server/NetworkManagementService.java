@@ -21,6 +21,8 @@ import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.provider.Settings.Secure.NETSTATS_ENABLED;
+import static com.android.server.NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED;
+import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -54,7 +56,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -89,8 +90,10 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     private static final String KEY_IFACE = "iface";
     private static final String KEY_TAG_HEX = "acct_tag_hex";
     private static final String KEY_UID = "uid_tag_int";
-    private static final String KEY_RX = "rx_bytes";
-    private static final String KEY_TX = "tx_bytes";
+    private static final String KEY_RX_BYTES = "rx_bytes";
+    private static final String KEY_RX_PACKETS = "rx_packets";
+    private static final String KEY_TX_BYTES = "tx_bytes";
+    private static final String KEY_TX_PACKETS = "tx_packets";
 
     class NetdResponseCode {
         /* Keep in sync with system/netd/ResponseCode.h */
@@ -203,8 +206,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
             Slog.d(TAG, "not enabling bandwidth control");
         }
 
-        SystemProperties.set(NetworkManagementSocketTagger.PROP_QTAGUID_ENABLED,
-                mBandwidthControlEnabled ? "1" : "0");
+        SystemProperties.set(PROP_QTAGUID_ENABLED, mBandwidthControlEnabled ? "1" : "0");
     }
 
     public void registerObserver(INetworkManagementEventObserver obs) {
@@ -1249,6 +1251,9 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 24);
         final NetworkStats.Entry entry = new NetworkStats.Entry();
 
+        // TODO: remove knownLines check once 5087722 verified
+        final HashSet<String> knownLines = Sets.newHashSet();
+
         final ArrayList<String> keys = Lists.newArrayList();
         final ArrayList<String> values = Lists.newArrayList();
         final HashMap<String, String> parsed = Maps.newHashMap();
@@ -1266,14 +1271,18 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 splitLine(line, values);
                 parseLine(keys, values, parsed);
 
+                if (!knownLines.add(line)) {
+                    throw new IllegalStateException("encountered duplicate proc entry");
+                }
+
                 try {
-                    // TODO: add rxPackets/txPackets once kernel exports
                     entry.iface = parsed.get(KEY_IFACE);
-                    entry.tag = NetworkManagementSocketTagger.kernelToTag(
-                            parsed.get(KEY_TAG_HEX));
-                    entry.uid = Integer.parseInt(parsed.get(KEY_UID));
-                    entry.rxBytes = Long.parseLong(parsed.get(KEY_RX));
-                    entry.txBytes = Long.parseLong(parsed.get(KEY_TX));
+                    entry.tag = kernelToTag(parsed.get(KEY_TAG_HEX));
+                    entry.uid = getParsedInt(parsed, KEY_UID);
+                    entry.rxBytes = getParsedLong(parsed, KEY_RX_BYTES);
+                    entry.rxPackets = getParsedLong(parsed, KEY_RX_PACKETS);
+                    entry.txBytes = getParsedLong(parsed, KEY_TX_BYTES);
+                    entry.txPackets = getParsedLong(parsed, KEY_TX_PACKETS);
 
                     if (limitUid == UID_ALL || limitUid == entry.uid) {
                         stats.addValues(entry);
@@ -1289,6 +1298,16 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
 
         return stats;
+    }
+
+    private static int getParsedInt(HashMap<String, String> parsed, String key) {
+        final String value = parsed.get(key);
+        return value != null ? Integer.parseInt(value) : 0;
+    }
+
+    private static long getParsedLong(HashMap<String, String> parsed, String key) {
+        final String value = parsed.get(key);
+        return value != null ? Long.parseLong(value) : 0;
     }
 
     /**

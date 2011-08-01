@@ -23,16 +23,18 @@ import static android.text.format.DateUtils.SECOND_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
 import static android.text.format.DateUtils.YEAR_IN_MILLIS;
 
+import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.test.suitebuilder.annotation.Suppress;
 import android.util.Log;
 
-import junit.framework.TestCase;
+import com.android.frameworks.coretests.R;
 
+import java.io.DataInputStream;
 import java.util.Random;
 
 @SmallTest
-public class NetworkStatsHistoryTest extends TestCase {
+public class NetworkStatsHistoryTest extends AndroidTestCase {
     private static final String TAG = "NetworkStatsHistoryTest";
 
     private static final long TEST_START = 1194220800000L;
@@ -44,6 +46,32 @@ public class NetworkStatsHistoryTest extends TestCase {
         super.tearDown();
         if (stats != null) {
             assertConsistent(stats);
+        }
+    }
+
+    public void testReadOriginalVersion() throws Exception {
+        final DataInputStream in = new DataInputStream(
+                getContext().getResources().openRawResource(R.raw.history_v1));
+
+        NetworkStatsHistory.Entry entry = null;
+        try {
+            final NetworkStatsHistory history = new NetworkStatsHistory(in);
+            assertEquals(15 * SECOND_IN_MILLIS, history.getBucketDuration());
+
+            entry = history.getValues(0, entry);
+            assertEquals(29143L, entry.rxBytes);
+            assertEquals(6223L, entry.txBytes);
+
+            entry = history.getValues(history.size() - 1, entry);
+            assertEquals(1476L, entry.rxBytes);
+            assertEquals(838L, entry.txBytes);
+
+            entry = history.getValues(Long.MIN_VALUE, Long.MAX_VALUE, entry);
+            assertEquals(332401L, entry.rxBytes);
+            assertEquals(64314L, entry.txBytes);
+
+        } finally {
+            in.close();
         }
     }
 
