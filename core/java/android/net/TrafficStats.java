@@ -20,14 +20,13 @@ import android.app.DownloadManager;
 import android.app.backup.BackupManager;
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.os.IBinder;
-import android.os.INetworkManagementService;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import com.android.server.NetworkManagementSocketTagger;
 
 import dalvik.system.SocketTagger;
+
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -172,7 +171,7 @@ public class TrafficStats {
             }
 
             // take snapshot in time; we calculate delta later
-            sActiveProfilingStart = getNetworkStatsForUid(context);
+            sActiveProfilingStart = getDataLayerSnapshotForUid(context);
         }
     }
 
@@ -190,11 +189,33 @@ public class TrafficStats {
             }
 
             // subtract starting values and return delta
-            final NetworkStats profilingStop = getNetworkStatsForUid(context);
+            final NetworkStats profilingStop = getDataLayerSnapshotForUid(context);
             final NetworkStats profilingDelta = profilingStop.subtractClamped(
                     sActiveProfilingStart);
             sActiveProfilingStart = null;
             return profilingDelta;
+        }
+    }
+
+    /**
+     * Increment count of network operations performed under the given
+     * accounting tag. This can be used to derive bytes-per-operation.
+     *
+     * @param tag Accounting tag used in {@link #setThreadStatsTag(int)}.
+     * @param operationCount Number of operations to increment count by.
+     */
+    public static void incrementOperationCount(int tag, int operationCount) {
+        if (operationCount < 0) {
+            throw new IllegalArgumentException("operation count can only be incremented");
+        }
+
+        final INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
+                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+        final int uid = android.os.Process.myUid();
+        try {
+            statsService.incrementOperationCount(uid, tag, operationCount);
+        } catch (RemoteException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -461,14 +482,12 @@ public class TrafficStats {
      * Return detailed {@link NetworkStats} for the current UID. Requires no
      * special permission.
      */
-    private static NetworkStats getNetworkStatsForUid(Context context) {
-        final IBinder binder = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        final INetworkManagementService service = INetworkManagementService.Stub.asInterface(
-                binder);
-
+    private static NetworkStats getDataLayerSnapshotForUid(Context context) {
+        final INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
+                ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         final int uid = android.os.Process.myUid();
         try {
-            return service.getNetworkStatsUidDetail(uid);
+            return statsService.getDataLayerSnapshotForUid(uid);
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }

@@ -69,8 +69,8 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
     public void tag(FileDescriptor fd) throws SocketException {
         final SocketTags options = threadSocketTags.get();
         if (LOGD) {
-            Log.d(TAG, "tagSocket(" + fd.getInt$() + ") with statsTag=" + options.statsTag
-                    + ", statsUid=" + options.statsUid);
+            Log.d(TAG, "tagSocket(" + fd.getInt$() + ") with statsTag=0x"
+                    + Integer.toHexString(options.statsTag) + ", statsUid=" + options.statsUid);
         }
         try {
             // TODO: skip tagging when options would be no-op
