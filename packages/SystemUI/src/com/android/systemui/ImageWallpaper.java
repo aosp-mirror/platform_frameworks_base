@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.internal.service.wallpaper;
+package com.android.systemui;
 
 import java.io.IOException;
-
-import com.android.internal.view.WindowManagerPolicyThread;
 
 import android.app.WallpaperManager;
 import android.graphics.Canvas;
@@ -26,11 +24,9 @@ import android.graphics.Rect;
 import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.os.Process;
 import android.service.wallpaper.WallpaperService;
 import android.util.Log;
+import android.util.Slog;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.content.Context;
@@ -45,40 +41,27 @@ public class ImageWallpaper extends WallpaperService {
     private static final String TAG = "ImageWallpaper";
     private static final boolean DEBUG = false;
 
+    static final boolean FIXED_SIZED_SURFACE = true;
+
     WallpaperManager mWallpaperManager;
-    private HandlerThread mThread;
     private Handler mHandler;
 
     @Override
     public void onCreate() {
         super.onCreate();
         mWallpaperManager = (WallpaperManager) getSystemService(WALLPAPER_SERVICE);
-        Looper looper = WindowManagerPolicyThread.getLooper();
-        if (looper == null) {
-            mThread = new HandlerThread("Wallpaper", Process.THREAD_PRIORITY_FOREGROUND);
-            mThread.start();
-            looper = mThread.getLooper();
-        }
-        setCallbackLooper(looper);
-        mHandler = new Handler(looper);
+        mHandler = new Handler();
     }
 
     public Engine onCreateEngine() {
         return new DrawableEngine();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mThread != null) {
-            mThread.quit();
-        }
-    }
-
     class DrawableEngine extends Engine {
         private final Object mLock = new Object();
         private WallpaperObserver mReceiver;
         Drawable mBackground;
+        int mBackgroundWidth = -1, mBackgroundHeight = -1;
         float mXOffset;
         float mYOffset;
 
@@ -95,7 +78,9 @@ public class ImageWallpaper extends WallpaperService {
                 }
 
                 synchronized (mLock) {
-                    updateWallpaperLocked();
+                    mBackgroundWidth = mBackgroundHeight = -1;
+                    mBackground = null;
+                    mRedrawNeeded = true;
                     drawFrameLocked();
                 }
             }
@@ -113,10 +98,6 @@ public class ImageWallpaper extends WallpaperService {
             registerReceiver(mReceiver, filter, null, mHandler);
 
             updateSurfaceSize(surfaceHolder);
-
-            synchronized (mLock) {
-                updateWallpaperLocked();
-            }
         }
 
         @Override
@@ -135,11 +116,14 @@ public class ImageWallpaper extends WallpaperService {
         }
 
         void updateSurfaceSize(SurfaceHolder surfaceHolder) {
-            surfaceHolder.setFixedSize(getDesiredMinimumWidth(), getDesiredMinimumHeight());
-            // Used a fixed size surface, because we are special.  We can do
-            // this because we know the current design of window animations doesn't
-            // cause this to break.
-            //surfaceHolder.setSizeFromLayout();
+            if (FIXED_SIZED_SURFACE) {
+                // Used a fixed size surface, because we are special.  We can do
+                // this because we know the current design of window animations doesn't
+                // cause this to break.
+                surfaceHolder.setFixedSize(getDesiredMinimumWidth(), getDesiredMinimumHeight());
+            } else {
+                surfaceHolder.setSizeFromLayout();
+            }
         }
 
         @Override
@@ -216,15 +200,18 @@ public class ImageWallpaper extends WallpaperService {
                 return;
             }
 
+            if (mBackgroundWidth < 0 || mBackgroundHeight < 0) {
+                // If we don't yet know the size of the wallpaper bitmap,
+                // we need to get it now.
+                updateWallpaperLocked();
+            }
+
             SurfaceHolder sh = getSurfaceHolder();
             final Rect frame = sh.getSurfaceFrame();
-            final Drawable background = mBackground;
             final int dw = frame.width();
             final int dh = frame.height();
-            final int bw = background != null ? background.getIntrinsicWidth() : 0;
-            final int bh = background != null ? background.getIntrinsicHeight() : 0;
-            final int availw = dw - bw;
-            final int availh = dh - bh;
+            final int availw = dw - mBackgroundWidth;
+            final int availh = dh - mBackgroundHeight;
             int xPixels = availw < 0 ? (int)(availw * mXOffset + .5f) : (availw / 2);
             int yPixels = availh < 0 ? (int)(availh * mYOffset + .5f) : (availh / 2);
 
@@ -241,6 +228,14 @@ public class ImageWallpaper extends WallpaperService {
             mLastXTranslation = xPixels;
             mLastYTranslation = yPixels;
 
+            if (mBackground == null) {
+                // If we somehow got to this point after we have last flushed
+                // the wallpaper, well we really need it to draw again.  So
+                // seems like we need to reload it.  Ouch.
+                updateWallpaperLocked();
+            }
+
+            //Slog.i(TAG, "************** DRAWING WALLAPER ******************");
             Canvas c = sh.lockCanvas();
             if (c != null) {
                 try {
@@ -251,20 +246,30 @@ public class ImageWallpaper extends WallpaperService {
                     c.translate(xPixels, yPixels);
                     if (availw < 0 || availh < 0) {
                         c.save(Canvas.CLIP_SAVE_FLAG);
-                        c.clipRect(0, 0, bw, bh, Op.DIFFERENCE);
+                        c.clipRect(0, 0, mBackgroundWidth, mBackgroundHeight, Op.DIFFERENCE);
                         c.drawColor(0xff000000);
                         c.restore();
                     }
-                    if (background != null) {
-                        background.draw(c);
+                    if (mBackground != null) {
+                        mBackground.draw(c);
                     }
                 } finally {
                     sh.unlockCanvasAndPost(c);
                 }
             }
+
+            if (FIXED_SIZED_SURFACE) {
+                // If the surface is fixed-size, we should only need to
+                // draw it once and then we'll let the window manager
+                // position it appropriately.  As such, we no longer needed
+                // the loaded bitmap.  Yay!
+                mBackground = null;
+                mWallpaperManager.forgetLoadedWallpaper();
+            }
         }
 
         void updateWallpaperLocked() {
+            //Slog.i(TAG, "************** LOADING WALLAPER ******************");
             Throwable exception = null;
             try {
                 mBackground = mWallpaperManager.getFastDrawable();
@@ -286,7 +291,8 @@ public class ImageWallpaper extends WallpaperService {
                     Log.w(TAG, "Unable reset to default wallpaper!", ex);
                 }
             }
-            mRedrawNeeded = true;
+            mBackgroundWidth = mBackground != null ? mBackground.getIntrinsicWidth() : 0;
+            mBackgroundHeight = mBackground != null ? mBackground.getIntrinsicHeight() : 0;
         }
     }
 }
