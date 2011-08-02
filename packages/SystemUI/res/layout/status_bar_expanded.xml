@@ -47,19 +47,13 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="?android:attr/textColorSecondary"
             />
-        <TextView android:id="@+id/clear_all_button"
+        <ImageView android:id="@+id/clear_all_button"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_gravity="center_vertical"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="1dp"
-            android:textSize="14sp"
-            android:textColor="#ff000000"
-            android:text="@string/status_bar_clear_all_button"
-            style="?android:attr/buttonStyle"
             android:paddingLeft="15dp"
             android:paddingRight="15dp"
-            android:background="@drawable/btn_default_small"
+            android:src="@drawable/ic_notify_clear"
             />
     </LinearLayout>
 
