@@ -187,24 +187,10 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
         return false;
     }
 
-    private synchronized boolean addAudioSink(BluetoothDevice device) {
-        String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
-        String propValues[] = (String []) getSinkPropertiesNative(path);
-        if (propValues == null) {
-            Log.e(TAG, "Error while getting AudioSink properties for device: " + device);
-            return false;
+    private synchronized void addAudioSink(BluetoothDevice device) {
+        if (mAudioDevices.get(device) == null) {
+            mAudioDevices.put(device, BluetoothA2dp.STATE_DISCONNECTED);
         }
-        Integer state = null;
-        // Properties are name-value pairs
-        for (int i = 0; i < propValues.length; i+=2) {
-            if (propValues[i].equals(PROPERTY_STATE)) {
-                state = new Integer(convertBluezSinkStringToState(propValues[i+1]));
-                break;
-            }
-        }
-        mAudioDevices.put(device, state);
-        handleSinkStateChange(device, BluetoothA2dp.STATE_DISCONNECTED, state);
-        return true;
     }
 
     private synchronized void onBluetoothEnable() {
@@ -259,9 +245,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
             return false;
         }
 
-        if (mAudioDevices.get(device) == null && !addAudioSink(device)) {
-            return false;
-        }
+        addAudioSink(device);
 
         String path = mBluetoothService.getObjectPathFromAddress(device.getAddress());
         if (path == null) {
@@ -495,6 +479,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
                 // This is for an incoming connection for a device not known to us.
                 // We have authorized it and bluez state has changed.
                 addAudioSink(device);
+                handleSinkStateChange(device, BluetoothA2dp.STATE_DISCONNECTED, state);
             } else {
                 if (state == BluetoothA2dp.STATE_PLAYING && mPlayingA2dpDevice == null) {
                    mPlayingA2dpDevice = device;
