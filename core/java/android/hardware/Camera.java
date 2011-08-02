@@ -1471,6 +1471,7 @@ public class Camera {
                                             "preferred-preview-size-for-video";
         private static final String KEY_MAX_NUM_DETECTED_FACES_HW = "max-num-detected-faces-hw";
         private static final String KEY_MAX_NUM_DETECTED_FACES_SW = "max-num-detected-faces-sw";
+        private static final String KEY_RECORDING_HINT = "recording-hint";
 
         // Parameter key suffix for supported values.
         private static final String SUPPORTED_VALUES_SUFFIX = "-values";
@@ -3170,6 +3171,37 @@ public class Camera {
                 return getInt(KEY_MAX_NUM_DETECTED_FACES_SW, 0);
             }
             throw new IllegalArgumentException("Invalid face detection type " + type);
+        }
+
+        /**
+         * Sets the hint of the recording mode. If this is true, {@link
+         * android.media.MediaRecorder#start()} may be faster or has less
+         * glitches. This should be called before starting the preview for the
+         * best result. But it is allowed to change the hint while the preview
+         * is active. The default value is false.
+         *
+         * The apps can still call {@link #takePicture(Camera.ShutterCallback,
+         * Camera.PictureCallback, Camera.PictureCallback, Camera.PictureCallback)}
+         * when the hint is true. The apps can call MediaRecorder.start() when
+         * the hint is false. But the performance may be worse.
+         *
+         * @param hint true if the apps intend to record a video using
+         *             {@link android.media.MediaRecorder}.
+         * @hide
+         */
+        public void setRecordingHint(boolean hint) {
+            set(KEY_RECORDING_HINT, hint ? TRUE : FALSE);
+        }
+
+        /**
+         * Gets the current recording hint.
+         *
+         * @return the current recording hint state.
+         * @see #setRecordingHint(boolean)
+         * @hide
+         */
+        public boolean getRecordingHint() {
+            return TRUE.equals(get(KEY_RECORDING_HINT));
         }
 
         // Splits a comma delimited string to an ArrayList of String.

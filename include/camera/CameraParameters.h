@@ -484,6 +484,17 @@ public:
     // Example value: "yuv420sp" or PIXEL_FORMAT_XXX constants. Read only.
     static const char KEY_VIDEO_FRAME_FORMAT[];
 
+    // Sets the hint of the recording mode. If this is true, MediaRecorder.start
+    // may be faster or has less glitches. This should be called before starting
+    // the preview for the best result. But it is allowed to change the hint
+    // while the preview is active. The default value is false.
+    //
+    // The apps can still call Camera.takePicture when the hint is true. The
+    // apps can call MediaRecorder.start when the hint is false. But the
+    // performance may be worse.
+    // Example value: "true" or "false". Read/write.
+    static const char KEY_RECORDING_HINT[];
+
     // Value for KEY_ZOOM_SUPPORTED or KEY_SMOOTH_ZOOM_SUPPORTED.
     static const char TRUE[];
     static const char FALSE[];
