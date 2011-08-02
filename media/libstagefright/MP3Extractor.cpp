@@ -407,6 +407,8 @@ status_t MP3Source::read(
 
     int64_t seekTimeUs;
     ReadOptions::SeekMode mode;
+    bool seekCBR = false;
+
     if (options != NULL && options->getSeekTo(&seekTimeUs, &mode)) {
         int64_t actualSeekTimeUs = seekTimeUs;
         if (mSeeker == NULL
@@ -421,6 +423,7 @@ status_t MP3Source::read(
 
             mCurrentTimeUs = seekTimeUs;
             mCurrentPos = mFirstFramePos + seekTimeUs * bitrate / 8000000;
+            seekCBR = true;
         } else {
             mCurrentTimeUs = actualSeekTimeUs;
         }
@@ -454,6 +457,13 @@ status_t MP3Source::read(
             && GetMPEGAudioFrameSize(
                 header, &frame_size, &sample_rate, NULL,
                 &bitrate, &num_samples)) {
+
+            // re-calculate mCurrentTimeUs because we might have called Resync()
+            if (seekCBR) {
+                mCurrentTimeUs = (mCurrentPos - mFirstFramePos) * 8000 / bitrate;
+                mBasisTimeUs = mCurrentTimeUs;
+            }
+
             break;
         }
 
