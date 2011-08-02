@@ -457,6 +457,23 @@ public final class BluetoothHeadset {
     }
 
     /**
+     * Reject the incoming connection.
+     * @hide
+     */
+    public boolean rejectIncomingConnect(BluetoothDevice device) {
+        if (DBG) log("rejectIncomingConnect");
+        if (mService != null) {
+            try {
+                return mService.rejectIncomingConnect(device);
+            } catch (RemoteException e) {Log.e(TAG, e.toString());}
+        } else {
+            Log.w(TAG, "Proxy not attached to service");
+            if (DBG) Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
+        return false;
+    }
+
+    /**
      * Connect to a Bluetooth Headset.
      * Note: This is an internal function and shouldn't be exposed
      * @hide
