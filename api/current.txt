@@ -18012,18 +18012,6 @@ package android.service.textservice {
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.textservice.SpellCheckerService";
   }
 
-  public class SpellCheckerSession {
-    method public void close();
-    method public android.view.textservice.SpellCheckerInfo getSpellChecker();
-    method public void getSuggestions(android.view.textservice.TextInfo, int);
-    method public void getSuggestions(android.view.textservice.TextInfo[], int, boolean);
-    method public boolean isSessionDisconnected();
-  }
-
-  public static abstract interface SpellCheckerSession.SpellCheckerSessionListener {
-    method public abstract void onGetSuggestions(android.view.textservice.SuggestionsInfo[]);
-  }
-
 }
 
 package android.service.wallpaper {
@@ -24123,6 +24111,19 @@ package android.view.textservice {
     field public static final android.os.Parcelable.Creator CREATOR;
   }
 
+  public class SpellCheckerSession {
+    method public void close();
+    method public android.view.textservice.SpellCheckerInfo getSpellChecker();
+    method public void getSuggestions(android.view.textservice.TextInfo, int);
+    method public void getSuggestions(android.view.textservice.TextInfo[], int, boolean);
+    method public boolean isSessionDisconnected();
+    field public static final java.lang.String SERVICE_META_DATA = "android.view.textservice.scs";
+  }
+
+  public static abstract interface SpellCheckerSession.SpellCheckerSessionListener {
+    method public abstract void onGetSuggestions(android.view.textservice.SuggestionsInfo[]);
+  }
+
   public final class SuggestionsInfo implements android.os.Parcelable {
     ctor public SuggestionsInfo(int, java.lang.String[]);
     ctor public SuggestionsInfo(int, java.lang.String[], int, int);
@@ -24153,7 +24154,7 @@ package android.view.textservice {
   }
 
   public final class TextServicesManager {
-    method public android.service.textservice.SpellCheckerSession newSpellCheckerSession(java.util.Locale, android.service.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
+    method public android.view.textservice.SpellCheckerSession newSpellCheckerSession(java.util.Locale, android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
   }
 
 }

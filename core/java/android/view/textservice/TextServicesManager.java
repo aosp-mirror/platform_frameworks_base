@@ -22,9 +22,9 @@ import android.content.Context;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.service.textservice.SpellCheckerSession;
-import android.service.textservice.SpellCheckerSession.SpellCheckerSessionListener;
 import android.util.Log;
+import android.view.textservice.SpellCheckerSession;
+import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener;
 
 import java.util.Locale;
 
