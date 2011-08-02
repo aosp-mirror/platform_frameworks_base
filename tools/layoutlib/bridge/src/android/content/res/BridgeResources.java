@@ -89,7 +89,7 @@ public final class BridgeResources extends Resources {
      * <p/>
      * {@link Bridge} calls this method after setting up a new bridge.
      */
-    /*package*/ public static Resources initSystem(BridgeContext context,
+    public static Resources initSystem(BridgeContext context,
             AssetManager assets,
             DisplayMetrics metrics,
             Configuration config,
@@ -105,7 +105,7 @@ public final class BridgeResources extends Resources {
      * Disposes the static {@link Resources#mSystem} to make sure we don't leave objects
      * around that would prevent us from unloading the library.
      */
-    /*package*/ public static void disposeSystem() {
+    public static void disposeSystem() {
         if (Resources.mSystem instanceof BridgeResources) {
             ((BridgeResources)(Resources.mSystem)).mContext = null;
             ((BridgeResources)(Resources.mSystem)).mProjectCallback = null;
