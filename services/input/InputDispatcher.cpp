@@ -2550,16 +2550,16 @@ InputDispatcher::splitMotionEvent(const MotionEntry* originalMotionEntry, BitSet
     return splitMotionEntry;
 }
 
-void InputDispatcher::notifyConfigurationChanged(nsecs_t eventTime) {
+void InputDispatcher::notifyConfigurationChanged(const NotifyConfigurationChangedArgs* args) {
 #if DEBUG_INBOUND_EVENT_DETAILS
-    LOGD("notifyConfigurationChanged - eventTime=%lld", eventTime);
+    LOGD("notifyConfigurationChanged - eventTime=%lld", args->eventTime);
 #endif
 
     bool needWake;
     { // acquire lock
         AutoMutex _l(mLock);
 
-        ConfigurationChangedEntry* newEntry = new ConfigurationChangedEntry(eventTime);
+        ConfigurationChangedEntry* newEntry = new ConfigurationChangedEntry(args->eventTime);
         needWake = enqueueInboundEventLocked(newEntry);
     } // release lock
 
@@ -2568,19 +2568,21 @@ void InputDispatcher::notifyConfigurationChanged(nsecs_t eventTime) {
     }
 }
 
-void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t source,
-        uint32_t policyFlags, int32_t action, int32_t flags,
-        int32_t keyCode, int32_t scanCode, int32_t metaState, nsecs_t downTime) {
+void InputDispatcher::notifyKey(const NotifyKeyArgs* args) {
 #if DEBUG_INBOUND_EVENT_DETAILS
     LOGD("notifyKey - eventTime=%lld, deviceId=%d, source=0x%x, policyFlags=0x%x, action=0x%x, "
             "flags=0x%x, keyCode=0x%x, scanCode=0x%x, metaState=0x%x, downTime=%lld",
-            eventTime, deviceId, source, policyFlags, action, flags,
-            keyCode, scanCode, metaState, downTime);
+            args->eventTime, args->deviceId, args->source, args->policyFlags,
+            args->action, args->flags, args->keyCode, args->scanCode,
+            args->metaState, args->downTime);
 #endif
-    if (! validateKeyEvent(action)) {
+    if (!validateKeyEvent(args->action)) {
         return;
     }
 
+    uint32_t policyFlags = args->policyFlags;
+    int32_t flags = args->flags;
+    int32_t metaState = args->metaState;
     if ((policyFlags & POLICY_FLAG_VIRTUAL) || (flags & AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY)) {
         policyFlags |= POLICY_FLAG_VIRTUAL;
         flags |= AKEY_EVENT_FLAG_VIRTUAL_HARD_KEY;
@@ -2604,8 +2606,9 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t so
     policyFlags |= POLICY_FLAG_TRUSTED;
 
     KeyEvent event;
-    event.initialize(deviceId, source, action, flags, keyCode, scanCode,
-            metaState, 0, downTime, eventTime);
+    event.initialize(args->deviceId, args->source, args->action,
+            flags, args->keyCode, args->scanCode, metaState, 0,
+            args->downTime, args->eventTime);
 
     mPolicy->interceptKeyBeforeQueueing(&event, /*byref*/ policyFlags);
 
@@ -2629,9 +2632,10 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t so
         }
 
         int32_t repeatCount = 0;
-        KeyEntry* newEntry = new KeyEntry(eventTime,
-                deviceId, source, policyFlags, action, flags, keyCode, scanCode,
-                metaState, repeatCount, downTime);
+        KeyEntry* newEntry = new KeyEntry(args->eventTime,
+                args->deviceId, args->source, policyFlags,
+                args->action, flags, args->keyCode, args->scanCode,
+                metaState, repeatCount, args->downTime);
 
         needWake = enqueueInboundEventLocked(newEntry);
         mLock.unlock();
@@ -2642,43 +2646,39 @@ void InputDispatcher::notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t so
     }
 }
 
-void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t source,
-        uint32_t policyFlags, int32_t action, int32_t flags,
-        int32_t metaState, int32_t buttonState, int32_t edgeFlags,
-        uint32_t pointerCount, const PointerProperties* pointerProperties,
-        const PointerCoords* pointerCoords,
-        float xPrecision, float yPrecision, nsecs_t downTime) {
+void InputDispatcher::notifyMotion(const NotifyMotionArgs* args) {
 #if DEBUG_INBOUND_EVENT_DETAILS
     LOGD("notifyMotion - eventTime=%lld, deviceId=%d, source=0x%x, policyFlags=0x%x, "
             "action=0x%x, flags=0x%x, metaState=0x%x, buttonState=0x%x, edgeFlags=0x%x, "
             "xPrecision=%f, yPrecision=%f, downTime=%lld",
-            eventTime, deviceId, source, policyFlags, action, flags,
-            metaState, buttonState, edgeFlags,
-            xPrecision, yPrecision, downTime);
-    for (uint32_t i = 0; i < pointerCount; i++) {
+            args->eventTime, args->deviceId, args->source, args->policyFlags,
+            args->action, args->flags, args->metaState, args->buttonState,
+            args->edgeFlags, args->xPrecision, args->yPrecision, args->downTime);
+    for (uint32_t i = 0; i < args->pointerCount; i++) {
         LOGD("  Pointer %d: id=%d, toolType=%d, "
                 "x=%f, y=%f, pressure=%f, size=%f, "
                 "touchMajor=%f, touchMinor=%f, toolMajor=%f, toolMinor=%f, "
                 "orientation=%f",
-                i, pointerProperties[i].id,
-                pointerProperties[i].toolType,
-                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_X),
-                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_Y),
-                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_PRESSURE),
-                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_SIZE),
-                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR),
-                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR),
-                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR),
-                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR),
-                pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
+                i, args->pointerProperties[i].id,
+                args->pointerProperties[i].toolType,
+                args->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_X),
+                args->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_Y),
+                args->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_PRESSURE),
+                args->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_SIZE),
+                args->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MAJOR),
+                args->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOUCH_MINOR),
+                args->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR),
+                args->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR),
+                args->pointerCoords[i].getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION));
     }
 #endif
-    if (! validateMotionEvent(action, pointerCount, pointerProperties)) {
+    if (!validateMotionEvent(args->action, args->pointerCount, args->pointerProperties)) {
         return;
     }
 
+    uint32_t policyFlags = args->policyFlags;
     policyFlags |= POLICY_FLAG_TRUSTED;
-    mPolicy->interceptMotionBeforeQueueing(eventTime, /*byref*/ policyFlags);
+    mPolicy->interceptMotionBeforeQueueing(args->eventTime, /*byref*/ policyFlags);
 
     bool needWake;
     { // acquire lock
@@ -2688,10 +2688,11 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
             mLock.unlock();
 
             MotionEvent event;
-            event.initialize(deviceId, source, action, flags, edgeFlags, metaState,
-                    buttonState, 0, 0,
-                    xPrecision, yPrecision, downTime, eventTime,
-                    pointerCount, pointerProperties, pointerCoords);
+            event.initialize(args->deviceId, args->source, args->action, args->flags,
+                    args->edgeFlags, args->metaState, args->buttonState, 0, 0,
+                    args->xPrecision, args->yPrecision,
+                    args->downTime, args->eventTime,
+                    args->pointerCount, args->pointerProperties, args->pointerCoords);
 
             policyFlags |= POLICY_FLAG_FILTERED;
             if (!mPolicy->filterInputEvent(&event, policyFlags)) {
@@ -2702,8 +2703,8 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
         }
 
         // Attempt batching and streaming of move events.
-        if (action == AMOTION_EVENT_ACTION_MOVE
-                || action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+        if (args->action == AMOTION_EVENT_ACTION_MOVE
+                || args->action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
             // BATCHING CASE
             //
             // Try to append a move sample to the tail of the inbound queue for this device.
@@ -2716,20 +2717,22 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                 }
 
                 MotionEntry* motionEntry = static_cast<MotionEntry*>(entry);
-                if (motionEntry->deviceId != deviceId
-                        || motionEntry->source != source) {
+                if (motionEntry->deviceId != args->deviceId
+                        || motionEntry->source != args->source) {
                     // Keep looking for this device and source.
                     continue;
                 }
 
-                if (!motionEntry->canAppendSamples(action, pointerCount, pointerProperties)) {
+                if (!motionEntry->canAppendSamples(args->action,
+                        args->pointerCount, args->pointerProperties)) {
                     // Last motion event in the queue for this device and source is
                     // not compatible for appending new samples.  Stop here.
                     goto NoBatchingOrStreaming;
                 }
 
                 // Do the batching magic.
-                batchMotionLocked(motionEntry, eventTime, metaState, pointerCoords,
+                batchMotionLocked(motionEntry, args->eventTime,
+                        args->metaState, args->pointerCoords,
                         "most recent motion event for this device and source in the inbound queue");
                 mLock.unlock();
                 return; // done!
@@ -2744,15 +2747,18 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                     && (!mPendingEvent->dispatchInProgress || !mCurrentInputTargetsValid)
                     && mPendingEvent->type == EventEntry::TYPE_MOTION) {
                 MotionEntry* motionEntry = static_cast<MotionEntry*>(mPendingEvent);
-                if (motionEntry->deviceId == deviceId && motionEntry->source == source) {
-                    if (!motionEntry->canAppendSamples(action, pointerCount, pointerProperties)) {
+                if (motionEntry->deviceId == args->deviceId
+                        && motionEntry->source == args->source) {
+                    if (!motionEntry->canAppendSamples(args->action,
+                            args->pointerCount, args->pointerProperties)) {
                         // Pending motion event is for this device and source but it is
                         // not compatible for appending new samples.  Stop here.
                         goto NoBatchingOrStreaming;
                     }
 
                     // Do the batching magic.
-                    batchMotionLocked(motionEntry, eventTime, metaState, pointerCoords,
+                    batchMotionLocked(motionEntry, args->eventTime,
+                            args->metaState, args->pointerCoords,
                             "pending motion event");
                     mLock.unlock();
                     return; // done!
@@ -2799,16 +2805,16 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
 
                     MotionEntry* motionEntry = static_cast<MotionEntry*>(
                             dispatchEntry->eventEntry);
-                    if (motionEntry->action != action
-                            || motionEntry->deviceId != deviceId
-                            || motionEntry->source != source
-                            || motionEntry->pointerCount != pointerCount
+                    if (motionEntry->action != args->action
+                            || motionEntry->deviceId != args->deviceId
+                            || motionEntry->source != args->source
+                            || motionEntry->pointerCount != args->pointerCount
                             || motionEntry->isInjected()) {
                         // The motion event is not compatible with this move.
                         continue;
                     }
 
-                    if (action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
+                    if (args->action == AMOTION_EVENT_ACTION_HOVER_MOVE) {
                         if (mLastHoverWindowHandle == NULL) {
 #if DEBUG_BATCHING
                             LOGD("Not streaming hover move because there is no "
@@ -2818,8 +2824,8 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
                         }
 
                         sp<InputWindowHandle> hoverWindowHandle = findTouchedWindowAtLocked(
-                                pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X),
-                                pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y));
+                                args->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X),
+                                args->pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y));
                         if (mLastHoverWindowHandle != hoverWindowHandle) {
 #if DEBUG_BATCHING
                             LOGD("Not streaming hover move because the last hovered window "
@@ -2834,7 +2840,7 @@ void InputDispatcher::notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t
 
                     // Hurray!  This foreground target is currently dispatching a move event
                     // that we can stream onto.  Append the motion sample and resume dispatch.
-                    motionEntry->appendSample(eventTime, pointerCoords);
+                    motionEntry->appendSample(args->eventTime, args->pointerCoords);
 #if DEBUG_BATCHING
                     LOGD("Appended motion sample onto batch for most recently dispatched "
                             "motion event for this device and source in the outbound queues.  "
@@ -2854,10 +2860,11 @@ NoBatchingOrStreaming:;
         }
 
         // Just enqueue a new motion event.
-        MotionEntry* newEntry = new MotionEntry(eventTime,
-                deviceId, source, policyFlags, action, flags, metaState, buttonState, edgeFlags,
-                xPrecision, yPrecision, downTime,
-                pointerCount, pointerProperties, pointerCoords);
+        MotionEntry* newEntry = new MotionEntry(args->eventTime,
+                args->deviceId, args->source, policyFlags,
+                args->action, args->flags, args->metaState, args->buttonState,
+                args->edgeFlags, args->xPrecision, args->yPrecision, args->downTime,
+                args->pointerCount, args->pointerProperties, args->pointerCoords);
 
         needWake = enqueueInboundEventLocked(newEntry);
         mLock.unlock();
@@ -2898,15 +2905,17 @@ void InputDispatcher::batchMotionLocked(MotionEntry* entry, nsecs_t eventTime,
 #endif
 }
 
-void InputDispatcher::notifySwitch(nsecs_t when, int32_t switchCode, int32_t switchValue,
-        uint32_t policyFlags) {
+void InputDispatcher::notifySwitch(const NotifySwitchArgs* args) {
 #if DEBUG_INBOUND_EVENT_DETAILS
-    LOGD("notifySwitch - switchCode=%d, switchValue=%d, policyFlags=0x%x",
-            switchCode, switchValue, policyFlags);
+    LOGD("notifySwitch - eventTime=%lld, policyFlags=0x%x, switchCode=%d, switchValue=%d",
+            args->eventTime, args->policyFlags,
+            args->switchCode, args->switchValue);
 #endif
 
+    uint32_t policyFlags = args->policyFlags;
     policyFlags |= POLICY_FLAG_TRUSTED;
-    mPolicy->notifySwitch(when, switchCode, switchValue, policyFlags);
+    mPolicy->notifySwitch(args->eventTime,
+            args->switchCode, args->switchValue, policyFlags);
 }
 
 int32_t InputDispatcher::injectInputEvent(const InputEvent* event,

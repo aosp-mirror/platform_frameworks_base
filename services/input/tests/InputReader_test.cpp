@@ -48,13 +48,16 @@ static inline float avg(float x, float y) {
 class FakePointerController : public PointerControllerInterface {
     bool mHaveBounds;
     float mMinX, mMinY, mMaxX, mMaxY;
+    float mX, mY;
+    int32_t mButtonState;
 
 protected:
     virtual ~FakePointerController() { }
 
 public:
     FakePointerController() :
-        mHaveBounds(false), mMinX(0), mMinY(0), mMaxX(0), mMaxY(0) {
+        mHaveBounds(false), mMinX(0), mMinY(0), mMaxX(0), mMaxY(0), mX(0), mY(0),
+        mButtonState(0) {
     }
 
     void setBounds(float minX, float minY, float maxX, float maxY) {
@@ -63,6 +66,24 @@ public:
         mMinY = minY;
         mMaxX = maxX;
         mMaxY = maxY;
+    }
+
+    virtual void setPosition(float x, float y) {
+        mX = x;
+        mY = y;
+    }
+
+    virtual void setButtonState(int32_t buttonState) {
+        mButtonState = buttonState;
+    }
+
+    virtual int32_t getButtonState() const {
+        return mButtonState;
+    }
+
+    virtual void getPosition(float* outX, float* outY) const {
+        *outX = mX;
+        *outY = mY;
     }
 
 private:
@@ -75,21 +96,12 @@ private:
     }
 
     virtual void move(float deltaX, float deltaY) {
-    }
-
-    virtual void setButtonState(int32_t buttonState) {
-    }
-
-    virtual int32_t getButtonState() const {
-        return 0;
-    }
-
-    virtual void setPosition(float x, float y) {
-    }
-
-    virtual void getPosition(float* outX, float* outY) const {
-        *outX = 0;
-        *outY = 0;
+        mX += deltaX;
+        if (mX < mMinX) mX = mMinX;
+        if (mX > mMaxX) mX = mMaxX;
+        mY += deltaY;
+        if (mY < mMinY) mY = mMinY;
+        if (mY > mMaxY) mY = mMaxY;
     }
 
     virtual void fade(Transition transition) {
@@ -186,221 +198,84 @@ private:
 };
 
 
-// --- FakeInputDispatcher ---
+// --- FakeInputListener ---
 
-class FakeInputDispatcher : public InputDispatcherInterface {
-public:
-    struct NotifyConfigurationChangedArgs {
-        NotifyConfigurationChangedArgs() : eventTime(0) { }
-
-        nsecs_t eventTime;
-    };
-
-    struct NotifyKeyArgs {
-        nsecs_t eventTime;
-        int32_t deviceId;
-        uint32_t source;
-        uint32_t policyFlags;
-        int32_t action;
-        int32_t flags;
-        int32_t keyCode;
-        int32_t scanCode;
-        int32_t metaState;
-        nsecs_t downTime;
-    };
-
-    struct NotifyMotionArgs {
-        nsecs_t eventTime;
-        int32_t deviceId;
-        uint32_t source;
-        uint32_t policyFlags;
-        int32_t action;
-        int32_t flags;
-        int32_t metaState;
-        int32_t buttonState;
-        int32_t edgeFlags;
-        uint32_t pointerCount;
-        Vector<PointerProperties> pointerProperties;
-        Vector<PointerCoords> pointerCoords;
-        float xPrecision;
-        float yPrecision;
-        nsecs_t downTime;
-    };
-
-    struct NotifySwitchArgs {
-        nsecs_t when;
-        int32_t switchCode;
-        int32_t switchValue;
-        uint32_t policyFlags;
-    };
-
+class FakeInputListener : public InputListenerInterface {
 private:
-    List<NotifyConfigurationChangedArgs> mNotifyConfigurationChangedArgs;
-    List<NotifyKeyArgs> mNotifyKeyArgs;
-    List<NotifyMotionArgs> mNotifyMotionArgs;
-    List<NotifySwitchArgs> mNotifySwitchArgs;
+    List<NotifyConfigurationChangedArgs> mNotifyConfigurationChangedArgsQueue;
+    List<NotifyKeyArgs> mNotifyKeyArgsQueue;
+    List<NotifyMotionArgs> mNotifyMotionArgsQueue;
+    List<NotifySwitchArgs> mNotifySwitchArgsQueue;
 
 protected:
-    virtual ~FakeInputDispatcher() { }
+    virtual ~FakeInputListener() { }
 
 public:
-    FakeInputDispatcher() {
+    FakeInputListener() {
     }
 
-    void assertNotifyConfigurationChangedWasCalled(NotifyConfigurationChangedArgs* outArgs = NULL) {
-        ASSERT_FALSE(mNotifyConfigurationChangedArgs.empty())
+    void assertNotifyConfigurationChangedWasCalled(
+            NotifyConfigurationChangedArgs* outEventArgs = NULL) {
+        ASSERT_FALSE(mNotifyConfigurationChangedArgsQueue.empty())
                 << "Expected notifyConfigurationChanged() to have been called.";
-        if (outArgs) {
-            *outArgs = *mNotifyConfigurationChangedArgs.begin();
+        if (outEventArgs) {
+            *outEventArgs = *mNotifyConfigurationChangedArgsQueue.begin();
         }
-        mNotifyConfigurationChangedArgs.erase(mNotifyConfigurationChangedArgs.begin());
+        mNotifyConfigurationChangedArgsQueue.erase(mNotifyConfigurationChangedArgsQueue.begin());
     }
 
-    void assertNotifyKeyWasCalled(NotifyKeyArgs* outArgs = NULL) {
-        ASSERT_FALSE(mNotifyKeyArgs.empty())
+    void assertNotifyKeyWasCalled(NotifyKeyArgs* outEventArgs = NULL) {
+        ASSERT_FALSE(mNotifyKeyArgsQueue.empty())
                 << "Expected notifyKey() to have been called.";
-        if (outArgs) {
-            *outArgs = *mNotifyKeyArgs.begin();
+        if (outEventArgs) {
+            *outEventArgs = *mNotifyKeyArgsQueue.begin();
         }
-        mNotifyKeyArgs.erase(mNotifyKeyArgs.begin());
+        mNotifyKeyArgsQueue.erase(mNotifyKeyArgsQueue.begin());
     }
 
     void assertNotifyKeyWasNotCalled() {
-        ASSERT_TRUE(mNotifyKeyArgs.empty())
+        ASSERT_TRUE(mNotifyKeyArgsQueue.empty())
                 << "Expected notifyKey() to not have been called.";
     }
 
-    void assertNotifyMotionWasCalled(NotifyMotionArgs* outArgs = NULL) {
-        ASSERT_FALSE(mNotifyMotionArgs.empty())
+    void assertNotifyMotionWasCalled(NotifyMotionArgs* outEventArgs = NULL) {
+        ASSERT_FALSE(mNotifyMotionArgsQueue.empty())
                 << "Expected notifyMotion() to have been called.";
-        if (outArgs) {
-            *outArgs = *mNotifyMotionArgs.begin();
+        if (outEventArgs) {
+            *outEventArgs = *mNotifyMotionArgsQueue.begin();
         }
-        mNotifyMotionArgs.erase(mNotifyMotionArgs.begin());
+        mNotifyMotionArgsQueue.erase(mNotifyMotionArgsQueue.begin());
     }
 
     void assertNotifyMotionWasNotCalled() {
-        ASSERT_TRUE(mNotifyMotionArgs.empty())
+        ASSERT_TRUE(mNotifyMotionArgsQueue.empty())
                 << "Expected notifyMotion() to not have been called.";
     }
 
-    void assertNotifySwitchWasCalled(NotifySwitchArgs* outArgs = NULL) {
-        ASSERT_FALSE(mNotifySwitchArgs.empty())
+    void assertNotifySwitchWasCalled(NotifySwitchArgs* outEventArgs = NULL) {
+        ASSERT_FALSE(mNotifySwitchArgsQueue.empty())
                 << "Expected notifySwitch() to have been called.";
-        if (outArgs) {
-            *outArgs = *mNotifySwitchArgs.begin();
+        if (outEventArgs) {
+            *outEventArgs = *mNotifySwitchArgsQueue.begin();
         }
-        mNotifySwitchArgs.erase(mNotifySwitchArgs.begin());
+        mNotifySwitchArgsQueue.erase(mNotifySwitchArgsQueue.begin());
     }
 
 private:
-    virtual void notifyConfigurationChanged(nsecs_t eventTime) {
-        NotifyConfigurationChangedArgs args;
-        args.eventTime = eventTime;
-        mNotifyConfigurationChangedArgs.push_back(args);
+    virtual void notifyConfigurationChanged(const NotifyConfigurationChangedArgs* args) {
+        mNotifyConfigurationChangedArgsQueue.push_back(*args);
     }
 
-    virtual void notifyKey(nsecs_t eventTime, int32_t deviceId, uint32_t source,
-            uint32_t policyFlags, int32_t action, int32_t flags, int32_t keyCode,
-            int32_t scanCode, int32_t metaState, nsecs_t downTime) {
-        NotifyKeyArgs args;
-        args.eventTime = eventTime;
-        args.deviceId = deviceId;
-        args.source = source;
-        args.policyFlags = policyFlags;
-        args.action = action;
-        args.flags = flags;
-        args.keyCode = keyCode;
-        args.scanCode = scanCode;
-        args.metaState = metaState;
-        args.downTime = downTime;
-        mNotifyKeyArgs.push_back(args);
+    virtual void notifyKey(const NotifyKeyArgs* args) {
+        mNotifyKeyArgsQueue.push_back(*args);
     }
 
-    virtual void notifyMotion(nsecs_t eventTime, int32_t deviceId, uint32_t source,
-            uint32_t policyFlags, int32_t action, int32_t flags,
-            int32_t metaState, int32_t buttonState, int32_t edgeFlags,
-            uint32_t pointerCount, const PointerProperties* pointerProperties,
-            const PointerCoords* pointerCoords,
-            float xPrecision, float yPrecision, nsecs_t downTime) {
-        NotifyMotionArgs args;
-        args.eventTime = eventTime;
-        args.deviceId = deviceId;
-        args.source = source;
-        args.policyFlags = policyFlags;
-        args.action = action;
-        args.flags = flags;
-        args.metaState = metaState;
-        args.buttonState = buttonState;
-        args.edgeFlags = edgeFlags;
-        args.pointerCount = pointerCount;
-        args.pointerProperties.clear();
-        args.pointerProperties.appendArray(pointerProperties, pointerCount);
-        args.pointerCoords.clear();
-        args.pointerCoords.appendArray(pointerCoords, pointerCount);
-        args.xPrecision = xPrecision;
-        args.yPrecision = yPrecision;
-        args.downTime = downTime;
-        mNotifyMotionArgs.push_back(args);
+    virtual void notifyMotion(const NotifyMotionArgs* args) {
+        mNotifyMotionArgsQueue.push_back(*args);
     }
 
-    virtual void notifySwitch(nsecs_t when,
-            int32_t switchCode, int32_t switchValue, uint32_t policyFlags) {
-        NotifySwitchArgs args;
-        args.when = when;
-        args.switchCode = switchCode;
-        args.switchValue = switchValue;
-        args.policyFlags = policyFlags;
-        mNotifySwitchArgs.push_back(args);
-    }
-
-    virtual void dump(String8& dump) {
-        ADD_FAILURE() << "Should never be called by input reader.";
-    }
-
-    virtual void dispatchOnce() {
-        ADD_FAILURE() << "Should never be called by input reader.";
-    }
-
-    virtual int32_t injectInputEvent(const InputEvent* event,
-            int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis,
-            uint32_t policyFlags) {
-        ADD_FAILURE() << "Should never be called by input reader.";
-        return INPUT_EVENT_INJECTION_FAILED;
-    }
-
-    virtual void setInputWindows(const Vector<sp<InputWindowHandle> >& inputWindowHandles) {
-        ADD_FAILURE() << "Should never be called by input reader.";
-    }
-
-    virtual void setFocusedApplication(
-            const sp<InputApplicationHandle>& inputApplicationHandle) {
-        ADD_FAILURE() << "Should never be called by input reader.";
-    }
-
-    virtual void setInputDispatchMode(bool enabled, bool frozen) {
-        ADD_FAILURE() << "Should never be called by input reader.";
-    }
-
-    virtual void setInputFilterEnabled(bool enabled) {
-        ADD_FAILURE() << "Should never be called by input reader.";
-    }
-
-    virtual bool transferTouchFocus(const sp<InputChannel>& fromChannel,
-            const sp<InputChannel>& toChannel) {
-        ADD_FAILURE() << "Should never be called by input reader.";
-        return 0;
-    }
-
-    virtual status_t registerInputChannel(const sp<InputChannel>& inputChannel,
-            const sp<InputWindowHandle>& inputWindowHandle, bool monitor) {
-        ADD_FAILURE() << "Should never be called by input reader.";
-        return 0;
-    }
-
-    virtual status_t unregisterInputChannel(const sp<InputChannel>& inputChannel) {
-        ADD_FAILURE() << "Should never be called by input reader.";
-        return 0;
+    virtual void notifySwitch(const NotifySwitchArgs* args) {
+        mNotifySwitchArgsQueue.push_back(*args);
     }
 };
 
@@ -551,6 +426,10 @@ public:
         event.value = value;
         event.flags = flags;
         mEvents.push_back(event);
+
+        if (type == EV_ABS) {
+            setAbsoluteAxisValue(deviceId, scanCode, value);
+        }
     }
 
     void assertQueueIsEmpty() {
@@ -765,15 +644,15 @@ private:
 class FakeInputReaderContext : public InputReaderContext {
     sp<EventHubInterface> mEventHub;
     sp<InputReaderPolicyInterface> mPolicy;
-    sp<InputDispatcherInterface> mDispatcher;
+    sp<InputListenerInterface> mListener;
     int32_t mGlobalMetaState;
     bool mUpdateGlobalMetaStateWasCalled;
 
 public:
     FakeInputReaderContext(const sp<EventHubInterface>& eventHub,
             const sp<InputReaderPolicyInterface>& policy,
-            const sp<InputDispatcherInterface>& dispatcher) :
-            mEventHub(eventHub), mPolicy(policy), mDispatcher(dispatcher),
+            const sp<InputListenerInterface>& listener) :
+            mEventHub(eventHub), mPolicy(policy), mListener(listener),
             mGlobalMetaState(0) {
     }
 
@@ -806,8 +685,8 @@ private:
         return mPolicy.get();
     }
 
-    virtual InputDispatcherInterface* getDispatcher() {
-        return mDispatcher.get();
+    virtual InputListenerInterface* getListener() {
+        return mListener.get();
     }
 
     virtual void disableVirtualKeysUntil(nsecs_t time) {
@@ -969,8 +848,8 @@ class InstrumentedInputReader : public InputReader {
 public:
     InstrumentedInputReader(const sp<EventHubInterface>& eventHub,
             const sp<InputReaderPolicyInterface>& policy,
-            const sp<InputDispatcherInterface>& dispatcher) :
-            InputReader(eventHub, policy, dispatcher),
+            const sp<InputListenerInterface>& listener) :
+            InputReader(eventHub, policy, listener),
             mNextDevice(NULL) {
     }
 
@@ -984,14 +863,19 @@ public:
         mNextDevice = device;
     }
 
+    InputDevice* newDevice(int32_t deviceId, const String8& name) {
+        return new InputDevice(&mContext, deviceId, name);
+    }
+
 protected:
-    virtual InputDevice* createDevice(int32_t deviceId, const String8& name, uint32_t classes) {
+    virtual InputDevice* createDeviceLocked(int32_t deviceId,
+            const String8& name, uint32_t classes) {
         if (mNextDevice) {
             InputDevice* device = mNextDevice;
             mNextDevice = NULL;
             return device;
         }
-        return InputReader::createDevice(deviceId, name, classes);
+        return InputReader::createDeviceLocked(deviceId, name, classes);
     }
 
     friend class InputReaderTest;
@@ -1002,7 +886,7 @@ protected:
 
 class InputReaderTest : public testing::Test {
 protected:
-    sp<FakeInputDispatcher> mFakeDispatcher;
+    sp<FakeInputListener> mFakeListener;
     sp<FakeInputReaderPolicy> mFakePolicy;
     sp<FakeEventHub> mFakeEventHub;
     sp<InstrumentedInputReader> mReader;
@@ -1010,15 +894,15 @@ protected:
     virtual void SetUp() {
         mFakeEventHub = new FakeEventHub();
         mFakePolicy = new FakeInputReaderPolicy();
-        mFakeDispatcher = new FakeInputDispatcher();
+        mFakeListener = new FakeInputListener();
 
-        mReader = new InstrumentedInputReader(mFakeEventHub, mFakePolicy, mFakeDispatcher);
+        mReader = new InstrumentedInputReader(mFakeEventHub, mFakePolicy, mFakeListener);
     }
 
     virtual void TearDown() {
         mReader.clear();
 
-        mFakeDispatcher.clear();
+        mFakeListener.clear();
         mFakePolicy.clear();
         mFakeEventHub.clear();
     }
@@ -1038,7 +922,7 @@ protected:
     FakeInputMapper* addDeviceWithFakeInputMapper(int32_t deviceId,
             const String8& name, uint32_t classes, uint32_t sources,
             const PropertyMap* configuration) {
-        InputDevice* device = new InputDevice(mReader.get(), deviceId, name);
+        InputDevice* device = mReader->newDevice(deviceId, name);
         FakeInputMapper* mapper = new FakeInputMapper(device, sources);
         device->addMapper(mapper);
         mReader->setNextDevice(device);
@@ -1304,8 +1188,9 @@ TEST_F(InputReaderTest, MarkSupportedKeyCodes_ForwardsRequestsToMappers) {
 TEST_F(InputReaderTest, LoopOnce_WhenDeviceScanFinished_SendsConfigurationChanged) {
     addDevice(1, String8("ignored"), INPUT_DEVICE_CLASS_KEYBOARD, NULL);
 
-    FakeInputDispatcher::NotifyConfigurationChangedArgs args;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyConfigurationChangedWasCalled(&args));
+    NotifyConfigurationChangedArgs args;
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyConfigurationChangedWasCalled(&args));
     ASSERT_EQ(ARBITRARY_TIME, args.eventTime);
 }
 
@@ -1339,7 +1224,7 @@ protected:
 
     sp<FakeEventHub> mFakeEventHub;
     sp<FakeInputReaderPolicy> mFakePolicy;
-    sp<FakeInputDispatcher> mFakeDispatcher;
+    sp<FakeInputListener> mFakeListener;
     FakeInputReaderContext* mFakeContext;
 
     InputDevice* mDevice;
@@ -1347,8 +1232,8 @@ protected:
     virtual void SetUp() {
         mFakeEventHub = new FakeEventHub();
         mFakePolicy = new FakeInputReaderPolicy();
-        mFakeDispatcher = new FakeInputDispatcher();
-        mFakeContext = new FakeInputReaderContext(mFakeEventHub, mFakePolicy, mFakeDispatcher);
+        mFakeListener = new FakeInputListener();
+        mFakeContext = new FakeInputReaderContext(mFakeEventHub, mFakePolicy, mFakeListener);
 
         mFakeEventHub->addDevice(DEVICE_ID, String8(DEVICE_NAME), 0);
         mDevice = new InputDevice(mFakeContext, DEVICE_ID, String8(DEVICE_NAME));
@@ -1358,7 +1243,7 @@ protected:
         delete mDevice;
 
         delete mFakeContext;
-        mFakeDispatcher.clear();
+        mFakeListener.clear();
         mFakePolicy.clear();
         mFakeEventHub.clear();
     }
@@ -1509,15 +1394,15 @@ protected:
 
     sp<FakeEventHub> mFakeEventHub;
     sp<FakeInputReaderPolicy> mFakePolicy;
-    sp<FakeInputDispatcher> mFakeDispatcher;
+    sp<FakeInputListener> mFakeListener;
     FakeInputReaderContext* mFakeContext;
     InputDevice* mDevice;
 
     virtual void SetUp() {
         mFakeEventHub = new FakeEventHub();
         mFakePolicy = new FakeInputReaderPolicy();
-        mFakeDispatcher = new FakeInputDispatcher();
-        mFakeContext = new FakeInputReaderContext(mFakeEventHub, mFakePolicy, mFakeDispatcher);
+        mFakeListener = new FakeInputListener();
+        mFakeContext = new FakeInputReaderContext(mFakeEventHub, mFakePolicy, mFakeListener);
         mDevice = new InputDevice(mFakeContext, DEVICE_ID, String8(DEVICE_NAME));
 
         mFakeEventHub->addDevice(DEVICE_ID, String8(DEVICE_NAME), 0);
@@ -1526,7 +1411,7 @@ protected:
     virtual void TearDown() {
         delete mDevice;
         delete mFakeContext;
-        mFakeDispatcher.clear();
+        mFakeListener.clear();
         mFakePolicy.clear();
         mFakeEventHub.clear();
     }
@@ -1570,7 +1455,7 @@ protected:
     static void assertPointerCoords(const PointerCoords& coords,
             float x, float y, float pressure, float size,
             float touchMajor, float touchMinor, float toolMajor, float toolMinor,
-            float orientation) {
+            float orientation, float distance) {
         ASSERT_NEAR(x, coords.getAxisValue(AMOTION_EVENT_AXIS_X), 1);
         ASSERT_NEAR(y, coords.getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
         ASSERT_NEAR(pressure, coords.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE), EPSILON);
@@ -1580,6 +1465,14 @@ protected:
         ASSERT_NEAR(toolMajor, coords.getAxisValue(AMOTION_EVENT_AXIS_TOOL_MAJOR), 1);
         ASSERT_NEAR(toolMinor, coords.getAxisValue(AMOTION_EVENT_AXIS_TOOL_MINOR), 1);
         ASSERT_NEAR(orientation, coords.getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION), EPSILON);
+        ASSERT_NEAR(distance, coords.getAxisValue(AMOTION_EVENT_AXIS_DISTANCE), EPSILON);
+    }
+
+    static void assertPosition(const sp<FakePointerController>& controller, float x, float y) {
+        float actualX, actualY;
+        controller->getPosition(&actualX, &actualY);
+        ASSERT_NEAR(x, actualX, 1);
+        ASSERT_NEAR(y, actualY, 1);
     }
 };
 
@@ -1617,9 +1510,9 @@ TEST_F(SwitchInputMapperTest, Process) {
 
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SW, SW_LID, 0, 1, 0);
 
-    FakeInputDispatcher::NotifySwitchArgs args;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifySwitchWasCalled(&args));
-    ASSERT_EQ(ARBITRARY_TIME, args.when);
+    NotifySwitchArgs args;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifySwitchWasCalled(&args));
+    ASSERT_EQ(ARBITRARY_TIME, args.eventTime);
     ASSERT_EQ(SW_LID, args.switchCode);
     ASSERT_EQ(1, args.switchValue);
     ASSERT_EQ(uint32_t(0), args.policyFlags);
@@ -1636,16 +1529,16 @@ protected:
 
 void KeyboardInputMapperTest::testDPadKeyRotation(KeyboardInputMapper* mapper,
         int32_t originalScanCode, int32_t originalKeyCode, int32_t rotatedKeyCode) {
-    FakeInputDispatcher::NotifyKeyArgs args;
+    NotifyKeyArgs args;
 
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, originalScanCode, originalKeyCode, 1, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, args.action);
     ASSERT_EQ(originalScanCode, args.scanCode);
     ASSERT_EQ(rotatedKeyCode, args.keyCode);
 
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, originalScanCode, originalKeyCode, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(AKEY_EVENT_ACTION_UP, args.action);
     ASSERT_EQ(originalScanCode, args.scanCode);
     ASSERT_EQ(rotatedKeyCode, args.keyCode);
@@ -1668,8 +1561,8 @@ TEST_F(KeyboardInputMapperTest, Process_SimpleKeyPress) {
     // Key down.
     process(mapper, ARBITRARY_TIME, DEVICE_ID,
             EV_KEY, KEY_HOME, AKEYCODE_HOME, 1, POLICY_FLAG_WAKE);
-    FakeInputDispatcher::NotifyKeyArgs args;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    NotifyKeyArgs args;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(DEVICE_ID, args.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, args.source);
     ASSERT_EQ(ARBITRARY_TIME, args.eventTime);
@@ -1684,7 +1577,7 @@ TEST_F(KeyboardInputMapperTest, Process_SimpleKeyPress) {
     // Key up.
     process(mapper, ARBITRARY_TIME + 1, DEVICE_ID,
             EV_KEY, KEY_HOME, AKEYCODE_HOME, 0, POLICY_FLAG_WAKE);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(DEVICE_ID, args.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, args.source);
     ASSERT_EQ(ARBITRARY_TIME + 1, args.eventTime);
@@ -1705,16 +1598,16 @@ TEST_F(KeyboardInputMapperTest, Reset_WhenKeysAreNotDown_DoesNotSynthesizeKeyUp)
     // Key down.
     process(mapper, ARBITRARY_TIME, DEVICE_ID,
             EV_KEY, KEY_HOME, AKEYCODE_HOME, 1, POLICY_FLAG_WAKE);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled());
 
     // Key up.
     process(mapper, ARBITRARY_TIME, DEVICE_ID,
             EV_KEY, KEY_HOME, AKEYCODE_HOME, 0, POLICY_FLAG_WAKE);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled());
 
     // Reset.  Since no keys still down, should not synthesize any key ups.
     mapper->reset();
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasNotCalled());
 }
 
 TEST_F(KeyboardInputMapperTest, Reset_WhenKeysAreDown_SynthesizesKeyUps) {
@@ -1725,18 +1618,18 @@ TEST_F(KeyboardInputMapperTest, Reset_WhenKeysAreDown_SynthesizesKeyUps) {
     // Metakey down.
     process(mapper, ARBITRARY_TIME, DEVICE_ID,
             EV_KEY, KEY_LEFTSHIFT, AKEYCODE_SHIFT_LEFT, 1, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled());
 
     // Key down.
     process(mapper, ARBITRARY_TIME + 1, DEVICE_ID,
             EV_KEY, KEY_A, AKEYCODE_A, 1, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled());
 
     // Reset.  Since two keys are still down, should synthesize two key ups in reverse order.
     mapper->reset();
 
-    FakeInputDispatcher::NotifyKeyArgs args;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    NotifyKeyArgs args;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(DEVICE_ID, args.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, args.source);
     ASSERT_EQ(AKEY_EVENT_ACTION_UP, args.action);
@@ -1747,7 +1640,7 @@ TEST_F(KeyboardInputMapperTest, Reset_WhenKeysAreDown_SynthesizesKeyUps) {
     ASSERT_EQ(uint32_t(0), args.policyFlags);
     ASSERT_EQ(ARBITRARY_TIME + 1, args.downTime);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(DEVICE_ID, args.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, args.source);
     ASSERT_EQ(AKEY_EVENT_ACTION_UP, args.action);
@@ -1759,7 +1652,7 @@ TEST_F(KeyboardInputMapperTest, Reset_WhenKeysAreDown_SynthesizesKeyUps) {
     ASSERT_EQ(ARBITRARY_TIME + 1, args.downTime);
 
     // And that's it.
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasNotCalled());
 }
 
 TEST_F(KeyboardInputMapperTest, Process_ShouldUpdateMetaState) {
@@ -1773,8 +1666,8 @@ TEST_F(KeyboardInputMapperTest, Process_ShouldUpdateMetaState) {
     // Metakey down.
     process(mapper, ARBITRARY_TIME, DEVICE_ID,
             EV_KEY, KEY_LEFTSHIFT, AKEYCODE_SHIFT_LEFT, 1, 0);
-    FakeInputDispatcher::NotifyKeyArgs args;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    NotifyKeyArgs args;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, args.metaState);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, mapper->getMetaState());
     ASSERT_NO_FATAL_FAILURE(mFakeContext->assertUpdateGlobalMetaStateWasCalled());
@@ -1782,21 +1675,21 @@ TEST_F(KeyboardInputMapperTest, Process_ShouldUpdateMetaState) {
     // Key down.
     process(mapper, ARBITRARY_TIME + 1, DEVICE_ID,
             EV_KEY, KEY_A, AKEYCODE_A, 1, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, args.metaState);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, mapper->getMetaState());
 
     // Key up.
     process(mapper, ARBITRARY_TIME + 2, DEVICE_ID,
             EV_KEY, KEY_A, AKEYCODE_A, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, args.metaState);
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, mapper->getMetaState());
 
     // Metakey up.
     process(mapper, ARBITRARY_TIME + 3, DEVICE_ID,
             EV_KEY, KEY_LEFTSHIFT, AKEYCODE_SHIFT_LEFT, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(AMETA_NONE, args.metaState);
     ASSERT_EQ(AMETA_NONE, mapper->getMetaState());
     ASSERT_NO_FATAL_FAILURE(mFakeContext->assertUpdateGlobalMetaStateWasCalled());
@@ -1876,13 +1769,13 @@ TEST_F(KeyboardInputMapperTest, Process_WhenOrientationAware_ShouldRotateDPad) {
 
     // Special case: if orientation changes while key is down, we still emit the same keycode
     // in the key up as we did in the key down.
-    FakeInputDispatcher::NotifyKeyArgs args;
+    NotifyKeyArgs args;
 
     mFakePolicy->setDisplayInfo(DISPLAY_ID,
             DISPLAY_WIDTH, DISPLAY_HEIGHT,
             DISPLAY_ORIENTATION_270);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, KEY_UP, AKEYCODE_DPAD_UP, 1, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, args.action);
     ASSERT_EQ(KEY_UP, args.scanCode);
     ASSERT_EQ(AKEYCODE_DPAD_RIGHT, args.keyCode);
@@ -1891,7 +1784,7 @@ TEST_F(KeyboardInputMapperTest, Process_WhenOrientationAware_ShouldRotateDPad) {
             DISPLAY_WIDTH, DISPLAY_HEIGHT,
             DISPLAY_ORIENTATION_180);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, KEY_UP, AKEYCODE_DPAD_UP, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(AKEY_EVENT_ACTION_UP, args.action);
     ASSERT_EQ(KEY_UP, args.scanCode);
     ASSERT_EQ(AKEYCODE_DPAD_RIGHT, args.keyCode);
@@ -2034,17 +1927,17 @@ const int32_t CursorInputMapperTest::TRACKBALL_MOVEMENT_THRESHOLD = 6;
 
 void CursorInputMapperTest::testMotionRotation(CursorInputMapper* mapper,
         int32_t originalX, int32_t originalY, int32_t rotatedX, int32_t rotatedY) {
-    FakeInputDispatcher::NotifyMotionArgs args;
+    NotifyMotionArgs args;
 
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_REL, REL_X, 0, originalX, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_REL, REL_Y, 0, originalY, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
             float(rotatedX) / TRACKBALL_MOVEMENT_THRESHOLD,
             float(rotatedY) / TRACKBALL_MOVEMENT_THRESHOLD,
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 TEST_F(CursorInputMapperTest, WhenModeIsPointer_GetSources_ReturnsMouse) {
@@ -2120,13 +2013,13 @@ TEST_F(CursorInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaStat
 
     mFakeContext->setGlobalMetaState(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
+    NotifyMotionArgs args;
 
     // Button press.
     // Mostly testing non x/y behavior here so we don't need to check again elsewhere.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 1, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(ARBITRARY_TIME, args.eventTime);
     ASSERT_EQ(DEVICE_ID, args.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TRACKBALL, args.source);
@@ -2140,7 +2033,7 @@ TEST_F(CursorInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaStat
     ASSERT_EQ(0, args.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_MOUSE, args.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
     ASSERT_EQ(TRACKBALL_MOVEMENT_THRESHOLD, args.xPrecision);
     ASSERT_EQ(TRACKBALL_MOVEMENT_THRESHOLD, args.yPrecision);
     ASSERT_EQ(ARBITRARY_TIME, args.downTime);
@@ -2148,7 +2041,7 @@ TEST_F(CursorInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaStat
     // Button release.  Should have same down time.
     process(mapper, ARBITRARY_TIME + 1, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 0, 0);
     process(mapper, ARBITRARY_TIME + 1, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(ARBITRARY_TIME + 1, args.eventTime);
     ASSERT_EQ(DEVICE_ID, args.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TRACKBALL, args.source);
@@ -2162,7 +2055,7 @@ TEST_F(CursorInputMapperTest, Process_ShouldSetAllFieldsAndIncludeGlobalMetaStat
     ASSERT_EQ(0, args.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_MOUSE, args.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
     ASSERT_EQ(TRACKBALL_MOVEMENT_THRESHOLD, args.xPrecision);
     ASSERT_EQ(TRACKBALL_MOVEMENT_THRESHOLD, args.yPrecision);
     ASSERT_EQ(ARBITRARY_TIME, args.downTime);
@@ -2173,23 +2066,23 @@ TEST_F(CursorInputMapperTest, Process_ShouldHandleIndependentXYUpdates) {
     addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
+    NotifyMotionArgs args;
 
     // Motion in X but not Y.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_REL, REL_X, 0, 1, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            1.0f / TRACKBALL_MOVEMENT_THRESHOLD, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+            1.0f / TRACKBALL_MOVEMENT_THRESHOLD, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 
     // Motion in Y but not X.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_REL, REL_Y, 0, -2, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            0.0f, -2.0f / TRACKBALL_MOVEMENT_THRESHOLD, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+            0.0f, -2.0f / TRACKBALL_MOVEMENT_THRESHOLD, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 TEST_F(CursorInputMapperTest, Process_ShouldHandleIndependentButtonUpdates) {
@@ -2197,23 +2090,23 @@ TEST_F(CursorInputMapperTest, Process_ShouldHandleIndependentButtonUpdates) {
     addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
+    NotifyMotionArgs args;
 
-    // Button press without following sync.
+    // Button press.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 1, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 
-    // Button release without following sync.
+    // Button release.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 0, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 TEST_F(CursorInputMapperTest, Process_ShouldHandleCombinedXYAndButtonUpdates) {
@@ -2221,36 +2114,36 @@ TEST_F(CursorInputMapperTest, Process_ShouldHandleCombinedXYAndButtonUpdates) {
     addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
+    NotifyMotionArgs args;
 
     // Combined X, Y and Button.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_REL, REL_X, 0, 1, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_REL, REL_Y, 0, -2, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 1, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
             1.0f / TRACKBALL_MOVEMENT_THRESHOLD, -2.0f / TRACKBALL_MOVEMENT_THRESHOLD,
-            1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+            1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 
     // Move X, Y a bit while pressed.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_REL, REL_X, 0, 2, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_REL, REL_Y, 0, 1, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
             2.0f / TRACKBALL_MOVEMENT_THRESHOLD, 1.0f / TRACKBALL_MOVEMENT_THRESHOLD,
-            1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+            1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 
     // Release Button.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 0, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 TEST_F(CursorInputMapperTest, Reset_WhenButtonIsNotDown_ShouldNotSynthesizeButtonUp) {
@@ -2258,22 +2151,24 @@ TEST_F(CursorInputMapperTest, Reset_WhenButtonIsNotDown_ShouldNotSynthesizeButto
     addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
+    NotifyMotionArgs args;
 
     // Button press.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 1, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, args.action);
 
     // Button release.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 0, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_UP, args.action);
 
     // Reset.  Should not synthesize button up since button is not pressed.
     mapper->reset();
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasNotCalled());
 }
 
 TEST_F(CursorInputMapperTest, Reset_WhenButtonIsDown_ShouldSynthesizeButtonUp) {
@@ -2281,20 +2176,20 @@ TEST_F(CursorInputMapperTest, Reset_WhenButtonIsDown_ShouldSynthesizeButtonUp) {
     addConfigurationProperty("cursor.mode", "navigation");
     addMapperAndConfigure(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
+    NotifyMotionArgs args;
 
     // Button press.
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MOUSE, 0, 1, 0);
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
 
     // Reset.  Should synthesize button up.
     mapper->reset();
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, args.action);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 TEST_F(CursorInputMapperTest, Process_WhenNotOrientationAware_ShouldNotRotateMotions) {
@@ -2366,6 +2261,203 @@ TEST_F(CursorInputMapperTest, Process_WhenOrientationAware_ShouldRotateMotions) 
     ASSERT_NO_FATAL_FAILURE(testMotionRotation(mapper, -1,  1, -1, -1));
 }
 
+TEST_F(CursorInputMapperTest, Process_ShouldHandleAllButtons) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "pointer");
+    addMapperAndConfigure(mapper);
+
+    mFakePointerController->setBounds(0, 0, 800 - 1, 480 - 1);
+    mFakePointerController->setPosition(100, 200);
+    mFakePointerController->setButtonState(0);
+
+    NotifyMotionArgs motionArgs;
+    NotifyKeyArgs keyArgs;
+
+    // press BTN_LEFT, release BTN_LEFT
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_LEFT, 0, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_PRIMARY, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_PRIMARY, mFakePointerController->getButtonState());
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_LEFT, 0, 0, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(0, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(0, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+
+    // press BTN_RIGHT + BTN_MIDDLE, release BTN_RIGHT, release BTN_MIDDLE
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_RIGHT, 0, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MIDDLE, 0, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_SECONDARY | AMOTION_EVENT_BUTTON_TERTIARY,
+            motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_SECONDARY | AMOTION_EVENT_BUTTON_TERTIARY,
+            mFakePointerController->getButtonState());
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_RIGHT, 0, 0, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_TERTIARY, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_TERTIARY, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_MIDDLE, 0, 0, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(0, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(0, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+
+    // press BTN_BACK, release BTN_BACK
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_BACK, 0, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_BACK, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_BACK, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_BACK, 0, 0, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(0, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+
+    // press BTN_SIDE, release BTN_SIDE
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_SIDE, 0, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_BACK, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_BACK, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_SIDE, 0, 0, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(0, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+
+    // press BTN_FORWARD, release BTN_FORWARD
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_FORWARD, 0, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_FORWARD, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_FORWARD, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_FORWARD, 0, 0, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(0, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+
+    // press BTN_EXTRA, release BTN_EXTRA
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_EXTRA, 0, 1, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_FORWARD, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_FORWARD, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, BTN_EXTRA, 0, 0, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(0, mFakePointerController->getButtonState());
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            100.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+}
+
+TEST_F(CursorInputMapperTest, Process_WhenModeIsPointer_ShouldMoveThePointerAround) {
+    CursorInputMapper* mapper = new CursorInputMapper(mDevice);
+    addConfigurationProperty("cursor.mode", "pointer");
+    addMapperAndConfigure(mapper);
+
+    mFakePointerController->setBounds(0, 0, 800 - 1, 480 - 1);
+    mFakePointerController->setPosition(100, 200);
+    mFakePointerController->setButtonState(0);
+
+    NotifyMotionArgs args;
+
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_REL, REL_X, 0, 10, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_REL, REL_Y, 0, 20, 0);
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_SYN, SYN_REPORT, 0, 0, 0);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, args.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
+            110.0f, 220.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+    ASSERT_NO_FATAL_FAILURE(assertPosition(mFakePointerController, 110.0f, 220.0f));
+}
+
 
 // --- TouchInputMapperTest ---
 
@@ -2383,8 +2475,12 @@ protected:
     static const int32_t RAW_PRESSURE_MAX;
     static const int32_t RAW_ORIENTATION_MIN;
     static const int32_t RAW_ORIENTATION_MAX;
+    static const int32_t RAW_DISTANCE_MIN;
+    static const int32_t RAW_DISTANCE_MAX;
     static const int32_t RAW_ID_MIN;
     static const int32_t RAW_ID_MAX;
+    static const int32_t RAW_SLOT_MIN;
+    static const int32_t RAW_SLOT_MAX;
     static const float X_PRECISION;
     static const float Y_PRECISION;
 
@@ -2398,6 +2494,9 @@ protected:
         ORIENTATION = 1 << 4,
         MINOR = 1 << 5,
         ID = 1 << 6,
+        DISTANCE = 1 << 7,
+        SLOT = 1 << 8,
+        TOOL_TYPE = 1 << 9,
     };
 
     void prepareDisplay(int32_t orientation);
@@ -2420,8 +2519,12 @@ const int32_t TouchInputMapperTest::RAW_PRESSURE_MIN = RAW_TOUCH_MIN;
 const int32_t TouchInputMapperTest::RAW_PRESSURE_MAX = RAW_TOUCH_MAX;
 const int32_t TouchInputMapperTest::RAW_ORIENTATION_MIN = -7;
 const int32_t TouchInputMapperTest::RAW_ORIENTATION_MAX = 7;
+const int32_t TouchInputMapperTest::RAW_DISTANCE_MIN = 0;
+const int32_t TouchInputMapperTest::RAW_DISTANCE_MAX = 7;
 const int32_t TouchInputMapperTest::RAW_ID_MIN = 0;
 const int32_t TouchInputMapperTest::RAW_ID_MAX = 9;
+const int32_t TouchInputMapperTest::RAW_SLOT_MIN = 0;
+const int32_t TouchInputMapperTest::RAW_SLOT_MAX = 9;
 const float TouchInputMapperTest::X_PRECISION = float(RAW_X_MAX - RAW_X_MIN + 1) / DISPLAY_WIDTH;
 const float TouchInputMapperTest::Y_PRECISION = float(RAW_Y_MAX - RAW_Y_MIN + 1) / DISPLAY_HEIGHT;
 
@@ -2470,6 +2573,8 @@ protected:
     void processUp(SingleTouchInputMapper* mappery);
     void processPressure(SingleTouchInputMapper* mapper, int32_t pressure);
     void processToolMajor(SingleTouchInputMapper* mapper, int32_t toolMajor);
+    void processDistance(SingleTouchInputMapper* mapper, int32_t distance);
+    void processKey(SingleTouchInputMapper* mapper, int32_t code, int32_t value);
     void processSync(SingleTouchInputMapper* mapper);
 };
 
@@ -2491,6 +2596,10 @@ void SingleTouchInputMapperTest::prepareAxes(int axes) {
     if (axes & TOOL) {
         mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_TOOL_WIDTH,
                 RAW_TOOL_MIN, RAW_TOOL_MAX, 0, 0);
+    }
+    if (axes & DISTANCE) {
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_DISTANCE,
+                RAW_DISTANCE_MIN, RAW_DISTANCE_MAX, 0, 0);
     }
 }
 
@@ -2517,6 +2626,16 @@ void SingleTouchInputMapperTest::processPressure(
 void SingleTouchInputMapperTest::processToolMajor(
         SingleTouchInputMapper* mapper, int32_t toolMajor) {
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_ABS, ABS_TOOL_WIDTH, 0, toolMajor, 0);
+}
+
+void SingleTouchInputMapperTest::processDistance(
+        SingleTouchInputMapper* mapper, int32_t distance) {
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_ABS, ABS_DISTANCE, 0, distance, 0);
+}
+
+void SingleTouchInputMapperTest::processKey(
+        SingleTouchInputMapper* mapper, int32_t code, int32_t value) {
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, code, 0, value, 0);
 }
 
 void SingleTouchInputMapperTest::processSync(SingleTouchInputMapper* mapper) {
@@ -2581,14 +2700,14 @@ TEST_F(SingleTouchInputMapperTest, GetKeyCodeState) {
     int32_t y = toRawY(VIRTUAL_KEYS[0].centerY);
     processDown(mapper, x, y);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled());
 
     ASSERT_EQ(AKEY_STATE_VIRTUAL, mapper->getKeyCodeState(AINPUT_SOURCE_ANY, AKEYCODE_HOME));
 
     // Virtual key is up.
     processUp(mapper);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled());
 
     ASSERT_EQ(AKEY_STATE_UP, mapper->getKeyCodeState(AINPUT_SOURCE_ANY, AKEYCODE_HOME));
 }
@@ -2610,14 +2729,14 @@ TEST_F(SingleTouchInputMapperTest, GetScanCodeState) {
     int32_t y = toRawY(VIRTUAL_KEYS[0].centerY);
     processDown(mapper, x, y);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled());
 
     ASSERT_EQ(AKEY_STATE_VIRTUAL, mapper->getScanCodeState(AINPUT_SOURCE_ANY, KEY_HOME));
 
     // Virtual key is up.
     processUp(mapper);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled());
 
     ASSERT_EQ(AKEY_STATE_UP, mapper->getScanCodeState(AINPUT_SOURCE_ANY, KEY_HOME));
 }
@@ -2656,13 +2775,13 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenVirtualKeysAreDown_SendsUp) {
     int32_t y = toRawY(VIRTUAL_KEYS[0].centerY);
     processDown(mapper, x, y);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled());
 
     // Reset.  Since key is down, synthesize key up.
     mapper->reset();
 
-    FakeInputDispatcher::NotifyKeyArgs args;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    NotifyKeyArgs args;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     //ASSERT_EQ(ARBITRARY_TIME, args.eventTime);
     ASSERT_EQ(DEVICE_ID, args.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, args.source);
@@ -2689,18 +2808,18 @@ TEST_F(SingleTouchInputMapperTest, Reset_WhenNothingIsPressed_NothingMuchHappens
     int32_t y = toRawY(VIRTUAL_KEYS[0].centerY);
     processDown(mapper, x, y);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled());
 
     // Release virtual key.
     processUp(mapper);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled());
 
     // Reset.  Since no key is down, nothing happens.
     mapper->reset();
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasNotCalled());
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasNotCalled());
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNormally_SendsKeyDownAndKeyUp) {
@@ -2714,7 +2833,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNor
 
     mFakeContext->setGlobalMetaState(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON);
 
-    FakeInputDispatcher::NotifyKeyArgs args;
+    NotifyKeyArgs args;
 
     // Press virtual key.
     int32_t x = toRawX(VIRTUAL_KEYS[0].centerX);
@@ -2722,7 +2841,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNor
     processDown(mapper, x, y);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(ARBITRARY_TIME, args.eventTime);
     ASSERT_EQ(DEVICE_ID, args.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, args.source);
@@ -2738,7 +2857,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNor
     processUp(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&args));
     ASSERT_EQ(ARBITRARY_TIME, args.eventTime);
     ASSERT_EQ(DEVICE_ID, args.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, args.source);
@@ -2751,7 +2870,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndReleasedNor
     ASSERT_EQ(ARBITRARY_TIME, args.downTime);
 
     // Should not have sent any motions.
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasNotCalled());
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfBounds_SendsKeyDownAndKeyCancel) {
@@ -2765,7 +2884,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
 
     mFakeContext->setGlobalMetaState(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON);
 
-    FakeInputDispatcher::NotifyKeyArgs keyArgs;
+    NotifyKeyArgs keyArgs;
 
     // Press virtual key.
     int32_t x = toRawX(VIRTUAL_KEYS[0].centerX);
@@ -2773,7 +2892,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     processDown(mapper, x, y);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
     ASSERT_EQ(ARBITRARY_TIME, keyArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, keyArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, keyArgs.source);
@@ -2791,7 +2910,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     processMove(mapper, x, y);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
     ASSERT_EQ(ARBITRARY_TIME, keyArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, keyArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_KEYBOARD, keyArgs.source);
@@ -2804,8 +2923,8 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     ASSERT_EQ(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON, keyArgs.metaState);
     ASSERT_EQ(ARBITRARY_TIME, keyArgs.downTime);
 
-    FakeInputDispatcher::NotifyMotionArgs motionArgs;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    NotifyMotionArgs motionArgs;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -2819,7 +2938,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
@@ -2829,7 +2948,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     processMove(mapper, x, y);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -2843,7 +2962,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
@@ -2852,7 +2971,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     processUp(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -2866,14 +2985,14 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenVirtualKeyIsPressedAndMovedOutOfB
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
 
     // Should not have sent any more keys or motions.
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasNotCalled());
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasNotCalled());
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMovesIn_SendsDownAsTouchEntersDisplay) {
@@ -2887,7 +3006,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
 
     mFakeContext->setGlobalMetaState(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON);
 
-    FakeInputDispatcher::NotifyMotionArgs motionArgs;
+    NotifyMotionArgs motionArgs;
 
     // Initially go down out of bounds.
     int32_t x = -10;
@@ -2895,7 +3014,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
     processDown(mapper, x, y);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasNotCalled());
 
     // Move into the display area.  Should generate a pointer down.
     x = 50;
@@ -2903,7 +3022,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
     processMove(mapper, x, y);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -2917,7 +3036,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
@@ -2926,7 +3045,7 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
     processUp(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -2940,14 +3059,14 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenTouchStartsOutsideDisplayAndMoves
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
 
     // Should not have sent any more keys or motions.
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasNotCalled());
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasNotCalled());
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
@@ -2961,7 +3080,7 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
 
     mFakeContext->setGlobalMetaState(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON);
 
-    FakeInputDispatcher::NotifyMotionArgs motionArgs;
+    NotifyMotionArgs motionArgs;
 
     // Down.
     int32_t x = 100;
@@ -2969,7 +3088,7 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     processDown(mapper, x, y);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -2983,7 +3102,7 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
@@ -2994,7 +3113,7 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     processMove(mapper, x, y);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3008,7 +3127,7 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
@@ -3017,7 +3136,7 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     processUp(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3031,14 +3150,14 @@ TEST_F(SingleTouchInputMapperTest, Process_NormalSingleTouchGesture) {
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x), toDisplayY(y), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
 
     // Should not have sent any more keys or motions.
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasNotCalled());
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasNotCalled());
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenNotOrientationAware_DoesNotRotateMotions) {
@@ -3049,20 +3168,20 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenNotOrientationAware_DoesNotRotate
     addConfigurationProperty("touch.orientationAware", "0");
     addMapperAndConfigure(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
+    NotifyMotionArgs args;
 
     // Rotation 90.
     prepareDisplay(DISPLAY_ORIENTATION_90);
     processDown(mapper, toRawX(50), toRawY(75));
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
     ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled());
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) {
@@ -3072,59 +3191,59 @@ TEST_F(SingleTouchInputMapperTest, Process_WhenOrientationAware_RotatesMotions) 
     prepareAxes(POSITION);
     addMapperAndConfigure(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
+    NotifyMotionArgs args;
 
     // Rotation 0.
     prepareDisplay(DISPLAY_ORIENTATION_0);
     processDown(mapper, toRawX(50), toRawY(75));
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
     ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled());
 
     // Rotation 90.
     prepareDisplay(DISPLAY_ORIENTATION_90);
     processDown(mapper, RAW_X_MAX - toRawX(75) + RAW_X_MIN, toRawY(50));
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
     ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled());
 
     // Rotation 180.
     prepareDisplay(DISPLAY_ORIENTATION_180);
     processDown(mapper, RAW_X_MAX - toRawX(50) + RAW_X_MIN, RAW_Y_MAX - toRawY(75) + RAW_Y_MIN);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
     ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled());
 
     // Rotation 270.
     prepareDisplay(DISPLAY_ORIENTATION_270);
     processDown(mapper, toRawX(75), RAW_Y_MAX - toRawY(50) + RAW_Y_MIN);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_NEAR(50, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_X), 1);
     ASSERT_NEAR(75, args.pointerCoords[0].getAxisValue(AMOTION_EVENT_AXIS_Y), 1);
 
     processUp(mapper);
     processSync(mapper);
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled());
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_AllAxes_DefaultCalibration) {
@@ -3132,7 +3251,7 @@ TEST_F(SingleTouchInputMapperTest, Process_AllAxes_DefaultCalibration) {
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareButtons();
-    prepareAxes(POSITION | PRESSURE | TOOL);
+    prepareAxes(POSITION | PRESSURE | TOOL | DISTANCE);
     addMapperAndConfigure(mapper);
 
     // These calculations are based on the input device calibration documentation.
@@ -3140,6 +3259,7 @@ TEST_F(SingleTouchInputMapperTest, Process_AllAxes_DefaultCalibration) {
     int32_t rawY = 200;
     int32_t rawPressure = 10;
     int32_t rawToolMajor = 12;
+    int32_t rawDistance = 0;
 
     float x = toDisplayX(rawX);
     float y = toDisplayY(rawY);
@@ -3147,16 +3267,388 @@ TEST_F(SingleTouchInputMapperTest, Process_AllAxes_DefaultCalibration) {
     float size = float(rawToolMajor) / RAW_TOOL_MAX;
     float tool = min(DISPLAY_WIDTH, DISPLAY_HEIGHT) * size;
     float touch = min(tool * pressure, tool);
+    float distance = float(rawDistance);
 
     processDown(mapper, rawX, rawY);
     processPressure(mapper, rawPressure);
     processToolMajor(mapper, rawToolMajor);
+    processDistance(mapper, rawDistance);
     processSync(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    NotifyMotionArgs args;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            x, y, pressure, size, touch, touch, tool, tool, 0));
+            x, y, pressure, size, touch, touch, tool, tool, 0, distance));
+}
+
+TEST_F(SingleTouchInputMapperTest, Process_ShouldHandleAllButtons) {
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
+    prepareAxes(POSITION);
+    addMapperAndConfigure(mapper);
+
+    NotifyMotionArgs motionArgs;
+    NotifyKeyArgs keyArgs;
+
+    processDown(mapper, 100, 200);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
+    ASSERT_EQ(0, motionArgs.buttonState);
+
+    // press BTN_LEFT, release BTN_LEFT
+    processKey(mapper, BTN_LEFT, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_PRIMARY, motionArgs.buttonState);
+
+    processKey(mapper, BTN_LEFT, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    // press BTN_RIGHT + BTN_MIDDLE, release BTN_RIGHT, release BTN_MIDDLE
+    processKey(mapper, BTN_RIGHT, 1);
+    processKey(mapper, BTN_MIDDLE, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_SECONDARY | AMOTION_EVENT_BUTTON_TERTIARY,
+            motionArgs.buttonState);
+
+    processKey(mapper, BTN_RIGHT, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_TERTIARY, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    processKey(mapper, BTN_MIDDLE, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    // press BTN_BACK, release BTN_BACK
+    processKey(mapper, BTN_BACK, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_BACK, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    processKey(mapper, BTN_BACK, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+
+    // press BTN_SIDE, release BTN_SIDE
+    processKey(mapper, BTN_SIDE, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_BACK, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    processKey(mapper, BTN_SIDE, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+
+    // press BTN_FORWARD, release BTN_FORWARD
+    processKey(mapper, BTN_FORWARD, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_FORWARD, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    processKey(mapper, BTN_FORWARD, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+
+    // press BTN_EXTRA, release BTN_EXTRA
+    processKey(mapper, BTN_EXTRA, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_FORWARD, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    processKey(mapper, BTN_EXTRA, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+
+    // press BTN_STYLUS, release BTN_STYLUS
+    processKey(mapper, BTN_STYLUS, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_SECONDARY, motionArgs.buttonState);
+
+    processKey(mapper, BTN_STYLUS, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    // press BTN_STYLUS2, release BTN_STYLUS2
+    processKey(mapper, BTN_STYLUS2, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_TERTIARY, motionArgs.buttonState);
+
+    processKey(mapper, BTN_STYLUS2, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    // release touch
+    processUp(mapper);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
+    ASSERT_EQ(0, motionArgs.buttonState);
+}
+
+TEST_F(SingleTouchInputMapperTest, Process_ShouldHandleAllToolTypes) {
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
+    prepareAxes(POSITION);
+    addMapperAndConfigure(mapper);
+
+    NotifyMotionArgs motionArgs;
+
+    // default tool type is finger
+    processDown(mapper, 100, 200);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+
+    // eraser
+    processKey(mapper, BTN_TOOL_RUBBER, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_ERASER, motionArgs.pointerProperties[0].toolType);
+
+    // stylus
+    processKey(mapper, BTN_TOOL_RUBBER, 0);
+    processKey(mapper, BTN_TOOL_PEN, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_STYLUS, motionArgs.pointerProperties[0].toolType);
+
+    // finger
+    processKey(mapper, BTN_TOOL_PEN, 0);
+    processKey(mapper, BTN_TOOL_FINGER, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+
+    // stylus trumps finger
+    processKey(mapper, BTN_TOOL_PEN, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_STYLUS, motionArgs.pointerProperties[0].toolType);
+
+    // eraser trumps stylus
+    processKey(mapper, BTN_TOOL_RUBBER, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_ERASER, motionArgs.pointerProperties[0].toolType);
+
+    // back to default tool type
+    processKey(mapper, BTN_TOOL_RUBBER, 0);
+    processKey(mapper, BTN_TOOL_PEN, 0);
+    processKey(mapper, BTN_TOOL_FINGER, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+}
+
+TEST_F(SingleTouchInputMapperTest, Process_WhenBtnTouchPresent_HoversIfItsValueIsZero) {
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
+    prepareAxes(POSITION);
+    mFakeEventHub->addKey(DEVICE_ID, BTN_TOOL_FINGER, AKEYCODE_UNKNOWN, 0);
+    addMapperAndConfigure(mapper);
+
+    NotifyMotionArgs motionArgs;
+
+    // initially hovering because BTN_TOUCH not sent yet, pressure defaults to 0
+    processKey(mapper, BTN_TOOL_FINGER, 1);
+    processMove(mapper, 100, 200);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_ENTER, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(100), toDisplayY(200), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(100), toDisplayY(200), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    // move a little
+    processMove(mapper, 150, 250);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    // down when BTN_TOUCH is pressed, pressure defaults to 1
+    processKey(mapper, BTN_TOUCH, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_EXIT, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    // up when BTN_TOUCH is released, hover restored
+    processKey(mapper, BTN_TOUCH, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_ENTER, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    // exit hover when pointer goes away
+    processKey(mapper, BTN_TOOL_FINGER, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_EXIT, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 0));
+}
+
+TEST_F(SingleTouchInputMapperTest, Process_WhenAbsDistanceIsPresent_HoversIfItsValueIsGreaterThanZero) {
+    SingleTouchInputMapper* mapper = new SingleTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareButtons();
+    prepareAxes(POSITION | DISTANCE);
+    addMapperAndConfigure(mapper);
+
+    NotifyMotionArgs motionArgs;
+
+    // initially hovering because distance is 1, pressure defaults to 0
+    processDown(mapper, 100, 200);
+    processDistance(mapper, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_ENTER, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(100), toDisplayY(200), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(100), toDisplayY(200), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    // move a little
+    processMove(mapper, 150, 250);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    // down when distance goes to 0, pressure defaults to 1
+    processDistance(mapper, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_EXIT, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    // up when distance goes to 1, hover restored
+    processDistance(mapper, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_ENTER, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    // exit hover when pointer goes away
+    processUp(mapper);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_EXIT, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 1));
 }
 
 
@@ -3173,7 +3665,11 @@ protected:
     void processToolMinor(MultiTouchInputMapper* mapper, int32_t toolMinor);
     void processOrientation(MultiTouchInputMapper* mapper, int32_t orientation);
     void processPressure(MultiTouchInputMapper* mapper, int32_t pressure);
+    void processDistance(MultiTouchInputMapper* mapper, int32_t distance);
     void processId(MultiTouchInputMapper* mapper, int32_t id);
+    void processSlot(MultiTouchInputMapper* mapper, int32_t slot);
+    void processToolType(MultiTouchInputMapper* mapper, int32_t toolType);
+    void processKey(MultiTouchInputMapper* mapper, int32_t code, int32_t value);
     void processMTSync(MultiTouchInputMapper* mapper);
     void processSync(MultiTouchInputMapper* mapper);
 };
@@ -3209,9 +3705,22 @@ void MultiTouchInputMapperTest::prepareAxes(int axes) {
         mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_PRESSURE,
                 RAW_PRESSURE_MIN, RAW_PRESSURE_MAX, 0, 0);
     }
+    if (axes & DISTANCE) {
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_DISTANCE,
+                RAW_DISTANCE_MIN, RAW_DISTANCE_MAX, 0, 0);
+    }
     if (axes & ID) {
         mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_TRACKING_ID,
                 RAW_ID_MIN, RAW_ID_MAX, 0, 0);
+    }
+    if (axes & SLOT) {
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_SLOT,
+                RAW_SLOT_MIN, RAW_SLOT_MAX, 0, 0);
+        mFakeEventHub->setAbsoluteAxisValue(DEVICE_ID, ABS_MT_SLOT, 0);
+    }
+    if (axes & TOOL_TYPE) {
+        mFakeEventHub->addAbsoluteAxis(DEVICE_ID, ABS_MT_TOOL_TYPE,
+                0, MT_TOOL_MAX, 0, 0);
     }
 }
 
@@ -3251,9 +3760,29 @@ void MultiTouchInputMapperTest::processPressure(
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_ABS, ABS_MT_PRESSURE, 0, pressure, 0);
 }
 
+void MultiTouchInputMapperTest::processDistance(
+        MultiTouchInputMapper* mapper, int32_t distance) {
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_ABS, ABS_MT_DISTANCE, 0, distance, 0);
+}
+
 void MultiTouchInputMapperTest::processId(
         MultiTouchInputMapper* mapper, int32_t id) {
     process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_ABS, ABS_MT_TRACKING_ID, 0, id, 0);
+}
+
+void MultiTouchInputMapperTest::processSlot(
+        MultiTouchInputMapper* mapper, int32_t slot) {
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_ABS, ABS_MT_SLOT, 0, slot, 0);
+}
+
+void MultiTouchInputMapperTest::processToolType(
+        MultiTouchInputMapper* mapper, int32_t toolType) {
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_ABS, ABS_MT_TOOL_TYPE, 0, toolType, 0);
+}
+
+void MultiTouchInputMapperTest::processKey(
+        MultiTouchInputMapper* mapper, int32_t code, int32_t value) {
+    process(mapper, ARBITRARY_TIME, DEVICE_ID, EV_KEY, code, 0, value, 0);
 }
 
 void MultiTouchInputMapperTest::processMTSync(MultiTouchInputMapper* mapper) {
@@ -3275,7 +3804,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
 
     mFakeContext->setGlobalMetaState(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON);
 
-    FakeInputDispatcher::NotifyMotionArgs motionArgs;
+    NotifyMotionArgs motionArgs;
 
     // Two fingers down at once.
     int32_t x1 = 100, y1 = 125, x2 = 300, y2 = 500;
@@ -3285,7 +3814,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3299,12 +3828,12 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3321,9 +3850,9 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
@@ -3336,7 +3865,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3352,9 +3881,9 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
@@ -3365,7 +3894,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3382,14 +3911,14 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3403,7 +3932,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
@@ -3414,7 +3943,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3428,7 +3957,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
@@ -3441,7 +3970,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3458,9 +3987,9 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
@@ -3471,7 +4000,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3488,14 +4017,14 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3509,7 +4038,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
@@ -3518,7 +4047,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.eventTime);
     ASSERT_EQ(DEVICE_ID, motionArgs.deviceId);
     ASSERT_EQ(AINPUT_SOURCE_TOUCHSCREEN, motionArgs.source);
@@ -3532,14 +4061,14 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithoutTrackin
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NEAR(X_PRECISION, motionArgs.xPrecision, EPSILON);
     ASSERT_NEAR(Y_PRECISION, motionArgs.yPrecision, EPSILON);
     ASSERT_EQ(ARBITRARY_TIME, motionArgs.downTime);
 
     // Should not have sent any more keys or motions.
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasNotCalled());
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasNotCalled());
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingIds) {
@@ -3552,7 +4081,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
 
     mFakeContext->setGlobalMetaState(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON);
 
-    FakeInputDispatcher::NotifyMotionArgs motionArgs;
+    NotifyMotionArgs motionArgs;
 
     // Two fingers down at once.
     int32_t x1 = 100, y1 = 125, x2 = 300, y2 = 500;
@@ -3564,15 +4093,15 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_DOWN | (1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
             motionArgs.action);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
@@ -3581,9 +4110,9 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
 
     // Move.
     x1 += 10; y1 += 15; x2 += 5; y2 -= 10;
@@ -3595,7 +4124,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
@@ -3603,9 +4132,9 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
 
     // First finger up.
     x2 += 15; y2 -= 20;
@@ -3614,7 +4143,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_UP | (0 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
             motionArgs.action);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
@@ -3623,17 +4152,17 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
     ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
 
     // Move.
     x2 += 20; y2 -= 25;
@@ -3642,13 +4171,13 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
     ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
 
     // New finger down.
     int32_t x3 = 700, y3 = 300;
@@ -3660,7 +4189,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_DOWN | (0 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
             motionArgs.action);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
@@ -3669,9 +4198,9 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
 
     // Second finger up.
     x3 += 30; y3 -= 20;
@@ -3680,7 +4209,7 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_UP | (1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
             motionArgs.action);
     ASSERT_EQ(size_t(2), motionArgs.pointerCount);
@@ -3689,40 +4218,211 @@ TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithTrackingId
     ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
-            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
 
     // Last finger up.
     processMTSync(mapper);
     processSync(mapper);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
     ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
     ASSERT_EQ(size_t(1), motionArgs.pointerCount);
     ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
     ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
-            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0));
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
 
     // Should not have sent any more keys or motions.
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyKeyWasNotCalled());
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasNotCalled());
+}
+
+TEST_F(MultiTouchInputMapperTest, Process_NormalMultiTouchGesture_WithSlots) {
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareAxes(POSITION | ID | SLOT);
+    prepareVirtualKeys();
+    addMapperAndConfigure(mapper);
+
+    mFakeContext->setGlobalMetaState(AMETA_SHIFT_LEFT_ON | AMETA_SHIFT_ON);
+
+    NotifyMotionArgs motionArgs;
+
+    // Two fingers down at once.
+    int32_t x1 = 100, y1 = 125, x2 = 300, y2 = 500;
+    processPosition(mapper, x1, y1);
+    processId(mapper, 1);
+    processSlot(mapper, 1);
+    processPosition(mapper, x2, y2);
+    processId(mapper, 2);
+    processSync(mapper);
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
+    ASSERT_EQ(size_t(1), motionArgs.pointerCount);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_DOWN | (1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
+            motionArgs.action);
+    ASSERT_EQ(size_t(2), motionArgs.pointerCount);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    // Move.
+    x1 += 10; y1 += 15; x2 += 5; y2 -= 10;
+    processSlot(mapper, 0);
+    processPosition(mapper, x1, y1);
+    processSlot(mapper, 1);
+    processPosition(mapper, x2, y2);
+    processSync(mapper);
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(size_t(2), motionArgs.pointerCount);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    // First finger up.
+    x2 += 15; y2 -= 20;
+    processSlot(mapper, 0);
+    processId(mapper, -1);
+    processSlot(mapper, 1);
+    processPosition(mapper, x2, y2);
+    processSync(mapper);
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_UP | (0 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
+            motionArgs.action);
+    ASSERT_EQ(size_t(2), motionArgs.pointerCount);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(x1), toDisplayY(y1), 1, 0, 0, 0, 0, 0, 0, 0));
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(size_t(1), motionArgs.pointerCount);
+    ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    // Move.
+    x2 += 20; y2 -= 25;
+    processPosition(mapper, x2, y2);
+    processSync(mapper);
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(size_t(1), motionArgs.pointerCount);
+    ASSERT_EQ(1, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    // New finger down.
+    int32_t x3 = 700, y3 = 300;
+    processPosition(mapper, x2, y2);
+    processSlot(mapper, 0);
+    processId(mapper, 3);
+    processPosition(mapper, x3, y3);
+    processSync(mapper);
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_DOWN | (0 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
+            motionArgs.action);
+    ASSERT_EQ(size_t(2), motionArgs.pointerCount);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    // Second finger up.
+    x3 += 30; y3 -= 20;
+    processSlot(mapper, 1);
+    processId(mapper, -1);
+    processSlot(mapper, 0);
+    processPosition(mapper, x3, y3);
+    processSync(mapper);
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_UP | (1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
+            motionArgs.action);
+    ASSERT_EQ(size_t(2), motionArgs.pointerCount);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_EQ(1, motionArgs.pointerProperties[1].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[1].toolType);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[1],
+            toDisplayX(x2), toDisplayY(y2), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(size_t(1), motionArgs.pointerCount);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    // Last finger up.
+    processId(mapper, -1);
+    processSync(mapper);
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
+    ASSERT_EQ(size_t(1), motionArgs.pointerCount);
+    ASSERT_EQ(0, motionArgs.pointerProperties[0].id);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(x3), toDisplayY(y3), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    // Should not have sent any more keys or motions.
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasNotCalled());
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasNotCalled());
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
-    prepareAxes(POSITION | TOUCH | TOOL | PRESSURE | ORIENTATION | ID | MINOR);
+    prepareAxes(POSITION | TOUCH | TOOL | PRESSURE | ORIENTATION | ID | MINOR | DISTANCE);
     addMapperAndConfigure(mapper);
 
     // These calculations are based on the input device calibration documentation.
@@ -3733,6 +4433,7 @@ TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
     int32_t rawToolMajor = 9;
     int32_t rawToolMinor = 8;
     int32_t rawPressure = 11;
+    int32_t rawDistance = 0;
     int32_t rawOrientation = 3;
     int32_t id = 5;
 
@@ -3745,6 +4446,7 @@ TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
     float touchMajor = min(toolMajor * pressure, toolMajor);
     float touchMinor = min(toolMinor * pressure, toolMinor);
     float orientation = float(rawOrientation) / RAW_ORIENTATION_MAX * M_PI_2;
+    float distance = float(rawDistance);
 
     processPosition(mapper, rawX, rawY);
     processTouchMajor(mapper, rawTouchMajor);
@@ -3753,15 +4455,16 @@ TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
     processToolMinor(mapper, rawToolMinor);
     processPressure(mapper, rawPressure);
     processOrientation(mapper, rawOrientation);
+    processDistance(mapper, rawDistance);
     processId(mapper, id);
     processMTSync(mapper);
     processSync(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    NotifyMotionArgs args;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(0, args.pointerProperties[0].id);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            x, y, pressure, size, touchMajor, touchMinor, toolMajor, toolMinor, orientation));
+            x, y, pressure, size, touchMajor, touchMinor, toolMajor, toolMinor, orientation, distance));
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration) {
@@ -3800,10 +4503,10 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration)
     processMTSync(mapper);
     processSync(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    NotifyMotionArgs args;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            x, y, pressure, size, touchMajor, touchMinor, toolMajor, toolMinor, 0));
+            x, y, pressure, size, touchMajor, touchMinor, toolMajor, toolMinor, 0, 0));
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinearCalibration) {
@@ -3850,18 +4553,18 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinear
     processMTSync(mapper);
     processSync(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    NotifyMotionArgs args;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, args.action);
 
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(AMOTION_EVENT_ACTION_POINTER_DOWN | (1 << AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT),
             args.action);
     ASSERT_EQ(size_t(2), args.pointerCount);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            x, y, pressure, size, touch, touch, tool, tool, 0));
+            x, y, pressure, size, touch, touch, tool, tool, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[1],
-            x2, y2, pressure, size, touch, touch, tool, tool, 0));
+            x2, y2, pressure, size, touch, touch, tool, tool, 0, 0));
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_AreaCalibration) {
@@ -3899,10 +4602,395 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_AreaCalibrat
     processMTSync(mapper);
     processSync(mapper);
 
-    FakeInputDispatcher::NotifyMotionArgs args;
-    ASSERT_NO_FATAL_FAILURE(mFakeDispatcher->assertNotifyMotionWasCalled(&args));
+    NotifyMotionArgs args;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            x, y, pressure, size, touch, touch, tool, tool, 0));
+            x, y, pressure, size, touch, touch, tool, tool, 0, 0));
 }
+
+TEST_F(MultiTouchInputMapperTest, Process_ShouldHandleAllButtons) {
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareAxes(POSITION | ID | SLOT);
+    addMapperAndConfigure(mapper);
+
+    NotifyMotionArgs motionArgs;
+    NotifyKeyArgs keyArgs;
+
+    processId(mapper, 1);
+    processPosition(mapper, 100, 200);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
+    ASSERT_EQ(0, motionArgs.buttonState);
+
+    // press BTN_LEFT, release BTN_LEFT
+    processKey(mapper, BTN_LEFT, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_PRIMARY, motionArgs.buttonState);
+
+    processKey(mapper, BTN_LEFT, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    // press BTN_RIGHT + BTN_MIDDLE, release BTN_RIGHT, release BTN_MIDDLE
+    processKey(mapper, BTN_RIGHT, 1);
+    processKey(mapper, BTN_MIDDLE, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_SECONDARY | AMOTION_EVENT_BUTTON_TERTIARY,
+            motionArgs.buttonState);
+
+    processKey(mapper, BTN_RIGHT, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_TERTIARY, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    processKey(mapper, BTN_MIDDLE, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    // press BTN_BACK, release BTN_BACK
+    processKey(mapper, BTN_BACK, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_BACK, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    processKey(mapper, BTN_BACK, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+
+    // press BTN_SIDE, release BTN_SIDE
+    processKey(mapper, BTN_SIDE, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_BACK, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    processKey(mapper, BTN_SIDE, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_BACK, keyArgs.keyCode);
+
+    // press BTN_FORWARD, release BTN_FORWARD
+    processKey(mapper, BTN_FORWARD, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_FORWARD, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    processKey(mapper, BTN_FORWARD, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+
+    // press BTN_EXTRA, release BTN_EXTRA
+    processKey(mapper, BTN_EXTRA, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_DOWN, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_FORWARD, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    processKey(mapper, BTN_EXTRA, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyKeyWasCalled(&keyArgs));
+    ASSERT_EQ(AKEY_EVENT_ACTION_UP, keyArgs.action);
+    ASSERT_EQ(AKEYCODE_FORWARD, keyArgs.keyCode);
+
+    // press BTN_STYLUS, release BTN_STYLUS
+    processKey(mapper, BTN_STYLUS, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_SECONDARY, motionArgs.buttonState);
+
+    processKey(mapper, BTN_STYLUS, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    // press BTN_STYLUS2, release BTN_STYLUS2
+    processKey(mapper, BTN_STYLUS2, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_BUTTON_TERTIARY, motionArgs.buttonState);
+
+    processKey(mapper, BTN_STYLUS2, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(0, motionArgs.buttonState);
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+
+    // release touch
+    processId(mapper, -1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
+    ASSERT_EQ(0, motionArgs.buttonState);
+}
+
+TEST_F(MultiTouchInputMapperTest, Process_ShouldHandleAllToolTypes) {
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareAxes(POSITION | ID | SLOT | TOOL_TYPE);
+    addMapperAndConfigure(mapper);
+
+    NotifyMotionArgs motionArgs;
+
+    // default tool type is finger
+    processId(mapper, 1);
+    processPosition(mapper, 100, 200);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+
+    // eraser
+    processKey(mapper, BTN_TOOL_RUBBER, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_ERASER, motionArgs.pointerProperties[0].toolType);
+
+    // stylus
+    processKey(mapper, BTN_TOOL_RUBBER, 0);
+    processKey(mapper, BTN_TOOL_PEN, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_STYLUS, motionArgs.pointerProperties[0].toolType);
+
+    // finger
+    processKey(mapper, BTN_TOOL_PEN, 0);
+    processKey(mapper, BTN_TOOL_FINGER, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+
+    // stylus trumps finger
+    processKey(mapper, BTN_TOOL_PEN, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_STYLUS, motionArgs.pointerProperties[0].toolType);
+
+    // eraser trumps stylus
+    processKey(mapper, BTN_TOOL_RUBBER, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_ERASER, motionArgs.pointerProperties[0].toolType);
+
+    // MT tool type trumps BTN tool types: MT_TOOL_FINGER
+    processToolType(mapper, MT_TOOL_FINGER); // this is the first time we send MT_TOOL_TYPE
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+
+    // MT tool type trumps BTN tool types: MT_TOOL_PEN
+    processToolType(mapper, MT_TOOL_PEN);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_STYLUS, motionArgs.pointerProperties[0].toolType);
+
+    // back to default tool type
+    processToolType(mapper, -1); // use a deliberately undefined tool type, for testing
+    processKey(mapper, BTN_TOOL_RUBBER, 0);
+    processKey(mapper, BTN_TOOL_PEN, 0);
+    processKey(mapper, BTN_TOOL_FINGER, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_MOVE, motionArgs.action);
+    ASSERT_EQ(AMOTION_EVENT_TOOL_TYPE_FINGER, motionArgs.pointerProperties[0].toolType);
+}
+
+TEST_F(MultiTouchInputMapperTest, Process_WhenBtnTouchPresent_HoversIfItsValueIsZero) {
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareAxes(POSITION | ID | SLOT);
+    mFakeEventHub->addKey(DEVICE_ID, BTN_TOUCH, AKEYCODE_UNKNOWN, 0);
+    addMapperAndConfigure(mapper);
+
+    NotifyMotionArgs motionArgs;
+
+    // initially hovering because BTN_TOUCH not sent yet, pressure defaults to 0
+    processId(mapper, 1);
+    processPosition(mapper, 100, 200);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_ENTER, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(100), toDisplayY(200), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(100), toDisplayY(200), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    // move a little
+    processPosition(mapper, 150, 250);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    // down when BTN_TOUCH is pressed, pressure defaults to 1
+    processKey(mapper, BTN_TOUCH, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_EXIT, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    // up when BTN_TOUCH is released, hover restored
+    processKey(mapper, BTN_TOUCH, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_ENTER, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 0));
+
+    // exit hover when pointer goes away
+    processId(mapper, -1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_EXIT, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 0));
+}
+
+TEST_F(MultiTouchInputMapperTest, Process_WhenAbsMTDistanceIsPresent_HoversIfItsValueIsGreaterThanZero) {
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareAxes(POSITION | ID | SLOT | DISTANCE);
+    addMapperAndConfigure(mapper);
+
+    NotifyMotionArgs motionArgs;
+
+    // initially hovering because distance is 1, pressure defaults to 0
+    processId(mapper, 1);
+    processPosition(mapper, 100, 200);
+    processDistance(mapper, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_ENTER, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(100), toDisplayY(200), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(100), toDisplayY(200), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    // move a little
+    processPosition(mapper, 150, 250);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    // down when distance goes to 0, pressure defaults to 1
+    processDistance(mapper, 0);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_EXIT, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_DOWN, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    // up when distance goes to 1, hover restored
+    processDistance(mapper, 1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_UP, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 1, 0, 0, 0, 0, 0, 0, 0));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_ENTER, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_MOVE, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 1));
+
+    // exit hover when pointer goes away
+    processId(mapper, -1);
+    processSync(mapper);
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&motionArgs));
+    ASSERT_EQ(AMOTION_EVENT_ACTION_HOVER_EXIT, motionArgs.action);
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(motionArgs.pointerCoords[0],
+            toDisplayX(150), toDisplayY(250), 0, 0, 0, 0, 0, 0, 0, 1));
+}
+
 
 } // namespace android

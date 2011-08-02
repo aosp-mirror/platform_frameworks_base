@@ -261,9 +261,7 @@ void PointerController::setSpots(const PointerCoords* spotCoords,
 
     // Add or move spots for fingers that are down.
     for (BitSet32 idBits(spotIdBits); !idBits.isEmpty(); ) {
-        uint32_t id = idBits.firstMarkedBit();
-        idBits.clearBit(id);
-
+        uint32_t id = idBits.clearFirstMarkedBit();
         const PointerCoords& c = spotCoords[spotIdToIndex[id]];
         const SpriteIcon& icon = c.getAxisValue(AMOTION_EVENT_AXIS_PRESSURE) > 0
                 ? mResources.spotTouch : mResources.spotHover;

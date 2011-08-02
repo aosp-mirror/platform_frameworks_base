@@ -280,6 +280,9 @@ status_t PointerCoords::setAxisValue(int32_t axis, float value) {
     uint64_t axisBit = 1LL << axis;
     uint32_t index = __builtin_popcountll(bits & (axisBit - 1LL));
     if (!(bits & axisBit)) {
+        if (value == 0) {
+            return OK; // axes with value 0 do not need to be stored
+        }
         uint32_t count = __builtin_popcountll(bits);
         if (count >= MAX_AXES) {
             tooManyAxes(axis);
@@ -294,23 +297,10 @@ status_t PointerCoords::setAxisValue(int32_t axis, float value) {
     return OK;
 }
 
-float* PointerCoords::editAxisValue(int32_t axis) {
-    if (axis < 0 || axis > 63) {
-        return NULL;
-    }
-
-    uint64_t axisBit = 1LL << axis;
-    if (!(bits & axisBit)) {
-        return NULL;
-    }
-    uint32_t index = __builtin_popcountll(bits & (axisBit - 1LL));
-    return &values[index];
-}
-
 static inline void scaleAxisValue(PointerCoords& c, int axis, float scaleFactor) {
-    float* value = c.editAxisValue(axis);
-    if (value) {
-        *value *= scaleFactor;
+    float value = c.getAxisValue(axis);
+    if (value != 0) {
+        c.setAxisValue(axis, value * scaleFactor);
     }
 }
 
@@ -574,20 +564,14 @@ void MotionEvent::transform(const SkMatrix* matrix) {
     size_t numSamples = mSamplePointerCoords.size();
     for (size_t i = 0; i < numSamples; i++) {
         PointerCoords& c = mSamplePointerCoords.editItemAt(i);
-        float* xPtr = c.editAxisValue(AMOTION_EVENT_AXIS_X);
-        float* yPtr = c.editAxisValue(AMOTION_EVENT_AXIS_Y);
-        if (xPtr && yPtr) {
-            float x = *xPtr + oldXOffset;
-            float y = *yPtr + oldYOffset;
-            matrix->mapXY(SkFloatToScalar(x), SkFloatToScalar(y), & point);
-            *xPtr = SkScalarToFloat(point.fX) - newXOffset;
-            *yPtr = SkScalarToFloat(point.fY) - newYOffset;
-        }
+        float x = c.getAxisValue(AMOTION_EVENT_AXIS_X) + oldXOffset;
+        float y = c.getAxisValue(AMOTION_EVENT_AXIS_Y) + oldYOffset;
+        matrix->mapXY(SkFloatToScalar(x), SkFloatToScalar(y), &point);
+        c.setAxisValue(AMOTION_EVENT_AXIS_X, SkScalarToFloat(point.fX) - newXOffset);
+        c.setAxisValue(AMOTION_EVENT_AXIS_Y, SkScalarToFloat(point.fY) - newYOffset);
 
-        float* orientationPtr = c.editAxisValue(AMOTION_EVENT_AXIS_ORIENTATION);
-        if (orientationPtr) {
-            *orientationPtr = transformAngle(matrix, *orientationPtr);
-        }
+        float orientation = c.getAxisValue(AMOTION_EVENT_AXIS_ORIENTATION);
+        c.setAxisValue(AMOTION_EVENT_AXIS_ORIENTATION, transformAngle(matrix, orientation));
     }
 }
 
@@ -727,7 +711,7 @@ void VelocityTracker::addMovement(nsecs_t eventTime, BitSet32 idBits, const Posi
     }
 
     while (idBits.count() > MAX_POINTERS) {
-        idBits.clearBit(idBits.lastMarkedBit());
+        idBits.clearLastMarkedBit();
     }
 
     Movement& movement = mMovements[mIndex];
@@ -776,7 +760,7 @@ void VelocityTracker::addMovement(const MotionEvent* event) {
         // We do this on down instead of on up because the client may want to query the
         // final velocity for a pointer that just went up.
         BitSet32 downIdBits;
-        downIdBits.markBit(event->getActionIndex());
+        downIdBits.markBit(event->getPointerId(event->getActionIndex()));
         clearPointers(downIdBits);
         break;
     }

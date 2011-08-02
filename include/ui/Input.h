@@ -206,9 +206,16 @@ struct PointerCoords {
 
     float getAxisValue(int32_t axis) const;
     status_t setAxisValue(int32_t axis, float value);
-    float* editAxisValue(int32_t axis);
 
     void scale(float scale);
+
+    inline float getX() const {
+        return getAxisValue(AMOTION_EVENT_AXIS_X);
+    }
+
+    inline float getY() const {
+        return getAxisValue(AMOTION_EVENT_AXIS_Y);
+    }
 
 #ifdef HAVE_ANDROID_OS
     status_t readFromParcel(Parcel* parcel);
