@@ -166,9 +166,6 @@ void ResourceCache::destructor(SkiaShader* resource) {
     ResourceReference* ref = mCache->indexOfKey(resource) >= 0 ? mCache->valueFor(resource) : NULL;
     if (ref == NULL) {
         // If we're not tracking this resource, just delete it
-        if (Caches::hasInstance()) {
-            Caches::getInstance().gradientCache.removeDeferred(resource->getSkShader());
-        }
         delete resource;
         return;
     }
@@ -220,9 +217,6 @@ void ResourceCache::deleteResourceReference(void* resource, ResourceReference* r
             break;
             case kShader: {
                 SkiaShader* shader = (SkiaShader*) resource;
-                if (Caches::hasInstance()) {
-                    Caches::getInstance().gradientCache.removeDeferred(shader->getSkShader());
-                }
                 delete shader;
             }
             break;
