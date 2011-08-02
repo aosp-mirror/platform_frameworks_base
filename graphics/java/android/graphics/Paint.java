@@ -349,6 +349,18 @@ public class Paint {
         mCompatScaling = paint.mCompatScaling;
         mInvCompatScaling = paint.mInvCompatScaling;
         mBidiFlags = paint.mBidiFlags;
+        hasShadow = paint.hasShadow;
+        mColorFilter = paint.mColorFilter;
+        mMaskFilter = paint.mMaskFilter;
+        mPathEffect = paint.mPathEffect;
+        mRasterizer = paint.mRasterizer;
+        mShader = paint.mShader;
+        mTypeface = paint.mTypeface;
+        mXfermode = paint.mXfermode;
+        shadowColor = paint.shadowColor;
+        shadowDx = paint.shadowDx;
+        shadowDy = paint.shadowDy;
+        shadowRadius = paint.shadowRadius;
     }
 
     /** Restores the paint to its default settings. */
@@ -1932,7 +1944,11 @@ public class Paint {
     
     @Override
     protected void finalize() throws Throwable {
-        finalizer(mNativePaint);
+        try {
+            finalizer(mNativePaint);
+        } finally {
+            super.finalize();
+        }
     }
 
     private static native int native_init();
