@@ -101,6 +101,7 @@ public class PathsActivity extends Activity {
             Canvas canvas = new Canvas(mBitmap);
             canvas.translate(-mPathBounds.left + mOffset * 1.5f, -mPathBounds.top + mOffset * 1.5f);
             canvas.drawPath(mPath, mMediumPaint);
+            canvas.setBitmap(null);
         }
 
         @Override
