@@ -129,6 +129,7 @@ import javax.crypto.spec.SecretKeySpec;
 class BackupManagerService extends IBackupManager.Stub {
     private static final String TAG = "BackupManagerService";
     private static final boolean DEBUG = true;
+    private static final boolean MORE_DEBUG = false;
 
     // Name and current contents version of the full-backup manifest file
     static final String BACKUP_MANIFEST_FILENAME = "_manifest";
@@ -851,10 +852,10 @@ class BackupManagerService extends IBackupManager.Stub {
                         info = mPackageManager.getPackageInfo(pkg, 0);
                         mEverStoredApps.add(pkg);
                         temp.writeUTF(pkg);
-                        if (DEBUG) Slog.v(TAG, "   + " + pkg);
+                        if (MORE_DEBUG) Slog.v(TAG, "   + " + pkg);
                     } catch (NameNotFoundException e) {
                         // nope, this package was uninstalled; don't include it
-                        if (DEBUG) Slog.v(TAG, "   - " + pkg);
+                        if (MORE_DEBUG) Slog.v(TAG, "   - " + pkg);
                     }
                 }
             } catch (EOFException e) {
@@ -1246,7 +1247,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     private void addPackageParticipantsLockedInner(String packageName,
             List<PackageInfo> targetPkgs) {
-        if (DEBUG) {
+        if (MORE_DEBUG) {
             Slog.v(TAG, "Adding " + targetPkgs.size() + " backup participants:");
             for (PackageInfo p : targetPkgs) {
                 Slog.v(TAG, "    " + p + " agent=" + p.applicationInfo.backupAgentName
@@ -1296,7 +1297,7 @@ class BackupManagerService extends IBackupManager.Stub {
 
     private void removePackageParticipantsLockedInner(String packageName,
             List<String> allPackageNames) {
-        if (DEBUG) {
+        if (MORE_DEBUG) {
             Slog.v(TAG, "removePackageParticipantsLockedInner (" + packageName
                     + ") removing " + allPackageNames.size() + " entries");
             for (String p : allPackageNames) {
@@ -1320,7 +1321,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     // We can't just remove(app) because the instances are different.
                     for (ApplicationInfo entry: set) {
                         if (entry.packageName.equals(pkg)) {
-                            if (DEBUG) Slog.v(TAG, "  removing participant " + pkg);
+                            if (MORE_DEBUG) Slog.v(TAG, "  removing participant " + pkg);
                             set.remove(entry);
                             removeEverBackedUp(pkg);
                             break;
@@ -1403,7 +1404,8 @@ class BackupManagerService extends IBackupManager.Stub {
 
     // Remove our awareness of having ever backed up the given package
     void removeEverBackedUp(String packageName) {
-        if (DEBUG) Slog.v(TAG, "Removing backed-up knowledge of " + packageName + ", new set:");
+        if (DEBUG) Slog.v(TAG, "Removing backed-up knowledge of " + packageName);
+        if (MORE_DEBUG) Slog.v(TAG, "New set:");
 
         synchronized (mEverStoredApps) {
             // Rewrite the file and rename to overwrite.  If we reboot in the middle,
@@ -1416,7 +1418,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 mEverStoredApps.remove(packageName);
                 for (String s : mEverStoredApps) {
                     known.writeUTF(s);
-                    if (DEBUG) Slog.v(TAG, "    " + s);
+                    if (MORE_DEBUG) Slog.v(TAG, "    " + s);
                 }
                 known.close();
                 known = null;
@@ -1460,7 +1462,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (DEBUG) Slog.v(TAG, "Ancestral packages:  " + mAncestralPackages.size());
                 for (String pkgName : mAncestralPackages) {
                     af.writeUTF(pkgName);
-                    if (DEBUG) Slog.v(TAG, "   " + pkgName);
+                    if (MORE_DEBUG) Slog.v(TAG, "   " + pkgName);
                 }
             }
             af.close();
@@ -1523,7 +1525,7 @@ class BackupManagerService extends IBackupManager.Stub {
         try {
             PackageInfo info = mPackageManager.getPackageInfo(packageName, 0);
             if ((info.applicationInfo.flags & ApplicationInfo.FLAG_ALLOW_CLEAR_USER_DATA) == 0) {
-                if (DEBUG) Slog.i(TAG, "allowClearUserData=false so not wiping "
+                if (MORE_DEBUG) Slog.i(TAG, "allowClearUserData=false so not wiping "
                         + packageName);
                 return;
             }
@@ -1593,13 +1595,13 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
         mBackupHandler.removeMessages(MSG_TIMEOUT);
-        if (DEBUG) Slog.v(TAG, "operation " + Integer.toHexString(token)
+        if (MORE_DEBUG) Slog.v(TAG, "operation " + Integer.toHexString(token)
                 + " complete: finalState=" + finalState);
         return finalState == OP_ACKNOWLEDGED;
     }
 
     void prepareOperationTimeout(int token, long interval) {
-        if (DEBUG) Slog.v(TAG, "starting timeout: token=" + Integer.toHexString(token)
+        if (MORE_DEBUG) Slog.v(TAG, "starting timeout: token=" + Integer.toHexString(token)
                 + " interval=" + interval);
         synchronized (mCurrentOpLock) {
             mCurrentOperations.put(token, OP_PENDING);
@@ -1937,7 +1939,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     BackupDataOutput output = new BackupDataOutput(
                             mPipe.getFileDescriptor());
 
-                    if (DEBUG) Slog.d(TAG, "Writing manifest for " + mPackage.packageName);
+                    if (MORE_DEBUG) Slog.d(TAG, "Writing manifest for " + mPackage.packageName);
                     writeAppManifest(mPackage, mManifestFile, mSendApk);
                     FullBackup.backupToTar(mPackage.packageName, null, null,
                             mFilesDir.getAbsolutePath(),
@@ -1948,7 +1950,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         writeApkToBackup(mPackage, output);
                     }
 
-                    if (DEBUG) Slog.d(TAG, "Calling doFullBackup()");
+                    if (DEBUG) Slog.d(TAG, "Calling doFullBackup() on " + mPackage.packageName);
                     prepareOperationTimeout(mToken, TIMEOUT_FULL_BACKUP_INTERVAL);
                     mAgent.doFullBackup(mPipe, mToken, mBackupManagerBinder);
                 } catch (IOException e) {
@@ -2285,7 +2287,7 @@ class BackupManagerService extends IBackupManager.Stub {
             // check for .obb and save those too
             final File obbDir = Environment.getExternalStorageAppObbDirectory(pkg.packageName);
             if (obbDir != null) {
-                if (DEBUG) Log.i(TAG, "obb dir: " + obbDir.getAbsolutePath());
+                if (MORE_DEBUG) Log.i(TAG, "obb dir: " + obbDir.getAbsolutePath());
                 File[] obbFiles = obbDir.listFiles();
                 if (obbFiles != null) {
                     final String obbDirName = obbDir.getAbsolutePath();
@@ -2374,10 +2376,10 @@ class BackupManagerService extends IBackupManager.Stub {
                         // The agent was running with a stub Application object, so shut it down.
                         if (app.uid != Process.SYSTEM_UID
                                 && app.uid != Process.PHONE_UID) {
-                            if (DEBUG) Slog.d(TAG, "Backup complete, killing host process");
+                            if (MORE_DEBUG) Slog.d(TAG, "Backup complete, killing host process");
                             mActivityManager.killApplicationProcess(app.processName, app.uid);
                         } else {
-                            if (DEBUG) Slog.d(TAG, "Not killing after restore: " + app.processName);
+                            if (MORE_DEBUG) Slog.d(TAG, "Not killing after restore: " + app.processName);
                         }
                     } catch (RemoteException e) {
                         Slog.d(TAG, "Lost app trying to shut down");
@@ -2600,7 +2602,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     didRestore = restoreOneFile(in, buffer);
                 } while (didRestore);
 
-                if (DEBUG) Slog.v(TAG, "Done consuming input tarfile, total bytes=" + mBytes);
+                if (MORE_DEBUG) Slog.v(TAG, "Done consuming input tarfile, total bytes=" + mBytes);
             } catch (IOException e) {
                 Slog.e(TAG, "Unable to read restore input");
             } finally {
@@ -2624,7 +2626,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 }
                 sendEndRestore();
                 mWakelock.release();
-                if (DEBUG) Slog.d(TAG, "Full restore pass complete.");
+                Slog.d(TAG, "Full restore pass complete.");
             }
         }
 
@@ -2722,7 +2724,7 @@ class BackupManagerService extends IBackupManager.Stub {
             try {
                 info = readTarHeaders(instream);
                 if (info != null) {
-                    if (DEBUG) {
+                    if (MORE_DEBUG) {
                         dumpFileMetadata(info);
                     }
 
@@ -2910,7 +2912,6 @@ class BackupManagerService extends IBackupManager.Stub {
                                 boolean pipeOkay = true;
                                 FileOutputStream pipe = new FileOutputStream(
                                         mPipes[1].getFileDescriptor());
-                                if (DEBUG) Slog.d(TAG, "Piping data to agent");
                                 while (toCopy > 0) {
                                     int toRead = (toCopy > buffer.length)
                                     ? buffer.length : (int)toCopy;
@@ -3629,7 +3630,7 @@ class BackupManagerService extends IBackupManager.Stub {
         // Allow unsigned apps, but not signed on one device and unsigned on the other
         // !!! TODO: is this the right policy?
         Signature[] deviceSigs = target.signatures;
-        if (DEBUG) Slog.v(TAG, "signaturesMatch(): stored=" + storedSigs
+        if (MORE_DEBUG) Slog.v(TAG, "signaturesMatch(): stored=" + storedSigs
                 + " device=" + deviceSigs);
         if ((storedSigs == null || storedSigs.length == 0)
                 && (deviceSigs == null || deviceSigs.length == 0)) {
@@ -4189,7 +4190,7 @@ class BackupManagerService extends IBackupManager.Stub {
                         // in the set; we want to avoid touching the disk redundantly.
                         writeToJournalLocked(packageName);
 
-                        if (DEBUG) {
+                        if (MORE_DEBUG) {
                             int numKeys = mPendingBackups.size();
                             Slog.d(TAG, "Now awaiting backup for " + numKeys + " participants:");
                             for (BackupRequest b : mPendingBackups.values()) {
@@ -4387,7 +4388,7 @@ class BackupManagerService extends IBackupManager.Stub {
             }
             Binder.restoreCallingIdentity(oldId);
         }
-        if (DEBUG) Slog.d(TAG, "Full backup done; returning to caller");
+        if (MORE_DEBUG) Slog.d(TAG, "Full backup done; returning to caller");
     }
 
     public void fullRestore(ParcelFileDescriptor fd) {
@@ -4446,7 +4447,7 @@ class BackupManagerService extends IBackupManager.Stub {
     }
 
     void startConfirmationTimeout(int token, FullParams params) {
-        if (DEBUG) Slog.d(TAG, "Posting conf timeout msg after "
+        if (MORE_DEBUG) Slog.d(TAG, "Posting conf timeout msg after "
                 + TIMEOUT_FULL_CONFIRMATION + " millis");
         Message msg = mBackupHandler.obtainMessage(MSG_FULL_CONFIRMATION_TIMEOUT,
                 token, 0, params);
@@ -4625,7 +4626,7 @@ class BackupManagerService extends IBackupManager.Stub {
     public String getCurrentTransport() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getCurrentTransport");
-        if (DEBUG) Slog.v(TAG, "... getCurrentTransport() returning " + mCurrentTransport);
+        if (MORE_DEBUG) Slog.v(TAG, "... getCurrentTransport() returning " + mCurrentTransport);
         return mCurrentTransport;
     }
 
@@ -4682,7 +4683,7 @@ class BackupManagerService extends IBackupManager.Stub {
             if (transport != null) {
                 try {
                     final Intent intent = transport.configurationIntent();
-                    if (DEBUG) Slog.d(TAG, "getConfigurationIntent() returning config intent "
+                    if (MORE_DEBUG) Slog.d(TAG, "getConfigurationIntent() returning config intent "
                             + intent);
                     return intent;
                 } catch (RemoteException e) {
@@ -4708,7 +4709,7 @@ class BackupManagerService extends IBackupManager.Stub {
             if (transport != null) {
                 try {
                     final String text = transport.currentDestinationString();
-                    if (DEBUG) Slog.d(TAG, "getDestinationString() returning " + text);
+                    if (MORE_DEBUG) Slog.d(TAG, "getDestinationString() returning " + text);
                     return text;
                 } catch (RemoteException e) {
                     /* fall through to return null */
@@ -4853,7 +4854,7 @@ class BackupManagerService extends IBackupManager.Stub {
     // completed the given outstanding asynchronous backup/restore operation.
     public void opComplete(int token) {
         synchronized (mCurrentOpLock) {
-            if (DEBUG) Slog.v(TAG, "opComplete: " + Integer.toHexString(token));
+            if (MORE_DEBUG) Slog.v(TAG, "opComplete: " + Integer.toHexString(token));
             mCurrentOperations.put(token, OP_ACKNOWLEDGED);
             mCurrentOpLock.notifyAll();
         }
