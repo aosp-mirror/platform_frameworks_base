@@ -408,6 +408,23 @@ public class UsbManager {
     }
 
     /**
+     * Returns the current default USB function.
+     *
+     * @return name of the default function.
+     *
+     * {@hide}
+     */
+    public String getDefaultFunction() {
+        String functions = SystemProperties.get("persist.sys.usb.config", "");
+        int commaIndex = functions.indexOf(',');
+        if (commaIndex > 0) {
+            return functions.substring(0, commaIndex);
+        } else {
+            return functions;
+        }
+    }
+
+    /**
      * Sets the current USB function.
      * If function is null, then the current function is set to the default function.
      *
