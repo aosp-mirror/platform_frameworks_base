@@ -16,24 +16,33 @@
 
 package com.android.mediaframeworktest;
 
+import android.media.EncoderCapabilities.AudioEncoderCap;
+import android.media.EncoderCapabilities.VideoEncoderCap;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
 import android.test.InstrumentationTestSuite;
 import com.android.mediaframeworktest.stress.MediaRecorderStressTest;
 
+import java.util.List;
 import junit.framework.TestSuite;
 
 public class MediaRecorderStressTestRunner extends InstrumentationTestRunner {
 
-    // Default recorder settings
+    public static List<VideoEncoderCap> videoEncoders = MediaProfileReader.getVideoEncoders();
+    public static  List<AudioEncoderCap> audioEncoders = MediaProfileReader.getAudioEncoders();
+
+    //Get the first capability as the default
+    public static VideoEncoderCap videoEncoder = videoEncoders.get(0);
+    public static AudioEncoderCap audioEncoder = audioEncoders.get(0);
+
     public static int mIterations = 100;
-    public static int mVideoEncoder = MediaRecorder.VideoEncoder.H263;
-    public static int mAudioEncdoer = MediaRecorder.AudioEncoder.AMR_NB;
-    public static int mFrameRate = 20;
-    public static int mVideoWidth = 352;
-    public static int mVideoHeight = 288;
-    public static int mBitRate = 100;
+    public static int mVideoEncoder = videoEncoder.mCodec;
+    public static int mAudioEncdoer = audioEncoder.mCodec;
+    public static int mFrameRate = videoEncoder.mMaxFrameRate;
+    public static int mVideoWidth = videoEncoder.mMaxFrameWidth;
+    public static int mVideoHeight = videoEncoder.mMaxFrameHeight;
+    public static int mBitRate = audioEncoder.mMaxBitRate;
     public static boolean mRemoveVideo = true;
     public static int mDuration = 10000;
 
