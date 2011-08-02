@@ -57,4 +57,7 @@
 
     <!-- opacity at which Notification icons will be drawn in the status bar -->
     <item type="dimen" name="status_bar_icon_drawing_alpha">40%</item>
+
+    <!-- gap on either side of status bar notification icons -->
+    <dimen name="status_bar_icon_padding">0dp</dimen>
 </resources>
