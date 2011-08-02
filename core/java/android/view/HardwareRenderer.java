@@ -685,16 +685,17 @@ public abstract class HardwareRenderer {
             if (full && mCanvas != null) {
                 mCanvas = null;
             }
-            
-            if (!isEnabled() || mDestroyed) return;
 
-            mDestroyed = true;
+            if (!isEnabled() || mDestroyed) {
+                setEnabled(false);
+                return;
+            }
 
             destroySurface();
-
-            mGl = null;
-
             setEnabled(false);
+
+            mDestroyed = true;
+            mGl = null;
         }
 
         void destroySurface() {
