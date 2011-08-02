@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Ļauj lietojumprogrammām sekot līdzi nospiestajiem taustiņiem, mijiedarbojoties ar citu lietojumprogrammu (piemēram, ievadot paroli). Parastajām lietojumprogrammām nekad nav nepieciešama."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"saistīt ar ievades metodi"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Ļauj īpašniekam saistīt ar ievades metodes augšējā līmeņa saskarni. Parastajām lietojumprogrammām nekad nav nepieciešama."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"saistīt ar īsziņu pakalpojumu"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Ļauj īpašniekam veikt saistīšanu ar īsziņu pakalpojuma augstākā līmeņa interfeisu (piem., SpellCheckerService). Nekad nav nepieciešama parastām lietojumprogrammām."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"saistīt ar tapeti"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Ļauj īpašniekam saistīties ar tapetes augšējā līmeņa saskarni. Parastajās lietojumprogrammās nekad nav nepieciešama."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"saistīt ar logrīka pakalpojumu"</string>
@@ -724,10 +722,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Ļauj lietojumprogrammai pārveidot tālrunī saglabāto pārlūkprogrammas vēsturi un grāmatzīmes. Ļaunprātīgas lietojumprogrammas var to izmantot, lai dzēstu vai pārveidotu pārlūkprogrammas datus."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"iestatīt trauksmi modinātājpulkstenī"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Ļauj lietojumprogrammai iestatīt trauksmi instalētajā modinātājpulksteņa lietojumprogrammā. Dažās modinātājpulksteņu lietojumprogrammās šī funkcija var nebūt īstenojama."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
-    <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
-    <skip />
+    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"Piekļuve balss pasta ziņojumiem, kas tiek pārvaldīti šajā lietojumprogrammā"</string>
+    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Ļauj lietojumprogrammai glabāt un izgūt tikai tos balss pasta ziņojumus, kuriem var piekļūt no saistītā pakalpojuma."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Pārveidot pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Ļauj lietojumprogrammai pārveidot pārlūkprogrammas ģeogrāfiskās atrašanās vietas atļaujas. Ļaunprātīgas lietojumprogrammas var to izmantot, lai atļautu atrašanās vietas informācijas sūtīšanu uz citām vietnēm."</string>
     <string name="save_password_message" msgid="767344687139195790">"Vai vēlaties, lai pārlūkprogrammā tiktu saglabāta šī parole?"</string>
@@ -843,7 +839,8 @@
     <string name="cut" msgid="3092569408438626261">"Izgriezt"</string>
     <string name="copy" msgid="2681946229533511987">"Kopēt"</string>
     <string name="paste" msgid="5629880836805036433">"Ielīmēt"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Nav ielīmējamu vien."</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Kopēt URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Atlasīt tekstu..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Teksta atlase"</string>
@@ -880,12 +877,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Lietojumpr. ir novirzīta"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> tagad darbojas."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Sākotnēji tika palaista lietojumprogramma <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Mērogs"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"Rādīt vienmēr"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Iespējojiet atkārtoti, izmantojot Iestatījumi &gt; Lietojumprogrammas &gt; Pārvaldīt lietojumprogrammas."</string>
     <string name="smv_application" msgid="295583804361236288">"Lietojumprogramma <xliff:g id="APPLICATION">%1$s</xliff:g> (process <xliff:g id="PROCESS">%2$s</xliff:g>) ir pārkāpusi savu pašieviesto StrictMode politiku."</string>
     <string name="smv_process" msgid="5120397012047462446">"Process <xliff:g id="PROCESS">%1$s</xliff:g> ir pārkāpis savu pašieviesto StrictMode politiku."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> darbojas"</string>
@@ -919,40 +913,26 @@
     <item quantity="one" msgid="1634101450343277345">"Ir pieejams atvērts Wi-Fi tīkls"</item>
     <item quantity="other" msgid="7915895323644292768">"Ir pieejami atvērti Wi-Fi tīkli."</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Wi-Fi tīkls tika atspējots."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Wi-Fi tīkls tika īslaicīgi atspējots sliktas savienojamības dēļ."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Sākt Wi-Fi Direct darbību. Tiks izslēgta Wi-Fi klienta/tīklāja darbība."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Neizdevās palaist Wi-Fi Direct"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Wi-Fi Direct savienojuma iestatīšanas pieprasījums no adreses <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Noklikšķiniet uz Labi, lai apstiprinātu."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Wi-Fi Direct savienojuma iestatīšanas pieprasījums no adreses <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Lai turpinātu, ievadiet PIN."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Lai turpinātu savienojuma iestatīšanu, vienādranga ierīcē <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> ir jāievada WPS PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>."</string>
     <string name="select_character" msgid="3365550120617701745">"Ievietojiet rakstzīmi"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Nezināma lietojumprogramma"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Īsziņu sūtīšana"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"Tiek sūtīts liels īsziņu skaits. Atlasiet Labi, lai turpinātu, vai Atcelt, lai apturētu sūtīšanu."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"Labi"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Atcelt"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM karte ir izņemta."</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"Mobilo sakaru tīkls nebūs pieejams, līdz nomainīsiet SIM karti."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Gatavs"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIM karte ir pievienota."</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"Lai piekļūtu mobilo sakaru tīklam, restartējiet ierīci."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Restartēt"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Laika iestatīšana"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datuma iestatīšana"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Iestatīt"</string>
@@ -983,8 +963,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Pievienots kā multivides ierīce"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Pievienots kā kamera"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Pievienots kā instalēšanas programma"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Ir izveidots savienojums ar USB piederumu."</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Pieskarieties, lai skatītu citas USB opcijas."</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"USB kr. formatēšana"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SD kartes formatēšana"</string>
@@ -1104,6 +1083,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Atlasīt kontu"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Palielināt"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Samazināt"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Pārvietoties uz sākuma ekrānu"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Pārvietoties augšup"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Vairāk opciju"</string>
@@ -1117,6 +1112,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G dati ir atspējoti"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilie dati ir atspējoti"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"pieskarieties, lai iespējotu"</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Drošības sertifikāts"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Sertifikāts ir derīgs."</string>
     <string name="issued_to" msgid="454239480274921032">"Izdots:"</string>
@@ -1132,8 +1135,7 @@
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 identifikators"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 identifikators:"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Skatīt visas"</string>
-    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Darbību atlasīšana"</string>
-    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Kopīgot ar..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Darbības atlase"</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Koplietot ar..."</string>
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Ierīce bloķēta"</string>
 </resources>

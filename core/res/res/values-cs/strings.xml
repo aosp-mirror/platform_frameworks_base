@@ -843,7 +843,8 @@
     <string name="cut" msgid="3092569408438626261">"Vyjmout"</string>
     <string name="copy" msgid="2681946229533511987">"Kopírovat"</string>
     <string name="paste" msgid="5629880836805036433">"Vložit"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Není co vložit"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Kopírovat adresu URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Vybrat text..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Výběr textu"</string>
@@ -880,12 +881,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplikace přesměrována"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Je spuštěna aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Původně byla spuštěna aplikace <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Měřítko"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"Vždy zobrazovat"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Tuto možnost můžete opět aktivovat v části Nastavení &gt; Aplikace &gt; Správa aplikací."</string>
     <string name="smv_application" msgid="295583804361236288">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila své vlastní vynucené zásady StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil své vlastní vynucené zásady StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Běží aplikace <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -941,18 +939,12 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Je odesílán velký počet zpráv SMS. Vyberte OK, chcete-li pokračovat, nebo Zrušit, chcete-li odesílání ukončit."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Zrušit"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"Karta SIM odebrána"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"Mobilní síť bude nedostupná, dokud nevyměníte kartu SIM."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Hotovo"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"Karta SIM přidána."</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"Mobilní síť bude přístupná po restartu zařízení."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Restartovat"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastavení času"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nastavení data"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Nastavit"</string>
@@ -1104,6 +1096,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Vybrat účet"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Zvýšení"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Snížení"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Přejít na plochu"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Přejít nahoru"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Další možnosti"</string>
@@ -1117,6 +1125,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Datové přenosy 4G jsou zakázány"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilní data jsou zakázána"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"klepnutím povolíte"</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Certifikát zabezpečení"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Tento certifikát je platný."</string>
     <string name="issued_to" msgid="454239480274921032">"Vydáno pro:"</string>
@@ -1133,7 +1149,7 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Digitální otisk SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Zobrazit vše..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Vybrat činnost"</string>
-    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Sdílet..."</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Sdílet s..."</string>
     <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
     <skip />
 </resources>

@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"อนุญาตให้แอปพลิเคชันดูปุ่มที่คุณกดแม้ในระหว่างที่ทำงานร่วมกับแอปพลิเคชันอื่น (เช่น ป้อนรหัสผ่าน) ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"เชื่อมโยงกับวิธีป้อนข้อมูล"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"อนุญาตให้ผู้ถือเชื่อมโยงกับอินเทอร์เฟซระดับสูงสุดของวิธีป้อนข้อมูล ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"เชื่อมโยงกับบริการข้อความ"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"อนุญาตให้ผู้ถือเชื่อมโยงกับอินเทอร์เฟซระดับสูงสุดของบริการข้อความ (เช่น บริการเครื่องตรวจตัวสะกด) ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"เชื่อมโยงกับวอลเปเปอร์"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"อนุญาตให้ผู้ถือเชื่อมโยงกับอินเทอร์เฟซระดับสูงสุดของวอลเปเปอร์ ไม่ควรต้องใช้สำหรับแอปพลิเคชันทั่วไป"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"เชื่อมโยงกับบริการวิดเจ็ต"</string>
@@ -724,10 +722,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"อนุญาตให้แอปพลิเคชันแก้ไขประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บบนโทรศัพท์ของคุณ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้ลบหรือแก้ไขข้อมูลเบราว์เซอร์ของคุณได้"</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"ตั้งเวลาปลุกในนาฬิกาปลุก"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"อนุญาตให้แอปพลิเคชันนี้ตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้งไว้ แอปพลิเคชันนาฬิกาปลุกบางประเภทอาจไม่ใช้คุณลักษณะนี้"</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
-    <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
-    <skip />
+    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"เข้าถึงข้อความเสียงที่จัดการโดยแอปพลิเคชันนี้"</string>
+    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"อนุญาตให้แอปพลิเคชันจัดเก็บและเรียกเฉพาะข้อมูลเสียงซึ่งบริการที่เกี่ยวข้องของข้อมูลเสียงสามารถเข้าถึงได้เท่านั้น"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"แก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"อนุญาตให้แอปพลิเคชันแก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้อนุญาตให้ส่งข้อมูลตำแหน่งไปที่เว็บไซต์อื่นได้โดยพลการ"</string>
     <string name="save_password_message" msgid="767344687139195790">"คุณต้องการให้เบราว์เซอร์จำรหัสผ่านนี้หรือไม่"</string>
@@ -843,7 +839,8 @@
     <string name="cut" msgid="3092569408438626261">"ตัด"</string>
     <string name="copy" msgid="2681946229533511987">"คัดลอก"</string>
     <string name="paste" msgid="5629880836805036433">"วาง"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"ไม่มีสิ่งที่จะวาง"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"คัดลอก URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"เลือกข้อความ..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"การเลือกข้อความ"</string>
@@ -880,12 +877,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"เปลี่ยนเส้นทางแอปพลิเคชัน"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> กำลังทำงานอยู่ในขณะนี้"</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> เปิดใช้ไว้แล้ว"</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"สเกล"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"แสดงเสมอ"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"เปิดใช้งานอีกครั้งด้วยการไปที่การตั้งค่า &gt; แอปพลิเคชัน &gt; จัดการแอปพลิเคชัน"</string>
     <string name="smv_application" msgid="295583804361236288">"แอปพลิเคชัน <xliff:g id="APPLICATION">%1$s</xliff:g> (กระบวนการ <xliff:g id="PROCESS">%2$s</xliff:g>) ละเมิดนโยบาย StrictMode ที่บังคับใช้ด้วยตัวเอง"</string>
     <string name="smv_process" msgid="5120397012047462446">"กระบวนการ <xliff:g id="PROCESS">%1$s</xliff:g> ละเมิดนโยบาย StrictMode ที่บังคับใช้ด้วยตัวเอง"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> กำลังทำงาน"</string>
@@ -919,40 +913,26 @@
     <item quantity="one" msgid="1634101450343277345">"เปิดเครือข่าย Wi-Fi ที่ใช้งานได้"</item>
     <item quantity="other" msgid="7915895323644292768">"เปิดเครือข่าย Wi-Fi ที่ใช้งานได้"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"เครือข่าย Wi-Fi ถูกปิดใช้งาน"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"เครือข่าย Wi-Fi ถูกปิดใช้งานชั่วคราวเนื่องจากปัญหาการเชื่อมต่อ"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"เริ่มการทำงาน Wi-Fi Direct ซึ่งจะเป็นการปิดการทำงาน Wi-Fi ไคลเอ็นต์/ฮอตสปอต"</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"ไม่สามารถเริ่ม Wi-Fi Direct ได้"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"คำขอการตั้งค่าการเชื่อมต่อ Wi-Fi Direct จาก <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> คลิก \"ตกลง\" เพื่อยอมรับ"</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"คำขอการตั้งค่าการเชื่อมต่อ Wi-Fi Direct จาก <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> ป้อน PIN เพื่อดำเนินการต่อ"</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"ต้องป้อน PIN WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> บนอุปกรณ์เพียร์ <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> เพื่อให้การตั้งค่าการเชื่อมต่อดำเนินการต่อ"</string>
     <string name="select_character" msgid="3365550120617701745">"ใส่อักขระ"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"ไม่ทราบแอปพลิเคชัน"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"กำลังส่งข้อความ SMS"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"กำลังส่งข้อความ SMS จำนวนมาก เลือก \"ตกลง\" เพื่อทำงานต่อหรือ \"ยกเลิก\" เพื่อหยุดส่ง"</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"ตกลง"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"ยกเลิก"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"นำซิมการ์ดออกแล้ว"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"ไม่สามารถใช้เครือข่ายมือถือได้จนกว่าคุณจะเปลี่ยนซิมการ์ด"</string>
+    <string name="sim_done_button" msgid="827949989369963775">"เสร็จสิ้น"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"เพิ่มซิมการ์ดแล้ว"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"คุณต้องรีสตาร์ทอุปกรณ์ของคุณเพื่อเข้าถึงเครือข่ายมือถือ"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"รีสตาร์ท"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"ตั้งเวลา"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"ตั้งวันที่"</string>
     <string name="date_time_set" msgid="5777075614321087758">"ตั้งค่า"</string>
@@ -983,8 +963,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"เชื่อมต่อเป็นอุปกรณ์สื่อ"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"เชื่อมต่อเป็นกล้องถ่ายรูป"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"เชื่อมต่อเป็นตัวติดตั้ง"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"เชื่อมต่อกับอุปกรณ์ USB"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"แตะสำหรับตัวเลือก USB อื่นๆ"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"ฟอร์แมตที่เก็บข้อมูล USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"ฟอร์แมตการ์ด SD"</string>
@@ -1104,6 +1083,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"เลือกบัญชี"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"การเพิ่ม"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"การลด"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"นำทางไปหน้าแรก"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"นำทางขึ้น"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"ตัวเลือกเพิ่มเติม"</string>
@@ -1117,6 +1112,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"ปิดใช้งานข้อมูล 4G"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"ปิดใช้งานข้อมูลมือถือ"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"แตะเพื่อเปิดใช้งาน"</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"ใบรับรองความปลอดภัย"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"ใบรับรองนี้ใช้งานได้"</string>
     <string name="issued_to" msgid="454239480274921032">"ออกให้แก่:"</string>
@@ -1134,6 +1137,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"ดูทั้งหมด..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"เลือกกิจกรรม"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"แบ่งปันกับ..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"ล็อกอุปกรณ์อยู่"</string>
 </resources>

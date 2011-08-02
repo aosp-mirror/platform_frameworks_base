@@ -23,10 +23,8 @@
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Tyhjennä"</string>
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Varattu"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Näytä ilmoitukset"</string>
-    <!-- no translation found for status_bar_recent_remove_item_title (6561944127804037619) -->
-    <skip />
-    <!-- no translation found for status_bar_recent_inspect_item_title (4906947311448880529) -->
-    <skip />
+    <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Poista"</string>
+    <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Tarkasta"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ei ilmoituksia"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Käynnissä olevat"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Ilmoitukset"</string>
@@ -62,103 +60,79 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Yhteensopivuustilan zoomaus"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Jos sovellus on suunniteltu pienemmälle näytölle, kellon viereen tulee näkyviin zoomaussäädin."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Kuvakaappaus on tallennettu galleriaan"</string>
-    <string name="screenshot_failed_toast" msgid="655180965533683356">"Kuvakaappausta ei voitu tallentaa"</string>
+    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-tiedostonsiirtoasetukset"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Käytä mediasoittimena (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Käytä kamerana (PTP)"</string>
     <string name="installer_cd_button_title" msgid="8485631662288445893">"Asenna Android File Transfer -sovellus Macille"</string>
-    <!-- no translation found for accessibility_back (567011538994429120) -->
+    <string name="accessibility_back" msgid="567011538994429120">"Takaisin"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Aloitusruutu"</string>
+    <string name="accessibility_menu" msgid="316839303324695949">"Valikko"</string>
+    <!-- no translation found for accessibility_recent (3027675523629738534) -->
     <skip />
-    <!-- no translation found for accessibility_home (8217216074895377641) -->
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Vaihda syöttötapapainiketta."</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Yhteensopivuus-zoomauspainike."</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoomaa pienemmältä suuremmalle ruudulle."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth yhdistetty."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth-yhteys katkaistu."</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Ei akkua."</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Akun virta - yksi palkki."</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Akun virta - kaksi palkkia."</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Akun virta - kolme palkkia."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Akku täynnä."</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"Katvealueella."</string>
+    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Puhelinverkkosignaali - yksi palkki."</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Puhelinverkkosignaali - kaksi palkkia."</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Puhelinverkkosignaali - kolme palkkia."</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Vahva puhelinverkkosignaali."</string>
+    <string name="accessibility_no_data" msgid="4791966295096867555">"Ei tietoja."</string>
+    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Datasignaali - yksi palkki"</string>
+    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Datasignaali - kaksi palkkia"</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Datasignaali - kolme palkkia"</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Vahva datasignaali."</string>
+    <string name="accessibility_no_wifi" msgid="4017628918351949575">"Ei wifi-yhteyttä."</string>
+    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Wifi-signaali - yksi palkki."</string>
+    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Wifi-signaali - kaksi palkkia."</string>
+    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Wifi-signaali - kolme palkkia."</string>
+    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Vahva wifi-signaali."</string>
+    <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
+    <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
+    <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
+    <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
+    <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
+    <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"Wifi"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"Ei SIM-korttia."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Internetyhteyden jakaminen Bluetoothin kautta"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Lentokonetila"</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Akun virta <xliff:g id="NUMBER">%d</xliff:g> prosenttia."</string>
+    <string name="accessibility_settings_button" msgid="7913780116850379698">"Asetukset-painike."</string>
+    <string name="accessibility_notifications_button" msgid="2933903195211483438">"Ilmoitukset-painike."</string>
+    <string name="accessibility_remove_notification" msgid="4883990503785778699">"Poista ilmoitus."</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS käytössä."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Haetaan GPS-signaalia."</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter käytössä."</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Soittoääni: värinä."</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Soittoääni: äänetön."</string>
+    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
     <skip />
-    <!-- no translation found for accessibility_menu (316839303324695949) -->
+    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
     <skip />
-    <!-- no translation found for accessibility_ime_switch_button (5032926134740456424) -->
+    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
     <skip />
-    <!-- no translation found for accessibility_compatibility_zoom_button (8461115318742350699) -->
+    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
     <skip />
-    <!-- no translation found for accessibility_compatibility_zoom_example (4220687294564945780) -->
+    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
     <skip />
-    <!-- no translation found for accessibility_bluetooth_connected (2707027633242983370) -->
+    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
     <skip />
-    <!-- no translation found for accessibility_bluetooth_disconnected (7416648669976870175) -->
+    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
     <skip />
-    <!-- no translation found for accessibility_no_battery (358343022352820946) -->
+    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
     <skip />
-    <!-- no translation found for accessibility_battery_one_bar (7774887721891057523) -->
+    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
     <skip />
-    <!-- no translation found for accessibility_battery_two_bars (8500650438735009973) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_three_bars (2302983330865040446) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_full (8909122401720158582) -->
-    <skip />
-    <!-- no translation found for accessibility_no_phone (4894708937052611281) -->
-    <skip />
-    <!-- no translation found for accessibility_phone_one_bar (687699278132664115) -->
-    <skip />
-    <!-- no translation found for accessibility_phone_two_bars (8384905382804815201) -->
-    <skip />
-    <!-- no translation found for accessibility_phone_three_bars (8521904843919971885) -->
-    <skip />
-    <!-- no translation found for accessibility_phone_signal_full (6471834868580757898) -->
-    <skip />
-    <!-- no translation found for accessibility_no_data (4791966295096867555) -->
-    <skip />
-    <!-- no translation found for accessibility_data_one_bar (1415625833238273628) -->
-    <skip />
-    <!-- no translation found for accessibility_data_two_bars (6166018492360432091) -->
-    <skip />
-    <!-- no translation found for accessibility_data_three_bars (9167670452395038520) -->
-    <skip />
-    <!-- no translation found for accessibility_data_signal_full (2708384608124519369) -->
-    <skip />
-    <!-- no translation found for accessibility_no_wifi (4017628918351949575) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_one_bar (1914343229091303434) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_two_bars (7869150535859760698) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_three_bars (2665319332961356254) -->
-    <skip />
-    <!-- no translation found for accessibility_wifi_signal_full (1275764416228473932) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_gprs (1606477224486747751) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_3g (8628562305003568260) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_3.5g (8664845609981692001) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_4g (7741000750630089612) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_cdma (6132648193978823023) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_edge (4477457051631979278) -->
-    <skip />
-    <!-- no translation found for accessibility_data_connection_wifi (1127208787254436420) -->
-    <skip />
-    <!-- no translation found for accessibility_no_sim (8274017118472455155) -->
-    <skip />
-    <!-- no translation found for accessibility_bluetooth_tether (4102784498140271969) -->
-    <skip />
-    <!-- no translation found for accessibility_airplane_mode (834748999790763092) -->
-    <skip />
-    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
-    <skip />
-    <!-- no translation found for accessibility_settings_button (7913780116850379698) -->
-    <skip />
-    <!-- no translation found for accessibility_notifications_button (2933903195211483438) -->
-    <skip />
-    <!-- no translation found for accessibility_remove_notification (4883990503785778699) -->
-    <skip />
-    <!-- no translation found for accessibility_gps_enabled (3511469499240123019) -->
-    <skip />
-    <!-- no translation found for accessibility_gps_acquiring (8959333351058967158) -->
-    <skip />
-    <!-- no translation found for accessibility_tty_enabled (4613200365379426561) -->
-    <skip />
-    <!-- no translation found for accessibility_ringer_vibrate (666585363364155055) -->
-    <skip />
-    <!-- no translation found for accessibility_ringer_silent (9061243307939135383) -->
+    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
     <skip />
 </resources>

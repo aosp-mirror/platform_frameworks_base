@@ -20,10 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="status_bar_clear_all_button" msgid="4661583896803349732">"Şterg. tot"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="383145178755329067">"Fără conex. internet"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="2535465294437586528">"Wi-Fi conectat"</string>
-    <string name="gps_notification_searching_text" msgid="4467935186864208249">"Se caută GPS"</string>
-    <string name="gps_notification_found_text" msgid="6270628388918822956">"Locaţie setată prin GPS"</string>
     <string name="notifications_off_title" msgid="1860117696034775851">"Notificările sunt dezactivate"</string>
     <string name="notifications_off_text" msgid="1439152806320786912">"Apăsaţi aici pentru a reactiva notificările."</string>
 </resources>

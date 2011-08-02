@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Membenarkan aplikasi melihat kekunci yang anda tekan walaupun semasa berinteraksi dengan aplikasi lain (seperti memasukkan kata laluan). Seharusnya tidak sekali-kali diperlukan untuk aplikasi biasa."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"terikat kepada kaedah input"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi kaedah input itu. Tidak sekali-kali diperlukan untuk aplikasi biasa."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"terikat kepada perkhidmatan teks"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Membenarkan pemegang mengikat kepada antara muka tahap tinggi perkhidmatan teks(mis. PerkhidmatanPenyemakEjaan). Tidak seharusnya diperlukan untuk aplikasi biasa."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"terikat pada kertas dinding"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Membenarkan pemegang terikat dengan antara muka peringkat tertinggi bagi kertas dinding. Tidak sekali-kali diperlukan untuk aplikasi biasa."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"terikat kepada perkhidmatan widget"</string>
@@ -726,10 +724,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Membenarkan aplikasi mengubah suai sejarah atau penanda halaman Penyemak Imbas yang disimpan pada telefon anda. Aplikasi berniat jahat boleh menggunakannya untuk memadamkan atau mengubah data Penyemak Imbas anda."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"menetapkan penggera pada jam penggera"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Membenarkan aplikasi menetapkan penggera dalam aplikasi jam penggera yang dipasang. Sesetengah aplikasi jam penggera mungkin tidak melaksanakan ciri ini."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
-    <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
-    <skip />
+    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"Akses mel suara yang diurus oleh aplikasi ini"</string>
+    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Membenarkan aplikasi menyimpan dan mendapatkan semula mel suara yang boleh diakses oleh perkhidmatan berkaitan sahaja."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Ubah suai kebenaran geolokasi Penyemak Imbas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Membenarkan aplikasi mengubah suai kebenaran geolokasi Penyemak Imbas. Aplikasi berniat jahat boleh menggunakannya untuk membenarkan penghantaran maklumat lokasi ke sembarangan tapak web."</string>
     <string name="save_password_message" msgid="767344687139195790">"Adakah anda mahu penyemak imbas mengingati kata laluan ini?"</string>
@@ -845,7 +841,8 @@
     <string name="cut" msgid="3092569408438626261">"Potong"</string>
     <string name="copy" msgid="2681946229533511987">"Salin"</string>
     <string name="paste" msgid="5629880836805036433">"Tampal"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Tiada apa utk ditmpl"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Salin URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Pilih teks..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Pemilihan teks"</string>
@@ -921,22 +918,14 @@
     <item quantity="one" msgid="1634101450343277345">"Rangkaian Wi-Fi terbuka tersedia"</item>
     <item quantity="other" msgid="7915895323644292768">"Rangkaian Wi-Fi terbuka tersedia"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Rangkaian Wi-Fi telah dilumpuhkan"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Rangkaian Wi-Fi dilumpuhkan buat sementara waktu kerana sambungan teruk."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Langsung"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Mulakan pengendalian Wi-Fi Langsung. Hal ini akan mematikan pengendalian klien Wi-Fi/titik panas."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Gagal memulakan Wi-Fi Langsung"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Permintaan persediaan sambungan Wi-Fi Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Klik OK untuk menerima."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Permintaan persediaan sambungan Wi-Fi Langsung dari <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Buang pin untuk meneruskan."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Pin WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> perlu dimasukkan pada peranti rakan <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> untuk penyediaan sambungan untuk meneruskan"</string>
     <string name="select_character" msgid="3365550120617701745">"Masukkan aksara"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Aplikasi tidak dikenali"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Menghantar mesej SMS"</string>
@@ -985,8 +974,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Disambungkan sebagai peranti media"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Disambungkan sebagai kamera"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Disambungkan sebagai pemasang"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Disambungkan kepada aksesori USB"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Sentuh untuk mendapatkan pilihan USB yang lain"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Format storan USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Format kad SD"</string>
@@ -1106,6 +1094,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Pilih akaun"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Kenaikan"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Penyusutan"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigasi laman utama"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigasi ke atas"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Lagi pilihan"</string>
@@ -1119,6 +1123,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Data 4G dilumpuhkan"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Data mudah alih dilumpuhkan"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"ketik untuk mendayakan"</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Sijil keselamatan"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Sijil ini sah."</string>
     <string name="issued_to" msgid="454239480274921032">"Dikeluarkan kepada:"</string>
@@ -1134,10 +1146,7 @@
     <string name="sha256_fingerprint" msgid="4391271286477279263">"Cap jari SHA-256:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Cap jari SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Lihat semua..."</string>
-    <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
-    <skip />
-    <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
-    <skip />
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Pilih aktiviti"</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Kongsi dengan..."</string>
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Peranti dikunci."</string>
 </resources>

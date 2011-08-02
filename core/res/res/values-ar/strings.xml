@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"للسماح للتطبيقات بمراقبة الأحرف التي تضغط عليها حتى عند التفاعل مع تطبيق آخر (مثل إدخال كلمة مرور). لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"الالتزام بطريقة إرسال ما"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لطريقة الإرسال. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"الالتزام بخدمة إدخال النصوص"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة إدخال النصوص (على سبيل المثال، SpellCheckerService). لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"الالتزام بخلفية ما"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"للسماح للمالك بالالتزام بواجهة المستوى العلوي للخلفية. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"الالتزام بخدمة أداة"</string>
@@ -724,10 +722,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"للسماح لتطبيق ما بتعديل سجل المتصفح أو الإشارات في هاتفك. يمكن أن تستخدم التطبيقات الضارة ذلك لمسح بيانات المتصفح أو تعديلها."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"تعيين المنبه في ساعة المنبه"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"للسماح للتطبيق بضبط المنبه في تطبيق ساعة منبه مثبّت. ربما لا تنفذ بعض تطبيقات المنبه هذه الميزة."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
-    <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
-    <skip />
+    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"الوصول إلى رسائل البريد الصوتي التي يديرها هذا التطبيق"</string>
+    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"للسماح للتطبيق بتخزين واسترداد رسائل البريد الصوتي التي يمكنه الوصول إلى الخدمة المرتبطة بها فقط."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"تعديل أذونات الموقع الجغرافي للمتصفح"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"للسماح لتطبيق ما بتعديل أذونات الموقع الجغرافي للمتصفح. يمكن أن تستخدم التطبيقات الضارة هذا للسماح بإرسال معلومات الموقع إلى مواقع ويب عشوائية."</string>
     <string name="save_password_message" msgid="767344687139195790">"هل تريد من المتصفح تذكر كلمة المرور هذه؟"</string>
@@ -843,7 +839,8 @@
     <string name="cut" msgid="3092569408438626261">"قص"</string>
     <string name="copy" msgid="2681946229533511987">"نسخ"</string>
     <string name="paste" msgid="5629880836805036433">"لصق"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"ليس هناك شيء للصقه"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"نسخ عنوان URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"تحديد نص..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"تحديد النص"</string>
@@ -919,22 +916,14 @@
     <item quantity="one" msgid="1634101450343277345">"هناك شبكة Wi-Fi مفتوحة متاحة"</item>
     <item quantity="other" msgid="7915895323644292768">"هناك شبكات Wi-Fi مفتوحة متاحة"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"تم تعطيل شبكة Wi-Fi."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"تم تعطيل شبكة Wi-Fi مؤقتًا بسبب اتصال خاطئ."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"اتصال Wi-Fi مباشر"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"ابدأ تشغيل اتصالWi-Fi المباشر. يؤدي ذلك إلى إيقاف تشغيل عميل/نقطة اتصال Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"أخفق بدء اتصال Wi-Fi مباشر."</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"هناك طلب اتصال Wi-Fi مباشر من <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. انقر على موافق للقبول."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"هناك طلب إعداد اتصال Wi-Fi مباشر من <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. أدخل رقم التعريف الشخصي للبدء."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"يجب إدخال رقم التعريف الشخصي لـ WPS‏ <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> في الجهاز النظير <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> حتى يبدأ إعداد الاتصال."</string>
     <string name="select_character" msgid="3365550120617701745">"إدراج حرف"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"تطبيق غير معروف"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"إرسال رسائل قصيرة SMS"</string>
@@ -983,8 +972,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"التوصيل كجهاز وسائط"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"التوصيل ككاميرا"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"التوصيل كأداة تثبيت"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"الاتصال بجهاز USB ملحق"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"المس للاطلاع على خيارات USB الأخرى"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"تهيئة وحدة تخزين USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"تنسيق بطاقة SD"</string>
@@ -1104,6 +1092,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"حدد حسابًا."</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"زيادة"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"تناقص"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"التنقل إلى الشاشة الرئيسية"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"التنقل إلى أعلى"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"المزيد من الخيارات"</string>
@@ -1117,6 +1121,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"تم تعطيل بيانات شبكة الجيل الرابع"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"تم تعطيل بيانات الجوال"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"انقر للتمكين."</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"شهادة الأمان"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"هذه الشهادة صالحة."</string>
     <string name="issued_to" msgid="454239480274921032">"إصدار لـ:"</string>
@@ -1134,6 +1146,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"عرض الكل..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"تحديد نشاط"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"مشاركة مع..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"تم قفل الجهاز."</string>
 </resources>

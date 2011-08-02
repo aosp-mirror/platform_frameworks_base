@@ -20,10 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="status_bar_clear_all_button" msgid="4661583896803349732">"I-clear"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="383145178755329067">"Wala koneksyon net"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="2535465294437586528">"Konektado ang Wi-Fi"</string>
-    <string name="gps_notification_searching_text" msgid="4467935186864208249">"Naghahanap ng GPS"</string>
-    <string name="gps_notification_found_text" msgid="6270628388918822956">"Lokasyong itinatakda ng GPS"</string>
     <string name="notifications_off_title" msgid="1860117696034775851">"Naka-off ang mga notification"</string>
     <string name="notifications_off_text" msgid="1439152806320786912">"Mag-tap dito upang i-on muli ang mga notification."</string>
 </resources>
