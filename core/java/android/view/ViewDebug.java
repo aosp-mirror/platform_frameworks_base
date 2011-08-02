@@ -1094,6 +1094,9 @@ public class ViewDebug {
                             }
 
                             public void post(Object... data) {
+                                if (data[1] != null) {
+                                    ((Canvas) data[1]).setBitmap(null);
+                                }
                                 if (data[0] != null) {
                                     ((Bitmap) data[0]).recycle();
                                 }

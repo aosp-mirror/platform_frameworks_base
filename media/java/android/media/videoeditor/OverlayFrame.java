@@ -420,6 +420,7 @@ public class OverlayFrame extends Overlay {
             }
 
             overlayCanvas.drawBitmap(overlayBitmap, srcRect, destRect, sResizePaint);
+            overlayCanvas.setBitmap(null);
 
             /*
              * Write to the dest file

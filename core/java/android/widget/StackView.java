@@ -1406,6 +1406,7 @@ public class StackView extends AdapterViewAnimator {
             v.setTranslationX(translationX);
 
             drawOutline(mCanvas, bitmap);
+            mCanvas.setBitmap(null);
             return bitmap;
         }
 
@@ -1417,6 +1418,7 @@ public class StackView extends AdapterViewAnimator {
             dest.drawColor(0, PorterDuff.Mode.CLEAR);
             dest.setMatrix(mIdentityMatrix);
             dest.drawBitmap(mask, xy[0], xy[1], mHolographicPaint);
+            mMaskCanvas.setBitmap(null);
             mask.recycle();
         }
     }

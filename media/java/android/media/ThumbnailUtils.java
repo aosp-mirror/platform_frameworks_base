@@ -387,6 +387,7 @@ public class ThumbnailUtils {
             if (recycle) {
                 source.recycle();
             }
+            c.setBitmap(null);
             return b2;
         }
         float bitmapWidthF = source.getWidth();

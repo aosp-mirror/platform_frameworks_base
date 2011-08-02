@@ -314,6 +314,7 @@ public abstract class LauncherActivity extends ListActivity {
                     icon.draw(canvas);
                     icon.setBounds(mOldBounds);
                     icon = new BitmapDrawable(getResources(), thumb);
+                    canvas.setBitmap(null);
                 } else if (iconWidth < width && iconHeight < height) {
                     final Bitmap.Config c = Bitmap.Config.ARGB_8888;
                     final Bitmap thumb = Bitmap.createBitmap(mIconWidth, mIconHeight, c);
@@ -326,6 +327,7 @@ public abstract class LauncherActivity extends ListActivity {
                     icon.draw(canvas);
                     icon.setBounds(mOldBounds);
                     icon = new BitmapDrawable(getResources(), thumb);
+                    canvas.setBitmap(null);
                 }
             }
 
