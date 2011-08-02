@@ -160,14 +160,6 @@ void NinePatch_Draw(SkCanvas* canvas, const SkRect& bounds,
         return;
     }
     
-    // if the nine patch is bigger than the dst on a given axis we cannot
-    // stretch properly so just draw the bitmap as best as possible and return
-    if (bitmap.width() >= bounds.width() || bitmap.height() >= bounds.height())
-    {
-        canvas->drawBitmapRect(bitmap, NULL, bounds, paint);
-        return;
-    }
-
     // should try a quick-reject test before calling lockPixels 
 
     SkAutoLockPixels alp(bitmap);
