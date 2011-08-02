@@ -1445,17 +1445,16 @@ public final class Settings {
         public static final String VOLUME_BLUETOOTH_SCO = "volume_bluetooth_sco";
 
         /**
-         * Whether the notifications should use the ring volume (value of 1) or
-         * a separate notification volume (value of 0). In most cases, users
-         * will have this enabled so the notification and ringer volumes will be
-         * the same. However, power users can disable this and use the separate
-         * notification volume control.
+         * Whether the notifications should use the ring volume (value of 1) or a separate
+         * notification volume (value of 0). In most cases, users will have this enabled so the
+         * notification and ringer volumes will be the same. However, power users can disable this
+         * and use the separate notification volume control.
          * <p>
-         * Note: This is a one-off setting that will be removed in the future
-         * when there is profile support. For this reason, it is kept hidden
-         * from the public APIs.
+         * Note: This is a one-off setting that will be removed in the future when there is profile
+         * support. For this reason, it is kept hidden from the public APIs.
          *
          * @hide
+         * @deprecated
          */
         public static final String NOTIFICATIONS_USE_RING_VOLUME =
             "notifications_use_ring_volume";
