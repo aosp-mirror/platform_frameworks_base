@@ -4919,6 +4919,7 @@ public class WindowManagerService extends IWindowManager.Stub
         matrix.postTranslate(-(int)(frame.left*scale), -(int)(frame.top*scale));
         Canvas canvas = new Canvas(bm);
         canvas.drawBitmap(rawss, matrix, null);
+        canvas.setBitmap(null);
 
         rawss.recycle();
         return bm;

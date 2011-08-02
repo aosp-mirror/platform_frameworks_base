@@ -186,6 +186,7 @@ final class IconUtilities {
         mask.recycle();
 
         dest.drawBitmap(src, 0, 0, mPaint);
+        dest.setBitmap(null);
 
         return result;
     }

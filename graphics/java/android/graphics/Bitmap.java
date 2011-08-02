@@ -567,6 +567,7 @@ public final class Bitmap implements Parcelable {
         
         canvas.setBitmap(bitmap);
         canvas.drawBitmap(source, srcR, dstR, paint);
+        canvas.setBitmap(null);
 
         return bitmap;
     }

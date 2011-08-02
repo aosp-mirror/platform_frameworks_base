@@ -294,6 +294,7 @@ class GlobalScreenshot {
             c.rotate(360f - degrees);
             c.translate(-dims[0] / 2, -dims[1] / 2);
             c.drawBitmap(mScreenBitmap, 0, 0, null);
+            c.setBitmap(null);
             mScreenBitmap = ss;
         }
 

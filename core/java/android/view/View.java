@@ -10221,6 +10221,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             }
 
             canvas.restoreToCount(restoreCount);
+            canvas.setBitmap(null);
 
             if (attachInfo != null) {
                 // Restore the cached Canvas for our siblings
@@ -10289,9 +10290,9 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         mPrivateFlags = flags;
 
         canvas.restoreToCount(restoreCount);
+        canvas.setBitmap(null);
 
         if (attachInfo != null) {
-            canvas.setBitmap(null);
             // Restore the cached Canvas for our siblings
             attachInfo.mCanvas = canvas;
         }
