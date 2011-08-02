@@ -16988,7 +16988,7 @@ package android.provider {
     field public static final java.lang.String VOICEMAIL_ACCESS_URI = "voicemail_access_uri";
   }
 
-  public static final class VoicemailContract.Voicemails implements android.provider.BaseColumns {
+  public static final class VoicemailContract.Voicemails implements android.provider.BaseColumns android.provider.OpenableColumns {
     method public static android.net.Uri buildSourceUri(java.lang.String);
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DATE = "date";

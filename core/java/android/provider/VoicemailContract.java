@@ -92,7 +92,7 @@ public class VoicemailContract {
     public static final String SOURCE_PACKAGE_FIELD = "source_package";
 
     /** Defines fields exposed through the /voicemail path of this content provider. */
-    public static final class Voicemails implements BaseColumns {
+    public static final class Voicemails implements BaseColumns, OpenableColumns {
         /** Not instantiable. */
         private Voicemails() {
         }
