@@ -57,6 +57,7 @@ public:
 protected:
 
     virtual void SetUp() {
+        android::ProcessState::self()->startThreadPool();
         mSMS = new SurfaceMediaSource(mYuvTexWidth, mYuvTexHeight);
         mSMS->setSynchronousMode(true);
         mSTC = new SurfaceTextureClient(mSMS);
