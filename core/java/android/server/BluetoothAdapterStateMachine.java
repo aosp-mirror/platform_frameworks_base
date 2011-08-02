@@ -156,7 +156,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
     private class PowerOff extends State {
         @Override
         public void enter() {
-            if (DBG) log("Enter PowerOff: ");
+            if (DBG) log("Enter PowerOff: " + getCurrentMessage().what);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -280,7 +280,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
 
         @Override
         public void enter() {
-            if (DBG) log("Enter WarmUp");
+            if (DBG) log("Enter WarmUp: " + getCurrentMessage().what);
         }
 
         @Override
@@ -319,7 +319,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
     private class HotOff extends State {
         @Override
         public void enter() {
-            if (DBG) log("Enter HotOff:");
+            if (DBG) log("Enter HotOff: " + getCurrentMessage().what);
         }
 
         @Override
@@ -380,8 +380,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
 
         @Override
         public void enter() {
-            int what = getCurrentMessage().what;
-            if (DBG) log("Enter Switching: " + what);
+            if (DBG) log("Enter Switching: " + getCurrentMessage().what);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -390,13 +389,12 @@ final class BluetoothAdapterStateMachine extends StateMachine {
             boolean retValue = HANDLED;
             switch(message.what) {
                 case BECAME_PAIRABLE:
-                    String[] propVal = {"Pairable", mBluetoothService.getProperty("Pairable")};
-                    mEventLoop.onPropertyChanged(propVal);
-
-                    // run bluetooth now that it's turned on
-                    mBluetoothService.runBluetooth();
+                    mBluetoothService.initBluetoothAfterTurningOn();
                     transitionTo(mBluetoothOn);
                     broadcastState(BluetoothAdapter.STATE_ON);
+                    // run bluetooth now that it's turned on
+                    // Note runBluetooth should be called only in adapter STATE_ON
+                    mBluetoothService.runBluetooth();
                     break;
                 case BECAME_NON_PAIRABLE:
                     if (mBluetoothService.getAdapterConnectionState() ==
@@ -438,11 +436,10 @@ final class BluetoothAdapterStateMachine extends StateMachine {
     }
 
     private class BluetoothOn extends State {
-        private boolean mPersistBluetoothOff = false;
 
         @Override
         public void enter() {
-            if (DBG) log("Enter BluetoothOn: " + mPersistBluetoothOff);
+            if (DBG) log("Enter BluetoothOn: " + getCurrentMessage().what);
         }
         @Override
         public boolean processMessage(Message message) {
@@ -500,7 +497,7 @@ final class BluetoothAdapterStateMachine extends StateMachine {
 
         @Override
         public void enter() {
-            if (DBG) log("Enter PerProcessState");
+            if (DBG) log("Enter PerProcessState: " + getCurrentMessage().what);
         }
 
         @Override
@@ -523,14 +520,11 @@ final class BluetoothAdapterStateMachine extends StateMachine {
                 case USER_TURN_ON:
                     broadcastState(BluetoothAdapter.STATE_TURNING_ON);
                     persistSwitchSetting(true);
-
-                    String[] propVal = {"Pairable", mBluetoothService.getProperty("Pairable")};
-                    mEventLoop.onPropertyChanged(propVal);
-
-                    // run bluetooth now that it's turned on
-                    mBluetoothService.runBluetooth();
+                    mBluetoothService.initBluetoothAfterTurningOn();
                     transitionTo(mBluetoothOn);
                     broadcastState(BluetoothAdapter.STATE_ON);
+                    // run bluetooth now that it's turned on
+                    mBluetoothService.runBluetooth();
                     break;
                case USER_TURN_OFF:
                     broadcastState(BluetoothAdapter.STATE_TURNING_OFF);
