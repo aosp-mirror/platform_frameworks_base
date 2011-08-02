@@ -1008,6 +1008,7 @@ public class MediaImageItem extends MediaItem {
                                               srcBitmap.getHeight()),
                                               new Rect(0, 0, (int)bitmapWidth,
                                               (int)bitmapHeight), sResizePaint);
+        canvas.setBitmap(null);
         /**
          *  Release the source bitmap
          */

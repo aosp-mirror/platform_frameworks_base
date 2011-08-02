@@ -183,7 +183,9 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     android.R.dimen.notification_large_icon_height);
             icon.setBounds(0, 0, width, height);
             bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            icon.draw(new Canvas(bitmap));
+            Canvas c = new Canvas(bitmap);
+            icon.draw(c);
+            c.setBitmap(null);
         }
 
         // Configure the interface. Abort if any of these steps fails.

@@ -501,6 +501,7 @@ public class RecentsPanelView extends RelativeLayout
                     new RectF(mGlowBitmapPaddingLeftPx, mGlowBitmapPaddingTopPx,
                             outBitmap.getWidth() - mGlowBitmapPaddingRightPx,
                             outBitmap.getHeight() - mGlowBitmapPaddingBottomPx), paint);
+            canvas.setBitmap(null);
         }
         return outBitmap;
     }
