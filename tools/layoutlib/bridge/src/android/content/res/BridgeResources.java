@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge.android;
+package android.content.res;
 
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.android.BridgeContext;
+import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.layoutlib.bridge.impl.ResourceHelper;
 import com.android.ninepatch.NinePatch;
@@ -30,13 +32,6 @@ import com.android.util.Pair;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
-import android.content.res.ColorStateList;
-import android.content.res.Configuration;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
-import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -94,7 +89,7 @@ public final class BridgeResources extends Resources {
      * <p/>
      * {@link Bridge} calls this method after setting up a new bridge.
      */
-    /*package*/ static Resources initSystem(BridgeContext context,
+    /*package*/ public static Resources initSystem(BridgeContext context,
             AssetManager assets,
             DisplayMetrics metrics,
             Configuration config,
@@ -110,7 +105,7 @@ public final class BridgeResources extends Resources {
      * Disposes the static {@link Resources#mSystem} to make sure we don't leave objects
      * around that would prevent us from unloading the library.
      */
-    /*package*/ static void disposeSystem() {
+    /*package*/ public static void disposeSystem() {
         if (Resources.mSystem instanceof BridgeResources) {
             ((BridgeResources)(Resources.mSystem)).mContext = null;
             ((BridgeResources)(Resources.mSystem)).mProjectCallback = null;
@@ -336,7 +331,7 @@ public final class BridgeResources extends Resources {
                 if (ResourceHelper.parseFloatAttribute(
                         value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
                         mTmpValue.type == TypedValue.TYPE_DIMENSION) {
-                    return mTmpValue.getDimension(mMetrics);
+                    return mTmpValue.getDimension(getDisplayMetrics());
                 }
             }
         }
@@ -359,7 +354,8 @@ public final class BridgeResources extends Resources {
                 if (ResourceHelper.parseFloatAttribute(
                         value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
                         mTmpValue.type == TypedValue.TYPE_DIMENSION) {
-                    return TypedValue.complexToDimensionPixelOffset(mTmpValue.data, mMetrics);
+                    return TypedValue.complexToDimensionPixelOffset(mTmpValue.data,
+                            getDisplayMetrics());
                 }
             }
         }
@@ -382,7 +378,8 @@ public final class BridgeResources extends Resources {
                 if (ResourceHelper.parseFloatAttribute(
                         value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
                         mTmpValue.type == TypedValue.TYPE_DIMENSION) {
-                    return TypedValue.complexToDimensionPixelSize(mTmpValue.data, mMetrics);
+                    return TypedValue.complexToDimensionPixelSize(mTmpValue.data,
+                            getDisplayMetrics());
                 }
             }
         }

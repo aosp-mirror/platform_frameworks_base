@@ -47,6 +47,8 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.content.res.BridgeResources;
+import android.content.res.BridgeTypedArray;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -813,7 +815,7 @@ public final class BridgeContext extends Activity {
         return null;
     }
 
-    int getDynamicIdByStyle(StyleResourceValue resValue) {
+    public int getDynamicIdByStyle(StyleResourceValue resValue) {
         if (mDynamicIdToStyleMap == null) {
             // create the maps.
             mDynamicIdToStyleMap = new HashMap<Integer, StyleResourceValue>();
@@ -843,7 +845,7 @@ public final class BridgeContext extends Activity {
         return null;
     }
 
-    int getFrameworkResourceValue(ResourceType resType, String resName, int defValue) {
+    public int getFrameworkResourceValue(ResourceType resType, String resName, int defValue) {
         Integer value = Bridge.getResourceId(resType, resName);
         if (value != null) {
             return value.intValue();
@@ -852,7 +854,7 @@ public final class BridgeContext extends Activity {
         return defValue;
     }
 
-    int getProjectResourceValue(ResourceType resType, String resName, int defValue) {
+    public int getProjectResourceValue(ResourceType resType, String resName, int defValue) {
         if (mProjectCallback != null) {
             Integer value = mProjectCallback.getResourceId(resType, resName);
             if (value != null) {
