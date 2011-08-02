@@ -116,15 +116,10 @@ LOCAL_SRC_FILES += \
 	core/java/android/net/INetworkPolicyListener.aidl \
 	core/java/android/net/INetworkPolicyManager.aidl \
 	core/java/android/net/INetworkStatsService.aidl \
-	core/java/android/nfc/ILlcpConnectionlessSocket.aidl \
-	core/java/android/nfc/ILlcpServiceSocket.aidl \
-	core/java/android/nfc/ILlcpSocket.aidl \
 	core/java/android/nfc/INdefPushCallback.aidl \
 	core/java/android/nfc/INfcAdapter.aidl \
 	core/java/android/nfc/INfcAdapterExtras.aidl \
 	core/java/android/nfc/INfcTag.aidl \
-	core/java/android/nfc/IP2pInitiator.aidl \
-	core/java/android/nfc/IP2pTarget.aidl \
 	core/java/android/os/IHardwareService.aidl \
 	core/java/android/os/IMessenger.aidl \
 	core/java/android/os/INetworkManagementService.aidl \
