@@ -3072,6 +3072,7 @@ package android.app {
     method public abstract android.app.FragmentManager.BackStackEntry getBackStackEntryAt(int);
     method public abstract int getBackStackEntryCount();
     method public abstract android.app.Fragment getFragment(android.os.Bundle, java.lang.String);
+    method public void invalidateOptionsMenu();
     method public abstract void popBackStack();
     method public abstract void popBackStack(java.lang.String, int);
     method public abstract void popBackStack(int, int);

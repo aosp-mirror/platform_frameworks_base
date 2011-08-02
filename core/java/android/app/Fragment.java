@@ -30,14 +30,14 @@ import android.util.AttributeSet;
 import android.util.DebugUtils;
 import android.util.SparseArray;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 
 import java.io.FileDescriptor;
@@ -883,8 +883,8 @@ public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListene
     public void setHasOptionsMenu(boolean hasMenu) {
         if (mHasMenu != hasMenu) {
             mHasMenu = hasMenu;
-            if (isAdded() && !isHidden() && isResumed()) {
-                mActivity.invalidateOptionsMenu();
+            if (isAdded() && !isHidden()) {
+                mFragmentManager.invalidateOptionsMenu();
             }
         }
     }
