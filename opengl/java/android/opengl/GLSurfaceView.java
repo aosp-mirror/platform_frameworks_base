@@ -1073,6 +1073,15 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
             return gl;
         }
 
+        public void purgeBuffers() {
+            mEgl.eglMakeCurrent(mEglDisplay,
+                    EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE,
+                    EGL10.EGL_NO_CONTEXT);
+            mEgl.eglMakeCurrent(mEglDisplay,
+                    mEglSurface, mEglSurface,
+                    mEglContext);
+        }
+
         /**
          * Display the current render surface.
          * @return false if the context has been lost.
@@ -1415,6 +1424,7 @@ public class GLSurfaceView extends SurfaceView implements SurfaceHolder.Callback
                         if (LOG_RENDERER) {
                             Log.w("GLThread", "onSurfaceChanged(" + w + ", " + h + ")");
                         }
+                        mEglHelper.purgeBuffers();
                         mRenderer.onSurfaceChanged(gl, w, h);
                         sizeChanged = false;
                     }
