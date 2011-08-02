@@ -2405,6 +2405,9 @@
     <!-- Item on EditText context menu. This action is used to paste from the clipboard into the eidt field -->
     <string name="paste">Paste</string>
 
+    <!-- Text displayed in a popup dialog in TextEdit when the clipboard is empty. 'paste' is used otherwise. [CHAR LIMIT=20] -->
+    <string name="pasteDisabled">Nothing to paste</string>
+
     <!-- Item on EditText context menu. This action is used to replace the current word by other suggested words, suggested by the IME or the spell checker -->
     <string name="replace">Replace</string>
 
