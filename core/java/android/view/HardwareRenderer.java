@@ -135,7 +135,7 @@ public abstract class HardwareRenderer {
     /**
      * Updates the hardware renderer for the specified surface.
      * 
-     * @param holder The holder for the surface to hardware accelerate.
+     * @param holder The holder for the surface to hardware accelerate
      */
     abstract void updateSurface(SurfaceHolder holder) throws Surface.OutOfResourcesException;
 
@@ -148,9 +148,11 @@ public abstract class HardwareRenderer {
 
     /**
      * This method should be invoked whenever the current hardware renderer
-     * context should be reset. 
+     * context should be reset.
+     * 
+     * @param holder The holder for the surface to hardware accelerate
      */
-    abstract void invalidate();
+    abstract void invalidate(SurfaceHolder holder);
 
     /**
      * This method should be invoked to ensure the hardware renderer is in
@@ -707,13 +709,24 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void invalidate() {
+        void invalidate(SurfaceHolder holder) {
             // Cancels any existing buffer to ensure we'll get a buffer
             // of the right size before we call eglSwapBuffers
-            sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE,
-                    EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+            sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
+            mEglSurface = sEgl.eglCreateWindowSurface(sEglDisplay, sEglConfig, holder, null);
+
+            if (mEglSurface == null || mEglSurface == EGL_NO_SURFACE) {
+                int error = sEgl.eglGetError();
+                if (error == EGL_BAD_NATIVE_WINDOW) {
+                    Log.e(LOG_TAG, "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
+                    return;
+                }
+                throw new RuntimeException("createWindowSurface failed "
+                        + getEGLErrorString(error));
+            }
         }
-        
+
         @Override
         boolean validate() {
             return checkCurrent() != SURFACE_STATE_ERROR;

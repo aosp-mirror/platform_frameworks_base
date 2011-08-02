@@ -1344,7 +1344,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     mAttachInfo.mHardwareRenderer.isEnabled())) {
                 mAttachInfo.mHardwareRenderer.setup(mWidth, mHeight);
                 if (!hwInitialized) {
-                    mAttachInfo.mHardwareRenderer.invalidate();
+                    mAttachInfo.mHardwareRenderer.invalidate(mHolder);
                 }
             }
 
