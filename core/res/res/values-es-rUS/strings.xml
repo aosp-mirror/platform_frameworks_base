@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Admite que las aplicaciones observen las teclas que presionas, incluso al interactuar con otra aplicación (como el ingreso de una contraseña). Se debe evitar utilizarlo en aplicaciones normales."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"vincular a un método de entrada"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permite al propietario vincularse a la interfaz de nivel superior de un método de entrada. Se debe evitar utilizarlo en aplicaciones normales."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"vincular a un servicio de texto"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Permite al titular vincularse a la interfaz de nivel superior de un servicio de texto (por ejemplo, SpellCheckerService). Nunca debe ser necesario para las aplicaciones normales."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vincular a un fondo de pantalla"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permite al propietario vincularse a la interfaz de nivel superior de un fondo de pantalla. Se debe evitar utilizarlo en aplicaciones normales."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincular a un servicio de widget"</string>
@@ -724,10 +722,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Permite a una aplicación modificar el historial y los marcadores del navegador almacenados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para borrar o modificar tus datos."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"configurar alarma en reloj alarma"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Permite que la aplicación configure una alarma en una aplicación instalada de reloj alarma. Es posible que algunas aplicaciones de reloj alarma no implementen esta función."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
-    <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
-    <skip />
+    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"Buzones de voz de acceso administrados por esta aplicación."</string>
+    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Permite que la aplicación almacene y recupere solo buzones de voz a los que sus servicios asociados pueden acceder."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modificar los permisos de ubicación geográfica del navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permite que una aplicación modifique los permisos de ubicación geográfica del navegador. Las aplicaciones maliciosas pueden utilizarlos para permitir el envío de información sobre la ubicación a sitos web de forma arbitraria."</string>
     <string name="save_password_message" msgid="767344687139195790">"¿Quieres recordar esta contraseña en el navegador?"</string>
@@ -843,7 +839,8 @@
     <string name="cut" msgid="3092569408438626261">"Cortar"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Pegar"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Nada que pegar"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Seleccionar texto..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selección de texto"</string>
@@ -880,12 +877,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Se redirigió la aplicación"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> se está ejecutando ahora."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> se inició originalmente."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Escala"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"Mostrar siempre"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Volver a habilitar esto con Configuración &gt; Aplicaciones &gt; Administrar aplicaciones."</string>
     <string name="smv_application" msgid="295583804361236288">"La aplicación <xliff:g id="APPLICATION">%1$s</xliff:g> (proceso <xliff:g id="PROCESS">%2$s</xliff:g>) ha violado su política StrictMode autoimpuesta."</string>
     <string name="smv_process" msgid="5120397012047462446">"El proceso <xliff:g id="PROCESS">%1$s</xliff:g> ha violado su política StrictMode autoimpuesta."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> en ejecución"</string>
@@ -919,40 +913,26 @@
     <item quantity="one" msgid="1634101450343277345">"Abrir red disponible de Wi-Fi"</item>
     <item quantity="other" msgid="7915895323644292768">"Abrir redes disponibles de Wi-Fi"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Una red Wi-Fi se ha inhabilitado."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Una red Wi-Fi ha sido temporalmente inhabilitada debido a mala conectividad."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Iniciar operación de Wi-Fi Direct. Esto desactivará la operación de cliente/zona Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Error al iniciar el Wi-Fi Direct"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Solicitud de configuración de conexión de Wi-Fi Direct desde <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Haz clic en Aceptar."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Solicitud de configuración de conexión de Wi-Fi Direct desde <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Ingresa el llamado para continuar."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"El llamado a WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> necesita ser ingresado en el dispositivo de pares <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> para que la configuración de la conexión continúe."</string>
     <string name="select_character" msgid="3365550120617701745">"Insertar caracteres"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Aplicación desconocida"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Enviando mensajes SMS"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"Se envía una gran cantidad de mensajes SMS. Selecciona \"Aceptar\" para continuar o \"Cancelar\" para detener el envío."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"Aceptar"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Cancelar"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"Tarjeta SIM eliminada"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"La red para celulares no estará disponible hasta que cambies la tarjeta SIM."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Finalizado"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"Tarjeta SIM agregada"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"Debes reiniciar tu dispositivo para acceder a la red para celulares."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Reiniciar"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Configurar hora"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Configurar fecha"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Establecer"</string>
@@ -983,8 +963,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Conectado como un dispositivo de medios"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Conectado como una cámara"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectado como un instalador"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectado a un accesorio USB"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Toca para otras opciones de USB"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formatear almacenamiento USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formatear tarjeta SD"</string>
@@ -1104,6 +1083,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Seleccionar una cuenta"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Incremento"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Decremento"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Desplazarse hasta la página principal"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Desplazarse hacia arriba"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Más opciones"</string>
@@ -1117,6 +1112,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Datos de 4 GB desactivados"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Datos móviles desactivados"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"pulsa para habilitarla"</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificado de seguridad"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Este certificado es válido."</string>
     <string name="issued_to" msgid="454239480274921032">"Emitido a:"</string>
@@ -1134,6 +1137,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Ver todas..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Seleccionar actividad"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Compartir con..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispositivo bloqueado"</string>
 </resources>

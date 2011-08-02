@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"別のアプリケーションへの入力（パスワードなど）でもキー入力を監視することをアプリケーションに許可します。通常のアプリケーションではまったく必要ありません。"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"入力方法に関連付ける"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"入力方法のトップレベルインターフェースに関連付けることを所有者に許可します。通常のアプリケーションにはまったく必要ありません。"</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"テキストサービスにバインド"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"テキストサービス（SpellCheckerServiceなど）のトップレベルインターフェースへのバインドを所有者に許可します。通常のアプリケーションでは不要です。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"壁紙にバインド"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"壁紙のトップレベルインターフェースへのバインドを所有者に許可します。通常のアプリケーションでは不要です。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ウィジェットサービスにバインド"</string>
@@ -712,9 +710,9 @@
     <string name="autofill_county" msgid="237073771020362891">"郡"</string>
     <string name="autofill_island" msgid="4020100875984667025">"島"</string>
     <string name="autofill_district" msgid="8400735073392267672">"地区"</string>
-    <string name="autofill_department" msgid="5343279462564453309">"県"</string>
+    <string name="autofill_department" msgid="5343279462564453309">"部署"</string>
     <string name="autofill_prefecture" msgid="2028499485065800419">"都道府県"</string>
-    <string name="autofill_parish" msgid="8202206105468820057">"行政区"</string>
+    <string name="autofill_parish" msgid="8202206105468820057">"教区"</string>
     <string name="autofill_area" msgid="3547409050889952423">"地域"</string>
     <string name="autofill_emirate" msgid="2893880978835698818">"首長国"</string>
     <string name="permlab_readHistoryBookmarks" msgid="1284843728203412135">"ブラウザの履歴とブックマークを読み取る"</string>
@@ -724,10 +722,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"携帯電話に保存されているブラウザの履歴やブックマークの修正をアプリケーショに許可します。これにより悪意のあるアプリケーションが、ブラウザのデータを消去または変更する恐れがあります。"</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"アラームの設定"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"インストール済みアラームアプリケーションのアラーム設定をアプリケーションに許可します。この機能が実装されていないアラームアプリケーションもあります。"</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
-    <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
-    <skip />
+    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"このアプリケーションで管理されているボイスメールにアクセス"</string>
+    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"関連サービスでアクセス可能なボイスメールのみを保存および取得することをアプリケーションに許可します。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"ブラウザの位置情報へのアクセス権を変更"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"ブラウザの位置情報に対するアクセス権の変更をアプリケーションに許可します。この設定では、悪意のあるアプリケーションが任意のウェブサイトに位置情報を送信する可能性があります。"</string>
     <string name="save_password_message" msgid="767344687139195790">"このパスワードをブラウザで保存しますか？"</string>
@@ -843,7 +839,8 @@
     <string name="cut" msgid="3092569408438626261">"切り取り"</string>
     <string name="copy" msgid="2681946229533511987">"コピー"</string>
     <string name="paste" msgid="5629880836805036433">"貼り付け"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"クリップボードが空です"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"URLをコピー"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"テキストを選択..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"テキスト選択"</string>
@@ -880,12 +877,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"アプリのリダイレクト"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g>が実行中です。"</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g>が最初に起動していました。"</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"スケール"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"常に表示"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"[設定]&gt;[アプリケーション]&gt;[アプリケーションの管理]で再度有効にできます。"</string>
     <string name="smv_application" msgid="295583804361236288">"アプリケーション<xliff:g id="APPLICATION">%1$s</xliff:g>（プロセス<xliff:g id="PROCESS">%2$s</xliff:g>）でStrictModeポリシー違反がありました。"</string>
     <string name="smv_process" msgid="5120397012047462446">"プロセス<xliff:g id="PROCESS">%1$s</xliff:g>でStrictModeポリシー違反がありました。"</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g>を実行中"</string>
@@ -919,40 +913,26 @@
     <item quantity="one" msgid="1634101450343277345">"Wi-Fiオープンネットワークが利用できます"</item>
     <item quantity="other" msgid="7915895323644292768">"Wi-Fiオープンネットワークが利用できます"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Wi-Fiネットワークが無効になりました"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"接続の不具合によりWi-Fiネットワークは一時的に無効になりました。"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Wi-Fi Directの操作を開始します。これによりWi-Fiクライアント/アクセスポイントの操作がオフになります。"</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Wi-Fi Directを開始できませんでした"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>からのWi-Fi Direct接続設定リクエスト。[OK]をクリックして受け入れます。"</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>からのWi-Fi Direct接続設定リクエスト。PINを入力して続行します。"</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"接続設定を続行するには、ピアデバイス<xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>でWPS PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>を入力する必要があります"</string>
     <string name="select_character" msgid="3365550120617701745">"文字を挿入"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"不明なアプリケーション"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMSメッセージの送信中"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"大量のSMSメッセージを送信しようとしています。[OK]で送信、[キャンセル]で中止します。"</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"キャンセル"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIMカードが取り外されました"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"モバイルネットワークはSIMカードを交換するまで利用できません。"</string>
+    <string name="sim_done_button" msgid="827949989369963775">"完了"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIMカードが追加されました"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"モバイルネットワークにアクセスするには端末を再起動する必要があります。"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"再起動"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"時刻設定"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"日付設定"</string>
     <string name="date_time_set" msgid="5777075614321087758">"設定"</string>
@@ -983,8 +963,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"メディアデバイスとして接続"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"カメラとして接続"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"インストーラとして接続"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USBアクセサリを接続しました"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"他のUSBオプションをタップしてください"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"USBストレージのフォーマット"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SDカードをフォーマット"</string>
@@ -1104,6 +1083,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"アカウントを選択"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"増やす"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"減らす"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"ホームへ移動"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"上へ移動"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"その他のオプション"</string>
@@ -1117,6 +1112,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4Gデータが無効になりました"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"モバイルデータが無効になりました"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"有効にするにはタップしてください"</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"セキュリティ証明書"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"証明書は有効です。"</string>
     <string name="issued_to" msgid="454239480274921032">"発行先:"</string>
@@ -1132,10 +1135,7 @@
     <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256指紋:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1指紋:"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"すべて見る..."</string>
-    <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
-    <skip />
-    <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
-    <skip />
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"操作の選択"</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"共有相手..."</string>
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"端末がロックされています。"</string>
 </resources>

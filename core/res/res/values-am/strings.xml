@@ -1117,7 +1117,8 @@
     <skip />
     <!-- no translation found for paste (5629880836805036433) -->
     <skip />
-    <string name="pasteDisabled" msgid="7259254654641456570">"ምንም የሚለጠፍ የለም"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <!-- no translation found for copyUrl (2538211579596067402) -->
     <skip />
     <string name="selectTextMode" msgid="6738556348861347240">"ፅሁፍ ምረጥ"</string>
@@ -1431,6 +1432,22 @@
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
     <skip />
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <!-- no translation found for action_bar_home_description (5293600496601490216) -->
     <skip />
     <!-- no translation found for action_bar_up_description (2237496562952152589) -->
@@ -1456,6 +1473,14 @@
     <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
     <skip />
     <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
+    <skip />
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
     <skip />
     <!-- no translation found for ssl_certificate (6510040486049237639) -->
     <skip />

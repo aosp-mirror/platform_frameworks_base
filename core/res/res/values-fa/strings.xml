@@ -843,7 +843,8 @@
     <string name="cut" msgid="3092569408438626261">"برش"</string>
     <string name="copy" msgid="2681946229533511987">"کپی"</string>
     <string name="paste" msgid="5629880836805036433">"جای گذاری"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"چیزی برای جای گذاری نیست"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"کپی URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"انتخاب متن..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"انتخاب متن"</string>
@@ -1104,6 +1105,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"انتخاب یک حساب"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"افزایش"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"کاهش"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"رفتن به صفحه اصلی"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"حرکت به بالا"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"سایر گزینه ها"</string>
@@ -1117,6 +1134,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"داده 4G غیر فعال شده است"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"داده های تلفن همراه غیرفعال شد"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"برای فعال کردن ضربه بزنید"</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"گواهی امنیتی"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"این گواهی معتبر است."</string>
     <string name="issued_to" msgid="454239480274921032">"صادر شده برای:"</string>
