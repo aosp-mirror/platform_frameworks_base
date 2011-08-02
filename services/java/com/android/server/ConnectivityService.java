@@ -900,7 +900,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         !network.isTeardownRequested()) {
                     if (ni.isConnected() == true) {
                         // add the pid-specific dns
-                        handleDnsConfigurationChange(networkType);
+                        handleDnsConfigurationChange(usedNetworkType);
                         if (DBG) log("special network already active");
                         return Phone.APN_ALREADY_ACTIVE;
                     }
