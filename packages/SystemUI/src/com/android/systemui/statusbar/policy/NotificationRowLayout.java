@@ -324,7 +324,14 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
             if (child.getVisibility() == GONE) {
                 continue;
             }
-            final int thisRowHeight = (int)(child.getAlpha() * mRowHeight);
+            float alpha = child.getAlpha();
+            if (alpha > 1.0f) {
+                if (DEBUG) {
+                    Slog.w(TAG, "alpha=" + alpha + " > 1!!! " + child);
+                }
+                alpha = 1f;
+            }
+            final int thisRowHeight = (int)(alpha * mRowHeight);
             if (DEBUG) {
                 Slog.d(TAG, String.format(
                             "laying out child #%d: (0, %d, %d, %d) h=%d",
