@@ -38,11 +38,15 @@ import java.io.IOException;
  */
 public class LayoutInflater_Delegate {
 
+    private static final String TAG_MERGE = "merge";
+
     public static boolean sIsInInclude = false;
 
     /**
      * Recursive method used to descend down the xml hierarchy and instantiate
      * views, instantiate their children, and then call onFinishInflate().
+     *
+     * This implementation just records the merge status before calling the default implementation.
      */
     @LayoutlibDelegate
     /*package*/ static void rInflate(LayoutInflater thisInflater,
@@ -58,37 +62,7 @@ public class LayoutInflater_Delegate {
 
         // ---- START DEFAULT IMPLEMENTATION.
 
-        final int depth = parser.getDepth();
-        int type;
-
-        while (((type = parser.next()) != XmlPullParser.END_TAG ||
-                parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
-
-            if (type != XmlPullParser.START_TAG) {
-                continue;
-            }
-
-            final String name = parser.getName();
-
-            if (LayoutInflater.TAG_REQUEST_FOCUS.equals(name)) {
-                thisInflater.parseRequestFocus(parser, parent);
-            } else if (LayoutInflater.TAG_INCLUDE.equals(name)) {
-                if (parser.getDepth() == 0) {
-                    throw new InflateException("<include /> cannot be the root element");
-                }
-                thisInflater.parseInclude(parser, parent, attrs);
-            } else if (LayoutInflater.TAG_MERGE.equals(name)) {
-                throw new InflateException("<merge /> must be the root element");
-            } else {
-                final View view = thisInflater.createViewFromTag(parent, name, attrs);
-                final ViewGroup viewGroup = (ViewGroup) parent;
-                final ViewGroup.LayoutParams params = viewGroup.generateLayoutParams(attrs);
-                thisInflater.rInflate(parser, view, attrs, true);
-                viewGroup.addView(view, params);
-            }
-        }
-
-        if (finishInflate) parent.onFinishInflate();
+        thisInflater.rInflate_Original(parser, parent, attrs, finishInflate);
 
         // ---- END DEFAULT IMPLEMENTATION.
 
@@ -138,7 +112,7 @@ public class LayoutInflater_Delegate {
 
                     final String childName = childParser.getName();
 
-                    if (LayoutInflater.TAG_MERGE.equals(childName)) {
+                    if (TAG_MERGE.equals(childName)) {
                         // Inflate all children.
                         thisInflater.rInflate(childParser, parent, childAttrs, false);
                     } else {
