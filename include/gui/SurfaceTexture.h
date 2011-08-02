@@ -30,6 +30,7 @@ struct SurfaceTexture {
     void setFrameAvailableListener(const sp<FrameAvailableListener>&) {}
     void setSynchronousMode(bool) {}
     GLenum getCurrentTextureTarget() const { return 0; }
+    void setBufferCount(int bufferCount) {}
 };
 
 static sp<SurfaceTexture> SurfaceTexture_getSurfaceTexture(JNIEnv* env, jobject thiz)
