@@ -302,13 +302,47 @@ void LayerBase::drawRegion(const Region& reg) const
     }
 }
 
-void LayerBase::setGeometry(hwc_layer_t* hwcl) {
-    hwcl->flags |= HWC_SKIP_LAYER;
+void LayerBase::setGeometry(hwc_layer_t* hwcl)
+{
+    hwcl->compositionType = HWC_FRAMEBUFFER;
+    hwcl->hints = 0;
+    hwcl->flags = HWC_SKIP_LAYER;
+    hwcl->transform = 0;
+    hwcl->blending = HWC_BLENDING_NONE;
+
+    // this gives us only the "orientation" component of the transform
+    const State& s(drawingState());
+    const uint32_t finalTransform = s.transform.getOrientation();
+    // we can only handle simple transformation
+    if (finalTransform & Transform::ROT_INVALID) {
+        hwcl->flags = HWC_SKIP_LAYER;
+    } else {
+        hwcl->transform = finalTransform;
+    }
+
+    if (!isOpaque()) {
+        hwcl->blending = mPremultipliedAlpha ?
+                HWC_BLENDING_PREMULT : HWC_BLENDING_COVERAGE;
+    }
+
+    // scaling is already applied in mTransformedBounds
+    hwcl->displayFrame.left   = mTransformedBounds.left;
+    hwcl->displayFrame.top    = mTransformedBounds.top;
+    hwcl->displayFrame.right  = mTransformedBounds.right;
+    hwcl->displayFrame.bottom = mTransformedBounds.bottom;
+    hwcl->visibleRegionScreen.rects =
+            reinterpret_cast<hwc_rect_t const *>(
+                    visibleRegionScreen.getArray(
+                            &hwcl->visibleRegionScreen.numRects));
 }
 
 void LayerBase::setPerFrameData(hwc_layer_t* hwcl) {
     hwcl->compositionType = HWC_FRAMEBUFFER;
     hwcl->handle = NULL;
+    hwcl->sourceCrop.left   = 0;
+    hwcl->sourceCrop.top    = 0;
+    hwcl->sourceCrop.right  = mTransformedBounds.width();
+    hwcl->sourceCrop.bottom = mTransformedBounds.height();
 }
 
 void LayerBase::setFiltering(bool filtering)
