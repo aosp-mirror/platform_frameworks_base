@@ -95,9 +95,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
         mTarget = target;
         mContext = context;
 
-        HandlerThread handlerThread = new HandlerThread("ConnectivityServiceThread");
-        handlerThread.start();
-        mHandler = new MdstHandler(handlerThread.getLooper(), this);
+        mHandler = new MdstHandler(target.getLooper(), this);
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(TelephonyIntents.ACTION_ANY_DATA_CONNECTION_STATE_CHANGED);
