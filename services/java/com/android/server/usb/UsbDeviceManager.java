@@ -388,13 +388,12 @@ public class UsbDeviceManager {
         }
 
         private void setEnabledFunctions(String functions, boolean makeDefault) {
-            if (mAdbEnabled) {
-                functions = addFunction(functions, UsbManager.USB_FUNCTION_ADB);
-            } else {
-                functions = removeFunction(functions, UsbManager.USB_FUNCTION_ADB);
-            }
-
             if (functions != null && makeDefault) {
+                if (mAdbEnabled) {
+                    functions = addFunction(functions, UsbManager.USB_FUNCTION_ADB);
+                } else {
+                    functions = removeFunction(functions, UsbManager.USB_FUNCTION_ADB);
+                }
                 if (!mDefaultFunctions.equals(functions)) {
                     if (!setUsbConfig("none")) {
                         Slog.e(TAG, "Failed to disable USB");
@@ -417,6 +416,11 @@ public class UsbDeviceManager {
             } else {
                 if (functions == null) {
                     functions = mDefaultFunctions;
+                }
+                if (mAdbEnabled) {
+                    functions = addFunction(functions, UsbManager.USB_FUNCTION_ADB);
+                } else {
+                    functions = removeFunction(functions, UsbManager.USB_FUNCTION_ADB);
                 }
                 if (!mCurrentFunctions.equals(functions)) {
                     if (!setUsbConfig("none")) {
