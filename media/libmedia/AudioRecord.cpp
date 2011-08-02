@@ -114,6 +114,7 @@ AudioRecord::~AudioRecord()
         }
         mAudioRecord.clear();
         IPCThreadState::self()->flushCommands();
+        AudioSystem::releaseAudioSessionId(mSessionId);
     }
 }
 
@@ -233,6 +234,7 @@ status_t AudioRecord::set(
     mInputSource = (uint8_t)inputSource;
     mFlags = flags;
     mInput = input;
+    AudioSystem::acquireAudioSessionId(mSessionId);
 
     return NO_ERROR;
 }
@@ -465,6 +467,7 @@ status_t AudioRecord::openRecord_l(
                                                        ((uint16_t)flags) << 16,
                                                        &mSessionId,
                                                        &status);
+
     if (record == 0) {
         LOGE("AudioFlinger could not create record track, status: %d", status);
         return status;

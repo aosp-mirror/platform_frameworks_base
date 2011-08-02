@@ -134,6 +134,7 @@ AudioTrack::~AudioTrack()
         }
         mAudioTrack.clear();
         IPCThreadState::self()->flushCommands();
+        AudioSystem::releaseAudioSessionId(mSessionId);
     }
 }
 
@@ -259,6 +260,7 @@ status_t AudioTrack::set(
     mNewPosition = 0;
     mUpdatePeriod = 0;
     mFlags = flags;
+    AudioSystem::acquireAudioSessionId(mSessionId);
 
     return NO_ERROR;
 }

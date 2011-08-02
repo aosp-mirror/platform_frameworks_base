@@ -264,6 +264,14 @@ status_t AudioFlinger::dumpClients(int fd, const Vector<String16>& args)
             }
         }
     }
+
+    result.append("Global session refs:\n");
+    result.append(" session pid cnt\n");
+    for (size_t i = 0; i < mAudioSessionRefs.size(); i++) {
+        AudioSessionRef *r = mAudioSessionRefs[i];
+        snprintf(buffer, SIZE, " %7d %3d %3d\n", r->sessionid, r->pid, r->cnt);
+        result.append(buffer);
+    }
     write(fd, result.string(), result.size());
     return NO_ERROR;
 }
@@ -891,6 +899,25 @@ void AudioFlinger::removeNotificationClient(pid_t pid)
         sp <NotificationClient> client = mNotificationClients.valueFor(pid);
         LOGV("removeNotificationClient() %p, pid %d", client.get(), pid);
         mNotificationClients.removeItem(pid);
+    }
+
+    LOGV("%d died, releasing its sessions", pid);
+    int num = mAudioSessionRefs.size();
+    bool removed = false;
+    for (int i = 0; i< num; i++) {
+        AudioSessionRef *ref = mAudioSessionRefs.itemAt(i);
+        LOGV(" pid %d @ %d", ref->pid, i);
+        if (ref->pid == pid) {
+            LOGV(" removing entry for pid %d session %d", pid, ref->sessionid);
+            mAudioSessionRefs.removeAt(i);
+            delete ref;
+            removed = true;
+            i--;
+            num--;
+        }
+    }
+    if (removed) {
+        purgeStaleEffects_l();
     }
 }
 
@@ -5042,6 +5069,109 @@ int AudioFlinger::newAudioSessionId()
     return nextUniqueId();
 }
 
+void AudioFlinger::acquireAudioSessionId(int audioSession)
+{
+    Mutex::Autolock _l(mLock);
+    int caller = IPCThreadState::self()->getCallingPid();
+    LOGV("acquiring %d from %d", audioSession, caller);
+    int num = mAudioSessionRefs.size();
+    for (int i = 0; i< num; i++) {
+        AudioSessionRef *ref = mAudioSessionRefs.editItemAt(i);
+        if (ref->sessionid == audioSession && ref->pid == caller) {
+            ref->cnt++;
+            LOGV(" incremented refcount to %d", ref->cnt);
+            return;
+        }
+    }
+    AudioSessionRef *ref = new AudioSessionRef();
+    ref->sessionid = audioSession;
+    ref->pid = caller;
+    ref->cnt = 1;
+    mAudioSessionRefs.push(ref);
+    LOGV(" added new entry for %d", ref->sessionid);
+}
+
+void AudioFlinger::releaseAudioSessionId(int audioSession)
+{
+    Mutex::Autolock _l(mLock);
+    int caller = IPCThreadState::self()->getCallingPid();
+    LOGV("releasing %d from %d", audioSession, caller);
+    int num = mAudioSessionRefs.size();
+    for (int i = 0; i< num; i++) {
+        AudioSessionRef *ref = mAudioSessionRefs.itemAt(i);
+        if (ref->sessionid == audioSession && ref->pid == caller) {
+            ref->cnt--;
+            LOGV(" decremented refcount to %d", ref->cnt);
+            if (ref->cnt == 0) {
+                mAudioSessionRefs.removeAt(i);
+                delete ref;
+                purgeStaleEffects_l();
+            }
+            return;
+        }
+    }
+    LOGW("session id %d not found for pid %d", audioSession, caller);
+}
+
+void AudioFlinger::purgeStaleEffects_l() {
+
+    LOGV("purging stale effects");
+
+    Vector< sp<EffectChain> > chains;
+
+    for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
+        sp<PlaybackThread> t = mPlaybackThreads.valueAt(i);
+        for (size_t j = 0; j < t->mEffectChains.size(); j++) {
+            sp<EffectChain> ec = t->mEffectChains[j];
+            chains.push(ec);
+        }
+    }
+    for (size_t i = 0; i < mRecordThreads.size(); i++) {
+        sp<RecordThread> t = mRecordThreads.valueAt(i);
+        for (size_t j = 0; j < t->mEffectChains.size(); j++) {
+            sp<EffectChain> ec = t->mEffectChains[j];
+            chains.push(ec);
+        }
+    }
+
+    for (size_t i = 0; i < chains.size(); i++) {
+        sp<EffectChain> ec = chains[i];
+        int sessionid = ec->sessionId();
+        sp<ThreadBase> t = ec->mThread.promote();
+        if (t == 0) {
+            continue;
+        }
+        size_t numsessionrefs = mAudioSessionRefs.size();
+        bool found = false;
+        for (size_t k = 0; k < numsessionrefs; k++) {
+            AudioSessionRef *ref = mAudioSessionRefs.itemAt(k);
+            if (ref->sessionid == sessionid) {
+                LOGV(" session %d still exists for %d with %d refs",
+                     sessionid, ref->pid, ref->cnt);
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            // remove all effects from the chain
+            while (ec->mEffects.size()) {
+                sp<EffectModule> effect = ec->mEffects[0];
+                effect->unPin();
+                Mutex::Autolock _l (t->mLock);
+                t->removeEffect_l(effect);
+                for (size_t j = 0; j < effect->mHandles.size(); j++) {
+                    sp<EffectHandle> handle = effect->mHandles[j].promote();
+                    if (handle != 0) {
+                        handle->mEffect.clear();
+                    }
+                }
+                AudioSystem::unregisterEffect(effect->id());
+            }
+        }
+    }
+    return;
+}
+
 // checkPlaybackThread_l() must be called with AudioFlinger::mLock held
 AudioFlinger::PlaybackThread *AudioFlinger::checkPlaybackThread_l(int output) const
 {
@@ -5199,6 +5329,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
             }
             uint32_t numEffects = 0;
             effect_descriptor_t d;
+            d.flags = 0; // prevent compiler warning
             bool found = false;
 
             lStatus = EffectQueryNumberEffects(&numEffects);
@@ -5302,7 +5433,7 @@ sp<IEffect> AudioFlinger::createEffect(pid_t pid,
             mClients.add(pid, client);
         }
 
-        // create effect on selected output trhead
+        // create effect on selected output thread
         handle = thread->createEffect_l(client, effectClient, priority, sessionId,
                 &desc, enabled, &lStatus);
         if (handle != 0 && id != NULL) {
@@ -5344,7 +5475,7 @@ status_t AudioFlinger::moveEffects(int sessionId, int srcOutput, int dstOutput)
     return NO_ERROR;
 }
 
-// moveEffectChain_l mustbe called with both srcThread and dstThread mLocks held
+// moveEffectChain_l must be called with both srcThread and dstThread mLocks held
 status_t AudioFlinger::moveEffectChain_l(int sessionId,
                                    AudioFlinger::PlaybackThread *srcThread,
                                    AudioFlinger::PlaybackThread *dstThread,
@@ -5370,7 +5501,7 @@ status_t AudioFlinger::moveEffectChain_l(int sessionId,
     // correct buffer sizes and audio parameters and effect engines reconfigured accordingly
     int dstOutput = dstThread->id();
     sp<EffectChain> dstChain;
-    uint32_t strategy;
+    uint32_t strategy = 0; // prevent compiler warning
     sp<EffectModule> effect = chain->getEffectFromId_l(0);
     while (effect != 0) {
         srcThread->removeEffect_l(effect);
@@ -5632,14 +5763,17 @@ void AudioFlinger::ThreadBase::setMode(uint32_t mode)
 }
 
 void AudioFlinger::ThreadBase::disconnectEffect(const sp<EffectModule>& effect,
-                                                    const wp<EffectHandle>& handle) {
+                                                    const wp<EffectHandle>& handle,
+                                                    bool unpiniflast) {
 
     Mutex::Autolock _l(mLock);
     LOGV("disconnectEffect() %p effect %p", this, effect.get());
     // delete the effect module if removing last handle on it
     if (effect->removeHandle(handle) == 0) {
-        removeEffect_l(effect);
-        AudioSystem::unregisterEffect(effect->id());
+        if (!effect->isPinned() || unpiniflast) {
+            removeEffect_l(effect);
+            AudioSystem::unregisterEffect(effect->id());
+        }
     }
 }
 
@@ -5847,6 +5981,9 @@ AudioFlinger::EffectModule::EffectModule(const wp<ThreadBase>& wThread,
         goto Error;
     }
 
+    if (mSessionId > AUDIO_SESSION_OUTPUT_MIX) {
+        mPinned = true;
+    }
     LOGV("Constructor success name %s, Interface %p", mDescriptor.name, mEffectInterface);
     return;
 Error:
@@ -5938,7 +6075,7 @@ size_t AudioFlinger::EffectModule::removeHandle(const wp<EffectHandle>& handle)
     // Prevent calls to process() and other functions on effect interface from now on.
     // The effect engine will be released by the destructor when the last strong reference on
     // this object is released which can happen after next process is called.
-    if (size == 0) {
+    if (size == 0 && !mPinned) {
         mState = DESTROYED;
     }
 
@@ -5955,9 +6092,7 @@ sp<AudioFlinger::EffectHandle> AudioFlinger::EffectModule::controlHandle()
     return handle;
 }
 
-
-
-void AudioFlinger::EffectModule::disconnect(const wp<EffectHandle>& handle)
+void AudioFlinger::EffectModule::disconnect(const wp<EffectHandle>& handle, bool unpiniflast)
 {
     LOGV("disconnect() %p handle %p ", this, handle.unsafe_get());
     // keep a strong reference on this EffectModule to avoid calling the
@@ -5966,7 +6101,7 @@ void AudioFlinger::EffectModule::disconnect(const wp<EffectHandle>& handle)
     {
         sp<ThreadBase> thread = mThread.promote();
         if (thread != 0) {
-            thread->disconnectEffect(keep, handle);
+            thread->disconnectEffect(keep, handle, unpiniflast);
         }
     }
 }
@@ -6533,11 +6668,14 @@ AudioFlinger::EffectHandle::EffectHandle(const sp<EffectModule>& effect,
                                         const sp<IEffectClient>& effectClient,
                                         int32_t priority)
     : BnEffect(),
-    mEffect(effect), mEffectClient(effectClient), mClient(client),
+    mEffect(effect), mEffectClient(effectClient), mClient(client), mCblk(NULL),
     mPriority(priority), mHasControl(false), mEnabled(false)
 {
     LOGV("constructor %p", this);
 
+    if (client == 0) {
+        return;
+    }
     int bufOffset = ((sizeof(effect_param_cblk_t) - 1) / sizeof(int) + 1) * sizeof(int);
     mCblkMemory = client->heap()->allocate(EFFECT_PARAM_BUFFER_SIZE + bufOffset);
     if (mCblkMemory != 0) {
@@ -6556,7 +6694,7 @@ AudioFlinger::EffectHandle::EffectHandle(const sp<EffectModule>& effect,
 AudioFlinger::EffectHandle::~EffectHandle()
 {
     LOGV("Destructor %p", this);
-    disconnect();
+    disconnect(false);
     LOGV("Destructor DONE %p", this);
 }
 
@@ -6605,12 +6743,16 @@ status_t AudioFlinger::EffectHandle::disable()
 
 void AudioFlinger::EffectHandle::disconnect()
 {
-    LOGV("disconnect %p", this);
+    disconnect(true);
+}
+
+void AudioFlinger::EffectHandle::disconnect(bool unpiniflast)
+{
+    LOGV("disconnect(%s)", unpiniflast ? "true" : "false");
     if (mEffect == 0) {
         return;
     }
-
-    mEffect->disconnect(this);
+    mEffect->disconnect(this, unpiniflast);
 
     sp<ThreadBase> thread = mEffect->thread().promote();
     if (thread != 0) {
@@ -6619,11 +6761,11 @@ void AudioFlinger::EffectHandle::disconnect()
 
     // release sp on module => module destructor can be called now
     mEffect.clear();
-    if (mCblk) {
-        mCblk->~effect_param_cblk_t();   // destroy our shared-structure.
-    }
-    mCblkMemory.clear();            // and free the shared memory
     if (mClient != 0) {
+        if (mCblk) {
+            mCblk->~effect_param_cblk_t();   // destroy our shared-structure.
+        }
+        mCblkMemory.clear();            // and free the shared memory
         Mutex::Autolock _l(mClient->audioFlinger()->mLock);
         mClient.clear();
     }
@@ -6643,6 +6785,7 @@ status_t AudioFlinger::EffectHandle::command(uint32_t cmdCode,
         return INVALID_OPERATION;
     }
     if (mEffect == 0) return DEAD_OBJECT;
+    if (mClient == 0) return INVALID_OPERATION;
 
     // handle commands that are not forwarded transparently to effect engine
     if (cmdCode == EFFECT_CMD_SET_PARAM_COMMIT) {
@@ -6749,15 +6892,15 @@ status_t AudioFlinger::EffectHandle::onTransact(
 
 void AudioFlinger::EffectHandle::dump(char* buffer, size_t size)
 {
-    bool locked = tryLock(mCblk->lock);
+    bool locked = mCblk ? tryLock(mCblk->lock) : false;
 
     snprintf(buffer, size, "\t\t\t%05d %05d    %01u    %01u      %05u  %05u\n",
             (mClient == NULL) ? getpid() : mClient->pid(),
             mPriority,
             mHasControl,
             !locked,
-            mCblk->clientIndex,
-            mCblk->serverIndex
+            mCblk ? mCblk->clientIndex : 0,
+            mCblk ? mCblk->serverIndex : 0
             );
 
     if (locked) {
