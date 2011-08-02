@@ -45,6 +45,8 @@ struct fields_t {
     jfieldID    rect_right;
     jfieldID    rect_bottom;
     jmethodID   post_event;
+    jmethodID   rect_constructor;
+    jmethodID   face_constructor;
 };
 
 static fields_t fields;
@@ -57,8 +59,10 @@ public:
     JNICameraContext(JNIEnv* env, jobject weak_this, jclass clazz, const sp<Camera>& camera);
     ~JNICameraContext() { release(); }
     virtual void notify(int32_t msgType, int32_t ext1, int32_t ext2);
-    virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr);
+    virtual void postData(int32_t msgType, const sp<IMemory>& dataPtr,
+                          camera_frame_metadata_t *metadata);
     virtual void postDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
+    void postMetadata(JNIEnv *env, int32_t msgType, camera_frame_metadata_t *metadata);
     void addCallbackBuffer(JNIEnv *env, jbyteArray cbb, int msgType);
     void setCallbackMode(JNIEnv *env, bool installed, bool manualMode);
     sp<Camera> getCamera() { Mutex::Autolock _l(mLock); return mCamera; }
@@ -74,6 +78,8 @@ private:
     jobject     mCameraJObjectWeak;     // weak reference to java object
     jclass      mCameraJClass;          // strong reference to java class
     sp<Camera>  mCamera;                // strong reference to native object
+    jclass      mFaceClass;  // strong reference to Face class
+    jclass      mRectClass;  // strong reference to Rect class
     Mutex       mLock;
 
     /*
@@ -124,6 +130,12 @@ JNICameraContext::JNICameraContext(JNIEnv* env, jobject weak_this, jclass clazz,
     mCameraJClass = (jclass)env->NewGlobalRef(clazz);
     mCamera = camera;
 
+    jclass faceClazz = env->FindClass("android/hardware/Camera$Face");
+    mFaceClass = (jclass) env->NewGlobalRef(faceClazz);
+
+    jclass rectClazz = env->FindClass("android/graphics/Rect");
+    mRectClass = (jclass) env->NewGlobalRef(rectClazz);
+
     mManualBufferMode = false;
     mManualCameraCallbackSet = false;
 }
@@ -141,6 +153,14 @@ void JNICameraContext::release()
     if (mCameraJClass != NULL) {
         env->DeleteGlobalRef(mCameraJClass);
         mCameraJClass = NULL;
+    }
+    if (mFaceClass != NULL) {
+        env->DeleteGlobalRef(mFaceClass);
+        mFaceClass = NULL;
+    }
+    if (mRectClass != NULL) {
+        env->DeleteGlobalRef(mRectClass);
+        mRectClass = NULL;
     }
     clearCallbackBuffers_l(env);
     mCamera.clear();
@@ -263,7 +283,8 @@ void JNICameraContext::copyAndPost(JNIEnv* env, const sp<IMemory>& dataPtr, int 
     }
 }
 
-void JNICameraContext::postData(int32_t msgType, const sp<IMemory>& dataPtr)
+void JNICameraContext::postData(int32_t msgType, const sp<IMemory>& dataPtr,
+                                camera_frame_metadata_t *metadata)
 {
     // VM pointer will be NULL if object is released
     Mutex::Autolock _l(mLock);
@@ -273,8 +294,10 @@ void JNICameraContext::postData(int32_t msgType, const sp<IMemory>& dataPtr)
         return;
     }
 
+    int32_t dataMsgType = msgType & ~CAMERA_MSG_PREVIEW_METADATA;
+
     // return data based on callback type
-    switch (msgType) {
+    switch (dataMsgType) {
         case CAMERA_MSG_VIDEO_FRAME:
             // should never happen
             break;
@@ -285,23 +308,63 @@ void JNICameraContext::postData(int32_t msgType, const sp<IMemory>& dataPtr)
             LOGV("rawCallback");
             if (mRawImageCallbackBuffers.isEmpty()) {
                 env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
-                        mCameraJObjectWeak, msgType, 0, 0, NULL);
+                        mCameraJObjectWeak, dataMsgType, 0, 0, NULL);
             } else {
-                copyAndPost(env, dataPtr, msgType);
+                copyAndPost(env, dataPtr, dataMsgType);
             }
             break;
 
-        default:
-            LOGV("dataCallback(%d, %p)", msgType, dataPtr.get());
-            copyAndPost(env, dataPtr, msgType);
+        // There is no data.
+        case 0:
             break;
+
+        default:
+            LOGV("dataCallback(%d, %p)", dataMsgType, dataPtr.get());
+            copyAndPost(env, dataPtr, dataMsgType);
+            break;
+    }
+
+    // post frame metadata to Java
+    if (metadata && (msgType & CAMERA_MSG_PREVIEW_METADATA)) {
+        postMetadata(env, CAMERA_MSG_PREVIEW_METADATA, metadata);
     }
 }
 
 void JNICameraContext::postDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr)
 {
     // TODO: plumb up to Java. For now, just drop the timestamp
-    postData(msgType, dataPtr);
+    postData(msgType, dataPtr, NULL);
+}
+
+void JNICameraContext::postMetadata(JNIEnv *env, int32_t msgType, camera_frame_metadata_t *metadata)
+{
+    jobjectArray obj = NULL;
+    obj = (jobjectArray) env->NewObjectArray(metadata->number_of_faces,
+                                             mFaceClass, NULL);
+    if (obj == NULL) {
+        LOGE("Couldn't allocate face metadata array");
+        return;
+    }
+
+    for (int i = 0; i < metadata->number_of_faces; i++) {
+        jobject face = env->NewObject(mFaceClass, fields.face_constructor);
+        env->SetObjectArrayElement(obj, i, face);
+
+        jobject rect = env->NewObject(mRectClass, fields.rect_constructor);
+        env->SetIntField(rect, fields.rect_left, metadata->faces[i].rect[0]);
+        env->SetIntField(rect, fields.rect_top, metadata->faces[i].rect[1]);
+        env->SetIntField(rect, fields.rect_right, metadata->faces[i].rect[2]);
+        env->SetIntField(rect, fields.rect_bottom, metadata->faces[i].rect[3]);
+
+        env->SetObjectField(face, fields.face_rect, rect);
+        env->SetIntField(face, fields.face_score, metadata->faces[i].score);
+
+        env->DeleteLocalRef(face);
+        env->DeleteLocalRef(rect);
+    }
+    env->CallStaticVoidMethod(mCameraJClass, fields.post_event,
+            mCameraJObjectWeak, msgType, 0, 0, obj);
+    env->DeleteLocalRef(obj);
 }
 
 void JNICameraContext::setCallbackMode(JNIEnv *env, bool installed, bool manualMode)
@@ -715,7 +778,7 @@ static void android_hardware_Camera_setDisplayOrientation(JNIEnv *env, jobject t
 }
 
 static void android_hardware_Camera_startFaceDetection(JNIEnv *env, jobject thiz,
-        jint type, jobjectArray face)
+        jint type)
 {
     LOGV("startFaceDetection");
     JNICameraContext* context;
@@ -878,6 +941,19 @@ int register_android_hardware_Camera(JNIEnv *env)
         return -1;
     }
 
+    clazz = env->FindClass("android/graphics/Rect");
+    fields.rect_constructor = env->GetMethodID(clazz, "<init>", "()V");
+    if (fields.rect_constructor == NULL) {
+        LOGE("Can't find android/graphics/Rect.Rect()");
+        return -1;
+    }
+
+    clazz = env->FindClass("android/hardware/Camera$Face");
+    fields.face_constructor = env->GetMethodID(clazz, "<init>", "()V");
+    if (fields.face_constructor == NULL) {
+        LOGE("Can't find android/hardware/Camera$Face.Face()");
+        return -1;
+    }
 
     // Register native functions
     return AndroidRuntime::registerNativeMethods(env, "android/hardware/Camera",

@@ -147,18 +147,22 @@ private:
         static sp<Client>       getClientFromCookie(void* user);
         // handlers for messages
         void                    handleShutter(void);
-        void                    handlePreviewData(const sp<IMemory>& mem);
+        void                    handlePreviewData(int32_t msgType, const sp<IMemory>& mem,
+                                                  camera_frame_metadata_t *metadata);
         void                    handlePostview(const sp<IMemory>& mem);
         void                    handleRawPicture(const sp<IMemory>& mem);
         void                    handleCompressedPicture(const sp<IMemory>& mem);
         void                    handleGenericNotify(int32_t msgType, int32_t ext1, int32_t ext2);
-        void                    handleGenericData(int32_t msgType, const sp<IMemory>& dataPtr);
+        void                    handleGenericData(int32_t msgType, const sp<IMemory>& dataPtr,
+                                                  camera_frame_metadata_t *metadata);
         void                    handleGenericDataTimestamp(nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
 
         void                    copyFrameAndPostCopiedFrame(
+                                    int32_t msgType,
                                     const sp<ICameraClient>& client,
                                     const sp<IMemoryHeap>& heap,
-                                    size_t offset, size_t size);
+                                    size_t offset, size_t size,
+                                    camera_frame_metadata_t *metadata);
 
         int                     getOrientation(int orientation, bool mirror);
 

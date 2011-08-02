@@ -37,7 +37,8 @@ struct CameraSourceListener : public CameraListener {
     CameraSourceListener(const sp<CameraSource> &source);
 
     virtual void notify(int32_t msgType, int32_t ext1, int32_t ext2);
-    virtual void postData(int32_t msgType, const sp<IMemory> &dataPtr);
+    virtual void postData(int32_t msgType, const sp<IMemory> &dataPtr,
+                          camera_frame_metadata_t *metadata);
 
     virtual void postDataTimestamp(
             nsecs_t timestamp, int32_t msgType, const sp<IMemory>& dataPtr);
@@ -63,7 +64,8 @@ void CameraSourceListener::notify(int32_t msgType, int32_t ext1, int32_t ext2) {
     LOGV("notify(%d, %d, %d)", msgType, ext1, ext2);
 }
 
-void CameraSourceListener::postData(int32_t msgType, const sp<IMemory> &dataPtr) {
+void CameraSourceListener::postData(int32_t msgType, const sp<IMemory> &dataPtr,
+                                    camera_frame_metadata_t *metadata) {
     LOGV("postData(%d, ptr:%p, size:%d)",
          msgType, dataPtr->pointer(), dataPtr->size());
 

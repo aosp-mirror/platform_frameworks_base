@@ -360,7 +360,8 @@ void Camera::notifyCallback(int32_t msgType, int32_t ext1, int32_t ext2)
 }
 
 // callback from camera service when frame or image is ready
-void Camera::dataCallback(int32_t msgType, const sp<IMemory>& dataPtr)
+void Camera::dataCallback(int32_t msgType, const sp<IMemory>& dataPtr,
+                          camera_frame_metadata_t *metadata)
 {
     sp<CameraListener> listener;
     {
@@ -368,7 +369,7 @@ void Camera::dataCallback(int32_t msgType, const sp<IMemory>& dataPtr)
         listener = mListener;
     }
     if (listener != NULL) {
-        listener->postData(msgType, dataPtr);
+        listener->postData(msgType, dataPtr, metadata);
     }
 }
 
