@@ -68,7 +68,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
 import com.android.internal.content.PackageMonitor;
-import com.android.internal.service.wallpaper.ImageWallpaper;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.JournaledFile;
 
@@ -150,8 +149,8 @@ class WallpaperManagerService extends IWallpaperManager.Stub {
      * Name of the component used to display bitmap wallpapers from either the gallery or
      * built-in wallpapers.
      */
-    ComponentName mImageWallpaperComponent = new ComponentName("android", 
-            ImageWallpaper.class.getName());
+    ComponentName mImageWallpaperComponent = new ComponentName("com.android.systemui",
+            "com.android.systemui.ImageWallpaper");
     
     WallpaperConnection mWallpaperConnection;
     long mLastDiedTime;

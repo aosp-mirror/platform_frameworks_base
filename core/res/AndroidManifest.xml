@@ -1504,10 +1504,6 @@
                 android:excludeFromRecents="true">
         </activity>
 
-        <service android:name="com.android.internal.service.wallpaper.ImageWallpaper"
-                android:permission="android.permission.BIND_WALLPAPER">
-        </service>
-
         <receiver android:name="com.android.server.BootReceiver" >
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

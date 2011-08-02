@@ -234,14 +234,25 @@ public class WallpaperManager {
                 } catch (OutOfMemoryError e) {
                     Log.w(TAG, "No memory load current wallpaper", e);
                 }
-                if (mWallpaper == null && returnDefault) {
-                    mDefaultWallpaper = getDefaultWallpaperLocked(context);
-                    return mDefaultWallpaper;
+                if (returnDefault) {
+                    if (mWallpaper == null) {
+                        mDefaultWallpaper = getDefaultWallpaperLocked(context);
+                        return mDefaultWallpaper;
+                    } else {
+                        mDefaultWallpaper = null;
+                    }
                 }
                 return mWallpaper;
             }
         }
-        
+
+        public void forgetLoadedWallpaper() {
+            synchronized (this) {
+                mWallpaper = null;
+                mDefaultWallpaper = null;
+            }
+        }
+
         private Bitmap getCurrentWallpaperLocked(Context context) {
             try {
                 Bundle params = new Bundle();
@@ -399,6 +410,16 @@ public class WallpaperManager {
             return dr;
         }
         return null;
+    }
+
+    /**
+     * Remove all internal references to the last loaded wallpaper.  Useful
+     * for apps that want to reduce memory usage when they only temporarily
+     * need to have the wallpaper.  After calling, the next request for the
+     * wallpaper will require reloading it again from disk.
+     */
+    public void forgetLoadedWallpaper() {
+        sGlobals.forgetLoadedWallpaper();
     }
 
     /**
@@ -716,6 +737,7 @@ public class WallpaperManager {
             c.drawBitmap(bm, null, targetRect, paint);
 
             bm.recycle();
+            c.setBitmap(null);
             return newbm;
         } catch (OutOfMemoryError e) {
             Log.w(TAG, "Can't generate default bitmap", e);
