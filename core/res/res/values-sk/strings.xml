@@ -843,7 +843,8 @@
     <string name="cut" msgid="3092569408438626261">"Vystrihnúť"</string>
     <string name="copy" msgid="2681946229533511987">"Kopírovať"</string>
     <string name="paste" msgid="5629880836805036433">"Prilepiť"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Nie je čo vložiť"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Skopírovať adresu URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Vybrať text..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Výber textu"</string>
@@ -880,12 +881,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplikácia bola presmerov."</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Je spustená aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Pôvodne bola spustená aplikácia <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Prispôsobiť veľkosť"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"Vždy zobraziť"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Toto nastavenie je možné znova povoliť v sekcii Nastavenia &gt; Aplikácie &gt; Správa aplikácií."</string>
     <string name="smv_application" msgid="295583804361236288">"Aplikácia <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) porušila svoje vlastné vynútené pravidlá StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> porušil svoje vlastné vynútené pravidlá StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Spustená aplikácia: <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -941,18 +939,12 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Odosiela sa veľký počet správ SMS. Ak chcete pokračovať, vyberte OK. Ak chcete odosielanie ukončiť, vyberte Zrušiť."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Zrušiť"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"Karta SIM bola odobraná"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"Mobilná sieť bude k dispozícii až keď vymeníte kartu SIM."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Hotovo"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"Bola pridaná karta SIM"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"Ak chcete získať prístup k mobilnej sieti, musíte zariadenie reštartovať."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Reštartovať"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Nastaviť čas"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Nastaviť dátum"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Nastaviť"</string>
@@ -1104,6 +1096,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Vybrať účet"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Zvýšenie"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Zníženie"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Prejsť na plochu"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Prejsť na"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Viac možností"</string>
@@ -1117,6 +1125,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Dátové prenosy 4G zakázané"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilné dátové prenosy zakázané"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"klepnutím povolíte"</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Certifikát zabezpečenia"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Certifikát je platný."</string>
     <string name="issued_to" msgid="454239480274921032">"Vydané pre:"</string>
@@ -1132,10 +1148,8 @@
     <string name="sha256_fingerprint" msgid="4391271286477279263">"Digitálny odtlačok SHA-256:"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Digitálny odtlačok SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Zobraziť všetko..."</string>
-    <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
-    <skip />
-    <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
-    <skip />
+    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Vybrať aktivitu"</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Zdieľať s..."</string>
     <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
     <skip />
 </resources>

@@ -843,7 +843,8 @@
     <string name="cut" msgid="3092569408438626261">"Couper"</string>
     <string name="copy" msgid="2681946229533511987">"Copier"</string>
     <string name="paste" msgid="5629880836805036433">"Coller"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Presse-papiers vide"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Copier l\'URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Sélect. le texte..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Sélection de texte"</string>
@@ -1104,6 +1105,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Sélectionner un compte"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Augmenter"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Diminuer"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Retour à l\'accueil"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Parcourir vers le haut"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Plus d\'options"</string>
@@ -1117,6 +1134,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Données 4G désactivées"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Données mobiles désactivées"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"appuyer pour activer"</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificat de sécurité"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Ce certificat est valide."</string>
     <string name="issued_to" msgid="454239480274921032">"Délivré à :"</string>
@@ -1132,10 +1157,8 @@
     <string name="sha256_fingerprint" msgid="4391271286477279263">"Empreinte SHA-256 :"</string>
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Empreinte SHA-1 :"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Tout afficher..."</string>
-    <!-- no translation found for activity_chooser_view_dialog_title_default (3325054276356556835) -->
-    <skip />
-    <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
-    <skip />
+    <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Sélectionner une activité"</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Partager avec..."</string>
     <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
     <skip />
 </resources>

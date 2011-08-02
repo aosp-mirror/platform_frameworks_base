@@ -20,10 +20,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="status_bar_clear_all_button" msgid="4661583896803349732">"모두 지우기"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="383145178755329067">"인터넷에 연결되지 않음"</string>
-    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="2535465294437586528">"Wi-Fi 연결됨"</string>
-    <string name="gps_notification_searching_text" msgid="4467935186864208249">"GPS 검색 중"</string>
-    <string name="gps_notification_found_text" msgid="6270628388918822956">"GPS에서 위치 설정"</string>
     <string name="notifications_off_title" msgid="1860117696034775851">"알림 사용 안함"</string>
     <string name="notifications_off_text" msgid="1439152806320786912">"알림을 다시 사용하려면 여기를 터치하세요."</string>
 </resources>

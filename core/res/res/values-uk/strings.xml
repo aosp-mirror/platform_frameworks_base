@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Дозволяє програмі переглядати клавіші, які ви натискаєте, навіть під час роботи з іншою програмою (наприклад, під час вводу пароля). Ніколи не потрібний для звичайних програм."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"прив\'яз. до методу введ."</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Дозволяє власнику прив\'язувати до інтерфейсу верхнього рівня методу введення. Ніколи не потрібний для звичайних програм."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"прив’язати до текстової служби"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Дозволяє власникові прив’язувати до інтерфейсу верхнього рівня текстової служби (напр. SpellCheckerService). Ніколи не застосовується для звичайних програм."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"прив\'зати до фон. мал."</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Дозволяє власнику прив\'язувати до інтерфейсу верхнього рівня фон. малюнка. Ніколи не потрібний для звичайних програм."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"прив\'язувати до служби віджетів"</string>
@@ -724,10 +722,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Дозволяє програмі змінювати історію чи закладки переглядача, збережені у вашому тел. Шкідливі програми можуть викор. це, щоб видаляти чи змінювати дані переглядача."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"налашт. сигнал у будильн."</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Дозволяє програмі налаштовувати сигнал у встановленій програмі будильника. У деяких програмах будильника ця функція може не застосовуватися."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
-    <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
-    <skip />
+    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"Доступ до голосової пошти, якою керує ця програма"</string>
+    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Дозволяє програмі зберігати та відновлювати лише голосову пошту, доступ до якої має пов’язана з нею служба."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Змін. дозволи геогр. місцезн. перегладача"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Дозволяє програмі змін. дозволи географ. місцезн. переглядача. Шкідливі програми можуть використ. це, щоб дозволяти надсилати інф-ю про місцезн. випадковим веб-сайтам."</string>
     <string name="save_password_message" msgid="767344687139195790">"Хочете, щоб переглядач запам\'ятав цей пароль?"</string>
@@ -843,7 +839,8 @@
     <string name="cut" msgid="3092569408438626261">"Виріз."</string>
     <string name="copy" msgid="2681946229533511987">"Копіюв."</string>
     <string name="paste" msgid="5629880836805036433">"Вставити"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Немає що вставити"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Копіюв. URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Вибрати текст..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Вибір тексту"</string>
@@ -880,12 +877,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Програму переадресовано"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Зараз працює <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Спочатку було запущено <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Масштаб"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"Завжди показувати"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Знову ввімкнути це в розділі Налаштування &gt; Програми &gt; Керування програмами."</string>
     <string name="smv_application" msgid="295583804361236288">"Програма <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) порушила свою самозастосовну політику StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> порушив свою самозастосовну політику StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Працює <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -919,40 +913,26 @@
     <item quantity="one" msgid="1634101450343277345">"Відкрита Wi-Fi мережа доступна"</item>
     <item quantity="other" msgid="7915895323644292768">"Відкриті Wi-Fi мережі доступні"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Мережа Wi-Fi була вимкнена"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Мережа Wi-Fi була тимчасово вимкнена через погане з’єднання."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Почати операцію Wi-Fi Direct. Це вимкне Wi-Fi-операцію клієнт/точка доступу."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Не вдалося запустити Wi-Fi Direct"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Запит на налаштування з’єднання Wi-Fi Direct від пристрою <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Натисніть ОК, щоб прийняти."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Запит на налаштування з’єднання Wi-Fi Direct від пристрою <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Введіть PIN-код, щоб продовжити."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Щоб продовжити процес налаштування з’днання, потрібно ввести PIN-код WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> на пристрої однорангової мережі <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>."</string>
     <string name="select_character" msgid="3365550120617701745">"Вставл-ня символу"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Невідома програма"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Надсил. SMS повідомлень"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"Надсил-ся завелика к-сть SMS повідомл. Натисн. \"OK\", щоб продовж, або \"Скасувати\", щоб припин. надсил."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Скасувати"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM-карту вилучено"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"Мобільна мережа буде недоступною, поки ви не заміните SIM-карту."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIM-карту додано"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"Щоб отримати доступ до мобільної мережі, потрібно перезапустити пристрій."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Перезапуск"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Установити час"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Установити дату"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Устан."</string>
@@ -983,8 +963,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Під’єднано як носій"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Під’єднано як камеру"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Під’єднано як програму встановлення"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Під’єднано до аксесуара USB"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Торкніться, щоб побачити інші параметри USB"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Форматув. носій USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Формат. карти SD"</string>
@@ -1104,6 +1083,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Вибрати обліковий запис"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Додати"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Відняти"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Перейти на головну"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Перейти вгору"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Інші варіанти"</string>
@@ -1117,6 +1112,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Дані 4G вимкнено"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Мобільне передав. даних вимкнено"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"торкніться, щоб увімкнути"</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Сертифікат безпеки"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Цей сертифікат дійсний."</string>
     <string name="issued_to" msgid="454239480274921032">"Кому видано:"</string>
@@ -1134,6 +1137,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Показати всі..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Вибрати дію"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Надіслати..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Пристрій заблоковано."</string>
 </resources>

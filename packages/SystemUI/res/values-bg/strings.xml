@@ -62,7 +62,8 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Промяна на мащаба за съвместимост"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Когато дадено приложение е създадено за по-малък екран, до часовника ще се покаже управление за промяна на мащаба."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Екранната снимка е запазена в галерията"</string>
-    <string name="screenshot_failed_toast" msgid="655180965533683356">"Екранната снимка не можа да бъде запазена"</string>
+    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
+    <skip />
     <string name="usb_preference_title" msgid="6551050377388882787">"Опции за пренос на файлове чрез USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Свързване като медиен плейър (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Свързване като камера (PTP)"</string>
@@ -72,6 +73,8 @@
     <!-- no translation found for accessibility_home (8217216074895377641) -->
     <skip />
     <!-- no translation found for accessibility_menu (316839303324695949) -->
+    <skip />
+    <!-- no translation found for accessibility_recent (3027675523629738534) -->
     <skip />
     <!-- no translation found for accessibility_ime_switch_button (5032926134740456424) -->
     <skip />
@@ -160,5 +163,25 @@
     <!-- no translation found for accessibility_ringer_vibrate (666585363364155055) -->
     <skip />
     <!-- no translation found for accessibility_ringer_silent (9061243307939135383) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
+    <skip />
+    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
+    <skip />
+    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
+    <skip />
+    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
+    <skip />
+    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
+    <skip />
+    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
     <skip />
 </resources>

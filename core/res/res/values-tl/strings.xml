@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Pinapayagan ang mga application na panoorin ang mga pinipindot mong key maging kapag nakikipag-ugnay sa isa pang application (gaya ng pagpasok ng password). Hindi dapat na kailanganin kailanman para sa mga normal na application."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"sumailalim sa isang pamamaraan ng pag-input"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Pinapayagan ang holder na sumailalim sa nangungunang antas na interface ng pamamaraan ng pag-input. Hindi dapat kailanmang kailanganin para sa mga normal na application."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"sumailalim sa serbisyo ng teksto"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Binibigyang-daan ang may-ari upang sumailalim sa interface sa nangungunang antas(hal. SpellCheckerService). Hindi dapat kailanman kakailanganin para sa mga normal na application."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"sumailalim sa wallpaper"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Pinapayagan ang holder na sumailalim sa interface na nasa nangungunang antas ng wallpaper. Hindi kailanman dapat na kailanganin para sa mga normal na application."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"itali sa serbisyo ng widget"</string>
@@ -724,10 +722,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Pinapayagan ang isang application na baguhin ang kasaysayan o mga bookmark ng Browser na nakaimbak sa iyong telepono. Magagamit ito ng mga nakakahamak na application upang burahin o baguhin ang iyong data ng Browser."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"itakda ang alarm sa alarm clock"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Pinapayagan ang application na magtakda ng alarm sa isang naka-install na application ng alarm clock. Maaaring hindi ipatupad ng ilang application ng alarm clock ang tampok na ito."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
-    <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
-    <skip />
+    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"I-access ang mga voicemail na pinapamahalaan ng application na ito"</string>
+    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Binibigyang-daan ang application upang mag-imbak at bumawi ng mga voicemail na maa-access ng nauugnay na serbisyo nito lamang."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Baguhin ang mga pahintulot ng Browser geolocation"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Pinapayagan ang isang application na baguhin ang mga pahintulot sa geolocation ng Browser. Magagamit ito ng mga nakakahamak na application upang payagan ang pagpapadala ng impormasyon ng lokasyon sa mga hindi saklaw na web site."</string>
     <string name="save_password_message" msgid="767344687139195790">"Gusto mo bang tandaan ng browser ang password na ito?"</string>
@@ -843,7 +839,8 @@
     <string name="cut" msgid="3092569408438626261">"I-cut"</string>
     <string name="copy" msgid="2681946229533511987">"Kopyahin"</string>
     <string name="paste" msgid="5629880836805036433">"I-paste"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Walang ipe-paste"</string>
+    <!-- no translation found for replace (8333608224471746584) -->
+    <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Kopyahin ang URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Pumili ng teksto..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Pagpili ng teksto"</string>
@@ -880,12 +877,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Ni-redirect application"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"Tumatakbo na ngayon ang <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Orihinal na nalunsad ang <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Sukat"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"Palaging ipakita"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Muling paganahin ang Mga Setting &gt; Mga Application &gt; Pamahalaan ang mga application."</string>
     <string name="smv_application" msgid="295583804361236288">"Ang application na <xliff:g id="APPLICATION">%1$s</xliff:g> (prosesong <xliff:g id="PROCESS">%2$s</xliff:g>) ay lumabag sa sarili nitong ipinapatupad na patakarang StrictMode."</string>
     <string name="smv_process" msgid="5120397012047462446">"Ang prosesong <xliff:g id="PROCESS">%1$s</xliff:g> ay lumabag sa sarili nitong ipinapatupad na patakarang StrictMode."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"Tumatakbo ang <xliff:g id="APP">%1$s</xliff:g>"</string>
@@ -919,40 +913,26 @@
     <item quantity="one" msgid="1634101450343277345">"Available ang bukas na Wi-Fi network"</item>
     <item quantity="other" msgid="7915895323644292768">"Buksan ang mga available na Wi-Fi network"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Hindi pinagana ang isang Wi-Fi network"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Pansamantalang hindi pinagana ang Wi-Fi network dahil sa hindi mahusay na connectivity."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Simulan ang pagpapatakbo ng Wi-Fi Direct. I-o-off nito ang pagpapatakbo ng client/hotspot ng Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Nabigong simulan ang Wi-Fi Direct"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Kahilingan sa pag-setup ng koneksyon ng Wi-Fi Direct mula sa <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. I-click ang OK upang tanggapin."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Kahilingan sa pag-setup ng koneksyon ng Wi-Fi Direct ng <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Ilagay ang pin upang magpatuloy."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Kailangang mailagay ang WPS pin <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> sa peer device <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> para magpatuloy ang setup ng koneksyon"</string>
     <string name="select_character" msgid="3365550120617701745">"Magpasok ng character"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Hindi kilalang application"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Nagpapadala ng mga SMS na mensahe"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"Pinapadala ang malaking bilang ng mga SMS na mensahe. Piliin ang \"OK\" upang magpatuloy, o \"Kanselahin\" upang itigil ang pagpapadala."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Kanselahin"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"Naalis ang SIM card"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"Hindi magiging available ang mobile network hanggang palitan mo ang SIM card."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Tapos na"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"Idinagdag ang SIM card"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"Dapat mong i-restart ang iyong device upang ma-access ang mobile network."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"I-restart"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Magtakda ng oras"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Itakda ang petsa"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Itakda"</string>
@@ -983,8 +963,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Nakakonekta bilang isang media device"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Nakakonekta bilang isang camera"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Nakakonekta bilang isang installer"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Nakakonekta sa isang USB accessory"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"I-touch para sa mga ibang pagpipilian sa USB"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"I-format USB storage"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"I-format ang SD card"</string>
@@ -1104,6 +1083,22 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Pumili ng account"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Taasan"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Babaan"</string>
+    <!-- no translation found for checkbox_checked (7222044992652711167) -->
+    <skip />
+    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
+    <skip />
+    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
+    <skip />
+    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
+    <skip />
+    <!-- no translation found for switch_on (551417728476977311) -->
+    <skip />
+    <!-- no translation found for switch_off (7249798614327155088) -->
+    <skip />
+    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
+    <skip />
+    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
+    <skip />
     <string name="action_bar_home_description" msgid="5293600496601490216">"Magnabiga sa home"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Magnabiga pataas"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Higit pang mga pagpipilian"</string>
@@ -1117,6 +1112,14 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Di pinagana ang data ng 4G"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Di pinagana ang data ng mobile"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"tapikin upang paganahin"</string>
+    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
+    <skip />
+    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
+    <skip />
+    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
+    <skip />
+    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificate ng seguridad"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"May-bisa ang certificate na ito."</string>
     <string name="issued_to" msgid="454239480274921032">"Ibinigay kay:"</string>
@@ -1133,7 +1136,6 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 na fingerprint:"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Tingnan lahat..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Pumili ng aktibidad"</string>
-    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Ibahagi sa..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Ibahagi kay..."</string>
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Naka-lock ang device."</string>
 </resources>
