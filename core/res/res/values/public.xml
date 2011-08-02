@@ -1728,10 +1728,8 @@
 
   <public type="attr" name="layout_row" />
   <public type="attr" name="layout_rowSpan" />
-  <public type="attr" name="layout_rowFlexibility" />
 
   <public type="attr" name="layout_columnSpan" />
-  <public type="attr" name="layout_columnFlexibility" />
 
   <public type="attr" name="actionModeSelectAllDrawable" />
 

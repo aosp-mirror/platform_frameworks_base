@@ -34,15 +34,17 @@ import static android.widget.GridLayout.*;
 public class Activity2 extends Activity {
 
     public static View create(Context context) {
-        GridLayout vg = new GridLayout(context);
-        vg.setUseDefaultMargins(true);
-        vg.setAlignmentMode(ALIGN_BOUNDS);
+        GridLayout p = new GridLayout(context);
+        p.setUseDefaultMargins(true);
+        p.setAlignmentMode(ALIGN_BOUNDS);
+        p.setRowOrderPreserved(false);
+        p.setPadding(0, 0, 0, 0);
 
         Spec row1 = spec(0);
         Spec row2 = spec(1);
         Spec row3 = spec(2, BASELINE);
         Spec row4 = spec(3, BASELINE);
-        Spec row5 = spec(4, FILL);
+        Spec row5 = spec(2, 3, FILL); // allow the last two rows to overlap the middle two
         Spec row6 = spec(5);
         Spec row7 = spec(6);
 
@@ -55,63 +57,63 @@ public class Activity2 extends Activity {
         Spec col4b = spec(3, FILL);
 
         {
-            TextView v = new TextView(context);
-            v.setTextSize(32);
-            v.setText("Email setup");
-            vg.addView(v, new LayoutParams(row1, col1a));
+            TextView c = new TextView(context);
+            c.setTextSize(32);
+            c.setText("Email setup");
+            p.addView(c, new LayoutParams(row1, col1a));
         }
         {
-            TextView v = new TextView(context);
-            v.setTextSize(16);
-            v.setText("You can configure email in just a few steps:");
-            vg.addView(v, new LayoutParams(row2, col1b));
+            TextView c = new TextView(context);
+            c.setTextSize(16);
+            c.setText("You can configure email in just a few steps:");
+            p.addView(c, new LayoutParams(row2, col1b));
         }
         {
-            TextView v = new TextView(context);
-            v.setText("Email address:");
-            vg.addView(v, new LayoutParams(row3, col1c));
+            TextView c = new TextView(context);
+            c.setText("Email address:");
+            p.addView(c, new LayoutParams(row3, col1c));
         }
         {
-            EditText v = new EditText(context);
-            v.setInputType(TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+            EditText c = new EditText(context);
+            c.setInputType(TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
             {
                 LayoutParams lp = new LayoutParams(row3, col2);
-                lp.width = (int) v.getPaint().measureText("Frederick.W.Flintstone");
-                vg.addView(v, lp);
+                lp.width = (int) c.getPaint().measureText("Frederick.W.Flintstone");
+                p.addView(c, lp);
             }
         }
         {
-            TextView v = new TextView(context);
-            v.setText("Password:");
-            vg.addView(v, new LayoutParams(row4, col1c));
+            TextView c = new TextView(context);
+            c.setText("Password:");
+            p.addView(c, new LayoutParams(row4, col1c));
         }
         {
-            TextView v = new EditText(context);
-            v.setInputType(TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_PASSWORD);
+            TextView c = new EditText(context);
+            c.setInputType(TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_PASSWORD);
             {
                 LayoutParams lp = new LayoutParams(row4, col2);
-                lp.width = (int) v.getPaint().measureText("************");
-                vg.addView(v, lp);
+                lp.width = (int) c.getPaint().measureText("************");
+                p.addView(c, lp);
             }
         }
         {
-            Space v = new Space(context);
+            Space c = new Space(context);
             LayoutParams lp = new LayoutParams(row5, col3);
             lp.setMargins(0, 0, 0, 0);
-            vg.addView(v, lp);
+            p.addView(c, lp);
         }
         {
-            Button v = new Button(context);
-            v.setText("Manual setup");
-            vg.addView(v, new LayoutParams(row6, col4a));
+            Button c = new Button(context);
+            c.setText("Manual setup");
+            p.addView(c, new LayoutParams(row6, col4a));
         }
         {
-            Button v = new Button(context);
-            v.setText("Next");
-            vg.addView(v, new LayoutParams(row7, col4b));
+            Button c = new Button(context);
+            c.setText("Next");
+            p.addView(c, new LayoutParams(row7, col4b));
         }
 
-        return vg;
+        return p;
     }
 
     protected void onCreate(Bundle savedInstanceState) {
