@@ -308,28 +308,6 @@ public final class BluetoothInputDevice implements BluetoothProfile {
         return BluetoothProfile.PRIORITY_OFF;
     }
 
-    /**
-     * Allow or disallow incoming connection
-     * @param device Input device
-     * @param allow true / false
-     * @return Success or Failure of the operation
-     * @hide
-     */
-    public boolean allowIncomingConnect(BluetoothDevice device, boolean allow) {
-        if (DBG) log("allowIncomingConnect(" + device + ", " + allow + ")");
-
-        if (mService == null || !isEnabled() || !isValidDevice(device)) {
-            return false;
-        }
-        try {
-            mService.allowIncomingHidConnect(device, allow);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
-            return false;
-        }
-        return true;
-    }
-
     private boolean isEnabled() {
        if (mAdapter.getState() == BluetoothAdapter.STATE_ON) return true;
        return false;
