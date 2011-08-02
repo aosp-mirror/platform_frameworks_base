@@ -1048,12 +1048,12 @@ public final class BluetoothDeviceProfileState extends StateMachine {
                 break;
             case CONNECT_HID_INCOMING:
                 if (!accept) {
-                    ret = mService.allowIncomingHidConnect(mDevice, false);
+                    ret = mService.allowIncomingProfileConnect(mDevice, false);
                     sendMessage(TRANSITION_TO_STABLE);
                     updateIncomingAllowedTimer();
                 } else {
                     writeTimerValue(0);
-                    ret = mService.allowIncomingHidConnect(mDevice, true);
+                    ret = mService.allowIncomingProfileConnect(mDevice, true);
                 }
                 break;
             default:

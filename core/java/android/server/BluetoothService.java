@@ -2113,7 +2113,16 @@ public class BluetoothService extends IBluetooth.Stub {
         }
     }
 
-    public boolean allowIncomingHidConnect(BluetoothDevice device, boolean allow) {
+    /**
+     * Handle incoming profile acceptance for profiles handled by Bluetooth Service,
+     * currently PAN and HID. This also is the catch all for all rejections for profiles
+     * that is not supported.
+     *
+     * @param device - Bluetooth Device
+     * @param allow - true / false
+     * @return
+     */
+    public boolean allowIncomingProfileConnect(BluetoothDevice device, boolean allow) {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_ADMIN_PERM,
                                                 "Need BLUETOOTH_ADMIN permission");
         String address = device.getAddress();
@@ -2123,11 +2132,11 @@ public class BluetoothService extends IBluetooth.Stub {
 
         Integer data = getAuthorizationAgentRequestData(address);
         if (data == null) {
-            Log.w(TAG, "allowIncomingHidConnect(" + device +
+            Log.w(TAG, "allowIncomingProfileConnect(" + device +
                   ") called but no native data available");
             return false;
         }
-        if (DBG) log("allowIncomingHidConnect: " + device + " : " + allow + " : " + data);
+        if (DBG) log("allowIncomingProfileConnect: " + device + " : " + allow + " : " + data);
         return setAuthorizationNative(address, allow, data.intValue());
     }
 
