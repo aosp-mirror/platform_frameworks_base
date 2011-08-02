@@ -80,7 +80,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 // Set the current spell checker if there is one or more spell checkers
                 // available. In this case, "sci" is the first one in the available spell
                 // checkers.
-                setCurrentSpellCheckerLocked(sci);
+                setCurrentSpellCheckerLocked(sci.getId());
             }
         }
     }
@@ -95,12 +95,14 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 if (sci == null) return;
                 final String packageName = sci.getPackageName();
                 final int change = isPackageDisappearing(packageName);
-                if (change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE) {
-                    // Package disappearing
-                    setCurrentSpellCheckerLocked(findAvailSpellCheckerLocked(null, packageName));
-                } else if (isPackageModified(packageName)) {
-                    // Package modified
-                    setCurrentSpellCheckerLocked(findAvailSpellCheckerLocked(null, packageName));
+                if (// Package disappearing
+                        change == PACKAGE_PERMANENT_CHANGE || change == PACKAGE_TEMPORARY_CHANGE
+                        // Package modified
+                        || isPackageModified(packageName)) {
+                    sci = findAvailSpellCheckerLocked(null, packageName);
+                    if (sci != null) {
+                        setCurrentSpellCheckerLocked(sci.getId());
+                    }
                 }
             }
         }
@@ -177,20 +179,20 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     @Override
-    public void getSpellCheckerService(SpellCheckerInfo info, String locale,
+    public void getSpellCheckerService(String sciId, String locale,
             ITextServicesSessionListener tsListener, ISpellCheckerSessionListener scListener) {
         if (!mSystemReady) {
             return;
         }
-        if (info == null || tsListener == null || scListener == null) {
+        if (TextUtils.isEmpty(sciId) || tsListener == null || scListener == null) {
             Slog.e(TAG, "getSpellCheckerService: Invalid input.");
             return;
         }
-        final String sciId = info.getId();
         synchronized(mSpellCheckerMap) {
             if (!mSpellCheckerMap.containsKey(sciId)) {
                 return;
             }
+            final SpellCheckerInfo sci = mSpellCheckerMap.get(sciId);
             final int uid = Binder.getCallingUid();
             if (mSpellCheckerBindGroups.containsKey(sciId)) {
                 final SpellCheckerBindGroup bindGroup = mSpellCheckerBindGroups.get(sciId);
@@ -234,7 +236,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                startSpellCheckerServiceInnerLocked(info, locale, tsListener, scListener, uid);
+                startSpellCheckerServiceInnerLocked(sci, locale, tsListener, scListener, uid);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -290,7 +292,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     }
 
     @Override
-    public void setCurrentSpellChecker(SpellCheckerInfo sci) {
+    public void setCurrentSpellChecker(String sciId) {
         synchronized(mSpellCheckerMap) {
             if (mContext.checkCallingOrSelfPermission(
                     android.Manifest.permission.WRITE_SECURE_SETTINGS)
@@ -299,19 +301,19 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                         "Requires permission "
                         + android.Manifest.permission.WRITE_SECURE_SETTINGS);
             }
-            setCurrentSpellCheckerLocked(sci);
+            setCurrentSpellCheckerLocked(sciId);
         }
     }
 
-    private void setCurrentSpellCheckerLocked(SpellCheckerInfo sci) {
+    private void setCurrentSpellCheckerLocked(String sciId) {
         if (DBG) {
-            Slog.w(TAG, "setCurrentSpellChecker: " + sci.getId());
+            Slog.w(TAG, "setCurrentSpellChecker: " + sciId);
         }
-        if (sci == null || !mSpellCheckerMap.containsKey(sci.getId())) return;
+        if (TextUtils.isEmpty(sciId) || !mSpellCheckerMap.containsKey(sciId)) return;
         final long ident = Binder.clearCallingIdentity();
         try {
             Settings.Secure.putString(mContext.getContentResolver(),
-                    Settings.Secure.SPELL_CHECKER_SERVICE, sci == null ? "" : sci.getId());
+                    Settings.Secure.SPELL_CHECKER_SERVICE, sciId);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

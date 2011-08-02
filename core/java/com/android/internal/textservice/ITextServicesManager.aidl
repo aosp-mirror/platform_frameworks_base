@@ -28,10 +28,10 @@ import android.view.textservice.SpellCheckerInfo;
  */
 interface ITextServicesManager {
     SpellCheckerInfo getCurrentSpellChecker(String locale);
-    oneway void getSpellCheckerService(in SpellCheckerInfo info, in String locale,
+    oneway void getSpellCheckerService(String sciId, in String locale,
             in ITextServicesSessionListener tsListener,
             in ISpellCheckerSessionListener scListener);
     oneway void finishSpellCheckerService(in ISpellCheckerSessionListener listener);
-    oneway void setCurrentSpellChecker(in SpellCheckerInfo info);
+    oneway void setCurrentSpellChecker(String sciId);
     SpellCheckerInfo[] getEnabledSpellCheckers();
 }
