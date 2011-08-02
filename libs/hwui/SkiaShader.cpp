@@ -225,10 +225,7 @@ void SkiaLinearGradientShader::setupProgram(Program* program, const mat4& modelV
     GLuint textureSlot = (*textureUnit)++;
     glActiveTexture(gTextureUnitsMap[textureSlot]);
 
-    Texture* texture = mGradientCache->get(mKey);
-    if (!texture) {
-        texture = mGradientCache->addLinearGradient(mKey, mColors, mPositions, mCount, mTileX);
-    }
+    Texture* texture = mGradientCache->get(mColors, mPositions, mCount, mTileX);
 
     mat4 screenSpace;
     computeScreenSpaceMatrix(screenSpace, modelView);
@@ -340,10 +337,7 @@ void SkiaSweepGradientShader::setupProgram(Program* program, const mat4& modelVi
     GLuint textureSlot = (*textureUnit)++;
     glActiveTexture(gTextureUnitsMap[textureSlot]);
 
-    Texture* texture = mGradientCache->get(mKey);
-    if (!texture) {
-        texture = mGradientCache->addLinearGradient(mKey, mColors, mPositions, mCount);
-    }
+    Texture* texture = mGradientCache->get(mColors, mPositions, mCount);
 
     mat4 screenSpace;
     computeScreenSpaceMatrix(screenSpace, modelView);

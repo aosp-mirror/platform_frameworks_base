@@ -35,7 +35,7 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 GradientCache::GradientCache():
-        mCache(GenerationCache<SkShader*, Texture*>::kUnlimitedCapacity),
+        mCache(GenerationCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(MB(DEFAULT_GRADIENT_CACHE_SIZE)) {
     char property[PROPERTY_VALUE_MAX];
     if (property_get(PROPERTY_GRADIENT_CACHE_SIZE, property, NULL) > 0) {
@@ -49,7 +49,7 @@ GradientCache::GradientCache():
 }
 
 GradientCache::GradientCache(uint32_t maxByteSize):
-        mCache(GenerationCache<SkShader*, Texture*>::kUnlimitedCapacity),
+        mCache(GenerationCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity),
         mSize(0), mMaxSize(maxByteSize) {
     mCache.setOnEntryRemovedListener(this);
 }
@@ -81,9 +81,8 @@ void GradientCache::setMaxSize(uint32_t maxSize) {
 // Callbacks
 ///////////////////////////////////////////////////////////////////////////////
 
-void GradientCache::operator()(SkShader*& shader, Texture*& texture) {
-    // Already locked here
-    if (shader) {
+void GradientCache::operator()(GradientCacheEntry& shader, Texture*& texture) {
+    if (texture) {
         const uint32_t size = texture->width * texture->height * 4;
         mSize -= size;
     }
@@ -98,34 +97,25 @@ void GradientCache::operator()(SkShader*& shader, Texture*& texture) {
 // Caching
 ///////////////////////////////////////////////////////////////////////////////
 
-Texture* GradientCache::get(SkShader* shader) {
-    return mCache.get(shader);
-}
+Texture* GradientCache::get(uint32_t* colors, float* positions,
+        int count, SkShader::TileMode tileMode) {
 
-void GradientCache::remove(SkShader* shader) {
-    mCache.remove(shader);
-}
+    GradientCacheEntry gradient(colors, positions, count, tileMode);
+    Texture* texture = mCache.get(gradient);
 
-void GradientCache::removeDeferred(SkShader* shader) {
-    Mutex::Autolock _l(mLock);
-    mGarbage.push(shader);
-}
-
-void GradientCache::clearGarbage() {
-    Mutex::Autolock _l(mLock);
-    size_t count = mGarbage.size();
-    for (size_t i = 0; i < count; i++) {
-        mCache.remove(mGarbage.itemAt(i));
+    if (!texture) {
+        texture = addLinearGradient(gradient, colors, positions, count, tileMode);
     }
-    mGarbage.clear();
+
+    return texture;
 }
 
 void GradientCache::clear() {
     mCache.clear();
 }
 
-Texture* GradientCache::addLinearGradient(SkShader* shader, uint32_t* colors,
-        float* positions, int count, SkShader::TileMode tileMode) {
+Texture* GradientCache::addLinearGradient(GradientCacheEntry& gradient,
+        uint32_t* colors, float* positions, int count, SkShader::TileMode tileMode) {
     SkBitmap bitmap;
     bitmap.setConfig(SkBitmap::kARGB_8888_Config, 1024, 1);
     bitmap.allocPixels();
@@ -156,7 +146,7 @@ Texture* GradientCache::addLinearGradient(SkShader* shader, uint32_t* colors,
     generateTexture(&bitmap, texture);
 
     mSize += size;
-    mCache.put(shader, texture);
+    mCache.put(gradient, texture);
 
     return texture;
 }
