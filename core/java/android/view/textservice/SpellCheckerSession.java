@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.service.textservice;
+package android.view.textservice;
 
 import com.android.internal.textservice.ISpellCheckerSession;
 import com.android.internal.textservice.ISpellCheckerSessionListener;
@@ -38,6 +38,12 @@ import java.util.Queue;
 public class SpellCheckerSession {
     private static final String TAG = SpellCheckerSession.class.getSimpleName();
     private static final boolean DBG = false;
+    /**
+     * Name under which a SpellChecker service component publishes information about itself.
+     * This meta-data must reference an XML resource.
+     **/
+    public static final String SERVICE_META_DATA = "android.view.textservice.scs";
+
 
     private static final int MSG_ON_GET_SUGGESTION_MULTIPLE = 1;
 
