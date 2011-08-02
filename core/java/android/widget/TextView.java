@@ -343,6 +343,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private Drawable mSelectHandleRight;
     private Drawable mSelectHandleCenter;
 
+    // Global listener that detects changes in the global position of the TextView
+    private PositionListener mPositionListener;
+
     private float mLastDownPositionX, mLastDownPositionY;
     private Callback mCustomSelectionActionModeCallback;
 
@@ -394,7 +397,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
          */
         boolean onEditorAction(TextView v, int actionId, KeyEvent event);
     }
-    
+
     public TextView(Context context) {
         this(context, null);
     }
@@ -2080,7 +2083,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                        TextAppearance_textStyle, -1);
 
         setTypefaceByIndex(typefaceIndex, styleIndex);
-        
+
         if (appearance.getBoolean(com.android.internal.R.styleable.TextAppearance_textAllCaps,
                 false)) {
             setTransformationMethod(new AllCapsTransformationMethod(getContext()));
@@ -3018,7 +3021,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * To style your strings, attach android.text.style.* objects to a
      * {@link android.text.SpannableString SpannableString}, or see the
      * <a href="{@docRoot}guide/topics/resources/available-resources.html#stringresources">
-     * Available Resource Types</a> documentation for an example of setting 
+     * Available Resource Types</a> documentation for an example of setting
      * formatted text in the XML resource file.
      *
      * @attr ref android.R.styleable#TextView_text
@@ -8755,32 +8758,247 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return ((minOffset >= selectionStart) && (maxOffset < selectionEnd));
     }
 
+    private PositionListener getPositionListener() {
+        if (mPositionListener == null) {
+            mPositionListener = new PositionListener();
+        }
+        return mPositionListener;
+    }
+
+    private interface TextViewPositionListener {
+        public void updatePosition(int parentPositionX, int parentPositionY, boolean modified);
+    }
+
+    private class PositionListener implements ViewTreeObserver.OnPreDrawListener {
+        // 3 handles, 2 ActionPopup (suggestionsPopup first hides the others)
+        private final int MAXIMUM_NUMBER_OF_LISTENERS = 5;
+        private TextViewPositionListener[] mPositionListeners =
+                new TextViewPositionListener[MAXIMUM_NUMBER_OF_LISTENERS];
+        private boolean mCanMove[] = new boolean[MAXIMUM_NUMBER_OF_LISTENERS];
+        private boolean mPositionHasChanged = true;
+        // Absolute position of the TextView with respect to its parent window
+        private int mPositionX, mPositionY;
+        private int mNumberOfListeners;
+
+        public void addSubscriber(TextViewPositionListener positionListener, boolean canMove) {
+            if (mNumberOfListeners == 0) {
+                updatePosition();
+                ViewTreeObserver vto = TextView.this.getViewTreeObserver();
+                vto.addOnPreDrawListener(this);
+            }
+
+            int emptySlotIndex = -1;
+            for (int i = 0; i < MAXIMUM_NUMBER_OF_LISTENERS; i++) {
+                TextViewPositionListener listener = mPositionListeners[i];
+                if (listener == positionListener) {
+                    return;
+                } else if (emptySlotIndex < 0 && listener == null) {
+                    emptySlotIndex = i;
+                }
+            }
+
+            mPositionListeners[emptySlotIndex] = positionListener;
+            mCanMove[emptySlotIndex] = canMove;
+            mNumberOfListeners++;
+        }
+
+        public void removeSubscriber(TextViewPositionListener positionListener) {
+            for (int i = 0; i < MAXIMUM_NUMBER_OF_LISTENERS; i++) {
+                if (mPositionListeners[i] == positionListener) {
+                    mPositionListeners[i] = null;
+                    mNumberOfListeners--;
+                    break;
+                }
+            }
+
+            if (mNumberOfListeners == 0) {
+                ViewTreeObserver vto = TextView.this.getViewTreeObserver();
+                vto.removeOnPreDrawListener(this);
+            }
+        }
+
+        public int getPositionX() {
+            return mPositionX;
+        }
+
+        public int getPositionY() {
+            return mPositionY;
+        }
+
+        @Override
+        public boolean onPreDraw() {
+            updatePosition();
+
+            for (int i = 0; i < MAXIMUM_NUMBER_OF_LISTENERS; i++) {
+                if (mPositionHasChanged || mCanMove[i]) {
+                    TextViewPositionListener positionListener = mPositionListeners[i];
+                    if (positionListener != null) {
+                        positionListener.updatePosition(mPositionX, mPositionY,
+                                mPositionHasChanged);
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private void updatePosition() {
+            TextView.this.getLocationInWindow(mTempCoords);
+
+            mPositionHasChanged = mTempCoords[0] != mPositionX || mTempCoords[1] != mPositionY;
+
+            mPositionX = mTempCoords[0];
+            mPositionY = mTempCoords[1];
+        }
+
+        public boolean isVisible(int positionX, int positionY) {
+            final TextView textView = TextView.this;
+
+            if (mTempRect == null) mTempRect = new Rect();
+            final Rect clip = mTempRect;
+            clip.left = getCompoundPaddingLeft();
+            clip.top = getExtendedPaddingTop();
+            clip.right = textView.getWidth() - getCompoundPaddingRight();
+            clip.bottom = textView.getHeight() - getExtendedPaddingBottom();
+
+            final ViewParent parent = textView.getParent();
+            if (parent == null || !parent.getChildVisibleRect(textView, clip, null)) {
+                return false;
+            }
+
+            int posX = mPositionX + positionX;
+            int posY = mPositionY + positionY;
+
+            // Offset by 1 to take into account 0.5 and int rounding around getPrimaryHorizontal.
+            return posX >= clip.left - 1 && posX <= clip.right + 1 &&
+                    posY >= clip.top && posY <= clip.bottom;
+        }
+
+        public boolean isOffsetVisible(int offset) {
+            final int line = mLayout.getLineForOffset(offset);
+            final int lineBottom = mLayout.getLineBottom(line);
+            final int primaryHorizontal = (int) mLayout.getPrimaryHorizontal(offset);
+            return isVisible(primaryHorizontal, lineBottom);
+        }
+    }
+
+    private abstract class PinnedPopupWindow implements TextViewPositionListener {
+        protected PopupWindow mPopupWindow;
+        protected LinearLayout mContentView;
+        int mPositionX, mPositionY;
+
+        protected abstract void createPopupWindow();
+        protected abstract void initContentView();
+        protected abstract int getTextOffset();
+        protected abstract int getVerticalLocalPosition(int line);
+        protected abstract int clipVertically(int positionY);
+
+        public PinnedPopupWindow() {
+            createPopupWindow();
+
+            mPopupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL);
+            mPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+            mPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+
+            mContentView = new LinearLayout(TextView.this.getContext());
+            LayoutParams wrapContent = new LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            mContentView.setLayoutParams(wrapContent);
+
+            initContentView();
+            mPopupWindow.setContentView(mContentView);
+        }
+
+        public void show() {
+            final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+            mContentView.measure(
+                    View.MeasureSpec.makeMeasureSpec(displayMetrics.widthPixels,
+                            View.MeasureSpec.AT_MOST),
+                    View.MeasureSpec.makeMeasureSpec(displayMetrics.heightPixels,
+                            View.MeasureSpec.AT_MOST));
+
+            TextView.this.getPositionListener().addSubscriber(this, false);
+
+            computeLocalPosition();
+
+            final PositionListener positionListener = TextView.this.getPositionListener();
+            updatePosition(positionListener.getPositionX(), positionListener.getPositionY());
+        }
+
+        private void computeLocalPosition() {
+            final int offset = getTextOffset();
+
+            final int width = mContentView.getMeasuredWidth();
+            mPositionX = (int) (mLayout.getPrimaryHorizontal(offset) - width / 2.0f);
+            mPositionX += viewportToContentHorizontalOffset();
+
+            final int line = mLayout.getLineForOffset(offset);
+            mPositionY = getVerticalLocalPosition(line);
+            mPositionY += viewportToContentVerticalOffset();
+        }
+
+        private void updatePosition(int parentPositionX, int parentPositionY) {
+            int positionX = parentPositionX + mPositionX;
+            int positionY = parentPositionY + mPositionY;
+
+            positionY = clipVertically(positionY);
+
+            // Horizontal clipping
+            final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+            final int width = mContentView.getMeasuredWidth();
+            positionX = Math.min(displayMetrics.widthPixels - width, positionX);
+            positionX = Math.max(0, positionX);
+
+            if (isShowing()) {
+                mPopupWindow.update(positionX, positionY, -1, -1);
+            } else {
+                mPopupWindow.showAtLocation(TextView.this, Gravity.NO_GRAVITY,
+                        positionX, positionY);
+            }
+        }
+
+        public void hide() {
+            mPopupWindow.dismiss();
+            TextView.this.getPositionListener().removeSubscriber(this);
+        }
+
+        @Override
+        public void updatePosition(int parentPositionX, int parentPositionY, boolean modified) {
+            if (isShowing() && getPositionListener().isOffsetVisible(getTextOffset())) {
+                updatePosition(parentPositionX, parentPositionY);
+            } else {
+                hide();
+            }
+        }
+
+        public boolean isShowing() {
+            return mPopupWindow.isShowing();
+        }
+    }
+
     private static class SuggestionRangeSpan extends UnderlineSpan {
         // TODO themable, would be nice to make it a child class of TextAppearanceSpan, but
         // there is no way to have underline and TextAppearanceSpan.
     }
 
-    private class SuggestionsPopupWindow implements OnClickListener {
+    private class SuggestionsPopupWindow extends PinnedPopupWindow implements OnClickListener {
         private static final int MAX_NUMBER_SUGGESTIONS = 5;
         private static final int NO_SUGGESTIONS = -1;
-        private final PopupWindow mPopupWindow;
-        private LinearLayout mSuggestionsContainer;
         private WordIterator mSuggestionWordIterator;
         private TextAppearanceSpan[] mHighlightSpans = new TextAppearanceSpan[0];
 
-        public SuggestionsPopupWindow() {
+        @Override
+        protected void createPopupWindow() {
             mPopupWindow = new PopupWindow(TextView.this.mContext, null,
-                    com.android.internal.R.attr.textSuggestionsWindowStyle);
-            mPopupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL);
+                com.android.internal.R.attr.textSuggestionsWindowStyle);
             mPopupWindow.setInputMethodMode(PopupWindow.INPUT_METHOD_NOT_NEEDED);
             mPopupWindow.setOutsideTouchable(true);
-            mPopupWindow.setClippingEnabled(true);
+            mPopupWindow.setClippingEnabled(false);
+        }
 
-            mPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
-            mPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
-
-            mSuggestionsContainer = new LinearLayout(TextView.this.mContext);
-            mSuggestionsContainer.setOrientation(LinearLayout.VERTICAL);
+        @Override
+        protected void initContentView() {
+            mContentView.setOrientation(LinearLayout.VERTICAL);
 
             LayoutInflater inflater = (LayoutInflater) TextView.this.mContext.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -8793,7 +9011,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Inflate the suggestion items once and for all.
             for (int i = 0; i < MAX_NUMBER_SUGGESTIONS; i++) {
                 View childView = inflater.inflate(mTextEditSuggestionItemLayout,
-                        mSuggestionsContainer, false);
+                        mContentView, false);
 
                 if (! (childView instanceof TextView)) {
                     throw new IllegalArgumentException(
@@ -8801,11 +9019,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
 
                 childView.setTag(new SuggestionInfo());
-                mSuggestionsContainer.addView(childView);
+                mContentView.addView(childView);
                 childView.setOnClickListener(this);
             }
-
-            mPopupWindow.setContentView(mSuggestionsContainer);
         }
 
         private class SuggestionInfo {
@@ -8825,30 +9041,61 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             SuggestionSpan[] suggestionSpans = spannable.getSpans(pos, pos, SuggestionSpan.class);
 
             // Cache the span length for performance reason.
-            final HashMap<SuggestionSpan, Integer> spanLengthMap =
-                new HashMap<SuggestionSpan, Integer>();
+            final HashMap<SuggestionSpan, Integer> spansLengths =
+                    new HashMap<SuggestionSpan, Integer>();
 
             for (SuggestionSpan suggestionSpan : suggestionSpans) {
                 int start = spannable.getSpanStart(suggestionSpan);
                 int end = spannable.getSpanEnd(suggestionSpan);
-                spanLengthMap.put(suggestionSpan, end - start);
+                spansLengths.put(suggestionSpan, Integer.valueOf(end - start));
             }
 
             // The suggestions are sorted according to the lenght of the text that they cover
             // (shorter first)
             Arrays.sort(suggestionSpans, new Comparator<SuggestionSpan>() {
                 public int compare(SuggestionSpan span1, SuggestionSpan span2) {
-                    return spanLengthMap.get(span1) - spanLengthMap.get(span2);
+                    return spansLengths.get(span1).intValue() - spansLengths.get(span2).intValue();
                 }
             });
 
             return suggestionSpans;
         }
 
+        @Override
         public void show() {
             if (!(mText instanceof Editable)) return;
+            updateSuggestions();
 
-            Spannable spannable = (Spannable) TextView.this.mText;
+            super.show();
+        }
+
+        @Override
+        protected int getTextOffset() {
+            return getSelectionStart();
+        }
+
+        @Override
+        protected int getVerticalLocalPosition(int line) {
+            return mLayout.getLineBottom(line);
+        }
+
+        @Override
+        protected int clipVertically(int positionY) {
+            final int height = mContentView.getMeasuredHeight();
+            final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
+            return Math.min(positionY, displayMetrics.heightPixels - height);
+        }
+
+        @Override
+        public void hide() {
+            super.hide();
+            if ((mText instanceof Editable) && mSuggestionRangeSpan != null) {
+                ((Editable) mText).removeSpan(mSuggestionRangeSpan);
+            }
+        }
+
+        private void updateSuggestions() {
+            Spannable spannable = (Spannable)TextView.this.mText;
             SuggestionSpan[] suggestionSpans = getSuggestionSpans();
 
             final int nbSpans = suggestionSpans.length;
@@ -8867,7 +9114,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 String[] suggestions = suggestionSpan.getSuggestions();
                 int nbSuggestions = suggestions.length;
                 for (int suggestionIndex = 0; suggestionIndex < nbSuggestions; suggestionIndex++) {
-                    TextView textView = (TextView) mSuggestionsContainer.getChildAt(
+                    TextView textView = (TextView) mContentView.getChildAt(
                             totalNbSuggestions);
                     textView.setText(suggestions[suggestionIndex]);
                     SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
@@ -8887,7 +9134,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (totalNbSuggestions == 0) {
                 // TODO Replace by final text, use a dedicated layout, add a fade out timer...
-                TextView textView = (TextView) mSuggestionsContainer.getChildAt(0);
+                TextView textView = (TextView) mContentView.getChildAt(0);
                 textView.setText("No suggestions available");
                 SuggestionInfo suggestionInfo = (SuggestionInfo) textView.getTag();
                 suggestionInfo.spanStart = NO_SUGGESTIONS;
@@ -8898,26 +9145,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                 for (int i = 0; i < totalNbSuggestions; i++) {
-                    final TextView textView = (TextView) mSuggestionsContainer.getChildAt(i);
+                    final TextView textView = (TextView) mContentView.getChildAt(i);
                     highlightTextDifferences(textView, spanUnionStart, spanUnionEnd);
                 }
             }
 
             for (int i = 0; i < totalNbSuggestions; i++) {
-                mSuggestionsContainer.getChildAt(i).setVisibility(VISIBLE);
+                mContentView.getChildAt(i).setVisibility(VISIBLE);
             }
             for (int i = totalNbSuggestions; i < MAX_NUMBER_SUGGESTIONS; i++) {
-                mSuggestionsContainer.getChildAt(i).setVisibility(GONE);
+                mContentView.getChildAt(i).setVisibility(GONE);
             }
-
-            final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
-            final int screenWidth = displayMetrics.widthPixels;
-            final int screenHeight = displayMetrics.heightPixels;
-            mSuggestionsContainer.measure(
-                    View.MeasureSpec.makeMeasureSpec(screenWidth, View.MeasureSpec.AT_MOST),
-                    View.MeasureSpec.makeMeasureSpec(screenHeight, View.MeasureSpec.AT_MOST));
-
-            positionAtCursor();
         }
 
         private long[] getWordLimits(CharSequence text) {
@@ -9069,17 +9307,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             textView.setText(ssb);
         }
 
-        public void hide() {
-            if ((mText instanceof Editable) && mSuggestionRangeSpan != null) {
-                ((Editable) mText).removeSpan(mSuggestionRangeSpan);
-            }
-            mPopupWindow.dismiss();
-        }
-
-        public boolean isShowing() {
-            return mPopupWindow.isShowing();
-        }
-
         @Override
         public void onClick(View view) {
             if (view instanceof TextView) {
@@ -9138,44 +9365,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
             hide();
-        }
-
-        void positionAtCursor() {
-            View contentView = mPopupWindow.getContentView();
-            int width = contentView.getMeasuredWidth();
-            int height = contentView.getMeasuredHeight();
-            final int offset = TextView.this.getSelectionStart();
-            final int line = mLayout.getLineForOffset(offset);
-            final int lineBottom = mLayout.getLineBottom(line);
-            float primaryHorizontal = mLayout.getPrimaryHorizontal(offset);
-
-            final Rect bounds = sCursorControllerTempRect;
-            bounds.left = (int) (primaryHorizontal - width / 2.0f);
-            bounds.top = lineBottom;
-
-            bounds.right = bounds.left + width;
-            bounds.bottom = bounds.top + height;
-
-            convertFromViewportToContentCoordinates(bounds);
-
-            final int[] coords = mTempCoords;
-            TextView.this.getLocationInWindow(coords);
-            coords[0] += bounds.left;
-            coords[1] += bounds.top;
-
-            final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
-            final int screenHeight = displayMetrics.heightPixels;
-
-            // Vertical clipping
-            if (coords[1] + height > screenHeight) {
-                coords[1] = screenHeight - height;
-            }
-
-            // Horizontal clipping
-            coords[0] = Math.min(displayMetrics.widthPixels - width, coords[0]);
-            coords[0] = Math.max(0, coords[0]);
-
-            mPopupWindow.showAtLocation(TextView.this, Gravity.NO_GRAVITY, coords[0], coords[1]);
         }
     }
 
@@ -9357,7 +9546,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             boolean allowText = getContext().getResources().getBoolean(
                     com.android.internal.R.bool.config_allowActionMenuItemTextWithIcon);
 
-            mode.setTitle(allowText ? 
+            mode.setTitle(allowText ?
                     mContext.getString(com.android.internal.R.string.textSelectionCABTitle) : null);
             mode.setSubtitle(null);
 
@@ -9450,29 +9639,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private class ActionPopupWindow implements OnClickListener {
-        private static final int TEXT_EDIT_ACTION_POPUP_TEXT =
+    private class ActionPopupWindow extends PinnedPopupWindow implements OnClickListener {
+        private static final int POPUP_TEXT_LAYOUT =
                 com.android.internal.R.layout.text_edit_action_popup_text;
-        private final PopupWindow mPopupWindow;
         private TextView mPasteTextView;
         private TextView mReplaceTextView;
-        private LinearLayout mContentView;
         // Whether or not the Paste action should be available when the action popup is displayed
         private boolean mWithPaste;
 
-        public ActionPopupWindow() {
+        @Override
+        protected void createPopupWindow() {
             mPopupWindow = new PopupWindow(TextView.this.mContext, null,
                     com.android.internal.R.attr.textSelectHandleWindowStyle);
             mPopupWindow.setClippingEnabled(true);
-            mPopupWindow.setWindowLayoutType(WindowManager.LayoutParams.TYPE_APPLICATION_PANEL);
+        }
 
-            mPopupWindow.setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
-            mPopupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
-
-            mContentView = new LinearLayout(TextView.this.getContext());
-            LayoutParams wrapContent = new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT);
-            mContentView.setLayoutParams(wrapContent);
+        @Override
+        protected void initContentView() {
             mContentView.setOrientation(LinearLayout.HORIZONTAL);
             mContentView.setBackgroundResource(
                     com.android.internal.R.drawable.text_edit_side_paste_window);
@@ -9480,36 +9663,26 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             LayoutInflater inflater = (LayoutInflater)TextView.this.mContext.
                     getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-            mPasteTextView = (TextView) inflater.inflate(TEXT_EDIT_ACTION_POPUP_TEXT, null);
+            LayoutParams wrapContent = new LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+
+            mPasteTextView = (TextView) inflater.inflate(POPUP_TEXT_LAYOUT, null);
             mPasteTextView.setLayoutParams(wrapContent);
             mContentView.addView(mPasteTextView);
             mPasteTextView.setText(com.android.internal.R.string.paste);
             mPasteTextView.setOnClickListener(this);
 
-            mReplaceTextView = (TextView) inflater.inflate(TEXT_EDIT_ACTION_POPUP_TEXT, null);
+            mReplaceTextView = (TextView) inflater.inflate(POPUP_TEXT_LAYOUT, null);
             mReplaceTextView.setLayoutParams(wrapContent);
             mContentView.addView(mReplaceTextView);
             mReplaceTextView.setText(com.android.internal.R.string.replace);
             mReplaceTextView.setOnClickListener(this);
-
-            mPopupWindow.setContentView(mContentView);
         }
 
+        @Override
         public void show() {
             mPasteTextView.setVisibility(mWithPaste && canPaste() ? View.VISIBLE : View.GONE);
-
-            final int size = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-            mContentView.measure(size, size);
-
-            positionAtCursor();
-        }
-
-        public void hide() {
-            mPopupWindow.dismiss();
-        }
-
-        public boolean isShowing() {
-            return mPopupWindow.isShowing();
+            super.show();
         }
 
         @Override
@@ -9522,48 +9695,30 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        void positionAtCursor() {
-            int width = mContentView.getMeasuredWidth();
-            int height = mContentView.getMeasuredHeight();
-            final int selectionStart = TextView.this.getSelectionStart();
-            final int selectionEnd = TextView.this.getSelectionEnd();
-            final int offset = (selectionStart + selectionEnd) / 2;
-            final int line = mLayout.getLineForOffset(offset);
-            final int lineTop = mLayout.getLineTop(line);
-            float primaryHorizontal = mLayout.getPrimaryHorizontal(offset);
+        @Override
+        protected int getTextOffset() {
+            return (getSelectionStart() + getSelectionEnd()) / 2;
+        }
 
-            final Rect bounds = sCursorControllerTempRect;
-            bounds.left = (int) (primaryHorizontal - width / 2.0f);
-            bounds.top = lineTop - height;
+        @Override
+        protected int getVerticalLocalPosition(int line) {
+            return mLayout.getLineTop(line) - mContentView.getMeasuredHeight();
+        }
 
-            bounds.right = bounds.left + width;
-            bounds.bottom = bounds.top + height;
-
-            convertFromViewportToContentCoordinates(bounds);
-
-            final int[] coords = mTempCoords;
-            TextView.this.getLocationInWindow(coords);
-            coords[0] += bounds.left;
-            coords[1] += bounds.top;
-
-            // Vertical clipping, move under edited line and to the side of insertion cursor
-            if (coords[1] < 0) {
-                coords[1] += height;
-                final int lineBottom = mLayout.getLineBottom(line);
-                final int lineHeight = lineBottom - lineTop;
-                coords[1] += lineHeight;
+        @Override
+        protected int clipVertically(int positionY) {
+            if (positionY < 0) {
+                final int offset = getTextOffset();
+                final int line = mLayout.getLineForOffset(offset);
+                positionY += mLayout.getLineBottom(line) - mLayout.getLineTop(line);
+                positionY += mContentView.getMeasuredHeight();
 
                 // Assumes insertion and selection handles share the same height
                 final Drawable handle = mContext.getResources().getDrawable(mTextSelectHandleRes);
-                coords[1] += handle.getIntrinsicHeight();
+                positionY += handle.getIntrinsicHeight();
             }
 
-            // Horizontal clipping
-            coords[0] = Math.max(0, coords[0]);
-            final int screenWidth = mContext.getResources().getDisplayMetrics().widthPixels;
-            coords[0] = Math.min(screenWidth - width, coords[0]);
-
-            mPopupWindow.showAtLocation(TextView.this, Gravity.NO_GRAVITY, coords[0], coords[1]);
+            return positionY;
         }
 
         public void setShowWithPaste(boolean withPaste) {
@@ -9571,7 +9726,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
     }
 
-    private abstract class HandleView extends View implements ViewTreeObserver.OnPreDrawListener {
+    private abstract class HandleView extends View implements TextViewPositionListener {
         protected Drawable mDrawable;
         private final PopupWindow mContainer;
         // Position with respect to the parent TextView
@@ -9579,21 +9734,19 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         private boolean mIsDragging;
         // Offset from touch position to mPosition
         private float mTouchToWindowOffsetX, mTouchToWindowOffsetY;
-        protected float mHotspotX;
+        protected int mHotspotX;
         // Offsets the hotspot point up, so that cursor is not hidden by the finger when moving up
         private float mTouchOffsetY;
         // Where the touch position should be on the handle to ensure a maximum cursor visibility
         private float mIdealVerticalOffset;
         // Parent's (TextView) previous position in window
         private int mLastParentX, mLastParentY;
-        // PopupWindow container absolute position with respect to the enclosing window
-        private int mContainerPositionX, mContainerPositionY;
-        // Visible or not (scrolled off screen), whether or not this handle should be visible
-        private boolean mIsActive = false;
-        // Used to detect that setFrame was called
-        private boolean mNeedsUpdate = true;
         // Transient action popup window for Paste and Replace actions
         protected ActionPopupWindow mActionPopupWindow;
+        // Previous text character offset
+        private int mPreviousOffset = -1;
+        // Previous text character offset
+        private boolean mPositionHasChanged = true;
         // Used to delay the appearance of the action popup window
         private Runnable mActionPopupShower;
 
@@ -9613,15 +9766,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             mIdealVerticalOffset = 0.7f * handleHeight;
         }
 
-        @Override
-        protected boolean setFrame(int left, int top, int right, int bottom) {
-            boolean changed = super.setFrame(left, top, right, bottom);
-            // onPreDraw is called for PhoneWindow before the layout of this view is
-            // performed. Make sure to update position, even if container didn't move.
-            if (changed) mNeedsUpdate  = true;
-            return changed;
-        }
-
         protected abstract void initDrawable();
 
         // Touch-up filter: number of previous positions remembered
@@ -9639,12 +9783,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         private void addPositionToTouchUpFilter(int offset) {
-            if (mNumberPreviousOffsets > 0 &&
-                    mPreviousOffsets[mPreviousOffsetIndex] == offset) {
-                // Make sure only actual changes of position are recorded.
-                return;
-            }
-
             mPreviousOffsetIndex = (mPreviousOffsetIndex + 1) % HISTORY_SIZE;
             mPreviousOffsets[mPreviousOffsetIndex] = offset;
             mPreviousOffsetsTimes[mPreviousOffsetIndex] = SystemClock.uptimeMillis();
@@ -9663,7 +9801,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             if (i > 0 && i < iMax &&
                     (now - mPreviousOffsetsTimes[index]) > TOUCH_UP_FILTER_DELAY_BEFORE) {
-                updateOffset(mPreviousOffsets[index]);
+                positionAtCursorOffset(mPreviousOffsets[index]);
             }
         }
 
@@ -9673,18 +9811,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public void show() {
-            if (isShowing()) {
-                mContainer.update(mContainerPositionX, mContainerPositionY, -1, -1);
-            } else {
-                mContainer.showAtLocation(TextView.this, 0,
-                        mContainerPositionX, mContainerPositionY);
+            if (isShowing()) return;
 
-                if (!mIsActive) {
-                    ViewTreeObserver vto = TextView.this.getViewTreeObserver();
-                    vto.addOnPreDrawListener(this);
-                    mIsActive = true;
-                }
-            }
+            getPositionListener().addSubscriber(this, true);
+
+            // Make sure the offset is always considered new, even when focusing at same position
+            mPreviousOffset = -1;
+            positionAtCursorOffset(getCurrentCursorOffset());
+
             hideActionPopupWindow();
         }
 
@@ -9697,9 +9831,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         public void hide() {
             dismiss();
 
-            ViewTreeObserver vto = TextView.this.getViewTreeObserver();
-            vto.removeOnPreDrawListener(this);
-            mIsActive = false;
+            TextView.this.getPositionListener().removeSubscriber(this);
         }
 
         void showActionPopupWindow(int delay, boolean withPaste) {
@@ -9732,7 +9864,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return mContainer.isShowing();
         }
 
-        private boolean isPositionVisible() {
+        private boolean isVisible() {
             // Always show a dragging handle.
             if (mIsDragging) {
                 return true;
@@ -9742,103 +9874,71 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 return false;
             }
 
-            final int extendedPaddingTop = getExtendedPaddingTop();
-            final int extendedPaddingBottom = getExtendedPaddingBottom();
-            final int compoundPaddingLeft = getCompoundPaddingLeft();
-            final int compoundPaddingRight = getCompoundPaddingRight();
-
-            final TextView textView = TextView.this;
-
-            if (mTempRect == null) mTempRect = new Rect();
-            final Rect clip = mTempRect;
-            clip.left = compoundPaddingLeft;
-            clip.top = extendedPaddingTop;
-            clip.right = textView.getWidth() - compoundPaddingRight;
-            clip.bottom = textView.getHeight() - extendedPaddingBottom;
-
-            final ViewParent parent = textView.getParent();
-            if (parent == null || !parent.getChildVisibleRect(textView, clip, null)) {
-                return false;
-            }
-
-            final int[] coords = mTempCoords;
-            textView.getLocationInWindow(coords);
-            final int posX = coords[0] + mPositionX + (int) mHotspotX;
-            final int posY = coords[1] + mPositionY;
-
-            // Offset by 1 to take into account 0.5 and int rounding around getPrimaryHorizontal.
-            return posX >= clip.left - 1 && posX <= clip.right + 1 &&
-                    posY >= clip.top && posY <= clip.bottom;
+            return getPositionListener().isVisible(mPositionX + mHotspotX, mPositionY);
         }
 
         public abstract int getCurrentCursorOffset();
 
-        public abstract void updateOffset(int offset);
+        public abstract void updateSelection(int offset);
 
         public abstract void updatePosition(float x, float y);
 
         protected void positionAtCursorOffset(int offset) {
-            // A HandleView relies on the layout, which may be nulled by external methods.
+            // A HandleView relies on the layout, which may be nulled by external methods
             if (mLayout == null) {
                 // Will update controllers' state, hiding them and stopping selection mode if needed
                 prepareCursorControllers();
                 return;
             }
 
-            addPositionToTouchUpFilter(offset);
-            final int line = mLayout.getLineForOffset(offset);
-            final int lineBottom = mLayout.getLineBottom(line);
+            if (offset != mPreviousOffset) {
+                updateSelection(offset);
+                addPositionToTouchUpFilter(offset);
+                final int line = mLayout.getLineForOffset(offset);
 
-            mPositionX = (int) (mLayout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX);
-            mPositionY = lineBottom;
+                mPositionX = (int) (mLayout.getPrimaryHorizontal(offset) - 0.5f - mHotspotX);
+                mPositionY = mLayout.getLineBottom(line);
 
-            // Take TextView's padding into account.
-            mPositionX += viewportToContentHorizontalOffset();
-            mPositionY += viewportToContentVerticalOffset();
+                // Take TextView's padding into account.
+                mPositionX += viewportToContentHorizontalOffset();
+                mPositionY += viewportToContentVerticalOffset();
+
+                mPreviousOffset = offset;
+                mPositionHasChanged = true;
+            }
         }
 
-        private void checkForContainerPositionChange() {
-            positionAtCursorOffset(getCurrentCursorOffset());
-
-            final int previousContainerPositionX = mContainerPositionX;
-            final int previousContainerPositionY = mContainerPositionY;
-
-            TextView.this.getLocationInWindow(mTempCoords);
-            mContainerPositionX = mTempCoords[0] + mPositionX;
-            mContainerPositionY = mTempCoords[1] + mPositionY;
-
-            mNeedsUpdate |= previousContainerPositionX != mContainerPositionX;
-            mNeedsUpdate |= previousContainerPositionY != mContainerPositionY;
-        }
-
-        public boolean onPreDraw() {
-            checkForContainerPositionChange();
-            if (mNeedsUpdate) {
+        public void updatePosition(int parentPositionX, int parentPositionY, boolean modified) {
+            if (modified || mPositionHasChanged) {
                 if (mIsDragging) {
-                    if (mTempCoords[0] != mLastParentX || mTempCoords[1] != mLastParentY) {
-                        mTouchToWindowOffsetX += mTempCoords[0] - mLastParentX;
-                        mTouchToWindowOffsetY += mTempCoords[1] - mLastParentY;
-                        mLastParentX = mTempCoords[0];
-                        mLastParentY = mTempCoords[1];
+                    // Update touchToWindow offset in case of parent scrolling while dragging
+                    if (parentPositionX != mLastParentX || parentPositionY != mLastParentY) {
+                        mTouchToWindowOffsetX += parentPositionX - mLastParentX;
+                        mTouchToWindowOffsetY += parentPositionY - mLastParentY;
+                        mLastParentX = parentPositionX;
+                        mLastParentY = parentPositionY;
                     }
 
                     onHandleMoved();
                 }
 
-                if (isPositionVisible()) {
-                    mContainer.update(mContainerPositionX, mContainerPositionY, -1, -1);
-
-                    if (mIsActive && !isShowing()) {
-                        show();
+                if (isVisible()) {
+                    final int positionX = parentPositionX + mPositionX;
+                    final int positionY = parentPositionY + mPositionY;
+                    if (isShowing()) {
+                        mContainer.update(positionX, positionY, -1, -1);
+                    } else {
+                        mContainer.showAtLocation(TextView.this, Gravity.NO_GRAVITY,
+                                positionX, positionY);
                     }
                 } else {
                     if (isShowing()) {
                         dismiss();
                     }
                 }
-                mNeedsUpdate = false;
+
+                mPositionHasChanged = false;
             }
-            return true;
         }
 
         @Override
@@ -9855,10 +9955,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     mTouchToWindowOffsetX = ev.getRawX() - mPositionX;
                     mTouchToWindowOffsetY = ev.getRawY() - mPositionY;
 
-                    final int[] coords = mTempCoords;
-                    TextView.this.getLocationInWindow(coords);
-                    mLastParentX = coords[0];
-                    mLastParentY = coords[1];
+                    final PositionListener positionListener = getPositionListener();
+                    mLastParentX = positionListener.getPositionX();
+                    mLastParentY = positionListener.getPositionY();
                     mIsDragging = true;
                     break;
                 }
@@ -9961,7 +10060,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         mTextSelectHandleRes);
             }
             mDrawable = mSelectHandleCenter;
-            mHotspotX = mDrawable.getIntrinsicWidth() / 2.0f;
+            mHotspotX = mDrawable.getIntrinsicWidth() / 2;
         }
 
         @Override
@@ -10006,13 +10105,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        public void updateOffset(int offset) {
+        public void updateSelection(int offset) {
             Selection.setSelection((Spannable) mText, offset);
         }
 
         @Override
         public void updatePosition(float x, float y) {
-            updateOffset(getOffsetForPosition(x, y));
+            positionAtCursorOffset(getOffsetForPosition(x, y));
         }
 
         @Override
@@ -10036,7 +10135,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         mTextSelectHandleLeftRes);
             }
             mDrawable = mSelectHandleLeft;
-            mHotspotX = mDrawable.getIntrinsicWidth() * 3.0f / 4.0f;
+            mHotspotX = (mDrawable.getIntrinsicWidth() * 3) / 4;
         }
 
         @Override
@@ -10045,7 +10144,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        public void updateOffset(int offset) {
+        public void updateSelection(int offset) {
             Selection.setSelection((Spannable) mText, offset, getSelectionEnd());
         }
 
@@ -10061,7 +10160,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Handles can not cross and selection is at least one character
             if (offset >= selectionEnd) offset = selectionEnd - 1;
 
-            Selection.setSelection((Spannable) mText, offset, selectionEnd);
+            positionAtCursorOffset(offset);
         }
 
         public ActionPopupWindow getActionPopupWindow() {
@@ -10077,7 +10176,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         mTextSelectHandleRightRes);
             }
             mDrawable = mSelectHandleRight;
-            mHotspotX = mDrawable.getIntrinsicWidth() / 4.0f;
+            mHotspotX = mDrawable.getIntrinsicWidth() / 4;
         }
 
         @Override
@@ -10086,7 +10185,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         @Override
-        public void updateOffset(int offset) {
+        public void updateSelection(int offset) {
             Selection.setSelection((Spannable) mText, getSelectionStart(), offset);
         }
 
@@ -10102,7 +10201,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // Handles can not cross and selection is at least one character
             if (offset <= selectionStart) offset = selectionStart + 1;
 
-            Selection.setSelection((Spannable) mText, selectionStart, offset);
+            positionAtCursorOffset(offset);
         }
 
         public void setActionPopupWindow(ActionPopupWindow actionPopupWindow) {
