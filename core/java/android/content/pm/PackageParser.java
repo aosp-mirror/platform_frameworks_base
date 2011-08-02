@@ -1645,6 +1645,9 @@ public class PackageParser {
             }
         }
 
+        ai.uiOptions = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestApplication_uiOptions, 0);
+
         sa.recycle();
 
         if (outError[0] != null) {
@@ -1849,6 +1852,10 @@ public class PackageParser {
 
         a.info.theme = sa.getResourceId(
                 com.android.internal.R.styleable.AndroidManifestActivity_theme, 0);
+
+        a.info.uiOptions = sa.getInt(
+                com.android.internal.R.styleable.AndroidManifestActivity_uiOptions,
+                a.info.applicationInfo.uiOptions);
 
         String str;
         str = sa.getNonConfigurationString(
@@ -2091,6 +2098,7 @@ public class PackageParser {
         info.screenOrientation = target.info.screenOrientation;
         info.taskAffinity = target.info.taskAffinity;
         info.theme = target.info.theme;
+        info.uiOptions = target.info.uiOptions;
         
         Activity a = new Activity(mParseActivityAliasArgs, info);
         if (outError[0] != null) {

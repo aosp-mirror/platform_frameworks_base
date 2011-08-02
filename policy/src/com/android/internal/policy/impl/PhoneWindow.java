@@ -35,13 +35,13 @@ import com.android.internal.view.menu.MenuBuilder;
 import com.android.internal.view.menu.MenuDialogHelper;
 import com.android.internal.view.menu.MenuPresenter;
 import com.android.internal.view.menu.MenuView;
-import com.android.internal.view.menu.SubMenuBuilder;
 import com.android.internal.widget.ActionBarContainer;
 import com.android.internal.widget.ActionBarContextView;
 import com.android.internal.widget.ActionBarView;
 
 import android.app.KeyguardManager;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -175,6 +175,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private AudioManager mAudioManager;
     private KeyguardManager mKeyguardManager;
 
+    private int mUiOptions = 0;
+
     public PhoneWindow(Context context) {
         super(context);
         mLayoutInflater = LayoutInflater.from(context);
@@ -210,6 +212,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             removeFeature(FEATURE_ACTION_BAR);
         }
         return super.requestFeature(featureId);
+    }
+
+    @Override
+    public void setUiOptions(int uiOptions) {
+        mUiOptions = uiOptions;
     }
 
     @Override
@@ -2634,8 +2641,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                         mActionBar.initIndeterminateProgress();
                     }
 
-                    final boolean splitActionBar = getWindowStyle().getBoolean(
-                            com.android.internal.R.styleable.Window_windowSplitActionBar, false);
+                    boolean splitActionBar = false;
+                    if ((mUiOptions & ActivityInfo.UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW) != 0) {
+                        splitActionBar = getContext().getResources().getBoolean(
+                                com.android.internal.R.bool.split_action_bar_is_narrow);
+                    } else {
+                        splitActionBar = getWindowStyle().getBoolean(
+                                com.android.internal.R.styleable.Window_windowSplitActionBar, false);
+                    }
                     if (splitActionBar) {
                         final ActionBarContainer splitView = (ActionBarContainer) findViewById(
                                 com.android.internal.R.id.split_action_bar);
@@ -2648,7 +2661,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                                     com.android.internal.R.id.action_context_bar);
                             cab.setSplitView(splitView);
                         } else {
-                            Log.e(TAG, "Window style requested split action bar with " +
+                            Log.e(TAG, "Requested split action bar with " +
                                     "incompatible window decor! Ignoring request.");
                         }
                     }

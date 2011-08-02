@@ -91,6 +91,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     public String backupAgentName;
 
     /**
+     * The default extra UI options for activities in this application.
+     * Set from the {@link android.R.attr#uiOptions} attribute in the
+     * activity's manifest.
+     */
+    public int uiOptions = 0;
+
+    /**
      * Value for {@link #flags}: if set, this application is installed in the
      * device's system image.
      */
@@ -456,6 +463,9 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         if (descriptionRes != 0) {
             pw.println(prefix + "description=0x"+Integer.toHexString(descriptionRes));
         }
+        if (uiOptions != 0) {
+            pw.println(prefix + "uiOptions=0x" + Integer.toHexString(uiOptions));
+        }
         super.dumpBack(pw, prefix);
     }
     
@@ -509,6 +519,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         installLocation = orig.installLocation;
         manageSpaceActivityName = orig.manageSpaceActivityName;
         descriptionRes = orig.descriptionRes;
+        uiOptions = orig.uiOptions;
     }
 
 
@@ -547,6 +558,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         dest.writeString(manageSpaceActivityName);
         dest.writeString(backupAgentName);
         dest.writeInt(descriptionRes);
+        dest.writeInt(uiOptions);
     }
 
     public static final Parcelable.Creator<ApplicationInfo> CREATOR
@@ -584,6 +596,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
         manageSpaceActivityName = source.readString();
         backupAgentName = source.readString();
         descriptionRes = source.readInt();
+        uiOptions = source.readInt();
     }
 
     /**
