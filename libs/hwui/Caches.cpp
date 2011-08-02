@@ -142,7 +142,6 @@ void Caches::dumpMemoryUsage(String8 &log) {
 
 void Caches::clearGarbage() {
     textureCache.clearGarbage();
-    gradientCache.clearGarbage();
     pathCache.clearGarbage();
 
     Mutex::Autolock _l(mGarbageLock);
