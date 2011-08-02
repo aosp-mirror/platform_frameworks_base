@@ -89,20 +89,10 @@
        <item>@drawable/btn_radio_off</item>
        <item>@drawable/btn_default_transparent_normal</item>
        <item>@drawable/btn_default_small_selected</item>
-       <item>@drawable/btn_default_small_pressed_holo_light</item>
-       <item>@drawable/btn_default_small_pressed_holo_dark</item>
        <item>@drawable/btn_default_small_pressed</item>
-       <item>@drawable/btn_default_small_normal_holo_light</item>
-       <item>@drawable/btn_default_small_normal_holo_dark</item>
        <item>@drawable/btn_default_small_normal_disable_focused</item>
        <item>@drawable/btn_default_small_normal_disable</item>
        <item>@drawable/btn_default_small_normal</item>
-       <item>@drawable/btn_default_small_focused_holo_light</item>
-       <item>@drawable/btn_default_small_focused_holo_dark</item>
-       <item>@drawable/btn_default_small_disabled_holo_light</item>
-       <item>@drawable/btn_default_small_disabled_holo_dark</item>
-       <item>@drawable/btn_default_small_disabled_focused_holo_light</item>
-       <item>@drawable/btn_default_small_disabled_focused_holo_dark</item>
        <item>@drawable/btn_default_selected</item>
        <item>@drawable/btn_default_pressed_holo_light</item>
        <item>@drawable/btn_default_pressed_holo_dark</item>
