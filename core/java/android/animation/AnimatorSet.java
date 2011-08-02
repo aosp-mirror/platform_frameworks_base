@@ -19,6 +19,7 @@ package android.animation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -445,7 +446,10 @@ public final class AnimatorSet extends Animator {
             // First, clear out the old listeners
             ArrayList<AnimatorListener> oldListeners = node.animation.getListeners();
             if (oldListeners != null && oldListeners.size() > 0) {
-                for (AnimatorListener listener : oldListeners) {
+                final ArrayList<AnimatorListener> clonedListeners = new
+                        ArrayList<AnimatorListener>(oldListeners);
+
+                for (AnimatorListener listener : clonedListeners) {
                     if (listener instanceof DependencyListener ||
                             listener instanceof AnimatorSetListener) {
                         node.animation.removeListener(listener);
