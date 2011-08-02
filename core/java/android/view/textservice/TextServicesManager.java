@@ -81,18 +81,18 @@ public final class TextServicesManager {
         }
         // TODO: set a proper locale instead of the dummy locale
         final String localeString = locale == null ? "en" : locale.toString();
-        final SpellCheckerInfo info;
+        final SpellCheckerInfo sci;
         try {
-            info = sService.getCurrentSpellChecker(localeString);
+            sci = sService.getCurrentSpellChecker(localeString);
         } catch (RemoteException e) {
             return null;
         }
-        if (info == null) {
+        if (sci == null) {
             return null;
         }
-        final SpellCheckerSession session = new SpellCheckerSession(info, sService, listener);
+        final SpellCheckerSession session = new SpellCheckerSession(sci, sService, listener);
         try {
-            sService.getSpellCheckerService(info, localeString,
+            sService.getSpellCheckerService(sci.getId(), localeString,
                     session.getTextServicesSessionListener(),
                     session.getSpellCheckerSessionListener());
         } catch (RemoteException e) {
@@ -132,9 +132,12 @@ public final class TextServicesManager {
     /**
      * @hide
      */
-    public void setCurrentSpellChecker(SpellCheckerInfo info) {
+    public void setCurrentSpellChecker(SpellCheckerInfo sci) {
         try {
-            sService.setCurrentSpellChecker(info);
+            if (sci == null) {
+                throw new NullPointerException("SpellCheckerInfo is null");
+            }
+            sService.setCurrentSpellChecker(sci.getId());
         } catch (RemoteException e) {
             Log.e(TAG, "Error in setCurrentSpellChecker: " + e);
         }
