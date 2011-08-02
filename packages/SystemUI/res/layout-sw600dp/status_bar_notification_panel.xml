@@ -22,7 +22,6 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:gravity="right"
-    android:background="@drawable/notify_panel_bg_protect_tiled"
     >
 
     <RelativeLayout
@@ -31,12 +30,12 @@
         android:layout_width="match_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="-27dip"
+        android:layout_marginBottom="8dp"
         >
 
         <include layout="@layout/status_bar_notification_panel_title"
-            android:layout_width="471dp"
-            android:layout_height="465dp"
+            android:layout_width="478dp"
+            android:layout_height="224dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             />
@@ -45,11 +44,11 @@
             android:id="@+id/content_frame"
             android:background="@drawable/notify_panel_notify_bg"
             android:layout_height="wrap_content"
-            android:layout_width="447dp"
+            android:layout_width="478dp"
             android:orientation="vertical"
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="352dp"
+            android:layout_marginTop="178dp"
             >
             <ScrollView
                 android:id="@+id/notification_scroller"

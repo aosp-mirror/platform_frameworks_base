@@ -3,15 +3,13 @@
     android:layout_height="@dimen/notification_height"
     >
 
-    <ImageButton
+    <Button
         android:id="@+id/veto"
         android:layout_width="48dp"
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
         android:layout_alignParentRight="true"
         android:layout_marginRight="-80dp"
-        android:src="@drawable/status_bar_veto"
-        android:scaleType="center"
         android:background="@null"
         android:paddingRight="8dp"
         android:paddingLeft="8dp"
