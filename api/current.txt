@@ -9053,6 +9053,7 @@ package android.hardware {
     method public void setPreviewFpsRange(int, int);
     method public deprecated void setPreviewFrameRate(int);
     method public void setPreviewSize(int, int);
+    method public void setRecordingHint(boolean);
     method public void setRotation(int);
     method public void setSceneMode(java.lang.String);
     method public void setWhiteBalance(java.lang.String);

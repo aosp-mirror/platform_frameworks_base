@@ -3177,34 +3177,25 @@ public class Camera {
         }
 
         /**
-         * Sets the hint of the recording mode. If this is true, {@link
-         * android.media.MediaRecorder#start()} may be faster or has less
-         * glitches. This should be called before starting the preview for the
-         * best result. But it is allowed to change the hint while the preview
-         * is active. The default value is false.
+         * Sets recording mode hint. This tells the camera that the intent of
+         * the application is to record videos {@link
+         * android.media.MediaRecorder#start()}, not to take still pictures
+         * {@link #takePicture(Camera.ShutterCallback, Camera.PictureCallback,
+         * Camera.PictureCallback, Camera.PictureCallback)}. Using this hint can
+         * allow MediaRecorder.start() to start faster or with fewer glitches on
+         * output. This should be called before starting preview for the best
+         * result, but can be changed while the preview is active. The default
+         * value is false.
          *
-         * The apps can still call {@link #takePicture(Camera.ShutterCallback,
-         * Camera.PictureCallback, Camera.PictureCallback, Camera.PictureCallback)}
-         * when the hint is true. The apps can call MediaRecorder.start() when
-         * the hint is false. But the performance may be worse.
+         * The app can still call takePicture() when the hint is true or call
+         * MediaRecorder.start() when the hint is false. But the performance may
+         * be worse.
          *
-         * @param hint true if the apps intend to record a video using
+         * @param hint true if the apps intend to record videos using
          *             {@link android.media.MediaRecorder}.
-         * @hide
          */
         public void setRecordingHint(boolean hint) {
             set(KEY_RECORDING_HINT, hint ? TRUE : FALSE);
-        }
-
-        /**
-         * Gets the current recording hint.
-         *
-         * @return the current recording hint state.
-         * @see #setRecordingHint(boolean)
-         * @hide
-         */
-        public boolean getRecordingHint() {
-            return TRUE.equals(get(KEY_RECORDING_HINT));
         }
 
         // Splits a comma delimited string to an ArrayList of String.
