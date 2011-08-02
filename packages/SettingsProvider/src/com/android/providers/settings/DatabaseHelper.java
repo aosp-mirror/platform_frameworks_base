@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 68;
+    private static final int DATABASE_VERSION = 69;
 
     private Context mContext;
 
@@ -862,34 +862,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         if (upgradeVersion == 66) {
-            // This upgrade makes sure that MODE_RINGER_STREAMS_AFFECTED and
-            // NOTIFICATIONS_USE_RING_VOLUME settings are set according to device voice capability
-             db.beginTransaction();
-             try {
-                 int ringerModeAffectedStreams = (1 << AudioManager.STREAM_RING) |
-                                                 (1 << AudioManager.STREAM_NOTIFICATION) |
-                                                 (1 << AudioManager.STREAM_SYSTEM) |
-                                                 (1 << AudioManager.STREAM_SYSTEM_ENFORCED);
-                 if (!mContext.getResources().getBoolean(
-                         com.android.internal.R.bool.config_voice_capable)) {
-                     ringerModeAffectedStreams |= (1 << AudioManager.STREAM_MUSIC);
-
-                     db.execSQL("DELETE FROM system WHERE name='"
-                             + Settings.System.NOTIFICATIONS_USE_RING_VOLUME + "'");
-                     db.execSQL("INSERT INTO system ('name', 'value') values ('"
-                             + Settings.System.NOTIFICATIONS_USE_RING_VOLUME + "', '1')");
-                 }
-                 db.execSQL("DELETE FROM system WHERE name='"
-                         + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "'");
-                 db.execSQL("INSERT INTO system ('name', 'value') values ('"
-                         + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "', '"
-                         + String.valueOf(ringerModeAffectedStreams) + "')");
-                 db.setTransactionSuccessful();
-             } finally {
-                 db.endTransaction();
-             }
-             upgradeVersion = 67;
-         }
+            // This upgrade makes sure that MODE_RINGER_STREAMS_AFFECTED is set
+            // according to device voice capability
+            db.beginTransaction();
+            try {
+                int ringerModeAffectedStreams = (1 << AudioManager.STREAM_RING) |
+                                                (1 << AudioManager.STREAM_NOTIFICATION) |
+                                                (1 << AudioManager.STREAM_SYSTEM) |
+                                                (1 << AudioManager.STREAM_SYSTEM_ENFORCED);
+                if (!mContext.getResources().getBoolean(
+                        com.android.internal.R.bool.config_voice_capable)) {
+                    ringerModeAffectedStreams |= (1 << AudioManager.STREAM_MUSIC);
+                }
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "'");
+                db.execSQL("INSERT INTO system ('name', 'value') values ('"
+                        + Settings.System.MODE_RINGER_STREAMS_AFFECTED + "', '"
+                        + String.valueOf(ringerModeAffectedStreams) + "')");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 67;
+        }
 
         if (upgradeVersion == 67) {
             // New setting to enable touch exploration.
@@ -909,6 +904,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             upgradeVersion = 68;
         }
 
+        if (upgradeVersion == 68) {
+            // Enable all system sounds by default
+            db.beginTransaction();
+            SQLiteStatement stmt = null;
+            try {
+                stmt = db.compileStatement("INSERT OR REPLACE INTO system(name,value)"
+                        + " VALUES(?,?);");
+                loadDefaultHapticSettings(stmt);
+                loadUISoundEffectsSettings(stmt);
+                db.execSQL("DELETE FROM system WHERE name='"
+                        + Settings.System.NOTIFICATIONS_USE_RING_VOLUME + "'");
+                stmt.close();
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+                if (stmt != null)
+                    stmt.close();
+            }
+            upgradeVersion = 69;
+        }
 
         // *** Remember to update DATABASE_VERSION above!
 
@@ -1284,20 +1299,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             loadSetting(stmt, Settings.Secure.SET_INSTALL_LOCATION, 0);
             loadSetting(stmt, Settings.Secure.DEFAULT_INSTALL_LOCATION,
                     PackageHelper.APP_INSTALL_AUTO);
-    
+
             loadUISoundEffectsSettings(stmt);
-    
+
             loadBooleanSetting(stmt, Settings.System.VIBRATE_IN_SILENT,
                     R.bool.def_vibrate_in_silent);
-
-            // Set notification volume to follow ringer volume by default
-            if (mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_voice_capable)) {
-                loadBooleanSetting(stmt, Settings.System.NOTIFICATIONS_USE_RING_VOLUME,
-                        R.bool.def_notifications_use_ring_volume);
-            } else {
-                loadSetting(stmt, Settings.System.NOTIFICATIONS_USE_RING_VOLUME, "1");
-            }
 
             loadIntegerSetting(stmt, Settings.System.POINTER_SPEED,
                     R.integer.def_pointer_speed);
@@ -1312,6 +1318,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             R.integer.def_power_sounds_enabled);
         loadStringSetting(stmt, Settings.System.LOW_BATTERY_SOUND,
             R.string.def_low_battery_sound);
+        loadBooleanSetting(stmt, Settings.System.DTMF_TONE_WHEN_DIALING,
+                R.bool.def_dtmf_tones_enabled);
+        loadBooleanSetting(stmt, Settings.System.SOUND_EFFECTS_ENABLED,
+                R.bool.def_sound_effects_enabled);
+        loadBooleanSetting(stmt, Settings.System.HAPTIC_FEEDBACK_ENABLED,
+                R.bool.def_haptic_feedback);
 
         loadIntegerSetting(stmt, Settings.System.DOCK_SOUNDS_ENABLED,
             R.integer.def_dock_sounds_enabled);

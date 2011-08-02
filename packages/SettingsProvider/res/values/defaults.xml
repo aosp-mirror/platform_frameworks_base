@@ -67,7 +67,7 @@
     <string name="def_desk_undock_sound" translatable="false">/system/media/audio/ui/Undock.ogg</string>
     <string name="def_car_dock_sound" translatable="false">/system/media/audio/ui/Dock.ogg</string>
     <string name="def_car_undock_sound" translatable="false">/system/media/audio/ui/Undock.ogg</string>
-    <integer name="def_lockscreen_sounds_enabled">0</integer>
+    <integer name="def_lockscreen_sounds_enabled">1</integer>
     <string name="def_lock_sound" translatable="false">/system/media/audio/ui/Lock.ogg</string>
     <string name="def_unlock_sound" translatable="false">/system/media/audio/ui/Unlock.ogg</string>
 
@@ -129,4 +129,8 @@
     <!-- Default for Settings.System.POINTER_SPEED -->
     <integer name="def_pointer_speed">0</integer>
 
+    <!-- Default for DTMF tones enabled -->
+    <bool name="def_dtmf_tones_enabled">true</bool>
+    <!-- Default for UI touch sounds enabled -->
+    <bool name="def_sound_effects_enabled">true</bool>
 </resources>
