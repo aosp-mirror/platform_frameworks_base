@@ -84,9 +84,19 @@ public class ImageFormat {
     public static final int JPEG = 0x100;
 
     /**
+     * Raw bayer format used for images, which is 10 bit precision samples
+     * stored in 16 bit words. The filter pattern is RGGB. Whether this format
+     * is supported by the camera hardware can be determined by
+     * {@link android.hardware.Camera.Parameters#getSupportedPreviewFormats()}.
+     *
+     * @hide
+     */
+    public static final int BAYER_RGGB = 0x200;
+
+    /**
      * Use this function to retrieve the number of bits per pixel of an
      * ImageFormat.
-     * 
+     *
      * @param format
      * @return the number of bits per pixel of the given format or -1 if the
      *         format doesn't exist or is not supported.
@@ -103,6 +113,8 @@ public class ImageFormat {
                 return 12;
             case NV21:
                 return 12;
+            case BAYER_RGGB:
+                return 16;
         }
         return -1;
     }
