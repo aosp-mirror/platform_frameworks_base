@@ -54,7 +54,6 @@ class BluetoothEventLoop {
     private final BluetoothAdapter mAdapter;
     private final BluetoothAdapterStateMachine mBluetoothState;
     private BluetoothA2dp mA2dp;
-    private BluetoothInputDevice mInputDevice;
     private final Context mContext;
     // The WakeLock is used for bringing up the LCD during a pairing request
     // from remote device when Android is in Suspend state.
@@ -134,15 +133,11 @@ class BluetoothEventLoop {
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
             if (profile == BluetoothProfile.A2DP) {
                 mA2dp = (BluetoothA2dp) proxy;
-            } else if (profile == BluetoothProfile.INPUT_DEVICE) {
-                mInputDevice = (BluetoothInputDevice) proxy;
             }
         }
         public void onServiceDisconnected(int profile) {
             if (profile == BluetoothProfile.A2DP) {
                 mA2dp = null;
-            } else if (profile == BluetoothProfile.INPUT_DEVICE) {
-                mInputDevice = null;
             }
         }
     };
@@ -803,21 +798,25 @@ class BluetoothEventLoop {
                       "Incoming A2DP / AVRCP connection from " + address);
                 mA2dp.allowIncomingConnect(device, authorized);
             }
-        } else if (mInputDevice != null && BluetoothUuid.isInputDevice(uuid)) {
+        } else if (BluetoothUuid.isInputDevice(uuid)) {
             // We can have more than 1 input device connected.
-            authorized = mInputDevice.getPriority(device) > BluetoothInputDevice.PRIORITY_OFF;
-             if (authorized) {
-                 Log.i(TAG, "First check pass for incoming HID connection from " + address);
-                 // notify profile state change
-                 mBluetoothService.notifyIncomingHidConnection(address);
-             } else {
-                 Log.i(TAG, "Rejecting incoming HID connection from " + address);
-                 mBluetoothService.allowIncomingHidConnect(device, authorized);
-             }
-        } else if (BluetoothUuid.isBnep(uuid) && mBluetoothService.allowIncomingTethering()){
-            authorized = true;
+            authorized = mBluetoothService.getInputDevicePriority(device) >
+                    BluetoothInputDevice.PRIORITY_OFF;
+            if (authorized) {
+                Log.i(TAG, "First check pass for incoming HID connection from " + address);
+                // notify profile state change
+                mBluetoothService.notifyIncomingHidConnection(address);
+            } else {
+                Log.i(TAG, "Rejecting incoming HID connection from " + address);
+                mBluetoothService.allowIncomingProfileConnect(device, authorized);
+            }
+        } else if (BluetoothUuid.isBnep(uuid)) {
+            // PAN doesn't go to the state machine, accept or reject from here
+            authorized = mBluetoothService.allowIncomingTethering();
+            mBluetoothService.allowIncomingProfileConnect(device, authorized);
         } else {
             Log.i(TAG, "Rejecting incoming " + deviceUuid + " connection from " + address);
+            mBluetoothService.allowIncomingProfileConnect(device, authorized);
         }
         log("onAgentAuthorize(" + objectPath + ", " + deviceUuid + ") = " + authorized);
     }

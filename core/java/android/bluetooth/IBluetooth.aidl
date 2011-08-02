@@ -85,6 +85,7 @@ interface IBluetooth
 
     int addRfcommServiceRecord(in String serviceName, in ParcelUuid uuid, int channel, IBinder b);
     void removeServiceRecord(int handle);
+    boolean allowIncomingProfileConnect(in BluetoothDevice device, boolean value);
 
     boolean connectHeadset(String address);
     boolean disconnectHeadset(String address);
@@ -98,7 +99,6 @@ interface IBluetooth
     int getInputDeviceConnectionState(in BluetoothDevice device);
     boolean setInputDevicePriority(in BluetoothDevice device, int priority);
     int getInputDevicePriority(in BluetoothDevice device);
-    boolean allowIncomingHidConnect(in BluetoothDevice device, boolean value);
 
     boolean isTetheringOn();
     void setBluetoothTethering(boolean value);
