@@ -112,7 +112,7 @@ bool rsdScriptInit(const Context *rsc,
         goto error;
     }
 
-    if (bccPrepareExecutableEx(drv->mBccScript, cacheDir, resName, 0) != 0) {
+    if (bccPrepareExecutable(drv->mBccScript, cacheDir, resName, 0) != 0) {
         LOGE("bcc: FAILS to prepare executable");
         goto error;
     }
