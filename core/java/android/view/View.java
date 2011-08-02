@@ -10291,6 +10291,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         canvas.restoreToCount(restoreCount);
 
         if (attachInfo != null) {
+            canvas.setBitmap(null);
             // Restore the cached Canvas for our siblings
             attachInfo.mCanvas = canvas;
         }

@@ -178,17 +178,22 @@ public class Canvas {
      * @see #getDensity()
      */
     public void setBitmap(Bitmap bitmap) {
-        if (!bitmap.isMutable()) {
-            throw new IllegalStateException();
-        }
         if (isHardwareAccelerated()) {
             throw new RuntimeException("Can't set a bitmap device on a GL canvas");
         }
-        throwIfRecycled(bitmap);
 
-        native_setBitmap(mNativeCanvas, bitmap.ni());
+        int pointer = 0;
+        if (bitmap != null) {
+            if (!bitmap.isMutable()) {
+                throw new IllegalStateException();
+            }
+            throwIfRecycled(bitmap);
+            mDensity = bitmap.mDensity;
+            pointer = bitmap.ni();
+        }
+
+        native_setBitmap(mNativeCanvas, pointer);
         mBitmap = bitmap;
-        mDensity = bitmap.mDensity;
     }
     
     /**

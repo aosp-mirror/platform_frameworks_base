@@ -88,9 +88,12 @@ public:
         return canvas->getDevice()->accessBitmap(false).height();
     }
 
-    static void setBitmap(JNIEnv* env, jobject, SkCanvas* canvas,
-                          SkBitmap* bitmap) {
-        canvas->setBitmapDevice(*bitmap);
+    static void setBitmap(JNIEnv* env, jobject, SkCanvas* canvas, SkBitmap* bitmap) {
+        if (bitmap) {
+            canvas->setBitmapDevice(*bitmap);
+        } else {
+            canvas->setDevice(NULL);
+        }
     }
  
     static int saveAll(JNIEnv* env, jobject jcanvas) {
