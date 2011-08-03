@@ -16,16 +16,9 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.animation.LayoutTransition;
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.Display;
-import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.util.Slog;
-
 
 public class ExpandedView extends LinearLayout {
     PhoneStatusBar mService;
@@ -38,8 +31,6 @@ public class ExpandedView extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-
-        setLayerType(LAYER_TYPE_HARDWARE, null);
     }
 
     /** We want to shrink down to 0, and ignore the background. */
@@ -49,7 +40,7 @@ public class ExpandedView extends LinearLayout {
     }
 
     @Override
-     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
          super.onLayout(changed, left, top, right, bottom);
          int height = bottom - top;
          if (height != mPrevHeight) {
