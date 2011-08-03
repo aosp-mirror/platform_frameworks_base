@@ -1213,5 +1213,10 @@ public abstract class Window {
      * @see android.app.Activity#getVolumeControlStream()
      */
     public abstract int getVolumeControlStream();
-    
+
+    /**
+     * Set extra options that will influence the UI for this window.
+     * @param uiOptions Flags specifying extra options for this window.
+     */
+    public void setUiOptions(int uiOptions) { }
 }

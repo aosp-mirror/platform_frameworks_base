@@ -4399,6 +4399,9 @@ public class Activity extends ContextThemeWrapper
         if (info.softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) {
             mWindow.setSoftInputMode(info.softInputMode);
         }
+        if (info.uiOptions != 0) {
+            mWindow.setUiOptions(info.uiOptions);
+        }
         mUiThread = Thread.currentThread();
         
         mMainThread = aThread;

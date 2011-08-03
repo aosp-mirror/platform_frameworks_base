@@ -1031,6 +1031,7 @@ package android {
     field public static final int translationY = 16843555; // 0x1010323
     field public static final int type = 16843169; // 0x10101a1
     field public static final int typeface = 16842902; // 0x1010096
+    field public static final int uiOptions = 16843682; // 0x10103a2
     field public static final int uncertainGestureColor = 16843382; // 0x1010276
     field public static final int unfocusedMonthDateColor = 16843588; // 0x1010344
     field public static final int unselectedAlpha = 16843278; // 0x101020e
@@ -1524,15 +1525,15 @@ package android {
     field public static final int TextAppearance_Holo_Small = 16974081; // 0x1030101
     field public static final int TextAppearance_Holo_Small_Inverse = 16974082; // 0x1030102
     field public static final int TextAppearance_Holo_Widget = 16974085; // 0x1030105
-    field public static final int TextAppearance_Holo_Widget_ActionBar_Menu = 16974113; // 0x1030121
+    field public static final int TextAppearance_Holo_Widget_ActionBar_Menu = 16974112; // 0x1030120
     field public static final int TextAppearance_Holo_Widget_ActionBar_Subtitle = 16974099; // 0x1030113
-    field public static final int TextAppearance_Holo_Widget_ActionBar_Subtitle_Inverse = 16974110; // 0x103011e
+    field public static final int TextAppearance_Holo_Widget_ActionBar_Subtitle_Inverse = 16974109; // 0x103011d
     field public static final int TextAppearance_Holo_Widget_ActionBar_Title = 16974098; // 0x1030112
-    field public static final int TextAppearance_Holo_Widget_ActionBar_Title_Inverse = 16974109; // 0x103011d
+    field public static final int TextAppearance_Holo_Widget_ActionBar_Title_Inverse = 16974108; // 0x103011c
     field public static final int TextAppearance_Holo_Widget_ActionMode_Subtitle = 16974101; // 0x1030115
-    field public static final int TextAppearance_Holo_Widget_ActionMode_Subtitle_Inverse = 16974112; // 0x1030120
+    field public static final int TextAppearance_Holo_Widget_ActionMode_Subtitle_Inverse = 16974111; // 0x103011f
     field public static final int TextAppearance_Holo_Widget_ActionMode_Title = 16974100; // 0x1030114
-    field public static final int TextAppearance_Holo_Widget_ActionMode_Title_Inverse = 16974111; // 0x103011f
+    field public static final int TextAppearance_Holo_Widget_ActionMode_Title_Inverse = 16974110; // 0x103011e
     field public static final int TextAppearance_Holo_Widget_Button = 16974086; // 0x1030106
     field public static final int TextAppearance_Holo_Widget_DropDownHint = 16974091; // 0x103010b
     field public static final int TextAppearance_Holo_Widget_DropDownItem = 16974092; // 0x103010c
@@ -1586,6 +1587,7 @@ package android {
     field public static final int Theme_Holo_Dialog_NoActionBar_MinWidth = 16973938; // 0x1030072
     field public static final int Theme_Holo_InputMethod = 16973951; // 0x103007f
     field public static final int Theme_Holo_Light = 16973934; // 0x103006e
+    field public static final int Theme_Holo_Light_DarkActionBar = 16974105; // 0x1030119
     field public static final int Theme_Holo_Light_Dialog = 16973939; // 0x1030073
     field public static final int Theme_Holo_Light_DialogWhenLarge = 16973945; // 0x1030079
     field public static final int Theme_Holo_Light_DialogWhenLarge_NoActionBar = 16973946; // 0x103007a
@@ -1595,17 +1597,9 @@ package android {
     field public static final int Theme_Holo_Light_NoActionBar = 16974064; // 0x10300f0
     field public static final int Theme_Holo_Light_NoActionBar_Fullscreen = 16974065; // 0x10300f1
     field public static final int Theme_Holo_Light_Panel = 16973948; // 0x103007c
-    field public static final int Theme_Holo_Light_SolidActionBar = 16974122; // 0x103012a
-    field public static final int Theme_Holo_Light_SolidActionBar_Inverse = 16974123; // 0x103012b
-    field public static final int Theme_Holo_Light_SolidActionBar_Inverse_SplitActionBarWhenNarrow = 16974126; // 0x103012e
-    field public static final int Theme_Holo_Light_SolidActionBar_SplitActionBarWhenNarrow = 16974125; // 0x103012d
-    field public static final int Theme_Holo_Light_SplitActionBarWhenNarrow = 16974106; // 0x103011a
     field public static final int Theme_Holo_NoActionBar = 16973932; // 0x103006c
     field public static final int Theme_Holo_NoActionBar_Fullscreen = 16973933; // 0x103006d
     field public static final int Theme_Holo_Panel = 16973947; // 0x103007b
-    field public static final int Theme_Holo_SolidActionBar = 16974121; // 0x1030129
-    field public static final int Theme_Holo_SolidActionBar_SplitActionBarWhenNarrow = 16974124; // 0x103012c
-    field public static final int Theme_Holo_SplitActionBarWhenNarrow = 16974105; // 0x1030119
     field public static final int Theme_Holo_Wallpaper = 16973949; // 0x103007d
     field public static final int Theme_Holo_Wallpaper_NoTitleBar = 16973950; // 0x103007e
     field public static final int Theme_InputMethod = 16973908; // 0x1030054
@@ -1656,7 +1650,7 @@ package android {
     field public static final int Widget_GridView = 16973874; // 0x1030032
     field public static final int Widget_Holo = 16973962; // 0x103008a
     field public static final int Widget_Holo_ActionBar = 16974004; // 0x10300b4
-    field public static final int Widget_Holo_ActionBar_Solid = 16974114; // 0x1030122
+    field public static final int Widget_Holo_ActionBar_Solid = 16974113; // 0x1030121
     field public static final int Widget_Holo_ActionBar_TabBar = 16974071; // 0x10300f7
     field public static final int Widget_Holo_ActionBar_TabText = 16974070; // 0x10300f6
     field public static final int Widget_Holo_ActionBar_TabView = 16974069; // 0x10300f5
@@ -1668,7 +1662,7 @@ package android {
     field public static final int Widget_Holo_AutoCompleteTextView = 16973968; // 0x1030090
     field public static final int Widget_Holo_Button = 16973963; // 0x103008b
     field public static final int Widget_Holo_Button_Borderless = 16974050; // 0x10300e2
-    field public static final int Widget_Holo_Button_Borderless_Small = 16974107; // 0x103011b
+    field public static final int Widget_Holo_Button_Borderless_Small = 16974106; // 0x103011a
     field public static final int Widget_Holo_Button_Inset = 16973965; // 0x103008d
     field public static final int Widget_Holo_Button_Small = 16973964; // 0x103008c
     field public static final int Widget_Holo_Button_Toggle = 16973966; // 0x103008e
@@ -1686,22 +1680,22 @@ package android {
     field public static final int Widget_Holo_ImageButton = 16973974; // 0x1030096
     field public static final int Widget_Holo_Light = 16974005; // 0x10300b5
     field public static final int Widget_Holo_Light_ActionBar = 16974049; // 0x10300e1
-    field public static final int Widget_Holo_Light_ActionBar_Solid = 16974115; // 0x1030123
-    field public static final int Widget_Holo_Light_ActionBar_Solid_Inverse = 16974116; // 0x1030124
+    field public static final int Widget_Holo_Light_ActionBar_Solid = 16974114; // 0x1030122
+    field public static final int Widget_Holo_Light_ActionBar_Solid_Inverse = 16974115; // 0x1030123
     field public static final int Widget_Holo_Light_ActionBar_TabBar = 16974074; // 0x10300fa
-    field public static final int Widget_Holo_Light_ActionBar_TabBar_Inverse = 16974117; // 0x1030125
+    field public static final int Widget_Holo_Light_ActionBar_TabBar_Inverse = 16974116; // 0x1030124
     field public static final int Widget_Holo_Light_ActionBar_TabText = 16974073; // 0x10300f9
-    field public static final int Widget_Holo_Light_ActionBar_TabText_Inverse = 16974119; // 0x1030127
+    field public static final int Widget_Holo_Light_ActionBar_TabText_Inverse = 16974118; // 0x1030126
     field public static final int Widget_Holo_Light_ActionBar_TabView = 16974072; // 0x10300f8
-    field public static final int Widget_Holo_Light_ActionBar_TabView_Inverse = 16974118; // 0x1030126
+    field public static final int Widget_Holo_Light_ActionBar_TabView_Inverse = 16974117; // 0x1030125
     field public static final int Widget_Holo_Light_ActionButton = 16974045; // 0x10300dd
     field public static final int Widget_Holo_Light_ActionButton_CloseMode = 16974048; // 0x10300e0
     field public static final int Widget_Holo_Light_ActionButton_Overflow = 16974046; // 0x10300de
     field public static final int Widget_Holo_Light_ActionMode = 16974047; // 0x10300df
-    field public static final int Widget_Holo_Light_ActionMode_Inverse = 16974120; // 0x1030128
+    field public static final int Widget_Holo_Light_ActionMode_Inverse = 16974119; // 0x1030127
     field public static final int Widget_Holo_Light_AutoCompleteTextView = 16974011; // 0x10300bb
     field public static final int Widget_Holo_Light_Button = 16974006; // 0x10300b6
-    field public static final int Widget_Holo_Light_Button_Borderless_Small = 16974108; // 0x103011c
+    field public static final int Widget_Holo_Light_Button_Borderless_Small = 16974107; // 0x103011b
     field public static final int Widget_Holo_Light_Button_Inset = 16974008; // 0x10300b8
     field public static final int Widget_Holo_Light_Button_Small = 16974007; // 0x10300b7
     field public static final int Widget_Holo_Light_Button_Toggle = 16974009; // 0x10300b9
@@ -5637,6 +5631,7 @@ package android.content.pm {
     field public static final int SCREEN_ORIENTATION_SENSOR_PORTRAIT = 7; // 0x7
     field public static final int SCREEN_ORIENTATION_UNSPECIFIED = -1; // 0xffffffff
     field public static final int SCREEN_ORIENTATION_USER = 2; // 0x2
+    field public static final int UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW = 1; // 0x1
     field public int configChanges;
     field public int flags;
     field public int launchMode;
@@ -5646,6 +5641,7 @@ package android.content.pm {
     field public java.lang.String targetActivity;
     field public java.lang.String taskAffinity;
     field public int theme;
+    field public int uiOptions;
   }
 
   public class ApplicationInfo extends android.content.pm.PackageItemInfo implements android.os.Parcelable {
@@ -5696,6 +5692,7 @@ package android.content.pm {
     field public int targetSdkVersion;
     field public java.lang.String taskAffinity;
     field public int theme;
+    field public int uiOptions;
     field public int uid;
   }
 
@@ -23162,6 +23159,7 @@ package android.view {
     method public abstract void setTitle(java.lang.CharSequence);
     method public abstract void setTitleColor(int);
     method public void setType(int);
+    method public void setUiOptions(int);
     method public abstract void setVolumeControlStream(int);
     method public void setWindowAnimations(int);
     method public void setWindowManager(android.view.WindowManager, android.os.IBinder, java.lang.String);
