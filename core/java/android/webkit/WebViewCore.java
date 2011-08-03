@@ -999,6 +999,7 @@ public final class WebViewCore {
         static final int DUMP_V8COUNTERS = 173;
 
         static final int SET_JS_FLAGS = 174;
+        static final int CONTENT_INVALIDATE_ALL = 175;
         // Geolocation
         static final int GEOLOCATION_PERMISSIONS_PROVIDE = 180;
 
@@ -1501,6 +1502,10 @@ public final class WebViewCore {
 
                         case SET_JS_FLAGS:
                             nativeSetJsFlags((String)msg.obj);
+                            break;
+
+                        case CONTENT_INVALIDATE_ALL:
+                            nativeContentInvalidateAll();
                             break;
 
                         case SAVE_WEBARCHIVE:

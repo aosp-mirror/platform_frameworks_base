@@ -18,15 +18,19 @@ package com.test.tilebenchmark;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.webkit.WebView;
 
 import com.test.tilebenchmark.ProfileActivity.ProfileCallback;
+import com.test.tilebenchmark.RunData.TileData;
 
 public class ProfiledWebView extends WebView {
     private int mSpeed;
 
+    private boolean isTesting = false;
     private boolean isScrolling = false;
     private ProfileCallback mCallback;
+    private long mContentInvalMillis;
 
     public ProfiledWebView(Context context) {
         super(context);
@@ -47,7 +51,7 @@ public class ProfiledWebView extends WebView {
 
     @Override
     protected void onDraw(android.graphics.Canvas canvas) {
-        if (isScrolling) {
+        if (isTesting && isScrolling) {
             if (canScrollVertically(1)) {
                 scrollBy(0, mSpeed);
             } else {
@@ -60,31 +64,53 @@ public class ProfiledWebView extends WebView {
 
     /*
      * Called once the page is loaded to start scrolling for evaluating tiles.
-     * If autoScrolling isn't set, stop must be called manually.
+     * If autoScrolling isn't set, stop must be called manually. Before
+     * scrolling, invalidate all content and redraw it, measuring time taken.
      */
     public void startScrollTest(ProfileCallback callback, boolean autoScrolling) {
         isScrolling = autoScrolling;
         mCallback = callback;
-        tileProfilingStart();
+        isTesting = false;
+        mContentInvalMillis = System.currentTimeMillis();
+        registerPageSwapCallback();
+        contentInvalidateAll();
         invalidate();
+    }
+
+    /*
+     * Called after the manual contentInvalidateAll, after the tiles have all
+     * been redrawn.
+     */
+    @Override
+    protected void pageSwapCallback() {
+        mContentInvalMillis = System.currentTimeMillis() - mContentInvalMillis;
+        super.pageSwapCallback();
+        Log.d("ProfiledWebView", "REDRAW TOOK " + mContentInvalMillis
+                + "millis");
+        isTesting = true;
+        invalidate(); // ensure a redraw so that auto-scrolling can occur
+        tileProfilingStart();
     }
 
     /*
      * Called once the page has stopped scrolling
      */
     public void stopScrollTest() {
-        super.tileProfilingStop();
+        tileProfilingStop();
+        isTesting = false;
 
         if (mCallback == null) {
             tileProfilingClear();
             return;
         }
 
-        TileData data[][] = new TileData[super.tileProfilingNumFrames()][];
-        for (int frame = 0; frame < data.length; frame++) {
-            data[frame] = new TileData[
+        RunData data = new RunData(super.tileProfilingNumFrames());
+        data.singleStats.put(getResources().getString(R.string.render_millis),
+                (double)mContentInvalMillis);
+        for (int frame = 0; frame < data.frames.length; frame++) {
+            data.frames[frame] = new TileData[
                     tileProfilingNumTilesInFrame(frame)];
-            for (int tile = 0; tile < data[frame].length; tile++) {
+            for (int tile = 0; tile < data.frames[frame].length; tile++) {
                 int left = tileProfilingGetInt(frame, tile, "left");
                 int top = tileProfilingGetInt(frame, tile, "top");
                 int right = tileProfilingGetInt(frame, tile, "right");
@@ -96,18 +122,18 @@ public class ProfiledWebView extends WebView {
 
                 float scale = tileProfilingGetFloat(frame, tile, "scale");
 
-                data[frame][tile] = new TileData(left, top, right, bottom,
+                data.frames[frame][tile] = data.new TileData(left, top, right, bottom,
                         isReady, level, scale);
             }
         }
-        super.tileProfilingClear();
+        tileProfilingClear();
 
         mCallback.profileCallback(data);
     }
 
     @Override
     public void loadUrl(String url) {
-        if (!url.startsWith("http://")) {
+        if (!url.startsWith("http://") && !url.startsWith("file://")) {
             url = "http://" + url;
         }
         super.loadUrl(url);

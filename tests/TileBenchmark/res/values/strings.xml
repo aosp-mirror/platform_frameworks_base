@@ -71,8 +71,16 @@
     <string name="frames_per_second">Frames/sec</string>
     <!-- Portion of viewport covered by good tiles [CHAR LIMIT=15] -->
     <string name="viewport_coverage">Coverage</string>
+    <!-- Milliseconds taken to inval, and re-render the page [CHAR LIMIT=15] -->
+    <string name="render_millis">RenderMillis</string>
     <!-- Format string for stat value overlay [CHAR LIMIT=15] -->
     <string name="format_stat">%4.4f</string>
+
+    <!-- Format string for viewport position value overlay [CHAR LIMIT=25] -->
+    <string name="format_view_pos">View:(%1$d,%2$d)-(%3$d,%4$d)</string>
+    <!-- Format string for viewport position value overlay [CHAR LIMIT=25] -->
+    <string name="format_inval_pos">Inval:(%1$d,%2$d)-(%3$d,%4$d)</string>
+
     <!-- Format string for displaying aggregate stats+values (nr of valid tiles,
     etc.) [CHAR LIMIT=20] -->
     <string name="format_stat_name">%1$-20s %2$3d</string>

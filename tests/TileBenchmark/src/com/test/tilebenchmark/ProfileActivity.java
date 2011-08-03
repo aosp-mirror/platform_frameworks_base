@@ -51,11 +51,11 @@ import java.io.ObjectOutputStream;
 public class ProfileActivity extends Activity {
 
     public interface ProfileCallback {
-        public void profileCallback(TileData data[][]);
+        public void profileCallback(RunData data);
     }
 
     public static final String TEMP_FILENAME = "profile.tiles";
-    private static final int LOAD_TEST_DELAY = 2000; // nr of millis after load,
+    private static final int LOAD_TEST_DELAY = 1000; // nr of millis after load,
                                                      // before test
 
     Button mInspectButton;
@@ -135,6 +135,7 @@ public class ProfileActivity extends Activity {
         public void onPageFinished(WebView view, String url) {
             super.onPageFinished(view, url);
             view.requestFocus();
+
             new CountDownTimer(LOAD_TEST_DELAY, LOAD_TEST_DELAY) {
                 @Override
                 public void onTick(long millisUntilFinished) {
@@ -155,10 +156,10 @@ public class ProfileActivity extends Activity {
     }
 
     private class StoreFileTask extends
-            AsyncTask<Pair<String, TileData[][]>, Void, Void> {
+            AsyncTask<Pair<String, RunData>, Void, Void> {
 
         @Override
-        protected Void doInBackground(Pair<String, TileData[][]>... params) {
+        protected Void doInBackground(Pair<String, RunData>... params) {
             try {
                 FileOutputStream fos = openFileOutput(params[0].first,
                         Context.MODE_PRIVATE);
@@ -205,10 +206,8 @@ public class ProfileActivity extends Activity {
 
     /** auto - automatically scroll. */
     private void startViewProfiling(boolean auto) {
-        if (!auto) {
-            // manual, toggle capture button to indicate capture state to user
-            mCaptureButton.setChecked(true);
-        }
+        // toggle capture button to indicate capture state to user
+        mCaptureButton.setChecked(true);
         mWeb.startScrollTest(mCallback, auto);
         setTestingState(TestingState.START_TESTING);
     }
@@ -227,8 +226,8 @@ public class ProfileActivity extends Activity {
         mCallback = new ProfileCallback() {
             @SuppressWarnings("unchecked")
             @Override
-            public void profileCallback(TileData[][] data) {
-                new StoreFileTask().execute(new Pair<String, TileData[][]>(
+            public void profileCallback(RunData data) {
+                new StoreFileTask().execute(new Pair<String, RunData>(
                         TEMP_FILENAME, data));
                 mCaptureButton.setChecked(false);
                 setTestingState(TestingState.STOP_TESTING);
