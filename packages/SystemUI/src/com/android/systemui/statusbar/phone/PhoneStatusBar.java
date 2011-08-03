@@ -505,7 +505,8 @@ public class PhoneStatusBar extends StatusBar {
         lp.gravity = Gravity.TOP | Gravity.FILL_HORIZONTAL;
         lp.y += height * 1.5; // FIXME
         lp.setTitle("IntruderAlert");
-        lp.windowAnimations = com.android.internal.R.style.Animation_StatusBar_IntruderAlert;
+        lp.packageName = mContext.getPackageName();
+        lp.windowAnimations = R.style.Animation_StatusBar_IntruderAlert;
 
         WindowManagerImpl.getDefault().addView(mIntruderAlertView, lp);
     }
