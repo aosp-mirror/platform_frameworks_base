@@ -713,17 +713,23 @@ public abstract class HardwareRenderer {
             // Cancels any existing buffer to ensure we'll get a buffer
             // of the right size before we call eglSwapBuffers
             sEgl.eglMakeCurrent(sEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-            sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
-            mEglSurface = sEgl.eglCreateWindowSurface(sEglDisplay, sEglConfig, holder, null);
+            
+            if (mEglSurface != null && mEglSurface != EGL_NO_SURFACE) {
+                sEgl.eglDestroySurface(sEglDisplay, mEglSurface);
+            }
 
-            if (mEglSurface == null || mEglSurface == EGL_NO_SURFACE) {
-                int error = sEgl.eglGetError();
-                if (error == EGL_BAD_NATIVE_WINDOW) {
-                    Log.e(LOG_TAG, "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
-                    return;
+            if (holder.getSurface().isValid()) {
+                mEglSurface = sEgl.eglCreateWindowSurface(sEglDisplay, sEglConfig, holder, null);
+    
+                if (mEglSurface == null || mEglSurface == EGL_NO_SURFACE) {
+                    int error = sEgl.eglGetError();
+                    if (error == EGL_BAD_NATIVE_WINDOW) {
+                        Log.e(LOG_TAG, "createWindowSurface returned EGL_BAD_NATIVE_WINDOW.");
+                        return;
+                    }
+                    throw new RuntimeException("createWindowSurface failed "
+                            + getEGLErrorString(error));
                 }
-                throw new RuntimeException("createWindowSurface failed "
-                        + getEGLErrorString(error));
             }
         }
 
