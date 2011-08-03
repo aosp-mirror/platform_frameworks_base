@@ -24134,7 +24134,7 @@ package android.view.textservice {
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final int RESULT_ATTR_IN_THE_DICTIONARY = 1; // 0x1
-    field public static final int RESULT_ATTR_LOOKS_TYPO = 2; // 0x2
+    field public static final int RESULT_ATTR_LOOKS_LIKE_TYPO = 2; // 0x2
   }
 
   public final class TextInfo implements android.os.Parcelable {
