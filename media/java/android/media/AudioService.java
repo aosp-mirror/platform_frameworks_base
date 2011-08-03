@@ -55,6 +55,7 @@ import com.android.internal.telephony.ITelephony;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -113,6 +114,8 @@ public class AudioService extends IAudioService.Stub {
     private static final int MSG_SET_FORCE_USE = 10;
     private static final int MSG_PERSIST_MEDIABUTTONRECEIVER = 11;
     private static final int MSG_BT_HEADSET_CNCT_FAILED = 12;
+    private static final int MSG_RCDISPLAY_CLEAR = 13;
+    private static final int MSG_RCDISPLAY_UPDATE = 14;
 
     private static final int BTA2DP_DOCK_TIMEOUT_MILLIS = 8000;
     // Timeout for connection to bluetooth headset service
@@ -371,7 +374,9 @@ public class AudioService extends IAudioService.Stub {
 
         // Register for media button intent broadcasts.
         intentFilter = new IntentFilter(Intent.ACTION_MEDIA_BUTTON);
-        intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        // Workaround for bug on priority setting
+        //intentFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
+        intentFilter.setPriority(Integer.MAX_VALUE);
         context.registerReceiver(mMediaButtonReceiver, intentFilter);
 
         // Register for phone state monitoring
@@ -885,7 +890,8 @@ public class AudioService extends IAudioService.Stub {
                 requestAudioFocus(AudioManager.STREAM_RING,
                         AudioManager.AUDIOFOCUS_GAIN_TRANSIENT, cb,
                         null /* IAudioFocusDispatcher allowed to be null only for this clientId */,
-                        IN_VOICE_COMM_FOCUS_ID /*clientId*/);
+                        IN_VOICE_COMM_FOCUS_ID /*clientId*/,
+                        "system");
 
             }
         }
@@ -897,7 +903,8 @@ public class AudioService extends IAudioService.Stub {
             requestAudioFocus(AudioManager.STREAM_RING,
                     AudioManager.AUDIOFOCUS_GAIN_TRANSIENT, cb,
                     null /* IAudioFocusDispatcher allowed to be null only for this clientId */,
-                    IN_VOICE_COMM_FOCUS_ID /*clientId*/);
+                    IN_VOICE_COMM_FOCUS_ID /*clientId*/,
+                    "system");
         }
         // if exiting call
         else if (newMode == AudioSystem.MODE_NORMAL) {
@@ -2155,6 +2162,33 @@ public class AudioService extends IAudioService.Stub {
                     persistMediaButtonReceiver( (ComponentName) msg.obj );
                     break;
 
+                case MSG_RCDISPLAY_CLEAR:
+                    Log.i(TAG, "Clear remote control display");
+                    Intent clearIntent = new Intent(AudioManager.REMOTE_CONTROL_CLIENT_CHANGED);
+                    // no extra means no IRemoteControlClient, which is a request to clear
+                    clearIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    mContext.sendBroadcast(clearIntent);
+                    break;
+
+                case MSG_RCDISPLAY_UPDATE:
+                    synchronized(mCurrentRcLock) {
+                        if (mCurrentRcClientRef.get() == null) {
+                            // the remote control display owner has changed between the
+                            // the message to update the display was sent, and the time it
+                            // gets to be processed (now)
+                        } else {
+                            mCurrentRcClientGen++;
+                            Log.i(TAG, "Display/update remote control ");
+                            Intent rcClientIntent = new Intent(
+                                    AudioManager.REMOTE_CONTROL_CLIENT_CHANGED);
+                            rcClientIntent.putExtra(AudioManager.EXTRA_REMOTE_CONTROL_CLIENT,
+                                    mCurrentRcClientGen);
+                            rcClientIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                            mContext.sendBroadcast(rcClientIntent);
+                        }
+                    }
+                    break;
+
                 case MSG_BT_HEADSET_CNCT_FAILED:
                     resetBluetoothSco();
                     break;
@@ -2567,23 +2601,25 @@ public class AudioService extends IAudioService.Stub {
 
     private static class FocusStackEntry {
         public int mStreamType = -1;// no stream type
-        public boolean mIsTransportControlReceiver = false;
         public IAudioFocusDispatcher mFocusDispatcher = null;
         public IBinder mSourceRef = null;
         public String mClientId;
         public int mFocusChangeType;
+        public String mPackageName;
+        public int mCallingUid;
 
         public FocusStackEntry() {
         }
 
-        public FocusStackEntry(int streamType, int duration, boolean isTransportControlReceiver,
-                IAudioFocusDispatcher afl, IBinder source, String id) {
+        public FocusStackEntry(int streamType, int duration,
+                IAudioFocusDispatcher afl, IBinder source, String id, String pn, int uid) {
             mStreamType = streamType;
-            mIsTransportControlReceiver = isTransportControlReceiver;
             mFocusDispatcher = afl;
             mSourceRef = source;
             mClientId = id;
             mFocusChangeType = duration;
+            mPackageName = pn;
+            mCallingUid = uid;
         }
     }
 
@@ -2600,13 +2636,15 @@ public class AudioService extends IAudioService.Stub {
             while(stackIterator.hasNext()) {
                 FocusStackEntry fse = stackIterator.next();
                 pw.println("     source:" + fse.mSourceRef + " -- client: " + fse.mClientId
-                        + " -- duration: " +fse.mFocusChangeType);
+                        + " -- duration: " + fse.mFocusChangeType
+                        + " -- uid: " + fse.mCallingUid);
             }
         }
     }
 
     /**
      * Helper function:
+     * Called synchronized on mAudioFocusLock
      * Remove a focus listener from the focus stack.
      * @param focusListenerToRemove the focus listener
      * @param signal if true and the listener was at the top of the focus stack, i.e. it was holding
@@ -2621,6 +2659,10 @@ public class AudioService extends IAudioService.Stub {
             if (signal) {
                 // notify the new top of the stack it gained focus
                 notifyTopOfAudioFocusStack();
+                // there's a new top of the stack, let the remote control know
+                synchronized(mRCStack) {
+                    checkUpdateRemoteControlDisplay();
+                }
             }
         } else {
             // focus is abandoned by a client that's not at the top of the stack,
@@ -2639,6 +2681,7 @@ public class AudioService extends IAudioService.Stub {
 
     /**
      * Helper function:
+     * Called synchronized on mAudioFocusLock
      * Remove focus listeners from the focus stack for a particular client.
      */
     private void removeFocusStackEntryForClient(IBinder cb) {
@@ -2658,6 +2701,10 @@ public class AudioService extends IAudioService.Stub {
             // we removed an entry at the top of the stack:
             //  notify the new top of the stack it gained focus.
             notifyTopOfAudioFocusStack();
+            // there's a new top of the stack, let the remote control know
+            synchronized(mRCStack) {
+                checkUpdateRemoteControlDisplay();
+            }
         }
     }
 
@@ -2700,7 +2747,7 @@ public class AudioService extends IAudioService.Stub {
 
     /** @see AudioManager#requestAudioFocus(IAudioFocusDispatcher, int, int) */
     public int requestAudioFocus(int mainStreamType, int focusChangeHint, IBinder cb,
-            IAudioFocusDispatcher fd, String clientId) {
+            IAudioFocusDispatcher fd, String clientId, String callingPackageName) {
         Log.i(TAG, " AudioFocus  requestAudioFocus() from " + clientId);
         // the main stream type for the audio focus request is currently not used. It may
         // potentially be used to handle multiple stream type-dependent audio focuses.
@@ -2743,8 +2790,13 @@ public class AudioService extends IAudioService.Stub {
             removeFocusStackEntry(clientId, false);
 
             // push focus requester at the top of the audio focus stack
-            mFocusStack.push(new FocusStackEntry(mainStreamType, focusChangeHint, false, fd, cb,
-                    clientId));
+            mFocusStack.push(new FocusStackEntry(mainStreamType, focusChangeHint, fd, cb,
+                    clientId, callingPackageName, Binder.getCallingUid()));
+
+            // there's a new top of the stack, let the remote control know
+            synchronized(mRCStack) {
+                checkUpdateRemoteControlDisplay();
+            }
         }//synchronized(mAudioFocusLock)
 
         // handle the potential premature death of the new holder of the focus
@@ -2831,19 +2883,100 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    private static class RemoteControlStackEntry {
-        public ComponentName mReceiverComponent;// always non null
-        // TODO implement registration expiration?
-        //public int mRegistrationTime;
+    private final static Object mCurrentRcLock = new Object();
+    /**
+     * The one remote control client to be polled for display information.
+     * This object is never null, but its reference might.
+     * Access protected by mCurrentRcLock.
+     */
+    private static SoftReference<IRemoteControlClient> mCurrentRcClientRef =
+            new SoftReference<IRemoteControlClient>(null);
 
-        public RemoteControlStackEntry() {
-        }
+    /**
+     * A monotonically increasing generation counter for mCurrentRcClientRef.
+     * Only accessed with a lock on mCurrentRcLock.
+     */
+    private static int mCurrentRcClientGen = 0;
 
-        public RemoteControlStackEntry(ComponentName r) {
-            mReceiverComponent = r;
+    /**
+     * Returns the current remote control client.
+     * @param rcClientId the counter value that matches the extra
+     *     {@link AudioManager#EXTRA_REMOTE_CONTROL_CLIENT} in the
+     *     {@link AudioManager#REMOTE_CONTROL_CLIENT_CHANGED} event
+     * @return the current IRemoteControlClient from which information to display on the remote
+     *     control can be retrieved, or null if rcClientId doesn't match the current generation
+     *     counter.
+     */
+    public static IRemoteControlClient getRemoteControlClient(int rcClientId) {
+        synchronized(mCurrentRcLock) {
+            if (rcClientId == mCurrentRcClientGen) {
+                return mCurrentRcClientRef.get();
+            } else {
+                return null;
+            }
         }
     }
 
+    /**
+     * Inner class to monitor remote control client deaths, and remove the client for the
+     * remote control stack if necessary.
+     */
+    private class RcClientDeathHandler implements IBinder.DeathRecipient {
+        private IBinder mCb; // To be notified of client's death
+        private ComponentName mRcEventReceiver;
+
+        RcClientDeathHandler(IBinder cb, ComponentName eventReceiver) {
+            mCb = cb;
+            mRcEventReceiver = eventReceiver;
+        }
+
+        public void binderDied() {
+            Log.w(TAG, "  RemoteControlClient died");
+            // remote control client died, make sure the displays don't use it anymore
+            //  by setting its remote control client to null
+            registerRemoteControlClient(mRcEventReceiver, null, null/*ignored*/);
+        }
+
+        public IBinder getBinder() {
+            return mCb;
+        }
+    }
+
+    private static class RemoteControlStackEntry {
+        /** the target for the ACTION_MEDIA_BUTTON events */
+        public ComponentName mReceiverComponent;// always non null
+        public String mCallingPackageName;
+        public int mCallingUid;
+
+        /** provides access to the information to display on the remote control */
+        public SoftReference<IRemoteControlClient> mRcClientRef;
+        public RcClientDeathHandler mRcClientDeathHandler;
+
+        public RemoteControlStackEntry(ComponentName r) {
+            mReceiverComponent = r;
+            mCallingUid = -1;
+            mRcClientRef = new SoftReference<IRemoteControlClient>(null);
+        }
+
+        public void unlinkToRcClientDeath() {
+            if ((mRcClientDeathHandler != null) && (mRcClientDeathHandler.mCb != null)) {
+                try {
+                    mRcClientDeathHandler.mCb.unlinkToDeath(mRcClientDeathHandler, 0);
+                } catch (java.util.NoSuchElementException e) {
+                    // not much we can do here
+                    Log.e(TAG, "Encountered " + e + " in unlinkToRcClientDeath()");
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     *  The stack of remote control event receivers.
+     *  Code sections and methods that modify the remote control event receiver stack are
+     *  synchronized on mRCStack, but also BEFORE on mFocusLock as any change in either
+     *  stack, audio focus or RC, can lead to a change in the remote control display
+     */
     private Stack<RemoteControlStackEntry> mRCStack = new Stack<RemoteControlStackEntry>();
 
     /**
@@ -2855,8 +2988,10 @@ public class AudioService extends IAudioService.Stub {
         synchronized(mRCStack) {
             Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
             while(stackIterator.hasNext()) {
-                RemoteControlStackEntry fse = stackIterator.next();
-                pw.println("     receiver:" + fse.mReceiverComponent);
+                RemoteControlStackEntry rcse = stackIterator.next();
+                pw.println("     receiver: " + rcse.mReceiverComponent +
+                        "  -- client: " + rcse.mRcClientRef.get() +
+                        "  -- uid: " + rcse.mCallingUid);
             }
         }
     }
@@ -2909,6 +3044,7 @@ public class AudioService extends IAudioService.Stub {
             ComponentName receiverComponentName = ComponentName.unflattenFromString(receiverName);
             registerMediaButtonEventReceiver(receiverComponentName);
         }
+        // upon restoring (e.g. after boot), do we want to refresh all remotes?
     }
 
     /**
@@ -2921,14 +3057,20 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
         Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+        RemoteControlStackEntry rcse = null;
+        boolean wasInsideStack = false;
         while(stackIterator.hasNext()) {
-            RemoteControlStackEntry rcse = (RemoteControlStackEntry)stackIterator.next();
+            rcse = (RemoteControlStackEntry)stackIterator.next();
             if(rcse.mReceiverComponent.equals(newReceiver)) {
+                wasInsideStack = true;
                 stackIterator.remove();
                 break;
             }
         }
-        mRCStack.push(new RemoteControlStackEntry(newReceiver));
+        if (!wasInsideStack) {
+            rcse = new RemoteControlStackEntry(newReceiver);
+        }
+        mRCStack.push(rcse);
 
         // post message to persist the default media button receiver
         mAudioHandler.sendMessage( mAudioHandler.obtainMessage(
@@ -2950,13 +3092,88 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
+    /**
+     * Helper function:
+     * Called synchronized on mRCStack
+     */
+    private boolean isCurrentRcController(ComponentName eventReceiver) {
+        if (!mRCStack.empty() && mRCStack.peek().mReceiverComponent.equals(eventReceiver)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Helper function:
+     * Called synchronized on mRCStack
+     */
+    private void clearRemoteControlDisplay() {
+        synchronized(mCurrentRcLock) {
+            mCurrentRcClientRef.clear();
+        }
+        mAudioHandler.sendMessage( mAudioHandler.obtainMessage(MSG_RCDISPLAY_CLEAR) );
+    }
+
+    /**
+     * Helper function:
+     * Called synchronized on mRCStack
+     * mRCStack.empty() is false
+     */
+    private void updateRemoteControlDisplay() {
+        RemoteControlStackEntry rcse = mRCStack.peek();
+        // this is where we enforce opt-in for information display on the remote controls
+        //   with the new AudioManager.registerRemoteControlClient() API
+        if (rcse.mRcClientRef.get() == null) {
+            // FIXME remove log before release: this warning will be displayed for every AF change
+            Log.w(TAG, "Can't update remote control display with null remote control client");
+            clearRemoteControlDisplay();
+            return;
+        }
+        synchronized(mCurrentRcLock) {
+            mCurrentRcClientRef = rcse.mRcClientRef;
+        }
+        mAudioHandler.sendMessage( mAudioHandler.obtainMessage(MSG_RCDISPLAY_UPDATE, 0, 0, rcse) );
+    }
+
+    /**
+     * Helper function:
+     * Called synchronized on mFocusLock, then mRCStack
+     * Check whether the remote control display should be updated, triggers the update if required
+     */
+    private void checkUpdateRemoteControlDisplay() {
+        // determine whether the remote control display should be refreshed
+        // if either stack is empty, there is a mismatch, so clear the RC display
+        if (mRCStack.isEmpty() || mFocusStack.isEmpty()) {
+            clearRemoteControlDisplay();
+            return;
+        }
+        // if the top of the two stacks belong to different packages, there is a mismatch, clear
+        if ((mRCStack.peek().mCallingPackageName != null)
+                && (mFocusStack.peek().mPackageName != null)
+                && !(mRCStack.peek().mCallingPackageName.compareTo(
+                        mFocusStack.peek().mPackageName) == 0)) {
+            clearRemoteControlDisplay();
+            return;
+        }
+        // if the audio focus didn't originate from the same Uid as the one in which the remote
+        //   control information will be retrieved, clear
+        if (mRCStack.peek().mCallingUid != mFocusStack.peek().mCallingUid) {
+            clearRemoteControlDisplay();
+            return;
+        }
+        // refresh conditions were verified: update the remote controls
+        updateRemoteControlDisplay();
+    }
 
     /** see AudioManager.registerMediaButtonEventReceiver(ComponentName eventReceiver) */
     public void registerMediaButtonEventReceiver(ComponentName eventReceiver) {
         Log.i(TAG, "  Remote Control   registerMediaButtonEventReceiver() for " + eventReceiver);
 
-        synchronized(mRCStack) {
-            pushMediaButtonReceiver(eventReceiver);
+        synchronized(mAudioFocusLock) {
+            synchronized(mRCStack) {
+                pushMediaButtonReceiver(eventReceiver);
+                checkUpdateRemoteControlDisplay();
+            }
         }
     }
 
@@ -2964,11 +3181,74 @@ public class AudioService extends IAudioService.Stub {
     public void unregisterMediaButtonEventReceiver(ComponentName eventReceiver) {
         Log.i(TAG, "  Remote Control   unregisterMediaButtonEventReceiver() for " + eventReceiver);
 
-        synchronized(mRCStack) {
-            removeMediaButtonReceiver(eventReceiver);
+        synchronized(mAudioFocusLock) {
+            synchronized(mRCStack) {
+                boolean topOfStackWillChange = isCurrentRcController(eventReceiver);
+                removeMediaButtonReceiver(eventReceiver);
+                if (topOfStackWillChange) {
+                    checkUpdateRemoteControlDisplay();
+                }
+            }
         }
     }
 
+    /** see AudioManager.registerRemoteControlClient(ComponentName eventReceiver, ...) */
+    public void registerRemoteControlClient(ComponentName eventReceiver,
+            IRemoteControlClient rcClient, String callingPackageName) {
+        synchronized(mAudioFocusLock) {
+            synchronized(mRCStack) {
+                // store the new display information
+                Iterator<RemoteControlStackEntry> stackIterator = mRCStack.iterator();
+                while(stackIterator.hasNext()) {
+                    RemoteControlStackEntry rcse = stackIterator.next();
+                    if(rcse.mReceiverComponent.equals(eventReceiver)) {
+                        // already had a remote control client?
+                        if (rcse.mRcClientDeathHandler != null) {
+                            // stop monitoring the old client's death
+                            rcse.unlinkToRcClientDeath();
+                        }
+                        // save the new remote control client
+                        rcse.mRcClientRef = new SoftReference<IRemoteControlClient>(rcClient);
+                        rcse.mCallingPackageName = callingPackageName;
+                        rcse.mCallingUid = Binder.getCallingUid();
+                        if (rcClient == null) {
+                            break;
+                        }
+                        // monitor the new client's death
+                        IBinder b = rcClient.asBinder();
+                        RcClientDeathHandler rcdh =
+                                new RcClientDeathHandler(b, rcse.mReceiverComponent);
+                        try {
+                            b.linkToDeath(rcdh, 0);
+                        } catch (RemoteException e) {
+                            // remote control client is DOA, disqualify it
+                            Log.w(TAG, "registerRemoteControlClient() has a dead client " + b);
+                            rcse.mRcClientRef.clear();
+                        }
+                        rcse.mRcClientDeathHandler = rcdh;
+                        break;
+                    }
+                }
+                // if the eventReceiver is at the top of the stack
+                // then check for potential refresh of the remote controls
+                if (isCurrentRcController(eventReceiver)) {
+                    checkUpdateRemoteControlDisplay();
+                }
+            }
+        }
+    }
+
+    /** see AudioManager.refreshRemoteControlDisplay(ComponentName er) */
+    public void refreshRemoteControlDisplay(ComponentName eventReceiver) {
+        synchronized(mAudioFocusLock) {
+            synchronized(mRCStack) {
+                // only refresh if the eventReceiver is at the top of the stack
+                if (isCurrentRcController(eventReceiver)) {
+                    checkUpdateRemoteControlDisplay();
+                }
+            }
+        }
+    }
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {

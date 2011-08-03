@@ -18,6 +18,9 @@ package android.media;
 
 import android.content.ComponentName;
 import android.media.IAudioFocusDispatcher;
+import android.media.IRemoteControlClient;
+import android.net.Uri;
+import android.os.Bundle;
 
 /**
  * {@hide}
@@ -77,7 +80,7 @@ interface IAudioService {
     boolean isBluetoothScoOn();
 
     int requestAudioFocus(int mainStreamType, int durationHint, IBinder cb, IAudioFocusDispatcher l,
-            String clientId);
+            String clientId, String callingPackageName);
 
     int abandonAudioFocus(IAudioFocusDispatcher l, String clientId);
     
@@ -86,6 +89,11 @@ interface IAudioService {
     void registerMediaButtonEventReceiver(in ComponentName eventReceiver);
 
     void unregisterMediaButtonEventReceiver(in ComponentName eventReceiver);
+
+    void registerRemoteControlClient(in ComponentName eventReceiver,
+           in IRemoteControlClient rcClient, in String callingPackageName);
+
+    void refreshRemoteControlDisplay(in ComponentName eventReceiver);
 
     void startBluetoothSco(IBinder cb);
 
