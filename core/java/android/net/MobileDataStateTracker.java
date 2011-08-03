@@ -119,22 +119,22 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             switch (msg.what) {
                 case AsyncChannel.CMD_CHANNEL_HALF_CONNECTED:
                     if (msg.arg1 == AsyncChannel.STATUS_SUCCESSFUL) {
-                        if (DBG) {
+                        if (VDBG) {
                             mMdst.log("MdstHandler connected");
                         }
                         mMdst.mDataConnectionTrackerAc = (AsyncChannel) msg.obj;
                     } else {
-                        if (DBG) {
+                        if (VDBG) {
                             mMdst.log("MdstHandler %s NOT connected error=" + msg.arg1);
                         }
                     }
                     break;
                 case AsyncChannel.CMD_CHANNEL_DISCONNECTED:
-                    mMdst.log("Disconnected from DataStateTracker");
+                    if (VDBG) mMdst.log("Disconnected from DataStateTracker");
                     mMdst.mDataConnectionTrackerAc = null;
                     break;
                 default: {
-                    mMdst.log("Ignorning unknown message=" + msg);
+                    if (VDBG) mMdst.log("Ignorning unknown message=" + msg);
                     break;
                 }
             }
@@ -221,13 +221,13 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                             mLinkProperties = intent.getParcelableExtra(
                                     Phone.DATA_LINK_PROPERTIES_KEY);
                             if (mLinkProperties == null) {
-                                log("CONNECTED event did not supply link properties.");
+                                loge("CONNECTED event did not supply link properties.");
                                 mLinkProperties = new LinkProperties();
                             }
                             mLinkCapabilities = intent.getParcelableExtra(
                                     Phone.DATA_LINK_CAPABILITIES_KEY);
                             if (mLinkCapabilities == null) {
-                                log("CONNECTED event did not supply link capabilities.");
+                                loge("CONNECTED event did not supply link capabilities.");
                                 mLinkCapabilities = new LinkCapabilities();
                             }
                             setDetailedState(DetailedState.CONNECTED, reason, apnName);
@@ -238,7 +238,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                     if (TextUtils.equals(reason, Phone.REASON_LINK_PROPERTIES_CHANGED)) {
                         mLinkProperties = intent.getParcelableExtra(Phone.DATA_LINK_PROPERTIES_KEY);
                         if (mLinkProperties == null) {
-                            log("No link property in LINK_PROPERTIES change event.");
+                            loge("No link property in LINK_PROPERTIES change event.");
                             mLinkProperties = new LinkProperties();
                         }
                         // Just update reason field in this NetworkInfo
@@ -269,7 +269,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
                 setDetailedState(DetailedState.FAILED, reason, apnName);
             } else if (intent.getAction().
                     equals(DataConnectionTracker.ACTION_DATA_CONNECTION_TRACKER_MESSENGER)) {
-                if (DBG) log(mApnType + " got ACTION_DATA_CONNECTION_TRACKER_MESSENGER");
+                if (VDBG) log(mApnType + " got ACTION_DATA_CONNECTION_TRACKER_MESSENGER");
                 mMessenger = intent.getParcelableExtra(DataConnectionTracker.EXTRA_MESSENGER);
                 AsyncChannel ac = new AsyncChannel();
                 ac.connect(mContext, MobileDataStateTracker.this.mHandler, mMessenger);
@@ -437,7 +437,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
          */
         for (int retry = 0; retry < 2; retry++) {
             if (mPhoneService == null) {
-                log("Ignoring mobile radio request because could not acquire PhoneService");
+                loge("Ignoring mobile radio request because could not acquire PhoneService");
                 break;
             }
 
@@ -448,7 +448,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             }
         }
 
-        log("Could not set radio power to " + (turnOn ? "on" : "off"));
+        loge("Could not set radio power to " + (turnOn ? "on" : "off"));
         return false;
     }
 
@@ -457,12 +457,12 @@ public class MobileDataStateTracker implements NetworkStateTracker {
      */
     public void setDataEnable(boolean enabled) {
         try {
-            log("setDataEnable: E enabled=" + enabled);
+            if (DBG) log("setDataEnable: E enabled=" + enabled);
             mDataConnectionTrackerAc.sendMessage(DataConnectionTracker.CMD_SET_DATA_ENABLE,
                     enabled ? DataConnectionTracker.ENABLED : DataConnectionTracker.DISABLED);
-            log("setDataEnable: X enabled=" + enabled);
+            if (VDBG) log("setDataEnable: X enabled=" + enabled);
         } catch (Exception e) {
-            log("setDataEnable: X mAc was null" + e);
+            loge("setDataEnable: X mAc was null" + e);
         }
     }
 
@@ -473,15 +473,15 @@ public class MobileDataStateTracker implements NetworkStateTracker {
     public void setDependencyMet(boolean met) {
         Bundle bundle = Bundle.forPair(DataConnectionTracker.APN_TYPE_KEY, mApnType);
         try {
-            log("setDependencyMet: E met=" + met);
+            if (DBG) log("setDependencyMet: E met=" + met);
             Message msg = Message.obtain();
             msg.what = DataConnectionTracker.CMD_SET_DEPENDENCY_MET;
             msg.arg1 = (met ? DataConnectionTracker.ENABLED : DataConnectionTracker.DISABLED);
             msg.setData(bundle);
             mDataConnectionTrackerAc.sendMessage(msg);
-            log("setDependencyMet: X met=" + met);
+            if (VDBG) log("setDependencyMet: X met=" + met);
         } catch (NullPointerException e) {
-            log("setDependencyMet: X mAc was null" + e);
+            loge("setDependencyMet: X mAc was null" + e);
         }
     }
 
@@ -508,7 +508,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
          */
         for (int retry = 0; retry < 2; retry++) {
             if (mPhoneService == null) {
-                log("Ignoring feature request because could not acquire PhoneService");
+                loge("Ignoring feature request because could not acquire PhoneService");
                 break;
             }
 
@@ -523,7 +523,7 @@ public class MobileDataStateTracker implements NetworkStateTracker {
             }
         }
 
-        log("Could not " + (enable ? "enable" : "disable") + " APN type \"" + apnType + "\"");
+        loge("Could not " + (enable ? "enable" : "disable") + " APN type \"" + apnType + "\"");
         return Phone.APN_REQUEST_FAILED;
     }
 
