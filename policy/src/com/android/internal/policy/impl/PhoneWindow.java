@@ -552,6 +552,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (!st.shownPanelView.hasFocus()) {
                 st.shownPanelView.requestFocus();
             }
+        } else if (!st.isInExpandedMode) {
+            width = MATCH_PARENT;
         }
 
         st.isOpen = true;
