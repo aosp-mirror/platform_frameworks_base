@@ -182,9 +182,6 @@ audio_policy_dev_state_t AudioPolicyService::getDeviceConnectionState(
     if (mpAudioPolicy == NULL) {
         return AUDIO_POLICY_DEVICE_STATE_UNAVAILABLE;
     }
-    if (!checkPermission()) {
-        return AUDIO_POLICY_DEVICE_STATE_UNAVAILABLE;
-    }
     return mpAudioPolicy->get_device_connection_state(mpAudioPolicy, device,
                                                       device_address);
 }
@@ -248,9 +245,6 @@ status_t AudioPolicyService::setForceUse(audio_policy_force_use_t usage,
 audio_policy_forced_cfg_t AudioPolicyService::getForceUse(audio_policy_force_use_t usage)
 {
     if (mpAudioPolicy == NULL) {
-        return AUDIO_POLICY_FORCE_NONE;
-    }
-    if (!checkPermission()) {
         return AUDIO_POLICY_FORCE_NONE;
     }
     if (usage < 0 || usage >= AUDIO_POLICY_FORCE_USE_CNT) {
@@ -433,9 +427,6 @@ status_t AudioPolicyService::getStreamVolumeIndex(audio_stream_type_t stream, in
 {
     if (mpAudioPolicy == NULL) {
         return NO_INIT;
-    }
-    if (!checkPermission()) {
-        return PERMISSION_DENIED;
     }
     if (stream < 0 || stream >= AUDIO_STREAM_CNT) {
         return BAD_VALUE;
