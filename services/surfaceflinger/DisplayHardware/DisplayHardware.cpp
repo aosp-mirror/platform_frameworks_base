@@ -40,6 +40,7 @@
 
 #include "GLExtensions.h"
 #include "HWComposer.h"
+#include "SurfaceFlinger.h"
 
 using namespace android;
 
@@ -75,7 +76,7 @@ DisplayHardware::DisplayHardware(
         const sp<SurfaceFlinger>& flinger,
         uint32_t dpy)
     : DisplayHardwareBase(flinger, dpy),
-      mFlags(0), mHwc(0)
+      mFlinger(flinger), mFlags(0), mHwc(0)
 {
     init(dpy);
 }
@@ -310,7 +311,7 @@ void DisplayHardware::init(uint32_t dpy)
 
 
     // initialize the H/W composer
-    mHwc = new HWComposer();
+    mHwc = new HWComposer(mFlinger);
     if (mHwc->initCheck() == NO_ERROR) {
         mHwc->setFrameBuffer(mDisplay, mSurface);
     }

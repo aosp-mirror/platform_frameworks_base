@@ -95,6 +95,7 @@ private:
     void init(uint32_t displayIndex) __attribute__((noinline));
     void fini() __attribute__((noinline));
 
+    sp<SurfaceFlinger> mFlinger;
     EGLDisplay      mDisplay;
     EGLSurface      mSurface;
     EGLContext      mContext;

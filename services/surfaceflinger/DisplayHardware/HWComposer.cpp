@@ -30,12 +30,14 @@
 #include <EGL/egl.h>
 
 #include "HWComposer.h"
+#include "SurfaceFlinger.h"
 
 namespace android {
 // ---------------------------------------------------------------------------
 
-HWComposer::HWComposer()
-    : mModule(0), mHwc(0), mList(0), mCapacity(0),
+HWComposer::HWComposer(const sp<SurfaceFlinger>& flinger)
+    : mFlinger(flinger),
+      mModule(0), mHwc(0), mList(0), mCapacity(0),
       mDpy(EGL_NO_DISPLAY), mSur(EGL_NO_SURFACE)
 {
     int err = hw_get_module(HWC_HARDWARE_MODULE_ID, &mModule);
@@ -44,6 +46,13 @@ HWComposer::HWComposer()
         err = hwc_open(mModule, &mHwc);
         LOGE_IF(err, "%s device failed to initialize (%s)",
                 HWC_HARDWARE_COMPOSER, strerror(-err));
+        if (err == 0) {
+            if (mHwc->registerProcs) {
+                mCBContext.hwc = this;
+                mCBContext.procs.invalidate = &hook_invalidate;
+                mHwc->registerProcs(mHwc, &mCBContext.procs);
+            }
+        }
     }
 }
 
@@ -56,6 +65,14 @@ HWComposer::~HWComposer() {
 
 status_t HWComposer::initCheck() const {
     return mHwc ? NO_ERROR : NO_INIT;
+}
+
+void HWComposer::hook_invalidate(struct hwc_procs* procs) {
+    reinterpret_cast<cb_context *>(procs)->hwc->invalidate();
+}
+
+void HWComposer::invalidate() {
+    mFlinger->signalEvent();
 }
 
 void HWComposer::setFrameBuffer(EGLDisplay dpy, EGLSurface sur) {
