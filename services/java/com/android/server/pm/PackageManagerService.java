@@ -5025,16 +5025,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
 
                 int loc = pkgLite.recommendedInstallLocation;
-                if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION){
+                if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION) {
                     ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
-                } else if (loc == PackageHelper.RECOMMEND_FAILED_ALREADY_EXISTS){
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_ALREADY_EXISTS) {
                     ret = PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
-                } else if (loc == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE){
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
                     ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
                 } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_APK) {
                     ret = PackageManager.INSTALL_FAILED_INVALID_APK;
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
+                    ret = PackageManager.INSTALL_FAILED_INVALID_URI;
                 } else if (loc == PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE) {
-                  ret = PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
+                    ret = PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
                 } else {
                     // Override with defaults if needed.
                     loc = installLocationPolicy(pkgLite, flags);

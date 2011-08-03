@@ -598,7 +598,12 @@ public class PackageParser {
             assmgr = new AssetManager();
             assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                     Build.VERSION.RESOURCES_SDK_INT);
+
             int cookie = assmgr.addAssetPath(packageFilePath);
+            if (cookie == 0) {
+                return null;
+            }
+
             parser = assmgr.openXmlResourceParser(cookie, "AndroidManifest.xml");
         } catch (Exception e) {
             if (assmgr != null) assmgr.close();
