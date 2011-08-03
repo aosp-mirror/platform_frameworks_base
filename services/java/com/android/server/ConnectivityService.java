@@ -40,6 +40,7 @@ import android.net.MobileDataStateTracker;
 import android.net.NetworkConfig;
 import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
 import android.net.NetworkStateTracker;
 import android.net.NetworkUtils;
@@ -735,6 +736,30 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         return result.toArray(new NetworkState[result.size()]);
+    }
+
+    private NetworkState getNetworkStateUnchecked(int networkType) {
+        if (isNetworkTypeValid(networkType)) {
+            final NetworkStateTracker tracker = mNetTrackers[networkType];
+            if (tracker != null) {
+                return new NetworkState(tracker.getNetworkInfo(), tracker.getLinkProperties(),
+                        tracker.getLinkCapabilities());
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
+        enforceAccessPermission();
+        final NetworkState state = getNetworkStateUnchecked(mActiveDefaultNetwork);
+        if (state != null) {
+            try {
+                return mPolicyManager.getNetworkQuotaInfo(state);
+            } catch (RemoteException e) {
+            }
+        }
+        return null;
     }
 
     public boolean setRadios(boolean turnOn) {
