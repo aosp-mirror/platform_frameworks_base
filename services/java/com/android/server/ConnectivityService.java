@@ -344,7 +344,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mPolicyManager.registerListener(mPolicyListener);
         } catch (RemoteException e) {
             // ouch, no rules updates means some processes may never get network
-            Slog.e(TAG, "unable to register INetworkPolicyListener", e);
+            loge("unable to register INetworkPolicyListener" + e.toString());
         }
 
         final PowerManager powerManager = (PowerManager) context.getSystemService(
@@ -798,9 +798,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
 
         public void expire() {
-            log("ConnectivityService FeatureUser expire(" +
-                    mNetworkType + ", " + mFeature + ", " + mBinder +"), created " +
-                    (System.currentTimeMillis() - mCreateTime) + " mSec ago");
+            if (VDBG) {
+                log("ConnectivityService FeatureUser expire(" +
+                        mNetworkType + ", " + mFeature + ", " + mBinder +"), created " +
+                        (System.currentTimeMillis() - mCreateTime) + " mSec ago");
+            }
             stopUsingNetworkFeature(this, false);
         }
 
@@ -843,7 +845,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if(networkType == ConnectivityManager.TYPE_MOBILE) {
             usedNetworkType = convertFeatureToNetworkType(feature);
             if (usedNetworkType < 0) {
-                Slog.e(TAG, "Can't match any netTracker!");
+                loge("Can't match any netTracker!");
                 usedNetworkType = networkType;
             }
         }
@@ -953,7 +955,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             return stopUsingNetworkFeature(u, true);
         } else {
             // none found!
-            if (DBG) log("ignoring stopUsingNetworkFeature - not a live request");
+            if (VDBG) log("ignoring stopUsingNetworkFeature - not a live request");
             return 1;
         }
     }
@@ -1081,7 +1083,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         if (tracker == null || !tracker.getNetworkInfo().isConnected() ||
                 tracker.isTeardownRequested()) {
-            if (DBG) {
+            if (VDBG) {
                 log("requestRouteToHostAddress on down network " +
                            "(" + networkType + ") - dropped");
             }
@@ -1152,13 +1154,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         if (doAdd) {
-            if (DBG) log("Adding " + r + " for interface " + ifaceName);
+            if (VDBG) log("Adding " + r + " for interface " + ifaceName);
             mAddedRoutes.add(r);
             try {
                 mNetd.addRoute(ifaceName, r);
             } catch (Exception e) {
                 // never crash - catch them all
-                loge("Exception trying to add a route: " + e);
+                if (VDBG) loge("Exception trying to add a route: " + e);
                 return false;
             }
         } else {
@@ -1166,16 +1168,16 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             // we can remove it from the table
             mAddedRoutes.remove(r);
             if (mAddedRoutes.contains(r) == false) {
-                if (DBG) log("Removing " + r + " for interface " + ifaceName);
+                if (VDBG) log("Removing " + r + " for interface " + ifaceName);
                 try {
                     mNetd.removeRoute(ifaceName, r);
                 } catch (Exception e) {
                     // never crash - catch them all
-                    loge("Exception trying to remove a route: " + e);
+                    if (VDBG) loge("Exception trying to remove a route: " + e);
                     return false;
                 }
             } else {
-                if (DBG) log("not removing " + r + " as it's still in use");
+                if (VDBG) log("not removing " + r + " as it's still in use");
             }
         }
         return true;
@@ -1220,7 +1222,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         enforceAccessPermission();
         boolean retVal = Settings.Secure.getInt(mContext.getContentResolver(),
                 Settings.Secure.MOBILE_DATA, 1) == 1;
-        if (DBG) log("getMobileDataEnabled returning " + retVal);
+        if (VDBG) log("getMobileDataEnabled returning " + retVal);
         return retVal;
     }
 
@@ -1247,7 +1249,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
             if (LOGD_RULES) {
-                Slog.d(TAG, "onUidRulesChanged(uid=" + uid + ", uidRules=" + uidRules + ")");
+                log("onUidRulesChanged(uid=" + uid + ", uidRules=" + uidRules + ")");
             }
 
             synchronized (mRulesLock) {
@@ -1268,8 +1270,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
 
             if (LOGD_RULES) {
-                Slog.d(TAG,
-                        "onMeteredIfacesChanged(ifaces=" + Arrays.toString(meteredIfaces) + ")");
+                log("onMeteredIfacesChanged(ifaces=" + Arrays.toString(meteredIfaces) + ")");
             }
 
             synchronized (mRulesLock) {
@@ -1294,8 +1295,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void handleSetMobileData(boolean enabled) {
         if (mNetTrackers[ConnectivityManager.TYPE_MOBILE] != null) {
-            if (DBG) {
-                Slog.d(TAG, mNetTrackers[ConnectivityManager.TYPE_MOBILE].toString() + enabled);
+            if (VDBG) {
+                log(mNetTrackers[ConnectivityManager.TYPE_MOBILE].toString() + enabled);
             }
             mNetTrackers[ConnectivityManager.TYPE_MOBILE].setDataEnable(enabled);
         }
@@ -1587,7 +1588,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         mNetConfigs[type].priority) ||
                         mNetworkPreference == mActiveDefaultNetwork) {
                         // don't accept this one
-                        if (DBG) {
+                        if (VDBG) {
                             log("Not broadcasting CONNECT_ACTION " +
                                 "to torn down network " + info.getTypeName());
                         }
@@ -1688,9 +1689,11 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                 } else {
                     resetMask = NetworkUtils.RESET_ALL_ADDRESSES;
-                    log("handleConnectivityChange: interface not not equivalent reset both" +
-                            " linkProperty[" + netType + "]:" +
-                            " resetMask=" + resetMask);
+                    if (DBG) {
+                        log("handleConnectivityChange: interface not not equivalent reset both" +
+                                " linkProperty[" + netType + "]:" +
+                                " resetMask=" + resetMask);
+                    }
                 }
             }
             if (mNetConfigs[netType].isDefault()) {
@@ -1798,7 +1801,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         String bufferSizes = SystemProperties.get(key);
 
         if (bufferSizes.length() == 0) {
-            loge(key + " not found in system properties. Using defaults");
+            if (VDBG) log(key + " not found in system properties. Using defaults");
 
             // Setting to default values so we won't be stuck to previous values
             key = "net.tcp.buffersize.default";
@@ -1807,7 +1810,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         // Set values in kernel
         if (bufferSizes.length() != 0) {
-            if (DBG) {
+            if (VDBG) {
                 log("Setting TCP values: [" + bufferSizes
                         + "] which comes from [" + key + "]");
             }
@@ -1849,7 +1852,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      */
     private void reassessPidDns(int myPid, boolean doBump)
     {
-        if (DBG) log("reassessPidDns for pid " + myPid);
+        if (VDBG) log("reassessPidDns for pid " + myPid);
         for(int i : mPriorityList) {
             if (mNetConfigs[i].isDefault()) {
                 continue;
@@ -1935,7 +1938,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             String value = mDefaultDns.getHostAddress();
             if (!value.equals(SystemProperties.get("net.dns1"))) {
                 if (DBG) {
-                    log("no dns provided for " + network + " - using " + value);
+                    loge("no dns provided for " + network + " - using " + value);
                 }
                 changed = true;
                 SystemProperties.set("net.dns1", value);
@@ -1948,7 +1951,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 if (!changed && value.equals(SystemProperties.get(key))) {
                     continue;
                 }
-                if (DBG) {
+                if (VDBG) {
                     log("adding dns " + value + " for " + network);
                 }
                 changed = true;
@@ -1957,7 +1960,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         }
         for (int i = last + 1; i <= mNumDnsEntries; ++i) {
             String key = "net.dns" + i;
-            if (DBG) log("erasing " + key);
+            if (VDBG) log("erasing " + key);
             changed = true;
             SystemProperties.set(key, "");
         }
@@ -1968,7 +1971,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mNetd.setDnsServersForInterface(iface, NetworkUtils.makeStrings(dnses));
                 mNetd.setDefaultInterfaceForDns(iface);
             } catch (Exception e) {
-                Slog.e(TAG, "exception setting default dns interface: " + e);
+                loge("exception setting default dns interface: " + e);
             }
         }
         if (!domains.equals(SystemProperties.get("net.dns.search"))) {
@@ -1998,7 +2001,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     mNetd.setDnsServersForInterface(p.getInterfaceName(),
                             NetworkUtils.makeStrings(dnses));
                 } catch (Exception e) {
-                    Slog.e(TAG, "exception setting dns servers: " + e);
+                    loge("exception setting dns servers: " + e);
                 }
                 // set per-pid dns for attached secondary nets
                 List pids = mNetRequestersPids[netType];
@@ -2335,7 +2338,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     // 100 percent is full good, 0 is full bad.
     public void reportInetCondition(int networkType, int percentage) {
-        if (DBG) log("reportNetworkCondition(" + networkType + ", " + percentage + ")");
+        if (VDBG) log("reportNetworkCondition(" + networkType + ", " + percentage + ")");
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.STATUS_BAR,
                 "ConnectivityService");
@@ -2372,7 +2375,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mDefaultInetCondition = condition;
         int delay;
         if (mInetConditionChangeInFlight == false) {
-            if (DBG) log("starting a change hold");
+            if (VDBG) log("starting a change hold");
             // setup a new hold to debounce this
             if (mDefaultInetCondition > 50) {
                 delay = Settings.Secure.getInt(mContext.getContentResolver(),
@@ -2387,12 +2390,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         } else {
             // we've set the new condition, when this hold ends that will get
             // picked up
-            if (DBG) log("currently in hold - not setting new end evt");
+            if (VDBG) log("currently in hold - not setting new end evt");
         }
     }
 
     private void handleInetConditionHoldEnd(int netType, int sequence) {
-        if (DBG) {
+        if (VDBG) {
             log("Inet hold end, net=" + netType +
                     ", condition =" + mDefaultInetCondition +
                     ", published condition =" + mDefaultInetConditionPublished);
@@ -2490,7 +2493,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mDefaultProxy = null;
             }
         }
-        if (DBG) log("changing default proxy to " + proxy);
+        if (VDBG) log("changing default proxy to " + proxy);
         if ((proxy == null && mGlobalProxy == null) || proxy.equals(mGlobalProxy)) return;
         if (mGlobalProxy != null) return;
         sendProxyBroadcast(proxy);
@@ -2517,7 +2520,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
     private void sendProxyBroadcast(ProxyProperties proxy) {
         if (proxy == null) proxy = new ProxyProperties("", 0, "");
-        log("sending Proxy Broadcast for " + proxy);
+        if (DBG) log("sending Proxy Broadcast for " + proxy);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
         intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING |
             Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
