@@ -167,22 +167,13 @@ public class Camera {
 
     /**
      * Hardware face detection. It does not use much CPU.
-     *
-     * @see #startFaceDetection(int)
-     * @see Parameters#getMaxNumDetectedFaces(int)
-     * @see #CAMERA_FACE_DETECTION_SW
-     * @hide
      */
-    public static final int CAMERA_FACE_DETECTION_HW = 0;
+    private static final int CAMERA_FACE_DETECTION_HW = 0;
 
     /**
-     * Software face detection. It uses some CPU. Applications must use
-     * {@link #setPreviewTexture(SurfaceTexture)} for preview in this mode.
-     *
-     * @see #CAMERA_FACE_DETECTION_HW
-     * @hide
+     * Software face detection. It uses some CPU.
      */
-    public static final int CAMERA_FACE_DETECTION_SW = 1;
+    private static final int CAMERA_FACE_DETECTION_SW = 1;
 
     /**
      * Returns the number of physical cameras available on this device.
@@ -1071,7 +1062,6 @@ public class Camera {
     /**
      * Callback interface for face detected in the preview frame.
      *
-     * @hide
      */
     public interface FaceDetectionListener
     {
@@ -1086,12 +1076,11 @@ public class Camera {
     }
 
     /**
-     * Registers a listener to be notified about the face detected of the
+     * Registers a listener to be notified about the faces detected in the
      * preview frame.
      *
      * @param listener the listener to notify
-     * @see #startFaceDetection(int)
-     * @hide
+     * @see #startFaceDetection()
      */
     public final void setFaceDetectionListener(FaceDetectionListener listener)
     {
@@ -1099,48 +1088,37 @@ public class Camera {
     }
 
     /**
-     * Start the face detection. This should be called after preview is started.
+     * Starts the face detection. This should be called after preview is started.
      * The camera will notify {@link FaceDetectionListener} of the detected
      * faces in the preview frame. The detected faces may be the same as the
      * previous ones. Applications should call {@link #stopFaceDetection} to
      * stop the face detection. This method is supported if {@link
-     * Parameters#getMaxNumDetectedFaces(int)} returns a number larger than 0.
-     * Hardware and software face detection cannot be used at the same time.
+     * Parameters#getMaxNumDetectedFaces()} returns a number larger than 0.
      * If the face detection has started, apps should not call this again.
      *
-     * In hardware face detection mode, {@link Parameters#setWhiteBalance(String)},
+     * When the face detection is running, {@link Parameters#setWhiteBalance(String)},
      * {@link Parameters#setFocusAreas(List)}, and {@link Parameters#setMeteringAreas(List)}
      * have no effect.
      *
-     * @param type face detection type. This can be either {@link
-     *        #CAMERA_FACE_DETECTION_HW} or {@link #CAMERA_FACE_DETECTION_SW}
-     * @throws IllegalArgumentException if the face detection type is
-     *         unsupported or invalid.
+     * @throws IllegalArgumentException if the face detection is unsupported.
      * @throws RuntimeException if the method fails or the face detection is
      *         already running.
-     * @see #CAMERA_FACE_DETECTION_HW
-     * @see #CAMERA_FACE_DETECTION_SW
      * @see FaceDetectionListener
      * @see #stopFaceDetection()
-     * @see Parameters#getMaxNumDetectedFaces(int)
-     * @hide
+     * @see Parameters#getMaxNumDetectedFaces()
      */
-    public final void startFaceDetection(int type) {
-        if (type != CAMERA_FACE_DETECTION_HW && type != CAMERA_FACE_DETECTION_SW) {
-            throw new IllegalArgumentException("Invalid face detection type " + type);
-        }
+    public final void startFaceDetection() {
         if (mFaceDetectionRunning) {
             throw new RuntimeException("Face detection is already running");
         }
-        _startFaceDetection(type);
+        _startFaceDetection(CAMERA_FACE_DETECTION_HW);
         mFaceDetectionRunning = true;
     }
 
     /**
-     * Stop the face detection.
+     * Stops the face detection.
      *
      * @see #startFaceDetection(int)
-     * @hide
      */
     public final void stopFaceDetection() {
         _stopFaceDetection();
@@ -1153,17 +1131,21 @@ public class Camera {
     /**
      * The information of a face from camera face detection.
      *
-     * @hide
      */
     public static class Face {
+        /**
+         * Create an empty face.
+         */
         public Face() {
         }
 
         /**
          * Bounds of the face. (-1000, -1000) represents the top-left of the
          * camera field of view, and (1000, 1000) represents the bottom-right of
-         * the field of view. The width and height cannot be 0 or negative. This
-         * is supported by both hardware and software face detection.
+         * the field of view. For example, suppose the size of the viewfinder UI
+         * is 800x480. The rect passed from the driver is (-1000, -1000, 0, 0).
+         * The corresponding viewfinder rect should be (0, 0, 400, 240). The
+         * width and height of the rect will not be 0 or negative.
          *
          * <p>The direction is relative to the sensor orientation, that is, what
          * the sensor sees. The direction is not affected by the rotation or
@@ -1175,37 +1157,11 @@ public class Camera {
 
         /**
          * The confidence level of the face. The range is 1 to 100. 100 is the
-         * highest confidence. This is supported by both hardware and software
-         * face detction.
+         * highest confidence.
          *
          * @see #startFaceDetection(int)
          */
         public int score;
-
-        /**
-         * An unique id per face while the face is visible to the tracker. If
-         * the face leaves the field-of-view and comes back, it will get a new
-         * id. If the value is 0, id is not supported.
-         */
-        public int id;
-
-        /**
-         * The coordinates of the center of the left eye. The range is -1000 to
-         * 1000. null if this is not supported.
-         */
-        public Point leftEye;
-
-        /**
-         * The coordinates of the center of the right eye. The range is -1000 to
-         * 1000. null if this is not supported.
-         */
-        public Point rightEye;
-
-        /**
-         * The coordinates of the center of the mouth. The range is -1000 to
-         * 1000. null if this is not supported.
-         */
-        public Point mouth;
     }
 
     // Error codes match the enum in include/ui/Camera.h
@@ -3167,15 +3123,9 @@ public class Camera {
          *
          * @return the maximum number of detected face supported by the camera.
          * @see #startFaceDetection(int)
-         * @hide
          */
-        public int getMaxNumDetectedFaces(int type) {
-            if (type == CAMERA_FACE_DETECTION_HW) {
-                return getInt(KEY_MAX_NUM_DETECTED_FACES_HW, 0);
-            } else if (type == CAMERA_FACE_DETECTION_SW){
-                return getInt(KEY_MAX_NUM_DETECTED_FACES_SW, 0);
-            }
-            throw new IllegalArgumentException("Invalid face detection type " + type);
+        public int getMaxNumDetectedFaces() {
+            return getInt(KEY_MAX_NUM_DETECTED_FACES_HW, 0);
         }
 
         /**
