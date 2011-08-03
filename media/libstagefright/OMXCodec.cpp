@@ -976,11 +976,6 @@ void OMXCodec::setVideoInputFormat(
     video_def->nFrameWidth = width;
     video_def->nFrameHeight = height;
     video_def->xFramerate = 0;      // No need for output port
-    // FIXME:
-    // Revmoe this workaround after work is done.
-    if (!strncmp(mComponentName, "OMX.TI.DUCATI1", 14)) {
-        video_def->xFramerate = (frameRate << 16);
-    }
     video_def->nBitrate = bitRate;  // Q16 format
     video_def->eCompressionFormat = compressionFormat;
     video_def->eColorFormat = OMX_COLOR_FormatUnused;
