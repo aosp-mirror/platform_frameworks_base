@@ -44,9 +44,11 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 
 Font::Font(FontRenderer* state, uint32_t fontId, float fontSize,
-        int flags, uint32_t italicStyle, uint32_t scaleX) :
+        int flags, uint32_t italicStyle, uint32_t scaleX,
+        SkPaint::Style style, uint32_t strokeWidth) :
         mState(state), mFontId(fontId), mFontSize(fontSize),
-        mFlags(flags), mItalicStyle(italicStyle), mScaleX(scaleX) {
+        mFlags(flags), mItalicStyle(italicStyle), mScaleX(scaleX),
+        mStyle(style), mStrokeWidth(mStrokeWidth) {
 }
 
 
@@ -283,19 +285,22 @@ Font::CachedGlyphInfo* Font::cacheGlyph(SkPaint* paint, glyph_t glyph) {
 }
 
 Font* Font::create(FontRenderer* state, uint32_t fontId, float fontSize,
-        int flags, uint32_t italicStyle, uint32_t scaleX) {
+        int flags, uint32_t italicStyle, uint32_t scaleX,
+        SkPaint::Style style, uint32_t strokeWidth) {
     Vector<Font*> &activeFonts = state->mActiveFonts;
 
     for (uint32_t i = 0; i < activeFonts.size(); i++) {
         Font* font = activeFonts[i];
         if (font->mFontId == fontId && font->mFontSize == fontSize &&
                 font->mFlags == flags && font->mItalicStyle == italicStyle &&
-                font->mScaleX == scaleX) {
+                font->mScaleX == scaleX && font->mStyle == style &&
+                (style == SkPaint::kFill_Style || font->mStrokeWidth == strokeWidth)) {
             return font;
         }
     }
 
-    Font* newFont = new Font(state, fontId, fontSize, flags, italicStyle, scaleX);
+    Font* newFont = new Font(state, fontId, fontSize, flags, italicStyle,
+            scaleX, style, strokeWidth);
     activeFonts.push(newFont);
     return newFont;
 }
@@ -690,7 +695,11 @@ void FontRenderer::setFont(SkPaint* paint, uint32_t fontId, float fontSize) {
     uint32_t italicStyle = *(uint32_t*) &skewX;
     const float scaleXFloat = paint->getTextScaleX();
     uint32_t scaleX = *(uint32_t*) &scaleXFloat;
-    mCurrentFont = Font::create(this, fontId, fontSize, flags, italicStyle, scaleX);
+    SkPaint::Style style = paint->getStyle();
+    const float strokeWidthFloat = paint->getStrokeWidth();
+    uint32_t strokeWidth = *(uint32_t*) &strokeWidthFloat;
+    mCurrentFont = Font::create(this, fontId, fontSize, flags, italicStyle,
+            scaleX, style, strokeWidth);
 
     const float maxPrecacheFontSize = 40.0f;
     bool isNewFont = currentNumFonts != mActiveFonts.size();
