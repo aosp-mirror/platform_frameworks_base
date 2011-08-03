@@ -236,8 +236,10 @@ public class PlaybackGraphs {
             int yPos = LABELOFFSET;
             canvas.drawText(label, xPos, yPos, whiteLabels);
             for (int statIndex = 0; statIndex < Stats.length; statIndex++) {
-                label = resources.getString(R.string.format_stat,
-                        mStats[metricIndex][statIndex]);
+                String statLabel = resources.getString(
+                        Stats[statIndex].getLabelId()).substring(0,3);
+                label = statLabel + " " + resources.getString(
+                        R.string.format_stat, mStats[metricIndex][statIndex]);
                 yPos = LABELOFFSET + (1 + statIndex) * PlaybackView.TILE_SCALE
                         / 2;
                 canvas.drawText(label, xPos, yPos, whiteLabels);
