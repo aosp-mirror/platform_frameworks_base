@@ -19,6 +19,9 @@ package com.android.server;
 import android.net.LocalSocketAddress;
 import android.net.LocalSocket;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.Slog;
@@ -39,7 +42,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * daemon which uses the libsysutils FrameworkListener
  * protocol.
  */
-final class NativeDaemonConnector implements Runnable {
+final class NativeDaemonConnector implements Runnable, Handler.Callback {
     private static final boolean LOCAL_LOGD = false;
 
     private BlockingQueue<String> mResponseQueue;
@@ -47,6 +50,7 @@ final class NativeDaemonConnector implements Runnable {
     private String                TAG = "NativeDaemonConnector";
     private String                mSocket;
     private INativeDaemonConnectorCallbacks mCallbacks;
+    private Handler               mCallbackHandler;
 
     private final int BUFFER_SIZE = 4096;
 
@@ -76,7 +80,11 @@ final class NativeDaemonConnector implements Runnable {
         mResponseQueue = new LinkedBlockingQueue<String>(responseQueueSize);
     }
 
+    @Override
     public void run() {
+        HandlerThread thread = new HandlerThread(TAG + ".CallbackHandler");
+        thread.start();
+        mCallbackHandler = new Handler(thread.getLooper(), this);
 
         while (true) {
             try {
@@ -86,6 +94,21 @@ final class NativeDaemonConnector implements Runnable {
                 SystemClock.sleep(5000);
             }
         }
+    }
+
+    @Override
+    public boolean handleMessage(Message msg) {
+        String event = (String) msg.obj;
+        try {
+            if (!mCallbacks.onEvent(msg.what, event, event.split(" "))) {
+                Slog.w(TAG, String.format(
+                        "Unhandled event '%s'", event));
+            }
+        } catch (Exception e) {
+            Slog.e(TAG, String.format(
+                    "Error handling '%s'", event), e);
+        }
+        return true;
     }
 
     private void listenToSocket() throws IOException {
@@ -119,20 +142,13 @@ final class NativeDaemonConnector implements Runnable {
                         String event = new String(buffer, start, i - start);
                         if (LOCAL_LOGD) Slog.d(TAG, String.format("RCV <- {%s}", event));
 
-                        String[] tokens = event.split(" ");
+                        String[] tokens = event.split(" ", 2);
                         try {
                             int code = Integer.parseInt(tokens[0]);
 
                             if (code >= ResponseCode.UnsolicitedInformational) {
-                                try {
-                                    if (!mCallbacks.onEvent(code, event, tokens)) {
-                                        Slog.w(TAG, String.format(
-                                                "Unhandled event (%s)", event));
-                                    }
-                                } catch (Exception ex) {
-                                    Slog.e(TAG, String.format(
-                                            "Error handling '%s'", event), ex);
-                                }
+                                mCallbackHandler.sendMessage(
+                                        mCallbackHandler.obtainMessage(code, event));
                             } else {
                                 try {
                                     mResponseQueue.put(event);
