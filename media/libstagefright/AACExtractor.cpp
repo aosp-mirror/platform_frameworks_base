@@ -92,7 +92,7 @@ static size_t getFrameSize(const sp<DataSource> &source, off64_t offset) {
     size_t frameSize = 0;
 
     uint8_t syncword[2];
-    if (source->readAt(0, &syncword, 2) != 2) {
+    if (source->readAt(offset, &syncword, 2) != 2) {
         return 0;
     }
     if ((syncword[0] != 0xff) || ((syncword[1] & 0xf6) != 0xf0)) {
