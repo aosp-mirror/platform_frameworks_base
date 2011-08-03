@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-/* //device/apps/common/res/anim/options_panel_enter.xml
+/* //device/apps/common/res/anim/options_panel_exit.xml
 **
 ** Copyright 2007, The Android Open Source Project
 **
@@ -18,9 +18,10 @@
 */
 -->
 
-<set xmlns:android="http://schemas.android.com/apk/res/android" android:interpolator="@interpolator/decelerate_quad">
-	<translate android:fromYDelta="-75%" android:toYDelta="0"
-        android:duration="@android:integer/config_mediumAnimTime"/>
-	<alpha android:fromAlpha="0.0" android:toAlpha="1.0"
-        android:duration="@android:integer/config_mediumAnimTime" />
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+        android:interpolator="@android:interpolator/accelerate_quad">
+	<translate android:fromYDelta="0" android:toYDelta="-75%"
+        android:startOffset="100" android:duration="@android:integer/config_mediumAnimTime"/>
+	<alpha android:fromAlpha="1.0" android:toAlpha="0.0"
+        android:startOffset="100" android:duration="@android:integer/config_mediumAnimTime" />
 </set>
