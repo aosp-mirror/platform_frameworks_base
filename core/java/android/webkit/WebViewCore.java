@@ -1152,7 +1152,7 @@ public final class WebViewCore {
         // accessibility support
         static final int MODIFY_SELECTION = 190;
 
-        static final int USE_MOCK_DEVICE_ORIENTATION = 191;
+        static final int SET_USE_MOCK_DEVICE_ORIENTATION = 191;
 
         static final int AUTOFILL_FORM = 192;
 
@@ -1715,8 +1715,8 @@ public final class WebViewCore {
                                     .sendToTarget();
                             break;
 
-                        case USE_MOCK_DEVICE_ORIENTATION:
-                            useMockDeviceOrientation();
+                        case SET_USE_MOCK_DEVICE_ORIENTATION:
+                            setUseMockDeviceOrientation();
                             break;
 
                         case AUTOFILL_FORM:
@@ -3055,8 +3055,8 @@ public final class WebViewCore {
         // TODO: Figure out what to do with this (b/6111818)
     }
 
-    private void useMockDeviceOrientation() {
-        mDeviceMotionAndOrientationManager.useMock();
+    private void setUseMockDeviceOrientation() {
+        mDeviceMotionAndOrientationManager.setUseMock();
     }
 
     public void setMockDeviceOrientation(boolean canProvideAlpha, double alpha,

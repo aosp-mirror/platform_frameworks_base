@@ -5011,8 +5011,8 @@ public final class WebViewClassic implements WebViewProvider, WebViewProvider.Sc
      *
      * debug only
      */
-    public void useMockDeviceOrientation() {
-        mWebViewCore.sendMessage(EventHub.USE_MOCK_DEVICE_ORIENTATION);
+    public void setUseMockDeviceOrientation() {
+        mWebViewCore.sendMessage(EventHub.SET_USE_MOCK_DEVICE_ORIENTATION);
     }
 
     /**

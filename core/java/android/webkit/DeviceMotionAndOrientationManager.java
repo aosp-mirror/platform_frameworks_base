@@ -22,9 +22,8 @@ package android.webkit;
  *
  * This could be part of WebViewCore, but have moved it to its own class to
  * avoid bloat there.
- * @hide
  */
-public final class DeviceMotionAndOrientationManager {
+final class DeviceMotionAndOrientationManager {
     private WebViewCore mWebViewCore;
 
     public DeviceMotionAndOrientationManager(WebViewCore webViewCore) {
@@ -32,12 +31,12 @@ public final class DeviceMotionAndOrientationManager {
     }
 
     /**
-     * Sets whether the Page for this WebViewCore should use a mock DeviceOrientation
+     * Sets that the Page for this WebViewCore should use a mock DeviceOrientation
      * client.
      */
-    public void useMock() {
+    public void setUseMock() {
         assert WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName());
-        nativeUseMock(mWebViewCore);
+        nativeSetUseMock(mWebViewCore);
     }
 
     /**
@@ -66,7 +65,7 @@ public final class DeviceMotionAndOrientationManager {
     }
 
     // Native functions
-    private static native void nativeUseMock(WebViewCore webViewCore);
+    private static native void nativeSetUseMock(WebViewCore webViewCore);
     private static native void nativeSetMockOrientation(WebViewCore webViewCore,
             boolean canProvideAlpha, double alpha, boolean canProvideBeta, double beta,
             boolean canProvideGamma, double gamma);

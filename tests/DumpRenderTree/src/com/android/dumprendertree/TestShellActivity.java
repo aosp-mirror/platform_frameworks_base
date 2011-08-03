@@ -168,7 +168,7 @@ public class TestShellActivity extends Activity implements LayoutTestController 
         }
 
         // This is asynchronous, but it gets processed by WebCore before it starts loading pages.
-        mWebViewClassic.useMockDeviceOrientation();
+        mWebViewClassic.setUseMockDeviceOrientation();
     }
 
     @Override
