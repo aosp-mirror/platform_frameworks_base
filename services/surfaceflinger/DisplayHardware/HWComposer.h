@@ -24,16 +24,19 @@
 
 #include <hardware/hwcomposer.h>
 
+#include <utils/StrongPointer.h>
+
 namespace android {
 // ---------------------------------------------------------------------------
 
 class String8;
+class SurfaceFlinger;
 
 class HWComposer
 {
 public:
 
-    HWComposer();
+    HWComposer(const sp<SurfaceFlinger>& flinger);
     ~HWComposer();
 
     status_t initCheck() const;
@@ -60,12 +63,21 @@ public:
     void dump(String8& out, char* scratch, size_t SIZE) const;
 
 private:
+    struct cb_context {
+        hwc_procs_t procs;
+        HWComposer* hwc;
+    };
+    static void hook_invalidate(struct hwc_procs* procs);
+    void invalidate();
+
+    sp<SurfaceFlinger>      mFlinger;
     hw_module_t const*      mModule;
     hwc_composer_device_t*  mHwc;
     hwc_layer_list_t*       mList;
     size_t                  mCapacity;
     hwc_display_t           mDpy;
     hwc_surface_t           mSur;
+    cb_context              mCBContext;
 };
 
 
