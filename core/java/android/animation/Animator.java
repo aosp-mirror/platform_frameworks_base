@@ -32,10 +32,9 @@ public abstract class Animator implements Cloneable {
 
     /**
      * Starts this animation. If the animation has a nonzero startDelay, the animation will start
-     * running after that delay elapses. Note that the animation does not start synchronously with
-     * this call, because all animation events are posted to a central timing loop so that animation
-     * times are all synchronized on a single timing pulse on the UI thread. So the animation will
-     * start the next time that event handler processes events.
+     * running after that delay elapses. A non-delayed animation will have its initial
+     * value(s) set immediately, followed by calls to
+     * {@link AnimatorListener#onAnimationStart(Animator)} for any listeners of this animator.
      *
      * <p>The animation started by calling this method will be run on the thread that called
      * this method. This thread should have a Looper on it (a runtime exception will be thrown if
