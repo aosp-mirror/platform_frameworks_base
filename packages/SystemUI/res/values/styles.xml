@@ -52,4 +52,15 @@
         <item name="android:windowExitAnimation">@*android:anim/shrink_fade_out_from_bottom</item>
     </style>
 
+    <!-- Standard animations for hiding and showing the status bar. -->
+    <style name="Animation.StatusBar">
+        <item name="android:windowEnterAnimation">@anim/status_bar_enter</item>
+        <item name="android:windowExitAnimation">@anim/status_bar_exit</item>
+    </style>
+
+    <style name="Animation.StatusBar.IntruderAlert">
+        <item name="android:windowEnterAnimation">@anim/priority_alert_enter</item>
+        <item name="android:windowExitAnimation">@anim/priority_alert_exit</item>
+    </style>
+
 </resources>
