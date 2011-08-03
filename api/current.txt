@@ -18186,11 +18186,19 @@ package android.service.textservice {
 
   public abstract class SpellCheckerService extends android.app.Service {
     ctor public SpellCheckerService();
-    method public void cancel();
-    method public abstract android.view.textservice.SuggestionsInfo getSuggestions(android.view.textservice.TextInfo, int, java.lang.String);
-    method public android.view.textservice.SuggestionsInfo[] getSuggestionsMultiple(android.view.textservice.TextInfo[], java.lang.String, int, boolean);
+    method public abstract android.service.textservice.SpellCheckerService.Session createSession();
     method public final android.os.IBinder onBind(android.content.Intent);
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.textservice.SpellCheckerService";
+  }
+
+  public abstract class SpellCheckerService.Session {
+    ctor public SpellCheckerService.Session();
+    method public android.os.Bundle getBundle();
+    method public java.lang.String getLocale();
+    method public void onCancel();
+    method public abstract void onCreate();
+    method public abstract android.view.textservice.SuggestionsInfo onGetSuggestions(android.view.textservice.TextInfo, int);
+    method public android.view.textservice.SuggestionsInfo[] onGetSuggestionsMultiple(android.view.textservice.TextInfo[], int, boolean);
   }
 
 }
@@ -24309,7 +24317,7 @@ package android.view.textservice {
   }
 
   public final class TextServicesManager {
-    method public android.view.textservice.SpellCheckerSession newSpellCheckerSession(java.util.Locale, android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
+    method public android.view.textservice.SpellCheckerSession newSpellCheckerSession(android.os.Bundle, java.util.Locale, android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
   }
 
 }

@@ -22,7 +22,7 @@ import android.view.textservice.TextInfo;
  * @hide
  */
 oneway interface ISpellCheckerSession {
-    void getSuggestionsMultiple(
+    void onGetSuggestionsMultiple(
             in TextInfo[] textInfos, int suggestionsLimit, boolean multipleWords);
-    void cancel();
+    void onCancel();
 }

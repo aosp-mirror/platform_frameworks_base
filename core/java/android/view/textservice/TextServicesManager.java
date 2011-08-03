@@ -19,11 +19,11 @@ package android.view.textservice;
 import com.android.internal.textservice.ITextServicesManager;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Log;
-import android.view.textservice.SpellCheckerSession;
 import android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener;
 
 import java.util.Locale;
@@ -74,7 +74,7 @@ public final class TextServicesManager {
      */
     // TODO: Add a method to get enabled spell checkers.
     // TODO: Handle referToSpellCheckerLanguageSettings
-    public SpellCheckerSession newSpellCheckerSession(Locale locale,
+    public SpellCheckerSession newSpellCheckerSession(Bundle bundle, Locale locale,
             SpellCheckerSessionListener listener, boolean referToSpellCheckerLanguageSettings) {
         if (listener == null) {
             throw new NullPointerException();
@@ -94,7 +94,7 @@ public final class TextServicesManager {
         try {
             sService.getSpellCheckerService(sci.getId(), localeString,
                     session.getTextServicesSessionListener(),
-                    session.getSpellCheckerSessionListener());
+                    session.getSpellCheckerSessionListener(), bundle);
         } catch (RemoteException e) {
             return null;
         }

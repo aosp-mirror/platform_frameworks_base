@@ -20,6 +20,7 @@ import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesSessionListener;
 
 import android.content.ComponentName;
+import android.os.Bundle;
 import android.view.textservice.SpellCheckerInfo;
 
 /**
@@ -30,7 +31,7 @@ interface ITextServicesManager {
     SpellCheckerInfo getCurrentSpellChecker(String locale);
     oneway void getSpellCheckerService(String sciId, in String locale,
             in ITextServicesSessionListener tsListener,
-            in ISpellCheckerSessionListener scListener);
+            in ISpellCheckerSessionListener scListener, in Bundle bundle);
     oneway void finishSpellCheckerService(in ISpellCheckerSessionListener listener);
     oneway void setCurrentSpellChecker(String sciId);
     SpellCheckerInfo[] getEnabledSpellCheckers();
