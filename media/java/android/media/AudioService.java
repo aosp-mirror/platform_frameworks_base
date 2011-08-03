@@ -187,7 +187,7 @@ public class AudioService extends IAudioService.Stub {
         AudioSystem.STREAM_RING,  // STREAM_RING
         AudioSystem.STREAM_MUSIC, // STREAM_MUSIC
         AudioSystem.STREAM_ALARM,  // STREAM_ALARM
-        AudioSystem.STREAM_NOTIFICATION,  // STREAM_NOTIFICATION
+        AudioSystem.STREAM_RING,   // STREAM_NOTIFICATION
         AudioSystem.STREAM_BLUETOOTH_SCO, // STREAM_BLUETOOTH_SCO
         AudioSystem.STREAM_SYSTEM,  // STREAM_SYSTEM_ENFORCED
         AudioSystem.STREAM_VOICE_CALL, // STREAM_DTMF
@@ -241,9 +241,6 @@ public class AudioService extends IAudioService.Stub {
      * type since it depends on the ringer mode. See {@link #shouldVibrate(int)}.
      */
     private int mVibrateSetting;
-
-    /** @see System#NOTIFICATIONS_USE_RING_VOLUME */
-    private int mNotificationsUseRingVolume;
 
     // Broadcast receiver for device connections intent broadcasts
     private final BroadcastReceiver mReceiver = new AudioServiceBroadcastReceiver();
@@ -456,16 +453,6 @@ public class AudioService extends IAudioService.Stub {
                 System.MUTE_STREAMS_AFFECTED,
                 ((1 << AudioSystem.STREAM_MUSIC)|(1 << AudioSystem.STREAM_RING)|(1 << AudioSystem.STREAM_SYSTEM)));
 
-        if (mVoiceCapable) {
-            mNotificationsUseRingVolume = System.getInt(cr,
-                    Settings.System.NOTIFICATIONS_USE_RING_VOLUME, 1);
-        } else {
-            mNotificationsUseRingVolume = 1;
-        }
-
-        if (mNotificationsUseRingVolume == 1) {
-            STREAM_VOLUME_ALIAS[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
-        }
         // Each stream will read its own persisted settings
 
         // Broadcast the sticky intent
@@ -2202,8 +2189,6 @@ public class AudioService extends IAudioService.Stub {
             super(new Handler());
             mContentResolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.MODE_RINGER_STREAMS_AFFECTED), false, this);
-            mContentResolver.registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.NOTIFICATIONS_USE_RING_VOLUME), false, this);
         }
 
         @Override
@@ -2226,29 +2211,6 @@ public class AudioService extends IAudioService.Stub {
                      */
                     mRingerModeAffectedStreams = ringerModeAffectedStreams;
                     setRingerModeInt(getRingerMode(), false);
-                }
-
-                int notificationsUseRingVolume = Settings.System.getInt(mContentResolver,
-                        Settings.System.NOTIFICATIONS_USE_RING_VOLUME,
-                        1);
-                if (mVoiceCapable) {
-                    if (notificationsUseRingVolume != mNotificationsUseRingVolume) {
-                        mNotificationsUseRingVolume = notificationsUseRingVolume;
-                        if (mNotificationsUseRingVolume == 1) {
-                            STREAM_VOLUME_ALIAS[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_RING;
-                            mStreamStates[AudioSystem.STREAM_NOTIFICATION].setVolumeIndexSettingName(
-                                    System.VOLUME_SETTINGS[AudioSystem.STREAM_RING]);
-                        } else {
-                            STREAM_VOLUME_ALIAS[AudioSystem.STREAM_NOTIFICATION] = AudioSystem.STREAM_NOTIFICATION;
-                            mStreamStates[AudioSystem.STREAM_NOTIFICATION].setVolumeIndexSettingName(
-                                    System.VOLUME_SETTINGS[AudioSystem.STREAM_NOTIFICATION]);
-                            // Persist notification volume volume as it was not persisted while aliased to ring volume
-                            //  and persist with no delay as there might be registered observers of the persisted
-                            //  notification volume.
-                            sendMsg(mAudioHandler, MSG_PERSIST_VOLUME, AudioSystem.STREAM_NOTIFICATION,
-                                    SENDMSG_REPLACE, 1, 1, mStreamStates[AudioSystem.STREAM_NOTIFICATION], 0);
-                        }
-                    }
                 }
             }
         }
