@@ -22068,45 +22068,18 @@ package android.view {
 
   public class Surface implements android.os.Parcelable {
     method public int describeContents();
-    method public void freeze();
-    method public void hide();
     method public boolean isValid();
     method public android.graphics.Canvas lockCanvas(android.graphics.Rect) throws java.lang.IllegalArgumentException, android.view.Surface.OutOfResourcesException;
     method public void readFromParcel(android.os.Parcel);
-    method public void setAlpha(float);
-    method public void setFlags(int, int);
-    method public void setFreezeTint(int);
-    method public void setLayer(int);
-    method public void setMatrix(float, float, float, float);
-    method public static void setOrientation(int, int);
-    method public void setPosition(int, int);
-    method public void setSize(int, int);
-    method public void setTransparentRegionHint(android.graphics.Region);
-    method public void show();
-    method public void unfreeze();
+    method public void release();
     method public void unlockCanvas(android.graphics.Canvas);
     method public void unlockCanvasAndPost(android.graphics.Canvas);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int FX_SURFACE_BLUR = 65536; // 0x10000
-    field public static final int FX_SURFACE_DIM = 131072; // 0x20000
-    field public static final int FX_SURFACE_MASK = 983040; // 0xf0000
-    field public static final int FX_SURFACE_NORMAL = 0; // 0x0
-    field public static final deprecated int GPU = 40; // 0x28
-    field public static final deprecated int HARDWARE = 16; // 0x10
-    field public static final int HIDDEN = 4; // 0x4
-    field public static final int NON_PREMULTIPLIED = 256; // 0x100
-    field public static final deprecated int PUSH_BUFFERS = 512; // 0x200
     field public static final int ROTATION_0 = 0; // 0x0
     field public static final int ROTATION_180 = 2; // 0x2
     field public static final int ROTATION_270 = 3; // 0x3
     field public static final int ROTATION_90 = 1; // 0x1
-    field public static final int SECURE = 128; // 0x80
-    field public static final deprecated int SURACE_FROZEN = 2; // 0x2
-    field public static final int SURFACE_BLUR_FREEZE = 16; // 0x10
-    field public static final int SURFACE_DITHER = 4; // 0x4
-    field public static final int SURFACE_FROZEN = 2; // 0x2
-    field public static final int SURFACE_HIDDEN = 1; // 0x1
   }
 
   public static class Surface.OutOfResourcesException extends java.lang.Exception {
