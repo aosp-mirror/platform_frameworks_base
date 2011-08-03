@@ -250,6 +250,7 @@ public class GridLayout extends ViewGroup {
      * {@inheritDoc}
      */
     public GridLayout(Context context) {
+        //noinspection NullableProblems
         this(context, null);
     }
 
@@ -519,14 +520,6 @@ public class GridLayout extends ViewGroup {
         return result;
     }
 
-    private static int sum(int[] a) {
-        int result = 0;
-        for (int i = 0, N = a.length; i < N; i++) {
-            result += a[i];
-        }
-        return result;
-    }
-
     @SuppressWarnings("unchecked")
     private static <T> T[] append(T[] a, T[] b) {
         T[] result = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length + b.length);
@@ -553,6 +546,7 @@ public class GridLayout extends ViewGroup {
         }
     }
 
+    /** @noinspection UnusedParameters*/
     private int getDefaultMargin(View c, boolean horizontal, boolean leading) {
         if (c.getClass() == Space.class) {
             return 0;
@@ -576,12 +570,25 @@ public class GridLayout extends ViewGroup {
         return getDefaultMargin(c, isAtEdge, horizontal, leading);
     }
 
-    private int getMargin(View view, boolean horizontal, boolean leading) {
+    private int getMargin1(View view, boolean horizontal, boolean leading) {
         LayoutParams lp = getLayoutParams(view);
         int margin = horizontal ?
                 (leading ? lp.leftMargin : lp.rightMargin) :
                 (leading ? lp.topMargin : lp.bottomMargin);
         return margin == UNDEFINED ? getDefaultMarginValue(view, lp, horizontal, leading) : margin;
+    }
+
+    private int getMargin(View view, boolean horizontal, boolean leading) {
+        if (mAlignmentMode == ALIGN_MARGINS) {
+            return getMargin1(view, horizontal, leading);
+        } else {
+            Axis axis = horizontal ? mHorizontalAxis : mVerticalAxis;
+            int[] margins = leading ? axis.getLeadingMargins() : axis.getTrailingMargins();
+            LayoutParams lp = getLayoutParams(view);
+            Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
+            int index = leading ? spec.span.min : spec.span.max;
+            return margins[index];
+        }
     }
 
     private int getTotalMargin(View child, boolean horizontal) {
@@ -733,15 +740,6 @@ public class GridLayout extends ViewGroup {
         graphics.drawLine(dx + x1, dy + y1, dx + x2, dy + y2, paint);
     }
 
-    private void drawRectangle(Canvas graphics, int x1, int y1, int x2, int y2, Paint paint) {
-        x2 = x2 - 1;
-        y2 = y2 - 1;
-        graphics.drawLine(x1, y1, x1, y2, paint);
-        graphics.drawLine(x1, y1, x2, y1, paint);
-        graphics.drawLine(x1, y2, x2, y2, paint);
-        graphics.drawLine(x2, y1, x2, y2, paint);
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -751,6 +749,7 @@ public class GridLayout extends ViewGroup {
             int width = getWidth() - getPaddingLeft() - getPaddingRight();
 
             Paint paint = new Paint();
+            paint.setStyle(Paint.Style.STROKE);
             paint.setColor(Color.argb(50, 255, 255, 255));
 
             int[] xs = mHorizontalAxis.locations;
@@ -773,22 +772,18 @@ public class GridLayout extends ViewGroup {
             paint.setColor(Color.BLUE);
             for (int i = 0; i < getChildCount(); i++) {
                 View c = getChildAt(i);
-                drawRectangle(canvas,
-                        c.getLeft(),
-                        c.getTop(),
-                        c.getRight(),
-                        c.getBottom(), paint);
+                canvas.drawRect(c.getLeft(), c.getTop(), c.getRight(), c.getBottom(), paint);
             }
 
             // Draw margins
             paint.setColor(Color.MAGENTA);
             for (int i = 0; i < getChildCount(); i++) {
                 View c = getChildAt(i);
-                drawRectangle(canvas,
-                        c.getLeft() - getMargin(c, true, true),
-                        c.getTop() - getMargin(c, false, true),
-                        c.getRight() + getMargin(c, true, false),
-                        c.getBottom() + getMargin(c, false, false), paint);
+                canvas.drawRect(
+                        c.getLeft() - getMargin1(c, true, true),
+                        c.getTop() - getMargin1(c, false, true),
+                        c.getRight() + getMargin1(c, true, false),
+                        c.getBottom() + getMargin1(c, false, false), paint);
             }
         }
     }
@@ -875,11 +870,7 @@ public class GridLayout extends ViewGroup {
         if (isGone(c)) {
             return 0;
         }
-        int result = getMeasurement(c, horizontal);
-        if (mAlignmentMode == ALIGN_MARGINS) {
-            return result + getTotalMargin(c, horizontal);
-        }
-        return result;
+        return getMeasurement(c, horizontal) + getTotalMargin(c, horizontal);
     }
 
     @Override
@@ -920,6 +911,9 @@ public class GridLayout extends ViewGroup {
         mHorizontalAxis.layout(targetWidth - paddingLeft - paddingRight);
         mVerticalAxis.layout(targetHeight - paddingTop - paddingBottom);
 
+        int[] hLocations = mHorizontalAxis.getLocations();
+        int[] vLocations = mVerticalAxis.getLocations();
+
         for (int i = 0, N = getChildCount(); i < N; i++) {
             View c = getChildAt(i);
             if (isGone(c)) continue;
@@ -930,11 +924,11 @@ public class GridLayout extends ViewGroup {
             Interval colSpan = columnSpec.span;
             Interval rowSpan = rowSpec.span;
 
-            int x1 = mHorizontalAxis.getLocationIncludingMargin(true, colSpan.min);
-            int y1 = mVerticalAxis.getLocationIncludingMargin(true, rowSpan.min);
+            int x1 = hLocations[colSpan.min];
+            int y1 = vLocations[rowSpan.min];
 
-            int x2 = mHorizontalAxis.getLocationIncludingMargin(false, colSpan.max);
-            int y2 = mVerticalAxis.getLocationIncludingMargin(false, rowSpan.max);
+            int x2 = hLocations[colSpan.max];
+            int y2 = vLocations[rowSpan.max];
 
             int cellWidth = x2 - x1;
             int cellHeight = y2 - y1;
@@ -951,36 +945,29 @@ public class GridLayout extends ViewGroup {
             Bounds rowBounds = mVerticalAxis.getGroupBounds().getValue(i);
 
             // Gravity offsets: the location of the alignment group relative to its cell group.
+            //noinspection NullableProblems
             int c2ax = protect(hAlign.getAlignmentValue(null, cellWidth - colBounds.size(true)));
+            //noinspection NullableProblems
             int c2ay = protect(vAlign.getAlignmentValue(null, cellHeight - rowBounds.size(true)));
 
-            if (mAlignmentMode == ALIGN_MARGINS) {
-                int leftMargin = getMargin(c, true, true);
-                int topMargin = getMargin(c, false, true);
-                int rightMargin = getMargin(c, true, false);
-                int bottomMargin = getMargin(c, false, false);
+            int leftMargin = getMargin(c, true, true);
+            int topMargin = getMargin(c, false, true);
+            int rightMargin = getMargin(c, true, false);
+            int bottomMargin = getMargin(c, false, false);
 
-                // Same calculation as getMeasurementIncludingMargin()
-                int mWidth = leftMargin + pWidth + rightMargin;
-                int mHeight = topMargin + pHeight + bottomMargin;
+            // Same calculation as getMeasurementIncludingMargin()
+            int mWidth = leftMargin + pWidth + rightMargin;
+            int mHeight = topMargin + pHeight + bottomMargin;
 
-                // Alignment offsets: the location of the view relative to its alignment group.
-                int a2vx = colBounds.getOffset(c, hAlign, mWidth);
-                int a2vy = rowBounds.getOffset(c, vAlign, mHeight);
+            // Alignment offsets: the location of the view relative to its alignment group.
+            int a2vx = colBounds.getOffset(c, hAlign, mWidth);
+            int a2vy = rowBounds.getOffset(c, vAlign, mHeight);
 
-                dx = c2ax + a2vx + leftMargin;
-                dy = c2ay + a2vy + topMargin;
+            dx = c2ax + a2vx + leftMargin;
+            dy = c2ay + a2vy + topMargin;
 
-                cellWidth -= leftMargin + rightMargin;
-                cellHeight -= topMargin + bottomMargin;
-            } else {
-                // Alignment offsets: the location of the view relative to its alignment group.
-                int a2vx = colBounds.getOffset(c, hAlign, pWidth);
-                int a2vy = rowBounds.getOffset(c, vAlign, pHeight);
-
-                dx = c2ax + a2vx;
-                dy = c2ay + a2vy;
-            }
+            cellWidth -= leftMargin + rightMargin;
+            cellHeight -= topMargin + bottomMargin;
 
             int type = PRF;
             int width = hAlign.getSizeInCell(c, pWidth, cellWidth, type);
@@ -1366,10 +1353,9 @@ public class GridLayout extends ViewGroup {
             String axis = horizontal ? "horizontal" : "vertical";
             int N = getCount() + 1; // The number of vertices is the number of columns/rows + 1.
 
-            boolean changed = false;
             // We take one extra pass over traditional Bellman-Ford (and omit their final step)
             for (int i = 0; i < N; i++) {
-                changed = false;
+                boolean changed = false;
                 for (int j = 0, length = arcs.length; j < length; j++) {
                     changed |= relax(locations, arcs[j]);
                 }
@@ -1420,7 +1406,7 @@ public class GridLayout extends ViewGroup {
                 Spec spec = horizontal ? lp.columnSpec : lp.rowSpec;
                 Interval span = spec.span;
                 int index = leading ? span.min : span.max;
-                margins[index] = max(margins[index], getMargin(c, horizontal, leading));
+                margins[index] = max(margins[index], getMargin1(c, horizontal, leading));
             }
         }
 
@@ -1446,34 +1432,8 @@ public class GridLayout extends ViewGroup {
             return trailingMargins;
         }
 
-        private void addMargins() {
-            int[] leadingMargins = getLeadingMargins();
-            int[] trailingMargins = getTrailingMargins();
-
-            int delta = 0;
-            for (int i = 0, N = getCount(); i < N; i++) {
-                int margins = leadingMargins[i] + trailingMargins[i + 1];
-                delta += margins;
-                locations[i + 1] += delta;
-            }
-        }
-
-        private int getLocationIncludingMargin(boolean leading, int index) {
-            int location = locations[index];
-            int margin;
-            if (mAlignmentMode != ALIGN_MARGINS) {
-                margin = (leading ? leadingMargins : trailingMargins)[index];
-            } else {
-                margin = 0;
-            }
-            return leading ? (location + margin) : (location - margin);
-        }
-
         private void computeLocations(int[] a) {
             solve1(getArcs(), a);
-            if (mAlignmentMode != ALIGN_MARGINS) {
-                addMargins();
-            }
         }
 
         private int[] getLocations() {
@@ -1495,12 +1455,6 @@ public class GridLayout extends ViewGroup {
         }
 
         private void setParentConstraints(int min, int max) {
-            if (mAlignmentMode != ALIGN_MARGINS) {
-                int margins = sum(getLeadingMargins()) + sum(getTrailingMargins());
-                min -= margins;
-                max -= margins;
-            }
-
             parentMin.value = min;
             parentMax.value = -max;
             locationsValid = false;
@@ -1905,10 +1859,6 @@ public class GridLayout extends ViewGroup {
             this.values = compact(values, index);
         }
 
-        private K getKey(int i) {
-            return keys[index[i]];
-        }
-
         private V getValue(int i) {
             return values[index[i]];
         }
@@ -1958,8 +1908,6 @@ public class GridLayout extends ViewGroup {
     of the values for each View.
     */
     private static class Bounds {
-        private static final Bounds GONE = new Bounds();
-
         public int before;
         public int after;
         public int flexibility; // we're flexible iff all included specs are flexible
@@ -1995,8 +1943,8 @@ public class GridLayout extends ViewGroup {
         protected final void include(View c, Spec spec, GridLayout gridLayout, Axis axis) {
             this.flexibility &= spec.getFlexibility();
             int size = gridLayout.getMeasurementIncludingMargin(c, axis.horizontal);
-            // todo test this works correctly when the returned value is UNDEFINED
             Alignment alignment = gridLayout.getAlignment(spec.alignment, axis.horizontal);
+            // todo test this works correctly when the returned value is UNDEFINED
             int before = alignment.getAlignmentValue(c, size);
             include(before, size - before);
         }
@@ -2079,6 +2027,7 @@ public class GridLayout extends ViewGroup {
             if (max != interval.max) {
                 return false;
             }
+            //noinspection RedundantIfStatement
             if (min != interval.min) {
                 return false;
             }
@@ -2113,57 +2062,33 @@ public class GridLayout extends ViewGroup {
      * For column groups, this specifies the horizontal alignment.
      */
     public static class Spec {
-        private static final int UNDEFINED_FLEXIBILITY = UNDEFINED;
-
         final Interval span;
-
         final Alignment alignment;
 
-        /**
-         * The <em>flexibility</em> property tells GridLayout how to derive minimum and maximum size
-         * values for a component. Specifications are made with respect to a child's
-         * 'measured size'. A child's measured size is, in turn, controlled by its
-         * height and width layout parameters which either specify a size or, in
-         * the case of {@link LayoutParams#WRAP_CONTENT WRAP_CONTENT}, defer to
-         * the computed size of the component.
-         * <p>
-         * A cell group is flexible only if <em>all</em> of its components are flexible.
-         * <p>
-         * By default, flexibility is {@link #INFLEXIBLE} only when alignment/gravity is undefined.
-         */
-        final int flexibility;
-
-        private Spec(Interval span, Alignment alignment, int flexibility) {
+        private Spec(Interval span, Alignment alignment) {
             this.span = span;
             this.alignment = alignment;
-            this.flexibility = flexibility;
         }
 
         /* Copying constructor */
         private Spec(Spec that) {
-            this(that.span, that.alignment, that.flexibility);
+            this(that.span, that.alignment);
         }
 
         private Spec(int start, int size, Alignment alignment) {
-            this(new Interval(start, start + size), alignment, UNDEFINED);
+            this(new Interval(start, start + size), alignment);
         }
 
         private Spec copyWriteSpan(Interval span) {
-            return new Spec(span, alignment, flexibility);
+            return new Spec(span, alignment);
         }
 
         private Spec copyWriteAlignment(Alignment alignment) {
-            return new Spec(span, alignment, flexibility);
-        }
-
-        private static int defaultFlexibility(Alignment alignment) {
-            return (alignment == UNDEFINED_ALIGNMENT) ? INFLEXIBLE : CAN_STRETCH;
+            return new Spec(span, alignment);
         }
 
         int getFlexibility() {
-            return (flexibility != UNDEFINED_FLEXIBILITY) ?
-                    flexibility :
-                    defaultFlexibility(alignment);
+            return (alignment == UNDEFINED_ALIGNMENT) ? INFLEXIBLE : CAN_STRETCH;
         }
 
         /**
@@ -2190,6 +2115,7 @@ public class GridLayout extends ViewGroup {
             if (!alignment.equals(spec.alignment)) {
                 return false;
             }
+            //noinspection RedundantIfStatement
             if (!span.equals(spec.span)) {
                 return false;
             }
@@ -2447,15 +2373,5 @@ public class GridLayout extends ViewGroup {
 
     private static final int INFLEXIBLE = 0;
 
-    /**
-     * Indicates that a view's size should be greater than or equal to the size specified by
-     * its layout parameters.
-     *
-     * @deprecated Please use {@link #spec(int, int, Alignment)} instead,
-     * all spec's that define alignment (gravity) are assumed to able to stretch.
-     *
-     * @hide
-     */
-    @Deprecated
-    public static final int CAN_STRETCH = 2;
+    private static final int CAN_STRETCH = 2;
 }
