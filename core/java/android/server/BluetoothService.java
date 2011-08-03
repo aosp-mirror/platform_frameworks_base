@@ -1565,6 +1565,8 @@ public class BluetoothService extends IBluetooth.Stub {
     @Override
     public boolean changeApplicationBluetoothState(boolean on,
             IBluetoothStateChangeCallback callback, IBinder binder) {
+        mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
+
         int pid = Binder.getCallingPid();
         //mStateChangeTracker is a synchronized map
         if (!mStateChangeTracker.containsKey(pid)) {
