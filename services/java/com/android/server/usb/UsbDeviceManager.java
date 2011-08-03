@@ -382,7 +382,7 @@ public class UsbDeviceManager {
                 mAdbEnabled = enable;
                 // Due to the persist.sys.usb.config property trigger, changing adb state requires
                 // switching to default function
-                setEnabledFunctions(mDefaultFunctions, false);
+                setEnabledFunctions(mDefaultFunctions, true);
                 updateAdbNotification();
             }
         }
