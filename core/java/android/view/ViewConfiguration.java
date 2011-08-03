@@ -220,6 +220,7 @@ public class ViewConfiguration {
     private final int mMaximumDrawingCacheSize;
     private final int mOverscrollDistance;
     private final int mOverflingDistance;
+    private final boolean mFadingMarqueeEnabled;
 
     private boolean sHasPermanentMenuKey;
     private boolean sHasPermanentMenuKeySet;
@@ -246,6 +247,7 @@ public class ViewConfiguration {
         mMaximumDrawingCacheSize = MAXIMUM_DRAWING_CACHE_SIZE;
         mOverscrollDistance = OVERSCROLL_DISTANCE;
         mOverflingDistance = OVERFLING_DISTANCE;
+        mFadingMarqueeEnabled = true;
     }
 
     /**
@@ -297,6 +299,9 @@ public class ViewConfiguration {
                 sHasPermanentMenuKey = false;
             }
         }
+
+        mFadingMarqueeEnabled = res.getBoolean(
+                com.android.internal.R.bool.config_ui_enableFadingMarquee);
     }
 
     /**
@@ -672,5 +677,13 @@ public class ViewConfiguration {
      */
     public boolean hasPermanentMenuKey() {
         return sHasPermanentMenuKey;
+    }
+
+    /**
+     * @hide
+     * @return Whether or not marquee should use fading edges.
+     */
+    public boolean isFadingMarqueeEnabled() {
+        return mFadingMarqueeEnabled;
     }
 }

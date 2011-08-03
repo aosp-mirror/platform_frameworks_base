@@ -999,7 +999,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 setEllipsize(TextUtils.TruncateAt.END);
                 break;
             case 4:
-                setHorizontalFadingEdgeEnabled(true);
+                setHorizontalFadingEdgeEnabled(
+                        ViewConfiguration.get(context).isFadingMarqueeEnabled());
                 setEllipsize(TextUtils.TruncateAt.MARQUEE);
                 break;
         }
@@ -3067,7 +3068,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (text instanceof Spanned &&
             ((Spanned) text).getSpanStart(TextUtils.TruncateAt.MARQUEE) >= 0) {
-            setHorizontalFadingEdgeEnabled(true);
+            setHorizontalFadingEdgeEnabled(
+                    ViewConfiguration.get(mContext).isFadingMarqueeEnabled());
             setEllipsize(TextUtils.TruncateAt.MARQUEE);
         }
 
