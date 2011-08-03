@@ -79,7 +79,7 @@ public class ManageDialog extends Activity implements Handler.Callback,
             mDataTransmitted = (TextView) view.findViewById(R.id.data_transmitted);
             mDataReceived = (TextView) view.findViewById(R.id.data_received);
 
-            if (mConfig.packagz.equals(VpnConfig.LEGACY_VPN)) {
+            if (mConfig.user.equals(VpnConfig.LEGACY_VPN)) {
                 mDialog = new AlertDialog.Builder(this)
                         .setIcon(android.R.drawable.ic_dialog_info)
                         .setTitle(R.string.legacy_title)
@@ -89,7 +89,7 @@ public class ManageDialog extends Activity implements Handler.Callback,
                         .create();
             } else {
                 PackageManager pm = getPackageManager();
-                ApplicationInfo app = pm.getApplicationInfo(mConfig.packagz, 0);
+                ApplicationInfo app = pm.getApplicationInfo(mConfig.user, 0);
                 mDialog = new AlertDialog.Builder(this)
                         .setIcon(app.loadIcon(pm))
                         .setTitle(app.loadLabel(pm))
@@ -131,7 +131,7 @@ public class ManageDialog extends Activity implements Handler.Callback,
             if (which == AlertDialog.BUTTON_POSITIVE) {
                 mConfig.configureIntent.send();
             } else if (which == AlertDialog.BUTTON_NEUTRAL) {
-                mService.prepareVpn(mConfig.packagz, VpnConfig.LEGACY_VPN);
+                mService.prepareVpn(mConfig.user, VpnConfig.LEGACY_VPN);
             }
         } catch (Exception e) {
             Log.e(TAG, "onClick", e);
