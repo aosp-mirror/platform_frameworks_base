@@ -1783,11 +1783,11 @@
   <public type="attr" name="minResizeHeight" />
 
   <public type="attr" name="actionBarWidgetTheme" />
+  <public type="attr" name="uiOptions" />
 
   <public type="style" name="TextAppearance.SuggestionHighlight" />
-  <public type="style" name="Theme.Holo.SplitActionBarWhenNarrow" />
-  <public type="style" name="Theme.Holo.Light.SplitActionBarWhenNarrow" />
 
+  <public type="style" name="Theme.Holo.Light.DarkActionBar" />
   <public type="style" name="Widget.Holo.Button.Borderless.Small" />
   <public type="style" name="Widget.Holo.Light.Button.Borderless.Small" />
   <public type="style" name="TextAppearance.Holo.Widget.ActionBar.Title.Inverse" />
@@ -1802,12 +1802,6 @@
   <public type="style" name="Widget.Holo.Light.ActionBar.TabView.Inverse" />
   <public type="style" name="Widget.Holo.Light.ActionBar.TabText.Inverse" />
   <public type="style" name="Widget.Holo.Light.ActionMode.Inverse" />
-  <public type="style" name="Theme.Holo.SolidActionBar" />
-  <public type="style" name="Theme.Holo.Light.SolidActionBar" />
-  <public type="style" name="Theme.Holo.Light.SolidActionBar.Inverse" />
-  <public type="style" name="Theme.Holo.SolidActionBar.SplitActionBarWhenNarrow" />
-  <public type="style" name="Theme.Holo.Light.SolidActionBar.SplitActionBarWhenNarrow" />
-  <public type="style" name="Theme.Holo.Light.SolidActionBar.Inverse.SplitActionBarWhenNarrow" />
 
   <public type="integer" name="status_bar_notification_info_maxnum" />
   <public type="string" name="status_bar_notification_info_overflow" />

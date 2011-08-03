@@ -710,6 +710,22 @@
         <enum name="preferExternal" value="2" />
     </attr>
 
+    <!-- Extra options for an activity's UI. If specified on the application
+         tag these will be considered defaults for all activities in the
+         application. -->
+    <attr name="uiOptions">
+        <!-- No extra UI options. -->
+        <flag name="none" value="0" />
+        <!-- Split the options menu into a separate bar at the bottom of
+             the screen when severely constrained for horizontal space.
+             (e.g. portrait mode on a phone.) Instead of a small number
+             of action buttons appearing in the action bar at the top
+             of the screen, the action bar will split into the top navigation
+             section and the bottom menu section. Menu items will not be
+             split across the two bars; they will always appear together. -->
+        <flag name="splitActionBarWhenNarrow" value="1" />
+    </attr>
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -812,6 +828,7 @@
              application is running, the user will be informed of this.
              @hide -->
         <attr name="cantSaveState" format="boolean" />
+        <attr name="uiOptions" />
     </declare-styleable>
     
     <!-- The <code>permission</code> tag declares a security permission that can be
@@ -1302,6 +1319,7 @@
         <attr name="windowSoftInputMode" />
         <attr name="immersive" />
         <attr name="hardwareAccelerated" />
+        <attr name="uiOptions" />
     </declare-styleable>
     
     <!-- The <code>activity-alias</code> tag declares a new

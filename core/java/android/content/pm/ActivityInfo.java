@@ -433,7 +433,19 @@ public class ActivityInfo extends ComponentInfo
      * the mode from the theme will be used.
      */
     public int softInputMode;
-    
+
+    /**
+     * The desired extra UI options for this activity and its main window.
+     * Set from the {@link android.R.attr#uiOptions} attribute in the
+     * activity's manifest.
+     */
+    public int uiOptions = 0;
+
+    /**
+     * Flag for use with uiOptions.
+     */
+    public static final int UIOPTION_SPLIT_ACTION_BAR_WHEN_NARROW = 1;
+
     public ActivityInfo() {
     }
 
@@ -448,6 +460,7 @@ public class ActivityInfo extends ComponentInfo
         screenOrientation = orig.screenOrientation;
         configChanges = orig.configChanges;
         softInputMode = orig.softInputMode;
+        uiOptions = orig.uiOptions;
     }
     
     /**
@@ -479,6 +492,9 @@ public class ActivityInfo extends ComponentInfo
                     + " configChanges=0x" + Integer.toHexString(configChanges)
                     + " softInputMode=0x" + Integer.toHexString(softInputMode));
         }
+        if (uiOptions != 0) {
+            pw.println(prefix + " uiOptions=0x" + Integer.toHexString(uiOptions));
+        }
         super.dumpBack(pw, prefix);
     }
     
@@ -503,6 +519,7 @@ public class ActivityInfo extends ComponentInfo
         dest.writeInt(screenOrientation);
         dest.writeInt(configChanges);
         dest.writeInt(softInputMode);
+        dest.writeInt(uiOptions);
     }
 
     public static final Parcelable.Creator<ActivityInfo> CREATOR
@@ -526,5 +543,6 @@ public class ActivityInfo extends ComponentInfo
         screenOrientation = source.readInt();
         configChanges = source.readInt();
         softInputMode = source.readInt();
+        uiOptions = source.readInt();
     }
 }
