@@ -82,7 +82,8 @@ public:
      * Creates a new font associated with the specified font state.
      */
     static Font* create(FontRenderer* state, uint32_t fontId, float fontSize,
-            int flags, uint32_t italicStyle, uint32_t scaleX);
+            int flags, uint32_t italicStyle, uint32_t scaleX, SkPaint::Style style,
+            uint32_t strokeWidth);
 
 protected:
     friend class FontRenderer;
@@ -128,7 +129,7 @@ protected:
     };
 
     Font(FontRenderer* state, uint32_t fontId, float fontSize, int flags, uint32_t italicStyle,
-            uint32_t scaleX);
+            uint32_t scaleX, SkPaint::Style style, uint32_t strokeWidth);
 
     // Cache of glyphs
     DefaultKeyedVector<glyph_t, CachedGlyphInfo*> mCachedGlyphs;
@@ -157,6 +158,8 @@ protected:
     int mFlags;
     uint32_t mItalicStyle;
     uint32_t mScaleX;
+    SkPaint::Style mStyle;
+    uint32_t mStrokeWidth;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

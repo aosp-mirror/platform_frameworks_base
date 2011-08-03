@@ -77,13 +77,23 @@ public class TextActivity extends Activity {
             super.onDraw(canvas);
             canvas.drawRGB(255, 255, 255);
 
+            mMediumPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+            mMediumPaint.setStrokeWidth(2.0f);
             canvas.drawText("Hello OpenGL renderer!", 100, 20, mMediumPaint);
+
+            mMediumPaint.setStyle(Paint.Style.FILL);
             mMediumPaint.setTextAlign(Paint.Align.CENTER);
             canvas.drawText("Hello OpenGL renderer!", 100, 40, mMediumPaint);
+
+            mMediumPaint.setStyle(Paint.Style.STROKE);
+            mMediumPaint.setStrokeWidth(2.0f);
             mMediumPaint.setTextAlign(Paint.Align.RIGHT);
             canvas.drawText("Hello OpenGL renderer!", 100, 60, mMediumPaint);
+
+            mMediumPaint.setStyle(Paint.Style.FILL);
             mMediumPaint.setTextAlign(Paint.Align.LEFT);
             canvas.drawText("Hello OpenGL renderer!", 100, 100, mMediumPaint);
+
             mMediumPaint.setShadowLayer(2.5f, 0.0f, 0.0f, 0xff000000);
             canvas.drawText("Hello OpenGL renderer!", 100, 150, mMediumPaint);
             mMediumPaint.clearShadowLayer();
