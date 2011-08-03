@@ -173,7 +173,7 @@ final class BluetoothPanProfileHandler {
 
                 if (!mBluetoothService.disconnectPanServerDeviceNative(objectPath,
                         device.getAddress(),
-                        panDevice.mIfaceAddr)) {
+                        panDevice.mIface)) {
                     errorLog("could not disconnect Pan Server Device "+device.getAddress());
 
                     // Restore prev state
@@ -291,6 +291,7 @@ final class BluetoothPanProfileHandler {
             panDevice.mState = state;
             panDevice.mIfaceAddr = ifaceAddr;
             panDevice.mLocalRole = role;
+            panDevice.mIface = iface;
         }
 
         Intent intent = new Intent(BluetoothPan.ACTION_CONNECTION_STATE_CHANGED);
