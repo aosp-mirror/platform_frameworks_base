@@ -1265,9 +1265,8 @@ public class ActionBarView extends AbsActionBarView {
         @Override
         public void initForMenu(Context context, MenuBuilder menu) {
             // Clear the expanded action view when menus change.
-            mExpandedActionView = null;
-            if (mCurrentExpandedItem != null) {
-                mCurrentExpandedItem.collapseActionView();
+            if (mMenu != null && mCurrentExpandedItem != null) {
+                mMenu.collapseItemActionView(mCurrentExpandedItem);
             }
             mMenu = menu;
         }

@@ -150,6 +150,11 @@ public class MenuBuilder implements Menu {
 
     private CopyOnWriteArrayList<WeakReference<MenuPresenter>> mPresenters =
             new CopyOnWriteArrayList<WeakReference<MenuPresenter>>();
+
+    /**
+     * Currently expanded menu item; must be collapsed when we clear.
+     */
+    private MenuItemImpl mExpandedItem;
     
     /**
      * Called by menu to notify of close and selection changes.
@@ -512,6 +517,9 @@ public class MenuBuilder implements Menu {
     }
     
     public void clear() {
+        if (mExpandedItem != null) {
+            collapseItemActionView(mExpandedItem);
+        }
         mItems.clear();
         
         onItemsChanged(true);
@@ -1223,11 +1231,14 @@ public class MenuBuilder implements Menu {
         }
         startDispatchingItemsChanged();
 
+        if (expanded) {
+            mExpandedItem = item;
+        }
         return expanded;
     }
 
     public boolean collapseItemActionView(MenuItemImpl item) {
-        if (mPresenters.isEmpty()) return false;
+        if (mPresenters.isEmpty() || mExpandedItem != item) return false;
 
         boolean collapsed = false;
 
@@ -1242,6 +1253,9 @@ public class MenuBuilder implements Menu {
         }
         startDispatchingItemsChanged();
 
+        if (collapsed) {
+            mExpandedItem = null;
+        }
         return collapsed;
     }
 }
