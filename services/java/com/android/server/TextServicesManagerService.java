@@ -23,6 +23,8 @@ import com.android.internal.textservice.ISpellCheckerSessionListener;
 import com.android.internal.textservice.ITextServicesManager;
 import com.android.internal.textservice.ITextServicesSessionListener;
 
+import org.xmlpull.v1.XmlPullParserException;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -40,6 +42,7 @@ import android.text.TextUtils;
 import android.util.Slog;
 import android.view.textservice.SpellCheckerInfo;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -125,9 +128,15 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 continue;
             }
             if (DBG) Slog.d(TAG, "Add: " + compName);
-            final SpellCheckerInfo sci = new SpellCheckerInfo(context, ri);
-            list.add(sci);
-            map.put(sci.getId(), sci);
+            try {
+                final SpellCheckerInfo sci = new SpellCheckerInfo(context, ri);
+                list.add(sci);
+                map.put(sci.getId(), sci);
+            } catch (XmlPullParserException e) {
+                Slog.w(TAG, "Unable to load the spell checker " + compName, e);
+            } catch (IOException e) {
+                Slog.w(TAG, "Unable to load the spell checker " + compName, e);
+            }
         }
         if (DBG) {
             Slog.d(TAG, "buildSpellCheckerMapLocked: " + list.size() + "," + map.size());
