@@ -172,17 +172,14 @@ status_t Layer::setBuffers( uint32_t w, uint32_t h,
 
 void Layer::setGeometry(hwc_layer_t* hwcl)
 {
-    hwcl->compositionType = HWC_FRAMEBUFFER;
-    hwcl->hints = 0;
-    hwcl->flags = 0;
-    hwcl->transform = 0;
-    hwcl->blending = HWC_BLENDING_NONE;
+    LayerBaseClient::setGeometry(hwcl);
+
+    hwcl->flags &= ~HWC_SKIP_LAYER;
 
     // we can't do alpha-fade with the hwc HAL
     const State& s(drawingState());
     if (s.alpha < 0xFF) {
         hwcl->flags = HWC_SKIP_LAYER;
-        return;
     }
 
     /*
@@ -205,26 +202,9 @@ void Layer::setGeometry(hwc_layer_t* hwcl)
     // we can only handle simple transformation
     if (finalTransform & Transform::ROT_INVALID) {
         hwcl->flags = HWC_SKIP_LAYER;
-        return;
+    } else {
+        hwcl->transform = finalTransform;
     }
-
-    hwcl->transform = finalTransform;
-
-    if (!isOpaque()) {
-        hwcl->blending = mPremultipliedAlpha ?
-                HWC_BLENDING_PREMULT : HWC_BLENDING_COVERAGE;
-    }
-
-    // scaling is already applied in mTransformedBounds
-    hwcl->displayFrame.left   = mTransformedBounds.left;
-    hwcl->displayFrame.top    = mTransformedBounds.top;
-    hwcl->displayFrame.right  = mTransformedBounds.right;
-    hwcl->displayFrame.bottom = mTransformedBounds.bottom;
-
-    hwcl->visibleRegionScreen.rects =
-            reinterpret_cast<hwc_rect_t const *>(
-                    visibleRegionScreen.getArray(
-                            &hwcl->visibleRegionScreen.numRects));
 }
 
 void Layer::setPerFrameData(hwc_layer_t* hwcl) {
@@ -235,9 +215,9 @@ void Layer::setPerFrameData(hwc_layer_t* hwcl) {
         // HWC handle it.
         hwcl->flags |= HWC_SKIP_LAYER;
         hwcl->handle = NULL;
-        return;
+    } else {
+        hwcl->handle = buffer->handle;
     }
-    hwcl->handle = buffer->handle;
 
     if (isCropped()) {
         hwcl->sourceCrop.left   = mCurrentCrop.left;
