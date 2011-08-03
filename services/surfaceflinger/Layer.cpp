@@ -227,8 +227,13 @@ void Layer::setPerFrameData(hwc_layer_t* hwcl) {
     } else {
         hwcl->sourceCrop.left   = 0;
         hwcl->sourceCrop.top    = 0;
-        hwcl->sourceCrop.right  = buffer->width;
-        hwcl->sourceCrop.bottom = buffer->height;
+        if (buffer != NULL) {
+            hwcl->sourceCrop.right  = buffer->width;
+            hwcl->sourceCrop.bottom = buffer->height;
+        } else {
+            hwcl->sourceCrop.right  = mTransformedBounds.width();
+            hwcl->sourceCrop.bottom = mTransformedBounds.height();
+        }
     }
 }
 
