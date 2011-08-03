@@ -9667,6 +9667,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
+        public boolean offsetHasBeenChanged() {
+            return mNumberPreviousOffsets > 1;
+        }
+
         @Override
         protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
             setMeasuredDimension(mDrawable.getIntrinsicWidth(), mDrawable.getIntrinsicHeight());
@@ -9975,15 +9979,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     break;
 
                 case MotionEvent.ACTION_UP:
-                    final float deltaX = mDownPositionX - ev.getRawX();
-                    final float deltaY = mDownPositionY - ev.getRawY();
-                    final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
-                    if (distanceSquared < mSquaredTouchSlopDistance) {
-                        if (mActionPopupWindow != null && mActionPopupWindow.isShowing()) {
-                            // Tapping on the handle dismisses the displayed action popup
-                            mActionPopupWindow.hide();
-                        } else {
-                            show(0);
+                    if (!offsetHasBeenChanged()) {
+                        final float deltaX = mDownPositionX - ev.getRawX();
+                        final float deltaY = mDownPositionY - ev.getRawY();
+                        final float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+                        if (distanceSquared < mSquaredTouchSlopDistance) {
+                            if (mActionPopupWindow != null && mActionPopupWindow.isShowing()) {
+                                // Tapping on the handle dismisses the displayed action popup
+                                mActionPopupWindow.hide();
+                            } else {
+                                show(0);
+                            }
                         }
                     }
                     hideAfterDelay();
