@@ -3326,7 +3326,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         if (pkg.applicationInfo.nativeLibraryDir != null) {
             try {
                 final File nativeLibraryDir = new File(pkg.applicationInfo.nativeLibraryDir);
-                final String dataPathString = dataPath.getCanonicalFile().getPath();
+                final String dataPathString = dataPath.getCanonicalPath();
 
                 if (isSystemApp(pkg) && !isUpdatedSystemApp(pkg)) {
                     /*
@@ -3340,7 +3340,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                         Log.i(TAG, "removed obsolete native libraries for system package "
                                 + path);
                     }
-                } else if (nativeLibraryDir.getCanonicalFile().getParent()
+                } else if (nativeLibraryDir.getParentFile().getCanonicalPath()
                         .equals(dataPathString)) {
                     /*
                      * Make sure the native library dir isn't a symlink to
