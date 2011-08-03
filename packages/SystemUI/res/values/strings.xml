@@ -41,8 +41,9 @@
     <!-- Title shown in recents popup for inspecting an application's properties -->
     <string name="status_bar_recent_inspect_item_title">Inspect</string>
 
-
-
+    <!-- For formatting day of week and date in DateView.  Day of week precedes date by default,
+         but this may be overridden on a per-locale basis if necessary. -->
+    <string name="status_bar_date_formatter">%1$s\n%2$s</string>
 
     <!-- The label in the bar at the top of the status bar when there are no notifications
          showing.  [CHAR LIMIT=40]-->
