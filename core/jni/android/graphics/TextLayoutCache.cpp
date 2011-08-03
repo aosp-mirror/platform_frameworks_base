@@ -17,6 +17,10 @@
 #include "TextLayoutCache.h"
 #include "TextLayout.h"
 
+extern "C" {
+#include "harfbuzz-unicode.h"
+}
+
 namespace android {
 
 TextLayoutCache::TextLayoutCache() :
@@ -355,7 +359,9 @@ void TextLayoutCacheValue::setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec
     shaperItem->item.pos = start;
     shaperItem->item.length = count;
     shaperItem->item.bidiLevel = isRTL;
-    shaperItem->item.script = isRTL ? HB_Script_Arabic : HB_Script_Common;
+
+    ssize_t iter = 0;
+    shaperItem->item.script = code_point_to_script(utf16_to_code_point(chars, count, &iter));
 
     shaperItem->string = chars;
     shaperItem->stringLength = contextCount;
