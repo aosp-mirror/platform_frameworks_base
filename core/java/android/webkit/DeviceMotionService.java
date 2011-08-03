@@ -99,6 +99,7 @@ final class DeviceMotionService implements SensorEventListener {
         mUpdateRunnable = new Runnable() {
             @Override
             public void run() {
+                assert mIsRunning;
                 mManager.onMotionChange(new Double(mLastAcceleration[0]),
                         new Double(mLastAcceleration[1]), new Double(mLastAcceleration[2]),
                         INTERVAL_MILLIS);
@@ -156,6 +157,11 @@ final class DeviceMotionService implements SensorEventListener {
         assert(event.values.length == 3);
         assert WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName());
         assert(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER);
+
+        // We may get callbacks after the call to getSensorManager().unregisterListener() returns.
+        if (!mIsRunning) {
+            return;
+        }
 
         boolean firstData = mLastAcceleration == null;
         mLastAcceleration = event.values;
