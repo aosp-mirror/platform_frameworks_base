@@ -145,13 +145,14 @@ final class BluetoothPanProfileHandler {
             return false;
         }
 
-        handlePanDeviceStateChange(device, BluetoothPan.STATE_CONNECTING,
+        // Send interface as null as it is not known
+        handlePanDeviceStateChange(device, null, BluetoothPan.STATE_CONNECTING,
                                            BluetoothPan.LOCAL_PANU_ROLE);
         if (mBluetoothService.connectPanDeviceNative(objectPath, "nap")) {
             debugLog("connecting to PAN");
             return true;
         } else {
-            handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTED,
+            handlePanDeviceStateChange(device, null, BluetoothPan.STATE_DISCONNECTED,
                                                 BluetoothPan.LOCAL_PANU_ROLE);
             errorLog("could not connect to PAN");
             return false;
@@ -168,8 +169,8 @@ final class BluetoothPanProfileHandler {
                     panDevice.mLocalRole == BluetoothPan.LOCAL_NAP_ROLE) {
                 String objectPath = mBluetoothService.getObjectPathFromAddress(device.getAddress());
 
-                handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTING,
-                        panDevice.mLocalRole);
+                handlePanDeviceStateChange(device, panDevice.mIface,
+                        BluetoothPan.STATE_DISCONNECTING, panDevice.mLocalRole);
 
                 if (!mBluetoothService.disconnectPanServerDeviceNative(objectPath,
                         device.getAddress(),
@@ -177,7 +178,7 @@ final class BluetoothPanProfileHandler {
                     errorLog("could not disconnect Pan Server Device "+device.getAddress());
 
                     // Restore prev state
-                    handlePanDeviceStateChange(device, state,
+                    handlePanDeviceStateChange(device, panDevice.mIface, state,
                             panDevice.mLocalRole);
 
                     return false;
@@ -230,19 +231,19 @@ final class BluetoothPanProfileHandler {
             return false;
         }
 
-        handlePanDeviceStateChange(device, BluetoothPan.STATE_DISCONNECTING,
+        handlePanDeviceStateChange(device, panDevice.mIface, BluetoothPan.STATE_DISCONNECTING,
                                     panDevice.mLocalRole);
         if (panDevice.mLocalRole == BluetoothPan.LOCAL_NAP_ROLE) {
             if (!mBluetoothService.disconnectPanServerDeviceNative(objectPath, device.getAddress(),
                     panDevice.mIface)) {
                 // Restore prev state, this shouldn't happen
-                handlePanDeviceStateChange(device, state, panDevice.mLocalRole);
+                handlePanDeviceStateChange(device, panDevice.mIface, state, panDevice.mLocalRole);
                 return false;
             }
         } else {
             if (!mBluetoothService.disconnectPanDeviceNative(objectPath)) {
                 // Restore prev state, this shouldn't happen
-                handlePanDeviceStateChange(device, state, panDevice.mLocalRole);
+                handlePanDeviceStateChange(device, panDevice.mIface, state, panDevice.mLocalRole);
                 return false;
             }
         }
@@ -302,11 +303,6 @@ final class BluetoothPanProfileHandler {
 
         debugLog("Pan Device state : device: " + device + " State:" + prevState + "->" + state);
         mBluetoothService.sendConnectionStateChange(device, state, prevState);
-    }
-
-    void handlePanDeviceStateChange(BluetoothDevice device,
-                                                 int state, int role) {
-        handlePanDeviceStateChange(device, null, state, role);
     }
 
     private class BluetoothPanDevice {
