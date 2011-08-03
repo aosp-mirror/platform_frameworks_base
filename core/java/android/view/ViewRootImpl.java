@@ -1253,6 +1253,11 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                         mScroller.abortAnimation();
                     }
                     disposeResizeBuffer();
+                    // Our surface is gone
+                    if (mAttachInfo.mHardwareRenderer != null &&
+                            mAttachInfo.mHardwareRenderer.isEnabled()) {
+                        mAttachInfo.mHardwareRenderer.destroy(true);
+                    }
                 } else if (surfaceGenerationId != mSurface.getGenerationId() &&
                         mSurfaceHolder == null && mAttachInfo.mHardwareRenderer != null) {
                     fullRedrawNeeded = true;
@@ -1273,7 +1278,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                 }
             } catch (RemoteException e) {
             }
-            
+
             if (DEBUG_ORIENTATION) Log.v(
                     TAG, "Relayout returned: frame=" + frame + ", surface=" + mSurface);
 
