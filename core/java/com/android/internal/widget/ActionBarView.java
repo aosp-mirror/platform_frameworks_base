@@ -583,7 +583,7 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     public void setLogo(int resId) {
-        mContext.getResources().getDrawable(resId);
+        setLogo(mContext.getResources().getDrawable(resId));
     }
 
     /**
