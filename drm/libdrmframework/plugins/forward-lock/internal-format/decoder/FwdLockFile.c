@@ -114,7 +114,7 @@ static int FwdLockFile_AcquireSession(int fileDesc) {
 }
 
 /**
- * Finds the file session associated to the given file descriptor.
+ * Finds the file session associated with the given file descriptor.
  *
  * @param[in] fileDesc A file descriptor.
  *
@@ -389,7 +389,7 @@ int FwdLockFile_CheckDataIntegrity(int fileDesc) {
                 result = FALSE;
             } else {
                 ssize_t numBytesRead;
-                size_t signatureSize = SHA1_HASH_SIZE;
+                unsigned int signatureSize = SHA1_HASH_SIZE;
                 while ((numBytesRead =
                         read(pSession->fileDesc, pData->buffer, SIG_CALC_BUFFER_SIZE)) > 0) {
                     HMAC_Update(&pSession->signingContext, pData->buffer, (size_t)numBytesRead);
@@ -399,7 +399,7 @@ int FwdLockFile_CheckDataIntegrity(int fileDesc) {
                 } else {
                     HMAC_Final(&pSession->signingContext, pData->signature, &signatureSize);
                     assert(signatureSize == SHA1_HASH_SIZE);
-                    result = memcmp(pData->signature, pSession->dataSignature, signatureSize) == 0;
+                    result = memcmp(pData->signature, pSession->dataSignature, SHA1_HASH_SIZE) == 0;
                 }
                 HMAC_Init_ex(&pSession->signingContext, NULL, KEY_SIZE, NULL, NULL);
                 (void)lseek64(pSession->fileDesc, pSession->dataOffset + pSession->filePos,
@@ -419,16 +419,16 @@ int FwdLockFile_CheckHeaderIntegrity(int fileDesc) {
     } else {
         FwdLockFile_Session_t *pSession = sessionPtrs[sessionId];
         unsigned char signature[SHA1_HASH_SIZE];
-        size_t signatureSize = SHA1_HASH_SIZE;
+        unsigned int signatureSize = SHA1_HASH_SIZE;
         HMAC_Update(&pSession->signingContext, pSession->topHeader, TOP_HEADER_SIZE);
         HMAC_Update(&pSession->signingContext, (unsigned char *)pSession->pContentType,
                     pSession->contentTypeLength);
         HMAC_Update(&pSession->signingContext, pSession->pEncryptedSessionKey,
                     pSession->encryptedSessionKeyLength);
-        HMAC_Update(&pSession->signingContext, pSession->dataSignature, signatureSize);
+        HMAC_Update(&pSession->signingContext, pSession->dataSignature, SHA1_HASH_SIZE);
         HMAC_Final(&pSession->signingContext, signature, &signatureSize);
         assert(signatureSize == SHA1_HASH_SIZE);
-        result = memcmp(signature, pSession->headerSignature, signatureSize) == 0;
+        result = memcmp(signature, pSession->headerSignature, SHA1_HASH_SIZE) == 0;
         HMAC_Init_ex(&pSession->signingContext, NULL, KEY_SIZE, NULL, NULL);
     }
     return result;
