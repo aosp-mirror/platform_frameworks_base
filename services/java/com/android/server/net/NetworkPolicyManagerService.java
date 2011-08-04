@@ -16,6 +16,7 @@
 
 package com.android.server.net;
 
+import static android.Manifest.permission.ACCESS_NETWORK_STATE;
 import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
@@ -75,9 +76,11 @@ import android.net.INetworkPolicyManager;
 import android.net.INetworkStatsService;
 import android.net.NetworkIdentity;
 import android.net.NetworkPolicy;
+import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -1054,6 +1057,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         synchronized (mRulesLock) {
             mRestrictBackground = restrictBackground;
             updateRulesForRestrictBackgroundLocked();
+            writePolicyLocked();
         }
     }
 
@@ -1064,6 +1068,68 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         synchronized (mRulesLock) {
             return mRestrictBackground;
         }
+    }
+
+    private NetworkPolicy findPolicyForNetworkLocked(NetworkIdentity ident) {
+        for (NetworkPolicy policy : mNetworkPolicy.values()) {
+            if (policy.template.matches(ident)) {
+                return policy;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public NetworkQuotaInfo getNetworkQuotaInfo(NetworkState state) {
+        mContext.enforceCallingOrSelfPermission(ACCESS_NETWORK_STATE, TAG);
+
+        // only returns usage summary, so we don't require caller to have
+        // READ_NETWORK_USAGE_HISTORY.
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return getNetworkQuotaInfoUnchecked(state);
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private NetworkQuotaInfo getNetworkQuotaInfoUnchecked(NetworkState state) {
+        final NetworkIdentity ident = NetworkIdentity.buildNetworkIdentity(mContext, state);
+
+        final NetworkPolicy policy;
+        synchronized (mRulesLock) {
+            policy = findPolicyForNetworkLocked(ident);
+        }
+
+        if (policy == null) {
+            // missing policy means we can't derive useful quota info
+            return null;
+        }
+
+        final long currentTime = mTime.hasCache() ? mTime.currentTimeMillis()
+                : System.currentTimeMillis();
+
+        final long start = computeLastCycleBoundary(currentTime, policy);
+        final long end = currentTime;
+
+        // find total bytes used under policy
+        long totalBytes = 0;
+        try {
+            final NetworkStats stats = mNetworkStats.getSummaryForNetwork(
+                    policy.template, start, end);
+            final NetworkStats.Entry entry = stats.getValues(0, null);
+            totalBytes = entry.rxBytes + entry.txBytes;
+        } catch (RemoteException e) {
+            Slog.w(TAG, "problem reading summary for template " + policy.template);
+        }
+
+        // report soft and hard limits under policy
+        final long softLimitBytes = policy.warningBytes != WARNING_DISABLED ? policy.warningBytes
+                : NetworkQuotaInfo.NO_LIMIT;
+        final long hardLimitBytes = policy.limitBytes != LIMIT_DISABLED ? policy.limitBytes
+                : NetworkQuotaInfo.NO_LIMIT;
+
+        return new NetworkQuotaInfo(totalBytes, softLimitBytes, hardLimitBytes);
     }
 
     @Override

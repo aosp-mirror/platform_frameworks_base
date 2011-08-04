@@ -11116,6 +11116,7 @@ package android.net {
 
   public class ConnectivityManager {
     method public android.net.NetworkInfo getActiveNetworkInfo();
+    method public android.net.NetworkQuotaInfo getActiveNetworkQuotaInfo();
     method public android.net.NetworkInfo[] getAllNetworkInfo();
     method public boolean getBackgroundDataSetting();
     method public android.net.NetworkInfo getNetworkInfo(int);
@@ -11130,7 +11131,7 @@ package android.net {
     field public static final int DEFAULT_NETWORK_PREFERENCE = 1; // 0x1
     field public static final java.lang.String EXTRA_EXTRA_INFO = "extraInfo";
     field public static final java.lang.String EXTRA_IS_FAILOVER = "isFailover";
-    field public static final java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
+    field public static final deprecated java.lang.String EXTRA_NETWORK_INFO = "networkInfo";
     field public static final java.lang.String EXTRA_NO_CONNECTIVITY = "noConnectivity";
     field public static final java.lang.String EXTRA_OTHER_NETWORK_INFO = "otherNetwork";
     field public static final java.lang.String EXTRA_REASON = "reason";
@@ -11273,6 +11274,16 @@ package android.net {
     enum_constant public static final android.net.NetworkInfo.State DISCONNECTING;
     enum_constant public static final android.net.NetworkInfo.State SUSPENDED;
     enum_constant public static final android.net.NetworkInfo.State UNKNOWN;
+  }
+
+  public class NetworkQuotaInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getEstimatedBytes();
+    method public long getHardLimitBytes();
+    method public long getSoftLimitBytes();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final long NO_LIMIT = -1L; // 0xffffffffffffffffL
   }
 
   public class ParseException extends java.lang.RuntimeException {

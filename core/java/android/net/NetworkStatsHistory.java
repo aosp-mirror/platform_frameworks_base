@@ -405,11 +405,10 @@ public class NetworkStatsHistory implements Parcelable {
             final long curEnd = randomLong(r, curStart, end);
             entry.rxBytes = randomLong(r, 0, rx);
             entry.txBytes = randomLong(r, 0, tx);
-
-            recordData(curStart, curEnd, entry);
-
             rx -= entry.rxBytes;
             tx -= entry.txBytes;
+
+            recordData(curStart, curEnd, entry);
         }
     }
 

@@ -16,10 +16,11 @@
 
 package android.net;
 
+import static com.android.internal.util.Preconditions.checkNotNull;
+
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.os.Binder;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 
 import java.net.InetAddress;
@@ -67,11 +68,19 @@ public class ConnectivityManager {
      * is set to {@code true} if there are no connected networks at all.
      */
     public static final String CONNECTIVITY_ACTION = "android.net.conn.CONNECTIVITY_CHANGE";
+
     /**
      * The lookup key for a {@link NetworkInfo} object. Retrieve with
      * {@link android.content.Intent#getParcelableExtra(String)}.
+     *
+     * @deprecated Since {@link NetworkInfo} can vary based on UID, applications
+     *             should always obtain network information through
+     *             {@link #getActiveNetworkInfo()} or
+     *             {@link #getAllNetworkInfo()}.
      */
+    @Deprecated
     public static final String EXTRA_NETWORK_INFO = "networkInfo";
+
     /**
      * The lookup key for a boolean that indicates whether a connect event
      * is for a network to which the connectivity manager was failing over
@@ -515,6 +524,19 @@ public class ConnectivityManager {
     }
 
     /**
+     * Return quota status for the current active network, or {@code null} if no
+     * network is active. Quota status can change rapidly, so these values
+     * shouldn't be cached.
+     */
+    public NetworkQuotaInfo getActiveNetworkQuotaInfo() {
+        try {
+            return mService.getActiveNetworkQuotaInfo();
+        } catch (RemoteException e) {
+            return null;
+        }
+    }
+
+    /**
      * Gets the value of the setting for enabling Mobile data.
      *
      * @return Whether mobile data is enabled.
@@ -546,10 +568,7 @@ public class ConnectivityManager {
      * {@hide}
      */
     public ConnectivityManager(IConnectivityManager service) {
-        if (service == null) {
-            throw new IllegalArgumentException("missing IConnectivityManager");
-        }
-        mService = service;
+        mService = checkNotNull(service, "missing IConnectivityManager");
     }
 
     /**
