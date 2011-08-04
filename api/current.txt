@@ -84,7 +84,6 @@ package android {
     field public static final java.lang.String READ_SMS = "android.permission.READ_SMS";
     field public static final java.lang.String READ_SYNC_SETTINGS = "android.permission.READ_SYNC_SETTINGS";
     field public static final java.lang.String READ_SYNC_STATS = "android.permission.READ_SYNC_STATS";
-    field public static final java.lang.String READ_WRITE_OWN_VOICEMAIL = "com.android.voicemail.permission.READ_WRITE_OWN_VOICEMAIL";
     field public static final java.lang.String REBOOT = "android.permission.REBOOT";
     field public static final java.lang.String RECEIVE_BOOT_COMPLETED = "android.permission.RECEIVE_BOOT_COMPLETED";
     field public static final java.lang.String RECEIVE_MMS = "android.permission.RECEIVE_MMS";

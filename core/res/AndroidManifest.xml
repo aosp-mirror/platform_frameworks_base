@@ -63,7 +63,7 @@
     <protected-broadcast android:name="android.app.action.EXIT_CAR_MODE" />
     <protected-broadcast android:name="android.app.action.ENTER_DESK_MODE" />
     <protected-broadcast android:name="android.app.action.EXIT_DESK_MODE" />
-    
+
     <protected-broadcast android:name="android.backup.intent.RUN" />
     <protected-broadcast android:name="android.backup.intent.CLEAR" />
     <protected-broadcast android:name="android.backup.intent.INIT" />
@@ -291,16 +291,6 @@
         android:label="@string/permlab_setAlarm"
         android:description="@string/permdesc_setAlarm"
         android:protectionLevel="normal" />
-
-   <!-- Allows an application to read/write the voicemails owned by its own
-        package. -->
-   <!--  TODO: delete this permission when dependent content provider &
-        application code has been migrated to use ADD_VOICEMAIL instead -->
-    <permission android:name="com.android.voicemail.permission.READ_WRITE_OWN_VOICEMAIL"
-        android:permissionGroup="android.permission-group.PERSONAL_INFO"
-        android:protectionLevel="dangerous"
-        android:label="@string/permlab_readWriteOwnVoicemail"
-        android:description="@string/permdesc_readWriteOwnVoicemail" />
 
    <!-- Allows an application to add voicemails into the system. -->
     <permission android:name="com.android.voicemail.permission.ADD_VOICEMAIL"
