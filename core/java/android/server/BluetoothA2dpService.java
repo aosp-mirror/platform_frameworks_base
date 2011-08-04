@@ -194,7 +194,7 @@ public class BluetoothA2dpService extends IBluetoothA2dp.Stub {
     }
 
     private synchronized void onBluetoothEnable() {
-        String devices = mBluetoothService.getProperty("Devices");
+        String devices = mBluetoothService.getProperty("Devices", true);
         if (devices != null) {
             String [] paths = devices.split(",");
             for (String path: paths) {
