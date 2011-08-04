@@ -2159,14 +2159,6 @@
 
     <!-- Title of an application permission, listed so the user can choose whether
         they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permlab_readWriteOwnVoicemail">Access voicemails managed by this application</string>
-    <!-- Description of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_readWriteOwnVoicemail">Allows the application to store and retrieve only
-      voicemails that its associated service can access.</string>
-
-    <!-- Title of an application permission, listed so the user can choose whether
-        they want to allow the application to do this. [CHAR LIMIT=NONE] -->
     <string name="permlab_addVoicemail">add voicemail</string>
     <!-- Description of an application permission, listed so the user can choose whether
         they want to allow the application to do this. [CHAR LIMIT=NONE] -->
