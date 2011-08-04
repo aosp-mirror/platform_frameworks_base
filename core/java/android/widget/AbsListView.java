@@ -628,6 +628,9 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private int mGlowPaddingLeft;
     private int mGlowPaddingRight;
 
+    private int mLastAccessibilityScrollEventFromIndex;
+    private int mLastAccessibilityScrollEventToIndex;
+
     /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
@@ -1262,6 +1265,24 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     public void onInitializeAccessibilityNodeInfo(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfo(info);
         info.setScrollable(true);
+    }
+
+    @Override
+    public void sendAccessibilityEvent(int eventType) {
+        // Since this class calls onScrollChanged even if the mFirstPosition and the
+        // child count have not changed we will avoid sending duplicate accessibility
+        // events.
+        if (eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+            final int lastPosition = mFirstPosition + getChildCount();
+            if (mLastAccessibilityScrollEventFromIndex == mFirstPosition
+                    && mLastAccessibilityScrollEventToIndex == lastPosition) {
+                return;   
+            } else {
+                mLastAccessibilityScrollEventFromIndex = mFirstPosition;
+                mLastAccessibilityScrollEventToIndex = lastPosition;       
+            }
+        }
+        super.sendAccessibilityEvent(eventType);
     }
 
     @Override
