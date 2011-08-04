@@ -223,7 +223,7 @@ public class ProfileActivity extends Activity {
         mMovementSpinner = (Spinner) findViewById(R.id.movement);
         mUrl = (EditText) findViewById(R.id.url);
         mWeb = (ProfiledWebView) findViewById(R.id.web);
-        mCallback = new ProfileCallback() {
+        setCallback(new ProfileCallback() {
             @SuppressWarnings("unchecked")
             @Override
             public void profileCallback(RunData data) {
@@ -232,7 +232,7 @@ public class ProfileActivity extends Activity {
                 mCaptureButton.setChecked(false);
                 setTestingState(TestingState.STOP_TESTING);
             }
-        };
+        });
 
         // Inspect button (opens PlaybackActivity)
         mInspectButton.setOnClickListener(new OnClickListener() {
