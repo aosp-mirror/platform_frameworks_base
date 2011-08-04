@@ -186,6 +186,16 @@ public class ValueAnimator extends Animator {
     int mPlayingState = STOPPED;
 
     /**
+     * Additional playing state to indicate whether an animator has been start()'d. There is
+     * some lag between a call to start() and the first animation frame. We should still note
+     * that the animation has been started, even if it's first animation frame has not yet
+     * happened, and reflect that state in isRunning().
+     * Note that delayed animations are different: they are not started until their first
+     * animation frame, which occurs after their delay elapses.
+     */
+    private boolean mStarted = false;
+
+    /**
      * Flag that denotes whether the animation is set up and ready to go. Used to
      * set up animation that has not yet been started.
      */
@@ -618,6 +628,7 @@ public class ValueAnimator extends Animator {
                         for (int i = 0; i < numReadyAnims; ++i) {
                             ValueAnimator anim = readyAnims.get(i);
                             anim.startAnimation();
+                            anim.mStarted = true;
                             delayedAnims.remove(anim);
                         }
                         readyAnims.clear();
@@ -908,6 +919,7 @@ public class ValueAnimator extends Animator {
             // This sets the initial value of the animation, prior to actually starting it running
             setCurrentPlayTime(getCurrentPlayTime());
             mPlayingState = STOPPED;
+            mStarted = true;
 
             if (mListeners != null) {
                 ArrayList<AnimatorListener> tmpListeners =
@@ -937,7 +949,8 @@ public class ValueAnimator extends Animator {
         // to run
         if (mPlayingState != STOPPED || sPendingAnimations.get().contains(this) ||
                 sDelayedAnims.get().contains(this)) {
-            if (mListeners != null) {
+            // Only notify listeners if the animator has actually started
+            if (mStarted && mListeners != null) {
                 ArrayList<AnimatorListener> tmpListeners =
                         (ArrayList<AnimatorListener>) mListeners.clone();
                 for (AnimatorListener listener : tmpListeners) {
@@ -969,7 +982,7 @@ public class ValueAnimator extends Animator {
 
     @Override
     public boolean isRunning() {
-        return (mPlayingState == RUNNING);
+        return (mPlayingState == RUNNING || mStarted);
     }
 
     /**
@@ -1000,7 +1013,7 @@ public class ValueAnimator extends Animator {
         sPendingAnimations.get().remove(this);
         sDelayedAnims.get().remove(this);
         mPlayingState = STOPPED;
-        if (mListeners != null) {
+        if (mStarted && mListeners != null) {
             ArrayList<AnimatorListener> tmpListeners =
                     (ArrayList<AnimatorListener>) mListeners.clone();
             int numListeners = tmpListeners.size();
@@ -1008,6 +1021,7 @@ public class ValueAnimator extends Animator {
                 tmpListeners.get(i).onAnimationEnd(this);
             }
         }
+        mStarted = false;
     }
 
     /**
