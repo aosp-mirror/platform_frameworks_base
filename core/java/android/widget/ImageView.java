@@ -83,6 +83,7 @@ public class ImageView extends View {
     // Avoid allocations...
     private RectF mTempSrc = new RectF();
     private RectF mTempDst = new RectF();
+    private float[] mTempPoints;
 
     private boolean mCropToPadding;
 
@@ -337,7 +338,6 @@ public class ImageView extends View {
         }
     }
 
-    
     /**
      * Sets a drawable as the content of this ImageView.
      * 
@@ -347,8 +347,31 @@ public class ImageView extends View {
         if (mDrawable != drawable) {
             mResource = 0;
             mUri = null;
+            int oldWidth = mDrawableWidth;
+            int oldHeight = mDrawableHeight;
             updateDrawable(drawable);
-            requestLayout();
+
+            boolean needsLayout;
+            if (mScaleType == ScaleType.CENTER) {
+                needsLayout = mDrawableWidth != oldWidth || mDrawableHeight != oldHeight;
+            } else {
+                if (mTempPoints == null) {
+                    mTempPoints = new float[4];
+                }
+                float[] points = mTempPoints;
+                points[0] = oldWidth;
+                points[1] = oldHeight;
+                points[2] = mDrawableWidth;
+                points[3] = mDrawableHeight;
+                if (!mMatrix.isIdentity()) {
+                    mMatrix.mapPoints(points);
+                }
+                needsLayout = points[0] != points[2] || points[1] != points[3];
+            }
+
+            if (needsLayout) {
+                requestLayout();
+            }
             invalidate();
         }
     }
@@ -643,6 +666,9 @@ public class ImageView extends View {
         // We are allowed to change the view's height
         boolean resizeHeight = false;
         
+        final int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
+        final int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+
         if (mDrawable == null) {
             // If no drawable, its intrinsic size is 0.
             mDrawableWidth = -1;
@@ -657,10 +683,6 @@ public class ImageView extends View {
             // We are supposed to adjust view bounds to match the aspect
             // ratio of our drawable. See if that is possible.
             if (mAdjustViewBounds) {
-                
-                int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
-                int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
-                
                 resizeWidth = widthSpecMode != MeasureSpec.EXACTLY;
                 resizeHeight = heightSpecMode != MeasureSpec.EXACTLY;
                 
