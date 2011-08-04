@@ -20,14 +20,18 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.ConnectivityManager.TYPE_WIFI;
+import static android.net.NetworkPolicy.LIMIT_DISABLED;
 import static android.net.NetworkPolicy.SNOOZE_NEVER;
+import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
+import static android.net.NetworkPolicyManager.computeNextCycleBoundary;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT_SNOOZED;
@@ -79,6 +83,7 @@ import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 
 import java.io.File;
+import java.util.LinkedHashSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -402,7 +407,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final NetworkPolicy policy = new NetworkPolicy(
                 sTemplateWifi, 5, 1024L, 1024L, SNOOZE_NEVER);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
-        assertEquals(expectedCycle, actualCycle);
+        assertTimeEquals(expectedCycle, actualCycle);
     }
 
     public void testLastCycleBoundaryLastMonth() throws Exception {
@@ -413,7 +418,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final NetworkPolicy policy = new NetworkPolicy(
                 sTemplateWifi, 20, 1024L, 1024L, SNOOZE_NEVER);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
-        assertEquals(expectedCycle, actualCycle);
+        assertTimeEquals(expectedCycle, actualCycle);
     }
 
     public void testLastCycleBoundaryThisMonthFebruary() throws Exception {
@@ -424,18 +429,48 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         final NetworkPolicy policy = new NetworkPolicy(
                 sTemplateWifi, 30, 1024L, 1024L, SNOOZE_NEVER);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
-        assertEquals(expectedCycle, actualCycle);
+        assertTimeEquals(expectedCycle, actualCycle);
     }
 
     public void testLastCycleBoundaryLastMonthFebruary() throws Exception {
         // assume cycle day of "30th" in february, which should clamp
         final long currentTime = parseTime("2007-03-14T00:00:00.000Z");
-        final long expectedCycle = parseTime("2007-03-01T00:00:00.000Z");
+        final long expectedCycle = parseTime("2007-02-28T23:59:59.000Z");
 
         final NetworkPolicy policy = new NetworkPolicy(
                 sTemplateWifi, 30, 1024L, 1024L, SNOOZE_NEVER);
         final long actualCycle = computeLastCycleBoundary(currentTime, policy);
-        assertEquals(expectedCycle, actualCycle);
+        assertTimeEquals(expectedCycle, actualCycle);
+    }
+
+    public void testNextCycleSane() throws Exception {
+        final NetworkPolicy policy = new NetworkPolicy(
+                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, SNOOZE_NEVER);
+        final LinkedHashSet<Long> seen = new LinkedHashSet<Long>();
+
+        // walk forwards, ensuring that cycle boundaries don't get stuck
+        long currentCycle = computeNextCycleBoundary(parseTime("2011-08-01T00:00:00.000Z"), policy);
+        for (int i = 0; i < 128; i++) {
+            long nextCycle = computeNextCycleBoundary(currentCycle, policy);
+            assertEqualsFuzzy(DAY_IN_MILLIS * 30, nextCycle - currentCycle, DAY_IN_MILLIS * 3);
+            assertUnique(seen, nextCycle);
+            currentCycle = nextCycle;
+        }
+    }
+
+    public void testLastCycleSane() throws Exception {
+        final NetworkPolicy policy = new NetworkPolicy(
+                sTemplateWifi, 31, WARNING_DISABLED, LIMIT_DISABLED, SNOOZE_NEVER);
+        final LinkedHashSet<Long> seen = new LinkedHashSet<Long>();
+
+        // walk backwards, ensuring that cycle boundaries look sane
+        long currentCycle = computeLastCycleBoundary(parseTime("2011-08-04T00:00:00.000Z"), policy);
+        for (int i = 0; i < 128; i++) {
+            long lastCycle = computeLastCycleBoundary(currentCycle, policy);
+            assertEqualsFuzzy(DAY_IN_MILLIS * 30, currentCycle - lastCycle, DAY_IN_MILLIS * 3);
+            assertUnique(seen, lastCycle);
+            currentCycle = lastCycle;
+        }
     }
 
     public void testNetworkPolicyAppliedCycleLastMonth() throws Exception {
@@ -731,6 +766,32 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         public Void answer() {
             set(null);
             return null;
+        }
+    }
+
+    private static void assertTimeEquals(long expected, long actual) {
+        if (expected != actual) {
+            fail("expected " + formatTime(expected) + " but was actually " + formatTime(actual));
+        }
+    }
+
+    private static String formatTime(long millis) {
+        final Time time = new Time(Time.TIMEZONE_UTC);
+        time.set(millis);
+        return time.format3339(false);
+    }
+
+    private static void assertEqualsFuzzy(long expected, long actual, long fuzzy) {
+        final long low = expected - fuzzy;
+        final long high = expected + fuzzy;
+        if (actual < low || actual > high) {
+            fail("value " + actual + " is outside [" + low + "," + high + "]");
+        }
+    }
+
+    private static void assertUnique(LinkedHashSet<Long> seen, Long value) {
+        if (!seen.add(value)) {
+            fail("found duplicate time " + value + " in series " + seen.toString());
         }
     }
 
