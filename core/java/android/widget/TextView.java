@@ -8449,6 +8449,17 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         info.setPassword(isPassword);
     }
 
+    @Override
+    public void sendAccessibilityEvent(int eventType) {
+        // Do not send scroll events since first they are not interesting for
+        // accessibility and second such events a generated too frequently.
+        // For details see the implementation of bringTextIntoView().
+        if (eventType == AccessibilityEvent.TYPE_VIEW_SCROLLED) {
+            return;
+        }
+        super.sendAccessibilityEvent(eventType);
+    }
+
     void sendAccessibilityEventTypeViewTextChanged(CharSequence beforeText,
             int fromIndex, int removedCount, int addedCount) {
         AccessibilityEvent event =
