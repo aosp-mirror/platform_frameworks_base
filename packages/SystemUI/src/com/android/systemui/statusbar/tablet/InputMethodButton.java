@@ -22,6 +22,7 @@ import android.provider.Settings;
 import android.util.AttributeSet;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSubtype;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -48,6 +49,9 @@ public class InputMethodButton extends ImageView {
     private boolean mScreenLocked = false;
     private boolean mHardKeyboardAvailable;
 
+    // Please refer to InputMethodManagerService.TAG_TRY_SUPPRESSING_IME_SWITCHER
+    private static final String TAG_TRY_SUPPRESSING_IME_SWITCHER = "TrySuppressingImeSwitcher";
+
     public InputMethodButton(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -64,10 +68,49 @@ public class InputMethodButton extends ImageView {
         refreshStatusIcon();
     }
 
-    // Display IME switcher icon only when all of the followings are true:
-    // * There is only one enabled IME on the device.  (Note that the IME should be the system IME)
-    // * There are no explicitly enabled (by the user) subtypes of the IME, or the IME doesn't have
-    // its subtypes at all
+    // Refer to InputMethodManagerService.needsToShowImeSwitchOngoingNotification()
+    private boolean needsToShowIMEButtonWhenVisibilityAuto() {
+        List<InputMethodInfo> imis = mImm.getEnabledInputMethodList();
+        final int N = imis.size();
+        if (N > 2) return true;
+        if (N < 1) return false;
+        int nonAuxCount = 0;
+        int auxCount = 0;
+        InputMethodSubtype nonAuxSubtype = null;
+        InputMethodSubtype auxSubtype = null;
+        for(int i = 0; i < N; ++i) {
+            final InputMethodInfo imi = imis.get(i);
+            final List<InputMethodSubtype> subtypes = mImm.getEnabledInputMethodSubtypeList(
+                    imi, true);
+            final int subtypeCount = subtypes.size();
+            if (subtypeCount == 0) {
+                ++nonAuxCount;
+            } else {
+                for (int j = 0; j < subtypeCount; ++j) {
+                    final InputMethodSubtype subtype = subtypes.get(j);
+                    if (!subtype.isAuxiliary()) {
+                        ++nonAuxCount;
+                        nonAuxSubtype = subtype;
+                    } else {
+                        ++auxCount;
+                        auxSubtype = subtype;
+                    }
+                }
+            }
+        }
+        if (nonAuxCount > 1 || auxCount > 1) {
+            return true;
+        } else if (nonAuxCount == 1 && auxCount == 1) {
+            if (nonAuxSubtype != null && auxSubtype != null
+                    && nonAuxSubtype.getLocale().equals(auxSubtype.getLocale())
+                    && nonAuxSubtype.containsExtraValueKey(TAG_TRY_SUPPRESSING_IME_SWITCHER)) {
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
+
     private boolean needsToShowIMEButton() {
         if (!mShowButton || mScreenLocked) return false;
 
@@ -75,13 +118,10 @@ public class InputMethodButton extends ImageView {
             return true;
         }
 
-        List<InputMethodInfo> imis = mImm.getEnabledInputMethodList();
-        final int size = imis.size();
         final int visibility = loadInputMethodSelectorVisibility();
         switch (visibility) {
             case ID_IME_BUTTON_VISIBILITY_AUTO:
-                return size > 1 || (size == 1
-                        && mImm.getEnabledInputMethodSubtypeList(imis.get(0), false).size() > 1);
+                return needsToShowIMEButtonWhenVisibilityAuto();
             case ID_IME_BUTTON_VISIBILITY_ALWAYS_SHOW:
                 return true;
             case ID_IME_BUTTON_VISIBILITY_ALWAYS_HIDE:
