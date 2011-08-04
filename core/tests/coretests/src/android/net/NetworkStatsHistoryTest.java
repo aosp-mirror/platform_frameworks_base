@@ -16,6 +16,14 @@
 
 package android.net;
 
+import static android.net.NetworkStatsHistory.FIELD_ALL;
+import static android.net.NetworkStatsHistory.FIELD_OPERATIONS;
+import static android.net.NetworkStatsHistory.FIELD_RX_BYTES;
+import static android.net.NetworkStatsHistory.FIELD_RX_PACKETS;
+import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
+import static android.net.NetworkStatsHistory.DataStreamUtils.readVarLong;
+import static android.net.NetworkStatsHistory.DataStreamUtils.writeVarLong;
+import static android.net.NetworkStatsHistory.Entry.UNKNOWN;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -30,7 +38,10 @@ import android.util.Log;
 
 import com.android.frameworks.coretests.R;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.Random;
 
 @SmallTest
@@ -38,6 +49,10 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
     private static final String TAG = "NetworkStatsHistoryTest";
 
     private static final long TEST_START = 1194220800000L;
+
+    private static final long KB_IN_BYTES = 1024;
+    private static final long MB_IN_BYTES = KB_IN_BYTES * 1024;
+    private static final long GB_IN_BYTES = MB_IN_BYTES * 1024;
 
     private NetworkStatsHistory stats;
 
@@ -80,10 +95,11 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         stats = new NetworkStatsHistory(BUCKET_SIZE);
 
         // record data into narrow window to get single bucket
-        stats.recordData(TEST_START, TEST_START + SECOND_IN_MILLIS, 1024L, 2048L);
+        stats.recordData(TEST_START, TEST_START + SECOND_IN_MILLIS,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 2L));
 
         assertEquals(1, stats.size());
-        assertValues(stats, 0, 1024L, 2048L);
+        assertValues(stats, 0, 1024L, 10L, 2048L, 20L, 2L);
     }
 
     public void testRecordEqualBuckets() throws Exception {
@@ -92,11 +108,12 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
 
         // split equally across two buckets
         final long recordStart = TEST_START + (bucketDuration / 2);
-        stats.recordData(recordStart, recordStart + bucketDuration, 1024L, 128L);
+        stats.recordData(recordStart, recordStart + bucketDuration,
+                new NetworkStats.Entry(1024L, 10L, 128L, 2L, 2L));
 
         assertEquals(2, stats.size());
-        assertValues(stats, 0, 512L, 64L);
-        assertValues(stats, 1, 512L, 64L);
+        assertValues(stats, 0, 512L, 5L, 64L, 1L, 1L);
+        assertValues(stats, 1, 512L, 5L, 64L, 1L, 1L);
     }
 
     public void testRecordTouchingBuckets() throws Exception {
@@ -107,15 +124,16 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         // overlap into neighboring buckets. total record is 20 minutes.
         final long recordStart = (TEST_START + BUCKET_SIZE) - MINUTE_IN_MILLIS;
         final long recordEnd = (TEST_START + (BUCKET_SIZE * 2)) + (MINUTE_IN_MILLIS * 4);
-        stats.recordData(recordStart, recordEnd, 1000L, 5000L);
+        stats.recordData(recordStart, recordEnd,
+                new NetworkStats.Entry(1000L, 2000L, 5000L, 10000L, 100L));
 
         assertEquals(3, stats.size());
         // first bucket should have (1/20 of value)
-        assertValues(stats, 0, 50L, 250L);
+        assertValues(stats, 0, 50L, 100L, 250L, 500L, 5L);
         // second bucket should have (15/20 of value)
-        assertValues(stats, 1, 750L, 3750L);
+        assertValues(stats, 1, 750L, 1500L, 3750L, 7500L, 75L);
         // final bucket should have (4/20 of value)
-        assertValues(stats, 2, 200L, 1000L);
+        assertValues(stats, 2, 200L, 400L, 1000L, 2000L, 20L);
     }
 
     public void testRecordGapBuckets() throws Exception {
@@ -125,25 +143,28 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         // record some data today and next week with large gap
         final long firstStart = TEST_START;
         final long lastStart = TEST_START + WEEK_IN_MILLIS;
-        stats.recordData(firstStart, firstStart + SECOND_IN_MILLIS, 128L, 256L);
-        stats.recordData(lastStart, lastStart + SECOND_IN_MILLIS, 64L, 512L);
+        stats.recordData(firstStart, firstStart + SECOND_IN_MILLIS,
+                new NetworkStats.Entry(128L, 2L, 256L, 4L, 1L));
+        stats.recordData(lastStart, lastStart + SECOND_IN_MILLIS,
+                new NetworkStats.Entry(64L, 1L, 512L, 8L, 2L));
 
         // we should have two buckets, far apart from each other
         assertEquals(2, stats.size());
-        assertValues(stats, 0, 128L, 256L);
-        assertValues(stats, 1, 64L, 512L);
+        assertValues(stats, 0, 128L, 2L, 256L, 4L, 1L);
+        assertValues(stats, 1, 64L, 1L, 512L, 8L, 2L);
 
         // now record something in middle, spread across two buckets
         final long middleStart = TEST_START + DAY_IN_MILLIS;
         final long middleEnd = middleStart + (HOUR_IN_MILLIS * 2);
-        stats.recordData(middleStart, middleEnd, 2048L, 2048L);
+        stats.recordData(middleStart, middleEnd,
+                new NetworkStats.Entry(2048L, 4L, 2048L, 4L, 2L));
 
         // now should have four buckets, with new record in middle two buckets
         assertEquals(4, stats.size());
-        assertValues(stats, 0, 128L, 256L);
-        assertValues(stats, 1, 1024L, 1024L);
-        assertValues(stats, 2, 1024L, 1024L);
-        assertValues(stats, 3, 64L, 512L);
+        assertValues(stats, 0, 128L, 2L, 256L, 4L, 1L);
+        assertValues(stats, 1, 1024L, 2L, 1024L, 2L, 1L);
+        assertValues(stats, 2, 1024L, 2L, 1024L, 2L, 1L);
+        assertValues(stats, 3, 64L, 1L, 512L, 8L, 2L);
     }
 
     public void testRecordOverlapBuckets() throws Exception {
@@ -151,14 +172,16 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         stats = new NetworkStatsHistory(BUCKET_SIZE);
 
         // record some data in one bucket, and another overlapping buckets
-        stats.recordData(TEST_START, TEST_START + SECOND_IN_MILLIS, 256L, 256L);
+        stats.recordData(TEST_START, TEST_START + SECOND_IN_MILLIS,
+                new NetworkStats.Entry(256L, 2L, 256L, 2L, 1L));
         final long midStart = TEST_START + (HOUR_IN_MILLIS / 2);
-        stats.recordData(midStart, midStart + HOUR_IN_MILLIS, 1024L, 1024L);
+        stats.recordData(midStart, midStart + HOUR_IN_MILLIS,
+                new NetworkStats.Entry(1024L, 10L, 1024L, 10L, 10L));
 
         // should have two buckets, with some data mixed together
         assertEquals(2, stats.size());
-        assertValues(stats, 0, 768L, 768L);
-        assertValues(stats, 1, 512L, 512L);
+        assertValues(stats, 0, 768L, 7L, 768L, 7L, 6L);
+        assertValues(stats, 1, 512L, 5L, 512L, 5L, 5L);
     }
 
     public void testRecordEntireGapIdentical() throws Exception {
@@ -283,6 +306,7 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
     public void testFuzzing() throws Exception {
         try {
             // fuzzing with random events, looking for crashes
+            final NetworkStats.Entry entry = new NetworkStats.Entry();
             final Random r = new Random();
             for (int i = 0; i < 500; i++) {
                 stats = new NetworkStatsHistory(r.nextLong());
@@ -291,7 +315,12 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
                         // add range
                         final long start = r.nextLong();
                         final long end = start + r.nextInt();
-                        stats.recordData(start, end, r.nextLong(), r.nextLong());
+                        entry.rxBytes = nextPositiveLong(r);
+                        entry.rxPackets = nextPositiveLong(r);
+                        entry.txBytes = nextPositiveLong(r);
+                        entry.txPackets = nextPositiveLong(r);
+                        entry.operations = nextPositiveLong(r);
+                        stats.recordData(start, end, entry);
                     } else {
                         // trim something
                         stats.removeBucketsBefore(r.nextLong());
@@ -303,6 +332,88 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
             Log.e(TAG, String.valueOf(stats));
             throw new RuntimeException(e);
         }
+    }
+
+    private static long nextPositiveLong(Random r) {
+        final long value = r.nextLong();
+        return value < 0 ? -value : value;
+    }
+
+    public void testIgnoreFields() throws Exception {
+        final NetworkStatsHistory history = new NetworkStatsHistory(
+                MINUTE_IN_MILLIS, 0, FIELD_RX_BYTES | FIELD_TX_BYTES);
+
+        history.recordData(0, MINUTE_IN_MILLIS,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 4L));
+        history.recordData(0, MINUTE_IN_MILLIS * 2,
+                new NetworkStats.Entry(2L, 2L, 2L, 2L, 2L));
+
+        assertValues(
+                history, Long.MIN_VALUE, Long.MAX_VALUE, 1026L, UNKNOWN, 2050L, UNKNOWN, UNKNOWN);
+    }
+
+    public void testIgnoreFieldsRecordIn() throws Exception {
+        final NetworkStatsHistory full = new NetworkStatsHistory(MINUTE_IN_MILLIS, 0, FIELD_ALL);
+        final NetworkStatsHistory partial = new NetworkStatsHistory(
+                MINUTE_IN_MILLIS, 0, FIELD_RX_PACKETS | FIELD_OPERATIONS);
+
+        full.recordData(0, MINUTE_IN_MILLIS,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 4L));
+        partial.recordEntireHistory(full);
+
+        assertValues(partial, Long.MIN_VALUE, Long.MAX_VALUE, UNKNOWN, 10L, UNKNOWN, UNKNOWN, 4L);
+    }
+
+    public void testIgnoreFieldsRecordOut() throws Exception {
+        final NetworkStatsHistory full = new NetworkStatsHistory(MINUTE_IN_MILLIS, 0, FIELD_ALL);
+        final NetworkStatsHistory partial = new NetworkStatsHistory(
+                MINUTE_IN_MILLIS, 0, FIELD_RX_PACKETS | FIELD_OPERATIONS);
+
+        partial.recordData(0, MINUTE_IN_MILLIS,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 4L));
+        full.recordEntireHistory(partial);
+
+        assertValues(full, Long.MIN_VALUE, Long.MAX_VALUE, 0L, 10L, 0L, 0L, 4L);
+    }
+
+    public void testSerialize() throws Exception {
+        final NetworkStatsHistory before = new NetworkStatsHistory(MINUTE_IN_MILLIS, 40, FIELD_ALL);
+        before.recordData(0, MINUTE_IN_MILLIS * 4,
+                new NetworkStats.Entry(1024L, 10L, 2048L, 20L, 4L));
+        before.recordData(DAY_IN_MILLIS, DAY_IN_MILLIS + MINUTE_IN_MILLIS,
+                new NetworkStats.Entry(10L, 20L, 30L, 40L, 50L));
+
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        before.writeToStream(new DataOutputStream(out));
+        out.close();
+
+        final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        final NetworkStatsHistory after = new NetworkStatsHistory(new DataInputStream(in));
+
+        // must have identical totals before and after
+        assertValues(before, Long.MIN_VALUE, Long.MAX_VALUE, 1034L, 30L, 2078L, 60L, 54L);
+        assertValues(after, Long.MIN_VALUE, Long.MAX_VALUE, 1034L, 30L, 2078L, 60L, 54L);
+    }
+
+    public void testVarLong() throws Exception {
+        assertEquals(0L, performVarLong(0L));
+        assertEquals(-1L, performVarLong(-1L));
+        assertEquals(1024L, performVarLong(1024L));
+        assertEquals(-1024L, performVarLong(-1024L));
+        assertEquals(40 * MB_IN_BYTES, performVarLong(40 * MB_IN_BYTES));
+        assertEquals(512 * GB_IN_BYTES, performVarLong(512 * GB_IN_BYTES));
+        assertEquals(Long.MIN_VALUE, performVarLong(Long.MIN_VALUE));
+        assertEquals(Long.MAX_VALUE, performVarLong(Long.MAX_VALUE));
+        assertEquals(Long.MIN_VALUE + 40, performVarLong(Long.MIN_VALUE + 40));
+        assertEquals(Long.MAX_VALUE - 40, performVarLong(Long.MAX_VALUE - 40));
+    }
+
+    private static long performVarLong(long before) throws Exception {
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        writeVarLong(new DataOutputStream(out), before);
+
+        final ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+        return readVarLong(new DataInputStream(in));
     }
 
     private static void assertConsistent(NetworkStatsHistory stats) {
@@ -330,4 +441,23 @@ public class NetworkStatsHistoryTest extends AndroidTestCase {
         assertEquals("unexpected txBytes", txBytes, entry.txBytes);
     }
 
+    private static void assertValues(NetworkStatsHistory stats, int index, long rxBytes,
+            long rxPackets, long txBytes, long txPackets, long operations) {
+        final NetworkStatsHistory.Entry entry = stats.getValues(index, null);
+        assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
+        assertEquals("unexpected rxPackets", rxPackets, entry.rxPackets);
+        assertEquals("unexpected txBytes", txBytes, entry.txBytes);
+        assertEquals("unexpected txPackets", txPackets, entry.txPackets);
+        assertEquals("unexpected operations", operations, entry.operations);
+    }
+
+    private static void assertValues(NetworkStatsHistory stats, long start, long end, long rxBytes,
+            long rxPackets, long txBytes, long txPackets, long operations) {
+        final NetworkStatsHistory.Entry entry = stats.getValues(start, end, null);
+        assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
+        assertEquals("unexpected rxPackets", rxPackets, entry.rxPackets);
+        assertEquals("unexpected txBytes", txBytes, entry.txBytes);
+        assertEquals("unexpected txPackets", txPackets, entry.txPackets);
+        assertEquals("unexpected operations", operations, entry.operations);
+    }
 }

@@ -16,10 +16,10 @@
 
 package com.android.server.net;
 
-import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
-import static android.Manifest.permission.MODIFY_NETWORK_ACCOUNTING;
+import static android.Manifest.permission.CONNECTIVITY_INTERNAL;
 import static android.Manifest.permission.DUMP;
+import static android.Manifest.permission.MODIFY_NETWORK_ACCOUNTING;
 import static android.Manifest.permission.READ_NETWORK_USAGE_HISTORY;
 import static android.content.Intent.ACTION_SHUTDOWN;
 import static android.content.Intent.ACTION_UID_REMOVED;
@@ -68,7 +68,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
@@ -282,13 +281,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public NetworkStatsHistory getHistoryForNetwork(NetworkTemplate template) {
+    public NetworkStatsHistory getHistoryForNetwork(NetworkTemplate template, int fields) {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
 
         synchronized (mStatsLock) {
             // combine all interfaces that match template
             final NetworkStatsHistory combined = new NetworkStatsHistory(
-                    mSettings.getNetworkBucketDuration(), estimateNetworkBuckets());
+                    mSettings.getNetworkBucketDuration(), estimateNetworkBuckets(), fields);
             for (NetworkIdentitySet ident : mNetworkStats.keySet()) {
                 if (templateMatches(template, ident)) {
                     final NetworkStatsHistory history = mNetworkStats.get(ident);
@@ -302,7 +301,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     @Override
-    public NetworkStatsHistory getHistoryForUid(NetworkTemplate template, int uid, int tag) {
+    public NetworkStatsHistory getHistoryForUid(
+            NetworkTemplate template, int uid, int tag, int fields) {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
 
         synchronized (mStatsLock) {
@@ -311,7 +311,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             // combine all interfaces that match template
             final NetworkStatsHistory combined = new NetworkStatsHistory(
-                    mSettings.getUidBucketDuration(), estimateUidBuckets());
+                    mSettings.getUidBucketDuration(), estimateUidBuckets(), fields);
             for (NetworkIdentitySet ident : mUidStats.keySet()) {
                 if (templateMatches(template, ident)) {
                     final NetworkStatsHistory history = mUidStats.get(ident).get(packed);
@@ -596,7 +596,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // decide if enough has changed to trigger persist
         final NetworkStats persistDelta = computeStatsDelta(
-                mLastPersistNetworkSnapshot, networkSnapshot);
+                mLastPersistNetworkSnapshot, networkSnapshot, true);
         final long persistThreshold = mSettings.getPersistThreshold();
 
         NetworkStats.Entry entry = null;
@@ -626,7 +626,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void performNetworkPollLocked(NetworkStats networkSnapshot, long currentTime) {
         final HashSet<String> unknownIface = Sets.newHashSet();
 
-        final NetworkStats delta = computeStatsDelta(mLastNetworkSnapshot, networkSnapshot);
+        final NetworkStats delta = computeStatsDelta(mLastNetworkSnapshot, networkSnapshot, false);
         final long timeStart = currentTime - delta.getElapsedRealtime();
 
         NetworkStats.Entry entry = null;
@@ -661,9 +661,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void performUidPollLocked(NetworkStats uidSnapshot, long currentTime) {
         ensureUidStatsLoadedLocked();
 
-        final NetworkStats delta = computeStatsDelta(mLastUidSnapshot, uidSnapshot);
+        final NetworkStats delta = computeStatsDelta(mLastUidSnapshot, uidSnapshot, false);
         final NetworkStats operationsDelta = computeStatsDelta(
-                mLastOperationsSnapshot, mOperations);
+                mLastOperationsSnapshot, mOperations, false);
         final long timeStart = currentTime - delta.getElapsedRealtime();
 
         NetworkStats.Entry entry = null;
@@ -932,6 +932,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             out.flush();
             mNetworkFile.finishWrite(fos);
         } catch (IOException e) {
+            Slog.w(TAG, "problem writing stats: ", e);
             if (fos != null) {
                 mNetworkFile.failWrite(fos);
             }
@@ -978,6 +979,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             out.flush();
             mUidFile.finishWrite(fos);
         } catch (IOException e) {
+            Slog.w(TAG, "problem writing stats: ", e);
             if (fos != null) {
                 mUidFile.failWrite(fos);
             }
@@ -1052,15 +1054,20 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      */
     @Deprecated
     private void generateRandomLocked() {
-        long networkEnd = System.currentTimeMillis();
-        long networkStart = networkEnd - mSettings.getNetworkMaxHistory();
-        long networkRx = 3 * GB_IN_BYTES;
-        long networkTx = 2 * GB_IN_BYTES;
+        final long NET_END = System.currentTimeMillis();
+        final long NET_START = NET_END - mSettings.getNetworkMaxHistory();
+        final long NET_RX_BYTES = 3 * GB_IN_BYTES;
+        final long NET_RX_PACKETS = NET_RX_BYTES / 1024;
+        final long NET_TX_BYTES = 2 * GB_IN_BYTES;
+        final long NET_TX_PACKETS = NET_TX_BYTES / 1024;
 
-        long uidEnd = System.currentTimeMillis();
-        long uidStart = uidEnd - mSettings.getUidMaxHistory();
-        long uidRx = 500 * MB_IN_BYTES;
-        long uidTx = 100 * MB_IN_BYTES;
+        final long UID_END = System.currentTimeMillis();
+        final long UID_START = UID_END - mSettings.getUidMaxHistory();
+        final long UID_RX_BYTES = 500 * MB_IN_BYTES;
+        final long UID_RX_PACKETS = UID_RX_BYTES / 1024;
+        final long UID_TX_BYTES = 100 * MB_IN_BYTES;
+        final long UID_TX_PACKETS = UID_TX_BYTES / 1024;
+        final long UID_OPERATIONS = UID_RX_BYTES / 2048;
 
         final List<ApplicationInfo> installedApps = mContext
                 .getPackageManager().getInstalledApplications(0);
@@ -1068,13 +1075,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mNetworkStats.clear();
         mUidStats.clear();
         for (NetworkIdentitySet ident : mActiveIfaces.values()) {
-            findOrCreateNetworkStatsLocked(ident).generateRandom(
-                    networkStart, networkEnd, networkRx, networkTx);
+            findOrCreateNetworkStatsLocked(ident).generateRandom(NET_START, NET_END, NET_RX_BYTES,
+                    NET_RX_PACKETS, NET_TX_BYTES, NET_TX_PACKETS, 0L);
 
             for (ApplicationInfo info : installedApps) {
                 final int uid = info.uid;
-                findOrCreateUidStatsLocked(ident, uid, TAG_NONE).generateRandom(
-                        uidStart, uidEnd, uidRx, uidTx);
+                findOrCreateUidStatsLocked(ident, uid, TAG_NONE).generateRandom(UID_START, UID_END,
+                        UID_RX_BYTES, UID_RX_PACKETS, UID_TX_BYTES, UID_TX_PACKETS, UID_OPERATIONS);
             }
         }
     }
@@ -1083,9 +1090,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
      * Return the delta between two {@link NetworkStats} snapshots, where {@code
      * before} can be {@code null}.
      */
-    private static NetworkStats computeStatsDelta(NetworkStats before, NetworkStats current) {
+    private static NetworkStats computeStatsDelta(
+            NetworkStats before, NetworkStats current, boolean collectStale) {
         if (before != null) {
             return current.subtractClamped(before);
+        } else if (collectStale) {
+            // caller is okay collecting stale stats for first call.
+            return current;
         } else {
             // this is first snapshot; to prevent from double-counting we only
             // observe traffic occuring between known snapshots.
