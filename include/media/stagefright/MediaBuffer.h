@@ -25,6 +25,7 @@
 
 namespace android {
 
+struct ABuffer;
 class GraphicBuffer;
 class MediaBuffer;
 class MediaBufferObserver;
@@ -50,6 +51,8 @@ public:
     MediaBuffer(size_t size);
 
     MediaBuffer(const sp<GraphicBuffer>& graphicBuffer);
+
+    MediaBuffer(const sp<ABuffer> &buffer);
 
     // Decrements the reference count and returns the buffer to its
     // associated MediaBufferGroup if the reference count drops to 0.
@@ -100,6 +103,7 @@ private:
     void *mData;
     size_t mSize, mRangeOffset, mRangeLength;
     sp<GraphicBuffer> mGraphicBuffer;
+    sp<ABuffer> mBuffer;
 
     bool mOwnsData;
 
