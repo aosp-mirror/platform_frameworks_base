@@ -21,6 +21,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 
+#include <media/stagefright/foundation/ABuffer.h>
 #include <media/stagefright/MediaBuffer.h>
 #include <media/stagefright/MediaDebug.h>
 #include <media/stagefright/MetaData.h>
@@ -65,6 +66,20 @@ MediaBuffer::MediaBuffer(const sp<GraphicBuffer>& graphicBuffer)
       mRangeOffset(0),
       mRangeLength(mSize),
       mGraphicBuffer(graphicBuffer),
+      mOwnsData(false),
+      mMetaData(new MetaData),
+      mOriginal(NULL) {
+}
+
+MediaBuffer::MediaBuffer(const sp<ABuffer> &buffer)
+    : mObserver(NULL),
+      mNextBuffer(NULL),
+      mRefCount(0),
+      mData(buffer->data()),
+      mSize(buffer->size()),
+      mRangeOffset(0),
+      mRangeLength(mSize),
+      mBuffer(buffer),
       mOwnsData(false),
       mMetaData(new MetaData),
       mOriginal(NULL) {
