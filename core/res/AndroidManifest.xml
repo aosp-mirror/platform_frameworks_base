@@ -1119,6 +1119,14 @@
         android:description="@string/permdesc_bindTextService"
         android:protectionLevel="signature" />
 
+    <!-- Must be required by an {@link android.net.VpnService},
+         to ensure that only the system can bind to it.
+         @hide -->
+    <permission android:name="android.permission.BIND_VPN_SERVICE"
+        android:label="@string/permlab_bindVpnService"
+        android:description="@string/permdesc_bindVpnService"
+        android:protectionLevel="signature" />
+
     <!-- Must be required by a {@link android.service.wallpaper.WallpaperService},
          to ensure that only the system can bind to it. -->
     <permission android:name="android.permission.BIND_WALLPAPER"

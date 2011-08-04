@@ -711,6 +711,12 @@
         interface of a text service(e.g. SpellCheckerService). Should never be needed for normal applications.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permlab_bindVpnService">bind to a VPN service</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
+    <string name="permdesc_bindVpnService">Allows the holder to bind to the top-level
+        interface of a Vpn service. Should never be needed for normal applications.</string>
+
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_bindWallpaper">bind to a wallpaper</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permdesc_bindWallpaper">Allows the holder to bind to the top-level

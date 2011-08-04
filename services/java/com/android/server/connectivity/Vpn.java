@@ -18,10 +18,13 @@ package com.android.server.connectivity;
 
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -30,6 +33,8 @@ import android.net.INetworkManagementEventObserver;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.Binder;
+import android.os.IBinder;
+import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.SystemClock;
@@ -55,11 +60,15 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
 
     private final static String TAG = "Vpn";
 
+    private final static String BIND_VPN_SERVICE =
+            android.Manifest.permission.BIND_VPN_SERVICE;
+
     private final Context mContext;
     private final VpnCallback mCallback;
 
     private String mPackage = VpnConfig.LEGACY_VPN;
     private String mInterface;
+    private Connection mConnection;
     private LegacyVpnRunner mLegacyVpnRunner;
 
     public Vpn(Context context, VpnCallback callback) {
@@ -111,8 +120,15 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
 
         // Revoke the connection or stop LegacyVpnRunner.
-        if (!mPackage.equals(VpnConfig.LEGACY_VPN)) {
-            // TODO
+        if (mConnection != null) {
+            try {
+                mConnection.mService.transact(IBinder.LAST_CALL_TRANSACTION,
+                        Parcel.obtain(), null, IBinder.FLAG_ONEWAY);
+            } catch (Exception e) {
+                // ignore
+            }
+            mContext.unbindService(mConnection);
+            mConnection = null;
         } else if (mLegacyVpnRunner != null) {
             mLegacyVpnRunner.exit();
             mLegacyVpnRunner = null;
@@ -161,7 +177,15 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         }
 
         // Check if the service is properly declared.
-        // TODO
+        Intent intent = new Intent(VpnConfig.SERVICE_INTERFACE);
+        intent.setClassName(mPackage, config.user);
+        ResolveInfo info = pm.resolveService(intent, 0);
+        if (info == null) {
+            throw new SecurityException("Cannot find " + config.user);
+        }
+        if (!BIND_VPN_SERVICE.equals(info.serviceInfo.permission)) {
+            throw new SecurityException(config.user + " does not require " + BIND_VPN_SERVICE);
+        }
 
         // Load the label.
         String label = app.loadLabel(pm).toString();
@@ -191,10 +215,17 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             if (config.routes != null) {
                 jniSetRoutes(interfaze, config.routes);
             }
-            // TODO: bind the service
+            Connection connection = new Connection();
+            if (!mContext.bindService(intent, connection, Context.BIND_AUTO_CREATE)) {
+                throw new IllegalStateException("Cannot bind " + config.user);
+            }
+            if (mConnection != null) {
+                mContext.unbindService(mConnection);
+            }
             if (mInterface != null && !mInterface.equals(interfaze)) {
                 jniReset(mInterface);
             }
+            mConnection = connection;
             mInterface = interfaze;
         } catch (RuntimeException e) {
             try {
@@ -204,6 +235,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             }
             throw e;
         }
+        Log.i(TAG, "Established by " + config.user + " on " + mInterface);
 
         // Fill more values.
         config.user = mPackage;
@@ -245,13 +277,30 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             hideNotification();
             Binder.restoreCallingIdentity(identity);
             mInterface = null;
-            // TODO: unbind the service
+            if (mConnection != null) {
+                mContext.unbindService(mConnection);
+                mConnection = null;
+            }
         }
     }
 
     // INetworkManagementEventObserver.Stub
     @Override
     public void limitReached(String limit, String interfaze) {
+    }
+
+    private class Connection implements ServiceConnection {
+        private IBinder mService;
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mService = service;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+        }
     }
 
     private void showNotification(VpnConfig config, String label, Bitmap icon) {
