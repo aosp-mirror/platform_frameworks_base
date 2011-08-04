@@ -41,7 +41,7 @@ You'll need the PNG image with which you'd like to create a NinePatch.</p>
      A previously saved 9-patch file (<code>*.9.png</code>) will be loaded as-is, 
      with no drawing area added, because it already exists.</p>
 
-<img src="{@docRoot}images/draw9patch-bad.png" style="float:right" alt="" height="300" width="341"
+<img src="{@docRoot}images/draw9patch-bad.png" style="float:right;clear:both" alt="" height="300" width="341"
 />
 
 <p>Optional controls include:</p>
