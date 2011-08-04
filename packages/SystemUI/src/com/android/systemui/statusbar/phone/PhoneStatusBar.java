@@ -1873,7 +1873,7 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     void updateExpandedSize() {
-        if (mExpandedDialog != null) {
+        if (mExpandedDialog != null && mExpandedParams != null) {
             mExpandedParams.width = mDisplaySize.x;
             mExpandedParams.height = getExpandedHeight(mDisplaySize.y);
             if (!mExpandedVisible) {
