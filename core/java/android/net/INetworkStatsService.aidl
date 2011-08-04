@@ -24,9 +24,9 @@ import android.net.NetworkTemplate;
 interface INetworkStatsService {
 
     /** Return historical network layer stats for traffic that matches template. */
-    NetworkStatsHistory getHistoryForNetwork(in NetworkTemplate template);
+    NetworkStatsHistory getHistoryForNetwork(in NetworkTemplate template, int fields);
     /** Return historical network layer stats for specific UID traffic that matches template. */
-    NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid, int tag);
+    NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid, int tag, int fields);
 
     /** Return network layer usage summary for traffic that matches template. */
     NetworkStats getSummaryForNetwork(in NetworkTemplate template, long start, long end);

@@ -240,6 +240,11 @@ interface INetworkManagementService
     void setUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces);
 
     /**
+     * Return status of bandwidth control module.
+     */
+    boolean isBandwidthControlEnabled();
+
+    /**
      * Configures bandwidth throttling on an interface.
      */
     void setInterfaceThrottle(String iface, int rxKbps, int txKbps);

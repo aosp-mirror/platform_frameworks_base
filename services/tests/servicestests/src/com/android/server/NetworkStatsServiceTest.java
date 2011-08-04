@@ -25,6 +25,7 @@ import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
+import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.UID_REMOVED;
@@ -302,7 +303,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
 
         // verify service recorded history
-        history = mService.getHistoryForNetwork(sTemplateWifi);
+        history = mService.getHistoryForNetwork(sTemplateWifi, FIELD_ALL);
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, 512L, 4L, 512L, 4L, 0);
         assertEquals(HOUR_IN_MILLIS, history.getBucketDuration());
         assertEquals(2, history.size());
@@ -319,7 +320,7 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
         mServiceContext.sendBroadcast(new Intent(ACTION_NETWORK_STATS_POLL));
 
         // verify identical stats, but spread across 4 buckets now
-        history = mService.getHistoryForNetwork(sTemplateWifi);
+        history = mService.getHistoryForNetwork(sTemplateWifi, FIELD_ALL);
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, 512L, 4L, 512L, 4L, 0);
         assertEquals(30 * MINUTE_IN_MILLIS, history.getBucketDuration());
         assertEquals(4, history.size());
@@ -631,14 +632,15 @@ public class NetworkStatsServiceTest extends AndroidTestCase {
 
     private void assertNetworkTotal(NetworkTemplate template, long rxBytes, long rxPackets,
             long txBytes, long txPackets, int operations) {
-        final NetworkStatsHistory history = mService.getHistoryForNetwork(template);
+        final NetworkStatsHistory history = mService.getHistoryForNetwork(template, FIELD_ALL);
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, rxBytes, rxPackets, txBytes,
                 txPackets, operations);
     }
 
     private void assertUidTotal(NetworkTemplate template, int uid, long rxBytes, long rxPackets,
             long txBytes, long txPackets, int operations) {
-        final NetworkStatsHistory history = mService.getHistoryForUid(template, uid, TAG_NONE);
+        final NetworkStatsHistory history = mService.getHistoryForUid(
+                template, uid, TAG_NONE, FIELD_ALL);
         assertValues(history, Long.MIN_VALUE, Long.MAX_VALUE, rxBytes, rxPackets, txBytes,
                 txPackets, operations);
     }
