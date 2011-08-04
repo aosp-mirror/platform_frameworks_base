@@ -28,6 +28,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewParent;
 
+import com.android.systemui.R;
+
 import java.util.Date;
 
 public final class DateView extends TextView {
@@ -90,7 +92,7 @@ public final class DateView extends TextView {
         Date now = new Date();
         CharSequence dow = DateFormat.format("EEEE", now);
         CharSequence date = DateFormat.getMediumDateFormat(getContext()).format(now);
-        setText(dow + "\n" + date);
+        setText(context.getString(R.string.status_bar_date_formatter, dow, date));
     }
 
     private boolean isVisible() {

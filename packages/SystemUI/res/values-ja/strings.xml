@@ -135,4 +135,8 @@
     <skip />
     <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
     <skip />
+
+    <!-- in Japanese the day of week should follow the date -->
+    <string name="status_bar_date_formatter">%2$s\n%1$s</string>
+
 </resources>
