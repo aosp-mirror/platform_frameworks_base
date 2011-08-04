@@ -5,7 +5,6 @@
     <application android:label="VpnDialogs"
             android:allowBackup="false" >
         <activity android:name=".ConfirmDialog"
-                android:permission="android.permission.VPN"
                 android:theme="@style/transparent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

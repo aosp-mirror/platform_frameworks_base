@@ -392,14 +392,6 @@
         android:description="@string/permdesc_nfc"
         android:label="@string/permlab_nfc" />
 
-    <!-- Allows applications to provide VPN functionality.
-         @hide Pending API council approval -->
-    <permission android:name="android.permission.VPN"
-        android:permissionGroup="android.permission-group.NETWORK"
-        android:protectionLevel="dangerous"
-        android:description="@string/permdesc_vpn"
-        android:label="@string/permlab_vpn" />
-
     <!-- Allows an application to use SIP service -->
     <permission android:name="android.permission.USE_SIP"
         android:permissionGroup="android.permission-group.NETWORK"
