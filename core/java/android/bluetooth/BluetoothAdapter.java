@@ -1163,7 +1163,10 @@ public final class BluetoothAdapter {
      * <p> If this API returns true, it means the callback will be called.
      * The callback will be called with the current state of Bluetooth.
      * If the state is not what was requested, an internal error would be the
-     * reason.
+     * reason. If Bluetooth is already on and if this function is called to turn
+     * it on, the api will return true and a callback will be called.
+     *
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH}
      *
      * @param on True for on, false for off.
      * @param callback The callback to notify changes to the state.
