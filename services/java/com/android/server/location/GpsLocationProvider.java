@@ -22,6 +22,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.location.Criteria;
 import android.location.IGpsStatusListener;
 import android.location.IGpsStatusProvider;
@@ -33,6 +34,7 @@ import android.location.LocationProvider;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.SntpClient;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -46,6 +48,7 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.provider.Telephony.Carriers;
 import android.provider.Telephony.Sms.Intents;
 import android.telephony.SmsMessage;
 import android.telephony.TelephonyManager;
@@ -490,8 +493,17 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
 
         if (info != null) {
+            boolean dataEnabled = Settings.Secure.getInt(mContext.getContentResolver(),
+                                                         Settings.Secure.MOBILE_DATA, 1) == 1;
+            boolean networkAvailable = info.isAvailable() && dataEnabled;
+            String defaultApn = getSelectedApn();
+            if (defaultApn == null) {
+                defaultApn = "dummy-apn";
+            }
+
             native_update_network_state(info.isConnected(), info.getType(),
-                    info.isRoaming(), info.getExtraInfo());
+                                        info.isRoaming(), networkAvailable,
+                                        info.getExtraInfo(), defaultApn);
         }
 
         if (info != null && info.getType() == ConnectivityManager.TYPE_MOBILE_SUPL
@@ -1578,6 +1590,25 @@ public class GpsLocationProvider implements LocationProviderInterface {
         }
     }
 
+    private String getSelectedApn() {
+        Uri uri = Uri.parse("content://telephony/carriers/preferapn");
+        String apn = null;
+
+        Cursor cursor = mContext.getContentResolver().query(uri, new String[] {"apn"},
+                null, null, Carriers.DEFAULT_SORT_ORDER);
+
+        if (null != cursor) {
+            try {
+                if (cursor.moveToFirst()) {
+                    apn = cursor.getString(0);
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        return apn;
+    }
+
     // for GPS SV statistics
     private static final int MAX_SVS = 32;
     private static final int EPHEMERIS_MASK = 0;
@@ -1636,5 +1667,5 @@ public class GpsLocationProvider implements LocationProviderInterface {
     private native void native_agps_set_id(int type, String setid);
 
     private native void native_update_network_state(boolean connected, int type,
-            boolean roaming, String extraInfo);
+            boolean roaming, boolean available, String extraInfo, String defaultAPN);
 }
