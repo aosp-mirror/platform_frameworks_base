@@ -617,23 +617,32 @@ rinse_repeat:
             goto rinse_repeat;
         }
 
-        if (!mPlaylist->isComplete()
-                && mSeqNumber > lastSeqNumberInPlaylist
-                && mNumRetries < kMaxNumRetries) {
+        if (!mPlaylist->isComplete() && mNumRetries < kMaxNumRetries) {
             ++mNumRetries;
 
-            mLastPlaylistFetchTimeUs = -1;
-            postMonitorQueue(3000000ll);
+            if (mSeqNumber > lastSeqNumberInPlaylist) {
+                mLastPlaylistFetchTimeUs = -1;
+                postMonitorQueue(3000000ll);
+                return;
+            }
+
+            // we've missed the boat, let's start from the lowest sequence
+            // number available and signal a discontinuity.
+
+            LOGI("We've missed the boat, restarting playback.");
+            mSeqNumber = lastSeqNumberInPlaylist;
+            explicitDiscontinuity = true;
+
+            // fall through
+        } else {
+            LOGE("Cannot find sequence number %d in playlist "
+                 "(contains %d - %d)",
+                 mSeqNumber, firstSeqNumberInPlaylist,
+                 firstSeqNumberInPlaylist + mPlaylist->size() - 1);
+
+            mDataSource->queueEOS(ERROR_END_OF_STREAM);
             return;
         }
-
-        LOGE("Cannot find sequence number %d in playlist "
-             "(contains %d - %d)",
-             mSeqNumber, firstSeqNumberInPlaylist,
-             firstSeqNumberInPlaylist + mPlaylist->size() - 1);
-
-        mDataSource->queueEOS(ERROR_END_OF_STREAM);
-        return;
     }
 
     mNumRetries = 0;

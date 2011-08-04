@@ -183,19 +183,19 @@ void SfDelegate::setOwner(ChromiumHTTPDataSource *owner) {
 
 void SfDelegate::OnReceivedRedirect(
             net::URLRequest *request, const GURL &new_url, bool *defer_redirect) {
-    MY_LOGI("OnReceivedRedirect");
+    MY_LOGV("OnReceivedRedirect");
 }
 
 void SfDelegate::OnAuthRequired(
             net::URLRequest *request, net::AuthChallengeInfo *auth_info) {
-    MY_LOGI("OnAuthRequired");
+    MY_LOGV("OnAuthRequired");
 
     inherited::OnAuthRequired(request, auth_info);
 }
 
 void SfDelegate::OnCertificateRequested(
             net::URLRequest *request, net::SSLCertRequestInfo *cert_request_info) {
-    MY_LOGI("OnCertificateRequested");
+    MY_LOGV("OnCertificateRequested");
 
     inherited::OnCertificateRequested(request, cert_request_info);
 }
@@ -208,7 +208,7 @@ void SfDelegate::OnSSLCertificateError(
 }
 
 void SfDelegate::OnGetCookies(net::URLRequest *request, bool blocked_by_policy) {
-    MY_LOGI("OnGetCookies");
+    MY_LOGV("OnGetCookies");
 }
 
 void SfDelegate::OnSetCookie(
@@ -216,7 +216,7 @@ void SfDelegate::OnSetCookie(
         const std::string &cookie_line,
         const net::CookieOptions &options,
         bool blocked_by_policy) {
-    MY_LOGI("OnSetCookie");
+    MY_LOGV("OnSetCookie");
 }
 
 void SfDelegate::OnResponseStarted(net::URLRequest *request) {
