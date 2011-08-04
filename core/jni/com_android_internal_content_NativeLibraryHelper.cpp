@@ -51,14 +51,16 @@
 
 namespace android {
 
-typedef void (*iterFunc)(JNIEnv*, void*, ZipFileRO*, ZipEntryRO, const char*);
-
 // These match PackageManager.java install codes
 typedef enum {
-    INSTALL_SUCCEEDED = 0,
+    INSTALL_SUCCEEDED = 1,
     INSTALL_FAILED_INVALID_APK = -2,
     INSTALL_FAILED_INSUFFICIENT_STORAGE = -4,
+    INSTALL_FAILED_CONTAINER_ERROR = -18,
+    INSTALL_FAILED_INTERNAL_ERROR = -110,
 } install_status_t;
+
+typedef install_status_t (*iterFunc)(JNIEnv*, void*, ZipFileRO*, ZipEntryRO, const char*);
 
 // Equivalent to isFilenameSafe
 static bool
@@ -140,17 +142,19 @@ isFileDifferent(const char* filePath, size_t fileSize, time_t modifiedTime,
     return false;
 }
 
-static void
+static install_status_t
 sumFiles(JNIEnv* env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char* fileName)
 {
     size_t* total = (size_t*) arg;
     size_t uncompLen;
 
     if (!zipFile->getEntryInfo(zipEntry, NULL, &uncompLen, NULL, NULL, NULL, NULL)) {
-        return;
+        return INSTALL_FAILED_INVALID_APK;
     }
 
     *total += uncompLen;
+
+    return INSTALL_SUCCEEDED;
 }
 
 /*
@@ -158,7 +162,7 @@ sumFiles(JNIEnv* env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const 
  *
  * This function assumes the library and path names passed in are considered safe.
  */
-static void
+static install_status_t
 copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntry, const char* fileName)
 {
     jstring* javaNativeLibPath = (jstring*) arg;
@@ -170,7 +174,8 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     time_t modTime;
 
     if (!zipFile->getEntryInfo(zipEntry, NULL, &uncompLen, NULL, NULL, &when, &crc)) {
-        return;
+        LOGD("Couldn't read zip entry info\n");
+        return INSTALL_FAILED_INVALID_APK;
     } else {
         struct tm t;
         ZipFileRO::zipTimeToTimespec(when, &t);
@@ -182,50 +187,50 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     char localFileName[nativeLibPath.size() + fileNameLen + 2];
 
     if (strlcpy(localFileName, nativeLibPath.c_str(), sizeof(localFileName)) != nativeLibPath.size()) {
-        LOGD("Couldn't allocate local file name for library: %s", strerror(errno));
-        return;
+        LOGD("Couldn't allocate local file name for library");
+        return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
     *(localFileName + nativeLibPath.size()) = '/';
 
     if (strlcpy(localFileName + nativeLibPath.size() + 1, fileName, sizeof(localFileName)
                     - nativeLibPath.size() - 1) != fileNameLen) {
-        LOGD("Couldn't allocate local file name for library: %s", strerror(errno));
-        return;
+        LOGD("Couldn't allocate local file name for library");
+        return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
     // Only copy out the native file if it's different.
     struct stat st;
     if (!isFileDifferent(localFileName, uncompLen, modTime, crc, &st)) {
-        return;
+        return INSTALL_SUCCEEDED;
     }
 
     char localTmpFileName[nativeLibPath.size() + TMP_FILE_PATTERN_LEN + 2];
     if (strlcpy(localTmpFileName, nativeLibPath.c_str(), sizeof(localTmpFileName))
             != nativeLibPath.size()) {
-        LOGD("Couldn't allocate local file name for library: %s", strerror(errno));
-        return;
+        LOGD("Couldn't allocate local file name for library");
+        return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
     *(localFileName + nativeLibPath.size()) = '/';
 
     if (strlcpy(localTmpFileName + nativeLibPath.size(), TMP_FILE_PATTERN,
                     TMP_FILE_PATTERN_LEN - nativeLibPath.size()) != TMP_FILE_PATTERN_LEN) {
-        LOGI("Couldn't allocate temporary file name for library: %s", strerror(errno));
-        return;
+        LOGI("Couldn't allocate temporary file name for library");
+        return INSTALL_FAILED_INTERNAL_ERROR;
     }
 
     int fd = mkstemp(localTmpFileName);
     if (fd < 0) {
         LOGI("Couldn't open temporary file name: %s: %s\n", localTmpFileName, strerror(errno));
-        return;
+        return INSTALL_FAILED_CONTAINER_ERROR;
     }
 
     if (!zipFile->uncompressEntry(zipEntry, fd)) {
-        LOGI("Failed uncompressing %s to %s: %s", fileName, localTmpFileName, strerror(errno));
+        LOGI("Failed uncompressing %s to %s\n", fileName, localTmpFileName);
         close(fd);
         unlink(localTmpFileName);
-        return;
+        return INSTALL_FAILED_CONTAINER_ERROR;
     }
 
     close(fd);
@@ -238,7 +243,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     if (utimes(localTmpFileName, times) < 0) {
         LOGI("Couldn't change modification time on %s: %s\n", localTmpFileName, strerror(errno));
         unlink(localTmpFileName);
-        return;
+        return INSTALL_FAILED_CONTAINER_ERROR;
     }
 
     // Set the mode to 755
@@ -246,17 +251,19 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     if (chmod(localTmpFileName, mode) < 0) {
         LOGI("Couldn't change permissions on %s: %s\n", localTmpFileName, strerror(errno));
         unlink(localTmpFileName);
-        return;
+        return INSTALL_FAILED_CONTAINER_ERROR;
     }
 
     // Finally, rename it to the final name.
     if (rename(localTmpFileName, localFileName) < 0) {
         LOGI("Couldn't rename %s to %s: %s\n", localTmpFileName, localFileName, strerror(errno));
         unlink(localTmpFileName);
-        return;
+        return INSTALL_FAILED_CONTAINER_ERROR;
     }
 
     LOGV("Successfully moved %s to %s\n", localTmpFileName, localFileName);
+
+    return INSTALL_SUCCEEDED;
 }
 
 static install_status_t
@@ -301,10 +308,7 @@ iterateOverNativeFiles(JNIEnv *env, jstring javaFilePath, jstring javaCpuAbi, js
         }
 
         const char* lastSlash = strrchr(fileName, '/');
-        if (lastSlash == NULL) {
-            LOG_ASSERT("last slash was null somehow for %s\n", fileName);
-            continue;
-        }
+        LOG_ASSERT(lastSlash != NULL, "last slash was null somehow for %s\n", fileName);
 
         // Check to make sure the CPU ABI of this file is one we support.
         const char* cpuAbiOffset = fileName + APK_LIB_LEN;
@@ -325,12 +329,17 @@ iterateOverNativeFiles(JNIEnv *env, jstring javaFilePath, jstring javaCpuAbi, js
         }
 
         // If this is a .so file, check to see if we need to copy it.
-        if (!strncmp(fileName + fileNameLen - LIB_SUFFIX_LEN, LIB_SUFFIX, LIB_SUFFIX_LEN)
-                && !strncmp(lastSlash, LIB_PREFIX, LIB_PREFIX_LEN)
-                && isFilenameSafe(lastSlash + 1)) {
-            callFunc(env, callArg, &zipFile, entry, lastSlash + 1);
-        } else if (!strncmp(lastSlash + 1, GDBSERVER, GDBSERVER_LEN)) {
-            callFunc(env, callArg, &zipFile, entry, lastSlash + 1);
+        if ((!strncmp(fileName + fileNameLen - LIB_SUFFIX_LEN, LIB_SUFFIX, LIB_SUFFIX_LEN)
+                    && !strncmp(lastSlash, LIB_PREFIX, LIB_PREFIX_LEN)
+                    && isFilenameSafe(lastSlash + 1))
+                || !strncmp(lastSlash + 1, GDBSERVER, GDBSERVER_LEN)) {
+
+            install_status_t ret = callFunc(env, callArg, &zipFile, entry, lastSlash + 1);
+
+            if (ret != INSTALL_SUCCEEDED) {
+                LOGV("Failure for entry %s", lastSlash + 1);
+                return ret;
+            }
         }
     }
 
@@ -341,7 +350,7 @@ static jint
 com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(JNIEnv *env, jclass clazz,
         jstring javaFilePath, jstring javaNativeLibPath, jstring javaCpuAbi, jstring javaCpuAbi2)
 {
-    return iterateOverNativeFiles(env, javaFilePath, javaCpuAbi, javaCpuAbi2,
+    return (jint) iterateOverNativeFiles(env, javaFilePath, javaCpuAbi, javaCpuAbi2,
             copyFileIfChanged, &javaNativeLibPath);
 }
 

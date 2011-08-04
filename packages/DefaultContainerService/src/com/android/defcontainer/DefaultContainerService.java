@@ -38,8 +38,7 @@ import android.os.ServiceManager;
 import android.os.StatFs;
 import android.app.IntentService;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.util.Pair;
+import android.util.Slog;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -47,11 +46,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
 
 import android.os.FileUtils;
 import android.provider.Settings;
@@ -120,29 +114,39 @@ public class DefaultContainerService extends IntentService {
         public PackageInfoLite getMinimalPackageInfo(final Uri fileUri, int flags, long threshold) {
             PackageInfoLite ret = new PackageInfoLite();
             if (fileUri == null) {
-                Log.i(TAG, "Invalid package uri " + fileUri);
+                Slog.i(TAG, "Invalid package uri " + fileUri);
                 ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
                 return ret;
             }
             String scheme = fileUri.getScheme();
             if (scheme != null && !scheme.equals("file")) {
-                Log.w(TAG, "Falling back to installing on internal storage only");
+                Slog.w(TAG, "Falling back to installing on internal storage only");
                 ret.recommendedInstallLocation = PackageHelper.RECOMMEND_INSTALL_INTERNAL;
                 return ret;
             }
             String archiveFilePath = fileUri.getPath();
             DisplayMetrics metrics = new DisplayMetrics();
             metrics.setToDefaults();
+
             PackageParser.PackageLite pkg = PackageParser.parsePackageLite(archiveFilePath, 0);
             if (pkg == null) {
-                Log.w(TAG, "Failed to parse package");
-                ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+                Slog.w(TAG, "Failed to parse package");
+
+                final File apkFile = new File(archiveFilePath);
+                if (!apkFile.exists()) {
+                    ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_URI;
+                } else {
+                    ret.recommendedInstallLocation = PackageHelper.RECOMMEND_FAILED_INVALID_APK;
+                }
+
                 return ret;
             }
             ret.packageName = pkg.packageName;
             ret.installLocation = pkg.installLocation;
+
             ret.recommendedInstallLocation = recommendAppInstallLocation(pkg.installLocation,
                     archiveFilePath, flags, threshold);
+
             return ret;
         }
 
@@ -150,20 +154,28 @@ public class DefaultContainerService extends IntentService {
         public boolean checkInternalFreeStorage(Uri packageUri, long threshold)
                 throws RemoteException {
             final File apkFile = new File(packageUri.getPath());
-            return isUnderInternalThreshold(apkFile, threshold);
+            try {
+                return isUnderInternalThreshold(apkFile, threshold);
+            } catch (FileNotFoundException e) {
+                return true;
+            }
         }
 
         @Override
         public boolean checkExternalFreeStorage(Uri packageUri) throws RemoteException {
             final File apkFile = new File(packageUri.getPath());
-            return isUnderExternalThreshold(apkFile);
+            try {
+                return isUnderExternalThreshold(apkFile);
+            } catch (FileNotFoundException e) {
+                return true;
+            }
         }
 
         public ObbInfo getObbInfo(String filename) {
             try {
                 return ObbScanner.getObbInfo(filename);
             } catch (IOException e) {
-                Log.d(TAG, "Couldn't get OBB info for " + filename);
+                Slog.d(TAG, "Couldn't get OBB info for " + filename);
                 return null;
             }
         }
@@ -221,7 +233,7 @@ public class DefaultContainerService extends IntentService {
         // Make sure the sdcard is mounted.
         String status = Environment.getExternalStorageState();
         if (!status.equals(Environment.MEDIA_MOUNTED)) {
-            Log.w(TAG, "Make sure sdcard is mounted.");
+            Slog.w(TAG, "Make sure sdcard is mounted.");
             return null;
         }
 
@@ -229,75 +241,81 @@ public class DefaultContainerService extends IntentService {
         String codePath = packageURI.getPath();
         File codeFile = new File(codePath);
 
-        // Native files we need to copy to the container.
-        List<Pair<ZipEntry, String>> nativeFiles = new ArrayList<Pair<ZipEntry, String>>();
-
         // Calculate size of container needed to hold base APK.
-        final int sizeMb = calculateContainerSize(codeFile, nativeFiles);
+        int sizeMb;
+        try {
+            sizeMb = calculateContainerSize(codeFile);
+        } catch (FileNotFoundException e) {
+            Slog.w(TAG, "File does not exist when trying to copy " + codeFile.getPath());
+            return null;
+        }
 
         // Create new container
-        String newCachePath = null;
+        final String newCachePath;
         if ((newCachePath = PackageHelper.createSdDir(sizeMb, newCid, key, Process.myUid())) == null) {
-            Log.e(TAG, "Failed to create container " + newCid);
-            return null;
-        }
-        if (localLOGV)
-            Log.i(TAG, "Created container for " + newCid + " at path : " + newCachePath);
-        File resFile = new File(newCachePath, resFileName);
-        if (!FileUtils.copyFile(new File(codePath), resFile)) {
-            Log.e(TAG, "Failed to copy " + codePath + " to " + resFile);
-            // Clean up container
-            PackageHelper.destroySdDir(newCid);
+            Slog.e(TAG, "Failed to create container " + newCid);
             return null;
         }
 
-        try {
-            ZipFile zipFile = new ZipFile(codeFile);
+        if (localLOGV) {
+            Slog.i(TAG, "Created container for " + newCid + " at path : " + newCachePath);
+        }
 
-            File sharedLibraryDir = new File(newCachePath, LIB_DIR_NAME);
-            sharedLibraryDir.mkdir();
-
-            final int N = nativeFiles.size();
-            for (int i = 0; i < N; i++) {
-                final Pair<ZipEntry, String> entry = nativeFiles.get(i);
-
-                InputStream is = zipFile.getInputStream(entry.first);
-                try {
-                    File destFile = new File(sharedLibraryDir, entry.second);
-                    if (!FileUtils.copyToFile(is, destFile)) {
-                        throw new IOException("Couldn't copy native binary "
-                                + entry.first.getName() + " to " + entry.second);
-                    }
-                } finally {
-                    is.close();
-                }
+        final File resFile = new File(newCachePath, resFileName);
+        if (FileUtils.copyFile(new File(codePath), resFile)) {
+            if (localLOGV) {
+                Slog.i(TAG, "Copied " + codePath + " to " + resFile);
             }
-        } catch (IOException e) {
-            Log.e(TAG, "Couldn't copy native file to container", e);
+        } else {
+            Slog.e(TAG, "Failed to copy " + codePath + " to " + resFile);
+            // Clean up container
             PackageHelper.destroySdDir(newCid);
             return null;
         }
 
-        if (localLOGV) Log.i(TAG, "Copied " + codePath + " to " + resFile);
+        final File sharedLibraryDir = new File(newCachePath, LIB_DIR_NAME);
+        if (sharedLibraryDir.mkdir()) {
+            int ret = NativeLibraryHelper.copyNativeBinariesIfNeededLI(codeFile, sharedLibraryDir);
+            if (ret != PackageManager.INSTALL_SUCCEEDED) {
+                Slog.e(TAG, "Could not copy native libraries to " + sharedLibraryDir.getPath());
+                PackageHelper.destroySdDir(newCid);
+                return null;
+            }
+        } else {
+            Slog.e(TAG, "Could not create native lib directory: " + sharedLibraryDir.getPath());
+            PackageHelper.destroySdDir(newCid);
+            return null;
+        }
+
         if (!PackageHelper.finalizeSdDir(newCid)) {
-            Log.e(TAG, "Failed to finalize " + newCid + " at path " + newCachePath);
+            Slog.e(TAG, "Failed to finalize " + newCid + " at path " + newCachePath);
             // Clean up container
             PackageHelper.destroySdDir(newCid);
+            return null;
         }
-        if (localLOGV) Log.i(TAG, "Finalized container " + newCid);
+
+        if (localLOGV) {
+            Slog.i(TAG, "Finalized container " + newCid);
+        }
+
         if (PackageHelper.isContainerMounted(newCid)) {
-            if (localLOGV) Log.i(TAG, "Unmounting " + newCid +
-                    " at path " + newCachePath);
+            if (localLOGV) {
+                Slog.i(TAG, "Unmounting " + newCid + " at path " + newCachePath);
+            }
+
             // Force a gc to avoid being killed.
             Runtime.getRuntime().gc();
             PackageHelper.unMountSdDir(newCid);
         } else {
-            if (localLOGV) Log.i(TAG, "Container " + newCid + " not mounted");
+            if (localLOGV) {
+                Slog.i(TAG, "Container " + newCid + " not mounted");
+            }
         }
+
         return newCachePath;
     }
 
-    public static boolean copyToFile(InputStream inputStream, FileOutputStream out) {
+    private static boolean copyToFile(InputStream inputStream, FileOutputStream out) {
         try {
             byte[] buffer = new byte[4096];
             int bytesRead;
@@ -306,12 +324,12 @@ public class DefaultContainerService extends IntentService {
             }
             return true;
         } catch (IOException e) {
-            Log.i(TAG, "Exception : " + e + " when copying file");
+            Slog.i(TAG, "Exception : " + e + " when copying file");
             return false;
         }
     }
 
-    public static boolean copyToFile(File srcFile, FileOutputStream out) {
+    private static boolean copyToFile(File srcFile, FileOutputStream out) {
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(srcFile);
@@ -323,7 +341,7 @@ public class DefaultContainerService extends IntentService {
         }
     }
 
-    private  boolean copyFile(Uri pPackageURI, FileOutputStream outStream) {
+    private boolean copyFile(Uri pPackageURI, FileOutputStream outStream) {
         String scheme = pPackageURI.getScheme();
         if (scheme == null || scheme.equals("file")) {
             final File srcPackageFile = new File(pPackageURI.getPath());
@@ -331,7 +349,7 @@ public class DefaultContainerService extends IntentService {
             // destination file in order to eliminate a window where the package directory
             // scanner notices the new package file but it's not completely copied yet.
             if (!copyToFile(srcPackageFile, outStream)) {
-                Log.e(TAG, "Couldn't copy file: " + srcPackageFile);
+                Slog.e(TAG, "Couldn't copy file: " + srcPackageFile);
                 return false;
             }
         } else if (scheme.equals("content")) {
@@ -339,28 +357,31 @@ public class DefaultContainerService extends IntentService {
             try {
                 fd = getContentResolver().openFileDescriptor(pPackageURI, "r");
             } catch (FileNotFoundException e) {
-                Log.e(TAG, "Couldn't open file descriptor from download service. Failed with exception " + e);
+                Slog.e(TAG,
+                        "Couldn't open file descriptor from download service. Failed with exception "
+                                + e);
                 return false;
             }
             if (fd == null) {
-                Log.e(TAG, "Couldn't open file descriptor from download service (null).");
+                Slog.e(TAG, "Couldn't open file descriptor from download service (null).");
                 return false;
             } else {
                 if (localLOGV) {
-                    Log.v(TAG, "Opened file descriptor from download service.");
+                    Slog.i(TAG, "Opened file descriptor from download service.");
                 }
                 ParcelFileDescriptor.AutoCloseInputStream
                 dlStream = new ParcelFileDescriptor.AutoCloseInputStream(fd);
                 // We copy the source package file to a temp file and then rename it to the
                 // destination file in order to eliminate a window where the package directory
-                // scanner notices the new package file but it's not completely copied yet.
+                // scanner notices the new package file but it's not completely
+                // cop
                 if (!copyToFile(dlStream, outStream)) {
-                    Log.e(TAG, "Couldn't copy " + pPackageURI + " to temp file.");
+                    Slog.e(TAG, "Couldn't copy " + pPackageURI + " to temp file.");
                     return false;
                 }
             }
         } else {
-            Log.e(TAG, "Package URI is not 'file:' or 'content:' - " + pPackageURI);
+            Slog.e(TAG, "Package URI is not 'file:' or 'content:' - " + pPackageURI);
             return false;
         }
         return true;
@@ -434,12 +455,20 @@ public class DefaultContainerService extends IntentService {
 
         boolean fitsOnInternal = false;
         if (checkBoth || prefer == PREFER_INTERNAL) {
-            fitsOnInternal = isUnderInternalThreshold(apkFile, threshold);
+            try {
+                fitsOnInternal = isUnderInternalThreshold(apkFile, threshold);
+            } catch (FileNotFoundException e) {
+                return PackageHelper.RECOMMEND_FAILED_INVALID_URI;
+            }
         }
 
         boolean fitsOnSd = false;
         if (!emulated && (checkBoth || prefer == PREFER_EXTERNAL)) {
-            fitsOnSd = isUnderExternalThreshold(apkFile);
+            try {
+                fitsOnSd = isUnderExternalThreshold(apkFile);
+            } catch (FileNotFoundException e) {
+                return PackageHelper.RECOMMEND_FAILED_INVALID_URI;
+            }
         }
 
         if (prefer == PREFER_INTERNAL) {
@@ -473,8 +502,20 @@ public class DefaultContainerService extends IntentService {
         }
     }
 
-    private boolean isUnderInternalThreshold(File apkFile, long threshold) {
+    /**
+     * Measure a file to see if it fits within the free space threshold.
+     *
+     * @param apkFile file to check
+     * @param threshold byte threshold to compare against
+     * @return true if file fits under threshold
+     * @throws FileNotFoundException when APK does not exist
+     */
+    private boolean isUnderInternalThreshold(File apkFile, long threshold)
+            throws FileNotFoundException {
         final long size = apkFile.length();
+        if (size == 0 && !apkFile.exists()) {
+            throw new FileNotFoundException();
+        }
 
         final StatFs internalStats = new StatFs(Environment.getDataDirectory().getPath());
         final long availInternalSize = (long) internalStats.getAvailableBlocks()
@@ -484,12 +525,19 @@ public class DefaultContainerService extends IntentService {
     }
 
 
-    private boolean isUnderExternalThreshold(File apkFile) {
+    /**
+     * Measure a file to see if it fits in the external free space.
+     *
+     * @param apkFile file to check
+     * @return true if file fits
+     * @throws IOException when file does not exist
+     */
+    private boolean isUnderExternalThreshold(File apkFile) throws FileNotFoundException {
         if (Environment.isExternalStorageEmulated()) {
             return false;
         }
 
-        final int sizeMb = calculateContainerSize(apkFile, null);
+        final int sizeMb = calculateContainerSize(apkFile);
 
         final int availSdMb;
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
@@ -508,10 +556,14 @@ public class DefaultContainerService extends IntentService {
      * 
      * @param apkFile file from which to calculate size
      * @return size in megabytes (2^20 bytes)
+     * @throws FileNotFoundException when file does not exist
      */
-    private int calculateContainerSize(File apkFile, List<Pair<ZipEntry, String>> outFiles) {
+    private int calculateContainerSize(File apkFile) throws FileNotFoundException {
         // Calculate size of container needed to hold base APK.
         long sizeBytes = apkFile.length();
+        if (sizeBytes == 0 && !apkFile.exists()) {
+            throw new FileNotFoundException();
+        }
 
         // Check all the native files that need to be copied and add that to the
         // container size.
