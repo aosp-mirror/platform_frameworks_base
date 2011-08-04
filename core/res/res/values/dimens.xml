@@ -32,8 +32,12 @@
     <dimen name="toast_y_offset">64dip</dimen>
     <!-- Height of the status bar -->
     <dimen name="status_bar_height">25dip</dimen>
-    <!-- Height of the system bar -->
+    <!-- Height of the system bar (combined status + navigation, used on large screens) -->
     <dimen name="system_bar_height">48dip</dimen>
+    <!-- Height of the horizontal navigation bar on devices that require it -->
+    <dimen name="navigation_bar_height">48dp</dimen>
+    <!-- Width of the vertical navigation bar on devices that require it -->
+    <dimen name="navigation_bar_width">42dp</dimen>
     <!-- Height of notification icons in the status bar -->
     <dimen name="status_bar_icon_size">24dip</dimen>
     <!-- Size of the giant number (unread count) in the notifications -->

@@ -17,7 +17,7 @@
 -->
 <resources>
     <!-- thickness (width) of the navigation bar on phones that require it -->
-    <dimen name="navigation_bar_size">42dp</dimen>
+    <dimen name="navigation_bar_size">@*android:dimen/navigation_bar_width</dimen>
 
     <!-- Recent Applications parameters -->
     <!-- Width of a recent app view, including all content -->
