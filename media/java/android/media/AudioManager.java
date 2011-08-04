@@ -1802,33 +1802,17 @@ public class AudioManager {
 
     /**
      * @hide
-     * FIXME to be changed to address Neel's comments
-     * Force a refresh of the remote control client associated with the event receiver.
+     * Notifies the users of the associated remote control client that the information to display
+     * has changed.
      * @param eventReceiver
      */
-    public void refreshRemoteControlDisplay(ComponentName eventReceiver) {
+    public void notifyRemoteControlInformationChanged(ComponentName eventReceiver) {
         IAudioService service = getService();
         try {
-            service.refreshRemoteControlDisplay(eventReceiver);
+            service.notifyRemoteControlInformationChanged(eventReceiver);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in refreshRemoteControlDisplay"+e);
         }
-    }
-
-    /**
-     * @hide
-     * FIXME API to be used by implementors of remote controls, not a candidate for SDK
-     */
-    public void registerRemoteControlObserver() {
-
-    }
-
-    /**
-     * @hide
-     * FIXME API to be used by implementors of remote controls, not a candidate for SDK
-     */
-    public void unregisterRemoteControlObserver() {
-
     }
 
     /**
