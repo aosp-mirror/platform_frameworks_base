@@ -13,141 +13,175 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef __SESSIONMAP_H__
 #define __SESSIONMAP_H__
 
 #include <utils/KeyedVector.h>
+#include <utils/threads.h>
 
 namespace android {
 
 /**
- * A wrapper template class for handling DRM Engine sessions.
+ * A thread safe wrapper template class for session handlings for Drm Engines. It wraps a
+ * pointer type over KeyedVector. It keeps pointer as data in the vector and free up memory
+ * allocated pointer can be of any type of structure/class meant for keeping session data.
+ * so session object here means pointer to the session data.
  */
-template <typename NODE>
+template <typename TValue>
 class SessionMap {
 
 public:
-    KeyedVector<int, NODE> map;
-
     SessionMap() {}
 
     virtual ~SessionMap() {
+        Mutex::Autolock lock(mLock);
         destroyMap();
     }
 
-/**
- * Adds a new value in the session map table. It expects memory to be allocated already
- * for the session object
- *
- * @param key - key or Session ID
- * @param value - session object to add
- *
- * @return boolean result of adding value. returns false if key is already exist.
- */
-bool addValue(int key, NODE value) {
-    bool result = false;
-
-    if (!isCreated(key)) {
-        map.add(key, value);
-        result = true;
+    /**
+     * Adds a new value in the session map table. It expects memory to be allocated already
+     * for the session object
+     *
+     * @param key - key or Session ID
+     * @param value - session object to add
+     *
+     * @return boolean result of adding value. returns false if key is already exist.
+     */
+    bool addValue(int key, TValue value) {
+        Mutex::Autolock lock(mLock);
+        if (!isCreatedInternal(key)) {
+            map.add(key, value);
+            return true;
+        }
+        return false;
     }
 
-    return result;
-}
-
-
-/**
- * returns the session object by the key
- *
- * @param key - key or Session ID
- *
- * @return session object as per the key
- */
-NODE getValue(int key) {
-    NODE value = NULL;
-
-    if (isCreated(key)) {
-        value = (NODE) map.valueFor(key);
+    /**
+     * returns the session object by the key
+     *
+     * @param key - key or Session ID
+     *
+     * @return session object as per the key
+     */
+    TValue getValue(int key) {
+        Mutex::Autolock lock(mLock);
+        return getValueInternal(key);
     }
 
-    return value;
-}
-
-/**
- * returns the number of objects in the session map table
- *
- * @return count of number of session objects.
- */
-int getSize() {
-    return map.size();
-}
-
-/**
- * returns the session object by the index in the session map table
- *
- * @param index - index of the value required
- *
- * @return session object as per the index
- */
-NODE getValueAt(unsigned int index) {
-    NODE value = NULL;
-
-    if (map.size() > index) {
-      value = map.valueAt(index);
+    /**
+     * returns the number of objects in the session map table
+     *
+     * @return count of number of session objects.
+     */
+    int getSize() {
+        Mutex::Autolock lock(mLock);
+        return map.size();
     }
 
-    return value;
-}
+    /**
+     * returns the session object by the index in the session map table
+     *
+     * @param index - index of the value required
+     *
+     * @return session object as per the index
+     */
+    TValue getValueAt(unsigned int index) {
+        TValue value = NULL;
+        Mutex::Autolock lock(mLock);
 
-/**
- * deletes the object from session map. It also frees up memory for the session object.
- *
- * @param key - key of the value to be deleted
- *
- */
-void removeValue(int key) {
-    deleteValue(getValue(key));
-    map.removeItem(key);
-}
-
-/**
- * decides if session is already created.
- *
- * @param key - key of the value for the session
- *
- * @return boolean result of whether session is created
- */
-bool isCreated(int key) {
-    return (0 <= map.indexOfKey(key));
-}
-
-/**
- * empty the entire session table. It releases all the memory for session objects.
- */
-void destroyMap() {
-    int size = map.size();
-    int i = 0;
-
-    for (i = 0; i < size; i++) {
-        deleteValue(map.valueAt(i));
+        if (map.size() > index) {
+            value = map.valueAt(index);
+        }
+        return value;
     }
 
-    map.clear();
-}
+    /**
+     * deletes the object from session map. It also frees up memory for the session object.
+     *
+     * @param key - key of the value to be deleted
+     *
+     */
+    void removeValue(int key) {
+        Mutex::Autolock lock(mLock);
+        deleteValue(getValueInternal(key));
+        map.removeItem(key);
+    }
 
-/**
- * free up the memory for the session object.
- * Make sure if any reference to the session object anywhere, otherwise it will be a
- * dangle pointer after this call.
- *
- * @param value - session object to free
- *
- */
-void deleteValue(NODE value) {
-    delete value;
-}
+    /**
+     * decides if session is already created.
+     *
+     * @param key - key of the value for the session
+     *
+     * @return boolean result of whether session is created
+     */
+    bool isCreated(int key) {
+        Mutex::Autolock lock(mLock);
+        return isCreatedInternal(key);
+    }
 
+    SessionMap<TValue> & operator=(const SessionMap<TValue> & objectCopy) {
+        Mutex::Autolock lock(mLock);
+
+        destroyMap();
+        map = objectCopy.map;
+        return *this;
+    }
+
+private:
+    KeyedVector<int, TValue> map;
+    Mutex mLock;
+
+   /**
+    * free up the memory for the session object.
+    * Make sure if any reference to the session object anywhere, otherwise it will be a
+    * dangle pointer after this call.
+    *
+    * @param value - session object to free
+    *
+    */
+    void deleteValue(TValue value) {
+        delete value;
+    }
+
+   /**
+    * free up the memory for the entire map.
+    * free up any resources in the sessions before calling this funtion.
+    *
+    */
+    void destroyMap() {
+        int size = map.size();
+
+        for (int i = 0; i < size; i++) {
+            deleteValue(map.valueAt(i));
+        }
+        map.clear();
+    }
+
+   /**
+    * decides if session is already created.
+    *
+    * @param key - key of the value for the session
+    *
+    * @return boolean result of whether session is created
+    */
+    bool isCreatedInternal(int key) {
+        return(0 <= map.indexOfKey(key));
+    }
+
+   /**
+    * returns the session object by the key
+    *
+    * @param key - key or Session ID
+    *
+    * @return session object as per the key
+    */
+    TValue getValueInternal(int key) {
+        TValue value = NULL;
+        if (isCreatedInternal(key)) {
+            value = (TValue) map.valueFor(key);
+        }
+        return value;
+    }
 };
 
 };
