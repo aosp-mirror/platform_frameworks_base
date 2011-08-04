@@ -188,6 +188,7 @@ final class DeviceOrientationService implements SensorEventListener {
         assert(event.values.length == 3);
         assert WebViewCore.THREAD_NAME.equals(Thread.currentThread().getName());
 
+        // We may get callbacks after the call to getSensorManager().unregisterListener() returns.
         if (!mIsRunning) {
             return;
         }
