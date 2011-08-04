@@ -61,6 +61,7 @@ public class NetworkController extends BroadcastReceiver {
     // debug
     static final String TAG = "StatusBar.NetworkController";
     static final boolean DEBUG = false;
+    static final boolean CHATTY = true; // additional diagnostics, but not logspew
 
     // telephony
     boolean mHspaDataDistinguishable;
@@ -286,7 +287,7 @@ public class NetworkController extends BroadcastReceiver {
 
         @Override
         public void onDataConnectionStateChanged(int state, int networkType) {
-            if (DEBUG) {
+            if (DEBUG || CHATTY) {
                 Slog.d(TAG, "onDataConnectionStateChanged: state=" + state
                         + " type=" + networkType);
             }
@@ -682,9 +683,18 @@ public class NetworkController extends BroadcastReceiver {
     // ===== Full or limited Internet connectivity ==================================
 
     private void updateConnectivity(Intent intent) {
+        if (CHATTY) {
+            Slog.d(TAG, "updateConnectivity: intent=" + intent);
+        }
+
         NetworkInfo info = (NetworkInfo)(intent.getParcelableExtra(
                 ConnectivityManager.EXTRA_NETWORK_INFO));
         int connectionStatus = intent.getIntExtra(ConnectivityManager.EXTRA_INET_CONDITION, 0);
+
+        if (CHATTY) {
+            Slog.d(TAG, "updateConnectivity: networkInfo=" + info);
+            Slog.d(TAG, "updateConnectivity: connectionStatus=" + connectionStatus);
+        }
 
         int inetCondition = (connectionStatus > INET_CONDITION_THRESHOLD ? 1 : 0);
 
