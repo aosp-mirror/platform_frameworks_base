@@ -47,6 +47,8 @@ ChromiumHTTPDataSource::~ChromiumHTTPDataSource() {
     delete mDelegate;
     mDelegate = NULL;
 
+    clearDRMState_l();
+
     if (mDrmManagerClient != NULL) {
         delete mDrmManagerClient;
         mDrmManagerClient = NULL;
@@ -116,8 +118,6 @@ void ChromiumHTTPDataSource::onConnectionFailed(status_t err) {
     // mURI.clear();
 
     mIOResult = err;
-
-    clearDRMState_l();
 }
 
 void ChromiumHTTPDataSource::disconnect() {
@@ -251,8 +251,6 @@ void ChromiumHTTPDataSource::onDisconnectComplete() {
     // mURI.clear();
 
     mCondition.broadcast();
-
-    clearDRMState_l();
 }
 
 sp<DecryptHandle> ChromiumHTTPDataSource::DrmInitialization() {
