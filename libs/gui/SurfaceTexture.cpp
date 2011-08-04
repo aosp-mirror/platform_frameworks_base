@@ -910,6 +910,7 @@ void SurfaceTexture::abandon() {
     Mutex::Autolock lock(mMutex);
     freeAllBuffers();
     mAbandoned = true;
+    mCurrentTextureBuf.clear();
     mDequeueCondition.signal();
 }
 

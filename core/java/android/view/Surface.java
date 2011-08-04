@@ -29,30 +29,84 @@ public class Surface implements Parcelable {
     private static final String LOG_TAG = "Surface";
     private static final boolean DEBUG_RELEASE = false;
     
+    /* orientations for setOrientation() */
+    public static final int ROTATION_0       = 0;
+    public static final int ROTATION_90      = 1;
+    public static final int ROTATION_180     = 2;
+    public static final int ROTATION_270     = 3;
+
+    /**
+     * Does this object hold a valid surface?  Returns true if it holds
+     * a physical surface, so lockCanvas() will succeed.  Otherwise
+     * returns false.
+     */
+    public native   boolean isValid();
+
+    /** Release the local reference to the server-side surface.  
+     * Always call release() when you're done with a Surface. This will
+     * make the surface invalid.
+     */
+    public native void release();
+
+    /** draw into a surface */
+    public Canvas lockCanvas(Rect dirty) throws OutOfResourcesException, IllegalArgumentException {
+        /*
+         * the dirty rectangle may be expanded to the surface's size, if for
+         * instance it has been resized or if the bits were lost, since the last
+         * call.
+         */
+        return lockCanvasNative(dirty);
+    }
+
+    /** unlock the surface and asks a page flip */
+    public native   void unlockCanvasAndPost(Canvas canvas);
+
+    /** 
+     * unlock the surface. the screen won't be updated until
+     * post() or postAll() is called
+     */
+    public native   void unlockCanvas(Canvas canvas);
+
+    @Override
+    public String toString() {
+        return "Surface(name=" + mName + ", identity=" + getIdentity() + ")";
+    }
+
+    public int describeContents() {
+        return 0;
+    }
+
+    public native   void readFromParcel(Parcel source);
+    public native   void writeToParcel(Parcel dest, int flags);
+
+    /**
+     * Exception thrown when a surface couldn't be created or resized
+     */
+    public static class OutOfResourcesException extends Exception {
+        public OutOfResourcesException() {
+        }
+        public OutOfResourcesException(String name) {
+            super(name);
+        }
+    }
+    
+    /*
+     * -----------------------------------------------------------------------
+     * No user serviceable parts beyond this point
+     * -----------------------------------------------------------------------
+     */
+
     /* flags used in constructor (keep in sync with ISurfaceComposer.h) */
 
-    /** Surface is created hidden */
+    /** Surface is created hidden @hide */
     public static final int HIDDEN              = 0x00000004;
-
-    /** The surface is to be used by hardware accelerators or DMA engines 
-     * @deprecated this is ignored, this value is set automatically when needed.
-     */
-    @Deprecated
-    public static final int HARDWARE            = 0x00000010;
-
-    /** Implies "HARDWARE", the surface is to be used by the GPU;
-     * additionally the backbuffer is never preserved for these
-     * surfaces. 
-     * @deprecated this is ignored, this value is set automatically when needed.
-     */
-    @Deprecated
-    public static final int GPU                 = 0x00000028;
 
     /** The surface contains secure content, special measures will
      * be taken to disallow the surface's content to be copied from
      * another process. In particular, screenshots and VNC servers will
      * be disabled, but other measures can take place, for instance the
-     * surface might not be hardware accelerated. */
+     * surface might not be hardware accelerated. 
+     * @hide*/
     public static final int SECURE              = 0x00000080;
     
     /** Creates a surface where color components are interpreted as 
@@ -75,19 +129,10 @@ public class Surface implements Parcelable {
      *  
      *  In some rare situations, a non pre-multiplied surface is preferable.
      *  
+     *  @hide
      */
     public static final int NON_PREMULTIPLIED   = 0x00000100;
     
-    /**
-     * Creates a surface without a rendering buffer. Instead, the content
-     * of the surface must be pushed by an external entity. This type
-     * of surface can be used for efficient camera preview or movie
-     * playback.
-     *
-     * @deprecated not support by the system anymore
-     */
-    @Deprecated
-    public static final int PUSH_BUFFERS        = 0x00000200;
     /**
      * Indicates that the surface must be considered opaque, even if its
      * pixel format is set to translucent. This can be useful if an
@@ -109,7 +154,7 @@ public class Surface implements Parcelable {
 
     // 0x1000 is reserved for an independent DRM protected flag in framework
 
-    /** Creates a normal surface. This is the default. */
+    /** Creates a normal surface. This is the default. @hide */
     public static final int FX_SURFACE_NORMAL   = 0x00000000;
     
     /** Creates a Blur surface. Everything behind this surface is blurred
@@ -117,6 +162,7 @@ public class Surface implements Parcelable {
      * is not settable or guaranteed.
      * It is an error to lock a Blur surface, since it doesn't have
      * a backing store.
+     * @hide
      */
     public static final int FX_SURFACE_BLUR     = 0x00010000;
     
@@ -124,55 +170,35 @@ public class Surface implements Parcelable {
      * by the amount specified in {@link #setAlpha}.
      * It is an error to lock a Dim surface, since it doesn't have
      * a backing store.
+     * @hide
      */
     public static final int FX_SURFACE_DIM     = 0x00020000;
 
-    /** Mask used for FX values above */
+    /** Mask used for FX values above @hide */
     public static final int FX_SURFACE_MASK     = 0x000F0000;
 
     /* flags used with setFlags() (keep in sync with ISurfaceComposer.h) */
     
-    /** Hide the surface. Equivalent to calling hide(). */
+    /** Hide the surface. Equivalent to calling hide(). @hide */
     public static final int SURFACE_HIDDEN    = 0x01;
     
-    /** Freeze the surface. Equivalent to calling freeze(). */
+    /** Freeze the surface. Equivalent to calling freeze(). @hide */
     public static final int SURFACE_FROZEN     = 0x02;
 
-    /**
-     * @deprecated Use {@link #SURFACE_FROZEN} instead.
-     */
-    @Deprecated
-    public static final int SURACE_FROZEN     = 0x02;
-
-    /** Enable dithering when compositing this surface */
+    /** Enable dithering when compositing this surface @hide */
     public static final int SURFACE_DITHER    = 0x04;
-
-    public static final int SURFACE_BLUR_FREEZE= 0x10;
-
-    /* orientations for setOrientation() */
-    public static final int ROTATION_0       = 0;
-    public static final int ROTATION_90      = 1;
-    public static final int ROTATION_180     = 2;
-    public static final int ROTATION_270     = 3;
     
-    /** 
-     * Disable the orientation animation 
-     * {@hide} 
-     */
+    /** Disable the orientation animation @hide */
     public static final int FLAGS_ORIENTATION_ANIMATION_DISABLE = 0x000000001;
 
     // The mSurfaceControl will only be present for Surfaces used by the window
     // server or system processes. When this class is parceled we defer to the
-    // mSurfaceControl to do the parceling. Otherwise we parcel the mNativeSurface.
-    @SuppressWarnings("unused")
+    // mSurfaceControl to do the parceling. Otherwise we parcel the
+    // mNativeSurface.
     private int mSurfaceControl;
-    @SuppressWarnings("unused")
     private int mSaveCount;
-    @SuppressWarnings("unused")
     private Canvas mCanvas;
-    @SuppressWarnings("unused")
     private int mNativeSurface;
-    @SuppressWarnings("unused")
     private int mSurfaceGenerationId;
     private String mName;
 
@@ -184,19 +210,8 @@ public class Surface implements Parcelable {
     // non compatibility mode.
     private Matrix mCompatibleMatrix;
 
-    @SuppressWarnings("unused")
     private Exception mCreationStack;
 
-    /**
-     * Exception thrown when a surface couldn't be created or resized
-     */
-    public static class OutOfResourcesException extends Exception {
-        public OutOfResourcesException() {
-        }
-        public OutOfResourcesException(String name) {
-            super(name);
-        }
-    }
 
     /*
      * We use a class initializer to allow the native code to cache some
@@ -219,10 +234,7 @@ public class Surface implements Parcelable {
         initFromSurfaceTexture(surfaceTexture);
     }
     
-    /**
-     * create a surface
-     * {@hide}
-     */
+    /** create a surface @hide */
     public Surface(SurfaceSession s,
             int pid, int display, int w, int h, int format, int flags)
         throws OutOfResourcesException {
@@ -233,10 +245,7 @@ public class Surface implements Parcelable {
         init(s,pid,null,display,w,h,format,flags);
     }
 
-    /**
-     * create a surface with a name
-     * {@hide}
-     */
+    /** create a surface with a name @hide */
     public Surface(SurfaceSession s,
             int pid, String name, int display, int w, int h, int format, int flags)
         throws OutOfResourcesException {
@@ -251,7 +260,7 @@ public class Surface implements Parcelable {
     /**
      * Create an empty surface, which will later be filled in by
      * readFromParcel().
-     * {@hide}
+     * @hide
      */
     public Surface() {
         if (DEBUG_RELEASE) {
@@ -260,16 +269,35 @@ public class Surface implements Parcelable {
         mCanvas = new CompatibleCanvas();
     }
 
+    private Surface(Parcel source) throws OutOfResourcesException {
+        init(source);
+    }
+
     /**
-     * A Canvas class that can handle the compatibility mode. This does two things differently.
+     * Copy another surface to this one.  This surface now holds a reference
+     * to the same data as the original surface, and is -not- the owner.
+     * @hide
+     */
+    public native void copyFrom(Surface o);
+    
+    /** @hide */
+    public int getGenerationId() {
+        return mSurfaceGenerationId;
+    }
+
+    /**
+     * A Canvas class that can handle the compatibility mode. This does two
+     * things differently.
      * <ul>
-     *  <li> Returns the width and height of the target metrics, rather than native.
-     *  For example, the canvas returns 320x480 even if an app is running in WVGA high density.
-     *  <li> Scales the matrix in setMatrix by the application scale, except if the matrix looks
-     *  like obtained from getMatrix. This is a hack to handle the case that an application
-     *  uses getMatrix to keep the original matrix, set matrix of its own, then set the original
-     *  matrix back. There is no perfect solution that works for all cases, and there are a lot of
-     *  cases that this model does not work, but we hope this works for many apps.
+     * <li>Returns the width and height of the target metrics, rather than
+     * native. For example, the canvas returns 320x480 even if an app is running
+     * in WVGA high density.
+     * <li>Scales the matrix in setMatrix by the application scale, except if
+     * the matrix looks like obtained from getMatrix. This is a hack to handle
+     * the case that an application uses getMatrix to keep the original matrix,
+     * set matrix of its own, then set the original matrix back. There is no
+     * perfect solution that works for all cases, and there are a lot of cases
+     * that this model does not work, but we hope this works for many apps.
      * </ul>
      */
     private class CompatibleCanvas extends Canvas {
@@ -318,7 +346,8 @@ public class Surface implements Parcelable {
     }
 
     /**
-     * Sets the translator used to scale canvas's width/height in compatibility mode.
+     * Sets the translator used to scale canvas's width/height in compatibility
+     * mode.
      */
     void setCompatibilityTranslator(Translator translator) {
         if (translator != null) {
@@ -328,73 +357,29 @@ public class Surface implements Parcelable {
         }
     }
     
-    /**
-     * Copy another surface to this one.  This surface now holds a reference
-     * to the same data as the original surface, and is -not- the owner.
-     * {@hide}
-     */
-    public native   void copyFrom(Surface o);
-    
-    /**
-     * Does this object hold a valid surface?  Returns true if it holds
-     * a physical surface, so lockCanvas() will succeed.  Otherwise
-     * returns false.
-     */
-    public native   boolean isValid();
-
-    /**
-     * @hide
-     */
-    public int getGenerationId() {
-        return mSurfaceGenerationId;
-    }
-    
     /** Free all server-side state associated with this surface and
-     * release this object's reference. {@hide} */
+     * release this object's reference. @hide */
     public native void destroy();
     
-    /** Release the local reference to the server-side surface. @hide */
-    public native void release();
+    private native Canvas lockCanvasNative(Rect dirty);   
     
-    /** draw into a surface */
-    public Canvas lockCanvas(Rect dirty) throws OutOfResourcesException, IllegalArgumentException
-    {
-        /* the dirty rectangle may be expanded to the surface's size, if
-         * for instance it has been resized or if the bits were lost, since
-         * the last call.
-         */
-        return lockCanvasNative(dirty);
-    }
-
-    private native Canvas lockCanvasNative(Rect dirty);
-
-    /** unlock the surface and asks a page flip */
-    public native   void unlockCanvasAndPost(Canvas canvas);
-
-    /** 
-     * unlock the surface. the screen won't be updated until
-     * post() or postAll() is called
+    /*
+     * set display parameters & screenshots
      */
-    public native   void unlockCanvas(Canvas canvas);
     
-    /** start/end a transaction {@hide} */
-    public static native   void openTransaction();
-    /** {@hide} */
-    public static native   void closeTransaction();
-
     /**
      * Freezes the specified display, No updating of the screen will occur
      * until unfreezeDisplay() is called. Everything else works as usual though,
      * in particular transactions.
      * @param display
-     * {@hide}
+     * @hide
      */
     public static native   void freezeDisplay(int display);
 
     /**
      * resume updating the specified display.
      * @param display
-     * {@hide}
+     * @hide
      */
     public static native   void unfreezeDisplay(int display);
 
@@ -403,7 +388,7 @@ public class Surface implements Parcelable {
      * @param display
      * @param orientation
      * @param flags
-     * {@hide}
+     * @hide
      */
     public static native   void setOrientation(int display, int orientation, int flags);
 
@@ -411,6 +396,7 @@ public class Surface implements Parcelable {
      * set the orientation of the given display.
      * @param display
      * @param orientation
+     * @hide
      */
     public static void setOrientation(int display, int orientation) {
         setOrientation(display, orientation, 0);
@@ -441,44 +427,43 @@ public class Surface implements Parcelable {
      */
     public static native Bitmap screenshot(int width, int height, int minLayer, int maxLayer);
 
-    /**
+    
+    /*
      * set surface parameters.
      * needs to be inside open/closeTransaction block
      */
+    
+    /** start a transaction @hide */
+    public static native   void openTransaction();
+    /** end a transaction @hide */
+    public static native   void closeTransaction();
+    /** @hide */
     public native   void setLayer(int zorder);
+    /** @hide */
     public native   void setPosition(int x, int y);
+    /** @hide */
     public native   void setSize(int w, int h);
-
+    /** @hide */
     public native   void hide();
+    /** @hide */
     public native   void show();
+    /** @hide */
     public native   void setTransparentRegionHint(Region region);
+    /** @hide */
     public native   void setAlpha(float alpha);
-    public native   void setMatrix(float dsdx, float dtdx,
-                                   float dsdy, float dtdy);
-
+    /** @hide */
+    public native   void setMatrix(float dsdx, float dtdx, float dsdy, float dtdy);
+    /** @hide */
     public native   void freeze();
+    /** @hide */
     public native   void unfreeze();
-
+    /** @hide */
     public native   void setFreezeTint(int tint);
-
+    /** @hide */
     public native   void setFlags(int flags, int mask);
 
-    @Override
-    public String toString() {
-        return "Surface(name=" + mName + ", identity=" + getIdentity() + ")";
-    }
 
-    private Surface(Parcel source) throws OutOfResourcesException {
-        init(source);
-    }
-    
-    public int describeContents() {
-        return 0;
-    }
-
-    public native   void readFromParcel(Parcel source);
-    public native   void writeToParcel(Parcel dest, int flags);
-    
+   
     public static final Parcelable.Creator<Surface> CREATOR
             = new Parcelable.Creator<Surface>()
     {
@@ -496,7 +481,6 @@ public class Surface implements Parcelable {
         }
     };
 
-    /* no user serviceable parts here ... */
     @Override
     protected void finalize() throws Throwable {
         try {

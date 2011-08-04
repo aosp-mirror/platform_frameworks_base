@@ -204,6 +204,7 @@ public class TextureView extends View {
             }
 
             mLayer.destroy();
+            mSurface.release();
             mSurface = null;
             mLayer = null;
         }
