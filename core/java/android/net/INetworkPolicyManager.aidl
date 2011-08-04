@@ -18,6 +18,8 @@ package android.net;
 
 import android.net.INetworkPolicyListener;
 import android.net.NetworkPolicy;
+import android.net.NetworkQuotaInfo;
+import android.net.NetworkState;
 import android.net.NetworkTemplate;
 
 /**
@@ -27,6 +29,7 @@ import android.net.NetworkTemplate;
  */
 interface INetworkPolicyManager {
 
+    /** Control UID policies. */
     void setUidPolicy(int uid, int policy);
     int getUidPolicy(int uid);
 
@@ -35,12 +38,17 @@ interface INetworkPolicyManager {
     void registerListener(INetworkPolicyListener listener);
     void unregisterListener(INetworkPolicyListener listener);
 
+    /** Control network policies atomically. */
     void setNetworkPolicies(in NetworkPolicy[] policies);
     NetworkPolicy[] getNetworkPolicies();
 
+    /** Snooze limit on policy matching given template. */
     void snoozePolicy(in NetworkTemplate template);
 
+    /** Control if background data is restricted system-wide. */
     void setRestrictBackground(boolean restrictBackground);
     boolean getRestrictBackground();
+
+    NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
 
 }
