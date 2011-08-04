@@ -116,6 +116,8 @@ class FastScroller {
 
     private int mOverlayPosition;
 
+    private boolean mMatchDragPosition;
+
     private static final int FADE_TIMEOUT = 1500;
 
     private final Rect mTmpRect = new Rect();
@@ -261,6 +263,9 @@ class FastScroller {
         refreshDrawableState();
 
         ta.recycle();
+
+        mMatchDragPosition = context.getApplicationInfo().targetSdkVersion >=
+                android.os.Build.VERSION_CODES.HONEYCOMB;
 
         setScrollbarPosition(mList.getVerticalScrollbarPosition());
     }
@@ -417,7 +422,7 @@ class FastScroller {
             }
             return;
         }
-        if (totalItemCount - visibleItemCount > 0 && mState != STATE_DRAGGING ) {
+        if (totalItemCount - visibleItemCount > 0 && mState != STATE_DRAGGING) {
             mThumbY = getThumbPositionForListPosition(firstVisibleItem, visibleItemCount,
                     totalItemCount);
             if (mChangedBounds) {
@@ -595,7 +600,7 @@ class FastScroller {
         if (mSectionIndexer == null) {
             getSectionsFromIndexer();
         }
-        if (mSectionIndexer == null) {
+        if (mSectionIndexer == null || !mMatchDragPosition) {
             return ((mList.getHeight() - mThumbH) * firstVisibleItem)
                     / (totalItemCount - visibleItemCount);
         }
