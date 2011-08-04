@@ -275,17 +275,18 @@ static int FwdLockConv_DeriveKeys(FwdLockConv_Session_t *pSession) {
 }
 
 /**
- * Checks whether a given character is valid in a boundary. Note that the boundary may contain
- * leading and internal spaces.
+ * Checks whether a given character is valid in a boundary. Allows some non-standard characters that
+ * are invalid according to RFC 2046 but nevertheless used by one vendor's DRM packager. Note that
+ * the boundary may contain leading and internal spaces.
  *
  * @param[in] ch The character to check.
  *
  * @return A Boolean value indicating whether the given character is valid in a boundary.
  */
 static int FwdLockConv_IsBoundaryChar(int ch) {
-    return isalnum(ch) || ch == '\'' ||
-            ch == '(' || ch == ')' || ch == '+' || ch == '_' || ch == ',' || ch == '-' ||
-            ch == '.' || ch == '/' || ch == ':' || ch == '=' || ch == '?' || ch == ' ';
+    return isalnum(ch) || ch == '\'' || ch == '(' || ch == ')' || ch == '+' || ch == '_' ||
+            ch == ',' || ch == '-' || ch == '.' || ch == '/' || ch == ':' || ch == '=' ||
+            ch == '?' || ch == ' ' || ch == '%' || ch == '[' || ch == '&' || ch == '*' || ch == '^';
 }
 
 /**
@@ -1085,6 +1086,13 @@ static FwdLockConv_Status_t FwdLockConv_PushChar(FwdLockConv_Session_t *pSession
         status = FwdLockConv_MatchBinaryEncodedData(pSession, ch, pOutput);
         break;
     case FwdLockConv_ParserState_WantsBase64EncodedData:
+        if (ch == '\n' && pSession->scannerState != FwdLockConv_ScannerState_WantsLF) {
+            // Repair base64-encoded data that doesn't have carriage returns in its line breaks.
+            status = FwdLockConv_MatchBase64EncodedData(pSession, '\r', pOutput);
+            if (status != FwdLockConv_Status_OK) {
+                break;
+            }
+        }
         status = FwdLockConv_MatchBase64EncodedData(pSession, ch, pOutput);
         break;
     case FwdLockConv_ParserState_Done:
@@ -1199,7 +1207,7 @@ FwdLockConv_Status_t FwdLockConv_CloseSession(int sessionId, FwdLockConv_Output_
             status = FwdLockConv_Status_SyntaxError;
         } else {
             // Finalize the data signature.
-            size_t signatureSize;
+            unsigned int signatureSize = SHA1_HASH_SIZE;
             HMAC_Final(&pSession->signingContext, pOutput->fromCloseSession.signatures,
                        &signatureSize);
             if (signatureSize != SHA1_HASH_SIZE) {
@@ -1214,9 +1222,9 @@ FwdLockConv_Status_t FwdLockConv_CloseSession(int sessionId, FwdLockConv_Output_
                 HMAC_Update(&pSession->signingContext, pSession->pEncryptedSessionKey,
                             pSession->encryptedSessionKeyLength);
                 HMAC_Update(&pSession->signingContext, pOutput->fromCloseSession.signatures,
-                            signatureSize);
-                HMAC_Final(&pSession->signingContext, &pOutput->fromCloseSession.
-                           signatures[signatureSize], &signatureSize);
+                            SHA1_HASH_SIZE);
+                HMAC_Final(&pSession->signingContext,
+                           &pOutput->fromCloseSession.signatures[SHA1_HASH_SIZE], &signatureSize);
                 if (signatureSize != SHA1_HASH_SIZE) {
                     status = FwdLockConv_Status_ProgramError;
                 } else {
