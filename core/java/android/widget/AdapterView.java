@@ -277,6 +277,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      *         called, false otherwise is returned.
      */
     public boolean performItemClick(View view, int position, long id) {
+        view.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
         if (mOnItemClickListener != null) {
             playSoundEffect(SoundEffectConstants.CLICK);
             mOnItemClickListener.onItemClick(this, view, position, id);
