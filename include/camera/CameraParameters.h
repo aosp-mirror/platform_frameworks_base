@@ -573,6 +573,9 @@ public:
     static const char PIXEL_FORMAT_RGB565[];
     static const char PIXEL_FORMAT_RGBA8888[];
     static const char PIXEL_FORMAT_JPEG[];
+    // Raw bayer format used for images, which is 10 bit precision samples
+    // stored in 16 bit words. The filter pattern is RGGB.
+    static const char PIXEL_FORMAT_BAYER_RGGB[];
 
     // Values for focus mode settings.
     // Auto-focus mode. Applications should call

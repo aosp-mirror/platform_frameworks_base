@@ -1708,6 +1708,7 @@ public class Camera {
         private static final String PIXEL_FORMAT_YUV420P = "yuv420p";
         private static final String PIXEL_FORMAT_RGB565 = "rgb565";
         private static final String PIXEL_FORMAT_JPEG = "jpeg";
+        private static final String PIXEL_FORMAT_BAYER_RGGB = "bayer-rggb";
 
         private HashMap<String, String> mMap;
 
@@ -2258,6 +2259,7 @@ public class Camera {
             case ImageFormat.YV12:      return PIXEL_FORMAT_YUV420P;
             case ImageFormat.RGB_565:   return PIXEL_FORMAT_RGB565;
             case ImageFormat.JPEG:      return PIXEL_FORMAT_JPEG;
+            case ImageFormat.BAYER_RGGB: return PIXEL_FORMAT_BAYER_RGGB;
             default:                    return null;
             }
         }
