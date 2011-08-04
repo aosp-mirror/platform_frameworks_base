@@ -17,6 +17,9 @@ LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
 
+# The flag below turns on local debug printouts
+#LOCAL_CFLAGS += -DDRM_OMA_FL_ENGINE_DEBUG
+
 base := frameworks/base
 
 # Determine whether the DRM framework uses 64-bit data types for file offsets and do the same.
