@@ -14,6 +14,20 @@
      limitations under the License.
 -->
 
+<!--
+===============================================================
+                        PLEASE READ
+===============================================================
+
+The Holo themes must not be modified in order to pass CTS.
+Many related themes and styles depend on other values defined in this file.
+If you would like to provide custom themes and styles for your device,
+please see themes_device_defaults.xml.
+
+===============================================================
+                        PLEASE READ
+===============================================================
+ -->
 <resources>
     <!-- The default system theme. This is the theme used for activities
          that have not explicitly set their own theme.
