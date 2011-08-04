@@ -54,7 +54,6 @@ import java.util.Arrays;
 public class Vpn extends INetworkManagementEventObserver.Stub {
 
     private final static String TAG = "Vpn";
-    private final static String VPN = android.Manifest.permission.VPN;
 
     private final Context mContext;
     private final VpnCallback mCallback;
@@ -66,18 +65,6 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     public Vpn(Context context, VpnCallback callback) {
         mContext = context;
         mCallback = callback;
-    }
-
-    /**
-     * Protect a socket from routing changes by binding it to the given
-     * interface. The socket is NOT closed by this method.
-     *
-     * @param socket The socket to be bound.
-     * @param name The name of the interface.
-     */
-    public void protect(ParcelFileDescriptor socket, String interfaze) {
-        mContext.enforceCallingPermission(VPN, "protect");
-        jniProtect(socket.getFd(), interfaze);
     }
 
     /**
@@ -115,13 +102,6 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             throw new SecurityException("Unauthorized Caller");
         }
 
-        // Check the permission of the given package.
-        PackageManager pm = mContext.getPackageManager();
-        if (!newPackage.equals(VpnConfig.LEGACY_VPN) &&
-                pm.checkPermission(VPN, newPackage) != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(newPackage + " does not have " + VPN);
-        }
-
         // Reset the interface and hide the notification.
         if (mInterface != null) {
             jniReset(mInterface);
@@ -130,12 +110,9 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             mInterface = null;
         }
 
-        // Send out the broadcast or stop LegacyVpnRunner.
+        // Revoke the connection or stop LegacyVpnRunner.
         if (!mPackage.equals(VpnConfig.LEGACY_VPN)) {
-            Intent intent = new Intent(VpnConfig.ACTION_VPN_REVOKED);
-            intent.setPackage(mPackage);
-            intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            mContext.sendBroadcast(intent);
+            // TODO
         } else if (mLegacyVpnRunner != null) {
             mLegacyVpnRunner.exit();
             mLegacyVpnRunner = null;
@@ -147,6 +124,22 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     }
 
     /**
+     * Protect a socket from routing changes by binding it to the given
+     * interface. The socket is NOT closed by this method.
+     *
+     * @param socket The socket to be bound.
+     * @param name The name of the interface.
+     */
+    public void protect(ParcelFileDescriptor socket, String interfaze) throws Exception {
+        PackageManager pm = mContext.getPackageManager();
+        ApplicationInfo app = pm.getApplicationInfo(mPackage, 0);
+        if (Binder.getCallingUid() != app.uid) {
+            throw new SecurityException("Unauthorized Caller");
+        }
+        jniProtect(socket.getFd(), interfaze);
+    }
+
+    /**
      * Establish a VPN network and return the file descriptor of the VPN
      * interface. This methods returns {@code null} if the application is
      * revoked or not prepared.
@@ -155,9 +148,6 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
      * @return The file descriptor of the VPN interface.
      */
     public synchronized ParcelFileDescriptor establish(VpnConfig config) {
-        // Check the permission of the caller.
-        mContext.enforceCallingPermission(VPN, "establish");
-
         // Check if the caller is already prepared.
         PackageManager pm = mContext.getPackageManager();
         ApplicationInfo app = null;
@@ -169,6 +159,9 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
         if (Binder.getCallingUid() != app.uid) {
             return null;
         }
+
+        // Check if the service is properly declared.
+        // TODO
 
         // Load the label.
         String label = app.loadLabel(pm).toString();
@@ -198,6 +191,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             if (config.routes != null) {
                 jniSetRoutes(interfaze, config.routes);
             }
+            // TODO: bind the service
             if (mInterface != null && !mInterface.equals(interfaze)) {
                 jniReset(mInterface);
             }
@@ -211,23 +205,25 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             throw e;
         }
 
-        // Override DNS servers and search domains.
-        mCallback.override(config.dnsServers, config.searchDomains);
-
         // Fill more values.
-        config.packagz = mPackage;
+        config.user = mPackage;
         config.interfaze = mInterface;
 
-        // Show the notification!
+        // Override DNS servers and show the notification.
+        long identity = Binder.clearCallingIdentity();
+        mCallback.override(config.dnsServers, config.searchDomains);
         showNotification(config, label, bitmap);
+        Binder.restoreCallingIdentity(identity);
         return tun;
     }
 
     // INetworkManagementEventObserver.Stub
+    @Override
     public void interfaceAdded(String interfaze) {
     }
 
     // INetworkManagementEventObserver.Stub
+    @Override
     public synchronized void interfaceStatusChanged(String interfaze, boolean up) {
         if (!up && mLegacyVpnRunner != null) {
             mLegacyVpnRunner.check(interfaze);
@@ -235,22 +231,28 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     }
 
     // INetworkManagementEventObserver.Stub
-    public synchronized void interfaceLinkStateChanged(String interfaze, boolean up) {
-        if (!up && mLegacyVpnRunner != null) {
-            mLegacyVpnRunner.check(interfaze);
+    @Override
+    public void interfaceLinkStateChanged(String interfaze, boolean up) {
+        interfaceStatusChanged(interfaze, up);
+    }
+
+    // INetworkManagementEventObserver.Stub
+    @Override
+    public synchronized void interfaceRemoved(String interfaze) {
+        if (interfaze.equals(mInterface) && jniCheck(interfaze) == 0) {
+            long identity = Binder.clearCallingIdentity();
+            mCallback.restore();
+            hideNotification();
+            Binder.restoreCallingIdentity(identity);
+            mInterface = null;
+            // TODO: unbind the service
         }
     }
 
     // INetworkManagementEventObserver.Stub
-    public synchronized void interfaceRemoved(String interfaze) {
-        if (interfaze.equals(mInterface) && jniCheck(interfaze) == 0) {
-            mCallback.restore();
-            hideNotification();
-            mInterface = null;
-        }
+    @Override
+    public void limitReached(String limit, String interfaze) {
     }
-
-    public void limitReached(String limitName, String iface) {}
 
     private void showNotification(VpnConfig config, String label, Bitmap icon) {
         NotificationManager nm = (NotificationManager)
@@ -263,7 +265,6 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     mContext.getString(R.string.vpn_text_long, config.session);
             config.startTime = SystemClock.elapsedRealtime();
 
-            long identity = Binder.clearCallingIdentity();
             Notification notification = new Notification.Builder(mContext)
                     .setSmallIcon(R.drawable.vpn_connected)
                     .setLargeIcon(icon)
@@ -274,7 +275,6 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                     .setOngoing(true)
                     .getNotification();
             nm.notify(R.drawable.vpn_connected, notification);
-            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -283,9 +283,7 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
                 mContext.getSystemService(Context.NOTIFICATION_SERVICE);
 
         if (nm != null) {
-            long identity = Binder.clearCallingIdentity();
             nm.cancel(R.drawable.vpn_connected);
-            Binder.restoreCallingIdentity(identity);
         }
     }
 
@@ -355,8 +353,8 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             mOuterInterface = mConfig.interfaze;
 
             // Legacy VPN is not a real package, so we use it to carry the key.
-            mInfo.key = mConfig.packagz;
-            mConfig.packagz = VpnConfig.LEGACY_VPN;
+            mInfo.key = mConfig.user;
+            mConfig.user = VpnConfig.LEGACY_VPN;
         }
 
         public void check(String interfaze) {

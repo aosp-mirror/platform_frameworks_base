@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class VpnConfig implements Parcelable {
 
-    public static final String ACTION_VPN_REVOKED = "android.net.vpn.action.REVOKED";
+    public static final String SERVICE_INTERFACE = "android.net.VpnService";
 
     public static final String LEGACY_VPN = "[Legacy VPN]";
 
@@ -52,7 +52,7 @@ public class VpnConfig implements Parcelable {
                 PendingIntent.FLAG_NO_CREATE : PendingIntent.FLAG_CANCEL_CURRENT);
     }
 
-    public String packagz;
+    public String user;
     public String interfaze;
     public String session;
     public int mtu = -1;
@@ -70,7 +70,7 @@ public class VpnConfig implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeString(packagz);
+        out.writeString(user);
         out.writeString(interfaze);
         out.writeString(session);
         out.writeInt(mtu);
@@ -87,7 +87,7 @@ public class VpnConfig implements Parcelable {
         @Override
         public VpnConfig createFromParcel(Parcel in) {
             VpnConfig config = new VpnConfig();
-            config.packagz = in.readString();
+            config.user = in.readString();
             config.interfaze = in.readString();
             config.session = in.readString();
             config.mtu = in.readInt();
