@@ -1592,7 +1592,10 @@ public class WifiService extends IWifiManager.Stub {
                 for (int i = scanResults.size() - 1; i >= 0; i--) {
                     ScanResult scanResult = scanResults.get(i);
 
-                    if (TextUtils.isEmpty(scanResult.capabilities)) {
+                    //A capability of [ESS] represents an open access point
+                    //that is available for an STA to connect
+                    if (scanResult.capabilities != null &&
+                            scanResult.capabilities.equals("[ESS]")) {
                         numOpenNetworks++;
                     }
                 }
