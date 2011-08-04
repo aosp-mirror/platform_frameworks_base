@@ -628,14 +628,12 @@ status_t APacketSource::read(
 
         updateNormalPlayTime_l(buffer);
 
-        MediaBuffer *mediaBuffer = new MediaBuffer(buffer->size());
-
         int64_t timeUs;
         CHECK(buffer->meta()->findInt64("timeUs", &timeUs));
 
+        MediaBuffer *mediaBuffer = new MediaBuffer(buffer);
         mediaBuffer->meta_data()->setInt64(kKeyTime, timeUs);
 
-        memcpy(mediaBuffer->data(), buffer->data(), buffer->size());
         *out = mediaBuffer;
 
         mBuffers.erase(mBuffers.begin());

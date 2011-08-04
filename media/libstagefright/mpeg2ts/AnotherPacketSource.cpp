@@ -105,12 +105,10 @@ status_t AnotherPacketSource::read(
             int64_t timeUs;
             CHECK(buffer->meta()->findInt64("timeUs", &timeUs));
 
-            MediaBuffer *mediaBuffer = new MediaBuffer(buffer->size());
+            MediaBuffer *mediaBuffer = new MediaBuffer(buffer);
+
             mediaBuffer->meta_data()->setInt64(kKeyTime, timeUs);
 
-            // hexdump(buffer->data(), buffer->size());
-
-            memcpy(mediaBuffer->data(), buffer->data(), buffer->size());
             *out = mediaBuffer;
             return OK;
         }
