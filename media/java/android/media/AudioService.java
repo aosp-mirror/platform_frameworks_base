@@ -3200,8 +3200,8 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    /** see AudioManager.refreshRemoteControlDisplay(ComponentName er) */
-    public void refreshRemoteControlDisplay(ComponentName eventReceiver) {
+    /** see AudioManager.notifyRemoteControlInformationChanged(ComponentName er) */
+    public void notifyRemoteControlInformationChanged(ComponentName eventReceiver) {
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
                 // only refresh if the eventReceiver is at the top of the stack
