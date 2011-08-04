@@ -187,6 +187,25 @@ public class SurfaceTexture {
         return nativeGetTimestamp();
     }
 
+    /**
+     * release() frees all the buffers and puts the SurfaceTexture into the
+     * 'abandoned' state. Once put in this state the SurfaceTexture can never
+     * leave it. When in the 'abandoned' state, all methods of the
+     * ISurfaceTexture interface will fail with the NO_INIT error.
+     *
+     * Note that while calling this method causes all the buffers to be freed
+     * from the perspective of the the SurfaceTexture, if there are additional
+     * references on the buffers (e.g. if a buffer is referenced by a client or
+     * by OpenGL ES as a texture) then those buffer will remain allocated.
+     *
+     * Always call this method when you are done with SurfaceTexture. Failing
+     * to do so may delay resource deallocation for a significant amount of
+     * time.
+     */
+    public void release() {
+        nativeRelease();
+    }
+
     protected void finalize() throws Throwable {
         try {
             nativeFinalize();
@@ -232,6 +251,7 @@ public class SurfaceTexture {
     private native void nativeSetDefaultBufferSize(int width, int height);
     private native void nativeUpdateTexImage();
     private native int nativeGetQueuedCount();
+    private native void nativeRelease();
 
     /*
      * We use a class initializer to allow the native code to cache some

@@ -233,6 +233,12 @@ static jlong SurfaceTexture_getTimestamp(JNIEnv* env, jobject thiz)
     return surfaceTexture->getTimestamp();
 }
 
+static void SurfaceTexture_release(JNIEnv* env, jobject thiz)
+{
+    sp<SurfaceTexture> surfaceTexture(SurfaceTexture_getSurfaceTexture(env, thiz));
+    surfaceTexture->abandon();
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gSurfaceTextureMethods[] = {
@@ -243,6 +249,7 @@ static JNINativeMethod gSurfaceTextureMethods[] = {
     {"nativeUpdateTexImage",     "()V",   (void*)SurfaceTexture_updateTexImage },
     {"nativeGetTransformMatrix", "([F)V", (void*)SurfaceTexture_getTransformMatrix },
     {"nativeGetTimestamp",       "()J",   (void*)SurfaceTexture_getTimestamp },
+    {"nativeRelease",            "()V",   (void*)SurfaceTexture_release },
 };
 
 int register_android_graphics_SurfaceTexture(JNIEnv* env)
