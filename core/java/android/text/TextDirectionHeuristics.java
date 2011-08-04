@@ -164,6 +164,7 @@ public class TextDirectionHeuristics {
             case Character.DIRECTIONALITY_RIGHT_TO_LEFT_ARABIC:
             case Character.DIRECTIONALITY_RIGHT_TO_LEFT_EMBEDDING:
             case Character.DIRECTIONALITY_RIGHT_TO_LEFT_OVERRIDE:
+            case Character.DIRECTIONALITY_ARABIC_NUMBER:
                 return TriState.TRUE;
             default:
                 return TriState.UNKNOWN;
