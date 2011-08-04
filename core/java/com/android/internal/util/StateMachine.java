@@ -1226,6 +1226,12 @@ public class StateMachine {
      * be executed and upon the next message arriving
      * destState.enter will be invoked.
      *
+     * this function can also be called inside the enter function of the
+     * previous transition target, but the behavior is undefined when it is
+     * called mid-way through a previous transition (for example, calling this
+     * in the enter() routine of a intermediate node when the current transition
+     * target is one of the nodes descendants).
+     *
      * @param destState will be the state that receives the next message.
      */
     protected final void transitionTo(IState destState) {
