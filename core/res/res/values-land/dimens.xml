@@ -22,7 +22,7 @@
     <!-- Default height of a key in the password keyboard for alpha -->
     <dimen name="password_keyboard_key_height_alpha">47dip</dimen>
     <!-- Default height of a key in the password keyboard for numeric -->
-    <dimen name="password_keyboard_key_height_numeric">60dip</dimen>
+    <dimen name="password_keyboard_key_height_numeric">50dip</dimen>
     <!-- Default correction for the space key in the password keyboard -->
     <dimen name="password_keyboard_spacebar_vertical_correction">2dip</dimen>
     <dimen name="preference_widget_width">72dp</dimen>
