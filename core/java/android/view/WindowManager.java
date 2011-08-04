@@ -394,6 +394,13 @@ public interface WindowManager extends ViewManager {
         public static final int TYPE_NAVIGATION_BAR = FIRST_SYSTEM_WINDOW+19;
 
         /**
+         * Window type: The volume level overlay/dialog shown when the user
+         * changes the system volume.
+         * @hide
+         */
+        public static final int TYPE_VOLUME_OVERLAY = FIRST_SYSTEM_WINDOW+20;
+
+        /**
          * End of types of system windows.
          */
         public static final int LAST_SYSTEM_WINDOW      = 2999;

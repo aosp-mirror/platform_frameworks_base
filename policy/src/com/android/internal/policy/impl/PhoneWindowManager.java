@@ -113,6 +113,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
+import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_POINTER;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -162,36 +163,39 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final int APPLICATION_LAYER = 2;
     static final int PHONE_LAYER = 3;
     static final int SEARCH_BAR_LAYER = 4;
-    static final int STATUS_BAR_SUB_PANEL_LAYER = 5;
-    static final int SYSTEM_DIALOG_LAYER = 6;
+    static final int SYSTEM_DIALOG_LAYER = 5;
     // toasts and the plugged-in battery thing
-    static final int TOAST_LAYER = 7;
+    static final int TOAST_LAYER = 6;
     // SIM errors and unlock.  Not sure if this really should be in a high layer.
-    static final int PRIORITY_PHONE_LAYER = 8;
+    static final int PRIORITY_PHONE_LAYER = 7;
     // like the ANR / app crashed dialogs
-    static final int SYSTEM_ALERT_LAYER = 9;
+    static final int SYSTEM_ALERT_LAYER = 8;
     // system-level error dialogs
-    static final int SYSTEM_ERROR_LAYER = 10;
+    static final int SYSTEM_ERROR_LAYER = 9;
     // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_LAYER = 11;
+    static final int INPUT_METHOD_LAYER = 10;
     // on-screen keyboards and other such input method user interfaces go here.
-    static final int INPUT_METHOD_DIALOG_LAYER = 12;
+    static final int INPUT_METHOD_DIALOG_LAYER = 11;
     // the keyguard; nothing on top of these can take focus, since they are
     // responsible for power management when displayed.
-    static final int KEYGUARD_LAYER = 13;
-    static final int KEYGUARD_DIALOG_LAYER = 14;
+    static final int KEYGUARD_LAYER = 12;
+    static final int KEYGUARD_DIALOG_LAYER = 13;
+    static final int STATUS_BAR_SUB_PANEL_LAYER = 14;
     static final int STATUS_BAR_LAYER = 15;
     static final int STATUS_BAR_PANEL_LAYER = 16;
     // the navigation bar, if available, shows atop most things
     static final int NAVIGATION_BAR_LAYER = 17;
+    // the on-screen volume indicator and controller shown when the user
+    // changes the device volume
+    static final int VOLUME_OVERLAY_LAYER = 18;
     // the drag layer: input for drag-and-drop is associated with this window,
     // which sits above all other focusable windows
-    static final int DRAG_LAYER = 18;
+    static final int DRAG_LAYER = 19;
     // things in here CAN NOT take focus, but are shown on top of everything else.
-    static final int SYSTEM_OVERLAY_LAYER = 19;
-    static final int SECURE_SYSTEM_OVERLAY_LAYER = 20;
+    static final int SYSTEM_OVERLAY_LAYER = 20;
+    static final int SECURE_SYSTEM_OVERLAY_LAYER = 21;
     // the (mouse) pointer layer
-    static final int POINTER_LAYER = 21;
+    static final int POINTER_LAYER = 22;
 
     static final int APPLICATION_MEDIA_SUBLAYER = -2;
     static final int APPLICATION_MEDIA_OVERLAY_SUBLAYER = -1;
@@ -1057,6 +1061,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return INPUT_METHOD_LAYER;
         case TYPE_INPUT_METHOD_DIALOG:
             return INPUT_METHOD_DIALOG_LAYER;
+        case TYPE_VOLUME_OVERLAY:
+            return VOLUME_OVERLAY_LAYER;
         case TYPE_SYSTEM_OVERLAY:
             return SYSTEM_OVERLAY_LAYER;
         case TYPE_SECURE_SYSTEM_OVERLAY:
