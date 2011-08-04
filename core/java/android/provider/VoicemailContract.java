@@ -41,7 +41,7 @@ import android.provider.CallLog.Calls;
  * </ul>
  *
  * <P> The minimum permission needed to access this content provider is
- * {@link Manifest.permission#READ_WRITE_OWN_VOICEMAIL}
+ * {@link Manifest.permission#ADD_VOICEMAIL}
  *
  * <P>Voicemails are inserted by what is called as a "voicemail source"
  * application, which is responsible for syncing voicemail data between a remote
