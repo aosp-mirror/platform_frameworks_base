@@ -18,10 +18,20 @@
  */
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="fill_parent" 
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent" 
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:padding="16dp" >
+
+    <ScrollView 
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_width="match_parent">
+        <LinearLayout
+                android:orientation="vertical"
                 android:layout_height="wrap_content"
-                android:padding="16dp" >
+                android:layout_width="match_parent">
 
     <TextView android:id="@+id/confirm_text"
               android:layout_width="match_parent" 
@@ -63,13 +73,21 @@
               android:layout_marginLeft="30dp"
               android:layout_below="@id/enc_password"
               android:layout_marginBottom="30dp" />
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout android:orientation="horizontal"
+                  android:layout_height="wrap_content"
+                  android:layout_width="match_parent"
+                  android:layout_gravity="bottom">
 
     <Button android:id="@+id/button_allow"
             android:filterTouchesWhenObscured="true"
             android:text="@string/allow_backup_button_label"
             android:layout_below="@id/package_name"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content" />
+            android:layout_width="0dp"
+            android:layout_weight="1" />
 
     <Button android:id="@+id/button_deny"
             android:text="@string/deny_backup_button_label"
@@ -77,6 +95,9 @@
             android:layout_toRightOf="@id/button_allow"
             android:layout_alignTop="@id/button_allow"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content" />
+            android:layout_width="0dp"
+            android:layout_weight="1" />
 
-</RelativeLayout>
+    </LinearLayout>
+
+</LinearLayout>
