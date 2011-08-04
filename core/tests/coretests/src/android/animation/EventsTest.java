@@ -21,6 +21,8 @@ import android.test.UiThreadTest;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.test.suitebuilder.annotation.SmallTest;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Tests for the various lifecycle events of Animators. This abstract class is subclassed by
  * concrete implementations that provide the actual Animator objects being tested. All of the
@@ -40,7 +42,10 @@ public abstract class EventsTest
     private static final int ANIM_DELAY = 100;
     private static final int ANIM_MID_DURATION = ANIM_DURATION / 2;
     private static final int ANIM_MID_DELAY = ANIM_DELAY / 2;
+    private static final int FUTURE_RELEASE_DELAY = 50;
+    private static final int TIMEOUT = ANIM_DURATION + ANIM_DELAY + FUTURE_RELEASE_DELAY;
 
+    private boolean mStarted;  // tracks whether we've received the onAnimationStart() callback
     private boolean mRunning;  // tracks whether we've started the animator
     private boolean mCanceled; // trackes whether we've canceled the animator
     private Animator.AnimatorListener mFutureListener; // mechanism for delaying the end of the test
@@ -51,17 +56,44 @@ public abstract class EventsTest
                                   // setup() method prior to calling the superclass setup()
 
     /**
-     * Cancels the given animator. Used to delay cancelation until some later time (after the
+     * Cancels the given animator. Used to delay cancellation until some later time (after the
      * animator has started playing).
      */
     static class Canceler implements Runnable {
         Animator mAnim;
-        public Canceler(Animator anim) {
+        FutureWaiter mFuture;
+        public Canceler(Animator anim, FutureWaiter future) {
             mAnim = anim;
+            mFuture = future;
         }
         @Override
         public void run() {
-            mAnim.cancel();
+            try {
+                mAnim.cancel();
+            } catch (junit.framework.AssertionFailedError e) {
+                mFuture.setException(new RuntimeException(e));
+            }
+        }
+    };
+
+    /**
+     * Ends the given animator. Used to delay ending until some later time (after the
+     * animator has started playing).
+     */
+    static class Ender implements Runnable {
+        Animator mAnim;
+        FutureWaiter mFuture;
+        public Ender(Animator anim, FutureWaiter future) {
+            mAnim = anim;
+            mFuture = future;
+        }
+        @Override
+        public void run() {
+            try {
+                mAnim.end();
+            } catch (junit.framework.AssertionFailedError e) {
+                mFuture.setException(new RuntimeException(e));
+            }
         }
     };
 
@@ -76,6 +108,23 @@ public abstract class EventsTest
         public FutureReleaseListener(FutureWaiter future) {
             mFuture = future;
         }
+
+        /**
+         * Variant constructor that auto-releases the FutureWaiter after the specified timeout.
+         * @param future
+         * @param timeout
+         */
+        public FutureReleaseListener(FutureWaiter future, long timeout) {
+            mFuture = future;
+            Handler handler = new Handler();
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mFuture.release();
+                }
+            }, timeout);
+        }
+
         @Override
         public void onAnimationEnd(Animator animation) {
             Handler handler = new Handler();
@@ -84,14 +133,13 @@ public abstract class EventsTest
                 public void run() {
                     mFuture.release();
                 }
-            }, ANIM_MID_DURATION);
+            }, FUTURE_RELEASE_DELAY);
         }
     };
 
     public EventsTest() {
         super(BasicAnimatorActivity.class);
     }
-
 
     /**
      * Sets up the fields used by each test. Subclasses must override this method to create
@@ -107,11 +155,20 @@ public abstract class EventsTest
         // are embedded in the listener callbacks that it implements.
         mListener = new AnimatorListenerAdapter() {
             @Override
+            public void onAnimationStart(Animator animation) {
+                // This should only be called on an animation that has not yet been started
+                assertFalse(mStarted);
+                assertTrue(mRunning);
+                mStarted = true;
+            }
+
+            @Override
             public void onAnimationCancel(Animator animation) {
                 // This should only be called on an animation that has been started and not
                 // yet canceled or ended
                 assertFalse(mCanceled);
                 assertTrue(mRunning);
+                assertTrue(mStarted);
                 mCanceled = true;
             }
 
@@ -120,7 +177,9 @@ public abstract class EventsTest
                 // This should only be called on an animation that has been started and not
                 // yet ended
                 assertTrue(mRunning);
+                assertTrue(mStarted);
                 mRunning = false;
+                mStarted = false;
                 super.onAnimationEnd(animation);
             }
         };
@@ -132,6 +191,7 @@ public abstract class EventsTest
 
         mRunning = false;
         mCanceled = false;
+        mStarted = false;
     }
 
     /**
@@ -144,26 +204,104 @@ public abstract class EventsTest
     }
 
     /**
+     * Verify that calling end on an unstarted animator does nothing.
+     */
+    @UiThreadTest
+    @SmallTest
+    public void testEnd() throws Exception {
+        mAnimator.end();
+    }
+
+    /**
      * Verify that calling cancel on a started animator does the right thing.
      */
     @UiThreadTest
     @SmallTest
     public void testStartCancel() throws Exception {
-        mRunning = true;
-        mAnimator.start();
-        mAnimator.cancel();
+        mFutureListener = new FutureReleaseListener(mFuture);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mRunning = true;
+                    mAnimator.start();
+                    mAnimator.cancel();
+                    mFuture.release();
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Verify that calling end on a started animator does the right thing.
+     */
+    @UiThreadTest
+    @SmallTest
+    public void testStartEnd() throws Exception {
+        mFutureListener = new FutureReleaseListener(mFuture);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mRunning = true;
+                    mAnimator.start();
+                    mAnimator.end();
+                    mFuture.release();
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
     }
 
     /**
      * Same as testStartCancel, but with a startDelayed animator
      */
-    @UiThreadTest
     @SmallTest
     public void testStartDelayedCancel() throws Exception {
+        mFutureListener = new FutureReleaseListener(mFuture);
         mAnimator.setStartDelay(ANIM_DELAY);
-        mRunning = true;
-        mAnimator.start();
-        mAnimator.cancel();
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mRunning = true;
+                    mAnimator.start();
+                    mAnimator.cancel();
+                    mFuture.release();
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Same as testStartEnd, but with a startDelayed animator
+     */
+    @SmallTest
+    public void testStartDelayedEnd() throws Exception {
+        mFutureListener = new FutureReleaseListener(mFuture);
+        mAnimator.setStartDelay(ANIM_DELAY);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mRunning = true;
+                    mAnimator.start();
+                    mAnimator.end();
+                    mFuture.release();
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -180,13 +318,36 @@ public abstract class EventsTest
                     mAnimator.addListener(mFutureListener);
                     mRunning = true;
                     mAnimator.start();
-                    handler.postDelayed(new Canceler(mAnimator), ANIM_MID_DURATION);
+                    handler.postDelayed(new Canceler(mAnimator, mFuture), ANIM_MID_DURATION);
                 } catch (junit.framework.AssertionFailedError e) {
                     mFuture.setException(new RuntimeException(e));
                 }
             }
         });
-        mFuture.get();
+        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Verify that ending an animator that is playing does the right thing.
+     */
+    @MediumTest
+    public void testPlayingEnd() throws Exception {
+        mFutureListener = new FutureReleaseListener(mFuture);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Handler handler = new Handler();
+                    mAnimator.addListener(mFutureListener);
+                    mRunning = true;
+                    mAnimator.start();
+                    handler.postDelayed(new Ender(mAnimator, mFuture), ANIM_MID_DURATION);
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -204,13 +365,91 @@ public abstract class EventsTest
                     mAnimator.addListener(mFutureListener);
                     mRunning = true;
                     mAnimator.start();
-                    handler.postDelayed(new Canceler(mAnimator), ANIM_MID_DURATION);
+                    handler.postDelayed(new Canceler(mAnimator, mFuture), ANIM_MID_DURATION);
                 } catch (junit.framework.AssertionFailedError e) {
                     mFuture.setException(new RuntimeException(e));
                 }
             }
         });
-        mFuture.get();
+        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Same as testPlayingEnd, but with a startDelayed animator
+     */
+    @MediumTest
+    public void testPlayingDelayedEnd() throws Exception {
+        mAnimator.setStartDelay(ANIM_DELAY);
+        mFutureListener = new FutureReleaseListener(mFuture);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Handler handler = new Handler();
+                    mAnimator.addListener(mFutureListener);
+                    mRunning = true;
+                    mAnimator.start();
+                    handler.postDelayed(new Ender(mAnimator, mFuture), ANIM_MID_DURATION);
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Same as testPlayingDelayedCancel, but cancel during the startDelay period
+     */
+    @MediumTest
+    public void testPlayingDelayedCancelMidDelay() throws Exception {
+        mAnimator.setStartDelay(ANIM_DELAY);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // Set the listener to automatically timeout after an uncanceled animation
+                    // would have finished. This tests to make sure that we're not calling
+                    // the listeners with cancel/end callbacks since they won't be called
+                    // with the start event.
+                    mFutureListener = new FutureReleaseListener(mFuture, TIMEOUT);
+                    Handler handler = new Handler();
+                    mRunning = true;
+                    mAnimator.start();
+                    handler.postDelayed(new Canceler(mAnimator, mFuture), ANIM_MID_DELAY);
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(TIMEOUT + 100,  TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Same as testPlayingDelayedEnd, but end during the startDelay period
+     */
+    @MediumTest
+    public void testPlayingDelayedEndMidDelay() throws Exception {
+        mAnimator.setStartDelay(ANIM_DELAY);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // Set the listener to automatically timeout after an uncanceled animation
+                    // would have finished. This tests to make sure that we're not calling
+                    // the listeners with cancel/end callbacks since they won't be called
+                    // with the start event.
+                    mFutureListener = new FutureReleaseListener(mFuture, TIMEOUT);
+                    Handler handler = new Handler();
+                    mRunning = true;
+                    mAnimator.start();
+                    handler.postDelayed(new Ender(mAnimator, mFuture), ANIM_MID_DELAY);
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(TIMEOUT + 100,  TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -234,7 +473,31 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get();
+        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Verifies that ending a started animation after it has already been ended
+     * does nothing.
+     */
+    @MediumTest
+    public void testStartDoubleEnd() throws Exception {
+        mFutureListener = new FutureReleaseListener(mFuture);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mRunning = true;
+                    mAnimator.start();
+                    mAnimator.end();
+                    mAnimator.end();
+                    mFuture.release();
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -258,8 +521,31 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get();
-    }
+        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
+     }
 
+    /**
+     * Same as testStartDoubleEnd, but with a startDelayed animator
+     */
+    @MediumTest
+    public void testStartDelayedDoubleEnd() throws Exception {
+        mAnimator.setStartDelay(ANIM_DELAY);
+        mFutureListener = new FutureReleaseListener(mFuture);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mRunning = true;
+                    mAnimator.start();
+                    mAnimator.end();
+                    mAnimator.end();
+                    mFuture.release();
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
+     }
 
 }

@@ -349,7 +349,8 @@ public final class AnimatorSet extends Animator {
                 return true;
             }
         }
-        return false;
+        // Also return true if we're currently running the startDelay animator
+        return (mDelayAnim != null && mDelayAnim.isRunning());
     }
 
     /**
@@ -487,7 +488,6 @@ public final class AnimatorSet extends Animator {
                 mPlayingSet.add(node.animation);
             }
         } else {
-            // TODO: Need to cancel out of the delay appropriately
             mDelayAnim = ValueAnimator.ofFloat(0f, 1f);
             mDelayAnim.setDuration(mStartDelay);
             mDelayAnim.addListener(new AnimatorListenerAdapter() {
