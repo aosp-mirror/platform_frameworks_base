@@ -1606,6 +1606,10 @@ public class TabletStatusBar extends StatusBar implements
             }
 
             return;
+        } else if (0 != (mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS)) {
+            // if icons are disabled but we're not in DND mode, this is probably Setup and we should
+            // just leave the area totally empty
+            return;
         }
 
         int N = mNotificationData.size();
