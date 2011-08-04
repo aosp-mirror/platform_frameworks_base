@@ -417,6 +417,22 @@ public final class BridgeResources extends Resources {
     }
 
     @Override
+    public boolean getBoolean(int id) throws NotFoundException {
+        Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
+
+        if (value != null && value.getSecond().getValue() != null) {
+            String v = value.getSecond().getValue();
+            return Boolean.parseBoolean(v);
+        }
+
+        // id was not found or not resolved. Throw a NotFoundException.
+        throwException(id);
+
+        // this is not used since the method above always throws
+        return false;
+    }
+
+    @Override
     public String getResourceEntryName(int resid) throws NotFoundException {
         throw new UnsupportedOperationException();
     }
