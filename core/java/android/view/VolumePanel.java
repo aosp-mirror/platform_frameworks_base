@@ -26,7 +26,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.AudioService;
 import android.media.AudioSystem;
@@ -36,13 +35,9 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
 import java.util.HashMap;
@@ -51,6 +46,10 @@ import java.util.HashMap;
  * Handle the volume up and down keys.
  *
  * This code really should be moved elsewhere.
+ *
+ * Seriously, it really really should be moved elsewhere.  This is used by
+ * android.media.AudioService, which actually runs in the system process, to
+ * show the volume dialog when the user changes the volume.  What a mess.
  *
  * @hide
  */
@@ -194,7 +193,7 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         window.setGravity(Gravity.TOP);
         WindowManager.LayoutParams lp = window.getAttributes();
         lp.token = null;
-        lp.type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        lp.type = WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
         window.setAttributes(lp);
         window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
 
