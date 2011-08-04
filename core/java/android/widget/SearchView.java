@@ -112,6 +112,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     private boolean mClearingFocus;
     private int mMaxWidth;
     private boolean mVoiceButtonEnabled;
+    private CharSequence mOldQueryText;
     private CharSequence mUserQuery;
     private boolean mExpandedInActionView;
 
@@ -462,6 +463,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         if (mIconifiedByDefault == iconified) return;
         mIconifiedByDefault = iconified;
         updateViewsVisibility(iconified);
+        updateQueryHint();
     }
 
     /**
@@ -970,9 +972,10 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         updateVoiceButton(!hasText);
         updateCloseButton();
         updateSubmitArea();
-        if (mOnQueryChangeListener != null) {
+        if (mOnQueryChangeListener != null && !TextUtils.equals(newText, mOldQueryText)) {
             mOnQueryChangeListener.onQueryTextChange(newText.toString());
         }
+        mOldQueryText = newText.toString();
     }
 
     private void onSubmitQuery() {
