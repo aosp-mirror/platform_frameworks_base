@@ -3018,7 +3018,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
-    Runnable mScreenSaverActivator = new Runnable() {
+    Runnable mScreenSaverActivator = null;
+    /*new Runnable() {
         public void run() {
             synchronized (this) {
                 if (!(mScreenSaverEnabled && mScreenOn)) {
@@ -3049,9 +3050,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
     };
+    */
 
     // Must call while holding mLock
     private void updateScreenSaverTimeoutLocked() {
+        if (mScreenSaverActivator == null) return;
+
         synchronized (mScreenSaverActivator) {
             mHandler.removeCallbacks(mScreenSaverActivator);
             if (mScreenSaverEnabled && mScreenOn && mScreenSaverTimeout > 0) {
