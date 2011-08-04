@@ -50,12 +50,17 @@
     <dimen name="fastscroll_thumb_height">52dp</dimen>
     <!-- Min width for a tablet device -->
     <dimen name="min_xlarge_screen_width">800dp</dimen>
-    <!-- Default height of a key in the password keyboard for alpha -->
+
+    <!-- Default height of a key in the password keyboard for alpha (used by keyguard) -->
     <dimen name="password_keyboard_key_height_alpha">56dip</dimen>
-    <!-- Default height of a key in the password keyboard for numeric -->
+    <!-- Default height of a key in the password keyboard for numeric (used by keyguard) -->
     <dimen name="password_keyboard_key_height_numeric">56dip</dimen>
-    <!-- Default correction for the space key in the password keyboard -->
+    <!-- Default correction for the space key in the password keyboard  (used by keyguard) -->
     <dimen name="password_keyboard_spacebar_vertical_correction">4dip</dimen>
+    <!-- Default horizontal gap between keys in the password keyboard (used by keyguard) -->
+    <dimen name="password_keyboard_horizontalGap">3dip</dimen>
+    <!-- Default vertical gap between keys in the password keyboard (used by keyguard) -->
+    <dimen name="password_keyboard_verticalGap">9dip</dimen>
 
     <!-- Default target placement radius for MultiWaveView -->
     <dimen name="multiwaveview_target_placement_radius">135dip</dimen>
