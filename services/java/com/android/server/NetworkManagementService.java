@@ -1231,6 +1231,13 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
+    @Override
+    public boolean isBandwidthControlEnabled() {
+        mContext.enforceCallingOrSelfPermission(MANAGE_NETWORK_POLICY, TAG);
+        return mBandwidthControlEnabled;
+    }
+
+    @Override
     public NetworkStats getNetworkStatsUidDetail(int uid) {
         if (Binder.getCallingUid() != uid) {
             mContext.enforceCallingOrSelfPermission(
