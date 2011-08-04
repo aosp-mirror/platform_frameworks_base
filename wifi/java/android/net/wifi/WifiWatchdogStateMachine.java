@@ -44,9 +44,11 @@ import com.android.internal.util.StateMachine;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * {@link WifiWatchdogStateMachine} monitors the initial connection to a Wi-Fi
@@ -82,7 +84,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final int DEFAULT_MAX_SSID_BLACKLISTS = 7;
     private static final int DEFAULT_NUM_DNS_PINGS = 5;
     private static final int DEFAULT_MIN_DNS_RESPONSES = 3;
-    private static final long DNS_PING_INTERVAL_MS = 100;
 
     private static final int DEFAULT_DNS_PING_TIMEOUT_MS = 2000;
 
@@ -92,6 +93,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final String DEFAULT_WALLED_GARDEN_URL =
             "http://clients3.google.com/generate_204";
     private static final int WALLED_GARDEN_SOCKET_TIMEOUT_MS = 10000;
+    private static final int DNS_INTRATEST_PING_INTERVAL = 20;
 
     private static final int BASE = Protocol.BASE_WIFI_WATCHDOG;
 
@@ -114,9 +116,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final int EVENT_WIFI_RADIO_STATE_CHANGE = BASE + 5;
     private static final int EVENT_WATCHDOG_SETTINGS_CHANGE = BASE + 6;
 
-    private static final int MESSAGE_CHECK_STEP = BASE + 100;
-    private static final int MESSAGE_HANDLE_WALLED_GARDEN = BASE + 101;
-    private static final int MESSAGE_HANDLE_BAD_AP = BASE + 102;
+    private static final int MESSAGE_HANDLE_WALLED_GARDEN = BASE + 100;
+    private static final int MESSAGE_HANDLE_BAD_AP = BASE + 101;
     /**
      * arg1 == mOnlineWatchState.checkCount
      */
@@ -189,8 +190,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
         mContext = context;
         mContentResolver = context.getContentResolver();
         mWifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        mDnsPinger = new DnsPinger("WifiWatchdogServer.DnsPinger", context,
-                ConnectivityManager.TYPE_WIFI);
+        mDnsPinger = new DnsPinger(mContext, "WifiWatchdogStateMachine.DnsPinger",
+                                this.getHandler().getLooper(), this.getHandler(),
+                                ConnectivityManager.TYPE_WIFI);
 
         setupNetworkReceiver();
 
@@ -637,36 +639,43 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     class DnsCheckingState extends State {
-        int dnsCheckTries = 0;
         int dnsCheckSuccesses = 0;
+        int dnsCheckTries = 0;
         String dnsCheckLogStr = "";
+        Set<Integer> ids = new HashSet<Integer>();
 
         @Override
         public void enter() {
             dnsCheckSuccesses = 0;
             dnsCheckTries = 0;
+            ids.clear();
+            InetAddress dns = mDnsPinger.getDns();
             if (DBG) {
                 Slog.d(WWSM_TAG, "Starting DNS pings at " + SystemClock.elapsedRealtime());
                 dnsCheckLogStr = String.format("Pinging %s on ssid [%s]: ",
-                        mDnsPinger.getDns(), mInitialConnInfo.getSSID());
+                        dns, mInitialConnInfo.getSSID());
             }
 
-            sendCheckStepMessage(0);
+            for (int i=0; i < mNumDnsPings; i++) {
+                ids.add(mDnsPinger.pingDnsAsync(dns, mDnsPingTimeoutMs,
+                        DNS_INTRATEST_PING_INTERVAL * i));
+            }
         }
 
         @Override
         public boolean processMessage(Message msg) {
-            if (msg.what != MESSAGE_CHECK_STEP) {
+            if (msg.what != DnsPinger.DNS_PING_RESULT) {
                 return NOT_HANDLED;
             }
-            if (msg.arg1 != mNetEventCounter) {
-                Slog.d(WWSM_TAG, "Check step out of sync, ignoring...");
+
+            int pingID = msg.arg1;
+            int pingResponseTime = msg.arg2;
+
+            if (!ids.contains(pingID)) {
+                Slog.w(WWSM_TAG, "Received a Dns response with unknown ID!");
                 return HANDLED;
             }
-
-            long pingResponseTime = mDnsPinger.pingDns(mDnsPinger.getDns(),
-                    mDnsPingTimeoutMs);
-
+            ids.remove(pingID);
             dnsCheckTries++;
             if (pingResponseTime >= 0)
                 dnsCheckSuccesses++;
@@ -730,10 +739,14 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 return HANDLED;
             }
 
-            // Still in dns check step
-            sendCheckStepMessage(DNS_PING_INTERVAL_MS);
             return HANDLED;
         }
+
+        @Override
+        public void exit() {
+            mDnsPinger.cancelPings();
+        }
+
 
         private boolean shouldCheckWalledGarden() {
             if (!mWalledGardenTestEnabled) {
@@ -752,11 +765,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
             }
             return true;
         }
-
-        private void sendCheckStepMessage(long delay) {
-            sendMessageDelayed(obtainMessage(MESSAGE_CHECK_STEP, mNetEventCounter, 0), delay);
-        }
-
     }
 
     class OnlineWatchState extends State {
@@ -779,12 +787,15 @@ public class WifiWatchdogStateMachine extends StateMachine {
         int checkGuard = 0;
         Long lastCheckTime = null;
 
+        int curPingID = 0;
+
         @Override
         public void enter() {
             lastCheckTime = SystemClock.elapsedRealtime();
             signalUnstable = false;
             checkGuard++;
             unstableSignalChecks = false;
+            curPingID = 0;
             triggerSingleDnsCheck();
         }
 
@@ -820,8 +831,18 @@ public class WifiWatchdogStateMachine extends StateMachine {
                         return HANDLED;
                     }
                     lastCheckTime = SystemClock.elapsedRealtime();
-                    long responseTime = mDnsPinger.pingDns(mDnsPinger.getDns(),
-                            mDnsPingTimeoutMs);
+                    curPingID = mDnsPinger.pingDnsAsync(mDnsPinger.getDns(),
+                            mDnsPingTimeoutMs, 0);
+                    return HANDLED;
+                case DnsPinger.DNS_PING_RESULT:
+                    if ((short) msg.arg1 != curPingID) {
+                        if (VDBG) {
+                            Slog.v(WWSM_TAG, "Received non-matching DnsPing w/ id: " +
+                                    msg.arg1);
+                        }
+                        return HANDLED;
+                    }
+                    int responseTime = msg.arg2;
                     if (responseTime >= 0) {
                         if (VDBG) {
                             Slog.v(WWSM_TAG, "Ran a single DNS ping. Response time: "
@@ -840,6 +861,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     return HANDLED;
             }
             return NOT_HANDLED;
+        }
+
+        @Override
+        public void exit() {
+            mDnsPinger.cancelPings();
         }
 
         /**

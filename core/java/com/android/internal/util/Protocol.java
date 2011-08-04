@@ -49,5 +49,6 @@ public class Protocol {
     public static final int BASE_DATA_CONNECTION_AC                                 = 0x00041000;
     public static final int BASE_DATA_CONNECTION_TRACKER                            = 0x00042000;
 
+    public static final int BASE_DNS_PINGER                                         = 0x00050000;
     //TODO: define all used protocols
 }
