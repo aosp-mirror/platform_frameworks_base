@@ -48,6 +48,8 @@ public class BackupRestoreConfirmation extends Activity {
     static final String TAG = "BackupRestoreConfirmation";
     static final boolean DEBUG = true;
 
+    static final String DID_ACKNOWLEDGE = "did_acknowledge";
+
     static final int MSG_START_BACKUP = 1;
     static final int MSG_BACKUP_PACKAGE = 2;
     static final int MSG_END_BACKUP = 3;
@@ -149,7 +151,13 @@ public class BackupRestoreConfirmation extends Activity {
         mBackupManager = IBackupManager.Stub.asInterface(ServiceManager.getService(Context.BACKUP_SERVICE));
 
         mHandler = new ObserverHandler(getApplicationContext());
-        mObserver = new FullObserver();
+        final Object oldObserver = getLastNonConfigurationInstance();
+        if (oldObserver == null) {
+            mObserver = new FullObserver(mHandler);
+        } else {
+            mObserver = (FullObserver) oldObserver;
+            mObserver.setHandler(mHandler);
+        }
 
         setContentView(layoutId);
 
@@ -189,16 +197,24 @@ public class BackupRestoreConfirmation extends Activity {
                 mDenyButton.setEnabled(false);
             }
         });
+
+        // if we're a relaunch we may need to adjust button enable state
+        if (icicle != null) {
+            mDidAcknowledge = icicle.getBoolean(DID_ACKNOWLEDGE, false);
+            mAllowButton.setEnabled(!mDidAcknowledge);
+            mDenyButton.setEnabled(!mDidAcknowledge);
+        }
+    }
+
+    // Preserve the restore observer callback binder across activity relaunch
+    @Override
+    public Object onRetainNonConfigurationInstance() {
+        return mObserver;
     }
 
     @Override
-    public void onStop() {
-        super.onStop();
-
-        // We explicitly equate departure from the UI with refusal.  This includes the
-        // implicit configuration-changed stop/restart cycle.
-        sendAcknowledgement(mToken, false, null);
-        finish();
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean(DID_ACKNOWLEDGE, mDidAcknowledge);
     }
 
     void sendAcknowledgement(int token, boolean allow, IFullBackupRestoreObserver observer) {
@@ -230,6 +246,16 @@ public class BackupRestoreConfirmation extends Activity {
      * the notifications onto the main thread.
      */
     class FullObserver extends IFullBackupRestoreObserver.Stub {
+        private Handler mHandler;
+
+        public FullObserver(Handler h) {
+            mHandler = h;
+        }
+
+        public void setHandler(Handler h) {
+            mHandler = h;
+        }
+
         //
         // IFullBackupRestoreObserver implementation
         //
