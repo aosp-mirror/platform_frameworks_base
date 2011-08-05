@@ -19,11 +19,13 @@ package com.android.internal.textservice;
 import com.android.internal.textservice.ISpellCheckerSession;
 import com.android.internal.textservice.ISpellCheckerSessionListener;
 
+import android.os.Bundle;
+
 /**
  * Public interface to the global spell checker.
  * @hide
  */
 interface ISpellCheckerService {
     ISpellCheckerSession getISpellCheckerSession(
-            String locale, ISpellCheckerSessionListener listener);
+            String locale, ISpellCheckerSessionListener listener, in Bundle bundle);
 }

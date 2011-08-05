@@ -22,6 +22,7 @@ import com.android.internal.textservice.ISpellCheckerSessionListener;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
@@ -43,45 +44,6 @@ public abstract class SpellCheckerService extends Service {
 
     private final SpellCheckerServiceBinder mBinder = new SpellCheckerServiceBinder(this);
 
-    /**
-     * Get suggestions for specified text in TextInfo.
-     * This function will run on the incoming IPC thread. So, this is not called on the main thread,
-     * but will be called in series on another thread.
-     * @param textInfo the text metadata
-     * @param suggestionsLimit the number of limit of suggestions returned
-     * @param locale the locale for getting suggestions
-     * @return SuggestionInfo which contains suggestions for textInfo
-     */
-    public abstract SuggestionsInfo getSuggestions(
-            TextInfo textInfo, int suggestionsLimit, String locale);
-
-    /**
-     * A batch process of onGetSuggestions.
-     * This function will run on the incoming IPC thread. So, this is not called on the main thread,
-     * but will be called in series on another thread.
-     * @param textInfos an array of the text metadata
-     * @param locale the locale for getting suggestions
-     * @param suggestionsLimit the number of limit of suggestions returned
-     * @param sequentialWords true if textInfos can be treated as sequential words.
-     * @return an array of SuggestionInfo of onGetSuggestions
-     */
-    public SuggestionsInfo[] getSuggestionsMultiple(
-            TextInfo[] textInfos, String locale, int suggestionsLimit, boolean sequentialWords) {
-        final int length = textInfos.length;
-        final SuggestionsInfo[] retval = new SuggestionsInfo[length];
-        for (int i = 0; i < length; ++i) {
-            retval[i] = getSuggestions(textInfos[i], suggestionsLimit, locale);
-            retval[i].setCookieAndSequence(textInfos[i].getCookie(), textInfos[i].getSequence());
-        }
-        return retval;
-    }
-
-    /**
-     * Request to abort all tasks executed in SpellChecker.
-     * This function will run on the incoming IPC thread. So, this is not called on the main thread,
-     * but will be called in series on another thread.
-     */
-    public void cancel() {}
 
     /**
      * Implement to return the implementation of the internal spell checker
@@ -95,36 +57,125 @@ public abstract class SpellCheckerService extends Service {
         return mBinder;
     }
 
-    private static class SpellCheckerSessionImpl extends ISpellCheckerSession.Stub {
-        private final WeakReference<SpellCheckerService> mInternalServiceRef;
-        private final String mLocale;
-        private final ISpellCheckerSessionListener mListener;
+    /**
+     * Factory method to create a spell checker session impl
+     * @return SpellCheckerSessionImpl which should be overridden by a concrete implementation.
+     */
+    public abstract Session createSession();
 
-        public SpellCheckerSessionImpl(
-                SpellCheckerService service, String locale, ISpellCheckerSessionListener listener) {
-            mInternalServiceRef = new WeakReference<SpellCheckerService>(service);
-            mLocale = locale;
+    /**
+     * This abstract class should be overridden by a concrete implementation of a spell checker.
+     */
+    public abstract class Session {
+        private InternalISpellCheckerSession mInternalSession;
+
+        /**
+         * @hide
+         */
+        public final void setInternalISpellCheckerSession(InternalISpellCheckerSession session) {
+            mInternalSession = session;
+        }
+
+        /**
+         * This is called after the class is initialized, at which point it knows it can call
+         * getLocale() etc...
+         */
+        public abstract void onCreate();
+
+        /**
+         * Get suggestions for specified text in TextInfo.
+         * This function will run on the incoming IPC thread.
+         * So, this is not called on the main thread,
+         * but will be called in series on another thread.
+         * @param textInfo the text metadata
+         * @param suggestionsLimit the number of limit of suggestions returned
+         * @return SuggestionInfo which contains suggestions for textInfo
+         */
+        public abstract SuggestionsInfo onGetSuggestions(TextInfo textInfo, int suggestionsLimit);
+
+        /**
+         * A batch process of onGetSuggestions.
+         * This function will run on the incoming IPC thread.
+         * So, this is not called on the main thread,
+         * but will be called in series on another thread.
+         * @param textInfos an array of the text metadata
+         * @param suggestionsLimit the number of limit of suggestions returned
+         * @param sequentialWords true if textInfos can be treated as sequential words.
+         * @return an array of SuggestionInfo of onGetSuggestions
+         */
+        public SuggestionsInfo[] onGetSuggestionsMultiple(TextInfo[] textInfos,
+                int suggestionsLimit, boolean sequentialWords) {
+            final int length = textInfos.length;
+            final SuggestionsInfo[] retval = new SuggestionsInfo[length];
+            for (int i = 0; i < length; ++i) {
+                retval[i] = onGetSuggestions(textInfos[i], suggestionsLimit);
+                retval[i].setCookieAndSequence(
+                        textInfos[i].getCookie(), textInfos[i].getSequence());
+            }
+            return retval;
+        }
+
+        /**
+         * Request to abort all tasks executed in SpellChecker.
+         * This function will run on the incoming IPC thread.
+         * So, this is not called on the main thread,
+         * but will be called in series on another thread.
+         */
+        public void onCancel() {}
+
+        /**
+         * @return Locale for this session
+         */
+        public String getLocale() {
+            return mInternalSession.getLocale();
+        }
+
+        /**
+         * @return Bundle for this session
+         */
+        public Bundle getBundle() {
+            return mInternalSession.getBundle();
+        }
+    }
+
+    // Preventing from exposing ISpellCheckerSession.aidl, create an internal class.
+    private static class InternalISpellCheckerSession extends ISpellCheckerSession.Stub {
+        private final ISpellCheckerSessionListener mListener;
+        private final Session mSession;
+        private final String mLocale;
+        private final Bundle mBundle;
+
+        public InternalISpellCheckerSession(String locale, ISpellCheckerSessionListener listener,
+                Bundle bundle, Session session) {
             mListener = listener;
+            mSession = session;
+            mLocale = locale;
+            mBundle = bundle;
+            session.setInternalISpellCheckerSession(this);
         }
 
         @Override
-        public void getSuggestionsMultiple(
+        public void onGetSuggestionsMultiple(
                 TextInfo[] textInfos, int suggestionsLimit, boolean sequentialWords) {
-            final SpellCheckerService service = mInternalServiceRef.get();
-            if (service == null) return;
             try {
                 mListener.onGetSuggestions(
-                        service.getSuggestionsMultiple(textInfos, mLocale,
-                                suggestionsLimit, sequentialWords));
+                        mSession.onGetSuggestionsMultiple(
+                                textInfos, suggestionsLimit, sequentialWords));
             } catch (RemoteException e) {
             }
         }
 
         @Override
-        public void cancel() {
-            final SpellCheckerService service = mInternalServiceRef.get();
-            if (service == null) return;
-            service.cancel();
+        public void onCancel() {
+            mSession.onCancel();
+        }
+
+        public String getLocale() {
+            return mLocale;
+        }
+
+        public Bundle getBundle() {
+            return mBundle;
         }
     }
 
@@ -137,10 +188,14 @@ public abstract class SpellCheckerService extends Service {
 
         @Override
         public ISpellCheckerSession getISpellCheckerSession(
-                String locale, ISpellCheckerSessionListener listener) {
+                String locale, ISpellCheckerSessionListener listener, Bundle bundle) {
             final SpellCheckerService service = mInternalServiceRef.get();
             if (service == null) return null;
-            return new SpellCheckerSessionImpl(service, locale, listener);
+            final Session session = service.createSession();
+            final InternalISpellCheckerSession internalSession =
+                    new InternalISpellCheckerSession(locale, listener, bundle, session);
+            session.onCreate();
+            return internalSession;
         }
     }
 }

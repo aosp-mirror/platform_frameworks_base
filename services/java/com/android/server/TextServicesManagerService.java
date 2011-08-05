@@ -31,19 +31,17 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.provider.Settings;
-import android.text.TextUtils;
 import android.service.textservice.SpellCheckerService;
-import android.util.Log;
+import android.text.TextUtils;
 import android.util.Slog;
 import android.view.textservice.SpellCheckerInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public class TextServicesManagerService extends ITextServicesManager.Stub {
@@ -180,7 +178,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
     @Override
     public void getSpellCheckerService(String sciId, String locale,
-            ITextServicesSessionListener tsListener, ISpellCheckerSessionListener scListener) {
+            ITextServicesSessionListener tsListener, ISpellCheckerSessionListener scListener,
+            Bundle bundle) {
         if (!mSystemReady) {
             return;
         }
@@ -199,7 +198,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 if (bindGroup != null) {
                     final InternalDeathRecipient recipient =
                             mSpellCheckerBindGroups.get(sciId).addListener(
-                                    tsListener, locale, scListener, uid);
+                                    tsListener, locale, scListener, uid, bundle);
                     if (recipient == null) {
                         if (DBG) {
                             Slog.w(TAG, "Didn't create a death recipient.");
@@ -217,7 +216,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                         try {
                             final ISpellCheckerSession session =
                                     bindGroup.mSpellChecker.getISpellCheckerSession(
-                                            recipient.mScLocale, recipient.mScListener);
+                                            recipient.mScLocale, recipient.mScListener, bundle);
                             if (session != null) {
                                 tsListener.onServiceConnected(session);
                                 return;
@@ -236,7 +235,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             }
             final long ident = Binder.clearCallingIdentity();
             try {
-                startSpellCheckerServiceInnerLocked(sci, locale, tsListener, scListener, uid);
+                startSpellCheckerServiceInnerLocked(
+                        sci, locale, tsListener, scListener, uid, bundle);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -246,13 +246,13 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
     private void startSpellCheckerServiceInnerLocked(SpellCheckerInfo info, String locale,
             ITextServicesSessionListener tsListener, ISpellCheckerSessionListener scListener,
-            int uid) {
+            int uid, Bundle bundle) {
         if (DBG) {
             Slog.w(TAG, "Start spell checker session inner locked.");
         }
         final String sciId = info.getId();
         final InternalServiceConnection connection = new InternalServiceConnection(
-                sciId, locale, scListener);
+                sciId, locale, scListener, bundle);
         final Intent serviceIntent = new Intent(SpellCheckerService.SERVICE_INTERFACE);
         serviceIntent.setComponent(info.getComponent());
         if (DBG) {
@@ -263,7 +263,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             return;
         }
         final SpellCheckerBindGroup group = new SpellCheckerBindGroup(
-                connection, tsListener, locale, scListener, uid);
+                connection, tsListener, locale, scListener, uid, bundle);
         mSpellCheckerBindGroups.put(sciId, group);
     }
 
@@ -332,10 +332,10 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
 
         public SpellCheckerBindGroup(InternalServiceConnection connection,
                 ITextServicesSessionListener listener, String locale,
-                ISpellCheckerSessionListener scListener, int uid) {
+                ISpellCheckerSessionListener scListener, int uid, Bundle bundle) {
             mInternalConnection = connection;
             mConnected = false;
-            addListener(listener, locale, scListener, uid);
+            addListener(listener, locale, scListener, uid, bundle);
         }
 
         public void onServiceConnected(ISpellCheckerService spellChecker) {
@@ -346,7 +346,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                 for (InternalDeathRecipient listener : mListeners) {
                     try {
                         final ISpellCheckerSession session = spellChecker.getISpellCheckerSession(
-                                listener.mScLocale, listener.mScListener);
+                                listener.mScLocale, listener.mScListener, listener.mBundle);
                         listener.mTsListener.onServiceConnected(session);
                     } catch (RemoteException e) {
                         Slog.e(TAG, "Exception in getting the spell checker session: " + e);
@@ -360,7 +360,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         }
 
         public InternalDeathRecipient addListener(ITextServicesSessionListener tsListener,
-                String locale, ISpellCheckerSessionListener scListener, int uid) {
+                String locale, ISpellCheckerSessionListener scListener, int uid, Bundle bundle) {
             if (DBG) {
                 Slog.d(TAG, "addListener: " + locale);
             }
@@ -375,7 +375,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                         }
                     }
                     recipient = new InternalDeathRecipient(
-                            this, tsListener, locale, scListener, uid);
+                            this, tsListener, locale, scListener, uid, bundle);
                     scListener.asBinder().linkToDeath(recipient, 0);
                     mListeners.add(recipient);
                 } catch(RemoteException e) {
@@ -440,11 +440,13 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         private final ISpellCheckerSessionListener mListener;
         private final String mSciId;
         private final String mLocale;
+        private final Bundle mBundle;
         public InternalServiceConnection(
-                String id, String locale, ISpellCheckerSessionListener listener) {
+                String id, String locale, ISpellCheckerSessionListener listener, Bundle bundle) {
             mSciId = id;
             mLocale = locale;
             mListener = listener;
+            mBundle = bundle;
         }
 
         @Override
@@ -473,14 +475,16 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         public final String mScLocale;
         private final SpellCheckerBindGroup mGroup;
         public final int mUid;
+        public final Bundle mBundle;
         public InternalDeathRecipient(SpellCheckerBindGroup group,
                 ITextServicesSessionListener tsListener, String scLocale,
-                ISpellCheckerSessionListener scListener, int uid) {
+                ISpellCheckerSessionListener scListener, int uid, Bundle bundle) {
             mTsListener = tsListener;
             mScListener = scListener;
             mScLocale = scLocale;
             mGroup = group;
             mUid = uid;
+            mBundle = bundle;
         }
 
         public boolean hasSpellCheckerListener(ISpellCheckerSessionListener listener) {

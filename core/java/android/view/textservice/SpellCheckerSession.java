@@ -233,7 +233,7 @@ public class SpellCheckerSession {
                 Log.w(TAG, "Cancel spell checker tasks.");
             }
             try {
-                mISpellCheckerSession.cancel();
+                mISpellCheckerSession.onCancel();
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to cancel " + e);
             }
@@ -247,7 +247,7 @@ public class SpellCheckerSession {
                 Log.w(TAG, "Get suggestions from the spell checker.");
             }
             try {
-                mISpellCheckerSession.getSuggestionsMultiple(
+                mISpellCheckerSession.onGetSuggestionsMultiple(
                         scp.mTextInfos, scp.mSuggestionsLimit, scp.mSequentialWords);
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to get suggestions " + e);
