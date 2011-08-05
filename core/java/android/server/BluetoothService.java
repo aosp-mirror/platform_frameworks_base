@@ -798,8 +798,15 @@ public class BluetoothService extends IBluetooth.Stub {
         return true;
     }
 
-    /*package*/ synchronized String getProperty(String name) {
-        if (!isEnabledInternal()) return null;
+    /*package*/ synchronized String getProperty(String name, boolean checkState) {
+        // If checkState is false, check if the event loop is running.
+        // before making the call to Bluez
+        if (checkState) {
+            if (!isEnabledInternal()) return null;
+        } else if (!mEventLoop.isEventLoopRunning()) {
+            return null;
+        }
+
         return mAdapterProperties.getProperty(name);
     }
 
@@ -825,17 +832,19 @@ public class BluetoothService extends IBluetooth.Stub {
 
     public synchronized String getAddress() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return getProperty("Address");
+        // Don't check state since we want to provide address, even if BT is off
+        return getProperty("Address", false);
     }
 
     public synchronized String getName() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        return getProperty("Name");
+        // Don't check state since we want to provide name, even if BT is off
+        return getProperty("Name", false);
     }
 
     public synchronized ParcelUuid[] getUuids() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        String value =  getProperty("UUIDs");
+        String value =  getProperty("UUIDs", true);
         if (value == null) return null;
         return convertStringToParcelUuid(value);
     }
@@ -915,7 +924,7 @@ public class BluetoothService extends IBluetooth.Stub {
      */
     public synchronized int getDiscoverableTimeout() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
-        String timeout = getProperty("DiscoverableTimeout");
+        String timeout = getProperty("DiscoverableTimeout", true);
         if (timeout != null)
            return Integer.valueOf(timeout);
         else
@@ -927,8 +936,8 @@ public class BluetoothService extends IBluetooth.Stub {
         if (!isEnabledInternal())
             return BluetoothAdapter.SCAN_MODE_NONE;
 
-        boolean pairable = getProperty("Pairable").equals("true");
-        boolean discoverable = getProperty("Discoverable").equals("true");
+        boolean pairable = getProperty("Pairable", true).equals("true");
+        boolean discoverable = getProperty("Discoverable", true).equals("true");
         return bluezStringToScanMode (pairable, discoverable);
     }
 
@@ -951,7 +960,7 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean isDiscovering() {
         mContext.enforceCallingOrSelfPermission(BLUETOOTH_PERM, "Need BLUETOOTH permission");
 
-        String discoveringProperty = mAdapterProperties.getProperty("Discovering");
+        String discoveringProperty = getProperty("Discovering", false);
         if (discoveringProperty == null) {
             return false;
         }
@@ -2341,7 +2350,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     synchronized String[] getKnownDevices() {
         String[] bonds = null;
-        String val = getProperty("Devices");
+        String val = getProperty("Devices", true);
         if (val != null) {
             bonds = val.split(",");
         }
@@ -2350,7 +2359,7 @@ public class BluetoothService extends IBluetooth.Stub {
 
     private void initProfileState() {
         String[] bonds = null;
-        String val = mAdapterProperties.getProperty("Devices");
+        String val = getProperty("Devices", false);
         if (val != null) {
             bonds = val.split(",");
         }
