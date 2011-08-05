@@ -1366,7 +1366,7 @@ public class PhoneStatusBar extends StatusBar {
         } else if (CHATTY) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 Slog.d(TAG, String.format(
-                            "panel: ACTION_DOWN at (%d, %d) mDisabled=0x%08x",
+                            "panel: ACTION_DOWN at (%f, %f) mDisabled=0x%08x",
                             event.getRawX(), event.getRawY(), mDisabled));
             }
         }
