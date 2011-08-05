@@ -907,20 +907,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (upgradeVersion == 68) {
             // Enable all system sounds by default
             db.beginTransaction();
-            SQLiteStatement stmt = null;
             try {
-                stmt = db.compileStatement("INSERT OR REPLACE INTO system(name,value)"
-                        + " VALUES(?,?);");
-                loadDefaultHapticSettings(stmt);
-                loadUISoundEffectsSettings(stmt);
                 db.execSQL("DELETE FROM system WHERE name='"
                         + Settings.System.NOTIFICATIONS_USE_RING_VOLUME + "'");
-                stmt.close();
                 db.setTransactionSuccessful();
             } finally {
                 db.endTransaction();
-                if (stmt != null)
-                    stmt.close();
             }
             upgradeVersion = 69;
         }
