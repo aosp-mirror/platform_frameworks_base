@@ -2845,20 +2845,20 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    private final static Object mCurrentRcLock = new Object();
+    private final Object mCurrentRcLock = new Object();
     /**
      * The one remote control client to be polled for display information.
      * This object is never null, but its reference might.
      * Access protected by mCurrentRcLock.
      */
-    private static SoftReference<IRemoteControlClient> mCurrentRcClientRef =
+    private SoftReference<IRemoteControlClient> mCurrentRcClientRef =
             new SoftReference<IRemoteControlClient>(null);
 
     /**
      * A monotonically increasing generation counter for mCurrentRcClientRef.
      * Only accessed with a lock on mCurrentRcLock.
      */
-    private static int mCurrentRcClientGen = 0;
+    private int mCurrentRcClientGen = 0;
 
     /**
      * Returns the current remote control client.
@@ -2869,7 +2869,7 @@ public class AudioService extends IAudioService.Stub {
      *     control can be retrieved, or null if rcClientId doesn't match the current generation
      *     counter.
      */
-    public static IRemoteControlClient getRemoteControlClient(int rcClientId) {
+    public IRemoteControlClient getRemoteControlClient(int rcClientId) {
         synchronized(mCurrentRcLock) {
             if (rcClientId == mCurrentRcClientGen) {
                 return mCurrentRcClientRef.get();
