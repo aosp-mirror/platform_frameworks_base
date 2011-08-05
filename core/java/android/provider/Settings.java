@@ -3166,6 +3166,18 @@ public final class Settings {
         public static final String TTY_MODE_ENABLED = "tty_mode_enabled";
 
         /**
+         * The number of milliseconds to delay before sending out Connectivyt Change broadcasts
+         * @hide
+         */
+        public static final String CONNECTIVITY_CHANGE_DELAY = "connectivity_change_delay";
+
+        /**
+         * Default value for CONNECTIVITY_CHANGE_DELAY in milliseconds.
+         * @hide
+         */
+        public static final int CONNECTIVITY_CHANGE_DELAY_DEFAULT = 3000;
+
+        /**
          * Controls whether settings backup is enabled.
          * Type: int ( 0 = disabled, 1 = enabled )
          * @hide
