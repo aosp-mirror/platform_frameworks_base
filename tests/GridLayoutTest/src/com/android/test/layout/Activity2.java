@@ -38,7 +38,6 @@ public class Activity2 extends Activity {
         p.setUseDefaultMargins(true);
         p.setAlignmentMode(ALIGN_BOUNDS);
         p.setRowOrderPreserved(false);
-        p.setPadding(0, 0, 0, 0);
 
         Spec row1 = spec(0);
         Spec row2 = spec(1);
@@ -75,12 +74,9 @@ public class Activity2 extends Activity {
         }
         {
             EditText c = new EditText(context);
+            c.setEms(10);
             c.setInputType(TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-            {
-                LayoutParams lp = new LayoutParams(row3, col2);
-                lp.width = (int) c.getPaint().measureText("Frederick.W.Flintstone");
-                p.addView(c, lp);
-            }
+            p.addView(c, new LayoutParams(row3, col2));
         }
         {
             TextView c = new TextView(context);
@@ -89,17 +85,13 @@ public class Activity2 extends Activity {
         }
         {
             TextView c = new EditText(context);
+            c.setEms(8);
             c.setInputType(TYPE_CLASS_TEXT | TYPE_TEXT_VARIATION_PASSWORD);
-            {
-                LayoutParams lp = new LayoutParams(row4, col2);
-                lp.width = (int) c.getPaint().measureText("************");
-                p.addView(c, lp);
-            }
+            p.addView(c, new LayoutParams(row4, col2));
         }
         {
             Space c = new Space(context);
             LayoutParams lp = new LayoutParams(row5, col3);
-            lp.setMargins(0, 0, 0, 0);
             p.addView(c, lp);
         }
         {

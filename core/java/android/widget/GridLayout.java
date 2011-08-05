@@ -395,10 +395,6 @@ public class GridLayout extends ViewGroup {
      */
     public void setUseDefaultMargins(boolean useDefaultMargins) {
         mUseDefaultMargins = useDefaultMargins;
-        if (useDefaultMargins) {
-            int padding = mDefaultGap;
-            setPadding(padding, padding, padding, padding);
-        }
         requestLayout();
     }
 
@@ -740,6 +736,10 @@ public class GridLayout extends ViewGroup {
         graphics.drawLine(dx + x1, dy + y1, dx + x2, dy + y2, paint);
     }
 
+    private static void drawRect(Canvas canvas, int x1, int y1, int x2, int y2, Paint paint) {
+        canvas.drawRect(x1, y1, x2 - 1, y2 - 1, paint);
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -772,14 +772,14 @@ public class GridLayout extends ViewGroup {
             paint.setColor(Color.BLUE);
             for (int i = 0; i < getChildCount(); i++) {
                 View c = getChildAt(i);
-                canvas.drawRect(c.getLeft(), c.getTop(), c.getRight(), c.getBottom(), paint);
+                drawRect(canvas, c.getLeft(), c.getTop(), c.getRight(), c.getBottom(), paint);
             }
 
             // Draw margins
             paint.setColor(Color.MAGENTA);
             for (int i = 0; i < getChildCount(); i++) {
                 View c = getChildAt(i);
-                canvas.drawRect(
+                drawRect(canvas,
                         c.getLeft() - getMargin1(c, true, true),
                         c.getTop() - getMargin1(c, false, true),
                         c.getRight() + getMargin1(c, true, false),
