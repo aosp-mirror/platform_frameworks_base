@@ -127,6 +127,7 @@ public class MultiWaveView extends View {
             mAnimatingTargets = false;
         }
     };
+    private int mTargetResourceId;
 
     public MultiWaveView(Context context) {
         this(context, null);
@@ -474,6 +475,7 @@ public class MultiWaveView extends View {
             Drawable drawable = array.getDrawable(i);
             targetDrawables.add(new TargetDrawable(res, drawable));
         }
+        mTargetResourceId = resourceId;
         mTargetDrawables = targetDrawables;
         updateTargetPositions();
     }
@@ -490,6 +492,10 @@ public class MultiWaveView extends View {
         } else {
             internalSetTargetResources(resourceId);
         }
+    }
+
+    public int getTargetResourceId() {
+        return mTargetResourceId;
     }
 
     /**

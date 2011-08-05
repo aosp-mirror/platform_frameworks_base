@@ -34,4 +34,11 @@
         <item>@drawable/ic_lockscreen_silent</item>
     </array>
 
+    <array name="lockscreen_targets_with_camera">
+        <item>@null</item>
+        <item>@drawable/ic_lockscreen_unlock</item>
+        <item>@null</item>
+        <item>@drawable/ic_lockscreen_camera</item>
+    </array>
+
 </resources>

@@ -23,7 +23,9 @@ import com.android.internal.widget.WaveView;
 import com.android.internal.widget.multiwaveview.MultiWaveView;
 
 import android.app.ActivityManager;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.view.KeyEvent;
@@ -181,14 +183,33 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
             UnlockWidgetCommonMethods {
 
         private final MultiWaveView mMultiWaveView;
+        private boolean mCameraDisabled;
 
         MultiWaveViewMethods(MultiWaveView multiWaveView) {
             mMultiWaveView = multiWaveView;
+            final boolean cameraDisabled = mLockPatternUtils.getDevicePolicyManager()
+                    .getCameraDisabled(null);
+            if (cameraDisabled) {
+                Log.v(TAG, "Camera disabled by Device Policy");
+                mCameraDisabled = true;
+            } else {
+                // Camera is enabled if resource is initially defined for MultiWaveView
+                // in the lockscreen layout file
+                mCameraDisabled = mMultiWaveView.getTargetResourceId()
+                        != R.array.lockscreen_targets_with_camera;
+            }
         }
 
         public void updateResources() {
-            mMultiWaveView.setTargetResources(mSilentMode ? R.array.lockscreen_targets_when_silent
-                    : R.array.lockscreen_targets_when_soundon);
+            int resId;
+            if (mCameraDisabled) {
+                // Fall back to showing ring/silence if camera is disabled by DPM...
+                resId = mSilentMode ? R.array.lockscreen_targets_when_silent
+                    : R.array.lockscreen_targets_when_soundon;
+            } else {
+                resId = R.array.lockscreen_targets_with_camera;
+            }
+            mMultiWaveView.setTargetResources(resId);
         }
 
         public void onGrabbed(View v, int handle) {
@@ -200,12 +221,19 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         }
 
         public void onTrigger(View v, int target) {
-            if (target == 0) { // TODO: Use resources to determine which handle was used
+            if (target == 0 || target == 1) { // 0 = unlock/portrait, 1 = unlock/landscape
                 mCallback.goToUnlockScreen();
-            } else if (target == 2) {
-                toggleRingMode();
-                mUnlockWidgetMethods.updateResources();
-                mCallback.pokeWakelock();
+            } else if (target == 2 || target == 3) { // 2 = alt/portrait, 3 = alt/landscape
+                if (!mCameraDisabled) {
+                    // Broadcast an intent to start the Camera
+                    Intent intent = new Intent(Intent.ACTION_CAMERA_BUTTON, null);
+                    mContext.sendOrderedBroadcast(intent, null);
+                    mCallback.goToUnlockScreen();
+                } else {
+                    toggleRingMode();
+                    mUnlockWidgetMethods.updateResources();
+                    mCallback.pokeWakelock();
+                }
             }
         }
 
