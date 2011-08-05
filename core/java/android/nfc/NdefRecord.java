@@ -21,6 +21,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.lang.UnsupportedOperationException;
+import java.nio.charset.Charset;
 import java.nio.charset.Charsets;
 import java.util.Arrays;
 
@@ -138,6 +139,22 @@ public final class NdefRecord implements Parcelable {
      * RTD Handover Select type. For use with TNF_WELL_KNOWN.
      */
     public static final byte[] RTD_HANDOVER_SELECT = {0x48, 0x73}; // "Hs"
+
+    /**
+     * RTD Android app type. For use with TNF_EXTERNAL.
+     * <p>
+     * The payload of a record with type RTD_ANDROID_APP
+     * should be the package name identifying an application.
+     * Multiple RTD_ANDROID_APP records may be included
+     * in a single {@link NdefMessage}.
+     * <p>
+     * Use {@link #createApplicationRecord(String)} to create
+     * RTD_ANDROID_APP records.
+     * @hide
+     */
+    // TODO unhide for ICS
+    // TODO recheck docs
+    public static final byte[] RTD_ANDROID_APP = "android.com:pkg".getBytes();
 
     private static final byte FLAG_MB = (byte) 0x80;
     private static final byte FLAG_ME = (byte) 0x40;
@@ -330,6 +347,29 @@ public final class NdefRecord implements Parcelable {
         byte[] fullUri = concat(prefix.getBytes(Charsets.UTF_8),
                 Arrays.copyOfRange(payload, 1, payload.length));
         return Uri.parse(new String(fullUri, Charsets.UTF_8));
+    }
+
+    /**
+     * Creates an Android application NDEF record.
+     * <p>
+     * When an Android device dispatches an {@link NdefMessage}
+     * containing one or more Android application records,
+     * the applications contained in those records will be the
+     * preferred target for the NDEF_DISCOVERED intent, in
+     * the order in which they appear in the {@link NdefMessage}.
+     * <p>
+     * If none of the applications are installed on the device,
+     * a Market link will be opened to the first application.
+     * <p>
+     * Note that Android application records do not overrule
+     * applications that have called {@link NfcAdapter#enableForegroundDispatch}.
+     * @hide
+     */
+    // TODO unhide for ICS
+    // TODO recheck javadoc - should mention this works from ICS only
+    public static NdefRecord createApplicationRecord(String packageName) {
+        return new NdefRecord(TNF_EXTERNAL_TYPE, RTD_ANDROID_APP, new byte[] {},
+                packageName.getBytes(Charsets.US_ASCII));
     }
 
     /**
