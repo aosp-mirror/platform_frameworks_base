@@ -212,8 +212,8 @@
     <!-- android.net.http Error strings --> <skip />
     <!-- Displayed when a web request was successful. -->
     <string name="httpErrorOk">OK</string>
-    <!-- Displayed when a web request failed because we don't know the exact reason. -->
-    <string name="httpError">The Web page contains an error.</string>
+    <!-- Displayed when a web request failed with a generic network error. -->
+    <string name="httpError">A network error occurred.</string>
     <!-- Displayed when a web request failed because the URL could not be found. -->
     <string name="httpErrorLookup">The URL could not be found.</string>
     <!-- Displayed when a web request failed because the site's authentication scheme is not supported by us. -->
