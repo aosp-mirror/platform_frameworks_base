@@ -48,6 +48,7 @@ RsdShader::~RsdShader() {
     delete[] mAttribNames;
     delete[] mUniformNames;
     delete[] mUniformArraySizes;
+    delete[] mTextureTargets;
 }
 
 void RsdShader::initMemberVars() {
@@ -59,6 +60,7 @@ void RsdShader::initMemberVars() {
     mAttribNames = NULL;
     mUniformNames = NULL;
     mUniformArraySizes = NULL;
+    mTextureTargets = NULL;
 
     mIsValid = false;
 }
@@ -81,6 +83,7 @@ void RsdShader::init() {
         mUniformArraySizes[uniformCount] = 1;
         uniformCount++;
     }
+
 }
 
 String8 RsdShader::getGLSLInputString() const {
@@ -141,8 +144,10 @@ void RsdShader::appendTextures() {
     for (uint32_t ct=0; ct < mRSProgram->mHal.state.texturesCount; ct++) {
         if (mRSProgram->mHal.state.textureTargets[ct] == RS_TEXTURE_2D) {
             snprintf(buf, sizeof(buf), "uniform sampler2D UNI_Tex%i;\n", ct);
+            mTextureTargets[ct] = GL_TEXTURE_2D;
         } else {
             snprintf(buf, sizeof(buf), "uniform samplerCube UNI_Tex%i;\n", ct);
+            mTextureTargets[ct] = GL_TEXTURE_CUBE_MAP;
         }
         mShader.append(buf);
     }
@@ -400,9 +405,11 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
 
     for (uint32_t ct=0; ct < numTexturesToBind; ct++) {
         glActiveTexture(GL_TEXTURE0 + ct);
+        glUniform1i(sc->fragUniformSlot(mTextureUniformIndexStart + ct), ct);
+
         if (!mRSProgram->mHal.state.textures[ct].get()) {
-            LOGE("No texture bound for shader id %u, texture unit %u", (uint)this, ct);
-            rsc->setError(RS_ERROR_BAD_SHADER, "No texture bound");
+            // if nothing is bound, reset to default GL texture
+            glBindTexture(mTextureTargets[ct], 0);
             continue;
         }
 
@@ -422,8 +429,6 @@ void RsdShader::setupTextures(const Context *rsc, RsdShaderCache *sc) {
             glTexParameteri(drvTex->glTarget, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             rsdGLCheckError(rsc, "ProgramFragment::setup tex env");
         }
-
-        glUniform1i(sc->fragUniformSlot(mTextureUniformIndexStart + ct), ct);
         rsdGLCheckError(rsc, "ProgramFragment::setup uniforms");
     }
 
@@ -515,6 +520,11 @@ void RsdShader::initAttribAndUniformArray() {
     if (mUniformCount) {
         mUniformNames = new String8[mUniformCount];
         mUniformArraySizes = new uint32_t[mUniformCount];
+    }
+
+    mTextureCount = mRSProgram->mHal.state.texturesCount;
+    if (mTextureCount) {
+        mTextureTargets = new uint32_t[mTextureCount];
     }
 }
 
