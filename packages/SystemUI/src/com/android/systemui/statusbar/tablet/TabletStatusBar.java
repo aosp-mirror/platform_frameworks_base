@@ -1077,7 +1077,10 @@ public class TabletStatusBar extends StatusBar implements
 
         mCompatModeButton.refresh();
         if (mCompatModeButton.getVisibility() == View.VISIBLE) {
+            if (DEBUG_COMPAT_HELP
+                    || ! Prefs.read(mContext).getBoolean(Prefs.SHOWN_COMPAT_MODE_HELP, false)) {
                 showCompatibilityHelp();
+            }
         } else {
             hideCompatibilityHelp();
             mCompatModePanel.closePanel();
