@@ -16,20 +16,29 @@
 
 package com.android.server.am;
 
-import com.android.internal.app.IUsageStats;
-
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageInfo;
 import android.os.Binder;
 import android.os.IBinder;
-import com.android.internal.os.PkgUsageStats;
-
 import android.os.FileUtils;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.util.Slog;
+import android.util.Xml;
+
+import com.android.internal.app.IUsageStats;
+import com.android.internal.content.PackageMonitor;
+import com.android.internal.os.AtomicFile;
+import com.android.internal.os.PkgUsageStats;
+import com.android.internal.util.FastXmlSerializer;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -63,12 +72,14 @@ public final class UsageStatsService extends IUsageStats.Stub {
     private static final String TAG = "UsageStats";
     
     // Current on-disk Parcel version
-    private static final int VERSION = 1006;
+    private static final int VERSION = 1007;
 
     private static final int CHECKIN_VERSION = 4;
     
     private static final String FILE_PREFIX = "usage-";
-    
+
+    private static final String FILE_HISTORY = FILE_PREFIX + "history.xml";
+
     private static final int FILE_WRITE_INTERVAL = 30*60*1000; //ms
     
     private static final int MAX_NUM_FILES = 5;
@@ -82,6 +93,13 @@ public final class UsageStatsService extends IUsageStats.Stub {
     private Context mContext;
     // structure used to maintain statistics since the last checkin.
     final private Map<String, PkgUsageStatsExtended> mStats;
+
+    // Maintains the last time any component was resumed, for all time.
+    final private Map<String, Map<String, Long>> mLastResumeTimes;
+
+    // To remove last-resume time stats when a pacakge is removed.
+    private PackageMonitor mPackageMonitor;
+
     // Lock to update package stats. Methods suffixed by SLOCK should invoked with
     // this lock held
     final Object mStatsLock;
@@ -93,6 +111,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
     private String mLastResumedComp;
     private boolean mIsResumed;
     private File mFile;
+    private AtomicFile mHistoryFile;
     private String mFileLeaf;
     private File mDir;
 
@@ -145,8 +164,6 @@ public final class UsageStatsService extends IUsageStats.Stub {
         final HashMap<String, TimeStats> mLaunchTimes
                 = new HashMap<String, TimeStats>();
         int mLaunchCount;
-        final HashMap<String, Long> mLastResumeTimes
-                = new HashMap<String, Long>();
         long mUsageTime;
         long mPausedTime;
         long mResumedTime;
@@ -170,20 +187,12 @@ public final class UsageStatsService extends IUsageStats.Stub {
                 TimeStats times = new TimeStats(in);
                 mLaunchTimes.put(comp, times);
             }
-            final int numResumeTimes = in.readInt();
-            if (localLOGV) Slog.v(TAG, "Reading last resume times: " + numResumeTimes);
-            for (int i=0; i<numResumeTimes; i++) {
-                String comp = in.readString();
-                if (localLOGV) Slog.v(TAG, "Component: " + comp);
-                mLastResumeTimes.put(comp, in.readLong());
-            }
         }
 
         void updateResume(String comp, boolean launched) {
             if (launched) {
                 mLaunchCount ++;
             }
-            mLastResumeTimes.put(comp, System.currentTimeMillis());
             mResumedTime = SystemClock.elapsedRealtime();
         }
         
@@ -222,26 +231,18 @@ public final class UsageStatsService extends IUsageStats.Stub {
                     times.writeToParcel(out);
                 }
             }
-            final int numResumeTimes = mLastResumeTimes.size();
-            out.writeInt(numResumeTimes);
-            if (numResumeTimes > 0) {
-                for (Map.Entry<String, Long> ent : mLastResumeTimes.entrySet()) {
-                    out.writeString(ent.getKey());
-                    out.writeLong(ent.getValue());
-                }
-            }
         }
         
         void clear() {
             mLaunchTimes.clear();
             mLaunchCount = 0;
-            mLastResumeTimes.clear();
             mUsageTime = 0;
         }
     }
     
     UsageStatsService(String dir) {
         mStats = new HashMap<String, PkgUsageStatsExtended>();
+        mLastResumeTimes = new HashMap<String, Map<String, Long>>();
         mStatsLock = new Object();
         mFileLock = new Object();
         mDir = new File(dir);
@@ -267,7 +268,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
         // Update current stats which are binned by date
         mFileLeaf = getCurrentDateStr(FILE_PREFIX);
         mFile = new File(mDir, mFileLeaf);
+        mHistoryFile = new AtomicFile(new File(mDir, FILE_HISTORY));
         readStatsFromFile();
+        readHistoryStatsFromFile();
         mLastWriteElapsedTime.set(SystemClock.elapsedRealtime());
         // mCal was set by getCurrentDateStr(), want to use that same time.
         mLastWriteDay.set(mCal.get(Calendar.DAY_OF_YEAR));
@@ -347,6 +350,73 @@ public final class UsageStatsService extends IUsageStats.Stub {
         }
     }
 
+    private void readHistoryStatsFromFile() {
+        synchronized (mFileLock) {
+            if (mHistoryFile.getBaseFile().exists()) {
+                readHistoryStatsFLOCK(mHistoryFile);
+            }
+        }
+    }
+
+    private void readHistoryStatsFLOCK(AtomicFile file) {
+        FileInputStream fis = null;
+        try {
+            fis = mHistoryFile.openRead();
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(fis, null);
+            int eventType = parser.getEventType();
+            while (eventType != XmlPullParser.START_TAG) {
+                eventType = parser.next();
+            }
+            String tagName = parser.getName();
+            if ("usage-history".equals(tagName)) {
+                String pkg = null;
+                do {
+                    eventType = parser.next();
+                    if (eventType == XmlPullParser.START_TAG) {
+                        tagName = parser.getName();
+                        int depth = parser.getDepth();
+                        if ("pkg".equals(tagName) && depth == 2) {
+                            pkg = parser.getAttributeValue(null, "name");
+                        } else if ("comp".equals(tagName) && depth == 3 && pkg != null) {
+                            String comp = parser.getAttributeValue(null, "name");
+                            String lastResumeTimeStr = parser.getAttributeValue(null, "lrt");
+                            if (comp != null && lastResumeTimeStr != null) {
+                                try {
+                                    long lastResumeTime = Long.parseLong(lastResumeTimeStr);
+                                    synchronized (mStatsLock) {
+                                        Map<String, Long> lrt = mLastResumeTimes.get(pkg);
+                                        if (lrt == null) {
+                                            lrt = new HashMap<String, Long>();
+                                            mLastResumeTimes.put(pkg, lrt);
+                                        }
+                                        lrt.put(comp, lastResumeTime);
+                                    }
+                                } catch (NumberFormatException e) {
+                                }
+                            }
+                        }
+                    } else if (eventType == XmlPullParser.END_TAG) {
+                        if ("pkg".equals(parser.getName())) {
+                            pkg = null;
+                        }
+                    }
+                } while (eventType != XmlPullParser.END_DOCUMENT);
+            }
+        } catch (XmlPullParserException e) {
+            Slog.w(TAG,"Error reading history stats: " + e);
+        } catch (IOException e) {
+            Slog.w(TAG,"Error reading history stats: " + e);
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+
     private ArrayList<String> getUsageStatsFileListFLOCK() {
         // Check if there are too many files in the system and delete older files
         String fList[] = mDir.list();
@@ -400,8 +470,9 @@ public final class UsageStatsService extends IUsageStats.Stub {
      *
      * @params force  do an unconditional, synchronous stats flush
      *                to disk on the current thread.
+     * @params forceWriteHistoryStats Force writing of historical stats.
      */
-    private void writeStatsToFile(final boolean force) {
+    private void writeStatsToFile(final boolean force, final boolean forceWriteHistoryStats) {
         int curDay;
         synchronized (mCal) {
             mCal.setTimeInMillis(System.currentTimeMillis());
@@ -427,7 +498,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
                     public void run() {
                         try {
                             if (localLOGV) Slog.d(TAG, "Disk writer thread starting.");
-                            writeStatsToFile(true);
+                            writeStatsToFile(true, false);
                         } finally {
                             mUnforcedDiskWriteRunning.set(false);
                             if (localLOGV) Slog.d(TAG, "Disk writer thread ending.");
@@ -468,6 +539,12 @@ public final class UsageStatsService extends IUsageStats.Stub {
                     mFile = new File(mDir, mFileLeaf);
                     checkFileLimitFLOCK();
                 }
+
+                if (dayChanged || forceWriteHistoryStats) {
+                    // Write history stats daily, or when forced (due to shutdown).
+                    writeHistoryStatsFLOCK(mHistoryFile);
+                }
+
                 // Delete the backup file
                 if (backupFile != null) {
                     backupFile.delete();
@@ -510,16 +587,86 @@ public final class UsageStatsService extends IUsageStats.Stub {
         }
     }
 
+    /** Filter out stats for any packages which aren't present anymore. */
+    private void filterHistoryStats() {
+        synchronized (mStatsLock) {
+            // Copy and clear the last resume times map, then copy back stats
+            // for all installed packages.
+            Map<String, Map<String, Long>> tmpLastResumeTimes =
+                new HashMap<String, Map<String, Long>>(mLastResumeTimes);
+            mLastResumeTimes.clear();
+            for (PackageInfo info : mContext.getPackageManager().getInstalledPackages(0)) {
+                if (tmpLastResumeTimes.containsKey(info.packageName)) {
+                    mLastResumeTimes.put(info.packageName, tmpLastResumeTimes.get(info.packageName));
+                }
+            }
+        }
+    }
+
+    private void writeHistoryStatsFLOCK(AtomicFile historyFile) {
+        FileOutputStream fos = null;
+        try {
+            fos = historyFile.startWrite();
+            XmlSerializer out = new FastXmlSerializer();
+            out.setOutput(fos, "utf-8");
+            out.startDocument(null, true);
+            out.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true);
+            out.startTag(null, "usage-history");
+            synchronized (mStatsLock) {
+                for (Map.Entry<String, Map<String, Long>> pkgEntry : mLastResumeTimes.entrySet()) {
+                    out.startTag(null, "pkg");
+                    out.attribute(null, "name", pkgEntry.getKey());
+                    for (Map.Entry<String, Long> compEntry : pkgEntry.getValue().entrySet()) {
+                        out.startTag(null, "comp");
+                        out.attribute(null, "name", compEntry.getKey());
+                        out.attribute(null, "lrt", compEntry.getValue().toString());
+                        out.endTag(null, "comp");
+                    }
+                    out.endTag(null, "pkg");
+                }
+            }
+            out.endTag(null, "usage-history");
+            out.endDocument();
+
+            historyFile.finishWrite(fos);
+        } catch (IOException e) {
+            Slog.w(TAG,"Error writing history stats" + e);
+            if (fos != null) {
+                historyFile.failWrite(fos);
+            }
+        }
+    }
+
     public void publish(Context context) {
         mContext = context;
         ServiceManager.addService(SERVICE_NAME, asBinder());
     }
-    
-    public void shutdown() {
-        Slog.i(TAG, "Writing usage stats before shutdown...");
-        writeStatsToFile(true);
+
+    /**
+     * Start watching packages to remove stats when a package is uninstalled.
+     * May only be called when the package manager is ready.
+     */
+    public void monitorPackages() {
+        mPackageMonitor = new PackageMonitor() {
+            @Override
+            public void onPackageRemoved(String packageName, int uid) {
+                synchronized (mStatsLock) {
+                    mLastResumeTimes.remove(packageName);
+                }
+            }
+        };
+        mPackageMonitor.register(mContext, true);
+        filterHistoryStats();
     }
-    
+
+    public void shutdown() {
+        if (mPackageMonitor != null) {
+            mPackageMonitor.unregister();
+        }
+        Slog.i(TAG, "Writing usage stats before shutdown...");
+        writeStatsToFile(true, true);
+    }
+
     public static IUsageStats getService() {
         if (sService != null) {
             return sService;
@@ -569,6 +716,13 @@ public final class UsageStatsService extends IUsageStats.Stub {
             if (!sameComp) {
                 pus.addLaunchCount(mLastResumedComp);
             }
+
+            Map<String, Long> componentResumeTimes = mLastResumeTimes.get(pkgName);
+            if (componentResumeTimes == null) {
+                componentResumeTimes = new HashMap<String, Long>();
+                mLastResumeTimes.put(pkgName, componentResumeTimes);
+            }
+            componentResumeTimes.put(mLastResumedComp, System.currentTimeMillis());
         }
     }
 
@@ -600,7 +754,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
         }
         
         // Persist current data to file if needed.
-        writeStatsToFile(false);
+        writeStatsToFile(false, false);
     }
     
     public void noteLaunchTime(ComponentName componentName, int millis) {
@@ -612,7 +766,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
         }
         
         // Persist current data to file if needed.
-        writeStatsToFile(false);
+        writeStatsToFile(false, false);
         
         synchronized (mStatsLock) {
             PkgUsageStatsExtended pus = mStats.get(pkgName);
@@ -640,11 +794,13 @@ public final class UsageStatsService extends IUsageStats.Stub {
         }
         synchronized (mStatsLock) {
             PkgUsageStatsExtended pus = mStats.get(pkgName);
-            if (pus == null) {
-               return null;
+            Map<String, Long> lastResumeTimes = mLastResumeTimes.get(pkgName);
+            if (pus == null && lastResumeTimes == null) {
+                return null;
             }
-            return new PkgUsageStats(pkgName, pus.mLaunchCount, pus.mUsageTime,
-                    pus.mLastResumeTimes);
+            int launchCount = pus != null ? pus.mLaunchCount : 0;
+            long usageTime = pus != null ? pus.mUsageTime : 0;
+            return new PkgUsageStats(pkgName, launchCount, usageTime, lastResumeTimes);
         }
     }
     
@@ -652,17 +808,23 @@ public final class UsageStatsService extends IUsageStats.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.PACKAGE_USAGE_STATS, null);
         synchronized (mStatsLock) {
-            Set<String> keys = mStats.keySet();
-            int size = keys.size();
+            int size = mLastResumeTimes.size();
             if (size <= 0) {
                 return null;
             }
             PkgUsageStats retArr[] = new PkgUsageStats[size];
             int i = 0;
-            for (String key: keys) {
-                PkgUsageStatsExtended pus = mStats.get(key);
-                retArr[i] = new PkgUsageStats(key, pus.mLaunchCount, pus.mUsageTime,
-                        pus.mLastResumeTimes);
+            for (Map.Entry<String, Map<String, Long>> entry : mLastResumeTimes.entrySet()) {
+                String pkg = entry.getKey();
+                long usageTime = 0;
+                int launchCount = 0;
+
+                PkgUsageStatsExtended pus = mStats.get(pkg);
+                if (pus != null) {
+                    usageTime = pus.mUsageTime;
+                    launchCount = pus.mLaunchCount;
+                }
+                retArr[i] = new PkgUsageStats(pkg, launchCount, usageTime, entry.getValue());
                 i++;
             }
             return retArr;
@@ -881,7 +1043,7 @@ public final class UsageStatsService extends IUsageStats.Stub {
         // doesn't need to be done if we are deleting files after printing,
         // since it that case we won't print the current stats.
         if (!deleteAfterPrint) {
-            writeStatsToFile(true);
+            writeStatsToFile(true, false);
         }
         
         HashSet<String> packages = null;
