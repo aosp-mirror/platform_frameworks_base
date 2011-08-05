@@ -50,4 +50,12 @@ public class HttpAuthHandler extends Handler {
      */
     public void proceed(String username, String password) {
     }
+
+    /**
+     * return true if the prompt dialog should be suppressed.
+     * @hide
+     */
+    public boolean suppressDialog() {
+        return false;
+    }
 }

@@ -1129,7 +1129,8 @@ class BrowserFrame extends Handler {
      * synchronous call and unable to pump our MessageQueue.
      */
     private void didReceiveAuthenticationChallenge(
-            final int handle, String host, String realm, final boolean useCachedCredentials) {
+            final int handle, String host, String realm, final boolean useCachedCredentials,
+            final boolean suppressDialog) {
 
         HttpAuthHandler handler = new HttpAuthHandler() {
 
@@ -1146,6 +1147,11 @@ class BrowserFrame extends Handler {
             @Override
             public void cancel() {
                 nativeAuthenticationCancel(handle);
+            }
+
+            @Override
+            public boolean suppressDialog() {
+                return suppressDialog;
             }
         };
         mCallbackProxy.onReceivedHttpAuthRequest(handler, host, realm);
