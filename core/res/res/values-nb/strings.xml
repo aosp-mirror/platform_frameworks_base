@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Funksjonskode utført."</string>
     <string name="fcError" msgid="3327560126588500777">"Tilkoblingsproblem eller ugyldig funksjonskode."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"Nettsiden inneholder en feil."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Nettsiden inneholder en feil."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Kunne ikke finne adressen."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Støtter ikke sidens autentiseringsmetode."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Autentiseringen feilet."</string>
@@ -461,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Lar applikasjonen se konfigurasjonen til den lokale Bluetooth-telefonen, og å opprette og godta tilkoblinger med parede enheter."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontroller overføring av data med NFC-teknologi"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Tillater programmet å kommunisere data via koder, kort og lesere for NFC-teknologi."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"fange opp og endre all nettverkstrafikk"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Lar en applikasjon fange opp og kontrollere all nettverkstrafikk for å etablere en VPN-tilkobling. Skadelige applikasjoner kan overvåke, omdirigere eller endre nettverkspakker uten at du vet om det."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"slå av tastaturlås"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Lar applikasjonen slå av tastaturlåsen og enhver tilknyttet passordsikkerhet. Et legitimt eksempel på dette er at telefonen slår av tastaturlåsen når den mottar et innkommende anrop, og så slår den på igjen når samtalen er over."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lese synkroniseringsinnstillinger"</string>
@@ -722,8 +720,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Lar applikasjonen endre nettleserens logg og bokmerker lagret på telefonen. Ondsinnede applikasjoner kan bruke dette til å fjerne eller redigere nettleserens data."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"angi alarm i alarmklokke"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Lar programmet angi en alarm i et installert alarmklokkeprogram. Det kan hende at enkelte alarmklokkeprogrammer ikke implementerer denne funksjonen."</string>
-    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"Tilgang til talepostmeldinger administrert av denne applikasjonen"</string>
-    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Gir applikasjonen mulighet til å lagre og hente bare talepostmeldinger som den tilhørende tjenesten har tilgang til."</string>
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
+    <skip />
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Endre nettleserens tillatelser for geografisk posisjonering"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Tillater programmet å endre nettleserens tillatelser for geografisk posisjonering. Skadelige programmer kan bruke denne funksjonen til å sende posisjonsopplysninger til vilkårlige nettsteder."</string>
     <string name="save_password_message" msgid="767344687139195790">"Ønsker du at nettleseren skal huske dette passordet?"</string>
@@ -839,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Klipp ut"</string>
     <string name="copy" msgid="2681946229533511987">"Kopier"</string>
     <string name="paste" msgid="5629880836805036433">"Lim inn"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Ingenting å lime inn"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Kopier URL"</string>
@@ -877,12 +878,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Programmet er omdirigert"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> kjører nå."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> ble opprinnelig startet."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skala"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"Vis alltid"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Aktiver denne på nytt med Innstillinger  &gt; Applikasjoner &gt; Administrer applikasjoner."</string>
     <string name="smv_application" msgid="295583804361236288">"Programmet <xliff:g id="APPLICATION">%1$s</xliff:g> (prosessen <xliff:g id="PROCESS">%2$s</xliff:g>) har brutt de selvpålagte StrictMode-retningslinjene."</string>
     <string name="smv_process" msgid="5120397012047462446">"Prosessen<xliff:g id="PROCESS">%1$s</xliff:g> har brutt de selvpålagte StrictMode-retningslinjene."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> kjører"</string>
@@ -903,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Alarmvolum"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Varslingsvolum"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volum"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Standard ringetone"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Standard ringetone (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Stille"</string>
@@ -930,18 +940,12 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Et stort antall SMS-meldinger blir sendt. Velg «OK» for å fortsette, eller «Avbryt» for å avbryte sendingen."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Avbryt"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM-kort er fjernet"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"Mobilnettverket er ikke tilgjengelig før du erstatter SIM-kortet."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Fullført"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIM-kort er lagt til"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"Du må starte enheten på nytt for å få tilgang til mobilnettet."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Start på nytt"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Stille klokken"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Angi dato"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Lagre"</string>

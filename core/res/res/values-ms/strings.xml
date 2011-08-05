@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Kod ciri selesai."</string>
     <string name="fcError" msgid="3327560126588500777">"Masalah sambungan atau kod ciri tidak sah."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"Halaman Web mengandungi ralat."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Halaman Web mengandungi ralat."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"URL tidak ditemui."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Skema pengesahan tapak tidak disokong."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Pengesahan tidak berjaya."</string>
@@ -461,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Membenarkan aplikasi melihat konfigurasi telefon Bluetooth setempat dan membuat dan menerima sambungan dengan peranti yang dipasangkan."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"mengawal Komunikasi Medan Dekat"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Membenarkan aplikasi berkomunikasi dengan teg, kad dan pembaca Komunikasi Medan Dekat (NFC)."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"memintas dan mengubah suai semua trafik rangkaian"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Membenarkan aplikasi memintas dan memeriksa semua trafik rangkaian untuk mewujudkan sambungan VPN. Aplikasi berniat jahat boleh memantau, menghalakan semula atau mengubah suai bingkisan rangkaian tanpa pengetahuan anda."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"lumpuhkan kunci kekunci"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Membenarkan aplikasi melumpuhkan kunci kekunci anda dan sebarang keselamatan kata laluan yang berkaitan. Contoh yang berkaitan adalah telefon melumpuhkan kunci kekunci apabila menerima panggilan telefon masuk kemudian mendayakan semula kunci kekunci apabila panggilan selesai."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"membaca tetapan penyegerakan"</string>
@@ -493,10 +491,8 @@
     <string name="permdesc_readNetworkUsageHistory" msgid="6040738474779135653">"Membenarkan aplikasi membaca sejarah penggunaan rangkaian untuk rangkaian dan aplikasi khusus."</string>
     <string name="permlab_manageNetworkPolicy" msgid="2562053592339859990">"urus dasar rangkaian"</string>
     <string name="permdesc_manageNetworkPolicy" msgid="3723795285132803958">"Membenarkan aplikasi mengurus dasar rangkaian dan menentukan peraturan khusus aplikasi."</string>
-    <!-- no translation found for permlab_modifyNetworkAccounting (5088217309088729650) -->
-    <skip />
-    <!-- no translation found for permdesc_modifyNetworkAccounting (8702285686629184404) -->
-    <skip />
+    <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"ubah suai perakaunan penggunaan rangkaian"</string>
+    <string name="permdesc_modifyNetworkAccounting" msgid="8702285686629184404">"Membenarkan pengubahsuaian cara penggunaan rangkaian diambil kira berbanding aplikasi. Bukan untuk kegunaan aplikasi biasa."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Tetapkan peraturan kata laluan"</string>
     <string name="policydesc_limitPassword" msgid="9083400080861728056">"Mengawal panjang dan aksara yang dibenarkan dalam kata laluan buka kunci skrin"</string>
     <string name="policylab_watchLogin" msgid="914130646942199503">"Memantau percubaan buka kunci skrin"</string>
@@ -724,8 +720,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Membenarkan aplikasi mengubah suai sejarah atau penanda halaman Penyemak Imbas yang disimpan pada telefon anda. Aplikasi berniat jahat boleh menggunakannya untuk memadamkan atau mengubah data Penyemak Imbas anda."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"menetapkan penggera pada jam penggera"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Membenarkan aplikasi menetapkan penggera dalam aplikasi jam penggera yang dipasang. Sesetengah aplikasi jam penggera mungkin tidak melaksanakan ciri ini."</string>
-    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"Akses mel suara yang diurus oleh aplikasi ini"</string>
-    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Membenarkan aplikasi menyimpan dan mendapatkan semula mel suara yang boleh diakses oleh perkhidmatan berkaitan sahaja."</string>
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
+    <skip />
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Ubah suai kebenaran geolokasi Penyemak Imbas"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Membenarkan aplikasi mengubah suai kebenaran geolokasi Penyemak Imbas. Aplikasi berniat jahat boleh menggunakannya untuk membenarkan penghantaran maklumat lokasi ke sembarangan tapak web."</string>
     <string name="save_password_message" msgid="767344687139195790">"Adakah anda mahu penyemak imbas mengingati kata laluan ini?"</string>
@@ -841,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Potong"</string>
     <string name="copy" msgid="2681946229533511987">"Salin"</string>
     <string name="paste" msgid="5629880836805036433">"Tampal"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Tiada apa utk ditmpl"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Salin URL"</string>
@@ -879,12 +878,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplikasi dihalakan semula"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> kini sedang berjalan."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> pada asalnya telah dilancarkan."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skala"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"Sentiasa tunjukkan"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Dayakan semula ini dengan Tetapan &gt; Aplikasi &gt; Urus aplikasi."</string>
     <string name="smv_application" msgid="295583804361236288">"Aplikasi <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="smv_process" msgid="5120397012047462446">"Proses <xliff:g id="PROCESS">%1$s</xliff:g> telah melanggar dasar Mod Tegasnya sendiri."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> dijalankan"</string>
@@ -905,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Kelantangan penggera"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Kelantangan pemberitahuan"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Kelantangan"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Nada dering lalai"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Nada dering lalai (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Senyap"</string>
@@ -932,18 +940,12 @@
     <string name="sms_control_message" msgid="1289331457999236205">"Sejumlah besar mesej SMS sedang dihantar. Pilih \"OK\" untuk meneruskan atau \"Batal\" untuk menghentikan penghantaran."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Batal"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"Kad SIM dikeluarkan"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"Rangkaian mudah alih tidak akan tersedia sehingga anda menggantikan kad SIM."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Selesai"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"Kad SIM ditambah"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"Anda mesti memulakan semula peranti anda untuk mengakses rangkaian mudah alih."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Mulakan semula"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Tetapkan masa"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Tetapkan tarikh"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Tetapkan"</string>

@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"کد ویژگی کامل شد."</string>
     <string name="fcError" msgid="3327560126588500777">"مشکل در اتصال یا کد ویژگی نامعتبر."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"تأیید"</string>
-    <string name="httpError" msgid="2567300624552921790">"این صفحه وب دارای یک خطاست."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"این صفحه وب دارای یک خطاست."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"آدر س اینترنتی یافت نشد."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"طرح کلی تأیید اعتبار سایت پشتیبانی نمی شود."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"تأیید اعتبار ناموفق بود."</string>
@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"به برنامه های کاربردی اجازه می دهد حتی زمانی که با برنامه دیگری در حال ارتباط هستید (مانند وارد کردن یک رمز ورود)، بتوانند کلیدهایی را که فشار می دهید ببینند. هرگز برای برنامه های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"پیوند شده به روش ورودی"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"به نگهدارنده اجازه می دهد به رابط سطح بالای یک روش ورودی متصل شود. هرگز برای برنامه های معمولی مورد نیاز نیست."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"اتصال به یک سرویس متنی"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"به دارنده اجازه می دهد خود را به یک رابط سطح بالای خدمات متنی بچسباند (برای مثال SpellCheckerService). برای برنامه های عادی نیاز نیست."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"پیوند شده به تصویر زمینه"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"به نگهدارنده اجازه می دهد که به رابط سطح بالای تصویر زمینه متصل شود. هرگز برای برنامه های معمولی مورد نیاز نیست."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"اتصال به یک سرویس ابزارک"</string>
@@ -463,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"به یک برنامه کاربردی اجازه می دهد تا پیکربندی تلفن بلوتوث محلی را مشاهده کند، اتصال ها را با دستگاه های جفت شده برقرار کرده، آنها را بپذیرد."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"کنترل ارتباط راه نزدیک"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"به یک برنامه کاربردی برای ارتباط با برچسب های ارتباط راه نزدیک (NFC)، کارت ها و خواننده ها اجازه می دهد."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"رهگیری و تغییر تمام ترافیک شبکه"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"به یک برنامه کاربردی امکان می دهد برای برقراری اتصال VPN، تمام ترافیک شبکه را رهگیری و بررسی کند. برنامه های مضر ممکن است بدون اطلاع شما بسته های شبکه را مدیریت کرده، مسیر آنها را تغییر دهند و یا تغییراتی در آنها ایجاد کنند."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"غیرفعال کردن قفل کلید"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"به یک برنامه کاربردی اجازه می دهد قفل کلید و حفاظت رمز ورود همراه با کلیه کلیدها را غیرفعال کند. یک نمونه قانونی از این مورد، غیرفعال شدن قفل کلید در هنگام دریافت تماس تلفنی و سپس فعال کردن قفل کلید پس از پایان تماس است."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"خواندن تنظیمات همگام سازی"</string>
@@ -724,9 +720,9 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"به یک برنامه کاربردی اجازه می دهد سابقه مرورگر یا نشانک ذخیره شده در گوشی شما را تغییر دهد. برنامه های مضر می توانند از این امکان برای حذف یا تغییر داده های مرورگر شما استفاده کنند."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"تنظیم هشدار در ساعت زنگ دار"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"به برنامه کاربردی برای تنظیم یک هشدار در یک برنامه ساعت زنگ دار نصب شده اجازه می دهد. در برخی از برنامه های ساعت زنگ دار ممکن است این ویژگی اجرا نشود."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
     <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"اصلاح کردن مجوزهای مکان جغرافیایی مرورگر"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"به یک برنامه کاربردی اجازه می دهد مجوزهای مکان جغرافیایی مرورگر را تغییر دهد. برنامه های مضر می توانند از این گزینه استفاده کرده و اطلاعات مربوط به مکان را به وب سایت های غیر قانونی ارسال کنند."</string>
@@ -843,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"برش"</string>
     <string name="copy" msgid="2681946229533511987">"کپی"</string>
     <string name="paste" msgid="5629880836805036433">"جای گذاری"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"چیزی برای جای گذاری نیست"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"کپی URL"</string>
@@ -881,12 +878,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"برنامه هدایت مجدد شد"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> اکنون در حال اجرا است."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> از ابتدا راه اندازی شد."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"مقیاس"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"همیشه نشان داده شود"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"این را با تنظیمات &gt; برنامه‌ها &gt; مدیریت برنامه‌های کاربردی دوباره فعال کنید."</string>
     <string name="smv_application" msgid="295583804361236288">"برنامه <xliff:g id="APPLICATION">%1$s</xliff:g> (پردازش <xliff:g id="PROCESS">%2$s</xliff:g>) خط مشی StrictMode اجرای خودکار را نقض کرده است."</string>
     <string name="smv_process" msgid="5120397012047462446">"فرآیند <xliff:g id="PROCESS">%1$s</xliff:g> خط مشی StrictMode اجرای خودکار خود را نقض کرده است."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> در حال اجرا"</string>
@@ -907,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"میزان صدای هشدار"</string>
     <string name="volume_notification" msgid="2422265656744276715">"میزان صدای اعلان"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"میزان صدا"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"آهنگ زنگ پیش فرض"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"آهنگ زنگ پیش فرض (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"ساکت"</string>
@@ -920,40 +926,26 @@
     <item quantity="one" msgid="1634101450343277345">"شبکه Wi-Fi موجود را باز کنید"</item>
     <item quantity="other" msgid="7915895323644292768">"شبکه های Wi-Fi موجود را باز کنید"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"یک شبکه Wi-Fi غیرفعال شده بود"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"یک شبکه Wi-Fi به علت اتصال بد به طور موقت غیرفعال شده است."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"عملکرد Wi-Fi Direct شروع می شود. این کار عملکرد مشتری/نقطه دسترسی Wi-Fi را خاموش می کند."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"شروع Wi-Fi Direct انجام نشد"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"درخواست راه اندازی Wi-Fi Direct از طرف <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> دریافت شد. برای قبول کردن، تأیید را کلیک کنید."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"درخواست راه اندازی Wi-Fi Direct از طرف <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> دریافت شد. برای ادامه پین را وارد کنید."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"پین WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> باید در دستگاه جفت شده <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> نیز وارد شود تا راه اندازی اتصال ادامه یابد."</string>
     <string name="select_character" msgid="3365550120617701745">"درج نویسه"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"برنامه ناشناس"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"ارسال پیامک ها"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"تعداد زیادی پیامک ارسال شده است. برای ادامه، \"تأیید\" را کلیک کرده و برای توقف ارسال، \"لغو\" را کلیک کنید."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"تأیید"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"لغو"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"سیم کارت برداشته شد"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"تا زمانی که سیم کارت را عوض نکنید شبکه تلفن همراه در دسترس نخواهد بود."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"انجام شد"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"سیم کارت اضافه شد"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"برای دسترسی به شبکه تلفن همراه باید دستگاه خود را مجددا راه اندازی کنید."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"راه اندازی مجدد"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"تنظیم زمان"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"تاریخ تنظیم"</string>
     <string name="date_time_set" msgid="5777075614321087758">"تنظیم"</string>
@@ -984,8 +976,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"متصل شده به عنوان دستگاه رسانه ای"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"متصل شده به عنوان دوربین"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"متصل شده به عنوان نصب کننده"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"به یک وسیله جانبی USB وصل شده است"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"برای سایر گزینه های USB لمس کنید"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"فرمت کردن حافظه USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"فرمت کردن کارت SD"</string>
@@ -1158,7 +1149,6 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"اثر انگشت SHA-1"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"مشاهده همه..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"انتخاب فعالیت"</string>
-    <string name="share_action_provider_share_with" msgid="1791316789651185229">"اشتراک گذاری با..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"اشتراک‌گذاری با..."</string>
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"دستگاه قفل شده است."</string>
 </resources>

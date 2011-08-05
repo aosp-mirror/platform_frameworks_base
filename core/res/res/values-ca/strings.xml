@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Codi de funció completat."</string>
     <string name="fcError" msgid="3327560126588500777">"Problema de connexió o codi de funció no vàlid."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"D\'acord"</string>
-    <string name="httpError" msgid="2567300624552921790">"La pàgina web conté un error."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"La pàgina web conté un error."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"No s\'ha trobat l\'URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"L\'esquema d\'autenticació de llocs no és compatible."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Autenticació incorrecta."</string>
@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Permet a les aplicacions fer un seguiment de les tecles que premeu, fins i tot quan s\'interactua amb una altra aplicació (com ara introduir una contrasenya). No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"vincular a un mètode d\'entrada"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permet al titular vincular amb la interfície de nivell superior d\'un mètode d\'entrada. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"vincula a un servei de text"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Permet al titular vincular amb la interfície de nivell superior d\'un servei de text (per exemple, SpellCheckerService). Les aplicacions normal mai no ho haurien de necessitar."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vincular a un empaperat"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permet al titular vincular amb la interfície de nivell superior d\'un empaperat. No s\'hauria de necessitar mai per a les aplicacions normals."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"vincula a un servei de widget"</string>
@@ -463,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Permet a una aplicació visualitzar la configuració del telèfon Bluetooth local i establir i acceptar connexions amb els dispositius emparellats."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controla Near Field Communication (NFC)"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Permet que una aplicació es comuniqui amb les etiquetes, les targetes i els lectors de Near Field Communication (NFC)"</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"intercepta i modifica tot el trànsit de la xarxa"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Permet que una aplicació intercepti i inspeccioni tot el trànsit de la xarxa per establir una connexió VPN. Les aplicacions malintencionades poden controlar, redirigir o modificar paquets de xarxa sense el teu coneixement."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"desactivar el bloqueig del teclat"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permet a una aplicació desactivar el bloqueig del teclat i qualsevol element de seguretat de contrasenyes associat. Un exemple d\'això és la desactivació per part del telèfon del bloqueig del teclat en rebre una trucada telefònica entrant i després la reactivació del bloqueig del teclat quan finalitza la trucada."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"llegir la configuració de sincronització"</string>
@@ -724,9 +720,9 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Permet a una aplicació modificar l\'historial o les adreces d\'interès del navegador emmagatzemats al telèfon. Les aplicacions malicioses poden utilitzar-ho per esborrar o modificar les dades del navegador."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"defineix l\'alarma com a despertador"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Permet que l\'aplicació defineixi una alarma en una aplicació de despertador instal·lada. És possible que algunes aplicacions de despertador no incorporin aquesta funció."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
     <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modifica els permisos d\'ubicació geogràfica del navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permet a una aplicació modificar els permisos d\'ubicació geogràfica del navegador. Les aplicacions malicioses poden utilitzar-ho per permetre l\'enviament d\'informació d\'ubicació a llocs web arbitraris."</string>
@@ -843,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Retalla"</string>
     <string name="copy" msgid="2681946229533511987">"Copia"</string>
     <string name="paste" msgid="5629880836805036433">"Enganxa"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Cap elem. per engan."</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Copia l\'URL"</string>
@@ -904,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Volum de l\'alarma"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volum de notificació"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volum"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"To predeterminat"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"To predeterminat (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Silenci"</string>
@@ -917,22 +926,14 @@
     <item quantity="one" msgid="1634101450343277345">"Xarxa Wi-fi oberta disponible"</item>
     <item quantity="other" msgid="7915895323644292768">"Xarxes Wi-fi obertes disponibles"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"S\'ha desactivat una xarxa Wi-Fi"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"S\'ha desactivat la connexió a una xarxa Wi-Fi a causa de la mala connectivitat."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Inicia l\'operació Wi-Fi Direct. Això desactivarà l\'operació client/zona Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"No s\'ha pogut  iniciar el Wi-Fi Direct"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Sol·licitud de configuració de connexió de Wi-Fi Direct des de <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Si la vols acceptar, fes clic a D\'acord."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Sol·licitud de configuració de connexió de Wi-Fi Direct des de <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Introdueix el PIN per continuar."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"S\'ha d\'introduir el PIN WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> al dispositiu de l\'altre extrem <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> per poder continuar amb la configuració de la connexió"</string>
     <string name="select_character" msgid="3365550120617701745">"Insereix un caràcter"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Aplicació desconeguda"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"S\'estan enviant missatges SMS"</string>
@@ -975,8 +976,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Connectat com a dispositiu multimèdia"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Connectat com a càmera"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Connectat com a instal·lador"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Connectat a un accessori USB"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Toca per obtenir altres opcions d\'USB"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formata l\'emmag. USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formata la targeta SD"</string>
@@ -1150,6 +1150,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Mostra-ho tot"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Selecció d’activitat"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Ús compartit amb..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispositiu bloquejat."</string>
 </resources>
