@@ -9926,6 +9926,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         public void updatePosition(int parentPositionX, int parentPositionY, boolean modified) {
+            positionAtCursorOffset(getCurrentCursorOffset());
             if (modified || mPositionHasChanged) {
                 if (mIsDragging) {
                     // Update touchToWindow offset in case of parent scrolling while dragging
