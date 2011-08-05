@@ -677,20 +677,36 @@ device.</td>
   <td>The application uses basic touch interaction events, such as "click down", "click
 up", and drag.</td>
   <td>When declared, this indicates that the application is compatible with a device that offers an
-emulated touchscreen (or better). A device that offers an emulated touchscreen provides a user input
-system that can emulate a subset of touchscreen capabilities. An example of such an input system is
-a mouse or remote control that drives an on-screen cursor. If your application does not require
-complicated gestures and you want your application available to devices that use an on-screen
-cursor to emulate touch events, you should declare this feature.</td>
+emulated touchscreen ("fake touch" interface), or better. A device that offers a fake touch 
+interface provides a user input system that emulates a subset of touchscreen capabilities. For
+example, a mouse or remote control that drives an on-screen cursor provides a fake touch interface.
+If your application requires only basic point and click interaction, you should declare this
+feature. Because this is the minimum level of touch interaction, your app will also be compatible
+with devices that offer more complex touch interfaces.
+  <p class="note"><strong>Note:</strong> Because applications require the {@code
+android.hardware.touchscreen} feature by default, if you want your application to be available to
+devices that provide a fake touch interface, you must also explicitly declare that a touch screen is
+<em>not</em> required by declaring {@code &lt;uses-feature
+android:name="android.hardware.touchscreen" <strong>android:required="false"</strong>
+/&gt;}</p></td>
 </tr>
 <tr>
   <td><code>android.hardware.touchscreen</code></td>
-  <td>The application uses touchscreen capabilities, for gestures more interactive
-than basic touches, such as a fling. This is a superset of the faketouch features.</td>
-  <td>By default, this is assumed to be required, unless you declare
-<code>android.hardware.faketouch</code> (the subset touch mode). As such, your application is
-<em>not</em> available to devices that provide only an emulated touch interface ("fake touch") by
-default.</td>
+  <td>The application uses touchscreen capabilities for gestures that are more interactive
+than basic touch events, such as a fling. This is a superset of the faketouch features.</td>
+  <td>By default, your application requires this. As such, your application is
+<em>not</em> available to devices that provide only an emulated touch interface ("fake touch"), by
+default. If you want your application available to devices that provide a fake touch interface,
+you must explicitly declare that a touch screen is not required, by
+declaring {@code android.hardware.touchscreen} with {@code android:required="false"}. You should
+do so even if your application uses&mdash;but does not <em>require</em>&mdash;a real touch screen
+interface.
+<p>If your application <em>does require</em> a basic touch interface (in order to perform touch
+gestures such as a fling), then you don't need to do anything, because this is required by default.
+However, it's best if you explicitly declare all features used by your application, so you should
+still declare this if your app uses it.</p>
+  <p>If you require more complex touch interaction, such as multi-finger gestures, you
+should declare the advanced touch screen features below.</p></td>
 </tr>
 <tr>
   <td><code>android.hardware.touchscreen.multitouch</code></td>
