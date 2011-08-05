@@ -2034,6 +2034,15 @@ class BackupManagerService extends IBackupManager.Stub {
                 boolean compressing = COMPRESS_FULL_BACKUPS;
                 OutputStream finalOutput = ofstream;
 
+                // Verify that the given password matches the currently-active
+                // backup password, if any
+                if (hasBackupPassword()) {
+                    if (!passwordMatchesSaved(mCurrentPassword, PBKDF2_HASH_ROUNDS)) {
+                        if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
+                        return;
+                    }
+                }
+
                 // Write the global file header.  All strings are UTF-8 encoded; lines end
                 // with a '\n' byte.  Actual backup data begins immediately following the
                 // final '\n'.
@@ -2068,15 +2077,6 @@ class BackupManagerService extends IBackupManager.Stub {
                 try {
                     // Set up the encryption stage if appropriate, and emit the correct header
                     if (encrypting) {
-                        // Verify that the given password matches the currently-active
-                        // backup password, if any
-                        if (hasBackupPassword()) {
-                            if (!passwordMatchesSaved(mCurrentPassword, PBKDF2_HASH_ROUNDS)) {
-                                if (DEBUG) Slog.w(TAG, "Backup password mismatch; aborting");
-                                return;
-                            }
-                        }
-
                         finalOutput = emitAesBackupHeader(headerbuf, finalOutput);
                     } else {
                         headerbuf.append("none\n");
