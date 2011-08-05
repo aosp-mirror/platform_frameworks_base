@@ -189,9 +189,10 @@ public class NetworkPolicyManager {
      */
     public static void snapToCycleDay(Time time, int cycleDay) {
         if (cycleDay > time.getActualMaximum(MONTH_DAY)) {
-            // cycle day isn't valid this month; snap to 1st of next month
+            // cycle day isn't valid this month; snap to last second of month
             time.month += 1;
             time.monthDay = 1;
+            time.second = -1;
         } else {
             time.monthDay = cycleDay;
         }
