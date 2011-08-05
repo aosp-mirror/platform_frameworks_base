@@ -16037,6 +16037,12 @@ package android.provider {
     field public static final java.lang.String GROUP_SOURCE_ID = "group_sourceid";
   }
 
+  public static final class ContactsContract.CommonDataKinds.Identity implements android.provider.ContactsContract.DataColumnsWithJoins {
+    field public static final java.lang.String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/identity";
+    field public static final java.lang.String IDENTITY = "data1";
+    field public static final java.lang.String NAMESPACE = "data2";
+  }
+
   public static final class ContactsContract.CommonDataKinds.Im implements android.provider.ContactsContract.CommonDataKinds.CommonColumns android.provider.ContactsContract.DataColumnsWithJoins {
     method public static final java.lang.CharSequence getProtocolLabel(android.content.res.Resources, int, java.lang.CharSequence);
     method public static final int getProtocolLabelResource(int);
