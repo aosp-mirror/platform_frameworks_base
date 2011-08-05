@@ -40,6 +40,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     final static int PANEL_FADE_DURATION = 150;
 
     boolean mShowing;
+    boolean mHasClearableNotifications = false;
     int mNotificationCount = 0;
     NotificationPanelTitle mTitleArea;
     View mSettingsButton;
@@ -50,6 +51,7 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
     View mSettingsView;
     ViewGroup mContentParent;
     TabletStatusBar mBar;
+    View mClearButton;
 
     // amount to slide mContentParent down by when mContentFrame is missing
     float mContentFrameMissingTranslation;
@@ -84,12 +86,25 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
 
         mNotificationScroller = findViewById(R.id.notification_scroller);
         mContentFrame = (ViewGroup)findViewById(R.id.content_frame);
-        mContentFrameMissingTranslation =
-            mContentFrame.getBackground().getMinimumHeight() + 10;
+        mContentFrameMissingTranslation = 0; // not needed with current assets
+
+        // the "X" that appears in place of the clock when the panel is showing notifications
+        mClearButton = findViewById(R.id.clear_all_button);
+        mClearButton.setOnClickListener(mClearButtonListener);
 
         mShowing = false;
 
         setContentFrameVisible(mNotificationCount > 0, false);
+    }
+
+    private View.OnClickListener mClearButtonListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            mBar.clearAll();
+        }
+    };
+
+    public View getClearButton() {
+        return mClearButton;
     }
 
     public void show(boolean show, boolean animate) {
@@ -264,10 +279,14 @@ public class NotificationPanel extends RelativeLayout implements StatusBarPanel,
         if (mBar != null) {
             final boolean showX 
                 = (isShowing()
-                        && mNotificationScroller.getVisibility() == View.VISIBLE 
-                        && mNotificationCount > 0);
-            mBar.getClearButton().setVisibility(showX ? View.VISIBLE : View.INVISIBLE);
+                        && mHasClearableNotifications
+                        && mNotificationScroller.getVisibility() == View.VISIBLE);
+            getClearButton().setVisibility(showX ? View.VISIBLE : View.INVISIBLE);
         }
+    }
+
+    public void setClearable(boolean clearable) {
+        mHasClearableNotifications = clearable;
     }
 
     public void updatePanelModeButtons() {

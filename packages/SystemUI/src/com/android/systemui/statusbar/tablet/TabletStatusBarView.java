@@ -94,6 +94,11 @@ public class TabletStatusBarView extends FrameLayout {
         mHandler = h;
     }
 
+    /**
+     * Let the status bar know that if you tap on ignore while panel is showing, don't do anything.
+     * 
+     * Debounces taps on, say, a popup's trigger when the popup is already showing.
+     */
     public void setIgnoreChildren(int index, View ignore, View panel) {
         mIgnoreChildren[index] = ignore;
         mPanels[index] = panel;
