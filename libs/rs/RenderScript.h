@@ -52,8 +52,8 @@ void rsaElementGetSubElements(RsContext, RsElement, uint32_t *ids, const char **
 RsDevice rsDeviceCreate();
 void rsDeviceDestroy(RsDevice dev);
 void rsDeviceSetConfig(RsDevice dev, RsDeviceParam p, int32_t value);
-RsContext rsContextCreate(RsDevice dev, uint32_t version);
-RsContext rsContextCreateGL(RsDevice dev, uint32_t version, RsSurfaceConfig sc, uint32_t dpi);
+RsContext rsContextCreate(RsDevice dev, uint32_t version, uint32_t sdkVersion);
+RsContext rsContextCreateGL(RsDevice dev, uint32_t version, uint32_t sdkVersion, RsSurfaceConfig sc, uint32_t dpi);
 
 #include "rsgApiFuncDecl.h"
 

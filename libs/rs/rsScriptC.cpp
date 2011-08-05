@@ -19,6 +19,10 @@
 #include "utils/Timers.h"
 #include "utils/StopWatch.h"
 
+#ifndef ANDROID_RS_SERIALIZE
+#include <bcinfo/BitcodeTranslator.h>
+#endif
+
 using namespace android;
 using namespace android::renderscript;
 
@@ -28,9 +32,18 @@ using namespace android::renderscript;
     ScriptC * sc = (ScriptC *) tls->mScript
 
 ScriptC::ScriptC(Context *rsc) : Script(rsc) {
+#ifndef ANDROID_RS_SERIALIZE
+    BT = NULL;
+#endif
 }
 
 ScriptC::~ScriptC() {
+#ifndef ANDROID_RS_SERIALIZE
+    if (BT) {
+        delete BT;
+        BT = NULL;
+    }
+#endif
     mRSC->mHal.funcs.script.destroy(mRSC, this);
 }
 
@@ -181,6 +194,22 @@ bool ScriptC::runCompiler(Context *rsc,
                           size_t bitcodeLen) {
 
     //LOGE("runCompiler %p %p %p %p %p %i", rsc, this, resName, cacheDir, bitcode, bitcodeLen);
+#ifndef ANDROID_RS_SERIALIZE
+    uint32_t sdkVersion = rsc->getTargetSdkVersion();
+    if (BT) {
+        delete BT;
+    }
+    BT = new bcinfo::BitcodeTranslator((const char *)bitcode, bitcodeLen,
+                                       sdkVersion);
+    if (!BT->translate()) {
+        LOGE("Failed to translate bitcode from version: %u", sdkVersion);
+        delete BT;
+        BT = NULL;
+        return false;
+    }
+    bitcode = (const uint8_t *) BT->getTranslatedBitcode();
+    bitcodeLen = BT->getTranslatedBitcodeSize();
+#endif
 
     rsc->mHal.funcs.script.init(rsc, this, resName, cacheDir, bitcode, bitcodeLen, 0);
 

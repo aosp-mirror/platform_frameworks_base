@@ -21,6 +21,9 @@
 
 #include "RenderScriptEnv.h"
 
+#ifndef ANDROID_RS_SERIALIZE
+#include "bcinfo/BitcodeTranslator.h"
+#endif
 
 // ---------------------------------------------------------------------------
 namespace android {
@@ -61,6 +64,10 @@ public:
     void setupScript(Context *);
     void setupGLState(Context *);
     Script * setTLS(Script *);
+  private:
+#ifndef ANDROID_RS_SERIALIZE
+    bcinfo::BitcodeTranslator *BT;
+#endif
 };
 
 class ScriptCState {
