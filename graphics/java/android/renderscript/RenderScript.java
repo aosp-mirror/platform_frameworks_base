@@ -19,6 +19,8 @@ package android.renderscript;
 import java.lang.reflect.Field;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,6 +28,7 @@ import android.graphics.SurfaceTexture;
 import android.os.Process;
 import android.util.Log;
 import android.view.Surface;
+
 
 
 /**
@@ -79,26 +82,26 @@ public class RenderScript {
 
     // Methods below are wrapped to protect the non-threadsafe
     // lockless fifo.
-    native int  rsnContextCreateGL(int dev, int ver,
+    native int  rsnContextCreateGL(int dev, int ver, int sdkVer,
                  int colorMin, int colorPref,
                  int alphaMin, int alphaPref,
                  int depthMin, int depthPref,
                  int stencilMin, int stencilPref,
                  int samplesMin, int samplesPref, float samplesQ, int dpi);
-    synchronized int nContextCreateGL(int dev, int ver,
+    synchronized int nContextCreateGL(int dev, int ver, int sdkVer,
                  int colorMin, int colorPref,
                  int alphaMin, int alphaPref,
                  int depthMin, int depthPref,
                  int stencilMin, int stencilPref,
                  int samplesMin, int samplesPref, float samplesQ, int dpi) {
-        return rsnContextCreateGL(dev, ver, colorMin, colorPref,
+        return rsnContextCreateGL(dev, ver, sdkVer, colorMin, colorPref,
                                   alphaMin, alphaPref, depthMin, depthPref,
                                   stencilMin, stencilPref,
                                   samplesMin, samplesPref, samplesQ, dpi);
     }
-    native int  rsnContextCreate(int dev, int ver);
-    synchronized int nContextCreate(int dev, int ver) {
-        return rsnContextCreate(dev, ver);
+    native int  rsnContextCreate(int dev, int ver, int sdkVer);
+    synchronized int nContextCreate(int dev, int ver, int sdkVer) {
+        return rsnContextCreate(dev, ver, sdkVer);
     }
     native void rsnContextDestroy(int con);
     synchronized void nContextDestroy() {
@@ -864,6 +867,16 @@ public class RenderScript {
         return mApplicationContext;
     }
 
+    static int getTargetSdkVersion(Context ctx) {
+        try {
+            PackageManager pm = ctx.getPackageManager();
+            ApplicationInfo app = pm.getApplicationInfo(ctx.getPackageName(), 0);
+            return app.targetSdkVersion;
+        } catch (Exception e) {
+            throw new RSDriverException("Error calculating target SDK version for RS.");
+        }
+    }
+
     /**
      * Create a basic RenderScript context.
      *
@@ -873,8 +886,10 @@ public class RenderScript {
     public static RenderScript create(Context ctx) {
         RenderScript rs = new RenderScript(ctx);
 
+        int sdkVersion = getTargetSdkVersion(ctx);
+
         rs.mDev = rs.nDeviceCreate();
-        rs.mContext = rs.nContextCreate(rs.mDev, 0);
+        rs.mContext = rs.nContextCreate(rs.mDev, 0, sdkVersion);
         if (rs.mContext == 0) {
             throw new RSDriverException("Failed to create RS context.");
         }

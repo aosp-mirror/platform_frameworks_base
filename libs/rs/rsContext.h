@@ -199,9 +199,13 @@ public:
     uint32_t getDPI() const {return mDPI;}
     void setDPI(uint32_t dpi) {mDPI = dpi;}
 
+    uint32_t getTargetSdkVersion() const {return mTargetSdkVersion;}
+    void setTargetSdkVersion(uint32_t sdkVer) {mTargetSdkVersion = sdkVer;}
+
     Device *mDev;
 protected:
 
+    uint32_t mTargetSdkVersion;
     uint32_t mDPI;
     uint32_t mWidth;
     uint32_t mHeight;
