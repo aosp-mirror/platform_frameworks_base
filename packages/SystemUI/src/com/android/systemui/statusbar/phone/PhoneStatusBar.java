@@ -87,6 +87,9 @@ public class PhoneStatusBar extends StatusBar {
     static final boolean SPEW = false;
     public static final boolean DEBUG = false;
 
+    // additional instrumentation for testing purposes; intended to be left on during development
+    public static final boolean CHATTY = DEBUG || true;
+
     public static final String ACTION_STATUSBAR_START
             = "com.android.internal.policy.statusbar.START";
 
@@ -1261,6 +1264,10 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     void prepareTracking(int y, boolean opening) {
+        if (CHATTY) {
+            Slog.d(TAG, "panel: beginning to track the user's touch, y=" + y + " opening=" + opening);
+        }
+
         mTracking = true;
         mVelocityTracker = VelocityTracker.obtain();
         if (opening) {
@@ -1290,6 +1297,10 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     void performFling(int y, float vel, boolean always) {
+        if (CHATTY) {
+            Slog.d(TAG, "panel: will fling, y=" + y + " vel=" + vel);
+        }
+
         mAnimatingReveal = false;
 
         mAnimY = y;
@@ -1352,6 +1363,12 @@ public class PhoneStatusBar extends StatusBar {
         if (SPEW) {
             Slog.d(TAG, "Touch: rawY=" + event.getRawY() + " event=" + event + " mDisabled="
                 + mDisabled);
+        } else if (CHATTY) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                Slog.d(TAG, String.format(
+                            "panel: ACTION_DOWN at (%d, %d) mDisabled=0x%08x",
+                            event.getRawX(), event.getRawY(), mDisabled));
+            }
         }
 
         if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
