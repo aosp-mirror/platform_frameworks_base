@@ -254,6 +254,12 @@ public class ConnectivityService extends IConnectivityManager.Stub {
     private static final int EVENT_RESTORE_DNS =
             MAX_NETWORK_STATE_TRACKER_EVENT + 11;
 
+    /**
+     * used internally to send a sticky broadcast delayed.
+     */
+    private static final int EVENT_SEND_STICKY_BROADCAST_INTENT =
+            MAX_NETWORK_STATE_TRACKER_EVENT + 12;
+
     private Handler mHandler;
 
     // list of DeathRecipients used to make sure features are turned off when
@@ -557,6 +563,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 enforcePreference();
             }
         }
+    }
+
+    private int getConnectivityChangeDelay() {
+        final ContentResolver cr = mContext.getContentResolver();
+
+        /** Check system properties for the default value then use secure settings value, if any. */
+        int defaultDelay = SystemProperties.getInt(
+                "conn." + Settings.Secure.CONNECTIVITY_CHANGE_DELAY,
+                Settings.Secure.CONNECTIVITY_CHANGE_DELAY_DEFAULT);
+        return Settings.Secure.getInt(cr, Settings.Secure.CONNECTIVITY_CHANGE_DELAY,
+                defaultDelay);
     }
 
     private int getPersistedNetworkPreference() {
@@ -1437,13 +1454,14 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         // do this before we broadcast the change
         handleConnectivityChange(prevNetType, doReset);
 
-        sendStickyBroadcast(intent);
+        sendStickyBroadcastDelayed(intent, getConnectivityChangeDelay());
         /*
          * If the failover network is already connected, then immediately send
          * out a followup broadcast indicating successful failover
          */
         if (mActiveDefaultNetwork != -1) {
-            sendConnectedBroadcast(mNetTrackers[mActiveDefaultNetwork].getNetworkInfo());
+            sendConnectedBroadcastDelayed(mNetTrackers[mActiveDefaultNetwork].getNetworkInfo(),
+                    getConnectivityChangeDelay());
         }
     }
 
@@ -1497,11 +1515,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         sendGeneralBroadcast(info, ConnectivityManager.CONNECTIVITY_ACTION);
     }
 
+    private void sendConnectedBroadcastDelayed(NetworkInfo info, int delayMs) {
+        sendGeneralBroadcastDelayed(info, ConnectivityManager.CONNECTIVITY_ACTION, delayMs);
+    }
+
     private void sendInetConditionBroadcast(NetworkInfo info) {
         sendGeneralBroadcast(info, ConnectivityManager.INET_CONDITION_ACTION);
     }
 
-    private void sendGeneralBroadcast(NetworkInfo info, String bcastType) {
+    private Intent makeGeneralIntent(NetworkInfo info, String bcastType) {
         Intent intent = new Intent(bcastType);
         intent.putExtra(ConnectivityManager.EXTRA_NETWORK_INFO, info);
         if (info.isFailover()) {
@@ -1516,7 +1538,15 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     info.getExtraInfo());
         }
         intent.putExtra(ConnectivityManager.EXTRA_INET_CONDITION, mDefaultInetConditionPublished);
-        sendStickyBroadcast(intent);
+        return intent;
+    }
+
+    private void sendGeneralBroadcast(NetworkInfo info, String bcastType) {
+        sendStickyBroadcast(makeGeneralIntent(info, bcastType));
+    }
+
+    private void sendGeneralBroadcastDelayed(NetworkInfo info, String bcastType, int delayMs) {
+        sendStickyBroadcastDelayed(makeGeneralIntent(info, bcastType), delayMs);
     }
 
     /**
@@ -1581,7 +1611,22 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 mInitialBroadcast = new Intent(intent);
             }
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+            if (DBG) {
+                log("sendStickyBroadcast: NetworkInfo=" +
+                    intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO));
+            }
+
             mContext.sendStickyBroadcast(intent);
+        }
+    }
+
+    private void sendStickyBroadcastDelayed(Intent intent, int delayMs) {
+        if (delayMs <= 0) {
+            sendStickyBroadcast(intent);
+        } else {
+            if (DBG) log("sendStickyBroadcastDelayed: delayMs=" + delayMs + " intent=" + intent);
+            mHandler.sendMessageDelayed(mHandler.obtainMessage(
+                    EVENT_SEND_STICKY_BROADCAST_INTENT, intent), delayMs);
         }
     }
 
@@ -1658,7 +1703,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         thisNet.setTeardownRequested(false);
         updateNetworkSettings(thisNet);
         handleConnectivityChange(type, false);
-        sendConnectedBroadcast(info);
+        sendConnectedBroadcastDelayed(info, getConnectivityChangeDelay());
     }
 
     /**
@@ -2240,6 +2285,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                     }
                     break;
                 }
+                case EVENT_SEND_STICKY_BROADCAST_INTENT:
+                {
+                    Intent intent = (Intent)msg.obj;
+                    log("EVENT_SEND_STICKY_BROADCAST_INTENT: sendStickyBroadcast intent=" + intent);
+                    sendStickyBroadcast(intent);
+                    break;
+                }
             }
         }
     }
@@ -2435,10 +2487,13 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             if (DBG) log("event hold for obsolete network - aborting");
             return;
         }
-        if (mDefaultInetConditionPublished == mDefaultInetCondition) {
-            if (DBG) log("no change in condition - aborting");
-            return;
-        }
+        // TODO: Figure out why this optimization sometimes causes a
+        //       change in mDefaultInetCondition to be missed and the
+        //       UI to not be updated.
+        //if (mDefaultInetConditionPublished == mDefaultInetCondition) {
+        //    if (DBG) log("no change in condition - aborting");
+        //    return;
+        //}
         NetworkInfo networkInfo = mNetTrackers[mActiveDefaultNetwork].getNetworkInfo();
         if (networkInfo.isConnected() == false) {
             if (DBG) log("default network not connected - aborting");
