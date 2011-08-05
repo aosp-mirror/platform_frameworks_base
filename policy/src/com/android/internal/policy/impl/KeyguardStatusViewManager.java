@@ -232,8 +232,12 @@ class KeyguardStatusViewManager implements OnClickListener {
      * @param resId resource id of the message
      */
     public void setCarrierHelpText(int resId) {
-        mCarrierHelpText = getContext().getText(resId);
+        mCarrierHelpText = getText(resId);
         update(CARRIER_HELP_TEXT, mCarrierHelpText);
+    }
+
+    private CharSequence getText(int resId) {
+        return resId == 0 ? null : getContext().getText(resId);
     }
 
     /**
@@ -244,7 +248,7 @@ class KeyguardStatusViewManager implements OnClickListener {
      * @param lockIcon
      */
     public void setHelpMessage(int textResId, int lockIcon) {
-        mHelpMessageText = getContext().getString(textResId);
+        mHelpMessageText = getText(textResId).toString();
         update(HELP_MESSAGE_TEXT, mHelpMessageText);
     }
 
