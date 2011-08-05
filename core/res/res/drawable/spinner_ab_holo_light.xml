@@ -16,10 +16,12 @@
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_enabled="false"
-          android:drawable="@drawable/spinner_cab_disabled_holo_light" />
+          android:drawable="@drawable/spinner_ab_disabled_holo_light" />
     <item android:state_pressed="true"
-          android:drawable="@drawable/spinner_cab_pressed_holo_light" />
+          android:drawable="@drawable/spinner_ab_pressed_holo_light" />
     <item android:state_pressed="false" android:state_focused="true"
-          android:drawable="@drawable/spinner_cab_focused_holo_light" />
-    <item android:drawable="@drawable/spinner_cab_default_holo_light" />
+          android:drawable="@drawable/spinner_ab_focused_holo_light" />
+    <item android:state_activated="true"
+          android:drawable="@drawable/spinner_ab_activated_holo_light" />
+    <item android:drawable="@drawable/spinner_ab_default_holo_light" />
 </selector>
