@@ -22,6 +22,7 @@
 
         android:useDefaultMargins="true"
         android:alignmentMode="alignBounds"
+        android:rowOrderPreserved="false"
 
         android:columnCount="4"
         >
@@ -49,7 +50,7 @@
             />
 
     <EditText
-            android:layout_width="64dip"
+            android:ems="10"
             />
 
     <TextView
@@ -60,13 +61,13 @@
             />
 
     <EditText
-            android:layout_width="32dip"
+            android:ems="8"
             />
 
     <Space
-            android:layout_row="4"
+            android:layout_row="2"
+            android:layout_rowSpan="3"
             android:layout_column="2"
-            android:layout_margin="0dip"
             android:layout_gravity="fill"
             />
 
