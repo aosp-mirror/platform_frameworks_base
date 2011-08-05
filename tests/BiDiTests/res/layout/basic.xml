@@ -34,17 +34,32 @@
                     android:textSize="32dip"
                     />
 
-            <TextView android:id="@+id/textview"
+            <TextView android:id="@+id/textview_ltr"
                       android:layout_height="wrap_content"
                       android:layout_width="wrap_content"
                       android:textSize="32dip"
-                      android:text="@string/textview_text"
+                      android:text="@string/textview_ltr_text"
                     />
 
-            <EditText android:id="@+id/edittext"
+            <EditText android:id="@+id/edittext_ltr"
                       android:layout_height="wrap_content"
                       android:layout_width="match_parent"
                       android:textSize="32dip"
+                      android:textDirection="ltr"
+                    />
+
+            <TextView android:id="@+id/textview_rtl"
+                      android:layout_height="wrap_content"
+                      android:layout_width="wrap_content"
+                      android:textSize="32dip"
+                      android:text="@string/textview_rtl_text"
+                    />
+
+            <EditText android:id="@+id/edittext_rtl"
+                      android:layout_height="wrap_content"
+                      android:layout_width="match_parent"
+                      android:textSize="32dip"
+                      android:textDirection="rtl"
                     />
 
         </LinearLayout>
