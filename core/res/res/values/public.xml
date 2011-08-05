@@ -1717,8 +1717,6 @@
   <public type="attr" name="textSuggestionsWindowStyle" />
   <public type="attr" name="textEditSuggestionItemLayout" />
 
-  <public type="attr" name="suggestionsEnabled" />
-
   <public type="attr" name="rowCount" />
   <public type="attr" name="rowOrderPreserved" />
   <public type="attr" name="columnCount" />

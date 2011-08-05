@@ -881,10 +881,6 @@
      Default value is false. EditText content is always selectable. -->
     <attr name="textIsSelectable" format="boolean" />
 
-    <!-- When true, IME suggestions will be displayed when the user double taps on editable text.
-     The default value is true. -->
-    <attr name="suggestionsEnabled" format="boolean" />
-
     <!-- Where to ellipsize text. -->
     <attr name="ellipsize">
         <enum name="none" value="0" />
@@ -3148,8 +3144,6 @@
 
         <!-- Indicates that the content of a non-editable text can be selected. -->
         <attr name="textIsSelectable" />
-        <!-- Suggestions will be displayed when the user double taps on editable text. -->
-        <attr name="suggestionsEnabled" />
         <!-- Present the text in ALL CAPS. This may use a small-caps form when available. -->
         <attr name="textAllCaps" />
     </declare-styleable>

@@ -40,7 +40,7 @@ import java.util.Locale;
  * These spans should typically be created by the input method to provide correction and alternates
  * for the text.
  *
- * @see TextView#setSuggestionsEnabled(boolean)
+ * @see TextView#isSuggestionsEnabled()
  */
 public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
 
@@ -76,7 +76,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
      * And the current IME might want to specify any IME as the target IME including other IMEs.
      */
 
-    private final int mFlags;
+    private int mFlags;
     private final String[] mSuggestions;
     private final String mLocaleString;
     private final String mNotificationTargetClassName;
@@ -134,8 +134,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         } else {
             mNotificationTargetClassName = "";
         }
-        mHashCode = hashCodeInternal(
-                mFlags, mSuggestions, mLocaleString, mNotificationTargetClassName);
+        mHashCode = hashCodeInternal(mSuggestions, mLocaleString, mNotificationTargetClassName);
 
         initStyle(context);
     }
@@ -211,6 +210,10 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         return mFlags;
     }
 
+    public void setFlags(int flags) {
+        mFlags = flags;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -247,10 +250,10 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
         return mHashCode;
     }
 
-    private static int hashCodeInternal(int flags, String[] suggestions,String locale,
+    private static int hashCodeInternal(String[] suggestions, String locale,
             String notificationTargetClassName) {
-        return Arrays.hashCode(new Object[] {SystemClock.uptimeMillis(), flags, suggestions, locale,
-                notificationTargetClassName});
+        return Arrays.hashCode(new Object[] {Long.valueOf(SystemClock.uptimeMillis()), suggestions,
+                locale, notificationTargetClassName});
     }
 
     public static final Parcelable.Creator<SuggestionSpan> CREATOR =
