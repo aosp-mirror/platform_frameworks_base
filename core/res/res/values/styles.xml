@@ -1744,6 +1744,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.Spinner.DropDown.ActionBar">
+        <item name="android:background">@android:drawable/spinner_ab_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.CompoundButton.Star" parent="Widget.CompoundButton.Star">
@@ -2131,6 +2132,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.Light.Spinner.DropDown.ActionBar">
+        <item name="android:background">@android:drawable/spinner_ab_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.CompoundButton.Star" parent="Widget.CompoundButton.Star">
