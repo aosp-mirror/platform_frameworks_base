@@ -307,7 +307,7 @@ public class MediaScanner
     private Uri mThumbsUri;
     private Uri mPlaylistsUri;
     private Uri mFilesUri;
-    private boolean mProcessPlaylists;
+    private boolean mProcessPlaylists, mProcessGenres;
     private int mMtpObjectHandle;
 
     private final String mExternalStoragePath;
@@ -612,7 +612,8 @@ public class MediaScanner
                 mAlbum = value.trim();
             } else if (name.equalsIgnoreCase("composer") || name.startsWith("composer;")) {
                 mComposer = value.trim();
-            } else if (name.equalsIgnoreCase("genre") || name.startsWith("genre;")) {
+            } else if (mProcessGenres &&
+                    (name.equalsIgnoreCase("genre") || name.startsWith("genre;"))) {
                 mGenre = getGenreName(value);
             } else if (name.equalsIgnoreCase("year") || name.startsWith("year;")) {
                 mYear = parseSubstring(value, 0, 0);
@@ -1151,6 +1152,7 @@ public class MediaScanner
         if (!volumeName.equals("internal")) {
             // we only support playlists on external media
             mProcessPlaylists = true;
+            mProcessGenres = true;
             mPlaylistsUri = Playlists.getContentUri(volumeName);
 
             mCaseInsensitivePaths = true;
