@@ -76,24 +76,29 @@
         </LinearLayout>
     </ScrollView>
 
+    <!-- button bar divider -->
+    <View android:background="?android:attr/dividerHorizontal"
+          android:layout_height="1dp"
+          android:layout_width="match_parent" />
+
+    <!-- button bar -->
     <LinearLayout android:orientation="horizontal"
+                  style="?android:attr/buttonBarStyle"                 
                   android:layout_height="wrap_content"
                   android:layout_width="match_parent"
                   android:layout_gravity="bottom">
 
-        <Button android:id="@+id/button_allow"
-                android:filterTouchesWhenObscured="true"
-                android:text="@string/allow_restore_button_label"
-                android:layout_below="@id/package_name"
+        <Button android:id="@+id/button_deny"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="@string/deny_restore_button_label"
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:layout_weight="1" />
 
-        <Button android:id="@+id/button_deny"
-                android:text="@string/deny_restore_button_label"
-                android:layout_below="@id/package_name"
-                android:layout_toRightOf="@id/button_allow"
-                android:layout_alignTop="@id/button_allow"
+        <Button android:id="@+id/button_allow"
+                style="?android:attr/buttonBarButtonStyle"
+                android:filterTouchesWhenObscured="true"
+                android:text="@string/allow_restore_button_label"
                 android:layout_height="wrap_content"
                 android:layout_width="0dp"
                 android:layout_weight="1" />
