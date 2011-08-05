@@ -484,8 +484,7 @@ public class CdmaLteServiceStateTracker extends CdmaServiceStateTracker {
         // Note: it needs to be confirmed which CDMA network types
         // can support voice and data calls concurrently.
         // For the time-being, the return value will be false.
-        // return (networkType >= ServiceState.RADIO_TECHNOLOGY_LTE);
-        return false;
+        return (networkType == ServiceState.RADIO_TECHNOLOGY_LTE);
     }
 
     /**
