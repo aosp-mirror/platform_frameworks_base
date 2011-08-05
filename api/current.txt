@@ -3555,6 +3555,7 @@ package android.app {
     method public android.app.Notification.Builder setNumber(int);
     method public android.app.Notification.Builder setOngoing(boolean);
     method public android.app.Notification.Builder setOnlyAlertOnce(boolean);
+    method public android.app.Notification.Builder setProgress(int, int, boolean);
     method public android.app.Notification.Builder setSmallIcon(int);
     method public android.app.Notification.Builder setSmallIcon(int, int);
     method public android.app.Notification.Builder setSound(android.net.Uri);

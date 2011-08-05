@@ -26,6 +26,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.RemoteViews;
 
 import java.text.NumberFormat;
@@ -645,6 +646,9 @@ public class Notification implements Parcelable
         private int mLedOffMs;
         private int mDefaults;
         private int mFlags;
+        private int mProgressMax;
+        private int mProgress;
+        private boolean mProgressIndeterminate;
 
         /**
          * Constructor.
@@ -732,6 +736,17 @@ public class Notification implements Parcelable
          */
         public Builder setContentInfo(CharSequence info) {
             mContentInfo = info;
+            return this;
+        }
+
+        /**
+         * Set the progress this notification represents, which may be
+         * represented as a {@link ProgressBar}.
+         */
+        public Builder setProgress(int max, int progress, boolean indeterminate) {
+            mProgressMax = max;
+            mProgress = progress;
+            mProgressIndeterminate = indeterminate;
             return this;
         }
 
@@ -917,17 +932,24 @@ public class Notification implements Parcelable
 
         private RemoteViews makeRemoteViews(int resId) {
             RemoteViews contentView = new RemoteViews(mContext.getPackageName(), resId);
+            boolean hasLine3 = false;
             if (mSmallIcon != 0) {
                 contentView.setImageViewResource(R.id.icon, mSmallIcon);
+                contentView.setViewVisibility(R.id.icon, View.VISIBLE);
+            } else {
+                contentView.setViewVisibility(R.id.icon, View.GONE);
             }
             if (mContentTitle != null) {
                 contentView.setTextViewText(R.id.title, mContentTitle);
             }
             if (mContentText != null) {
                 contentView.setTextViewText(R.id.text, mContentText);
+                hasLine3 = true;
             }
             if (mContentInfo != null) {
                 contentView.setTextViewText(R.id.info, mContentInfo);
+                contentView.setViewVisibility(R.id.info, View.VISIBLE);
+                hasLine3 = true;
             } else if (mNumber > 0) {
                 final int tooBig = mContext.getResources().getInteger(
                         R.integer.status_bar_notification_info_maxnum);
@@ -938,12 +960,22 @@ public class Notification implements Parcelable
                     NumberFormat f = NumberFormat.getIntegerInstance();
                     contentView.setTextViewText(R.id.info, f.format(mNumber));
                 }
+                contentView.setViewVisibility(R.id.info, View.VISIBLE);
+                hasLine3 = true;
             } else {
                 contentView.setViewVisibility(R.id.info, View.GONE);
+            }
+            if (mProgressMax != 0 || mProgressIndeterminate) {
+                contentView.setProgressBar(
+                        R.id.progress, mProgressMax, mProgress, mProgressIndeterminate);
+                contentView.setViewVisibility(R.id.progress, View.VISIBLE);
+            } else {
+                contentView.setViewVisibility(R.id.progress, View.GONE);
             }
             if (mWhen != 0) {
                 contentView.setLong(R.id.time, "setTime", mWhen);
             }
+            contentView.setViewVisibility(R.id.line3, hasLine3 ? View.VISIBLE : View.GONE);
             return contentView;
         }
 
