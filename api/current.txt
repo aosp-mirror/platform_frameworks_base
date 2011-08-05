@@ -2179,6 +2179,7 @@ package android.animation {
     method public java.util.ArrayList<android.animation.Animator.AnimatorListener> getListeners();
     method public abstract long getStartDelay();
     method public abstract boolean isRunning();
+    method public boolean isStarted();
     method public void removeAllListeners();
     method public void removeListener(android.animation.Animator.AnimatorListener);
     method public abstract android.animation.Animator setDuration(long);

@@ -15,25 +15,74 @@
 */
 package android.animation;
 
+import android.os.Handler;
+import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.widget.Button;
 import com.android.frameworks.coretests.R;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Listener tests for AnimatorSet.
  */
 public class AnimatorSetEventsTest extends EventsTest {
 
+    Button button;
+    ObjectAnimator xAnim = ObjectAnimator.ofFloat(this, "translationX", 0, 100);
+    ObjectAnimator yAnim = ObjectAnimator.ofFloat(this, "translationY", 0, 100);
+
     @Override
     public void setUp() throws Exception {
-        final BasicAnimatorActivity activity = getActivity();
-        Button button = (Button) activity.findViewById(R.id.animatingButton);
-
-        ObjectAnimator xAnim = ObjectAnimator.ofFloat(button, "translationX", 0, 100);
-        ObjectAnimator yAnim = ObjectAnimator.ofFloat(button, "translationX", 0, 100);
+        button = (Button) getActivity().findViewById(R.id.animatingButton);
         mAnimator = new AnimatorSet();
         ((AnimatorSet)mAnimator).playSequentially(xAnim, yAnim);
 
         super.setUp();
     }
+
+    @Override
+    protected long getTimeout() {
+        return (xAnim.getDuration() + yAnim.getDuration()) +
+                (xAnim.getStartDelay() + yAnim.getStartDelay()) +
+                ANIM_DELAY + FUTURE_RELEASE_DELAY;
+    }
+
+    /**
+     * Tests that an AnimatorSet can be correctly canceled during the delay of one of
+     * its children
+     */
+    @MediumTest
+    public void testPlayingCancelDuringChildDelay() throws Exception {
+        yAnim.setStartDelay(500);
+        final AnimatorSet animSet = new AnimatorSet();
+        animSet.playSequentially(xAnim, yAnim);
+        mFutureListener = new FutureReleaseListener(mFuture);
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Handler handler = new Handler();
+                    animSet.addListener(mFutureListener);
+                    mRunning = true;
+                    animSet.start();
+                    handler.postDelayed(new Canceler(animSet, mFuture), ANIM_DURATION + 250);
+                } catch (junit.framework.AssertionFailedError e) {
+                    mFuture.setException(new RuntimeException(e));
+                }
+            }
+        });
+        mFuture.get(getTimeout(), TimeUnit.MILLISECONDS);
+    }
+
+    public void setTranslationX(float value) {
+        button.setTranslationX(value);
+    }
+
+
+    public void setTranslationY(float value) {
+        button.setTranslationY(value);
+    }
+
 
 }
