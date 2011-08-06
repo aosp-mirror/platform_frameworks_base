@@ -229,6 +229,13 @@ static jboolean setUpEventLoop(native_data_t *nat) {
         DBusError err;
         dbus_error_init(&err);
 
+        const char *agent_path = "/android/bluetooth/agent";
+        const char *capabilities = "DisplayYesNo";
+        if (register_agent(nat, agent_path, capabilities) < 0) {
+            dbus_connection_unregister_object_path (nat->conn, agent_path);
+            return JNI_FALSE;
+        }
+
         // Add a filter for all incoming messages
         if (!dbus_connection_add_filter(nat->conn, event_filter, nat, NULL)){
             return JNI_FALSE;
@@ -294,12 +301,6 @@ static jboolean setUpEventLoop(native_data_t *nat) {
             return JNI_FALSE;
         }
 
-        const char *agent_path = "/android/bluetooth/agent";
-        const char *capabilities = "DisplayYesNo";
-        if (register_agent(nat, agent_path, capabilities) < 0) {
-            dbus_connection_unregister_object_path (nat->conn, agent_path);
-            return JNI_FALSE;
-        }
         return JNI_TRUE;
     }
     return JNI_FALSE;
