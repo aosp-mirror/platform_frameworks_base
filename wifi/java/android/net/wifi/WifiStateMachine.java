@@ -1911,6 +1911,17 @@ public class WifiStateMachine extends StateMachine {
                     transitionTo(mDriverUnloadingState);
                     break;
                 case CMD_START_SUPPLICANT:
+                    //A runtime crash can leave the interface up and
+                    //this affects connectivity when supplicant starts up.
+                    //Ensure interface is down before a supplicant start.
+                    try {
+                        mNwService.setInterfaceDown(mInterfaceName);
+                    } catch (RemoteException re) {
+                        if (DBG) Log.w(TAG, "Unable to bring down wlan interface: " + re);
+                    } catch (IllegalStateException ie) {
+                        if (DBG) Log.w(TAG, "Unable to bring down wlan interface: " + ie);
+                    }
+
                     if(WifiNative.startSupplicant()) {
                         Log.d(TAG, "Supplicant start successful");
                         mWifiMonitor.startMonitoring();
