@@ -665,7 +665,7 @@ void CameraSource::releaseRecordingFrame(const sp<IMemory>& frame) {
     LOGV("releaseRecordingFrame");
     if (mCameraRecordingProxy != NULL) {
         mCameraRecordingProxy->releaseRecordingFrame(frame);
-    } else {
+    } else if (mCamera != NULL) {
         int64_t token = IPCThreadState::self()->clearCallingIdentity();
         mCamera->releaseRecordingFrame(frame);
         IPCThreadState::self()->restoreCallingIdentity(token);
