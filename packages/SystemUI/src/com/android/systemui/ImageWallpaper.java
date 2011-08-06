@@ -93,9 +93,12 @@ public class ImageWallpaper extends WallpaperService {
             }
 
             super.onCreate(surfaceHolder);
-            IntentFilter filter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
-            mReceiver = new WallpaperObserver();
-            registerReceiver(mReceiver, filter, null, mHandler);
+            
+            // Don't need this currently because the wallpaper service
+            // will restart the image wallpaper whenever the image changes.
+            //IntentFilter filter = new IntentFilter(Intent.ACTION_WALLPAPER_CHANGED);
+            //mReceiver = new WallpaperObserver();
+            //registerReceiver(mReceiver, filter, null, mHandler);
 
             updateSurfaceSize(surfaceHolder);
         }
@@ -103,7 +106,9 @@ public class ImageWallpaper extends WallpaperService {
         @Override
         public void onDestroy() {
             super.onDestroy();
-            unregisterReceiver(mReceiver);
+            if (mReceiver != null) {
+                unregisterReceiver(mReceiver);
+            }
         }
 
         @Override
