@@ -279,6 +279,39 @@ static void android_os_Debug_getDirtyPages(JNIEnv *env, jobject clazz, jobject o
     android_os_Debug_getDirtyPagesPid(env, clazz, getpid(), object);
 }
 
+static jlong android_os_Debug_getPssPid(JNIEnv *env, jobject clazz, jint pid)
+{
+    char line[1024];
+    jlong pss = 0;
+    unsigned temp;
+
+    char tmp[128];
+    FILE *fp;
+
+    sprintf(tmp, "/proc/%d/smaps", pid);
+    fp = fopen(tmp, "r");
+    if (fp == 0) return 0;
+
+    while (true) {
+        if (fgets(line, 1024, fp) == 0) {
+            break;
+        }
+
+        if (sscanf(line, "Pss: %d kB", &temp) == 1) {
+            pss += temp;
+        }
+    }
+
+    fclose(fp);
+
+    return pss;
+}
+
+static jlong android_os_Debug_getPss(JNIEnv *env, jobject clazz)
+{
+    return android_os_Debug_getPssPid(env, clazz, getpid());
+}
+
 static jint read_binder_stat(const char* stat)
 {
     FILE* fp = fopen(BINDER_STATS, "r");
@@ -520,6 +553,10 @@ static JNINativeMethod gMethods[] = {
             (void*) android_os_Debug_getDirtyPages },
     { "getMemoryInfo",          "(ILandroid/os/Debug$MemoryInfo;)V",
             (void*) android_os_Debug_getDirtyPagesPid },
+    { "getPss",                 "()J",
+            (void*) android_os_Debug_getPss },
+    { "getPss",                 "(I)J",
+            (void*) android_os_Debug_getPssPid },
     { "dumpNativeHeap",         "(Ljava/io/FileDescriptor;)V",
             (void*) android_os_Debug_dumpNativeHeap },
     { "getBinderSentTransactions", "()I",

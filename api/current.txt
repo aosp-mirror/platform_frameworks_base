@@ -14095,6 +14095,7 @@ package android.os {
     method public static long getNativeHeapAllocatedSize();
     method public static long getNativeHeapFreeSize();
     method public static long getNativeHeapSize();
+    method public static long getPss();
     method public static int getThreadAllocCount();
     method public static int getThreadAllocSize();
     method public static deprecated int getThreadExternalAllocCount();
