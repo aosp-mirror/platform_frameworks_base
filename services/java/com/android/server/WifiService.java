@@ -289,6 +289,10 @@ public class WifiService extends IWifiManager.Stub {
                     mWifiStateMachine.startWps(msg.replyTo, (WpsConfiguration)msg.obj);
                     break;
                 }
+                case WifiManager.CMD_DISABLE_NETWORK: {
+                    mWifiStateMachine.disableNetwork(msg.replyTo, msg.arg1, msg.arg2);
+                    break;
+                }
                 default: {
                     Slog.d(TAG, "WifiServicehandler.handleMessage ignoring msg=" + msg);
                     break;

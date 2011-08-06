@@ -89,7 +89,7 @@ class SupplicantStateTracker extends StateMachine {
             mNetworksDisabledDuringConnect = false;
         }
         /* Disable failed network */
-        WifiConfigStore.disableNetwork(netId);
+        WifiConfigStore.disableNetwork(netId, WifiConfiguration.DISABLED_AUTH_FAILURE);
     }
 
     private void transitionOnSupplicantStateChange(StateChangeResult stateChangeResult) {

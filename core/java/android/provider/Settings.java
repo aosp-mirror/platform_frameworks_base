@@ -3042,7 +3042,7 @@ public final class Settings {
 
         /**
          * Boolean to determine whether to notify on disabling a network.  Secure setting used
-         * to notify user only once.  This setting is not monitored continuously.
+         * to notify user only once.
          * @hide
          */
         public static final String WIFI_WATCHDOG_SHOW_DISABLED_NETWORK_POPUP =

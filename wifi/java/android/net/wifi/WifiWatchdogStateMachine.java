@@ -70,6 +70,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final boolean VDBG = false;
     private static final boolean DBG = true;
     private static final String WWSM_TAG = "WifiWatchdogStateMachine";
+    private static final String WATCHDOG_NOTIFICATION_ID = "Android.System.WifiWatchdog";
 
     private static final int WIFI_SIGNAL_LEVELS = 4;
     /**
@@ -157,7 +158,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     /**
      * The {@link WifiInfo} object passed to WWSM on network broadcasts
      */
-    private WifiInfo mInitialConnInfo;
+    private WifiInfo mConnectionInfo;
     private int mNetEventCounter = 0;
 
     /**
@@ -173,7 +174,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
      * It triggers a disableNetwork call if a DNS check fails.
      */
     public boolean mDisableAPNextFailure = false;
-    public ConnectivityManager mConnectivityManager;
+    private ConnectivityManager mConnectivityManager;
+    private boolean mNotificationShown;
+    public boolean mHasConnectedWifiManager = false;
 
     /**
      * STATE MAP
@@ -212,8 +215,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
         setInitialState(mWatchdogDisabledState);
         updateSettings();
-        mShowDisabledNotification = getSettingsBoolean(mContentResolver,
-                Settings.Secure.WIFI_WATCHDOG_SHOW_DISABLED_NETWORK_POPUP, true);
     }
 
     public static WifiWatchdogStateMachine makeWifiWatchdogStateMachine(Context context) {
@@ -318,6 +319,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_WALLED_GARDEN_URL),
                 false, contentObserver);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.WIFI_WATCHDOG_SHOW_DISABLED_NETWORK_POPUP)
+                , false, contentObserver);
     }
 
     /**
@@ -356,7 +360,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     public void dump(PrintWriter pw) {
         pw.print("WatchdogStatus: ");
         pw.print("State " + getCurrentState());
-        pw.println(", network [" + mInitialConnInfo + "]");
+        pw.println(", network [" + mConnectionInfo + "]");
         pw.print("checkFailures   " + mNumCheckFailures);
         pw.println(", bssids: " + mBssids);
         pw.println("lastSingleCheck: " + mOnlineWatchState.lastCheckTime);
@@ -396,6 +400,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
         mWalledGardenIntervalMs = Secure.getLong(mContentResolver,
                 Secure.WIFI_WATCHDOG_WALLED_GARDEN_INTERVAL_MS,
                 DEFAULT_WALLED_GARDEN_INTERVAL_MS);
+        mShowDisabledNotification = getSettingsBoolean(mContentResolver,
+                Settings.Secure.WIFI_WATCHDOG_SHOW_DISABLED_NETWORK_POPUP, true);
     }
 
     /**
@@ -420,17 +426,42 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     /**
-   *
-   */
+     * Uses {@link #mConnectionInfo}.
+     */
+    private void updateBssids() {
+        String curSsid = mConnectionInfo.getSSID();
+        List<ScanResult> results = mWifiManager.getScanResults();
+        int oldNumBssids = mBssids.size();
+
+        if (results == null) {
+            if (DBG) {
+                Slog.d(WWSM_TAG, "updateBssids: Got null scan results!");
+            }
+            return;
+        }
+
+        for (ScanResult result : results) {
+            if (result == null || result.SSID == null) {
+                if (DBG) {
+                    Slog.d(WWSM_TAG, "Received invalid scan result: " + result);
+                }
+                continue;
+            }
+            if (curSsid.equals(result.SSID))
+                mBssids.add(result.BSSID);
+        }
+    }
+
     private void resetWatchdogState() {
         if (VDBG) {
             Slog.v(WWSM_TAG, "Resetting watchdog state...");
         }
-        mInitialConnInfo = null;
+        mConnectionInfo = null;
         mDisableAPNextFailure = false;
         mLastWalledGardenCheckTime = null;
         mNumCheckFailures = 0;
         mBssids.clear();
+        cancelNetworkNotification();
     }
 
     private void popUpBrowser() {
@@ -441,11 +472,11 @@ public class WifiWatchdogStateMachine extends StateMachine {
         mContext.startActivity(intent);
     }
 
-    private void displayDisabledNetworkNotification() {
+    private void displayDisabledNetworkNotification(String ssid) {
         Resources r = Resources.getSystem();
         CharSequence title =
                 r.getText(com.android.internal.R.string.wifi_watchdog_network_disabled);
-        CharSequence msg =
+        String msg = ssid +
                 r.getText(com.android.internal.R.string.wifi_watchdog_network_disabled_detailed);
 
         Notification wifiDisabledWarning = new Notification.Builder(mContext)
@@ -455,7 +486,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
             .setContentTitle(title)
             .setContentText(msg)
             .setContentIntent(PendingIntent.getActivity(mContext, 0,
-                    new Intent(Settings.ACTION_WIFI_IP_SETTINGS)
+                    new Intent(WifiManager.ACTION_PICK_WIFI_NETWORK)
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK), 0))
             .setWhen(System.currentTimeMillis())
             .setAutoCancel(true)
@@ -464,7 +495,17 @@ public class WifiWatchdogStateMachine extends StateMachine {
         NotificationManager notificationManager = (NotificationManager) mContext
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notificationManager.notify("WifiWatchdog", wifiDisabledWarning.icon, wifiDisabledWarning);
+        notificationManager.notify(WATCHDOG_NOTIFICATION_ID, 1, wifiDisabledWarning);
+        mNotificationShown = true;
+    }
+
+    public void cancelNetworkNotification() {
+        if (mNotificationShown) {
+            NotificationManager notificationManager = (NotificationManager) mContext
+                    .getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel(WATCHDOG_NOTIFICATION_ID, 1);
+            mNotificationShown = false;
+        }
     }
 
     /**
@@ -537,6 +578,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
 
                     switch (networkInfo.getState()) {
                         case CONNECTED:
+                            cancelNetworkNotification();
                             WifiInfo wifiInfo = (WifiInfo)
                                 stateChangeIntent.getParcelableExtra(WifiManager.EXTRA_WIFI_INFO);
                             if (wifiInfo == null) {
@@ -551,6 +593,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
                             }
 
                             initConnection(wifiInfo);
+                            mConnectionInfo = wifiInfo;
+                            updateBssids();
                             transitionTo(mDnsCheckingState);
                             mNetEventCounter++;
                             return HANDLED;
@@ -579,16 +623,15 @@ public class WifiWatchdogStateMachine extends StateMachine {
          */
         private void initConnection(WifiInfo wifiInfo) {
             if (VDBG) {
-                Slog.v(WWSM_TAG, "Connected:: old " + wifiInfoToStr(mInitialConnInfo) +
+                Slog.v(WWSM_TAG, "Connected:: old " + wifiInfoToStr(mConnectionInfo) +
                         " ==> new " + wifiInfoToStr(wifiInfo));
             }
 
-            if (mInitialConnInfo == null || !wifiInfo.getSSID().equals(mInitialConnInfo.getSSID())) {
+            if (mConnectionInfo == null || !wifiInfo.getSSID().equals(mConnectionInfo.getSSID())) {
                 resetWatchdogState();
-            } else if (!wifiInfo.getBSSID().equals(mInitialConnInfo.getBSSID())) {
+            } else if (!wifiInfo.getBSSID().equals(mConnectionInfo.getBSSID())) {
                 mDisableAPNextFailure = false;
             }
-            mInitialConnInfo = wifiInfo;
         }
 
         @Override
@@ -606,27 +649,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
         public boolean processMessage(Message msg) {
             switch (msg.what) {
                 case EVENT_SCAN_RESULTS_AVAILABLE:
-                    String curSsid = mInitialConnInfo.getSSID();
-                    List<ScanResult> results = mWifiManager.getScanResults();
-                    int oldNumBssids = mBssids.size();
-
-                    if (results == null) {
-                        if (DBG) {
-                            Slog.d(WWSM_TAG, "updateBssids: Got null scan results!");
-                        }
-                        return HANDLED;
-                    }
-
-                    for (ScanResult result : results) {
-                        if (result == null || result.SSID == null) {
-                            if (VDBG) {
-                                Slog.v(WWSM_TAG, "Received invalid scan result: " + result);
-                            }
-                            continue;
-                        }
-                        if (curSsid.equals(result.SSID))
-                            mBssids.add(result.BSSID);
-                    }
+                    updateBssids();
                     return HANDLED;
                 case EVENT_WATCHDOG_SETTINGS_CHANGE:
                     // Stop current checks, but let state update
@@ -635,7 +658,6 @@ public class WifiWatchdogStateMachine extends StateMachine {
             }
             return NOT_HANDLED;
         }
-
     }
 
     class DnsCheckingState extends State {
@@ -653,7 +675,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
             if (DBG) {
                 Slog.d(WWSM_TAG, "Starting DNS pings at " + SystemClock.elapsedRealtime());
                 dnsCheckLogStr = String.format("Pinging %s on ssid [%s]: ",
-                        dns, mInitialConnInfo.getSSID());
+                        mDnsPinger.getDns(), mConnectionInfo.getSSID());
             }
 
             for (int i=0; i < mNumDnsPings; i++) {
@@ -905,7 +927,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 return HANDLED;
             }
 
-            if (mDisableAPNextFailure || mNumCheckFailures >= mMaxSsidBlacklists) {
+            if (mDisableAPNextFailure || mNumCheckFailures >= mBssids.size()
+                    || mNumCheckFailures >= mMaxSsidBlacklists) {
                 if (hasNoMobileData()) {
                     Slog.w(WWSM_TAG, "Would disable bad network, but device has no mobile data!" +
                             "  Going idle...");
@@ -913,23 +936,26 @@ public class WifiWatchdogStateMachine extends StateMachine {
                     transitionTo(mNotConnectedState);
                     return HANDLED;
                 }
+
                 // TODO : Unban networks if they had low signal ?
-                Slog.i(WWSM_TAG, "Disabling current SSID " + wifiInfoToStr(mInitialConnInfo)
+                Slog.i(WWSM_TAG, "Disabling current SSID " + wifiInfoToStr(mConnectionInfo)
                         + ".  " + "numCheckFailures " + mNumCheckFailures
                         + ", numAPs " + mBssids.size());
-                mWifiManager.disableNetwork(mInitialConnInfo.getNetworkId());
-                if (mShowDisabledNotification) {
-                    displayDisabledNetworkNotification();
-                    mShowDisabledNotification = false;
-                    putSettingsBoolean(mContentResolver,
-                            Settings.Secure.WIFI_WATCHDOG_SHOW_DISABLED_NETWORK_POPUP, false);
+                int networkId = mConnectionInfo.getNetworkId();
+                if (!mHasConnectedWifiManager) {
+                    mWifiManager.asyncConnect(mContext, getHandler());
+                    mHasConnectedWifiManager = true;
+                }
+                mWifiManager.disableNetwork(networkId, WifiConfiguration.DISABLED_DNS_FAILURE);
+                if (mShowDisabledNotification && mConnectionInfo.isExplicitConnect()) {
+                    displayDisabledNetworkNotification(mConnectionInfo.getSSID());
                 }
                 transitionTo(mNotConnectedState);
             } else {
-                Slog.i(WWSM_TAG, "Blacklisting current BSSID.  " + wifiInfoToStr(mInitialConnInfo)
+                Slog.i(WWSM_TAG, "Blacklisting current BSSID.  " + wifiInfoToStr(mConnectionInfo)
                        + "numCheckFailures " + mNumCheckFailures + ", numAPs " + mBssids.size());
 
-                mWifiManager.addToBlacklist(mInitialConnInfo.getBSSID());
+                mWifiManager.addToBlacklist(mConnectionInfo.getBSSID());
                 mWifiManager.reassociate();
                 transitionTo(mBlacklistedApState);
             }

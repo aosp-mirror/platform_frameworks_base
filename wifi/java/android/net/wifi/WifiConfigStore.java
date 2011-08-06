@@ -195,8 +195,9 @@ class WifiConfigStore {
      * or a failure event from supplicant
      *
      * @param config The configuration details in WifiConfiguration
+     * @return the networkId now associated with the specified configuration
      */
-    static void selectNetwork(WifiConfiguration config) {
+    static int selectNetwork(WifiConfiguration config) {
         if (config != null) {
             NetworkUpdateResult result = addOrUpdateNetworkNative(config);
             int netId = result.getNetworkId();
@@ -205,7 +206,9 @@ class WifiConfigStore {
             } else {
                 Log.e(TAG, "Failed to update network " + config);
             }
+            return netId;
         }
+        return INVALID_NETWORK_ID;
     }
 
     /**
@@ -351,10 +354,22 @@ class WifiConfigStore {
      * @param netId network to be disabled
      */
     static boolean disableNetwork(int netId) {
+        return disableNetwork(netId, WifiConfiguration.DISABLED_UNKNOWN_REASON);
+    }
+
+    /**
+     * Disable a network. Note that there is no saveConfig operation.
+     * @param netId network to be disabled
+     * @param reason reason code network was disabled
+     */
+    static boolean disableNetwork(int netId, int reason) {
         boolean ret = WifiNative.disableNetworkCommand(netId);
         synchronized (sConfiguredNetworks) {
             WifiConfiguration config = sConfiguredNetworks.get(netId);
-            if (config != null) config.status = Status.DISABLED;
+            if (config != null) {
+                config.status = Status.DISABLED;
+                config.disableReason = reason;
+            }
         }
         sendConfiguredNetworksChangedBroadcast();
         return ret;

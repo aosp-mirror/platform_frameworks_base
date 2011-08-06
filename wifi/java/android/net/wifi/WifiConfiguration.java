@@ -211,6 +211,15 @@ public class WifiConfiguration implements Parcelable {
         public static final String[] strings = { "current", "disabled", "enabled" };
     }
 
+    /** @hide */
+    public static final int DISABLED_UNKNOWN_REASON                         = 0;
+    /** @hide */
+    public static final int DISABLED_DNS_FAILURE                            = 1;
+    /** @hide */
+    public static final int DISABLED_DHCP_FAILURE                           = 2;
+    /** @hide */
+    public static final int DISABLED_AUTH_FAILURE                           = 3;
+
     /**
      * The ID number that the supplicant uses to identify this
      * network configuration entry. This must be passed as an argument
@@ -223,6 +232,14 @@ public class WifiConfiguration implements Parcelable {
      * @see Status
      */
     public int status;
+
+    /**
+     * The code referring to a reason for disabling the network
+     * Valid when {@link #status} == Status.DISABLED
+     * @hide
+     */
+    public int disableReason;
+
     /**
      * The network's SSID. Can either be an ASCII string,
      * which must be enclosed in double quotation marks
@@ -351,6 +368,7 @@ public class WifiConfiguration implements Parcelable {
         BSSID = null;
         priority = 0;
         hiddenSSID = false;
+        disableReason = DISABLED_UNKNOWN_REASON;
         allowedKeyManagement = new BitSet();
         allowedProtocols = new BitSet();
         allowedAuthAlgorithms = new BitSet();
@@ -367,12 +385,13 @@ public class WifiConfiguration implements Parcelable {
         linkProperties = new LinkProperties();
     }
 
+    @Override
     public String toString() {
-        StringBuffer sbuf = new StringBuffer();
+        StringBuilder sbuf = new StringBuilder();
         if (this.status == WifiConfiguration.Status.CURRENT) {
             sbuf.append("* ");
         } else if (this.status == WifiConfiguration.Status.DISABLED) {
-            sbuf.append("- ");
+            sbuf.append("- DSBLE: ").append(this.disableReason).append(" ");
         }
         sbuf.append("ID: ").append(this.networkId).append(" SSID: ").append(this.SSID).
                 append(" BSSID: ").append(this.BSSID).append(" PRIO: ").append(this.priority).
@@ -541,6 +560,7 @@ public class WifiConfiguration implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(networkId);
         dest.writeInt(status);
+        dest.writeInt(disableReason);
         dest.writeString(SSID);
         dest.writeString(BSSID);
         dest.writeString(preSharedKey);
@@ -571,6 +591,7 @@ public class WifiConfiguration implements Parcelable {
                 WifiConfiguration config = new WifiConfiguration();
                 config.networkId = in.readInt();
                 config.status = in.readInt();
+                config.disableReason = in.readInt();
                 config.SSID = in.readString();
                 config.BSSID = in.readString();
                 config.preSharedKey = in.readString();

@@ -2583,10 +2583,10 @@
         <item quantity="other">Open Wi-Fi networks available</item>
     </plurals>
 
-     <!-- A notification is shown the first time a wireless network is disabled due to bad connectivity.  This is the notification's title / ticker. -->
-    <string name="wifi_watchdog_network_disabled">A Wi-Fi network was disabled</string>
-    <!--  A notification is shown the first time a wireless network is disabled due to bad connectivity.  This is the notification's message which leads to the settings pane -->
-    <string name="wifi_watchdog_network_disabled_detailed">A Wi-Fi network was temporarily disabled due to bad connectivity.</string>
+     <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  This is the notification's title / ticker. -->
+     <string name="wifi_watchdog_network_disabled">Couldn\'t connect to Wi-Fi</string>
+     <!-- A notification is shown when a user's selected SSID is later disabled due to connectivity problems.  This is a partial string of the message, which will also include the (possibly truncated) hotspot name. -->
+    <string name="wifi_watchdog_network_disabled_detailed"> has a poor internet connection.</string>
 
     <!-- Do not translate. Default access point SSID used for tethering -->
     <string name="wifi_tether_configure_ssid_default" translatable="false">AndroidAP</string>
