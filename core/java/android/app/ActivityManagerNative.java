@@ -1523,6 +1523,15 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             return true;
         }
 
+        case GET_PROCESS_PSS_TRANSACTION: {
+            data.enforceInterface(IActivityManager.descriptor);
+            int[] pids = data.createIntArray();
+            long[] pss = getProcessPss(pids);
+            reply.writeNoException();
+            reply.writeLongArray(pss);
+            return true;
+        }
+
         }
 
         return super.onTransact(code, data, reply, flags);
@@ -3430,6 +3439,19 @@ class ActivityManagerProxy implements IActivityManager
         reply.readException();
         data.recycle();
         reply.recycle();
+    }
+
+    public long[] getProcessPss(int[] pids) throws RemoteException {
+        Parcel data = Parcel.obtain();
+        Parcel reply = Parcel.obtain();
+        data.writeInterfaceToken(IActivityManager.descriptor);
+        data.writeIntArray(pids);
+        mRemote.transact(GET_PROCESS_PSS_TRANSACTION, data, reply, 0);
+        reply.readException();
+        long[] res = reply.createLongArray();
+        data.recycle();
+        reply.recycle();
+        return res;
     }
 
     private IBinder mRemote;

@@ -3317,6 +3317,14 @@ public final class ActivityManagerService extends ActivityManagerNative
         return infos;
     }
 
+    public long[] getProcessPss(int[] pids) throws RemoteException {
+        long[] pss = new long[pids.length];
+        for (int i=pids.length-1; i>=0; i--) {
+            pss[i] = Debug.getPss(pids[i]);
+        }
+        return pss;
+    }
+
     public void killApplicationProcess(String processName, int uid) {
         if (processName == null) {
             return;
@@ -8868,15 +8876,15 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    ArrayList<ProcessRecord> collectProcesses(PrintWriter pw, String[] args) {
+    ArrayList<ProcessRecord> collectProcesses(PrintWriter pw, int start, String[] args) {
         ArrayList<ProcessRecord> procs;
         synchronized (this) {
-            if (args != null && args.length > 0
-                    && args[0].charAt(0) != '-') {
+            if (args != null && args.length > start
+                    && args[start].charAt(0) != '-') {
                 procs = new ArrayList<ProcessRecord>();
                 int pid = -1;
                 try {
-                    pid = Integer.parseInt(args[0]);
+                    pid = Integer.parseInt(args[start]);
                 } catch (NumberFormatException e) {
 
                 }
@@ -8884,12 +8892,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                     ProcessRecord proc = mLruProcesses.get(i);
                     if (proc.pid == pid) {
                         procs.add(proc);
-                    } else if (proc.processName.equals(args[0])) {
+                    } else if (proc.processName.equals(args[start])) {
                         procs.add(proc);
                     }
                 }
                 if (procs.size() <= 0) {
-                    pw.println("No process found for: " + args[0]);
+                    pw.println("No process found for: " + args[start]);
                     return null;
                 }
             } else {
@@ -8901,7 +8909,7 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void dumpGraphicsHardwareUsage(FileDescriptor fd,
             PrintWriter pw, String[] args) {
-        ArrayList<ProcessRecord> procs = collectProcesses(pw, args);
+        ArrayList<ProcessRecord> procs = collectProcesses(pw, 0, args);
         if (procs == null) {
             return;
         }
@@ -8945,18 +8953,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    final void dumpMemItems(PrintWriter pw, String prefix, ArrayList<MemItem> items) {
-        Collections.sort(items, new Comparator<MemItem>() {
-            @Override
-            public int compare(MemItem lhs, MemItem rhs) {
-                if (lhs.pss < rhs.pss) {
-                    return 1;
-                } else if (lhs.pss > rhs.pss) {
-                    return -1;
+    final void dumpMemItems(PrintWriter pw, String prefix, ArrayList<MemItem> items,
+            boolean sort) {
+        if (sort) {
+            Collections.sort(items, new Comparator<MemItem>() {
+                @Override
+                public int compare(MemItem lhs, MemItem rhs) {
+                    if (lhs.pss < rhs.pss) {
+                        return 1;
+                    } else if (lhs.pss > rhs.pss) {
+                        return -1;
+                    }
+                    return 0;
                 }
-                return 0;
-            }
-        });
+            });
+        }
 
         for (int i=0; i<items.size(); i++) {
             MemItem mi = items.get(i);
@@ -8966,7 +8977,29 @@ public final class ActivityManagerService extends ActivityManagerNative
 
     final void dumpApplicationMemoryUsage(FileDescriptor fd,
             PrintWriter pw, String prefix, String[] args) {
-        ArrayList<ProcessRecord> procs = collectProcesses(pw, args);
+        boolean dumpAll = false;
+        
+        int opti = 0;
+        while (opti < args.length) {
+            String opt = args[opti];
+            if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
+                break;
+            }
+            opti++;
+            if ("-a".equals(opt)) {
+                dumpAll = true;
+            } else if ("-h".equals(opt)) {
+                pw.println("meminfo dump options: [-a] [process]");
+                pw.println("  -a: include all available information for each process.");
+                pw.println("If [process] is specified it can be the name or ");
+                pw.println("pid of a specific process to dump.");
+                return;
+            } else {
+                pw.println("Unknown argument: " + opt + "; use -h for help");
+            }
+        }
+        
+        ArrayList<ProcessRecord> procs = collectProcesses(pw, opti, args);
         if (procs == null) {
             return;
         }
@@ -8974,7 +9007,11 @@ public final class ActivityManagerService extends ActivityManagerNative
         final boolean isCheckinRequest = scanArgs(args, "--checkin");
         long uptime = SystemClock.uptimeMillis();
         long realtime = SystemClock.elapsedRealtime();
-        
+
+        if (procs.size() == 1 || isCheckinRequest) {
+            dumpAll = true;
+        }
+
         if (isCheckinRequest) {
             // short checkin version
             pw.println(uptime + "," + realtime);
@@ -8984,29 +9021,53 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("Uptime: " + uptime + " Realtime: " + realtime);
         }
 
+        String[] innerArgs = new String[args.length-opti];
+        System.arraycopy(args, opti, innerArgs, 0, args.length-opti);
+
         ArrayList<MemItem> procMems = new ArrayList<MemItem>();
         long nativePss=0, dalvikPss=0, otherPss=0;
         long[] miscPss = new long[Debug.MemoryInfo.NUM_OTHER_STATS];
 
+        final int[] oomAdj = new int[] {
+            SYSTEM_ADJ, CORE_SERVER_ADJ, FOREGROUND_APP_ADJ,
+            VISIBLE_APP_ADJ, PERCEPTIBLE_APP_ADJ, HEAVY_WEIGHT_APP_ADJ,
+            BACKUP_APP_ADJ, SECONDARY_SERVER_ADJ, HOME_APP_ADJ, EMPTY_APP_ADJ
+        };
+        final String[] oomLabel = new String[] {
+                "System", "Persistent", "Foreground",
+                "Visible", "Perceptible", "Heavy Weight",
+                "Backup", "Services", "Home", "Background"
+        };
+        long oomPss[] = new long[oomLabel.length];
+
+        long totalPss = 0;
+
         for (int i = procs.size() - 1 ; i >= 0 ; i--) {
             ProcessRecord r = procs.get(i);
             if (r.thread != null) {
-                if (!isCheckinRequest) {
+                if (!isCheckinRequest && dumpAll) {
                     pw.println("\n** MEMINFO in pid " + r.pid + " [" + r.processName + "] **");
                     pw.flush();
                 }
                 Debug.MemoryInfo mi = null;
-                try {
-                    mi = r.thread.dumpMemInfo(fd, args);
-                } catch (RemoteException e) {
-                    if (!isCheckinRequest) {
-                        pw.println("Got RemoteException!");
-                        pw.flush();
+                if (dumpAll) {
+                    try {
+                        mi = r.thread.dumpMemInfo(fd, isCheckinRequest, dumpAll, innerArgs);
+                    } catch (RemoteException e) {
+                        if (!isCheckinRequest) {
+                            pw.println("Got RemoteException!");
+                            pw.flush();
+                        }
                     }
+                } else {
+                    mi = new Debug.MemoryInfo();
+                    Debug.getMemoryInfo(r.pid, mi);
                 }
+
                 if (!isCheckinRequest && mi != null) {
-                    procMems.add(new MemItem(r.processName + " (pid " + r.pid + ")",
-                            mi.getTotalPss()));
+                    long myTotalPss = mi.getTotalPss();
+                    totalPss += myTotalPss;
+                    procMems.add(new MemItem(r.processName + " (pid " + r.pid + ")", myTotalPss));
 
                     nativePss += mi.nativePss;
                     dalvikPss += mi.dalvikPss;
@@ -9015,6 +9076,13 @@ public final class ActivityManagerService extends ActivityManagerNative
                         long mem = mi.getOtherPss(j);
                         miscPss[j] += mem;
                         otherPss -= mem;
+                    }
+
+                    for (int oomIndex=0; oomIndex<oomPss.length; oomIndex++) {
+                        if (r.setAdj <= oomAdj[oomIndex] || oomIndex == (oomPss.length-1)) {
+                            oomPss[oomIndex] += myTotalPss;
+                            break;
+                        }
                     }
                 }
             }
@@ -9030,12 +9098,24 @@ public final class ActivityManagerService extends ActivityManagerNative
                 catMems.add(new MemItem(Debug.MemoryInfo.getOtherLabel(j), miscPss[j]));
             }
 
+            ArrayList<MemItem> oomMems = new ArrayList<MemItem>();
+            for (int j=0; j<oomPss.length; j++) {
+                if (oomPss[j] != 0) {
+                    oomMems.add(new MemItem(oomLabel[j], oomPss[j]));
+                }
+            }
+
             pw.println();
             pw.println("Total PSS by process:");
-            dumpMemItems(pw, "  ", procMems);
+            dumpMemItems(pw, "  ", procMems, true);
+            pw.println();
+            pw.println("Total PSS by OOM adjustment:");
+            dumpMemItems(pw, "  ", oomMems, false);
             pw.println();
             pw.println("Total PSS by category:");
-            dumpMemItems(pw, "  ", catMems);
+            dumpMemItems(pw, "  ", catMems, true);
+            pw.println();
+            pw.print("Total PSS: "); pw.print(totalPss); pw.println(" Kb");
         }
     }
 
