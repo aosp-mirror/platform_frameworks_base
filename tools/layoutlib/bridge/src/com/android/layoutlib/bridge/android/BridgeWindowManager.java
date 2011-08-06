@@ -28,6 +28,7 @@ import android.os.RemoteException;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Display_Delegate;
+import android.view.Gravity;
 import android.view.IApplicationToken;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -453,6 +454,11 @@ public class BridgeWindowManager implements IWindowManager {
     public IBinder asBinder() {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    @Override
+    public int getPreferredOptionsPanelGravity() throws RemoteException {
+        return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
     }
 
 }

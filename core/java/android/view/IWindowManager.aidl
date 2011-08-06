@@ -184,6 +184,13 @@ interface IWindowManager
      */
     int watchRotation(IRotationWatcher watcher);
 
+    /**
+     * Determine the preferred edge of the screen to pin the compact options menu against.
+     * @return a Gravity value for the options menu panel
+     * @hide
+     */
+    int getPreferredOptionsPanelGravity();
+
 	/**
 	 * Lock the device orientation to the current rotation. Sensor input will
 	 * be ignored until thawRotation() is called.
