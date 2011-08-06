@@ -729,23 +729,29 @@ public final class ActivityThread {
         }
 
         @Override
-        public Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, String[] args) {
+        public Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, boolean checkin,
+                boolean all, String[] args) {
             FileOutputStream fout = new FileOutputStream(fd);
             PrintWriter pw = new PrintWriter(fout);
             try {
-                return dumpMemInfo(pw, args);
+                return dumpMemInfo(pw, checkin, all, args);
             } finally {
                 pw.flush();
             }
         }
 
-        private Debug.MemoryInfo dumpMemInfo(PrintWriter pw, String[] args) {
+        private Debug.MemoryInfo dumpMemInfo(PrintWriter pw, boolean checkin, boolean all,
+                String[] args) {
             long nativeMax = Debug.getNativeHeapSize() / 1024;
             long nativeAllocated = Debug.getNativeHeapAllocatedSize() / 1024;
             long nativeFree = Debug.getNativeHeapFreeSize() / 1024;
 
             Debug.MemoryInfo memInfo = new Debug.MemoryInfo();
             Debug.getMemoryInfo(memInfo);
+
+            if (!all) {
+                return memInfo;
+            }
 
             Runtime runtime = Runtime.getRuntime();
 
@@ -765,16 +771,8 @@ public final class ActivityThread {
             long sqliteAllocated = SQLiteDebug.getHeapAllocatedSize() / 1024;
             SQLiteDebug.PagerStats stats = SQLiteDebug.getDatabaseInfo();
 
-            // Check to see if we were called by checkin server. If so, print terse format.
-            boolean doCheckinFormat = false;
-            if (args != null) {
-                for (String arg : args) {
-                    if ("-c".equals(arg)) doCheckinFormat = true;
-                }
-            }
-
             // For checkin, we print one long comma-separated list of values
-            if (doCheckinFormat) {
+            if (checkin) {
                 // NOTE: if you change anything significant below, also consider changing
                 // ACTIVITY_THREAD_CHECKIN_VERSION.
                 String processName = (mBoundApplication != null)
@@ -841,13 +839,17 @@ public final class ActivityThread {
                 pw.print(sqliteAllocated); pw.print(',');
                 pw.print(stats.memoryUsed / 1024); pw.print(',');
                 pw.print(stats.pageCacheOverflo / 1024); pw.print(',');
-                pw.print(stats.largestMemAlloc / 1024); pw.print(',');
+                pw.print(stats.largestMemAlloc / 1024);
                 for (int i = 0; i < stats.dbStats.size(); i++) {
                     DbStats dbStats = stats.dbStats.get(i);
-                    printRow(pw, DB_INFO_FORMAT, dbStats.pageSize, dbStats.dbSize,
-                            dbStats.lookaside, dbStats.cache, dbStats.dbName);
-                    pw.print(',');
+                    pw.print(','); pw.print(dbStats.dbName);
+                    pw.print(','); pw.print(dbStats.pageSize);
+                    pw.print(','); pw.print(dbStats.dbSize);
+                    pw.print(','); pw.print(dbStats.lookaside);
+                    pw.print(','); pw.print(dbStats.cache);
+                    pw.print(','); pw.print(dbStats.cache);
                 }
+                pw.println();
 
                 return memInfo;
             }

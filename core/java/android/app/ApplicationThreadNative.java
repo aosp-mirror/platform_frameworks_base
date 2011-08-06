@@ -491,11 +491,13 @@ public abstract class ApplicationThreadNative extends Binder
         {
             data.enforceInterface(IApplicationThread.descriptor);
             ParcelFileDescriptor fd = data.readFileDescriptor();
+            boolean checkin = data.readInt() != 0;
+            boolean all = data.readInt() != 0;
             String[] args = data.readStringArray();
             Debug.MemoryInfo mi = null;
             if (fd != null) {
                 try {
-                    mi = dumpMemInfo(fd.getFileDescriptor(), args);
+                    mi = dumpMemInfo(fd.getFileDescriptor(), checkin, all, args);
                 } finally {
                     try {
                         fd.close();
@@ -1049,11 +1051,14 @@ class ApplicationThreadProxy implements IApplicationThread {
                 IBinder.FLAG_ONEWAY);
     }
 
-    public Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, String[] args) throws RemoteException {
+    public Debug.MemoryInfo dumpMemInfo(FileDescriptor fd, boolean checkin, boolean all,
+            String[] args) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
         data.writeFileDescriptor(fd);
+        data.writeInt(checkin ? 1 : 0);
+        data.writeInt(all ? 1 : 0);
         data.writeStringArray(args);
         mRemote.transact(DUMP_MEM_INFO_TRANSACTION, data, reply, 0);
         reply.readException();
