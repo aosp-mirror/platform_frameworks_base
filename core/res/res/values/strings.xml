@@ -2460,25 +2460,24 @@
          activity chooser. See the "Select an action" title. -->
     <string name="noApplications">No applications can perform this action.</string>
     <!-- Title of the alert when an application has crashed. -->
-    <string name="aerr_title">Sorry!</string>
+    <string name="aerr_title"></string>
     <!-- Text of the alert that is displayed when an application has crashed. -->
-    <string name="aerr_application">The application <xliff:g id="application">%1$s</xliff:g>
-        (process <xliff:g id="process">%2$s</xliff:g>) has stopped unexpectedly. Please try again.</string>
+    <string name="aerr_application"><xliff:g id="application">%1$s</xliff:g> has stopped by mistake.</string>
     <!-- Text of the alert that is displayed when an application has crashed. -->
     <string name="aerr_process">The process <xliff:g id="process">%1$s</xliff:g> has
-        stopped unexpectedly. Please try again.</string>
+        stopped by mistake.</string>
     <!-- Title of the alert when an application is not responding. -->
-    <string name="anr_title">Sorry!</string>
+    <string name="anr_title"></string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
-    <string name="anr_activity_application">Activity <xliff:g id="activity">%1$s</xliff:g> (in application <xliff:g id="application">%2$s</xliff:g>) is not responding.</string>
+    <string name="anr_activity_application"><xliff:g id="application">%2$s</xliff:g> is not responding.\n\nWould you like to close it?</string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
-    <string name="anr_activity_process">Activity <xliff:g id="activity">%1$s</xliff:g> (in process <xliff:g id="process">%2$s</xliff:g>) is not responding.</string>
+    <string name="anr_activity_process">Activity <xliff:g id="activity">%1$s</xliff:g> is not responding.\n\nWould you like to close it?</string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
-    <string name="anr_application_process">Application <xliff:g id="application">%1$s</xliff:g> (in process <xliff:g id="process">%2$s</xliff:g>) is not responding.</string>
+    <string name="anr_application_process"><xliff:g id="application">%1$s</xliff:g> is not responding. Would you like to close it?</string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
-    <string name="anr_process">Process <xliff:g id="process">%1$s</xliff:g> is not responding.</string>
+    <string name="anr_process">Process <xliff:g id="process">%1$s</xliff:g> is not responding.\n\nWould you like to close it?</string>
     <!-- Button allowing the user to close an application that is not responding. This will kill the application. -->
-    <string name="force_close">Force close</string>
+    <string name="force_close">OK</string>
     <!-- Button allowing the user to send a bug report for application which has encountered an error. -->
     <string name="report">Report</string>
     <!-- Button allowing the user to choose to wait for an application that is not responding to become responsive again. -->
