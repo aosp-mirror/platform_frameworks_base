@@ -581,8 +581,9 @@ resource usage.
 </p></dd>
 
 <dt><a name="screen"></a>{@code android:screenOrientation}</dt>
-<dd>The orientation of the activity's display on the device.
-The value can be any one of the following strings:
+<dd>The orientation of the activity's display on the device. 
+  
+<p>The value can be any one of the following strings:</p>
 
 <table>
 <tr>
@@ -640,7 +641,23 @@ is ignored, so the display will not rotate based on how the user moves the devic
 distinction, the system chooses the orientation using the same policy as for the "{@code
 unspecified}" setting.</td>
 </tr>
-</table></dd>
+</table>
+
+<p class="note"><strong>Note:</strong> When you declare one of the landscape or portrait values,
+it is considered a hard requirement for the orientation in which the activity runs. As such,
+the value you declare enables filtering by services such as Android Market so your application is
+available only to devices that support the orientation required by your activities. For
+example, if you declare either {@code "landscape"}, {@code "reverseLandscape"}, or
+{@code "sensorLandscape"}, then your application will be available only to devices that support
+landscape orientation. However, you should also explicitly declare that
+your application requires either portrait or landscape orientation with the <a
+href="{@docRoot}guide/topics/manifest/uses-feature-element.html">{@code &lt;uses-feature&gt;}</a>
+element. For example, <code>&lt;uses-feature
+android:name="android.hardware.screen.portrait"/></code>. This is purely a filtering behavior
+provided by Android Market (and other services that support it) and the platform itself does not
+control whether your app can be installed when a device supports only certain orientations.</p>
+
+</dd>
 
 <dt><a name="state"></a>{@code android:stateNotNeeded}</dt>
 <dd>Whether or not the activity can be killed and successfully restarted 

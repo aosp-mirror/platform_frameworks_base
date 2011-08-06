@@ -550,7 +550,11 @@ portrait orientation.</li>
 
 <p>A typical application that functions properly in both landscape and portrait orientations would not normally need to declare an orientation requirement. Rather, an application designed primarily for one orientation, such as an app designed for a television, could declare one of the constants to ensure that it isn't available to devices that don't provide that orientation.</p>
 
-<p>If the application is targeting API level 12 or lower, the platform assumes that if app has not specified whether it requires portrait or landscape, both orientations are required.</p>
+<p>If any of activities declared in the manifest request that they run in a specific orientation,
+using the <a href="{@docRoot}guide/topics/manifest/activity-element.html#screen">{@code
+android:screenOrientation}</a> attribute, then this also declares that the application
+requires that orientation.</p>
+
 </li>
 <li>Other feature constants
 
