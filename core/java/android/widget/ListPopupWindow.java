@@ -1092,7 +1092,7 @@ public class ListPopupWindow {
         }
 
         final int listContent = mDropDownList.measureHeightOfChildren(MeasureSpec.UNSPECIFIED,
-                0, ListView.NO_POSITION, maxHeight - otherHeights, 2);
+                0, ListView.NO_POSITION, maxHeight - otherHeights, -1);
         // add padding only if the list has items in it, that way we don't show
         // the popup if it is not needed
         if (listContent > 0) otherHeights += padding;
