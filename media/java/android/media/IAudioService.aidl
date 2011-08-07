@@ -93,6 +93,8 @@ interface IAudioService {
     void registerRemoteControlClient(in ComponentName eventReceiver,
            in IRemoteControlClient rcClient, in String callingPackageName);
 
+    IRemoteControlClient getRemoteControlClient(in int rcClientId);
+
     void notifyRemoteControlInformationChanged(in ComponentName eventReceiver);
 
     void startBluetoothSco(IBinder cb);
