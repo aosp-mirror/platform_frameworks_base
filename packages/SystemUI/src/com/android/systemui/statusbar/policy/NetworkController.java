@@ -522,6 +522,7 @@ public class NetworkController extends BroadcastReceiver {
                 }
             } else {
                 iconId = R.drawable.stat_sys_no_sim;
+                visible = false; // no SIM? no data
             }
         } else {
             // CDMA case, mDataActivity can be also DATA_ACTIVITY_DORMANT
@@ -801,7 +802,12 @@ public class NetworkController extends BroadcastReceiver {
         }
 
         if (DEBUG) {
-            Slog.d(TAG, "refreshViews combinedSignalIconId=0x"
+            Slog.d(TAG, "refreshViews connected={"
+                    + (mWifiConnected?" wifi":"")
+                    + (mDataConnected?" data":"")
+                    + " } level="
+                    + ((mSignalStrength == null)?"??":Integer.toString(mSignalStrength.getLevel()))
+                    + " combinedSignalIconId=0x"
                     + Integer.toHexString(combinedSignalIconId)
                     + "/" + getResourceName(combinedSignalIconId)
                     + " dataDirectionOverlayIconId=0x" + Integer.toHexString(dataDirectionOverlayIconId)
