@@ -1230,12 +1230,13 @@ status_t AudioFlinger::PlaybackThread::dumpInternals(int fd, const Vector<String
 // Thread virtuals
 status_t AudioFlinger::PlaybackThread::readyToRun()
 {
-    if (mSampleRate == 0) {
+    status_t status = initCheck();
+    if (status == NO_ERROR) {
+        LOGI("AudioFlinger's thread %p ready to run", this);
+    } else {
         LOGE("No working audio driver found.");
-        return NO_INIT;
     }
-    LOGI("AudioFlinger's thread %p ready to run", this);
-    return NO_ERROR;
+    return status;
 }
 
 void AudioFlinger::PlaybackThread::onFirstRef()
@@ -1329,10 +1330,10 @@ Exit:
 
 uint32_t AudioFlinger::PlaybackThread::latency() const
 {
-    if (mOutput) {
+    Mutex::Autolock _l(mLock);
+    if (initCheck() == NO_ERROR) {
         return mOutput->stream->get_latency(mOutput->stream);
-    }
-    else {
+    } else {
         return 0;
     }
 }
@@ -1433,8 +1434,13 @@ void AudioFlinger::PlaybackThread::removeTrack_l(const sp<Track>& track)
 
 String8 AudioFlinger::PlaybackThread::getParameters(const String8& keys)
 {
-    String8 out_s8;
+    String8 out_s8 = String8("");
     char *s;
+
+    Mutex::Autolock _l(mLock);
+    if (initCheck() != NO_ERROR) {
+        return out_s8;
+    }
 
     s = mOutput->stream->common.get_parameters(&mOutput->stream->common, keys.string());
     out_s8 = String8(s);
@@ -1442,7 +1448,7 @@ String8 AudioFlinger::PlaybackThread::getParameters(const String8& keys)
     return out_s8;
 }
 
-// destroyTrack_l() must be called with AudioFlinger::mLock held
+// audioConfigChanged_l() must be called with AudioFlinger::mLock held
 void AudioFlinger::PlaybackThread::audioConfigChanged_l(int event, int param) {
     AudioSystem::OutputDescriptor desc;
     void *param2 = 0;
@@ -1501,6 +1507,7 @@ status_t AudioFlinger::PlaybackThread::getRenderPosition(uint32_t *halFrames, ui
     if (halFrames == 0 || dspFrames == 0) {
         return BAD_VALUE;
     }
+    Mutex::Autolock _l(mLock);
     if (initCheck() != NO_ERROR) {
         return INVALID_OPERATION;
     }
@@ -1546,6 +1553,29 @@ uint32_t AudioFlinger::PlaybackThread::getStrategyForSession_l(int sessionId)
     return AudioSystem::getStrategyForStream(AUDIO_STREAM_MUSIC);
 }
 
+
+AudioFlinger::AudioStreamOut* AudioFlinger::PlaybackThread::getOutput()
+{
+    Mutex::Autolock _l(mLock);
+    return mOutput;
+}
+
+AudioFlinger::AudioStreamOut* AudioFlinger::PlaybackThread::clearOutput()
+{
+    Mutex::Autolock _l(mLock);
+    AudioStreamOut *output = mOutput;
+    mOutput = NULL;
+    return output;
+}
+
+// this method must always be called either with ThreadBase mLock held or inside the thread loop
+audio_stream_t* AudioFlinger::PlaybackThread::stream()
+{
+    if (mOutput == NULL) {
+        return NULL;
+    }
+    return &mOutput->stream->common;
+}
 
 // ----------------------------------------------------------------------------
 
@@ -3921,6 +3951,13 @@ void AudioFlinger::RecordThread::onFirstRef()
     run(mName, PRIORITY_URGENT_AUDIO);
 }
 
+status_t AudioFlinger::RecordThread::readyToRun()
+{
+    status_t status = initCheck();
+    LOGW_IF(status != NO_ERROR,"RecordThread %p could not initialize", this);
+    return status;
+}
+
 bool AudioFlinger::RecordThread::threadLoop()
 {
     AudioBufferProvider::Buffer buffer;
@@ -4400,7 +4437,12 @@ bool AudioFlinger::RecordThread::checkForNewParameters_l()
 String8 AudioFlinger::RecordThread::getParameters(const String8& keys)
 {
     char *s;
-    String8 out_s8;
+    String8 out_s8 = String8();
+
+    Mutex::Autolock _l(mLock);
+    if (initCheck() != NO_ERROR) {
+        return out_s8;
+    }
 
     s = mInput->stream->common.get_parameters(&mInput->stream->common, keys.string());
     out_s8 = String8(s);
@@ -4472,6 +4514,11 @@ void AudioFlinger::RecordThread::readInputParameters()
 
 unsigned int AudioFlinger::RecordThread::getInputFramesLost()
 {
+    Mutex::Autolock _l(mLock);
+    if (initCheck() != NO_ERROR) {
+        return 0;
+    }
+
     return mInput->stream->get_input_frames_lost(mInput->stream);
 }
 
@@ -4489,6 +4536,30 @@ uint32_t AudioFlinger::RecordThread::hasAudioSession(int sessionId)
 
     return result;
 }
+
+AudioFlinger::AudioStreamIn* AudioFlinger::RecordThread::getInput()
+{
+    Mutex::Autolock _l(mLock);
+    return mInput;
+}
+
+AudioFlinger::AudioStreamIn* AudioFlinger::RecordThread::clearInput()
+{
+    Mutex::Autolock _l(mLock);
+    AudioStreamIn *input = mInput;
+    mInput = NULL;
+    return input;
+}
+
+// this method must always be called either with ThreadBase mLock held or inside the thread loop
+audio_stream_t* AudioFlinger::RecordThread::stream()
+{
+    if (mInput == NULL) {
+        return NULL;
+    }
+    return &mInput->stream->common;
+}
+
 
 // ----------------------------------------------------------------------------
 
@@ -4613,7 +4684,8 @@ status_t AudioFlinger::closeOutput(int output)
     thread->exit();
 
     if (thread->type() != ThreadBase::DUPLICATING) {
-        AudioStreamOut *out = thread->getOutput();
+        AudioStreamOut *out = thread->clearOutput();
+        // from now on thread->mOutput is NULL
         out->hwDev->close_output_stream(out->hwDev, out->stream);
         delete out;
     }
@@ -4753,7 +4825,8 @@ status_t AudioFlinger::closeInput(int input)
     }
     thread->exit();
 
-    AudioStreamIn *in = thread->getInput();
+    AudioStreamIn *in = thread->clearInput();
+    // from now on thread->mInput is NULL
     in->hwDev->close_input_stream(in->hwDev, in->stream);
     delete in;
 
@@ -4831,7 +4904,8 @@ AudioFlinger::PlaybackThread *AudioFlinger::primaryPlaybackThread_l()
 {
     for (size_t i = 0; i < mPlaybackThreads.size(); i++) {
         PlaybackThread *thread = mPlaybackThreads.valueAt(i).get();
-        if (thread->getOutput()->hwDev == mPrimaryHardwareDev) {
+        AudioStreamOut *output = thread->getOutput();
+        if (output != NULL && output->hwDev == mPrimaryHardwareDev) {
             return thread;
         }
     }
@@ -5609,7 +5683,10 @@ AudioFlinger::EffectModule::~EffectModule()
                 (mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_POST_PROC) {
             sp<ThreadBase> thread = mThread.promote();
             if (thread != 0) {
-                thread->stream()->remove_audio_effect(thread->stream(), mEffectInterface);
+                audio_stream_t *stream = thread->stream();
+                if (stream != NULL) {
+                    stream->remove_audio_effect(stream, mEffectInterface);
+                }
             }
         }
         // release effect engine
@@ -5900,7 +5977,10 @@ status_t AudioFlinger::EffectModule::start_l()
              (mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_POST_PROC)) {
         sp<ThreadBase> thread = mThread.promote();
         if (thread != 0) {
-            thread->stream()->add_audio_effect(thread->stream(), mEffectInterface);
+            audio_stream_t *stream = thread->stream();
+            if (stream != NULL) {
+                stream->add_audio_effect(stream, mEffectInterface);
+            }
         }
     }
     return status;
@@ -5933,7 +6013,10 @@ status_t AudioFlinger::EffectModule::stop_l()
              (mDescriptor.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_POST_PROC)) {
         sp<ThreadBase> thread = mThread.promote();
         if (thread != 0) {
-            thread->stream()->remove_audio_effect(thread->stream(), mEffectInterface);
+            audio_stream_t *stream = thread->stream();
+            if (stream != NULL) {
+                stream->remove_audio_effect(stream, mEffectInterface);
+            }
         }
     }
     return status;
