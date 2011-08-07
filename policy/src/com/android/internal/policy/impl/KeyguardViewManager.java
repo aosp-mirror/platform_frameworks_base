@@ -127,10 +127,10 @@ public class KeyguardViewManager implements KeyguardWindowController {
         }
 
         if (enableScreenRotation) {
-            Log.d(TAG, "Rotation sensor for lock screen On!");
+            if (DEBUG) Log.d(TAG, "Rotation sensor for lock screen On!");
             mWindowLayoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR;
         } else {
-            Log.d(TAG, "Rotation sensor for lock screen Off!");
+            if (DEBUG) Log.d(TAG, "Rotation sensor for lock screen Off!");
             mWindowLayoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_NOSENSOR;
         }
 
