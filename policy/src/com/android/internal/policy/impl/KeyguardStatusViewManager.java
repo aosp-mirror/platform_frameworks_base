@@ -266,7 +266,7 @@ class KeyguardStatusViewManager implements OnClickListener {
                 case OWNER_INFO:
                 case CARRIER_TEXT:
                 default:
-                    Log.w(TAG, "Not showing message id " + what + ", str=" + string);
+                    if (DEBUG) Log.w(TAG, "Not showing message id " + what + ", str=" + string);
             }
         } else {
             updateStatusLines(mShowingStatus);
