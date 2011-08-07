@@ -2854,6 +2854,19 @@ public class AudioService extends IAudioService.Stub {
     private SoftReference<IRemoteControlClient> mCurrentRcClientRef =
             new SoftReference<IRemoteControlClient>(null);
 
+    private final static int RC_INFO_NONE = 0;
+    private final static int RC_INFO_ALL =
+        AudioManager.RemoteControlParameters.FLAG_INFORMATION_CHANGED_ALBUM_ART |
+        AudioManager.RemoteControlParameters.FLAG_INFORMATION_CHANGED_KEY_MEDIA |
+        AudioManager.RemoteControlParameters.FLAG_INFORMATION_CHANGED_METADATA |
+        AudioManager.RemoteControlParameters.FLAG_INFORMATION_CHANGED_PLAYSTATE;
+
+    /**
+     * The flags indicating what type of information changed since the last time it was queried.
+     * Access protected by mCurrentRcLock.
+     */
+    private int mCurrentRcClientInfoFlags = RC_INFO_ALL;
+
     /**
      * A monotonically increasing generation counter for mCurrentRcClientRef.
      * Only accessed with a lock on mCurrentRcLock.
@@ -2875,6 +2888,27 @@ public class AudioService extends IAudioService.Stub {
                 return mCurrentRcClientRef.get();
             } else {
                 return null;
+            }
+        }
+    }
+
+    /**
+     * Returns the current flags of information that changed on the current remote control client.
+     * Requesting this information clears it.
+     * @param rcClientId the counter value that matches the extra
+     *     {@link AudioManager#EXTRA_REMOTE_CONTROL_CLIENT} in the
+     *     {@link AudioManager#REMOTE_CONTROL_CLIENT_CHANGED} event
+     * @return the flags indicating which type of information changed since the client notified
+     *     that its information had changed.
+     */
+    public int getRemoteControlClientInformationChangedFlags(int rcClientId) {
+        synchronized(mCurrentRcLock) {
+            if (rcClientId == mCurrentRcClientGen) {
+                int flags = mCurrentRcClientInfoFlags;
+                mCurrentRcClientInfoFlags = RC_INFO_NONE;
+                return flags;
+            } else {
+                return RC_INFO_NONE;
             }
         }
     }
@@ -3072,6 +3106,7 @@ public class AudioService extends IAudioService.Stub {
     private void clearRemoteControlDisplay() {
         synchronized(mCurrentRcLock) {
             mCurrentRcClientRef.clear();
+            mCurrentRcClientInfoFlags = RC_INFO_NONE;
         }
         mAudioHandler.sendMessage( mAudioHandler.obtainMessage(MSG_RCDISPLAY_CLEAR) );
     }
@@ -3092,6 +3127,10 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
         synchronized(mCurrentRcLock) {
+            if (!mCurrentRcClientRef.get().equals(rcse.mRcClientRef.get())) {
+                // new RC client, assume every type of information shall be queried
+                mCurrentRcClientInfoFlags = RC_INFO_ALL;
+            }
             mCurrentRcClientRef = rcse.mRcClientRef;
         }
         mAudioHandler.sendMessage( mAudioHandler.obtainMessage(MSG_RCDISPLAY_UPDATE, 0, 0, rcse) );
@@ -3200,12 +3239,18 @@ public class AudioService extends IAudioService.Stub {
         }
     }
 
-    /** see AudioManager.notifyRemoteControlInformationChanged(ComponentName er) */
-    public void notifyRemoteControlInformationChanged(ComponentName eventReceiver) {
+    /** see AudioManager.notifyRemoteControlInformationChanged(ComponentName er, int infoFlag) */
+    public void notifyRemoteControlInformationChanged(ComponentName eventReceiver, int infoFlag) {
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
                 // only refresh if the eventReceiver is at the top of the stack
                 if (isCurrentRcController(eventReceiver)) {
+                    // there is a refresh request for the current event receiver: it might not be
+                    // displayed on the remote control display, but we can cache what new
+                    // information has changed.
+                    synchronized(mCurrentRcLock) {
+                        mCurrentRcClientInfoFlags |= infoFlag;
+                    }
                     checkUpdateRemoteControlDisplay();
                 }
             }
