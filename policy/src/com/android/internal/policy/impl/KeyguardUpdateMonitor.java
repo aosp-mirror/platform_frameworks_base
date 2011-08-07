@@ -20,7 +20,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Configuration;
 import android.database.ContentObserver;
 import static android.os.BatteryManager.BATTERY_STATUS_CHARGING;
 import static android.os.BatteryManager.BATTERY_STATUS_FULL;
@@ -29,7 +28,6 @@ import android.media.AudioManager;
 import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.provider.Telephony;
 import static android.provider.Telephony.Intents.EXTRA_PLMN;
@@ -503,7 +501,8 @@ public class KeyguardUpdateMonitor {
         if (!mSimStateCallbacks.contains(callback)) {
             mSimStateCallbacks.add(callback);
         } else {
-            Log.e(TAG, "Object tried to add another SIM callback", new Exception("Whoops"));
+            if (DEBUG) Log.e(TAG, "Object tried to add another SIM callback",
+                    new Exception("Whoops"));
         }
     }
 

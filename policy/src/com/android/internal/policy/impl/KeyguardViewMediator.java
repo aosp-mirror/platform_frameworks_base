@@ -646,7 +646,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      * @see #onWakeKeyWhenKeyguardShowingTq(int)
      */
     private void wakeWhenReadyLocked(int keyCode) {
-        if (true || DBG_WAKE) Log.d(TAG, "wakeWhenReadyLocked(" + keyCode + ")");
+        if (DBG_WAKE) Log.d(TAG, "wakeWhenReadyLocked(" + keyCode + ")");
 
         /**
          * acquire the handoff lock that will keep the cpu running.  this will
@@ -741,7 +741,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
 
                 int sequence = intent.getIntExtra("seq", 0);
 
-                if (false) Log.d(TAG, "received DELAYED_KEYGUARD_ACTION with seq = "
+                if (DEBUG) Log.d(TAG, "received DELAYED_KEYGUARD_ACTION with seq = "
                         + sequence + ", mDelayedShowingSequence = " + mDelayedShowingSequence);
 
                 if (mDelayedShowingSequence == sequence) {
@@ -1033,13 +1033,15 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                         sfx.setStreamType(AudioManager.STREAM_SYSTEM);
                         sfx.play();
                     } else {
-                        Log.d(TAG, "playSounds: failed to load ringtone from uri: " + soundUri);
+                        if (DEBUG) Log.d(TAG, "playSounds: failed to load ringtone from uri: "
+                                + soundUri);
                     }
                 } else {
-                    Log.d(TAG, "playSounds: could not parse Uri: " + soundPath);
+                    if (DEBUG) Log.d(TAG, "playSounds: could not parse Uri: " + soundPath);
                 }
             } else {
-                Log.d(TAG, "playSounds: whichSound = " + whichSound + "; soundPath was null");
+                if (DEBUG) Log.d(TAG, "playSounds: whichSound = " + whichSound
+                        + "; soundPath was null");
             }
         }
     }
