@@ -51,8 +51,11 @@ import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
@@ -61,6 +64,8 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.view.ActionMode;
 import android.view.Gravity;
+import android.view.IRotationWatcher;
+import android.view.IWindowManager;
 import android.view.InputQueue;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -84,6 +89,9 @@ import android.widget.ImageView;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 /**
  * Android-specific Window.
@@ -176,6 +184,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private KeyguardManager mKeyguardManager;
 
     private int mUiOptions = 0;
+
+    static class WindowManagerHolder {
+        static final IWindowManager sWindowManager = IWindowManager.Stub.asInterface(
+                ServiceManager.getService("window"));
+    }
+
+    static final RotationWatcher sRotationWatcher = new RotationWatcher();
 
     public PhoneWindow(Context context) {
         super(context);
@@ -415,8 +430,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     if (st.iconMenuPresenter != null) {
                         st.iconMenuPresenter.saveHierarchyState(state);
                     }
-                    if (st.expandedMenuPresenter != null) {
-                        st.expandedMenuPresenter.saveHierarchyState(state);
+                    if (st.listMenuPresenter != null) {
+                        st.listMenuPresenter.saveHierarchyState(state);
                     }
 
                     // Remove the menu views since they need to be recreated
@@ -430,8 +445,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     if (st.iconMenuPresenter != null) {
                         st.iconMenuPresenter.restoreHierarchyState(state);
                     }
-                    if (st.expandedMenuPresenter != null) {
-                        st.expandedMenuPresenter.restoreHierarchyState(state);
+                    if (st.listMenuPresenter != null) {
+                        st.listMenuPresenter.restoreHierarchyState(state);
                     }
 
                 } else {
@@ -552,7 +567,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (!st.shownPanelView.hasFocus()) {
                 st.shownPanelView.requestFocus();
             }
-        } else if (!st.isInExpandedMode) {
+        } else if (!st.isInListMode()) {
             width = MATCH_PARENT;
         }
 
@@ -567,7 +582,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
                 st.decorView.mDefaultOpacity);
 
-        lp.gravity = st.gravity;
+        if (st.isCompact) {
+            lp.gravity = getOptionsPanelGravity();
+            sRotationWatcher.addWindow(this);
+        } else {
+            lp.gravity = st.gravity;
+        }
+
         lp.windowAnimations = st.windowAnimations;
         
         wm.addView(st.decorView, lp);
@@ -610,6 +631,9 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             if (st.decorView != null) {
                 wm.removeView(st.decorView);
                 // Log.v(TAG, "Removing main menu from window manager.");
+                if (st.isCompact) {
+                    sRotationWatcher.removeWindow(this);
+                }
             }
 
             if (doCallback) {
@@ -961,6 +985,36 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     /**
+     * Determine the gravity value for the options panel. This can
+     * differ in compact mode.
+     *
+     * @return gravity value to use for the panel window
+     */
+    private int getOptionsPanelGravity() {
+        try {
+            return WindowManagerHolder.sWindowManager.getPreferredOptionsPanelGravity();
+        } catch (RemoteException ex) {
+            Log.e(TAG, "Couldn't getOptionsPanelGravity; using default", ex);
+            return Gravity.CENTER | Gravity.BOTTOM;
+        }
+    }
+
+    void onOptionsPanelRotationChanged() {
+        final PanelFeatureState st = getPanelState(FEATURE_OPTIONS_PANEL, false);
+        if (st == null) return;
+
+        final WindowManager.LayoutParams lp = st.decorView != null ?
+                (WindowManager.LayoutParams) st.decorView.getLayoutParams() : null;
+        if (lp != null) {
+            lp.gravity = getOptionsPanelGravity();
+            final ViewManager wm = getWindowManager();
+            if (wm != null) {
+                wm.updateViewLayout(st.decorView, lp);
+            }
+        }
+    }
+
+    /**
      * Initializes the panel associated with the panel feature state. You must
      * at the very least set PanelFeatureState.panel to the View implementing
      * its contents. The default implementation gets the panel from the menu.
@@ -982,8 +1036,8 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             mPanelMenuPresenterCallback = new PanelMenuPresenterCallback();
         }
 
-        MenuView menuView = st.isInExpandedMode
-                ? st.getExpandedMenuView(mPanelMenuPresenterCallback)
+        MenuView menuView = st.isInListMode()
+                ? st.getListMenuView(mPanelMenuPresenterCallback)
                 : st.getIconMenuView(mPanelMenuPresenterCallback);
 
         st.shownPanelView = (View) menuView;
@@ -3015,7 +3069,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         MenuBuilder menu;
 
         IconMenuPresenter iconMenuPresenter;
-        ListMenuPresenter expandedMenuPresenter;
+        ListMenuPresenter listMenuPresenter;
+
+        /** true if this menu will show in single-list compact mode */
+        boolean isCompact;
+
+        /** Theme resource ID for list elements of the panel menu */
+        int listPresenterTheme;
 
         /**
          * Whether the panel has been prepared (see
@@ -3065,11 +3125,15 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             refreshDecorView = false;
         }
 
+        public boolean isInListMode() {
+            return isInExpandedMode || isCompact;
+        }
+
         public boolean hasPanelItems() {
             if (shownPanelView == null) return false;
 
-            if (isInExpandedMode) {
-                return expandedMenuPresenter.getAdapter().getCount() > 0;
+            if (isCompact || isInExpandedMode) {
+                return listMenuPresenter.getAdapter().getCount() > 0;
             } else {
                 return ((ViewGroup) shownPanelView).getChildCount() > 0;
             }
@@ -3081,10 +3145,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         public void clearMenuPresenters() {
             if (menu != null) {
                 menu.removeMenuPresenter(iconMenuPresenter);
-                menu.removeMenuPresenter(expandedMenuPresenter);
+                menu.removeMenuPresenter(listMenuPresenter);
             }
             iconMenuPresenter = null;
-            expandedMenuPresenter = null;
+            listMenuPresenter = null;
         }
 
         void setStyle(Context context) {
@@ -3095,6 +3159,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     com.android.internal.R.styleable.Theme_panelFullBackground, 0);
             windowAnimations = a.getResourceId(
                     com.android.internal.R.styleable.Theme_windowAnimationStyle, 0);
+            isCompact = a.getBoolean(
+                    com.android.internal.R.styleable.Theme_panelMenuIsCompact, false);
+            listPresenterTheme = a.getResourceId(
+                    com.android.internal.R.styleable.Theme_panelMenuListTheme,
+                    com.android.internal.R.style.Theme_ExpandedMenu);
             a.recycle();
         }
 
@@ -3102,22 +3171,26 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             this.menu = menu;
         }
 
-        MenuView getExpandedMenuView(MenuPresenter.Callback cb) {
+        MenuView getListMenuView(MenuPresenter.Callback cb) {
             if (menu == null) return null;
 
-            getIconMenuView(cb); // Need this initialized to know where our offset goes
-
-            if (expandedMenuPresenter == null) {
-                expandedMenuPresenter = new ListMenuPresenter(
-                        com.android.internal.R.layout.list_menu_item_layout,
-                        com.android.internal.R.style.Theme_ExpandedMenu);
-                expandedMenuPresenter.setCallback(cb);
-                expandedMenuPresenter.setId(com.android.internal.R.id.list_menu_presenter);
-                menu.addMenuPresenter(expandedMenuPresenter);
+            if (!isCompact) {
+                getIconMenuView(cb); // Need this initialized to know where our offset goes
             }
 
-            expandedMenuPresenter.setItemIndexOffset(iconMenuPresenter.getNumActualItemsShown());
-            MenuView result = expandedMenuPresenter.getMenuView(decorView);
+            if (listMenuPresenter == null) {
+                listMenuPresenter = new ListMenuPresenter(
+                        com.android.internal.R.layout.list_menu_item_layout, listPresenterTheme);
+                listMenuPresenter.setCallback(cb);
+                listMenuPresenter.setId(com.android.internal.R.id.list_menu_presenter);
+                menu.addMenuPresenter(listMenuPresenter);
+            }
+
+            if (iconMenuPresenter != null) {
+                listMenuPresenter.setItemIndexOffset(
+                        iconMenuPresenter.getNumActualItemsShown());
+            }
+            MenuView result = listMenuPresenter.getMenuView(decorView);
 
             return result;
         }
@@ -3222,6 +3295,69 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             };
         }
 
+    }
+
+    static class RotationWatcher extends IRotationWatcher.Stub {
+        private Handler mHandler;
+        private final Runnable mRotationChanged = new Runnable() {
+            public void run() {
+                dispatchRotationChanged();
+            }
+        };
+        private final ArrayList<WeakReference<PhoneWindow>> mWindows =
+                new ArrayList<WeakReference<PhoneWindow>>();
+        private boolean mIsWatching;
+
+        @Override
+        public void onRotationChanged(int rotation) throws RemoteException {
+            mHandler.post(mRotationChanged);
+        }
+
+        public void addWindow(PhoneWindow phoneWindow) {
+            synchronized (mWindows) {
+                if (!mIsWatching) {
+                    try {
+                        WindowManagerHolder.sWindowManager.watchRotation(this);
+                        mHandler = new Handler();
+                        mIsWatching = true;
+                    } catch (RemoteException ex) {
+                        Log.e(TAG, "Couldn't start watching for device rotation", ex);
+                    }
+                }
+                mWindows.add(new WeakReference<PhoneWindow>(phoneWindow));
+            }
+        }
+
+        public void removeWindow(PhoneWindow phoneWindow) {
+            synchronized (mWindows) {
+                int i = 0;
+                while (i < mWindows.size()) {
+                    final WeakReference<PhoneWindow> ref = mWindows.get(i);
+                    final PhoneWindow win = ref.get();
+                    if (win == null || win == phoneWindow) {
+                        mWindows.remove(i);
+                    } else {
+                        i++;
+                    }
+                }
+            }
+        }
+
+        void dispatchRotationChanged() {
+            synchronized (mWindows) {
+                int i = 0;
+                while (i < mWindows.size()) {
+                    final WeakReference<PhoneWindow> ref = mWindows.get(i);
+                    final PhoneWindow win = ref.get();
+                    if (win != null) {
+                        win.onOptionsPanelRotationChanged();
+                        i++;
+                    } else {
+                        mWindows.remove(i);
+                    }
+                }
+            }
+        }
     }
 
     /**

@@ -185,6 +185,9 @@ please see themes_device_defaults.xml.
         <item name="panelColorForeground">?android:attr/textColorPrimary</item>
         <item name="panelTextAppearance">?android:attr/textAppearance</item>
 
+        <item name="panelMenuIsCompact">false</item>
+        <item name="panelMenuListWidth">296dip</item>
+
         <!-- Scrollbar attributes -->
         <item name="scrollbarFadeDuration">250</item>
         <item name="scrollbarDefaultDelayBeforeFade">300</item> 
@@ -755,6 +758,22 @@ please see themes_device_defaults.xml.
         <item name="android:background">@null</item>
     </style>
 
+    <style name="Theme.Holo.CompactMenu">
+        <!-- Menu/item attributes -->
+        <item name="android:itemTextAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:listViewStyle">@android:style/Widget.Holo.ListView</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.DropDownUp</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="Theme.Holo.Light.CompactMenu">
+        <!-- Menu/item attributes -->
+        <item name="android:itemTextAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:listViewStyle">@android:style/Widget.Holo.Light.ListView</item>
+        <item name="android:windowAnimationStyle">@android:style/Animation.DropDownUp</item>
+        <item name="android:background">@null</item>
+    </style>
+
     <!-- @hide -->
     <style name="Theme.Dialog.AppError" parent="Theme.Holo.Dialog">
         <item name="windowFrame">@null</item>
@@ -947,12 +966,16 @@ please see themes_device_defaults.xml.
         <item name="toastFrameBackground">@android:drawable/toast_frame_holo</item>
         
         <!-- Panel attributes -->
-        <item name="panelBackground">@android:drawable/menu_background</item>
+        <item name="panelBackground">@android:drawable/menu_dropdown_panel_holo_dark</item>
         <item name="panelFullBackground">@android:drawable/menu_background_fill_parent_width</item>
         <!-- These three attributes do not seems to be used by the framework. Declared public though -->
         <item name="panelColorBackground">#000</item>
         <item name="panelColorForeground">?android:attr/textColorPrimary</item>
         <item name="panelTextAppearance">?android:attr/textAppearance</item>
+
+        <item name="panelMenuIsCompact">true</item>
+        <item name="panelMenuListWidth">250dip</item>
+        <item name="panelMenuListTheme">@android:style/Theme.Holo.CompactMenu</item>
 
         <!-- Scrollbar attributes -->
         <item name="scrollbarFadeDuration">250</item>
@@ -1244,12 +1267,16 @@ please see themes_device_defaults.xml.
         <item name="toastFrameBackground">@android:drawable/toast_frame_holo</item>
         
         <!-- Panel attributes -->
-        <item name="panelBackground">@android:drawable/menu_background</item>
+        <item name="panelBackground">@android:drawable/menu_dropdown_panel_holo_light</item>
         <item name="panelFullBackground">@android:drawable/menu_background_fill_parent_width</item>
         <!-- These three attributes do not seems to be used by the framework. Declared public though -->
         <item name="panelColorBackground">#000</item>
         <item name="panelColorForeground">?android:attr/textColorPrimary</item>
         <item name="panelTextAppearance">?android:attr/textAppearance</item>
+
+        <item name="panelMenuIsCompact">true</item>
+        <item name="panelMenuListWidth">250dip</item>
+        <item name="panelMenuListTheme">@android:style/Theme.Holo.Light.CompactMenu</item>
 
         <!-- Scrollbar attributes -->
         <item name="scrollbarFadeDuration">250</item>
