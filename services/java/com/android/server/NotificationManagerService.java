@@ -325,6 +325,7 @@ public class NotificationManagerService extends INotificationManager.Stub
             
             if (action.equals(Intent.ACTION_PACKAGE_REMOVED)
                     || action.equals(Intent.ACTION_PACKAGE_RESTARTED)
+                    || action.equals(Intent.ACTION_PACKAGE_CHANGED)
                     || (queryRestart=action.equals(Intent.ACTION_QUERY_PACKAGE_RESTART))
                     || action.equals(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE)) {
                 String pkgList[] = null;
@@ -430,6 +431,7 @@ public class NotificationManagerService extends INotificationManager.Stub
         mContext.registerReceiver(mIntentReceiver, filter);
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        pkgFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         pkgFilter.addAction(Intent.ACTION_PACKAGE_RESTARTED);
         pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
         pkgFilter.addDataScheme("package");
