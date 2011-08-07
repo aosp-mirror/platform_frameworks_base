@@ -6664,6 +6664,13 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    public void getInitialDisplaySize(Point size) {
+        synchronized(mWindowMap) {
+            size.x = mInitialDisplayWidth;
+            size.y = mInitialDisplayHeight;
+        }
+    }
+
     public int getMaximumSizeDimension() {
         synchronized(mWindowMap) {
             // Do this based on the raw screen size, until we are smarter.

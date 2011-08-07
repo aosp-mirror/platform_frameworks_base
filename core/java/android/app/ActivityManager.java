@@ -864,6 +864,15 @@ public class ActivityManager {
          */
         public boolean lowMemory;
 
+        /** @hide */
+        public long hiddenAppThreshold;
+        /** @hide */
+        public long secondaryServerThreshold;
+        /** @hide */
+        public long visibleAppThreshold;
+        /** @hide */
+        public long foregroundAppThreshold;
+
         public MemoryInfo() {
         }
 
@@ -875,12 +884,20 @@ public class ActivityManager {
             dest.writeLong(availMem);
             dest.writeLong(threshold);
             dest.writeInt(lowMemory ? 1 : 0);
+            dest.writeLong(hiddenAppThreshold);
+            dest.writeLong(secondaryServerThreshold);
+            dest.writeLong(visibleAppThreshold);
+            dest.writeLong(foregroundAppThreshold);
         }
         
         public void readFromParcel(Parcel source) {
             availMem = source.readLong();
             threshold = source.readLong();
             lowMemory = source.readInt() != 0;
+            hiddenAppThreshold = source.readLong();
+            secondaryServerThreshold = source.readLong();
+            visibleAppThreshold = source.readLong();
+            foregroundAppThreshold = source.readLong();
         }
 
         public static final Creator<MemoryInfo> CREATOR
