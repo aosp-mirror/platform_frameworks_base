@@ -1757,6 +1757,26 @@ public class AudioManager {
 
     /**
      * @hide
+     * Returns the current remote control client.
+     * @param rcClientId the counter value that matches the extra
+     *     {@link AudioManager#EXTRA_REMOTE_CONTROL_CLIENT} in the
+     *     {@link AudioManager#REMOTE_CONTROL_CLIENT_CHANGED} event
+     * @return the current IRemoteControlClient from which information to display on the remote
+     *     control can be retrieved, or null if rcClientId doesn't match the current generation
+     *     counter.
+     */
+    public IRemoteControlClient getRemoteControlClient(int rcClientId) {
+        IAudioService service = getService();
+        try {
+            return service.getRemoteControlClient(rcClientId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in getRemoteControlClient "+e);
+            return null;
+        }
+    }
+
+    /**
+     * @hide
      * Definitions of constants to be used in {@link android.media.IRemoteControlClient}.
      */
     public final class RemoteControlParameters {
