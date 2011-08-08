@@ -724,8 +724,9 @@ private:
                                     int sessionId,
                                     status_t *status);
 
-                    AudioStreamOut* getOutput() { return mOutput; }
-                    virtual audio_stream_t* stream() { return &mOutput->stream->common; }
+                    AudioStreamOut* getOutput();
+                    AudioStreamOut* clearOutput();
+                    virtual audio_stream_t* stream();
 
                     void        suspend() { mSuspended++; }
                     void        restore() { if (mSuspended) mSuspended--; }
@@ -967,7 +968,7 @@ private:
                 ~RecordThread();
 
         virtual bool        threadLoop();
-        virtual status_t    readyToRun() { return NO_ERROR; }
+        virtual status_t    readyToRun();
         virtual void        onFirstRef();
 
         virtual status_t    initCheck() const { return (mInput == 0) ? NO_INIT : NO_ERROR; }
@@ -984,8 +985,9 @@ private:
                 status_t    start(RecordTrack* recordTrack);
                 void        stop(RecordTrack* recordTrack);
                 status_t    dump(int fd, const Vector<String16>& args);
-                AudioStreamIn* getInput() { return mInput; }
-                virtual audio_stream_t* stream() { return &mInput->stream->common; }
+                AudioStreamIn* getInput();
+                AudioStreamIn* clearInput();
+                virtual audio_stream_t* stream();
 
         virtual status_t    getNextBuffer(AudioBufferProvider::Buffer* buffer);
         virtual void        releaseBuffer(AudioBufferProvider::Buffer* buffer);
