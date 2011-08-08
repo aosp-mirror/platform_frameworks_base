@@ -858,8 +858,9 @@ public class TouchExplorer implements Explorer {
     /**
      * Clears the internal state of this explorer.
      */
-    private void clear() {
+    public void clear() {
         mSendHoverDelayed.remove();
+        mPerformLongPressDelayed.remove();
         mPointerTracker.clear();
         mLastTouchExploreEvent = null;
         mCurrentState = STATE_TOUCH_EXPLORING;

@@ -56,6 +56,11 @@ public class AccessibilityInputFilter extends InputFilter {
          * @param policyFlags The policy flags associated with the event.
          */
         public void clear(MotionEvent event, int policyFlags);
+
+        /**
+         * Requests that the explorer clears its internal state.
+         */
+        public void clear();
     }
 
     private TouchExplorer mTouchExplorer;
@@ -71,6 +76,7 @@ public class AccessibilityInputFilter extends InputFilter {
         if (DEBUG) {
             Slog.d(TAG, "Accessibility input filter installed.");
         }
+        mTouchExplorer = new TouchExplorer(this, mContext);
         super.onInstalled();
     }
 
@@ -79,6 +85,7 @@ public class AccessibilityInputFilter extends InputFilter {
         if (DEBUG) {
             Slog.d(TAG, "Accessibility input filter uninstalled.");
         }
+        mTouchExplorer.clear();
         super.onUninstalled();
     }
 
@@ -93,11 +100,7 @@ public class AccessibilityInputFilter extends InputFilter {
             int deviceId = event.getDeviceId();
             if (mTouchscreenSourceDeviceId != deviceId) {
                 mTouchscreenSourceDeviceId = deviceId;
-                if (mTouchExplorer != null) {
-                    mTouchExplorer.clear(motionEvent, policyFlags);
-                } else {
-                    mTouchExplorer = new TouchExplorer(this, mContext);
-                }
+                mTouchExplorer.clear(motionEvent, policyFlags);
             }
             if ((policyFlags & WindowManagerPolicy.FLAG_PASS_TO_USER) != 0) {
                 mTouchExplorer.onMotionEvent(motionEvent, policyFlags);
