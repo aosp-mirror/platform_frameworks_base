@@ -38,18 +38,17 @@ import java.util.concurrent.TimeUnit;
 public abstract class EventsTest
         extends ActivityInstrumentationTestCase2<BasicAnimatorActivity> {
 
-    private static final int ANIM_DURATION = 400;
-    private static final int ANIM_DELAY = 100;
-    private static final int ANIM_MID_DURATION = ANIM_DURATION / 2;
-    private static final int ANIM_MID_DELAY = ANIM_DELAY / 2;
-    private static final int FUTURE_RELEASE_DELAY = 50;
-    private static final int TIMEOUT = ANIM_DURATION + ANIM_DELAY + FUTURE_RELEASE_DELAY;
+    protected static final int ANIM_DURATION = 400;
+    protected static final int ANIM_DELAY = 100;
+    protected static final int ANIM_MID_DURATION = ANIM_DURATION / 2;
+    protected static final int ANIM_MID_DELAY = ANIM_DELAY / 2;
+    protected static final int FUTURE_RELEASE_DELAY = 50;
 
     private boolean mStarted;  // tracks whether we've received the onAnimationStart() callback
-    private boolean mRunning;  // tracks whether we've started the animator
+    protected boolean mRunning;  // tracks whether we've started the animator
     private boolean mCanceled; // trackes whether we've canceled the animator
-    private Animator.AnimatorListener mFutureListener; // mechanism for delaying the end of the test
-    private FutureWaiter mFuture; // Mechanism for waiting for the UI test to complete
+    protected Animator.AnimatorListener mFutureListener; // mechanism for delaying the end of the test
+    protected FutureWaiter mFuture; // Mechanism for waiting for the UI test to complete
     private Animator.AnimatorListener mListener; // Listener that handles/tests the events
 
     protected Animator mAnimator; // The animator used in the tests. Must be set in subclass
@@ -59,7 +58,7 @@ public abstract class EventsTest
      * Cancels the given animator. Used to delay cancellation until some later time (after the
      * animator has started playing).
      */
-    static class Canceler implements Runnable {
+    protected static class Canceler implements Runnable {
         Animator mAnim;
         FutureWaiter mFuture;
         public Canceler(Animator anim, FutureWaiter future) {
@@ -75,6 +74,13 @@ public abstract class EventsTest
             }
         }
     };
+
+    /**
+     * Timeout length, based on when the animation should reasonably be complete.
+     */
+    protected long getTimeout() {
+        return ANIM_DURATION + ANIM_DELAY + FUTURE_RELEASE_DELAY;
+    }
 
     /**
      * Ends the given animator. Used to delay ending until some later time (after the
@@ -102,7 +108,7 @@ public abstract class EventsTest
      * it releases it after some further delay, to give the test time to do other things right
      * after an animation ends.
      */
-    static class FutureReleaseListener extends AnimatorListenerAdapter {
+    protected static class FutureReleaseListener extends AnimatorListenerAdapter {
         FutureWaiter mFuture;
 
         public FutureReleaseListener(FutureWaiter future) {
@@ -232,7 +238,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -255,7 +261,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -278,7 +284,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -301,7 +307,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -324,7 +330,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -347,7 +353,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT, TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -371,7 +377,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(),  TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -395,7 +401,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(),  TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -412,7 +418,7 @@ public abstract class EventsTest
                     // would have finished. This tests to make sure that we're not calling
                     // the listeners with cancel/end callbacks since they won't be called
                     // with the start event.
-                    mFutureListener = new FutureReleaseListener(mFuture, TIMEOUT);
+                    mFutureListener = new FutureReleaseListener(mFuture, getTimeout());
                     Handler handler = new Handler();
                     mRunning = true;
                     mAnimator.start();
@@ -422,7 +428,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT + 100,  TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout() + 100,  TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -439,7 +445,7 @@ public abstract class EventsTest
                     // would have finished. This tests to make sure that we're not calling
                     // the listeners with cancel/end callbacks since they won't be called
                     // with the start event.
-                    mFutureListener = new FutureReleaseListener(mFuture, TIMEOUT);
+                    mFutureListener = new FutureReleaseListener(mFuture, getTimeout());
                     Handler handler = new Handler();
                     mRunning = true;
                     mAnimator.start();
@@ -449,7 +455,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT + 100,  TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout() + 100,  TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -473,7 +479,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(),  TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -497,7 +503,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(),  TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -521,7 +527,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(),  TimeUnit.MILLISECONDS);
      }
 
     /**
@@ -545,7 +551,7 @@ public abstract class EventsTest
                 }
             }
         });
-        mFuture.get(TIMEOUT,  TimeUnit.MILLISECONDS);
+        mFuture.get(getTimeout(),  TimeUnit.MILLISECONDS);
      }
 
 }

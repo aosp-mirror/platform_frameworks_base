@@ -95,6 +95,12 @@ public final class AnimatorSet extends Animator {
      */
     boolean mTerminated = false;
 
+    /**
+     * Indicates whether an AnimatorSet has been start()'d, whether or
+     * not there is a nonzero startDelay.
+     */
+    private boolean mStarted = false;
+
     // The amount of time in ms to delay starting the animation after start() is called
     private long mStartDelay = 0;
 
@@ -267,14 +273,14 @@ public final class AnimatorSet extends Animator {
     /**
      * {@inheritDoc}
      *
-     * <p>Note that canceling a <code>AnimatorSet</code> also cancels all of the animations that it is
-     * responsible for.</p>
+     * <p>Note that canceling a <code>AnimatorSet</code> also cancels all of the animations that it
+     * is responsible for.</p>
      */
     @SuppressWarnings("unchecked")
     @Override
     public void cancel() {
         mTerminated = true;
-        if (isRunning()) {
+        if (isStarted()) {
             ArrayList<AnimatorListener> tmpListeners = null;
             if (mListeners != null) {
                 tmpListeners = (ArrayList<AnimatorListener>) mListeners.clone();
@@ -296,6 +302,7 @@ public final class AnimatorSet extends Animator {
                     listener.onAnimationEnd(this);
                 }
             }
+            mStarted = false;
         }
     }
 
@@ -308,7 +315,7 @@ public final class AnimatorSet extends Animator {
     @Override
     public void end() {
         mTerminated = true;
-        if (isRunning()) {
+        if (isStarted()) {
             if (mSortedNodes.size() != mNodes.size()) {
                 // hasn't been started yet - sort the nodes now, then end them
                 sortNodes();
@@ -334,12 +341,13 @@ public final class AnimatorSet extends Animator {
                     listener.onAnimationEnd(this);
                 }
             }
+            mStarted = false;
         }
     }
 
     /**
-     * Returns true if any of the child animations of this AnimatorSet have been started and have not
-     * yet ended.
+     * Returns true if any of the child animations of this AnimatorSet have been started and have
+     * not yet ended.
      * @return Whether this AnimatorSet has been started and has not yet ended.
      */
     @Override
@@ -349,8 +357,12 @@ public final class AnimatorSet extends Animator {
                 return true;
             }
         }
-        // Also return true if we're currently running the startDelay animator
-        return (mDelayAnim != null && mDelayAnim.isRunning());
+        return false;
+    }
+
+    @Override
+    public boolean isStarted() {
+        return mStarted;
     }
 
     /**
@@ -435,6 +447,7 @@ public final class AnimatorSet extends Animator {
     @Override
     public void start() {
         mTerminated = false;
+        mStarted = true;
 
         // First, sort the nodes (if necessary). This will ensure that sortedNodes
         // contains the animation nodes in the correct order.
@@ -514,9 +527,17 @@ public final class AnimatorSet extends Animator {
             int numListeners = tmpListeners.size();
             for (int i = 0; i < numListeners; ++i) {
                 tmpListeners.get(i).onAnimationStart(this);
-                if (mNodes.size() == 0) {
-                    // Handle unusual case where empty AnimatorSet is started - should send out
-                    // end event immediately since the event will not be sent out at all otherwise
+            }
+        }
+        if (mNodes.size() == 0 && mStartDelay == 0) {
+            // Handle unusual case where empty AnimatorSet is started - should send out
+            // end event immediately since the event will not be sent out at all otherwise
+            mStarted = false;
+            if (mListeners != null) {
+                ArrayList<AnimatorListener> tmpListeners =
+                        (ArrayList<AnimatorListener>) mListeners.clone();
+                int numListeners = tmpListeners.size();
+                for (int i = 0; i < numListeners; ++i) {
                     tmpListeners.get(i).onAnimationEnd(this);
                 }
             }
@@ -536,6 +557,7 @@ public final class AnimatorSet extends Animator {
          */
         anim.mNeedsSort = true;
         anim.mTerminated = false;
+        anim.mStarted = false;
         anim.mPlayingSet = new ArrayList<Animator>();
         anim.mNodeMap = new HashMap<Animator, Node>();
         anim.mNodes = new ArrayList<Node>();
@@ -732,6 +754,7 @@ public final class AnimatorSet extends Animator {
                             tmpListeners.get(i).onAnimationEnd(mAnimatorSet);
                         }
                     }
+                    mAnimatorSet.mStarted = false;
                 }
             }
         }
@@ -936,9 +959,9 @@ public final class AnimatorSet extends Animator {
      * The <code>Builder</code> object is a utility class to facilitate adding animations to a
      * <code>AnimatorSet</code> along with the relationships between the various animations. The
      * intention of the <code>Builder</code> methods, along with the {@link
-     * AnimatorSet#play(Animator) play()} method of <code>AnimatorSet</code> is to make it possible to
-     * express the dependency relationships of animations in a natural way. Developers can also use
-     * the {@link AnimatorSet#playTogether(Animator[]) playTogether()} and {@link
+     * AnimatorSet#play(Animator) play()} method of <code>AnimatorSet</code> is to make it possible
+     * to express the dependency relationships of animations in a natural way. Developers can also
+     * use the {@link AnimatorSet#playTogether(Animator[]) playTogether()} and {@link
      * AnimatorSet#playSequentially(Animator[]) playSequentially()} methods if these suit the need,
      * but it might be easier in some situations to express the AnimatorSet of animations in pairs.
      * <p/>
