@@ -5847,6 +5847,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         mSelf.mCoreSettingsObserver = new CoreSettingsObserver(mSelf);
+
+        mSelf.mUsageStatsService.monitorPackages();
     }
 
     /**
