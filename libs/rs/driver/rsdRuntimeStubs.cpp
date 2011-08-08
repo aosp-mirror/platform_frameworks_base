@@ -42,41 +42,6 @@ using namespace android::renderscript;
 // Allocation
 //////////////////////////////////////////////////////////////////////////////
 
-static uint32_t SC_allocGetDimX(Allocation *a) {
-    return a->mHal.state.dimensionX;
-}
-
-static uint32_t SC_allocGetDimY(Allocation *a) {
-    return a->mHal.state.dimensionY;
-}
-
-static uint32_t SC_allocGetDimZ(Allocation *a) {
-    return a->mHal.state.dimensionZ;
-}
-
-static uint32_t SC_allocGetDimLOD(Allocation *a) {
-    return a->mHal.state.hasMipmaps;
-}
-
-static uint32_t SC_allocGetDimFaces(Allocation *a) {
-    return a->mHal.state.hasFaces;
-}
-
-static const void * SC_getElementAtX(Allocation *a, uint32_t x) {
-    const uint8_t *p = (const uint8_t *)a->getPtr();
-    return &p[a->mHal.state.elementSizeBytes * x];
-}
-
-static const void * SC_getElementAtXY(Allocation *a, uint32_t x, uint32_t y) {
-    const uint8_t *p = (const uint8_t *)a->getPtr();
-    return &p[a->mHal.state.elementSizeBytes * (x + y * a->mHal.state.dimensionX)];
-}
-
-static const void * SC_getElementAtXYZ(Allocation *a, uint32_t x, uint32_t y, uint32_t z) {
-    const uint8_t *p = (const uint8_t *)a->getPtr();
-    return &p[a->mHal.state.elementSizeBytes * (x + y * a->mHal.state.dimensionX +
-              z * a->mHal.state.dimensionX * a->mHal.state.dimensionY)];
-}
 
 static void SC_AllocationSyncAll2(Allocation *a, RsAllocationUsageType source) {
     GET_TLS();
@@ -112,12 +77,6 @@ static void SC_AllocationCopy2DRange(Allocation *dstAlloc,
                              width, height,
                              srcAlloc,
                              srcXoff, srcYoff, srcMip, srcFace);
-}
-
-
-const Allocation * SC_getAllocation(const void *ptr) {
-    GET_TLS();
-    return rsrGetAllocation(rsc, sc, ptr);
 }
 
 
@@ -599,18 +558,6 @@ static RsdSymbolTable gSyms[] = {
     { "_Z10rsIsObject7rs_font", (void *)&SC_IsObject, true },
 
     // Allocation ops
-    { "_Z19rsAllocationGetDimX13rs_allocation", (void *)&SC_allocGetDimX, true },
-    { "_Z19rsAllocationGetDimY13rs_allocation", (void *)&SC_allocGetDimY, true },
-    { "_Z19rsAllocationGetDimZ13rs_allocation", (void *)&SC_allocGetDimZ, true },
-    { "_Z21rsAllocationGetDimLOD13rs_allocation", (void *)&SC_allocGetDimLOD, true },
-    { "_Z23rsAllocationGetDimFaces13rs_allocation", (void *)&SC_allocGetDimFaces, true },
-
-    { "_Z14rsGetElementAt13rs_allocationj", (void *)&SC_getElementAtX, true },
-    { "_Z14rsGetElementAt13rs_allocationjj", (void *)&SC_getElementAtXY, true },
-    { "_Z14rsGetElementAt13rs_allocationjjj", (void *)&SC_getElementAtXYZ, true },
-
-    { "_Z15rsGetAllocationPKv", (void *)&SC_getAllocation, true },
-
     { "_Z21rsAllocationMarkDirty13rs_allocation", (void *)&SC_AllocationSyncAll, true },
     { "_Z20rsgAllocationSyncAll13rs_allocation", (void *)&SC_AllocationSyncAll, false },
     { "_Z20rsgAllocationSyncAll13rs_allocationj", (void *)&SC_AllocationSyncAll2, false },
