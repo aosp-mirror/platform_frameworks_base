@@ -1779,7 +1779,7 @@ public final class ViewRootImpl extends Handler implements ViewParent,
 
         if (fullRedrawNeeded) {
             mAttachInfo.mIgnoreDirtyState = true;
-            dirty.union(0, 0, (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
+            dirty.set(0, 0, (int) (mWidth * appScale + 0.5f), (int) (mHeight * appScale + 0.5f));
         }
 
         if (mAttachInfo.mHardwareRenderer != null && mAttachInfo.mHardwareRenderer.isEnabled()) {
