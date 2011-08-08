@@ -108,7 +108,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Code da servetsch terminà"</string>
     <string name="fcError" msgid="3327560126588500777">"Problem da connexiun u code da funcziun nunvalid"</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"La pagina d\'internet cuntegna ina errur."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"La pagina d\'internet cuntegna ina errur."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Impussibel da chattar la URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Il schema d\'autentificaziun da la site na vegn betg sustegnì."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"L\'autentificaziun n\'è betg reussida."</string>
@@ -490,10 +490,6 @@
     <skip />
     <!-- no translation found for permdesc_nfc (9171401851954407226) -->
     <skip />
-    <!-- no translation found for permlab_vpn (8345800584532175312) -->
-    <skip />
-    <!-- no translation found for permdesc_vpn (7093963230333602420) -->
-    <skip />
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"deactivar la bloccaziun da la tastatura"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permetta ad ina applicaziun da deactivar la bloccaziun da la tastatura e la protecziun cun il pled-clav associada. In exempel dad ina utilisaziun legitima: La bloccaziun da la tastatura vegn deactivada sche Vus retschavais in clom ed ella vegn reactivada sche Vus finis il telefon."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leger ils parameters da sincronisaziun"</string>
@@ -818,9 +814,9 @@
     <skip />
     <!-- no translation found for permdesc_setAlarm (5966966598149875082) -->
     <skip />
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
     <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modifitgar las autorisaziuns da geolocalisaziun dal navigatur"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permetta ad ina applicaziun da modifitgar las permissiuns da geolocalisaziun dal navigatur. Applicaziuns donnegiusas pon utilisar questa funcziun per trametter datas da posiziun a websites arbitraras."</string>
@@ -937,6 +933,8 @@
     <string name="cut" msgid="3092569408438626261">"Tagliar ora"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Encollar"</string>
+    <!-- no translation found for pasteDisabled (7259254654641456570) -->
+    <skip />
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Copiar l\'URL"</string>
@@ -1005,6 +1003,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Volumen dal svegliarin"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volumen dals avis"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volumen"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Tun da scalin predefinì"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Tun da scalin predefinì (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Silenzius"</string>

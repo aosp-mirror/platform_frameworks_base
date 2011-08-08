@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Código de función completo."</string>
     <string name="fcError" msgid="3327560126588500777">"Problema de conexión o código de función no válido."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"Aceptar"</string>
-    <string name="httpError" msgid="2567300624552921790">"La página web contiene un error."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"La página web contiene un error."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"No se ha podido encontrar la dirección URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"No se admite el programa de autenticación del sitio."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"La autenticación no se ha realizado correctamente."</string>
@@ -461,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Admite una aplicación que ve la configuración del teléfono Bluetooth local, y realiza y acepta conexiones con dispositivos vinculados."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlar la Transmisión de datos en proximidad"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Permite que una aplicación se comunique con etiquetas, tarjetas y lectores de Transmisión de datos en proximidad (NFC)."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"Interceptar y modificar todo el tráfico de red"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Permite que una aplicación intercepte e inspeccione todo el tráfico de red para establecer una conexión VPN. Las aplicaciones maliciosas pueden monitorear, redireccionar o modificar paquetes de red sin que lo sepas."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"desactivar el bloqueo"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Admite una aplicación que desactiva el bloqueo y cualquier seguridad con contraseña relacionada. Un ejemplo legítimo de esto es el bloqueo desactivado por el teléfono cuando recibe una llamada telefónica entrante, y luego la reactivación del bloqueo cuando finaliza la llamada."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"leer la configuración de sincronización"</string>
@@ -722,8 +720,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Permite a una aplicación modificar el historial y los marcadores del navegador almacenados en tu teléfono. Las aplicaciones maliciosas pueden utilizarlo para borrar o modificar tus datos."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"configurar alarma en reloj alarma"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Permite que la aplicación configure una alarma en una aplicación instalada de reloj alarma. Es posible que algunas aplicaciones de reloj alarma no implementen esta función."</string>
-    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"Buzones de voz de acceso administrados por esta aplicación."</string>
-    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Permite que la aplicación almacene y recupere solo buzones de voz a los que sus servicios asociados pueden acceder."</string>
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
+    <skip />
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modificar los permisos de ubicación geográfica del navegador"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permite que una aplicación modifique los permisos de ubicación geográfica del navegador. Las aplicaciones maliciosas pueden utilizarlos para permitir el envío de información sobre la ubicación a sitos web de forma arbitraria."</string>
     <string name="save_password_message" msgid="767344687139195790">"¿Quieres recordar esta contraseña en el navegador?"</string>
@@ -839,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Cortar"</string>
     <string name="copy" msgid="2681946229533511987">"Copiar"</string>
     <string name="paste" msgid="5629880836805036433">"Pegar"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Nada que pegar"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Copiar URL"</string>
@@ -900,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Volumen de la alarma"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volumen de notificación"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volumen"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Tono de llamada predeterminado"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Tono de llamada predeterminado (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Silencioso"</string>

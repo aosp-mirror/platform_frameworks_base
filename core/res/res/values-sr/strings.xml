@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Кôд функције је извршен."</string>
     <string name="fcError" msgid="3327560126588500777">"Проблеми са везом или неважећи кôд функције."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"Потврди"</string>
-    <string name="httpError" msgid="2567300624552921790">"Веб страница садржи грешку."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Веб страница садржи грешку."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Није било могуће пронаћи URL адресу."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Шема потврде идентитета сајта није подржана."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Потврда идентитета није успела."</string>
@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Омогућава да апликације виде које тастере притискате чак и док радите у некој другој апликацији (нпр. када уносите лозинку). Нормалне апликације никада не би требало да је користе."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"обавезивање на методу уноса"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Омогућава власнику да се обавеже на интерфејс методе уноса највишег нивоа. Обичне апликације никада не би требало да је користе."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"обавезивање на текстуалну услугу"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Омогућава власнику да се обавеже на интерфејс текстуалне услуге највишег нивоа (нпр. SpellCheckerService). Обичне апликације никада не би требало да је користе."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"обавезивање на позадину"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Омогућава власнику да се обавеже на интерфејс позадине највишег нивоа. Обичне апликације никада не би требало да је користе."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"обавезивање на услугу виџета"</string>
@@ -463,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Омогућава да апликација види конфигурацију локалног Bluetooth телефона, као и да успоставља и прихвата везе са упареним уређајима."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"контрола комуникације у ужем пољу (Near Field Communication)"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Омогућава апликацији да комуницира са ознакама, картицама и читачима комуникације у ужем пољу (Near Field Communication – NFC)."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"пресретање и измена целокупног мрежног саобраћаја"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Омогућава апликацији да пресреће и прегледа сав мрежни саобраћај да би успоставила VPN везу. Злонамерне апликације могу да прате, преусмеравају или мењају мрежне пакете без вашег знања."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"онемогућавање закључавања тастатуре"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Омогућава да апликација онемогући закључавање тастатуре и свих безбедносних мера успостављених на основу лозинке. У оправдане примере додељивања такве дозволе спада онемогућавање закључавања тастатуре при пријему долазећег телефонског позива и поновно омогућавање тастатуре по његовом завршетку."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"читање подешавања синхронизације"</string>
@@ -724,9 +720,9 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Омогућава да апликација измени историју и обележиваче у прегледачу сачуване на телефону. Злонамерне апликације могу то да злоупотребе и да избришу или измене податке у прегледачу."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"подешавање аларма у будилнику"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Дозвољава да апликација подеси аларм у инсталираној апликацији будилника. Неке апликације будилника можда не примењују ову функцију."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
     <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Измена дозвола за географске локације прегледача"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Омогућава да апликација измени дозволе за утврђивање географске локације у прегледачу. Злонамерне апликације то могу да злоупотребе и искористе за слање информација о локацији насумичним веб сајтовима."</string>
@@ -843,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Исеци"</string>
     <string name="copy" msgid="2681946229533511987">"Копирај"</string>
     <string name="paste" msgid="5629880836805036433">"Налепи"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Ништа није копирано"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Копирај URL адресу"</string>
@@ -904,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Јачина звука аларма"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Јачина звука за обавештења"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Јачина звука"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Подразумевани звук звона"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Подразумевани звук звона (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Нечујно"</string>
@@ -917,22 +926,14 @@
     <item quantity="one" msgid="1634101450343277345">"Доступна је отворена Wi-Fi мрежа"</item>
     <item quantity="other" msgid="7915895323644292768">"Доступне су отворене Wi-Fi мреже"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Wi-Fi мрежа је онемогућена"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Wi-Fi мрежа је привремено онемогућена због лоше везе."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Покрените Wi-Fi Direct. Тиме ћете искључити клијента/хотспот за Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Покретање Wi-Fi Direct везе није успело"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Захтев за подешавање Wi-Fi Direct везе са адресе <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Кликните на Потврди да бисте прихватили."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Захтев за подешавање Wi-Fi Direct везе са адресе <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Унесите PIN да бисте наставили."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Потребно је да унесете WPS PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> на равноправном уређају <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> да би се наставило подешавање везе"</string>
     <string name="select_character" msgid="3365550120617701745">"Уметање знака"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Непозната апликација"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Слање SMS порука"</string>
@@ -975,8 +976,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Повезан као медијски уређај"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Повезан као камера"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Повезан као инсталациони програм"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Повезано са USB додатком"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Додирните за друге USB опције"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Форматирање USB меморије"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Форматирање SD картице"</string>
@@ -1150,6 +1150,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Прикажи све..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Избор активности"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Дељење са..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Уређај је закључан."</string>
 </resources>

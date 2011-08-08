@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"A funkciókód kész."</string>
     <string name="fcError" msgid="3327560126588500777">"Kapcsolódási probléma vagy érvénytelen funkciókód."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"Hiba van a weboldalon."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Hiba van a weboldalon."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Az URL nem található."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"A webhely azonosítási sémája nem támogatott."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Az azonosítás nem sikerült."</string>
@@ -461,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Lehetővé teszi egy alkalmazás számára a helyi Bluetooth telefon konfigurációjának megtekintését, valamint kapcsolatok kezdeményezését és fogadását a párosított eszközökkel."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"NFC technológia vezérlése"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Lehetővé teszi az alkalmazások számára, hogy NFC (Near Field Communication - kis hatósugarú vezeték nélküli kommunikáció) technológiát használó címkékkel, kártyákkal és leolvasókkal kommunikáljanak."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"teljes hálózati forgalom elfogása és módosítása"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Lehetővé teszi egy alkalmazás számára, hogy elfogja és megvizsgálja a teljes hálózati forgalmat VPN-kapcsolat létrehozásához. A rosszindulatú alkalmazások a tudta nélkül figyelhetik, átirányíthatják vagy módosíthatják a hálózati csomagokat."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"billentyűzár kikapcsolása"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Lehetővé teszi egy alkalmazás számára a billentyűzár és a kapcsolódó jelszavas biztonság kikapcsolását. Ennek egy szabályos példája, amikor a telefon kikapcsolja a billentyűzárat egy beérkező hívás fogadásakor, majd a hívás befejezése után újra bekapcsolja azt."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"szinkronizálási beállítások olvasása"</string>
@@ -722,8 +720,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Lehetővé teszi egy alkalmazás számára, hogy módosítsa a telefonon tárolt böngészési előzményeket és könyvjelzőket. A rosszindulatú alkalmazások felhasználhatják ezt a böngésző adatainak törlésére vagy módosítására."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"ébresztő beállítása az ébresztőórában"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Lehetővé teszi az alkalmazások számára, hogy beállítsanak egy ébresztőt egy telepített ébresztőóra alkalmazásban. Egyes ilyen alkalmazásokban lehet, hogy nem működik ez a funkció."</string>
-    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"Hozzáférés az alkalmazás által kezelt hangüzenetekhez"</string>
-    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Lehetővé teszi, hogy az alkalmazás csak azokat a hangüzeneteket tárolja és kérje le, amelyekhez a kapcsolódó szolgáltatás hozzáfér."</string>
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
+    <skip />
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"A böngésző helymeghatározási engedélyeinek módosítása"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Lehetővé teszi egy alkalmazás számára, hogy módosítsa a böngésző helymeghatározási engedélyeit. A rosszindulatú alkalmazások kihasználhatják ezt arra, hogy helyadatokat küldjenek tetszőleges webhelyeknek."</string>
     <string name="save_password_message" msgid="767344687139195790">"Szeretné, hogy a böngésző megjegyezze a jelszót?"</string>
@@ -839,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Kivágás"</string>
     <string name="copy" msgid="2681946229533511987">"Másolás"</string>
     <string name="paste" msgid="5629880836805036433">"Beillesztés"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Nincs mit bemásolni"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"URL másolása"</string>
@@ -900,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Ébresztés hangereje"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Értesítés hangereje"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Hangerő"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Alapértelmezett csengőhang"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Alapértelmezett csengőhang (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Néma"</string>

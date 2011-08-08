@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"기능 코드가 완료되었습니다."</string>
     <string name="fcError" msgid="3327560126588500777">"연결에 문제가 있거나 기능 코드가 잘못되었습니다."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"확인"</string>
-    <string name="httpError" msgid="2567300624552921790">"웹페이지에 오류가 있습니다."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"웹페이지에 오류가 있습니다."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"URL을 찾을 수 없습니다."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"사이트 인증 스키마가 지원되지 않습니다."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"인증에 실패했습니다."</string>
@@ -461,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"애플리케이션이 로컬 Bluetooth 전화의 구성을 보고 페어링된 장치에 연결하며 연결을 수락할 수 있도록 합니다."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"NFC(Near Field Communication) 제어"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"애플리케이션에서 NFC(Near Field Communication) 태그, 카드 및 리더와 통신할 수 있습니다."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"모든 네트워크 트래픽을 가로채고 수정"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"애플리케이션이 모든 네트워크 트래픽을 가로채서 검사하여 VPN 연결을 설정하도록 허용합니다. 사용자 몰래 악성 애플리케이션이 네트워크 패킷을 모니터링, 리디렉션 또는 수정할 수 있습니다."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"키 잠금 사용 중지"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"애플리케이션이 키 잠금 및 관련 비밀번호 보안을 사용 중지할 수 있도록 합니다. 예를 들어, 휴대전화가 수신전화를 받을 때 키 잠금을 사용 중지했다가 통화가 끝나면 키 잠금을 다시 사용할 수 있습니다."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"동기화 설정 읽기"</string>
@@ -722,8 +720,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"애플리케이션이 휴대전화에 저장된 브라우저 기록 또는 북마크를 수정할 수 있도록 허용합니다. 이 경우 악성 애플리케이션이 브라우저의 데이터를 지우거나 수정할 수 있습니다."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"알람 시계에 알람 설정"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"실치된 알람 시계 애플리케이션에 알람을 설정하도록 허용합니다. 일부 알람 시계 애플리케이션은 이 기능을 구현하지 않을 수 있습니다."</string>
-    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"이 애플리케이션에서 관리하는 음성사서함에 액세스"</string>
-    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"애플리케이션이 관련 서비스에서 액세스할 수 있는 음성사서함만 저장하고 검색할 수 있도록 합니다."</string>
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
+    <skip />
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"브라우저 위치 정보 수정 권한"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"애플리케이션이 브라우저의 위치 정보 권한을 수정할 수 있도록 합니다. 악성 애플리케이션이 이를 사용하여 임의의 웹사이트에 위치 정보를 보낼 수도 있습니다."</string>
     <string name="save_password_message" msgid="767344687139195790">"브라우저에 이 비밀번호를 저장하시겠습니까?"</string>
@@ -839,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"잘라내기"</string>
     <string name="copy" msgid="2681946229533511987">"복사"</string>
     <string name="paste" msgid="5629880836805036433">"붙여넣기"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"붙여넣을 내용이 없습니다."</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"URL 복사"</string>
@@ -903,6 +904,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"알람 볼륨"</string>
     <string name="volume_notification" msgid="2422265656744276715">"알림 볼륨"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"볼륨"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"기본 벨소리"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"기본 벨소리(<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"무음"</string>

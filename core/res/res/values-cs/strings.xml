@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Požadavek zadaný pomocí kódu funkce byl úspěšně dokončen."</string>
     <string name="fcError" msgid="3327560126588500777">"Problém s připojením nebo neplatný kód funkce."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"Webová stránka obsahuje chybu."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Webová stránka obsahuje chybu."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Adresu URL nelze najít."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Schéma ověření webu není podporováno."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Ověření nebylo úspěšné."</string>
@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Umožňuje aplikacím sledovat, které klávesy používáte, a to i při práci s jinými aplikacemi (například při zadávání hesla). Běžné aplikace by toto nastavení nikdy neměly vyžadovat."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"vazba k metodě zadávání dat"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Umožňuje držiteli vázat se na nejvyšší úroveň rozhraní pro zadávání dat. Běžné aplikace by toto nastavení nikdy neměly využívat."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"navázat se na textovou službu"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Umožňuje držiteli vázat se na nejvyšší úroveň rozhraní textové služby (např. SpellCheckerService). Běžné aplikace by toto nastavení nikdy neměly potřebovat."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"vazba na tapetu"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Umožňuje držiteli navázat se na nejvyšší úroveň rozhraní tapety. Běžné aplikace by toto oprávnění nikdy neměly potřebovat."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"navázat se na službu widgetu"</string>
@@ -463,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Umožňuje aplikaci zobrazit konfiguraci místního telefonu s rozhraním Bluetooth, vytvářet připojení ke spárovaným zařízením a přijímat tato připojení."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ovládat technologii NFC"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Umožňuje aplikaci komunikovat se štítky, kartami a čtečkami s podporou technologie NFC."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"zachytit a upravit veškerý síťový provoz"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Umožňuje aplikaci zachytit a kontrolovat veškerý síťový provoz za účelem navázání připojení VPN. Škodlivé aplikace mohou sledovat, přesměrovat nebo měnit síťové pakety bez vašeho vědomí."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"vypnutí zámku kláves"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Umožňuje aplikaci vypnout zámek kláves a související zabezpečení heslem. Příkladem oprávněného použití této funkce je vypnutí zámku klávesnice při příchozím hovoru a jeho opětovné zapnutí po skončení hovoru."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"čtení nastavení synchronizace"</string>
@@ -724,9 +720,9 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Umožní aplikaci změnit historii či záložky prohlížeče uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit data Prohlížeče."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"nastavit budík v budíku"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Dovoluje aplikaci nastavit budík v nainstalované aplikaci budíku. Některé budíkové aplikace nemusí tuto funkci implementovat."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
     <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Změnit oprávnění prohlížeče poskytovat informace o zeměpisné poloze"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Umožňuje aplikaci změnit oprávnění prohlížeče poskytovat informace o zeměpisné poloze. Škodlivé aplikace mohou toto nastavení použít k odesílání informací o umístění na libovolné webové stránky."</string>
@@ -843,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Vyjmout"</string>
     <string name="copy" msgid="2681946229533511987">"Kopírovat"</string>
     <string name="paste" msgid="5629880836805036433">"Vložit"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Není co vložit"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Kopírovat adresu URL"</string>
@@ -904,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Hlasitost budíku"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Hlasitost oznámení"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Hlasitost"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Výchozí vyzváněcí tón"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Výchozí vyzváněcí tón (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Ticho"</string>
@@ -917,22 +926,14 @@
     <item quantity="one" msgid="1634101450343277345">"K dispozici je veřejná síť WiFi"</item>
     <item quantity="other" msgid="7915895323644292768">"Jsou k dispozici veřejné sítě WiFi"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Síť Wi-Fi byla zakázána"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Síť Wi-Fi byla dočasně zakázána kvůli problémům s připojením."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Přímé připojení sítě Wi-Fi"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Spustit provoz přímého připojení sítě Wi-Fi. Tato možnost vypne provoz sítě Wi-Fi v režimu klient/hotspot."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Přímé připojení sítě Wi-Fi se nepodařilo spustit"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Žádost o nastavení přímého připojení sítě Wi-Fi z adresy <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Chcete-li žádost přijmout, klikněte na tlačítko OK."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Žádost o nastavení přímého připojení sítě Wi-Fi z adresy <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Pokračujte zadáním kódu PIN."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Chcete-li pokračovat v nastavení připojení, je potřeba zadat kód PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> ve sdíleném zařízení <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Vkládání znaků"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Neznámá aplikace"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Odesílání zpráv SMS"</string>
@@ -975,8 +976,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Připojeno jako mediální zařízení"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Připojeno jako fotoaparát"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Připojeno jako instalátor"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Připojeno k perifernímu zařízení USB"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Dotykem zobrazíte další možnosti USB"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formátovat úložiště USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formátovat kartu SD"</string>
@@ -1150,6 +1150,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Zobrazit vše..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Vybrat činnost"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Sdílet s..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Zařízení je uzamčeno."</string>
 </resources>

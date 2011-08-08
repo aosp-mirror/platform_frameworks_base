@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Код функции выполнен."</string>
     <string name="fcError" msgid="3327560126588500777">"Неполадки подключения или неверный код функции."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"ОК"</string>
-    <string name="httpError" msgid="2567300624552921790">"Ошибка на веб-странице."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Ошибка на веб-странице."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Не удалось найти URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Схема аутентификации сайта не поддерживается."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Не удалось провести аутентификацию."</string>
@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Позволяет приложению распознавать нажатые пользователем клавиши даже при работе с другим приложением (например, при вводе пароля). Не требуется для обычных приложений."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"связывать с методом ввода"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Позволяет выполнять привязку к интерфейсу ввода верхнего уровня. Не требуется для обычных приложений."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"привязка к текстовой службе"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Позволяет выполнять привязку к интерфейсу текстовой службы верхнего уровня (например, SpellCheckerService). Не требуется для обычных приложений."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"связать с фоновым рисунком"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Разрешает выполнять привязку к интерфейсу фонового рисунка верхнего уровня. Не требуется для обычных приложений."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"привязка к службе виджетов"</string>
@@ -463,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Позволяет приложению просматривать конфигурацию локального телефона Bluetooth, создавать подключения с сопряженными устройствами."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"управлять радиосвязью ближнего действия"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Позволяет приложению обмениваться данными с метками, картами и считывателями через радиосвязь ближнего действия (NFC)."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"перехватывать и изменять сетевой трафик"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Позволяет приложению перехватывать и проверять весь сетевой трафик для установки соединения VPN. Вредоносное ПО может отслеживать, перенаправлять или изменять сетевые пакеты без вашего ведома."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"отключать блокировку клавиатуры"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Позволяет приложению отключить блокировку клавиатуры и другие функции защиты паролем. Примером допустимого использования этой функции является отключение блокировки клавиатуры при получении входящего вызова и включение блокировки после завершения разговора."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"считывать настройки синхронизации"</string>
@@ -724,9 +720,9 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Разрешает приложению изменять историю и закладки браузера, сохраненные в вашем телефоне. Вредоносное ПО может пользоваться этим, чтобы стирать или изменять данные вашего браузера."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"настраивать сигнал будильника"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Позволяет настраивать сигнал установленного приложения будильника. Для некоторых приложений будильника эта функция может быть недоступна."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
     <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Изменить разрешения браузера для доступа к географическому местоположению"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Позволяет программе изменять разрешения браузера для доступа к географическому положению. Вредоносные программы могут пользоваться этим для отправки информации о местоположении на некоторые сайты."</string>
@@ -843,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Вырезать"</string>
     <string name="copy" msgid="2681946229533511987">"Копировать"</string>
     <string name="paste" msgid="5629880836805036433">"Вставить"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Текст для вставки отсутствует"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Копировать URL"</string>
@@ -904,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Громкость сигнала предупреждения"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Громкость уведомления"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Громкость"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Мелодия по умолчанию"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"По умолчанию (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Без звука"</string>
@@ -917,22 +926,14 @@
     <item quantity="one" msgid="1634101450343277345">"Найдена доступная сеть Wi-Fi"</item>
     <item quantity="other" msgid="7915895323644292768">"Найдены доступные сети Wi-Fi"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Сеть Wi-Fi отключена"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Из-за проблем с соединением сеть Wi-Fi временно отключена."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Начать соединение через Wi-Fi Direct. Клиент Wi-Fi и точка доступа будут отключены."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Не удалось запустить Wi-Fi Direct"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Чтобы принять запрос от устройства <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> на соединение через Wi-Fi Direct, нажмите кнопку \"ОК\"."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Чтобы продолжить настройку соединения с устройством <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> через Wi-Fi Direct, введите PIN-код."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Чтобы продолжить настройку подключения, введите PIN-код WPS <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> на обнаруженном устройстве <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Введите символ"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Неизвестное приложение"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Отправка SMS-сообщений"</string>
@@ -975,8 +976,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Подключен как устройство хранения данных"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Подключен как камера"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Подключен как установщик"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"USB-устройство подключено"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Нажмите, чтобы увидеть другие параметры USB"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Форматирование"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Очистить SD-карту"</string>
@@ -1150,6 +1150,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Просмотреть все"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Выбор действия"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Поделиться с..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Устройство заблокировано."</string>
 </resources>

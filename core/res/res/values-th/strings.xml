@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"รหัสคุณลักษณะเสร็จสมบูรณ์"</string>
     <string name="fcError" msgid="3327560126588500777">"พบปัญหาในการเชื่อมต่อหรือรหัสคุณลักษณะไม่ถูกต้อง"</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"ตกลง"</string>
-    <string name="httpError" msgid="2567300624552921790">"หน้าเว็บมีข้อผิดพลาด"</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"หน้าเว็บมีข้อผิดพลาด"</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"ไม่พบ URL"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"สกีมการตรวจสอบสิทธิ์ของไซต์ไม่ได้รับการสนับสนุน"</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"การตรวจสอบสิทธิ์สำเร็จแล้ว"</string>
@@ -461,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"อนุญาตให้แอปพลิเคชันดูการกำหนดค่าของโทรศัพท์บลูทูธในพื้นที่ ตลอดจนเชื่อมต่อและยอมรับการเชื่อมต่อด้วยอุปกรณ์ที่จับคู่ไว้"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"ควบคุม Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"อนุญาตให้แอปพลิเคชันสื่อสารกับแท็ก Near Field Communication (NFC) การ์ด และโปรแกรมอ่าน"</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"สกัดกั้นและแก้ไขการเข้าใช้งานเครือข่ายทั้งหมด"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"อนุญาตให้แอปพลิเคชันสกัดกั้นและตรวจสอบการเข้าใช้งานเครือข่ายทั้งหมดเพื่อสร้างการเชื่อมต่อ VPN แอปพลิเคชันที่เป็นอันตรายอาจตรวจสอบ เปลี่ยนเส้นทาง หรือแก้ไขแพ็คเก็ตเครือข่ายโดยที่คุณไม่ทราบ"</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"ปิดการใช้งานการล็อกปุ่มกด"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"อนุญาตให้แอปพลิเคชันปิดการใช้งานการล็อกปุ่มและการรักษาความปลอดภัยรหัสผ่านที่เกี่ยวข้องใดๆ ตัวอย่างการใช้งานของกรณีนี้คือ โทรศัพท์ปิดการใช้งานการล็อกปุ่มกดเมื่อมีสายเรียกเข้า จากนั้นจึงเปิดการใช้งานการล็อกปุ่มกดใหม่เมื่อวางสายแล้ว"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"อ่านการตั้งค่าการซิงค์แล้ว"</string>
@@ -722,8 +720,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"อนุญาตให้แอปพลิเคชันแก้ไขประวัติหรือบุ๊กมาร์กของเบราว์เซอร์ที่จัดเก็บบนโทรศัพท์ของคุณ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้ลบหรือแก้ไขข้อมูลเบราว์เซอร์ของคุณได้"</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"ตั้งเวลาปลุกในนาฬิกาปลุก"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"อนุญาตให้แอปพลิเคชันนี้ตั้งเวลาปลุกในแอปพลิเคชันนาฬิกาปลุกที่ติดตั้งไว้ แอปพลิเคชันนาฬิกาปลุกบางประเภทอาจไม่ใช้คุณลักษณะนี้"</string>
-    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"เข้าถึงข้อความเสียงที่จัดการโดยแอปพลิเคชันนี้"</string>
-    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"อนุญาตให้แอปพลิเคชันจัดเก็บและเรียกเฉพาะข้อมูลเสียงซึ่งบริการที่เกี่ยวข้องของข้อมูลเสียงสามารถเข้าถึงได้เท่านั้น"</string>
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
+    <skip />
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"แก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"อนุญาตให้แอปพลิเคชันแก้ไขการอนุญาตเกี่ยวกับการระบุตำแหน่งทางภูมิศาสตร์ของเบราว์เซอร์ แอปพลิเคชันที่เป็นอันตรายอาจใช้วิธีนี้อนุญาตให้ส่งข้อมูลตำแหน่งไปที่เว็บไซต์อื่นได้โดยพลการ"</string>
     <string name="save_password_message" msgid="767344687139195790">"คุณต้องการให้เบราว์เซอร์จำรหัสผ่านนี้หรือไม่"</string>
@@ -839,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"ตัด"</string>
     <string name="copy" msgid="2681946229533511987">"คัดลอก"</string>
     <string name="paste" msgid="5629880836805036433">"วาง"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"ไม่มีสิ่งที่จะวาง"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"คัดลอก URL"</string>
@@ -900,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"ระดับเสียงปลุก"</string>
     <string name="volume_notification" msgid="2422265656744276715">"ระดับเสียงของการแจ้งเตือน"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"ระดับเสียง"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"เสียงเรียกเข้าเริ่มต้น"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"เสียงเรียกเข้าเริ่มต้น (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"ปิดเสียง"</string>
