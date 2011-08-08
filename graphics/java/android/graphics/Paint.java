@@ -1602,7 +1602,7 @@ public class Paint {
         int len = end - start;
         char[] buf = TemporaryBuffer.obtain(contextLen);
         TextUtils.getChars(text, start, end, buf, 0);
-        float result = getTextRunAdvances(buf, start - contextStart, len,
+        float result = getTextRunAdvances(buf, 0, len,
                 0, contextLen, flags, advances, advancesIndex, reserved);
         TemporaryBuffer.recycle(buf);
         return result;

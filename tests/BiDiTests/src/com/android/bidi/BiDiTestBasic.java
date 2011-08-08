@@ -19,10 +19,14 @@ package com.android.bidi;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.Spannable;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 
 public class BiDiTestBasic extends Fragment {
 
@@ -47,11 +51,52 @@ public class BiDiTestBasic extends Fragment {
                 showDialog();
             }
         });
+
+        useSpans();
     }
 
     private void showDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(currentView.getContext());
         builder.setSingleChoiceItems(items, 0, null);
         builder.show();
+    }
+
+    private void useSpans() {
+        EditText urlEdit = (EditText) currentView.findViewById(R.id.edittext_url);
+        Editable url = urlEdit.getText();
+        if (url.length() < 1) {
+          return;
+        }
+
+        String urlString = url.toString();
+        int urlLength = urlString.length();
+        String domainAndRegistry = "amazon.co.uk";
+
+        int startSchemeIndex = urlString.startsWith("https") ? 5 : 0;
+        int startDomainIndex = urlString.indexOf(domainAndRegistry);
+        if (startDomainIndex == -1) {
+          assert false;
+          return;
+        }
+        int stopIndex = startDomainIndex + domainAndRegistry.length();
+
+        if (startDomainIndex != 0) {
+          url.setSpan(new ForegroundColorSpan(0xfff00fff),
+                  startSchemeIndex,
+                  startDomainIndex,
+                  Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+
+        url.setSpan(new ForegroundColorSpan(0xff548aff),
+                startDomainIndex,
+                stopIndex,
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        if (stopIndex < urlString.length()) {
+          url.setSpan(new ForegroundColorSpan(0xfff00fff),
+                  stopIndex,
+                  urlLength,
+                  Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
     }
 }
