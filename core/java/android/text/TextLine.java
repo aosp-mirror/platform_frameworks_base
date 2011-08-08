@@ -822,7 +822,10 @@ class TextLine {
         if (start == measureLimit) {
             TextPaint wp = mWorkPaint;
             wp.set(mPaint);
-            return handleText(wp, 0, 0, 0, 0, runIsRtl, c, x, top, y, bottom, fmi, needWidth);
+            if (fmi != null) {
+                expandMetricsFromPaint(fmi, wp);
+            }
+            return 0f;
         }
 
         // Shaping needs to take into account context up to metric boundaries,
