@@ -706,9 +706,19 @@ class TextLine {
             Canvas c, float x, int top, int y, int bottom,
             FontMetricsInt fmi, boolean needWidth) {
 
-        float ret = 0;
+        // Get metrics first (even for empty strings or "0" width runs)
+        if (fmi != null) {
+            expandMetricsFromPaint(fmi, wp);
+        }
 
         int runLen = end - start;
+        // No need to do anything if the run width is "0"
+        if (runLen == 0) {
+            return 0f;
+        }
+
+        float ret = 0;
+
         int contextLen = contextEnd - contextStart;
         if (needWidth || (c != null && (wp.bgColor != 0 || runIsRtl))) {
             int flags = runIsRtl ? Paint.DIRECTION_RTL : Paint.DIRECTION_LTR;
@@ -721,10 +731,6 @@ class TextLine {
                         delta + end, delta + contextStart, delta + contextEnd,
                         flags, null, 0);
             }
-        }
-
-        if (fmi != null) {
-            expandMetricsFromPaint(fmi, wp);
         }
 
         if (c != null) {
