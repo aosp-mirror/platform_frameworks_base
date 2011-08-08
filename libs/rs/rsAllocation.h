@@ -25,8 +25,16 @@ namespace renderscript {
 
 class Program;
 
+/*****************************************************************************
+ * CAUTION
+ *
+ * Any layout changes for this class may require a corresponding change to be
+ * made to frameworks/compile/libbcc/lib/ScriptCRT/rs_core.c, which contains
+ * a partial copy of the information below.
+ *
+ *****************************************************************************/
 class Allocation : public ObjectBase {
-    // The graphics equilivent of malloc.  The allocation contains a structure of elements.
+    // The graphics equivalent of malloc.  The allocation contains a structure of elements.
 
 public:
     struct Hal {
