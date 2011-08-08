@@ -73,6 +73,16 @@ struct StoreMetaDataInBuffersParams {
     OMX_BOOL bStoreMetaData;
 };
 
+// A pointer to this struct is passed to OMX_SetParameter() when the extension
+// index "OMX.google.android.index.enableSecureMode"
+// is given.
+//
+struct EnableSecureModeParams {
+    OMX_U32 nSize;
+    OMX_VERSIONTYPE nVersion;
+    OMX_BOOL bEnableSecureMode;
+};
+
 // A pointer to this struct is passed to OMX_SetParameter when the extension
 // index for the 'OMX.google.android.index.useAndroidNativeBuffer' extension is
 // given.  This call will only be performed if a prior call was made with the
