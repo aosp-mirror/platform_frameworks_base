@@ -46,6 +46,7 @@
                       android:layout_width="match_parent"
                       android:textSize="32dip"
                       android:textDirection="ltr"
+                      android:text="@string/url"
                     />
 
             <TextView android:id="@+id/textview_rtl"
@@ -70,34 +71,45 @@
                 android:text="@string/button_alert_dialog_text"
                 android:textSize="32dip"
                 />
-    </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="600dip"
-        android:layout_height="128dip"
-        android:layout_gravity="center_vertical"
-        android:orientation="horizontal"
-        style="@android:style/Widget.Holo.Spinner"
-        >
+        <EditText xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/edittext_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:textSize="32dip"
+            android:scrollHorizontally="true"
+            android:ellipsize="end"
+            android:text="@string/url"
+            />
+
         <LinearLayout
-            android:layout_width="0dip"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
+            android:layout_width="600dip"
+            android:layout_height="128dip"
             android:layout_gravity="center_vertical"
-            android:orientation="vertical"
+            android:orientation="horizontal"
+            style="@android:style/Widget.Holo.Spinner"
             >
-            <TextView
-                android:id="@+id/spinner_line_1"
-                android:layout_width="match_parent"
-                android:layout_height="0dip"
+            <LinearLayout
+                android:layout_width="0dip"
                 android:layout_weight="1"
-                android:textSize="16dip"
-                android:singleLine="true"
-                android:ellipsize="end"
-                android:gravity="left|center_vertical"
-                android:text="@string/button_text"
-                />
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
+                android:orientation="vertical"
+                >
+                <TextView
+                    android:id="@+id/spinner_line_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dip"
+                    android:layout_weight="1"
+                    android:textSize="16dip"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:gravity="left|center_vertical"
+                    android:text="@string/button_text"
+                    />
+            </LinearLayout>
         </LinearLayout>
+
     </LinearLayout>
 
 </FrameLayout>
