@@ -15,11 +15,15 @@
  */
 package com.android.internal.widget;
 
+import com.android.internal.R;
+
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.TimeInterpolator;
 import android.app.ActionBar;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils.TruncateAt;
 import android.view.Gravity;
@@ -90,6 +94,18 @@ public class ScrollingTabContainerView extends HorizontalScrollView {
     public void setContentHeight(int contentHeight) {
         mTabLayout.getLayoutParams().height = contentHeight;
         requestLayout();
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Action bar can change size on configuration changes.
+        // Reread the desired height from the theme-specified style.
+        TypedArray a = getContext().obtainStyledAttributes(null, R.styleable.ActionBar,
+                com.android.internal.R.attr.actionBarStyle, 0);
+        setContentHeight(a.getLayoutDimension(R.styleable.ActionBar_height, 0));
+        a.recycle();
     }
 
     public void animateToVisibility(int visibility) {
