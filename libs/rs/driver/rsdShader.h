@@ -84,6 +84,7 @@ protected:
     uint32_t mType;
 
     uint32_t mTextureCount;
+    uint32_t *mTextureTargets;
     uint32_t mAttribCount;
     uint32_t mUniformCount;
     android::String8 *mAttribNames;
