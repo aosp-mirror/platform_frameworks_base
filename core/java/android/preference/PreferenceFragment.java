@@ -159,7 +159,6 @@ public abstract class PreferenceFragment extends Fragment implements
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        getListView().setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
 
         if (mHavePrefs) {
             bindPreferences();
