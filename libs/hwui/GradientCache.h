@@ -58,8 +58,8 @@ struct GradientCacheEntry {
     }
 
     ~GradientCacheEntry() {
-        delete[] colors;
-        delete[] positions;
+        if (colors) delete[] colors;
+        if (positions) delete[] positions;
     }
 
     bool operator<(const GradientCacheEntry& r) const {
