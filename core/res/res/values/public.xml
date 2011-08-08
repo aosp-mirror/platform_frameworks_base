@@ -1785,6 +1785,9 @@
   <public type="attr" name="actionBarWidgetTheme" />
   <public type="attr" name="uiOptions" />
 
+  <public type="attr" name="subtypeLocale" />
+  <public type="attr" name="subtypeExtraValue" />
+
   <public type="style" name="TextAppearance.SuggestionHighlight" />
 
   <public type="style" name="Theme.Holo.Light.DarkActionBar" />

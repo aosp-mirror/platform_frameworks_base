@@ -911,6 +911,8 @@ package android {
     field public static final int stretchMode = 16843030; // 0x1010116
     field public static final int subtitle = 16843473; // 0x10102d1
     field public static final int subtitleTextStyle = 16843513; // 0x10102f9
+    field public static final int subtypeExtraValue = 16843684; // 0x10103a4
+    field public static final int subtypeLocale = 16843683; // 0x10103a3
     field public static final int suggestActionMsg = 16843228; // 0x10101dc
     field public static final int suggestActionMsgColumn = 16843229; // 0x10101dd
     field public static final int suggestionsEnabled = 16843632; // 0x1010370
@@ -24268,6 +24270,9 @@ package android.view.textservice {
     method public android.content.ComponentName getComponent();
     method public java.lang.String getId();
     method public java.lang.String getPackageName();
+    method public java.lang.String getSettingsActivity();
+    method public android.view.textservice.SpellCheckerSubtype getSubtypeAt(int);
+    method public int getSubtypeCount();
     method public android.graphics.drawable.Drawable loadIcon(android.content.pm.PackageManager);
     method public java.lang.CharSequence loadLabel(android.content.pm.PackageManager);
     method public void writeToParcel(android.os.Parcel, int);
@@ -24285,6 +24290,16 @@ package android.view.textservice {
 
   public static abstract interface SpellCheckerSession.SpellCheckerSessionListener {
     method public abstract void onGetSuggestions(android.view.textservice.SuggestionsInfo[]);
+  }
+
+  public final class SpellCheckerSubtype implements android.os.Parcelable {
+    ctor public SpellCheckerSubtype(int, java.lang.String, java.lang.String);
+    method public int describeContents();
+    method public java.lang.String getExtraValue();
+    method public java.lang.String getLocale();
+    method public int getNameResId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
   }
 
   public final class SuggestionsInfo implements android.os.Parcelable {

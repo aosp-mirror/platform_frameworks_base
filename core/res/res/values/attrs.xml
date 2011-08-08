@@ -2224,6 +2224,34 @@
         <attr name="imeSubtypeExtraValue" format="string" />
     </declare-styleable>
 
+    <!-- Use <code>spell-checker</code> as the root tag of the XML resource that
+         describes an
+         {@link android.service.textservice.SpellCheckerService} service, which is
+         referenced from its
+         {@link android.view.textservice.SpellCheckerSession#SERVICE_META_DATA}
+         meta-data entry.  Described here are the attributes that can be
+         included in that tag. -->
+    <declare-styleable name="SpellChecker">
+        <!-- The name of the spell checker. -->
+        <attr name="label" />
+        <!-- Component name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity"/>
+    </declare-styleable>
+
+    <!-- This is the subtype of the spell checker. Subtype can describe locales (e.g. en_US, fr_FR...) -->
+    <declare-styleable name="SpellChecker_Subtype">
+        <!-- The name of the subtype. -->
+        <attr name="label" />
+        <!-- The locale of the subtype. This string should be a locale (e.g. en_US, fr_FR...)
+             This is also used by the framework to know the supported locales
+             of the spell checker.  -->
+        <attr name="subtypeLocale" format="string" />
+        <!-- The extra value of the subtype. This string can be any string and will be passed to
+             the SpellChecker.  -->
+        <attr name="subtypeExtraValue" format="string" />
+    </declare-styleable>
+
     <!-- Use <code>accessibility-service</code> as the root tag of the XML resource that
          describes an {@link android.accessibilityservice.AccessibilityService} service,
          which is referenced from its
