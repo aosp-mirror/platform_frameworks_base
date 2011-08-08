@@ -1777,6 +1777,27 @@ public class AudioManager {
 
     /**
      * @hide
+     * Returns the current remote control client flags describing what information has changed.
+     * The flags are reset everytime this method is called with a valid rcClientId.
+     * @param rcClientId the counter value that matches the extra
+     *     {@link AudioManager#EXTRA_REMOTE_CONTROL_CLIENT} in the
+     *     {@link AudioManager#REMOTE_CONTROL_CLIENT_CHANGED} event
+     * @return the "information changed" flags from the current IRemoteControlClient from
+     *     which information to display on the remote control can be retrieved,
+     *     or 0 if rcClientId doesn't match the current generation counter.
+     */
+    public int getRemoteControlClientInformationChangedFlags(int rcClientId) {
+        IAudioService service = getService();
+        try {
+            return service.getRemoteControlClientInformationChangedFlags(rcClientId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Dead object in getRemoteControlClientInformationChangedFlags "+e);
+            return 0;
+        }
+    }
+
+    /**
+     * @hide
      * Definitions of constants to be used in {@link android.media.IRemoteControlClient}.
      */
     public final class RemoteControlParameters {
@@ -1797,6 +1818,11 @@ public class AudioManager {
         public final static int FLAG_KEY_MEDIA_STOP = 1 << 5;
         public final static int FLAG_KEY_MEDIA_FAST_FORWARD = 1 << 6;
         public final static int FLAG_KEY_MEDIA_NEXT = 1 << 7;
+
+        public final static int FLAG_INFORMATION_CHANGED_METADATA = 1 << 0;
+        public final static int FLAG_INFORMATION_CHANGED_KEY_MEDIA = 1 << 1;
+        public final static int FLAG_INFORMATION_CHANGED_PLAYSTATE = 1 << 2;
+        public final static int FLAG_INFORMATION_CHANGED_ALBUM_ART = 1 << 3;
     }
 
     /**
@@ -1824,12 +1850,24 @@ public class AudioManager {
      * @hide
      * Notifies the users of the associated remote control client that the information to display
      * has changed.
-     * @param eventReceiver
+     @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
+     *      that will receive the media button intent, and associated with the remote control
+     *      client. This method has no effect if
+     *      {@link #registerMediaButtonEventReceiver(ComponentName)} hasn't been called
+     *      with the same eventReceiver, or if
+     *      {@link #unregisterMediaButtonEventReceiver(ComponentName)} has been called.
+     * @param infoFlag the type of information that has changed since this method was last called,
+     *      or the event receiver was registered. Use one or multiple of the following flags to
+     *      describe what changed:
+     *      {@link RemoteControlParameters#FLAG_INFORMATION_CHANGED_METADATA},
+     *      {@link RemoteControlParameters#FLAG_INFORMATION_CHANGED_KEY_MEDIA},
+     *      {@link RemoteControlParameters#FLAG_INFORMATION_CHANGED_PLAYSTATE},
+     *      {@link RemoteControlParameters#FLAG_INFORMATION_CHANGED_ALBUM_ART}.
      */
-    public void notifyRemoteControlInformationChanged(ComponentName eventReceiver) {
+    public void notifyRemoteControlInformationChanged(ComponentName eventReceiver, int infoFlag) {
         IAudioService service = getService();
         try {
-            service.notifyRemoteControlInformationChanged(eventReceiver);
+            service.notifyRemoteControlInformationChanged(eventReceiver, infoFlag);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in refreshRemoteControlDisplay"+e);
         }
