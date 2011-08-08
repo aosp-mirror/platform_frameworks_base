@@ -996,6 +996,8 @@ public class IntentFilter implements Parcelable {
 
     /**
      * Return an iterator over the filter's categories.
+     *
+     * @return Iterator if this filter has categories or {@code null} if none.
      */
     public final Iterator<String> categoriesIterator() {
         return mCategories != null ? mCategories.iterator() : null;
