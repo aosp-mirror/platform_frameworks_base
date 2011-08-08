@@ -965,10 +965,15 @@ void SurfaceTexture::dump(String8& result, const char* prefix,
 
     for (int i=0 ; i<mBufferCount ; i++) {
         const BufferSlot& slot(mSlots[i]);
+        const sp<GraphicBuffer>& buf(slot.mGraphicBuffer);
         snprintf(buffer, SIZE,
-                "%s%s[%02d] state=%-8s, crop=[%d,%d,%d,%d], transform=0x%02x, "
-                "timestamp=%lld\n",
-                prefix, (i==mCurrentTexture)?">":" ", i, stateName(slot.mBufferState),
+                "%s%s[%02d] "
+                "%p [%4ux%4u:%4u,%3X] "
+                "state=%-8s, crop=[%d,%d,%d,%d], "
+                "transform=0x%02x, timestamp=%lld\n",
+                prefix, (i==mCurrentTexture)?">":" ", i,
+                buf->handle, buf->width, buf->height, buf->stride, buf->format,
+                stateName(slot.mBufferState),
                 slot.mCrop.left, slot.mCrop.top, slot.mCrop.right, slot.mCrop.bottom,
                 slot.mTransform, slot.mTimestamp
         );
