@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Codice funzione completo."</string>
     <string name="fcError" msgid="3327560126588500777">"Problema di connessione o codice funzione non valido."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"La pagina web contiene un errore."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"La pagina web contiene un errore."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Impossibile trovare l\'URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Schema di autenticazione del sito non supportato."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Autenticazione non riuscita."</string>
@@ -461,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Consente a un\'applicazione di visualizzare la configurazione del telefono Bluetooth locale e di stabilire e accettare connessioni con dispositivi associati."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controllo Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Consente a un\'applicazione di comunicare con tag, schede e lettori NFC (Near Field Communication)."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"intercettazione e modifica di tutto il traffico di rete"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Consente a un\'applicazione di intercettare e controllare tutto il traffico di rete per stabilire una connessione VPN. Le applicazioni dannose potrebbero monitorare, reindirizzare o modificare i pacchetti di rete a tua insaputa."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"disattivazione blocco tastiera"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Consente la disattivazione da parte di un\'applicazione del blocco tastiera e di eventuali protezioni tramite password associate. Un valido esempio è la disattivazione da parte del telefono del blocco tastiera quando riceve una telefonata in entrata, e la successiva riattivazione del blocco al termine della chiamata."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lettura impostazioni di sincronizz."</string>
@@ -722,8 +720,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Consente a un\'applicazione di modificare la cronologia o i segnalibri del browser memorizzati sul telefono. Le applicazioni dannose possono sfruttare questa possibilità per cancellare o modificare i dati del browser."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"impostazione allarmi nella sveglia"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Consente all\'applicazione di impostare un allarme in un\'applicazione sveglia installata. Alcune applicazioni sveglia potrebbero non supportare questa funzione."</string>
-    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"Accesso ai messaggi vocali gestiti da questa applicazione"</string>
-    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Consente all\'applicazione di memorizzare e recuperare soltanto i messaggi vocali a cui può accedere il suo servizio associato."</string>
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
+    <skip />
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modifica le autorizzazioni di localizzazione geografica del browser"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Consente a un\'applicazione di modificare le autorizzazioni di localizzazione geografica del browser. Le applicazioni dannose possono utilizzare questa autorizzazione per consentire l\'invio di informazioni sulla posizione a siti web arbitrari."</string>
     <string name="save_password_message" msgid="767344687139195790">"Memorizzare la password nel browser?"</string>
@@ -839,8 +839,8 @@
     <string name="cut" msgid="3092569408438626261">"Taglia"</string>
     <string name="copy" msgid="2681946229533511987">"Copia"</string>
     <string name="paste" msgid="5629880836805036433">"Incolla"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="pasteDisabled" msgid="7259254654641456570">"Niente da incollare"</string>
+    <string name="replace" msgid="8333608224471746584">"Sostituisci"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copia URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Seleziona testo..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selezione testo"</string>
@@ -900,6 +900,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Volume allarme"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volume notifiche"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Suoneria predefinita"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Suoneria predefinita (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Silenzioso"</string>
@@ -1083,22 +1095,14 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Seleziona un account"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Aumenta"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Diminuisci"</string>
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"selezionata"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"non selezionato"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"selezionato"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"non selezionato"</string>
+    <string name="switch_on" msgid="551417728476977311">"attivo"</string>
+    <string name="switch_off" msgid="7249798614327155088">"disattivo"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"premuto"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"non premuto"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Vai alla home page"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Vai in alto"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Altre opzioni"</string>
@@ -1112,14 +1116,10 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Dati 4G disattivati"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Dati mobili disattivati"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"tocca per attivare"</string>
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Limite dati 2G-3G superato"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Limite dati 4G superato"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Limite dati cellulare superato"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> oltre il limite indicato"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificato di protezione"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Questo certificato è valido."</string>
     <string name="issued_to" msgid="454239480274921032">"Rilasciato a:"</string>

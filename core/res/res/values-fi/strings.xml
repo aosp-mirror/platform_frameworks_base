@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Ominaisuuskoodi valmis."</string>
     <string name="fcError" msgid="3327560126588500777">"Yhteysongelma tai virheellinen ominaisuuskoodi."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"Verkkosivulla on virhe."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Verkkosivulla on virhe."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"URL-osoitetta ei löydy."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Sivuston todennusmallia ei tueta."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Todennus epäonnistui."</string>
@@ -461,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Antaa sovelluksen tarkastella paikallisen Bluetooth-puhelimen asetuksia sekä muodostaa ja hyväksyä laitepariyhteyksiä muihin laitteisiin."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"hallitse Near Field Communication -tunnistusta"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Antaa sovelluksen viestiä Near Field Communication (NFC) -tunnisteiden, -korttien ja -lukijoiden kanssa."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"kaappaa ja muokkaa kaikkea verkkoliikennettä"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Antaa sovelluksen kaapata ja tarkastaa kaiken verkkoliikenteen VPN-yhteyden muodostamiseksi. Haitalliset sovellukset voivat tarkkailla, uudelleenohjata tai muokata verkkopaketteja tietämättäsi."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"poista näppäinlukitus käytöstä"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Antaa sovelluksen poistaa näppäinlukituksen ja siihen liittyvän salasanasuojauksen käytöstä. Esimerkki: puhelin poistaa näppäinlukituksen käytöstä saapuvan puhelun yhteydessä ja ottaa näppäinlukituksen takaisin käyttöön puhelun päätyttyä."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"lue synkronointiasetuksia"</string>
@@ -722,8 +720,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Antaa sovelluksen muokata puhelimeen tallennettuja selaimen historia- ja kirjanmerkkitietoja. Haitalliset sovellukset voivat käyttää tätä pyyhkiäkseen tai muokatakseen selaimen tietoja."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"aseta herätys herätyskelloon"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Antaa sovelluksen asettaa herätyksen asennettuun herätyskellosovellukseen. Kaikki herätyskellosovellukset eivät välttämättä käytä tätä ominaisuutta."</string>
-    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"Käytä tämän sovelluksen hallinnoimia vastaajaviestejä"</string>
-    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Antaa sovelluksen tallentaa ja noutaa vain siihen liitetyn palvelun käyttämiä vastaajaviestejä."</string>
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
+    <skip />
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"muokkaa selaimen maantieteellisen sijainnin lupia"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Antaa sovelluksen muokata selaimen maantieteellisen sijainnin lupia. Haitalliset sovellukset saattavat käyttää tätä sijaintitietojen lähettämiseen satunnaisiin verkkosivustoihin."</string>
     <string name="save_password_message" msgid="767344687139195790">"Haluatko selaimen muistavan tämän salasanan?"</string>
@@ -839,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Leikkaa"</string>
     <string name="copy" msgid="2681946229533511987">"Kopioi"</string>
     <string name="paste" msgid="5629880836805036433">"Liitä"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Ei mitään liitettävää"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Kopioi URL-osoite"</string>
@@ -903,6 +904,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Hälytyksien äänenvoimakkuus"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Ilmoituksen äänenvoimakkuus"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Äänenvoimakkuus"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Oletussoittoääni"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Oletussoittoääni (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Äänetön"</string>

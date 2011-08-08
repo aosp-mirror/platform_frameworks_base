@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Funktionscode abgeschlossen"</string>
     <string name="fcError" msgid="3327560126588500777">"Verbindungsproblem oder ungültiger Funktionscode"</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"Auf der Webseite ist ein Fehler aufgetreten."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Auf der Webseite ist ein Fehler aufgetreten."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Die URL konnte nicht gefunden werden."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Das Authentifizierungsschema für die Site wird nicht unterstützt."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Authentifizierung ist fehlgeschlagen."</string>
@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Ermöglicht Anwendungen, die von Ihnen gedrückten Tasten zu überwachen (etwa die Eingabe eines Passworts). Dies gilt auch für die Interaktion mit anderen Anwendungen. Sollte für normale Anwendungen nicht benötigt werden."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"An eine Eingabemethode binden"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Ermöglicht dem Halter, sich an die Oberfläche einer Eingabemethode auf oberster Ebene zu binden. Sollte nie für normale Anwendungen benötigt werden."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"An einen Textdienst binden"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Berechtigt den Inhaber zum Binden an die Oberfläche der obersten Ebene eines Textdienstes, beispielsweise eines Rechtschreibprüfungsdienstes. Sollte für normale Apps nicht benötigt werden."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"An einen Hintergrund binden"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Ermöglicht dem Halter, sich an die Oberfläche einer Eingabemethode auf oberster Ebene zu binden. Sollte nie für normale Anwendungen benötigt werden."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"An einen Widget-Dienst binden"</string>
@@ -463,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Ermöglicht einer App, die Konfiguration des lokalen Bluetooth-Telefons einzusehen und Verbindungen mit Partnergeräten herzustellen und zu akzeptieren"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"Nahfeldkommunikation steuern"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Ermöglicht einer App die Kommunikation mit Tags für Nahfeldkommunikation, Karten und Lesegeräte"</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"Gesamten Netzwerkverkehr abfangen und ändern"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Ermöglicht einer App, den gesamten Netzwerkverkehr zum Aufbau einer VPN-Verbindung abzufangen und zu überprüfen. Schädliche Apps können Netzwerkpakete ohne Ihr Wissen überwachen, weiterleiten oder ändern."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"Tastensperre deaktivieren"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Ermöglicht einer App, die Tastensperre sowie den damit verbundenen Passwortschutz zu deaktivieren. So wird die Tastensperre vom Telefon deaktiviert, wenn ein Anruf eingeht, und nach Beendigung des Anrufs wieder aktiviert."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"Synchronisierungseinstellungen lesen"</string>
@@ -724,9 +720,9 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Ermöglicht einer App, den auf Ihrem Telefon gespeicherten Browserverlauf und die Lesezeichen zu ändern. Schädliche Anwendungen können so Ihre Browserdaten löschen oder ändern."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"Alarm im Wecker festlegen"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Ermöglicht dieser Anwendung, einen Alarm mithilfe eines installierten Weckers festzulegen. Einige Weckeranwendungen verfügen möglicherweise nicht über diese Funktion."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
     <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Geolokalisierungsberechtigungen des Browsers ändern"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Ermöglicht einer App, die Geolokalisierungsberechtigungen des Browsers zu ändern. Schädliche Anwendungen können dies nutzen, um das Senden von Standortinformationen an willkürliche Websites zuzulassen."</string>
@@ -843,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Ausschneiden"</string>
     <string name="copy" msgid="2681946229533511987">"Kopieren"</string>
     <string name="paste" msgid="5629880836805036433">"Einfügen"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Nichts zum Einfügen"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"URL kopieren"</string>
@@ -881,12 +878,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Anwendung umgeleitet"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> wird jetzt ausgeführt."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"<xliff:g id="APP_NAME">%1$s</xliff:g> wurde ursprünglich gestartet."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Skalieren"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"Immer anzeigen"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Erneute Aktivierung unter \"Einstellungen\" &gt; \"Apps\" &gt; \"Apps verwalten\""</string>
     <string name="smv_application" msgid="295583804361236288">"Die Anwendung <xliff:g id="APPLICATION">%1$s</xliff:g> (Prozess <xliff:g id="PROCESS">%2$s</xliff:g>) hat gegen ihre selbsterzwungene StrictMode-Richtlinie verstoßen."</string>
     <string name="smv_process" msgid="5120397012047462446">"Der Prozess <xliff:g id="PROCESS">%1$s</xliff:g> hat gegen seine selbsterzwungene StrictMode-Richtlinie verstoßen."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> läuft"</string>
@@ -907,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Lautstärke für Wecker"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Benachrichtigungslautstärke"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Lautstärke"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Standard-Klingelton"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Standard-Klingelton (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Lautlos"</string>
@@ -920,40 +926,26 @@
     <item quantity="one" msgid="1634101450343277345">"Verfügbares WLAN-Netzwerk öffnen"</item>
     <item quantity="other" msgid="7915895323644292768">"Verfügbare WLAN-Netzwerke öffnen"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Ein WLAN-Netzwerk wurde deaktiviert."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Ein WLAN-Netzwerk wurde wegen einer mangelhaften Verbindung vorübergehend deaktiviert."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Wi-Fi Direct-Betrieb starten. Hierdurch wird der WLAN-Client-/-Hotspot-Betrieb deaktiviert."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Wi-Fi Direct konnte nicht gestartet werden."</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Anfrage für Wi-Fi Direct-Verbindungseinrichtung von <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Klicken Sie auf \"OK\", um sie zu akzeptieren."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Anfrage für Wi-Fi Direct-Verbindungseinrichtung von <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Geben Sie zum Fortfahren die PIN ein."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Die WPS-PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> muss auf dem Peer-Gerät <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> eingegeben werden, damit die Verbindungseinrichtung fortgesetzt werden kann."</string>
     <string name="select_character" msgid="3365550120617701745">"Zeichen einfügen"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Unbekannte Anwendung"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Kurznachrichten werden gesendet"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"Es werden eine große Anzahl an Kurznachrichten versendet. Wählen Sie \"OK\", um fortzufahren, oder drücken Sie auf \"Abbrechen\", um den Sendevorgang zu beenden."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Abbrechen"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM-Karte entfernt"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"Das Mobilfunknetz ist erst wieder verfügbar, nachdem Sie die SIM-Karte ersetzt haben."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Fertig"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIM-Karte hinzugefügt"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"Sie müssen Ihr Gerät neu starten, um auf das Mobilfunknetz zuzugreifen."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Neu starten"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Uhrzeit festlegen"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Datum festlegen"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Speichern"</string>
@@ -984,8 +976,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Als Mediengerät angeschlossen"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Als Kamera angeschlossen"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Als Installationsprogramm angeschlossen"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Mit USB-Zubehör verbunden"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Zum Anzeigen weiterer USB-Optionen tippen"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"USB-Sp. formatieren"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"SD-Karte formatieren"</string>
@@ -1159,6 +1150,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Alle anzeigen..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Aktion auswählen"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Teilen mit..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Gerät gesperrt"</string>
 </resources>

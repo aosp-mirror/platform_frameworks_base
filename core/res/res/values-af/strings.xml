@@ -155,7 +155,7 @@
     <string name="fcError" msgid="3327560126588500777">"Verbindingsprobleem of ongeldige kenmerk-kode."</string>
     <!-- no translation found for httpErrorOk (1191919378083472204) -->
     <skip />
-    <!-- no translation found for httpError (2567300624552921790) -->
+    <!-- no translation found for httpError (6603022914760066338) -->
     <skip />
     <!-- no translation found for httpErrorLookup (4517085806977851374) -->
     <skip />
@@ -644,10 +644,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Laat \'n program toe om die plaaslike Bluetooth-foon se opstelling te sien, en om verbindings met saamgebinde toestelle te bewerkstellig en te aanvaar."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"beheer kortveldkommunikasie"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Laat \'n program toe om te kommunikeer met kortveldkommunikasie- (NFC) merkers, kaarte en lesers."</string>
-    <!-- no translation found for permlab_vpn (8345800584532175312) -->
-    <skip />
-    <!-- no translation found for permdesc_vpn (7093963230333602420) -->
-    <skip />
     <!-- no translation found for permlab_disableKeyguard (4977406164311535092) -->
     <skip />
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Laat \'n program toe om die sleutelslot te deaktiveer asook enige gepaardgaande wagwoordsekuriteit. \'n Legitieme voorbeeld hiervan is wanneer die foon die sleutelslot deaktiveer wanneer \'n inkomende oproep ontvang word, dan dit weer te aktiveer wanneer die oproep verby is."</string>
@@ -966,9 +962,9 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Laat \'n program toe om die blaaier se geskiedenis of gestoorde boekmerke op die foon te wysig. Kwaadwillige programme kan dit gebruik om jou blaaier se data uit te vee of dit te wysig."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"stel alarm in wekker"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Laat die program toe om \'n alarm te stel in \'n geïnstalleerde wekkerprogram. Sommige wekkerprogramme sal dalk nie hierdie kenmerk implementeer nie."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
     <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Wysig blaaier se geoligging-toestemmings"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Laat \'n program toe om die blaaier se geoligging-toestemmings te wysig. Kwaadwillige programme kan dit gebruik om liggingsinligting na arbitrêre webwerwe te stuur."</string>
@@ -1117,6 +1113,7 @@
     <skip />
     <!-- no translation found for paste (5629880836805036433) -->
     <skip />
+    <string name="pasteDisabled" msgid="7259254654641456570">"Niks om te plak nie"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <!-- no translation found for copyUrl (2538211579596067402) -->
@@ -1207,6 +1204,18 @@
     <skip />
     <string name="volume_notification" msgid="2422265656744276715">"Kennisgewing-volume"</string>
     <!-- no translation found for volume_unknown (1400219669770445902) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
     <skip />
     <!-- no translation found for ringtone_default (3789758980357696936) -->
     <skip />

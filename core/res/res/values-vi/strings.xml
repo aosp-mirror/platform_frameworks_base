@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Mã tính năng đã hoàn tất."</string>
     <string name="fcError" msgid="3327560126588500777">"Sự cố kết nối hoặc mã tính năng không hợp lệ."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"Trang Web có lỗi."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Trang Web có lỗi."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Không thể tìm thấy URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Không hỗ trợ lược đồ xác thực trang web."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Xác thực không thành công."</string>
@@ -461,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Cho phép ứng dụng xem cấu hình của điện thoại Bluetooth nội hạt cũng như tạo và chấp nhận các kết nối với các thiết bị được ghép nối."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kiểm soát Liên lạc trường gần"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Cho phép ứng dụng liên lạc với thẻ Liên lạc trường gần (NFC), thẻ và trình đọc."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"chặn và sửa đổi tất cả lưu lượng truy cập mạng"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Cho phép ứng dụng chặn và kiểm tra tất cả lưu lượng truy cập mạng để thiết lập kết nối VPN. Các ứng dụng độc hại có thể giám sát, chuyển hướng hoặc sửa đổi gói tin mạng mà bạn không biết."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"vô hiệu hoá khoá phím"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Cho phép ứng dụng vô hiệu hoá khoá phím và bất kỳ bảo mật mật khẩu được liên kết nào. Ví dụ thích hợp của việc này là điện thoại vô hiệu hoá khoá phím khi nhận được cuộc gọi đến sau đó bật lại khoá phím khi cuộc gọi kết thúc."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"đọc cài đặt đồng bộ hoá"</string>
@@ -722,8 +720,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Cho phép ứng dụng sửa đổi lịch sử hoặc dấu trang của Trình duyệt được lưu trữ trên điện thoại của bạn. Các ứng dụng độc hại có thể sử dụng quyền này để xoá hoặc sửa đổi dữ liệu Trình duyệt của bạn."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"đặt báo thức trong đồng hồ báo thức"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Cho phép ứng dụng đặt báo thức trong ứng dụng đồng hồ báo thức được cài đặt. Một số ứng dụng đồng hồ báo thức có thể không sử dụng tính năng này."</string>
-    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"Truy cập thư thoại do ứng dụng này quản lý"</string>
-    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Cho phép ứng dụng lưu trữ và truy xuất chỉ các thư thoại mà dịch vụ liên quan của nó có thể truy cập."</string>
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
+    <skip />
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Sửa đổi quyền về vị trí địa lý của Trình duyệt"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Cho phép ứng dụng sửa đổi các quyền về vị trí địa lý của Trình duyệt. Các ứng dụng độc hại có thể sử dụng quyền này để cho phép gửi thông tin vị trí đến trang web bất kỳ."</string>
     <string name="save_password_message" msgid="767344687139195790">"Bạn có muốn trình duyệt nhớ mật khẩu này không?"</string>
@@ -839,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Cắt"</string>
     <string name="copy" msgid="2681946229533511987">"Sao chép"</string>
     <string name="paste" msgid="5629880836805036433">"Dán"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Không có gì để dán"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Sao chép URL"</string>
@@ -900,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Âm lượng báo thức"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Âm lượng thông báo"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Âm lượng"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Nhạc chuông mặc định"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Nhạc chuông mặc định (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Im lặng"</string>

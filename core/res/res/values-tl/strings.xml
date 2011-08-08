@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Kumpleto na ang code ng tampok."</string>
     <string name="fcError" msgid="3327560126588500777">"Problema sa koneksyon o di-wastong code ng tampok."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"Naglalaman ng error ang web page."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Naglalaman ng error ang web page."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Hindi makita ang URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Hindi suportado ang scheme na pagpapatotoo ng site."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Hindi tagumpay ang pagpapatotoo."</string>
@@ -461,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Pinapayagan ang isang application na tingnan ang configuration ng lokal na Bluetooth na telepono, at upang gumawa at tumanggap ng mga koneksyon sa mga nakapares na device."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kontrolin ang Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Pinapayagan ang application na makipagkomunika sa mga Near Field Communication (NFC) na tag, card, at reader."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"harangin at baguhin ang lahat ng trapiko ng network"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Pinapayagan ang isang application na harangin at suriin ang lahat ng trapiko ng network upang magtaguyod ng koneksyon ng VPN. Maaaring sumubaybay, mag-redirect, o magbago ng mga network packet nang hindi mo nalalaman."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"huwag paganahin ang keylock"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Pinapayagan ang isang application na huwag paganahin ang keylock at ang anumang nauugnay na seguridad sa password. Ang isang lehitimong halimbawa nito ay ang hindi pagpapagana ng telepono sa keylock kapag nakakatanggap ng papasok na tawag sa telepono, pagkatapos ay muling pagaganahin ang keylock kapag tapos na ang tawag."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"basahin ang mga setting ng sync"</string>
@@ -722,8 +720,10 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Pinapayagan ang isang application na baguhin ang kasaysayan o mga bookmark ng Browser na nakaimbak sa iyong telepono. Magagamit ito ng mga nakakahamak na application upang burahin o baguhin ang iyong data ng Browser."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"itakda ang alarm sa alarm clock"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Pinapayagan ang application na magtakda ng alarm sa isang naka-install na application ng alarm clock. Maaaring hindi ipatupad ng ilang application ng alarm clock ang tampok na ito."</string>
-    <string name="permlab_readWriteOwnVoicemail" msgid="8861946090046059697">"I-access ang mga voicemail na pinapamahalaan ng application na ito"</string>
-    <string name="permdesc_readWriteOwnVoicemail" msgid="7343490168272921274">"Binibigyang-daan ang application upang mag-imbak at bumawi ng mga voicemail na maa-access ng nauugnay na serbisyo nito lamang."</string>
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
+    <skip />
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
+    <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Baguhin ang mga pahintulot ng Browser geolocation"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Pinapayagan ang isang application na baguhin ang mga pahintulot sa geolocation ng Browser. Magagamit ito ng mga nakakahamak na application upang payagan ang pagpapadala ng impormasyon ng lokasyon sa mga hindi saklaw na web site."</string>
     <string name="save_password_message" msgid="767344687139195790">"Gusto mo bang tandaan ng browser ang password na ito?"</string>
@@ -839,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"I-cut"</string>
     <string name="copy" msgid="2681946229533511987">"Kopyahin"</string>
     <string name="paste" msgid="5629880836805036433">"I-paste"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Walang ipe-paste"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Kopyahin ang URL"</string>
@@ -900,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Lakas ng tunog ng alarm"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Lakas ng tunog ng notification"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Lakas ng Tunog"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Default na ringtone"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Default na ringtone (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Tahimik"</string>

@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Cod de funcţie complet."</string>
     <string name="fcError" msgid="3327560126588500777">"Problemă de conectare sau cod de funcţie nevalid."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"Pagina web conţine o eroare."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Pagina web conţine o eroare."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Imposibil de găsit adresa URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Schema de autentificare a site-ului nu este acceptată."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Autentificarea nu a reuşit."</string>
@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Permite unei aplicaţii să monitorizeze tastele pe care le apăsaţi când interacţionaţi cu o altă aplicaţie (cum ar fi introducerea unei parole). Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"conectare la o metodă de intrare"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permite deţinătorului să se conecteze la interfaţa de nivel superior a unei metode de intrare. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"conectare la un serviciu text"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Permite deţinătorului să se conecteze la o interfaţă de nivel superior a unui serviciu text (de ex., SpellCheckerService). Nu ar trebui să fie necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"conectare la o imagine de fundal"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unei imagini de fundal. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"conectare la un serviciu widget"</string>
@@ -463,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Permite unei aplicaţii să vizualizeze configuraţia telefonului Bluetooth local, să efectueze şi să accepte conexiuni cu dispozitive pereche."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"controlare schimb de date prin Near Field Communication"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Permite unei aplicaţii să comunice cu etichetele, cardurile şi cititoarele NFC (Near Field Communication)."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"interceptează şi modifică tot traficul de reţea"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Permite unei aplicaţii să intercepteze şi să inspecteze tot traficul de reţea pentru a stabili o conexiune VPN. Aplicaţiile rău intenţionate pot monitoriza, redirecţiona sau modifica pachetele de reţea fără ştirea dvs."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"dezactivare blocare taste"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Permite unei aplicaţii să dezactiveze blocarea tastelor şi orice modalitate asociată de securitate a parolelor. Un bun exemplu este deblocarea tastelor de către telefon atunci când se primeşte un apel şi reactivarea blocării tastelor la terminarea apelului."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"citire setări sincronizare"</string>
@@ -724,9 +720,9 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Permite unei aplicaţii să modifice istoricul şi marcajele din browser, stocate pe telefonul dvs. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a şterge sau a modifica datele din browser."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"setare alarmă pentru ceasul cu alarmă"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Permite aplicaţiei să seteze o alarmă într-o aplicaţie de ceas de alarmă instalată. Este posibil ca unele aplicaţii de ceas de alarmă să nu implementeze această funcţie."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
     <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modificare permisiuni pentru locaţia geografică a browserului"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Permite unei aplicaţii să modifice permisiunile privind locaţia geografică a browserului. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a permite trimiterea informaţiilor privind locaţia către site-uri Web arbitrare."</string>
@@ -843,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Decupaţi"</string>
     <string name="copy" msgid="2681946229533511987">"Copiaţi"</string>
     <string name="paste" msgid="5629880836805036433">"Inseraţi"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Nimic de inserat"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Copiaţi adresa URL"</string>
@@ -904,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Volum alarmă"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volum notificare"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volum"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Ton de apel prestabilit"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Ton de apel prestabilit (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Silenţios"</string>
@@ -917,22 +926,14 @@
     <item quantity="one" msgid="1634101450343277345">"Reţea Wi-Fi deschisă disponibilă"</item>
     <item quantity="other" msgid="7915895323644292768">"Reţele Wi-Fi deschise disponibile"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"O reţea Wi-Fi a fost dezactivată"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"O reţea Wi-Fi a fost dezactivată temporar din cauza conectivităţii slabe."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Porniţi funcţionarea Wi-Fi Direct. Acest lucru va dezactiva funcţionarea clientului/hotspotului Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Wi-Fi Direct nu a putut porni"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Solicitare de configurare a conexiunii pentru Wi-Fi Direct de la <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Faceţi clic pe OK pentru a accepta."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Solicitare de configurare a conexiunii Wi-Fi Direct de la <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Introduceţi codul PIN pentru a continua."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Pentru a continua configurarea conexiunii, este necesar să introduceţi codul PIN WPS pentru <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> pe dispozitivul pereche <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>"</string>
     <string name="select_character" msgid="3365550120617701745">"Introduceţi caracterul"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Aplicaţie necunoscută"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Se trimit mesaje SMS"</string>
@@ -975,8 +976,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Conectat ca dispozitiv media"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Conectat ca aparat foto"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Conectat ca program de instalare"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Conectat la un accesoriu USB"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Atingeţi pentru alte opţiuni USB"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Formataţi stoc. USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Formataţi cardul SD"</string>
@@ -1150,6 +1150,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Afişaţi-le pe toate..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Selectaţi o activitate"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Distribuiţi cu..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Dispozitiv blocat."</string>
 </resources>

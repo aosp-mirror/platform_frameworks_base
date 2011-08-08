@@ -98,7 +98,7 @@
     <string name="roamingText10" msgid="3992906999815316417">"Роуминг – частична функционалност на услугата"</string>
     <string name="roamingText11" msgid="4154476854426920970">"Банерът за роуминг е включен"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Банерът за роуминг е изключен"</string>
-    <string name="roamingTextSearching" msgid="8360141885972279963">"Търси се услуга"</string>
+    <string name="roamingTextSearching" msgid="8360141885972279963">"Търси се покритие"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Не е пренасочено"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="9206251736527085256">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> след <xliff:g id="TIME_DELAY">{2}</xliff:g> секунди"</string>
@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Кодът за функцията се изпълни."</string>
     <string name="fcError" msgid="3327560126588500777">"Има проблем с връзката или кодът за функцията е невалиден."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <string name="httpError" msgid="2567300624552921790">"Уеб страницата съдържа грешка."</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Уеб страницата съдържа грешка."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"URL адресът не можа да бъде намерен."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Схемата за удостоверяване на сайта не се поддържа."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Удостоверяването не бе успешно."</string>
@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"Разрешава на приложенията да наблюдават кои клавиши натискате дори и когато взаимодействате с друго приложение (например когато въвеждате парола). Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"обвързване с метод на въвеждане"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Разрешава на притежателя да се обвърже с интерфейса от най-високото ниво на метод на въвеждане. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"обвързване с текстова услуга"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"Разрешава на притежателя да се обвърже с интерфейса от най-високото ниво на текстова услуга (напр. SpellCheckerService). Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"обвързване с тапет"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Разрешава на притежателя да се обвърже с интерфейса от най-високото ниво на тапет. Нормалните приложения би трябвало никога да не се нуждаят от това."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"обвързване с услуга за приспособления"</string>
@@ -463,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"Разрешава на приложението да вижда конфигурацията на локалния Bluetooth телефон и да изгражда и приема връзки със сдвоени устройства."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"контролиране на комуникацията в близкото поле"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"Разрешава на приложението да комуникира с маркери, карти и четци, ползващи комуникация в близкото поле (NFC)."</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"прехващане и промяна на целия трафик от мрежата"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"Разрешава на приложението да прехваща и проверява целия трафик от мрежата, за да установи връзка с VPN. Злонамерените приложения могат да наблюдават, пренасочват или променят пакети от мрежата без ваше знание."</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"деактивиране на заключването на клавиатурата"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"Разрешава на приложението да деактивира заключването на клавиатурата и свързаната защита с парола. Това е допустимо, когато например телефонът деактивира заключването при получаване на входящо обаждане и после го активира отново, когато обаждането завърши."</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"четене на настройките за синхронизиране"</string>
@@ -640,7 +636,7 @@
     <string name="keyguard_password_wrong_pin_code" msgid="1295984114338107718">"Неправилен PIN код!"</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"За да отключите, натиснете „Меню“ и после 0."</string>
     <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Спешен номер"</string>
-    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Няма услуга)"</string>
+    <string name="lockscreen_carrier_default" msgid="8812714795156374435">"(Няма покритие)"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Екранът е заключен."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Натиснете „Меню“, за да отключите или да извършите спешно обаждане."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Натиснете „Меню“, за да отключите."</string>
@@ -724,9 +720,9 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Разрешава на приложението да променя историята или отметките на браузъра, съхранени на телефона ви. Злонамерените приложения могат да използват това, за да изтрият или променят данните на браузъра ви."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"навиване на будилника"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Разрешава на приложението да навие инсталирано приложение будилник. Някои будилници може да не изпълнят тази функция."</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
     <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Промяна на разрешенията за местоположение в браузъра"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Разрешава на приложението да променя разрешенията на браузъра за местоположение. Злонамерените приложения могат да използват това, за да изпращат информация за местоположението до произволни уебсайтове."</string>
@@ -843,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"Изрязване"</string>
     <string name="copy" msgid="2681946229533511987">"Копиране"</string>
     <string name="paste" msgid="5629880836805036433">"Поставяне"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"Нищо за поставяне"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"Копиране на URL адреса"</string>
@@ -881,12 +878,9 @@
     <string name="launch_warning_title" msgid="8323761616052121936">"Приложението се пренасочи"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g> се изпълнява."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"Първоначално бе стартирано: <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"Мащаб"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"Винаги да се показва"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"Активирайте отново това в „Настройки“ &gt; „Приложения“ &gt; „Управление на приложенията“."</string>
     <string name="smv_application" msgid="295583804361236288">"Приложението <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) наруши правилото за стриктен режим, наложено от самото него."</string>
     <string name="smv_process" msgid="5120397012047462446">"Процесът <xliff:g id="PROCESS">%1$s</xliff:g> наруши правилото за стриктен режим, наложено от самия него."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> се изпълнява"</string>
@@ -907,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Сила на звука на будилника"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Сила на звука при известие"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Сила на звука"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Стандартна мелодия"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Стандартна мелодия (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Тишина"</string>
@@ -920,40 +926,26 @@
     <item quantity="one" msgid="1634101450343277345">"Има достъпна отворена Wi-Fi мрежа"</item>
     <item quantity="other" msgid="7915895323644292768">"Има достъпни отворени Wi-Fi мрежи"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Wi-Fi мрежа бе деактивирана"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Wi-Fi мрежа бе временно деактивирана поради лоша връзка."</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Стартиране на операция за Wi-Fi Direct. Това ще изключи операцията за клиентска програма/гореща точка за Wi-Fi."</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Стартирането на Wi-Fi Direct не бе успешно"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Заявка за настройка на връзка с Wi-Fi Direct от <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Кликнете върху „OK“, за да приемете."</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Заявка за настройка на връзка с Wi-Fi Direct от <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Въведете ПИН, за да продължите."</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"WPS ПИН кодът <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> трябва да бъде въведен в съответното устройство <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>, за да продължи настройката за връзка"</string>
     <string name="select_character" msgid="3365550120617701745">"Вмъкване на знак"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"Неизвестно приложение"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"Изпращане на SMS съобщения"</string>
     <string name="sms_control_message" msgid="1289331457999236205">"Изпращат се голям брой SMS съобщения. Изберете „OK“, за да продължите, или „Отказ“, за да спрете изпращането."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Отказ"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM картата е премахната"</string>
+    <string name="sim_removed_message" msgid="2064255102770489459">"Тази мобилна мрежа няма да е налице, докато не замените SIM картата."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIM картата е добавена"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"Трябва да рестартирате устройството си, за да осъществите достъп до мобилната мрежа."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Рестартиране"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"Задаване на часа"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"Задаване на дата"</string>
     <string name="date_time_set" msgid="5777075614321087758">"Задаване"</string>
@@ -984,8 +976,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Свързан като медийно устройство"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Свързан като камера"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"Свързан като инсталационна програма"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"Установена е връзка с аксесоар за USB"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"Докоснете за други опции за USB"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"Форматиране на USB"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"Форматиране на SD картата"</string>
@@ -1158,7 +1149,6 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Пръстов отпечатък SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Вижте всички..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Избор на активност"</string>
-    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Споделяне с..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Споделяне със..."</string>
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"Устройството е заключено."</string>
 </resources>

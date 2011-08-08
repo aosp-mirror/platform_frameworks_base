@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"功能碼輸入完成。"</string>
     <string name="fcError" msgid="3327560126588500777">"連線發生問題或功能碼無效。"</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"確定"</string>
-    <string name="httpError" msgid="2567300624552921790">"網頁內容錯誤。"</string>
+    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"網頁內容錯誤。"</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"找不到網址。"</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"不支援此網站驗證機制。"</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"驗證失敗。"</string>
@@ -262,10 +262,8 @@
     <string name="permdesc_readInputState" msgid="5132879321450325445">"允許應用程式在使用者操作其他程式時 (例如：輸入密碼)，仍可監看輸入的按鍵。一般應用程式應不需要此功能。"</string>
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"連結至輸入法"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"允許擁有人連結至輸入法的最頂層介面。一般應用程式不需使用此選項。"</string>
-    <!-- no translation found for permlab_bindTextService (7358378401915287938) -->
-    <skip />
-    <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
-    <skip />
+    <string name="permlab_bindTextService" msgid="7358378401915287938">"繫結至文字服務"</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"允許應用程式繫結至文字服務 (例如 SpellCheckerService) 的頂層介面，一般應用程式不需使用這個選項。"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"連結至桌布"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"允許擁有人連結至桌布的最頂層介面，一般應用程式不需使用此選項。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"繫結至小工具服務"</string>
@@ -463,8 +461,6 @@
     <string name="permdesc_bluetooth" product="default" msgid="762515380679392945">"允許應用程式檢視本機藍牙電話設定，並與其他配對裝置連線。"</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"控制近距離無線通訊"</string>
     <string name="permdesc_nfc" msgid="9171401851954407226">"允許應用程式使用近距離無線通訊 (NFC) 標記、卡片及讀取程式進行通訊。"</string>
-    <string name="permlab_vpn" msgid="8345800584532175312">"攔截和修改所有網路流量"</string>
-    <string name="permdesc_vpn" msgid="7093963230333602420">"允許應用程式攔截和檢查所有要建立 VPN 連線的網路流量。請注意，惡意應用程式會在您不知情的情況下，藉此監視、重新導向或修改網路套件。"</string>
     <string name="permlab_disableKeyguard" msgid="4977406164311535092">"停用按鍵鎖定"</string>
     <string name="permdesc_disableKeyguard" msgid="3189763479326302017">"允許應用程式停用按鍵鎖定以及其他相關的密碼安全性。例如：收到來電時解除按鍵鎖定，通話結束後重新啟動按鍵鎖定。"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"讀取同步處理設定"</string>
@@ -724,9 +720,9 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"允許應用程式修改儲存在電話上的瀏覽記錄或書籤。請注意：惡意應用程式可能會使用此選項來清除或修改您瀏覽器的資料。"</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"在鬧鐘應用程式中設定鬧鈴"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"允許應用程式在安裝的鬧鐘應用程式中設定鬧鐘，某些鬧鐘應用程式可能無法執行這項功能。"</string>
-    <!-- no translation found for permlab_readWriteOwnVoicemail (8861946090046059697) -->
+    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
     <skip />
-    <!-- no translation found for permdesc_readWriteOwnVoicemail (7343490168272921274) -->
+    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
     <skip />
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"修改瀏覽器地理資訊的權限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"允許應用程式修改瀏覽器的地理位置權限，惡意應用程式可能會透過此方式允許將您的位置資訊任意傳送給某些網站。"</string>
@@ -843,6 +839,7 @@
     <string name="cut" msgid="3092569408438626261">"剪下"</string>
     <string name="copy" msgid="2681946229533511987">"複製"</string>
     <string name="paste" msgid="5629880836805036433">"貼上"</string>
+    <string name="pasteDisabled" msgid="7259254654641456570">"沒有可貼上的內容"</string>
     <!-- no translation found for replace (8333608224471746584) -->
     <skip />
     <string name="copyUrl" msgid="2538211579596067402">"複製網址"</string>
@@ -904,6 +901,18 @@
     <string name="volume_alarm" msgid="1985191616042689100">"鬧鐘音量"</string>
     <string name="volume_notification" msgid="2422265656744276715">"通知音量"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"音量"</string>
+    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <skip />
+    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
+    <skip />
+    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"預設鈴聲"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"預設鈴聲 (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"靜音"</string>
@@ -917,22 +926,14 @@
     <item quantity="one" msgid="1634101450343277345">"開啟可用 Wi-Fi 網路"</item>
     <item quantity="other" msgid="7915895323644292768">"開啟可用 Wi-Fi 網路"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_go_negotiation_request_message (5177412094633377308) -->
-    <skip />
-    <!-- no translation found for wifi_p2p_pin_display_message (2834049169114922902) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"某個 Wi-Fi 網路已停用"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"某個 Wi-Fi 網路因連線品質不佳，已暫時停用。"</string>
+    <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"啟動 Wi-Fi Direct 作業，將關閉 Wi-Fi 用戶端/無線基地台作業。"</string>
+    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"無法啟動 Wi-Fi Direct"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"收到來自 <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> 的 Wi-Fi Direct 連線設定要求。按一下 [確定] 即可接受。"</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"收到來自 <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g> 的 Wi-Fi Direct 連線設定要求。輸入 PIN 即可繼續進行。"</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"必須在對端裝置 <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> 上輸入 WPS PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>，才能繼續進行連線設定"</string>
     <string name="select_character" msgid="3365550120617701745">"插入字元"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"未知的應用程式"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"傳送 SMS 簡訊"</string>
@@ -975,8 +976,7 @@
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"已視為媒體裝置連線"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"已視為相機連線"</string>
     <string name="usb_cd_installer_notification_title" msgid="6774712827892090754">"已視為安裝程式連線"</string>
-    <!-- no translation found for usb_accessory_notification_title (7848236974087653666) -->
-    <skip />
+    <string name="usb_accessory_notification_title" msgid="7848236974087653666">"已連接到一個 USB 配件"</string>
     <string name="usb_notification_message" msgid="4447869605109736382">"輕觸即可顯示其他 USB 選項"</string>
     <string name="extmedia_format_title" product="nosdcard" msgid="7980995592595097841">"格式化 USB 儲存空間"</string>
     <string name="extmedia_format_title" product="default" msgid="8663247929551095854">"將 SD 卡格式化"</string>
@@ -1150,6 +1150,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"查看所有活動..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"選取活動"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"分享活動..."</string>
-    <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
-    <skip />
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"裝置已鎖定。"</string>
 </resources>
