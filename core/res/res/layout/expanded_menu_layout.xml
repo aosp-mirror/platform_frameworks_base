@@ -16,5 +16,5 @@
 
 <com.android.internal.view.menu.ExpandedMenuView xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+android:id/expanded_menu" 
-	android:layout_width="296dip"
+	android:layout_width="?android:attr/panelMenuListWidth"
 	android:layout_height="wrap_content" />

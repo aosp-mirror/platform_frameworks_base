@@ -95,6 +95,7 @@ import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.IApplicationToken;
 import android.view.IOnKeyguardExitResult;
 import android.view.IRotationWatcher;
@@ -5159,6 +5160,57 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             return mRotation;
+        }
+    }
+
+    /**
+     * Apps that use the compact menu panel (as controlled by the panelMenuIsCompact
+     * theme attribute) on devices that feature a physical options menu key attempt to position
+     * their menu panel window along the edge of the screen nearest the physical menu key.
+     * This lowers the travel distance between invoking the menu panel and selecting
+     * a menu option.
+     *
+     * This method helps control where that menu is placed. Its current implementation makes
+     * assumptions about the menu key and its relationship to the screen based on whether
+     * the device's natural orientation is portrait (width < height) or landscape.
+     *
+     * The menu key is assumed to be located along the bottom edge of natural-portrait
+     * devices and along the right edge of natural-landscape devices. If these assumptions
+     * do not hold for the target device, this method should be changed to reflect that.
+     *
+     * @return A {@link Gravity} value for placing the options menu window
+     */
+    public int getPreferredOptionsPanelGravity() {
+        synchronized (mWindowMap) {
+            final int rotation = getRotation();
+
+            if (mInitialDisplayWidth < mInitialDisplayHeight) {
+                // On devices with a natural orientation of portrait
+                switch (rotation) {
+                    default:
+                    case Surface.ROTATION_0:
+                        return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+                    case Surface.ROTATION_90:
+                        return Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+                    case Surface.ROTATION_180:
+                        return Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+                    case Surface.ROTATION_270:
+                        return Gravity.LEFT | Gravity.CENTER_VERTICAL;
+                }
+            } else {
+                // On devices with a natural orientation of landscape
+                switch (rotation) {
+                    default:
+                    case Surface.ROTATION_0:
+                        return Gravity.RIGHT | Gravity.CENTER_VERTICAL;
+                    case Surface.ROTATION_90:
+                        return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+                    case Surface.ROTATION_180:
+                        return Gravity.LEFT | Gravity.CENTER_VERTICAL;
+                    case Surface.ROTATION_270:
+                        return Gravity.CENTER_HORIZONTAL | Gravity.TOP;
+                }
+            }
         }
     }
 
