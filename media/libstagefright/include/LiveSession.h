@@ -120,7 +120,10 @@ private:
     void onMonitorQueue();
     void onSeek(const sp<AMessage> &msg);
 
-    status_t fetchFile(const char *url, sp<ABuffer> *out);
+    status_t fetchFile(
+            const char *url, sp<ABuffer> *out,
+            int64_t range_offset = 0, int64_t range_length = -1);
+
     sp<M3UParser> fetchPlaylist(const char *url, bool *unchanged);
     size_t getBandwidthIndex();
 
