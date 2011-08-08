@@ -95,7 +95,6 @@ public class ActionBarImpl extends ActionBar {
 
     private int mContextDisplayMode;
     private boolean mHasEmbeddedTabs;
-    private int mContentHeight;
 
     final Handler mHandler = new Handler();
     Runnable mTabSelector;
@@ -163,8 +162,6 @@ public class ActionBarImpl extends ActionBar {
         mContextDisplayMode = mActionView.isSplitActionBar() ?
                 CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;
 
-        mContentHeight = mActionView.getContentHeight();
-
         // Older apps get the home button interaction enabled by default.
         // Newer apps need to enable it explicitly.
         setHomeButtonEnabled(mContext.getApplicationInfo().targetSdkVersion <
@@ -188,12 +185,6 @@ public class ActionBarImpl extends ActionBar {
         }
         mActionView.setCollapsable(!mHasEmbeddedTabs &&
                 getNavigationMode() == NAVIGATION_MODE_TABS);
-
-        mContentHeight = mActionView.getContentHeight();
-
-        if (mTabScrollView != null) {
-            mTabScrollView.setContentHeight(mContentHeight);
-        }
     }
 
     private void ensureTabsExist() {
