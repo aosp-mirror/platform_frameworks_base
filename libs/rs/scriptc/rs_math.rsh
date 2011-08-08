@@ -1,6 +1,44 @@
+/** @file rs_math.rsh
+ *  \brief todo-jsams
+ *
+ *  todo-jsams
+ *
+ */
 #ifndef __RS_MATH_RSH__
 #define __RS_MATH_RSH__
 
+
+
+/**
+ * \overload
+ */
+extern void __attribute__((overloadable))
+    rsSetObject(rs_element *dst, rs_element src);
+/**
+ * \overload
+ */
+extern void __attribute__((overloadable))
+    rsSetObject(rs_type *dst, rs_type src);
+/**
+ * \overload
+ */
+extern void __attribute__((overloadable))
+    rsSetObject(rs_allocation *dst, rs_allocation src);
+/**
+ * \overload
+ */
+extern void __attribute__((overloadable))
+    rsSetObject(rs_sampler *dst, rs_sampler src);
+/**
+ * \overload
+ */
+extern void __attribute__((overloadable))
+    rsSetObject(rs_script *dst, rs_script src);
+/**
+ * \overload
+ */
+extern void __attribute__((overloadable))
+    rsSetObject(rs_mesh *dst, rs_mesh src);
 /**
  * Copy reference to the specified object.
  *
@@ -8,25 +46,25 @@
  * @param src
  */
 extern void __attribute__((overloadable))
-    rsSetObject(rs_element *dst, rs_element src);
-extern void __attribute__((overloadable))
-    rsSetObject(rs_type *dst, rs_type src);
-extern void __attribute__((overloadable))
-    rsSetObject(rs_allocation *dst, rs_allocation src);
-extern void __attribute__((overloadable))
-    rsSetObject(rs_sampler *dst, rs_sampler src);
-extern void __attribute__((overloadable))
-    rsSetObject(rs_script *dst, rs_script src);
-extern void __attribute__((overloadable))
-    rsSetObject(rs_mesh *dst, rs_mesh src);
-extern void __attribute__((overloadable))
     rsSetObject(rs_program_fragment *dst, rs_program_fragment src);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsSetObject(rs_program_vertex *dst, rs_program_vertex src);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsSetObject(rs_program_raster *dst, rs_program_raster src);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsSetObject(rs_program_store *dst, rs_program_store src);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsSetObject(rs_font *dst, rs_font src);
 
@@ -37,53 +75,114 @@ extern void __attribute__((overloadable))
  */
 extern void __attribute__((overloadable))
     rsClearObject(rs_element *dst);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsClearObject(rs_type *dst);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsClearObject(rs_allocation *dst);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsClearObject(rs_sampler *dst);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsClearObject(rs_script *dst);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsClearObject(rs_mesh *dst);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsClearObject(rs_program_fragment *dst);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsClearObject(rs_program_vertex *dst);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsClearObject(rs_program_raster *dst);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsClearObject(rs_program_store *dst);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsClearObject(rs_font *dst);
 
+/**
+ * \overload
+ */
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_element);
+/**
+ * \overload
+ */
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_type);
+/**
+ * \overload
+ */
+extern bool __attribute__((overloadable))
+    rsIsObject(rs_allocation);
 /**
  * Tests if the object is valid.  Returns true if the object is valid, false if
  * it is NULL.
  *
  * @return bool
  */
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_element);
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_type);
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_allocation);
+
 extern bool __attribute__((overloadable))
     rsIsObject(rs_sampler);
+/**
+ * \overload
+ */
 extern bool __attribute__((overloadable))
     rsIsObject(rs_script);
+/**
+ * \overload
+ */
 extern bool __attribute__((overloadable))
     rsIsObject(rs_mesh);
+/**
+ * \overload
+ */
 extern bool __attribute__((overloadable))
     rsIsObject(rs_program_fragment);
+/**
+ * \overload
+ */
 extern bool __attribute__((overloadable))
     rsIsObject(rs_program_vertex);
+/**
+ * \overload
+ */
 extern bool __attribute__((overloadable))
     rsIsObject(rs_program_raster);
+/**
+ * \overload
+ */
 extern bool __attribute__((overloadable))
     rsIsObject(rs_program_store);
+/**
+ * \overload
+ */
 extern bool __attribute__((overloadable))
     rsIsObject(rs_font);
 
@@ -188,46 +287,82 @@ extern void __attribute__((overloadable))
                             uint32_t srcMip,
                             rs_allocation_cubemap_face srcFace);
 
-// Extract a single element from an allocation.
+
+/**
+ * Extract a single element from an allocation.
+ */
 extern const void * __attribute__((overloadable))
     rsGetElementAt(rs_allocation, uint32_t x);
+/**
+ * \overload
+ */
 extern const void * __attribute__((overloadable))
     rsGetElementAt(rs_allocation, uint32_t x, uint32_t y);
+/**
+ * \overload
+ */
 extern const void * __attribute__((overloadable))
     rsGetElementAt(rs_allocation, uint32_t x, uint32_t y, uint32_t z);
 
-// Return a random value between 0 (or min_value) and max_malue.
+/**
+ * Return a random value between 0 (or min_value) and max_malue.
+ */
 extern int __attribute__((overloadable))
     rsRand(int max_value);
+/**
+ * \overload
+ */
 extern int __attribute__((overloadable))
     rsRand(int min_value, int max_value);
+/**
+ * \overload
+ */
 extern float __attribute__((overloadable))
     rsRand(float max_value);
+/**
+ * \overload
+ */
 extern float __attribute__((overloadable))
     rsRand(float min_value, float max_value);
 
-// return the fractional part of a float
-// min(v - ((int)floor(v)), 0x1.fffffep-1f);
+/**
+ * Returns the fractional part of a float
+ */
 extern float __attribute__((overloadable))
     rsFrac(float);
 
-// Send a message back to the client.  Will not block and returns true
-// if the message was sendable and false if the fifo was full.
-// A message ID is required.  Data payload is optional.
+/**
+ * Send a message back to the client.  Will not block and returns true
+ * if the message was sendable and false if the fifo was full.
+ * A message ID is required.  Data payload is optional.
+ */
 extern bool __attribute__((overloadable))
     rsSendToClient(int cmdID);
+/**
+ * \overload
+ */
 extern bool __attribute__((overloadable))
     rsSendToClient(int cmdID, const void *data, uint len);
-
-// Send a message back to the client, blocking until the message is queued.
-// A message ID is required.  Data payload is optional.
+/**
+ * Send a message back to the client, blocking until the message is queued.
+ * A message ID is required.  Data payload is optional.
+ */
 extern void __attribute__((overloadable))
     rsSendToClientBlocking(int cmdID);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsSendToClientBlocking(int cmdID, const void *data, uint len);
 
 
-// Script to Script
+/**
+ * Launch order hint for rsForEach calls.  This provides a hint to the system to
+ * determine in which order the root function of the target is called with each
+ * cell of the allocation.
+ *
+ * This is a hint and implementations may not obey the order.
+ */
 enum rs_for_each_strategy {
     RS_FOR_EACH_STRATEGY_SERIAL,
     RS_FOR_EACH_STRATEGY_DONT_CARE,
@@ -237,6 +372,11 @@ enum rs_for_each_strategy {
     RS_FOR_EACH_STRATEGY_TILE_LARGE
 };
 
+
+/**
+ * Structure to provide extra information to a rsForEach call.  Primarly used to
+ * restrict the call to a subset of cells in the allocation.
+ */
 typedef struct rs_script_call {
     enum rs_for_each_strategy strategy;
     uint32_t xStart;
@@ -249,26 +389,67 @@ typedef struct rs_script_call {
     uint32_t arrayEnd;
 } rs_script_call_t;
 
+/**
+ * Make a script to script call to launch work. One of the input or output is
+ * required to be a valid object. The input and output must be of the same
+ * dimensions.
+ * API 10-13
+ *
+ * @param script The target script to call
+ * @param input The allocation to source data from
+ * @param output the allocation to write date into
+ * @param usrData The user definied params to pass to the root script.  May be
+ *                NULL.
+ * @param sc Extra control infomation used to select a sub-region of the
+ *           allocation to be processed or suggest a walking strategy.  May be
+ *           NULL.
+ *
+ *  */
 #if !defined(RS_VERSION) || (RS_VERSION < 14)
 extern void __attribute__((overloadable))
-    rsForEach(rs_script script, rs_allocation input,
+    rsForEach(rs_script script script, rs_allocation input,
               rs_allocation output, const void * usrData,
-              const rs_script_call_t *);
-
+              const rs_script_call_t *sc);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsForEach(rs_script script, rs_allocation input,
               rs_allocation output, const void * usrData);
 #else
-extern void __attribute__((overloadable))
-    rsForEach(rs_script script, rs_allocation input, rs_allocation output);
 
-extern void __attribute__((overloadable))
-    rsForEach(rs_script script, rs_allocation input, rs_allocation output,
-              const void * usrData, size_t usrDataLen);
-
+/**
+ * Make a script to script call to launch work. One of the input or output is
+ * required to be a valid object. The input and output must be of the same
+ * dimensions.
+ * API 14+
+ *
+ * @param script The target script to call
+ * @param input The allocation to source data from
+ * @param output the allocation to write date into
+ * @param usrData The user definied params to pass to the root script.  May be
+ *                NULL.
+ * @param usrDataLen The size of the userData structure.  This will be used to
+ *                   perform a shallow copy of the data if necessary.
+ * @param sc Extra control infomation used to select a sub-region of the
+ *           allocation to be processed or suggest a walking strategy.  May be
+ *           NULL.
+ *
+ */
 extern void __attribute__((overloadable))
     rsForEach(rs_script script, rs_allocation input, rs_allocation output,
               const void * usrData, size_t usrDataLen, const rs_script_call_t *);
+/**
+ * \overload
+ */
+extern void __attribute__((overloadable))
+    rsForEach(rs_script script, rs_allocation input, rs_allocation output,
+              const void * usrData, size_t usrDataLen);
+/**
+ * \overload
+ */
+extern void __attribute__((overloadable))
+    rsForEach(rs_script script, rs_allocation input, rs_allocation output);
 #endif
 
 
