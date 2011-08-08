@@ -3127,7 +3127,7 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
         synchronized(mCurrentRcLock) {
-            if (!mCurrentRcClientRef.get().equals(rcse.mRcClientRef.get())) {
+            if (!rcse.mRcClientRef.get().equals(mCurrentRcClientRef.get())) {
                 // new RC client, assume every type of information shall be queried
                 mCurrentRcClientInfoFlags = RC_INFO_ALL;
             }
