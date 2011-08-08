@@ -270,8 +270,8 @@ class ProcessRecord {
         processName = _processName;
         pkgList.add(_info.packageName);
         thread = _thread;
-        maxAdj = ActivityManagerService.EMPTY_APP_ADJ;
-        hiddenAdj = ActivityManagerService.HIDDEN_APP_MIN_ADJ;
+        maxAdj = ProcessList.EMPTY_APP_ADJ;
+        hiddenAdj = ProcessList.HIDDEN_APP_MIN_ADJ;
         curRawAdj = setRawAdj = -100;
         curAdj = setAdj = -100;
         persistent = false;

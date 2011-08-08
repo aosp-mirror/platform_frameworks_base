@@ -432,7 +432,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         PackageHandler(Looper looper) {
             super(looper);
         }
-        
+
         public void handleMessage(Message msg) {
             try {
                 doHandleMessage(msg);
@@ -490,7 +490,34 @@ public class PackageManagerService extends IPackageManager.Stub {
                     } else if (mPendingInstalls.size() > 0) {
                         HandlerParams params = mPendingInstalls.get(0);
                         if (params != null) {
-                            params.startCopy();
+                            if (params.startCopy()) {
+                                // We are done...  look for more work or to
+                                // go idle.
+                                if (DEBUG_SD_INSTALL) Log.i(TAG,
+                                        "Checking for more work or unbind...");
+                                // Delete pending install
+                                if (mPendingInstalls.size() > 0) {
+                                    mPendingInstalls.remove(0);
+                                }
+                                if (mPendingInstalls.size() == 0) {
+                                    if (mBound) {
+                                        if (DEBUG_SD_INSTALL) Log.i(TAG,
+                                                "Posting delayed MCS_UNBIND");
+                                        removeMessages(MCS_UNBIND);
+                                        Message ubmsg = obtainMessage(MCS_UNBIND);
+                                        // Unbind after a little delay, to avoid
+                                        // continual thrashing.
+                                        sendMessageDelayed(ubmsg, 10000);
+                                    }
+                                } else {
+                                    // There are more pending requests in queue.
+                                    // Just post MCS_BOUND message to trigger processing
+                                    // of next pending install.
+                                    if (DEBUG_SD_INSTALL) Log.i(TAG,
+                                            "Posting MCS_BOUND for next woek");
+                                    mHandler.sendEmptyMessage(MCS_BOUND);
+                                }
+                            }
                         }
                     } else {
                         // Should never happen ideally.
@@ -517,11 +544,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     break;
                 }
                 case MCS_UNBIND : {
+                    // If there is no actual work left, then time to unbind.
                     if (DEBUG_SD_INSTALL) Log.i(TAG, "mcs_unbind");
-                    // Delete pending install
-                    if (mPendingInstalls.size() > 0) {
-                        mPendingInstalls.remove(0);
-                    }
                     if (mPendingInstalls.size() == 0) {
                         if (mBound) {
                             disconnectService();
@@ -4814,7 +4838,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     abstract class HandlerParams {
         final static int MAX_RETRIES = 4;
         int retry = 0;
-        final void startCopy() {
+        final boolean startCopy() {
+            boolean res;
             try {
                 if (DEBUG_SD_INSTALL) Log.i(TAG, "startCopy");
                 retry++;
@@ -4822,17 +4847,18 @@ public class PackageManagerService extends IPackageManager.Stub {
                     Slog.w(TAG, "Failed to invoke remote methods on default container service. Giving up");
                     mHandler.sendEmptyMessage(MCS_GIVE_UP);
                     handleServiceError();
-                    return;
+                    return false;
                 } else {
                     handleStartCopy();
-                    if (DEBUG_SD_INSTALL) Log.i(TAG, "Posting install MCS_UNBIND");
-                    mHandler.sendEmptyMessage(MCS_UNBIND);
+                    res = true;
                 }
             } catch (RemoteException e) {
                 if (DEBUG_SD_INSTALL) Log.i(TAG, "Posting install MCS_RECONNECT");
                 mHandler.sendEmptyMessage(MCS_RECONNECT);
+                res = false;
             }
             handleReturnCode();
+            return res;
         }
 
         final void serviceError() {
