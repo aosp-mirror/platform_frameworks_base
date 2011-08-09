@@ -424,8 +424,8 @@ public class NetworkStatsHistory implements Parcelable {
         final NetworkStats.Entry entry = new NetworkStats.Entry(
                 IFACE_ALL, UID_ALL, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
         final Random r = new Random();
-        while (rxBytes > 1024 && rxPackets > 128 && txBytes > 1024 && txPackets > 128
-                && operations > 32) {
+        while (rxBytes > 1024 || rxPackets > 128 || txBytes > 1024 || txPackets > 128
+                || operations > 32) {
             final long curStart = randomLong(r, start, end);
             final long curEnd = randomLong(r, curStart, end);
 
