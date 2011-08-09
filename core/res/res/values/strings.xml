@@ -930,22 +930,22 @@
         modify your profile data.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_readCalendar">read calendar events</string>
+    <string name="permlab_readCalendar">read calendar events plus confidential information</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readCalendar" product="tablet">Allows an application to read all
-        of the calendar events stored on your tablet. Malicious applications
-        can use this to send your calendar events to other people.</string>
+    <string name="permdesc_readCalendar" product="tablet">Allows an application to read all calendar 
+        events stored on your tablet, including those of friends or coworkers. A malicious application with
+        this permission can extract personal information from these calendars without the owners\' knowledge.</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_readCalendar" product="default">Allows an application to read all
-        of the calendar events stored on your phone. Malicious applications
-        can use this to send your calendar events to other people.</string>
+    <string name="permdesc_readCalendar" product="default">Allows an application to read all calendar 
+        events stored on your phone, including those of friends or coworkers. A malicious application with
+        this permission can extract personal information from these calendars without the owners\' knowledge.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_writeCalendar">add or modify calendar events and send email to guests</string>
+    <string name="permlab_writeCalendar">add or modify calendar events and send email to guests without owners\' knowledge</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeCalendar">Allows an application to add or change the
-        events on your calendar, which may send email to guests. Malicious applications can use this
-        to erase or modify your calendar events or to send email to guests.</string>
+    <string name="permdesc_writeCalendar">Allows an application to send event invitations as the calendar owner and add, remove, 
+        change events that you can modify on your device, including those of friends or co-workers. A malicious application with this permission 
+        can send spam emails that appear to come from calendar owners, modify events without the owners\' knowledge, or add fake events.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_accessMockLocation">mock location sources for testing</string>
