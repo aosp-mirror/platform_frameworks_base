@@ -57,11 +57,12 @@ public class KeyButtonView extends ImageView {
     int mTouchSlop;
     Drawable mGlowBG;
     float mGlowAlpha = 0f, mGlowScale = 1f, mDrawingAlpha = 1f;
+    boolean mSupportsLongpress = true;
 
     Runnable mCheckLongPress = new Runnable() {
         public void run() {
             if (isPressed()) {
-
+                // Slog.d("KeyButtonView", "longpressed: " + this);
                 if (mCode != 0) {
                     mRepeat++;
                     sendEvent(KeyEvent.ACTION_DOWN,
@@ -89,6 +90,8 @@ public class KeyButtonView extends ImageView {
                 defStyle, 0);
 
         mCode = a.getInteger(R.styleable.KeyButtonView_keyCode, 0);
+        
+        mSupportsLongpress = a.getBoolean(R.styleable.KeyButtonView_keyRepeat, true);
 
         mGlowBG = a.getDrawable(R.styleable.KeyButtonView_glowBackground);
         if (mGlowBG != null) {
@@ -207,11 +210,19 @@ public class KeyButtonView extends ImageView {
                 mDownTime = SystemClock.uptimeMillis();
                 mRepeat = 0;
                 mSending = true;
+                setPressed(true);
                 sendEvent(KeyEvent.ACTION_DOWN,
                         KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY, mDownTime);
-                setPressed(true);
-                removeCallbacks(mCheckLongPress);
-                postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
+                if (mSupportsLongpress) {
+                    removeCallbacks(mCheckLongPress);
+                    postDelayed(mCheckLongPress, ViewConfiguration.getLongPressTimeout());
+                } else {
+                    mSending = false;
+                    sendEvent(KeyEvent.ACTION_UP,
+                            KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY, mDownTime);
+                    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+                    playSoundEffect(SoundEffectConstants.CLICK);
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
                 if (mSending) {
@@ -230,7 +241,9 @@ public class KeyButtonView extends ImageView {
                     sendEvent(KeyEvent.ACTION_UP,
                             KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY
                                 | KeyEvent.FLAG_CANCELED);
-                    removeCallbacks(mCheckLongPress);
+                    if (mSupportsLongpress) {
+                        removeCallbacks(mCheckLongPress);
+                    }
                 }
                 break;
             case MotionEvent.ACTION_UP:
@@ -239,15 +252,15 @@ public class KeyButtonView extends ImageView {
                 if (mSending) {
                     mSending = false;
                     final int flags = KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY;
-                    removeCallbacks(mCheckLongPress);
+                    if (mSupportsLongpress) {
+                        removeCallbacks(mCheckLongPress);
+                    }
 
                     if (mCode != 0) {
                         if (doIt) {
                             sendEvent(KeyEvent.ACTION_UP, flags);
                             sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
                             playSoundEffect(SoundEffectConstants.CLICK);
-                        } else {
-                            sendEvent(KeyEvent.ACTION_UP, flags | KeyEvent.FLAG_CANCELED);
                         }
                     } else {
                         // no key code, just a regular ImageView
