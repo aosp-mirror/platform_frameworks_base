@@ -1185,6 +1185,9 @@ public class Paint {
      * @return      The width of the text
      */
     public float measureText(char[] text, int index, int count) {
+        if (text == null || text.length == 0 || count == 0) {
+            return 0f;
+        }
         if (!mHasCompatScaling) return native_measureText(text, index, count);
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
@@ -1204,6 +1207,9 @@ public class Paint {
      * @return      The width of the text
      */
     public float measureText(String text, int start, int end) {
+        if (text == null || text.length() == 0 || start == end) {
+            return 0f;
+        }
         if (!mHasCompatScaling) return native_measureText(text, start, end);
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
@@ -1221,6 +1227,9 @@ public class Paint {
      * @return      The width of the text
      */
     public float measureText(String text) {
+        if (text == null || text.length() == 0) {
+            return 0f;
+        }
         if (!mHasCompatScaling) return native_measureText(text);
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
@@ -1240,6 +1249,9 @@ public class Paint {
      * @return      The width of the text
      */
     public float measureText(CharSequence text, int start, int end) {
+        if (text == null || text.length() == 0 || start == end) {
+            return 0f;
+        }
         if (text instanceof String) {
             return measureText((String)text, start, end);
         }
@@ -1275,6 +1287,9 @@ public class Paint {
      */
     public int breakText(char[] text, int index, int count,
                                 float maxWidth, float[] measuredWidth) {
+        if (text == null || text.length == 0 || count == 0) {
+            return 0;
+        }
         if (!mHasCompatScaling) {
             return native_breakText(text, index, count, maxWidth, measuredWidth);
         }
@@ -1309,6 +1324,9 @@ public class Paint {
     public int breakText(CharSequence text, int start, int end,
                          boolean measureForwards,
                          float maxWidth, float[] measuredWidth) {
+        if (text == null || text.length() == 0 || start == end) {
+            return 0;
+        }
         if (start == 0 && text instanceof String && end == text.length()) {
             return breakText((String) text, measureForwards, maxWidth,
                              measuredWidth);
@@ -1347,6 +1365,9 @@ public class Paint {
      */
     public int breakText(String text, boolean measureForwards,
                                 float maxWidth, float[] measuredWidth) {
+        if (text == null || text.length() == 0) {
+            return 0;
+        }
         if (!mHasCompatScaling) {
             return native_breakText(text, measureForwards, maxWidth, measuredWidth);
         }
@@ -1374,6 +1395,9 @@ public class Paint {
      */
     public int getTextWidths(char[] text, int index, int count,
                              float[] widths) {
+        if (text == null || text.length == 0 || count == 0) {
+            return 0;
+        }
         if ((index | count) < 0 || index + count > text.length
                 || count > widths.length) {
             throw new ArrayIndexOutOfBoundsException();
@@ -1404,6 +1428,9 @@ public class Paint {
      */
     public int getTextWidths(CharSequence text, int start, int end,
                              float[] widths) {
+        if (text == null || text.length() == 0 || start == end) {
+            return 0;
+        }
         if (text instanceof String) {
             return getTextWidths((String) text, start, end, widths);
         }
@@ -1434,6 +1461,9 @@ public class Paint {
      * @return       the number of unichars in the specified text.
      */
     public int getTextWidths(String text, int start, int end, float[] widths) {
+        if (text == null || text.length() == 0 || start == end) {
+            return 0;
+        }
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
         }
@@ -1528,6 +1558,9 @@ public class Paint {
             int contextIndex, int contextCount, int flags, float[] advances,
             int advancesIndex, int reserved) {
 
+        if (chars == null || chars.length == 0){
+            return 0f;
+        }
         if ((index | count | contextIndex | contextCount | advancesIndex
                 | (index - contextIndex)
                 | ((contextIndex + contextCount) - (index + count))
@@ -1584,6 +1617,9 @@ public class Paint {
             int contextStart, int contextEnd, int flags, float[] advances,
             int advancesIndex, int reserved) {
 
+        if (text == null || text.length() == 0) {
+            return 0f;
+        }
         if (text instanceof String) {
             return getTextRunAdvances((String) text, start, end,
                     contextStart, contextEnd, flags, advances, advancesIndex, reserved);
@@ -1702,6 +1738,9 @@ public class Paint {
     public float getTextRunAdvances(String text, int start, int end, int contextStart,
             int contextEnd, int flags, float[] advances, int advancesIndex, int reserved) {
 
+        if (text == null || text.length() == 0 || start == end || contextStart == contextEnd) {
+            return 0f;
+        }
         if ((start | end | contextStart | contextEnd | advancesIndex | (end - start)
                 | (start - contextStart) | (contextEnd - end)
                 | (text.length() - contextEnd)

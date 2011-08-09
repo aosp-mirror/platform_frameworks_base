@@ -325,9 +325,11 @@ public:
         NPE_CHECK_RETURN_ZERO(env, text);
 
         size_t textLength = env->GetArrayLength(text);
-
         if ((index | count) < 0 || (size_t)(index + count) > textLength) {
             doThrowAIOOBE(env);
+            return 0;
+        }
+        if (count == 0) {
             return 0;
         }
 
@@ -350,15 +352,22 @@ public:
         NPE_CHECK_RETURN_ZERO(env, jpaint);
         NPE_CHECK_RETURN_ZERO(env, text);
 
-        SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
-        const jchar* textArray = env->GetStringChars(text, NULL);
-
         int count = end - start;
-        size_t textLength = env->GetStringLength(text);
-        if ((start | count) < 0 || (size_t)count > textLength) {
+        if ((start | count) < 0) {
             doThrowAIOOBE(env);
             return 0;
         }
+        if (count == 0) {
+            return 0;
+        }
+        size_t textLength = env->GetStringLength(text);
+        if ((size_t)count > textLength) {
+            doThrowAIOOBE(env);
+            return 0;
+        }
+
+        const jchar* textArray = env->GetStringChars(text, NULL);
+        SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         jfloat width = 0;
 
 #if RTL_USE_HARFBUZZ
@@ -376,10 +385,15 @@ public:
         NPE_CHECK_RETURN_ZERO(env, jpaint);
         NPE_CHECK_RETURN_ZERO(env, text);
 
-        SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
-        const jchar* textArray = env->GetStringChars(text, NULL);
         size_t textLength = env->GetStringLength(text);
+        if (textLength == 0) {
+            return 0;
+        }
+
+        const jchar* textArray = env->GetStringChars(text, NULL);
+        SkPaint* paint = GraphicsJNI::getNativePaint(env, jpaint);
         jfloat width = 0;
+
 #if RTL_USE_HARFBUZZ
         TextLayout::getTextRunAdvances(paint, textArray, 0, textLength, textLength,
                 paint->getFlags(), NULL /* dont need all advances */, width);
@@ -391,8 +405,25 @@ public:
     }
 
     static int dotextwidths(JNIEnv* env, SkPaint* paint, const jchar text[], int count, jfloatArray widths) {
+        NPE_CHECK_RETURN_ZERO(env, paint);
+        NPE_CHECK_RETURN_ZERO(env, text);
+
+        if (count < 0 || !widths) {
+            doThrowAIOOBE(env);
+            return 0;
+        }
+        if (count == 0) {
+            return 0;
+        }
+        size_t widthsLength = env->GetArrayLength(widths);
+        if ((size_t)count > widthsLength) {
+            doThrowAIOOBE(env);
+            return 0;
+        }
+
         AutoJavaFloatArray autoWidths(env, widths, count);
         jfloat* widthsArray = autoWidths.ptr();
+
 #if RTL_USE_HARFBUZZ
         jfloat totalAdvance;
 
@@ -427,6 +458,22 @@ public:
 
     static int doTextGlyphs(JNIEnv* env, SkPaint* paint, const jchar* text, jint start, jint count,
             jint contextCount, jint flags, jcharArray glyphs) {
+        NPE_CHECK_RETURN_ZERO(env, paint);
+        NPE_CHECK_RETURN_ZERO(env, text);
+
+        if ((start | count | contextCount) < 0 || contextCount < count || !glyphs) {
+            doThrowAIOOBE(env);
+            return 0;
+        }
+        if (count == 0) {
+            return 0;
+        }
+        size_t glypthsLength = env->GetArrayLength(glyphs);
+        if ((size_t)count > glypthsLength) {
+            doThrowAIOOBE(env);
+            return 0;
+        }
+
         jchar* glyphsArray = env->GetCharArrayElements(glyphs, NULL);
         HB_ShaperItem shaperItem;
         HB_FontRec font;
@@ -455,8 +502,25 @@ public:
     static jfloat doTextRunAdvances(JNIEnv *env, SkPaint *paint, const jchar *text,
                                     jint start, jint count, jint contextCount, jint flags,
                                     jfloatArray advances, jint advancesIndex) {
+        NPE_CHECK_RETURN_ZERO(env, paint);
+        NPE_CHECK_RETURN_ZERO(env, text);
+
+        if ((start | count | contextCount | advancesIndex) < 0 || contextCount < count) {
+            doThrowAIOOBE(env);
+            return 0;
+        }
+        if (count == 0) {
+            return 0;
+        }
+        if (advances) {
+            size_t advancesLength = env->GetArrayLength(advances);
+            if ((size_t)count > advancesLength) {
+                doThrowAIOOBE(env);
+                return 0;
+            }
+        }
         jfloat advancesArray[count];
-        jfloat totalAdvance;
+        jfloat totalAdvance = 0;
 
         TextLayout::getTextRunAdvances(paint, text, start, count, contextCount, flags,
                                        advancesArray, totalAdvance);
@@ -470,8 +534,26 @@ public:
     static jfloat doTextRunAdvancesICU(JNIEnv *env, SkPaint *paint, const jchar *text,
                                     jint start, jint count, jint contextCount, jint flags,
                                     jfloatArray advances, jint advancesIndex) {
+        NPE_CHECK_RETURN_ZERO(env, paint);
+        NPE_CHECK_RETURN_ZERO(env, text);
+
+        if ((start | count | contextCount | advancesIndex) < 0 || contextCount < count) {
+            doThrowAIOOBE(env);
+            return 0;
+        }
+        if (count == 0) {
+            return 0;
+        }
+        if (advances) {
+            size_t advancesLength = env->GetArrayLength(advances);
+            if ((size_t)count > advancesLength) {
+                doThrowAIOOBE(env);
+                return 0;
+            }
+        }
+
         jfloat advancesArray[count];
-        jfloat totalAdvance;
+        jfloat totalAdvance = 0;
 
         TextLayout::getTextRunAdvancesICU(paint, text, start, count, contextCount, flags,
                                        advancesArray, totalAdvance);
@@ -512,7 +594,7 @@ public:
             jint count, jint flags, jint offset, jint opt) {
 #if RTL_USE_HARFBUZZ
         jfloat scalarArray[count];
-        jfloat totalAdvance;
+        jfloat totalAdvance = 0;
 
         TextLayout::getTextRunAdvances(paint, text, start, count, count, flags,
                 scalarArray, totalAdvance);
