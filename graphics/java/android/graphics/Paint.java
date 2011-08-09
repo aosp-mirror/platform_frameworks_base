@@ -1179,16 +1179,26 @@ public class Paint {
     /**
      * Return the width of the text.
      *
-     * @param text  The text to measure
+     * @param text  The text to measure. Cannot be null.
      * @param index The index of the first character to start measuring
      * @param count THe number of characters to measure, beginning with start
      * @return      The width of the text
      */
     public float measureText(char[] text, int index, int count) {
-        if (text == null || text.length == 0 || count == 0) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((index | count) < 0 || index + count > text.length) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+
+        if (text.length == 0 || count == 0) {
             return 0f;
         }
-        if (!mHasCompatScaling) return native_measureText(text, index, count);
+        if (!mHasCompatScaling) {
+            return native_measureText(text, index, count);
+        }
+
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
         float w = native_measureText(text, index, count);
@@ -1201,16 +1211,26 @@ public class Paint {
     /**
      * Return the width of the text.
      *
-     * @param text  The text to measure
+     * @param text  The text to measure. Cannot be null.
      * @param start The index of the first character to start measuring
      * @param end   1 beyond the index of the last character to measure
      * @return      The width of the text
      */
     public float measureText(String text, int start, int end) {
-        if (text == null || text.length() == 0 || start == end) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((start | end | (end - start) | (text.length() - end)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        if (text.length() == 0 || start == end) {
             return 0f;
         }
-        if (!mHasCompatScaling) return native_measureText(text, start, end);
+        if (!mHasCompatScaling) {
+            return native_measureText(text, start, end);
+        }
+
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
         float w = native_measureText(text, start, end);
@@ -1223,13 +1243,18 @@ public class Paint {
     /**
      * Return the width of the text.
      *
-     * @param text  The text to measure
+     * @param text  The text to measure. Cannot be null.
      * @return      The width of the text
      */
     public float measureText(String text) {
-        if (text == null || text.length() == 0) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+
+        if (text.length() == 0) {
             return 0f;
         }
+
         if (!mHasCompatScaling) return native_measureText(text);
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
@@ -1249,7 +1274,14 @@ public class Paint {
      * @return      The width of the text
      */
     public float measureText(CharSequence text, int start, int end) {
-        if (text == null || text.length() == 0 || start == end) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((start | end | (end - start) | (text.length() - end)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        if (text.length() == 0 || start == end) {
             return 0f;
         }
         if (text instanceof String) {
@@ -1275,7 +1307,7 @@ public class Paint {
      * Return the number of chars that were measured, and if measuredWidth is
      * not null, return in it the actual width measured.
      *
-     * @param text  The text to measure
+     * @param text  The text to measure. Cannot be null.
      * @param index The offset into text to begin measuring at
      * @param count The number of maximum number of entries to measure. If count
      *              is negative, then the characters are measured in reverse order.
@@ -1287,12 +1319,20 @@ public class Paint {
      */
     public int breakText(char[] text, int index, int count,
                                 float maxWidth, float[] measuredWidth) {
-        if (text == null || text.length == 0 || count == 0) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((index | count) < 0 || index + count > text.length) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+
+        if (text.length == 0 || count == 0) {
             return 0;
         }
         if (!mHasCompatScaling) {
             return native_breakText(text, index, count, maxWidth, measuredWidth);
         }
+
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
         int res = native_breakText(text, index, count, maxWidth*mCompatScaling,
@@ -1310,7 +1350,7 @@ public class Paint {
      * Return the number of chars that were measured, and if measuredWidth is
      * not null, return in it the actual width measured.
      *
-     * @param text  The text to measure
+     * @param text  The text to measure. Cannot be null.
      * @param start The offset into text to begin measuring at
      * @param end   The end of the text slice to measure.
      * @param measureForwards If true, measure forwards, starting at start.
@@ -1324,7 +1364,14 @@ public class Paint {
     public int breakText(CharSequence text, int start, int end,
                          boolean measureForwards,
                          float maxWidth, float[] measuredWidth) {
-        if (text == null || text.length() == 0 || start == end) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((start | end | (end - start) | (text.length() - end)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        if (text.length() == 0 || start == end) {
             return 0;
         }
         if (start == 0 && text instanceof String && end == text.length()) {
@@ -1352,7 +1399,7 @@ public class Paint {
      * Return the number of chars that were measured, and if measuredWidth is
      * not null, return in it the actual width measured.
      *
-     * @param text  The text to measure
+     * @param text  The text to measure. Cannot be null.
      * @param measureForwards If true, measure forwards, starting with the
      *                        first character in the string. Otherwise,
      *                        measure backwards, starting with the
@@ -1365,12 +1412,17 @@ public class Paint {
      */
     public int breakText(String text, boolean measureForwards,
                                 float maxWidth, float[] measuredWidth) {
-        if (text == null || text.length() == 0) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+
+        if (text.length() == 0) {
             return 0;
         }
         if (!mHasCompatScaling) {
             return native_breakText(text, measureForwards, maxWidth, measuredWidth);
         }
+
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
         int res = native_breakText(text, measureForwards, maxWidth*mCompatScaling,
@@ -1386,7 +1438,7 @@ public class Paint {
     /**
      * Return the advance widths for the characters in the string.
      *
-     * @param text     The text to measure
+     * @param text     The text to measure. Cannot be null.
      * @param index    The index of the first char to to measure
      * @param count    The number of chars starting with index to measure
      * @param widths   array to receive the advance widths of the characters.
@@ -1395,17 +1447,21 @@ public class Paint {
      */
     public int getTextWidths(char[] text, int index, int count,
                              float[] widths) {
-        if (text == null || text.length == 0 || count == 0) {
-            return 0;
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
         }
         if ((index | count) < 0 || index + count > text.length
                 || count > widths.length) {
             throw new ArrayIndexOutOfBoundsException();
         }
-        
+
+        if (text.length == 0 || count == 0) {
+            return 0;
+        }
         if (!mHasCompatScaling) {
             return native_getTextWidths(mNativePaint, text, index, count, widths);
         }
+
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
         int res = native_getTextWidths(mNativePaint, text, index, count, widths);
@@ -1419,7 +1475,7 @@ public class Paint {
     /**
      * Return the advance widths for the characters in the string.
      *
-     * @param text     The text to measure
+     * @param text     The text to measure. Cannot be null.
      * @param start    The index of the first char to to measure
      * @param end      The end of the text slice to measure
      * @param widths   array to receive the advance widths of the characters.
@@ -1428,7 +1484,17 @@ public class Paint {
      */
     public int getTextWidths(CharSequence text, int start, int end,
                              float[] widths) {
-        if (text == null || text.length() == 0 || start == end) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if ((start | end | (end - start) | (text.length() - end)) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+        if (end - start > widths.length) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+
+        if (text.length() == 0 || start == end) {
             return 0;
         }
         if (text instanceof String) {
@@ -1453,7 +1519,7 @@ public class Paint {
     /**
      * Return the advance widths for the characters in the string.
      *
-     * @param text   The text to measure
+     * @param text   The text to measure. Cannot be null.
      * @param start  The index of the first char to to measure
      * @param end    The end of the text slice to measure
      * @param widths array to receive the advance widths of the characters.
@@ -1461,8 +1527,8 @@ public class Paint {
      * @return       the number of unichars in the specified text.
      */
     public int getTextWidths(String text, int start, int end, float[] widths) {
-        if (text == null || text.length() == 0 || start == end) {
-            return 0;
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
         }
         if ((start | end | (end - start) | (text.length() - end)) < 0) {
             throw new IndexOutOfBoundsException();
@@ -1471,9 +1537,13 @@ public class Paint {
             throw new ArrayIndexOutOfBoundsException();
         }
         
+        if (text.length() == 0 || start == end) {
+            return 0;
+        }
         if (!mHasCompatScaling) {
             return native_getTextWidths(mNativePaint, text, start, end, widths);
         }
+
         final float oldSize = getTextSize();
         setTextSize(oldSize*mCompatScaling);
         int res = native_getTextWidths(mNativePaint, text, start, end, widths);
@@ -1518,6 +1588,12 @@ public class Paint {
      */
     public int getTextGlypths(String text, int start, int end, int contextStart, int contextEnd,
             int flags, char[] glyphs) {
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
+            throw new IllegalArgumentException("unknown flags value: " + flags);
+        }
         if ((start | end | contextStart | contextEnd | (end - start)
                 | (start - contextStart) | (contextEnd - end) | (text.length() - end)
                 | (text.length() - contextEnd)) < 0) {
@@ -1525,9 +1601,6 @@ public class Paint {
         }
         if (end - start > glyphs.length) {
             throw new ArrayIndexOutOfBoundsException();
-        }
-        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
-            throw new IllegalArgumentException("unknown flags value: " + flags);
         }
         return native_getTextGlyphs(mNativePaint, text, start, end, contextStart, contextEnd,
                 flags, glyphs);
@@ -1558,21 +1631,24 @@ public class Paint {
             int contextIndex, int contextCount, int flags, float[] advances,
             int advancesIndex, int reserved) {
 
-        if (chars == null || chars.length == 0){
-            return 0f;
+        if (chars == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
+            throw new IllegalArgumentException("unknown flags value: " + flags);
         }
         if ((index | count | contextIndex | contextCount | advancesIndex
-                | (index - contextIndex)
+                | (index - contextIndex) | (contextCount - count)
                 | ((contextIndex + contextCount) - (index + count))
                 | (chars.length - (contextIndex + contextCount))
                 | (advances == null ? 0 :
                     (advances.length - (advancesIndex + count)))) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
-            throw new IllegalArgumentException("unknown flags value: " + flags);
-        }
 
+        if (chars.length == 0 || count == 0){
+            return 0f;
+        }
         if (!mHasCompatScaling) {
             return native_getTextRunAdvances(mNativePaint, chars, index, count,
                     contextIndex, contextCount, flags, advances, advancesIndex, reserved);
@@ -1617,9 +1693,17 @@ public class Paint {
             int contextStart, int contextEnd, int flags, float[] advances,
             int advancesIndex, int reserved) {
 
-        if (text == null || text.length() == 0) {
-            return 0f;
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
         }
+        if ((start | end | contextStart | contextEnd | advancesIndex | (end - start)
+                | (start - contextStart) | (contextEnd - end)
+                | (text.length() - contextEnd)
+                | (advances == null ? 0 :
+                    (advances.length - advancesIndex - (end - start)))) < 0) {
+            throw new IndexOutOfBoundsException();
+        }
+
         if (text instanceof String) {
             return getTextRunAdvances((String) text, start, end,
                     contextStart, contextEnd, flags, advances, advancesIndex, reserved);
@@ -1632,6 +1716,9 @@ public class Paint {
         if (text instanceof GraphicsOperations) {
             return ((GraphicsOperations) text).getTextRunAdvances(start, end,
                     contextStart, contextEnd, flags, advances, advancesIndex, this);
+        }
+        if (text.length() == 0 || end == start) {
+            return 0f;
         }
 
         int contextLen = contextEnd - contextStart;
@@ -1669,7 +1756,7 @@ public class Paint {
      * These bounds typically reflect changes in bidi level or font
      * metrics across which shaping does not occur.
      *
-     * @param text the text to measure
+     * @param text the text to measure. Cannot be null.
      * @param start the index of the first character to measure
      * @param end the index past the last character to measure
      * @param contextStart the index of the first character to use for shaping context,
@@ -1717,7 +1804,7 @@ public class Paint {
      * These bounds typically reflect changes in bidi level or font
      * metrics across which shaping does not occur.
      *
-     * @param text the text to measure
+     * @param text the text to measure. Cannot be null.
      * @param start the index of the first character to measure
      * @param end the index past the last character to measure
      * @param contextStart the index of the first character to use for shaping context,
@@ -1738,8 +1825,11 @@ public class Paint {
     public float getTextRunAdvances(String text, int start, int end, int contextStart,
             int contextEnd, int flags, float[] advances, int advancesIndex, int reserved) {
 
-        if (text == null || text.length() == 0 || start == end || contextStart == contextEnd) {
-            return 0f;
+        if (text == null) {
+            throw new IllegalArgumentException("text cannot be null");
+        }
+        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
+            throw new IllegalArgumentException("unknown flags value: " + flags);
         }
         if ((start | end | contextStart | contextEnd | advancesIndex | (end - start)
                 | (start - contextStart) | (contextEnd - end)
@@ -1748,8 +1838,9 @@ public class Paint {
                     (advances.length - advancesIndex - (end - start)))) < 0) {
             throw new IndexOutOfBoundsException();
         }
-        if (flags != DIRECTION_LTR && flags != DIRECTION_RTL) {
-            throw new IllegalArgumentException("unknown flags value: " + flags);
+
+        if (text.length() == 0 || start == end) {
+            return 0f;
         }
 
         if (!mHasCompatScaling) {
