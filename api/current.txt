@@ -26455,6 +26455,8 @@ package android.widget {
     method public void onActionViewExpanded();
     method public void setIconified(boolean);
     method public void setIconifiedByDefault(boolean);
+    method public void setImeOptions(int);
+    method public void setInputType(int);
     method public void setMaxWidth(int);
     method public void setOnCloseListener(android.widget.SearchView.OnCloseListener);
     method public void setOnQueryTextFocusChangeListener(android.view.View.OnFocusChangeListener);

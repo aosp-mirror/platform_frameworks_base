@@ -37,6 +37,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -49,6 +50,7 @@ import android.view.CollapsibleActionView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -79,6 +81,8 @@ import java.util.WeakHashMap;
  *
  * @see android.view.MenuItem#SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW
  * @attr ref android.R.styleable#SearchView_iconifiedByDefault
+ * @attr ref android.R.styleable#SearchView_imeOptions
+ * @attr ref android.R.styleable#SearchView_inputType
  * @attr ref android.R.styleable#SearchView_maxWidth
  * @attr ref android.R.styleable#SearchView_queryHint
  */
@@ -254,8 +258,6 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             }
         });
 
-        boolean focusable = true;
-
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.SearchView, 0, 0);
         setIconifiedByDefault(a.getBoolean(R.styleable.SearchView_iconifiedByDefault, true));
         int maxWidth = a.getDimensionPixelSize(R.styleable.SearchView_maxWidth, -1);
@@ -266,7 +268,18 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         if (!TextUtils.isEmpty(queryHint)) {
             setQueryHint(queryHint);
         }
+        int imeOptions = a.getInt(R.styleable.SearchView_imeOptions, -1);
+        if (imeOptions != -1) {
+            setImeOptions(imeOptions);
+        }
+        int inputType = a.getInt(R.styleable.SearchView_inputType, -1);
+        if (inputType != -1) {
+            setInputType(inputType);
+        }
+
         a.recycle();
+
+        boolean focusable = true;
 
         a = context.obtainStyledAttributes(attrs, R.styleable.View, 0, 0);
         focusable = a.getBoolean(R.styleable.View_focusable, focusable);
@@ -324,6 +337,30 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      */
     public void setAppSearchData(Bundle appSearchData) {
         mAppSearchData = appSearchData;
+    }
+
+    /**
+     * Sets the IME options on the query text field.
+     *
+     * @see TextView#setImeOptions(int)
+     * @param imeOptions the options to set on the query text field
+     *
+     * @attr ref android.R.styleable#SearchView_imeOptions
+     */
+    public void setImeOptions(int imeOptions) {
+        mQueryTextView.setImeOptions(imeOptions);
+    }
+
+    /**
+     * Sets the input type on the query text field.
+     *
+     * @see TextView#setInputType(int)
+     * @param inputType the input type to set on the query text field
+     *
+     * @attr ref android.R.styleable#SearchView_inputType
+     */
+    public void setInputType(int inputType) {
+        mQueryTextView.setInputType(inputType);
     }
 
     /** @hide */
@@ -918,11 +955,21 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      * Updates the auto-complete text view.
      */
     private void updateSearchAutoComplete() {
-        // close any existing suggestions adapter
-        //closeSuggestionsAdapter();
-
         mQueryTextView.setDropDownAnimationStyle(0); // no animation
         mQueryTextView.setThreshold(mSearchable.getSuggestThreshold());
+        mQueryTextView.setImeOptions(mSearchable.getImeOptions());
+        int inputType = mSearchable.getInputType();
+        // We only touch this if the input type is set up for text (which it almost certainly
+        // should be, in the case of search!)
+        if ((inputType & InputType.TYPE_MASK_CLASS) == InputType.TYPE_CLASS_TEXT) {
+            // The existence of a suggestions authority is the proxy for "suggestions
+            // are available here"
+            inputType &= ~InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE;
+            if (mSearchable.getSuggestAuthority() != null) {
+                inputType |= InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE;
+            }
+        }
+        mQueryTextView.setInputType(inputType);
 
         // attach the suggestions adapter, if suggestions are available
         // The existence of a suggestions authority is the proxy for "suggestions available here"
