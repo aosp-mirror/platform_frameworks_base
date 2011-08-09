@@ -225,8 +225,6 @@
        <item>@drawable/spinner_ab_focused_holo_light</item>
        <item>@drawable/spinner_ab_pressed_holo_dark</item>
        <item>@drawable/spinner_ab_pressed_holo_light</item>
-       <item>@drawable/spinner_ab_activated_holo_dark</item>
-       <item>@drawable/spinner_ab_activated_holo_light</item>
        <item>@drawable/spinner_ab_holo_dark</item>
        <item>@drawable/spinner_ab_holo_light</item>
        <item>@drawable/spinner_default_holo_dark</item>
