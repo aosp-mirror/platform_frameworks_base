@@ -8753,6 +8753,12 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @see #SCROLLBARS_OUTSIDE_OVERLAY
      * @see #SCROLLBARS_OUTSIDE_INSET
      */
+    @ViewDebug.ExportedProperty(mapping = {
+            @ViewDebug.IntToString(from = SCROLLBARS_INSIDE_OVERLAY, to = "INSIDE_OVERLAY"),
+            @ViewDebug.IntToString(from = SCROLLBARS_INSIDE_INSET, to = "INSIDE_INSET"),
+            @ViewDebug.IntToString(from = SCROLLBARS_OUTSIDE_OVERLAY, to = "OUTSIDE_OVERLAY"),
+            @ViewDebug.IntToString(from = SCROLLBARS_OUTSIDE_INSET, to = "OUTSIDE_INSET")
+    })
     public int getScrollBarStyle() {
         return mViewFlags & SCROLLBARS_STYLE_MASK;
     }

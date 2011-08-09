@@ -28,5 +28,5 @@
     <!-- Minimum space to allocate to the left of a preference item for an icon.
         This helps in aligning titles when some items have icons and some don't. When space is
         at a premium, we don't pre-allocate any space. -->
-    <dimen name="preference_icon_minWidth">48dp</dimen>
+    <dimen name="preference_icon_minWidth">56dp</dimen>
 </resources>
