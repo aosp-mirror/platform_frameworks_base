@@ -607,13 +607,13 @@ public class MediaPlayer
 
     /**
      * Sets the {@link SurfaceHolder} to use for displaying the video
-     * portion of the media.  A surface must be set if a display is
-     * needed.  Not calling this method when playing back a video will
-     * result in only the audio track being played.
+     * portion of the media.
      *
      * Either a surface holder or surface must be set if a display or video sink
      * is needed.  Not calling this method or {@link #setTexture(SurfaceTexture)}
      * when playing back a video will result in only the audio track being played.
+     * A null surface holder or surface will result in only the audio track being
+     * played.
      *
      * @param sh the SurfaceHolder to use for video display
      */
@@ -634,6 +634,7 @@ public class MediaPlayer
      * the media. This is similar to {@link #setDisplay(SurfaceHolder)}, but does not
      * support {@link #setScreenOnWhilePlaying(boolean)} or {@link #updateSurfaceScreenOn()}.
      * Setting a Surface will un-set any Surface or SurfaceHolder that was previously set.
+     * A null surface will result in only the audio track being played.
      *
      * @param surface The {@link Surface} to be used for the video portion of the media.
      *
