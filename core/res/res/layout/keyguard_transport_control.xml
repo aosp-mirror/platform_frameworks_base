@@ -1,53 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-**
-** Copyright 2008, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License")
-** you may not use this file except in compliance with the License.
-** You may obtain a copy of the License at
-**
-**     http://www.apache.org/licenses/LICENSE-2.0
-**
-** Unless required by applicable law or agreed to in writing, software
-** distributed under the License is distributed on an "AS IS" BASIS,
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-** See the License for the specific language governing permissions and
-** limitations under the License.
-*/
+<!-- Copyright (C) 2011 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
 -->
 
+<!-- Note: This file is meant to be included in various password unlock screens. As such,
+     LayoutParams (layout_*) for TransportControlView should *NOT* be specified here,
+     but rather as include tags for this file or the layout will break. -->
 <com.android.internal.widget.TransportControlView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:gravity="bottom"
-    android:orientation="horizontal"
-    android:background="#a0808080"
-    android:visibility="gone">
+    android:id="@+id/transport_controls"
+    android:background="@drawable/ic_lockscreen_player_background">
 
-    <Button android:id="@+id/control_prev"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="#80ff0000"
+    <ImageView
+        android:id="@+id/albumart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="fill"
+        android:scaleType="centerCrop"
+        android:adjustViewBounds="false"
         />
 
-    <Space android:layout_width="0dip"
-        android:layout_height="0dip"
-        android:layout_weight="1"/>
-
-    <Button android:id="@+id/control_pauseplay"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#8000ff00"
+        android:background="#c8000000"
+        android:layout_gravity="bottom">
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dip"
+            android:layout_marginLeft="16dip"
+            android:layout_marginRight="16dip"
+            android:gravity="center_horizontal"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textAppearance="?android:attr/textAppearanceMedium"
         />
-
-    <Space android:layout_width="0dip"
-        android:layout_height="0dip"
-        android:layout_weight="1"/>
-
-    <Button android:id="@+id/control_next"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="#800000ff"
-        />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="5dip">
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+                <ImageView
+                    android:id="@+id/btn_prev"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_media_rew"
+                    android:clickable="true"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:padding="10dip"/>
+            </FrameLayout>
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+                <ImageView
+                    android:id="@+id/btn_play"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:clickable="true"
+                    android:src="@drawable/ic_media_play"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:padding="10dip"/>
+            </FrameLayout>
+            <FrameLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+                <ImageView
+                    android:id="@+id/btn_next"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:clickable="true"
+                    android:src="@drawable/ic_media_ff"
+                    android:background="?android:attr/selectableItemBackground"
+                    android:padding="10dip"/>
+            </FrameLayout>
+        </LinearLayout>
+    </LinearLayout>
 
 </com.android.internal.widget.TransportControlView>
