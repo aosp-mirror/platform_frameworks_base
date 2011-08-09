@@ -254,8 +254,8 @@ public class ViewPropertyAnimator {
      * @return The duration of animations, in milliseconds.
      */
     public long getDuration() {
-        if (mStartDelaySet) {
-            return mStartDelay;
+        if (mDurationSet) {
+            return mDuration;
         } else {
             // Just return the default from ValueAnimator, since that's what we'd get if
             // the value has not been set otherwise
@@ -631,6 +631,9 @@ public class ViewPropertyAnimator {
         mAnimatorMap.put(animator, new PropertyBundle(propertyMask, nameValueList));
         animator.addUpdateListener(mAnimatorEventListener);
         animator.addListener(mAnimatorEventListener);
+        if (mStartDelaySet) {
+            animator.setStartDelay(mStartDelay);
+        }
         if (mDurationSet) {
             animator.setDuration(mDuration);
         }
