@@ -1,308 +1,29 @@
+/*
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 /** @file rs_math.rsh
  *  \brief todo-jsams
  *
  *  todo-jsams
  *
  */
+
 #ifndef __RS_MATH_RSH__
 #define __RS_MATH_RSH__
 
-
-
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsSetObject(rs_element *dst, rs_element src);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsSetObject(rs_type *dst, rs_type src);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsSetObject(rs_allocation *dst, rs_allocation src);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsSetObject(rs_sampler *dst, rs_sampler src);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsSetObject(rs_script *dst, rs_script src);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsSetObject(rs_mesh *dst, rs_mesh src);
-/**
- * Copy reference to the specified object.
- *
- * @param dst
- * @param src
- */
-extern void __attribute__((overloadable))
-    rsSetObject(rs_program_fragment *dst, rs_program_fragment src);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsSetObject(rs_program_vertex *dst, rs_program_vertex src);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsSetObject(rs_program_raster *dst, rs_program_raster src);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsSetObject(rs_program_store *dst, rs_program_store src);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsSetObject(rs_font *dst, rs_font src);
-
-/**
- * Sets the object to NULL.
- *
- * @return bool
- */
-extern void __attribute__((overloadable))
-    rsClearObject(rs_element *dst);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsClearObject(rs_type *dst);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsClearObject(rs_allocation *dst);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsClearObject(rs_sampler *dst);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsClearObject(rs_script *dst);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsClearObject(rs_mesh *dst);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsClearObject(rs_program_fragment *dst);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsClearObject(rs_program_vertex *dst);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsClearObject(rs_program_raster *dst);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsClearObject(rs_program_store *dst);
-/**
- * \overload
- */
-extern void __attribute__((overloadable))
-    rsClearObject(rs_font *dst);
-
-/**
- * \overload
- */
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_element);
-/**
- * \overload
- */
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_type);
-/**
- * \overload
- */
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_allocation);
-/**
- * Tests if the object is valid.  Returns true if the object is valid, false if
- * it is NULL.
- *
- * @return bool
- */
-
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_sampler);
-/**
- * \overload
- */
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_script);
-/**
- * \overload
- */
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_mesh);
-/**
- * \overload
- */
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_program_fragment);
-/**
- * \overload
- */
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_program_vertex);
-/**
- * \overload
- */
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_program_raster);
-/**
- * \overload
- */
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_program_store);
-/**
- * \overload
- */
-extern bool __attribute__((overloadable))
-    rsIsObject(rs_font);
-
-
-/**
- * Returns the Allocation for a given pointer.  The pointer should point within
- * a valid allocation.  The results are undefined if the pointer is not from a
- * valid allocation.
- */
-extern rs_allocation __attribute__((overloadable))
-    rsGetAllocation(const void *);
-
-/**
- * Query the dimension of an allocation.
- *
- * @return uint32_t The X dimension of the allocation.
- */
-extern uint32_t __attribute__((overloadable))
-    rsAllocationGetDimX(rs_allocation);
-
-/**
- * Query the dimension of an allocation.
- *
- * @return uint32_t The Y dimension of the allocation.
- */
-extern uint32_t __attribute__((overloadable))
-    rsAllocationGetDimY(rs_allocation);
-
-/**
- * Query the dimension of an allocation.
- *
- * @return uint32_t The Z dimension of the allocation.
- */
-extern uint32_t __attribute__((overloadable))
-    rsAllocationGetDimZ(rs_allocation);
-
-/**
- * Query an allocation for the presence of more than one LOD.
- *
- * @return uint32_t Returns 1 if more than one LOD is present, 0 otherwise.
- */
-extern uint32_t __attribute__((overloadable))
-    rsAllocationGetDimLOD(rs_allocation);
-
-/**
- * Query an allocation for the presence of more than one face.
- *
- * @return uint32_t Returns 1 if more than one face is present, 0 otherwise.
- */
-extern uint32_t __attribute__((overloadable))
-    rsAllocationGetDimFaces(rs_allocation);
-
-/**
- * Copy part of an allocation from another allocation.
- *
- * @param dstAlloc Allocation to copy data into.
- * @param dstOff The offset of the first element to be copied in
- *               the destination allocation.
- * @param dstMip Mip level in the destination allocation.
- * @param count The number of elements to be copied.
- * @param srcAlloc The source data allocation.
- * @param srcOff The offset of the first element in data to be
- *               copied in the source allocation.
- * @param srcMip Mip level in the source allocation.
- */
-extern void __attribute__((overloadable))
-    rsAllocationCopy1DRange(rs_allocation dstAlloc,
-                            uint32_t dstOff, uint32_t dstMip,
-                            uint32_t count,
-                            rs_allocation srcAlloc,
-                            uint32_t srcOff, uint32_t srcMip);
-
-/**
- * Copy a rectangular region into the allocation from another
- * allocation.
- *
- * @param dstAlloc allocation to copy data into.
- * @param dstXoff X offset of the region to update in the
- *                destination allocation.
- * @param dstYoff Y offset of the region to update in the
- *                destination allocation.
- * @param dstMip Mip level in the destination allocation.
- * @param dstFace Cubemap face of the destination allocation,
- *                ignored for allocations that aren't cubemaps.
- * @param width Width of the incoming region to update.
- * @param height Height of the incoming region to update.
- * @param srcAlloc The source data allocation.
- * @param srcXoff X offset in data of the source allocation.
- * @param srcYoff Y offset in data of the source allocation.
- * @param srcMip Mip level in the source allocation.
- * @param srcFace Cubemap face of the source allocation,
- *                ignored for allocations that aren't cubemaps.
- */
-extern void __attribute__((overloadable))
-    rsAllocationCopy2DRange(rs_allocation dstAlloc,
-                            uint32_t dstXoff, uint32_t dstYoff,
-                            uint32_t dstMip,
-                            rs_allocation_cubemap_face dstFace,
-                            uint32_t width, uint32_t height,
-                            rs_allocation srcAlloc,
-                            uint32_t srcXoff, uint32_t srcYoff,
-                            uint32_t srcMip,
-                            rs_allocation_cubemap_face srcFace);
-
-
-/**
- * Extract a single element from an allocation.
- */
-extern const void * __attribute__((overloadable))
-    rsGetElementAt(rs_allocation, uint32_t x);
-/**
- * \overload
- */
-extern const void * __attribute__((overloadable))
-    rsGetElementAt(rs_allocation, uint32_t x, uint32_t y);
-/**
- * \overload
- */
-extern const void * __attribute__((overloadable))
-    rsGetElementAt(rs_allocation, uint32_t x, uint32_t y, uint32_t z);
 
 /**
  * Return a random value between 0 (or min_value) and max_malue.
@@ -331,346 +52,197 @@ extern float __attribute__((overloadable))
 extern float __attribute__((overloadable))
     rsFrac(float);
 
+
+/////////////////////////////////////////////////////
+// int ops
+/////////////////////////////////////////////////////
+
 /**
- * Send a message back to the client.  Will not block and returns true
- * if the message was sendable and false if the fifo was full.
- * A message ID is required.  Data payload is optional.
+ * Clamp the value amount between low and high.
+ *
+ * @param amount  The value to clamp
+ * @param low
+ * @param high
  */
-extern bool __attribute__((overloadable))
-    rsSendToClient(int cmdID);
+_RS_RUNTIME uint __attribute__((overloadable, always_inline)) rsClamp(uint amount, uint low, uint high);
+
 /**
  * \overload
  */
-extern bool __attribute__((overloadable))
-    rsSendToClient(int cmdID, const void *data, uint len);
-/**
- * Send a message back to the client, blocking until the message is queued.
- * A message ID is required.  Data payload is optional.
- */
-extern void __attribute__((overloadable))
-    rsSendToClientBlocking(int cmdID);
+_RS_RUNTIME int __attribute__((overloadable, always_inline)) rsClamp(int amount, int low, int high);
 /**
  * \overload
  */
-extern void __attribute__((overloadable))
-    rsSendToClientBlocking(int cmdID, const void *data, uint len);
-
-
-/**
- * Launch order hint for rsForEach calls.  This provides a hint to the system to
- * determine in which order the root function of the target is called with each
- * cell of the allocation.
- *
- * This is a hint and implementations may not obey the order.
- */
-enum rs_for_each_strategy {
-    RS_FOR_EACH_STRATEGY_SERIAL,
-    RS_FOR_EACH_STRATEGY_DONT_CARE,
-    RS_FOR_EACH_STRATEGY_DST_LINEAR,
-    RS_FOR_EACH_STRATEGY_TILE_SMALL,
-    RS_FOR_EACH_STRATEGY_TILE_MEDIUM,
-    RS_FOR_EACH_STRATEGY_TILE_LARGE
-};
-
-
-/**
- * Structure to provide extra information to a rsForEach call.  Primarly used to
- * restrict the call to a subset of cells in the allocation.
- */
-typedef struct rs_script_call {
-    enum rs_for_each_strategy strategy;
-    uint32_t xStart;
-    uint32_t xEnd;
-    uint32_t yStart;
-    uint32_t yEnd;
-    uint32_t zStart;
-    uint32_t zEnd;
-    uint32_t arrayStart;
-    uint32_t arrayEnd;
-} rs_script_call_t;
-
-/**
- * Make a script to script call to launch work. One of the input or output is
- * required to be a valid object. The input and output must be of the same
- * dimensions.
- * API 10-13
- *
- * @param script The target script to call
- * @param input The allocation to source data from
- * @param output the allocation to write date into
- * @param usrData The user definied params to pass to the root script.  May be
- *                NULL.
- * @param sc Extra control infomation used to select a sub-region of the
- *           allocation to be processed or suggest a walking strategy.  May be
- *           NULL.
- *
- *  */
-#if !defined(RS_VERSION) || (RS_VERSION < 14)
-extern void __attribute__((overloadable))
-    rsForEach(rs_script script script, rs_allocation input,
-              rs_allocation output, const void * usrData,
-              const rs_script_call_t *sc);
+_RS_RUNTIME ushort __attribute__((overloadable, always_inline)) rsClamp(ushort amount, ushort low, ushort high);
 /**
  * \overload
  */
-extern void __attribute__((overloadable))
-    rsForEach(rs_script script, rs_allocation input,
-              rs_allocation output, const void * usrData);
-#else
-
-/**
- * Make a script to script call to launch work. One of the input or output is
- * required to be a valid object. The input and output must be of the same
- * dimensions.
- * API 14+
- *
- * @param script The target script to call
- * @param input The allocation to source data from
- * @param output the allocation to write date into
- * @param usrData The user definied params to pass to the root script.  May be
- *                NULL.
- * @param usrDataLen The size of the userData structure.  This will be used to
- *                   perform a shallow copy of the data if necessary.
- * @param sc Extra control infomation used to select a sub-region of the
- *           allocation to be processed or suggest a walking strategy.  May be
- *           NULL.
- *
- */
-extern void __attribute__((overloadable))
-    rsForEach(rs_script script, rs_allocation input, rs_allocation output,
-              const void * usrData, size_t usrDataLen, const rs_script_call_t *);
+_RS_RUNTIME short __attribute__((overloadable, always_inline)) rsClamp(short amount, short low, short high);
 /**
  * \overload
  */
-extern void __attribute__((overloadable))
-    rsForEach(rs_script script, rs_allocation input, rs_allocation output,
-              const void * usrData, size_t usrDataLen);
+_RS_RUNTIME uchar __attribute__((overloadable, always_inline)) rsClamp(uchar amount, uchar low, uchar high);
 /**
  * \overload
  */
-extern void __attribute__((overloadable))
-    rsForEach(rs_script script, rs_allocation input, rs_allocation output);
-#endif
+_RS_RUNTIME char __attribute__((overloadable, always_inline)) rsClamp(char amount, char low, char high);
 
 
 /**
- * Atomic add one to the value at addr.
- * Equal to rsAtomicAdd(addr, 1)
- *
- * @param addr Address of value to increment
- *
- * @return old value
+ * Computes 6 frustum planes from the view projection matrix
+ * @param viewProj matrix to extract planes from
+ * @param left plane
+ * @param right plane
+ * @param top plane
+ * @param bottom plane
+ * @param near plane
+ * @param far plane
  */
-extern int32_t __attribute__((overloadable))
-    rsAtomicInc(volatile int32_t* addr);
-/**
- * Atomic add one to the value at addr.
- * Equal to rsAtomicAdd(addr, 1)
- *
- * @param addr Address of value to increment
- *
- * @return old value
- */
-extern uint32_t __attribute__((overloadable))
-    rsAtomicInc(volatile uint32_t* addr);
+__inline__ static void __attribute__((overloadable, always_inline))
+rsExtractFrustumPlanes(const rs_matrix4x4 *viewProj,
+                         float4 *left, float4 *right,
+                         float4 *top, float4 *bottom,
+                         float4 *near, float4 *far) {
+    // x y z w = a b c d in the plane equation
+    left->x = viewProj->m[3] + viewProj->m[0];
+    left->y = viewProj->m[7] + viewProj->m[4];
+    left->z = viewProj->m[11] + viewProj->m[8];
+    left->w = viewProj->m[15] + viewProj->m[12];
+
+    right->x = viewProj->m[3] - viewProj->m[0];
+    right->y = viewProj->m[7] - viewProj->m[4];
+    right->z = viewProj->m[11] - viewProj->m[8];
+    right->w = viewProj->m[15] - viewProj->m[12];
+
+    top->x = viewProj->m[3] - viewProj->m[1];
+    top->y = viewProj->m[7] - viewProj->m[5];
+    top->z = viewProj->m[11] - viewProj->m[9];
+    top->w = viewProj->m[15] - viewProj->m[13];
+
+    bottom->x = viewProj->m[3] + viewProj->m[1];
+    bottom->y = viewProj->m[7] + viewProj->m[5];
+    bottom->z = viewProj->m[11] + viewProj->m[9];
+    bottom->w = viewProj->m[15] + viewProj->m[13];
+
+    near->x = viewProj->m[3] + viewProj->m[2];
+    near->y = viewProj->m[7] + viewProj->m[6];
+    near->z = viewProj->m[11] + viewProj->m[10];
+    near->w = viewProj->m[15] + viewProj->m[14];
+
+    far->x = viewProj->m[3] - viewProj->m[2];
+    far->y = viewProj->m[7] - viewProj->m[6];
+    far->z = viewProj->m[11] - viewProj->m[10];
+    far->w = viewProj->m[15] - viewProj->m[14];
+
+    float len = length(left->xyz);
+    *left /= len;
+    len = length(right->xyz);
+    *right /= len;
+    len = length(top->xyz);
+    *top /= len;
+    len = length(bottom->xyz);
+    *bottom /= len;
+    len = length(near->xyz);
+    *near /= len;
+    len = length(far->xyz);
+    *far /= len;
+}
 
 /**
- * Atomic subtract one from the value at addr. Equal to rsAtomicSub(addr, 1)
- *
- * @param addr Address of value to decrement
- *
- * @return old value
+ * Checks if a sphere is withing the 6 frustum planes
+ * @param sphere float4 representing the sphere
+ * @param left plane
+ * @param right plane
+ * @param top plane
+ * @param bottom plane
+ * @param near plane
+ * @param far plane
  */
-extern int32_t __attribute__((overloadable))
-    rsAtomicDec(volatile int32_t* addr);
-/**
- * Atomic subtract one from the value at addr. Equal to rsAtomicSub(addr, 1)
- *
- * @param addr Address of value to decrement
- *
- * @return old value
- */
-extern uint32_t __attribute__((overloadable))
-    rsAtomicDec(volatile uint32_t* addr);
+__inline__ static bool __attribute__((overloadable, always_inline))
+rsIsSphereInFrustum(float4 *sphere,
+                      float4 *left, float4 *right,
+                      float4 *top, float4 *bottom,
+                      float4 *near, float4 *far) {
+
+    float distToCenter = dot(left->xyz, sphere->xyz) + left->w;
+    if (distToCenter < -sphere->w) {
+        return false;
+    }
+    distToCenter = dot(right->xyz, sphere->xyz) + right->w;
+    if (distToCenter < -sphere->w) {
+        return false;
+    }
+    distToCenter = dot(top->xyz, sphere->xyz) + top->w;
+    if (distToCenter < -sphere->w) {
+        return false;
+    }
+    distToCenter = dot(bottom->xyz, sphere->xyz) + bottom->w;
+    if (distToCenter < -sphere->w) {
+        return false;
+    }
+    distToCenter = dot(near->xyz, sphere->xyz) + near->w;
+    if (distToCenter < -sphere->w) {
+        return false;
+    }
+    distToCenter = dot(far->xyz, sphere->xyz) + far->w;
+    if (distToCenter < -sphere->w) {
+        return false;
+    }
+    return true;
+}
+
 
 /**
- * Atomic add a value to the value at addr.  addr[0] += value
+ * Pack floating point (0-1) RGB values into a uchar4.  The alpha component is
+ * set to 255 (1.0).
  *
- * @param addr Address of value to modify
- * @param value Amount to add to the value at addr
+ * @param r
+ * @param g
+ * @param b
  *
- * @return old value
+ * @return uchar4
  */
-extern int32_t __attribute__((overloadable))
-    rsAtomicAdd(volatile int32_t* addr, int32_t value);
-/**
- * Atomic add a value to the value at addr.  addr[0] += value
- *
- * @param addr Address of value to modify
- * @param value Amount to add to the value at addr
- *
- * @return old value
- */
-extern uint32_t __attribute__((overloadable))
-    rsAtomicAdd(volatile uint32_t* addr, uint32_t value);
+_RS_RUNTIME uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b);
 
 /**
- * Atomic Subtract a value from the value at addr.  addr[0] -= value
+ * Pack floating point (0-1) RGBA values into a uchar4.
  *
- * @param addr Address of value to modify
- * @param value Amount to subtract from the value at addr
+ * @param r
+ * @param g
+ * @param b
+ * @param a
  *
- * @return old value
+ * @return uchar4
  */
-extern int32_t __attribute__((overloadable))
-    rsAtomicSub(volatile int32_t* addr, int32_t value);
-/**
- * Atomic Subtract a value from the value at addr.  addr[0] -= value
- *
- * @param addr Address of value to modify
- * @param value Amount to subtract from the value at addr
- *
- * @return old value
- */
-extern uint32_t __attribute__((overloadable))
-    rsAtomicSub(volatile uint32_t* addr, uint32_t value);
+_RS_RUNTIME uchar4 __attribute__((overloadable)) rsPackColorTo8888(float r, float g, float b, float a);
 
 /**
- * Atomic Bitwise and a value from the value at addr.  addr[0] &= value
+ * Pack floating point (0-1) RGB values into a uchar4.  The alpha component is
+ * set to 255 (1.0).
  *
- * @param addr Address of value to modify
- * @param value Amount to and with the value at addr
+ * @param color
  *
- * @return old value
+ * @return uchar4
  */
-extern int32_t __attribute__((overloadable))
-    rsAtomicAnd(volatile int32_t* addr, int32_t value);
-/**
- * Atomic Bitwise and a value from the value at addr.  addr[0] &= value
- *
- * @param addr Address of value to modify
- * @param value Amount to and with the value at addr
- *
- * @return old value
- */
-extern uint32_t __attribute__((overloadable))
-    rsAtomicAnd(volatile uint32_t* addr, uint32_t value);
+_RS_RUNTIME uchar4 __attribute__((overloadable)) rsPackColorTo8888(float3 color);
 
 /**
- * Atomic Bitwise or a value from the value at addr.  addr[0] |= value
+ * Pack floating point (0-1) RGBA values into a uchar4.
  *
- * @param addr Address of value to modify
- * @param value Amount to or with the value at addr
+ * @param color
  *
- * @return old value
+ * @return uchar4
  */
-extern int32_t __attribute__((overloadable))
-    rsAtomicOr(volatile int32_t* addr, int32_t value);
-/**
- * Atomic Bitwise or a value from the value at addr.  addr[0] |= value
- *
- * @param addr Address of value to modify
- * @param value Amount to or with the value at addr
- *
- * @return old value
- */
-extern uint32_t __attribute__((overloadable))
-    rsAtomicOr(volatile uint32_t* addr, uint32_t value);
+_RS_RUNTIME uchar4 __attribute__((overloadable)) rsPackColorTo8888(float4 color);
 
 /**
- * Atomic Bitwise xor a value from the value at addr.  addr[0] ^= value
+ * Unpack a uchar4 color to float4.  The resulting float range will be (0-1).
  *
- * @param addr Address of value to modify
- * @param value Amount to xor with the value at addr
+ * @param c
  *
- * @return old value
+ * @return float4
  */
-extern uint32_t __attribute__((overloadable))
-    rsAtomicXor(volatile uint32_t* addr, uint32_t value);
-/**
- * Atomic Bitwise xor a value from the value at addr.  addr[0] ^= value
- *
- * @param addr Address of value to modify
- * @param value Amount to xor with the value at addr
- *
- * @return old value
- */
-extern int32_t __attribute__((overloadable))
-    rsAtomicXor(volatile int32_t* addr, int32_t value);
-
-/**
- * Atomic Set the value at addr to the min of addr and value
- * addr[0] = rsMin(addr[0], value)
- *
- * @param addr Address of value to modify
- * @param value comparison value
- *
- * @return old value
- */
-extern uint32_t __attribute__((overloadable))
-    rsAtomicMin(volatile uint32_t* addr, uint32_t value);
-/**
- * Atomic Set the value at addr to the min of addr and value
- * addr[0] = rsMin(addr[0], value)
- *
- * @param addr Address of value to modify
- * @param value comparison value
- *
- * @return old value
- */
-extern int32_t __attribute__((overloadable))
-    rsAtomicMin(volatile int32_t* addr, int32_t value);
-
-/**
- * Atomic Set the value at addr to the max of addr and value
- * addr[0] = rsMax(addr[0], value)
- *
- * @param addr Address of value to modify
- * @param value comparison value
- *
- * @return old value
- */
-extern uint32_t __attribute__((overloadable))
-    rsAtomicMax(volatile uint32_t* addr, uint32_t value);
-/**
- * Atomic Set the value at addr to the max of addr and value
- * addr[0] = rsMin(addr[0], value)
- *
- * @param addr Address of value to modify
- * @param value comparison value
- *
- * @return old value
- */
-extern int32_t __attribute__((overloadable))
-    rsAtomicMax(volatile int32_t* addr, int32_t value);
-
-/**
- * Compare-and-set operation with a full memory barrier.
- *
- * If the value at addr matches compareValue then newValue is written.
- *
- * @param addr The address to compare and replace if the compare passes.
- * @param compareValue The value to test addr[0] against.
- * @param newValue The value to write if the test passes.
- *
- * @return old value
- */
-extern int32_t __attribute__((overloadable))
-    rsAtomicCas(volatile int32_t* addr, int32_t compareValue, int32_t newValue);
-
-/**
- * Compare-and-set operation with a full memory barrier.
- *
- * If the value at addr matches compareValue then newValue is written.
- *
- * @param addr The address to compare and replace if the compare passes.
- * @param compareValue The value to test addr[0] against.
- * @param newValue The value to write if the test passes.
- *
- * @return old value
- */
-extern uint32_t __attribute__((overloadable))
-    rsAtomicCas(volatile uint32_t* addr, int32_t compareValue, int32_t newValue);
+_RS_RUNTIME float4 rsUnpackColor8888(uchar4 c);
 
 
 #endif
