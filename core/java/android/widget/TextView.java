@@ -9657,8 +9657,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 com.android.internal.R.layout.text_edit_action_popup_text;
         private TextView mPasteTextView;
         private TextView mReplaceTextView;
-        // Whether or not the Paste action should be available when the action popup is displayed
-        private boolean mWithPaste;
 
         @Override
         protected void createPopupWindow() {
@@ -9694,7 +9692,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void show() {
-            mPasteTextView.setVisibility(mWithPaste && canPaste() ? View.VISIBLE : View.GONE);
+            mPasteTextView.setVisibility(canPaste() ? View.VISIBLE : View.GONE);
             super.show();
         }
 
@@ -9732,10 +9730,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
 
             return positionY;
-        }
-
-        public void setShowWithPaste(boolean withPaste) {
-            mWithPaste = withPaste;
         }
     }
 
@@ -9851,7 +9845,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             TextView.this.getPositionListener().removeSubscriber(this);
         }
 
-        void showActionPopupWindow(int delay, boolean withPaste) {
+        void showActionPopupWindow(int delay) {
             if (mActionPopupWindow == null) {
                 mActionPopupWindow = new ActionPopupWindow();
             }
@@ -9864,7 +9858,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             } else {
                 TextView.this.removeCallbacks(mActionPopupShower);
             }
-            mActionPopupWindow.setShowWithPaste(withPaste);
             TextView.this.postDelayed(mActionPopupShower, delay);
         }
 
@@ -10049,7 +10042,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             if (durationSinceCutOrCopy < RECENT_CUT_COPY_DURATION) {
                 delayBeforeShowActionPopup = 0;
             }
-            showActionPopupWindow(delayBeforeShowActionPopup, true);
+            showActionPopupWindow(delayBeforeShowActionPopup);
         }
 
         private void hideAfterDelay() {
@@ -10325,7 +10318,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
             // Make sure both left and right handles share the same ActionPopupWindow (so that
             // moving any of the handles hides the action popup).
-            mStartHandle.showActionPopupWindow(DELAY_BEFORE_REPLACE_ACTION, false);
+            mStartHandle.showActionPopupWindow(DELAY_BEFORE_REPLACE_ACTION);
             mEndHandle.setActionPopupWindow(mStartHandle.getActionPopupWindow());
 
             hideInsertionPointCursorController();
@@ -10791,9 +10784,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean                 mDPadCenterIsDown = false;
     private boolean                 mEnterKeyIsDown = false;
     private boolean                 mContextMenuTriggeredByKey = false;
-    // Created once and shared by different CursorController helper methods.
-    // Only one cursor controller is active at any time which prevent race conditions.
-    private static Rect             sCursorControllerTempRect = new Rect();
 
     private boolean                 mSelectAllOnFocus = false;
 
