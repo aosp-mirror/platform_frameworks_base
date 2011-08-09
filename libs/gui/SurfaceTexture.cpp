@@ -599,6 +599,7 @@ status_t SurfaceTexture::disconnect(int api) {
         case NATIVE_WINDOW_API_CAMERA:
             if (mConnectedApi == api) {
                 mConnectedApi = NO_CONNECTED_API;
+                freeAllBuffers();
             } else {
                 LOGE("disconnect: connected to another api (cur=%d, req=%d)",
                         mConnectedApi, api);
