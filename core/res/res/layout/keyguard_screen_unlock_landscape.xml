@@ -64,11 +64,13 @@
 
     <TextView
         android:id="@+id/date"
+        android:layout_width="0dip"
+        android:layout_gravity="fill_horizontal"
+        android:gravity="right"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
-        android:layout_gravity="right"
         />
 
     <TextView
@@ -83,17 +85,21 @@
 
     <TextView
         android:id="@+id/status1"
+        android:layout_width="0dip"
+        android:layout_gravity="fill_horizontal"
+        android:gravity="right"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textSize="@dimen/keyguard_lockscreen_status_line_font_size"
-        android:layout_gravity="right"
         />
 
     <Space android:layout_gravity="fill" />
 
     <TextView android:id="@+id/carrier"
-        android:layout_gravity="right"
+        android:layout_width="0dip"
+        android:layout_gravity="fill_horizontal"
+        android:gravity="right"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:textAppearance="?android:attr/textAppearanceMedium"
