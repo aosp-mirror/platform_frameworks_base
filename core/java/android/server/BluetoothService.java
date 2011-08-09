@@ -748,18 +748,13 @@ public class BluetoothService extends IBluetooth.Stub {
 
     /**
      * @param on true set the local Bluetooth module to be connectable
-     *                but not dicoverable
+     *                The dicoverability is recovered to what it was before
+     *                switchConnectable(false) call
      *           false set the local Bluetooth module to be not connectable
      *                 and not dicoverable
      */
     /*package*/ synchronized void switchConnectable(boolean on) {
-        if (on) {
-            // 0 is a dummy value, does not apply for SCAN_MODE_CONNECTABLE
-            setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE, 0, false);
-        } else {
-            // 0 is a dummy value, does not apply for SCAN_MODE_NONE
-            setScanMode(BluetoothAdapter.SCAN_MODE_NONE, 0, false);
-        }
+        setAdapterPropertyBooleanNative("Powered", on ? 1 : 0);
     }
 
     private synchronized boolean setScanMode(int mode, int duration, boolean allowOnlyInOnState) {
