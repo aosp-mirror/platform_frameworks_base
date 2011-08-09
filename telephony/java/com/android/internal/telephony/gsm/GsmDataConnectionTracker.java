@@ -576,7 +576,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
         boolean allowed =
                     (gprsState == ServiceState.STATE_IN_SERVICE || mAutoAttachOnCreation) &&
                     mPhone.mIccRecords.getRecordsLoaded() &&
-                    mPhone.mIccRecords.isProvisioned() &&
                     mPhone.getState() == Phone.State.IDLE &&
                     mInternalDataEnabled &&
                     (!mPhone.getServiceState().getRoaming() || getDataOnRoamingEnabled()) &&
@@ -588,7 +587,6 @@ public final class GsmDataConnectionTracker extends DataConnectionTracker {
                 reason += " - gprs= " + gprsState;
             }
             if (!mPhone.mIccRecords.getRecordsLoaded()) reason += " - SIM not loaded";
-            if (!mPhone.mIccRecords.isProvisioned()) reason += " - SIM not provisioned";
             if (mPhone.getState() != Phone.State.IDLE) {
                 reason += " - PhoneState= " + mPhone.getState();
             }
