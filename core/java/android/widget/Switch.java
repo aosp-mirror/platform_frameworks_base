@@ -489,7 +489,7 @@ public class Switch extends CompoundButton {
             mVelocityTracker.computeCurrentVelocity(1000);
             float xvel = mVelocityTracker.getXVelocity();
             if (Math.abs(xvel) > mMinFlingVelocity) {
-                newState = xvel < 0;
+                newState = xvel > 0;
             } else {
                 newState = getTargetCheckedState();
             }
