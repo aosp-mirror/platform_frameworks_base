@@ -149,6 +149,10 @@ public:
 
     virtual int newAudioSessionId();
 
+    virtual void acquireAudioSessionId(int audioSession);
+
+    virtual void releaseAudioSessionId(int audioSession);
+
     virtual status_t queryNumberEffects(uint32_t *numEffects);
 
     virtual status_t queryEffect(uint32_t index, effect_descriptor_t *descriptor);
@@ -215,6 +219,7 @@ private:
     status_t                initCheck() const;
     virtual     void        onFirstRef();
     audio_hw_device_t*      findSuitableHwDev_l(uint32_t devices);
+    void                    purgeStaleEffects_l();
 
     // Internal dump utilites.
     status_t dumpPermissionDenial(int fd, const Vector<String16>& args);
@@ -436,7 +441,8 @@ private:
                                         int *enabled,
                                         status_t *status);
                     void disconnectEffect(const sp< EffectModule>& effect,
-                                          const wp<EffectHandle>& handle);
+                                          const wp<EffectHandle>& handle,
+                                          bool unpiniflast);
 
                     // return values for hasAudioSession (bit field)
                     enum effect_state {
@@ -519,6 +525,7 @@ private:
                     // updated mSuspendedSessions when an effect chain is removed
                     void updateSuspendedSessionsOnRemoveEffectChain_l(const sp<EffectChain>& chain);
 
+        friend class AudioFlinger;
         friend class Track;
         friend class TrackBase;
         friend class PlaybackThread;
@@ -607,7 +614,6 @@ private:
 
         protected:
             friend class ThreadBase;
-            friend class AudioFlinger;
             friend class TrackHandle;
             friend class PlaybackThread;
             friend class MixerThread;
@@ -1100,7 +1106,7 @@ private:
         wp<ThreadBase>& thread() { return mThread; }
 
         status_t addHandle(sp<EffectHandle>& handle);
-        void disconnect(const wp<EffectHandle>& handle);
+        void disconnect(const wp<EffectHandle>& handle, bool unpiniflast);
         size_t removeHandle (const wp<EffectHandle>& handle);
 
         effect_descriptor_t& desc() { return mDescriptor; }
@@ -1115,9 +1121,15 @@ private:
 
         sp<EffectHandle> controlHandle();
 
+        bool             isPinned() { return mPinned; }
+        void             unPin() { mPinned = false; }
+
         status_t         dump(int fd, const Vector<String16>& args);
 
     protected:
+        friend class EffectHandle;
+        friend class AudioFlinger;
+        bool                mPinned;
 
         // Maximum time allocated to effect engines to complete the turn off sequence
         static const uint32_t MAX_DISABLE_TIME_MS = 10000;
@@ -1169,6 +1181,7 @@ private:
                                  uint32_t *replySize,
                                  void *pReplyData);
         virtual void disconnect();
+        virtual void disconnect(bool unpiniflast);
         virtual sp<IMemory> getCblk() const;
         virtual status_t onTransact(uint32_t code, const Parcel& data,
                 Parcel* reply, uint32_t flags);
@@ -1196,7 +1209,8 @@ private:
         void dump(char* buffer, size_t size);
 
     protected:
-
+        friend class AudioFlinger;
+        friend class EffectModule;
         EffectHandle(const EffectHandle&);
         EffectHandle& operator =(const EffectHandle&);
 
@@ -1288,7 +1302,7 @@ private:
         status_t dump(int fd, const Vector<String16>& args);
 
     protected:
-
+        friend class AudioFlinger;
         EffectChain(const EffectChain&);
         EffectChain& operator =(const EffectChain&);
 
@@ -1344,6 +1358,12 @@ private:
             hwDev(dev), stream(in) {}
     };
 
+    struct AudioSessionRef {
+        int sessionid;
+        pid_t pid;
+        int cnt;
+    };
+
     friend class RecordThread;
     friend class PlaybackThread;
 
@@ -1369,6 +1389,7 @@ private:
                 uint32_t                            mMode;
                 bool                                mBtNrec;
 
+                Vector<AudioSessionRef*> mAudioSessionRefs;
 };
 
 

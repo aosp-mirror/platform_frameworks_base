@@ -108,6 +108,8 @@ public:
     static unsigned int  getInputFramesLost(audio_io_handle_t ioHandle);
 
     static int newAudioSessionId();
+    static void acquireAudioSessionId(int audioSession);
+    static void releaseAudioSessionId(int audioSession);
 
     // types of io configuration change events received with ioConfigChanged()
     enum io_config_event {
