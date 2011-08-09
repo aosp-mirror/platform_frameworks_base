@@ -632,6 +632,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private int mLastAccessibilityScrollEventToIndex;
 
     /**
+     * Track if we are currently attached to a window.
+     */
+    private boolean mIsAttached;
+
+    /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
      */
@@ -1665,6 +1670,13 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(gainFocus, direction, previouslyFocusedRect);
         if (gainFocus && mSelectedPosition < 0 && !isInTouchMode()) {
+            if (!mIsAttached && mAdapter != null) {
+                // Data may have changed while we were detached and it's valid
+                // to change focus while detached. Refresh so we don't die.
+                mDataChanged = true;
+                mOldItemCount = mItemCount;
+                mItemCount = mAdapter.getCount();
+            }
             resurrectSelection();
         }
     }
@@ -2334,6 +2346,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             mOldItemCount = mItemCount;
             mItemCount = mAdapter.getCount();
         }
+        mIsAttached = true;
     }
 
     @Override
@@ -2388,6 +2401,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
             removeCallbacks(mTouchModeReset);
             mTouchModeReset = null;
         }
+        mIsAttached = false;
     }
 
     @Override
