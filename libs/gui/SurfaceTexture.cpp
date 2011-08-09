@@ -628,16 +628,32 @@ status_t SurfaceTexture::updateTexImage() {
     LOGV("SurfaceTexture::updateTexImage");
     Mutex::Autolock lock(mMutex);
 
+    if (mAbandoned) {
+        LOGE("calling updateTexImage() on an abandoned SurfaceTexture");
+        //return NO_INIT;
+    }
+
     // In asynchronous mode the list is guaranteed to be one buffer
     // deep, while in synchronous mode we use the oldest buffer.
     if (!mQueue.empty()) {
         Fifo::iterator front(mQueue.begin());
         int buf = *front;
 
+        if (uint32_t(buf) >= NUM_BUFFER_SLOTS) {
+            LOGE("buffer index out of range (index=%d)", buf);
+            //return BAD_VALUE;
+        }
+
         // Update the GL texture object.
         EGLImageKHR image = mSlots[buf].mEglImage;
         if (image == EGL_NO_IMAGE_KHR) {
             EGLDisplay dpy = eglGetCurrentDisplay();
+
+            if (mSlots[buf].mGraphicBuffer == 0) {
+                LOGE("buffer at slot %d is null", buf);
+                //return BAD_VALUE;
+            }
+
             image = createImage(dpy, mSlots[buf].mGraphicBuffer);
             mSlots[buf].mEglImage = image;
             mSlots[buf].mEglDisplay = dpy;
