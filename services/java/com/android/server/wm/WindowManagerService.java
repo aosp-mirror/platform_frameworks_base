@@ -53,6 +53,7 @@ import android.app.IActivityManager;
 import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -2467,10 +2468,13 @@ public class WindowManagerService extends IWindowManager.Stub
 
         // if they don't have this permission, mask out the status bar bits
         if (attrs != null) {
-            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
-                    != PackageManager.PERMISSION_GRANTED) {
-                attrs.systemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
-                attrs.subtreeSystemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
+            if (((attrs.systemUiVisibility|attrs.subtreeSystemUiVisibility)
+                    & StatusBarManager.DISABLE_MASK) != 0) {
+                if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    attrs.systemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
+                    attrs.subtreeSystemUiVisibility &= ~StatusBarManager.DISABLE_MASK;
+                }
             }
         }
         long origId = Binder.clearCallingIdentity();
@@ -6900,7 +6904,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (ws.mRebuilding) {
                     StringWriter sw = new StringWriter();
                     PrintWriter pw = new PrintWriter(sw);
-                    ws.dump(pw, "");
+                    ws.dump(pw, "", true);
                     pw.flush();
                     Slog.w(TAG, "This window was lost: " + ws);
                     Slog.w(TAG, sw.toString());
@@ -8900,159 +8904,260 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (mContext.checkCallingOrSelfPermission("android.permission.DUMP")
-                != PackageManager.PERMISSION_GRANTED) {
-            pw.println("Permission Denial: can't dump WindowManager from from pid="
-                    + Binder.getCallingPid()
-                    + ", uid=" + Binder.getCallingUid());
-            return;
-        }
-
+    void dumpInput(FileDescriptor fd, PrintWriter pw, boolean dumpAll) {
+        pw.println("WINDOW MANAGER INPUT (dumpsys window input)");
         mInputManager.dump(pw);
-        pw.println(" ");
-        
-        synchronized(mWindowMap) {
-            pw.println("Current Window Manager state:");
-            for (int i=mWindows.size()-1; i>=0; i--) {
-                WindowState w = mWindows.get(i);
+    }
+
+    void dumpPolicyLocked(FileDescriptor fd, PrintWriter pw, String[] args, boolean dumpAll) {
+        pw.println("WINDOW MANAGER POLICY STATE (dumpsys window policy)");
+        mPolicy.dump("    ", fd, pw, args);
+    }
+
+    void dumpTokensLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll) {
+        pw.println("WINDOW MANAGER TOKENS (dumpsys window tokens)");
+        if (mTokenMap.size() > 0) {
+            pw.println("  All tokens:");
+            Iterator<WindowToken> it = mTokenMap.values().iterator();
+            while (it.hasNext()) {
+                WindowToken token = it.next();
+                pw.print("  Token "); pw.print(token.token);
+                if (dumpAll) {
+                    pw.println(':');
+                    token.dump(pw, "    ");
+                } else {
+                    pw.println();
+                }
+            }
+        }
+        if (mWallpaperTokens.size() > 0) {
+            pw.println();
+            pw.println("  Wallpaper tokens:");
+            for (int i=mWallpaperTokens.size()-1; i>=0; i--) {
+                WindowToken token = mWallpaperTokens.get(i);
+                pw.print("  Wallpaper #"); pw.print(i);
+                        pw.print(' '); pw.print(token);
+                if (dumpAll) {
+                    pw.println(':');
+                    token.dump(pw, "    ");
+                } else {
+                    pw.println();
+                }
+            }
+        }
+        if (mAppTokens.size() > 0) {
+            pw.println();
+            pw.println("  Application tokens in Z order:");
+            for (int i=mAppTokens.size()-1; i>=0; i--) {
+                pw.print("  App #"); pw.print(i); pw.print(": ");
+                        pw.println(mAppTokens.get(i));
+            }
+        }
+        if (mFinishedStarting.size() > 0) {
+            pw.println();
+            pw.println("  Finishing start of application tokens:");
+            for (int i=mFinishedStarting.size()-1; i>=0; i--) {
+                WindowToken token = mFinishedStarting.get(i);
+                pw.print("  Finished Starting #"); pw.print(i);
+                        pw.print(' '); pw.print(token);
+                if (dumpAll) {
+                    pw.println(':');
+                    token.dump(pw, "    ");
+                } else {
+                    pw.println();
+                }
+            }
+        }
+        if (mExitingTokens.size() > 0) {
+            pw.println();
+            pw.println("  Exiting tokens:");
+            for (int i=mExitingTokens.size()-1; i>=0; i--) {
+                WindowToken token = mExitingTokens.get(i);
+                pw.print("  Exiting #"); pw.print(i);
+                        pw.print(' '); pw.print(token);
+                if (dumpAll) {
+                    pw.println(':');
+                    token.dump(pw, "    ");
+                } else {
+                    pw.println();
+                }
+            }
+        }
+        if (mExitingAppTokens.size() > 0) {
+            pw.println();
+            pw.println("  Exiting application tokens:");
+            for (int i=mExitingAppTokens.size()-1; i>=0; i--) {
+                WindowToken token = mExitingAppTokens.get(i);
+                pw.print("  Exiting App #"); pw.print(i);
+                        pw.print(' '); pw.print(token);
+                if (dumpAll) {
+                    pw.println(':');
+                    token.dump(pw, "    ");
+                } else {
+                    pw.println();
+                }
+            }
+        }
+        pw.println();
+        if (mOpeningApps.size() > 0) {
+            pw.print("  mOpeningApps="); pw.println(mOpeningApps);
+        }
+        if (mClosingApps.size() > 0) {
+            pw.print("  mClosingApps="); pw.println(mClosingApps);
+        }
+        if (mToTopApps.size() > 0) {
+            pw.print("  mToTopApps="); pw.println(mToTopApps);
+        }
+        if (mToBottomApps.size() > 0) {
+            pw.print("  mToBottomApps="); pw.println(mToBottomApps);
+        }
+    }
+
+    void dumpSessionsLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll) {
+        pw.println("WINDOW MANAGER SESSIONS (dumpsys window sessions)");
+        if (mSessions.size() > 0) {
+            Iterator<Session> it = mSessions.iterator();
+            while (it.hasNext()) {
+                Session s = it.next();
+                pw.print("  Session "); pw.print(s); pw.println(':');
+                s.dump(pw, "    ");
+            }
+        }
+    }
+
+    void dumpWindowsLocked(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
+            ArrayList<WindowState> windows) {
+        pw.println("WINDOW MANAGER WINDOWS (dumpsys window windows)");
+        for (int i=mWindows.size()-1; i>=0; i--) {
+            WindowState w = mWindows.get(i);
+            if (windows == null || windows.contains(w)) {
                 pw.print("  Window #"); pw.print(i); pw.print(' ');
                         pw.print(w); pw.println(":");
-                w.dump(pw, "    ");
+                w.dump(pw, "    ", dumpAll);
             }
-            if (mInputMethodDialogs.size() > 0) {
-                pw.println(" ");
-                pw.println("  Input method dialogs:");
-                for (int i=mInputMethodDialogs.size()-1; i>=0; i--) {
-                    WindowState w = mInputMethodDialogs.get(i);
+        }
+        if (mInputMethodDialogs.size() > 0) {
+            pw.println();
+            pw.println("  Input method dialogs:");
+            for (int i=mInputMethodDialogs.size()-1; i>=0; i--) {
+                WindowState w = mInputMethodDialogs.get(i);
+                if (windows == null || windows.contains(w)) {
                     pw.print("  IM Dialog #"); pw.print(i); pw.print(": "); pw.println(w);
                 }
             }
-            if (mPendingRemove.size() > 0) {
-                pw.println(" ");
-                pw.println("  Remove pending for:");
-                for (int i=mPendingRemove.size()-1; i>=0; i--) {
-                    WindowState w = mPendingRemove.get(i);
+        }
+        if (mPendingRemove.size() > 0) {
+            pw.println();
+            pw.println("  Remove pending for:");
+            for (int i=mPendingRemove.size()-1; i>=0; i--) {
+                WindowState w = mPendingRemove.get(i);
+                if (windows == null || windows.contains(w)) {
                     pw.print("  Remove #"); pw.print(i); pw.print(' ');
-                            pw.print(w); pw.println(":");
-                    w.dump(pw, "    ");
+                            pw.print(w);
+                    if (dumpAll) {
+                        pw.println(":");
+                        w.dump(pw, "    ", true);
+                    } else {
+                        pw.println();
+                    }
                 }
             }
-            if (mForceRemoves != null && mForceRemoves.size() > 0) {
-                pw.println(" ");
-                pw.println("  Windows force removing:");
-                for (int i=mForceRemoves.size()-1; i>=0; i--) {
-                    WindowState w = mForceRemoves.get(i);
-                    pw.print("  Removing #"); pw.print(i); pw.print(' ');
-                            pw.print(w); pw.println(":");
-                    w.dump(pw, "    ");
+        }
+        if (mForceRemoves != null && mForceRemoves.size() > 0) {
+            pw.println();
+            pw.println("  Windows force removing:");
+            for (int i=mForceRemoves.size()-1; i>=0; i--) {
+                WindowState w = mForceRemoves.get(i);
+                pw.print("  Removing #"); pw.print(i); pw.print(' ');
+                        pw.print(w);
+                if (dumpAll) {
+                    pw.println(":");
+                    w.dump(pw, "    ", true);
+                } else {
+                    pw.println();
                 }
             }
-            if (mDestroySurface.size() > 0) {
-                pw.println(" ");
-                pw.println("  Windows waiting to destroy their surface:");
-                for (int i=mDestroySurface.size()-1; i>=0; i--) {
-                    WindowState w = mDestroySurface.get(i);
+        }
+        if (mDestroySurface.size() > 0) {
+            pw.println();
+            pw.println("  Windows waiting to destroy their surface:");
+            for (int i=mDestroySurface.size()-1; i>=0; i--) {
+                WindowState w = mDestroySurface.get(i);
+                if (windows == null || windows.contains(w)) {
                     pw.print("  Destroy #"); pw.print(i); pw.print(' ');
-                            pw.print(w); pw.println(":");
-                    w.dump(pw, "    ");
+                            pw.print(w);
+                    if (dumpAll) {
+                        pw.println(":");
+                        w.dump(pw, "    ", true);
+                    } else {
+                        pw.println();
+                    }
                 }
             }
-            if (mLosingFocus.size() > 0) {
-                pw.println(" ");
-                pw.println("  Windows losing focus:");
-                for (int i=mLosingFocus.size()-1; i>=0; i--) {
-                    WindowState w = mLosingFocus.get(i);
+        }
+        if (mLosingFocus.size() > 0) {
+            pw.println();
+            pw.println("  Windows losing focus:");
+            for (int i=mLosingFocus.size()-1; i>=0; i--) {
+                WindowState w = mLosingFocus.get(i);
+                if (windows == null || windows.contains(w)) {
                     pw.print("  Losing #"); pw.print(i); pw.print(' ');
-                            pw.print(w); pw.println(":");
-                    w.dump(pw, "    ");
+                            pw.print(w);
+                    if (dumpAll) {
+                        pw.println(":");
+                        w.dump(pw, "    ", true);
+                    } else {
+                        pw.println();
+                    }
                 }
             }
-            if (mResizingWindows.size() > 0) {
-                pw.println(" ");
-                pw.println("  Windows waiting to resize:");
-                for (int i=mResizingWindows.size()-1; i>=0; i--) {
-                    WindowState w = mResizingWindows.get(i);
+        }
+        if (mResizingWindows.size() > 0) {
+            pw.println();
+            pw.println("  Windows waiting to resize:");
+            for (int i=mResizingWindows.size()-1; i>=0; i--) {
+                WindowState w = mResizingWindows.get(i);
+                if (windows == null || windows.contains(w)) {
                     pw.print("  Resizing #"); pw.print(i); pw.print(' ');
-                            pw.print(w); pw.println(":");
-                    w.dump(pw, "    ");
+                            pw.print(w);
+                    if (dumpAll) {
+                        pw.println(":");
+                        w.dump(pw, "    ", true);
+                    } else {
+                        pw.println();
+                    }
                 }
             }
-            if (mSessions.size() > 0) {
-                pw.println(" ");
-                pw.println("  All active sessions:");
-                Iterator<Session> it = mSessions.iterator();
-                while (it.hasNext()) {
-                    Session s = it.next();
-                    pw.print("  Session "); pw.print(s); pw.println(':');
-                    s.dump(pw, "    ");
-                }
-            }
-            if (mTokenMap.size() > 0) {
-                pw.println(" ");
-                pw.println("  All tokens:");
-                Iterator<WindowToken> it = mTokenMap.values().iterator();
-                while (it.hasNext()) {
-                    WindowToken token = it.next();
-                    pw.print("  Token "); pw.print(token.token); pw.println(':');
-                    token.dump(pw, "    ");
-                }
-            }
-            if (mWallpaperTokens.size() > 0) {
-                pw.println(" ");
-                pw.println("  Wallpaper tokens:");
-                for (int i=mWallpaperTokens.size()-1; i>=0; i--) {
-                    WindowToken token = mWallpaperTokens.get(i);
-                    pw.print("  Wallpaper #"); pw.print(i);
-                            pw.print(' '); pw.print(token); pw.println(':');
-                    token.dump(pw, "    ");
-                }
-            }
-            if (mAppTokens.size() > 0) {
-                pw.println(" ");
-                pw.println("  Application tokens in Z order:");
-                for (int i=mAppTokens.size()-1; i>=0; i--) {
-                    pw.print("  App #"); pw.print(i); pw.print(": ");
-                            pw.println(mAppTokens.get(i));
-                }
-            }
-            if (mFinishedStarting.size() > 0) {
-                pw.println(" ");
-                pw.println("  Finishing start of application tokens:");
-                for (int i=mFinishedStarting.size()-1; i>=0; i--) {
-                    WindowToken token = mFinishedStarting.get(i);
-                    pw.print("  Finished Starting #"); pw.print(i);
-                            pw.print(' '); pw.print(token); pw.println(':');
-                    token.dump(pw, "    ");
-                }
-            }
-            if (mExitingTokens.size() > 0) {
-                pw.println(" ");
-                pw.println("  Exiting tokens:");
-                for (int i=mExitingTokens.size()-1; i>=0; i--) {
-                    WindowToken token = mExitingTokens.get(i);
-                    pw.print("  Exiting #"); pw.print(i);
-                            pw.print(' '); pw.print(token); pw.println(':');
-                    token.dump(pw, "    ");
-                }
-            }
-            if (mExitingAppTokens.size() > 0) {
-                pw.println(" ");
-                pw.println("  Exiting application tokens:");
-                for (int i=mExitingAppTokens.size()-1; i>=0; i--) {
-                    WindowToken token = mExitingAppTokens.get(i);
-                    pw.print("  Exiting App #"); pw.print(i);
-                            pw.print(' '); pw.print(token); pw.println(':');
-                    token.dump(pw, "    ");
-                }
-            }
-            pw.println(" ");
-            pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
+        }
+        pw.println();
+        if (mDisplay != null) {
+            pw.print("  Display: init="); pw.print(mInitialDisplayWidth); pw.print("x");
+                    pw.print(mInitialDisplayHeight); pw.print(" base=");
+                    pw.print(mBaseDisplayWidth); pw.print("x"); pw.print(mBaseDisplayHeight);
+                    pw.print(" cur=");
+                    pw.print(mCurDisplayWidth); pw.print("x"); pw.print(mCurDisplayHeight);
+                    pw.print(" app=");
+                    pw.print(mAppDisplayWidth); pw.print("x"); pw.print(mAppDisplayHeight);
+                    pw.print(" raw="); pw.print(mDisplay.getRawWidth());
+                    pw.print("x"); pw.println(mDisplay.getRawHeight());
+        } else {
+            pw.println("  NO DISPLAY");
+        }
+        pw.print("  mCurConfiguration="); pw.println(this.mCurConfiguration);
+        pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
+        if (mLastFocus != mCurrentFocus) {
             pw.print("  mLastFocus="); pw.println(mLastFocus);
-            pw.print("  mFocusedApp="); pw.println(mFocusedApp);
+        }
+        pw.print("  mFocusedApp="); pw.println(mFocusedApp);
+        if (mInputMethodTarget != null) {
             pw.print("  mInputMethodTarget="); pw.println(mInputMethodTarget);
-            pw.print("  mInputMethodWindow="); pw.println(mInputMethodWindow);
+        }
+        pw.print("  mInTouchMode="); pw.print(mInTouchMode);
+                pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
+        if (dumpAll) {
+            if (mInputMethodWindow != null) {
+                pw.print("  mInputMethodWindow="); pw.println(mInputMethodWindow);
+            }
             pw.print("  mWallpaperTarget="); pw.println(mWallpaperTarget);
             if (mLowerWallpaperTarget != null && mUpperWallpaperTarget != null) {
                 pw.print("  mLowerWallpaperTarget="); pw.println(mLowerWallpaperTarget);
@@ -9061,13 +9166,19 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mWindowDetachedWallpaper != null) {
                 pw.print("  mWindowDetachedWallpaper="); pw.println(mWindowDetachedWallpaper);
             }
+            pw.print("  mLastWallpaperX="); pw.print(mLastWallpaperX);
+                    pw.print(" mLastWallpaperY="); pw.println(mLastWallpaperY);
+            if (mInputMethodAnimLayerAdjustment != 0 ||
+                    mWallpaperAnimLayerAdjustment != 0) {
+                pw.print("  mInputMethodAnimLayerAdjustment=");
+                        pw.print(mInputMethodAnimLayerAdjustment);
+                        pw.print("  mWallpaperAnimLayerAdjustment=");
+                        pw.println(mWallpaperAnimLayerAdjustment);
+            }
             if (mWindowAnimationBackgroundSurface != null) {
                 pw.println("  mWindowAnimationBackgroundSurface:");
                 mWindowAnimationBackgroundSurface.printTo("    ", pw);
             }
-            pw.print("  mCurConfiguration="); pw.println(this.mCurConfiguration);
-            pw.print("  mInTouchMode="); pw.print(mInTouchMode);
-                    pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
             pw.print("  mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
             pw.print("  mLayoutNeeded="); pw.print(mLayoutNeeded);
@@ -9078,12 +9189,6 @@ public class WindowManagerService extends IWindowManager.Stub
             } else {
                 pw.println( "  no DimAnimator ");
             }
-            pw.print("  mInputMethodAnimLayerAdjustment=");
-                    pw.print(mInputMethodAnimLayerAdjustment);
-                    pw.print("  mWallpaperAnimLayerAdjustment=");
-                    pw.println(mWallpaperAnimLayerAdjustment);
-            pw.print("  mLastWallpaperX="); pw.print(mLastWallpaperX);
-                    pw.print(" mLastWallpaperY="); pw.println(mLastWallpaperY);
             pw.print("  mDisplayFrozen="); pw.print(mDisplayFrozen);
                     pw.print(" mWindowsFreezingScreen="); pw.print(mWindowsFreezingScreen);
                     pw.print(" mAppsFreezingScreen="); pw.print(mAppsFreezingScreen);
@@ -9113,33 +9218,159 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             pw.print("  mStartingIconInTransition="); pw.print(mStartingIconInTransition);
                     pw.print(", mSkipAppTransitionAnimation="); pw.println(mSkipAppTransitionAnimation);
-            if (mOpeningApps.size() > 0) {
-                pw.print("  mOpeningApps="); pw.println(mOpeningApps);
+        }
+    }
+
+    boolean dumpWindows(FileDescriptor fd, PrintWriter pw, String name, String[] args,
+            int opti, boolean dumpAll) {
+        ArrayList<WindowState> windows = new ArrayList<WindowState>();
+        if ("visible".equals(name)) {
+            synchronized(mWindowMap) {
+                for (int i=mWindows.size()-1; i>=0; i--) {
+                    WindowState w = mWindows.get(i);
+                    if (w.mSurfaceShown) {
+                        windows.add(w);
+                    }
+                }
             }
-            if (mClosingApps.size() > 0) {
-                pw.print("  mClosingApps="); pw.println(mClosingApps);
+        } else {
+            int objectId = 0;
+            // See if this is an object ID.
+            try {
+                objectId = Integer.parseInt(name, 16);
+                name = null;
+            } catch (RuntimeException e) {
             }
-            if (mToTopApps.size() > 0) {
-                pw.print("  mToTopApps="); pw.println(mToTopApps);
+            synchronized(mWindowMap) {
+                for (int i=mWindows.size()-1; i>=0; i--) {
+                    WindowState w = mWindows.get(i);
+                    if (name != null) {
+                        if (w.mAttrs.getTitle().toString().contains(name)) {
+                            windows.add(w);
+                        }
+                    } else if (System.identityHashCode(w) == objectId) {
+                        windows.add(w);
+                    }
+                }
             }
-            if (mToBottomApps.size() > 0) {
-                pw.print("  mToBottomApps="); pw.println(mToBottomApps);
+        }
+
+        if (windows.size() <= 0) {
+            return false;
+        }
+
+        synchronized(mWindowMap) {
+            dumpWindowsLocked(fd, pw, dumpAll, windows);
+        }
+        return true;
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (mContext.checkCallingOrSelfPermission("android.permission.DUMP")
+                != PackageManager.PERMISSION_GRANTED) {
+            pw.println("Permission Denial: can't dump WindowManager from from pid="
+                    + Binder.getCallingPid()
+                    + ", uid=" + Binder.getCallingUid());
+            return;
+        }
+
+        boolean dumpAll = false;
+
+        int opti = 0;
+        while (opti < args.length) {
+            String opt = args[opti];
+            if (opt == null || opt.length() <= 0 || opt.charAt(0) != '-') {
+                break;
             }
-            if (mDisplay != null) {
-                pw.print("  Display: init="); pw.print(mInitialDisplayWidth); pw.print("x");
-                        pw.print(mInitialDisplayHeight); pw.print(" base=");
-                        pw.print(mBaseDisplayWidth); pw.print("x"); pw.print(mBaseDisplayHeight);
-                        pw.print(" cur=");
-                        pw.print(mCurDisplayWidth); pw.print("x"); pw.print(mCurDisplayHeight);
-                        pw.print(" app=");
-                        pw.print(mAppDisplayWidth); pw.print("x"); pw.print(mAppDisplayHeight);
-                        pw.print(" raw="); pw.print(mDisplay.getRawWidth());
-                        pw.print("x"); pw.println(mDisplay.getRawHeight());
+            opti++;
+            if ("-a".equals(opt)) {
+                dumpAll = true;
+            } else if ("-h".equals(opt)) {
+                pw.println("Window manager dump options:");
+                pw.println("  [-a] [-h] [cmd] ...");
+                pw.println("  cmd may be one of:");
+                pw.println("    i[input]: input subsystem state");
+                pw.println("    p[policy]: policy state");
+                pw.println("    s[essions]: active sessions");
+                pw.println("    t[okens]: token list");
+                pw.println("    w[indows]: window list");
+                pw.println("  cmd may also be a NAME to dump windows.  NAME may");
+                pw.println("    be a partial substring in a window name, a");
+                pw.println("    Window hex object identifier, or");
+                pw.println("    \"all\" for all windows, or");
+                pw.println("    \"visible\" for the visible windows.");
+                pw.println("  -a: include all available server state.");
+                return;
             } else {
-                pw.println("  NO DISPLAY");
+                pw.println("Unknown argument: " + opt + "; use -h for help");
             }
-            pw.println("  Policy:");
-            mPolicy.dump("    ", fd, pw, args);
+        }
+
+        // Is the caller requesting to dump a particular piece of data?
+        if (opti < args.length) {
+            String cmd = args[opti];
+            opti++;
+            if ("input".equals(cmd) || "i".equals(cmd)) {
+                dumpInput(fd, pw, true);
+                return;
+            } else if ("policy".equals(cmd) || "p".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    dumpPolicyLocked(fd, pw, args, true);
+                }
+                return;
+            } else if ("sessions".equals(cmd) || "s".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    dumpSessionsLocked(fd, pw, true);
+                }
+                return;
+            } else if ("tokens".equals(cmd) || "t".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    dumpTokensLocked(fd, pw, true);
+                }
+                return;
+            } else if ("windows".equals(cmd) || "w".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    dumpWindowsLocked(fd, pw, true, null);
+                }
+                return;
+            } else if ("all".equals(cmd) || "a".equals(cmd)) {
+                synchronized(mWindowMap) {
+                    dumpWindowsLocked(fd, pw, true, null);
+                }
+                return;
+            } else {
+                // Dumping a single name?
+                if (!dumpWindows(fd, pw, cmd, args, opti, dumpAll)) {
+                    pw.println("Bad window command, or no windows match: " + cmd);
+                    pw.println("Use -h for help.");
+                }
+                return;
+            }
+        }
+
+        dumpInput(fd, pw, dumpAll);
+
+        synchronized(mWindowMap) {
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpPolicyLocked(fd, pw, args, dumpAll);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpSessionsLocked(fd, pw, dumpAll);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpTokensLocked(fd, pw, dumpAll);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpWindowsLocked(fd, pw, dumpAll, null);
         }
     }
 

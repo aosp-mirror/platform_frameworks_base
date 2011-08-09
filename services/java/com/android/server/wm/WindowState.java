@@ -1511,10 +1511,13 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         }
     }
 
-    void dump(PrintWriter pw, String prefix) {
+    void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         pw.print(prefix); pw.print("mSession="); pw.print(mSession);
                 pw.print(" mClient="); pw.println(mClient.asBinder());
         pw.print(prefix); pw.print("mAttrs="); pw.println(mAttrs);
+        pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
+                pw.print(" h="); pw.print(mRequestedHeight);
+                pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
         if (mAttachedWindow != null || mLayoutAttached) {
             pw.print(prefix); pw.print("mAttachedWindow="); pw.print(mAttachedWindow);
                     pw.print(" mLayoutAttached="); pw.println(mLayoutAttached);
@@ -1525,15 +1528,19 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(" mIsFloatingLayer="); pw.print(mIsFloatingLayer);
                     pw.print(" mWallpaperVisible="); pw.println(mWallpaperVisible);
         }
-        pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
-                pw.print(" mSubLayer="); pw.print(mSubLayer);
-                pw.print(" mAnimLayer="); pw.print(mLayer); pw.print("+");
-                pw.print((mTargetAppToken != null ? mTargetAppToken.animLayerAdjustment
-                      : (mAppToken != null ? mAppToken.animLayerAdjustment : 0)));
-                pw.print("="); pw.print(mAnimLayer);
-                pw.print(" mLastLayer="); pw.println(mLastLayer);
+        if (dumpAll) {
+            pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
+                    pw.print(" mSubLayer="); pw.print(mSubLayer);
+                    pw.print(" mAnimLayer="); pw.print(mLayer); pw.print("+");
+                    pw.print((mTargetAppToken != null ? mTargetAppToken.animLayerAdjustment
+                          : (mAppToken != null ? mAppToken.animLayerAdjustment : 0)));
+                    pw.print("="); pw.print(mAnimLayer);
+                    pw.print(" mLastLayer="); pw.println(mLastLayer);
+        }
         if (mSurface != null) {
-            pw.print(prefix); pw.print("mSurface="); pw.println(mSurface);
+            if (dumpAll) {
+                pw.print(prefix); pw.print("mSurface="); pw.println(mSurface);
+            }
             pw.print(prefix); pw.print("Surface: shown="); pw.print(mSurfaceShown);
                     pw.print(" layer="); pw.print(mSurfaceLayer);
                     pw.print(" alpha="); pw.print(mSurfaceAlpha);
@@ -1542,19 +1549,21 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(") "); pw.print(mSurfaceW);
                     pw.print(" x "); pw.println(mSurfaceH);
         }
-        pw.print(prefix); pw.print("mToken="); pw.println(mToken);
-        pw.print(prefix); pw.print("mRootToken="); pw.println(mRootToken);
-        if (mAppToken != null) {
-            pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
+        if (dumpAll) {
+            pw.print(prefix); pw.print("mToken="); pw.println(mToken);
+            pw.print(prefix); pw.print("mRootToken="); pw.println(mRootToken);
+            if (mAppToken != null) {
+                pw.print(prefix); pw.print("mAppToken="); pw.println(mAppToken);
+            }
+            if (mTargetAppToken != null) {
+                pw.print(prefix); pw.print("mTargetAppToken="); pw.println(mTargetAppToken);
+            }
+            pw.print(prefix); pw.print("mViewVisibility=0x");
+            pw.print(Integer.toHexString(mViewVisibility));
+            pw.print(" mLastHidden="); pw.print(mLastHidden);
+            pw.print(" mHaveFrame="); pw.print(mHaveFrame);
+            pw.print(" mObscured="); pw.println(mObscured);
         }
-        if (mTargetAppToken != null) {
-            pw.print(prefix); pw.print("mTargetAppToken="); pw.println(mTargetAppToken);
-        }
-        pw.print(prefix); pw.print("mViewVisibility=0x");
-                pw.print(Integer.toHexString(mViewVisibility));
-                pw.print(" mLastHidden="); pw.print(mLastHidden);
-                pw.print(" mHaveFrame="); pw.print(mHaveFrame);
-                pw.print(" mObscured="); pw.println(mObscured);
         if (!mPolicyVisibility || !mPolicyVisibilityAfterAnim || mAttachedHidden) {
             pw.print(prefix); pw.print("mPolicyVisibility=");
                     pw.print(mPolicyVisibility);
@@ -1565,47 +1574,50 @@ final class WindowState implements WindowManagerPolicy.WindowState {
         if (!mRelayoutCalled) {
             pw.print(prefix); pw.print("mRelayoutCalled="); pw.println(mRelayoutCalled);
         }
-        pw.print(prefix); pw.print("Requested w="); pw.print(mRequestedWidth);
-                pw.print(" h="); pw.print(mRequestedHeight);
-                pw.print(" mLayoutSeq="); pw.println(mLayoutSeq);
         if (mXOffset != 0 || mYOffset != 0) {
             pw.print(prefix); pw.print("Offsets x="); pw.print(mXOffset);
                     pw.print(" y="); pw.println(mYOffset);
         }
-        pw.print(prefix); pw.print("mGivenContentInsets=");
-                mGivenContentInsets.printShortString(pw);
-                pw.print(" mGivenVisibleInsets=");
-                mGivenVisibleInsets.printShortString(pw);
-                pw.println();
-        if (mTouchableInsets != 0 || mGivenInsetsPending) {
-            pw.print(prefix); pw.print("mTouchableInsets="); pw.print(mTouchableInsets);
-                    pw.print(" mGivenInsetsPending="); pw.println(mGivenInsetsPending);
+        if (dumpAll) {
+            pw.print(prefix); pw.print("mGivenContentInsets=");
+                    mGivenContentInsets.printShortString(pw);
+                    pw.print(" mGivenVisibleInsets=");
+                    mGivenVisibleInsets.printShortString(pw);
+                    pw.println();
+            if (mTouchableInsets != 0 || mGivenInsetsPending) {
+                pw.print(prefix); pw.print("mTouchableInsets="); pw.print(mTouchableInsets);
+                        pw.print(" mGivenInsetsPending="); pw.println(mGivenInsetsPending);
+            }
+            pw.print(prefix); pw.print("mConfiguration="); pw.println(mConfiguration);
         }
-        pw.print(prefix); pw.print("mConfiguration="); pw.println(mConfiguration);
         pw.print(prefix); pw.print("mShownFrame=");
                 mShownFrame.printShortString(pw); pw.println();
-        pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
-                pw.print(" last="); mLastFrame.printShortString(pw);
-                pw.println();
+        if (dumpAll) {
+            pw.print(prefix); pw.print("mFrame="); mFrame.printShortString(pw);
+                    pw.print(" last="); mLastFrame.printShortString(pw);
+                    pw.println();
+        }
         if (mEnforceSizeCompat) {
             pw.print(prefix); pw.print("mCompatFrame="); mCompatFrame.printShortString(pw);
                     pw.println();
         }
-        pw.print(prefix); pw.print("mContainingFrame=");
-                mContainingFrame.printShortString(pw);
-                pw.print(" mParentFrame=");
-                mParentFrame.printShortString(pw);
-                pw.print(" mDisplayFrame=");
-                mDisplayFrame.printShortString(pw);
-                pw.println();
-        pw.print(prefix); pw.print("mContentFrame="); mContentFrame.printShortString(pw);
-                pw.print(" mVisibleFrame="); mVisibleFrame.printShortString(pw);
-                pw.println();
-        pw.print(prefix); pw.print("mContentInsets="); mContentInsets.printShortString(pw);
-                pw.print(" last="); mLastContentInsets.printShortString(pw);
-                pw.print(" mVisibleInsets="); mVisibleInsets.printShortString(pw);
-                pw.print(" last="); mLastVisibleInsets.printShortString(pw);
-                pw.println();
+        if (dumpAll) {
+            pw.print(prefix); pw.print("mContainingFrame=");
+                    mContainingFrame.printShortString(pw);
+                    pw.print(" mParentFrame=");
+                    mParentFrame.printShortString(pw);
+                    pw.print(" mDisplayFrame=");
+                    mDisplayFrame.printShortString(pw);
+                    pw.println();
+            pw.print(prefix); pw.print("mContentFrame="); mContentFrame.printShortString(pw);
+                    pw.print(" mVisibleFrame="); mVisibleFrame.printShortString(pw);
+                    pw.println();
+            pw.print(prefix); pw.print("mContentInsets="); mContentInsets.printShortString(pw);
+                    pw.print(" last="); mLastContentInsets.printShortString(pw);
+                    pw.print(" mVisibleInsets="); mVisibleInsets.printShortString(pw);
+                    pw.print(" last="); mLastVisibleInsets.printShortString(pw);
+                    pw.println();
+        }
         if (mAnimating || mLocalAnimating || mAnimationIsEntrance
                 || mAnimation != null) {
             pw.print(prefix); pw.print("mAnimating="); pw.print(mAnimating);
@@ -1632,10 +1644,12 @@ final class WindowState implements WindowManagerPolicy.WindowState {
                     pw.print(" mDsDy="); pw.print(mDsDy);
                     pw.print(" mDtDy="); pw.println(mDtDy);
         }
-        pw.print(prefix); pw.print("mDrawPending="); pw.print(mDrawPending);
-                pw.print(" mCommitDrawPending="); pw.print(mCommitDrawPending);
-                pw.print(" mReadyToShow="); pw.print(mReadyToShow);
-                pw.print(" mHasDrawn="); pw.println(mHasDrawn);
+        if (dumpAll) {
+            pw.print(prefix); pw.print("mDrawPending="); pw.print(mDrawPending);
+                    pw.print(" mCommitDrawPending="); pw.print(mCommitDrawPending);
+                    pw.print(" mReadyToShow="); pw.print(mReadyToShow);
+                    pw.print(" mHasDrawn="); pw.println(mHasDrawn);
+        }
         if (mExiting || mRemoveOnExit || mDestroying || mRemoved) {
             pw.print(prefix); pw.print("mExiting="); pw.print(mExiting);
                     pw.print(" mRemoveOnExit="); pw.print(mRemoveOnExit);
