@@ -40,6 +40,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.Log;
@@ -140,6 +141,8 @@ public class PhoneStatusBar extends StatusBar {
     // top bar
     TextView mNoNotificationsTitle;
     View mClearButton;
+    View mSettingsButton;
+
     // drag bar
     CloseDragHandle mCloseView;
     
@@ -296,7 +299,6 @@ public class PhoneStatusBar extends StatusBar {
         mNotificationIcons = (IconMerger)sb.findViewById(R.id.notificationIcons);
         mIcons = (LinearLayout)sb.findViewById(R.id.icons);
         mTickerView = sb.findViewById(R.id.ticker);
-        mDateView = (DateView)sb.findViewById(R.id.date);
 
         mExpandedDialog = new ExpandedDialog(context);
         mExpandedView = expanded;
@@ -305,6 +307,9 @@ public class PhoneStatusBar extends StatusBar {
         mNoNotificationsTitle = (TextView)expanded.findViewById(R.id.noNotificationsTitle);
         mClearButton = expanded.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
+        mDateView = (DateView)expanded.findViewById(R.id.date);
+        mSettingsButton = expanded.findViewById(R.id.settings_button);
+        mSettingsButton.setOnClickListener(mSettingsButtonListener);
         mScrollView = (ScrollView)expanded.findViewById(R.id.scroll);
         mNotificationLinearLayout = expanded.findViewById(R.id.notificationLinearLayout);
 
@@ -322,7 +327,6 @@ public class PhoneStatusBar extends StatusBar {
 
         // set the inital view visibility
         setAreThereNotifications();
-        mDateView.setVisibility(View.INVISIBLE);
 
         // Other icons
         mLocationController = new LocationController(mContext); // will post a notification
@@ -1106,10 +1110,6 @@ public class PhoneStatusBar extends StatusBar {
         mExpandedDialog.getWindow().setAttributes(mExpandedParams);
         mExpandedView.requestFocus(View.FOCUS_FORWARD);
         mTrackingView.setVisibility(View.VISIBLE);
-
-        if (!mTicking) {
-            setDateViewVisibility(true, com.android.internal.R.anim.fade_in);
-        }
     }
 
     public void animateExpand() {
@@ -1194,7 +1194,6 @@ public class PhoneStatusBar extends StatusBar {
         if ((mDisabled & StatusBarManager.DISABLE_NOTIFICATION_ICONS) == 0) {
             setNotificationIconVisibility(true, com.android.internal.R.anim.fade_in);
         }
-        setDateViewVisibility(false, com.android.internal.R.anim.fade_out);
 
         if (!mExpanded) {
             return;
@@ -1578,9 +1577,6 @@ public class PhoneStatusBar extends StatusBar {
             mTickerView.setVisibility(View.VISIBLE);
             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_up_in, null));
             mIcons.startAnimation(loadAnim(com.android.internal.R.anim.push_up_out, null));
-            if (mExpandedVisible) {
-                setDateViewVisibility(false, com.android.internal.R.anim.push_up_out);
-            }
         }
 
         @Override
@@ -1590,9 +1586,6 @@ public class PhoneStatusBar extends StatusBar {
             mIcons.startAnimation(loadAnim(com.android.internal.R.anim.push_down_in, null));
             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.push_down_out,
                         mTickingDoneListener));
-            if (mExpandedVisible) {
-                setDateViewVisibility(true, com.android.internal.R.anim.push_down_in);
-            }
         }
 
         public void tickerHalting() {
@@ -1601,9 +1594,6 @@ public class PhoneStatusBar extends StatusBar {
             mIcons.startAnimation(loadAnim(com.android.internal.R.anim.fade_in, null));
             mTickerView.startAnimation(loadAnim(com.android.internal.R.anim.fade_out,
                         mTickingDoneListener));
-            if (mExpandedVisible) {
-                setDateViewVisibility(true, com.android.internal.R.anim.fade_in);
-            }
         }
     }
 
@@ -1762,11 +1752,6 @@ public class PhoneStatusBar extends StatusBar {
                                            ViewGroup.LayoutParams.MATCH_PARENT));
         mExpandedDialog.getWindow().setBackgroundDrawable(null);
         mExpandedDialog.show();
-    }
-
-    void setDateViewVisibility(boolean visible, int anim) {
-        mDateView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
-        mDateView.startAnimation(loadAnim(anim, null));
     }
 
     void setNotificationIconVisibility(boolean visible, int anim) {
@@ -1975,6 +1960,14 @@ public class PhoneStatusBar extends StatusBar {
             } catch (RemoteException ex) {
                 // system process is dead if we're here.
             }
+            animateCollapse();
+        }
+    };
+
+    private View.OnClickListener mSettingsButtonListener = new View.OnClickListener() {
+        public void onClick(View v) {
+            v.getContext().startActivity(new Intent(Settings.ACTION_SETTINGS)
+                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
             animateCollapse();
         }
     };

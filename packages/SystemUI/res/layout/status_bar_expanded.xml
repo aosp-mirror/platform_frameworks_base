@@ -26,15 +26,24 @@
     android:descendantFocusability="afterDescendants"
     >
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
+        android:layout_height="55dp"
         android:paddingTop="3dp"
         android:paddingBottom="5dp"
         android:paddingRight="3dp"
-        android:background="@drawable/shade_header_background"
         >
+        <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
+            android:textAppearance="@android:style/TextAppearance.StatusBar.EventContent.Title"
+            android:textColor="@android:color/holo_blue_bright"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:singleLine="true"
+            android:gravity="center_vertical|left"
+            android:paddingLeft="16dp"
+            />
+        <!--
         <com.android.systemui.statusbar.phone.CarrierLabel
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -47,15 +56,30 @@
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="?android:attr/textColorSecondary"
             />
+        -->
+        <ImageView android:id="@+id/settings_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/date"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:src="@drawable/ic_sysbar_quicksettings"
+            />
         <ImageView android:id="@+id/clear_all_button"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
+            android:layout_alignParentRight="true"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
             android:src="@drawable/ic_notify_clear"
             />
-    </LinearLayout>
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@drawable/status_bar_hr"
+        />
 
     <FrameLayout
         android:layout_width="match_parent" 

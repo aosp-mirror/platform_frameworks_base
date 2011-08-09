@@ -42,8 +42,6 @@ public class PhoneStatusBarView extends FrameLayout {
     int mStartX, mStartY;
     ViewGroup mNotificationIcons;
     ViewGroup mStatusIcons;
-    View mDate;
-    FixedSizeDrawable mBackground;
     
     boolean mNightMode = false;
     int mStartAlpha = 0, mEndAlpha = 0;
@@ -61,11 +59,6 @@ public class PhoneStatusBarView extends FrameLayout {
         super.onFinishInflate();
         mNotificationIcons = (ViewGroup)findViewById(R.id.notificationIcons);
         mStatusIcons = (ViewGroup)findViewById(R.id.statusIcons);
-        mDate = findViewById(R.id.date);
-
-        mBackground = new FixedSizeDrawable(mDate.getBackground());
-        mBackground.setFixedBounds(0, 0, 0, 0);
-        mDate.setBackgroundDrawable(mBackground);
     }
 
     @Override
@@ -107,31 +100,6 @@ public class PhoneStatusBarView extends FrameLayout {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-
-        // put the date date view quantized to the icons
-        int oldDateRight = mDate.getRight();
-        int newDateRight;
-
-        newDateRight = getDateSize(mNotificationIcons, oldDateRight,
-                getViewOffset(mNotificationIcons));
-        if (newDateRight < 0) {
-            int offset = getViewOffset(mStatusIcons);
-            if (oldDateRight < offset) {
-                newDateRight = oldDateRight;
-            } else {
-                newDateRight = getDateSize(mStatusIcons, oldDateRight, offset);
-                if (newDateRight < 0) {
-                    newDateRight = r;
-                }
-            }
-        }
-        int max = r - getPaddingRight();
-        if (newDateRight > max) {
-            newDateRight = max;
-        }
-
-        mDate.layout(mDate.getLeft(), mDate.getTop(), newDateRight, mDate.getBottom());
-        mBackground.setFixedBounds(-mDate.getLeft(), -mDate.getTop(), (r-l), (b-t));
     }
 
     @Override
@@ -162,19 +130,6 @@ public class PhoneStatusBarView extends FrameLayout {
             }
         }
         return offset;
-    }
-
-    private int getDateSize(ViewGroup g, int w, int offset) {
-        final int N = g.getChildCount();
-        for (int i=0; i<N; i++) {
-            View v = g.getChildAt(i);
-            int l = v.getLeft() + offset;
-            int r = v.getRight() + offset;
-            if (w >= l && w <= r) {
-                return r;
-            }
-        }
-        return -1;
     }
 
     /**
