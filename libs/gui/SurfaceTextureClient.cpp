@@ -385,7 +385,8 @@ int SurfaceTextureClient::dispatchUnlockAndPost(va_list args) {
 int SurfaceTextureClient::connect(int api) {
     LOGV("SurfaceTextureClient::connect");
     Mutex::Autolock lock(mMutex);
-    int err = mSurfaceTexture->connect(api);
+    int err = mSurfaceTexture->connect(api,
+            &mDefaultWidth, &mDefaultHeight, &mTransformHint);
     if (!err && api == NATIVE_WINDOW_API_CPU) {
         mConnectedToCpu = true;
     }

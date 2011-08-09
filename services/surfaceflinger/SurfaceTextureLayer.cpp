@@ -86,9 +86,19 @@ status_t SurfaceTextureLayer::dequeueBuffer(int *buf,
     return res;
 }
 
-status_t SurfaceTextureLayer::connect(int api) {
-    status_t err = SurfaceTexture::connect(api);
+status_t SurfaceTextureLayer::connect(int api,
+        uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
+    status_t err = SurfaceTexture::connect(api,
+            outWidth, outHeight, outTransform);
     if (err == NO_ERROR) {
+        sp<Layer> layer(mLayer.promote());
+        if (layer != NULL) {
+            uint32_t orientation = layer->getOrientation();
+            if (orientation & Transform::ROT_INVALID) {
+                orientation = 0;
+            }
+            *outTransform = orientation;
+        }
         switch(api) {
             case NATIVE_WINDOW_API_MEDIA:
             case NATIVE_WINDOW_API_CAMERA:
