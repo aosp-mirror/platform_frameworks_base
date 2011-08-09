@@ -133,7 +133,8 @@ public:
     //
     // This method will fail if the connect was previously called on the
     // SurfaceMediaSource and no corresponding disconnect call was made.
-    virtual status_t connect(int api);
+    virtual status_t connect(int api,
+            uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform);
 
     // disconnect attempts to disconnect a client API from the SurfaceMediaSource.
     // Calling this method will cause any subsequent calls to other
