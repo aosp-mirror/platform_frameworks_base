@@ -1,3 +1,25 @@
+/*
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/** @file rs_graphics.rsh
+ *  \brief Renderscript graphics API
+ *
+ *  A set of graphics functions used by Renderscript.
+ *
+ */
 #ifndef __RS_GRAPHICS_RSH__
 #define __RS_GRAPHICS_RSH__
 
@@ -37,7 +59,7 @@ extern void __attribute__((overloadable))
     rsgClearAllRenderTargets(void);
 
 /**
- * Force RenderScript to finish all rendering commands
+ * Force Renderscript to finish all rendering commands
  */
 extern uint __attribute__((overloadable))
     rsgFinish(void);
@@ -94,16 +116,38 @@ extern void __attribute__((overloadable))
 extern void __attribute__((overloadable))
     rsgBindTexture(rs_program_fragment, uint slot, rs_allocation);
 
-
+/**
+ * Load the projection matrix for a currently bound fixed function
+ * vertex program. Calling this function with a custom vertex shader
+ * would result in an error.
+ * @param proj projection matrix
+ */
 extern void __attribute__((overloadable))
-    rsgProgramVertexLoadProjectionMatrix(const rs_matrix4x4 *);
+    rsgProgramVertexLoadProjectionMatrix(const rs_matrix4x4 *proj);
+/**
+ * Load the model matrix for a currently bound fixed function
+ * vertex program. Calling this function with a custom vertex shader
+ * would result in an error.
+ * @param model model matrix
+ */
 extern void __attribute__((overloadable))
-    rsgProgramVertexLoadModelMatrix(const rs_matrix4x4 *);
+    rsgProgramVertexLoadModelMatrix(const rs_matrix4x4 *model);
+/**
+ * Load the texture matrix for a currently bound fixed function
+ * vertex program. Calling this function with a custom vertex shader
+ * would result in an error.
+ * @param tex texture matrix
+ */
 extern void __attribute__((overloadable))
-    rsgProgramVertexLoadTextureMatrix(const rs_matrix4x4 *);
-
+    rsgProgramVertexLoadTextureMatrix(const rs_matrix4x4 *tex);
+/**
+ * Get the projection matrix for a currently bound fixed function
+ * vertex program. Calling this function with a custom vertex shader
+ * would result in an error.
+ * @param proj matrix to store the current projection matrix into
+ */
 extern void __attribute__((overloadable))
-    rsgProgramVertexGetProjectionMatrix(rs_matrix4x4 *);
+    rsgProgramVertexGetProjectionMatrix(rs_matrix4x4 *proj);
 
 /**
  * Set the constant color for a fixed function emulation program.
@@ -239,15 +283,29 @@ extern void __attribute__((overloadable))
     rsgDrawSpriteScreenspace(float x, float y, float z, float w, float h);
 
 /**
- * Draw a mesh of geometry using the current context state.  The whole mesh is
+ * Draw a mesh using the current context state.  The whole mesh is
  * rendered.
  *
  * @param ism
  */
 extern void __attribute__((overloadable))
     rsgDrawMesh(rs_mesh ism);
+/**
+ * Draw part of a mesh using the current context state.
+ * @param ism mesh object to render
+ * @param primitiveIndex for meshes that contain multiple primitive groups
+ *        this parameter specifies the index of the group to draw.
+ */
 extern void __attribute__((overloadable))
     rsgDrawMesh(rs_mesh ism, uint primitiveIndex);
+/**
+ * Draw specified index range of part of a mesh using the current context state.
+ * @param ism mesh object to render
+ * @param primitiveIndex for meshes that contain multiple primitive groups
+ *        this parameter specifies the index of the group to draw.
+ * @param start starting index in the range
+ * @param len number of indices to draw
+ */
 extern void __attribute__((overloadable))
     rsgDrawMesh(rs_mesh ism, uint primitiveIndex, uint start, uint len);
 
@@ -264,29 +322,54 @@ extern void __attribute__((overloadable))
 
 /**
  * Clears the depth suface to the specified value.
- *
  */
 extern void __attribute__((overloadable))
     rsgClearDepth(float value);
-
+/**
+ * Draws text given a string and location
+ */
 extern void __attribute__((overloadable))
     rsgDrawText(const char *, int x, int y);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsgDrawText(rs_allocation, int x, int y);
+/**
+ * Binds the font object to be used for all subsequent font rendering calls
+ * @param font object to bind
+ */
 extern void __attribute__((overloadable))
-    rsgBindFont(rs_font);
+    rsgBindFont(rs_font font);
+/**
+ * Sets the font color for all subsequent rendering calls
+ * @param r red component
+ * @param g green component
+ * @param b blue component
+ * @param a alpha component
+ */
 extern void __attribute__((overloadable))
-    rsgFontColor(float, float, float, float);
-// Returns the bounding box of the text relative to (0, 0)
-// Any of left, right, top, bottom could be NULL
+    rsgFontColor(float r, float g, float b, float a);
+/**
+ * Returns the bounding box of the text relative to (0, 0)
+ * Any of left, right, top, bottom could be NULL
+ */
 extern void __attribute__((overloadable))
     rsgMeasureText(const char *, int *left, int *right, int *top, int *bottom);
+/**
+ * \overload
+ */
 extern void __attribute__((overloadable))
     rsgMeasureText(rs_allocation, int *left, int *right, int *top, int *bottom);
-
+/**
+ * Computes an axis aligned bounding box of a mesh object
+ */
 extern void __attribute__((overloadable))
     rsgMeshComputeBoundingBox(rs_mesh mesh, float *minX, float *minY, float *minZ,
                                                 float *maxX, float *maxY, float *maxZ);
+/**
+ * \overload
+ */
 __inline__ static void __attribute__((overloadable, always_inline))
 rsgMeshComputeBoundingBox(rs_mesh mesh, float3 *bBoxMin, float3 *bBoxMax) {
     float x1, y1, z1, x2, y2, z2;
