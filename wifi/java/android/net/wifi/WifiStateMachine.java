@@ -1087,13 +1087,11 @@ public class WifiStateMachine extends StateMachine {
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Error configuring interface " + intf + ", :" + e);
-                        setWifiApEnabled(null, false);
                         return false;
                     }
 
                     if(mCm.tether(intf) != ConnectivityManager.TETHER_ERROR_NO_ERROR) {
                         Log.e(TAG, "Error tethering on " + intf);
-                        setWifiApEnabled(null, false);
                         return false;
                     }
                     return true;
