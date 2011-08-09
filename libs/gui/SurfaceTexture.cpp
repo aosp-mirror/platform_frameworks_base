@@ -548,7 +548,8 @@ status_t SurfaceTexture::setTransform(uint32_t transform) {
     return OK;
 }
 
-status_t SurfaceTexture::connect(int api) {
+status_t SurfaceTexture::connect(int api,
+        uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
     LOGV("SurfaceTexture::connect(this=%p, %d)", this, api);
     Mutex::Autolock lock(mMutex);
 
@@ -569,6 +570,9 @@ status_t SurfaceTexture::connect(int api) {
                 err = -EINVAL;
             } else {
                 mConnectedApi = api;
+                *outWidth = mDefaultWidth;
+                *outHeight = mDefaultHeight;
+                *outTransform = 0;
             }
             break;
         default:

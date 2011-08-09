@@ -371,7 +371,8 @@ status_t SurfaceMediaSource::setSynchronousMode(bool enabled) {
     return err;
 }
 
-status_t SurfaceMediaSource::connect(int api) {
+status_t SurfaceMediaSource::connect(int api,
+        uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
     LOGV("SurfaceMediaSource::connect");
     Mutex::Autolock lock(mMutex);
     status_t err = NO_ERROR;
@@ -384,6 +385,9 @@ status_t SurfaceMediaSource::connect(int api) {
                 err = -EINVAL;
             } else {
                 mConnectedApi = api;
+                *outWidth = mDefaultWidth;
+                *outHeight = mDefaultHeight;
+                *outTransform = 0;
             }
             break;
         default:

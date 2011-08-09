@@ -162,11 +162,15 @@ public:
         return result;
     }
 
-    virtual status_t connect(int api) {
+    virtual status_t connect(int api,
+            uint32_t* outWidth, uint32_t* outHeight, uint32_t* outTransform) {
         Parcel data, reply;
         data.writeInterfaceToken(ISurfaceTexture::getInterfaceDescriptor());
         data.writeInt32(api);
         remote()->transact(CONNECT, data, &reply);
+        *outWidth = reply.readInt32();
+        *outHeight = reply.readInt32();
+        *outTransform = reply.readInt32();
         status_t result = reply.readInt32();
         return result;
     }
@@ -283,7 +287,12 @@ status_t BnSurfaceTexture::onTransact(
         case CONNECT: {
             CHECK_INTERFACE(ISurfaceTexture, data, reply);
             int api = data.readInt32();
-            status_t res = connect(api);
+            uint32_t outWidth, outHeight, outTransform;
+            status_t res = connect(api,
+                    &outWidth, &outHeight, &outTransform);
+            reply->writeInt32(outWidth);
+            reply->writeInt32(outHeight);
+            reply->writeInt32(outTransform);
             reply->writeInt32(res);
             return NO_ERROR;
         } break;
