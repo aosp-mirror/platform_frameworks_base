@@ -35,7 +35,7 @@ interface INfcAdapter
     INfcAdapterExtras getNfcAdapterExtrasInterface();
 
     // NfcAdapter-class related methods
-    boolean isEnabled();
+    int getState();
     void enableForegroundDispatch(in ComponentName activity, in PendingIntent intent,
             in IntentFilter[] filters, in TechListParcel techLists);
     void disableForegroundDispatch(in ComponentName activity);
@@ -48,5 +48,5 @@ interface INfcAdapter
     boolean enable();
     boolean enableZeroClick();
     boolean disableZeroClick();
-    boolean zeroClickEnabled();
+    boolean isZeroClickEnabled();
 }
