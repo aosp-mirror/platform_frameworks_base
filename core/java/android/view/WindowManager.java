@@ -1336,8 +1336,10 @@ public interface WindowManager extends ViewManager {
             sb.append(type);
             sb.append(" fl=#");
             sb.append(Integer.toHexString(flags));
-            sb.append(" fmt=");
-            sb.append(format);
+            if (format != PixelFormat.OPAQUE) {
+                sb.append(" fmt=");
+                sb.append(format);
+            }
             if (windowAnimations != 0) {
                 sb.append(" wanim=0x");
                 sb.append(Integer.toHexString(windowAnimations));
@@ -1373,7 +1375,9 @@ public interface WindowManager extends ViewManager {
                 sb.append(" sysuil=");
                 sb.append(hasSystemUiListeners);
             }
-            sb.append(" if=0x").append(Integer.toHexString(inputFeatures));
+            if (inputFeatures != 0) {
+                sb.append(" if=0x").append(Integer.toHexString(inputFeatures));
+            }
             sb.append('}');
             return sb.toString();
         }
