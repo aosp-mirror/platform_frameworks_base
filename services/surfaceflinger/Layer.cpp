@@ -533,7 +533,7 @@ void Layer::dump(String8& result, char* buffer, size_t SIZE) const
     }
     snprintf(buffer, SIZE,
             "      "
-            "format=%2d, activeBuffer=[%3ux%3u:%3u,%3u],"
+            "format=%2d, activeBuffer=[%4ux%4u:%4u,%3X],"
             " freezeLock=%p, queued-frames=%d\n",
             mFormat, w0, h0, s0,f0,
             getFreezeLock().get(), mQueuedFrames);
