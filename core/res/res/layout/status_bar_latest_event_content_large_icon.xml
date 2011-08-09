@@ -28,6 +28,7 @@
         android:alpha="0.7"
         />
     <LinearLayout
+        android:id="@+id/line3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -60,6 +61,14 @@
             android:layout_weight="0"
             android:scaleType="center"
             android:paddingLeft="8dp"
+            android:visibility="gone"
             />
     </LinearLayout>
+    <ProgressBar
+        android:id="@android:id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        style="?android:attr/progressBarStyleHorizontal"
+        />
 </LinearLayout>
