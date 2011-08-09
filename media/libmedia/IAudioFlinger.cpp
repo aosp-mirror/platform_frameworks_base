@@ -1,4 +1,4 @@
-/* //device/extlibs/pv/android/IAudioflinger.cpp
+/*
 **
 ** Copyright 2007, The Android Open Source Project
 **
@@ -63,6 +63,8 @@ enum {
     GET_RENDER_POSITION,
     GET_INPUT_FRAMES_LOST,
     NEW_AUDIO_SESSION_ID,
+    ACQUIRE_AUDIO_SESSION_ID,
+    RELEASE_AUDIO_SESSION_ID,
     QUERY_NUM_EFFECTS,
     QUERY_EFFECT,
     GET_EFFECT_DESCRIPTOR,
@@ -526,6 +528,22 @@ public:
         return id;
     }
 
+    virtual void acquireAudioSessionId(int audioSession)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(audioSession);
+        remote()->transact(ACQUIRE_AUDIO_SESSION_ID, data, &reply);
+    }
+
+    virtual void releaseAudioSessionId(int audioSession)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioFlinger::getInterfaceDescriptor());
+        data.writeInt32(audioSession);
+        remote()->transact(RELEASE_AUDIO_SESSION_ID, data, &reply);
+    }
+
     virtual status_t queryNumberEffects(uint32_t *numEffects)
     {
         Parcel data, reply;
@@ -917,6 +935,18 @@ status_t BnAudioFlinger::onTransact(
         case NEW_AUDIO_SESSION_ID: {
             CHECK_INTERFACE(IAudioFlinger, data, reply);
             reply->writeInt32(newAudioSessionId());
+            return NO_ERROR;
+        } break;
+        case ACQUIRE_AUDIO_SESSION_ID: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            int audioSession = data.readInt32();
+            acquireAudioSessionId(audioSession);
+            return NO_ERROR;
+        } break;
+        case RELEASE_AUDIO_SESSION_ID: {
+            CHECK_INTERFACE(IAudioFlinger, data, reply);
+            int audioSession = data.readInt32();
+            releaseAudioSessionId(audioSession);
             return NO_ERROR;
         } break;
         case QUERY_NUM_EFFECTS: {

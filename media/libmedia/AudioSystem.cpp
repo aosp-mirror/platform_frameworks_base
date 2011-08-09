@@ -356,6 +356,20 @@ int AudioSystem::newAudioSessionId() {
     return af->newAudioSessionId();
 }
 
+void AudioSystem::acquireAudioSessionId(int audioSession) {
+    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+    if (af != 0) {
+        af->acquireAudioSessionId(audioSession);
+    }
+}
+
+void AudioSystem::releaseAudioSessionId(int audioSession) {
+    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+    if (af != 0) {
+        af->releaseAudioSessionId(audioSession);
+    }
+}
+
 // ---------------------------------------------------------------------------
 
 void AudioSystem::AudioFlingerClient::binderDied(const wp<IBinder>& who) {
