@@ -49,7 +49,8 @@ M4OSA_ERR ThumbnailOpen(M4OSA_Context *pPContext,
 */
 M4OSA_ERR ThumbnailGetPixels32(const M4OSA_Context pContext,
                              M4OSA_Int32* pixelArray, M4OSA_UInt32 width,
-                             M4OSA_UInt32 height, M4OSA_UInt32 *timeMS);
+                             M4OSA_UInt32 height, M4OSA_UInt32 *timeMS,
+                             M4OSA_UInt32 tolerance);
 
 /**
  ************************************************************************
@@ -63,7 +64,8 @@ M4OSA_ERR ThumbnailGetPixels32(const M4OSA_Context pContext,
 */
 M4OSA_ERR ThumbnailGetPixels16(const M4OSA_Context pContext,
                              M4OSA_Int16* pixelArray, M4OSA_UInt32 width,
-                             M4OSA_UInt32 height, M4OSA_UInt32 *timeMS);
+                             M4OSA_UInt32 height, M4OSA_UInt32 *timeMS,
+                             M4OSA_UInt32 tolerance);
 
 /**
  ************************************************************************

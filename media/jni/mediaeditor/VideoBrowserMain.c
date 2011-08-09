@@ -258,6 +258,7 @@ M4OSA_ERR videoBrowserCreate(
                     err = pContext->m_pDecoder->m_pFctCreate(
                             &pContext->m_pDecoderCtx,
                             pContext->m_pStreamHandler,
+                            pContext->m_3gpReader,
                             pContext->m_3gpData,
                             &pContext->m_accessUnit,
                             pContext->m_pCodecLoaderContext) ;
@@ -284,6 +285,7 @@ M4OSA_ERR videoBrowserCreate(
                     err = pContext->m_pDecoder->m_pFctCreate(
                             &pContext->m_pDecoderCtx,
                             pContext->m_pStreamHandler,
+                            pContext->m_3gpReader,
                             pContext->m_3gpData,
                             &pContext->m_accessUnit,
                             pContext->m_pCodecLoaderContext) ;
@@ -435,9 +437,12 @@ videoBrowserCleanUp_cleanUp:
 * @param        pContext     (IN) : Video browser context
 * @param        pTime        (IN/OUT) : Pointer on the time to reach. Updated
 *                                       by this function with the reached time
+* @param        tolerance    (IN) :  We may decode an earlier frame within the tolerance.
+*                                    The time difference is specified in milliseconds.
 * @return       M4NO_ERROR / M4ERR_PARAMETER / M4ERR_STATE / M4ERR_ALLOC
 ******************************************************************************/
-M4OSA_ERR videoBrowserPrepareFrame(M4OSA_Context pContext, M4OSA_UInt32* pTime)
+M4OSA_ERR videoBrowserPrepareFrame(M4OSA_Context pContext, M4OSA_UInt32* pTime,
+    M4OSA_UInt32 tolerance)
 {
     VideoBrowserContext* pC = (VideoBrowserContext*)pContext;
     M4OSA_ERR err = M4NO_ERROR;
@@ -481,50 +486,13 @@ M4OSA_ERR videoBrowserPrepareFrame(M4OSA_Context pContext, M4OSA_UInt32* pTime)
         bJumpNeeded = M4OSA_TRUE;
     }
 
-    if (M4OSA_TRUE == bJumpNeeded)
-    {
-        rapTime = targetTime;
-        /*--- Retrieve the previous RAP time ---*/
-        err = pC->m_3gpReader->m_pFctGetPrevRapTime(
-                pC->m_pReaderCtx, pC->m_pStreamHandler, &rapTime);
-
-        CHECK_ERR(videoBrowserPrepareFrame, err);
-
-        jumpTime = rapTime;
-
-        err = pC->m_3gpReader->m_pFctJump(pC->m_pReaderCtx,
-                                          pC->m_pStreamHandler,
-                                          (M4OSA_Int32*)&jumpTime);
-        CHECK_ERR(videoBrowserPrepareFrame, err);
-    }
-
     timeMS = (M4_MediaTime)targetTime;
     err = pC->m_pDecoder->m_pFctDecode(
-        pC->m_pDecoderCtx, &timeMS, bJumpNeeded);
+        pC->m_pDecoderCtx, &timeMS, bJumpNeeded, tolerance);
 
     if ((err != M4NO_ERROR) && (err != M4WAR_NO_MORE_AU))
     {
         return err;
-    }
-
-    // FIXME:
-    // Not sure that I understand why we need a second jump logic here
-    if ((timeMS >= pC->m_currentCTS) && (M4OSA_TRUE == isBackward))
-    {
-        jumpTime = rapTime;
-        err = pC->m_3gpReader->m_pFctJump(
-            pC->m_pReaderCtx, pC->m_pStreamHandler, (M4OSA_Int32*)&jumpTime);
-
-        CHECK_ERR(videoBrowserPrepareFrame, err);
-
-        timeMS = (M4_MediaTime)rapTime;
-        err = pC->m_pDecoder->m_pFctDecode(
-            pC->m_pDecoderCtx, &timeMS, M4OSA_TRUE);
-
-        if ((err != M4NO_ERROR) && (err != M4WAR_NO_MORE_AU))
-        {
-            return err;
-        }
     }
 
     err = pC->m_pDecoder->m_pFctRender(

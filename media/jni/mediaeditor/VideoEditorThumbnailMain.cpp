@@ -74,7 +74,7 @@ typedef struct
 M4OSA_ERR ThumbnailGetPixels(const M4OSA_Context pContext,
                              M4OSA_Int32* pixelArray,
                              M4OSA_UInt32 width, M4OSA_UInt32 height,
-                             M4OSA_UInt32* pTimeMS);
+                             M4OSA_UInt32* pTimeMS, M4OSA_UInt32 tolerance);
 
 
 /**
@@ -219,7 +219,7 @@ ThumbnailOpen_cleanUp:
 M4OSA_ERR ThumbnailGetPixels(const M4OSA_Context pContext,
                              M4OSA_Int32* pixelArray,
                              M4OSA_UInt32 width, M4OSA_UInt32 height,
-                             M4OSA_UInt32* pTimeMS)
+                             M4OSA_UInt32* pTimeMS, M4OSA_UInt32 tolerance)
 {
     M4OSA_ERR err;
 
@@ -249,7 +249,7 @@ M4OSA_ERR ThumbnailGetPixels(const M4OSA_Context pContext,
         pC->m_previousTime = *pTimeMS;
     }
 
-    err = videoBrowserPrepareFrame(pC->m_pVideoBrowser, pTimeMS);
+    err = videoBrowserPrepareFrame(pC->m_pVideoBrowser, pTimeMS, tolerance);
     CHECK_ERR(ThumbnailGetPixels, err);
 
     if (pC->m_bRender != M4OSA_TRUE) {
@@ -264,7 +264,8 @@ ThumbnailGetPixels_cleanUp:
 
 M4OSA_ERR ThumbnailGetPixels32(const M4OSA_Context pContext,
                          M4OSA_Int32* pixelArray, M4OSA_UInt32 width,
-                         M4OSA_UInt32 height, M4OSA_UInt32* timeMS)
+                         M4OSA_UInt32 height, M4OSA_UInt32* timeMS,
+                         M4OSA_UInt32 tolerance)
 {
 
     M4OSA_ERR err = M4NO_ERROR;
@@ -277,7 +278,7 @@ M4OSA_ERR ThumbnailGetPixels32(const M4OSA_Context pContext,
     pC->m_dst16 = NULL;
     pC->m_dst32 = pixelArray;
 
-    err = ThumbnailGetPixels(pContext, pixelArray, width, height, timeMS);
+    err = ThumbnailGetPixels(pContext, pixelArray, width, height, timeMS, tolerance);
 
 ThumbnailGetPixels32_cleanUp:
 
@@ -286,7 +287,8 @@ ThumbnailGetPixels32_cleanUp:
 
 M4OSA_ERR ThumbnailGetPixels16(const M4OSA_Context pContext,
                          M4OSA_Int16* pixelArray, M4OSA_UInt32 width,
-                         M4OSA_UInt32 height, M4OSA_UInt32* timeMS)
+                         M4OSA_UInt32 height, M4OSA_UInt32* timeMS,
+                         M4OSA_UInt32 tolerance)
 {
     M4OSA_ERR err = M4NO_ERROR;
 
@@ -298,7 +300,8 @@ M4OSA_ERR ThumbnailGetPixels16(const M4OSA_Context pContext,
     pC->m_dst16 = pixelArray;
     pC->m_dst32 = NULL;
 
-    err = ThumbnailGetPixels(pContext, (M4OSA_Int32*)pixelArray, width, height, timeMS);
+    err = ThumbnailGetPixels(pContext, (M4OSA_Int32*)pixelArray, width, height,
+            timeMS, tolerance);
 
 ThumbnailGetPixels16_cleanUp:
 
