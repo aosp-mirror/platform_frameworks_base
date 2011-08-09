@@ -193,6 +193,15 @@ public class CallLog {
         public static final String IS_READ = "is_read";
 
         /**
+         * A geocoded location for the number associated with this call.
+         * <p>
+         * The string represents a city, state, or country associated with the number.
+         * <P>Type: TEXT</P>
+         * @hide
+         */
+        public static final String GEOCODED_LOCATION = "geocoded_location";
+
+        /**
          * Adds a call to the call log.
          *
          * @param ci the CallerInfo object to get the target contact from.  Can be null
