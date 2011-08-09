@@ -2814,7 +2814,23 @@ public class PackageManagerService extends IPackageManager.Stub {
         return true;
     }
 
+    /**
+     * Enforces that only the system UID or root's UID can call a method exposed
+     * via Binder.
+     *
+     * @param message used as message if SecurityException is thrown
+     * @throws SecurityException if the caller is not system or root
+     */
+    private static final void enforceSystemOrRoot(String message) {
+        final int uid = Binder.getCallingUid();
+        if (uid != Process.SYSTEM_UID && uid != 0) {
+            throw new SecurityException(message);
+        }
+    }
+
     public boolean performDexOpt(String packageName) {
+        enforceSystemOrRoot("Only the system can request dexopt be performed");
+
         if (!mNoDexOpt) {
             return false;
         }
@@ -4687,8 +4703,13 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public void finishPackageInstall(int token) {
-        if (DEBUG_INSTALL) Log.v(TAG, "BM finishing package install for " + token);
-        Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
+        enforceSystemOrRoot("Only the system is allowed to finish installs");
+
+        if (DEBUG_INSTALL) {
+            Slog.v(TAG, "BM finishing package install for " + token);
+        }
+
+        final Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
         mHandler.sendMessage(msg);
     }
 
@@ -7184,6 +7205,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public void enterSafeMode() {
+        enforceSystemOrRoot("Only the system can request entering safe mode");
+
         if (!mSystemReady) {
             mSafeMode = true;
         }
@@ -8086,12 +8109,18 @@ public class PackageManagerService extends IPackageManager.Stub {
     }
 
     public UserInfo createUser(String name, int flags) {
+        // TODO(kroot): Add a real permission for creating users
+        enforceSystemOrRoot("Only the system can create users");
+
         // TODO(kroot): fix this API
         UserInfo userInfo = mUserManager.createUser(name, flags, new ArrayList<ApplicationInfo>());
         return userInfo;
     }
 
     public boolean removeUser(int userId) {
+        // TODO(kroot): Add a real permission for removing users
+        enforceSystemOrRoot("Only the system can remove users");
+
         if (userId == 0) {
             return false;
         }
