@@ -178,6 +178,7 @@ LOCAL_C_INCLUDES += \
 	external/icu4c/i18n \
 	external/icu4c/common \
 	external/jpeg \
+	external/harfbuzz/contrib \
 	external/harfbuzz/src \
 	external/zlib \
 	frameworks/opt/emoji \
