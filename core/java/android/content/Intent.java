@@ -1132,7 +1132,8 @@ public class Intent implements Parcelable, Cloneable {
      * <p>Input: No data is specified. The bug report is passed in using
      * an {@link #EXTRA_BUG_REPORT} field.
      * <p>Output: Nothing.
-     * @hide
+     *
+     * @see #EXTRA_BUG_REPORT
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
@@ -1167,6 +1168,80 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_NETWORK_USAGE =
             "android.intent.action.MANAGE_NETWORK_USAGE";
+
+    /**
+     * Activity Action: Launch application installer.
+     * <p>
+     * Input: The data must be a content: or file: URI at which the application
+     * can be retrieved.  You can optionally supply
+     * {@link #EXTRA_INSTALLER_PACKAGE_NAME}, {@link #EXTRA_NOT_UNKNOWN_SOURCE},
+     * {@link #EXTRA_ALLOW_REPLACE}, and {@link #EXTRA_RETURN_RESULT}.
+     * <p>
+     * Output: If {@link #EXTRA_RETURN_RESULT}, returns whether the install
+     * succeeded.
+     *
+     * @see #EXTRA_INSTALLER_PACKAGE_NAME
+     * @see #EXTRA_NOT_UNKNOWN_SOURCE
+     * @see #EXTRA_RETURN_RESULT
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_INSTALL_PACKAGE = "android.intent.action.INSTALL_PACKAGE";
+
+    /**
+     * Used as a string extra field with {@link #ACTION_INSTALL_PACKAGE} to install a
+     * package.  Specifies the installer package name; this package will receive the
+     * {@link #ACTION_APP_ERROR} intent.
+     */
+    public static final String EXTRA_INSTALLER_PACKAGE_NAME
+            = "android.intent.extra.INSTALLER_PACKAGE_NAME";
+
+    /**
+     * Used as a boolean extra field with {@link #ACTION_INSTALL_PACKAGE} to install a
+     * package.  Specifies that the application being installed should not be
+     * treated as coming from an unknown source, but as coming from the app
+     * invoking the Intent.  For this to work you must start the installer with
+     * startActivityForResult().
+     */
+    public static final String EXTRA_NOT_UNKNOWN_SOURCE
+            = "android.intent.extra.NOT_UNKNOWN_SOURCE";
+
+    /**
+     * Used as a boolean extra field with {@link #ACTION_INSTALL_PACKAGE} to install a
+     * package.  Tells the installer UI to skip the confirmation with the user
+     * if the .apk is replacing an existing one.
+     */
+    public static final String EXTRA_ALLOW_REPLACE
+            = "android.intent.extra.ALLOW_REPLACE";
+
+    /**
+     * Used as a boolean extra field with {@link #ACTION_INSTALL_PACKAGE} or
+     * {@link #ACTION_UNINSTALL_PACKAGE}.  Specifies that the installer UI should
+     * return to the application the result code of the install/uninstall.  The returned result
+     * code will be {@link android.app.Activity#RESULT_OK} on success or
+     * {@link android.app.Activity#RESULT_FIRST_USER} on failure.
+     */
+    public static final String EXTRA_RETURN_RESULT
+            = "android.intent.extra.RETURN_RESULT";
+
+    /**
+     * Package manager install result code.  @hide because result codes are not
+     * yet ready to be exposed.
+     */
+    public static final String EXTRA_INSTALL_RESULT
+            = "android.intent.extra.INSTALL_RESULT";
+
+    /**
+     * Activity Action: Launch application uninstaller.
+     * <p>
+     * Input: The data must be a package: URI whose scheme specific part is
+     * the package name of the current installed package to be uninstalled.
+     * You can optionally supply {@link #EXTRA_RETURN_RESULT}.
+     * <p>
+     * Output: If {@link #EXTRA_RETURN_RESULT}, returns whether the install
+     * succeeded.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_UNINSTALL_PACKAGE = "android.intent.action.UNINSTALL_PACKAGE";
 
     /**
      * A string associated with a {@link #ACTION_UPGRADE_SETUP} activity
@@ -1287,7 +1362,10 @@ public class Intent implements Parcelable, Cloneable {
      *
      * <p class="note">This is a protected intent that can only be sent
      * by the system.
+     *
+     * @deprecated This constant has never been used.
      */
+    @Deprecated
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_INSTALL = "android.intent.action.PACKAGE_INSTALL";
     /**
@@ -2380,20 +2458,8 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Used as a parcelable extra field in {@link #ACTION_APP_ERROR}, containing
      * the bug report.
-     *
-     * @hide
      */
     public static final String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
-
-    /**
-     * Used as a string extra field when sending an intent to PackageInstaller to install a
-     * package. Specifies the installer package name; this package will receive the
-     * {@link #ACTION_APP_ERROR} intent.
-     *
-     * @hide
-     */
-    public static final String EXTRA_INSTALLER_PACKAGE_NAME
-            = "android.intent.extra.INSTALLER_PACKAGE_NAME";
 
     /**
      * Used in the extra field in the remote intent. It's astring token passed with the

@@ -2918,6 +2918,76 @@ package android.app {
     method public abstract void onActivityStopped(android.app.Activity);
   }
 
+  public class ApplicationErrorReport implements android.os.Parcelable {
+    ctor public ApplicationErrorReport();
+    method public int describeContents();
+    method public void dump(android.util.Printer, java.lang.String);
+    method public static android.content.ComponentName getErrorReportReceiver(android.content.Context, java.lang.String, int);
+    method public void readFromParcel(android.os.Parcel);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator CREATOR;
+    field public static final int TYPE_ANR = 2; // 0x2
+    field public static final int TYPE_BATTERY = 3; // 0x3
+    field public static final int TYPE_CRASH = 1; // 0x1
+    field public static final int TYPE_NONE = 0; // 0x0
+    field public static final int TYPE_RUNNING_SERVICE = 5; // 0x5
+    field public android.app.ApplicationErrorReport.AnrInfo anrInfo;
+    field public android.app.ApplicationErrorReport.BatteryInfo batteryInfo;
+    field public android.app.ApplicationErrorReport.CrashInfo crashInfo;
+    field public java.lang.String installerPackageName;
+    field public java.lang.String packageName;
+    field public java.lang.String processName;
+    field public android.app.ApplicationErrorReport.RunningServiceInfo runningServiceInfo;
+    field public boolean systemApp;
+    field public long time;
+    field public int type;
+  }
+
+  public static class ApplicationErrorReport.AnrInfo {
+    ctor public ApplicationErrorReport.AnrInfo();
+    ctor public ApplicationErrorReport.AnrInfo(android.os.Parcel);
+    method public void dump(android.util.Printer, java.lang.String);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public java.lang.String activity;
+    field public java.lang.String cause;
+    field public java.lang.String info;
+  }
+
+  public static class ApplicationErrorReport.BatteryInfo {
+    ctor public ApplicationErrorReport.BatteryInfo();
+    ctor public ApplicationErrorReport.BatteryInfo(android.os.Parcel);
+    method public void dump(android.util.Printer, java.lang.String);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public java.lang.String checkinDetails;
+    field public long durationMicros;
+    field public java.lang.String usageDetails;
+    field public int usagePercent;
+  }
+
+  public static class ApplicationErrorReport.CrashInfo {
+    ctor public ApplicationErrorReport.CrashInfo();
+    ctor public ApplicationErrorReport.CrashInfo(java.lang.Throwable);
+    ctor public ApplicationErrorReport.CrashInfo(android.os.Parcel);
+    method public void dump(android.util.Printer, java.lang.String);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public java.lang.String exceptionClassName;
+    field public java.lang.String exceptionMessage;
+    field public java.lang.String stackTrace;
+    field public java.lang.String throwClassName;
+    field public java.lang.String throwFileName;
+    field public int throwLineNumber;
+    field public java.lang.String throwMethodName;
+  }
+
+  public static class ApplicationErrorReport.RunningServiceInfo {
+    ctor public ApplicationErrorReport.RunningServiceInfo();
+    ctor public ApplicationErrorReport.RunningServiceInfo(android.os.Parcel);
+    method public void dump(android.util.Printer, java.lang.String);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public long durationMillis;
+    field public java.lang.String serviceDetails;
+  }
+
   public class DatePickerDialog extends android.app.AlertDialog implements android.widget.DatePicker.OnDateChangedListener android.content.DialogInterface.OnClickListener {
     ctor public DatePickerDialog(android.content.Context, android.app.DatePickerDialog.OnDateSetListener, int, int, int);
     ctor public DatePickerDialog(android.content.Context, int, android.app.DatePickerDialog.OnDateSetListener, int, int, int);
@@ -5267,6 +5337,7 @@ package android.content {
     field public static final java.lang.String ACTION_AIRPLANE_MODE_CHANGED = "android.intent.action.AIRPLANE_MODE";
     field public static final java.lang.String ACTION_ALL_APPS = "android.intent.action.ALL_APPS";
     field public static final java.lang.String ACTION_ANSWER = "android.intent.action.ANSWER";
+    field public static final java.lang.String ACTION_APP_ERROR = "android.intent.action.APP_ERROR";
     field public static final java.lang.String ACTION_ATTACH_DATA = "android.intent.action.ATTACH_DATA";
     field public static final java.lang.String ACTION_BATTERY_CHANGED = "android.intent.action.BATTERY_CHANGED";
     field public static final java.lang.String ACTION_BATTERY_LOW = "android.intent.action.BATTERY_LOW";
@@ -5298,6 +5369,7 @@ package android.content {
     field public static final java.lang.String ACTION_INPUT_METHOD_CHANGED = "android.intent.action.INPUT_METHOD_CHANGED";
     field public static final java.lang.String ACTION_INSERT = "android.intent.action.INSERT";
     field public static final java.lang.String ACTION_INSERT_OR_EDIT = "android.intent.action.INSERT_OR_EDIT";
+    field public static final java.lang.String ACTION_INSTALL_PACKAGE = "android.intent.action.INSTALL_PACKAGE";
     field public static final java.lang.String ACTION_LOCALE_CHANGED = "android.intent.action.LOCALE_CHANGED";
     field public static final java.lang.String ACTION_MAIN = "android.intent.action.MAIN";
     field public static final java.lang.String ACTION_MANAGE_NETWORK_USAGE = "android.intent.action.MANAGE_NETWORK_USAGE";
@@ -5321,7 +5393,7 @@ package android.content {
     field public static final java.lang.String ACTION_PACKAGE_CHANGED = "android.intent.action.PACKAGE_CHANGED";
     field public static final java.lang.String ACTION_PACKAGE_DATA_CLEARED = "android.intent.action.PACKAGE_DATA_CLEARED";
     field public static final java.lang.String ACTION_PACKAGE_FIRST_LAUNCH = "android.intent.action.PACKAGE_FIRST_LAUNCH";
-    field public static final java.lang.String ACTION_PACKAGE_INSTALL = "android.intent.action.PACKAGE_INSTALL";
+    field public static final deprecated java.lang.String ACTION_PACKAGE_INSTALL = "android.intent.action.PACKAGE_INSTALL";
     field public static final java.lang.String ACTION_PACKAGE_REMOVED = "android.intent.action.PACKAGE_REMOVED";
     field public static final java.lang.String ACTION_PACKAGE_REPLACED = "android.intent.action.PACKAGE_REPLACED";
     field public static final java.lang.String ACTION_PACKAGE_RESTARTED = "android.intent.action.PACKAGE_RESTARTED";
@@ -5351,6 +5423,7 @@ package android.content {
     field public static final java.lang.String ACTION_UID_REMOVED = "android.intent.action.UID_REMOVED";
     field public static final deprecated java.lang.String ACTION_UMS_CONNECTED = "android.intent.action.UMS_CONNECTED";
     field public static final deprecated java.lang.String ACTION_UMS_DISCONNECTED = "android.intent.action.UMS_DISCONNECTED";
+    field public static final java.lang.String ACTION_UNINSTALL_PACKAGE = "android.intent.action.UNINSTALL_PACKAGE";
     field public static final java.lang.String ACTION_USER_PRESENT = "android.intent.action.USER_PRESENT";
     field public static final java.lang.String ACTION_VIEW = "android.intent.action.VIEW";
     field public static final java.lang.String ACTION_VOICE_COMMAND = "android.intent.action.VOICE_COMMAND";
@@ -5381,7 +5454,9 @@ package android.content {
     field public static final java.lang.String CATEGORY_UNIT_TEST = "android.intent.category.UNIT_TEST";
     field public static final android.os.Parcelable.Creator CREATOR;
     field public static final java.lang.String EXTRA_ALARM_COUNT = "android.intent.extra.ALARM_COUNT";
+    field public static final java.lang.String EXTRA_ALLOW_REPLACE = "android.intent.extra.ALLOW_REPLACE";
     field public static final java.lang.String EXTRA_BCC = "android.intent.extra.BCC";
+    field public static final java.lang.String EXTRA_BUG_REPORT = "android.intent.extra.BUG_REPORT";
     field public static final java.lang.String EXTRA_CC = "android.intent.extra.CC";
     field public static final deprecated java.lang.String EXTRA_CHANGED_COMPONENT_NAME = "android.intent.extra.changed_component_name";
     field public static final java.lang.String EXTRA_CHANGED_COMPONENT_NAME_LIST = "android.intent.extra.changed_component_name_list";
@@ -5397,12 +5472,15 @@ package android.content {
     field public static final java.lang.String EXTRA_DONT_KILL_APP = "android.intent.extra.DONT_KILL_APP";
     field public static final java.lang.String EXTRA_EMAIL = "android.intent.extra.EMAIL";
     field public static final java.lang.String EXTRA_INITIAL_INTENTS = "android.intent.extra.INITIAL_INTENTS";
+    field public static final java.lang.String EXTRA_INSTALLER_PACKAGE_NAME = "android.intent.extra.INSTALLER_PACKAGE_NAME";
     field public static final java.lang.String EXTRA_INTENT = "android.intent.extra.INTENT";
     field public static final java.lang.String EXTRA_KEY_EVENT = "android.intent.extra.KEY_EVENT";
     field public static final java.lang.String EXTRA_LOCAL_ONLY = "android.intent.extra.LOCAL_ONLY";
+    field public static final java.lang.String EXTRA_NOT_UNKNOWN_SOURCE = "android.intent.extra.NOT_UNKNOWN_SOURCE";
     field public static final java.lang.String EXTRA_PHONE_NUMBER = "android.intent.extra.PHONE_NUMBER";
     field public static final java.lang.String EXTRA_REMOTE_INTENT_TOKEN = "android.intent.extra.remote_intent_token";
     field public static final java.lang.String EXTRA_REPLACING = "android.intent.extra.REPLACING";
+    field public static final java.lang.String EXTRA_RETURN_RESULT = "android.intent.extra.RETURN_RESULT";
     field public static final java.lang.String EXTRA_SHORTCUT_ICON = "android.intent.extra.shortcut.ICON";
     field public static final java.lang.String EXTRA_SHORTCUT_ICON_RESOURCE = "android.intent.extra.shortcut.ICON_RESOURCE";
     field public static final java.lang.String EXTRA_SHORTCUT_INTENT = "android.intent.extra.shortcut.INTENT";
