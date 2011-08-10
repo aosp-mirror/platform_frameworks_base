@@ -211,6 +211,11 @@ protected:
     // freeAllBuffers frees the resources (both GraphicBuffer and EGLImage) for
     // all slots.
     void freeAllBuffersLocked();
+
+    // drainQueueLocked drains the buffer queue if we're in synchronous mode
+    // returns immediately otherwise.
+    void drainQueueLocked();
+
     static bool isExternalFormat(uint32_t format);
 
 private:

@@ -158,7 +158,6 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
         LOGE("setBufferCount: SurfaceTexture is not connected!");
         return NO_INIT;
     }
-
     if (bufferCount > NUM_BUFFER_SLOTS) {
         LOGE("setBufferCount: bufferCount larger than slots available");
         return BAD_VALUE;
@@ -236,15 +235,6 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         uint32_t format, uint32_t usage) {
     LOGV("SurfaceTexture::dequeueBuffer");
 
-    if (mAbandoned) {
-        LOGE("dequeueBuffer: SurfaceTexture has been abandoned!");
-        return NO_INIT;
-    }
-    if (mConnectedApi == NO_CONNECTED_API) {
-        LOGE("dequeueBuffer: SurfaceTexture is not connected!");
-        return NO_INIT;
-    }
-
     if ((w && !h) || (!w && h)) {
         LOGE("dequeueBuffer: invalid size: w=%u, h=%u", w, h);
         return BAD_VALUE;
@@ -258,10 +248,19 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
     int dequeuedCount = 0;
     bool tryAgain = true;
     while (tryAgain) {
+        if (mAbandoned) {
+            LOGE("dequeueBuffer: SurfaceTexture has been abandoned!");
+            return NO_INIT;
+        }
+        if (mConnectedApi == NO_CONNECTED_API) {
+            LOGE("dequeueBuffer: SurfaceTexture is not connected!");
+            return NO_INIT;
+        }
+
         // We need to wait for the FIFO to drain if the number of buffer
         // needs to change.
         //
-        // The condition "number of buffer needs to change" is true if
+        // The condition "number of buffers needs to change" is true if
         // - the client doesn't care about how many buffers there are
         // - AND the actual number of buffer is different from what was
         //   set in the last setBufferCountServer()
@@ -273,29 +272,22 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         // As long as this condition is true AND the FIFO is not empty, we
         // wait on mDequeueCondition.
 
-        int minBufferCountNeeded = mSynchronousMode ?
+        const int minBufferCountNeeded = mSynchronousMode ?
                 MIN_SYNC_BUFFER_SLOTS : MIN_ASYNC_BUFFER_SLOTS;
 
-        if (!mClientBufferCount &&
+        const bool numberOfBuffersNeedsToChange = !mClientBufferCount &&
                 ((mServerBufferCount != mBufferCount) ||
-                        (mServerBufferCount < minBufferCountNeeded))) {
+                        (mServerBufferCount < minBufferCountNeeded));
+
+        if (!mQueue.isEmpty() && numberOfBuffersNeedsToChange) {
             // wait for the FIFO to drain
-            while (!mQueue.isEmpty()) {
-                mDequeueCondition.wait(mMutex);
-                if (mAbandoned) {
-                    LOGE("dequeueBuffer: SurfaceTexture was abandoned while "
-                            "blocked!");
-                    return NO_INIT;
-                }
-            }
-            minBufferCountNeeded = mSynchronousMode ?
-                    MIN_SYNC_BUFFER_SLOTS : MIN_ASYNC_BUFFER_SLOTS;
+            mDequeueCondition.wait(mMutex);
+            // NOTE: we continue here because we need to reevaluate our
+            // whole state (eg: we could be abandoned or disconnected)
+            continue;
         }
 
-
-        if (!mClientBufferCount &&
-                ((mServerBufferCount != mBufferCount) ||
-                        (mServerBufferCount < minBufferCountNeeded))) {
+        if (numberOfBuffersNeedsToChange) {
             // here we're guaranteed that mQueue is empty
             freeAllBuffersLocked();
             mBufferCount = mServerBufferCount;
@@ -426,9 +418,7 @@ status_t SurfaceTexture::setSynchronousMode(bool enabled) {
 
     if (!enabled) {
         // going to asynchronous mode, drain the queue
-        while (mSynchronousMode != enabled && !mQueue.isEmpty()) {
-            mDequeueCondition.wait(mMutex);
-        }
+        drainQueueLocked();
     }
 
     if (mSynchronousMode != enabled) {
@@ -627,7 +617,12 @@ status_t SurfaceTexture::disconnect(int api) {
         case NATIVE_WINDOW_API_CAMERA:
             if (mConnectedApi == api) {
                 mConnectedApi = NO_CONNECTED_API;
-                freeAllBuffersLocked();
+                if (mQueue.isEmpty()) {
+                    // if the queue is not empty, we need to wait for it
+                    // to drain before we can free all buffers. This is
+                    // done in updateTexImage().
+                    freeAllBuffersLocked();
+                }
             } else {
                 LOGE("disconnect: connected to another api (cur=%d, req=%d)",
                         mConnectedApi, api);
@@ -890,6 +885,12 @@ void SurfaceTexture::freeAllBuffersLocked() {
     }
 }
 
+void SurfaceTexture::drainQueueLocked() {
+    while (mSynchronousMode && !mQueue.isEmpty()) {
+        mDequeueCondition.wait(mMutex);
+    }
+}
+
 EGLImageKHR SurfaceTexture::createImage(EGLDisplay dpy,
         const sp<GraphicBuffer>& graphicBuffer) {
     EGLClientBuffer cbuf = (EGLClientBuffer)graphicBuffer->getNativeBuffer();
@@ -959,6 +960,7 @@ int SurfaceTexture::query(int what, int* outValue)
 
 void SurfaceTexture::abandon() {
     Mutex::Autolock lock(mMutex);
+    // clear the queue
     freeAllBuffersLocked();
     mAbandoned = true;
     mCurrentTextureBuf.clear();
