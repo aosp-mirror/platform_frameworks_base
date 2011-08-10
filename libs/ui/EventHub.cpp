@@ -94,11 +94,13 @@ static inline const char* toString(bool value) {
 
 EventHub::device_t::device_t(int32_t _id, const char* _path, const char* name)
     : id(_id), path(_path), name(name), classes(0)
-    , keyBitmask(NULL), layoutMap(new KeyLayoutMap()), fd(-1), next(NULL) {
+    , keyBitmask(NULL), switchBitmask(NULL)
+    , layoutMap(new KeyLayoutMap()), fd(-1), next(NULL) {
 }
 
 EventHub::device_t::~device_t() {
     delete [] keyBitmask;
+    delete [] switchBitmask;
     delete layoutMap;
 }
 
@@ -243,11 +245,14 @@ int32_t EventHub::getSwitchState(int32_t deviceId, int32_t sw) const {
 }
 
 int32_t EventHub::getSwitchStateLocked(device_t* device, int32_t sw) const {
-    uint8_t sw_bitmask[sizeof_bit_array(SW_MAX + 1)];
-    memset(sw_bitmask, 0, sizeof(sw_bitmask));
-    if (ioctl(device->fd,
-               EVIOCGSW(sizeof(sw_bitmask)), sw_bitmask) >= 0) {
-        return test_bit(sw, sw_bitmask) ? AKEY_STATE_DOWN : AKEY_STATE_UP;
+    if (device->switchBitmask != NULL
+            && test_bit(sw, device->switchBitmask)) {
+        uint8_t sw_bitmask[sizeof_bit_array(SW_MAX + 1)];
+        memset(sw_bitmask, 0, sizeof(sw_bitmask));
+        if (ioctl(device->fd,
+                   EVIOCGSW(sizeof(sw_bitmask)), sw_bitmask) >= 0) {
+            return test_bit(sw, sw_bitmask) ? AKEY_STATE_DOWN : AKEY_STATE_UP;
+        }
     }
     return AKEY_STATE_UNKNOWN;
 }
@@ -759,6 +764,14 @@ int EventHub::openDevice(const char *deviceName) {
     }
     if (hasSwitches) {
         device->classes |= INPUT_DEVICE_CLASS_SWITCH;
+        device->switchBitmask = new uint8_t[sizeof(sw_bitmask)];
+        if (device->switchBitmask != NULL) {
+            memcpy(device->switchBitmask, sw_bitmask, sizeof(sw_bitmask));
+        } else {
+            delete device;
+            LOGE("out of memory allocating switch bitmask");
+            return -1;
+        }
     }
 #endif
 
