@@ -442,9 +442,17 @@ sp<MediaSource> OMXCodec::Create(
     sp<OMXCodecObserver> observer = new OMXCodecObserver;
     IOMX::node_id node = 0;
 
-    const char *componentName;
     for (size_t i = 0; i < matchingCodecs.size(); ++i) {
-        componentName = matchingCodecs[i].string();
+        const char *componentNameBase = matchingCodecs[i].string();
+        const char *componentName = componentNameBase;
+
+        AString tmp;
+        if (flags & kUseSecureInputBuffers) {
+            tmp = componentNameBase;
+            tmp.append(".secure");
+
+            componentName = tmp.c_str();
+        }
 
         if (createEncoder) {
             sp<MediaSource> softwareCodec =
@@ -459,7 +467,7 @@ sp<MediaSource> OMXCodec::Create(
 
         LOGV("Attempting to allocate OMX node '%s'", componentName);
 
-        uint32_t quirks = getComponentQuirks(componentName, createEncoder);
+        uint32_t quirks = getComponentQuirks(componentNameBase, createEncoder);
 
         if (!createEncoder
                 && (quirks & kOutputBuffersAreUnreadable)
