@@ -128,10 +128,7 @@ int main(int argc, const char* const argv[])
     mArgLen--;
 
     AppRuntime runtime;
-    const char *arg;
-    const char *argv0;
-
-    argv0 = argv[0];
+    const char* argv0 = argv[0];
 
     // Process command line arguments
     // ignore argv[0]
@@ -142,39 +139,53 @@ int main(int argc, const char* const argv[])
     
     int i = runtime.addVmArguments(argc, argv);
 
-    // Next arg is parent directory
-    if (i < argc) {
-        runtime.mParentDir = argv[i++];
+    // Parse runtime arguments.  Stop at first unrecognized option.
+    bool zygote = false;
+    bool startSystemServer = false;
+    bool application = false;
+    const char* parentDir = NULL;
+    const char* niceName = NULL;
+    const char* className = NULL;
+    while (i < argc) {
+        const char* arg = argv[i++];
+        if (!parentDir) {
+            parentDir = arg;
+        } else if (strcmp(arg, "--zygote") == 0) {
+            zygote = true;
+            niceName = "zygote";
+        } else if (strcmp(arg, "--start-system-server") == 0) {
+            startSystemServer = true;
+        } else if (strcmp(arg, "--application") == 0) {
+            application = true;
+        } else if (strncmp(arg, "--nice-name=", 12) == 0) {
+            niceName = arg + 12;
+        } else {
+            className = arg;
+            break;
+        }
     }
 
-    // Next arg is startup classname or "--zygote"
-    if (i < argc) {
-        arg = argv[i++];
-        if (0 == strcmp("--zygote", arg)) {
-            bool startSystemServer = (i < argc) ? 
-                    strcmp(argv[i], "--start-system-server") == 0 : false;
-            setArgv0(argv0, "zygote");
-            set_process_name("zygote");
-            runtime.start("com.android.internal.os.ZygoteInit",
-                startSystemServer);
-        } else {
-            set_process_name(argv0);
+    if (niceName && *niceName) {
+        setArgv0(argv0, niceName);
+        set_process_name(niceName);
+    }
 
-            runtime.mClassName = arg;
+    runtime.mParentDir = parentDir;
 
-            // Remainder of args get passed to startup class main()
-            runtime.mArgC = argc-i;
-            runtime.mArgV = argv+i;
-
-            LOGV("App process is starting with pid=%d, class=%s.\n",
-                 getpid(), runtime.getClassName());
-            runtime.start();
-        }
+    if (zygote) {
+        runtime.start("com.android.internal.os.ZygoteInit",
+                startSystemServer ? "start-system-server" : "");
+    } else if (className) {
+        // Remainder of args get passed to startup class main()
+        runtime.mClassName = className;
+        runtime.mArgC = argc - i;
+        runtime.mArgV = argv + i;
+        runtime.start("com.android.internal.os.RuntimeInit",
+                application ? "application" : "tool");
     } else {
         LOG_ALWAYS_FATAL("app_process: no class name or --zygote supplied.");
         fprintf(stderr, "Error: no class name or --zygote supplied.\n");
         app_usage();
         return 10;
     }
-
 }

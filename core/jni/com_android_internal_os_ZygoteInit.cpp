@@ -145,6 +145,10 @@ static void com_android_internal_os_ZygoteInit_reopenStdio(JNIEnv* env,
 static void com_android_internal_os_ZygoteInit_closeDescriptor(JNIEnv* env, 
         jobject clazz, jobject descriptor)
 {
+    if (!descriptor) {
+        return;
+    }
+
     int fd;
     int err;
 
@@ -327,6 +331,30 @@ static jobject com_android_internal_os_ZygoteInit_createFileDescriptor (
     return jniCreateFileDescriptor(env, fd);
 }
 
+static jint com_android_internal_os_ZygoteInit_getFDFromFileDescriptor (
+        JNIEnv *env, jobject clazz, jobject fd)
+{
+    return jniGetFDFromFileDescriptor(env, fd);
+}
+
+static void com_android_internal_os_ZygoteInit_pipe (
+        JNIEnv *env, jobject clazz, jobjectArray outFds)
+{
+    int fds[2];
+    if (pipe(fds) < 0) {
+        jniThrowIOException(env, errno);
+        return;
+    }
+
+    for (int i = 0; i < 2; i++) {
+        jobject fdObj = jniCreateFileDescriptor(env, fds[i]);
+        if  (env->ExceptionCheck()) {
+            return;
+        }
+        env->SetObjectArrayElement(outFds, i, fdObj);
+    }
+}
+
 /*
  * JNI registration.
  */
@@ -355,7 +383,11 @@ static JNINativeMethod gMethods[] = {
     { "selectReadable", "([Ljava/io/FileDescriptor;)I",
         (void *) com_android_internal_os_ZygoteInit_selectReadable },
     { "createFileDescriptor", "(I)Ljava/io/FileDescriptor;",
-        (void *) com_android_internal_os_ZygoteInit_createFileDescriptor }
+        (void *) com_android_internal_os_ZygoteInit_createFileDescriptor },
+    { "getFDFromFileDescriptor", "(Ljava/io/FileDescriptor;)I",
+        (void *) com_android_internal_os_ZygoteInit_getFDFromFileDescriptor },
+    { "pipe", "([Ljava/io/FileDescriptor;)V",
+        (void *) com_android_internal_os_ZygoteInit_pipe },
 };
 int register_com_android_internal_os_ZygoteInit(JNIEnv* env)
 {

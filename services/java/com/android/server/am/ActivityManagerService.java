@@ -203,6 +203,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     // before we decide it's never going to come up for real.
     static final int PROC_START_TIMEOUT = 10*1000;
 
+    // How long we wait for a launched process to attach to the activity manager
+    // before we decide it's never going to come up for real, when the process was
+    // started with a wrapper for instrumentation (such as Valgrind) because it
+    // could take much longer than usual.
+    static final int PROC_START_TIMEOUT_WITH_WRAPPER = 300*1000;
+
     // How long to wait after going idle before forcing apps to GC.
     static final int GC_TIMEOUT = 5*1000;
 
@@ -841,14 +847,6 @@ public final class ActivityManagerService extends ActivityManagerNative
      * Current sequence id for process LRU updating.
      */
     int mLruSeq = 0;
-    
-    /**
-     * Set to true if the ANDROID_SIMPLE_PROCESS_MANAGEMENT envvar
-     * is set, indicating the user wants processes started in such a way
-     * that they can use ANDROID_PROCESS_WRAPPER and know what will be
-     * running in each process (thus no pre-initialized process, etc).
-     */
-    boolean mSimpleProcessManagement = false;
 
     /**
      * System monitoring: number of processes that died since the last
@@ -1395,15 +1393,6 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private ActivityManagerService() {
-        String v = System.getenv("ANDROID_SIMPLE_PROCESS_MANAGEMENT");
-        if (v != null && Integer.getInteger(v) != 0) {
-            mSimpleProcessManagement = true;
-        }
-        v = System.getenv("ANDROID_DEBUG_APP");
-        if (v != null) {
-            mSimpleProcessManagement = true;
-        }
-
         Slog.i(TAG, "Memory class: " + ActivityManager.staticGetMemoryClass());
         
         File dataDir = Environment.getDataDirectory();
@@ -1872,9 +1861,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             if ("1".equals(SystemProperties.get("debug.assert"))) {
                 debugFlags |= Zygote.DEBUG_ENABLE_ASSERT;
             }
-            int pid = Process.start("android.app.ActivityThread",
-                    mSimpleProcessManagement ? app.processName : null, uid, uid,
-                    gids, debugFlags, null);
+
+            // Start the process.  It will either succeed and return a result containing
+            // the PID of the new process, or else throw a RuntimeException.
+            Process.ProcessStartResult startResult = Process.start("android.app.ActivityThread",
+                    app.processName, uid, uid, gids, debugFlags, null);
             BatteryStatsImpl bs = app.batteryStats.getBatteryStats();
             synchronized (bs) {
                 if (bs.isOnBattery()) {
@@ -1882,12 +1873,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
             
-            EventLog.writeEvent(EventLogTags.AM_PROC_START, pid, uid,
+            EventLog.writeEvent(EventLogTags.AM_PROC_START, startResult.pid, uid,
                     app.processName, hostingType,
                     hostingNameStr != null ? hostingNameStr : "");
             
             if (app.persistent) {
-                Watchdog.getInstance().processStarted(app.processName, pid);
+                Watchdog.getInstance().processStarted(app.processName, startResult.pid);
             }
             
             StringBuilder buf = mStringBuilder;
@@ -1901,7 +1892,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 buf.append(hostingNameStr);
             }
             buf.append(": pid=");
-            buf.append(pid);
+            buf.append(startResult.pid);
             buf.append(" uid=");
             buf.append(uid);
             buf.append(" gids={");
@@ -1914,26 +1905,22 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
             buf.append("}");
             Slog.i(TAG, buf.toString());
-            if (pid == 0 || pid == MY_PID) {
+            if (startResult.pid == 0 || startResult.pid == MY_PID) {
                 // Processes are being emulated with threads.
                 app.pid = MY_PID;
                 app.removed = false;
                 mStartingProcesses.add(app);
-            } else if (pid > 0) {
-                app.pid = pid;
+            } else {
+                app.pid = startResult.pid;
+                app.usingWrapper = startResult.usingWrapper;
                 app.removed = false;
                 synchronized (mPidsSelfLocked) {
-                    this.mPidsSelfLocked.put(pid, app);
+                    this.mPidsSelfLocked.put(startResult.pid, app);
                     Message msg = mHandler.obtainMessage(PROC_START_TIMEOUT_MSG);
                     msg.obj = app;
-                    mHandler.sendMessageDelayed(msg, PROC_START_TIMEOUT);
+                    mHandler.sendMessageDelayed(msg, startResult.usingWrapper
+                            ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
                 }
-            } else {
-                app.pid = 0;
-                RuntimeException e = new RuntimeException(
-                        "Failure starting process " + app.processName
-                        + ": returned pid=" + pid);
-                Slog.e(TAG, e.getMessage(), e);
             }
         } catch (RuntimeException e) {
             // XXX do better error recovery.

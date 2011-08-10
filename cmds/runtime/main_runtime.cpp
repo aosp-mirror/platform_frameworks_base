@@ -497,8 +497,8 @@ int main(int argc, char* const argv[])
     } else {
 #ifndef HAVE_ANDROID_OS
         QuickRuntime* runt = new QuickRuntime();
-        runt->start("com/android/server/SystemServer", 
-                    false /* spontaneously fork system server from zygote */);
+        runt->start("com/android/server/SystemServer",
+                    "" /* spontaneously fork system server from zygote */);
 #endif
     }
 
