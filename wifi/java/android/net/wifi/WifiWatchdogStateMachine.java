@@ -83,7 +83,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final long DEFAULT_WALLED_GARDEN_INTERVAL_MS = 30 * 60 * 1000;
 
     private static final int DEFAULT_MAX_SSID_BLACKLISTS = 7;
-    private static final int DEFAULT_NUM_DNS_PINGS = 5;
+    private static final int DEFAULT_NUM_DNS_PINGS = 15; // Multiple pings to detect setup issues
     private static final int DEFAULT_MIN_DNS_RESPONSES = 3;
 
     private static final int DEFAULT_DNS_PING_TIMEOUT_MS = 2000;
@@ -94,7 +94,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final String DEFAULT_WALLED_GARDEN_URL =
             "http://clients3.google.com/generate_204";
     private static final int WALLED_GARDEN_SOCKET_TIMEOUT_MS = 10000;
-    private static final int DNS_INTRATEST_PING_INTERVAL = 20;
+    private static final int DNS_INTRATEST_PING_INTERVAL = 200; // Long delay to detect setup issues
 
     private static final int BASE = Protocol.BASE_WIFI_WATCHDOG;
 
