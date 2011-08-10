@@ -24,13 +24,12 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.PatternMatcher;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
+import android.util.Slog;
 import android.util.TypedValue;
 import com.android.internal.util.XmlUtils;
 import org.xmlpull.v1.XmlPullParser;
@@ -48,6 +47,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 /**
  * Package archive parsing
@@ -55,6 +55,10 @@ import java.util.jar.JarFile;
  * {@hide}
  */
 public class PackageParser {
+    private static final boolean DEBUG_JAR = false;
+    private static final boolean DEBUG_PARSER = false;
+    private static final boolean DEBUG_BACKUP = false;
+
     /** @hide */
     public static class NewPermissionInfo {
         public final String name;
@@ -342,10 +346,10 @@ public class PackageParser {
             is.close();
             return je != null ? je.getCertificates() : null;
         } catch (IOException e) {
-            Log.w(TAG, "Exception reading " + je.getName() + " in "
+            Slog.w(TAG, "Exception reading " + je.getName() + " in "
                     + jarFile.getName(), e);
         } catch (RuntimeException e) {
-            Log.w(TAG, "Exception reading " + je.getName() + " in "
+            Slog.w(TAG, "Exception reading " + je.getName() + " in "
                     + jarFile.getName(), e);
         }
         return null;
@@ -369,7 +373,7 @@ public class PackageParser {
 
         mArchiveSourcePath = sourceFile.getPath();
         if (!sourceFile.isFile()) {
-            Log.w(TAG, "Skipping dir: " + mArchiveSourcePath);
+            Slog.w(TAG, "Skipping dir: " + mArchiveSourcePath);
             mParseError = PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
             return null;
         }
@@ -378,14 +382,14 @@ public class PackageParser {
             if ((flags&PARSE_IS_SYSTEM) == 0) {
                 // We expect to have non-.apk files in the system dir,
                 // so don't warn about them.
-                Log.w(TAG, "Skipping non-package file: " + mArchiveSourcePath);
+                Slog.w(TAG, "Skipping non-package file: " + mArchiveSourcePath);
             }
             mParseError = PackageManager.INSTALL_PARSE_FAILED_NOT_APK;
             return null;
         }
 
-        if ((flags&PARSE_CHATTY) != 0 && false) Log.d(
-            TAG, "Scanning package: " + mArchiveSourcePath);
+        if (DEBUG_JAR)
+            Slog.d(TAG, "Scanning package: " + mArchiveSourcePath);
 
         XmlResourceParser parser = null;
         AssetManager assmgr = null;
@@ -401,10 +405,10 @@ public class PackageParser {
                 parser = assmgr.openXmlResourceParser(cookie, "AndroidManifest.xml");
                 assetError = false;
             } else {
-                Log.w(TAG, "Failed adding asset path:"+mArchiveSourcePath);
+                Slog.w(TAG, "Failed adding asset path:"+mArchiveSourcePath);
             }
         } catch (Exception e) {
-            Log.w(TAG, "Unable to read AndroidManifest.xml of "
+            Slog.w(TAG, "Unable to read AndroidManifest.xml of "
                     + mArchiveSourcePath, e);
         }
         if (assetError) {
@@ -426,9 +430,9 @@ public class PackageParser {
 
         if (pkg == null) {
             if (errorException != null) {
-                Log.w(TAG, mArchiveSourcePath, errorException);
+                Slog.w(TAG, mArchiveSourcePath, errorException);
             } else {
-                Log.w(TAG, mArchiveSourcePath + " (at "
+                Slog.w(TAG, mArchiveSourcePath + " (at "
                         + parser.getPositionDescription()
                         + "): " + errorText[0]);
             }
@@ -483,20 +487,20 @@ public class PackageParser {
                 JarEntry jarEntry = jarFile.getJarEntry("AndroidManifest.xml");
                 certs = loadCertificates(jarFile, jarEntry, readBuffer);
                 if (certs == null) {
-                    Log.e(TAG, "Package " + pkg.packageName
+                    Slog.e(TAG, "Package " + pkg.packageName
                             + " has no certificates at entry "
                             + jarEntry.getName() + "; ignoring!");
                     jarFile.close();
                     mParseError = PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
                     return false;
                 }
-                if (false) {
-                    Log.i(TAG, "File " + mArchiveSourcePath + ": entry=" + jarEntry
+                if (DEBUG_JAR) {
+                    Slog.i(TAG, "File " + mArchiveSourcePath + ": entry=" + jarEntry
                             + " certs=" + (certs != null ? certs.length : 0));
                     if (certs != null) {
                         final int N = certs.length;
                         for (int i=0; i<N; i++) {
-                            Log.i(TAG, "  Public key: "
+                            Slog.i(TAG, "  Public key: "
                                     + certs[i].getPublicKey().getEncoded()
                                     + " " + certs[i].getPublicKey());
                         }
@@ -504,20 +508,21 @@ public class PackageParser {
                 }
 
             } else {
-                Enumeration entries = jarFile.entries();
+                Enumeration<JarEntry> entries = jarFile.entries();
                 while (entries.hasMoreElements()) {
-                    JarEntry je = (JarEntry)entries.nextElement();
+                    final JarEntry je = entries.nextElement();
                     if (je.isDirectory()) continue;
                     if (je.getName().startsWith("META-INF/")) continue;
-                    Certificate[] localCerts = loadCertificates(jarFile, je,
+
+                    final Certificate[] localCerts = loadCertificates(jarFile, je,
                             readBuffer);
-                    if (false) {
-                        Log.i(TAG, "File " + mArchiveSourcePath + " entry " + je.getName()
+                    if (DEBUG_JAR) {
+                        Slog.i(TAG, "File " + mArchiveSourcePath + " entry " + je.getName()
                                 + ": certs=" + certs + " ("
                                 + (certs != null ? certs.length : 0) + ")");
                     }
                     if (localCerts == null) {
-                        Log.e(TAG, "Package " + pkg.packageName
+                        Slog.e(TAG, "Package " + pkg.packageName
                                 + " has no certificates at entry "
                                 + je.getName() + "; ignoring!");
                         jarFile.close();
@@ -537,7 +542,7 @@ public class PackageParser {
                                 }
                             }
                             if (!found || certs.length != localCerts.length) {
-                                Log.e(TAG, "Package " + pkg.packageName
+                                Slog.e(TAG, "Package " + pkg.packageName
                                         + " has mismatched certificates at entry "
                                         + je.getName() + "; ignoring!");
                                 jarFile.close();
@@ -562,21 +567,21 @@ public class PackageParser {
                             certs[i].getEncoded());
                 }
             } else {
-                Log.e(TAG, "Package " + pkg.packageName
+                Slog.e(TAG, "Package " + pkg.packageName
                         + " has no certificates; ignoring!");
                 mParseError = PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
                 return false;
             }
         } catch (CertificateEncodingException e) {
-            Log.w(TAG, "Exception reading " + mArchiveSourcePath, e);
+            Slog.w(TAG, "Exception reading " + mArchiveSourcePath, e);
             mParseError = PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
             return false;
         } catch (IOException e) {
-            Log.w(TAG, "Exception reading " + mArchiveSourcePath, e);
+            Slog.w(TAG, "Exception reading " + mArchiveSourcePath, e);
             mParseError = PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
             return false;
         } catch (RuntimeException e) {
-            Log.w(TAG, "Exception reading " + mArchiveSourcePath, e);
+            Slog.w(TAG, "Exception reading " + mArchiveSourcePath, e);
             mParseError = PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION;
             return false;
         }
@@ -607,7 +612,7 @@ public class PackageParser {
             parser = assmgr.openXmlResourceParser(cookie, "AndroidManifest.xml");
         } catch (Exception e) {
             if (assmgr != null) assmgr.close();
-            Log.w(TAG, "Unable to read AndroidManifest.xml of "
+            Slog.w(TAG, "Unable to read AndroidManifest.xml of "
                     + packageFilePath, e);
             return null;
         }
@@ -617,15 +622,15 @@ public class PackageParser {
         try {
             packageLite = parsePackageLite(parser, attrs, flags, errors);
         } catch (IOException e) {
-            Log.w(TAG, packageFilePath, e);
+            Slog.w(TAG, packageFilePath, e);
         } catch (XmlPullParserException e) {
-            Log.w(TAG, packageFilePath, e);
+            Slog.w(TAG, packageFilePath, e);
         } finally {
             if (parser != null) parser.close();
             if (assmgr != null) assmgr.close();
         }
         if (packageLite == null) {
-            Log.e(TAG, "parsePackageLite error: " + errors[0]);
+            Slog.e(TAG, "parsePackageLite error: " + errors[0]);
             return null;
         }
         return packageLite;
@@ -662,17 +667,17 @@ public class PackageParser {
             throws IOException, XmlPullParserException {
 
         int type;
-        while ((type=parser.next()) != parser.START_TAG
-                   && type != parser.END_DOCUMENT) {
+        while ((type = parser.next()) != XmlPullParser.START_TAG
+                && type != XmlPullParser.END_DOCUMENT) {
             ;
         }
 
-        if (type != parser.START_TAG) {
+        if (type != XmlPullParser.START_TAG) {
             outError[0] = "No start tag found";
             return null;
         }
-        if ((flags&PARSE_CHATTY) != 0 && false) Log.v(
-            TAG, "Root element name: '" + parser.getName() + "'");
+        if (DEBUG_PARSER)
+            Slog.v(TAG, "Root element name: '" + parser.getName() + "'");
         if (!parser.getName().equals("manifest")) {
             outError[0] = "No <manifest> tag";
             return null;
@@ -697,17 +702,17 @@ public class PackageParser {
             throws IOException, XmlPullParserException {
 
         int type;
-        while ((type=parser.next()) != parser.START_TAG
-                   && type != parser.END_DOCUMENT) {
+        while ((type = parser.next()) != XmlPullParser.START_TAG
+                && type != XmlPullParser.END_DOCUMENT) {
             ;
         }
 
-        if (type != parser.START_TAG) {
+        if (type != XmlPullParser.START_TAG) {
             outError[0] = "No start tag found";
             return null;
         }
-        if ((flags&PARSE_CHATTY) != 0 && false) Log.v(
-            TAG, "Root element name: '" + parser.getName() + "'");
+        if (DEBUG_PARSER)
+            Slog.v(TAG, "Root element name: '" + parser.getName() + "'");
         if (!parser.getName().equals("manifest")) {
             outError[0] = "No <manifest> tag";
             return null;
@@ -806,9 +811,9 @@ public class PackageParser {
         int anyDensity = 1;
         
         int outerDepth = parser.getDepth();
-        while ((type=parser.next()) != parser.END_DOCUMENT
-               && (type != parser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == parser.END_TAG || type == parser.TEXT) {
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
                 continue;
             }
 
@@ -820,7 +825,7 @@ public class PackageParser {
                         mParseError = PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
                         return null;
                     } else {
-                        Log.w(TAG, "<manifest> has more than one <application>");
+                        Slog.w(TAG, "<manifest> has more than one <application>");
                         XmlUtils.skipCurrentTag(parser);
                         continue;
                     }
@@ -1118,7 +1123,7 @@ public class PackageParser {
                 return null;
 
             } else {
-                Log.w(TAG, "Unknown element under <manifest>: " + parser.getName()
+                Slog.w(TAG, "Unknown element under <manifest>: " + parser.getName()
                         + " at " + mArchiveSourcePath + " "
                         + parser.getPositionDescription());
                 XmlUtils.skipCurrentTag(parser);
@@ -1152,7 +1157,7 @@ public class PackageParser {
             }
         }
         if (implicitPerms != null) {
-            Log.i(TAG, implicitPerms.toString());
+            Slog.i(TAG, implicitPerms.toString());
         }
         
         if (supportsSmallScreens < 0 || (supportsSmallScreens > 0
@@ -1504,8 +1509,8 @@ public class PackageParser {
                     com.android.internal.R.styleable.AndroidManifestApplication_backupAgent, 0);
             if (backupAgent != null) {
                 ai.backupAgentName = buildClassName(pkgName, backupAgent, outError);
-                if (false) {
-                    Log.v(TAG, "android:backupAgent = " + ai.backupAgentName
+                if (DEBUG_BACKUP) {
+                    Slog.v(TAG, "android:backupAgent = " + ai.backupAgentName
                             + " from " + pkgName + "+" + backupAgent);
                 }
 
@@ -1663,9 +1668,9 @@ public class PackageParser {
         final int innerDepth = parser.getDepth();
 
         int type;
-        while ((type=parser.next()) != parser.END_DOCUMENT
-               && (type != parser.END_TAG || parser.getDepth() > innerDepth)) {
-            if (type == parser.END_TAG || type == parser.TEXT) {
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > innerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
                 continue;
             }
 
@@ -1767,7 +1772,7 @@ public class PackageParser {
 
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Unknown element under <application>: " + tagName
+                    Slog.w(TAG, "Unknown element under <application>: " + tagName
                             + " at " + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
@@ -1990,7 +1995,7 @@ public class PackageParser {
                     return null;
                 }
                 if (intent.countActions() == 0) {
-                    Log.w(TAG, "No actions in intent filter at "
+                    Slog.w(TAG, "No actions in intent filter at "
                             + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                 } else {
@@ -2003,25 +2008,26 @@ public class PackageParser {
                 }
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
+                    Slog.w(TAG, "Problem in package " + mArchiveSourcePath + ":");
                     if (receiver) {
-                        Log.w(TAG, "Unknown element under <receiver>: " + parser.getName()
+                        Slog.w(TAG, "Unknown element under <receiver>: " + parser.getName()
                                 + " at " + mArchiveSourcePath + " "
                                 + parser.getPositionDescription());
                     } else {
-                        Log.w(TAG, "Unknown element under <activity>: " + parser.getName()
+                        Slog.w(TAG, "Unknown element under <activity>: " + parser.getName()
                                 + " at " + mArchiveSourcePath + " "
                                 + parser.getPositionDescription());
                     }
                     XmlUtils.skipCurrentTag(parser);
                     continue;
-                }
-                if (receiver) {
-                    outError[0] = "Bad element under <receiver>: " + parser.getName();
                 } else {
-                    outError[0] = "Bad element under <activity>: " + parser.getName();
+                    if (receiver) {
+                        outError[0] = "Bad element under <receiver>: " + parser.getName();
+                    } else {
+                        outError[0] = "Bad element under <activity>: " + parser.getName();
+                    }
+                    return null;
                 }
-                return null;
             }
         }
 
@@ -2146,7 +2152,7 @@ public class PackageParser {
                     return null;
                 }
                 if (intent.countActions() == 0) {
-                    Log.w(TAG, "No actions in intent filter at "
+                    Slog.w(TAG, "No actions in intent filter at "
                             + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                 } else {
@@ -2159,14 +2165,15 @@ public class PackageParser {
                 }
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Unknown element under <activity-alias>: " + parser.getName()
+                    Slog.w(TAG, "Unknown element under <activity-alias>: " + parser.getName()
                             + " at " + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
+                } else {
+                    outError[0] = "Bad element under <activity-alias>: " + parser.getName();
+                    return null;
                 }
-                outError[0] = "Bad element under <activity-alias>: " + parser.getName();
-                return null;
             }
         }
 
@@ -2335,14 +2342,15 @@ public class PackageParser {
                     outInfo.info.grantUriPermissions = true;
                 } else {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "Unknown element under <path-permission>: "
+                        Slog.w(TAG, "Unknown element under <path-permission>: "
                                 + parser.getName() + " at " + mArchiveSourcePath + " "
                                 + parser.getPositionDescription());
                         XmlUtils.skipCurrentTag(parser);
                         continue;
+                    } else {
+                        outError[0] = "No path, pathPrefix, or pathPattern for <path-permission>";
+                        return false;
                     }
-                    outError[0] = "No path, pathPrefix, or pathPattern for <path-permission>";
-                    return false;
                 }
                 XmlUtils.skipCurrentTag(parser);
 
@@ -2377,14 +2385,15 @@ public class PackageParser {
 
                 if (!havePerm) {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "No readPermission or writePermssion for <path-permission>: "
+                        Slog.w(TAG, "No readPermission or writePermssion for <path-permission>: "
                                 + parser.getName() + " at " + mArchiveSourcePath + " "
                                 + parser.getPositionDescription());
                         XmlUtils.skipCurrentTag(parser);
                         continue;
+                    } else {
+                        outError[0] = "No readPermission or writePermssion for <path-permission>";
+                        return false;
                     }
-                    outError[0] = "No readPermission or writePermssion for <path-permission>";
-                    return false;
                 }
                 
                 String path = sa.getNonConfigurationString(
@@ -2423,7 +2432,7 @@ public class PackageParser {
                     }
                 } else {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>: "
+                        Slog.w(TAG, "No path, pathPrefix, or pathPattern for <path-permission>: "
                                 + parser.getName() + " at " + mArchiveSourcePath + " "
                                 + parser.getPositionDescription());
                         XmlUtils.skipCurrentTag(parser);
@@ -2436,15 +2445,15 @@ public class PackageParser {
 
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Unknown element under <provider>: "
+                    Slog.w(TAG, "Unknown element under <provider>: "
                             + parser.getName() + " at " + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
+                } else {
+                    outError[0] = "Bad element under <provider>: " + parser.getName();
+                    return false;
                 }
-                outError[0] = "Bad element under <provider>: "
-                    + parser.getName();
-                return false;
             }
         }
         return true;
@@ -2534,15 +2543,15 @@ public class PackageParser {
                 }
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Unknown element under <service>: "
+                    Slog.w(TAG, "Unknown element under <service>: "
                             + parser.getName() + " at " + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
+                } else {
+                    outError[0] = "Bad element under <service>: " + parser.getName();
+                    return null;
                 }
-                outError[0] = "Bad element under <service>: "
-                    + parser.getName();
-                return null;
             }
         }
 
@@ -2573,15 +2582,15 @@ public class PackageParser {
                 }
             } else {
                 if (!RIGID_PARSER) {
-                    Log.w(TAG, "Unknown element under " + tag + ": "
+                    Slog.w(TAG, "Unknown element under " + tag + ": "
                             + parser.getName() + " at " + mArchiveSourcePath + " "
                             + parser.getPositionDescription());
                     XmlUtils.skipCurrentTag(parser);
                     continue;
+                } else {
+                    outError[0] = "Bad element under " + tag + ": " + parser.getName();
+                    return false;
                 }
-                outError[0] = "Bad element under " + tag + ": "
-                    + parser.getName();
-                return false;
             }
         }
         return true;
@@ -2612,12 +2621,12 @@ public class PackageParser {
         TypedValue v = sa.peekValue(
                 com.android.internal.R.styleable.AndroidManifestMetaData_resource);
         if (v != null && v.resourceId != 0) {
-            //Log.i(TAG, "Meta data ref " + name + ": " + v);
+            //Slog.i(TAG, "Meta data ref " + name + ": " + v);
             data.putInt(name, v.resourceId);
         } else {
             v = sa.peekValue(
                     com.android.internal.R.styleable.AndroidManifestMetaData_value);
-            //Log.i(TAG, "Meta data " + name + ": " + v);
+            //Slog.i(TAG, "Meta data " + name + ": " + v);
             if (v != null) {
                 if (v.type == TypedValue.TYPE_STRING) {
                     CharSequence cs = v.coerceToString();
@@ -2631,7 +2640,7 @@ public class PackageParser {
                     data.putFloat(name, v.getFloat());
                 } else {
                     if (!RIGID_PARSER) {
-                        Log.w(TAG, "<meta-data> only supports string, integer, float, color, boolean, and resource reference types: "
+                        Slog.w(TAG, "<meta-data> only supports string, integer, float, color, boolean, and resource reference types: "
                                 + parser.getName() + " at " + mArchiveSourcePath + " "
                                 + parser.getPositionDescription());
                     } else {
@@ -2683,9 +2692,9 @@ public class PackageParser {
 
         int outerDepth = parser.getDepth();
         int type;
-        while ((type=parser.next()) != parser.END_DOCUMENT
-               && (type != parser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == parser.END_TAG || type == parser.TEXT) {
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
+            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
                 continue;
             }
 
@@ -2762,7 +2771,7 @@ public class PackageParser {
                 sa.recycle();
                 XmlUtils.skipCurrentTag(parser);
             } else if (!RIGID_PARSER) {
-                Log.w(TAG, "Unknown element under <intent-filter>: "
+                Slog.w(TAG, "Unknown element under <intent-filter>: "
                         + parser.getName() + " at " + mArchiveSourcePath + " "
                         + parser.getPositionDescription());
                 XmlUtils.skipCurrentTag(parser);
@@ -2773,14 +2782,20 @@ public class PackageParser {
         }
 
         outInfo.hasDefault = outInfo.hasCategory(Intent.CATEGORY_DEFAULT);
-        if (false) {
-            String cats = "";
-            Iterator<String> it = outInfo.categoriesIterator();
-            while (it != null && it.hasNext()) {
-                cats += " " + it.next();
+
+        if (DEBUG_PARSER) {
+            final StringBuilder cats = new StringBuilder("Intent d=");
+            cats.append(outInfo.hasDefault);
+            cats.append(", cat=");
+
+            final Iterator<String> it = outInfo.categoriesIterator();
+            if (it != null) {
+                while (it.hasNext()) {
+                    cats.append(' ');
+                    cats.append(it.next());
+                }
             }
-            System.out.println("Intent d=" +
-                    outInfo.hasDefault + ", cat=" + cats);
+            Slog.d(TAG, cats.toString());
         }
 
         return true;
