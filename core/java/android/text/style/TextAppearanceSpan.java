@@ -205,7 +205,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         }
 
         if (mTextColorLink != null) {
-            ds.linkColor = mTextColor.getColorForState(ds.drawableState, 0);
+            ds.linkColor = mTextColorLink.getColorForState(ds.drawableState, 0);
         }
     }
 
