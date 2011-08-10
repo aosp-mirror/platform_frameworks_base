@@ -2157,6 +2157,7 @@ public class AudioService extends IAudioService.Stub {
                     break;
 
                 case MSG_RCDISPLAY_CLEAR:
+                    // TODO remove log before release
                     Log.i(TAG, "Clear remote control display");
                     Intent clearIntent = new Intent(AudioManager.REMOTE_CONTROL_CLIENT_CHANGED);
                     // no extra means no IRemoteControlClient, which is a request to clear
@@ -2166,17 +2167,22 @@ public class AudioService extends IAudioService.Stub {
 
                 case MSG_RCDISPLAY_UPDATE:
                     synchronized(mCurrentRcLock) {
-                        if (mCurrentRcClient == null) {
+                        if ((mCurrentRcClient == null) ||
+                                (!mCurrentRcClient.equals((IRemoteControlClient)msg.obj))) {
                             // the remote control display owner has changed between the
                             // the message to update the display was sent, and the time it
                             // gets to be processed (now)
                         } else {
                             mCurrentRcClientGen++;
+                            // TODO remove log before release
                             Log.i(TAG, "Display/update remote control ");
                             Intent rcClientIntent = new Intent(
                                     AudioManager.REMOTE_CONTROL_CLIENT_CHANGED);
                             rcClientIntent.putExtra(AudioManager.EXTRA_REMOTE_CONTROL_CLIENT,
                                     mCurrentRcClientGen);
+                            rcClientIntent.putExtra(
+                                    AudioManager.EXTRA_REMOTE_CONTROL_CLIENT_INFO_CHANGED,
+                                    msg.arg1);
                             rcClientIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                             mContext.sendBroadcast(rcClientIntent);
                         }
@@ -2630,7 +2636,7 @@ public class AudioService extends IAudioService.Stub {
                 notifyTopOfAudioFocusStack();
                 // there's a new top of the stack, let the remote control know
                 synchronized(mRCStack) {
-                    checkUpdateRemoteControlDisplay();
+                    checkUpdateRemoteControlDisplay(RC_INFO_ALL);
                 }
             }
         } else {
@@ -2672,7 +2678,7 @@ public class AudioService extends IAudioService.Stub {
             notifyTopOfAudioFocusStack();
             // there's a new top of the stack, let the remote control know
             synchronized(mRCStack) {
-                checkUpdateRemoteControlDisplay();
+                checkUpdateRemoteControlDisplay(RC_INFO_ALL);
             }
         }
     }
@@ -2764,7 +2770,7 @@ public class AudioService extends IAudioService.Stub {
 
             // there's a new top of the stack, let the remote control know
             synchronized(mRCStack) {
-                checkUpdateRemoteControlDisplay();
+                checkUpdateRemoteControlDisplay(RC_INFO_ALL);
             }
         }//synchronized(mAudioFocusLock)
 
@@ -2868,12 +2874,6 @@ public class AudioService extends IAudioService.Stub {
         AudioManager.RemoteControlParameters.FLAG_INFORMATION_CHANGED_PLAYSTATE;
 
     /**
-     * The flags indicating what type of information changed since the last time it was queried.
-     * Access protected by mCurrentRcLock.
-     */
-    private int mCurrentRcClientInfoFlags = RC_INFO_ALL;
-
-    /**
      * A monotonically increasing generation counter for mCurrentRcClient.
      * Only accessed with a lock on mCurrentRcLock.
      * No value wrap-around issues as we only act on equal values.
@@ -2895,27 +2895,6 @@ public class AudioService extends IAudioService.Stub {
                 return mCurrentRcClient;
             } else {
                 return null;
-            }
-        }
-    }
-
-    /**
-     * Returns the current flags of information that changed on the current remote control client.
-     * Requesting this information clears it.
-     * @param rcClientId the counter value that matches the extra
-     *     {@link AudioManager#EXTRA_REMOTE_CONTROL_CLIENT} in the
-     *     {@link AudioManager#REMOTE_CONTROL_CLIENT_CHANGED} event
-     * @return the flags indicating which type of information changed since the client notified
-     *     that its information had changed.
-     */
-    public int getRemoteControlClientInformationChangedFlags(int rcClientId) {
-        synchronized(mCurrentRcLock) {
-            if (rcClientId == mCurrentRcClientGen) {
-                int flags = mCurrentRcClientInfoFlags;
-                mCurrentRcClientInfoFlags = RC_INFO_NONE;
-                return flags;
-            } else {
-                return RC_INFO_NONE;
             }
         }
     }
@@ -3113,7 +3092,6 @@ public class AudioService extends IAudioService.Stub {
     private void clearRemoteControlDisplay() {
         synchronized(mCurrentRcLock) {
             mCurrentRcClient = null;
-            mCurrentRcClientInfoFlags = RC_INFO_NONE;
         }
         mAudioHandler.sendMessage( mAudioHandler.obtainMessage(MSG_RCDISPLAY_CLEAR) );
     }
@@ -3123,8 +3101,9 @@ public class AudioService extends IAudioService.Stub {
      * Called synchronized on mRCStack
      * mRCStack.empty() is false
      */
-    private void updateRemoteControlDisplay() {
+    private void updateRemoteControlDisplay(int infoChangedFlags) {
         RemoteControlStackEntry rcse = mRCStack.peek();
+        int infoFlagsAboutToBeUsed = infoChangedFlags;
         // this is where we enforce opt-in for information display on the remote controls
         //   with the new AudioManager.registerRemoteControlClient() API
         if (rcse.mRcClient == null) {
@@ -3135,19 +3114,23 @@ public class AudioService extends IAudioService.Stub {
         synchronized(mCurrentRcLock) {
             if (!rcse.mRcClient.equals(mCurrentRcClient)) {
                 // new RC client, assume every type of information shall be queried
-                mCurrentRcClientInfoFlags = RC_INFO_ALL;
+                infoFlagsAboutToBeUsed = RC_INFO_ALL;
             }
             mCurrentRcClient = rcse.mRcClient;
         }
-        mAudioHandler.sendMessage( mAudioHandler.obtainMessage(MSG_RCDISPLAY_UPDATE, 0, 0, rcse) );
+        mAudioHandler.sendMessage( mAudioHandler.obtainMessage(MSG_RCDISPLAY_UPDATE,
+                infoFlagsAboutToBeUsed /* arg1 */, 0, rcse.mRcClient /* obj */) );
     }
 
     /**
      * Helper function:
      * Called synchronized on mFocusLock, then mRCStack
      * Check whether the remote control display should be updated, triggers the update if required
+     * @param infoChangedFlags the flags corresponding to the remote control client information
+     *     that has changed, if applicable (checking for the update conditions might trigger a
+     *     clear, rather than an update event).
      */
-    private void checkUpdateRemoteControlDisplay() {
+    private void checkUpdateRemoteControlDisplay(int infoChangedFlags) {
         // determine whether the remote control display should be refreshed
         // if either stack is empty, there is a mismatch, so clear the RC display
         if (mRCStack.isEmpty() || mFocusStack.isEmpty()) {
@@ -3169,7 +3152,7 @@ public class AudioService extends IAudioService.Stub {
             return;
         }
         // refresh conditions were verified: update the remote controls
-        updateRemoteControlDisplay();
+        updateRemoteControlDisplay(infoChangedFlags);
     }
 
     /** see AudioManager.registerMediaButtonEventReceiver(ComponentName eventReceiver) */
@@ -3179,7 +3162,8 @@ public class AudioService extends IAudioService.Stub {
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
                 pushMediaButtonReceiver(eventReceiver);
-                checkUpdateRemoteControlDisplay();
+                // new RC client, assume every type of information shall be queried
+                checkUpdateRemoteControlDisplay(RC_INFO_ALL);
             }
         }
     }
@@ -3193,7 +3177,8 @@ public class AudioService extends IAudioService.Stub {
                 boolean topOfStackWillChange = isCurrentRcController(eventReceiver);
                 removeMediaButtonReceiver(eventReceiver);
                 if (topOfStackWillChange) {
-                    checkUpdateRemoteControlDisplay();
+                    // current RC client will change, assume every type of info needs to be queried
+                    checkUpdateRemoteControlDisplay(RC_INFO_ALL);
                 }
             }
         }
@@ -3239,7 +3224,7 @@ public class AudioService extends IAudioService.Stub {
                 // if the eventReceiver is at the top of the stack
                 // then check for potential refresh of the remote controls
                 if (isCurrentRcController(eventReceiver)) {
-                    checkUpdateRemoteControlDisplay();
+                    checkUpdateRemoteControlDisplay(RC_INFO_ALL);
                 }
             }
         }
@@ -3251,13 +3236,7 @@ public class AudioService extends IAudioService.Stub {
             synchronized(mRCStack) {
                 // only refresh if the eventReceiver is at the top of the stack
                 if (isCurrentRcController(eventReceiver)) {
-                    // there is a refresh request for the current event receiver: it might not be
-                    // displayed on the remote control display, but we can cache what new
-                    // information has changed.
-                    synchronized(mCurrentRcLock) {
-                        mCurrentRcClientInfoFlags |= infoFlag;
-                    }
-                    checkUpdateRemoteControlDisplay();
+                    checkUpdateRemoteControlDisplay(infoFlag);
                 }
             }
         }
