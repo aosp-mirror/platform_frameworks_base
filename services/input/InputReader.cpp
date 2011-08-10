@@ -1170,9 +1170,8 @@ int32_t TouchButtonAccumulator::getToolType() const {
     return AMOTION_EVENT_TOOL_TYPE_UNKNOWN;
 }
 
-bool TouchButtonAccumulator::isActive() const {
-    return mBtnTouch || mBtnToolFinger || mBtnToolPen
-            || mBtnToolRubber || mBtnStylus || mBtnStylus2;
+bool TouchButtonAccumulator::isToolActive() const {
+    return mBtnTouch || mBtnToolFinger || mBtnToolPen || mBtnToolRubber;
 }
 
 bool TouchButtonAccumulator::isHovering() const {
@@ -5144,7 +5143,7 @@ void SingleTouchInputMapper::sync(nsecs_t when) {
     mCurrentRawPointerData.clear();
     mCurrentButtonState = 0;
 
-    if (mTouchButtonAccumulator.isActive()) {
+    if (mTouchButtonAccumulator.isToolActive()) {
         mCurrentRawPointerData.pointerCount = 1;
         mCurrentRawPointerData.idToIndex[0] = 0;
 
@@ -5168,10 +5167,10 @@ void SingleTouchInputMapper::sync(nsecs_t when) {
             outPointer.toolType = AMOTION_EVENT_TOOL_TYPE_FINGER;
         }
         outPointer.isHovering = isHovering;
-
-        mCurrentButtonState = mTouchButtonAccumulator.getButtonState()
-                | mCursorButtonAccumulator.getButtonState();
     }
+
+    mCurrentButtonState = mTouchButtonAccumulator.getButtonState()
+            | mCursorButtonAccumulator.getButtonState();
 
     syncTouch(when, true);
 }

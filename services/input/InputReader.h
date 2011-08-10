@@ -526,7 +526,7 @@ public:
 
     uint32_t getButtonState() const;
     int32_t getToolType() const;
-    bool isActive() const;
+    bool isToolActive() const;
     bool isHovering() const;
 
 private:
