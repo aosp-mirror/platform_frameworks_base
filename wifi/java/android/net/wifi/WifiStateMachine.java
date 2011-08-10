@@ -114,7 +114,7 @@ public class WifiStateMachine extends StateMachine {
     private static final String SOFTAP_IFACE = "wl0.1";
 
     private WifiMonitor mWifiMonitor;
-    private INetworkManagementService nwService;
+    private INetworkManagementService mNwService;
     private ConnectivityManager mCm;
 
     /* Scan results handling */
@@ -500,7 +500,7 @@ public class WifiStateMachine extends StateMachine {
         mBatteryStats = IBatteryStats.Stub.asInterface(ServiceManager.getService("batteryinfo"));
 
         IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
-        nwService = INetworkManagementService.Stub.asInterface(b);
+        mNwService = INetworkManagementService.Stub.asInterface(b);
 
         mWifiMonitor = new WifiMonitor(this);
         mDhcpInfoInternal = new DhcpInfoInternal();
@@ -1090,14 +1090,14 @@ public class WifiStateMachine extends StateMachine {
 
                     InterfaceConfiguration ifcg = null;
                     try {
-                        ifcg = nwService.getInterfaceConfig(intf);
+                        ifcg = mNwService.getInterfaceConfig(intf);
                         if (ifcg != null) {
                             /* IP/netmask: 192.168.43.1/255.255.255.0 */
                             ifcg.addr = new LinkAddress(NetworkUtils.numericToInetAddress(
                                     "192.168.43.1"), 24);
                             ifcg.interfaceFlags = "[up]";
 
-                            nwService.setInterfaceConfig(intf, ifcg);
+                            mNwService.setInterfaceConfig(intf, ifcg);
                         }
                     } catch (Exception e) {
                         Log.e(TAG, "Error configuring interface " + intf + ", :" + e);
@@ -1124,11 +1124,11 @@ public class WifiStateMachine extends StateMachine {
            ip settings */
         InterfaceConfiguration ifcg = null;
         try {
-            ifcg = nwService.getInterfaceConfig(mInterfaceName);
+            ifcg = mNwService.getInterfaceConfig(mInterfaceName);
             if (ifcg != null) {
                 ifcg.addr = new LinkAddress(NetworkUtils.numericToInetAddress(
                             "0.0.0.0"), 0);
-                nwService.setInterfaceConfig(mInterfaceName, ifcg);
+                mNwService.setInterfaceConfig(mInterfaceName, ifcg);
             }
         } catch (Exception e) {
             Log.e(TAG, "Error resetting interface " + mInterfaceName + ", :" + e);
@@ -1534,7 +1534,7 @@ public class WifiStateMachine extends StateMachine {
         }
 
         try {
-            nwService.clearInterfaceAddresses(mInterfaceName);
+            mNwService.clearInterfaceAddresses(mInterfaceName);
         } catch (Exception e) {
             Log.e(TAG, "Failed to clear IP addresses on disconnect" + e);
         }
@@ -1669,12 +1669,12 @@ public class WifiStateMachine extends StateMachine {
             WifiApConfigStore.setApConfiguration(config);
         }
         try {
-            nwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
+            mNwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
         } catch (Exception e) {
             Log.e(TAG, "Exception in softap start " + e);
             try {
-                nwService.stopAccessPoint(mInterfaceName);
-                nwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
+                mNwService.stopAccessPoint(mInterfaceName);
+                mNwService.startAccessPoint(config, mInterfaceName, SOFTAP_IFACE);
             } catch (Exception e1) {
                 Log.e(TAG, "Exception in softap re-start " + e1);
                 return false;
@@ -2698,7 +2698,7 @@ public class WifiStateMachine extends StateMachine {
                 ifcg.addr = dhcpInfoInternal.makeLinkAddress();
                 ifcg.interfaceFlags = "[up]";
                 try {
-                    nwService.setInterfaceConfig(mInterfaceName, ifcg);
+                    mNwService.setInterfaceConfig(mInterfaceName, ifcg);
                     Log.v(TAG, "Static IP configuration succeeded");
                     sendMessage(CMD_STATIC_IP_SUCCESS, dhcpInfoInternal);
                 } catch (RemoteException re) {
@@ -3158,7 +3158,7 @@ public class WifiStateMachine extends StateMachine {
                     setWifiApState(WIFI_AP_STATE_DISABLING);
                     stopTethering();
                     try {
-                        nwService.stopAccessPoint(mInterfaceName);
+                        mNwService.stopAccessPoint(mInterfaceName);
                     } catch(Exception e) {
                         Log.e(TAG, "Exception in stopAccessPoint()");
                     }

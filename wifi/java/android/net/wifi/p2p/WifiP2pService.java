@@ -34,10 +34,13 @@ import android.net.wifi.WpsConfiguration.Setup;
 import android.net.wifi.p2p.WifiP2pDevice.Status;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.INetworkManagementService;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,6 +72,9 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     private static final boolean DBG = true;
 
     private Context mContext;
+    private String mInterface;
+
+    INetworkManagementService mNwService;
 
     // Tracked to notify the user about wifi client/hotspot being shut down
     // during p2p bring up
@@ -94,6 +100,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
     public WifiP2pService(Context context) {
         mContext = context;
 
+        mInterface = SystemProperties.get("wifi.interface", "wlan0");
         mP2pSupported = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_wifi_p2p_support);
 
@@ -107,6 +114,11 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         mContext.registerReceiver(new WifiStateReceiver(), filter);
 
    }
+
+    public void connectivityServiceReady() {
+        IBinder b = ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE);
+        mNwService = INetworkManagementService.Stub.asInterface(b);
+    }
 
     private class WifiStateReceiver extends BroadcastReceiver {
         @Override
@@ -324,8 +336,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
         @Override
         public void enter() {
             if (DBG) Slog.d(TAG, getName());
-            // TODO: fix later
-            WifiNative.unloadDriver();
             transitionTo(mP2pDisabledState);
         }
 
@@ -334,7 +344,6 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             if (DBG) Slog.d(TAG, getName() + message.toString());
             switch (message.what) {
                 case WifiMonitor.SUP_DISCONNECTION_EVENT:
-                    WifiNative.unloadDriver();
                     transitionTo(mP2pDisabledState);
                     break;
                 default:
@@ -411,9 +420,13 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             if (DBG) Slog.d(TAG, getName() + message.toString());
             switch (message.what) {
                 case WifiStateMachine.P2P_ENABLE_PROCEED:
-                    // TODO: fix this for p2p
-                    if (WifiNative.loadDriver() &&
-                            WifiNative.startSupplicant()) {
+                    try {
+                        mNwService.wifiFirmwareReload(mInterface, "P2P");
+                    } catch (Exception e) {
+                        Slog.e(TAG, "Failed to reload p2p firmware " + e);
+                        // continue
+                    }
+                    if (WifiNative.startSupplicant()) {
                         Slog.d(TAG, "Wi-fi Direct start successful");
                         mWifiMonitor.startMonitoring();
                         transitionTo(mP2pEnablingState);
