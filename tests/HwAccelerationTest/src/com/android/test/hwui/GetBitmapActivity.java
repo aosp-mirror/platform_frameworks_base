@@ -96,9 +96,10 @@ public class GetBitmapActivity extends Activity implements TextureView.SurfaceTe
     }
 
     @Override
-    public void onSurfaceTextureDestroyed(SurfaceTexture surface) {
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         mCamera.stopPreview();
         mCamera.release();
+        return true;
     }
 
     @Override

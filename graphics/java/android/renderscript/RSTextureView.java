@@ -85,13 +85,15 @@ public class RSTextureView extends TextureView implements TextureView.SurfaceTex
     }
 
     @Override
-    public void onSurfaceTextureDestroyed(SurfaceTexture surface) {
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         //Log.e(RenderScript.LOG_TAG, "onSurfaceTextureDestroyed");
         mSurfaceTexture = surface;
 
         if (mRS != null) {
             mRS.setSurfaceTexture(null, 0, 0);
         }
+
+        return true;
     }
 
     @Override
