@@ -1288,6 +1288,15 @@ static jstring android_server_InputManager_nativeDump(JNIEnv* env, jclass clazz)
     return env->NewStringUTF(dump.string());
 }
 
+static void android_server_InputManager_nativeMonitor(JNIEnv* env, jclass clazz) {
+    if (checkInputManagerUnitialized(env)) {
+        return;
+    }
+
+    gNativeInputManager->getInputManager()->getReader()->monitor();
+    gNativeInputManager->getInputManager()->getDispatcher()->monitor();
+}
+
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gInputManagerMethods[] = {
@@ -1338,6 +1347,8 @@ static JNINativeMethod gInputManagerMethods[] = {
             (void*) android_server_InputManager_nativeSetPointerSpeed },
     { "nativeDump", "()Ljava/lang/String;",
             (void*) android_server_InputManager_nativeDump },
+    { "nativeMonitor", "()V",
+            (void*) android_server_InputManager_nativeMonitor },
 };
 
 #define FIND_CLASS(var, className) \

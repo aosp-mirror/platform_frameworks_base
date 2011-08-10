@@ -1294,4 +1294,11 @@ void EventHub::dump(String8& dump) {
     } // release lock
 }
 
+void EventHub::monitor() {
+    // Acquire and release the lock to ensure that the event hub has not deadlocked.
+    mLock.lock();
+    mLock.unlock();
+}
+
+
 }; // namespace android
