@@ -45,6 +45,7 @@ import java.security.cert.CertificateEncodingException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
@@ -58,6 +59,9 @@ public class PackageParser {
     private static final boolean DEBUG_JAR = false;
     private static final boolean DEBUG_PARSER = false;
     private static final boolean DEBUG_BACKUP = false;
+
+    /** File name in an APK for the Android manifest. */
+    private static final String ANDROID_MANIFEST_FILENAME = "AndroidManifest.xml";
 
     /** @hide */
     public static class NewPermissionInfo {
@@ -402,7 +406,7 @@ public class PackageParser {
                 res = new Resources(assmgr, metrics, null);
                 assmgr.setConfiguration(0, 0, null, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                         Build.VERSION.RESOURCES_SDK_INT);
-                parser = assmgr.openXmlResourceParser(cookie, "AndroidManifest.xml");
+                parser = assmgr.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
                 assetError = false;
             } else {
                 Slog.w(TAG, "Failed adding asset path:"+mArchiveSourcePath);
@@ -484,7 +488,7 @@ public class PackageParser {
                 // can trust it...  we'll just use the AndroidManifest.xml
                 // to retrieve its signatures, not validating all of the
                 // files.
-                JarEntry jarEntry = jarFile.getJarEntry("AndroidManifest.xml");
+                JarEntry jarEntry = jarFile.getJarEntry(ANDROID_MANIFEST_FILENAME);
                 certs = loadCertificates(jarFile, jarEntry, readBuffer);
                 if (certs == null) {
                     Slog.e(TAG, "Package " + pkg.packageName
@@ -506,21 +510,30 @@ public class PackageParser {
                         }
                     }
                 }
-
             } else {
                 Enumeration<JarEntry> entries = jarFile.entries();
+                final Manifest manifest = jarFile.getManifest();
                 while (entries.hasMoreElements()) {
                     final JarEntry je = entries.nextElement();
                     if (je.isDirectory()) continue;
-                    if (je.getName().startsWith("META-INF/")) continue;
 
-                    final Certificate[] localCerts = loadCertificates(jarFile, je,
-                            readBuffer);
+                    final String name = je.getName();
+
+                    if (name.startsWith("META-INF/"))
+                        continue;
+
+                    if (ANDROID_MANIFEST_FILENAME.equals(name)) {
+                        final Attributes attributes = manifest.getAttributes(name);
+                        pkg.manifestDigest = ManifestDigest.fromAttributes(attributes);
+                    }
+
+                    final Certificate[] localCerts = loadCertificates(jarFile, je, readBuffer);
                     if (DEBUG_JAR) {
                         Slog.i(TAG, "File " + mArchiveSourcePath + " entry " + je.getName()
                                 + ": certs=" + certs + " ("
                                 + (certs != null ? certs.length : 0) + ")");
                     }
+
                     if (localCerts == null) {
                         Slog.e(TAG, "Package " + pkg.packageName
                                 + " has no certificates at entry "
@@ -609,7 +622,7 @@ public class PackageParser {
                 return null;
             }
 
-            parser = assmgr.openXmlResourceParser(cookie, "AndroidManifest.xml");
+            parser = assmgr.openXmlResourceParser(cookie, ANDROID_MANIFEST_FILENAME);
         } catch (Exception e) {
             if (assmgr != null) assmgr.close();
             Slog.w(TAG, "Unable to read AndroidManifest.xml of "
@@ -2883,6 +2896,12 @@ public class PackageParser {
         public ArrayList<FeatureInfo> reqFeatures = null;
 
         public int installLocation;
+
+        /**
+         * Digest suitable for comparing whether this package's manifest is the
+         * same as another.
+         */
+        public ManifestDigest manifestDigest;
 
         public Package(String _name) {
             packageName = _name;
