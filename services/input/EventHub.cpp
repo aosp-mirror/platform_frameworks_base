@@ -205,27 +205,30 @@ status_t EventHub::getAbsoluteAxisInfo(int32_t deviceId, int axis,
         RawAbsoluteAxisInfo* outAxisInfo) const {
     outAxisInfo->clear();
 
-    AutoMutex _l(mLock);
-    Device* device = getDeviceLocked(deviceId);
-    if (device == NULL) return -1;
+    if (axis >= 0 && axis <= ABS_MAX) {
+        AutoMutex _l(mLock);
 
-    struct input_absinfo info;
+        Device* device = getDeviceLocked(deviceId);
+        if (device && test_bit(axis, device->absBitmask)) {
+            struct input_absinfo info;
+            if(ioctl(device->fd, EVIOCGABS(axis), &info)) {
+                LOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
+                     axis, device->identifier.name.string(), device->fd, errno);
+                return -errno;
+            }
 
-    if(ioctl(device->fd, EVIOCGABS(axis), &info)) {
-        LOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
-             axis, device->identifier.name.string(), device->fd, errno);
-        return -errno;
+            if (info.minimum != info.maximum) {
+                outAxisInfo->valid = true;
+                outAxisInfo->minValue = info.minimum;
+                outAxisInfo->maxValue = info.maximum;
+                outAxisInfo->flat = info.flat;
+                outAxisInfo->fuzz = info.fuzz;
+                outAxisInfo->resolution = info.resolution;
+            }
+            return OK;
+        }
     }
-
-    if (info.minimum != info.maximum) {
-        outAxisInfo->valid = true;
-        outAxisInfo->minValue = info.minimum;
-        outAxisInfo->maxValue = info.maximum;
-        outAxisInfo->flat = info.flat;
-        outAxisInfo->fuzz = info.fuzz;
-        outAxisInfo->resolution = info.resolution;
-    }
-    return OK;
+    return -1;
 }
 
 bool EventHub::hasRelativeAxis(int32_t deviceId, int axis) const {
@@ -233,7 +236,7 @@ bool EventHub::hasRelativeAxis(int32_t deviceId, int axis) const {
         AutoMutex _l(mLock);
 
         Device* device = getDeviceLocked(deviceId);
-        if (device && device->relBitmask) {
+        if (device) {
             return test_bit(axis, device->relBitmask);
         }
     }
@@ -245,7 +248,7 @@ bool EventHub::hasInputProperty(int32_t deviceId, int property) const {
         AutoMutex _l(mLock);
 
         Device* device = getDeviceLocked(deviceId);
-        if (device && device->propBitmask) {
+        if (device) {
             return test_bit(property, device->propBitmask);
         }
     }
@@ -257,19 +260,13 @@ int32_t EventHub::getScanCodeState(int32_t deviceId, int32_t scanCode) const {
         AutoMutex _l(mLock);
 
         Device* device = getDeviceLocked(deviceId);
-        if (device != NULL) {
-            return getScanCodeStateLocked(device, scanCode);
+        if (device && test_bit(scanCode, device->keyBitmask)) {
+            uint8_t keyState[sizeof_bit_array(KEY_MAX + 1)];
+            memset(keyState, 0, sizeof(keyState));
+            if (ioctl(device->fd, EVIOCGKEY(sizeof(keyState)), keyState) >= 0) {
+                return test_bit(scanCode, keyState) ? AKEY_STATE_DOWN : AKEY_STATE_UP;
+            }
         }
-    }
-    return AKEY_STATE_UNKNOWN;
-}
-
-int32_t EventHub::getScanCodeStateLocked(Device* device, int32_t scanCode) const {
-    uint8_t key_bitmask[sizeof_bit_array(KEY_MAX + 1)];
-    memset(key_bitmask, 0, sizeof(key_bitmask));
-    if (ioctl(device->fd,
-               EVIOCGKEY(sizeof(key_bitmask)), key_bitmask) >= 0) {
-        return test_bit(scanCode, key_bitmask) ? AKEY_STATE_DOWN : AKEY_STATE_UP;
     }
     return AKEY_STATE_UNKNOWN;
 }
@@ -278,37 +275,22 @@ int32_t EventHub::getKeyCodeState(int32_t deviceId, int32_t keyCode) const {
     AutoMutex _l(mLock);
 
     Device* device = getDeviceLocked(deviceId);
-    if (device != NULL) {
-        return getKeyCodeStateLocked(device, keyCode);
-    }
-    return AKEY_STATE_UNKNOWN;
-}
-
-int32_t EventHub::getKeyCodeStateLocked(Device* device, int32_t keyCode) const {
-    if (!device->keyMap.haveKeyLayout()) {
-        return AKEY_STATE_UNKNOWN;
-    }
-
-    Vector<int32_t> scanCodes;
-    device->keyMap.keyLayoutMap->findScanCodesForKey(keyCode, &scanCodes);
-
-    uint8_t key_bitmask[sizeof_bit_array(KEY_MAX + 1)];
-    memset(key_bitmask, 0, sizeof(key_bitmask));
-    if (ioctl(device->fd, EVIOCGKEY(sizeof(key_bitmask)), key_bitmask) >= 0) {
-        #if 0
-        for (size_t i=0; i<=KEY_MAX; i++) {
-            LOGI("(Scan code %d: down=%d)", i, test_bit(i, key_bitmask));
-        }
-        #endif
-        const size_t N = scanCodes.size();
-        for (size_t i=0; i<N && i<=KEY_MAX; i++) {
-            int32_t sc = scanCodes.itemAt(i);
-            //LOGI("Code %d: down=%d", sc, test_bit(sc, key_bitmask));
-            if (sc >= 0 && sc <= KEY_MAX && test_bit(sc, key_bitmask)) {
-                return AKEY_STATE_DOWN;
+    if (device && device->keyMap.haveKeyLayout()) {
+        Vector<int32_t> scanCodes;
+        device->keyMap.keyLayoutMap->findScanCodesForKey(keyCode, &scanCodes);
+        if (scanCodes.size() != 0) {
+            uint8_t keyState[sizeof_bit_array(KEY_MAX + 1)];
+            memset(keyState, 0, sizeof(keyState));
+            if (ioctl(device->fd, EVIOCGKEY(sizeof(keyState)), keyState) >= 0) {
+                for (size_t i = 0; i < scanCodes.size(); i++) {
+                    int32_t sc = scanCodes.itemAt(i);
+                    if (sc >= 0 && sc <= KEY_MAX && test_bit(sc, keyState)) {
+                        return AKEY_STATE_DOWN;
+                    }
+                }
+                return AKEY_STATE_UP;
             }
         }
-        return AKEY_STATE_UP;
     }
     return AKEY_STATE_UNKNOWN;
 }
@@ -318,19 +300,13 @@ int32_t EventHub::getSwitchState(int32_t deviceId, int32_t sw) const {
         AutoMutex _l(mLock);
 
         Device* device = getDeviceLocked(deviceId);
-        if (device != NULL) {
-            return getSwitchStateLocked(device, sw);
+        if (device && test_bit(sw, device->swBitmask)) {
+            uint8_t swState[sizeof_bit_array(SW_MAX + 1)];
+            memset(swState, 0, sizeof(swState));
+            if (ioctl(device->fd, EVIOCGSW(sizeof(swState)), swState) >= 0) {
+                return test_bit(sw, swState) ? AKEY_STATE_DOWN : AKEY_STATE_UP;
+            }
         }
-    }
-    return AKEY_STATE_UNKNOWN;
-}
-
-int32_t EventHub::getSwitchStateLocked(Device* device, int32_t sw) const {
-    uint8_t sw_bitmask[sizeof_bit_array(SW_MAX + 1)];
-    memset(sw_bitmask, 0, sizeof(sw_bitmask));
-    if (ioctl(device->fd,
-               EVIOCGSW(sizeof(sw_bitmask)), sw_bitmask) >= 0) {
-        return test_bit(sw, sw_bitmask) ? AKEY_STATE_DOWN : AKEY_STATE_UP;
     }
     return AKEY_STATE_UNKNOWN;
 }
@@ -340,26 +316,20 @@ status_t EventHub::getAbsoluteAxisValue(int32_t deviceId, int32_t axis, int32_t*
         AutoMutex _l(mLock);
 
         Device* device = getDeviceLocked(deviceId);
-        if (device != NULL) {
-            return getAbsoluteAxisValueLocked(device, axis, outValue);
+        if (device && test_bit(axis, device->absBitmask)) {
+            struct input_absinfo info;
+            if(ioctl(device->fd, EVIOCGABS(axis), &info)) {
+                LOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
+                     axis, device->identifier.name.string(), device->fd, errno);
+                return -errno;
+            }
+
+            *outValue = info.value;
+            return OK;
         }
     }
     *outValue = 0;
     return -1;
-}
-
-status_t EventHub::getAbsoluteAxisValueLocked(Device* device, int32_t axis,
-        int32_t* outValue) const {
-    struct input_absinfo info;
-
-     if(ioctl(device->fd, EVIOCGABS(axis), &info)) {
-         LOGW("Error reading absolute controller %d for device %s fd %d, errno=%d",
-              axis, device->identifier.name.string(), device->fd, errno);
-         return -errno;
-     }
-
-     *outValue = info.value;
-     return OK;
 }
 
 bool EventHub::markSupportedKeyCodes(int32_t deviceId, size_t numCodes,
@@ -367,36 +337,27 @@ bool EventHub::markSupportedKeyCodes(int32_t deviceId, size_t numCodes,
     AutoMutex _l(mLock);
 
     Device* device = getDeviceLocked(deviceId);
-    if (device != NULL) {
-        return markSupportedKeyCodesLocked(device, numCodes, keyCodes, outFlags);
-    }
-    return false;
-}
+    if (device && device->keyMap.haveKeyLayout()) {
+        Vector<int32_t> scanCodes;
+        for (size_t codeIndex = 0; codeIndex < numCodes; codeIndex++) {
+            scanCodes.clear();
 
-bool EventHub::markSupportedKeyCodesLocked(Device* device, size_t numCodes,
-        const int32_t* keyCodes, uint8_t* outFlags) const {
-    if (!device->keyMap.haveKeyLayout()) {
-        return false;
-    }
-
-    Vector<int32_t> scanCodes;
-    for (size_t codeIndex = 0; codeIndex < numCodes; codeIndex++) {
-        scanCodes.clear();
-
-        status_t err = device->keyMap.keyLayoutMap->findScanCodesForKey(
-                keyCodes[codeIndex], &scanCodes);
-        if (! err) {
-            // check the possible scan codes identified by the layout map against the
-            // map of codes actually emitted by the driver
-            for (size_t sc = 0; sc < scanCodes.size(); sc++) {
-                if (test_bit(scanCodes[sc], device->keyBitmask)) {
-                    outFlags[codeIndex] = 1;
-                    break;
+            status_t err = device->keyMap.keyLayoutMap->findScanCodesForKey(
+                    keyCodes[codeIndex], &scanCodes);
+            if (! err) {
+                // check the possible scan codes identified by the layout map against the
+                // map of codes actually emitted by the driver
+                for (size_t sc = 0; sc < scanCodes.size(); sc++) {
+                    if (test_bit(scanCodes[sc], device->keyBitmask)) {
+                        outFlags[codeIndex] = 1;
+                        break;
+                    }
                 }
             }
         }
+        return true;
     }
-    return true;
+    return false;
 }
 
 status_t EventHub::mapKey(int32_t deviceId, int scancode,
