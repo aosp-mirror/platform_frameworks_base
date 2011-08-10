@@ -2550,17 +2550,15 @@
     <string name="volume_unknown">Volume</string>
 
     <!-- Content description for bluetooth volume icon [CHAR LIMIT=100] -->
-    <string name="volume_icon_description_bluetooth">Bluetooth volume. Tap to toggle silent mode.</string>
+    <string name="volume_icon_description_bluetooth">Bluetooth volume</string>
     <!-- Content description for ringer volume icon [CHAR LIMIT=100] -->
-    <string name="volume_icon_description_ringer">Ringtone volume. Tap to toggle silent mode.</string>
+    <string name="volume_icon_description_ringer">Ringtone volume</string>
     <!-- Content description for in-call volume icon [CHAR LIMIT=100] -->
-    <string name="volume_icon_description_incall">Call volume. Tap to toggle silent mode.</string>
+    <string name="volume_icon_description_incall">Call volume</string>
     <!-- Content description for media volume icon [CHAR LIMIT=100] -->
-    <string name="volume_icon_description_media">Media volume. Tap to toggle silent mode.</string>
+    <string name="volume_icon_description_media">Media volume</string>
     <!-- Content description for notification volume icon [CHAR LIMIT=100] -->
-    <string name="volume_icon_description_notification">Notification volume. Tap to toggle silent mode.</string>
-    <!-- Content description for volume settings expansion button [CHAR LIMIT=100] -->
-    <string name="volume_panel_more_description">Tap to show more audio stream volumes.</string>
+    <string name="volume_icon_description_notification">Notification volume</string>
 
     <!-- Ringtone picker strings --> <skip />
     <!-- Choice in the ringtone picker.  If chosen, the default ringtone will be used. -->
