@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.widget.LinearLayout;
 
 public class ExpandedView extends LinearLayout {
@@ -44,8 +45,10 @@ public class ExpandedView extends LinearLayout {
          super.onLayout(changed, left, top, right, bottom);
          int height = bottom - top;
          if (height != mPrevHeight) {
-             //Slog.d(StatusBar.TAG, "height changed old=" + mPrevHeight
-             //     + " new=" + height);
+             if (PhoneStatusBar.DEBUG) {
+                 Slog.d(PhoneStatusBar.TAG, "ExpandedView height changed old=" + mPrevHeight
+                      + " new=" + height);
+             }
              mPrevHeight = height;
              mService.updateExpandedViewPos(PhoneStatusBar.EXPANDED_LEAVE_ALONE);
          }

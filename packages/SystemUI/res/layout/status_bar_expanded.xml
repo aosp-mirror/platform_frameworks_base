@@ -103,9 +103,9 @@
                 <TextView android:id="@+id/noNotificationsTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/title_bar_portrait"
-                    android:paddingLeft="5dp"
-                    android:textAppearance="@style/TextAppearance.StatusBar.Title"
+                    android:textAppearance="@android:style/TextAppearance.Large"
+                    android:padding="8dp"
+                    android:gravity="center"
                     android:text="@string/status_bar_no_notifications_title"
                     />
 
