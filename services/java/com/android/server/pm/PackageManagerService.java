@@ -6457,6 +6457,10 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (removedPackage != null) {
                 sendPackageBroadcast(Intent.ACTION_PACKAGE_REMOVED, removedPackage,
                         extras, null, null);
+                if (fullRemove && !replacing) {
+                    sendPackageBroadcast(Intent.ACTION_PACKAGE_FULLY_REMOVED, removedPackage,
+                            extras, null, null);
+                }
             }
             if (removedUid >= 0) {
                 sendPackageBroadcast(Intent.ACTION_UID_REMOVED, null, extras, null, null);
