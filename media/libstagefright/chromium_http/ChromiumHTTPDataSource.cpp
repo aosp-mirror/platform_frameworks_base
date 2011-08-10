@@ -61,6 +61,12 @@ status_t ChromiumHTTPDataSource::connect(
         off64_t offset) {
     Mutex::Autolock autoLock(mLock);
 
+    uid_t uid;
+    if (getUID(&uid)) {
+        mDelegate->setUID(uid);
+    }
+    LOG_PRI(ANDROID_LOG_VERBOSE, LOG_TAG, "connect on behalf of uid %d", uid);
+
     return connect_l(uri, headers, offset);
 }
 

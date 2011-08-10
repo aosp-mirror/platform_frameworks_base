@@ -91,6 +91,11 @@ struct SfDelegate : public net::URLRequest::Delegate {
 
     void setOwner(ChromiumHTTPDataSource *mOwner);
 
+    // Gets the UID of the calling process
+    bool getUID(uid_t *uid) const;
+
+    void setUID(uid_t uid);
+
     virtual void OnReceivedRedirect(
             net::URLRequest *request, const GURL &new_url, bool *defer_redirect);
 

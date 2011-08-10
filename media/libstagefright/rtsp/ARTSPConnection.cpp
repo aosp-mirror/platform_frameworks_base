@@ -56,6 +56,9 @@ ARTSPConnection::ARTSPConnection(bool uidValid, uid_t uid)
 ARTSPConnection::~ARTSPConnection() {
     if (mSocket >= 0) {
         LOGE("Connection is still open, closing the socket.");
+        if (mUIDValid) {
+            HTTPBase::UnRegisterSocketUserTag(mSocket);
+        }
         close(mSocket);
         mSocket = -1;
     }
@@ -202,6 +205,9 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
     ++mConnectionID;
 
     if (mState != DISCONNECTED) {
+        if (mUIDValid) {
+            HTTPBase::UnRegisterSocketUserTag(mSocket);
+        }
         close(mSocket);
         mSocket = -1;
 
@@ -251,7 +257,8 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
     mSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     if (mUIDValid) {
-        HTTPBase::RegisterSocketUser(mSocket, mUID);
+        HTTPBase::RegisterSocketUserTag(mSocket, mUID,
+                                        (uint32_t)*(uint32_t*) "RTSP");
     }
 
     MakeSocketBlocking(mSocket, false);
@@ -279,6 +286,9 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
         reply->setInt32("result", -errno);
         mState = DISCONNECTED;
 
+        if (mUIDValid) {
+            HTTPBase::UnRegisterSocketUserTag(mSocket);
+        }
         close(mSocket);
         mSocket = -1;
     } else {
@@ -294,6 +304,9 @@ void ARTSPConnection::onConnect(const sp<AMessage> &msg) {
 
 void ARTSPConnection::onDisconnect(const sp<AMessage> &msg) {
     if (mState == CONNECTED || mState == CONNECTING) {
+        if (mUIDValid) {
+            HTTPBase::UnRegisterSocketUserTag(mSocket);
+        }
         close(mSocket);
         mSocket = -1;
 
@@ -358,6 +371,9 @@ void ARTSPConnection::onCompleteConnection(const sp<AMessage> &msg) {
         reply->setInt32("result", -err);
 
         mState = DISCONNECTED;
+        if (mUIDValid) {
+            HTTPBase::UnRegisterSocketUserTag(mSocket);
+        }
         close(mSocket);
         mSocket = -1;
     } else {
