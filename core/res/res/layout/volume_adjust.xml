@@ -54,7 +54,6 @@
             android:padding="16dip"
             android:background="?attr/selectableItemBackground"
             android:src="@drawable/ic_sysbar_quicksettings"
-            android:contentDescription="@string/volume_panel_more_description"
             />
 
     </LinearLayout>
