@@ -1172,6 +1172,9 @@ void MPEG4Writer::Track::addOneStssTableEntry(size_t sampleId) {
 void MPEG4Writer::Track::addOneSttsTableEntry(
         size_t sampleCount, int32_t duration) {
 
+    if (duration == 0) {
+        LOGW("%d 0-duration samples found: %d", sampleCount);
+    }
     SttsTableEntry sttsEntry(sampleCount, duration);
     mSttsTableEntries.push_back(sttsEntry);
     ++mNumSttsTableEntries;
@@ -2001,17 +2004,18 @@ status_t MPEG4Writer::Track::threadEntry() {
             mTrackDurationUs = timestampUs;
         }
 
+        // We need to use the time scale based ticks, rather than the
+        // timestamp itself to determine whether we have to use a new
+        // stts entry, since we may have rounding errors.
+        // The calculation is intended to reduce the accumulated
+        // rounding errors.
+        currDurationTicks =
+            ((timestampUs * mTimeScale + 500000LL) / 1000000LL -
+                (lastTimestampUs * mTimeScale + 500000LL) / 1000000LL);
+
         mSampleSizes.push_back(sampleSize);
         ++mNumSamples;
         if (mNumSamples > 2) {
-            // We need to use the time scale based ticks, rather than the
-            // timestamp itself to determine whether we have to use a new
-            // stts entry, since we may have rounding errors.
-            // The calculation is intended to reduce the accumulated
-            // rounding errors.
-            currDurationTicks =
-                     ((timestampUs * mTimeScale + 500000LL) / 1000000LL -
-                     (lastTimestampUs * mTimeScale + 500000LL) / 1000000LL);
 
             // Force the first sample to have its own stts entry so that
             // we can adjust its value later to maintain the A/V sync.
