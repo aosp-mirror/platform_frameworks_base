@@ -105,7 +105,7 @@ key 82    NUMPAD_0
 key 83    NUMPAD_DOT
 # key 84 (undefined)
 # key 85 "KEY_ZENKAKUHANKAKU"
-# key 86 "KEY_102ND"
+key 86    BACKSLASH
 key 87    F11
 key 88    F12
 # key 89 "KEY_RO"
@@ -161,8 +161,8 @@ key 128   MEDIA_STOP
 key 139   MENU              WAKE_DROPPED
 # key 140 "KEY_CALC"
 # key 141 "KEY_SETUP"
-# key 142 "KEY_SLEEP"
-# key 143 "KEY_WAKEUP"
+key 142   POWER             WAKE
+key 143   POWER             WAKE
 # key 144 "KEY_FILE"
 # key 145 "KEY_SENDFILE"
 # key 146 "KEY_DELETEFILE"
@@ -171,7 +171,7 @@ key 139   MENU              WAKE_DROPPED
 # key 149 "KEY_PROG2"
 key 150   EXPLORER
 # key 151 "KEY_MSDOS"
-# key 152 "KEY_COFFEE"
+key 152   POWER             WAKE
 # key 153 "KEY_DIRECTION"
 # key 154 "KEY_CYCLEWINDOWS"
 key 155   ENVELOPE
@@ -246,20 +246,6 @@ key 217   SEARCH
 # key 224 "KEY_BRIGHTNESSDOWN"
 # key 225 "KEY_BRIGHTNESSUP"
 key 226   HEADSETHOOK
-key 227   STAR
-key 228   POUND
-key 229   SOFT_LEFT
-key 230   SOFT_RIGHT
-key 231   CALL
-key 232   DPAD_CENTER
-key 233   HEADSETHOOK
-# key 234 "KEY_0_5" or "KEY_SAVE"
-# key 235 "KEY_2_5" or "KEY_DOCUMENTS"
-# key 236 "KEY_SWITCHVIDEOMODE" or "KEY_BATTERY"
-# key 237 "KEY_KBDILLUMTOGGLE"
-# key 238 "KEY_KBDILLUMDOWN"
-# key 239 "KEY_KBDILLUMUP"
-# key 240 "KEY_UNKNOWN"
 
 key 256   BUTTON_1
 key 257   BUTTON_2
