@@ -143,6 +143,12 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
      */
     private static final int KEYGUARD_DONE_DRAWING_TIMEOUT_MS = 2000;
 
+    /**
+     * Allow the user to operate the status bar when the keyguard is engaged (without a pattern or
+     * password).
+     */
+    private static final boolean ENABLE_STATUS_BAR_IN_KEYGUARD = true;
+
     private Context mContext;
     private AlarmManager mAlarmManager;
     private StatusBarManager mStatusBarManager;
@@ -1137,7 +1143,7 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             boolean enable = !mShowing || (mHidden && !isSecure());
             mStatusBarManager.disable(enable ?
                          StatusBarManager.DISABLE_NONE :
-                         ( StatusBarManager.DISABLE_EXPAND
+                         ( (ENABLE_STATUS_BAR_IN_KEYGUARD ? 0 : StatusBarManager.DISABLE_EXPAND)
                          | StatusBarManager.DISABLE_NAVIGATION
                          | StatusBarManager.DISABLE_CLOCK));
         }
