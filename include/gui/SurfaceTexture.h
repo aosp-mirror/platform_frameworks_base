@@ -210,7 +210,7 @@ protected:
 
     // freeAllBuffers frees the resources (both GraphicBuffer and EGLImage) for
     // all slots.
-    void freeAllBuffers();
+    void freeAllBuffersLocked();
     static bool isExternalFormat(uint32_t format);
 
 private:

@@ -104,7 +104,7 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode) :
 
 SurfaceTexture::~SurfaceTexture() {
     LOGV("SurfaceTexture::~SurfaceTexture");
-    freeAllBuffers();
+    freeAllBuffersLocked();
 }
 
 status_t SurfaceTexture::setBufferCountServerLocked(int bufferCount) {
@@ -154,6 +154,10 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
         LOGE("setBufferCount: SurfaceTexture has been abandoned!");
         return NO_INIT;
     }
+    if (mConnectedApi == NO_CONNECTED_API) {
+        LOGE("setBufferCount: SurfaceTexture is not connected!");
+        return NO_INIT;
+    }
 
     if (bufferCount > NUM_BUFFER_SLOTS) {
         LOGE("setBufferCount: bufferCount larger than slots available");
@@ -185,7 +189,7 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
 
     // here we're guaranteed that the client doesn't have dequeued buffers
     // and will release all of its buffer references.
-    freeAllBuffers();
+    freeAllBuffersLocked();
     mBufferCount = bufferCount;
     mClientBufferCount = bufferCount;
     mCurrentTexture = INVALID_BUFFER_SLOT;
@@ -214,6 +218,10 @@ status_t SurfaceTexture::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
         LOGE("requestBuffer: SurfaceTexture has been abandoned!");
         return NO_INIT;
     }
+    if (mConnectedApi == NO_CONNECTED_API) {
+        LOGE("requestBuffer: SurfaceTexture is not connected!");
+        return NO_INIT;
+    }
     if (slot < 0 || mBufferCount <= slot) {
         LOGE("requestBuffer: slot index out of range [0, %d]: %d",
                 mBufferCount, slot);
@@ -230,6 +238,10 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
 
     if (mAbandoned) {
         LOGE("dequeueBuffer: SurfaceTexture has been abandoned!");
+        return NO_INIT;
+    }
+    if (mConnectedApi == NO_CONNECTED_API) {
+        LOGE("dequeueBuffer: SurfaceTexture is not connected!");
         return NO_INIT;
     }
 
@@ -285,7 +297,7 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
                 ((mServerBufferCount != mBufferCount) ||
                         (mServerBufferCount < minBufferCountNeeded))) {
             // here we're guaranteed that mQueue is empty
-            freeAllBuffers();
+            freeAllBuffersLocked();
             mBufferCount = mServerBufferCount;
             if (mBufferCount < minBufferCountNeeded)
                 mBufferCount = minBufferCountNeeded;
@@ -442,6 +454,10 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp,
             LOGE("queueBuffer: SurfaceTexture has been abandoned!");
             return NO_INIT;
         }
+        if (mConnectedApi == NO_CONNECTED_API) {
+            LOGE("queueBuffer: SurfaceTexture is not connected!");
+            return NO_INIT;
+        }
         if (buf < 0 || buf >= mBufferCount) {
             LOGE("queueBuffer: slot index out of range [0, %d]: %d",
                     mBufferCount, buf);
@@ -512,6 +528,10 @@ void SurfaceTexture::cancelBuffer(int buf) {
         LOGW("cancelBuffer: SurfaceTexture has been abandoned!");
         return;
     }
+    if (mConnectedApi == NO_CONNECTED_API) {
+        LOGE("cancelBuffer: SurfaceTexture is not connected!");
+        return;
+    }
 
     if (buf < 0 || buf >= mBufferCount) {
         LOGE("cancelBuffer: slot index out of range [0, %d]: %d",
@@ -533,6 +553,10 @@ status_t SurfaceTexture::setCrop(const Rect& crop) {
         LOGE("setCrop: SurfaceTexture has been abandoned!");
         return NO_INIT;
     }
+    if (mConnectedApi == NO_CONNECTED_API) {
+        LOGE("setCrop: SurfaceTexture is not connected!");
+        return NO_INIT;
+    }
     mNextCrop = crop;
     return OK;
 }
@@ -542,6 +566,10 @@ status_t SurfaceTexture::setTransform(uint32_t transform) {
     Mutex::Autolock lock(mMutex);
     if (mAbandoned) {
         LOGE("setTransform: SurfaceTexture has been abandoned!");
+        return NO_INIT;
+    }
+    if (mConnectedApi == NO_CONNECTED_API) {
+        LOGE("setTransform: SurfaceTexture is not connected!");
         return NO_INIT;
     }
     mNextTransform = transform;
@@ -599,7 +627,7 @@ status_t SurfaceTexture::disconnect(int api) {
         case NATIVE_WINDOW_API_CAMERA:
             if (mConnectedApi == api) {
                 mConnectedApi = NO_CONNECTED_API;
-                freeAllBuffers();
+                freeAllBuffersLocked();
             } else {
                 LOGE("disconnect: connected to another api (cur=%d, req=%d)",
                         mConnectedApi, api);
@@ -848,7 +876,9 @@ void SurfaceTexture::setFrameAvailableListener(
     mFrameAvailableListener = listener;
 }
 
-void SurfaceTexture::freeAllBuffers() {
+void SurfaceTexture::freeAllBuffersLocked() {
+    LOGW_IF(!mQueue.isEmpty(),
+            "freeAllBuffersLocked called but mQueue is not empty");
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         mSlots[i].mGraphicBuffer = 0;
         mSlots[i].mBufferState = BufferSlot::FREE;
@@ -929,7 +959,7 @@ int SurfaceTexture::query(int what, int* outValue)
 
 void SurfaceTexture::abandon() {
     Mutex::Autolock lock(mMutex);
-    freeAllBuffers();
+    freeAllBuffersLocked();
     mAbandoned = true;
     mCurrentTextureBuf.clear();
     mDequeueCondition.signal();
