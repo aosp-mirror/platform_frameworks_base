@@ -39,7 +39,8 @@ HTTPBase::HTTPBase()
       mPrevBandwidthMeasureTimeUs(0),
       mPrevEstimatedBandWidthKbps(0),
       mBandWidthCollectFreqMs(5000),
-      mUIDValid(false) {
+      mUIDValid(false),
+      mUID(0) {
 }
 
 // static
@@ -135,9 +136,19 @@ bool HTTPBase::getUID(uid_t *uid) const {
 }
 
 // static
-void HTTPBase::RegisterSocketUser(int s, uid_t uid) {
-    static const uint32_t kTag = 0xdeadbeef;
-    set_qtaguid(s, kTag, uid);
+void HTTPBase::RegisterSocketUserTag(int sockfd, uid_t uid, uint32_t kTag) {
+    int res = qtaguid_tagSocket(sockfd, kTag, uid);
+    if (res != 0) {
+        LOGE("Failed tagging socket %d for uid %d (My UID=%d)", sockfd, uid, geteuid());
+    }
+}
+
+// static
+void HTTPBase::UnRegisterSocketUserTag(int sockfd) {
+    int res = qtaguid_untagSocket(sockfd);
+    if (res != 0) {
+        LOGE("Failed untagging socket %d (My UID=%d)", sockfd, geteuid());
+    }
 }
 
 }  // namespace android

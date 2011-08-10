@@ -255,8 +255,8 @@ sp<IMediaPlayer> MediaPlayerService::create(
             this, pid, connId, client, audioSessionId,
             IPCThreadState::self()->getCallingUid());
 
-    LOGV("Create new client(%d) from pid %d, url=%s, connId=%d, audioSessionId=%d",
-            connId, pid, url, connId, audioSessionId);
+    LOGV("Create new client(%d) from pid %d, uid %d, url=%s, connId=%d, audioSessionId=%d",
+            connId, pid, IPCThreadState::self()->getCallingUid(), url, connId, audioSessionId);
     if (NO_ERROR != c->setDataSource(url, headers))
     {
         c.clear();
@@ -277,8 +277,9 @@ sp<IMediaPlayer> MediaPlayerService::create(pid_t pid, const sp<IMediaPlayerClie
             this, pid, connId, client, audioSessionId,
             IPCThreadState::self()->getCallingUid());
 
-    LOGV("Create new client(%d) from pid %d, fd=%d, offset=%lld, length=%lld, audioSessionId=%d",
-            connId, pid, fd, offset, length, audioSessionId);
+    LOGV("Create new client(%d) from pid %d, uid %d, fd=%d, offset=%lld, "
+         "length=%lld, audioSessionId=%d", connId, pid,
+         IPCThreadState::self()->getCallingUid(), fd, offset, length, audioSessionId);
     if (NO_ERROR != c->setDataSource(fd, offset, length)) {
         c.clear();
     } else {
