@@ -1169,6 +1169,11 @@ public final class Settings {
         public static final String RADIO_CELL = "cell";
 
         /**
+         * Constant for use in AIRPLANE_MODE_RADIOS to specify NFC radio.
+         */
+        public static final String RADIO_NFC = "nfc";
+
+        /**
          * A comma separated list of radios that need to be disabled when airplane mode
          * is on. This overrides WIFI_ON and BLUETOOTH_ON, if Wi-Fi and bluetooth are
          * included in the comma separated list.

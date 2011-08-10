@@ -63,7 +63,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // database gets upgraded properly. At a minimum, please confirm that 'upgradeVersion'
     // is properly propagated through your change.  Not doing so will result in a loss of user
     // settings.
-    private static final int DATABASE_VERSION = 69;
+    private static final int DATABASE_VERSION = 70;
 
     private Context mContext;
 
@@ -915,6 +915,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 db.endTransaction();
             }
             upgradeVersion = 69;
+        }
+
+        if (upgradeVersion == 69) {
+            // Add RADIO_NFC to AIRPLANE_MODE_RADIO and AIRPLANE_MODE_TOGGLEABLE_RADIOS
+            String airplaneRadios = mContext.getResources().getString(
+                    R.string.def_airplane_mode_radios);
+            String toggleableRadios = mContext.getResources().getString(
+                    R.string.airplane_mode_toggleable_radios);
+            db.beginTransaction();
+            try {
+                db.execSQL("UPDATE system SET value='" + airplaneRadios + "' " +
+                        "WHERE name='" + Settings.System.AIRPLANE_MODE_RADIOS + "'");
+                db.execSQL("UPDATE system SET value='" + toggleableRadios + "' " +
+                        "WHERE name='" + Settings.System.AIRPLANE_MODE_TOGGLEABLE_RADIOS + "'");
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+            upgradeVersion = 70;
         }
 
         // *** Remember to update DATABASE_VERSION above!

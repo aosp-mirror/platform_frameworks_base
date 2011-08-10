@@ -157,23 +157,35 @@ public final class NfcAdapter {
     public static final String EXTRA_ID = "android.nfc.extra.ID";
 
     /**
-     * Broadcast Action: an adapter's state changed between enabled and disabled.
-     *
-     * The new value is stored in the extra EXTRA_NEW_BOOLEAN_STATE and just contains
-     * whether it's enabled or disabled, not including any information about whether it's
-     * actively enabling or disabling.
-     *
+     * Broadcast Action: The state of the local NFC adapter has been
+     * changed.
+     * <p>For example, NFC has been turned on or off.
+     * <p>Always contains the extra field {@link #EXTRA_STATE}
      * @hide
      */
-    public static final String ACTION_ADAPTER_STATE_CHANGE =
-            "android.nfc.action.ADAPTER_STATE_CHANGE";
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_ADAPTER_STATE_CHANGED =
+            "android.nfc.action.ADAPTER_STATE_CHANGED";
 
     /**
-     * The Intent extra for ACTION_ADAPTER_STATE_CHANGE, saying what the new state is.
-     *
+     * Used as an int extra field in {@link #ACTION_STATE_CHANGED}
+     * intents to request the current power state. Possible values are:
+     * {@link #STATE_OFF},
+     * {@link #STATE_TURNING_ON},
+     * {@link #STATE_ON},
+     * {@link #STATE_TURNING_OFF},
      * @hide
      */
-    public static final String EXTRA_NEW_BOOLEAN_STATE = "android.nfc.isEnabled";
+    public static final String EXTRA_ADAPTER_STATE = "android.nfc.extra.ADAPTER_STATE";
+
+    /** @hide */
+    public static final int STATE_OFF = 1;
+    /** @hide */
+    public static final int STATE_TURNING_ON = 2;
+    /** @hide */
+    public static final int STATE_ON = 3;
+    /** @hide */
+    public static final int STATE_TURNING_OFF = 4;
 
     /**
      * LLCP link status: The LLCP link is activated.
@@ -430,7 +442,7 @@ public final class NfcAdapter {
      */
     public boolean isEnabled() {
         try {
-            return sService.isEnabled();
+            return sService.getState() == STATE_ON;
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
@@ -438,10 +450,40 @@ public final class NfcAdapter {
     }
 
     /**
+     * Return the state of this NFC Adapter.
+     *
+     * <p>Returns one of {@link #STATE_ON}, {@link #STATE_TURNING_ON},
+     * {@link #STATE_OFF}, {@link #STATE_TURNING_OFF}.
+     *
+     * <p>{@link #isEnabled()} is equivalent to
+     * <code>{@link #getAdapterState()} == {@link #STATE_ON}</code>
+     *
+     * @return the current state of this NFC adapter
+     *
+     * @hide
+     */
+    public int getAdapterState() {
+        try {
+            return sService.getState();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            return NfcAdapter.STATE_OFF;
+        }
+    }
+
+    /**
      * Enable NFC hardware.
-     * <p>
-     * NOTE: may block for ~second or more.  Poor API.  Avoid
-     * calling from the UI thread.
+     *
+     * <p>This call is asynchronous. Listen for
+     * {@link #ACTION_ADAPTER_STATE_CHANGED} broadcasts to find out when the
+     * operation is complete.
+     *
+     * <p>If this returns true, then either NFC is already on, or
+     * a {@link #ACTION_ADAPTER_STATE_CHANGED} broadcast will be sent
+     * to indicate a state transition. If this returns false, then
+     * there is some problem that prevents an attempt to turn
+     * NFC on (for example we are in airplane mode and NFC is not
+     * toggleable in airplane mode on this platform).
      *
      * @hide
      */
@@ -456,11 +498,19 @@ public final class NfcAdapter {
 
     /**
      * Disable NFC hardware.
-     * No NFC features will work after this call, and the hardware
+     *
+     * <p>No NFC features will work after this call, and the hardware
      * will not perform or respond to any NFC communication.
-     * <p>
-     * NOTE: may block for ~second or more.  Poor API.  Avoid
-     * calling from the UI thread.
+     *
+     * <p>This call is asynchronous. Listen for
+     * {@link #ACTION_ADAPTER_STATE_CHANGED} broadcasts to find out when the
+     * operation is complete.
+     *
+     * <p>If this returns true, then either NFC is already off, or
+     * a {@link #ACTION_ADAPTER_STATE_CHANGED} broadcast will be sent
+     * to indicate a state transition. If this returns false, then
+     * there is some problem that prevents an attempt to turn
+     * NFC off.
      *
      * @hide
      */
@@ -712,14 +762,20 @@ public final class NfcAdapter {
     }
 
     /**
-     * Return true if zero-click sharing is enabled.
+     * Return true if zero-click sharing feature is enabled.
+     * <p>This function can return true even if NFC is currently turned-off.
+     * This indicates that zero-click is not currently active, but it has
+     * been requested by the user and will be active as soon as NFC is turned
+     * on.
+     * <p>If you want to check if zero-click sharing is currently active, use
+     * <code>{@link #isEnabled()} && {@link #isZeroClickEnabled()}</code>
      *
      * @return true if zero-click sharing is enabled
      * @hide
      */
-    public boolean zeroClickEnabled() {
+    public boolean isZeroClickEnabled() {
         try {
-            return sService.zeroClickEnabled();
+            return sService.isZeroClickEnabled();
         } catch (RemoteException e) {
             attemptDeadServiceRecovery(e);
             return false;
