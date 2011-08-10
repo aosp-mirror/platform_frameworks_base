@@ -37,14 +37,17 @@ import java.io.StringWriter;
  *
  * A report has a type, which is one of
  * <ul>
+ * <li> {@link #TYPE_NONE} uninitialized instance of {@link ApplicationErrorReport}.
  * <li> {@link #TYPE_CRASH} application crash. Information about the crash
  * is stored in {@link #crashInfo}.
  * <li> {@link #TYPE_ANR} application not responding. Information about the
  * ANR is stored in {@link #anrInfo}.
- * <li> {@link #TYPE_NONE} uninitialized instance of {@link ApplicationErrorReport}.
+ * <li> {@link #TYPE_BATTERY} user reported application is using too much
+ * battery. Information about the battery use is stored in {@link #batteryInfo}.
+ * <li> {@link #TYPE_RUNNING_SERVICE} user reported application is leaving an
+ * unneeded serive running. Information about the battery use is stored in
+ * {@link #runningServiceInfo}.
  * </ul>
- *
- * @hide
  */
 
 public class ApplicationErrorReport implements Parcelable {

@@ -23,11 +23,6 @@ import android.widget.TabWidget;
 import android.widget.TextView;
 
 /**
- * @deprecated New applications should use Fragments instead of this class;
- * to continue to run on older devices, you can use the v4 support library
- * which provides a version of the Fragment API that is compatible down to
- * {@link android.os.Build.VERSION_CODES#DONUT}.
- *
  * <p>For apps developing against {@link android.os.Build.VERSION_CODES#HONEYCOMB}
  * or later, tabs are typically presented in the UI using the new
  * {@link ActionBar#newTab() ActionBar.newTab()} and
@@ -49,6 +44,11 @@ import android.widget.TextView;
  * <p>Also see the <a href="{@docRoot}resources/samples/Support4Demos/src/com/example/android/supportv4/app/FragmentTabsPager.html">
  * Fragment Tabs Pager</a> sample for an example of using the support library's ViewPager to
  * allow the user to swipe the content to switch between tabs.</p>
+ *
+ * @deprecated New applications should use Fragments instead of this class;
+ * to continue to run on older devices, you can use the v4 support library
+ * which provides a version of the Fragment API that is compatible down to
+ * {@link android.os.Build.VERSION_CODES#DONUT}.
  */
 @Deprecated
 public class TabActivity extends ActivityGroup {
