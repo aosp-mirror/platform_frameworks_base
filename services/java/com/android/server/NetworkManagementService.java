@@ -446,6 +446,28 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
+    public void setInterfaceDown(String iface) throws IllegalStateException {
+        try {
+            InterfaceConfiguration ifcg = getInterfaceConfig(iface);
+            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("up", "down");
+            setInterfaceConfig(iface, ifcg);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate with native daemon for interface down - " + e);
+        }
+    }
+
+    public void setInterfaceUp(String iface) throws IllegalStateException {
+        try {
+            InterfaceConfiguration ifcg = getInterfaceConfig(iface);
+            ifcg.interfaceFlags = ifcg.interfaceFlags.replace("down", "up");
+            setInterfaceConfig(iface, ifcg);
+        } catch (NativeDaemonConnectorException e) {
+            throw new IllegalStateException(
+                    "Unable to communicate with native daemon for interface up - " + e);
+        }
+    }
+
     /* TODO: This is right now a IPv4 only function. Works for wifi which loses its
        IPv6 addresses on interface down, but we need to do full clean up here */
     public void clearInterfaceAddresses(String iface) throws IllegalStateException {
