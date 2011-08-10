@@ -78,7 +78,7 @@ public class DateTimeView extends TextView {
 
     @Override
     protected void onAttachedToWindow() {
-        super.onDetachedFromWindow();
+        super.onAttachedToWindow();
         registerReceivers();
         mAttachedToWindow = true;
     }
