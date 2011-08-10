@@ -64,6 +64,16 @@ interface INetworkManagementService
     void clearInterfaceAddresses(String iface);
 
     /**
+     * Set interface down
+     */
+    void setInterfaceDown(String iface);
+
+    /**
+     * Set interface up
+     */
+    void setInterfaceUp(String iface);
+
+    /**
      * Retrieves the network routes currently configured on the specified
      * interface
      */
