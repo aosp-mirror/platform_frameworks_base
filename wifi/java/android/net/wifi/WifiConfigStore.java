@@ -954,7 +954,7 @@ class WifiConfigStore {
                         netId,
                         WifiConfiguration.pskVarName,
                         config.preSharedKey)) {
-                Log.d(TAG, "failed to set psk: "+config.preSharedKey);
+                Log.d(TAG, "failed to set psk");
                 break setVariables;
             }
 
