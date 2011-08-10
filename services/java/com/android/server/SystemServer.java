@@ -315,6 +315,7 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.CONNECTIVITY_SERVICE, connectivity);
                 networkStats.bindConnectivityManager(connectivity);
                 networkPolicy.bindConnectivityManager(connectivity);
+                wifiP2p.connectivityServiceReady();
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Connectivity Service", e);
             }

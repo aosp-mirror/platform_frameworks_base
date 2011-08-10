@@ -173,6 +173,12 @@ interface INetworkManagementService
     void detachPppd(String tty);
 
     /**
+     * Load firmware for operation in the given mode. Currently the three
+     * modes supported are "AP", "STA" and "P2P".
+     */
+    void wifiFirmwareReload(String wlanIface, String mode);
+
+    /**
      * Start Wifi Access Point
      */
     void startAccessPoint(in WifiConfiguration wifiConfig, String wlanIface, String softapIface);
