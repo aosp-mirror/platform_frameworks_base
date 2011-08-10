@@ -9098,6 +9098,7 @@ package android.hardware {
     method public final void release();
     method public final void setDisplayOrientation(int);
     method public final void setErrorCallback(android.hardware.Camera.ErrorCallback);
+    method public final void setFaceDetectionListener(android.hardware.Camera.FaceDetectionListener);
     method public final void setOneShotPreviewCallback(android.hardware.Camera.PreviewCallback);
     method public void setParameters(android.hardware.Camera.Parameters);
     method public final void setPreviewCallback(android.hardware.Camera.PreviewCallback);
@@ -9105,8 +9106,10 @@ package android.hardware {
     method public final void setPreviewDisplay(android.view.SurfaceHolder) throws java.io.IOException;
     method public final void setPreviewTexture(android.graphics.SurfaceTexture) throws java.io.IOException;
     method public final void setZoomChangeListener(android.hardware.Camera.OnZoomChangeListener);
+    method public final void startFaceDetection();
     method public final void startPreview();
     method public final void startSmoothZoom(int);
+    method public final void stopFaceDetection();
     method public final void stopPreview();
     method public final void stopSmoothZoom();
     method public final void takePicture(android.hardware.Camera.ShutterCallback, android.hardware.Camera.PictureCallback, android.hardware.Camera.PictureCallback);
@@ -9140,6 +9143,16 @@ package android.hardware {
     method public abstract void onError(int, android.hardware.Camera);
   }
 
+  public static class Camera.Face {
+    ctor public Camera.Face();
+    field public android.graphics.Rect rect;
+    field public int score;
+  }
+
+  public static abstract interface Camera.FaceDetectionListener {
+    method public abstract void onFaceDetection(android.hardware.Camera.Face[], android.hardware.Camera);
+  }
+
   public static abstract interface Camera.OnZoomChangeListener {
     method public abstract void onZoomChange(int, boolean, android.hardware.Camera);
   }
@@ -9164,6 +9177,7 @@ package android.hardware {
     method public int getJpegThumbnailQuality();
     method public android.hardware.Camera.Size getJpegThumbnailSize();
     method public int getMaxExposureCompensation();
+    method public int getMaxNumDetectedFaces();
     method public int getMaxNumFocusAreas();
     method public int getMaxNumMeteringAreas();
     method public int getMaxZoom();
