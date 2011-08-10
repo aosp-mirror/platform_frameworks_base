@@ -312,6 +312,18 @@ public class MediaScanner
 
     private final String mExternalStoragePath;
 
+    // WARNING: Bulk inserts sounded like a great idea and gave us a good performance improvement,
+    // but unfortunately it also introduced a number of bugs.  Many of those bugs were fixed,
+    // but (at least) two problems are still outstanding:
+    //
+    // 1) Bulk inserts broke the code that sets the default ringtones on first boot
+    // 2) Bulk inserts broke file based playlists in the case where the playlist is processed
+    //    at the same time the files in the playlist are inserted in the database
+    //
+    // These problems might be solvable by moving the logic to the media provider instead,
+    // but for now we are disabling bulk inserts until we have solid fixes for these problems.
+    private static final boolean ENABLE_BULK_INSERTS = false;
+
     // used when scanning the image database so we know whether we have to prune
     // old thumbnail files
     private int mOriginalCount;
@@ -1166,25 +1178,29 @@ public class MediaScanner
             prescan(null, true);
             long prescan = System.currentTimeMillis();
 
-            // create FileInserters for bulk inserts
-            mAudioInserter = new FileInserter(mAudioUri, 500);
-            mVideoInserter = new FileInserter(mVideoUri, 500);
-            mImageInserter = new FileInserter(mImagesUri, 500);
-            mFileInserter = new FileInserter(mFilesUri, 500);
+            if (ENABLE_BULK_INSERTS) {
+                // create FileInserters for bulk inserts
+                mAudioInserter = new FileInserter(mAudioUri, 500);
+                mVideoInserter = new FileInserter(mVideoUri, 500);
+                mImageInserter = new FileInserter(mImagesUri, 500);
+                mFileInserter = new FileInserter(mFilesUri, 500);
+            }
 
             for (int i = 0; i < directories.length; i++) {
                 processDirectory(directories[i], mClient);
             }
 
-            // flush remaining inserts
-            mAudioInserter.flush();
-            mVideoInserter.flush();
-            mImageInserter.flush();
-            mFileInserter.flush();
-            mAudioInserter = null;
-            mVideoInserter = null;
-            mImageInserter = null;
-            mFileInserter = null;
+            if (ENABLE_BULK_INSERTS) {
+                // flush remaining inserts
+                mAudioInserter.flush();
+                mVideoInserter.flush();
+                mImageInserter.flush();
+                mFileInserter.flush();
+                mAudioInserter = null;
+                mVideoInserter = null;
+                mImageInserter = null;
+                mFileInserter = null;
+            }
 
             long scan = System.currentTimeMillis();
             postscan(directories);
