@@ -89,7 +89,8 @@ import javax.crypto.spec.PBEKeySpec;
  * @hide - Applications should use android.os.storage.StorageManager
  * to access the MountService.
  */
-class MountService extends IMountService.Stub implements INativeDaemonConnectorCallbacks {
+class MountService extends IMountService.Stub
+        implements INativeDaemonConnectorCallbacks, Watchdog.Monitor {
 
     private static final boolean LOCAL_LOGD = false;
     private static final boolean DEBUG_UNMOUNT = false;
@@ -474,7 +475,8 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
                             // it is not safe to call vold with mVolumeStates locked
                             // so we make a copy of the paths and states and process them
                             // outside the lock
-                            String[] paths, states;
+                            String[] paths;
+                            String[] states;
                             int count;
                             synchronized (mVolumeStates) {
                                 Set<String> keys = mVolumeStates.keySet();
@@ -1179,6 +1181,9 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
         mReady = false;
         Thread thread = new Thread(mConnector, VOLD_TAG);
         thread.start();
+
+        // Add ourself to the Watchdog monitors.
+        Watchdog.getInstance().addMonitor(this);
     }
 
     /**
@@ -2379,5 +2384,11 @@ class MountService extends IMountService.Stub implements INativeDaemonConnectorC
             }
         }
     }
-}
 
+    /** {@inheritDoc} */
+    public void monitor() {
+        if (mConnector != null) {
+            mConnector.monitor();
+        }
+    }
+}
