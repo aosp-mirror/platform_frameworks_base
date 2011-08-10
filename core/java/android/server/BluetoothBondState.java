@@ -134,6 +134,7 @@ class BluetoothBondState {
     /** reason is ignored unless state == BOND_NOT_BONDED */
     public synchronized void setBondState(String address, int state, int reason) {
         if (DBG) Log.d(TAG, "setBondState " + "address" + " " + state + "reason: " + reason);
+        if (!mService.isEnabled()) return;
 
         int oldState = getBondState(address);
         if (oldState == state) {
