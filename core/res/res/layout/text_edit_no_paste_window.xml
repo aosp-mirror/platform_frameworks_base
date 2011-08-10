@@ -30,7 +30,6 @@
         android:textAppearance="?android:attr/textAppearanceMediumInverse"
         android:textColor="@android:color/dim_foreground_dark_inverse_disabled"
         android:background="@android:drawable/text_edit_paste_window"
-        android:text="@android:string/pasteDisabled"
         android:layout_marginBottom="12dip"
     />
 
