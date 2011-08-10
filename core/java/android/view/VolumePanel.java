@@ -35,6 +35,8 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
+import android.provider.Settings;
+import android.provider.Settings.System;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -233,6 +235,10 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     }
 
     private void createSliders() {
+        final int silentableStreams = System.getInt(mContext.getContentResolver(),
+                System.MODE_RINGER_STREAMS_AFFECTED,
+                ((1 << AudioSystem.STREAM_NOTIFICATION) | (1 << AudioSystem.STREAM_RING)));
+
         LayoutInflater inflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mStreamControls = new HashMap<Integer,StreamControl>(STREAM_TYPES.length);
@@ -243,7 +249,9 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
             sc.group = (ViewGroup) inflater.inflate(R.layout.volume_adjust_item, null);
             sc.group.setTag(sc);
             sc.icon = (ImageView) sc.group.findViewById(R.id.stream_icon);
-            sc.icon.setOnClickListener(this);
+            if ((silentableStreams & (1 << sc.streamType)) != 0) {
+                sc.icon.setOnClickListener(this);
+            }
             sc.icon.setTag(sc);
             sc.icon.setContentDescription(res.getString(CONTENT_DESCRIPTIONS[i]));
             sc.iconRes = STREAM_ICONS_NORMAL[i];
