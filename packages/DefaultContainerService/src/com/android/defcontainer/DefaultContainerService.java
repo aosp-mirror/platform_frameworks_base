@@ -20,6 +20,7 @@ import com.android.internal.app.IMediaContainerService;
 import com.android.internal.content.NativeLibraryHelper;
 import com.android.internal.content.PackageHelper;
 
+import android.app.IntentService;
 import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -30,25 +31,24 @@ import android.content.res.ObbInfo;
 import android.content.res.ObbScanner;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StatFs;
-import android.app.IntentService;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Slog;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import android.os.FileUtils;
-import android.provider.Settings;
+import java.io.OutputStream;
 
 /*
  * This service copies a downloaded apk to a file passed in as
@@ -88,19 +88,32 @@ public class DefaultContainerService extends IntentService {
 
         /*
          * Copy specified resource to output stream
-         * @param packageURI the uri of resource to be copied. Should be a
-         * file uri
+         * @param packageURI the uri of resource to be copied. Should be a file
+         * uri
          * @param outStream Remote file descriptor to be used for copying
-         * @return Returns true if copy succeded or false otherwise.
+         * @return returns status code according to those in {@link
+         * PackageManager}
          */
-        public boolean copyResource(final Uri packageURI,
-                ParcelFileDescriptor outStream) {
-            if (packageURI == null ||  outStream == null) {
-                return false;
+        public int copyResource(final Uri packageURI, ParcelFileDescriptor outStream) {
+            if (packageURI == null || outStream == null) {
+                return PackageManager.INSTALL_FAILED_INVALID_URI;
             }
-            ParcelFileDescriptor.AutoCloseOutputStream
-            autoOut = new ParcelFileDescriptor.AutoCloseOutputStream(outStream);
-            return copyFile(packageURI, autoOut);
+
+            ParcelFileDescriptor.AutoCloseOutputStream autoOut
+                    = new ParcelFileDescriptor.AutoCloseOutputStream(outStream);
+
+            try {
+                copyFile(packageURI, autoOut);
+                return PackageManager.INSTALL_SUCCEEDED;
+            } catch (FileNotFoundException e) {
+                Slog.e(TAG, "Could not copy URI " + packageURI.toString() + " FNF: "
+                        + e.getMessage());
+                return PackageManager.INSTALL_FAILED_INVALID_URI;
+            } catch (IOException e) {
+                Slog.e(TAG, "Could not copy URI " + packageURI.toString() + " IO: "
+                        + e.getMessage());
+                return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            }
         }
 
         /*
@@ -315,76 +328,63 @@ public class DefaultContainerService extends IntentService {
         return newCachePath;
     }
 
-    private static boolean copyToFile(InputStream inputStream, FileOutputStream out) {
-        try {
-            byte[] buffer = new byte[4096];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) >= 0) {
-                out.write(buffer, 0, bytesRead);
-            }
-            return true;
-        } catch (IOException e) {
-            Slog.i(TAG, "Exception : " + e + " when copying file");
-            return false;
+    private static void copyToFile(InputStream inputStream, OutputStream out) throws IOException {
+        byte[] buffer = new byte[16384];
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) >= 0) {
+            out.write(buffer, 0, bytesRead);
         }
     }
 
-    private static boolean copyToFile(File srcFile, FileOutputStream out) {
-        InputStream inputStream = null;
+    private static void copyToFile(File srcFile, OutputStream out)
+            throws FileNotFoundException, IOException {
+        InputStream inputStream = new BufferedInputStream(new FileInputStream(srcFile));
         try {
-            inputStream = new FileInputStream(srcFile);
-            return copyToFile(inputStream, out);
-        } catch (IOException e) {
-            return false;
+            copyToFile(inputStream, out);
         } finally {
-            try { if (inputStream != null) inputStream.close(); } catch (IOException e) {}
+            try { inputStream.close(); } catch (IOException e) {}
         }
     }
 
-    private boolean copyFile(Uri pPackageURI, FileOutputStream outStream) {
+    private void copyFile(Uri pPackageURI, OutputStream outStream) throws FileNotFoundException,
+            IOException {
         String scheme = pPackageURI.getScheme();
         if (scheme == null || scheme.equals("file")) {
             final File srcPackageFile = new File(pPackageURI.getPath());
             // We copy the source package file to a temp file and then rename it to the
             // destination file in order to eliminate a window where the package directory
             // scanner notices the new package file but it's not completely copied yet.
-            if (!copyToFile(srcPackageFile, outStream)) {
-                Slog.e(TAG, "Couldn't copy file: " + srcPackageFile);
-                return false;
-            }
+            copyToFile(srcPackageFile, outStream);
         } else if (scheme.equals("content")) {
             ParcelFileDescriptor fd = null;
             try {
                 fd = getContentResolver().openFileDescriptor(pPackageURI, "r");
             } catch (FileNotFoundException e) {
-                Slog.e(TAG,
-                        "Couldn't open file descriptor from download service. Failed with exception "
-                                + e);
-                return false;
+                Slog.e(TAG, "Couldn't open file descriptor from download service. "
+                        + "Failed with exception " + e);
+                throw e;
             }
+
             if (fd == null) {
-                Slog.e(TAG, "Couldn't open file descriptor from download service (null).");
-                return false;
+                Slog.e(TAG, "Provider returned no file descriptor for " + pPackageURI.toString());
+                throw new FileNotFoundException("provider returned no file descriptor");
             } else {
                 if (localLOGV) {
                     Slog.i(TAG, "Opened file descriptor from download service.");
                 }
-                ParcelFileDescriptor.AutoCloseInputStream
-                dlStream = new ParcelFileDescriptor.AutoCloseInputStream(fd);
+                ParcelFileDescriptor.AutoCloseInputStream dlStream
+                        = new ParcelFileDescriptor.AutoCloseInputStream(fd);
+
                 // We copy the source package file to a temp file and then rename it to the
                 // destination file in order to eliminate a window where the package directory
                 // scanner notices the new package file but it's not completely
-                // cop
-                if (!copyToFile(dlStream, outStream)) {
-                    Slog.e(TAG, "Couldn't copy " + pPackageURI + " to temp file.");
-                    return false;
-                }
+                // copied
+                copyToFile(dlStream, outStream);
             }
         } else {
             Slog.e(TAG, "Package URI is not 'file:' or 'content:' - " + pPackageURI);
-            return false;
+            throw new FileNotFoundException("Package URI is not 'file:' or 'content:'");
         }
-        return true;
     }
 
     private static final int PREFER_INTERNAL = 1;

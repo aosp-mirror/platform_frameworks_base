@@ -5348,7 +5348,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             try {
                 out = ParcelFileDescriptor.open(codeFile, ParcelFileDescriptor.MODE_READ_WRITE);
             } catch (FileNotFoundException e) {
-                Slog.e(TAG, "Failed to create file descritpor for : " + codeFileName);
+                Slog.e(TAG, "Failed to create file descriptor for : " + codeFileName);
                 return PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
             }
             // Copy the resource now
@@ -5356,9 +5356,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             try {
                 mContext.grantUriPermission(DEFAULT_CONTAINER_PACKAGE, packageURI,
                         Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                if (imcs.copyResource(packageURI, out)) {
-                    ret = PackageManager.INSTALL_SUCCEEDED;
-                }
+                ret = imcs.copyResource(packageURI, out);
             } finally {
                 try { if (out != null) out.close(); } catch (IOException e) {}
                 mContext.revokeUriPermission(packageURI, Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -5553,6 +5551,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         int copyApk(IMediaContainerService imcs, boolean temp) throws RemoteException {
             if (temp) {
                 createCopyFile();
+            } else {
+                /*
+                 * Pre-emptively destroy the container since it's destroyed if
+                 * copying fails due to it existing anyway.
+                 */
+                PackageHelper.destroySdDir(cid);
             }
 
             final String newCachePath;
