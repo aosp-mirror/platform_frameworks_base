@@ -55,7 +55,6 @@ import com.android.internal.telephony.ITelephony;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -2159,7 +2158,7 @@ public class AudioService extends IAudioService.Stub {
 
                 case MSG_RCDISPLAY_UPDATE:
                     synchronized(mCurrentRcLock) {
-                        if (mCurrentRcClientRef.get() == null) {
+                        if (mCurrentRcClient == null) {
                             // the remote control display owner has changed between the
                             // the message to update the display was sent, and the time it
                             // gets to be processed (now)
@@ -2848,11 +2847,10 @@ public class AudioService extends IAudioService.Stub {
     private final Object mCurrentRcLock = new Object();
     /**
      * The one remote control client to be polled for display information.
-     * This object is never null, but its reference might.
+     * This object may be null.
      * Access protected by mCurrentRcLock.
      */
-    private SoftReference<IRemoteControlClient> mCurrentRcClientRef =
-            new SoftReference<IRemoteControlClient>(null);
+    private IRemoteControlClient mCurrentRcClient = null;
 
     private final static int RC_INFO_NONE = 0;
     private final static int RC_INFO_ALL =
@@ -2868,8 +2866,9 @@ public class AudioService extends IAudioService.Stub {
     private int mCurrentRcClientInfoFlags = RC_INFO_ALL;
 
     /**
-     * A monotonically increasing generation counter for mCurrentRcClientRef.
+     * A monotonically increasing generation counter for mCurrentRcClient.
      * Only accessed with a lock on mCurrentRcLock.
+     * No value wrap-around issues as we only act on equal values.
      */
     private int mCurrentRcClientGen = 0;
 
@@ -2885,7 +2884,7 @@ public class AudioService extends IAudioService.Stub {
     public IRemoteControlClient getRemoteControlClient(int rcClientId) {
         synchronized(mCurrentRcLock) {
             if (rcClientId == mCurrentRcClientGen) {
-                return mCurrentRcClientRef.get();
+                return mCurrentRcClient;
             } else {
                 return null;
             }
@@ -2945,13 +2944,13 @@ public class AudioService extends IAudioService.Stub {
         public int mCallingUid;
 
         /** provides access to the information to display on the remote control */
-        public SoftReference<IRemoteControlClient> mRcClientRef;
+        public IRemoteControlClient mRcClient;
         public RcClientDeathHandler mRcClientDeathHandler;
 
         public RemoteControlStackEntry(ComponentName r) {
             mReceiverComponent = r;
             mCallingUid = -1;
-            mRcClientRef = new SoftReference<IRemoteControlClient>(null);
+            mRcClient = null;
         }
 
         public void unlinkToRcClientDeath() {
@@ -2986,7 +2985,7 @@ public class AudioService extends IAudioService.Stub {
             while(stackIterator.hasNext()) {
                 RemoteControlStackEntry rcse = stackIterator.next();
                 pw.println("     receiver: " + rcse.mReceiverComponent +
-                        "  -- client: " + rcse.mRcClientRef.get() +
+                        "  -- client: " + rcse.mRcClient +
                         "  -- uid: " + rcse.mCallingUid);
             }
         }
@@ -3105,7 +3104,7 @@ public class AudioService extends IAudioService.Stub {
      */
     private void clearRemoteControlDisplay() {
         synchronized(mCurrentRcLock) {
-            mCurrentRcClientRef.clear();
+            mCurrentRcClient = null;
             mCurrentRcClientInfoFlags = RC_INFO_NONE;
         }
         mAudioHandler.sendMessage( mAudioHandler.obtainMessage(MSG_RCDISPLAY_CLEAR) );
@@ -3120,18 +3119,17 @@ public class AudioService extends IAudioService.Stub {
         RemoteControlStackEntry rcse = mRCStack.peek();
         // this is where we enforce opt-in for information display on the remote controls
         //   with the new AudioManager.registerRemoteControlClient() API
-        if (rcse.mRcClientRef.get() == null) {
-            // FIXME remove log before release: this warning will be displayed for every AF change
-            Log.w(TAG, "Can't update remote control display with null remote control client");
+        if (rcse.mRcClient == null) {
+            //Log.w(TAG, "Can't update remote control display with null remote control client");
             clearRemoteControlDisplay();
             return;
         }
         synchronized(mCurrentRcLock) {
-            if (!rcse.mRcClientRef.get().equals(mCurrentRcClientRef.get())) {
+            if (!rcse.mRcClient.equals(mCurrentRcClient)) {
                 // new RC client, assume every type of information shall be queried
                 mCurrentRcClientInfoFlags = RC_INFO_ALL;
             }
-            mCurrentRcClientRef = rcse.mRcClientRef;
+            mCurrentRcClient = rcse.mRcClient;
         }
         mAudioHandler.sendMessage( mAudioHandler.obtainMessage(MSG_RCDISPLAY_UPDATE, 0, 0, rcse) );
     }
@@ -3209,7 +3207,7 @@ public class AudioService extends IAudioService.Stub {
                             rcse.unlinkToRcClientDeath();
                         }
                         // save the new remote control client
-                        rcse.mRcClientRef = new SoftReference<IRemoteControlClient>(rcClient);
+                        rcse.mRcClient = rcClient;
                         rcse.mCallingPackageName = callingPackageName;
                         rcse.mCallingUid = Binder.getCallingUid();
                         if (rcClient == null) {
@@ -3224,7 +3222,7 @@ public class AudioService extends IAudioService.Stub {
                         } catch (RemoteException e) {
                             // remote control client is DOA, disqualify it
                             Log.w(TAG, "registerRemoteControlClient() has a dead client " + b);
-                            rcse.mRcClientRef.clear();
+                            rcse.mRcClient = null;
                         }
                         rcse.mRcClientDeathHandler = rcdh;
                         break;
