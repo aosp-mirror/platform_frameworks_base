@@ -26,8 +26,10 @@ import dalvik.system.PathClassLoader;
 import dalvik.system.Zygote;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -193,15 +195,20 @@ class ZygoteConnection {
                     new FileOutputStream(descriptors[2]));
         }
 
-        int pid;
+        int pid = -1;
+        FileDescriptor childPipeFd = null;
+        FileDescriptor serverPipeFd = null;
 
         try {
             parsedArgs = new Arguments(args);
 
             applyUidSecurityPolicy(parsedArgs, peer);
-            applyDebuggerSecurityPolicy(parsedArgs);
             applyRlimitSecurityPolicy(parsedArgs, peer);
             applyCapabilitiesSecurityPolicy(parsedArgs, peer);
+            applyInvokeWithSecurityPolicy(parsedArgs, peer);
+
+            applyDebuggerSystemProperty(parsedArgs);
+            applyInvokeWithSystemProperty(parsedArgs);
 
             int[][] rlimits = null;
 
@@ -209,25 +216,44 @@ class ZygoteConnection {
                 rlimits = parsedArgs.rlimits.toArray(intArray2d);
             }
 
+            if (parsedArgs.runtimeInit && parsedArgs.invokeWith != null) {
+                FileDescriptor[] pipeFds = new FileDescriptor[2];
+                ZygoteInit.pipe(pipeFds);
+                childPipeFd = pipeFds[1];
+                serverPipeFd = pipeFds[0];
+                ZygoteInit.setCloseOnExec(serverPipeFd, true);
+            }
+
             pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid,
                     parsedArgs.gids, parsedArgs.debugFlags, rlimits);
+        } catch (IOException ex) {
+            logAndPrintError(newStderr, "Exception creating pipe", ex);
         } catch (IllegalArgumentException ex) {
-            logAndPrintError (newStderr, "Invalid zygote arguments", ex);
-            pid = -1;
+            logAndPrintError(newStderr, "Invalid zygote arguments", ex);
         } catch (ZygoteSecurityException ex) {
             logAndPrintError(newStderr,
                     "Zygote security policy prevents request: ", ex);
-            pid = -1;
         }
 
-        if (pid == 0) {
-            // in child
-            handleChildProc(parsedArgs, descriptors, newStderr);
-            // should never happen
-            return true;
-        } else { /* pid != 0 */
-            // in parent...pid of < 0 means failure
-            return handleParentProc(pid, descriptors, parsedArgs);
+        try {
+            if (pid == 0) {
+                // in child
+                ZygoteInit.closeDescriptorQuietly(serverPipeFd);
+                serverPipeFd = null;
+                handleChildProc(parsedArgs, descriptors, childPipeFd, newStderr);
+
+                // should never get here, the child is expected to either
+                // throw ZygoteInit.MethodAndArgsCaller or exec().
+                return true;
+            } else {
+                // in parent...pid of < 0 means failure
+                ZygoteInit.closeDescriptorQuietly(childPipeFd);
+                childPipeFd = null;
+                return handleParentProc(pid, descriptors, serverPipeFd, parsedArgs);
+            }
+        } finally {
+            ZygoteInit.closeDescriptorQuietly(childPipeFd);
+            ZygoteInit.closeDescriptorQuietly(serverPipeFd);
         }
     }
 
@@ -244,8 +270,8 @@ class ZygoteConnection {
     }
 
     /**
-     * Handles argument parsing for args related to the zygote spawner.<p>
-
+     * Handles argument parsing for args related to the zygote spawner.
+     *
      * Current recognized args:
      * <ul>
      *   <li> --setuid=<i>uid of child process, defaults to 0</i>
@@ -274,6 +300,7 @@ class ZygoteConnection {
      * be handed off to com.android.internal.os.RuntimeInit, rather than
      * processed directly
      * Android runtime startup (eg, Binder initialization) is also eschewed.
+     *   <li> --nice-name=<i>nice name to appear in ps</i>
      *   <li> If <code>--runtime-init</code> is present:
      *      [--] &lt;args for RuntimeInit &gt;
      *   <li> If <code>--runtime-init</code> is absent:
@@ -307,6 +334,9 @@ class ZygoteConnection {
         /** from --runtime-init */
         boolean runtimeInit;
 
+        /** from --nice-name */
+        String niceName;
+
         /** from --capabilities */
         boolean capabilitiesSpecified;
         long permittedCapabilities;
@@ -314,6 +344,9 @@ class ZygoteConnection {
 
         /** from all --rlimit=r,c,m */
         ArrayList<int[]> rlimits;
+
+        /** from --invoke-with */
+        String invokeWith;
 
         /**
          * Any args after and including the first non-option arg
@@ -438,6 +471,23 @@ class ZygoteConnection {
                     for (int i = params.length - 1; i >= 0 ; i--) {
                         gids[i] = Integer.parseInt(params[i]);
                     }
+                } else if (arg.equals("--invoke-with")) {
+                    if (invokeWith != null) {
+                        throw new IllegalArgumentException(
+                                "Duplicate arg specified");
+                    }
+                    try {
+                        invokeWith = args[++curArg];
+                    } catch (IndexOutOfBoundsException ex) {
+                        throw new IllegalArgumentException(
+                                "--invoke-with requires argument");
+                    }
+                } else if (arg.startsWith("--nice-name=")) {
+                    if (niceName != null) {
+                        throw new IllegalArgumentException(
+                                "Duplicate arg specified");
+                    }
+                    niceName = arg.substring(arg.indexOf('=') + 1);
                 } else {
                     break;
                 }
@@ -567,14 +617,15 @@ class ZygoteConnection {
 
 
     /**
-     * Applies debugger security policy.
+     * Applies debugger system properties to the zygote arguments.
+     *
      * If "ro.debuggable" is "1", all apps are debuggable. Otherwise,
      * the debugger state is specified via the "--enable-debugger" flag
      * in the spawn request.
      *
      * @param args non-null; zygote spawner args
      */
-    private static void applyDebuggerSecurityPolicy(Arguments args) {
+    public static void applyDebuggerSystemProperty(Arguments args) {
         if ("1".equals(SystemProperties.get("ro.debuggable"))) {
             args.debugFlags |= Zygote.DEBUG_ENABLE_DEBUGGER;
         }
@@ -664,12 +715,56 @@ class ZygoteConnection {
     }
 
     /**
+     * Applies zygote security policy.
+     * Based on the credentials of the process issuing a zygote command:
+     * <ol>
+     * <li> uid 0 (root) may specify --invoke-with to launch Zygote with a
+     * wrapper command.
+     * <li> Any other uid may not specify any invoke-with argument.
+     * </ul>
+     *
+     * @param args non-null; zygote spawner arguments
+     * @param peer non-null; peer credentials
+     * @throws ZygoteSecurityException
+     */
+    private static void applyInvokeWithSecurityPolicy(Arguments args, Credentials peer)
+            throws ZygoteSecurityException {
+        int peerUid = peer.getUid();
+
+        if (args.invokeWith != null && peerUid != 0) {
+            throw new ZygoteSecurityException("Peer is not permitted to specify "
+                    + "an explicit invoke-with wrapper command");
+        }
+    }
+
+    /**
+     * Applies invoke-with system properties to the zygote arguments.
+     *
+     * @param parsedArgs non-null; zygote args
+     */
+    public static void applyInvokeWithSystemProperty(Arguments args) {
+        if (args.invokeWith == null && args.niceName != null) {
+            if (args.niceName != null) {
+                String property = "wrap." + args.niceName;
+                if (property.length() > 31) {
+                    property = property.substring(0, 31);
+                }
+                args.invokeWith = SystemProperties.get(property);
+                if (args.invokeWith != null && args.invokeWith.length() == 0) {
+                    args.invokeWith = null;
+                }
+            }
+        }
+    }
+
+    /**
      * Handles post-fork setup of child proc, closing sockets as appropriate,
      * reopen stdio as appropriate, and ultimately throwing MethodAndArgsCaller
      * if successful or returning if failed.
      *
      * @param parsedArgs non-null; zygote args
      * @param descriptors null-ok; new file descriptors for stdio if available.
+     * @param pipeFd null-ok; pipe for communication back to Zygote.
      * @param newStderr null-ok; stream to use for stderr until stdio
      * is reopened.
      *
@@ -677,7 +772,7 @@ class ZygoteConnection {
      * trampoline to code that invokes static main.
      */
     private void handleChildProc(Arguments parsedArgs,
-            FileDescriptor[] descriptors, PrintStream newStderr)
+            FileDescriptor[] descriptors, FileDescriptor pipeFd, PrintStream newStderr)
             throws ZygoteInit.MethodAndArgsCaller {
 
         /*
@@ -704,7 +799,7 @@ class ZygoteConnection {
                         descriptors[1], descriptors[2]);
 
                 for (FileDescriptor fd: descriptors) {
-                    ZygoteInit.closeDescriptor(fd);
+                    ZygoteInit.closeDescriptorQuietly(fd);
                 }
                 newStderr = System.err;
             } catch (IOException ex) {
@@ -712,37 +807,48 @@ class ZygoteConnection {
             }
         }
 
+        if (parsedArgs.niceName != null) {
+            Process.setArgV0(parsedArgs.niceName);
+        }
+
         if (parsedArgs.runtimeInit) {
-            RuntimeInit.zygoteInit(parsedArgs.remainingArgs);
-        } else {
-            ClassLoader cloader;
-
-            if (parsedArgs.classpath != null) {
-                cloader
-                    = new PathClassLoader(parsedArgs.classpath,
-                    ClassLoader.getSystemClassLoader());
+            if (parsedArgs.invokeWith != null) {
+                WrapperInit.execApplication(parsedArgs.invokeWith,
+                        parsedArgs.niceName, pipeFd, parsedArgs.remainingArgs);
             } else {
-                cloader = ClassLoader.getSystemClassLoader();
+                RuntimeInit.zygoteInit(parsedArgs.remainingArgs);
             }
-
+        } else {
             String className;
             try {
                 className = parsedArgs.remainingArgs[0];
             } catch (ArrayIndexOutOfBoundsException ex) {
-                logAndPrintError (newStderr,
+                logAndPrintError(newStderr,
                         "Missing required class name argument", null);
                 return;
             }
-            String[] mainArgs
-                    = new String[parsedArgs.remainingArgs.length - 1];
 
+            String[] mainArgs = new String[parsedArgs.remainingArgs.length - 1];
             System.arraycopy(parsedArgs.remainingArgs, 1,
                     mainArgs, 0, mainArgs.length);
 
-            try {
-                ZygoteInit.invokeStaticMain(cloader, className, mainArgs);
-            } catch (RuntimeException ex) {
-                logAndPrintError (newStderr, "Error starting. ", ex);
+            if (parsedArgs.invokeWith != null) {
+                WrapperInit.execStandalone(parsedArgs.invokeWith,
+                        parsedArgs.classpath, className, mainArgs);
+            } else {
+                ClassLoader cloader;
+                if (parsedArgs.classpath != null) {
+                    cloader = new PathClassLoader(parsedArgs.classpath,
+                            ClassLoader.getSystemClassLoader());
+                } else {
+                    cloader = ClassLoader.getSystemClassLoader();
+                }
+
+                try {
+                    ZygoteInit.invokeStaticMain(cloader, className, mainArgs);
+                } catch (RuntimeException ex) {
+                    logAndPrintError(newStderr, "Error starting.", ex);
+                }
             }
         }
     }
@@ -754,40 +860,61 @@ class ZygoteConnection {
      * if &lt; 0;
      * @param descriptors null-ok; file descriptors for child's new stdio if
      * specified.
+     * @param pipeFd null-ok; pipe for communication with child.
      * @param parsedArgs non-null; zygote args
      * @return true for "exit command loop" and false for "continue command
      * loop"
      */
     private boolean handleParentProc(int pid,
-            FileDescriptor[] descriptors, Arguments parsedArgs) {
+            FileDescriptor[] descriptors, FileDescriptor pipeFd, Arguments parsedArgs) {
 
-        if(pid > 0) {
-            // Try to move the new child into the peer's process group.
-            try {
-                ZygoteInit.setpgid(pid, ZygoteInit.getpgid(peer.getPid()));
-            } catch (IOException ex) {
-                // This exception is expected in the case where
-                // the peer is not in our session
-                // TODO get rid of this log message in the case where
-                // getsid(0) != getsid(peer.getPid())
-                Log.i(TAG, "Zygote: setpgid failed. This is "
-                    + "normal if peer is not in our session");
+        if (pid > 0) {
+            setChildPgid(pid);
+        }
+
+        if (descriptors != null) {
+            for (FileDescriptor fd: descriptors) {
+                ZygoteInit.closeDescriptorQuietly(fd);
             }
         }
 
-        try {
-            if (descriptors != null) {
-                for (FileDescriptor fd: descriptors) {
-                    ZygoteInit.closeDescriptor(fd);
+        boolean usingWrapper = false;
+        if (pipeFd != null && pid > 0) {
+            DataInputStream is = new DataInputStream(new FileInputStream(pipeFd));
+            int innerPid = -1;
+            try {
+                innerPid = is.readInt();
+            } catch (IOException ex) {
+                Log.w(TAG, "Error reading pid from wrapped process, child may have died", ex);
+            } finally {
+                try {
+                    is.close();
+                } catch (IOException ex) {
                 }
             }
-        } catch (IOException ex) {
-            Log.e(TAG, "Error closing passed descriptors in "
-                    + "parent process", ex);
+
+            // Ensure that the pid reported by the wrapped process is either the
+            // child process that we forked, or a descendant of it.
+            if (innerPid > 0) {
+                int parentPid = innerPid;
+                while (parentPid > 0 && parentPid != pid) {
+                    parentPid = Process.getParentPid(parentPid);
+                }
+                if (parentPid > 0) {
+                    Log.i(TAG, "Wrapped process has pid " + innerPid);
+                    pid = innerPid;
+                    usingWrapper = true;
+                } else {
+                    Log.w(TAG, "Wrapped process reported a pid that is not a child of "
+                            + "the process that we forked: childPid=" + pid
+                            + " innerPid=" + innerPid);
+                }
+            }
         }
 
         try {
             mSocketOutStream.writeInt(pid);
+            mSocketOutStream.writeBoolean(usingWrapper);
         } catch (IOException ex) {
             Log.e(TAG, "Error reading from command socket", ex);
             return true;
@@ -806,6 +933,20 @@ class ZygoteConnection {
             return true;
         }
         return false;
+    }
+
+    private void setChildPgid(int pid) {
+        // Try to move the new child into the peer's process group.
+        try {
+            ZygoteInit.setpgid(pid, ZygoteInit.getpgid(peer.getPid()));
+        } catch (IOException ex) {
+            // This exception is expected in the case where
+            // the peer is not in our session
+            // TODO get rid of this log message in the case where
+            // getsid(0) != getsid(peer.getPid())
+            Log.i(TAG, "Zygote: setpgid failed. This is "
+                + "normal if peer is not in our session");
+        }
     }
 
     /**

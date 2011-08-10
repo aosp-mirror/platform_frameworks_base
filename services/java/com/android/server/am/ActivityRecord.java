@@ -554,12 +554,12 @@ class ActivityRecord extends IApplicationToken.Stub {
     public long getKeyDispatchingTimeout() {
         synchronized(service) {
             ActivityRecord r = getWaitingHistoryRecordLocked();
-            if (r == null || r.app == null
-                    || r.app.instrumentationClass == null) {
-                return ActivityManagerService.KEY_DISPATCHING_TIMEOUT;
+            if (r != null && r.app != null
+                    && (r.app.instrumentationClass != null || r.app.usingWrapper)) {
+                return ActivityManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT;
             }
-            
-            return ActivityManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT;
+
+            return ActivityManagerService.KEY_DISPATCHING_TIMEOUT;
         }
     }
 
