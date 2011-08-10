@@ -21,8 +21,8 @@
     <integer name="def_screen_off_timeout">60000</integer>
     <bool name="def_airplane_mode_on">false</bool>
     <!-- Comma-separated list of bluetooth, wifi, and cell. -->
-    <string name="def_airplane_mode_radios" translatable="false">cell,bluetooth,wifi</string>
-    <string name="airplane_mode_toggleable_radios" translatable="false">bluetooth,wifi</string>
+    <string name="def_airplane_mode_radios" translatable="false">cell,bluetooth,wifi,nfc</string>
+    <string name="airplane_mode_toggleable_radios" translatable="false">bluetooth,wifi,nfc</string>
     <bool name="def_auto_time">true</bool>
     <bool name="def_auto_time_zone">true</bool>
     <bool name="def_accelerometer_rotation">true</bool>
