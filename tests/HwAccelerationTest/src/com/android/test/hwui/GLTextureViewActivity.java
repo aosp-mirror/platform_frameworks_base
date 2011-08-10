@@ -110,13 +110,14 @@ public class GLTextureViewActivity extends Activity implements TextureView.Surfa
     }
 
     @Override
-    public void onSurfaceTextureDestroyed(SurfaceTexture surface) {
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         mRenderThread.finish();
         try {
             mRenderThread.join();
         } catch (InterruptedException e) {
             Log.e(RenderThread.LOG_TAG, "Could not wait for render thread");
         }
+        return true;
     }
 
     @Override

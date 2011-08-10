@@ -58,8 +58,9 @@ public class CanvasTextureViewActivity extends Activity
     }
 
     @Override
-    public void onSurfaceTextureDestroyed(SurfaceTexture surface) {
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
         if (mThread != null) mThread.stopRendering();
+        return true;
     }
 
     @Override

@@ -17930,7 +17930,7 @@ package android.renderscript {
     method public void destroyRenderScriptGL();
     method public android.renderscript.RenderScriptGL getRenderScriptGL();
     method public void onSurfaceTextureAvailable(android.graphics.SurfaceTexture, int, int);
-    method public void onSurfaceTextureDestroyed(android.graphics.SurfaceTexture);
+    method public boolean onSurfaceTextureDestroyed(android.graphics.SurfaceTexture);
     method public void onSurfaceTextureSizeChanged(android.graphics.SurfaceTexture, int, int);
     method public void onSurfaceTextureUpdated(android.graphics.SurfaceTexture);
     method public void pause();
@@ -22351,7 +22351,7 @@ package android.view {
 
   public static abstract interface TextureView.SurfaceTextureListener {
     method public abstract void onSurfaceTextureAvailable(android.graphics.SurfaceTexture, int, int);
-    method public abstract void onSurfaceTextureDestroyed(android.graphics.SurfaceTexture);
+    method public abstract boolean onSurfaceTextureDestroyed(android.graphics.SurfaceTexture);
     method public abstract void onSurfaceTextureSizeChanged(android.graphics.SurfaceTexture, int, int);
     method public abstract void onSurfaceTextureUpdated(android.graphics.SurfaceTexture);
   }

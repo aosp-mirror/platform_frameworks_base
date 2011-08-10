@@ -73,9 +73,10 @@ import android.util.Log;
  *          // Ignored, Camera does all the work for us
  *      }
  *
- *      public void onSurfaceTextureDestroyed(SurfaceTexture surface) {
+ *      public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
  *          mCamera.stopPreview();
  *          mCamera.release();
+ *          return true;
  *      }
  *
  *      public void onSurfaceTextureUpdated(SurfaceTexture surface) {
@@ -195,8 +196,9 @@ public class TextureView extends View {
         super.onDetachedFromWindow();
 
         if (mLayer != null) {
+            boolean shouldRelease = true;
             if (mListener != null) {
-                mListener.onSurfaceTextureDestroyed(mSurface);
+                shouldRelease = mListener.onSurfaceTextureDestroyed(mSurface);
             }
 
             synchronized (mNativeWindowLock) {
@@ -204,7 +206,7 @@ public class TextureView extends View {
             }
 
             mLayer.destroy();
-            mSurface.release();
+            if (shouldRelease) mSurface.release();
             mSurface = null;
             mLayer = null;
         }
@@ -578,12 +580,12 @@ public class TextureView extends View {
 
         /**
          * Invoked when the specified {@link SurfaceTexture} is about to be destroyed.
-         * After this method is invoked, no rendering should happen inside the surface
-         * texture.
+         * If returns true, no rendering should happen inside the surface texture after this method
+         * is invoked. If returns false, the client needs to call {@link SurfaceTexture#release()}.
          * 
          * @param surface The surface about to be destroyed
          */
-        public void onSurfaceTextureDestroyed(SurfaceTexture surface);
+        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface);
 
         /**
          * Invoked when the specified {@link SurfaceTexture} is updated through
