@@ -1157,6 +1157,8 @@ void AwesomePlayer::setSurfaceTexture(const sp<ISurfaceTexture> &surfaceTexture)
     mSurface.clear();
     if (surfaceTexture != NULL) {
         setNativeWindow_l(new SurfaceTextureClient(surfaceTexture));
+    } else {
+        setNativeWindow_l(NULL);
     }
 }
 
@@ -1769,7 +1771,8 @@ void AwesomePlayer::onVideoEvent() {
         }
     }
 
-    if (mVideoRendererIsPreview || mVideoRenderer == NULL) {
+    if ((mNativeWindow != NULL)
+            && (mVideoRendererIsPreview || mVideoRenderer == NULL)) {
         mVideoRendererIsPreview = false;
 
         initRenderer_l();

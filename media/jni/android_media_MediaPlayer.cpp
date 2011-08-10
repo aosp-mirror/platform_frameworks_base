@@ -247,9 +247,8 @@ android_media_MediaPlayer_setDataSourceFD(JNIEnv *env, jobject thiz, jobject fil
 static void setVideoSurfaceOrSurfaceTexture(
         const sp<MediaPlayer>& mp, JNIEnv *env, jobject thiz, const char *prefix)
 {
-    // The Java MediaPlayer class makes sure that at most one of mSurface and
-    // mParcelSurfaceTexture is non-null.  But just in case, we give priority to
-    // mSurface over mParcelSurfaceTexture.
+    // Both mSurface and mParcelSurfaceTexture could be null.
+    // We give priority to mSurface over mParcelSurfaceTexture.
     jobject surface = env->GetObjectField(thiz, fields.surface);
     if (surface != NULL) {
         sp<Surface> native_surface(get_surface(env, surface));
@@ -263,6 +262,8 @@ static void setVideoSurfaceOrSurfaceTexture(
                     ParcelSurfaceTexture_getISurfaceTexture(env, parcelSurfaceTexture));
             LOGV("%s: texture=%p", prefix, native_surfaceTexture.get());
             mp->setVideoSurfaceTexture(native_surfaceTexture);
+        } else {
+            mp->setVideoSurfaceTexture(NULL);
         }
     }
 }
