@@ -1445,10 +1445,6 @@ public class Activity extends ContextThemeWrapper
     }
     
     /**
-     * @deprecated Use the new {@link Fragment} API
-     * {@link Fragment#setRetainInstance(boolean)} instead; this is also
-     * available on older platforms through the Android compatibility package.
-     *
      * Retrieve the non-configuration instance data that was previously
      * returned by {@link #onRetainNonConfigurationInstance()}.  This will
      * be available from the initial {@link #onCreate} and
@@ -1464,6 +1460,10 @@ public class Activity extends ContextThemeWrapper
      * 
      * @return Returns the object previously returned by
      * {@link #onRetainNonConfigurationInstance()}.
+     *
+     * @deprecated Use the new {@link Fragment} API
+     * {@link Fragment#setRetainInstance(boolean)} instead; this is also
+     * available on older platforms through the Android compatibility package.
      */
     @Deprecated
     public Object getLastNonConfigurationInstance() {
@@ -1472,10 +1472,6 @@ public class Activity extends ContextThemeWrapper
     }
     
     /**
-     * @deprecated Use the new {@link Fragment} API
-     * {@link Fragment#setRetainInstance(boolean)} instead; this is also
-     * available on older platforms through the Android compatibility package.
-     *
      * Called by the system, as part of destroying an
      * activity due to a configuration change, when it is known that a new
      * instance will immediately be created for the new configuration.  You
@@ -1522,6 +1518,10 @@ public class Activity extends ContextThemeWrapper
      *
      * @return Return any Object holding the desired state to propagate to the
      * next activity instance.
+     *
+     * @deprecated Use the new {@link Fragment} API
+     * {@link Fragment#setRetainInstance(boolean)} instead; this is also
+     * available on older platforms through the Android compatibility package.
      */
     public Object onRetainNonConfigurationInstance() {
         return null;
@@ -1696,10 +1696,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @deprecated Use the new {@link android.content.CursorLoader} class with
-     * {@link LoaderManager} instead; this is also
-     * available on older platforms through the Android compatibility package.
-     *
      * This method allows the activity to take care of managing the given
      * {@link Cursor}'s lifecycle for you based on the activity's lifecycle.
      * That is, when the activity is stopped it will automatically call
@@ -1715,6 +1711,10 @@ public class Activity extends ContextThemeWrapper
      * 
      * @see #managedQuery(android.net.Uri , String[], String, String[], String)
      * @see #stopManagingCursor
+     *
+     * @deprecated Use the new {@link android.content.CursorLoader} class with
+     * {@link LoaderManager} instead; this is also
+     * available on older platforms through the Android compatibility package.
      */
     @Deprecated
     public void startManagingCursor(Cursor c) {
@@ -1724,10 +1724,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @deprecated Use the new {@link android.content.CursorLoader} class with
-     * {@link LoaderManager} instead; this is also
-     * available on older platforms through the Android compatibility package.
-     *
      * Given a Cursor that was previously given to
      * {@link #startManagingCursor}, stop the activity's management of that
      * cursor.
@@ -1735,6 +1731,10 @@ public class Activity extends ContextThemeWrapper
      * @param c The Cursor that was being managed.
      * 
      * @see #startManagingCursor
+     *
+     * @deprecated Use the new {@link android.content.CursorLoader} class with
+     * {@link LoaderManager} instead; this is also
+     * available on older platforms through the Android compatibility package.
      */
     @Deprecated
     public void stopManagingCursor(Cursor c) {
@@ -2746,10 +2746,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @deprecated Use the new {@link DialogFragment} class with
-     * {@link FragmentManager} instead; this is also
-     * available on older platforms through the Android compatibility package.
-     *
      * Callback for creating dialogs that are managed (saved and restored) for you
      * by the activity.  The default implementation calls through to
      * {@link #onCreateDialog(int)} for compatibility.
@@ -2777,6 +2773,10 @@ public class Activity extends ContextThemeWrapper
      * @see #showDialog(int, Bundle)
      * @see #dismissDialog(int)
      * @see #removeDialog(int)
+     *
+     * @deprecated Use the new {@link DialogFragment} class with
+     * {@link FragmentManager} instead; this is also
+     * available on older platforms through the Android compatibility package.
      */
     @Deprecated
     protected Dialog onCreateDialog(int id, Bundle args) {
@@ -2793,10 +2793,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @deprecated Use the new {@link DialogFragment} class with
-     * {@link FragmentManager} instead; this is also
-     * available on older platforms through the Android compatibility package.
-     *
      * Provides an opportunity to prepare a managed dialog before it is being
      * shown.  The default implementation calls through to
      * {@link #onPrepareDialog(int, Dialog)} for compatibility.
@@ -2815,6 +2811,10 @@ public class Activity extends ContextThemeWrapper
      * @see #showDialog(int)
      * @see #dismissDialog(int)
      * @see #removeDialog(int)
+     *
+     * @deprecated Use the new {@link DialogFragment} class with
+     * {@link FragmentManager} instead; this is also
+     * available on older platforms through the Android compatibility package.
      */
     @Deprecated
     protected void onPrepareDialog(int id, Dialog dialog, Bundle args) {
@@ -2822,13 +2822,13 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @deprecated Use the new {@link DialogFragment} class with
-     * {@link FragmentManager} instead; this is also
-     * available on older platforms through the Android compatibility package.
-     *
      * Simple version of {@link #showDialog(int, Bundle)} that does not
      * take any arguments.  Simply calls {@link #showDialog(int, Bundle)}
      * with null arguments.
+     *
+     * @deprecated Use the new {@link DialogFragment} class with
+     * {@link FragmentManager} instead; this is also
+     * available on older platforms through the Android compatibility package.
      */
     @Deprecated
     public final void showDialog(int id) {
@@ -2836,10 +2836,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @deprecated Use the new {@link DialogFragment} class with
-     * {@link FragmentManager} instead; this is also
-     * available on older platforms through the Android compatibility package.
-     *
      * Show a dialog managed by this activity.  A call to {@link #onCreateDialog(int, Bundle)}
      * will be made with the same id the first time this is called for a given
      * id.  From thereafter, the dialog will be automatically saved and restored.
@@ -2864,6 +2860,10 @@ public class Activity extends ContextThemeWrapper
      * @see #onPrepareDialog(int, Dialog, Bundle)
      * @see #dismissDialog(int)
      * @see #removeDialog(int)
+     *
+     * @deprecated Use the new {@link DialogFragment} class with
+     * {@link FragmentManager} instead; this is also
+     * available on older platforms through the Android compatibility package.
      */
     @Deprecated
     public final boolean showDialog(int id, Bundle args) {
@@ -2887,10 +2887,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @deprecated Use the new {@link DialogFragment} class with
-     * {@link FragmentManager} instead; this is also
-     * available on older platforms through the Android compatibility package.
-     *
      * Dismiss a dialog that was previously shown via {@link #showDialog(int)}.
      *
      * @param id The id of the managed dialog.
@@ -2902,6 +2898,10 @@ public class Activity extends ContextThemeWrapper
      * @see #onPrepareDialog(int, Dialog, Bundle)
      * @see #showDialog(int)
      * @see #removeDialog(int)
+     *
+     * @deprecated Use the new {@link DialogFragment} class with
+     * {@link FragmentManager} instead; this is also
+     * available on older platforms through the Android compatibility package.
      */
     @Deprecated
     public final void dismissDialog(int id) {
@@ -2926,10 +2926,6 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * @deprecated Use the new {@link DialogFragment} class with
-     * {@link FragmentManager} instead; this is also
-     * available on older platforms through the Android compatibility package.
-     *
      * Removes any internal references to a dialog managed by this Activity.
      * If the dialog is showing, it will dismiss it as part of the clean up.
      *
@@ -2946,6 +2942,10 @@ public class Activity extends ContextThemeWrapper
      * @see #onPrepareDialog(int, Dialog, Bundle)
      * @see #showDialog(int)
      * @see #dismissDialog(int)
+     *
+     * @deprecated Use the new {@link DialogFragment} class with
+     * {@link FragmentManager} instead; this is also
+     * available on older platforms through the Android compatibility package.
      */
     @Deprecated
     public final void removeDialog(int id) {
