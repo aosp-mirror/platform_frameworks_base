@@ -720,30 +720,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         }
     }
 
-    if (mFlags & kUseSecureInputBuffers) {
-        (void)enableSecureMode();
-    }
-
     return OK;
-}
-
-status_t OMXCodec::enableSecureMode() {
-    OMX_INDEXTYPE index;
-
-    status_t err =
-        mOMX->getExtensionIndex(
-                mNode, "OMX.google.android.index.enableSecureMode", &index);
-
-    if (err != OK) {
-        return err;
-    }
-
-    EnableSecureModeParams params;
-    InitOMXParams(&params);
-
-    params.bEnableSecureMode = OMX_TRUE;
-
-    return mOMX->setConfig(mNode, index, &params, sizeof(params));
 }
 
 void OMXCodec::setMinBufferSize(OMX_U32 portIndex, OMX_U32 size) {
