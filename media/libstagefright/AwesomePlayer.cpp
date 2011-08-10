@@ -63,7 +63,7 @@
 namespace android {
 
 static int64_t kLowWaterMarkUs = 2000000ll;  // 2secs
-static int64_t kHighWaterMarkUs = 10000000ll;  // 10secs
+static int64_t kHighWaterMarkUs = 5000000ll;  // 5secs
 static int64_t kHighWaterMarkRTSPUs = 4000000ll;  // 4secs
 static const size_t kLowWaterMarkBytes = 40000;
 static const size_t kHighWaterMarkBytes = 200000;
