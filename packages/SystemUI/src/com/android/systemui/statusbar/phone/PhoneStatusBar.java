@@ -255,6 +255,9 @@ public class PhoneStatusBar extends StatusBar {
 
         ExpandedView expanded = (ExpandedView)View.inflate(context,
                 R.layout.status_bar_expanded, null);
+        if (DEBUG) {
+            expanded.setBackgroundColor(0x6000FF80);
+        }
         expanded.mService = this;
 
         mIntruderAlertView = View.inflate(context, R.layout.intruder_alert, null);
@@ -1267,6 +1270,10 @@ public class PhoneStatusBar extends StatusBar {
             Slog.d(TAG, "panel: beginning to track the user's touch, y=" + y + " opening=" + opening);
         }
 
+        // there are some race conditions that cause this to be inaccurate; let's recalculate it any
+        // time we're about to drag the panel
+        updateExpandedSize();
+
         mTracking = true;
         mVelocityTracker = VelocityTracker.obtain();
         if (opening) {
@@ -1780,7 +1787,7 @@ public class PhoneStatusBar extends StatusBar {
     void updateExpandedViewPos(int expandedPosition) {
         if (SPEW) {
             Slog.d(TAG, "updateExpandedViewPos before expandedPosition=" + expandedPosition
-                    + " mTrackingParams.y=" + mTrackingParams.y
+                    + " mTrackingParams.y=" + ((mTrackingParams == null) ? "?" : mTrackingParams.y)
                     + " mTrackingPosition=" + mTrackingPosition);
         }
 
@@ -1824,6 +1831,16 @@ public class PhoneStatusBar extends StatusBar {
 
                 mExpandedParams.y = pos + mTrackingView.getHeight()
                         - (mTrackingParams.height-closePos) - contentsBottom;
+
+                if (SPEW) {
+                    Slog.d(PhoneStatusBar.TAG, 
+                            "pos=" + pos +
+                            " trackingHeight=" + mTrackingView.getHeight() +
+                            " (trackingParams.height - closePos)=" + 
+                                (mTrackingParams.height - closePos) +
+                            " contentsBottom=" + contentsBottom);
+                }
+
             } else {
                 // If the tracking view is not yet visible, then we can't have
                 // a good value of the close view location.  We need to wait for
@@ -1866,6 +1883,10 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     int getExpandedHeight(int disph) {
+        if (DEBUG) {
+            Slog.d(TAG, "getExpandedHeight(" + disph + "): sbView="
+                    + mStatusBarView.getHeight() + " closeView=" + mCloseView.getHeight());
+        }
         return disph - mStatusBarView.getHeight() - mCloseView.getHeight();
     }
 
@@ -1875,6 +1896,9 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     void updateExpandedSize() {
+        if (DEBUG) {
+            Slog.d(TAG, "updateExpandedSize()");
+        }
         if (mExpandedDialog != null && mExpandedParams != null && mDisplaySize != null) {
             mExpandedParams.width = mDisplaySize.x;
             mExpandedParams.height = getExpandedHeight(mDisplaySize.y);
@@ -1882,6 +1906,10 @@ public class PhoneStatusBar extends StatusBar {
                 updateExpandedInvisiblePosition();
             } else {
                 mExpandedDialog.getWindow().setAttributes(mExpandedParams);
+            }
+            if (DEBUG) {
+                Slog.d(TAG, "updateExpandedSize: height=" + mExpandedParams.height + " " + 
+                    (mExpandedVisible ? "VISIBLE":"INVISIBLE"));
             }
         }
     }
