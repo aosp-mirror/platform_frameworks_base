@@ -392,6 +392,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             // Preparing the panel menu can involve a lot of manipulation;
             // don't dispatch change events to presenters until we're done.
             st.menu.stopDispatchingItemsChanged();
+
+            // Restore action view state before we prepare. This gives apps
+            // an opportunity to override frozen/restored state in onPrepare.
+            if (st.frozenActionViewState != null) {
+                st.menu.restoreActionViewStates(st.frozenActionViewState);
+                st.frozenActionViewState = null;
+            }
+
             if (!cb.onPreparePanel(st.featureId, st.createdPanelView, st.menu)) {
                 st.menu.startDispatchingItemsChanged();
                 return false;
@@ -409,11 +417,6 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         st.isPrepared = true;
         st.isHandled = false;
         mPreparedPanel = st;
-
-        if (st.frozenActionViewState != null) {
-            st.menu.restoreActionViewStates(st.frozenActionViewState);
-            st.frozenActionViewState = null;
-        }
 
         return true;
     }
