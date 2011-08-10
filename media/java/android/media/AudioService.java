@@ -752,10 +752,12 @@ public class AudioService extends IAudioService.Stub {
 
     private class SetModeDeathHandler implements IBinder.DeathRecipient {
         private IBinder mCb; // To be notified of client's death
+        private int mPid;
         private int mMode = AudioSystem.MODE_NORMAL; // Current mode set by this client
 
         SetModeDeathHandler(IBinder cb) {
             mCb = cb;
+            mPid = Binder.getCallingPid();
         }
 
         public void binderDied() {
@@ -784,6 +786,10 @@ public class AudioService extends IAudioService.Stub {
                     }
                 }
             }
+        }
+
+        public int getPid() {
+            return mPid;
         }
 
         public void setMode(int mode) {
@@ -1227,10 +1233,12 @@ public class AudioService extends IAudioService.Stub {
 
     private class ScoClient implements IBinder.DeathRecipient {
         private IBinder mCb; // To be notified of client's death
+        private int mCreatorPid;
         private int mStartcount; // number of SCO connections started by this client
 
         ScoClient(IBinder cb) {
             mCb = cb;
+            mCreatorPid = Binder.getCallingPid();
             mStartcount = 0;
         }
 
@@ -1323,9 +1331,9 @@ public class AudioService extends IAudioService.Stub {
                     // the connection.
                     broadcastScoConnectionState(AudioManager.SCO_AUDIO_STATE_CONNECTING);
                     // Accept SCO audio activation only in NORMAL audio mode or if the mode is
-                    // currently controlled by the same client.
+                    // currently controlled by the same client process.
                     if ((AudioService.this.mMode == AudioSystem.MODE_NORMAL ||
-                            mSetModeDeathHandlers.get(0).getBinder() == mCb) &&
+                            mSetModeDeathHandlers.get(0).getPid() == mCreatorPid) &&
                             mBluetoothHeadsetDevice != null &&
                             (mScoAudioState == SCO_STATE_INACTIVE ||
                              mScoAudioState == SCO_STATE_DEACTIVATE_REQ)) {
