@@ -121,15 +121,4 @@
                 />
         </com.android.systemui.statusbar.phone.TickerView>
     </LinearLayout>
-
-    <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
-        android:textAppearance="@*android:style/TextAppearance.StatusBar.Icon"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:singleLine="true"
-        android:gravity="center_vertical|left"
-        android:paddingLeft="6px"
-        android:paddingRight="6px"
-        android:background="@drawable/status_bar_background"
-        />
 </com.android.systemui.statusbar.phone.PhoneStatusBarView>
