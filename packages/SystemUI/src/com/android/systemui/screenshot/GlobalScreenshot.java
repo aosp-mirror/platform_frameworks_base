@@ -91,7 +91,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
 
         try {
             long currentTime = System.currentTimeMillis();
-            String date = new SimpleDateFormat("yyyy-MM-dd-kk-mm-ss").format(new Date(currentTime));
+            String date = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date(currentTime));
             String imageDir = Environment.getExternalStoragePublicDirectory(
                     Environment.DIRECTORY_PICTURES).getAbsolutePath();
             String imageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, date);
