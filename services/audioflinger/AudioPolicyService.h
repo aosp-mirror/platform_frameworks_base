@@ -102,6 +102,7 @@ public:
                                     int session,
                                     int id);
     virtual status_t unregisterEffect(int id);
+    virtual status_t setEffectEnabled(int id, bool enabled);
     virtual bool isStreamActive(int stream, uint32_t inPastMs = 0) const;
 
     virtual status_t queryDefaultPreProcessing(int audioSession,

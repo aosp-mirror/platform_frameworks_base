@@ -488,6 +488,14 @@ status_t AudioPolicyService::unregisterEffect(int id)
     return mpAudioPolicy->unregister_effect(mpAudioPolicy, id);
 }
 
+status_t AudioPolicyService::setEffectEnabled(int id, bool enabled)
+{
+    if (mpAudioPolicy == NULL) {
+        return NO_INIT;
+    }
+    return mpAudioPolicy->set_effect_enabled(mpAudioPolicy, id, enabled);
+}
+
 bool AudioPolicyService::isStreamActive(int stream, uint32_t inPastMs) const
 {
     if (mpAudioPolicy == NULL) {
