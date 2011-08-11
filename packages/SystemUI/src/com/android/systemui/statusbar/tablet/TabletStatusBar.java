@@ -471,25 +471,9 @@ public class TabletStatusBar extends StatusBar implements
         mBluetoothController.addIconView((ImageView)sb.findViewById(R.id.bluetooth));
 
         mNetworkController = new NetworkController(mContext);
-        final ImageView comboRSSI = 
-                (ImageView)sb.findViewById(R.id.network_signal);
-        if (comboRSSI != null) {
-            mNetworkController.addCombinedSignalIconView(comboRSSI);
-        }
-        final ImageView mobileRSSI = 
-                (ImageView)sb.findViewById(R.id.mobile_signal);
-        if (mobileRSSI != null) {
-            mNetworkController.addPhoneSignalIconView(mobileRSSI);
-        }
-        final ImageView wifiRSSI = 
-                (ImageView)sb.findViewById(R.id.wifi_signal);
-        if (wifiRSSI != null) {
-            mNetworkController.addWifiIconView(wifiRSSI);
-        }
-        mNetworkController.addDataTypeIconView(
-                (ImageView)sb.findViewById(R.id.network_type));
-        mNetworkController.addDataDirectionOverlayIconView(
-                (ImageView)sb.findViewById(R.id.network_direction));
+        final SignalClusterView signalCluster = 
+                (SignalClusterView)sb.findViewById(R.id.signal_cluster);
+        mNetworkController.addSignalCluster(signalCluster);
 
         // The navigation buttons
         mBackButton = (ImageView)sb.findViewById(R.id.back);
