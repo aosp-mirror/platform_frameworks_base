@@ -1831,6 +1831,19 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         for (RouteInfo r :  routeDiff.added) {
             if (isLinkDefault || ! r.isDefaultRoute()) {
                 addRoute(newLp, r);
+            } else {
+                // many radios add a default route even when we don't want one.
+                // remove the default route unless somebody else has asked for it
+                String ifaceName = newLp.getInterfaceName();
+                if (TextUtils.isEmpty(ifaceName) == false && mAddedRoutes.contains(r) == false) {
+                    if (DBG) log("Removing " + r + " for interface " + ifaceName);
+                    try {
+                        mNetd.removeRoute(ifaceName, r);
+                    } catch (Exception e) {
+                        // never crash - catch them all
+                        loge("Exception trying to remove a route: " + e);
+                    }
+                }
             }
         }
 
