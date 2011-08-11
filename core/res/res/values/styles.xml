@@ -1090,6 +1090,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.ActionMode">
         <item name="android:background">?android:attr/actionModeBackground</item>
+        <item name="android:backgroundSplit">?android:attr/actionModeSplitBackground</item>
         <item name="android:height">?android:attr/actionBarSize</item>
         <item name="android:titleTextStyle">@android:style/TextAppearance.Widget.ActionMode.Title</item>
         <item name="android:subtitleTextStyle">@android:style/TextAppearance.Widget.ActionMode.Subtitle</item>
@@ -1126,7 +1127,6 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.ActionButton.CloseMode">
-        <item name="android:src">?android:attr/actionModeCloseDrawable</item>
     </style>
 
     <style name="Widget.ActionBar.TabView" parent="Widget">
@@ -1866,7 +1866,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.ActionButton.CloseMode">
-        <item name="android:src">@drawable/cab_ic_close_holo</item>
+        <item name="android:background">@drawable/btn_cab_done_holo_dark</item>
     </style>
 
     <style name="Widget.Holo.ActionBar" parent="Widget.ActionBar">
@@ -2230,6 +2230,7 @@ please see styles_device_defaults.xml.
     </style>
 
     <style name="Widget.Holo.Light.ActionButton.CloseMode">
+        <item name="android:background">@drawable/btn_cab_done_holo_light</item>
     </style>
 
     <style name="Widget.Holo.Light.ActionBar" parent="Widget.Holo.ActionBar">

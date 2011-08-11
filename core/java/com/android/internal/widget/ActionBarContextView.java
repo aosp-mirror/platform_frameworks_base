@@ -15,12 +15,18 @@
  */
 package com.android.internal.widget;
 
+import com.android.internal.R;
+import com.android.internal.view.menu.ActionMenuPresenter;
+import com.android.internal.view.menu.ActionMenuView;
+import com.android.internal.view.menu.MenuBuilder;
+
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.ActionMode;
@@ -29,11 +35,6 @@ import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import com.android.internal.R;
-import com.android.internal.view.menu.ActionMenuPresenter;
-import com.android.internal.view.menu.ActionMenuView;
-import com.android.internal.view.menu.MenuBuilder;
 
 /**
  * @hide
@@ -53,6 +54,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     private TextView mSubtitleView;
     private int mTitleStyleRes;
     private int mSubtitleStyleRes;
+    private Drawable mSplitBackground;
 
     private Animator mCurrentAnimation;
     private boolean mAnimateInOnLayout;
@@ -83,6 +85,10 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
 
         mContentHeight = a.getLayoutDimension(
                 com.android.internal.R.styleable.ActionMode_height, 0);
+
+        mSplitBackground = a.getDrawable(
+                com.android.internal.R.styleable.ActionMode_backgroundSplit);
+
         a.recycle();
     }
 
@@ -175,6 +181,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         if (mSplitView == null) {
             menu.addMenuPresenter(mActionMenuPresenter);
             mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
+            mMenuView.setBackgroundDrawable(null);
             addView(mMenuView, layoutParams);
         } else {
             // Allow full screen width in split mode.
@@ -187,6 +194,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
             layoutParams.height = mContentHeight;
             menu.addMenuPresenter(mActionMenuPresenter);
             mMenuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
+            mMenuView.setBackgroundDrawable(mSplitBackground);
             mSplitView.addView(mMenuView, layoutParams);
         }
 
@@ -256,7 +264,12 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     protected LayoutParams generateDefaultLayoutParams() {
         // Used by custom views if they don't supply layout params. Everything else
         // added to an ActionBarContextView should have them already.
-        return new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        return new MarginLayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+    }
+
+    @Override
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new MarginLayoutParams(getContext(), attrs);
     }
 
     @Override
@@ -285,6 +298,8 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         
         if (mClose != null) {
             availableWidth = measureChildView(mClose, availableWidth, childSpecHeight, 0);
+            MarginLayoutParams lp = (MarginLayoutParams) mClose.getLayoutParams();
+            availableWidth -= lp.leftMargin + lp.rightMargin;
         }
 
         if (mMenuView != null && mMenuView.getParent() == this) {
@@ -327,7 +342,8 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
     }
 
     private Animator makeInAnimation() {
-        mClose.setTranslationX(-mClose.getWidth());
+        mClose.setTranslationX(-mClose.getWidth() -
+                ((MarginLayoutParams) mClose.getLayoutParams()).leftMargin);
         ObjectAnimator buttonAnimator = ObjectAnimator.ofFloat(mClose, "translationX", 0);
         buttonAnimator.setDuration(200);
         buttonAnimator.addListener(this);
@@ -355,7 +371,7 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
 
     private Animator makeOutAnimation() {
         ObjectAnimator buttonAnimator = ObjectAnimator.ofFloat(mClose, "translationX",
-                -mClose.getWidth());
+                -mClose.getWidth() - ((MarginLayoutParams) mClose.getLayoutParams()).leftMargin);
         buttonAnimator.setDuration(200);
         buttonAnimator.addListener(this);
         buttonAnimator.setInterpolator(new DecelerateInterpolator());
@@ -387,7 +403,10 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
         final int contentHeight = b - t - getPaddingTop() - getPaddingBottom();
         
         if (mClose != null && mClose.getVisibility() != GONE) {
+            MarginLayoutParams lp = (MarginLayoutParams) mClose.getLayoutParams();
+            x += lp.leftMargin;
             x += positionChild(mClose, x, y, contentHeight);
+            x += lp.rightMargin;
 
             if (mAnimateInOnLayout) {
                 mAnimationMode = ANIMATE_IN;

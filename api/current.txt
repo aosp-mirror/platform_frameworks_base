@@ -211,6 +211,7 @@ package android {
     field public static final int actionModeCutDrawable = 16843537; // 0x1010311
     field public static final int actionModePasteDrawable = 16843539; // 0x1010313
     field public static final int actionModeSelectAllDrawable = 16843642; // 0x101037a
+    field public static final int actionModeSplitBackground = 16843687; // 0x10103a7
     field public static final int actionModeStyle = 16843678; // 0x101039e
     field public static final int actionOverflowButtonStyle = 16843510; // 0x10102f6
     field public static final int actionProviderClass = 16843667; // 0x1010393
