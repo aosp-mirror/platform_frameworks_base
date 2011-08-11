@@ -166,6 +166,13 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+
+        // Skip this work if a transition is running; it sets the scroll values independently
+        // and should not have those animated values clobbered by this logic
+        LayoutTransition transition = mLinearLayout.getLayoutTransition();
+        if (transition != null && transition.isRunning()) {
+            return;
+        }
         // Keep track of the last visible item in the list so we can restore it
         // to the bottom when the orientation changes.
         mLastScrollPosition = scrollPositionOfMostRecent();
@@ -173,7 +180,12 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
         // This has to happen post-layout, so run it "in the future"
         post(new Runnable() {
             public void run() {
-                scrollTo(0, mLastScrollPosition);
+                // Make sure we're still not clobbering the transition-set values, since this
+                // runnable launches asynchronously
+                LayoutTransition transition = mLinearLayout.getLayoutTransition();
+                if (transition == null || !transition.isRunning()) {
+                    scrollTo(0, mLastScrollPosition);
+                }
             }
         });
     }
