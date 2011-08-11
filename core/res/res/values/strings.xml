@@ -916,18 +916,19 @@
         applications can use this to erase or modify your contact data.</string>
 
     <!-- Title of the read profile permission, listed so the user can decide whether to allow the application to read the user's personal profile data. [CHAR LIMIT=30] -->
-    <string name="permlab_readProfile">read profile data</string>
+    <string name="permlab_readProfile">read your profile data</string>
     <!-- Description of the read profile permission, listed so the user can decide whether to allow the application to read the user's personal profile data. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_readProfile" product="default">Allows an application to read all
-        of your personal profile information. Malicious applications can use this to identify
-        you and send your personal information to other people.</string>
+    <string name="permdesc_readProfile" product="default">Allows the application to read personal
+        profile information stored on your device, such as your name and contact information. This
+        means the application can identify you and send your profile information to others.</string>
 
     <!-- Title of the write profile permission, listed so the user can decide whether to allow the application to write to the user's personal profile data. [CHAR LIMIT=30] -->
-    <string name="permlab_writeProfile">write profile data</string>
+    <string name="permlab_writeProfile">write to your profile data</string>
     <!-- Description of the write profile permission, listed so the user can decide whether to allow the application to write to the user's personal profile data. [CHAR LIMIT=NONE] -->
-    <string name="permdesc_writeProfile" product="default">Allows an application to modify
-        your personal profile information. Malicious applications can use this to erase or
-        modify your profile data.</string>
+    <string name="permdesc_writeProfile" product="default">Allows the application to change or add
+        to personal profile information stored on your device, such as your name and contact
+        information.  This means other applications can identify you and send your profile
+        information to others.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_readCalendar">read calendar events plus confidential information</string>
