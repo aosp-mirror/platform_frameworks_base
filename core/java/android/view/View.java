@@ -8318,8 +8318,11 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * Causes the Runnable to be added to the message queue.
-     * The runnable will be run on the user interface thread.
+     * <p>Causes the Runnable to be added to the message queue.
+     * The runnable will be run on the user interface thread.</p>
+     * 
+     * <p>This method can be invoked from outside of the UI thread
+     * only when this View is attached to a window.</p>
      *
      * @param action The Runnable that will be executed.
      *
@@ -8342,9 +8345,12 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * Causes the Runnable to be added to the message queue, to be run
+     * <p>Causes the Runnable to be added to the message queue, to be run
      * after the specified amount of time elapses.
-     * The runnable will be run on the user interface thread.
+     * The runnable will be run on the user interface thread.</p>
+     * 
+     * <p>This method can be invoked from outside of the UI thread
+     * only when this View is attached to a window.</p>
      *
      * @param action The Runnable that will be executed.
      * @param delayMillis The delay (in milliseconds) until the Runnable
@@ -8372,7 +8378,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * Removes the specified Runnable from the message queue.
+     * <p>Removes the specified Runnable from the message queue.</p>
+     * 
+     * <p>This method can be invoked from outside of the UI thread
+     * only when this View is attached to a window.</p>
      *
      * @param action The Runnable to remove from the message handling queue
      *
@@ -8397,9 +8406,12 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * Cause an invalidate to happen on a subsequent cycle through the event loop.
-     * Use this to invalidate the View from a non-UI thread.
+     * <p>Cause an invalidate to happen on a subsequent cycle through the event loop.
+     * Use this to invalidate the View from a non-UI thread.</p>
      *
+     * <p>This method can be invoked from outside of the UI thread
+     * only when this View is attached to a window.</p>
+     * 
      * @see #invalidate()
      */
     public void postInvalidate() {
@@ -8407,8 +8419,11 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * Cause an invalidate of the specified area to happen on a subsequent cycle
-     * through the event loop. Use this to invalidate the View from a non-UI thread.
+     * <p>Cause an invalidate of the specified area to happen on a subsequent cycle
+     * through the event loop. Use this to invalidate the View from a non-UI thread.</p>
+     * 
+     * <p>This method can be invoked from outside of the UI thread
+     * only when this View is attached to a window.</p>
      *
      * @param left The left coordinate of the rectangle to invalidate.
      * @param top The top coordinate of the rectangle to invalidate.
@@ -8423,8 +8438,11 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * Cause an invalidate to happen on a subsequent cycle through the event
-     * loop. Waits for the specified amount of time.
+     * <p>Cause an invalidate to happen on a subsequent cycle through the event
+     * loop. Waits for the specified amount of time.</p>
+     * 
+     * <p>This method can be invoked from outside of the UI thread
+     * only when this View is attached to a window.</p>
      *
      * @param delayMilliseconds the duration in milliseconds to delay the
      *         invalidation by
@@ -8442,8 +8460,11 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     }
 
     /**
-     * Cause an invalidate of the specified area to happen on a subsequent cycle
-     * through the event loop. Waits for the specified amount of time.
+     * <p>Cause an invalidate of the specified area to happen on a subsequent cycle
+     * through the event loop. Waits for the specified amount of time.</p>
+     * 
+     * <p>This method can be invoked from outside of the UI thread
+     * only when this View is attached to a window.</p>
      *
      * @param delayMilliseconds the duration in milliseconds to delay the
      *         invalidation by
