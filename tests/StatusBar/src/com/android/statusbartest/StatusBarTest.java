@@ -167,10 +167,13 @@ public class StatusBarTest extends TestActivity
         },
         new Test("Priority notification") {
             public void run() {
-                Notification not = new Notification(
-                                R.drawable.stat_sys_phone,
-                                "Incoming call from: Imperious Leader",
-                                System.currentTimeMillis()-(1000*60*60*24)
+                Notification not = new Notification();
+                not.icon = R.drawable.stat_sys_phone;
+                not.when = System.currentTimeMillis()-(1000*60*60*24);
+                not.setLatestEventInfo(StatusBarTest.this,
+                                "Incoming call",
+                                "from: Imperious Leader",
+                                null
                                 );
                 not.flags |= Notification.FLAG_HIGH_PRIORITY;
                 Intent fullScreenIntent = new Intent(StatusBarTest.this, TestAlertActivity.class);
