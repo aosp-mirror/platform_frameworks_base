@@ -104,7 +104,7 @@ SurfaceTexture::SurfaceTexture(GLuint tex, bool allowSynchronousMode) :
 
 SurfaceTexture::~SurfaceTexture() {
     LOGV("SurfaceTexture::~SurfaceTexture");
-    freeAllBuffers();
+    freeAllBuffersLocked();
 }
 
 status_t SurfaceTexture::setBufferCountServerLocked(int bufferCount) {
@@ -154,7 +154,10 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
         LOGE("setBufferCount: SurfaceTexture has been abandoned!");
         return NO_INIT;
     }
-
+    if (mConnectedApi == NO_CONNECTED_API) {
+        LOGE("setBufferCount: SurfaceTexture is not connected!");
+        return NO_INIT;
+    }
     if (bufferCount > NUM_BUFFER_SLOTS) {
         LOGE("setBufferCount: bufferCount larger than slots available");
         return BAD_VALUE;
@@ -185,7 +188,7 @@ status_t SurfaceTexture::setBufferCount(int bufferCount) {
 
     // here we're guaranteed that the client doesn't have dequeued buffers
     // and will release all of its buffer references.
-    freeAllBuffers();
+    freeAllBuffersLocked();
     mBufferCount = bufferCount;
     mClientBufferCount = bufferCount;
     mCurrentTexture = INVALID_BUFFER_SLOT;
@@ -214,6 +217,10 @@ status_t SurfaceTexture::requestBuffer(int slot, sp<GraphicBuffer>* buf) {
         LOGE("requestBuffer: SurfaceTexture has been abandoned!");
         return NO_INIT;
     }
+    if (mConnectedApi == NO_CONNECTED_API) {
+        LOGE("requestBuffer: SurfaceTexture is not connected!");
+        return NO_INIT;
+    }
     if (slot < 0 || mBufferCount <= slot) {
         LOGE("requestBuffer: slot index out of range [0, %d]: %d",
                 mBufferCount, slot);
@@ -228,11 +235,6 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         uint32_t format, uint32_t usage) {
     LOGV("SurfaceTexture::dequeueBuffer");
 
-    if (mAbandoned) {
-        LOGE("dequeueBuffer: SurfaceTexture has been abandoned!");
-        return NO_INIT;
-    }
-
     if ((w && !h) || (!w && h)) {
         LOGE("dequeueBuffer: invalid size: w=%u, h=%u", w, h);
         return BAD_VALUE;
@@ -246,10 +248,19 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
     int dequeuedCount = 0;
     bool tryAgain = true;
     while (tryAgain) {
+        if (mAbandoned) {
+            LOGE("dequeueBuffer: SurfaceTexture has been abandoned!");
+            return NO_INIT;
+        }
+        if (mConnectedApi == NO_CONNECTED_API) {
+            LOGE("dequeueBuffer: SurfaceTexture is not connected!");
+            return NO_INIT;
+        }
+
         // We need to wait for the FIFO to drain if the number of buffer
         // needs to change.
         //
-        // The condition "number of buffer needs to change" is true if
+        // The condition "number of buffers needs to change" is true if
         // - the client doesn't care about how many buffers there are
         // - AND the actual number of buffer is different from what was
         //   set in the last setBufferCountServer()
@@ -261,31 +272,24 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         // As long as this condition is true AND the FIFO is not empty, we
         // wait on mDequeueCondition.
 
-        int minBufferCountNeeded = mSynchronousMode ?
+        const int minBufferCountNeeded = mSynchronousMode ?
                 MIN_SYNC_BUFFER_SLOTS : MIN_ASYNC_BUFFER_SLOTS;
 
-        if (!mClientBufferCount &&
+        const bool numberOfBuffersNeedsToChange = !mClientBufferCount &&
                 ((mServerBufferCount != mBufferCount) ||
-                        (mServerBufferCount < minBufferCountNeeded))) {
+                        (mServerBufferCount < minBufferCountNeeded));
+
+        if (!mQueue.isEmpty() && numberOfBuffersNeedsToChange) {
             // wait for the FIFO to drain
-            while (!mQueue.isEmpty()) {
-                mDequeueCondition.wait(mMutex);
-                if (mAbandoned) {
-                    LOGE("dequeueBuffer: SurfaceTexture was abandoned while "
-                            "blocked!");
-                    return NO_INIT;
-                }
-            }
-            minBufferCountNeeded = mSynchronousMode ?
-                    MIN_SYNC_BUFFER_SLOTS : MIN_ASYNC_BUFFER_SLOTS;
+            mDequeueCondition.wait(mMutex);
+            // NOTE: we continue here because we need to reevaluate our
+            // whole state (eg: we could be abandoned or disconnected)
+            continue;
         }
 
-
-        if (!mClientBufferCount &&
-                ((mServerBufferCount != mBufferCount) ||
-                        (mServerBufferCount < minBufferCountNeeded))) {
+        if (numberOfBuffersNeedsToChange) {
             // here we're guaranteed that mQueue is empty
-            freeAllBuffers();
+            freeAllBuffersLocked();
             mBufferCount = mServerBufferCount;
             if (mBufferCount < minBufferCountNeeded)
                 mBufferCount = minBufferCountNeeded;
@@ -414,9 +418,9 @@ status_t SurfaceTexture::setSynchronousMode(bool enabled) {
 
     if (!enabled) {
         // going to asynchronous mode, drain the queue
-        while (mSynchronousMode != enabled && !mQueue.isEmpty()) {
-            mDequeueCondition.wait(mMutex);
-        }
+        err = drainQueueLocked();
+        if (err != NO_ERROR)
+            return err;
     }
 
     if (mSynchronousMode != enabled) {
@@ -440,6 +444,10 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp,
         Mutex::Autolock lock(mMutex);
         if (mAbandoned) {
             LOGE("queueBuffer: SurfaceTexture has been abandoned!");
+            return NO_INIT;
+        }
+        if (mConnectedApi == NO_CONNECTED_API) {
+            LOGE("queueBuffer: SurfaceTexture is not connected!");
             return NO_INIT;
         }
         if (buf < 0 || buf >= mBufferCount) {
@@ -512,6 +520,10 @@ void SurfaceTexture::cancelBuffer(int buf) {
         LOGW("cancelBuffer: SurfaceTexture has been abandoned!");
         return;
     }
+    if (mConnectedApi == NO_CONNECTED_API) {
+        LOGE("cancelBuffer: SurfaceTexture is not connected!");
+        return;
+    }
 
     if (buf < 0 || buf >= mBufferCount) {
         LOGE("cancelBuffer: slot index out of range [0, %d]: %d",
@@ -533,6 +545,10 @@ status_t SurfaceTexture::setCrop(const Rect& crop) {
         LOGE("setCrop: SurfaceTexture has been abandoned!");
         return NO_INIT;
     }
+    if (mConnectedApi == NO_CONNECTED_API) {
+        LOGE("setCrop: SurfaceTexture is not connected!");
+        return NO_INIT;
+    }
     mNextCrop = crop;
     return OK;
 }
@@ -542,6 +558,10 @@ status_t SurfaceTexture::setTransform(uint32_t transform) {
     Mutex::Autolock lock(mMutex);
     if (mAbandoned) {
         LOGE("setTransform: SurfaceTexture has been abandoned!");
+        return NO_INIT;
+    }
+    if (mConnectedApi == NO_CONNECTED_API) {
+        LOGE("setTransform: SurfaceTexture is not connected!");
         return NO_INIT;
     }
     mNextTransform = transform;
@@ -598,8 +618,9 @@ status_t SurfaceTexture::disconnect(int api) {
         case NATIVE_WINDOW_API_MEDIA:
         case NATIVE_WINDOW_API_CAMERA:
             if (mConnectedApi == api) {
+                drainQueueAndFreeBuffersLocked();
                 mConnectedApi = NO_CONNECTED_API;
-                freeAllBuffers();
+                mDequeueCondition.signal();
             } else {
                 LOGE("disconnect: connected to another api (cur=%d, req=%d)",
                         mConnectedApi, api);
@@ -635,7 +656,7 @@ status_t SurfaceTexture::updateTexImage() {
 
     if (mAbandoned) {
         LOGE("calling updateTexImage() on an abandoned SurfaceTexture");
-        //return NO_INIT;
+        return NO_INIT;
     }
 
     // In asynchronous mode the list is guaranteed to be one buffer
@@ -644,21 +665,14 @@ status_t SurfaceTexture::updateTexImage() {
         Fifo::iterator front(mQueue.begin());
         int buf = *front;
 
-        if (uint32_t(buf) >= NUM_BUFFER_SLOTS) {
-            LOGE("buffer index out of range (index=%d)", buf);
-            //return BAD_VALUE;
-        }
-
         // Update the GL texture object.
         EGLImageKHR image = mSlots[buf].mEglImage;
         if (image == EGL_NO_IMAGE_KHR) {
             EGLDisplay dpy = eglGetCurrentDisplay();
-
             if (mSlots[buf].mGraphicBuffer == 0) {
                 LOGE("buffer at slot %d is null", buf);
-                //return BAD_VALUE;
+                return BAD_VALUE;
             }
-
             image = createImage(dpy, mSlots[buf].mGraphicBuffer);
             mSlots[buf].mEglImage = image;
             mSlots[buf].mEglDisplay = dpy;
@@ -848,16 +862,64 @@ void SurfaceTexture::setFrameAvailableListener(
     mFrameAvailableListener = listener;
 }
 
-void SurfaceTexture::freeAllBuffers() {
+void SurfaceTexture::freeBufferLocked(int i) {
+    mSlots[i].mGraphicBuffer = 0;
+    mSlots[i].mBufferState = BufferSlot::FREE;
+    if (mSlots[i].mEglImage != EGL_NO_IMAGE_KHR) {
+        eglDestroyImageKHR(mSlots[i].mEglDisplay, mSlots[i].mEglImage);
+        mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
+        mSlots[i].mEglDisplay = EGL_NO_DISPLAY;
+    }
+}
+
+void SurfaceTexture::freeAllBuffersLocked() {
+    LOGW_IF(!mQueue.isEmpty(),
+            "freeAllBuffersLocked called but mQueue is not empty");
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
-        mSlots[i].mGraphicBuffer = 0;
-        mSlots[i].mBufferState = BufferSlot::FREE;
-        if (mSlots[i].mEglImage != EGL_NO_IMAGE_KHR) {
-            eglDestroyImageKHR(mSlots[i].mEglDisplay, mSlots[i].mEglImage);
-            mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
-            mSlots[i].mEglDisplay = EGL_NO_DISPLAY;
+        freeBufferLocked(i);
+    }
+}
+
+void SurfaceTexture::freeAllBuffersExceptHeadLocked() {
+    LOGW_IF(!mQueue.isEmpty(),
+            "freeAllBuffersExceptCurrentLocked called but mQueue is not empty");
+    int head = -1;
+    if (!mQueue.empty()) {
+        Fifo::iterator front(mQueue.begin());
+        head = *front;
+    }
+    for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
+        if (i != head) {
+            freeBufferLocked(i);
         }
     }
+}
+
+status_t SurfaceTexture::drainQueueLocked() {
+    while (mSynchronousMode && !mQueue.isEmpty()) {
+        mDequeueCondition.wait(mMutex);
+        if (mAbandoned) {
+            LOGE("drainQueueLocked: SurfaceTexture has been abandoned!");
+            return NO_INIT;
+        }
+        if (mConnectedApi == NO_CONNECTED_API) {
+            LOGE("drainQueueLocked: SurfaceTexture is not connected!");
+            return NO_INIT;
+        }
+    }
+    return NO_ERROR;
+}
+
+status_t SurfaceTexture::drainQueueAndFreeBuffersLocked() {
+    status_t err = drainQueueLocked();
+    if (err == NO_ERROR) {
+        if (mSynchronousMode) {
+            freeAllBuffersLocked();
+        } else {
+            freeAllBuffersExceptHeadLocked();
+        }
+    }
+    return err;
 }
 
 EGLImageKHR SurfaceTexture::createImage(EGLDisplay dpy,
@@ -929,9 +991,10 @@ int SurfaceTexture::query(int what, int* outValue)
 
 void SurfaceTexture::abandon() {
     Mutex::Autolock lock(mMutex);
-    freeAllBuffers();
+    mQueue.clear();
     mAbandoned = true;
     mCurrentTextureBuf.clear();
+    freeAllBuffersLocked();
     mDequeueCondition.signal();
 }
 
