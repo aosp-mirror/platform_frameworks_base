@@ -1232,18 +1232,6 @@ void AudioFlinger::ThreadBase::checkSuspendOnAddEffectChain_l(const sp<EffectCha
     }
 }
 
-void AudioFlinger::ThreadBase::updateSuspendedSessionsOnRemoveEffectChain_l(
-        const sp<EffectChain>& chain)
-{
-    int index = mSuspendedSessions.indexOfKey(chain->sessionId());
-    if (index < 0) {
-        return;
-    }
-    LOGV("updateSuspendedSessionsOnRemoveEffectChain_l() removed suspended session %d",
-         chain->sessionId());
-    mSuspendedSessions.removeItemsAt(index);
-}
-
 void AudioFlinger::ThreadBase::updateSuspendedSessions_l(const effect_uuid_t *type,
                                                          bool suspend,
                                                          int sessionId)
@@ -1311,7 +1299,14 @@ void AudioFlinger::ThreadBase::checkSuspendOnEffectEnabled(const sp<EffectModule
 {
     Mutex::Autolock _l(mLock);
 
-    // TODO: implement PlaybackThread or RecordThread specific behavior here
+    if (mType != RECORD) {
+        // suspend all effects in AUDIO_SESSION_OUTPUT_MIX when enabling any effect on
+        // another session. This gives the priority to well behaved effect control panels
+        // and applications not using global effects.
+        if (sessionId != AUDIO_SESSION_OUTPUT_MIX) {
+            setEffectSuspended_l(NULL, enabled, AUDIO_SESSION_OUTPUT_MIX);
+        }
+    }
 
     sp<EffectChain> chain = getEffectChain_l(sessionId);
     if (chain != 0) {
@@ -5847,7 +5842,6 @@ size_t AudioFlinger::PlaybackThread::removeEffectChain_l(const sp<EffectChain>& 
 
     for (size_t i = 0; i < mEffectChains.size(); i++) {
         if (chain == mEffectChains[i]) {
-            updateSuspendedSessionsOnRemoveEffectChain_l(chain);
             mEffectChains.removeAt(i);
             // detach all active tracks from the chain
             for (size_t i = 0 ; i < mActiveTracks.size() ; ++i) {
@@ -5939,7 +5933,6 @@ size_t AudioFlinger::RecordThread::removeEffectChain_l(const sp<EffectChain>& ch
             "removeEffectChain_l() %p invalid chain size %d on thread %p",
             chain.get(), mEffectChains.size(), this);
     if (mEffectChains.size() == 1) {
-        updateSuspendedSessionsOnRemoveEffectChain_l(chain);
         mEffectChains.removeAt(0);
     }
     return 0;
@@ -6393,10 +6386,16 @@ status_t AudioFlinger::EffectModule::command(uint32_t cmdCode,
 
 status_t AudioFlinger::EffectModule::setEnabled(bool enabled)
 {
+
     Mutex::Autolock _l(mLock);
     LOGV("setEnabled %p enabled %d", this, enabled);
 
     if (enabled != isEnabled()) {
+        status_t status = AudioSystem::setEffectEnabled(mId, enabled);
+        if (enabled && status != NO_ERROR) {
+            return status;
+        }
+
         switch (mState) {
         // going from disabled to enabled
         case IDLE:
@@ -6704,6 +6703,10 @@ status_t AudioFlinger::EffectHandle::enable()
     if (!mHasControl) return INVALID_OPERATION;
     if (mEffect == 0) return DEAD_OBJECT;
 
+    if (mEnabled) {
+        return NO_ERROR;
+    }
+
     mEnabled = true;
 
     sp<ThreadBase> thread = mEffect->thread().promote();
@@ -6716,7 +6719,14 @@ status_t AudioFlinger::EffectHandle::enable()
         return NO_ERROR;
     }
 
-    return mEffect->setEnabled(true);
+    status_t status = mEffect->setEnabled(true);
+    if (status != NO_ERROR) {
+        if (thread != 0) {
+            thread->checkSuspendOnEffectEnabled(mEffect, false, mEffect->sessionId());
+        }
+        mEnabled = false;
+    }
+    return status;
 }
 
 status_t AudioFlinger::EffectHandle::disable()
@@ -6725,6 +6735,9 @@ status_t AudioFlinger::EffectHandle::disable()
     if (!mHasControl) return INVALID_OPERATION;
     if (mEffect == 0) return DEAD_OBJECT;
 
+    if (!mEnabled) {
+        return NO_ERROR;
+    }
     mEnabled = false;
 
     if (mEffect->suspended()) {
@@ -6754,9 +6767,11 @@ void AudioFlinger::EffectHandle::disconnect(bool unpiniflast)
     }
     mEffect->disconnect(this, unpiniflast);
 
-    sp<ThreadBase> thread = mEffect->thread().promote();
-    if (thread != 0) {
-        thread->checkSuspendOnEffectEnabled(mEffect, false, mEffect->sessionId());
+    if (mEnabled) {
+        sp<ThreadBase> thread = mEffect->thread().promote();
+        if (thread != 0) {
+            thread->checkSuspendOnEffectEnabled(mEffect, false, mEffect->sessionId());
+        }
     }
 
     // release sp on module => module destructor can be called now
@@ -7367,15 +7382,22 @@ void AudioFlinger::EffectChain::setEffectSuspendedAll_l(bool suspend)
     }
 }
 
+bool AudioFlinger::EffectChain::isEffectEligibleForSuspend(const effect_descriptor_t& desc)
+{
+    // auxiliary effects and visualizer are never suspended on output mix
+    if ((mSessionId == AUDIO_SESSION_OUTPUT_MIX) &&
+        (((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) ||
+         (memcmp(&desc.type, SL_IID_VISUALIZATION, sizeof(effect_uuid_t)) == 0))) {
+        return false;
+    }
+    return true;
+}
+
 Vector< sp<AudioFlinger::EffectModule> > AudioFlinger::EffectChain::getSuspendEligibleEffects()
 {
     Vector< sp<EffectModule> > effects;
     for (size_t i = 0; i < mEffects.size(); i++) {
-        effect_descriptor_t desc = mEffects[i]->desc();
-        // auxiliary effects and vizualizer are never suspended on output mix
-        if ((mSessionId == AUDIO_SESSION_OUTPUT_MIX) && (
-            ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) ||
-             (memcmp(&desc.type, SL_IID_VISUALIZATION, sizeof(effect_uuid_t)) == 0))) {
+        if (!isEffectEligibleForSuspend(mEffects[i]->desc())) {
             continue;
         }
         effects.add(mEffects[i]);
@@ -7405,8 +7427,15 @@ void AudioFlinger::EffectChain::checkSuspendOnEffectEnabled(const sp<EffectModul
             if (index < 0) {
                 return;
             }
+            if (!isEffectEligibleForSuspend(effect->desc())) {
+                return;
+            }
             setEffectSuspended_l(&effect->desc().type, enabled);
             index = mSuspendedEffects.indexOfKey(effect->desc().type.timeLow);
+            if (index < 0) {
+                LOGW("checkSuspendOnEffectEnabled() Fx should be suspended here!");
+                return;
+            }
         }
         LOGV("checkSuspendOnEffectEnabled() enable suspending fx %08x",
              effect->desc().type.timeLow);

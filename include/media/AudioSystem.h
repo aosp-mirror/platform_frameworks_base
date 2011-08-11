@@ -183,6 +183,7 @@ public:
                                     int session,
                                     int id);
     static status_t unregisterEffect(int id);
+    static status_t setEffectEnabled(int id, bool enabled);
 
     static const sp<IAudioPolicyService>& get_audio_policy_service();
 

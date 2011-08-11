@@ -522,8 +522,6 @@ private:
                                                           int sessionId);
                     // check if some effects must be suspended when an effect chain is added
                     void checkSuspendOnAddEffectChain_l(const sp<EffectChain>& chain);
-                    // updated mSuspendedSessions when an effect chain is removed
-                    void updateSuspendedSessionsOnRemoveEffectChain_l(const sp<EffectChain>& chain);
 
         friend class AudioFlinger;
         friend class Track;
@@ -1320,6 +1318,10 @@ private:
         Vector< sp<EffectModule> > getSuspendEligibleEffects();
         // get an effect module if it is currently enable
         sp<EffectModule> getEffectIfEnabled(const effect_uuid_t *type);
+        // true if the effect whose descriptor is passed can be suspended
+        // OEMs can modify the rules implemented in this method to exclude specific effect
+        // types or implementations from the suspend/restore mechanism.
+        bool isEffectEligibleForSuspend(const effect_descriptor_t& desc);
 
         wp<ThreadBase> mThread;     // parent mixer thread
         Mutex mLock;                // mutex protecting effect list
