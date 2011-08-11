@@ -978,36 +978,23 @@ protected:
 
     // Immutable calibration parameters in parsed form.
     struct Calibration {
-        // Touch Size
-        enum TouchSizeCalibration {
-            TOUCH_SIZE_CALIBRATION_DEFAULT,
-            TOUCH_SIZE_CALIBRATION_NONE,
-            TOUCH_SIZE_CALIBRATION_GEOMETRIC,
-            TOUCH_SIZE_CALIBRATION_PRESSURE,
+        // Size
+        enum SizeCalibration {
+            SIZE_CALIBRATION_DEFAULT,
+            SIZE_CALIBRATION_NONE,
+            SIZE_CALIBRATION_GEOMETRIC,
+            SIZE_CALIBRATION_DIAMETER,
+            SIZE_CALIBRATION_AREA,
         };
 
-        TouchSizeCalibration touchSizeCalibration;
+        SizeCalibration sizeCalibration;
 
-        // Tool Size
-        enum ToolSizeCalibration {
-            TOOL_SIZE_CALIBRATION_DEFAULT,
-            TOOL_SIZE_CALIBRATION_NONE,
-            TOOL_SIZE_CALIBRATION_GEOMETRIC,
-            TOOL_SIZE_CALIBRATION_LINEAR,
-            TOOL_SIZE_CALIBRATION_AREA,
-        };
-
-        ToolSizeCalibration toolSizeCalibration;
-        bool haveToolSizeLinearScale;
-        float toolSizeLinearScale;
-        bool haveToolSizeLinearBias;
-        float toolSizeLinearBias;
-        bool haveToolSizeAreaScale;
-        float toolSizeAreaScale;
-        bool haveToolSizeAreaBias;
-        float toolSizeAreaBias;
-        bool haveToolSizeIsSummed;
-        bool toolSizeIsSummed;
+        bool haveSizeScale;
+        float sizeScale;
+        bool haveSizeBias;
+        float sizeBias;
+        bool haveSizeIsSummed;
+        bool sizeIsSummed;
 
         // Pressure
         enum PressureCalibration {
@@ -1016,25 +1003,10 @@ protected:
             PRESSURE_CALIBRATION_PHYSICAL,
             PRESSURE_CALIBRATION_AMPLITUDE,
         };
-        enum PressureSource {
-            PRESSURE_SOURCE_DEFAULT,
-            PRESSURE_SOURCE_PRESSURE,
-            PRESSURE_SOURCE_TOUCH,
-        };
 
         PressureCalibration pressureCalibration;
-        PressureSource pressureSource;
         bool havePressureScale;
         float pressureScale;
-
-        // Size
-        enum SizeCalibration {
-            SIZE_CALIBRATION_DEFAULT,
-            SIZE_CALIBRATION_NONE,
-            SIZE_CALIBRATION_NORMALIZED,
-        };
-
-        SizeCalibration sizeCalibration;
 
         // Orientation
         enum OrientationCalibration {
@@ -1056,6 +1028,15 @@ protected:
         DistanceCalibration distanceCalibration;
         bool haveDistanceScale;
         float distanceScale;
+
+        inline void applySizeScaleAndBias(float* outSize) const {
+            if (haveSizeScale) {
+                *outSize *= sizeScale;
+            }
+            if (haveSizeBias) {
+                *outSize += sizeBias;
+            }
+        }
     } mCalibration;
 
     // Raw pointer axis information from the driver.
@@ -1117,11 +1098,6 @@ private:
     float mYPrecision;
 
     float mGeometricScale;
-
-    float mToolSizeLinearScale;
-    float mToolSizeLinearBias;
-    float mToolSizeAreaScale;
-    float mToolSizeAreaBias;
 
     float mPressureScale;
 
