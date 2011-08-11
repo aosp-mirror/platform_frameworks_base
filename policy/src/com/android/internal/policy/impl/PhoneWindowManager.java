@@ -243,6 +243,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mStatusBarHeight;
     final ArrayList<WindowState> mStatusBarPanels = new ArrayList<WindowState>();
     WindowState mNavigationBar = null;
+    boolean mHasNavigationBar = false;
+    int mNavigationBarWidth = 0, mNavigationBarHeight = 0;
 
     WindowState mKeyguard = null;
     KeyguardViewMediator mKeyguardMediator;
@@ -796,6 +798,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStatusBarCanHide
                 ? com.android.internal.R.dimen.status_bar_height
                 : com.android.internal.R.dimen.system_bar_height);
+
+        mHasNavigationBar = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_showNavigationBar);
+        mNavigationBarHeight = mHasNavigationBar
+                ? mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.navigation_bar_height)
+                : 0;
+        mNavigationBarWidth = mHasNavigationBar
+                ? mContext.getResources().getDimensionPixelSize(
+                    com.android.internal.R.dimen.navigation_bar_width)
+                : 0;
     }
 
     public void updateSettings() {
@@ -1110,19 +1123,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     public int getNonDecorDisplayWidth(int rotation, int fullWidth) {
-        return fullWidth;
+        // Assumes that the navigation bar appears on the side of the display in landscape.
+        final boolean horizontal
+            = (rotation == Surface.ROTATION_270 || rotation == Surface.ROTATION_90);
+        return fullWidth - (horizontal ? mNavigationBarWidth : 0);
     }
 
     public int getNonDecorDisplayHeight(int rotation, int fullHeight) {
-        return mStatusBarCanHide ? fullHeight : (fullHeight - mStatusBarHeight);
+        final boolean horizontal
+            = (rotation == Surface.ROTATION_270 || rotation == Surface.ROTATION_90);
+        return fullHeight
+            - (mStatusBarCanHide ? 0 : mStatusBarHeight)
+            - (horizontal ? 0 : mNavigationBarHeight);
     }
 
     public int getConfigDisplayWidth(int rotation, int fullWidth) {
-        return fullWidth;
+        return getNonDecorDisplayWidth(rotation, fullWidth);
     }
 
     public int getConfigDisplayHeight(int rotation, int fullHeight) {
-        return fullHeight - mStatusBarHeight;
+        return getNonDecorDisplayHeight(rotation, fullHeight);
     }
 
     public boolean doesForceHide(WindowState win, WindowManager.LayoutParams attrs) {
@@ -1851,7 +1871,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final Rect cf = mTmpContentFrame;
         final Rect vf = mTmpVisibleFrame;
         
-        final boolean hasNavBar = (mNavigationBar != null && mNavigationBar.isVisibleLw());
+        final boolean hasNavBar = (mHasNavigationBar 
+                && mNavigationBar != null && mNavigationBar.isVisibleLw());
 
         if (attrs.type == TYPE_INPUT_METHOD) {
             pf.left = df.left = cf.left = vf.left = mDockLeft;
@@ -1943,6 +1964,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                           ? mRestrictedScreenTop+mRestrictedScreenHeight
                                           : mUnrestrictedScreenTop+mUnrestrictedScreenHeight;
 
+                    if (DEBUG_LAYOUT) {
+                        Log.v(TAG, String.format(
+                                    "Laying out IN_SCREEN status bar window: (%d,%d - %d,%d)",
+                                    pf.left, pf.top, pf.right, pf.bottom));
+                    }
                 } else if (attrs.type == TYPE_NAVIGATION_BAR) {
                     // The navigation bar has Real Ultimate Power.
                     pf.left = df.left = mUnrestrictedScreenLeft;
