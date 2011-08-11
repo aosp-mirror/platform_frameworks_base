@@ -102,7 +102,7 @@ public class ActionBarContainer extends FrameLayout {
         return true;
     }
 
-    public void setTabContainer(View tabView) {
+    public void setTabContainer(ScrollingTabContainerView tabView) {
         if (mTabContainer != null) {
             removeView(mTabContainer);
         }
@@ -110,6 +110,7 @@ public class ActionBarContainer extends FrameLayout {
         if (tabView != null) {
             addView(tabView);
             tabView.getLayoutParams().width = LayoutParams.MATCH_PARENT;
+            tabView.setAllowCollapse(false);
         }
     }
 

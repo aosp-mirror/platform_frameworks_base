@@ -156,8 +156,6 @@ public class ActionBarImpl extends ActionBar {
                     "with a compatible window decor layout");
         }
 
-        mHasEmbeddedTabs = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.action_bar_embed_tabs);
         mActionView.setContextView(mContextView);
         mContextDisplayMode = mActionView.isSplitActionBar() ?
                 CONTEXT_DISPLAY_SPLIT : CONTEXT_DISPLAY_NORMAL;
@@ -166,25 +164,31 @@ public class ActionBarImpl extends ActionBar {
         // Newer apps need to enable it explicitly.
         setHomeButtonEnabled(mContext.getApplicationInfo().targetSdkVersion <
                 Build.VERSION_CODES.ICE_CREAM_SANDWICH);
+
+        setHasEmbeddedTabs(mContext.getResources().getBoolean(
+                com.android.internal.R.bool.action_bar_embed_tabs));
     }
 
     public void onConfigurationChanged(Configuration newConfig) {
-        mHasEmbeddedTabs = mContext.getResources().getBoolean(
-                com.android.internal.R.bool.action_bar_embed_tabs);
+        setHasEmbeddedTabs(mContext.getResources().getBoolean(
+                com.android.internal.R.bool.action_bar_embed_tabs));
+    }
 
+    private void setHasEmbeddedTabs(boolean hasEmbeddedTabs) {
+        mHasEmbeddedTabs = hasEmbeddedTabs;
         // Switch tab layout configuration if needed
         if (!mHasEmbeddedTabs) {
             mActionView.setEmbeddedTabView(null);
             mContainerView.setTabContainer(mTabScrollView);
         } else {
             mContainerView.setTabContainer(null);
-            if (mTabScrollView != null) {
-                mTabScrollView.setVisibility(View.VISIBLE);
-            }
             mActionView.setEmbeddedTabView(mTabScrollView);
         }
-        mActionView.setCollapsable(!mHasEmbeddedTabs &&
-                getNavigationMode() == NAVIGATION_MODE_TABS);
+        final boolean isInTabMode = getNavigationMode() == NAVIGATION_MODE_TABS;
+        if (mTabScrollView != null) {
+            mTabScrollView.setVisibility(isInTabMode ? View.VISIBLE : View.GONE);
+        }
+        mActionView.setCollapsable(!mHasEmbeddedTabs && isInTabMode);
     }
 
     private void ensureTabsExist() {
@@ -192,7 +196,7 @@ public class ActionBarImpl extends ActionBar {
             return;
         }
 
-        ScrollingTabContainerView tabScroller = mActionView.createTabContainer();
+        ScrollingTabContainerView tabScroller = new ScrollingTabContainerView(mContext);
 
         if (mHasEmbeddedTabs) {
             tabScroller.setVisibility(View.VISIBLE);
@@ -925,18 +929,14 @@ public class ActionBarImpl extends ActionBar {
             case NAVIGATION_MODE_TABS:
                 mSavedTabPosition = getSelectedNavigationIndex();
                 selectTab(null);
-                if (!mActionView.hasEmbeddedTabs()) {
-                    mTabScrollView.setVisibility(View.GONE);
-                }
+                mTabScrollView.setVisibility(View.GONE);
                 break;
         }
         mActionView.setNavigationMode(mode);
         switch (mode) {
             case NAVIGATION_MODE_TABS:
                 ensureTabsExist();
-                if (!mActionView.hasEmbeddedTabs()) {
-                    mTabScrollView.setVisibility(View.VISIBLE);
-                }
+                mTabScrollView.setVisibility(View.VISIBLE);
                 if (mSavedTabPosition != INVALID_POSITION) {
                     setSelectedNavigationItem(mSavedTabPosition);
                     mSavedTabPosition = INVALID_POSITION;
