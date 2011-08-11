@@ -1428,6 +1428,24 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_PACKAGE_REMOVED = "android.intent.action.PACKAGE_REMOVED";
     /**
+     * Broadcast Action: An existing application package has been completely
+     * removed from the device.  The data contains the name of the package.
+     * This is like {@link #ACTION_PACKAGE_REMOVED}, but only set when
+     * {@link #EXTRA_DATA_REMOVED} is true and
+     * {@link #EXTRA_REPLACING} is false of that broadcast.
+     *
+     * <ul>
+     * <li> {@link #EXTRA_UID} containing the integer uid previously assigned
+     * to the package.
+     * </ul>
+     *
+     * <p class="note">This is a protected intent that can only be sent
+     * by the system.
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGE_FULLY_REMOVED
+            = "android.intent.action.PACKAGE_FULLY_REMOVED";
+    /**
      * Broadcast Action: An existing application package has been changed (e.g.
      * a component has been enabled or disabled).  The data contains the name of
      * the package.
