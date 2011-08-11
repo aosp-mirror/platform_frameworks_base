@@ -208,7 +208,11 @@ public:
     /* Wakes up getEvents() if it is blocked on a read. */
     virtual void wake() = 0;
 
+    /* Dump EventHub state to a string. */
     virtual void dump(String8& dump) = 0;
+
+    /* Called by the heatbeat to ensures that the reader has not deadlocked. */
+    virtual void monitor() = 0;
 };
 
 class EventHub : public EventHubInterface
@@ -259,6 +263,7 @@ public:
     virtual void wake();
 
     virtual void dump(String8& dump);
+    virtual void monitor();
 
 protected:
     virtual ~EventHub();

@@ -631,6 +631,9 @@ private:
     virtual void dump(String8& dump) {
     }
 
+    virtual void monitor() {
+    }
+
     virtual void requestReopenDevices() {
     }
 

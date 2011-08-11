@@ -731,6 +731,15 @@ void InputReader::dump(String8& dump) {
             mConfig.pointerGestureZoomSpeedRatio);
 }
 
+void InputReader::monitor() {
+    // Acquire and release the lock to ensure that the reader has not deadlocked.
+    mLock.lock();
+    mLock.unlock();
+
+    // Check the EventHub
+    mEventHub->monitor();
+}
+
 
 // --- InputReader::ContextImpl ---
 

@@ -210,6 +210,9 @@ public:
      * This method may be called on any thread (usually by the input manager). */
     virtual void dump(String8& dump) = 0;
 
+    /* Called by the heatbeat to ensures that the reader has not deadlocked. */
+    virtual void monitor() = 0;
+
     /* Runs a single iteration of the processing loop.
      * Nominally reads and processes one incoming message from the EventHub.
      *
@@ -297,6 +300,7 @@ public:
     virtual ~InputReader();
 
     virtual void dump(String8& dump);
+    virtual void monitor();
 
     virtual void loopOnce();
 
