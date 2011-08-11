@@ -75,5 +75,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="fitXY"
-        android:src="@drawable/title_bar_shadow"/>
+        android:src="@drawable/ab_solid_shadow_holo"/>
 </view>

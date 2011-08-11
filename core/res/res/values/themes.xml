@@ -308,6 +308,8 @@ please see themes_device_defaults.xml.
         <item name="actionMenuTextAppearance">@android:style/TextAppearance.Holo.Widget.ActionBar.Menu</item>
         <item name="actionMenuTextColor">?android:attr/textColorPrimary</item>
         <item name="actionBarWidgetTheme">@null</item>
+        <item name="actionBarDivider">?android:attr/dividerVertical</item>
+        <item name="actionBarItemBackground">?android:attr/selectableItemBackground</item>
 
         <item name="dividerVertical">@drawable/divider_vertical_dark</item>
         <item name="dividerHorizontal">@drawable/divider_vertical_dark</item>
@@ -1429,7 +1431,7 @@ please see themes_device_defaults.xml.
          with an inverse color profile. The dark action bar sharply stands out against
          the light content. -->
     <style name="Theme.Holo.Light.DarkActionBar">
-        <item name="android:windowContentOverlay">@android:drawable/title_bar_shadow</item>
+        <item name="android:windowContentOverlay">@android:drawable/ab_solid_shadow_holo</item>
         <item name="android:actionBarStyle">@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse</item>
         <item name="actionBarWidgetTheme">@android:style/Theme.Holo</item>
 
@@ -1442,6 +1444,8 @@ please see themes_device_defaults.xml.
         <item name="actionBarTabStyle">@style/Widget.Holo.Light.ActionBar.TabView.Inverse</item>
         <item name="actionBarTabBarStyle">@style/Widget.Holo.Light.ActionBar.TabBar.Inverse</item>
         <item name="actionBarTabTextStyle">@style/Widget.Holo.Light.ActionBar.TabText.Inverse</item>
+        <item name="actionBarDivider">@android:drawable/list_divider_holo_dark</item>
+        <item name="actionBarItemBackground">@android:drawable/item_background_holo_dark</item>
         <item name="actionMenuTextColor">?android:attr/textColorPrimaryInverse</item>
         <item name="actionModeStyle">@style/Widget.Holo.Light.ActionMode.Inverse</item>
         <item name="actionModeCloseButtonStyle">@style/Widget.Holo.ActionButton.CloseMode</item>

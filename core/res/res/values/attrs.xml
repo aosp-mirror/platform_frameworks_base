@@ -633,6 +633,10 @@
         <attr name="actionBarSize" format="dimension" >
             <enum name="wrap_content" value="0" />
         </attr>
+        <!-- Custom divider drawable to use for elements in the action bar. -->
+        <attr name="actionBarDivider" format="reference" />
+        <!-- Custom item state list drawable background for action bar items. -->
+        <attr name="actionBarItemBackground" format="reference" />
         <!-- TextAppearance style that will be applied to text that
              appears within action menu items. -->
         <attr name="actionMenuTextAppearance" format="reference" />
