@@ -49,11 +49,6 @@ namespace android {
 
 // ---------------------------------------------------------------------------
 
-RefBase::Destroyer::~Destroyer() {
-}
-
-// ---------------------------------------------------------------------------
-
 class RefBase::weakref_impl : public RefBase::weakref_type
 {
 public:
@@ -61,7 +56,6 @@ public:
     volatile int32_t    mWeak;
     RefBase* const      mBase;
     volatile int32_t    mFlags;
-    Destroyer*          mDestroyer;
 
 #if !DEBUG_REFS
 
@@ -70,7 +64,6 @@ public:
         , mWeak(0)
         , mBase(base)
         , mFlags(0)
-        , mDestroyer(0)
     {
     }
 
@@ -113,7 +106,7 @@ public:
                 LOGD("\t%c ID %p (ref %d):", inc, refs->id, refs->ref);
 #if DEBUG_REFS_CALLSTACK_ENABLED
                 refs->stack.dump();
-#endif;
+#endif
                 refs = refs->next;
             }
         }
@@ -131,7 +124,7 @@ public:
                 LOGD("\t%c ID %p (ref %d):", inc, refs->id, refs->ref);
 #if DEBUG_REFS_CALLSTACK_ENABLED
                 refs->stack.dump();
-#endif;
+#endif
                 refs = refs->next;
             }
         }
@@ -193,7 +186,7 @@ public:
         String8 text;
 
         {
-            Mutex::Autolock _l(const_cast<weakref_impl*>(this)->mMutex);
+            Mutex::Autolock _l(mMutex);
             char buf[128];
             sprintf(buf, "Strong references on RefBase %p (weakref_type %p):\n", mBase, this);
             text.append(buf);
@@ -318,7 +311,7 @@ private:
         }
     }
 
-    Mutex mMutex;
+    mutable Mutex mMutex;
     ref_entry* mStrongRefs;
     ref_entry* mWeakRefs;
 
@@ -348,7 +341,7 @@ void RefBase::incStrong(const void* id) const
     }
 
     android_atomic_add(-INITIAL_STRONG_VALUE, &refs->mStrong);
-    const_cast<RefBase*>(this)->onFirstRef();
+    refs->mBase->onFirstRef();
 }
 
 void RefBase::decStrong(const void* id) const
@@ -361,13 +354,9 @@ void RefBase::decStrong(const void* id) const
 #endif
     LOG_ASSERT(c >= 1, "decStrong() called on %p too many times", refs);
     if (c == 1) {
-        const_cast<RefBase*>(this)->onLastStrongRef(id);
-        if ((refs->mFlags&OBJECT_LIFETIME_WEAK) != OBJECT_LIFETIME_WEAK) {
-            if (refs->mDestroyer) {
-                refs->mDestroyer->destroy(this);
-            } else {
-                delete this;
-            }
+        refs->mBase->onLastStrongRef(id);
+        if ((refs->mFlags&OBJECT_LIFETIME_MASK) == OBJECT_LIFETIME_STRONG) {
+            delete this;
         }
     }
     refs->decWeak(id);
@@ -391,17 +380,13 @@ void RefBase::forceIncStrong(const void* id) const
         android_atomic_add(-INITIAL_STRONG_VALUE, &refs->mStrong);
         // fall through...
     case 0:
-        const_cast<RefBase*>(this)->onFirstRef();
+        refs->mBase->onFirstRef();
     }
 }
 
 int32_t RefBase::getStrongCount() const
 {
     return mRefs->mStrong;
-}
-
-void RefBase::setDestroyer(RefBase::Destroyer* destroyer) {
-    mRefs->mDestroyer = destroyer;
 }
 
 RefBase* RefBase::weakref_type::refBase() const
@@ -417,6 +402,7 @@ void RefBase::weakref_type::incWeak(const void* id)
     LOG_ASSERT(c >= 0, "incWeak called on %p after last weak ref", this);
 }
 
+
 void RefBase::weakref_type::decWeak(const void* id)
 {
     weakref_impl* const impl = static_cast<weakref_impl*>(this);
@@ -424,30 +410,27 @@ void RefBase::weakref_type::decWeak(const void* id)
     const int32_t c = android_atomic_dec(&impl->mWeak);
     LOG_ASSERT(c >= 1, "decWeak called on %p too many times", this);
     if (c != 1) return;
-    
-    if ((impl->mFlags&OBJECT_LIFETIME_WEAK) != OBJECT_LIFETIME_WEAK) {
+
+    if ((impl->mFlags&OBJECT_LIFETIME_WEAK) == OBJECT_LIFETIME_STRONG) {
+        // This is the regular lifetime case. The object is destroyed
+        // when the last strong reference goes away. Since weakref_impl
+        // outlive the object, it is not destroyed in the dtor, and
+        // we'll have to do it here.
         if (impl->mStrong == INITIAL_STRONG_VALUE) {
-            if (impl->mBase) {
-                if (impl->mDestroyer) {
-                    impl->mDestroyer->destroy(impl->mBase);
-                } else {
-                    delete impl->mBase;
-                }
-            }
+            // Special case: we never had a strong reference, so we need to
+            // destroy the object now.
+            delete impl->mBase;
         } else {
             // LOGV("Freeing refs %p of old RefBase %p\n", this, impl->mBase);
             delete impl;
         }
     } else {
+        // less common case: lifetime is OBJECT_LIFETIME_{WEAK|FOREVER}
         impl->mBase->onLastWeakRef(id);
-        if ((impl->mFlags&OBJECT_LIFETIME_FOREVER) != OBJECT_LIFETIME_FOREVER) {
-            if (impl->mBase) {
-                if (impl->mDestroyer) {
-                    impl->mDestroyer->destroy(impl->mBase);
-                } else {
-                    delete impl->mBase;
-                }
-            }
+        if ((impl->mFlags&OBJECT_LIFETIME_MASK) == OBJECT_LIFETIME_WEAK) {
+            // this is the OBJECT_LIFETIME_WEAK case. The last weak-reference
+            // is gone, we can destroy the object.
+            delete impl->mBase;
         }
     }
 }
@@ -569,11 +552,23 @@ RefBase::RefBase()
 
 RefBase::~RefBase()
 {
-    if ((mRefs->mFlags & OBJECT_LIFETIME_WEAK) == OBJECT_LIFETIME_WEAK) {
-        if (mRefs->mWeak == 0) {
-            delete mRefs;
+    if (mRefs->mStrong == INITIAL_STRONG_VALUE) {
+        // we never acquired a strong (and/or weak) reference on this object.
+        delete mRefs;
+    } else {
+        // life-time of this object is extended to WEAK or FOREVER, in
+        // which case weakref_impl doesn't out-live the object and we
+        // can free it now.
+        if ((mRefs->mFlags & OBJECT_LIFETIME_MASK) != OBJECT_LIFETIME_STRONG) {
+            // It's possible that the weak count is not 0 if the object
+            // re-acquired a weak reference in its destructor
+            if (mRefs->mWeak == 0) {
+                delete mRefs;
+            }
         }
     }
+    // for debugging purposes, clear this.
+    const_cast<weakref_impl*&>(mRefs) = NULL;
 }
 
 void RefBase::extendObjectLifetime(int32_t mode)

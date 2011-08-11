@@ -80,9 +80,12 @@ public:
         void                incWeak(const void* id);
         void                decWeak(const void* id);
         
+        // acquires a strong reference if there is already one.
         bool                attemptIncStrong(const void* id);
         
-        //! This is only safe if you have set OBJECT_LIFETIME_FOREVER.
+        // acquires a weak reference if there is already one.
+        // This is not always safe. see ProcessState.cpp and BpBinder.cpp
+        // for proper use.
         bool                attemptIncWeak(const void* id);
 
         //! DEBUGGING ONLY: Get current weak ref count.
@@ -116,28 +119,15 @@ public:
 
     typedef RefBase basetype;
 
-    // used to override the RefBase destruction.
-    class Destroyer {
-        friend class RefBase;
-        friend class weakref_type;
-    public:
-        virtual ~Destroyer();
-    private:
-        virtual void destroy(RefBase const* base) = 0;
-    };
-
-    // Make sure to never acquire a strong reference from this function. The
-    // same restrictions than for destructors apply.
-    void setDestroyer(Destroyer* destroyer);
-
 protected:
                             RefBase();
     virtual                 ~RefBase();
 
     //! Flags for extendObjectLifetime()
     enum {
+        OBJECT_LIFETIME_STRONG  = 0x0000,
         OBJECT_LIFETIME_WEAK    = 0x0001,
-        OBJECT_LIFETIME_FOREVER = 0x0003
+        OBJECT_LIFETIME_MASK    = 0x0001
     };
     
             void            extendObjectLifetime(int32_t mode);
@@ -163,7 +153,7 @@ private:
     
                             RefBase(const RefBase& o);
             RefBase&        operator=(const RefBase& o);
-            
+
         weakref_impl* const mRefs;
 };
 
