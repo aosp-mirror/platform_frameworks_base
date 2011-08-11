@@ -112,7 +112,7 @@ public class NavigationBarView extends LinearLayout {
             public void onAnimationEnd(Animator _a) {
                 mLastAnimator = null;
                 if (hide) {
-                    setVisibility(View.INVISIBLE);
+                    setVisibility(View.GONE);
                 }
             }
         });
