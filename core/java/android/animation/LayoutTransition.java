@@ -593,11 +593,13 @@ public class LayoutTransition {
             }
         }
         if (mAnimateParentHierarchy) {
+            Animator parentAnimator = (changeReason == APPEARING) ?
+                    defaultChangeIn : defaultChangeOut;
             ViewGroup tempParent = parent;
             while (tempParent != null) {
                 ViewParent parentParent = tempParent.getParent();
                 if (parentParent instanceof ViewGroup) {
-                    setupChangeAnimation((ViewGroup)parentParent, changeReason, baseAnimator,
+                    setupChangeAnimation((ViewGroup)parentParent, changeReason, parentAnimator,
                             duration, tempParent);
                     tempParent = (ViewGroup) parentParent;
                 } else {
@@ -626,11 +628,17 @@ public class LayoutTransition {
 
     /**
      * This flag controls whether CHANGE_APPEARING or CHANGE_DISAPPEARING animations will
-     * cause the same changing animation to be run on the parent hierarchy as well. This allows
+     * cause the default changing animation to be run on the parent hierarchy as well. This allows
      * containers of transitioning views to also transition, which may be necessary in situations
      * where the containers bounds change between the before/after states and may clip their
      * children during the transition animations. For example, layouts with wrap_content will
      * adjust their bounds according to the dimensions of their children.
+     *
+     * <p>The default changing transitions animate the bounds and scroll positions of the
+     * target views. These are the animations that will run on the parent hierarchy, not
+     * the custom animations that happen to be set on the transition. This allows custom
+     * behavior for the children of the transitioning container, but uses standard behavior
+     * of resizing/rescrolling on any changing parents.
      *
      * @param animateParentHierarchy A boolean value indicating whether the parents of
      * transitioning views should also be animated during the transition. Default value is true.
