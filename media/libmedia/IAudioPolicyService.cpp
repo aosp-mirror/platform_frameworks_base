@@ -53,7 +53,8 @@ enum {
     UNREGISTER_EFFECT,
     IS_STREAM_ACTIVE,
     GET_DEVICES_FOR_STREAM,
-    QUERY_DEFAULT_PRE_PROCESSING
+    QUERY_DEFAULT_PRE_PROCESSING,
+    SET_EFFECT_ENABLED
 };
 
 class BpAudioPolicyService : public BpInterface<IAudioPolicyService>
@@ -310,6 +311,16 @@ public:
         data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
         data.writeInt32(id);
         remote()->transact(UNREGISTER_EFFECT, data, &reply);
+        return static_cast <status_t> (reply.readInt32());
+    }
+
+    virtual status_t setEffectEnabled(int id, bool enabled)
+    {
+        Parcel data, reply;
+        data.writeInterfaceToken(IAudioPolicyService::getInterfaceDescriptor());
+        data.writeInt32(id);
+        data.writeInt32(enabled);
+        remote()->transact(SET_EFFECT_ENABLED, data, &reply);
         return static_cast <status_t> (reply.readInt32());
     }
 
@@ -574,6 +585,14 @@ status_t BnAudioPolicyService::onTransact(
             CHECK_INTERFACE(IAudioPolicyService, data, reply);
             int id = data.readInt32();
             reply->writeInt32(static_cast <int32_t>(unregisterEffect(id)));
+            return NO_ERROR;
+        } break;
+
+        case SET_EFFECT_ENABLED: {
+            CHECK_INTERFACE(IAudioPolicyService, data, reply);
+            int id = data.readInt32();
+            bool enabled = static_cast <bool>(data.readInt32());
+            reply->writeInt32(static_cast <int32_t>(setEffectEnabled(id, enabled)));
             return NO_ERROR;
         } break;
 

@@ -710,6 +710,13 @@ status_t AudioSystem::unregisterEffect(int id)
     return aps->unregisterEffect(id);
 }
 
+status_t AudioSystem::setEffectEnabled(int id, bool enabled)
+{
+    const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
+    if (aps == 0) return PERMISSION_DENIED;
+    return aps->setEffectEnabled(id, enabled);
+}
+
 status_t AudioSystem::isStreamActive(int stream, bool* state, uint32_t inPastMs)
 {
     const sp<IAudioPolicyService>& aps = AudioSystem::get_audio_policy_service();
