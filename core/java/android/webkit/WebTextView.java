@@ -1023,7 +1023,8 @@ import junit.framework.Assert;
                 break;
             case NUMBER:
                 // inputType needs to be overwritten because of the different class.
-                inputType = InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL;
+                inputType = InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_VARIATION_NORMAL
+                        | InputType.TYPE_NUMBER_FLAG_SIGNED | InputType.TYPE_NUMBER_FLAG_DECIMAL;
                 // Number and telephone do not have both a Tab key and an
                 // action, so set the action to NEXT
                 imeOptions |= EditorInfo.IME_ACTION_NEXT;
