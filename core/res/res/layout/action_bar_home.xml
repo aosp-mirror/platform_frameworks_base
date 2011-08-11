@@ -18,7 +18,7 @@
       class="com.android.internal.widget.ActionBarView$HomeView"
       android:layout_width="wrap_content"
       android:layout_height="match_parent"
-      android:background="?android:attr/selectableItemBackground" >
+      android:background="?android:attr/actionBarItemBackground" >
     <ImageView android:id="@android:id/up"
                android:src="?android:attr/homeAsUpIndicator"
                android:layout_gravity="center_vertical|left"
