@@ -115,7 +115,7 @@ public class Path {
     }
     
     // these must be in the same order as their native values
-    private static final FillType[] sFillTypeArray = {
+    static final FillType[] sFillTypeArray = {
         FillType.WINDING,
         FillType.EVEN_ODD,
         FillType.INVERSE_WINDING,

@@ -33,9 +33,6 @@ import com.android.resources.ResourceType;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.content.res.ColorStateList;
-import android.content.res.Resources;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
@@ -894,12 +891,6 @@ public final class BridgeTypedArray extends TypedArray {
     @Override
     public void recycle() {
         // pass
-    }
-
-    @Override
-    public boolean getValueAt(int index, TypedValue outValue) {
-        // pass
-        return false;
     }
 
     @Override

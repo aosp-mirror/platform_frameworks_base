@@ -43,7 +43,7 @@ public class Typeface {
     /** The NORMAL style of the default monospace typeface. */
     public static final Typeface MONOSPACE;
 
-    private static Typeface[] sDefaults;
+    /* package */ static Typeface[] sDefaults;
     
     /* package */ int native_instance;
 

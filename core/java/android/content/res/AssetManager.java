@@ -62,7 +62,7 @@ public final class AssetManager {
     private static final boolean DEBUG_REFS = false;
     
     private static final Object sSync = new Object();
-    private static AssetManager sSystem = null;
+    /*package*/ static AssetManager sSystem = null;
 
     private final TypedValue mValue = new TypedValue();
     private final long[] mOffsets = new long[2];
@@ -252,7 +252,7 @@ public final class AssetManager {
         }
     }
 
-    private final void makeStringBlocks(boolean copyFromSystem) {
+    /*package*/ final void makeStringBlocks(boolean copyFromSystem) {
         final int sysNum = copyFromSystem ? sSystem.mStringBlocks.length : 0;
         final int num = getStringBlockCount();
         mStringBlocks = new StringBlock[num];

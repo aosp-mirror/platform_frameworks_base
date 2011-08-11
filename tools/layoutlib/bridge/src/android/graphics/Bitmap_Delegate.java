@@ -22,7 +22,6 @@ import com.android.layoutlib.bridge.impl.DelegateManager;
 import com.android.resources.Density;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
-import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Parcel;
 
@@ -149,7 +148,7 @@ public final class Bitmap_Delegate {
     }
 
     public static int getBufferedImageType(int nativeBitmapConfig) {
-        switch (Config.sConfigs[nativeBitmapConfig]) {
+        switch (Config.nativeToConfig(nativeBitmapConfig)) {
             case ALPHA_8:
                 return BufferedImage.TYPE_INT_ARGB;
             case RGB_565:
@@ -210,7 +209,7 @@ public final class Bitmap_Delegate {
         }
 
         // create a delegate with the content of the stream.
-        Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.sConfigs[nativeConfig]);
+        Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.nativeToConfig(nativeConfig));
 
         return createBitmap(delegate, mutable, Bitmap.getDefaultDensity());
     }
@@ -238,7 +237,7 @@ public final class Bitmap_Delegate {
         image.setRGB(0, 0, width, height, argb, 0, width);
 
         // create a delegate with the content of the stream.
-        Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.sConfigs[nativeConfig]);
+        Bitmap_Delegate delegate = new Bitmap_Delegate(image, Config.nativeToConfig(nativeConfig));
 
         return createBitmap(delegate, isMutable, Bitmap.getDefaultDensity());
     }

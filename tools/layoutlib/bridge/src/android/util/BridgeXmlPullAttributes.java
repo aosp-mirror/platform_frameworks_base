@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge.android;
+package android.util;
 
 import com.android.ide.common.rendering.api.RenderResources;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.BridgeConstants;
+import com.android.layoutlib.bridge.android.BridgeContext;
 import com.android.resources.ResourceType;
 
 import org.xmlpull.v1.XmlPullParser;

@@ -40,10 +40,7 @@ import com.android.ide.common.rendering.api.SessionParams.RenderingMode;
 import com.android.internal.util.XmlUtils;
 import com.android.layoutlib.bridge.Bridge;
 import com.android.layoutlib.bridge.android.BridgeContext;
-import com.android.layoutlib.bridge.android.BridgeInflater;
 import com.android.layoutlib.bridge.android.BridgeLayoutParamsMapAttributes;
-import com.android.layoutlib.bridge.android.BridgeWindow;
-import com.android.layoutlib.bridge.android.BridgeWindowSession;
 import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.bars.FakeActionBar;
 import com.android.layoutlib.bridge.bars.PhoneSystemBar;
@@ -57,6 +54,7 @@ import com.android.util.Pair;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import android.animation.AnimationThread;
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.animation.LayoutTransition;
@@ -66,12 +64,12 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.AttachInfo_Accessor;
+import android.view.BridgeInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.View.AttachInfo;
 import android.view.View.MeasureSpec;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewGroup.MarginLayoutParams;
@@ -190,7 +188,6 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
         // build the inflater and parser.
         mInflater = new BridgeInflater(context, params.getProjectCallback());
         context.setBridgeInflater(mInflater);
-        mInflater.setFactory2(context);
 
         mBlockParser = new BridgeXmlBlockParser(
                 params.getLayoutDescription(), context, false /* platformResourceFlag */);
@@ -329,13 +326,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
             Fragment_Delegate.setProjectCallback(null);
 
             // set the AttachInfo on the root view.
-            AttachInfo info = new AttachInfo(new BridgeWindowSession(), new BridgeWindow(),
-                    new Handler(), null);
-            info.mHasWindowFocus = true;
-            info.mWindowVisibility = View.VISIBLE;
-            info.mInTouchMode = false; // this is so that we can display selections.
-            info.mHardwareAccelerated = false;
-            mViewRoot.dispatchAttachedToWindow(info, 0);
+            AttachInfo_Accessor.setAttachInfo(mViewRoot);
 
             // post-inflate process. For now this supports TabHost/TabWidget
             postInflateProcess(view, params.getProjectCallback());
@@ -462,7 +453,7 @@ public class RenderSessionImpl extends RenderAction<SessionParams> {
                 mImage = null;
                 mCanvas = null;
             } else {
-                mViewRoot.mAttachInfo.mTreeObserver.dispatchOnPreDraw();
+                AttachInfo_Accessor.dispatchOnPreDraw(mViewRoot);
 
                 // draw the views
                 // create the BufferedImage into which the layout will be rendered.

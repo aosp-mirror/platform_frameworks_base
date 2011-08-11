@@ -32,7 +32,8 @@ public class PhoneSystemBar extends CustomBar {
     public PhoneSystemBar(Context context, Density density) throws XmlPullParserException {
         super(context, density, "/bars/phone_system_bar.xml", "phone_system_bar.xml");
 
-        setGravity(mGravity | Gravity.RIGHT);
+        // FIXME: use FILL_H?
+        setGravity(Gravity.START | Gravity.TOP | Gravity.RIGHT);
         setBackgroundColor(0xFF000000);
 
         // Cannot access the inside items through id because no R.id values have been

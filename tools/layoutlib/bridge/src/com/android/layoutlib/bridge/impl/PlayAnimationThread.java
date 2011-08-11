@@ -20,6 +20,7 @@ import com.android.ide.common.rendering.api.IAnimationListener;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.Result.Status;
 
+import android.animation.AnimationThread;
 import android.animation.Animator;
 
 public class PlayAnimationThread extends AnimationThread {

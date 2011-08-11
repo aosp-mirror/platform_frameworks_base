@@ -26,7 +26,6 @@ import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.SessionParams;
 import com.android.ide.common.rendering.api.Result.Status;
-import com.android.layoutlib.bridge.android.BridgeAssetManager;
 import com.android.layoutlib.bridge.impl.FontLoader;
 import com.android.layoutlib.bridge.impl.RenderDrawable;
 import com.android.layoutlib.bridge.impl.RenderSessionImpl;
@@ -36,10 +35,12 @@ import com.android.tools.layoutlib.create.MethodAdapter;
 import com.android.tools.layoutlib.create.OverrideMethod;
 import com.android.util.Pair;
 
+import android.content.res.BridgeAssetManager;
 import android.graphics.Bitmap;
-import android.graphics.Typeface;
+import android.graphics.Typeface_Accessor;
 import android.graphics.Typeface_Delegate;
 import android.os.Looper;
+import android.os.Looper_Accessor;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -295,7 +296,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
         BridgeAssetManager.clearSystem();
 
         // dispose of the default typeface.
-        Typeface.sDefaults = null;
+        Typeface_Accessor.resetDefaults();
 
         return true;
     }
@@ -429,7 +430,7 @@ public final class Bridge extends com.android.ide.common.rendering.api.Bridge {
      */
     public static void cleanupThread() {
         // clean up the looper
-        Looper.sThreadLocal.remove();
+        Looper_Accessor.cleanupThread();
     }
 
     public static LayoutLog getLog() {
