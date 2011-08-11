@@ -332,7 +332,10 @@ public class ActionBarView extends AbsActionBarView {
         mIncludeTabs = tabs != null;
         if (mIncludeTabs && mNavigationMode == ActionBar.NAVIGATION_MODE_TABS) {
             addView(mTabScrollView);
-            mTabScrollView.getLayoutParams().width = LayoutParams.WRAP_CONTENT;
+            ViewGroup.LayoutParams lp = mTabScrollView.getLayoutParams();
+            lp.width = LayoutParams.WRAP_CONTENT;
+            lp.height = LayoutParams.MATCH_PARENT;
+            tabs.setAllowCollapse(true);
         }
     }
 
@@ -647,18 +650,6 @@ public class ActionBarView extends AbsActionBarView {
             mNavigationMode = mode;
             requestLayout();
         }
-    }
-
-    public ScrollingTabContainerView createTabContainer() {
-        final LinearLayout tabLayout = new LinearLayout(getContext(), null,
-                com.android.internal.R.attr.actionBarTabBarStyle);
-        tabLayout.setMeasureWithLargestChildEnabled(true);
-        tabLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT, mContentHeight));
-
-        final ScrollingTabContainerView scroller = new ScrollingTabContainerView(mContext);
-        scroller.setTabLayout(tabLayout);
-        return scroller;
     }
 
     public void setDropdownAdapter(SpinnerAdapter adapter) {
