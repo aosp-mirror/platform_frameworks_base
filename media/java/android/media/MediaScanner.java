@@ -327,6 +327,8 @@ public class MediaScanner
     // used when scanning the image database so we know whether we have to prune
     // old thumbnail files
     private int mOriginalCount;
+    /** Whether the database had any entries in it before the scan started */
+    private boolean mWasEmptyPriorToScan = false;
     /** Whether the scanner has set a default sound for the ringer ringtone. */
     private boolean mDefaultRingtoneSet;
     /** Whether the scanner has set a default sound for the notification ringtone. */
@@ -547,6 +549,7 @@ public class MediaScanner
             return entry;
         }
 
+        @Override
         public void scanFile(String path, long lastModified, long fileSize,
                 boolean isDirectory, boolean noMedia) {
             // This is the callback funtion from native codes.
@@ -901,19 +904,19 @@ public class MediaScanner
                 mMediaProvider.update(result, values, null, null);
             }
 
-            if (notifications && !mDefaultNotificationSet) {
+            if (notifications && mWasEmptyPriorToScan && !mDefaultNotificationSet) {
                 if (TextUtils.isEmpty(mDefaultNotificationFilename) ||
                         doesPathHaveFilename(entry.mPath, mDefaultNotificationFilename)) {
                     setSettingIfNotSet(Settings.System.NOTIFICATION_SOUND, tableUri, rowId);
                     mDefaultNotificationSet = true;
                 }
-            } else if (ringtones && !mDefaultRingtoneSet) {
+            } else if (ringtones && mWasEmptyPriorToScan && !mDefaultRingtoneSet) {
                 if (TextUtils.isEmpty(mDefaultRingtoneFilename) ||
                         doesPathHaveFilename(entry.mPath, mDefaultRingtoneFilename)) {
                     setSettingIfNotSet(Settings.System.RINGTONE, tableUri, rowId);
                     mDefaultRingtoneSet = true;
                 }
-            } else if (alarms && !mDefaultAlarmSet) {
+            } else if (alarms && mWasEmptyPriorToScan && !mDefaultAlarmSet) {
                 if (TextUtils.isEmpty(mDefaultAlarmAlertFilename) ||
                         doesPathHaveFilename(entry.mPath, mDefaultAlarmAlertFilename)) {
                     setSettingIfNotSet(Settings.System.ALARM_ALERT, tableUri, rowId);
@@ -997,6 +1000,7 @@ public class MediaScanner
                         where, selectionArgs, null);
 
                 if (c != null) {
+                    mWasEmptyPriorToScan = c.getCount() == 0;
                     while (c.moveToNext()) {
                         long rowId = c.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
                         String path = c.getString(FILES_PRESCAN_PATH_COLUMN_INDEX);
