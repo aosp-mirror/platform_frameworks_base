@@ -557,7 +557,9 @@ public class PhoneStatusBar extends StatusBar {
         boolean immersive = false;
         try {
             immersive = ActivityManagerNative.getDefault().isTopActivityImmersive();
-            Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
+            if (DEBUG) {
+                Slog.d(TAG, "Top activity is " + (immersive?"immersive":"not immersive"));
+            }
         } catch (RemoteException ex) {
         }
         if (immersive) {
@@ -587,8 +589,7 @@ public class PhoneStatusBar extends StatusBar {
             }
         } else if (notification.notification.fullScreenIntent != null) {
             // not immersive & a full-screen alert should be shown
-            Slog.d(TAG, "Notification has fullScreenIntent and activity is not immersive;"
-                    + " sending fullScreenIntent");
+            Slog.d(TAG, "Notification has fullScreenIntent; sending fullScreenIntent");
             try {
                 notification.notification.fullScreenIntent.send();
             } catch (PendingIntent.CanceledException e) {
