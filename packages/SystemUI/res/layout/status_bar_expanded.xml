@@ -86,6 +86,16 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         >
+        <TextView android:id="@+id/noNotificationsTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            android:padding="8dp"
+            android:layout_gravity="top"
+            android:gravity="center"
+            android:text="@string/status_bar_no_notifications_title"
+            />
+
         <ScrollView
             android:id="@+id/scroll"
             android:layout_width="match_parent"
@@ -93,29 +103,12 @@
             android:fadingEdge="none"
             android:overScrollMode="ifContentScrolls"
             >
-            <LinearLayout
-                android:id="@+id/notificationLinearLayout"
+            <com.android.systemui.statusbar.policy.NotificationRowLayout
+                android:id="@+id/latestItems"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                >
-                
-                <TextView android:id="@+id/noNotificationsTitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@android:style/TextAppearance.Large"
-                    android:padding="8dp"
-                    android:gravity="center"
-                    android:text="@string/status_bar_no_notifications_title"
-                    />
-
-                <com.android.systemui.statusbar.policy.NotificationRowLayout
-                    android:id="@+id/latestItems"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    systemui:rowHeight="@dimen/notification_height"
-                    />
-            </LinearLayout>
+                systemui:rowHeight="@dimen/notification_height"
+                />
         </ScrollView>
 
         <ImageView
