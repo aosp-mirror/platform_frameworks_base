@@ -43,6 +43,7 @@ public class SwipeHelper {
 
     private float SWIPE_ESCAPE_VELOCITY = 100f; // dp/sec
     private int MAX_ESCAPE_ANIMATION_DURATION = 500; // ms
+    private int MAX_DISMISS_VELOCITY = 1000; // dp/sec
     private static final int SNAP_ANIM_LEN = SLOW_ANIMATIONS ? 1000 : 250; // ms
 
     public static float ALPHA_FADE_START = 0.8f; // fraction of thumbnail width
@@ -281,7 +282,7 @@ public class SwipeHelper {
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 if (mCurrView != null) {
-                    float maxVelocity = 1000; // px/sec
+                    float maxVelocity = MAX_DISMISS_VELOCITY * mDensityScale;
                     mVelocityTracker.computeCurrentVelocity(1000 /* px/sec */, maxVelocity);
                     float escapeVelocity = SWIPE_ESCAPE_VELOCITY * mDensityScale;
                     float velocity = getVelocity(mVelocityTracker);
