@@ -24,6 +24,8 @@
     android:layout_height="match_parent"
     android:layout_alignParentRight="true"
     android:orientation="horizontal"
+    android:background="?android:attr/listChoiceBackgroundIndicator"
+    android:clickable="true"
     >
 
     <LinearLayout
@@ -65,14 +67,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="8dp"
-                />
-            <View 
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignLeft="@id/icons"
-                android:layout_alignRight="@id/icons"
-                android:background="@drawable/notification_icon_area_smoke"
-                android:clickable="false"
+                android:alpha="0.4"
                 />
         </com.android.systemui.statusbar.tablet.NotificationIconArea>
     </LinearLayout>
@@ -88,7 +83,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="3dip"
-            android:layout_marginLeft="4dip"
+            android:layout_marginLeft="8dip"
             android:layout_marginRight="4dip"
             >
             <TextView android:id="@+id/time_solid"
