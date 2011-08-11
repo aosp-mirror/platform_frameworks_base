@@ -17268,6 +17268,7 @@ package android.provider {
   }
 
   public class VoicemailContract {
+    field public static final java.lang.String ACTION_FETCH_VOICEMAIL = "android.intent.action.FETCH_VOICEMAIL";
     field public static final java.lang.String ACTION_NEW_VOICEMAIL = "android.intent.action.NEW_VOICEMAIL";
     field public static final java.lang.String AUTHORITY = "com.android.voicemail";
     field public static final java.lang.String EXTRA_SELF_CHANGE = "com.android.voicemail.extra.SELF_CHANGE";
