@@ -96,7 +96,7 @@ import java.util.List;
 @SuppressWarnings({"EmptyCatchBlock", "PointlessBooleanExpression"})
 public final class ViewRootImpl extends Handler implements ViewParent,
         View.AttachInfo.Callbacks, HardwareRenderer.HardwareDrawCallbacks {
-    private static final String TAG = "ViewAncestor";
+    private static final String TAG = "ViewRootImpl";
     private static final boolean DBG = false;
     private static final boolean LOCAL_LOGV = false;
     /** @noinspection PointlessBooleanExpression*/

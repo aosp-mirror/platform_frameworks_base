@@ -4969,18 +4969,42 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return;
         }
 
-        int sel = getSelectionEnd();
-        if (sel < 0) {
+        int selEnd = getSelectionEnd();
+        if (selEnd < 0) {
             super.getFocusedRect(r);
             return;
         }
 
-        int line = mLayout.getLineForOffset(sel);
-        r.top = mLayout.getLineTop(line);
-        r.bottom = mLayout.getLineBottom(line);
-
-        r.left = (int) mLayout.getPrimaryHorizontal(sel);
-        r.right = r.left + 1;
+        int selStart = getSelectionStart();
+        if (selStart < 0 || selStart >= selEnd) {
+            int line = mLayout.getLineForOffset(selEnd);
+            r.top = mLayout.getLineTop(line);
+            r.bottom = mLayout.getLineBottom(line);
+            r.left = (int) mLayout.getPrimaryHorizontal(selEnd) - 2;
+            r.right = r.left + 4;
+        } else {
+            int lineStart = mLayout.getLineForOffset(selStart);
+            int lineEnd = mLayout.getLineForOffset(selEnd);
+            r.top = mLayout.getLineTop(lineStart);
+            r.bottom = mLayout.getLineBottom(lineEnd);
+            if (lineStart == lineEnd) {
+                r.left = (int) mLayout.getPrimaryHorizontal(selStart);
+                r.right = (int) mLayout.getPrimaryHorizontal(selEnd);
+            } else {
+                // Selection extends across multiple lines -- the focused
+                // rect covers the entire width.
+                if (mHighlightPathBogus) {
+                    mHighlightPath.reset();
+                    mLayout.getSelectionPath(selStart, selEnd, mHighlightPath);
+                    mHighlightPathBogus = false;
+                }
+                synchronized (sTempRect) {
+                    mHighlightPath.computeBounds(sTempRect, true);
+                    r.left = (int)sTempRect.left-1;
+                    r.right = (int)sTempRect.right+1;
+                }
+            }
+        }
 
         // Adjust for padding and gravity.
         int paddingLeft = getCompoundPaddingLeft();
@@ -6812,7 +6836,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             // requestRectangleOnScreen() is in terms of content coordinates.
 
             if (mTempRect == null) mTempRect = new Rect();
-            mTempRect.set(x, top, x + 1, bottom);
+            // The offsets here are to ensure the rectangle we are using is
+            // within our view bounds, in case the cursor is on the far left
+            // or right.  If it isn't withing the bounds, then this request
+            // will be ignored.
+            mTempRect.set(x - 2, top, x + 2, bottom);
             getInterestingRect(mTempRect, line);
             mTempRect.offset(mScrollX, mScrollY);
 
