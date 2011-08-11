@@ -16,8 +16,6 @@
 
 package android.text;
 
-import com.android.internal.util.ArrayUtils;
-
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -29,6 +27,8 @@ import android.text.style.CharacterStyle;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.ReplacementSpan;
 import android.util.Log;
+
+import com.android.internal.util.ArrayUtils;
 
 /**
  * Represents a line of styled text, for measuring in visual order and
@@ -720,7 +720,7 @@ class TextLine {
         float ret = 0;
 
         int contextLen = contextEnd - contextStart;
-        if (needWidth || (c != null && (wp.bgColor != 0 || runIsRtl))) {
+        if (needWidth || (c != null && (wp.bgColor != 0 || wp.underlineColor !=0 || runIsRtl))) {
             int flags = runIsRtl ? Paint.DIRECTION_RTL : Paint.DIRECTION_LTR;
             if (mCharsValid) {
                 ret = wp.getTextRunAdvances(mChars, start, runLen,
@@ -739,15 +739,32 @@ class TextLine {
             }
 
             if (wp.bgColor != 0) {
-                int color = wp.getColor();
-                Paint.Style s = wp.getStyle();
+                int previousColor = wp.getColor();
+                Paint.Style previousStyle = wp.getStyle();
+
                 wp.setColor(wp.bgColor);
                 wp.setStyle(Paint.Style.FILL);
-
                 c.drawRect(x, top, x + ret, bottom, wp);
 
-                wp.setStyle(s);
-                wp.setColor(color);
+                wp.setStyle(previousStyle);
+                wp.setColor(previousColor);
+            }
+
+            if (wp.underlineColor != 0) {
+                // kStdUnderline_Offset = 1/9, defined in SkTextFormatParams.h
+                float middle = y + wp.baselineShift + (1.0f / 9.0f) * wp.getTextSize();
+                // kStdUnderline_Thickness = 1/18, defined in SkTextFormatParams.h
+                float halfHeight = wp.underlineThickness * (1.0f / 18.0f / 2.0f) * wp.getTextSize();
+
+                int previousColor = wp.getColor();
+                Paint.Style previousStyle = wp.getStyle();
+
+                wp.setColor(wp.underlineColor);
+                wp.setStyle(Paint.Style.FILL);
+                c.drawRect(x, middle - halfHeight, x + ret, middle + halfHeight, wp);
+
+                wp.setStyle(previousStyle);
+                wp.setColor(previousColor);
             }
 
             drawTextRun(c, wp, start, end, contextStart, contextEnd, runIsRtl,
