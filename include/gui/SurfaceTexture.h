@@ -17,6 +17,8 @@
 #ifndef ANDROID_GUI_SURFACETEXTURE_H
 #define ANDROID_GUI_SURFACETEXTURE_H
 
+#include <ui/GraphicBuffer.h>
+
 namespace android {
 
 struct SurfaceTexture {
