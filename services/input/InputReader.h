@@ -696,7 +696,6 @@ public:
         int32_t mAbsMTToolType;
 
         Slot();
-        void clearIfInUse();
         void clear();
     };
 
