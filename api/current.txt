@@ -23,6 +23,7 @@ package android {
     field public static final java.lang.String BIND_INPUT_METHOD = "android.permission.BIND_INPUT_METHOD";
     field public static final java.lang.String BIND_REMOTEVIEWS = "android.permission.BIND_REMOTEVIEWS";
     field public static final java.lang.String BIND_TEXT_SERVICE = "android.permission.BIND_TEXT_SERVICE";
+    field public static final java.lang.String BIND_VPN_SERVICE = "android.permission.BIND_VPN_SERVICE";
     field public static final java.lang.String BIND_WALLPAPER = "android.permission.BIND_WALLPAPER";
     field public static final java.lang.String BLUETOOTH = "android.permission.BLUETOOTH";
     field public static final java.lang.String BLUETOOTH_ADMIN = "android.permission.BLUETOOTH_ADMIN";
@@ -11756,6 +11757,32 @@ package android.net {
 
   public static abstract interface UrlQuerySanitizer.ValueSanitizer {
     method public abstract java.lang.String sanitize(java.lang.String);
+  }
+
+  public class VpnService extends android.app.Service {
+    ctor public VpnService();
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public void onRevoke();
+    method public static android.content.Intent prepare(android.content.Context);
+    method public boolean protect(int);
+    method public boolean protect(java.net.Socket);
+    method public boolean protect(java.net.DatagramSocket);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.net.VpnService";
+  }
+
+  public class VpnService.Builder {
+    ctor public VpnService.Builder();
+    method public android.net.VpnService.Builder addAddress(java.net.InetAddress, int);
+    method public android.net.VpnService.Builder addAddress(java.lang.String, int);
+    method public android.net.VpnService.Builder addDnsServer(java.net.InetAddress);
+    method public android.net.VpnService.Builder addDnsServer(java.lang.String);
+    method public android.net.VpnService.Builder addRoute(java.net.InetAddress, int);
+    method public android.net.VpnService.Builder addRoute(java.lang.String, int);
+    method public android.net.VpnService.Builder addSearchDomain(java.lang.String);
+    method public android.os.ParcelFileDescriptor establish();
+    method public android.net.VpnService.Builder setConfigureIntent(android.app.PendingIntent);
+    method public android.net.VpnService.Builder setMtu(int);
+    method public android.net.VpnService.Builder setSession(java.lang.String);
   }
 
 }

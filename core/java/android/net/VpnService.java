@@ -101,7 +101,6 @@ import java.util.ArrayList;
  * &lt;/service&gt;</pre>
  *
  * @see Builder
- * @hide
  */
 public class VpnService extends Service {
 
