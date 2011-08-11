@@ -241,6 +241,9 @@ public class CallLog {
             values.put(DATE, Long.valueOf(start));
             values.put(DURATION, Long.valueOf(duration));
             values.put(NEW, Integer.valueOf(1));
+            if (callType == MISSED_TYPE) {
+                values.put(IS_READ, Integer.valueOf(0));
+            }
             if (ci != null) {
                 values.put(CACHED_NAME, ci.name);
                 values.put(CACHED_NUMBER_TYPE, ci.numberType);
