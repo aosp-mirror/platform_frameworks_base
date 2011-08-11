@@ -145,6 +145,14 @@ public class SearchManager
     public final static String EXTRA_NEW_SEARCH = "new_search";
 
     /**
+     * Extra data key for {@link Intent#ACTION_WEB_SEARCH}. If set, the value must be a
+     * {@link PendingIntent}. The search activity handling the {@link Intent#ACTION_WEB_SEARCH}
+     * intent will fill in and launch the pending intent. The data URI will be filled in with an
+     * http or https URI, and {@link android.provider.Browser#EXTRA_HEADERS} may be filled in.
+     */
+    public static final String EXTRA_WEB_SEARCH_PENDINGINTENT = "web_search_pendingintent";
+
+    /**
      * Boolean extra data key for a suggestion provider to return in {@link Cursor#getExtras} to
      * indicate that the search is not complete yet. This can be used by the search UI
      * to indicate that a search is in progress. The suggestion provider can return partial results
