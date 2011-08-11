@@ -78,6 +78,18 @@ public class VoicemailContract {
     /** Broadcast intent when a new voicemail record is inserted. */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_NEW_VOICEMAIL = "android.intent.action.NEW_VOICEMAIL";
+
+    /**
+     * Broadcast intent to request a voicemail source to fetch voicemail content of a specific
+     * voicemail from the remote server. The voicemail to fetch is specified by the data uri
+     * of the intent.
+     * <p>
+     * All voicemail sources are expected to handle this event. After storing the content
+     * the application should also set {@link Voicemails#HAS_CONTENT} to 1;
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_FETCH_VOICEMAIL = "android.intent.action.FETCH_VOICEMAIL";
+
     /**
      * Extra included in {@link Intent#ACTION_PROVIDER_CHANGED} broadcast intents to indicate if the
      * receiving package made this change.
