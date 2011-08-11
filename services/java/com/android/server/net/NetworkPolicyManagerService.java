@@ -1313,6 +1313,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         // dispatch changed rule to existing listeners
         mHandler.obtainMessage(MSG_RULES_CHANGED, uid, uidRules).sendToTarget();
+
+        try {
+            // adjust stats accounting based on foreground status
+            mNetworkStats.setUidForeground(uid, uidForeground);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "problem dispatching foreground change");
+        }
     }
 
     private Handler.Callback mHandlerCallback = new Handler.Callback() {

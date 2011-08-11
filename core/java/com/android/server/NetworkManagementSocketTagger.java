@@ -16,8 +16,11 @@
 
 package com.android.server;
 
+import android.net.NetworkStats;
 import android.os.SystemProperties;
 import android.util.Log;
+import android.util.Slog;
+
 import dalvik.system.SocketTagger;
 import libcore.io.IoUtils;
 
@@ -122,6 +125,26 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
         public int statsUid = -1;
     }
 
+    public static void setKernelCounterSet(int uid, int counterSet) {
+        final StringBuilder command = new StringBuilder();
+        command.append("s ").append(counterSet).append(" ").append(uid);
+        try {
+            internalModuleCtrl(command.toString());
+        } catch (IOException e) {
+            Slog.w(TAG, "problem changing counter set for uid " + uid + " : " + e);
+        }
+    }
+
+    public static void resetKernelUidStats(int uid) {
+        final StringBuilder command = new StringBuilder();
+        command.append("d 0 ").append(uid);
+        try {
+            internalModuleCtrl(command.toString());
+        } catch (IOException e) {
+            Slog.w(TAG, "problem clearing counters for uid " + uid + " : " + e);
+        }
+    }
+
     /**
      * Sends commands to the kernel netfilter module.
      *
@@ -141,7 +164,7 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
      *   <li><i>*_tag</i> are 64bit values</li></ul>
      *
      */
-    private void internalModuleCtrl(String cmd) throws IOException {
+    private static void internalModuleCtrl(String cmd) throws IOException {
         if (!SystemProperties.getBoolean(PROP_QTAGUID_ENABLED, false)) return;
 
         // TODO: migrate to native library for tagging commands

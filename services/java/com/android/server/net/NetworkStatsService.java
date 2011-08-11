@@ -26,6 +26,9 @@ import static android.content.Intent.ACTION_UID_REMOVED;
 import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.CONNECTIVITY_ACTION;
 import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.SET_ALL;
+import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.TrafficStats.UID_REMOVED;
@@ -40,6 +43,8 @@ import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.server.NetworkManagementSocketTagger.resetKernelUidStats;
+import static com.android.server.NetworkManagementSocketTagger.setKernelCounterSet;
 
 import android.app.AlarmManager;
 import android.app.IAlarmManager;
@@ -63,17 +68,20 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.INetworkManagementService;
+import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
-import android.util.LongSparseArray;
 import android.util.NtpTrustedTime;
 import android.util.Slog;
+import android.util.SparseIntArray;
 import android.util.TrustedTime;
 
 import com.android.internal.os.AtomicFile;
+import com.android.internal.util.Objects;
+import com.google.android.collect.Lists;
 import com.google.android.collect.Maps;
 import com.google.android.collect.Sets;
 
@@ -88,6 +96,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ProtocolException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -109,6 +119,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final int VERSION_UID_INIT = 1;
     private static final int VERSION_UID_WITH_IDENT = 2;
     private static final int VERSION_UID_WITH_TAG = 3;
+    private static final int VERSION_UID_WITH_SET = 4;
+
+    private static final int MSG_FORCE_UPDATE = 0x1;
 
     private final Context mContext;
     private final INetworkManagementService mNetworkManager;
@@ -156,8 +169,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     /** Set of historical network layer stats for known networks. */
     private HashMap<NetworkIdentitySet, NetworkStatsHistory> mNetworkStats = Maps.newHashMap();
     /** Set of historical network layer stats for known UIDs. */
-    private HashMap<NetworkIdentitySet, LongSparseArray<NetworkStatsHistory>> mUidStats =
-            Maps.newHashMap();
+    private HashMap<UidStatsKey, NetworkStatsHistory> mUidStats = Maps.newHashMap();
 
     /** Flag if {@link #mUidStats} have been loaded from disk. */
     private boolean mUidStatsLoaded = false;
@@ -166,6 +178,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private NetworkStats mLastPersistNetworkSnapshot;
 
     private NetworkStats mLastUidSnapshot;
+
+    /** Current counter sets for each UID. */
+    private SparseIntArray mActiveUidCounterSet = new SparseIntArray();
 
     /** Data layer operation counters for splicing into other structures. */
     private NetworkStats mOperations = new NetworkStats(0L, 10);
@@ -176,11 +191,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private final AtomicFile mNetworkFile;
     private final AtomicFile mUidFile;
-
-    // TODO: collect detailed uid stats, storing tag-granularity data until next
-    // dropbox, and uid summary for a specific bucket count.
-
-    // TODO: periodically compile statistics and send to dropbox.
 
     public NetworkStatsService(
             Context context, INetworkManagementService networkManager, IAlarmManager alarmManager) {
@@ -207,7 +217,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         mHandlerThread = new HandlerThread(TAG);
         mHandlerThread.start();
-        mHandler = new Handler(mHandlerThread.getLooper());
+        mHandler = new Handler(mHandlerThread.getLooper(), mHandlerCallback);
 
         mNetworkFile = new AtomicFile(new File(systemDir, "netstats.bin"));
         mUidFile = new AtomicFile(new File(systemDir, "netstats_uid.bin"));
@@ -246,6 +256,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         } catch (RemoteException e) {
             Slog.w(TAG, "unable to register poll alarm");
         }
+
+        // kick off background poll to bootstrap deltas
+        mHandler.obtainMessage(MSG_FORCE_UPDATE).sendToTarget();
     }
 
     private void shutdownLocked() {
@@ -302,24 +315,24 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     @Override
     public NetworkStatsHistory getHistoryForUid(
-            NetworkTemplate template, int uid, int tag, int fields) {
+            NetworkTemplate template, int uid, int set, int tag, int fields) {
         mContext.enforceCallingOrSelfPermission(READ_NETWORK_USAGE_HISTORY, TAG);
 
         synchronized (mStatsLock) {
             ensureUidStatsLoadedLocked();
-            final long packed = packUidAndTag(uid, tag);
 
             // combine all interfaces that match template
             final NetworkStatsHistory combined = new NetworkStatsHistory(
                     mSettings.getUidBucketDuration(), estimateUidBuckets(), fields);
-            for (NetworkIdentitySet ident : mUidStats.keySet()) {
-                if (templateMatches(template, ident)) {
-                    final NetworkStatsHistory history = mUidStats.get(ident).get(packed);
-                    if (history != null) {
-                        combined.recordEntireHistory(history);
-                    }
+            for (UidStatsKey key : mUidStats.keySet()) {
+                final boolean setMatches = set == SET_ALL || key.set == set;
+                if (templateMatches(template, key.ident) && key.uid == uid && setMatches
+                        && key.tag == tag) {
+                    final NetworkStatsHistory history = mUidStats.get(key);
+                    combined.recordEntireHistory(history);
                 }
             }
+
             return combined;
         }
     }
@@ -371,33 +384,27 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             final NetworkStats.Entry entry = new NetworkStats.Entry();
             NetworkStatsHistory.Entry historyEntry = null;
 
-            for (NetworkIdentitySet ident : mUidStats.keySet()) {
-                if (templateMatches(template, ident)) {
-                    final LongSparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
-                    for (int i = 0; i < uidStats.size(); i++) {
-                        final long packed = uidStats.keyAt(i);
-                        final int uid = unpackUid(packed);
-                        final int tag = unpackTag(packed);
+            for (UidStatsKey key : mUidStats.keySet()) {
+                if (templateMatches(template, key.ident)) {
+                    // always include summary under TAG_NONE, and include
+                    // other tags when requested.
+                    if (key.tag == TAG_NONE || includeTags) {
+                        final NetworkStatsHistory history = mUidStats.get(key);
+                        historyEntry = history.getValues(start, end, now, historyEntry);
 
-                        // always include summary under TAG_NONE, and include
-                        // other tags when requested.
-                        if (tag == TAG_NONE || includeTags) {
-                            final NetworkStatsHistory history = uidStats.valueAt(i);
-                            historyEntry = history.getValues(start, end, now, historyEntry);
+                        entry.iface = IFACE_ALL;
+                        entry.uid = key.uid;
+                        entry.set = key.set;
+                        entry.tag = key.tag;
+                        entry.rxBytes = historyEntry.rxBytes;
+                        entry.rxPackets = historyEntry.rxPackets;
+                        entry.txBytes = historyEntry.txBytes;
+                        entry.txPackets = historyEntry.txPackets;
+                        entry.operations = historyEntry.operations;
 
-                            entry.iface = IFACE_ALL;
-                            entry.uid = uid;
-                            entry.tag = tag;
-                            entry.rxBytes = historyEntry.rxBytes;
-                            entry.rxPackets = historyEntry.rxPackets;
-                            entry.txBytes = historyEntry.txBytes;
-                            entry.txPackets = historyEntry.txPackets;
-                            entry.operations = historyEntry.operations;
-
-                            if (entry.rxBytes > 0 || entry.rxPackets > 0 || entry.txBytes > 0
-                                    || entry.txPackets > 0 || entry.operations > 0) {
-                                stats.combineValues(entry);
-                            }
+                        if (entry.rxBytes > 0 || entry.rxPackets > 0 || entry.txBytes > 0
+                                || entry.txPackets > 0 || entry.operations > 0) {
+                            stats.combineValues(entry);
                         }
                     }
                 }
@@ -437,8 +444,31 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             mContext.enforceCallingOrSelfPermission(MODIFY_NETWORK_ACCOUNTING, TAG);
         }
 
+        if (operationCount < 0) {
+            throw new IllegalArgumentException("operation count can only be incremented");
+        }
+        if (tag == TAG_NONE) {
+            throw new IllegalArgumentException("operation count must have specific tag");
+        }
+
         synchronized (mStatsLock) {
-            mOperations.combineValues(IFACE_ALL, uid, tag, 0L, 0L, 0L, 0L, operationCount);
+            final int set = mActiveUidCounterSet.get(uid, SET_DEFAULT);
+            mOperations.combineValues(IFACE_ALL, uid, set, tag, 0L, 0L, 0L, 0L, operationCount);
+            mOperations.combineValues(IFACE_ALL, uid, set, TAG_NONE, 0L, 0L, 0L, 0L, operationCount);
+        }
+    }
+
+    @Override
+    public void setUidForeground(int uid, boolean uidForeground) {
+        mContext.enforceCallingOrSelfPermission(MODIFY_NETWORK_ACCOUNTING, TAG);
+
+        synchronized (mStatsLock) {
+            final int set = uidForeground ? SET_FOREGROUND : SET_DEFAULT;
+            final int oldSet = mActiveUidCounterSet.get(uid, SET_DEFAULT);
+            if (oldSet != set) {
+                mActiveUidCounterSet.put(uid, set);
+                setKernelCounterSet(uid, set);
+            }
         }
     }
 
@@ -601,7 +631,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         NetworkStats.Entry entry = null;
         for (String iface : persistDelta.getUniqueIfaces()) {
-            final int index = persistDelta.findIndex(iface, UID_ALL, TAG_NONE);
+            final int index = persistDelta.findIndex(iface, UID_ALL, SET_DEFAULT, TAG_NONE);
             entry = persistDelta.getValues(index, entry);
             if (forcePersist || entry.rxBytes > persistThreshold
                     || entry.txBytes > persistThreshold) {
@@ -676,31 +706,28 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
 
             // splice in operation counts since last poll
-            final int j = operationsDelta.findIndex(IFACE_ALL, entry.uid, entry.tag);
+            final int j = operationsDelta.findIndex(IFACE_ALL, entry.uid, entry.set, entry.tag);
             if (j != -1) {
                 operationsEntry = operationsDelta.getValues(j, operationsEntry);
                 entry.operations = operationsEntry.operations;
             }
 
             final NetworkStatsHistory history = findOrCreateUidStatsLocked(
-                    ident, entry.uid, entry.tag);
+                    ident, entry.uid, entry.set, entry.tag);
             history.recordData(timeStart, currentTime, entry);
         }
 
         // trim any history beyond max
         final long maxUidHistory = mSettings.getUidMaxHistory();
         final long maxTagHistory = mSettings.getTagMaxHistory();
-        for (LongSparseArray<NetworkStatsHistory> uidStats : mUidStats.values()) {
-            for (int i = 0; i < uidStats.size(); i++) {
-                final long packed = uidStats.keyAt(i);
-                final NetworkStatsHistory history = uidStats.valueAt(i);
+        for (UidStatsKey key : mUidStats.keySet()) {
+            final NetworkStatsHistory history = mUidStats.get(key);
 
-                // detailed tags are trimmed sooner than summary in TAG_NONE
-                if (unpackTag(packed) == TAG_NONE) {
-                    history.removeBucketsBefore(currentTime - maxUidHistory);
-                } else {
-                    history.removeBucketsBefore(currentTime - maxTagHistory);
-                }
+            // detailed tags are trimmed sooner than summary in TAG_NONE
+            if (key.tag == TAG_NONE) {
+                history.removeBucketsBefore(currentTime - maxUidHistory);
+            } else {
+                history.removeBucketsBefore(currentTime - maxTagHistory);
             }
         }
 
@@ -715,26 +742,25 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private void removeUidLocked(int uid) {
         ensureUidStatsLoadedLocked();
 
+        final ArrayList<UidStatsKey> knownKeys = Lists.newArrayList();
+        knownKeys.addAll(mUidStats.keySet());
+
         // migrate all UID stats into special "removed" bucket
-        for (NetworkIdentitySet ident : mUidStats.keySet()) {
-            final LongSparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
-            for (int i = 0; i < uidStats.size(); i++) {
-                final long packed = uidStats.keyAt(i);
-                if (unpackUid(packed) == uid) {
-                    // only migrate combined TAG_NONE history
-                    if (unpackTag(packed) == TAG_NONE) {
-                        final NetworkStatsHistory uidHistory = uidStats.valueAt(i);
-                        final NetworkStatsHistory removedHistory = findOrCreateUidStatsLocked(
-                                ident, UID_REMOVED, TAG_NONE);
-                        removedHistory.recordEntireHistory(uidHistory);
-                    }
-                    uidStats.remove(packed);
+        for (UidStatsKey key : knownKeys) {
+            if (key.uid == uid) {
+                // only migrate combined TAG_NONE history
+                if (key.tag == TAG_NONE) {
+                    final NetworkStatsHistory uidHistory = mUidStats.get(key);
+                    final NetworkStatsHistory removedHistory = findOrCreateUidStatsLocked(
+                            key.ident, UID_REMOVED, SET_DEFAULT, TAG_NONE);
+                    removedHistory.recordEntireHistory(uidHistory);
                 }
+                mUidStats.remove(key);
             }
         }
 
-        // TODO: push kernel event to wipe stats for UID, otherwise we risk
-        // picking them up again during next poll.
+        // clear kernel stats associated with UID
+        resetKernelUidStats(uid);
 
         // since this was radical rewrite, push to disk
         writeUidStatsLocked();
@@ -763,17 +789,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     }
 
     private NetworkStatsHistory findOrCreateUidStatsLocked(
-            NetworkIdentitySet ident, int uid, int tag) {
+            NetworkIdentitySet ident, int uid, int set, int tag) {
         ensureUidStatsLoadedLocked();
 
-        LongSparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
-        if (uidStats == null) {
-            uidStats = new LongSparseArray<NetworkStatsHistory>();
-            mUidStats.put(ident, uidStats);
-        }
-
-        final long packed = packUidAndTag(uid, tag);
-        final NetworkStatsHistory existing = uidStats.get(packed);
+        final UidStatsKey key = new UidStatsKey(ident, uid, set, tag);
+        final NetworkStatsHistory existing = mUidStats.get(key);
 
         // update when no existing, or when bucket duration changed
         final long bucketDuration = mSettings.getUidBucketDuration();
@@ -787,7 +807,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         if (updated != null) {
-            uidStats.put(packed, updated);
+            mUidStats.put(key, updated);
             return updated;
         } else {
             return existing;
@@ -874,25 +894,24 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     // for a short time.
                     break;
                 }
-                case VERSION_UID_WITH_TAG: {
-                    // uid := size *(NetworkIdentitySet size *(UID tag NetworkStatsHistory))
-                    final int ifaceSize = in.readInt();
-                    for (int i = 0; i < ifaceSize; i++) {
+                case VERSION_UID_WITH_TAG:
+                case VERSION_UID_WITH_SET: {
+                    // uid := size *(NetworkIdentitySet size *(uid set tag NetworkStatsHistory))
+                    final int identSize = in.readInt();
+                    for (int i = 0; i < identSize; i++) {
                         final NetworkIdentitySet ident = new NetworkIdentitySet(in);
 
-                        final int childSize = in.readInt();
-                        final LongSparseArray<NetworkStatsHistory> uidStats = new LongSparseArray<
-                                NetworkStatsHistory>(childSize);
-                        for (int j = 0; j < childSize; j++) {
+                        final int size = in.readInt();
+                        for (int j = 0; j < size; j++) {
                             final int uid = in.readInt();
+                            final int set = (version >= VERSION_UID_WITH_SET) ? in.readInt()
+                                    : SET_DEFAULT;
                             final int tag = in.readInt();
-                            final long packed = packUidAndTag(uid, tag);
 
+                            final UidStatsKey key = new UidStatsKey(ident, uid, set, tag);
                             final NetworkStatsHistory history = new NetworkStatsHistory(in);
-                            uidStats.put(packed, history);
+                            mUidStats.put(key, history);
                         }
-
-                        mUidStats.put(ident, uidStats);
                     }
                     break;
                 }
@@ -949,29 +968,36 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         // TODO: consider duplicating stats and releasing lock while writing
 
+        // build UidStatsKey lists grouped by ident
+        final HashMap<NetworkIdentitySet, ArrayList<UidStatsKey>> keysByIdent = Maps.newHashMap();
+        for (UidStatsKey key : mUidStats.keySet()) {
+            ArrayList<UidStatsKey> keys = keysByIdent.get(key.ident);
+            if (keys == null) {
+                keys = Lists.newArrayList();
+                keysByIdent.put(key.ident, keys);
+            }
+            keys.add(key);
+        }
+
         FileOutputStream fos = null;
         try {
             fos = mUidFile.startWrite();
             final DataOutputStream out = new DataOutputStream(new BufferedOutputStream(fos));
 
             out.writeInt(FILE_MAGIC);
-            out.writeInt(VERSION_UID_WITH_TAG);
+            out.writeInt(VERSION_UID_WITH_SET);
 
-            final int size = mUidStats.size();
-            out.writeInt(size);
-            for (NetworkIdentitySet ident : mUidStats.keySet()) {
-                final LongSparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
+            out.writeInt(keysByIdent.size());
+            for (NetworkIdentitySet ident : keysByIdent.keySet()) {
+                final ArrayList<UidStatsKey> keys = keysByIdent.get(ident);
                 ident.writeToStream(out);
 
-                final int childSize = uidStats.size();
-                out.writeInt(childSize);
-                for (int i = 0; i < childSize; i++) {
-                    final long packed = uidStats.keyAt(i);
-                    final int uid = unpackUid(packed);
-                    final int tag = unpackTag(packed);
-                    final NetworkStatsHistory history = uidStats.valueAt(i);
-                    out.writeInt(uid);
-                    out.writeInt(tag);
+                out.writeInt(keys.size());
+                for (UidStatsKey key : keys) {
+                    final NetworkStatsHistory history = mUidStats.get(key);
+                    out.writeInt(key.uid);
+                    out.writeInt(key.set);
+                    out.writeInt(key.tag);
                     history.writeToStream(out);
                 }
             }
@@ -1030,20 +1056,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 // from disk if not already in memory.
                 ensureUidStatsLoadedLocked();
 
-                pw.println("Detailed UID stats:");
-                for (NetworkIdentitySet ident : mUidStats.keySet()) {
-                    pw.print("  ident="); pw.println(ident.toString());
+                final ArrayList<UidStatsKey> keys = Lists.newArrayList();
+                keys.addAll(mUidStats.keySet());
+                Collections.sort(keys);
 
-                    final LongSparseArray<NetworkStatsHistory> uidStats = mUidStats.get(ident);
-                    for (int i = 0; i < uidStats.size(); i++) {
-                        final long packed = uidStats.keyAt(i);
-                        final int uid = unpackUid(packed);
-                        final int tag = unpackTag(packed);
-                        final NetworkStatsHistory history = uidStats.valueAt(i);
-                        pw.print("    UID="); pw.print(uid);
-                        pw.print(" tag=0x"); pw.println(Integer.toHexString(tag));
-                        history.dump("    ", pw, fullHistory);
-                    }
+                pw.println("Detailed UID stats:");
+                for (UidStatsKey key : keys) {
+                    pw.print("  ident="); pw.print(key.ident.toString());
+                    pw.print(" uid="); pw.print(key.uid);
+                    pw.print(" set="); pw.print(NetworkStats.setToString(key.set));
+                    pw.print(" tag="); pw.println(NetworkStats.tagToString(key.tag));
+
+                    final NetworkStatsHistory history = mUidStats.get(key);
+                    history.dump("    ", pw, fullHistory);
                 }
             }
         }
@@ -1080,8 +1105,12 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
             for (ApplicationInfo info : installedApps) {
                 final int uid = info.uid;
-                findOrCreateUidStatsLocked(ident, uid, TAG_NONE).generateRandom(UID_START, UID_END,
-                        UID_RX_BYTES, UID_RX_PACKETS, UID_TX_BYTES, UID_TX_PACKETS, UID_OPERATIONS);
+                findOrCreateUidStatsLocked(ident, uid, SET_DEFAULT, TAG_NONE).generateRandom(
+                        UID_START, UID_END, UID_RX_BYTES, UID_RX_PACKETS, UID_TX_BYTES,
+                        UID_TX_PACKETS, UID_OPERATIONS);
+                findOrCreateUidStatsLocked(ident, uid, SET_FOREGROUND, TAG_NONE).generateRandom(
+                        UID_START, UID_END, UID_RX_BYTES, UID_RX_PACKETS, UID_TX_BYTES,
+                        UID_TX_PACKETS, UID_OPERATIONS);
             }
         }
     }
@@ -1116,23 +1145,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         return (int) (existing.size() * existing.getBucketDuration() / newBucketDuration);
     }
 
-    // @VisibleForTesting
-    public static long packUidAndTag(int uid, int tag) {
-        final long uidLong = uid;
-        final long tagLong = tag;
-        return (uidLong << 32) | (tagLong & 0xFFFFFFFFL);
-    }
-
-    // @VisibleForTesting
-    public static int unpackUid(long packed) {
-        return (int) (packed >> 32);
-    }
-
-    // @VisibleForTesting
-    public static int unpackTag(long packed) {
-        return (int) (packed & 0xFFFFFFFFL);
-    }
-
     /**
      * Test if given {@link NetworkTemplate} matches any {@link NetworkIdentity}
      * in the given {@link NetworkIdentitySet}.
@@ -1144,6 +1156,58 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             }
         }
         return false;
+    }
+
+    private Handler.Callback mHandlerCallback = new Handler.Callback() {
+        /** {@inheritDoc} */
+        public boolean handleMessage(Message msg) {
+            switch (msg.what) {
+                case MSG_FORCE_UPDATE: {
+                    forceUpdate();
+                    return true;
+                }
+                default: {
+                    return false;
+                }
+            }
+        }
+    };
+
+    /**
+     * Key uniquely identifying a {@link NetworkStatsHistory} for a UID.
+     */
+    private static class UidStatsKey implements Comparable<UidStatsKey> {
+        public final NetworkIdentitySet ident;
+        public final int uid;
+        public final int set;
+        public final int tag;
+
+        public UidStatsKey(NetworkIdentitySet ident, int uid, int set, int tag) {
+            this.ident = ident;
+            this.uid = uid;
+            this.set = set;
+            this.tag = tag;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(ident, uid, set, tag);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof UidStatsKey) {
+                final UidStatsKey key = (UidStatsKey) obj;
+                return Objects.equal(ident, key.ident) && uid == key.uid && set == key.set
+                        && tag == key.tag;
+            }
+            return false;
+        }
+
+        /** {@inheritDoc} */
+        public int compareTo(UidStatsKey another) {
+            return Integer.compare(uid, another.uid);
+        }
     }
 
     /**

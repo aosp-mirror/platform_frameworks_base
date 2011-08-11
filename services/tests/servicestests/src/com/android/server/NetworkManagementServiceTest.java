@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.SET_FOREGROUND;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
@@ -27,7 +29,6 @@ import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.LargeTest;
 
 import com.android.frameworks.servicestests.R;
-import com.google.common.io.Files;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -74,11 +75,11 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
 
         final NetworkStats stats = mService.getNetworkStatsDetail();
         assertEquals(31, stats.size());
-        assertStatsEntry(stats, "wlan0", 0, 0, 14615L, 4270L);
-        assertStatsEntry(stats, "wlan0", 10004, 0, 333821L, 53558L);
-        assertStatsEntry(stats, "wlan0", 10004, 1947740890, 18725L, 1066L);
-        assertStatsEntry(stats, "rmnet0", 10037, 0, 31184994L, 684122L);
-        assertStatsEntry(stats, "rmnet0", 10037, 1947740890, 28507378L, 437004L);
+        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0, 14615L, 4270L);
+        assertStatsEntry(stats, "wlan0", 10004, SET_DEFAULT, 0, 333821L, 53558L);
+        assertStatsEntry(stats, "wlan0", 10004, SET_DEFAULT, 1947740890, 18725L, 1066L);
+        assertStatsEntry(stats, "rmnet0", 10037, SET_DEFAULT, 0, 31184994L, 684122L);
+        assertStatsEntry(stats, "rmnet0", 10037, SET_DEFAULT, 1947740890, 28507378L, 437004L);
     }
 
     public void testNetworkStatsDetailExtended() throws Exception {
@@ -86,8 +87,8 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
 
         final NetworkStats stats = mService.getNetworkStatsDetail();
         assertEquals(2, stats.size());
-        assertStatsEntry(stats, "test0", 1000, 0, 1024L, 2048L);
-        assertStatsEntry(stats, "test0", 1000, 0xF00D, 512L, 512L);
+        assertStatsEntry(stats, "test0", 1000, SET_DEFAULT, 0, 1024L, 2048L);
+        assertStatsEntry(stats, "test0", 1000, SET_DEFAULT, 0xF00D, 512L, 512L);
     }
 
     public void testNetworkStatsSummary() throws Exception {
@@ -95,12 +96,12 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
 
         final NetworkStats stats = mService.getNetworkStatsSummary();
         assertEquals(6, stats.size());
-        assertStatsEntry(stats, "lo", UID_ALL, TAG_NONE, 8308L, 8308L);
-        assertStatsEntry(stats, "rmnet0", UID_ALL, TAG_NONE, 1507570L, 489339L);
-        assertStatsEntry(stats, "ifb0", UID_ALL, TAG_NONE, 52454L, 0L);
-        assertStatsEntry(stats, "ifb1", UID_ALL, TAG_NONE, 52454L, 0L);
-        assertStatsEntry(stats, "sit0", UID_ALL, TAG_NONE, 0L, 0L);
-        assertStatsEntry(stats, "ip6tnl0", UID_ALL, TAG_NONE, 0L, 0L);
+        assertStatsEntry(stats, "lo", UID_ALL, SET_DEFAULT, TAG_NONE, 8308L, 8308L);
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_DEFAULT, TAG_NONE, 1507570L, 489339L);
+        assertStatsEntry(stats, "ifb0", UID_ALL, SET_DEFAULT, TAG_NONE, 52454L, 0L);
+        assertStatsEntry(stats, "ifb1", UID_ALL, SET_DEFAULT, TAG_NONE, 52454L, 0L);
+        assertStatsEntry(stats, "sit0", UID_ALL, SET_DEFAULT, TAG_NONE, 0L, 0L);
+        assertStatsEntry(stats, "ip6tnl0", UID_ALL, SET_DEFAULT, TAG_NONE, 0L, 0L);
     }
 
     public void testNetworkStatsSummaryDown() throws Exception {
@@ -112,8 +113,8 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
 
         final NetworkStats stats = mService.getNetworkStatsSummary();
         assertEquals(7, stats.size());
-        assertStatsEntry(stats, "rmnet0", UID_ALL, TAG_NONE, 1507570L, 489339L);
-        assertStatsEntry(stats, "wlan0", UID_ALL, TAG_NONE, 1024L, 2048L);
+        assertStatsEntry(stats, "rmnet0", UID_ALL, SET_DEFAULT, TAG_NONE, 1507570L, 489339L);
+        assertStatsEntry(stats, "wlan0", UID_ALL, SET_DEFAULT, TAG_NONE, 1024L, 2048L);
     }
 
     public void testKernelTags() throws Exception {
@@ -128,6 +129,15 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         assertEquals(2147483647, kernelToTag("0x7fffffff00000000"));
         assertEquals(0, kernelToTag("0x0000000000000000"));
         assertEquals(2147483136, kernelToTag("0x7FFFFE0000000000"));
+    }
+
+    public void testNetworkStatsWithSet() throws Exception {
+        stageFile(R.raw.xt_qtaguid_typical_with_set, new File(mTestProc, "net/xt_qtaguid/stats"));
+
+        final NetworkStats stats = mService.getNetworkStatsDetail();
+        assertEquals(12, stats.size());
+        assertStatsEntry(stats, "rmnet0", 1000, SET_DEFAULT, 0, 278102L, 253L, 10487L, 182L);
+        assertStatsEntry(stats, "rmnet0", 1000, SET_FOREGROUND, 0, 26033L, 30L, 1401L, 26L);
     }
 
     /**
@@ -159,12 +169,22 @@ public class NetworkManagementServiceTest extends AndroidTestCase {
         }
     }
 
-    private static void assertStatsEntry(
-            NetworkStats stats, String iface, int uid, int tag, long rxBytes, long txBytes) {
-        final int i = stats.findIndex(iface, uid, tag);
+    private static void assertStatsEntry(NetworkStats stats, String iface, int uid, int set,
+            int tag, long rxBytes, long txBytes) {
+        final int i = stats.findIndex(iface, uid, set, tag);
         final NetworkStats.Entry entry = stats.getValues(i, null);
-        assertEquals(rxBytes, entry.rxBytes);
-        assertEquals(txBytes, entry.txBytes);
+        assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
+        assertEquals("unexpected txBytes", txBytes, entry.txBytes);
+    }
+
+    private static void assertStatsEntry(NetworkStats stats, String iface, int uid, int set,
+            int tag, long rxBytes, long rxPackets, long txBytes, long txPackets) {
+        final int i = stats.findIndex(iface, uid, set, tag);
+        final NetworkStats.Entry entry = stats.getValues(i, null);
+        assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
+        assertEquals("unexpected rxPackets", rxPackets, entry.rxPackets);
+        assertEquals("unexpected txBytes", txBytes, entry.txBytes);
+        assertEquals("unexpected txPackets", txPackets, entry.txPackets);
     }
 
 }

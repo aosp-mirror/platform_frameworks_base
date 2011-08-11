@@ -18,6 +18,7 @@ package com.android.server;
 
 import static android.Manifest.permission.MANAGE_NETWORK_POLICY;
 import static android.net.NetworkStats.IFACE_ALL;
+import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.provider.Settings.Secure.NETSTATS_ENABLED;
@@ -88,8 +89,9 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
     /** {@link #mStatsXtUid} headers. */
     private static final String KEY_IFACE = "iface";
-    private static final String KEY_TAG_HEX = "acct_tag_hex";
     private static final String KEY_UID = "uid_tag_int";
+    private static final String KEY_COUNTER_SET = "cnt_set";
+    private static final String KEY_TAG_HEX = "acct_tag_hex";
     private static final String KEY_RX_BYTES = "rx_bytes";
     private static final String KEY_RX_PACKETS = "rx_packets";
     private static final String KEY_TX_BYTES = "tx_bytes";
@@ -1041,6 +1043,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
                 try {
                     entry.iface = values.get(0);
                     entry.uid = UID_ALL;
+                    entry.set = SET_DEFAULT;
                     entry.tag = TAG_NONE;
                     entry.rxBytes = Long.parseLong(values.get(1));
                     entry.rxPackets = Long.parseLong(values.get(2));
@@ -1071,6 +1074,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
                 entry.iface = iface;
                 entry.uid = UID_ALL;
+                entry.set = SET_DEFAULT;
                 entry.tag = TAG_NONE;
                 entry.rxBytes = readSingleLongFromFile(new File(ifacePath, "rx_bytes"));
                 entry.rxPackets = readSingleLongFromFile(new File(ifacePath, "rx_packets"));
@@ -1319,8 +1323,9 @@ class NetworkManagementService extends INetworkManagementService.Stub {
 
                 try {
                     entry.iface = parsed.get(KEY_IFACE);
-                    entry.tag = kernelToTag(parsed.get(KEY_TAG_HEX));
                     entry.uid = getParsedInt(parsed, KEY_UID);
+                    entry.set = getParsedInt(parsed, KEY_COUNTER_SET);
+                    entry.tag = kernelToTag(parsed.get(KEY_TAG_HEX));
                     entry.rxBytes = getParsedLong(parsed, KEY_RX_BYTES);
                     entry.rxPackets = getParsedLong(parsed, KEY_RX_PACKETS);
                     entry.txBytes = getParsedLong(parsed, KEY_TX_BYTES);
