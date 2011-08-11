@@ -3726,6 +3726,7 @@ package android.app {
     field public static final java.lang.String EXTRA_DATA_KEY = "intent_extra_data_key";
     field public static final java.lang.String EXTRA_NEW_SEARCH = "new_search";
     field public static final java.lang.String EXTRA_SELECT_QUERY = "select_query";
+    field public static final java.lang.String EXTRA_WEB_SEARCH_PENDINGINTENT = "web_search_pendingintent";
     field public static final int FLAG_QUERY_REFINEMENT = 1; // 0x1
     field public static final java.lang.String INTENT_ACTION_GLOBAL_SEARCH = "android.search.action.GLOBAL_SEARCH";
     field public static final java.lang.String INTENT_ACTION_SEARCHABLES_CHANGED = "android.search.action.SEARCHABLES_CHANGED";
