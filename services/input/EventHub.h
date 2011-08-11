@@ -307,13 +307,6 @@ private:
 
     bool hasKeycodeLocked(Device* device, int keycode) const;
 
-    int32_t getScanCodeStateLocked(Device* device, int32_t scanCode) const;
-    int32_t getKeyCodeStateLocked(Device* device, int32_t keyCode) const;
-    int32_t getSwitchStateLocked(Device* device, int32_t sw) const;
-    int32_t getAbsoluteAxisValueLocked(Device* device, int32_t axis, int32_t* outValue) const;
-    bool markSupportedKeyCodesLocked(Device* device, size_t numCodes,
-            const int32_t* keyCodes, uint8_t* outFlags) const;
-
     void loadConfigurationLocked(Device* device);
     status_t loadVirtualKeyMapLocked(Device* device);
     status_t loadKeyMapLocked(Device* device);
