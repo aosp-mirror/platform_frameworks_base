@@ -80,6 +80,7 @@ import com.android.systemui.recent.RecentsPanelView;
 import com.android.systemui.statusbar.NotificationData;
 import com.android.systemui.statusbar.StatusBar;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.SignalClusterView;
 import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -344,26 +345,9 @@ public class PhoneStatusBar extends StatusBar {
         mBatteryController = new BatteryController(mContext);
         mBatteryController.addIconView((ImageView)sb.findViewById(R.id.battery));
         mNetworkController = new NetworkController(mContext);
-        final ImageView comboRSSI = 
-                (ImageView)sb.findViewById(R.id.network_signal);
-        if (comboRSSI != null) {
-            mNetworkController.addCombinedSignalIconView(comboRSSI);
-        }
-        final ImageView mobileRSSI = 
-                (ImageView)sb.findViewById(R.id.mobile_signal);
-        if (mobileRSSI != null) {
-            mNetworkController.addPhoneSignalIconView(mobileRSSI);
-        }
-        final ImageView wifiRSSI = 
-                (ImageView)sb.findViewById(R.id.wifi_signal);
-        if (wifiRSSI != null) {
-            mNetworkController.addWifiIconView(wifiRSSI);
-        }
-        mNetworkController.addDataTypeIconView(
-                (ImageView)sb.findViewById(R.id.network_type));
-        mNetworkController.addDataDirectionOverlayIconView(
-                (ImageView)sb.findViewById(R.id.network_direction));
-        mNetworkController.setStackedMode(true);
+        final SignalClusterView signalCluster = 
+                (SignalClusterView)sb.findViewById(R.id.signal_cluster);
+        mNetworkController.addSignalCluster(signalCluster);
 
         // Recents Panel
         updateRecentsPanel();
