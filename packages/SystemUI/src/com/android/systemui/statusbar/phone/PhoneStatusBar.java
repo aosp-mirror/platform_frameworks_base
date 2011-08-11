@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import android.animation.ObjectAnimator;
 import android.app.ActivityManagerNative;
 import android.app.Dialog;
 import android.app.Notification;
@@ -137,7 +138,6 @@ public class PhoneStatusBar extends StatusBar {
     ExpandedView mExpandedView;
     WindowManager.LayoutParams mExpandedParams;
     ScrollView mScrollView;
-    View mNotificationLinearLayout;
     View mExpandedContents;
     // top bar
     TextView mNoNotificationsTitle;
@@ -311,16 +311,18 @@ public class PhoneStatusBar extends StatusBar {
 
         mExpandedDialog = new ExpandedDialog(context);
         mExpandedView = expanded;
-        mExpandedContents = expanded.findViewById(R.id.notificationLinearLayout);
         mPile = (ViewGroup)expanded.findViewById(R.id.latestItems);
+        mExpandedContents = mPile; // was: expanded.findViewById(R.id.notificationLinearLayout);
         mNoNotificationsTitle = (TextView)expanded.findViewById(R.id.noNotificationsTitle);
+        mNoNotificationsTitle.setAlpha(0f);
+        mNoNotificationsTitle.setVisibility(View.VISIBLE);
         mClearButton = expanded.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
+        mClearButton.setAlpha(0f);
         mDateView = (DateView)expanded.findViewById(R.id.date);
         mSettingsButton = expanded.findViewById(R.id.settings_button);
         mSettingsButton.setOnClickListener(mSettingsButtonListener);
         mScrollView = (ScrollView)expanded.findViewById(R.id.scroll);
-        mNotificationLinearLayout = expanded.findViewById(R.id.notificationLinearLayout);
 
         mTicker = new MyTicker(context, sb);
 
@@ -707,9 +709,10 @@ public class PhoneStatusBar extends StatusBar {
             mTicker.removeEntry(old);
 
             // Recalculate the position of the sliding windows and the titles.
-            setAreThereNotifications();
             updateExpandedViewPos(EXPANDED_LEAVE_ALONE);
         }
+
+        setAreThereNotifications();
     }
 
     @Override
@@ -1014,13 +1017,37 @@ public class PhoneStatusBar extends StatusBar {
     }
 
     private void setAreThereNotifications() {
-        mClearButton.setVisibility(mNotificationData.hasClearableItems() 
-                ? View.VISIBLE 
-                : View.INVISIBLE);
+        final boolean any = mNotificationData.size() > 0;
 
-        mNoNotificationsTitle.setVisibility(mNotificationData.size() > 0
-                ? View.GONE
-                : View.VISIBLE);
+        final boolean clearable = any && mNotificationData.hasClearableItems();
+
+        if (DEBUG) {
+            Slog.d(TAG, "setAreThereNotifications: N=" + mNotificationData.size()
+                    + " any=" + any + " clearable=" + clearable);
+        }
+
+        if (mClearButton.isShown()) {
+            if (clearable != (mClearButton.getAlpha() == 1.0f)) {
+                ObjectAnimator.ofFloat(mClearButton, "alpha",
+                        clearable ? 1.0f : 0.0f)
+                    .setDuration(250)
+                    .start();
+            }
+        } else {
+            mClearButton.setAlpha(clearable ? 1.0f : 0.0f);
+        }
+
+        if (mNoNotificationsTitle.isShown()) {
+            if (any != (mNoNotificationsTitle.getAlpha() == 0.0f)) {
+                ObjectAnimator a = ObjectAnimator.ofFloat(mNoNotificationsTitle, "alpha",
+                            (any ? 0.0f : 0.75f));
+                a.setDuration(any ? 0 : 500);
+                a.setStartDelay(any ? 250 : 1000);
+                a.start();
+            }
+        } else {
+            mNoNotificationsTitle.setAlpha(any ? 0.0f : 0.75f);
+        }
     }
 
 
@@ -1662,7 +1689,6 @@ public class PhoneStatusBar extends StatusBar {
             pw.println("  mTickerView: " + viewInfo(mTickerView));
             pw.println("  mScrollView: " + viewInfo(mScrollView)
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
-            pw.println("mNotificationLinearLayout: " + viewInfo(mNotificationLinearLayout));
         }
         /*
         synchronized (mNotificationData) {

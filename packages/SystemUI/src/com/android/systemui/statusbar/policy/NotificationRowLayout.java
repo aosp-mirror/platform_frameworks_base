@@ -166,20 +166,16 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
             mAppearingViews.add(child);
 
             child.setPivotY(0);
-            AnimatorSet a = new AnimatorSet();
-            a.playTogether(
-                    ObjectAnimator.ofFloat(child, "alpha", 0f, 1f)
-//                    ,ObjectAnimator.ofFloat(child, "scaleY", 0f, 1f)
-            );
-            a.setDuration(APPEAR_ANIM_LEN);
-            a.addListener(new AnimatorListenerAdapter() {
+            final ObjectAnimator alphaFade = ObjectAnimator.ofFloat(child, "alpha", 0f, 1f);
+            alphaFade.setDuration(APPEAR_ANIM_LEN);
+            alphaFade.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mAppearingViews.remove(childF);
                     requestLayout(); // pick up any final changes in position
                 }
             });
-            a.start();
+            alphaFade.start();
             requestLayout(); // start the container animation
         }
     }
@@ -195,23 +191,10 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
 
             child.setPivotY(0);
 
-            //final float velocity = (mSlidingChild == child)
-             //       ? Math.min(mLiftoffVelocity, SWIPE_ANIM_VELOCITY_MIN)
-            //        : SWIPE_ESCAPE_VELOCITY;
-            final float velocity = 0f;
-            final TimeAnimator zoom = new TimeAnimator();
-            zoom.setTimeListener(new TimeAnimator.TimeListener() {
-                @Override
-                public void onTimeUpdate(TimeAnimator animation, long totalTime, long deltaTime) {
-                    childF.setTranslationX(childF.getTranslationX() + deltaTime / 1000f * velocity);
-                }
-            });
-
             final ObjectAnimator alphaFade = ObjectAnimator.ofFloat(child, "alpha", 0f);
             alphaFade.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    zoom.cancel(); // it won't end on its own
                     if (DEBUG) Slog.d(TAG, "actually removing child: " + childF);
                     NotificationRowLayout.super.removeView(childF);
                     childF.setAlpha(1f);
@@ -220,14 +203,8 @@ public class NotificationRowLayout extends ViewGroup implements SwipeHelper.Call
                 }
             });
 
-            AnimatorSet a = new AnimatorSet();
-            a.playTogether(alphaFade, zoom);
-                    
-//                    ,ObjectAnimator.ofFloat(child, "scaleY", 0f)
-//                    ,ObjectAnimator.ofFloat(child, "translationX", child.getTranslationX() + 300f)
-
-            a.setDuration(DISAPPEAR_ANIM_LEN);
-            a.start();
+            alphaFade.setDuration(DISAPPEAR_ANIM_LEN);
+            alphaFade.start();
             requestLayout(); // start the container animation
         } else {
             super.removeView(child);
