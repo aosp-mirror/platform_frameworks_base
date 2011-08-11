@@ -418,7 +418,9 @@ status_t SurfaceTexture::setSynchronousMode(bool enabled) {
 
     if (!enabled) {
         // going to asynchronous mode, drain the queue
-        drainQueueLocked();
+        err = drainQueueLocked();
+        if (err != NO_ERROR)
+            return err;
     }
 
     if (mSynchronousMode != enabled) {
@@ -616,13 +618,9 @@ status_t SurfaceTexture::disconnect(int api) {
         case NATIVE_WINDOW_API_MEDIA:
         case NATIVE_WINDOW_API_CAMERA:
             if (mConnectedApi == api) {
+                drainQueueAndFreeBuffersLocked();
                 mConnectedApi = NO_CONNECTED_API;
-                if (mQueue.isEmpty()) {
-                    // if the queue is not empty, we need to wait for it
-                    // to drain before we can free all buffers. This is
-                    // done in updateTexImage().
-                    freeAllBuffersLocked();
-                }
+                mDequeueCondition.signal();
             } else {
                 LOGE("disconnect: connected to another api (cur=%d, req=%d)",
                         mConnectedApi, api);
@@ -658,7 +656,7 @@ status_t SurfaceTexture::updateTexImage() {
 
     if (mAbandoned) {
         LOGE("calling updateTexImage() on an abandoned SurfaceTexture");
-        //return NO_INIT;
+        return NO_INIT;
     }
 
     // In asynchronous mode the list is guaranteed to be one buffer
@@ -667,21 +665,14 @@ status_t SurfaceTexture::updateTexImage() {
         Fifo::iterator front(mQueue.begin());
         int buf = *front;
 
-        if (uint32_t(buf) >= NUM_BUFFER_SLOTS) {
-            LOGE("buffer index out of range (index=%d)", buf);
-            //return BAD_VALUE;
-        }
-
         // Update the GL texture object.
         EGLImageKHR image = mSlots[buf].mEglImage;
         if (image == EGL_NO_IMAGE_KHR) {
             EGLDisplay dpy = eglGetCurrentDisplay();
-
             if (mSlots[buf].mGraphicBuffer == 0) {
                 LOGE("buffer at slot %d is null", buf);
-                //return BAD_VALUE;
+                return BAD_VALUE;
             }
-
             image = createImage(dpy, mSlots[buf].mGraphicBuffer);
             mSlots[buf].mEglImage = image;
             mSlots[buf].mEglDisplay = dpy;
@@ -871,24 +862,64 @@ void SurfaceTexture::setFrameAvailableListener(
     mFrameAvailableListener = listener;
 }
 
+void SurfaceTexture::freeBufferLocked(int i) {
+    mSlots[i].mGraphicBuffer = 0;
+    mSlots[i].mBufferState = BufferSlot::FREE;
+    if (mSlots[i].mEglImage != EGL_NO_IMAGE_KHR) {
+        eglDestroyImageKHR(mSlots[i].mEglDisplay, mSlots[i].mEglImage);
+        mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
+        mSlots[i].mEglDisplay = EGL_NO_DISPLAY;
+    }
+}
+
 void SurfaceTexture::freeAllBuffersLocked() {
     LOGW_IF(!mQueue.isEmpty(),
             "freeAllBuffersLocked called but mQueue is not empty");
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
-        mSlots[i].mGraphicBuffer = 0;
-        mSlots[i].mBufferState = BufferSlot::FREE;
-        if (mSlots[i].mEglImage != EGL_NO_IMAGE_KHR) {
-            eglDestroyImageKHR(mSlots[i].mEglDisplay, mSlots[i].mEglImage);
-            mSlots[i].mEglImage = EGL_NO_IMAGE_KHR;
-            mSlots[i].mEglDisplay = EGL_NO_DISPLAY;
+        freeBufferLocked(i);
+    }
+}
+
+void SurfaceTexture::freeAllBuffersExceptHeadLocked() {
+    LOGW_IF(!mQueue.isEmpty(),
+            "freeAllBuffersExceptCurrentLocked called but mQueue is not empty");
+    int head = -1;
+    if (!mQueue.empty()) {
+        Fifo::iterator front(mQueue.begin());
+        head = *front;
+    }
+    for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
+        if (i != head) {
+            freeBufferLocked(i);
         }
     }
 }
 
-void SurfaceTexture::drainQueueLocked() {
+status_t SurfaceTexture::drainQueueLocked() {
     while (mSynchronousMode && !mQueue.isEmpty()) {
         mDequeueCondition.wait(mMutex);
+        if (mAbandoned) {
+            LOGE("drainQueueLocked: SurfaceTexture has been abandoned!");
+            return NO_INIT;
+        }
+        if (mConnectedApi == NO_CONNECTED_API) {
+            LOGE("drainQueueLocked: SurfaceTexture is not connected!");
+            return NO_INIT;
+        }
     }
+    return NO_ERROR;
+}
+
+status_t SurfaceTexture::drainQueueAndFreeBuffersLocked() {
+    status_t err = drainQueueLocked();
+    if (err == NO_ERROR) {
+        if (mSynchronousMode) {
+            freeAllBuffersLocked();
+        } else {
+            freeAllBuffersExceptHeadLocked();
+        }
+    }
+    return err;
 }
 
 EGLImageKHR SurfaceTexture::createImage(EGLDisplay dpy,
@@ -960,10 +991,10 @@ int SurfaceTexture::query(int what, int* outValue)
 
 void SurfaceTexture::abandon() {
     Mutex::Autolock lock(mMutex);
-    // clear the queue
-    freeAllBuffersLocked();
+    mQueue.clear();
     mAbandoned = true;
     mCurrentTextureBuf.clear();
+    freeAllBuffersLocked();
     mDequeueCondition.signal();
 }
 

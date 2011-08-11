@@ -208,13 +208,27 @@ public:
 
 protected:
 
-    // freeAllBuffers frees the resources (both GraphicBuffer and EGLImage) for
-    // all slots.
+    // freeBufferLocked frees the resources (both GraphicBuffer and EGLImage)
+    // for the given slot.
+    void freeBufferLocked(int index);
+
+    // freeAllBuffersLocked frees the resources (both GraphicBuffer and
+    // EGLImage) for all slots.
     void freeAllBuffersLocked();
 
+    // freeAllBuffersExceptHeadLocked frees the resources (both GraphicBuffer
+    // and EGLImage) for all slots except the head of mQueue
+    void freeAllBuffersExceptHeadLocked();
+
     // drainQueueLocked drains the buffer queue if we're in synchronous mode
-    // returns immediately otherwise.
-    void drainQueueLocked();
+    // returns immediately otherwise. return NO_INIT if SurfaceTexture
+    // became abandoned or disconnected during this call.
+    status_t drainQueueLocked();
+
+    // drainQueueAndFreeBuffersLocked drains the buffer queue if we're in
+    // synchronous mode and free all buffers. In asynchronous mode, all buffers
+    // are freed except the current buffer.
+    status_t drainQueueAndFreeBuffersLocked();
 
     static bool isExternalFormat(uint32_t format);
 
