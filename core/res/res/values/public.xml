@@ -1788,6 +1788,9 @@
   <public type="attr" name="subtypeLocale" />
   <public type="attr" name="subtypeExtraValue" />
 
+  <public type="attr" name="actionBarDivider" />
+  <public type="attr" name="actionBarItemBackground" />
+
   <public type="style" name="TextAppearance.SuggestionHighlight" />
 
   <public type="style" name="Theme.Holo.Light.DarkActionBar" />

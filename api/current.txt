@@ -190,6 +190,8 @@ package android {
     field public static final int accountPreferences = 16843423; // 0x101029f
     field public static final int accountType = 16843407; // 0x101028f
     field public static final int action = 16842797; // 0x101002d
+    field public static final int actionBarDivider = 16843685; // 0x10103a5
+    field public static final int actionBarItemBackground = 16843686; // 0x10103a6
     field public static final int actionBarSize = 16843499; // 0x10102eb
     field public static final int actionBarSplitStyle = 16843666; // 0x1010392
     field public static final int actionBarStyle = 16843470; // 0x10102ce

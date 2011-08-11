@@ -253,7 +253,7 @@ public class ActionBarImpl extends ActionBar {
 
     @Override
     public void setCustomView(int resId) {
-        setCustomView(LayoutInflater.from(mContext).inflate(resId, mActionView, false));
+        setCustomView(LayoutInflater.from(getThemedContext()).inflate(resId, mActionView, false));
     }
 
     @Override
@@ -630,14 +630,14 @@ public class ActionBarImpl extends ActionBar {
         
         public ActionModeImpl(ActionMode.Callback callback) {
             mCallback = callback;
-            mMenu = new MenuBuilder(mActionView.getContext())
+            mMenu = new MenuBuilder(getThemedContext())
                     .setDefaultShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM);
             mMenu.setCallback(this);
         }
 
         @Override
         public MenuInflater getMenuInflater() {
-            return new MenuInflater(mContext);
+            return new MenuInflater(getThemedContext());
         }
 
         @Override
@@ -755,7 +755,7 @@ public class ActionBarImpl extends ActionBar {
                 return true;
             }
 
-            new MenuPopupHelper(mContext, subMenu).show();
+            new MenuPopupHelper(getThemedContext(), subMenu).show();
             return true;
         }
 
@@ -819,7 +819,8 @@ public class ActionBarImpl extends ActionBar {
 
         @Override
         public Tab setCustomView(int layoutResId) {
-            return setCustomView(LayoutInflater.from(mContext).inflate(layoutResId, null));
+            return setCustomView(LayoutInflater.from(getThemedContext())
+                    .inflate(layoutResId, null));
         }
 
         @Override
