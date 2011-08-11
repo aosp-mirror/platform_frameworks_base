@@ -2105,10 +2105,13 @@ class BackupManagerService extends IBackupManager.Stub {
                     backupOnePackage(pkg, out);
                 }
 
-                // Finally, shared storage if requested
+                // Shared storage if requested
                 if (mIncludeShared) {
                     backupSharedStorage();
                 }
+
+                // Done!
+                finalizeBackup(out);
             } catch (RemoteException e) {
                 Slog.e(TAG, "App died during full backup");
             } finally {
@@ -2323,6 +2326,16 @@ class BackupManagerService extends IBackupManager.Stub {
                 Slog.e(TAG, "Shared storage backup package not found");
             } finally {
                 tearDown(pkg);
+            }
+        }
+
+        private void finalizeBackup(OutputStream out) {
+            try {
+                // A standard 'tar' EOF sequence: two 512-byte blocks of all zeroes.
+                byte[] eof = new byte[512 * 2]; // newly allocated == zero filled
+                out.write(eof);
+            } catch (IOException e) {
+                Slog.w(TAG, "Error attempting to finalize backup stream");
             }
         }
 
@@ -3186,9 +3199,11 @@ class BackupManagerService extends IBackupManager.Stub {
         void skipTarPadding(long size, InputStream instream) throws IOException {
             long partial = (size + 512) % 512;
             if (partial > 0) {
-                byte[] buffer = new byte[512];
-                int nRead = instream.read(buffer, 0, 512 - (int)partial);
-                if (nRead >= 0) mBytes += nRead;
+                final int needed = 512 - (int)partial;
+                byte[] buffer = new byte[needed];
+                if (readExactly(instream, buffer, 0, needed) == needed) {
+                    mBytes += needed;
+                } else throw new IOException("Unexpected EOF in padding");
             }
         }
 
@@ -3199,12 +3214,11 @@ class BackupManagerService extends IBackupManager.Stub {
             if (info.size > 64 * 1024) {
                 throw new IOException("Restore manifest too big; corrupt? size=" + info.size);
             }
+
             byte[] buffer = new byte[(int) info.size];
-            int nRead = 0;
-            while (nRead < info.size) {
-                nRead += instream.read(buffer, nRead, (int)info.size - nRead);
-            }
-            if (nRead >= 0) mBytes += nRead;
+            if (readExactly(instream, buffer, 0, (int)info.size) == info.size) {
+                mBytes += info.size;
+            } else throw new IOException("Unexpected EOF in manifest");
 
             RestorePolicy policy = RestorePolicy.IGNORE;
             String[] str = new String[1];
@@ -3453,7 +3467,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     }
                 } catch (IOException e) {
                     if (DEBUG) {
-                        Slog.e(TAG, "Parse error in header.  Hexdump:");
+                        Slog.e(TAG, "Parse error in header: " + e.getMessage());
                         HEXLOG(block);
                     }
                     throw e;
@@ -3479,22 +3493,31 @@ class BackupManagerService extends IBackupManager.Stub {
             }
         }
 
-        boolean readTarHeader(InputStream instream, byte[] block) throws IOException {
-            int totalRead = 0;
-            while (totalRead < 512) {
-                int nRead = instream.read(block, totalRead, 512 - totalRead);
-                if (nRead >= 0) {
-                    mBytes += nRead;
-                    totalRead += nRead;
-                } else {
-                    if (totalRead == 0) {
-                        // EOF instead of a new header; we're done
-                        break;
-                    }
-                    throw new IOException("Unable to read full block header, t=" + totalRead);
+        // Read exactly the given number of bytes into a buffer at the stated offset.
+        // Returns false if EOF is encountered before the requested number of bytes
+        // could be read.
+        int readExactly(InputStream in, byte[] buffer, int offset, int size)
+                throws IOException {
+            if (size <= 0) throw new IllegalArgumentException("size must be > 0");
+
+            int soFar = 0;
+            while (soFar < size) {
+                int nRead = in.read(buffer, offset + soFar, size - soFar);
+                if (nRead <= 0) {
+                    if (MORE_DEBUG) Slog.w(TAG, "- wanted exactly " + size + " but got only " + soFar);
+                    break;
                 }
+                soFar += nRead;
             }
-            return (totalRead == 512);
+            return soFar;
+        }
+
+        boolean readTarHeader(InputStream instream, byte[] block) throws IOException {
+            final int got = readExactly(instream, block, 0, 512);
+            if (got == 0) return false;     // Clean EOF
+            if (got < 512) throw new IOException("Unable to read full block header");
+            mBytes += 512;
+            return true;
         }
 
         // overwrites 'info' fields based on the pax extended header
@@ -3510,11 +3533,10 @@ class BackupManagerService extends IBackupManager.Stub {
             // read whole blocks, not just the content size
             int numBlocks = (int)((info.size + 511) >> 9);
             byte[] data = new byte[numBlocks * 512];
-            int nRead = instream.read(data);
-            if (nRead >= 0) mBytes += nRead;
-            if (nRead != data.length) {
-                return false;
+            if (readExactly(instream, data, 0, data.length) < data.length) {
+                throw new IOException("Unable to read full pax header");
             }
+            mBytes += data.length;
 
             final int contentSize = (int) info.size;
             int offset = 0;
