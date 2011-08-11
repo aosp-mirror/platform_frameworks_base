@@ -20,6 +20,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 #include <time.h>
+#include <system/graphics.h>
 
 #if defined(HAVE_PTHREADS)
 # include <pthread.h>
@@ -42,8 +43,8 @@ enum {
      * ** Keep in sync with android.os.Process.java **
      * ***********************************************
      * 
-     * This maps directly to the "nice" priorites we use in Android.
-     * A thread priority should be chosen inverse-proportinally to
+     * This maps directly to the "nice" priorities we use in Android.
+     * A thread priority should be chosen inverse-proportionally to
      * the amount of work the thread is expected to do. The more work
      * a thread will do, the less favorable priority it should get so that 
      * it doesn't starve the system. Threads not behaving properly might
@@ -66,7 +67,7 @@ enum {
     ANDROID_PRIORITY_DISPLAY        =  -4,
     
     /* ui service treads might want to run at a urgent display (uncommon) */
-    ANDROID_PRIORITY_URGENT_DISPLAY =  -8,
+    ANDROID_PRIORITY_URGENT_DISPLAY =  HAL_PRIORITY_URGENT_DISPLAY,
     
     /* all normal audio threads */
     ANDROID_PRIORITY_AUDIO          = -16,
