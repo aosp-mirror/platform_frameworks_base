@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import com.android.internal.util.XmlUtils;
+import com.android.server.Watchdog;
 
 import org.xmlpull.v1.XmlPullParser;
 
@@ -52,7 +53,7 @@ import java.util.ArrayList;
 /*
  * Wraps the C++ InputManager and provides its callbacks.
  */
-public class InputManager {
+public class InputManager implements Watchdog.Monitor {
     static final String TAG = "InputManager";
     
     private static final boolean DEBUG = false;
@@ -94,6 +95,7 @@ public class InputManager {
             InputChannel toChannel);
     private static native void nativeSetPointerSpeed(int speed);
     private static native String nativeDump();
+    private static native void nativeMonitor();
     
     // Input event injection constants defined in InputDispatcher.h.
     static final int INPUT_EVENT_INJECTION_SUCCEEDED = 0;
@@ -135,6 +137,9 @@ public class InputManager {
 
         Slog.i(TAG, "Initializing input manager");
         nativeInit(mContext, mCallbacks, looper.getQueue());
+
+        // Add ourself to the Watchdog monitors.
+        Watchdog.getInstance().addMonitor(this);
     }
 
     public void start() {
@@ -454,6 +459,12 @@ public class InputManager {
         if (dumpStr != null) {
             pw.println(dumpStr);
         }
+    }
+
+    // Called by the heartbeat to ensure locks are not held indefnitely (for deadlock detection).
+    public void monitor() {
+        synchronized (mInputFilterLock) { }
+        nativeMonitor();
     }
 
     private final class InputFilterHost implements InputFilter.Host {

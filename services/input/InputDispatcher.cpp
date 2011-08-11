@@ -3919,6 +3919,8 @@ void InputDispatcher::updateDispatchStatisticsLocked(nsecs_t currentTime, const 
 }
 
 void InputDispatcher::dump(String8& dump) {
+    AutoMutex _l(mLock);
+
     dump.append("Input Dispatcher State:\n");
     dumpDispatchStateLocked(dump);
 
@@ -3926,6 +3928,12 @@ void InputDispatcher::dump(String8& dump) {
     dump.appendFormat(INDENT2 "MaxEventsPerSecond: %d\n", mConfig.maxEventsPerSecond);
     dump.appendFormat(INDENT2 "KeyRepeatDelay: %0.1fms\n", mConfig.keyRepeatDelay * 0.000001f);
     dump.appendFormat(INDENT2 "KeyRepeatTimeout: %0.1fms\n", mConfig.keyRepeatTimeout * 0.000001f);
+}
+
+void InputDispatcher::monitor() {
+    // Acquire and release the lock to ensure that the dispatcher has not deadlocked.
+    mLock.lock();
+    mLock.unlock();
 }
 
 

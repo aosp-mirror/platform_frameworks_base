@@ -282,6 +282,9 @@ public:
      * This method may be called on any thread (usually by the input manager). */
     virtual void dump(String8& dump) = 0;
 
+    /* Called by the heatbeat to ensures that the dispatcher has not deadlocked. */
+    virtual void monitor() = 0;
+
     /* Runs a single iteration of the dispatch loop.
      * Nominally processes one queued event, a timeout, or a response from an input consumer.
      *
@@ -370,6 +373,7 @@ public:
     explicit InputDispatcher(const sp<InputDispatcherPolicyInterface>& policy);
 
     virtual void dump(String8& dump);
+    virtual void monitor();
 
     virtual void dispatchOnce();
 
