@@ -339,42 +339,8 @@ public class VideoEditorImpl implements VideoEditor {
                        int audioCodec, int videoCodec,
                        ExportProgressListener listener)
                        throws IOException {
-
-        switch (audioCodec) {
-            case MediaProperties.ACODEC_AAC_LC:
-                break;
-            case MediaProperties.ACODEC_AMRNB:
-                break;
-
-            default: {
-                String message = "Unsupported audio codec type " + audioCodec;
-                throw new IllegalArgumentException(message);
-            }
-        }
-
-        switch (videoCodec) {
-            case MediaProperties.VCODEC_H263:
-                break;
-            case MediaProperties.VCODEC_H264BP:
-                break;
-            case MediaProperties.VCODEC_MPEG4:
-                break;
-
-            default: {
-                String message = "Unsupported video codec type " + videoCodec;
-                throw new IllegalArgumentException(message);
-            }
-        }
-
-        export(filename, height, bitrate, listener);
-    }
-
-    /*
-     * {@inheritDoc}
-     */
-    public void export(String filename, int height, int bitrate,
-                       ExportProgressListener listener)
-                       throws IOException {
+        int audcodec = 0;
+        int vidcodec = 0;
         if (filename == null) {
             throw new IllegalArgumentException("export: filename is null");
         }
@@ -386,20 +352,6 @@ public class VideoEditorImpl implements VideoEditor {
 
         if (mMediaItems.size() == 0) {
             throw new IllegalStateException("No MediaItems added");
-        }
-
-        /** Check the platform specific maximum export resolution */
-        VideoEditorProfile veProfile = VideoEditorProfile.get();
-        if (veProfile == null) {
-            throw new RuntimeException("Can't get the video editor profile");
-        }
-        final int maxOutputHeight = veProfile.maxOutputVideoFrameHeight;
-        final int maxOutputWidth = veProfile.maxOutputVideoFrameWidth;
-        if (height > maxOutputHeight) {
-            throw new IllegalArgumentException(
-                    "Unsupported export resolution. Supported maximum width:" +
-                    maxOutputWidth + " height:" + maxOutputHeight +
-                    " current height:" + height);
         }
 
         switch (height) {
@@ -461,6 +413,36 @@ public class VideoEditorImpl implements VideoEditor {
         if (MAX_SUPPORTED_FILE_SIZE <= fileSize) {
             throw new IllegalStateException("Export Size is more than 2GB");
         }
+        switch (audioCodec) {
+            case MediaProperties.ACODEC_AAC_LC:
+                audcodec = MediaArtistNativeHelper.AudioFormat.AAC;
+                break;
+            case MediaProperties.ACODEC_AMRNB:
+                audcodec = MediaArtistNativeHelper.AudioFormat.AMR_NB;
+                break;
+
+            default: {
+                String message = "Unsupported audio codec type " + audioCodec;
+                throw new IllegalArgumentException(message);
+            }
+        }
+
+        switch (videoCodec) {
+            case MediaProperties.VCODEC_H263:
+                vidcodec = MediaArtistNativeHelper.VideoFormat.H263;
+                break;
+            case MediaProperties.VCODEC_H264:
+                vidcodec = MediaArtistNativeHelper.VideoFormat.H264;
+                break;
+            case MediaProperties.VCODEC_MPEG4:
+                vidcodec = MediaArtistNativeHelper.VideoFormat.MPEG4;
+                break;
+
+            default: {
+                String message = "Unsupported video codec type " + videoCodec;
+                throw new IllegalArgumentException(message);
+            }
+        }
 
         boolean semAcquireDone = false;
         try {
@@ -470,7 +452,8 @@ public class VideoEditorImpl implements VideoEditor {
             if (mMANativeHelper == null) {
                 throw new IllegalStateException("The video editor is not initialized");
             }
-
+            mMANativeHelper.setAudioCodec(audcodec);
+            mMANativeHelper.setVideoCodec(vidcodec);
             mMANativeHelper.export(filename, mProjectPath, height,bitrate,
                                mMediaItems, mTransitions, mAudioTracks, listener);
         } catch (InterruptedException  ex) {
@@ -480,6 +463,19 @@ public class VideoEditorImpl implements VideoEditor {
                 unlock();
             }
         }
+    }
+
+    /*
+     * {@inheritDoc}
+     */
+    public void export(String filename, int height, int bitrate,
+                       ExportProgressListener listener)
+                       throws IOException {
+        int defaultAudiocodec = MediaArtistNativeHelper.AudioFormat.AAC;
+        int defaultVideocodec = MediaArtistNativeHelper.VideoFormat.H264;
+
+        export(filename, height, bitrate, defaultAudiocodec,
+                defaultVideocodec, listener);
     }
 
     /*

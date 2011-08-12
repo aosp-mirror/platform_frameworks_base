@@ -26,6 +26,7 @@
 #include <expat.h>
 #include <media/MediaProfiles.h>
 #include <media/stagefright/MediaDebug.h>
+#include <media/stagefright/openmax/OMX_Video.h>
 
 namespace android {
 
@@ -377,7 +378,24 @@ void MediaProfiles::addStartTimeOffset(int cameraId, const char** atts)
     LOGV("%s: cameraId=%d, offset=%d ms", __func__, cameraId, offsetTimeMs);
     mStartTimeOffsets.replaceValueFor(cameraId, offsetTimeMs);
 }
+/*static*/ MediaProfiles::ExportVideoProfile*
+MediaProfiles::createExportVideoProfile(const char **atts)
+{
+    CHECK(!strcmp("name", atts[0]) &&
+          !strcmp("profile", atts[2]) &&
+          !strcmp("level", atts[4]));
 
+    const size_t nMappings =
+        sizeof(sVideoEncoderNameMap)/sizeof(sVideoEncoderNameMap[0]);
+    const int codec = findTagForName(sVideoEncoderNameMap, nMappings, atts[1]);
+    CHECK(codec != -1);
+
+    MediaProfiles::ExportVideoProfile *profile =
+        new MediaProfiles::ExportVideoProfile(
+            codec, atoi(atts[3]), atoi(atts[5]));
+
+    return profile;
+}
 /*static*/ MediaProfiles::VideoEditorCap*
 MediaProfiles::createVideoEditorCap(const char **atts, MediaProfiles *profiles)
 {
@@ -428,6 +446,8 @@ MediaProfiles::startElementHandler(void *userData, const char *name, const char 
         profiles->addImageEncodingQualityLevel(profiles->mCurrentCameraId, atts);
     } else if (strcmp("VideoEditorCap", name) == 0) {
         createVideoEditorCap(atts, profiles);
+    } else if (strcmp("ExportVideoProfile", name) == 0) {
+        profiles->mVideoEditorExportProfiles.add(createExportVideoProfile(atts));
     }
 }
 
@@ -830,6 +850,20 @@ MediaProfiles::createDefaultVideoEditorCap(MediaProfiles *profiles)
                 VIDEOEDITOR_DEFAULT_MAX_OUTPUT_FRAME_WIDTH,
                 VIDEOEDITOR_DEFUALT_MAX_OUTPUT_FRAME_HEIGHT);
 }
+/*static*/ void
+MediaProfiles::createDefaultExportVideoProfiles(MediaProfiles *profiles)
+{
+    // Create default video export profiles
+    profiles->mVideoEditorExportProfiles.add(
+        new ExportVideoProfile(VIDEO_ENCODER_H263,
+            OMX_VIDEO_H263ProfileBaseline, OMX_VIDEO_H263Level10));
+    profiles->mVideoEditorExportProfiles.add(
+        new ExportVideoProfile(VIDEO_ENCODER_MPEG_4_SP,
+            OMX_VIDEO_MPEG4ProfileSimple, OMX_VIDEO_MPEG4Level1));
+    profiles->mVideoEditorExportProfiles.add(
+        new ExportVideoProfile(VIDEO_ENCODER_H264,
+            OMX_VIDEO_AVCProfileBaseline, OMX_VIDEO_AVCLevel13));
+}
 
 /*static*/ MediaProfiles*
 MediaProfiles::createDefaultInstance()
@@ -843,6 +877,7 @@ MediaProfiles::createDefaultInstance()
     createDefaultEncoderOutputFileFormats(profiles);
     createDefaultImageEncodingQualityLevels(profiles);
     createDefaultVideoEditorCap(profiles);
+    createDefaultExportVideoProfiles(profiles);
     return profiles;
 }
 
@@ -940,7 +975,31 @@ int MediaProfiles::getVideoEncoderParamByName(const char *name, video_encoder co
     LOGE("The given video encoder param name %s is not found", name);
     return -1;
 }
+int MediaProfiles::getVideoEditorExportParamByName(
+    const char *name, int codec) const
+{
+    LOGV("getVideoEditorExportParamByName: name %s codec %d", name, codec);
+    ExportVideoProfile *exportProfile = NULL;
+    int index = -1;
+    for (size_t i =0; i < mVideoEditorExportProfiles.size(); i++) {
+        exportProfile = mVideoEditorExportProfiles[i];
+        if (exportProfile->mCodec == codec) {
+            index = i;
+            break;
+        }
+    }
+    if (index == -1) {
+        LOGE("The given video decoder %d is not found", codec);
+        return -1;
+    }
+    if (!strcmp("videoeditor.export.profile", name))
+        return exportProfile->mProfile;
+    if (!strcmp("videoeditor.export.level", name))
+        return exportProfile->mLevel;
 
+    LOGE("The given video editor export param name %s is not found", name);
+    return -1;
+}
 int MediaProfiles::getVideoEditorCapParamByName(const char *name) const
 {
     LOGV("getVideoEditorCapParamByName: %s", name);

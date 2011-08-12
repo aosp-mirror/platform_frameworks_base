@@ -13,7 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+#define LOG_NDEBUG 1
+#define LOG_TAG "VideoEditorMain"
 #include <dlfcn.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -103,6 +104,7 @@ typedef struct
     bool                            mIsUpdateOverlay;
     char                            *mOverlayFileName;
     int                             mOverlayRenderingMode;
+    M4DECODER_VideoDecoders* decoders;
 } ManualEditContext;
 
 extern "C" M4OSA_ERR M4MCS_open_normalMode(
@@ -483,6 +485,82 @@ static void jniPreviewProgressCallback (void* cookie, M4OSA_UInt32 msgType,
     // Detach the current thread.
     pContext->pVM->DetachCurrentThread();
 
+}
+static M4OSA_ERR checkClipVideoProfileAndLevel(M4DECODER_VideoDecoders *pDecoders,
+    M4OSA_Int32 format, M4OSA_UInt32 profile, M4OSA_UInt32 level){
+
+    M4OSA_Int32 codec = 0;
+    M4OSA_Bool foundCodec = M4OSA_FALSE;
+    M4OSA_ERR  result = M4VSS3GPP_ERR_EDITING_UNSUPPORTED_VIDEO_PROFILE;
+    M4OSA_Bool foundProfile = M4OSA_FALSE;
+    LOGV("checkClipVideoProfileAndLevel format %d profile;%d level:0x%x",
+       format, profile, level);
+
+    switch (format) {
+        case M4VIDEOEDITING_kH263:
+            codec = M4DA_StreamTypeVideoH263;
+            break;
+        case M4VIDEOEDITING_kH264:
+             codec = M4DA_StreamTypeVideoMpeg4Avc;
+            break;
+        case M4VIDEOEDITING_kMPEG4:
+             codec = M4DA_StreamTypeVideoMpeg4;
+            break;
+        case M4VIDEOEDITING_kNoneVideo:
+        case M4VIDEOEDITING_kNullVideo:
+        case M4VIDEOEDITING_kUnsupportedVideo:
+             // For these case we do not check the profile and level
+             return M4NO_ERROR;
+        default :
+            LOGE("checkClipVideoProfileAndLevel unsupport Video format %ld", format);
+            break;
+    }
+
+    if (pDecoders != M4OSA_NULL && pDecoders->decoderNumber > 0) {
+        VideoDecoder *pVideoDecoder = pDecoders->decoder;
+        for(size_t k =0; k < pDecoders->decoderNumber; k++) {
+            if (pVideoDecoder != M4OSA_NULL) {
+                if (pVideoDecoder->codec == codec) {
+                    foundCodec = M4OSA_TRUE;
+                    break;
+                }
+            }
+            pVideoDecoder++;
+        }
+
+        if (foundCodec) {
+            VideoComponentCapabilities* pComponent = pVideoDecoder->component;
+            for (size_t i = 0; i < pVideoDecoder->componentNumber; i++) {
+                if (pComponent != M4OSA_NULL) {
+                    VideoProfileLevel *pProfileLevel = pComponent->profileLevel;
+                    for (size_t j =0; j < pComponent->profileNumber; j++) {
+                        // Check the profile and level
+                        if (pProfileLevel != M4OSA_NULL) {
+                            if (profile == pProfileLevel->mProfile) {
+                                foundProfile = M4OSA_TRUE;
+
+                                if (level <= pProfileLevel->mLevel) {
+                                    return M4NO_ERROR;
+                                }
+                            } else {
+                                foundProfile = M4OSA_FALSE;
+                            }
+                        }
+                        pProfileLevel++;
+                    }
+                }
+                pComponent++;
+            }
+        }
+    }
+
+    if (foundProfile) {
+        result = M4VSS3GPP_ERR_EDITING_UNSUPPORTED_VIDEO_LEVEL;
+    } else {
+        result = M4VSS3GPP_ERR_EDITING_UNSUPPORTED_VIDEO_PROFILE;
+    }
+
+    return result;
 }
 static int videoEditor_stopPreview(JNIEnv*  pEnv,
                               jobject  thiz)
@@ -1244,6 +1322,8 @@ M4OSA_ERR videoEditor_generateAudio(JNIEnv* pEnv,ManualEditContext* pContext,
     // Set the video format.
     pOutputParams->OutputVideoFormat =
         (M4VIDEOEDITING_VideoFormat)M4VIDEOEDITING_kNoneVideo;//M4VIDEOEDITING_kNoneVideo;
+    pOutputParams->outputVideoProfile = 1;
+    pOutputParams->outputVideoLevel = 1;
     // Set the frame size.
     pOutputParams->OutputVideoFrameSize
         = (M4VIDEOEDITING_VideoFrameSize)M4VIDEOEDITING_kQCIF;
@@ -1797,7 +1877,8 @@ videoEditor_populateSettings(
         }
 
         fid = pEnv->GetFieldID(audioSettingClazz,"bRemoveOriginal","Z");
-        pContext->mAudioSettings->bRemoveOriginal = pEnv->GetBooleanField(audioSettingObject,fid);
+        pContext->mAudioSettings->bRemoveOriginal =
+            pEnv->GetBooleanField(audioSettingObject,fid);
         M4OSA_TRACE1_1("bRemoveOriginal = %d",pContext->mAudioSettings->bRemoveOriginal);
 
         fid = pEnv->GetFieldID(audioSettingClazz,"channels","I");
@@ -2090,8 +2171,44 @@ videoEditor_getProperties(
                 jstring                             file)
 {
     jobject object = M4OSA_NULL;
+    jclass clazz = pEnv->FindClass(PROPERTIES_CLASS_NAME);
+    jfieldID fid;
+    bool needToBeLoaded = true;
+    ManualEditContext* pContext = M4OSA_NULL;
+    M4OSA_ERR          result   = M4NO_ERROR;
+    int profile = 0;
+    int level = 0;
+    int videoFormat = 0;
+
+    // Get the context.
+    pContext = (ManualEditContext*)videoEditClasses_getContext(&needToBeLoaded, pEnv, thiz);
+
+    videoEditJava_checkAndThrowIllegalStateException(&needToBeLoaded, pEnv,
+                                             (M4OSA_NULL == clazz),
+                                             "not initialized");
+
     object = videoEditProp_getProperties(pEnv,thiz,file);
 
+    if (object != M4OSA_NULL) {
+        fid = pEnv->GetFieldID(clazz,"profile","I");
+        profile = pEnv->GetIntField(object,fid);
+        fid = pEnv->GetFieldID(clazz,"level","I");
+        level = pEnv->GetIntField(object,fid);
+        fid = pEnv->GetFieldID(clazz,"videoFormat","I");
+        videoFormat = pEnv->GetIntField(object,fid);
+
+        result = checkClipVideoProfileAndLevel(pContext->decoders, videoFormat, profile, level);
+
+        fid = pEnv->GetFieldID(clazz,"profileSupported","Z");
+        if (M4VSS3GPP_ERR_EDITING_UNSUPPORTED_VIDEO_PROFILE == result) {
+            pEnv->SetBooleanField(object,fid,false);
+        }
+
+        fid = pEnv->GetFieldID(clazz,"levelSupported","Z");
+        if (M4VSS3GPP_ERR_EDITING_UNSUPPORTED_VIDEO_LEVEL == result) {
+            pEnv->SetBooleanField(object,fid,false);
+        }
+    }
     return object;
 
 }
@@ -2505,6 +2622,7 @@ videoEditor_init(
             free(tmpString);
             pContext->mIsUpdateOverlay = false;
             pContext->mOverlayFileName = NULL;
+            pContext->decoders = NULL;
         }
 
         // Check if the initialization succeeded
@@ -2548,6 +2666,12 @@ videoEditor_init(
              videoEditOsal_getResultString(result));
 
             // Check if the library could be initialized.
+            videoEditJava_checkAndThrowRuntimeException(&initialized, pEnv,
+             (M4NO_ERROR != result), result);
+
+            // Get platform video decoder capablities.
+            result = M4xVSS_getVideoDecoderCapabilities(&pContext->decoders);
+
             videoEditJava_checkAndThrowRuntimeException(&initialized, pEnv,
              (M4NO_ERROR != result), result);
         }
@@ -3097,6 +3221,47 @@ videoEditor_release(
             free(pContext->mAudioSettings);
             pContext->mAudioSettings = M4OSA_NULL;
         }
+        // Free video Decoders capabilities
+        if (pContext->decoders != M4OSA_NULL) {
+            VideoDecoder *pDecoder = NULL;
+            VideoComponentCapabilities *pComponents = NULL;
+            int32_t decoderNumber = pContext->decoders->decoderNumber;
+            if (pContext->decoders->decoder != NULL &&
+                decoderNumber > 0) {
+                pDecoder = pContext->decoders->decoder;
+                for (int32_t k = 0; k < decoderNumber; k++) {
+                    // free each component
+                    LOGV("decoder index :%d",k);
+                    if (pDecoder != NULL &&
+                        pDecoder->component != NULL &&
+                        pDecoder->componentNumber > 0) {
+                        LOGV("component number %d",pDecoder->componentNumber);
+                        int32_t componentNumber =
+                           pDecoder->componentNumber;
+
+                        pComponents = pDecoder->component;
+                        for (int32_t i = 0; i< componentNumber; i++) {
+                            LOGV("component index :%d",i);
+                            if (pComponents != NULL &&
+                                pComponents->profileLevel != NULL) {
+                                free(pComponents->profileLevel);
+                                pComponents->profileLevel = NULL;
+                            }
+                            pComponents++;
+                        }
+                        free(pDecoder->component);
+                        pDecoder->component = NULL;
+                    }
+
+                    pDecoder++;
+                }
+                free(pContext->decoders->decoder);
+                pContext->decoders->decoder = NULL;
+            }
+            free(pContext->decoders);
+            pContext->decoders = NULL;
+        }
+
         videoEditor_freeContext(pEnv, &pContext);
     }
 }

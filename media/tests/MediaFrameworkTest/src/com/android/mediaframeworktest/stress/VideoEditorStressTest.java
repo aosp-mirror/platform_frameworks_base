@@ -665,9 +665,10 @@ public class VideoEditorStressTest
         int i = 0;
         final int videoAspectRatio = MediaProperties.ASPECT_RATIO_3_2;
         final int videoFileType = MediaProperties.FILE_MP4;
-        final int videoCodecType = MediaProperties.VCODEC_H264BP;
+        final int videoCodecType = MediaProperties.VCODEC_H264;
         final int videoDuration = 77366;
-        final int videoProfile = MediaProperties.H264_PROFILE_0_LEVEL_1_3;
+        final int videoProfile = MediaProperties.H264Profile.H264ProfileBaseline;
+        final int videoLevel = MediaProperties.H264Level.H264Level13;
         final int videoHeight = MediaProperties.HEIGHT_720;
         final int videoWidth = 1080;
 
@@ -698,6 +699,8 @@ public class VideoEditorStressTest
                     videoDuration, mediaItem1.getDuration());
                 assertEquals("Video Profile ",
                     videoProfile, mediaItem1.getVideoProfile());
+                assertEquals("Video Level ",
+                    videoLevel, mediaItem1.getVideoLevel());
                 assertEquals("Video height ",
                     videoHeight, mediaItem1.getHeight());
                 assertEquals("Video width ",
@@ -939,9 +942,9 @@ public class VideoEditorStressTest
 
         for ( i = 0; i < 50; i++) {
             if(i%4 ==0){
-                final int aspectRatio = MediaProperties.ASPECT_RATIO_4_3;
+                final int aspectRatio = MediaProperties.ASPECT_RATIO_11_9;
                 mVideoEditor.setAspectRatio(aspectRatio);
-                mVideoEditor.export(outFilename, MediaProperties.HEIGHT_480,
+                mVideoEditor.export(outFilename, MediaProperties.HEIGHT_288,
                     MediaProperties.BITRATE_256K,MediaProperties.ACODEC_AAC_LC,
                         MediaProperties.VCODEC_H263,
                         new ExportProgressListener() {
@@ -967,7 +970,7 @@ public class VideoEditorStressTest
                 mVideoEditor.setAspectRatio(aspectRatio);
                 mVideoEditor.export(outFilename, MediaProperties.HEIGHT_144,
                     MediaProperties.BITRATE_512K,MediaProperties.ACODEC_AAC_LC,
-                        MediaProperties.VCODEC_H264BP,
+                        MediaProperties.VCODEC_H264,
                         new ExportProgressListener() {
                         public void onProgress(VideoEditor ve, String outFileName,
                             int progress) {
@@ -979,7 +982,7 @@ public class VideoEditorStressTest
                 mVideoEditor.setAspectRatio(aspectRatio);
                 mVideoEditor.export(outFilename, MediaProperties.HEIGHT_480,
                     MediaProperties.BITRATE_800K,MediaProperties.ACODEC_AAC_LC,
-                        MediaProperties.VCODEC_H264BP,
+                        MediaProperties.VCODEC_H264,
                         new ExportProgressListener() {
                         public void onProgress(VideoEditor ve, String outFileName,
                             int progress) {

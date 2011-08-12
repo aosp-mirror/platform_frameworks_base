@@ -42,6 +42,7 @@ public class MediaVideoItem extends MediaItem {
     private final int mFileType;
     private final int mVideoType;
     private final int mVideoProfile;
+    private final int mVideoLevel;
     private final int mVideoBitrate;
     private final long mDurationMs;
     private final int mAudioBitrate;
@@ -134,6 +135,15 @@ public class MediaVideoItem extends MediaItem {
                 ", current width:" + properties.width +
                 " height:" + properties.height);
         }
+        /** Check the platform specific maximum video profile and level */
+        if (!properties.profileSupported) {
+            throw new IllegalArgumentException(
+                "Unsupported video profile " + properties.profile);
+        }
+        if (!properties.levelSupported) {
+            throw new IllegalArgumentException(
+                "Unsupported video level " + properties.level);
+        }
         switch (mMANativeHelper.getFileType(properties.fileType)) {
             case MediaProperties.FILE_3GP:
             case MediaProperties.FILE_MP4:
@@ -146,18 +156,12 @@ public class MediaVideoItem extends MediaItem {
 
         switch (mMANativeHelper.getVideoCodecType(properties.videoFormat)) {
             case MediaProperties.VCODEC_H263:
-            case MediaProperties.VCODEC_H264BP:
-            case MediaProperties.VCODEC_H264MP:
+            case MediaProperties.VCODEC_H264:
             case MediaProperties.VCODEC_MPEG4:
                 break;
 
             default:
                 throw new IllegalArgumentException("Unsupported Video Codec Format in Input File");
-        }
-
-        /* Check if the profile is unsupported. */
-        if (properties.profileAndLevel == MediaProperties.UNDEFINED_VIDEO_PROFILE) {
-            throw new IllegalArgumentException("Unsupported Video Codec Profile in Input File");
         }
 
         mWidth = properties.width;
@@ -166,7 +170,8 @@ public class MediaVideoItem extends MediaItem {
                 properties.height);
         mFileType = mMANativeHelper.getFileType(properties.fileType);
         mVideoType = mMANativeHelper.getVideoCodecType(properties.videoFormat);
-        mVideoProfile = properties.profileAndLevel;
+        mVideoProfile = properties.profile;
+        mVideoLevel = properties.level;
         mDurationMs = properties.videoDuration;
         mVideoBitrate = properties.videoBitrate;
         mAudioBitrate = properties.audioBitrate;
@@ -658,6 +663,13 @@ public class MediaVideoItem extends MediaItem {
      */
     public int getVideoProfile() {
         return mVideoProfile;
+    }
+
+    /**
+     * @return The video profile
+     */
+    public int getVideoLevel() {
+        return mVideoLevel;
     }
 
     /**

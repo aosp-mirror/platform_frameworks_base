@@ -71,7 +71,7 @@ public class MediaPropertiesTest extends
 
     protected void validateVideoProperties(int aspectRatio, int fileType,
         int videoCodecType, int duration, int videoBitrate, int fps,
-        int videoProfile, int width, int height, int audioCodecType,
+        int videoProfile, int videoLevel, int width, int height, int audioCodecType,
         int audioSamplingFrequency, int audioChannel, int audioBitrate,
         MediaVideoItem mvi) throws Exception {
         assertEquals("Aspect Ratio Mismatch", aspectRatio, mvi.getAspectRatio());
@@ -82,6 +82,8 @@ public class MediaPropertiesTest extends
             duration, mvi.getDuration(), 10));
         assertEquals("Video Profile " + mvi.getVideoProfile(), videoProfile,
             mvi.getVideoProfile());
+        assertEquals("Video Level " + mvi.getVideoLevel(), videoLevel,
+            mvi.getVideoLevel());
         assertEquals("Video height " + mvi.getHeight(), height, mvi.getHeight());
         assertEquals("Video width " + mvi.getWidth(), width, mvi.getWidth());
         /** Check FPS with 10% range */
@@ -143,7 +145,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = MediaProperties.ACODEC_AAC_LC;
         final int audioSamplingFrequency = 16000;
         final int audioChannel = 2;
-        final int videoProfile = MediaProperties.MPEG4_SP_LEVEL_1;
+        final int videoProfile = MediaProperties.MPEG4Profile.MPEG4ProfileSimple;
+        final int videoLevel = MediaProperties.MPEG4Level.MPEG4Level1;
         final int width = 854;
         final int height = MediaProperties.HEIGHT_480;
 
@@ -152,7 +155,7 @@ public class MediaPropertiesTest extends
             MediaItem.RENDERING_MODE_BLACK_BORDER);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 
@@ -175,7 +178,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = MediaProperties.ACODEC_AMRNB;
         final int audioSamplingFrequency = 8000;
         final int audioChannel = 1;
-        final int videoProfile = MediaProperties.MPEG4_SP_LEVEL_1;
+        final int videoProfile = MediaProperties.MPEG4Profile.MPEG4ProfileSimple;
+        final int videoLevel = MediaProperties.MPEG4Level.MPEG4Level1;
         final int width = 800;
         final int height = MediaProperties.HEIGHT_480;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -184,7 +188,7 @@ public class MediaPropertiesTest extends
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 
@@ -206,7 +210,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = MediaProperties.ACODEC_AAC_LC;
         final int audioSamplingFrequency = 48000;
         final int audioChannel = 2;
-        final int videoProfile = MediaProperties.MPEG4_SP_LEVEL_1;
+        final int videoProfile = MediaProperties.MPEG4Profile.MPEG4ProfileSimple;
+        final int videoLevel = MediaProperties.MPEG4Level.MPEG4Level1;
         final int width = 720;
         final int height = MediaProperties.HEIGHT_480;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -215,7 +220,7 @@ public class MediaPropertiesTest extends
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 
@@ -237,7 +242,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = MediaProperties.ACODEC_AAC_LC;
         final int audioSamplingFrequency = 48000;
         final int audioChannel = 2;
-        final int videoProfile = MediaProperties.MPEG4_SP_LEVEL_1;
+        final int videoProfile = MediaProperties.MPEG4Profile.MPEG4ProfileSimple;
+        final int videoLevel = MediaProperties.MPEG4Level.MPEG4Level1;
         final int width = 640;
         final int height = MediaProperties.HEIGHT_480;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -246,7 +252,7 @@ public class MediaPropertiesTest extends
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 
@@ -268,7 +274,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = MediaProperties.ACODEC_AMRNB;
         final int audioSamplingFrequency = 8000;
         final int audioChannel = 1;
-        final int videoProfile = MediaProperties.MPEG4_SP_LEVEL_1;
+        final int videoProfile = MediaProperties.MPEG4Profile.MPEG4ProfileSimple;
+        final int videoLevel = MediaProperties.MPEG4Level.MPEG4Level1;
         final int width = 176;
         final int height = MediaProperties.HEIGHT_144;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -277,7 +284,7 @@ public class MediaPropertiesTest extends
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 
@@ -299,7 +306,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = MediaProperties.ACODEC_AAC_LC;
         final int audioSamplingFrequency = 16000;
         final int audioChannel = 1;
-        final int videoProfile = MediaProperties.H263_PROFILE_0_LEVEL_10;
+        final int videoProfile = MediaProperties.H263Profile.H263ProfileBaseline;
+        final int videoLevel = MediaProperties.H263Level.H263Level10;
         final int width = 176;
         final int height = MediaProperties.HEIGHT_144;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -307,7 +315,7 @@ public class MediaPropertiesTest extends
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 
@@ -321,7 +329,7 @@ public class MediaPropertiesTest extends
             + "H264_BP_640x480_15fps_1200Kbps_AACLC_48KHz_64kps_m_0_27.3gp";
         final int aspectRatio = MediaProperties.ASPECT_RATIO_4_3;
         final int fileType = MediaProperties.FILE_3GP;
-        final int videoCodecType = MediaProperties.VCODEC_H264BP;
+        final int videoCodecType = MediaProperties.VCODEC_H264;
         final int duration = 77600;
         final int videoBitrate = 745000;
         final int audioBitrate = 64000;
@@ -329,7 +337,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = MediaProperties.ACODEC_AAC_LC;
         final int audioSamplingFrequency = 48000;
         final int audioChannel = 2;
-        final int videoProfile = MediaProperties.H264_PROFILE_0_LEVEL_1_3;
+        final int videoProfile = MediaProperties.H264Profile.H264ProfileBaseline;
+        final int videoLevel = MediaProperties.H264Level.H264Level13;
         final int width = 640;
         final int height = MediaProperties.HEIGHT_480;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -337,7 +346,7 @@ public class MediaPropertiesTest extends
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 
@@ -351,7 +360,7 @@ public class MediaPropertiesTest extends
             + "H264_BP_720x480_25fps_256kbps_AMRNB_8khz_12.2kbps_m_0_26.mp4";
         final int aspectRatio = MediaProperties.ASPECT_RATIO_3_2;
         final int fileType = MediaProperties.FILE_MP4;
-        final int videoCodecType = MediaProperties.VCODEC_H264BP;
+        final int videoCodecType = MediaProperties.VCODEC_H264;
         final int duration = 26880;
         final int videoBitrate = 244000;
         final int audioBitrate = 12200;
@@ -359,7 +368,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = MediaProperties.ACODEC_AMRNB;
         final int audioSamplingFrequency = 8000;
         final int audioChannel = 1;
-        final int videoProfile = MediaProperties.H264_PROFILE_0_LEVEL_1_3;
+        final int videoProfile = MediaProperties.H264Profile.H264ProfileBaseline;
+        final int videoLevel = MediaProperties.H264Level.H264Level13;
         final int width = 720;
         final int height = MediaProperties.HEIGHT_480;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -368,7 +378,7 @@ public class MediaPropertiesTest extends
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 
@@ -382,7 +392,7 @@ public class MediaPropertiesTest extends
               "H264_BP_800x480_15fps_512kbps_AACLC_24KHz_38Kbps_s_1_17.mp4";
         final int aspectRatio = MediaProperties.ASPECT_RATIO_5_3;
         final int fileType = MediaProperties.FILE_MP4;
-        final int videoCodecType = MediaProperties.VCODEC_H264BP;
+        final int videoCodecType = MediaProperties.VCODEC_H264;
         final int duration = 77466;
         final int videoBitrate = 528000;
         final int audioBitrate = 38000;
@@ -390,7 +400,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = MediaProperties.ACODEC_AAC_LC;
         final int audioSamplingFrequency = 24000;
         final int audioChannel = 2;
-        final int videoProfile = MediaProperties.H264_PROFILE_0_LEVEL_1_3;
+        final int videoProfile = MediaProperties.H264Profile.H264ProfileBaseline;
+        final int videoLevel = MediaProperties.H264Level.H264Level13;
         final int width = 800;
         final int height = MediaProperties.HEIGHT_480;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -399,7 +410,7 @@ public class MediaPropertiesTest extends
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 
@@ -413,7 +424,7 @@ public class MediaPropertiesTest extends
             + "H264_BP_1280x720_15fps_512kbps_AACLC_16khz_48kbps_s_1_17.mp4";
         final int aspectRatio = MediaProperties.ASPECT_RATIO_16_9;
         final int fileType = MediaProperties.FILE_MP4;
-        final int videoCodecType = MediaProperties.VCODEC_H264BP;
+        final int videoCodecType = MediaProperties.VCODEC_H264;
         final int duration = 77600;
         final int videoBitrate = 606000;
         final int audioBitrate = 48000;
@@ -421,7 +432,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = MediaProperties.ACODEC_AAC_LC;
         final int audioSamplingFrequency = 16000;
         final int audioChannel = 2;
-        final int videoProfile = MediaProperties.H264_PROFILE_0_LEVEL_1_3;
+        final int videoProfile = MediaProperties.H264Profile.H264ProfileBaseline;
+        final int videoLevel = MediaProperties.H264Level.H264Level13;
         final int width = 1280;
         final int height = MediaProperties.HEIGHT_720;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -430,7 +442,7 @@ public class MediaPropertiesTest extends
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 
@@ -444,7 +456,7 @@ public class MediaPropertiesTest extends
             + "H264_BP_1080x720_30fps_12Mbps_AACLC_44.1khz_64kbps_s_1_17.mp4";
         final int aspectRatio = MediaProperties.ASPECT_RATIO_3_2;
         final int fileType = MediaProperties.FILE_MP4;
-        final int videoCodecType = MediaProperties.VCODEC_H264BP;
+        final int videoCodecType = MediaProperties.VCODEC_H264;
         final int duration = 77500;
         final int videoBitrate = 1190000;
         final int audioBitrate = 64000;
@@ -452,7 +464,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = MediaProperties.ACODEC_AAC_LC;
         final int audioSamplingFrequency = 44100;
         final int audioChannel = 2;
-        final int videoProfile = MediaProperties.H264_PROFILE_0_LEVEL_1_3;
+        final int videoProfile = MediaProperties.H264Profile.H264ProfileBaseline;
+        final int videoLevel = MediaProperties.H264Level.H264Level13;
         final int width = 1080;
         final int height = MediaProperties.HEIGHT_720;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -461,7 +474,7 @@ public class MediaPropertiesTest extends
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 
@@ -491,7 +504,7 @@ public class MediaPropertiesTest extends
     }
 
     /**
-     *To test media properties for H.264 Main/Advanced profile. (unsupported profile input)
+     *To test media properties for H.264 Main/Advanced profile.
      */
     // TODO : Remove TC_MP_013
     @LargeTest
@@ -499,19 +512,28 @@ public class MediaPropertiesTest extends
         final String videoItemFilename = INPUT_FILE_PATH
             + "H264_MP_960x720_25fps_800kbps_AACLC_48Khz_192Kbps_s_1_17.mp4";
         final int aspectRatio = MediaProperties.ASPECT_RATIO_4_3;
-        //final int videoCodecType = MediaProperties.VCODEC_H264BP;
-        final int videoCodecType = MediaProperties.VCODEC_H264MP;
+        final int videoCodecType = MediaProperties.VCODEC_H264;
+        final int fileType = MediaProperties.FILE_MP4;
+        final int duration = 77500;
+        final int videoBitrate = 800000;
+        final int audioBitrate = 192000;
+        final int fps = 25;
+        final int audioCodecType = MediaProperties.ACODEC_AAC_LC;
+        final int audioSamplingFrequency = 48000;
+        final int audioChannel = 2;
+        final int videoProfile = MediaProperties.H264Profile.H264ProfileMain;
+        final int videoLevel = MediaProperties.H264Level.H264Level31;
+        final int width = 960;
+        final int height = MediaProperties.HEIGHT_720;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
-        boolean flagForException = false;
 
-        try {
         final MediaVideoItem mvi = mVideoEditorHelper.createMediaItem
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
-            assertEquals("VideoCodec Mismatch", videoCodecType, mvi.getVideoType());
-        }catch (IllegalArgumentException e){
-            flagForException = true;
-        }
-            assertTrue("Unsupported Main Profile", flagForException);
+
+        validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
+            audioSamplingFrequency, audioChannel, audioBitrate, mvi);
+
     }
 
     /**
@@ -544,7 +566,7 @@ public class MediaPropertiesTest extends
             "H264_BP_1080x720_30fps_800kbps_1_17.mp4";
         final int aspectRatio = MediaProperties.ASPECT_RATIO_3_2;
         final int fileType = MediaProperties.FILE_MP4;
-        final int videoCodecType = MediaProperties.VCODEC_H264BP;
+        final int videoCodecType = MediaProperties.VCODEC_H264;
         final int duration = 77366;
         final int videoBitrate = 859000;
         final int audioBitrate = 0;
@@ -552,7 +574,8 @@ public class MediaPropertiesTest extends
         final int audioCodecType = -1;
         final int audioSamplingFrequency = 0;
         final int audioChannel = 0;
-        final int videoProfile = MediaProperties.H264_PROFILE_0_LEVEL_1_3;
+        final int videoProfile = MediaProperties.H264Profile.H264ProfileBaseline;
+        final int videoLevel = MediaProperties.H264Level.H264Level13;
         final int width = 1080;
         final int height = MediaProperties.HEIGHT_720;
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
@@ -561,7 +584,7 @@ public class MediaPropertiesTest extends
             (mVideoEditor, "m1", videoItemFilename, renderingMode);
 
         validateVideoProperties(aspectRatio, fileType, videoCodecType, duration,
-            videoBitrate, fps, videoProfile, width, height, audioCodecType,
+            videoBitrate, fps, videoProfile, videoLevel, width, height, audioCodecType,
             audioSamplingFrequency, audioChannel, audioBitrate, mvi);
     }
 

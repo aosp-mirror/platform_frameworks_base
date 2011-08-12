@@ -402,7 +402,6 @@ VIDEOEDIT_JAVA_DEFINE_CONSTANTS(VideoFormat)
     VIDEOEDIT_JAVA_CONSTANT_INIT("NO_VIDEO",    M4VIDEOEDITING_kNoneVideo),
     VIDEOEDIT_JAVA_CONSTANT_INIT("H263",        M4VIDEOEDITING_kH263),
     VIDEOEDIT_JAVA_CONSTANT_INIT("MPEG4",       M4VIDEOEDITING_kMPEG4),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("MPEG4_EMP",   M4VIDEOEDITING_kMPEG4_EMP),
     VIDEOEDIT_JAVA_CONSTANT_INIT("H264",        M4VIDEOEDITING_kH264),
     VIDEOEDIT_JAVA_CONSTANT_INIT("NULL_VIDEO",  M4VIDEOEDITING_kNullVideo),
     VIDEOEDIT_JAVA_CONSTANT_INIT("UNSUPPORTED", M4VIDEOEDITING_kUnsupportedVideo),
@@ -448,73 +447,6 @@ VIDEOEDIT_JAVA_DEFINE_CONSTANTS(VideoFrameSize)
 VIDEOEDIT_JAVA_DEFINE_CONSTANT_CLASS(VideoFrameSize, VIDEO_FRAME_SIZE_CLASS_NAME,
  M4OSA_NULL, M4OSA_NULL)
 
-
-VIDEOEDIT_JAVA_DEFINE_CONSTANTS(VideoProfile)
-{
-    VIDEOEDIT_JAVA_CONSTANT_INIT("MPEG4_SP_LEVEL_0",       \
-        M4VIDEOEDITING_kMPEG4_SP_Level_0),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("MPEG4_SP_LEVEL_0B",      \
-        M4VIDEOEDITING_kMPEG4_SP_Level_0b),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("MPEG4_SP_LEVEL_1",       \
-        M4VIDEOEDITING_kMPEG4_SP_Level_1),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("MPEG4_SP_LEVEL_2",       \
-        M4VIDEOEDITING_kMPEG4_SP_Level_2),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("MPEG4_SP_LEVEL_3",       \
-        M4VIDEOEDITING_kMPEG4_SP_Level_3),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("MPEG4_SP_LEVEL_4A",      \
-        M4VIDEOEDITING_kMPEG4_SP_Level_4a),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("MPEG4_SP_LEVEL_5",       \
-        M4VIDEOEDITING_kMPEG4_SP_Level_5),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H263_PROFILE_0_LEVEL_10",\
-        M4VIDEOEDITING_kH263_Profile_0_Level_10),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H263_PROFILE_0_LEVEL_20",\
-        M4VIDEOEDITING_kH263_Profile_0_Level_20),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H263_PROFILE_0_LEVEL_30",\
-        M4VIDEOEDITING_kH263_Profile_0_Level_30),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H263_PROFILE_0_LEVEL_40",\
-        M4VIDEOEDITING_kH263_Profile_0_Level_40),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H263_PROFILE_0_LEVEL_45",\
-        M4VIDEOEDITING_kH263_Profile_0_Level_45),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_1", \
-        M4VIDEOEDITING_kH264_Profile_0_Level_1),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_1b",\
-        M4VIDEOEDITING_kH264_Profile_0_Level_1b),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_1_1",\
-        M4VIDEOEDITING_kH264_Profile_0_Level_1_1),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_1_2",\
-        M4VIDEOEDITING_kH264_Profile_0_Level_1_2),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_1_3",\
-        M4VIDEOEDITING_kH264_Profile_0_Level_1_3),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_2",  \
-        M4VIDEOEDITING_kH264_Profile_0_Level_2),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_2_1",\
-        M4VIDEOEDITING_kH264_Profile_0_Level_2_1),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_2_2",\
-        M4VIDEOEDITING_kH264_Profile_0_Level_2_2),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_3",  \
-        M4VIDEOEDITING_kH264_Profile_0_Level_3),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_3_1",\
-        M4VIDEOEDITING_kH264_Profile_0_Level_3_1),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_3_2",\
-        M4VIDEOEDITING_kH264_Profile_0_Level_3_2),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_4",  \
-        M4VIDEOEDITING_kH264_Profile_0_Level_4),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_4_1",\
-        M4VIDEOEDITING_kH264_Profile_0_Level_4_1),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_4_2",\
-        M4VIDEOEDITING_kH264_Profile_0_Level_4_2),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_5",  \
-        M4VIDEOEDITING_kH264_Profile_0_Level_5),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("H264_PROFILE_0_LEVEL_5_1",\
-        M4VIDEOEDITING_kH264_Profile_0_Level_5_1),
-    VIDEOEDIT_JAVA_CONSTANT_INIT("OUT_OF_RANGE",            \
-        M4VIDEOEDITING_kProfile_and_Level_Out_Of_Range)
-};
-
-VIDEOEDIT_JAVA_DEFINE_CONSTANT_CLASS(VideoProfile, VIDEO_PROFILE_CLASS_NAME, M4OSA_NULL,
-                                     M4OSA_NULL)
-
-
 VIDEOEDIT_JAVA_DEFINE_CONSTANTS(VideoTransition)
 {
     VIDEOEDIT_JAVA_CONSTANT_INIT("NONE",             M4VSS3GPP_kVideoTransitionType_None),
@@ -550,7 +482,10 @@ VIDEOEDIT_JAVA_DEFINE_FIELDS(Properties)
     VIDEOEDIT_JAVA_FIELD_INIT("width",                  "I"),
     VIDEOEDIT_JAVA_FIELD_INIT("height",                 "I"),
     VIDEOEDIT_JAVA_FIELD_INIT("averageFrameRate",       "F"),
-    VIDEOEDIT_JAVA_FIELD_INIT("profileAndLevel",        "I"),
+    VIDEOEDIT_JAVA_FIELD_INIT("profile",                "I"),
+    VIDEOEDIT_JAVA_FIELD_INIT("level",                  "I"),
+    VIDEOEDIT_JAVA_FIELD_INIT("profileSupported",       "Z"),
+    VIDEOEDIT_JAVA_FIELD_INIT("levelSupported",         "Z"),
     VIDEOEDIT_JAVA_FIELD_INIT("audioFormat",            "I"),
     VIDEOEDIT_JAVA_FIELD_INIT("audioDuration",          "I"),
     VIDEOEDIT_JAVA_FIELD_INIT("audioBitrate",           "I"),
@@ -620,6 +555,8 @@ VIDEOEDIT_JAVA_DEFINE_FIELDS(EditSettings)
     VIDEOEDIT_JAVA_FIELD_INIT("outputFile",              "Ljava/lang/String;"                    ),
     VIDEOEDIT_JAVA_FIELD_INIT("videoFrameSize",          "I"                                     ),
     VIDEOEDIT_JAVA_FIELD_INIT("videoFormat",             "I"                                     ),
+    VIDEOEDIT_JAVA_FIELD_INIT("videoProfile",            "I"                                     ),
+    VIDEOEDIT_JAVA_FIELD_INIT("videoLevel",              "I"                                     ),
     VIDEOEDIT_JAVA_FIELD_INIT("audioFormat",             "I"                                     ),
     VIDEOEDIT_JAVA_FIELD_INIT("audioSamplingFreq",       "I"                                     ),
     VIDEOEDIT_JAVA_FIELD_INIT("maxFileSize",             "I"                                     ),
@@ -846,7 +783,6 @@ videoEditClasses_init(
         videoEditJava_initVideoFormatConstants(pResult, pEnv);
         videoEditJava_initVideoFrameRateConstants(pResult, pEnv);
         videoEditJava_initVideoFrameSizeConstants(pResult, pEnv);
-        videoEditJava_initVideoProfileConstants(pResult, pEnv);
         videoEditJava_initVideoTransitionConstants(pResult, pEnv);
 
         // Initialize the fields.
@@ -881,7 +817,6 @@ videoEditPropClass_init(
         videoEditJava_initErrorConstants(pResult, pEnv);
         videoEditJava_initFileTypeConstants(pResult, pEnv);
         videoEditJava_initVideoFormatConstants(pResult, pEnv);
-        videoEditJava_initVideoProfileConstants(pResult, pEnv);
 
         // Initialize the fields.
         videoEditJava_initPropertiesFields(pResult, pEnv);
@@ -1250,15 +1185,6 @@ videoEditClasses_logClipProperties(
         VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_CLASSES",
             "%*c fAverageFrameRate:                %.3f",     indentation, ' ',
             pProperties->fAverageFrameRate);
-        VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_CLASSES",
-            "%*c ProfileAndLevel:                  %s",       indentation, ' ',
-            videoEditJava_getVideoProfileString(pProperties->ProfileAndLevel));
-        VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_CLASSES",
-            "%*c uiH263level:                      %d",       indentation, ' ',
-            pProperties->uiH263level);
-        VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_CLASSES",
-            "%*c uiVideoProfile:                   %d",       indentation, ' ',
-            pProperties->uiVideoProfile);
         VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_CLASSES",
             "%*c bMPEG4dataPartition:              %s",       indentation, ' ',
             pProperties->bMPEG4dataPartition ? "true" : "false");
@@ -1650,9 +1576,21 @@ videoEditPropClass_createProperties(
             // Set the averageFrameRate field.
             pEnv->SetFloatField(object, fieldIds.averageFrameRate, pProperties->fAverageFrameRate);
 
-            // Set the profileAndLevel field.
-            pEnv->SetIntField(object, fieldIds.profileAndLevel,
-                videoEditJava_getVideoProfileCToJava(pProperties->ProfileAndLevel));
+            // Set the profile field.
+            pEnv->SetIntField(object, fieldIds.profile,
+                pProperties->uiVideoProfile);
+
+            // Set the level field.
+            pEnv->SetIntField(object, fieldIds.level,
+                pProperties->uiVideoLevel);
+
+            // Set whether profile supported
+            pEnv->SetBooleanField(object, fieldIds.profileSupported,
+                pProperties->bProfileSupported);
+
+            // Set whether level supported
+            pEnv->SetBooleanField(object, fieldIds.levelSupported,
+                pProperties->bLevelSupported);
 
             // Set the audioFormat field.
             pEnv->SetIntField(object, fieldIds.audioFormat,
@@ -2062,6 +2000,14 @@ videoEditClasses_getEditSettings(
                     pSettings->xVSS.outputVideoBitrate = (M4OSA_UInt32)pEnv->GetIntField(object,
                             fieldIds.videoBitrate);
 
+                    // Set the output video profile.
+                    pSettings->xVSS.outputVideoProfile = (M4OSA_UInt32)pEnv->GetIntField(object,
+                            fieldIds.videoProfile);
+
+                    // Set the output video level.
+                    pSettings->xVSS.outputVideoLevel = (M4OSA_UInt32)pEnv->GetIntField(object,
+                            fieldIds.videoLevel);
+
                     // Set the output audio bitrate.
                     pSettings->xVSS.outputAudioBitrate = (M4OSA_UInt32)pEnv->GetIntField(object,
                             fieldIds.audioBitrate);
@@ -2255,6 +2201,12 @@ videoEditClasses_logEditSettings(
         VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_CLASSES",
             "%*c outputVideoFormat:    %s", indentation, ' ',
             videoEditJava_getVideoFormatString(pSettings->xVSS.outputVideoFormat));
+        VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_CLASSES",
+            "%*c outputVideoProfile:    %u", indentation, ' ',
+            videoEditJava_getVideoFormatString(pSettings->xVSS.outputVideoProfile));
+        VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_CLASSES",
+            "%*c outputVideoLevel:    %u", indentation, ' ',
+            videoEditJava_getVideoFormatString(pSettings->xVSS.outputVideoLevel));
         VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_CLASSES",
             "%*c outputAudioFormat:    %s", indentation, ' ',
             videoEditJava_getAudioFormatString(pSettings->xVSS.outputAudioFormat));
@@ -2982,10 +2934,6 @@ videoEditPropClass_logProperties(
         VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_PROP_CLASSES",
             "%*c fAverageFrameRate:                %.3f",     indentation, ' ',
             pProperties->fAverageFrameRate);
-
-        VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_PROP_CLASSES",
-            "%*c ProfileAndLevel:                  %s",       indentation, ' ',
-            videoEditJava_getVideoProfileString(pProperties->ProfileAndLevel));
 
         VIDEOEDIT_LOG_SETTING(ANDROID_LOG_INFO, "VIDEO_EDITOR_PROP_CLASSES",
             "%*c AudioStreamType:                  %s",       indentation, ' ',
