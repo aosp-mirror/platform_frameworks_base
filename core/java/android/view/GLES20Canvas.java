@@ -509,13 +509,6 @@ class GLES20Canvas extends HardwareCanvas {
     private static native void nSetMatrix(int renderer, int matrix);
 
     @Override
-    public int getNativeMatrix() {
-        return nGetMatrix(mRenderer);
-    }
-
-    private static native int nGetMatrix(int renderer);    
-
-    @Override
     public void getMatrix(Matrix matrix) {
         nGetMatrix(mRenderer, matrix.native_instance);
     }
