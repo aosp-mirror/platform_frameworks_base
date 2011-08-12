@@ -241,21 +241,18 @@
        <item>@drawable/spinner_pressed_holo_dark</item>
        <item>@drawable/spinner_pressed_holo_light</item>
        <item>@drawable/spinner_select</item>
-       <item>@drawable/btn_cab_done</item>
-       <item>@drawable/btn_cab_done_focused_holo</item>
-       <item>@drawable/btn_cab_done_holo</item>
-       <item>@drawable/btn_cab_done_pressed_holo</item>
-       <item>@drawable/cab_background_holo_dark</item>
-       <item>@drawable/cab_background_holo_light</item>
-       <item>@drawable/cab_background_opaque_holo_dark</item>
-       <item>@drawable/cab_background_opaque_holo_light</item>
-       <item>@drawable/cab_ic_close_focused_holo</item>
-       <item>@drawable/cab_ic_close_holo</item>
-       <item>@drawable/cab_ic_close_normal_holo</item>
-       <item>@drawable/cab_ic_close_pressed_holo</item>
-       <item>@drawable/ic_cab_close_holo</item>
-       <item>@drawable/action_bar_background</item>
-       <item>@drawable/action_bar_divider</item>
+       <item>@drawable/cab_background_bottom_holo_dark</item>
+       <item>@drawable/cab_background_top_holo_light</item>
+       <item>@drawable/cab_background_bottom_holo_light</item>
+       <item>@drawable/ic_cab_done_holo_dark</item>
+       <item>@drawable/cab_background_top_holo_dark</item>
+       <item>@drawable/ic_cab_done_holo_light</item>
+       <item>@drawable/btn_cab_done_default_holo_dark</item>
+       <item>@drawable/btn_cab_done_focused_holo_light</item>
+       <item>@drawable/btn_cab_done_default_holo_light</item>
+       <item>@drawable/btn_cab_done_pressed_holo_dark</item>
+       <item>@drawable/btn_cab_done_focused_holo_dark</item>
+       <item>@drawable/btn_cab_done_pressed_holo_light</item>
        <item>@drawable/ic_menu_close_clear_cancel</item>
        <item>@drawable/ic_menu_copy_holo_dark</item>
        <item>@drawable/ic_menu_copy_holo_light</item>
