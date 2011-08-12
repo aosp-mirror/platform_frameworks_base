@@ -359,7 +359,9 @@ public class RecentsPanelView extends RelativeLayout
     }
 
     private void createCustomAnimations(LayoutTransition transitioner) {
-        transitioner.setDuration(LayoutTransition.DISAPPEARING, 250);
+        transitioner.setDuration(200);
+        transitioner.setStartDelay(LayoutTransition.CHANGE_DISAPPEARING, 0);
+        transitioner.setAnimator(LayoutTransition.DISAPPEARING, null);
     }
 
     @Override
