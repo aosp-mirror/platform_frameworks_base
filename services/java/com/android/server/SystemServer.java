@@ -108,6 +108,7 @@ class ServerThread extends Thread {
         String factoryTestStr = SystemProperties.get("ro.factorytest");
         int factoryTest = "".equals(factoryTestStr) ? SystemServer.FACTORY_TEST_OFF
                 : Integer.parseInt(factoryTestStr);
+        final boolean headless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
 
         LightsService lights = null;
         PowerManagerService power = null;
@@ -458,8 +459,10 @@ class ServerThread extends Thread {
 
             try {
                 Slog.i(TAG, "Wallpaper Service");
-                wallpaper = new WallpaperManagerService(context);
-                ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
+                if (!headless) {
+                    wallpaper = new WallpaperManagerService(context);
+                    ServiceManager.addService(Context.WALLPAPER_SERVICE, wallpaper);
+                }
             } catch (Throwable e) {
                 reportWtf("starting Wallpaper Service", e);
             }
@@ -642,7 +645,7 @@ class ServerThread extends Thread {
             public void run() {
                 Slog.i(TAG, "Making services ready");
 
-                startSystemUi(contextF);
+                if (!headless) startSystemUi(contextF);
                 try {
                     if (batteryF != null) batteryF.systemReady();
                 } catch (Throwable e) {
