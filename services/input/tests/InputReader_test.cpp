@@ -2487,6 +2487,8 @@ protected:
     static const float X_PRECISION;
     static const float Y_PRECISION;
 
+    static const float GEOMETRIC_SCALE;
+
     static const VirtualKeyDefinition VIRTUAL_KEYS[2];
 
     enum Axes {
@@ -2530,6 +2532,10 @@ const int32_t TouchInputMapperTest::RAW_SLOT_MIN = 0;
 const int32_t TouchInputMapperTest::RAW_SLOT_MAX = 9;
 const float TouchInputMapperTest::X_PRECISION = float(RAW_X_MAX - RAW_X_MIN + 1) / DISPLAY_WIDTH;
 const float TouchInputMapperTest::Y_PRECISION = float(RAW_Y_MAX - RAW_Y_MIN + 1) / DISPLAY_HEIGHT;
+
+const float TouchInputMapperTest::GEOMETRIC_SCALE =
+        avg(float(DISPLAY_WIDTH) / (RAW_X_MAX - RAW_X_MIN + 1),
+                float(DISPLAY_HEIGHT) / (RAW_Y_MAX - RAW_Y_MIN + 1));
 
 const VirtualKeyDefinition TouchInputMapperTest::VIRTUAL_KEYS[2] = {
         { KEY_HOME, 60, DISPLAY_HEIGHT + 15, 20, 20 },
@@ -3268,8 +3274,7 @@ TEST_F(SingleTouchInputMapperTest, Process_AllAxes_DefaultCalibration) {
     float y = toDisplayY(rawY);
     float pressure = float(rawPressure) / RAW_PRESSURE_MAX;
     float size = float(rawToolMajor) / RAW_TOOL_MAX;
-    float tool = min(DISPLAY_WIDTH, DISPLAY_HEIGHT) * size;
-    float touch = min(tool * pressure, tool);
+    float tool = float(rawToolMajor) * GEOMETRIC_SCALE;
     float distance = float(rawDistance);
 
     processDown(mapper, rawX, rawY);
@@ -3281,7 +3286,7 @@ TEST_F(SingleTouchInputMapperTest, Process_AllAxes_DefaultCalibration) {
     NotifyMotionArgs args;
     ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            x, y, pressure, size, touch, touch, tool, tool, 0, distance));
+            x, y, pressure, size, tool, tool, tool, tool, 0, distance));
 }
 
 TEST_F(SingleTouchInputMapperTest, Process_ShouldHandleAllButtons) {
@@ -4443,11 +4448,11 @@ TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
     float x = toDisplayX(rawX);
     float y = toDisplayY(rawY);
     float pressure = float(rawPressure) / RAW_PRESSURE_MAX;
-    float size = avg(rawToolMajor, rawToolMinor) / RAW_TOOL_MAX;
-    float toolMajor = float(min(DISPLAY_WIDTH, DISPLAY_HEIGHT)) * rawToolMajor / RAW_TOOL_MAX;
-    float toolMinor = float(min(DISPLAY_WIDTH, DISPLAY_HEIGHT)) * rawToolMinor / RAW_TOOL_MAX;
-    float touchMajor = min(toolMajor * pressure, toolMajor);
-    float touchMinor = min(toolMinor * pressure, toolMinor);
+    float size = avg(rawTouchMajor, rawTouchMinor) / RAW_TOUCH_MAX;
+    float toolMajor = float(rawToolMajor) * GEOMETRIC_SCALE;
+    float toolMinor = float(rawToolMinor) * GEOMETRIC_SCALE;
+    float touchMajor = float(rawTouchMajor) * GEOMETRIC_SCALE;
+    float touchMinor = float(rawTouchMinor) * GEOMETRIC_SCALE;
     float orientation = float(rawOrientation) / RAW_ORIENTATION_MAX * M_PI_2;
     float distance = float(rawDistance);
 
@@ -4467,7 +4472,8 @@ TEST_F(MultiTouchInputMapperTest, Process_AllAxes_WithDefaultCalibration) {
     ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_EQ(0, args.pointerProperties[0].id);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            x, y, pressure, size, touchMajor, touchMinor, toolMajor, toolMinor, orientation, distance));
+            x, y, pressure, size, touchMajor, touchMinor, toolMajor, toolMinor,
+            orientation, distance));
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration) {
@@ -4475,8 +4481,7 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration)
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL | MINOR);
-    addConfigurationProperty("touch.touchSize.calibration", "geometric");
-    addConfigurationProperty("touch.toolSize.calibration", "geometric");
+    addConfigurationProperty("touch.size.calibration", "geometric");
     addMapperAndConfigure(mapper);
 
     // These calculations are based on the input device calibration documentation.
@@ -4489,14 +4494,11 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration)
 
     float x = toDisplayX(rawX);
     float y = toDisplayY(rawY);
-    float pressure = float(rawTouchMajor) / RAW_TOUCH_MAX;
-    float size = avg(rawToolMajor, rawToolMinor) / RAW_TOOL_MAX;
-    float scale = avg(float(DISPLAY_WIDTH) / (RAW_X_MAX - RAW_X_MIN + 1),
-            float(DISPLAY_HEIGHT) / (RAW_Y_MAX - RAW_Y_MIN + 1));
-    float toolMajor = float(rawToolMajor) * scale;
-    float toolMinor = float(rawToolMinor) * scale;
-    float touchMajor = min(float(rawTouchMajor) * scale, toolMajor);
-    float touchMinor = min(float(rawTouchMinor) * scale, toolMinor);
+    float size = avg(rawTouchMajor, rawTouchMinor) / RAW_TOUCH_MAX;
+    float toolMajor = float(rawToolMajor) * GEOMETRIC_SCALE;
+    float toolMinor = float(rawToolMinor) * GEOMETRIC_SCALE;
+    float touchMajor = float(rawTouchMajor) * GEOMETRIC_SCALE;
+    float touchMinor = float(rawTouchMinor) * GEOMETRIC_SCALE;
 
     processPosition(mapper, rawX, rawY);
     processTouchMajor(mapper, rawTouchMajor);
@@ -4509,22 +4511,18 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_GeometricCalibration)
     NotifyMotionArgs args;
     ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            x, y, pressure, size, touchMajor, touchMinor, toolMajor, toolMinor, 0, 0));
+            x, y, 1.0f, size, touchMajor, touchMinor, toolMajor, toolMinor, 0, 0));
 }
 
-TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinearCalibration) {
+TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_SummedLinearCalibration) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL);
-    addConfigurationProperty("touch.touchSize.calibration", "pressure");
-    addConfigurationProperty("touch.toolSize.calibration", "linear");
-    addConfigurationProperty("touch.toolSize.linearScale", "10");
-    addConfigurationProperty("touch.toolSize.linearBias", "160");
-    addConfigurationProperty("touch.toolSize.isSummed", "1");
-    addConfigurationProperty("touch.pressure.calibration", "amplitude");
-    addConfigurationProperty("touch.pressure.source", "touch");
-    addConfigurationProperty("touch.pressure.scale", "0.01");
+    addConfigurationProperty("touch.size.calibration", "diameter");
+    addConfigurationProperty("touch.size.scale", "10");
+    addConfigurationProperty("touch.size.bias", "160");
+    addConfigurationProperty("touch.size.isSummed", "1");
     addMapperAndConfigure(mapper);
 
     // These calculations are based on the input device calibration documentation.
@@ -4534,17 +4532,16 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinear
     int32_t rawY = 200;
     int32_t rawX2 = 150;
     int32_t rawY2 = 250;
-    int32_t rawTouchMajor = 60;
-    int32_t rawToolMajor = 5;
+    int32_t rawTouchMajor = 5;
+    int32_t rawToolMajor = 8;
 
     float x = toDisplayX(rawX);
     float y = toDisplayY(rawY);
     float x2 = toDisplayX(rawX2);
     float y2 = toDisplayY(rawY2);
-    float pressure = float(rawTouchMajor) * 0.01f;
-    float size = float(rawToolMajor) / RAW_TOOL_MAX;
-    float tool = (float(rawToolMajor) * 10.0f + 160.0f) / 2;
-    float touch = min(tool * pressure, tool);
+    float size = float(rawTouchMajor) / 2 / RAW_TOUCH_MAX;
+    float touch = float(rawTouchMajor) / 2 * 10.0f + 160.0f;
+    float tool = float(rawToolMajor) / 2 * 10.0f + 160.0f;
 
     processPosition(mapper, rawX, rawY);
     processTouchMajor(mapper, rawTouchMajor);
@@ -4565,39 +4562,32 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_SummedLinear
             args.action);
     ASSERT_EQ(size_t(2), args.pointerCount);
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            x, y, pressure, size, touch, touch, tool, tool, 0, 0));
+            x, y, 1.0f, size, touch, touch, tool, tool, 0, 0));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[1],
-            x2, y2, pressure, size, touch, touch, tool, tool, 0, 0));
+            x2, y2, 1.0f, size, touch, touch, tool, tool, 0, 0));
 }
 
-TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_AreaCalibration) {
+TEST_F(MultiTouchInputMapperTest, Process_TouchAndToolAxes_AreaCalibration) {
     MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
     addConfigurationProperty("touch.deviceType", "touchScreen");
     prepareDisplay(DISPLAY_ORIENTATION_0);
     prepareAxes(POSITION | TOUCH | TOOL);
-    addConfigurationProperty("touch.touchSize.calibration", "pressure");
-    addConfigurationProperty("touch.toolSize.calibration", "area");
-    addConfigurationProperty("touch.toolSize.areaScale", "22");
-    addConfigurationProperty("touch.toolSize.areaBias", "1");
-    addConfigurationProperty("touch.toolSize.linearScale", "9.2");
-    addConfigurationProperty("touch.toolSize.linearBias", "3");
-    addConfigurationProperty("touch.pressure.calibration", "amplitude");
-    addConfigurationProperty("touch.pressure.source", "touch");
-    addConfigurationProperty("touch.pressure.scale", "0.01");
+    addConfigurationProperty("touch.size.calibration", "area");
+    addConfigurationProperty("touch.size.scale", "43");
+    addConfigurationProperty("touch.size.bias", "3");
     addMapperAndConfigure(mapper);
 
     // These calculations are based on the input device calibration documentation.
     int32_t rawX = 100;
     int32_t rawY = 200;
-    int32_t rawTouchMajor = 60;
-    int32_t rawToolMajor = 5;
+    int32_t rawTouchMajor = 5;
+    int32_t rawToolMajor = 8;
 
     float x = toDisplayX(rawX);
     float y = toDisplayY(rawY);
-    float pressure = float(rawTouchMajor) * 0.01f;
-    float size = float(rawToolMajor) / RAW_TOOL_MAX;
-    float tool = sqrtf(float(rawToolMajor) * 22.0f + 1.0f) * 9.2f + 3.0f;
-    float touch = min(tool * pressure, tool);
+    float size = float(rawTouchMajor) / RAW_TOUCH_MAX;
+    float touch = sqrtf(rawTouchMajor) * 43.0f + 3.0f;
+    float tool = sqrtf(rawToolMajor) * 43.0f + 3.0f;
 
     processPosition(mapper, rawX, rawY);
     processTouchMajor(mapper, rawTouchMajor);
@@ -4608,7 +4598,36 @@ TEST_F(MultiTouchInputMapperTest, Process_TouchToolPressureSizeAxes_AreaCalibrat
     NotifyMotionArgs args;
     ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
     ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
-            x, y, pressure, size, touch, touch, tool, tool, 0, 0));
+            x, y, 1.0f, size, touch, touch, tool, tool, 0, 0));
+}
+
+TEST_F(MultiTouchInputMapperTest, Process_PressureAxis_AmplitudeCalibration) {
+    MultiTouchInputMapper* mapper = new MultiTouchInputMapper(mDevice);
+    addConfigurationProperty("touch.deviceType", "touchScreen");
+    prepareDisplay(DISPLAY_ORIENTATION_0);
+    prepareAxes(POSITION | PRESSURE);
+    addConfigurationProperty("touch.pressure.calibration", "amplitude");
+    addConfigurationProperty("touch.pressure.scale", "0.01");
+    addMapperAndConfigure(mapper);
+
+    // These calculations are based on the input device calibration documentation.
+    int32_t rawX = 100;
+    int32_t rawY = 200;
+    int32_t rawPressure = 60;
+
+    float x = toDisplayX(rawX);
+    float y = toDisplayY(rawY);
+    float pressure = float(rawPressure) * 0.01f;
+
+    processPosition(mapper, rawX, rawY);
+    processPressure(mapper, rawPressure);
+    processMTSync(mapper);
+    processSync(mapper);
+
+    NotifyMotionArgs args;
+    ASSERT_NO_FATAL_FAILURE(mFakeListener->assertNotifyMotionWasCalled(&args));
+    ASSERT_NO_FATAL_FAILURE(assertPointerCoords(args.pointerCoords[0],
+            x, y, pressure, 0, 0, 0, 0, 0, 0, 0));
 }
 
 TEST_F(MultiTouchInputMapperTest, Process_ShouldHandleAllButtons) {
