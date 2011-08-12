@@ -21,32 +21,20 @@
         android:detachWallpaper="true" android:shareInterpolator="false"
         android:zAdjustment="top">
 
-        <alpha android:fromAlpha="0.0" android:toAlpha="0.5"
+
+        <alpha android:fromAlpha="1.0" android:toAlpha="0.0"
                 android:interpolator="@interpolator/accelerate_cubic"
                 android:fillEnabled="true"
                 android:fillBefore="true" android:fillAfter="false"
-                android:duration="140"/>
-        <alpha android:fromAlpha="0.5" android:toAlpha="1.0"
-                android:interpolator="@interpolator/decelerate_cubic"
-                android:fillEnabled="true"
-                android:fillBefore="false" android:fillAfter="true"
-                android:startOffset="140"
-                android:duration="140"/>
+                android:duration="@android:integer/config_shortAnimTime"/>
 
-        <scale android:fromXScale="2.0" android:toXScale="1.5"
-                android:fromYScale="0.01" android:toYScale="0.495"
+
+        <scale android:fromXScale="1.0" android:toXScale="2.0"
+                android:fromYScale="1.0" android:toYScale="0.1"
                 android:pivotX="50%p" android:pivotY="50%p"
                 android:interpolator="@interpolator/accelerate_quint"
                 android:fillEnabled="true"
                 android:fillBefore="true" android:fillAfter="false"
-                android:duration="140"/>
-        <scale android:fromXScale="1.5" android:toXScale="1.0"
-                android:fromYScale="0.495" android:toYScale="1.0"
-                android:pivotX="50%p" android:pivotY="50%p"
-                android:interpolator="@interpolator/decelerate_quint"
-                android:fillEnabled="true"
-                android:fillBefore="false" android:fillAfter="true"
-                android:startOffset="140"
-                android:duration="140"/>
+                android:duration="@android:integer/config_shortAnimTime" />
 
 </set>
