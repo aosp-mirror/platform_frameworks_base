@@ -80,13 +80,6 @@ private:
                 emptyCount(emptyCount), colorKey(colorKey) {
         }
 
-        PatchDescription(const PatchDescription& description):
-                bitmapWidth(description.bitmapWidth), bitmapHeight(description.bitmapHeight),
-                pixelWidth(description.pixelWidth), pixelHeight(description.pixelHeight),
-                xCount(description.xCount), yCount(description.yCount),
-                emptyCount(description.emptyCount), colorKey(description.colorKey) {
-        }
-
         bool operator<(const PatchDescription& rhs) const {
             LTE_FLOAT(bitmapWidth) {
                 LTE_FLOAT(bitmapHeight) {
