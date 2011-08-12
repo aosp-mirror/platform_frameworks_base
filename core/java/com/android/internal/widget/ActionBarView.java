@@ -462,8 +462,9 @@ public class ActionBarView extends AbsActionBarView {
         mTitle = title;
         if (mTitleView != null) {
             mTitleView.setText(title);
-            mTitleLayout.setVisibility(TextUtils.isEmpty(mTitle) && TextUtils.isEmpty(mSubtitle) ?
-                    GONE : VISIBLE);
+            mTitleLayout.setVisibility(mExpandedActionView != null &&
+                    (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0 &&
+                    (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle)) ? VISIBLE : GONE);
         }
         if (mLogoNavItem != null) {
             mLogoNavItem.setTitle(title);
@@ -479,8 +480,9 @@ public class ActionBarView extends AbsActionBarView {
         if (mSubtitleView != null) {
             mSubtitleView.setText(subtitle);
             mSubtitleView.setVisibility(subtitle != null ? VISIBLE : GONE);
-            mTitleLayout.setVisibility(TextUtils.isEmpty(mTitle) && TextUtils.isEmpty(mSubtitle) ?
-                    GONE : VISIBLE);
+            mTitleLayout.setVisibility(mExpandedActionView != null &&
+                    (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0 &&
+                    (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle)) ? VISIBLE : GONE);
         }
     }
 
@@ -739,7 +741,12 @@ public class ActionBarView extends AbsActionBarView {
             mTitleLayout.setEnabled(titleUp);
         }
 
-        addView(mTitleLayout);
+        addView(mTitleLayout, new LayoutParams(LayoutParams.WRAP_CONTENT,
+                LayoutParams.MATCH_PARENT));
+        if (mExpandedActionView != null) {
+            // Don't show while in expanded mode
+            mTitleLayout.setVisibility(GONE);
+        }
     }
 
     public void setContextView(ActionBarContextView view) {
