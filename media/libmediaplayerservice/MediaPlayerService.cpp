@@ -687,7 +687,9 @@ sp<MediaPlayerBase> MediaPlayerService::Client::createPlayer(player_type playerT
         p = android::createPlayer(playerType, this, notify);
     }
 
-    p->setUID(mUID);
+    if (p != NULL) {
+        p->setUID(mUID);
+    }
 
     return p;
 }
