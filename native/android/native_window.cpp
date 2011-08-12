@@ -20,20 +20,12 @@
 #include <android/native_window_jni.h>
 #include <surfaceflinger/Surface.h>
 #include <android_runtime/android_view_Surface.h>
-#include <android_runtime/android_graphics_ParcelSurfaceTexture.h>
 #include <android_runtime/android_graphics_SurfaceTexture.h>
 
 using namespace android;
 
 ANativeWindow* ANativeWindow_fromSurface(JNIEnv* env, jobject surface) {
-    sp<ANativeWindow> win;
-    if (android_Surface_isInstanceOf(env, surface)) {
-        win = android_Surface_getNativeWindow(env, surface);
-    } else if (android_SurfaceTexture_isInstanceOf(env, surface)) {
-        win = android_SurfaceTexture_getNativeWindow(env, surface);
-    } else if (android_ParcelSurfaceTexture_isInstanceOf(env, surface)) {
-        win = android_ParcelSurfaceTexture_getNativeWindow(env, surface);
-    }
+    sp<ANativeWindow> win = android_Surface_getNativeWindow(env, surface);
     if (win != NULL) {
         win->incStrong((void*)ANativeWindow_acquire);
     }

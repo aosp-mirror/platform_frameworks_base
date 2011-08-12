@@ -30,7 +30,6 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.graphics.Bitmap;
-import android.graphics.ParcelSurfaceTexture;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 
@@ -527,10 +526,9 @@ public class MediaPlayer
     private final static String IMEDIA_PLAYER = "android.media.IMediaPlayer";
 
     private int mNativeContext; // accessed by native methods
+    private int mNativeSurfaceTexture;  // accessed by native methods
     private int mListenerContext; // accessed by native methods
-    private Surface mSurface; // accessed by native methods
-    private SurfaceHolder  mSurfaceHolder;
-    private ParcelSurfaceTexture mParcelSurfaceTexture; // accessed by native methods
+    private SurfaceHolder mSurfaceHolder;
     private EventHandler mEventHandler;
     private PowerManager.WakeLock mWakeLock = null;
     private boolean mScreenOnWhilePlaying;
@@ -561,10 +559,10 @@ public class MediaPlayer
     }
 
     /*
-     * Update the MediaPlayer ISurface and ISurfaceTexture.
-     * Call after updating mSurface and/or mParcelSurfaceTexture.
+     * Update the MediaPlayer SurfaceTexture.
+     * Call after setting a new display surface.
      */
-    private native void _setVideoSurfaceOrSurfaceTexture();
+    private native void _setVideoSurface(Surface surface);
 
     /**
      * Create a request parcel which can be routed to the native media
@@ -619,13 +617,13 @@ public class MediaPlayer
      */
     public void setDisplay(SurfaceHolder sh) {
         mSurfaceHolder = sh;
+        Surface surface;
         if (sh != null) {
-            mSurface = sh.getSurface();
+            surface = sh.getSurface();
         } else {
-            mSurface = null;
+            surface = null;
         }
-        mParcelSurfaceTexture = null;
-        _setVideoSurfaceOrSurfaceTexture();
+        _setVideoSurface(surface);
         updateSurfaceScreenOn();
     }
 
@@ -641,13 +639,11 @@ public class MediaPlayer
      * @hide Pending review by API council.
      */
     public void setSurface(Surface surface) {
-        if (mScreenOnWhilePlaying && surface != null && mSurface != null) {
+        if (mScreenOnWhilePlaying && surface != null) {
             Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective for Surface");
         }
         mSurfaceHolder = null;
-        mSurface = surface;
-        mParcelSurfaceTexture = null;  // TODO(tedbo): Remove.
-        _setVideoSurfaceOrSurfaceTexture();
+        _setVideoSurface(surface);
         updateSurfaceScreenOn();
     }
 
@@ -670,34 +666,19 @@ public class MediaPlayer
      * by time-of-day adjustments, but is reset when the position is set.
      */
     public void setTexture(SurfaceTexture st) {
-        ParcelSurfaceTexture pst = null;
+        // TODO: This method should be hidden before it is published and setSurface
+        // should be unhidden and made public instead.
         if (st != null) {
-            pst = ParcelSurfaceTexture.fromSurfaceTexture(st);
-        }
-        setParcelSurfaceTexture(pst);
-    }
+            Surface surface = new Surface(st);
+            setSurface(surface);
 
-    /**
-     * Sets the {@link ParcelSurfaceTexture} to be used as the sink for the video portion of
-     * the media. This is similar to {@link #setTexture(SurfaceTexture)}, but supports using
-     * a {@link ParcelSurfaceTexture} to transport the texture to be used via Binder. Setting
-     * a parceled surface texture will un-set any surface or surface texture that was previously
-     * set. See {@link #setTexture(SurfaceTexture)} for more details.
-     *
-     * @param pst The {@link ParcelSurfaceTexture} to be used as the sink for
-     * the video portion of the media.
-     *
-     * @hide Pending removal when there are no more callers.
-     */
-    public void setParcelSurfaceTexture(ParcelSurfaceTexture pst) {
-        if (mScreenOnWhilePlaying && pst != null && mParcelSurfaceTexture == null) {
-            Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective for SurfaceTexture");
+            // It is safe and desired to release the newly created Surface here since the
+            // native code will grab a reference to the underlying ISurfaceTexture. At that
+            // point the Surface we just created is no longer needed.
+            surface.release();
+        } else {
+            setSurface(null);
         }
-        mSurfaceHolder = null;
-        mSurface = null;
-        mParcelSurfaceTexture = pst;
-        _setVideoSurfaceOrSurfaceTexture();
-        updateSurfaceScreenOn();
     }
 
     /**
