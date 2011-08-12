@@ -68,6 +68,11 @@ public class ScrollingTabContainerView extends HorizontalScrollView
         super(context);
         setHorizontalScrollBarEnabled(false);
 
+        TypedArray a = getContext().obtainStyledAttributes(null, R.styleable.ActionBar,
+                com.android.internal.R.attr.actionBarStyle, 0);
+        setContentHeight(a.getLayoutDimension(R.styleable.ActionBar_height, 0));
+        a.recycle();
+
         mTabLayout = createTabLayout();
         addView(mTabLayout, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.MATCH_PARENT));
@@ -91,16 +96,7 @@ public class ScrollingTabContainerView extends HorizontalScrollView
             mMaxTabWidth = -1;
         }
 
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
-        if (heightMode != MeasureSpec.UNSPECIFIED) {
-            if (mContentHeight == 0 && heightMode == MeasureSpec.EXACTLY) {
-                // Use this as our content height.
-                mContentHeight = heightSize;
-            }
-            heightSize = Math.min(heightSize, mContentHeight);
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(heightSize, heightMode);
-        }
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(mContentHeight, MeasureSpec.EXACTLY);
 
         final boolean canCollapse = !lockedExpanded && mAllowCollapse;
 
