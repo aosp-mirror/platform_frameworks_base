@@ -2217,10 +2217,6 @@ void TouchInputMapper::dump(String8& dump) {
     dump.appendFormat(INDENT4 "XPrecision: %0.3f\n", mXPrecision);
     dump.appendFormat(INDENT4 "YPrecision: %0.3f\n", mYPrecision);
     dump.appendFormat(INDENT4 "GeometricScale: %0.3f\n", mGeometricScale);
-    dump.appendFormat(INDENT4 "ToolSizeLinearScale: %0.3f\n", mToolSizeLinearScale);
-    dump.appendFormat(INDENT4 "ToolSizeLinearBias: %0.3f\n", mToolSizeLinearBias);
-    dump.appendFormat(INDENT4 "ToolSizeAreaScale: %0.3f\n", mToolSizeAreaScale);
-    dump.appendFormat(INDENT4 "ToolSizeAreaBias: %0.3f\n", mToolSizeAreaBias);
     dump.appendFormat(INDENT4 "PressureScale: %0.3f\n", mPressureScale);
     dump.appendFormat(INDENT4 "SizeScale: %0.3f\n", mSizeScale);
     dump.appendFormat(INDENT4 "OrientationScale: %0.3f\n", mOrientationScale);
@@ -2541,9 +2537,21 @@ bool TouchInputMapper::configureSurface() {
         // Size of diagonal axis.
         float diagonalSize = hypotf(width, height);
 
-        // TouchMajor and TouchMinor factors.
-        if (mCalibration.touchSizeCalibration != Calibration::TOUCH_SIZE_CALIBRATION_NONE) {
+        // Size factors.
+        if (mCalibration.sizeCalibration != Calibration::SIZE_CALIBRATION_NONE) {
+            if (mRawPointerAxes.touchMajor.valid
+                    && mRawPointerAxes.touchMajor.maxValue != 0) {
+                mSizeScale = 1.0f / mRawPointerAxes.touchMajor.maxValue;
+            } else if (mRawPointerAxes.toolMajor.valid
+                    && mRawPointerAxes.toolMajor.maxValue != 0) {
+                mSizeScale = 1.0f / mRawPointerAxes.toolMajor.maxValue;
+            } else {
+                mSizeScale = 0.0f;
+            }
+
             mOrientedRanges.haveTouchSize = true;
+            mOrientedRanges.haveToolSize = true;
+            mOrientedRanges.haveSize = true;
 
             mOrientedRanges.touchMajor.axis = AMOTION_EVENT_AXIS_TOUCH_MAJOR;
             mOrientedRanges.touchMajor.source = mTouchSource;
@@ -2554,51 +2562,6 @@ bool TouchInputMapper::configureSurface() {
 
             mOrientedRanges.touchMinor = mOrientedRanges.touchMajor;
             mOrientedRanges.touchMinor.axis = AMOTION_EVENT_AXIS_TOUCH_MINOR;
-        }
-
-        // ToolMajor and ToolMinor factors.
-        mToolSizeLinearScale = 0;
-        mToolSizeLinearBias = 0;
-        mToolSizeAreaScale = 0;
-        mToolSizeAreaBias = 0;
-        if (mCalibration.toolSizeCalibration != Calibration::TOOL_SIZE_CALIBRATION_NONE) {
-            if (mCalibration.toolSizeCalibration == Calibration::TOOL_SIZE_CALIBRATION_LINEAR) {
-                if (mCalibration.haveToolSizeLinearScale) {
-                    mToolSizeLinearScale = mCalibration.toolSizeLinearScale;
-                } else if (mRawPointerAxes.toolMajor.valid
-                        && mRawPointerAxes.toolMajor.maxValue != 0) {
-                    mToolSizeLinearScale = float(min(width, height))
-                            / mRawPointerAxes.toolMajor.maxValue;
-                }
-
-                if (mCalibration.haveToolSizeLinearBias) {
-                    mToolSizeLinearBias = mCalibration.toolSizeLinearBias;
-                }
-            } else if (mCalibration.toolSizeCalibration ==
-                    Calibration::TOOL_SIZE_CALIBRATION_AREA) {
-                if (mCalibration.haveToolSizeLinearScale) {
-                    mToolSizeLinearScale = mCalibration.toolSizeLinearScale;
-                } else {
-                    mToolSizeLinearScale = min(width, height);
-                }
-
-                if (mCalibration.haveToolSizeLinearBias) {
-                    mToolSizeLinearBias = mCalibration.toolSizeLinearBias;
-                }
-
-                if (mCalibration.haveToolSizeAreaScale) {
-                    mToolSizeAreaScale = mCalibration.toolSizeAreaScale;
-                } else if (mRawPointerAxes.toolMajor.valid
-                        && mRawPointerAxes.toolMajor.maxValue != 0) {
-                    mToolSizeAreaScale = 1.0f / mRawPointerAxes.toolMajor.maxValue;
-                }
-
-                if (mCalibration.haveToolSizeAreaBias) {
-                    mToolSizeAreaBias = mCalibration.toolSizeAreaBias;
-                }
-            }
-
-            mOrientedRanges.haveToolSize = true;
 
             mOrientedRanges.toolMajor.axis = AMOTION_EVENT_AXIS_TOOL_MAJOR;
             mOrientedRanges.toolMajor.source = mTouchSource;
@@ -2609,30 +2572,28 @@ bool TouchInputMapper::configureSurface() {
 
             mOrientedRanges.toolMinor = mOrientedRanges.toolMajor;
             mOrientedRanges.toolMinor.axis = AMOTION_EVENT_AXIS_TOOL_MINOR;
+
+            mOrientedRanges.size.axis = AMOTION_EVENT_AXIS_SIZE;
+            mOrientedRanges.size.source = mTouchSource;
+            mOrientedRanges.size.min = 0;
+            mOrientedRanges.size.max = 1.0;
+            mOrientedRanges.size.flat = 0;
+            mOrientedRanges.size.fuzz = 0;
+        } else {
+            mSizeScale = 0.0f;
         }
 
         // Pressure factors.
         mPressureScale = 0;
         if (mCalibration.pressureCalibration != Calibration::PRESSURE_CALIBRATION_NONE) {
-            RawAbsoluteAxisInfo rawPressureAxis;
-            switch (mCalibration.pressureSource) {
-            case Calibration::PRESSURE_SOURCE_PRESSURE:
-                rawPressureAxis = mRawPointerAxes.pressure;
-                break;
-            case Calibration::PRESSURE_SOURCE_TOUCH:
-                rawPressureAxis = mRawPointerAxes.touchMajor;
-                break;
-            default:
-                rawPressureAxis.clear();
-            }
-
             if (mCalibration.pressureCalibration == Calibration::PRESSURE_CALIBRATION_PHYSICAL
                     || mCalibration.pressureCalibration
                             == Calibration::PRESSURE_CALIBRATION_AMPLITUDE) {
                 if (mCalibration.havePressureScale) {
                     mPressureScale = mCalibration.pressureScale;
-                } else if (rawPressureAxis.valid && rawPressureAxis.maxValue != 0) {
-                    mPressureScale = 1.0f / rawPressureAxis.maxValue;
+                } else if (mRawPointerAxes.pressure.valid
+                        && mRawPointerAxes.pressure.maxValue != 0) {
+                    mPressureScale = 1.0f / mRawPointerAxes.pressure.maxValue;
                 }
             }
 
@@ -2646,31 +2607,13 @@ bool TouchInputMapper::configureSurface() {
             mOrientedRanges.pressure.fuzz = 0;
         }
 
-        // Size factors.
-        mSizeScale = 0;
-        if (mCalibration.sizeCalibration != Calibration::SIZE_CALIBRATION_NONE) {
-            if (mCalibration.sizeCalibration == Calibration::SIZE_CALIBRATION_NORMALIZED) {
-                if (mRawPointerAxes.toolMajor.valid && mRawPointerAxes.toolMajor.maxValue != 0) {
-                    mSizeScale = 1.0f / mRawPointerAxes.toolMajor.maxValue;
-                }
-            }
-
-            mOrientedRanges.haveSize = true;
-
-            mOrientedRanges.size.axis = AMOTION_EVENT_AXIS_SIZE;
-            mOrientedRanges.size.source = mTouchSource;
-            mOrientedRanges.size.min = 0;
-            mOrientedRanges.size.max = 1.0;
-            mOrientedRanges.size.flat = 0;
-            mOrientedRanges.size.fuzz = 0;
-        }
-
         // Orientation
         mOrientationScale = 0;
         if (mCalibration.orientationCalibration != Calibration::ORIENTATION_CALIBRATION_NONE) {
             if (mCalibration.orientationCalibration
                     == Calibration::ORIENTATION_CALIBRATION_INTERPOLATED) {
-                if (mRawPointerAxes.orientation.valid && mRawPointerAxes.orientation.maxValue != 0) {
+                if (mRawPointerAxes.orientation.valid
+                        && mRawPointerAxes.orientation.maxValue != 0) {
                     mOrientationScale = float(M_PI_2) / mRawPointerAxes.orientation.maxValue;
                 }
             }
@@ -2879,50 +2822,30 @@ void TouchInputMapper::parseCalibration() {
     const PropertyMap& in = getDevice()->getConfiguration();
     Calibration& out = mCalibration;
 
-    // Touch Size
-    out.touchSizeCalibration = Calibration::TOUCH_SIZE_CALIBRATION_DEFAULT;
-    String8 touchSizeCalibrationString;
-    if (in.tryGetProperty(String8("touch.touchSize.calibration"), touchSizeCalibrationString)) {
-        if (touchSizeCalibrationString == "none") {
-            out.touchSizeCalibration = Calibration::TOUCH_SIZE_CALIBRATION_NONE;
-        } else if (touchSizeCalibrationString == "geometric") {
-            out.touchSizeCalibration = Calibration::TOUCH_SIZE_CALIBRATION_GEOMETRIC;
-        } else if (touchSizeCalibrationString == "pressure") {
-            out.touchSizeCalibration = Calibration::TOUCH_SIZE_CALIBRATION_PRESSURE;
-        } else if (touchSizeCalibrationString != "default") {
-            LOGW("Invalid value for touch.touchSize.calibration: '%s'",
-                    touchSizeCalibrationString.string());
+    // Size
+    out.sizeCalibration = Calibration::SIZE_CALIBRATION_DEFAULT;
+    String8 sizeCalibrationString;
+    if (in.tryGetProperty(String8("touch.size.calibration"), sizeCalibrationString)) {
+        if (sizeCalibrationString == "none") {
+            out.sizeCalibration = Calibration::SIZE_CALIBRATION_NONE;
+        } else if (sizeCalibrationString == "geometric") {
+            out.sizeCalibration = Calibration::SIZE_CALIBRATION_GEOMETRIC;
+        } else if (sizeCalibrationString == "diameter") {
+            out.sizeCalibration = Calibration::SIZE_CALIBRATION_DIAMETER;
+        } else if (sizeCalibrationString == "area") {
+            out.sizeCalibration = Calibration::SIZE_CALIBRATION_AREA;
+        } else if (sizeCalibrationString != "default") {
+            LOGW("Invalid value for touch.size.calibration: '%s'",
+                    sizeCalibrationString.string());
         }
     }
 
-    // Tool Size
-    out.toolSizeCalibration = Calibration::TOOL_SIZE_CALIBRATION_DEFAULT;
-    String8 toolSizeCalibrationString;
-    if (in.tryGetProperty(String8("touch.toolSize.calibration"), toolSizeCalibrationString)) {
-        if (toolSizeCalibrationString == "none") {
-            out.toolSizeCalibration = Calibration::TOOL_SIZE_CALIBRATION_NONE;
-        } else if (toolSizeCalibrationString == "geometric") {
-            out.toolSizeCalibration = Calibration::TOOL_SIZE_CALIBRATION_GEOMETRIC;
-        } else if (toolSizeCalibrationString == "linear") {
-            out.toolSizeCalibration = Calibration::TOOL_SIZE_CALIBRATION_LINEAR;
-        } else if (toolSizeCalibrationString == "area") {
-            out.toolSizeCalibration = Calibration::TOOL_SIZE_CALIBRATION_AREA;
-        } else if (toolSizeCalibrationString != "default") {
-            LOGW("Invalid value for touch.toolSize.calibration: '%s'",
-                    toolSizeCalibrationString.string());
-        }
-    }
-
-    out.haveToolSizeLinearScale = in.tryGetProperty(String8("touch.toolSize.linearScale"),
-            out.toolSizeLinearScale);
-    out.haveToolSizeLinearBias = in.tryGetProperty(String8("touch.toolSize.linearBias"),
-            out.toolSizeLinearBias);
-    out.haveToolSizeAreaScale = in.tryGetProperty(String8("touch.toolSize.areaScale"),
-            out.toolSizeAreaScale);
-    out.haveToolSizeAreaBias = in.tryGetProperty(String8("touch.toolSize.areaBias"),
-            out.toolSizeAreaBias);
-    out.haveToolSizeIsSummed = in.tryGetProperty(String8("touch.toolSize.isSummed"),
-            out.toolSizeIsSummed);
+    out.haveSizeScale = in.tryGetProperty(String8("touch.size.scale"),
+            out.sizeScale);
+    out.haveSizeBias = in.tryGetProperty(String8("touch.size.bias"),
+            out.sizeBias);
+    out.haveSizeIsSummed = in.tryGetProperty(String8("touch.size.isSummed"),
+            out.sizeIsSummed);
 
     // Pressure
     out.pressureCalibration = Calibration::PRESSURE_CALIBRATION_DEFAULT;
@@ -2940,35 +2863,8 @@ void TouchInputMapper::parseCalibration() {
         }
     }
 
-    out.pressureSource = Calibration::PRESSURE_SOURCE_DEFAULT;
-    String8 pressureSourceString;
-    if (in.tryGetProperty(String8("touch.pressure.source"), pressureSourceString)) {
-        if (pressureSourceString == "pressure") {
-            out.pressureSource = Calibration::PRESSURE_SOURCE_PRESSURE;
-        } else if (pressureSourceString == "touch") {
-            out.pressureSource = Calibration::PRESSURE_SOURCE_TOUCH;
-        } else if (pressureSourceString != "default") {
-            LOGW("Invalid value for touch.pressure.source: '%s'",
-                    pressureSourceString.string());
-        }
-    }
-
     out.havePressureScale = in.tryGetProperty(String8("touch.pressure.scale"),
             out.pressureScale);
-
-    // Size
-    out.sizeCalibration = Calibration::SIZE_CALIBRATION_DEFAULT;
-    String8 sizeCalibrationString;
-    if (in.tryGetProperty(String8("touch.size.calibration"), sizeCalibrationString)) {
-        if (sizeCalibrationString == "none") {
-            out.sizeCalibration = Calibration::SIZE_CALIBRATION_NONE;
-        } else if (sizeCalibrationString == "normalized") {
-            out.sizeCalibration = Calibration::SIZE_CALIBRATION_NORMALIZED;
-        } else if (sizeCalibrationString != "default") {
-            LOGW("Invalid value for touch.size.calibration: '%s'",
-                    sizeCalibrationString.string());
-        }
-    }
 
     // Orientation
     out.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_DEFAULT;
@@ -3005,178 +2901,77 @@ void TouchInputMapper::parseCalibration() {
 }
 
 void TouchInputMapper::resolveCalibration() {
-    // Pressure
-    switch (mCalibration.pressureSource) {
-    case Calibration::PRESSURE_SOURCE_DEFAULT:
-        if (mRawPointerAxes.pressure.valid) {
-            mCalibration.pressureSource = Calibration::PRESSURE_SOURCE_PRESSURE;
-        } else if (mRawPointerAxes.touchMajor.valid) {
-            mCalibration.pressureSource = Calibration::PRESSURE_SOURCE_TOUCH;
-        }
-        break;
-
-    case Calibration::PRESSURE_SOURCE_PRESSURE:
-        if (! mRawPointerAxes.pressure.valid) {
-            LOGW("Calibration property touch.pressure.source is 'pressure' but "
-                    "the pressure axis is not available.");
-        }
-        break;
-
-    case Calibration::PRESSURE_SOURCE_TOUCH:
-        if (! mRawPointerAxes.touchMajor.valid) {
-            LOGW("Calibration property touch.pressure.source is 'touch' but "
-                    "the touchMajor axis is not available.");
-        }
-        break;
-
-    default:
-        break;
-    }
-
-    switch (mCalibration.pressureCalibration) {
-    case Calibration::PRESSURE_CALIBRATION_DEFAULT:
-        if (mCalibration.pressureSource != Calibration::PRESSURE_SOURCE_DEFAULT) {
-            mCalibration.pressureCalibration = Calibration::PRESSURE_CALIBRATION_AMPLITUDE;
-        } else {
-            mCalibration.pressureCalibration = Calibration::PRESSURE_CALIBRATION_NONE;
-        }
-        break;
-
-    default:
-        break;
-    }
-
-    // Tool Size
-    switch (mCalibration.toolSizeCalibration) {
-    case Calibration::TOOL_SIZE_CALIBRATION_DEFAULT:
-        if (mRawPointerAxes.toolMajor.valid) {
-            mCalibration.toolSizeCalibration = Calibration::TOOL_SIZE_CALIBRATION_LINEAR;
-        } else {
-            mCalibration.toolSizeCalibration = Calibration::TOOL_SIZE_CALIBRATION_NONE;
-        }
-        break;
-
-    default:
-        break;
-    }
-
-    // Touch Size
-    switch (mCalibration.touchSizeCalibration) {
-    case Calibration::TOUCH_SIZE_CALIBRATION_DEFAULT:
-        if (mCalibration.pressureCalibration != Calibration::PRESSURE_CALIBRATION_NONE
-                && mCalibration.toolSizeCalibration != Calibration::TOOL_SIZE_CALIBRATION_NONE) {
-            mCalibration.touchSizeCalibration = Calibration::TOUCH_SIZE_CALIBRATION_PRESSURE;
-        } else {
-            mCalibration.touchSizeCalibration = Calibration::TOUCH_SIZE_CALIBRATION_NONE;
-        }
-        break;
-
-    default:
-        break;
-    }
-
     // Size
-    switch (mCalibration.sizeCalibration) {
-    case Calibration::SIZE_CALIBRATION_DEFAULT:
-        if (mRawPointerAxes.toolMajor.valid) {
-            mCalibration.sizeCalibration = Calibration::SIZE_CALIBRATION_NORMALIZED;
-        } else {
-            mCalibration.sizeCalibration = Calibration::SIZE_CALIBRATION_NONE;
+    if (mRawPointerAxes.touchMajor.valid || mRawPointerAxes.toolMajor.valid) {
+        if (mCalibration.sizeCalibration == Calibration::SIZE_CALIBRATION_DEFAULT) {
+            mCalibration.sizeCalibration = Calibration::SIZE_CALIBRATION_GEOMETRIC;
         }
-        break;
+    } else {
+        mCalibration.sizeCalibration = Calibration::SIZE_CALIBRATION_NONE;
+    }
 
-    default:
-        break;
+    // Pressure
+    if (mRawPointerAxes.pressure.valid) {
+        if (mCalibration.pressureCalibration == Calibration::PRESSURE_CALIBRATION_DEFAULT) {
+            mCalibration.pressureCalibration = Calibration::PRESSURE_CALIBRATION_PHYSICAL;
+        }
+    } else {
+        mCalibration.pressureCalibration = Calibration::PRESSURE_CALIBRATION_NONE;
     }
 
     // Orientation
-    switch (mCalibration.orientationCalibration) {
-    case Calibration::ORIENTATION_CALIBRATION_DEFAULT:
-        if (mRawPointerAxes.orientation.valid) {
+    if (mRawPointerAxes.orientation.valid) {
+        if (mCalibration.orientationCalibration == Calibration::ORIENTATION_CALIBRATION_DEFAULT) {
             mCalibration.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_INTERPOLATED;
-        } else {
-            mCalibration.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_NONE;
         }
-        break;
-
-    default:
-        break;
+    } else {
+        mCalibration.orientationCalibration = Calibration::ORIENTATION_CALIBRATION_NONE;
     }
 
     // Distance
-    switch (mCalibration.distanceCalibration) {
-    case Calibration::DISTANCE_CALIBRATION_DEFAULT:
-        if (mRawPointerAxes.distance.valid) {
+    if (mRawPointerAxes.distance.valid) {
+        if (mCalibration.distanceCalibration == Calibration::DISTANCE_CALIBRATION_DEFAULT) {
             mCalibration.distanceCalibration = Calibration::DISTANCE_CALIBRATION_SCALED;
-        } else {
-            mCalibration.distanceCalibration = Calibration::DISTANCE_CALIBRATION_NONE;
         }
-        break;
-
-    default:
-        break;
+    } else {
+        mCalibration.distanceCalibration = Calibration::DISTANCE_CALIBRATION_NONE;
     }
 }
 
 void TouchInputMapper::dumpCalibration(String8& dump) {
     dump.append(INDENT3 "Calibration:\n");
 
-    // Touch Size
-    switch (mCalibration.touchSizeCalibration) {
-    case Calibration::TOUCH_SIZE_CALIBRATION_NONE:
-        dump.append(INDENT4 "touch.touchSize.calibration: none\n");
+    // Size
+    switch (mCalibration.sizeCalibration) {
+    case Calibration::SIZE_CALIBRATION_NONE:
+        dump.append(INDENT4 "touch.size.calibration: none\n");
         break;
-    case Calibration::TOUCH_SIZE_CALIBRATION_GEOMETRIC:
-        dump.append(INDENT4 "touch.touchSize.calibration: geometric\n");
+    case Calibration::SIZE_CALIBRATION_GEOMETRIC:
+        dump.append(INDENT4 "touch.size.calibration: geometric\n");
         break;
-    case Calibration::TOUCH_SIZE_CALIBRATION_PRESSURE:
-        dump.append(INDENT4 "touch.touchSize.calibration: pressure\n");
+    case Calibration::SIZE_CALIBRATION_DIAMETER:
+        dump.append(INDENT4 "touch.size.calibration: diameter\n");
         break;
-    default:
-        LOG_ASSERT(false);
-    }
-
-    // Tool Size
-    switch (mCalibration.toolSizeCalibration) {
-    case Calibration::TOOL_SIZE_CALIBRATION_NONE:
-        dump.append(INDENT4 "touch.toolSize.calibration: none\n");
-        break;
-    case Calibration::TOOL_SIZE_CALIBRATION_GEOMETRIC:
-        dump.append(INDENT4 "touch.toolSize.calibration: geometric\n");
-        break;
-    case Calibration::TOOL_SIZE_CALIBRATION_LINEAR:
-        dump.append(INDENT4 "touch.toolSize.calibration: linear\n");
-        break;
-    case Calibration::TOOL_SIZE_CALIBRATION_AREA:
-        dump.append(INDENT4 "touch.toolSize.calibration: area\n");
+    case Calibration::SIZE_CALIBRATION_AREA:
+        dump.append(INDENT4 "touch.size.calibration: area\n");
         break;
     default:
         LOG_ASSERT(false);
     }
 
-    if (mCalibration.haveToolSizeLinearScale) {
-        dump.appendFormat(INDENT4 "touch.toolSize.linearScale: %0.3f\n",
-                mCalibration.toolSizeLinearScale);
+    if (mCalibration.haveSizeScale) {
+        dump.appendFormat(INDENT4 "touch.size.scale: %0.3f\n",
+                mCalibration.sizeScale);
     }
 
-    if (mCalibration.haveToolSizeLinearBias) {
-        dump.appendFormat(INDENT4 "touch.toolSize.linearBias: %0.3f\n",
-                mCalibration.toolSizeLinearBias);
+    if (mCalibration.haveSizeBias) {
+        dump.appendFormat(INDENT4 "touch.size.bias: %0.3f\n",
+                mCalibration.sizeBias);
     }
 
-    if (mCalibration.haveToolSizeAreaScale) {
-        dump.appendFormat(INDENT4 "touch.toolSize.areaScale: %0.3f\n",
-                mCalibration.toolSizeAreaScale);
-    }
-
-    if (mCalibration.haveToolSizeAreaBias) {
-        dump.appendFormat(INDENT4 "touch.toolSize.areaBias: %0.3f\n",
-                mCalibration.toolSizeAreaBias);
-    }
-
-    if (mCalibration.haveToolSizeIsSummed) {
-        dump.appendFormat(INDENT4 "touch.toolSize.isSummed: %s\n",
-                toString(mCalibration.toolSizeIsSummed));
+    if (mCalibration.haveSizeIsSummed) {
+        dump.appendFormat(INDENT4 "touch.size.isSummed: %s\n",
+                toString(mCalibration.sizeIsSummed));
     }
 
     // Pressure
@@ -3194,34 +2989,9 @@ void TouchInputMapper::dumpCalibration(String8& dump) {
         LOG_ASSERT(false);
     }
 
-    switch (mCalibration.pressureSource) {
-    case Calibration::PRESSURE_SOURCE_PRESSURE:
-        dump.append(INDENT4 "touch.pressure.source: pressure\n");
-        break;
-    case Calibration::PRESSURE_SOURCE_TOUCH:
-        dump.append(INDENT4 "touch.pressure.source: touch\n");
-        break;
-    case Calibration::PRESSURE_SOURCE_DEFAULT:
-        break;
-    default:
-        LOG_ASSERT(false);
-    }
-
     if (mCalibration.havePressureScale) {
         dump.appendFormat(INDENT4 "touch.pressure.scale: %0.3f\n",
                 mCalibration.pressureScale);
-    }
-
-    // Size
-    switch (mCalibration.sizeCalibration) {
-    case Calibration::SIZE_CALIBRATION_NONE:
-        dump.append(INDENT4 "touch.size.calibration: none\n");
-        break;
-    case Calibration::SIZE_CALIBRATION_NORMALIZED:
-        dump.append(INDENT4 "touch.size.calibration: normalized\n");
-        break;
-    default:
-        LOG_ASSERT(false);
     }
 
     // Orientation
@@ -3613,116 +3383,91 @@ void TouchInputMapper::cookPointerData() {
     for (uint32_t i = 0; i < currentPointerCount; i++) {
         const RawPointerData::Pointer& in = mCurrentRawPointerData.pointers[i];
 
-        // ToolMajor and ToolMinor
-        float toolMajor, toolMinor;
-        switch (mCalibration.toolSizeCalibration) {
-        case Calibration::TOOL_SIZE_CALIBRATION_GEOMETRIC:
-            toolMajor = in.toolMajor * mGeometricScale;
-            if (mRawPointerAxes.toolMinor.valid) {
-                toolMinor = in.toolMinor * mGeometricScale;
+        // Size
+        float touchMajor, touchMinor, toolMajor, toolMinor, size;
+        switch (mCalibration.sizeCalibration) {
+        case Calibration::SIZE_CALIBRATION_GEOMETRIC:
+        case Calibration::SIZE_CALIBRATION_DIAMETER:
+        case Calibration::SIZE_CALIBRATION_AREA:
+            if (mRawPointerAxes.touchMajor.valid && mRawPointerAxes.toolMajor.valid) {
+                touchMajor = in.touchMajor;
+                touchMinor = mRawPointerAxes.touchMinor.valid ? in.touchMinor : in.touchMajor;
+                toolMajor = in.toolMajor;
+                toolMinor = mRawPointerAxes.toolMinor.valid ? in.toolMinor : in.toolMajor;
+                size = mRawPointerAxes.touchMinor.valid
+                        ? avg(in.touchMajor, in.touchMinor) : in.touchMajor;
+            } else if (mRawPointerAxes.touchMajor.valid) {
+                toolMajor = touchMajor = in.touchMajor;
+                toolMinor = touchMinor = mRawPointerAxes.touchMinor.valid
+                        ? in.touchMinor : in.touchMajor;
+                size = mRawPointerAxes.touchMinor.valid
+                        ? avg(in.touchMajor, in.touchMinor) : in.touchMajor;
+            } else if (mRawPointerAxes.toolMajor.valid) {
+                touchMajor = toolMajor = in.toolMajor;
+                touchMinor = toolMinor = mRawPointerAxes.toolMinor.valid
+                        ? in.toolMinor : in.toolMajor;
+                size = mRawPointerAxes.toolMinor.valid
+                        ? avg(in.toolMajor, in.toolMinor) : in.toolMajor;
             } else {
-                toolMinor = toolMajor;
-            }
-            break;
-        case Calibration::TOOL_SIZE_CALIBRATION_LINEAR:
-            toolMajor = in.toolMajor != 0
-                    ? in.toolMajor * mToolSizeLinearScale + mToolSizeLinearBias
-                    : 0;
-            if (mRawPointerAxes.toolMinor.valid) {
-                toolMinor = in.toolMinor != 0
-                        ? in.toolMinor * mToolSizeLinearScale
-                                + mToolSizeLinearBias
-                        : 0;
-            } else {
-                toolMinor = toolMajor;
-            }
-            break;
-        case Calibration::TOOL_SIZE_CALIBRATION_AREA:
-            if (in.toolMajor != 0) {
-                float diameter = sqrtf(in.toolMajor
-                        * mToolSizeAreaScale + mToolSizeAreaBias);
-                toolMajor = diameter * mToolSizeLinearScale + mToolSizeLinearBias;
-            } else {
+                LOG_ASSERT(false, "No touch or tool axes.  "
+                        "Size calibration should have been resolved to NONE.");
+                touchMajor = 0;
+                touchMinor = 0;
                 toolMajor = 0;
+                toolMinor = 0;
+                size = 0;
             }
-            toolMinor = toolMajor;
-            break;
-        default:
-            toolMajor = 0;
-            toolMinor = 0;
-            break;
-        }
 
-        if (mCalibration.haveToolSizeIsSummed && mCalibration.toolSizeIsSummed) {
-            uint32_t touchingCount = mCurrentRawPointerData.touchingIdBits.count();
-            toolMajor /= touchingCount;
-            toolMinor /= touchingCount;
-        }
+            if (mCalibration.haveSizeIsSummed && mCalibration.sizeIsSummed) {
+                uint32_t touchingCount = mCurrentRawPointerData.touchingIdBits.count();
+                if (touchingCount > 1) {
+                    touchMajor /= touchingCount;
+                    touchMinor /= touchingCount;
+                    toolMajor /= touchingCount;
+                    toolMinor /= touchingCount;
+                    size /= touchingCount;
+                }
+            }
 
-        // Pressure
-        float rawPressure;
-        switch (mCalibration.pressureSource) {
-        case Calibration::PRESSURE_SOURCE_PRESSURE:
-            rawPressure = in.pressure;
-            break;
-        case Calibration::PRESSURE_SOURCE_TOUCH:
-            rawPressure = in.touchMajor;
-            break;
-        default:
-            rawPressure = 0;
-        }
-
-        float pressure;
-        switch (mCalibration.pressureCalibration) {
-        case Calibration::PRESSURE_CALIBRATION_PHYSICAL:
-        case Calibration::PRESSURE_CALIBRATION_AMPLITUDE:
-            pressure = rawPressure * mPressureScale;
-            break;
-        default:
-            pressure = in.isHovering ? 0 : 1;
-            break;
-        }
-
-        // TouchMajor and TouchMinor
-        float touchMajor, touchMinor;
-        switch (mCalibration.touchSizeCalibration) {
-        case Calibration::TOUCH_SIZE_CALIBRATION_GEOMETRIC:
-            touchMajor = in.touchMajor * mGeometricScale;
-            if (mRawPointerAxes.touchMinor.valid) {
-                touchMinor = in.touchMinor * mGeometricScale;
-            } else {
+            if (mCalibration.sizeCalibration == Calibration::SIZE_CALIBRATION_GEOMETRIC) {
+                touchMajor *= mGeometricScale;
+                touchMinor *= mGeometricScale;
+                toolMajor *= mGeometricScale;
+                toolMinor *= mGeometricScale;
+            } else if (mCalibration.sizeCalibration == Calibration::SIZE_CALIBRATION_AREA) {
+                touchMajor = touchMajor > 0 ? sqrtf(touchMajor) : 0;
                 touchMinor = touchMajor;
+                toolMajor = toolMajor > 0 ? sqrtf(toolMajor) : 0;
+                toolMinor = toolMajor;
+            } else if (mCalibration.sizeCalibration == Calibration::SIZE_CALIBRATION_DIAMETER) {
+                touchMinor = touchMajor;
+                toolMinor = toolMajor;
             }
-            break;
-        case Calibration::TOUCH_SIZE_CALIBRATION_PRESSURE:
-            touchMajor = toolMajor * pressure;
-            touchMinor = toolMinor * pressure;
+
+            mCalibration.applySizeScaleAndBias(&touchMajor);
+            mCalibration.applySizeScaleAndBias(&touchMinor);
+            mCalibration.applySizeScaleAndBias(&toolMajor);
+            mCalibration.applySizeScaleAndBias(&toolMinor);
+            size *= mSizeScale;
             break;
         default:
             touchMajor = 0;
             touchMinor = 0;
-            break;
-        }
-
-        if (touchMajor > toolMajor) {
-            touchMajor = toolMajor;
-        }
-        if (touchMinor > toolMinor) {
-            touchMinor = toolMinor;
-        }
-
-        // Size
-        float size;
-        switch (mCalibration.sizeCalibration) {
-        case Calibration::SIZE_CALIBRATION_NORMALIZED: {
-            float rawSize = mRawPointerAxes.toolMinor.valid
-                    ? avg(in.toolMajor, in.toolMinor)
-                    : in.toolMajor;
-            size = rawSize * mSizeScale;
-            break;
-        }
-        default:
+            toolMajor = 0;
+            toolMinor = 0;
             size = 0;
+            break;
+        }
+
+        // Pressure
+        float pressure;
+        switch (mCalibration.pressureCalibration) {
+        case Calibration::PRESSURE_CALIBRATION_PHYSICAL:
+        case Calibration::PRESSURE_CALIBRATION_AMPLITUDE:
+            pressure = in.pressure * mPressureScale;
+            break;
+        default:
+            pressure = in.isHovering ? 0 : 1;
             break;
         }
 
@@ -3737,7 +3482,8 @@ void TouchInputMapper::cookPointerData() {
             int32_t c2 = signExtendNybble(in.orientation & 0x0f);
             if (c1 != 0 || c2 != 0) {
                 orientation = atan2f(c1, c2) * 0.5f;
-                float scale = 1.0f + hypotf(c1, c2) / 16.0f;
+                float confidence = hypotf(c1, c2);
+                float scale = 1.0f + confidence / 16.0f;
                 touchMajor *= scale;
                 touchMinor /= scale;
                 toolMajor *= scale;
