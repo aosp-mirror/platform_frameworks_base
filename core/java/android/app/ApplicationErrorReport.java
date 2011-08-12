@@ -332,20 +332,31 @@ public class ApplicationErrorReport implements Parcelable {
             exceptionMessage = tr.getMessage();
 
             // Populate fields with the "root cause" exception
+            Throwable rootTr = tr;
             while (tr.getCause() != null) {
                 tr = tr.getCause();
+                if (tr.getStackTrace() != null && tr.getStackTrace().length > 0) {
+                    rootTr = tr;
+                }
                 String msg = tr.getMessage();
                 if (msg != null && msg.length() > 0) {
                     exceptionMessage = msg;
                 }
             }
 
-            exceptionClassName = tr.getClass().getName();
-            StackTraceElement trace = tr.getStackTrace()[0];
-            throwFileName = trace.getFileName();
-            throwClassName = trace.getClassName();
-            throwMethodName = trace.getMethodName();
-            throwLineNumber = trace.getLineNumber();
+            exceptionClassName = rootTr.getClass().getName();
+            if (rootTr.getStackTrace().length > 0) {
+                StackTraceElement trace = rootTr.getStackTrace()[0];
+                throwFileName = trace.getFileName();
+                throwClassName = trace.getClassName();
+                throwMethodName = trace.getMethodName();
+                throwLineNumber = trace.getLineNumber();
+            } else {
+                throwFileName = "unknown";
+                throwClassName = "unknown";
+                throwMethodName = "unknown";
+                throwLineNumber = 0;
+            }
         }
 
         /**

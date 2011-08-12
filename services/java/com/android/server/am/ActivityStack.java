@@ -276,10 +276,12 @@ final class ActivityStack {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SLEEP_TIMEOUT_MSG: {
-                    if (mService.isSleeping()) {
-                        Slog.w(TAG, "Sleep timeout!  Sleeping now.");
-                        mSleepTimeout = true;
-                        checkReadyForSleepLocked();
+                    synchronized (mService) {
+                        if (mService.isSleeping()) {
+                            Slog.w(TAG, "Sleep timeout!  Sleeping now.");
+                            mSleepTimeout = true;
+                            checkReadyForSleepLocked();
+                        }
                     }
                 } break;
                 case PAUSE_TIMEOUT_MSG: {
@@ -775,7 +777,6 @@ final class ActivityStack {
         if (mService.mShuttingDown) {
             mService.notifyAll();
         }
-
     }
     
     public final Bitmap screenshotActivities(ActivityRecord who) {

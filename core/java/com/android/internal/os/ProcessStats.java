@@ -19,6 +19,7 @@ package com.android.internal.os;
 import static android.os.Process.*;
 
 import android.os.Process;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.util.Slog;
 
@@ -798,6 +799,10 @@ public class ProcessStats {
     }
     
     private String readFile(String file, char endChar) {
+        // Permit disk reads here, as /proc/meminfo isn't really "on
+        // disk" and should be fast.  TODO: make BlockGuard ignore
+        // /proc/ and /sys/ files perhaps?
+        StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
         FileInputStream is = null;
         try {
             is = new FileInputStream(file);
@@ -822,6 +827,7 @@ public class ProcessStats {
                 } catch (java.io.IOException e) {
                 }
             }
+            StrictMode.setThreadPolicy(savedPolicy);
         }
         return null;
     }
