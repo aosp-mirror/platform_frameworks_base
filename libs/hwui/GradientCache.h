@@ -38,28 +38,27 @@ struct GradientCacheEntry {
 
     GradientCacheEntry(uint32_t* colors, float* positions, int count,
             SkShader::TileMode tileMode) {
-        this->count = count;
-        this->colors = new uint32_t[count];
-        this->positions = new float[count];
-        this->tileMode = tileMode;
-
-        memcpy(this->colors, colors, count * sizeof(uint32_t));
-        memcpy(this->positions, positions, count * sizeof(float));
+        copy(colors, positions, count, tileMode);
     }
 
     GradientCacheEntry(const GradientCacheEntry& entry) {
-        this->count = entry.count;
-        this->colors = new uint32_t[count];
-        this->positions = new float[count];
-        this->tileMode = entry.tileMode;
-
-        memcpy(this->colors, entry.colors, count * sizeof(uint32_t));
-        memcpy(this->positions, entry.positions, count * sizeof(float));
+        copy(entry.colors, entry.positions, entry.count, entry.tileMode);
     }
 
     ~GradientCacheEntry() {
-        if (colors) delete[] colors;
-        if (positions) delete[] positions;
+        delete[] colors;
+        delete[] positions;
+    }
+
+    GradientCacheEntry& operator=(const GradientCacheEntry& entry) {
+        if (this != &entry) {
+            delete[] colors;
+            delete[] positions;
+
+            copy(entry.colors, entry.positions, entry.count, entry.tileMode);
+        }
+
+        return *this;
     }
 
     bool operator<(const GradientCacheEntry& r) const {
@@ -81,6 +80,18 @@ struct GradientCacheEntry {
     float* positions;
     int count;
     SkShader::TileMode tileMode;
+
+private:
+
+    void copy(uint32_t* colors, float* positions, int count, SkShader::TileMode tileMode) {
+        this->count = count;
+        this->colors = new uint32_t[count];
+        this->positions = new float[count];
+        this->tileMode = tileMode;
+
+        memcpy(this->colors, colors, count * sizeof(uint32_t));
+        memcpy(this->positions, positions, count * sizeof(float));
+    }
 
 }; // GradientCacheEntry
 

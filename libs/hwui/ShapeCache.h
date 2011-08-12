@@ -96,12 +96,6 @@ struct ShapeCacheEntry {
         pathEffect = NULL;
     }
 
-    ShapeCacheEntry(const ShapeCacheEntry& entry):
-        shapeType(entry.shapeType), join(entry.join), cap(entry.cap),
-        style(entry.style), miter(entry.miter),
-        strokeWidth(entry.strokeWidth), pathEffect(entry.pathEffect) {
-    }
-
     ShapeCacheEntry(ShapeType type, SkPaint* paint) {
         shapeType = type;
         join = paint->getStrokeJoin();
@@ -167,14 +161,6 @@ struct RoundRectShapeCacheEntry: public ShapeCacheEntry {
         mRy = 0;
     }
 
-    RoundRectShapeCacheEntry(const RoundRectShapeCacheEntry& entry):
-            ShapeCacheEntry(entry) {
-        mWidth = entry.mWidth;
-        mHeight = entry.mHeight;
-        mRx = entry.mRx;
-        mRy = entry.mRy;
-    }
-
     bool lessThan(const ShapeCacheEntry& r) const {
         const RoundRectShapeCacheEntry& rhs = (const RoundRectShapeCacheEntry&) r;
         LTE_INT(mWidth) {
@@ -206,11 +192,6 @@ struct CircleShapeCacheEntry: public ShapeCacheEntry {
         mRadius = 0;
     }
 
-    CircleShapeCacheEntry(const CircleShapeCacheEntry& entry):
-            ShapeCacheEntry(entry) {
-        mRadius = entry.mRadius;
-    }
-
     bool lessThan(const ShapeCacheEntry& r) const {
         const CircleShapeCacheEntry& rhs = (const CircleShapeCacheEntry&) r;
         LTE_INT(mRadius) {
@@ -232,12 +213,6 @@ struct OvalShapeCacheEntry: public ShapeCacheEntry {
 
     OvalShapeCacheEntry(): ShapeCacheEntry() {
         mWidth = mHeight = 0;
-    }
-
-    OvalShapeCacheEntry(const OvalShapeCacheEntry& entry):
-            ShapeCacheEntry(entry) {
-        mWidth = entry.mWidth;
-        mHeight = entry.mHeight;
     }
 
     bool lessThan(const ShapeCacheEntry& r) const {
@@ -264,12 +239,6 @@ struct RectShapeCacheEntry: public ShapeCacheEntry {
 
     RectShapeCacheEntry(): ShapeCacheEntry() {
         mWidth = mHeight = 0;
-    }
-
-    RectShapeCacheEntry(const RectShapeCacheEntry& entry):
-            ShapeCacheEntry(entry) {
-        mWidth = entry.mWidth;
-        mHeight = entry.mHeight;
     }
 
     bool lessThan(const ShapeCacheEntry& r) const {
@@ -304,15 +273,6 @@ struct ArcShapeCacheEntry: public ShapeCacheEntry {
         mStartAngle = 0;
         mSweepAngle = 0;
         mUseCenter = 0;
-    }
-
-    ArcShapeCacheEntry(const ArcShapeCacheEntry& entry):
-            ShapeCacheEntry(entry) {
-        mWidth = entry.mWidth;
-        mHeight = entry.mHeight;
-        mStartAngle = entry.mStartAngle;
-        mSweepAngle = entry.mSweepAngle;
-        mUseCenter = entry.mUseCenter;
     }
 
     bool lessThan(const ShapeCacheEntry& r) const {
