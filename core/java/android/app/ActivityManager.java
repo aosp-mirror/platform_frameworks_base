@@ -18,6 +18,7 @@ package android.app;
 
 import com.android.internal.app.IUsageStats;
 import com.android.internal.os.PkgUsageStats;
+import com.android.internal.util.MemInfoReader;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,6 +29,7 @@ import android.content.pm.IPackageDataObserver;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.Parcel;
@@ -38,6 +40,8 @@ import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.Slog;
+import android.view.Display;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -205,6 +209,31 @@ public class ActivityManager {
         return Integer.parseInt(vmHeapSize.substring(0, vmHeapSize.length()-1));
     }
     
+    /**
+     * Used by persistent processes to determine if they are running on a
+     * higher-end device so should be okay using hardware drawing acceleration
+     * (which tends to consume a lot more RAM).
+     * @hide
+     */
+    static public boolean isHighEndGfx(Display display) {
+        MemInfoReader reader = new MemInfoReader();
+        reader.readMemInfo();
+        if (reader.getTotalSize() >= (512*1024*1024)) {
+            // If the device has at least 512MB RAM available to the kernel,
+            // we can afford the overhead of graphics acceleration.
+            return true;
+        }
+        Point p = new Point();
+        display.getRealSize(p);
+        int pixels = p.x * p.y;
+        if (pixels >= (1024*600)) {
+            // If this is a sufficiently large screen, then there are enough
+            // pixels on it that we'd really like to use hw drawing.
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Information you can retrieve about tasks that the user has most recently
      * started or visited.
