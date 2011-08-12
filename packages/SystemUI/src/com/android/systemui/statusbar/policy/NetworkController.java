@@ -120,6 +120,7 @@ public class NetworkController extends BroadcastReceiver {
     ArrayList<ImageView> mCombinedSignalIconViews = new ArrayList<ImageView>();
     ArrayList<ImageView> mDataTypeIconViews = new ArrayList<ImageView>();
     ArrayList<TextView> mLabelViews = new ArrayList<TextView>();
+    ArrayList<SignalCluster> mSignalClusters = new ArrayList<SignalCluster>();
     int mLastPhoneSignalIconId = -1;
     int mLastDataDirectionIconId = -1;
     int mLastDataDirectionOverlayIconId = -1;
@@ -132,6 +133,12 @@ public class NetworkController extends BroadcastReceiver {
 
     // yuck -- stop doing this here and put it in the framework
     IBatteryStats mBatteryStats;
+
+    public interface SignalCluster {
+        void setWifiIndicators(boolean visible, int strengthIcon, int activityIcon);
+        void setMobileDataIndicators(boolean visible, int strengthIcon, int activityIcon,
+                int typeIcon);
+    }
 
     /**
      * Construct this controller object and register for updates.
@@ -212,6 +219,10 @@ public class NetworkController extends BroadcastReceiver {
 
     public void addLabelView(TextView v) {
         mLabelViews.add(v);
+    }
+
+    public void addSignalCluster(SignalCluster v) {
+        mSignalClusters.add(v);
     }
 
     public void setStackedMode(boolean stacked) {
@@ -369,12 +380,12 @@ public class NetworkController extends BroadcastReceiver {
     private final void updateTelephonySignalStrength() {
         if (!hasService()) {
             //Slog.d(TAG, "updateTelephonySignalStrength: no service");
-            mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
-            mDataSignalIconId = R.drawable.stat_sys_signal_0; // note we use 0 instead of null
+            mPhoneSignalIconId = R.drawable.stat_sys_signal_0;
+            mDataSignalIconId = R.drawable.stat_sys_signal_0;
         } else {
             if (mSignalStrength == null) {
-                mPhoneSignalIconId = R.drawable.stat_sys_signal_null;
-                mDataSignalIconId = R.drawable.stat_sys_signal_0; // note we use 0 instead of null
+                mPhoneSignalIconId = R.drawable.stat_sys_signal_0;
+                mDataSignalIconId = R.drawable.stat_sys_signal_0;
                 mContentDescriptionPhoneSignal = mContext.getString(
                         AccessibilityContentDescriptions.PHONE_SIGNAL_STRENGTH[0]);
             } else {
@@ -414,13 +425,13 @@ public class NetworkController extends BroadcastReceiver {
                 break;
             case TelephonyManager.NETWORK_TYPE_EDGE:
                 mDataIconList = TelephonyIcons.DATA_E[mInetCondition];
-                mDataTypeIconId = R.drawable.stat_sys_signal_edge;
+                mDataTypeIconId = R.drawable.stat_sys_data_connected_e;
                 mContentDescriptionDataType = mContext.getString(
                         R.string.accessibility_data_connection_edge);
                 break;
             case TelephonyManager.NETWORK_TYPE_UMTS:
                 mDataIconList = TelephonyIcons.DATA_3G[mInetCondition];
-                mDataTypeIconId = R.drawable.stat_sys_signal_3g;
+                mDataTypeIconId = R.drawable.stat_sys_data_connected_3g;
                 mContentDescriptionDataType = mContext.getString(
                         R.string.accessibility_data_connection_3g);
                 break;
@@ -429,12 +440,12 @@ public class NetworkController extends BroadcastReceiver {
             case TelephonyManager.NETWORK_TYPE_HSPA:
                 if (mHspaDataDistinguishable) {
                     mDataIconList = TelephonyIcons.DATA_H[mInetCondition];
-                    mDataTypeIconId = R.drawable.stat_sys_signal_hsdpa;
+                    mDataTypeIconId = R.drawable.stat_sys_data_connected_h;
                     mContentDescriptionDataType = mContext.getString(
                             R.string.accessibility_data_connection_3_5g);
                 } else {
                     mDataIconList = TelephonyIcons.DATA_3G[mInetCondition];
-                    mDataTypeIconId = R.drawable.stat_sys_signal_3g;
+                    mDataTypeIconId = R.drawable.stat_sys_data_connected_3g;
                     mContentDescriptionDataType = mContext.getString(
                             R.string.accessibility_data_connection_3g);
                 }
@@ -442,13 +453,13 @@ public class NetworkController extends BroadcastReceiver {
             case TelephonyManager.NETWORK_TYPE_CDMA:
                 // display 1xRTT for IS95A/B
                 mDataIconList = TelephonyIcons.DATA_1X[mInetCondition];
-                mDataTypeIconId = R.drawable.stat_sys_signal_1x;
+                mDataTypeIconId = R.drawable.stat_sys_data_connected_1x;
                 mContentDescriptionDataType = mContext.getString(
                         R.string.accessibility_data_connection_cdma);
                 break;
             case TelephonyManager.NETWORK_TYPE_1xRTT:
                 mDataIconList = TelephonyIcons.DATA_1X[mInetCondition];
-                mDataTypeIconId = R.drawable.stat_sys_signal_1x;
+                mDataTypeIconId = R.drawable.stat_sys_data_connected_1x;
                 mContentDescriptionDataType = mContext.getString(
                         R.string.accessibility_data_connection_cdma);
                 break;
@@ -457,25 +468,25 @@ public class NetworkController extends BroadcastReceiver {
             case TelephonyManager.NETWORK_TYPE_EVDO_B:
             case TelephonyManager.NETWORK_TYPE_EHRPD:
                 mDataIconList = TelephonyIcons.DATA_3G[mInetCondition];
-                mDataTypeIconId = R.drawable.stat_sys_signal_3g;
+                mDataTypeIconId = R.drawable.stat_sys_data_connected_3g;
                 mContentDescriptionDataType = mContext.getString(
                         R.string.accessibility_data_connection_3g);
                 break;
             case TelephonyManager.NETWORK_TYPE_LTE:
                 mDataIconList = TelephonyIcons.DATA_4G[mInetCondition];
-                mDataTypeIconId = R.drawable.stat_sys_signal_4g;
+                mDataTypeIconId = R.drawable.stat_sys_data_connected_4g;
                 mContentDescriptionDataType = mContext.getString(
                         R.string.accessibility_data_connection_4g);
                 break;
             default:
                 mDataIconList = TelephonyIcons.DATA_G[mInetCondition];
-                mDataTypeIconId = R.drawable.stat_sys_signal_gprs;
+                mDataTypeIconId = R.drawable.stat_sys_data_connected_g;
                 mContentDescriptionDataType = mContext.getString(
                         R.string.accessibility_data_connection_gprs);
                 break;
         }
         if ((isCdma() && isCdmaEri()) || mPhone.isNetworkRoaming()) {
-            mDataTypeIconId = R.drawable.stat_sys_signal_roam;
+            mDataTypeIconId = R.drawable.stat_sys_data_connected_roam;
         }
     }
 
@@ -730,7 +741,9 @@ public class NetworkController extends BroadcastReceiver {
         Context context = mContext;
 
         int combinedSignalIconId;
-        int dataDirectionOverlayIconId = 0;
+        int dataDirectionOverlayIconId = 0,
+            wifiActivityIconId = 0,
+            mobileActivityIconId = 0;
         int dataTypeIconId;
         String label;
         int N;
@@ -753,6 +766,7 @@ public class NetworkController extends BroadcastReceiver {
                     case WifiManager.DATA_ACTIVITY_NONE:
                         break;
                 }
+                wifiActivityIconId = dataDirectionOverlayIconId;
             }
             combinedSignalIconId = mWifiIconId;
             mContentDescriptionCombinedSignal = mContentDescriptionWifi;
@@ -774,6 +788,7 @@ public class NetworkController extends BroadcastReceiver {
                     dataDirectionOverlayIconId = 0;
                     break;
             }
+            mobileActivityIconId = dataDirectionOverlayIconId;
             combinedSignalIconId = mDataSignalIconId;
             mContentDescriptionCombinedSignal = mContentDescriptionDataType;
             dataTypeIconId = mDataTypeIconId;
@@ -790,7 +805,7 @@ public class NetworkController extends BroadcastReceiver {
             combinedSignalIconId = R.drawable.stat_sys_signal_flightmode;
             mContentDescriptionCombinedSignal = mContext.getString(
                     R.string.accessibility_airplane_mode);
-            dataTypeIconId = 0;
+            dataTypeIconId = R.drawable.stat_sys_signal_flightmode; // was 0;
         } else {
             label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
             // On devices without mobile radios, we want to show the wifi icon
@@ -819,6 +834,25 @@ public class NetworkController extends BroadcastReceiver {
                     + " mDataTypeIconId=0x" + Integer.toHexString(mDataTypeIconId)
                     + " mWifiIconId=0x" + Integer.toHexString(mWifiIconId)
                     + " mBluetoothTetherIconId=0x" + Integer.toHexString(mBluetoothTetherIconId));
+        }
+
+        if (mLastPhoneSignalIconId          != mPhoneSignalIconId
+         || mLastDataDirectionOverlayIconId != dataDirectionOverlayIconId
+         || mLastWifiIconId                 != mWifiIconId
+         || mLastDataTypeIconId             != dataTypeIconId)
+        {
+            // NB: the mLast*s will be updated later
+            for (SignalCluster cluster : mSignalClusters) {
+                cluster.setWifiIndicators(
+                        mWifiEnabled,
+                        mWifiIconId,
+                        wifiActivityIconId);
+                cluster.setMobileDataIndicators(
+                        hasMobileDataFeature(),
+                        mPhoneSignalIconId,
+                        mobileActivityIconId,
+                        dataTypeIconId);
+            }
         }
 
         // the phone icon on phones

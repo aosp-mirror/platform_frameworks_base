@@ -121,9 +121,10 @@
                 android:layout_width="wrap_content"
                 android:visibility="gone"
                 />
-            <include layout="@layout/stacked_signal_icons" 
-                android:layout_width="32dp"
-                android:layout_height="24dp"
+            <include layout="@layout/signal_cluster_view" 
+                android:id="@+id/signal_cluster"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 />
             <ImageView
                 android:id="@+id/battery"
