@@ -579,7 +579,7 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     public void setIcon(int resId) {
-        setIcon(mContext.getResources().getDrawableForDensity(resId, getPreferredIconDensity()));
+        setIcon(mContext.getResources().getDrawable(resId));
     }
 
     public void setLogo(Drawable logo) {
@@ -591,25 +591,6 @@ public class ActionBarView extends AbsActionBarView {
 
     public void setLogo(int resId) {
         setLogo(mContext.getResources().getDrawable(resId));
-    }
-
-    /**
-     * @return Drawable density to load that will best fit the available height.
-     */
-    private int getPreferredIconDensity() {
-        final Resources res = mContext.getResources();
-        final int availableHeight = getLayoutParams().height -
-                mHomeLayout.getVerticalIconPadding();
-        int iconSize = res.getDimensionPixelSize(android.R.dimen.app_icon_size);
-
-        if (iconSize * DisplayMetrics.DENSITY_LOW >= availableHeight) {
-            return DisplayMetrics.DENSITY_LOW;
-        } else if (iconSize * DisplayMetrics.DENSITY_MEDIUM >= availableHeight) {
-            return DisplayMetrics.DENSITY_MEDIUM;
-        } else if (iconSize * DisplayMetrics.DENSITY_HIGH >= availableHeight) {
-            return DisplayMetrics.DENSITY_HIGH;
-        }
-        return DisplayMetrics.DENSITY_XHIGH;
     }
 
     public void setNavigationMode(int mode) {
