@@ -189,6 +189,7 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
     if (tmp == NULL) {  // Out of memory
         return;
     }
+    LOGV("setDataSource: path %s", tmp);
 
     String8 pathStr(tmp);
     env->ReleaseStringUTFChars(path, tmp);
@@ -201,7 +202,6 @@ android_media_MediaPlayer_setDataSourceAndHeaders(
         return;
     }
 
-    LOGV("setDataSource: path %s", pathStr);
     status_t opStatus =
         mp->setDataSource(
                 pathStr,
@@ -243,11 +243,13 @@ getVideoSurfaceTexture(JNIEnv* env, jobject thiz) {
 }
 
 static void
-android_media_MediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
+setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface, jboolean mediaPlayerMustBeAlive)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+    if (mp == NULL) {
+        if (mediaPlayerMustBeAlive) {
+            jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        }
         return;
     }
 
@@ -268,6 +270,12 @@ android_media_MediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsu
     // before setDataSource(). The redundant call to setVideoSurfaceTexture()
     // in prepare/prepareAsync covers for this case.
     mp->setVideoSurfaceTexture(new_st);
+}
+
+static void
+android_media_MediaPlayer_setVideoSurface(JNIEnv *env, jobject thiz, jobject jsurface)
+{
+    setVideoSurface(env, thiz, jsurface, true /* mediaPlayerMustBeAlive */);
 }
 
 static void
@@ -615,6 +623,7 @@ static void
 android_media_MediaPlayer_release(JNIEnv *env, jobject thiz)
 {
     LOGV("release");
+    setVideoSurface(env, thiz, NULL, false /* mediaPlayerMustBeAlive */);
     sp<MediaPlayer> mp = setMediaPlayer(env, thiz, 0);
     if (mp != NULL) {
         // this prevents native callbacks after the object is released
@@ -627,7 +636,6 @@ static void
 android_media_MediaPlayer_native_finalize(JNIEnv *env, jobject thiz)
 {
     LOGV("native_finalize");
-    android_media_MediaPlayer_setVideoSurface(env, thiz, NULL);
     android_media_MediaPlayer_release(env, thiz);
 }
 
