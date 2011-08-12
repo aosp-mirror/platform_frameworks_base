@@ -23,9 +23,11 @@ import android.media.audiofx.AudioEffect;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.media.AudioRecord;
 import android.media.audiofx.EnvironmentalReverb;
 import android.media.audiofx.Equalizer;
 import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 
 import android.os.Looper;
 import android.test.suitebuilder.annotation.LargeTest;
@@ -54,6 +56,7 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
     private Looper mLooper = null;
     private int mError = 0;
     private final Object lock = new Object();
+    private final static int SAMPLING_RATE = 44100;
 
     public MediaAudioEffectTest() {
         super("com.android.mediaframeworktest", MediaFrameworkTest.class);
@@ -124,6 +127,25 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
     // 1 - constructor
     //----------------------------------
 
+    private AudioRecord getAudioRecord() {
+        AudioRecord ar = null;
+        try {
+            ar = new AudioRecord(MediaRecorder.AudioSource.DEFAULT,
+                    SAMPLING_RATE,
+                    AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    AudioRecord.getMinBufferSize(SAMPLING_RATE,
+                            AudioFormat.CHANNEL_CONFIGURATION_MONO,
+                            AudioFormat.ENCODING_PCM_16BIT) * 10);
+            assertNotNull("Could not create AudioRecord", ar);
+            assertEquals("AudioRecord not initialized",
+                    AudioRecord.STATE_INITIALIZED, ar.getState());
+        } catch (IllegalArgumentException e) {
+            fail("AudioRecord invalid parameter");
+        }
+        return ar;
+    }
+
     //Test case 1.0: test constructor from effect type and get effect ID
     @LargeTest
     public void test1_0ConstructorFromType() throws Exception {
@@ -132,10 +154,19 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
         AudioEffect.Descriptor[] desc = AudioEffect.queryEffects();
         assertTrue(msg+": no effects found", (desc.length != 0));
         try {
+            int sessionId;
+            AudioRecord ar = null;
+            if (AudioEffect.EFFECT_PRE_PROCESSING.equals(desc[0].connectMode)) {
+                ar = getAudioRecord();
+                sessionId = ar.getAudioSessionId();
+            } else {
+                sessionId = 0;
+            }
+
             AudioEffect effect = new AudioEffect(desc[0].type,
                     AudioEffect.EFFECT_TYPE_NULL,
                     0,
-                    0);
+                    sessionId);
             assertNotNull(msg + ": could not create AudioEffect", effect);
             try {
                 assertTrue(msg +": invalid effect ID", (effect.getId() != 0));
@@ -144,6 +175,9 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
                 result = false;
             } finally {
                 effect.release();
+                if (ar != null) {
+                    ar.release();
+                }
             }
         } catch (IllegalArgumentException e) {
             msg = msg.concat(": Effect not found: "+desc[0].name);
@@ -163,12 +197,23 @@ public class MediaAudioEffectTest extends ActivityInstrumentationTestCase2<Media
         AudioEffect.Descriptor[] desc = AudioEffect.queryEffects();
         assertTrue(msg+"no effects found", (desc.length != 0));
         try {
+            int sessionId;
+            AudioRecord ar = null;
+            if (AudioEffect.EFFECT_PRE_PROCESSING.equals(desc[0].connectMode)) {
+                ar = getAudioRecord();
+                sessionId = ar.getAudioSessionId();
+            } else {
+                sessionId = 0;
+            }
             AudioEffect effect = new AudioEffect(AudioEffect.EFFECT_TYPE_NULL,
                     desc[0].uuid,
                     0,
-                    0);
+                    sessionId);
             assertNotNull(msg + ": could not create AudioEffect", effect);
             effect.release();
+            if (ar != null) {
+                ar.release();
+            }
         } catch (IllegalArgumentException e) {
             msg = msg.concat(": Effect not found: "+desc[0].name);
             result = false;
