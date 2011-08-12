@@ -25,6 +25,7 @@ import android.util.AttributeSet;
 import android.view.ActionMode;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
 /**
@@ -109,7 +110,9 @@ public class ActionBarContainer extends FrameLayout {
         mTabContainer = tabView;
         if (tabView != null) {
             addView(tabView);
-            tabView.getLayoutParams().width = LayoutParams.MATCH_PARENT;
+            final ViewGroup.LayoutParams lp = tabView.getLayoutParams();
+            lp.width = LayoutParams.MATCH_PARENT;
+            lp.height = LayoutParams.WRAP_CONTENT;
             tabView.setAllowCollapse(false);
         }
     }
