@@ -289,11 +289,6 @@ static void android_view_GLES20Canvas_setMatrix(JNIEnv* env, jobject clazz,
     renderer->setMatrix(matrix);
 }
 
-static const float* android_view_GLES20Canvas_getNativeMatrix(JNIEnv* env,
-        jobject clazz, OpenGLRenderer* renderer) {
-    return renderer->getMatrix();
-}
-
 static void android_view_GLES20Canvas_getMatrix(JNIEnv* env, jobject clazz,
         OpenGLRenderer* renderer, SkMatrix* matrix) {
     renderer->getMatrix(matrix);
@@ -776,7 +771,6 @@ static JNINativeMethod gMethods[] = {
     { "nSkew",              "(IFF)V",          (void*) android_view_GLES20Canvas_skew },
 
     { "nSetMatrix",         "(II)V",           (void*) android_view_GLES20Canvas_setMatrix },
-    { "nGetMatrix",         "(I)I",            (void*) android_view_GLES20Canvas_getNativeMatrix },
     { "nGetMatrix",         "(II)V",           (void*) android_view_GLES20Canvas_getMatrix },
     { "nConcatMatrix",      "(II)V",           (void*) android_view_GLES20Canvas_concatMatrix },
 

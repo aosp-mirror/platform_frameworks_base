@@ -87,7 +87,6 @@ public:
     virtual void scale(float sx, float sy);
     virtual void skew(float sx, float sy);
 
-    const float* getMatrix() const;
     void getMatrix(SkMatrix* matrix);
     virtual void setMatrix(SkMatrix* matrix);
     virtual void concatMatrix(SkMatrix* matrix);
