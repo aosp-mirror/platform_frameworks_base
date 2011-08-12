@@ -89,10 +89,10 @@ public class Font extends BaseObj {
 
         FontFamily sansFamily = new FontFamily();
         sansFamily.mNames = sSansNames;
-        sansFamily.mNormalFileName = "DroidSans.ttf";
-        sansFamily.mBoldFileName = "DroidSans-Bold.ttf";
-        sansFamily.mItalicFileName = "DroidSans.ttf";
-        sansFamily.mBoldItalicFileName = "DroidSans-Bold.ttf";
+        sansFamily.mNormalFileName = "Roboto-Regular.ttf";
+        sansFamily.mBoldFileName = "Roboto-Bold.ttf";
+        sansFamily.mItalicFileName = "Roboto-Italic.ttf";
+        sansFamily.mBoldItalicFileName = "Roboto-BoldItalic.ttf";
         addFamilyToMap(sansFamily);
 
         FontFamily serifFamily = new FontFamily();
