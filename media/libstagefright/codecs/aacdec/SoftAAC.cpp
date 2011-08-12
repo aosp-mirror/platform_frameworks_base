@@ -316,7 +316,7 @@ void SoftAAC::onQueueFilled(OMX_U32 portIndex) {
          * Thus, we could not say for sure whether a stream is
          * AAC+/eAAC+ until the first data frame is decoded.
          */
-        if (mInputBufferCount <= 2) {
+        if (decoderErr == MP4AUDEC_SUCCESS && mInputBufferCount <= 2) {
             LOGV("audio/extended audio object type: %d + %d",
                 mConfig->audioObjectType, mConfig->extendedAudioObjectType);
             LOGV("aac+ upsampling factor: %d desired channels: %d",
@@ -410,7 +410,9 @@ void SoftAAC::onQueueFilled(OMX_U32 portIndex) {
         notifyFillBufferDone(outHeader);
         outHeader = NULL;
 
-        ++mInputBufferCount;
+        if (decoderErr == MP4AUDEC_SUCCESS) {
+            ++mInputBufferCount;
+        }
     }
 }
 
