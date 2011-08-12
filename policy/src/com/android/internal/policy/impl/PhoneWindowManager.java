@@ -607,7 +607,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (mGlobalActions == null) {
             mGlobalActions = new GlobalActions(mContext);
         }
-        final boolean keyguardShowing = mKeyguardMediator.isShowingAndNotHidden();
+        final boolean keyguardShowing = keyguardIsShowingTq();
         mGlobalActions.showDialog(keyguardShowing, isDeviceProvisioned());
         if (keyguardShowing) {
             // since it took two seconds of long press to bring this up,
@@ -690,7 +690,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mContext = context;
         mWindowManager = windowManager;
         mPowerManager = powerManager;
-        mKeyguardMediator = new KeyguardViewMediator(context, this, powerManager);
+        if ("0".equals(SystemProperties.get("ro.config.headless", "0"))) {
+            // don't create KeyguardViewMediator if headless
+            mKeyguardMediator = new KeyguardViewMediator(context, this, powerManager);
+        }
         mHandler = new Handler();
         mOrientationListener = new MyOrientationListener(mContext);
         SettingsObserver settingsObserver = new SettingsObserver(mHandler);
@@ -1642,7 +1645,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
      * given the situation with the keyguard.
      */
     void launchHomeFromHotKey() {
-        if (mKeyguardMediator.isShowingAndNotHidden()) {
+        if (mKeyguardMediator != null && mKeyguardMediator.isShowingAndNotHidden()) {
             // don't launch home if keyguard showing
         } else if (!mHideLockScreen && mKeyguardMediator.isInputRestricted()) {
             // when in keyguard restricted mode, must first verify unlock
@@ -2283,6 +2286,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
+        // do nothing if headless
+        if (mKeyguardMediator == null) return;
+
         // lid changed state
         mLidOpen = lidOpen ? LID_OPEN : LID_CLOSED;
         boolean awakeNow = mKeyguardMediator.doLidChangeTq(lidOpen);
@@ -2429,9 +2435,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // the same as if it were open and in front.
         // This will prevent any keys other than the power button from waking the screen
         // when the keyguard is hidden by another activity.
-        final boolean keyguardActive = (isScreenOn ?
-                                        mKeyguardMediator.isShowingAndNotHidden() :
-                                        mKeyguardMediator.isShowing());
+        final boolean keyguardActive = (mKeyguardMediator == null ? false :
+                                            (isScreenOn ?
+                                                mKeyguardMediator.isShowingAndNotHidden() :
+                                                mKeyguardMediator.isShowing()));
 
         if (false) {
             Log.d(TAG, "interceptKeyTq keycode=" + keyCode
@@ -2685,7 +2692,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final boolean isWakeMotion = (policyFlags
                 & (WindowManagerPolicy.FLAG_WAKE | WindowManagerPolicy.FLAG_WAKE_DROPPED)) != 0;
         if (isWakeMotion) {
-            if (mKeyguardMediator.isShowing()) {
+            if (mKeyguardMediator != null && mKeyguardMediator.isShowing()) {
                 // If the keyguard is showing, let it decide what to do with the wake motion.
                 mKeyguardMediator.onWakeMotionWhenKeyguardShowingTq();
             } else {
@@ -2740,7 +2747,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public void screenTurnedOff(int why) {
         EventLog.writeEvent(70000, 0);
-        mKeyguardMediator.onScreenTurnedOff(why);
+        if (mKeyguardMediator != null) {
+            mKeyguardMediator.onScreenTurnedOff(why);
+        }
         synchronized (mLock) {
             mScreenOn = false;
             updateOrientationListenerLp();
@@ -2752,7 +2761,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     public void screenTurnedOn() {
         EventLog.writeEvent(70000, 1);
-        mKeyguardMediator.onScreenTurnedOn();
+        if (mKeyguardMediator != null) {
+            mKeyguardMediator.onScreenTurnedOn();
+        }
         synchronized (mLock) {
             mScreenOn = true;
             updateOrientationListenerLp();
@@ -2768,15 +2779,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     /** {@inheritDoc} */
     public void enableKeyguard(boolean enabled) {
-        mKeyguardMediator.setKeyguardEnabled(enabled);
+        if (mKeyguardMediator != null) {
+            mKeyguardMediator.setKeyguardEnabled(enabled);
+        }
     }
 
     /** {@inheritDoc} */
     public void exitKeyguardSecurely(OnKeyguardExitResult callback) {
-        mKeyguardMediator.verifyUnlock(callback);
+        if (mKeyguardMediator != null) {
+            mKeyguardMediator.verifyUnlock(callback);
+        }
     }
 
     private boolean keyguardIsShowingTq() {
+        if (mKeyguardMediator == null) return false;
         return mKeyguardMediator.isShowingAndNotHidden();
     }
 
@@ -2788,11 +2804,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     /** {@inheritDoc} */
     public boolean isKeyguardSecure() {
+        if (mKeyguardMediator == null) return false;
         return mKeyguardMediator.isSecure();
     }
 
     /** {@inheritDoc} */
     public boolean inKeyguardRestrictedKeyInputMode() {
+        if (mKeyguardMediator == null) return false;
         return mKeyguardMediator.isInputRestricted();
     }
 
@@ -3009,8 +3027,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     
     /** {@inheritDoc} */
     public void systemReady() {
-        // tell the keyguard
-        mKeyguardMediator.onSystemReady();
+        if (mKeyguardMediator != null) {
+            // tell the keyguard
+            mKeyguardMediator.onSystemReady();
+        }
         android.os.SystemProperties.set("dev.bootcomplete", "1"); 
         synchronized (mLock) {
             updateOrientationListenerLp();
@@ -3105,7 +3125,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         public void run() {
             synchronized (this) {
                 if (localLOGV) Log.v(TAG, "mScreenLockTimeout activating keyguard");
-                mKeyguardMediator.doKeyguardTimeout();
+                if (mKeyguardMediator != null) {
+                    mKeyguardMediator.doKeyguardTimeout();
+                }
                 mLockScreenTimerActive = false;
             }
         }
@@ -3113,7 +3135,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void updateLockScreenTimeout() {
         synchronized (mScreenLockTimeout) {
-            boolean enable = (mAllowLockscreenWhenOn && mScreenOn && mKeyguardMediator.isSecure());
+            boolean enable = (mAllowLockscreenWhenOn && mScreenOn &&
+                    mKeyguardMediator != null && mKeyguardMediator.isSecure());
             if (mLockScreenTimerActive != enable) {
                 if (enable) {
                     if (localLOGV) Log.v(TAG, "setting lockscreen timer");
@@ -3304,7 +3327,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     public void screenOnStoppedLw() {
         if (mPowerManager.isScreenOn()) {
-            if (!mKeyguardMediator.isShowingAndNotHidden()) {
+            if (mKeyguardMediator != null && !mKeyguardMediator.isShowingAndNotHidden()) {
                 long curTime = SystemClock.uptimeMillis();
                 mPowerManager.userActivity(curTime, false, LocalPowerManager.OTHER_EVENT);
             }

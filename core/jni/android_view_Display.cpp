@@ -28,6 +28,7 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
+#include <cutils/properties.h>
 
 // ----------------------------------------------------------------------------
 
@@ -44,6 +45,7 @@ struct offsets_t {
     jfieldID ydpi;
 };
 static offsets_t offsets;
+static bool headless = false;
 
 // ----------------------------------------------------------------------------
 
@@ -51,10 +53,19 @@ static void android_view_Display_init(
         JNIEnv* env, jobject clazz, jint dpy)
 {
     DisplayInfo info;
-    status_t err = SurfaceComposerClient::getDisplayInfo(DisplayID(dpy), &info);
-    if (err < 0) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
-        return;
+    if (headless) {
+        // initialize dummy display with reasonable values
+        info.pixelFormatInfo.format = 1; // RGB_8888
+        info.fps = 60;
+        info.density = 160;
+        info.xdpi = 160;
+        info.ydpi = 160;
+    } else {
+        status_t err = SurfaceComposerClient::getDisplayInfo(DisplayID(dpy), &info);
+        if (err < 0) {
+            jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+            return;
+        }
     }
     env->SetIntField(clazz, offsets.pixelFormat,info.pixelFormatInfo.format);
     env->SetFloatField(clazz, offsets.fps,      info.fps);
@@ -66,6 +77,7 @@ static void android_view_Display_init(
 static jint android_view_Display_getRawWidth(
         JNIEnv* env, jobject clazz)
 {
+    if (headless) return 640;
     DisplayID dpy = env->GetIntField(clazz, offsets.display);
     return SurfaceComposerClient::getDisplayWidth(dpy);
 }
@@ -73,6 +85,7 @@ static jint android_view_Display_getRawWidth(
 static jint android_view_Display_getRawHeight(
         JNIEnv* env, jobject clazz)
 {
+    if (headless) return 480;
     DisplayID dpy = env->GetIntField(clazz, offsets.display);
     return SurfaceComposerClient::getDisplayHeight(dpy);
 }
@@ -80,6 +93,7 @@ static jint android_view_Display_getRawHeight(
 static jint android_view_Display_getOrientation(
         JNIEnv* env, jobject clazz)
 {
+    if (headless) return 0; // Surface.ROTATION_0
     DisplayID dpy = env->GetIntField(clazz, offsets.display);
     return SurfaceComposerClient::getDisplayOrientation(dpy);
 }
@@ -87,6 +101,7 @@ static jint android_view_Display_getOrientation(
 static jint android_view_Display_getDisplayCount(
         JNIEnv* env, jclass clazz)
 {
+    if (headless) return 1;
     return SurfaceComposerClient::getNumberOfDisplays();
 }
 
@@ -113,6 +128,12 @@ static JNINativeMethod gMethods[] = {
 
 void nativeClassInit(JNIEnv* env, jclass clazz)
 {
+    char value[PROPERTY_VALUE_MAX];
+
+    property_get("ro.config.headless", value, "0");
+    if (strcmp(value, "1") == 0)
+        headless = true;
+
     offsets.display     = env->GetFieldID(clazz, "mDisplay", "I");
     offsets.pixelFormat = env->GetFieldID(clazz, "mPixelFormat", "I");
     offsets.fps         = env->GetFieldID(clazz, "mRefreshRate", "F");

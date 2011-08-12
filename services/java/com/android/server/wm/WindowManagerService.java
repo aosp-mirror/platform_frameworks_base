@@ -244,6 +244,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private static final String SYSTEM_SECURE = "ro.secure";
     private static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
+    private static final String SYSTEM_HEADLESS = "ro.config.headless";
 
     /**
      * Condition waited on by {@link #reenableKeyguard} to know the call to
@@ -252,6 +253,8 @@ public class WindowManagerService extends IWindowManager.Stub
      * actually disabled the keyguard.
      */
     private boolean mKeyguardDisabled = false;
+
+    private final boolean mHeadless;
 
     private static final int ALLOW_DISABLE_YES = 1;
     private static final int ALLOW_DISABLE_NO = 0;
@@ -716,6 +719,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mHaveInputMethods = haveInputMethods;
         mLimitedAlphaCompositing = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_sf_limitedAlpha);
+        mHeadless = "1".equals(SystemProperties.get(SYSTEM_HEADLESS, "0"));
 
         mPowerManager = pm;
         mPowerManager.setPolicy(mPolicy);
@@ -4758,6 +4762,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // TODO: more accounting of which pid(s) turned it on, keep count,
     // only allow disables from pids which have count on, etc.
     public void showStrictModeViolation(boolean on) {
+        if (mHeadless) return;
+
         int pid = Binder.getCallingPid();
         synchronized(mWindowMap) {
             // Ignoring requests to enable the red border from clients
