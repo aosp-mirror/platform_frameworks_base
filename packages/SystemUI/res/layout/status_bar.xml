@@ -57,9 +57,10 @@
             android:orientation="horizontal"
             android:gravity="center"
             >
-            <include layout="@layout/stacked_signal_icons" 
-                android:layout_width="24dp"
-                android:layout_height="match_parent"
+            <include layout="@layout/signal_cluster_view" 
+                android:id="@+id/signal_cluster"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 />
             <ImageView
                 android:id="@+id/battery"
