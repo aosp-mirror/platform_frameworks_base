@@ -30,10 +30,10 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder;
-import com.google.i18n.phonenumbers.NumberParseException;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
-import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.android.i18n.phonenumbers.geocoding.PhoneNumberOfflineGeocoder;
+import com.android.i18n.phonenumbers.NumberParseException;
+import com.android.i18n.phonenumbers.PhoneNumberUtil;
+import com.android.i18n.phonenumbers.Phonenumber.PhoneNumber;
 
 import java.util.Locale;
 
@@ -502,7 +502,7 @@ public class CallerInfo {
 
     /**
      * @return a geographical description string for the specified number.
-     * @see com.google.i18n.phonenumbers.PhoneNumberOfflineGeocoder
+     * @see com.android.i18n.phonenumbers.PhoneNumberOfflineGeocoder
      */
     private static String getGeoDescription(Context context, String number) {
         if (VDBG) Log.v(TAG, "getGeoDescription('" + number + "')...");
