@@ -68,26 +68,43 @@ void Signal::set() {
     }
 }
 
-void Signal::wait() {
+bool Signal::wait(uint64_t timeout) {
     int status;
+    bool ret = false;
 
     status = pthread_mutex_lock(&mMutex);
     if (status) {
         LOGE("LocklessCommandFifo: error %i locking for condition.", status);
-        return;
+        return false;
     }
 
     if (!mSet) {
-        status = pthread_cond_wait(&mCondition, &mMutex);
-        if (status) {
-            LOGE("LocklessCommandFifo: error %i waiting on condition.", status);
+        if (!timeout) {
+            status = pthread_cond_wait(&mCondition, &mMutex);
+        } else {
+#if defined(HAVE_PTHREAD_COND_TIMEDWAIT_RELATIVE)
+            status = pthread_cond_timeout_np(&mCondition, &mMutex, timeout / 1000000);
+#else
+            // This is safe it will just make things less reponsive
+            status = pthread_cond_wait(&mCondition, &mMutex);
+#endif
         }
     }
-    mSet = false;
+
+    if (!status) {
+        mSet = false;
+        ret = true;
+    } else {
+        if (status != ETIMEDOUT) {
+            LOGE("LocklessCommandFifo: error %i waiting for condition.", status);
+        }
+    }
 
     status = pthread_mutex_unlock(&mMutex);
     if (status) {
         LOGE("LocklessCommandFifo: error %i unlocking for condition.", status);
     }
+
+    return ret;
 }
 

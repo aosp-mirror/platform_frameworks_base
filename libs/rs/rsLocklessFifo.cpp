@@ -129,21 +129,23 @@ void LocklessCommandFifo::flush() {
     //dumpState("flush 2");
 }
 
-void LocklessCommandFifo::wait() {
+bool LocklessCommandFifo::wait(uint64_t timeout) {
     while (isEmpty() && !mInShutdown) {
         mSignalToControl.set();
-        mSignalToWorker.wait();
+        return mSignalToWorker.wait(timeout);
     }
+    return true;
 }
 
-const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData) {
+const void * LocklessCommandFifo::get(uint32_t *command, uint32_t *bytesData, uint64_t timeout) {
     while (1) {
         //dumpState("get");
-        wait();
-        if (mInShutdown) {
+        wait(timeout);
+
+        if (isEmpty() || mInShutdown) {
             *command = 0;
             *bytesData = 0;
-            return 0;
+            return NULL;
         }
 
         *command = reinterpret_cast<const uint16_t *>(mGet)[0];

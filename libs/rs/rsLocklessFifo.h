@@ -57,9 +57,9 @@ public:
     void commitSync(uint32_t command, uint32_t bytes);
 
     void flush();
-    void wait();
+    bool wait(uint64_t timeout = 0);
 
-    const void * get(uint32_t *command, uint32_t *bytesData);
+    const void * get(uint32_t *command, uint32_t *bytesData, uint64_t timeout = 0);
     void next();
 
     void makeSpace(uint32_t bytes);
