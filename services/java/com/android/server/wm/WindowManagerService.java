@@ -598,7 +598,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * Whether the UI is currently running in touch mode (not showing
      * navigational focus because the user is directly pressing the screen).
      */
-    boolean mInTouchMode = false;
+    boolean mInTouchMode = true;
 
     private ViewServer mViewServer;
     private ArrayList<WindowChangeListener> mWindowChangeListeners =
