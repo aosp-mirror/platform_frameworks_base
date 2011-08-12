@@ -402,9 +402,6 @@ bool SurfaceFlinger::threadLoop()
 {
     waitForEvent();
 
-    // call Layer's destructor
-    handleDestroyLayers();
-
     // check for transactions
     if (UNLIKELY(mConsoleSignals)) {
         handleConsoleEvents();
@@ -595,31 +592,6 @@ void SurfaceFlinger::handleTransactionLocked(uint32_t transactionFlags)
     }
 
     commitTransaction();
-}
-
-void SurfaceFlinger::destroyLayer(LayerBase const* layer)
-{
-    Mutex::Autolock _l(mDestroyedLayerLock);
-    mDestroyedLayers.add(layer);
-    signalEvent();
-}
-
-void SurfaceFlinger::handleDestroyLayers()
-{
-    Vector<LayerBase const *> destroyedLayers;
-
-    { // scope for the lock
-        Mutex::Autolock _l(mDestroyedLayerLock);
-        destroyedLayers = mDestroyedLayers;
-        mDestroyedLayers.clear();
-    }
-
-    // call destructors without a lock held
-    const size_t count = destroyedLayers.size();
-    for (size_t i=0 ; i<count ; i++) {
-        //LOGD("destroying %s", destroyedLayers[i]->getName().string());
-        delete destroyedLayers[i];
-    }
 }
 
 sp<FreezeLock> SurfaceFlinger::getFreezeLock() const

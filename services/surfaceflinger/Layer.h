@@ -45,7 +45,7 @@ class GLExtensions;
 
 // ---------------------------------------------------------------------------
 
-class Layer : public LayerBaseClient, private RefBase::Destroyer
+class Layer : public LayerBaseClient
 {
 public:
             Layer(SurfaceFlinger* flinger, DisplayID display,
@@ -78,7 +78,6 @@ public:
     inline const sp<FreezeLock>&  getFreezeLock() const { return mFreezeLock; }
 
 protected:
-    virtual void destroy(RefBase const* base);
     virtual void onFirstRef();
     virtual void dump(String8& result, char* scratch, size_t size) const;
 
