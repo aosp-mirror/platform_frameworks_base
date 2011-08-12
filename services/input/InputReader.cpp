@@ -1335,7 +1335,7 @@ void MultiTouchMotionAccumulator::configure(size_t slotCount, bool usingSlotsPro
 
 void MultiTouchMotionAccumulator::clearSlots(int32_t initialSlot) {
     for (size_t i = 0; i < mSlotCount; i++) {
-        mSlots[i].clearIfInUse();
+        mSlots[i].clear();
     }
     mCurrentSlot = initialSlot;
 }
@@ -1396,7 +1396,9 @@ void MultiTouchMotionAccumulator::process(const RawEvent* rawEvent) {
                 break;
             case ABS_MT_TRACKING_ID:
                 if (mUsingSlotsProtocol && rawEvent->value < 0) {
-                    slot->clearIfInUse();
+                    // The slot is no longer in use but it retains its previous contents,
+                    // which may be reused for subsequent touches.
+                    slot->mInUse = false;
                 } else {
                     slot->mInUse = true;
                     slot->mAbsMTTrackingId = rawEvent->value;
@@ -1428,12 +1430,6 @@ void MultiTouchMotionAccumulator::process(const RawEvent* rawEvent) {
 
 MultiTouchMotionAccumulator::Slot::Slot() {
     clear();
-}
-
-void MultiTouchMotionAccumulator::Slot::clearIfInUse() {
-    if (mInUse) {
-        clear();
-    }
 }
 
 void MultiTouchMotionAccumulator::Slot::clear() {
