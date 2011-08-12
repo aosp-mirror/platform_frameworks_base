@@ -113,8 +113,10 @@ void ThreadIO::coreGetReturn(void *data, size_t dataLen) {
 }
 
 
-bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand) {
+bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand, uint64_t timeToWait) {
     bool ret = false;
+    uint64_t startTime = con->getTime();
+
     while (!mToCore.isEmpty() || waitForCommand) {
         uint32_t cmdID = 0;
         uint32_t cmdSize = 0;
@@ -122,9 +124,17 @@ bool ThreadIO::playCoreCommands(Context *con, bool waitForCommand) {
         if (con->props.mLogTimes) {
             con->timerSet(Context::RS_TIMER_IDLE);
         }
-        const void * data = mToCore.get(&cmdID, &cmdSize);
+
+        uint64_t delay = 0;
+        if (waitForCommand) {
+            delay = timeToWait - (con->getTime() - startTime);
+            if (delay > timeToWait) {
+                delay = 0;
+            }
+        }
+        const void * data = mToCore.get(&cmdID, &cmdSize, delay);
         if (!cmdSize) {
-            // exception occured, probably shutdown.
+            // exception or timeout occurred.
             return false;
         }
         if (con->props.mLogTimes) {

@@ -245,32 +245,38 @@ void * Context::threadProc(void *vrsc) {
 
     rsc->mRunning = true;
     bool mDraw = true;
+    bool doWait = true;
+
+    uint64_t targetTime = rsc->getTime();
     while (!rsc->mExit) {
-        mDraw |= rsc->mIO.playCoreCommands(rsc, !mDraw);
+        uint64_t waitTime = 0;
+        uint64_t now = rsc->getTime();
+        if (now < targetTime) {
+            waitTime = targetTime - now;
+        } else {
+            doWait = false;
+        }
+
+        mDraw |= rsc->mIO.playCoreCommands(rsc, doWait, waitTime);
         mDraw &= (rsc->mRootScript.get() != NULL);
         mDraw &= rsc->mHasSurface;
 
-        uint32_t targetTime = 0;
         if (mDraw && rsc->mIsGraphicsContext) {
-            targetTime = rsc->runRootScript();
+            uint64_t delay = rsc->runRootScript() * 1000000;
+            targetTime = rsc->getTime() + delay;
+            doWait = delay != 0;
 
             if (rsc->props.mLogVisual) {
                 rsc->displayDebugStats();
             }
 
-            mDraw = targetTime && !rsc->mPaused;
+            mDraw = !rsc->mPaused;
             rsc->timerSet(RS_TIMER_CLEAR_SWAP);
             rsc->mHal.funcs.swap(rsc);
             rsc->timerFrame();
             rsc->timerSet(RS_TIMER_INTERNAL);
             rsc->timerPrint();
             rsc->timerReset();
-        }
-        if (targetTime > 1) {
-            int32_t t = (targetTime - (int32_t)(rsc->mTimeMSLastScript + rsc->mTimeMSLastSwap)) * 1000;
-            if (t > 0) {
-                usleep(t);
-            }
         }
     }
 
