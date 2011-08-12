@@ -16,11 +16,6 @@
 
 package android.widget;
 
-import com.android.internal.util.FastMath;
-import com.android.internal.widget.EditableInputConnection;
-
-import org.xmlpull.v1.XmlPullParserException;
-
 import android.R;
 import android.content.ClipData;
 import android.content.ClipData.Item;
@@ -138,6 +133,11 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.RemoteViews.RemoteView;
+
+import com.android.internal.util.FastMath;
+import com.android.internal.widget.EditableInputConnection;
+
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -2493,12 +2493,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_scrollHorizontally
      */
     public void setHorizontallyScrolling(boolean whether) {
-        mHorizontallyScrolling = whether;
+        if (mHorizontallyScrolling != whether) {
+            mHorizontallyScrolling = whether;
 
-        if (mLayout != null) {
-            nullLayouts();
-            requestLayout();
-            invalidate();
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
         }
     }
 
@@ -2699,13 +2701,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_lineSpacingMultiplier
      */
     public void setLineSpacing(float add, float mult) {
-        mSpacingMult = mult;
-        mSpacingAdd = add;
+        if (mSpacingAdd != add || mSpacingMult != mult) {
+            mSpacingAdd = add;
+            mSpacingMult = mult;
 
-        if (mLayout != null) {
-            nullLayouts();
-            requestLayout();
-            invalidate();
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
         }
     }
 
@@ -6252,12 +6256,14 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_includeFontPadding
      */
     public void setIncludeFontPadding(boolean includepad) {
-        mIncludePad = includepad;
+        if (mIncludePad != includepad) {
+            mIncludePad = includepad;
 
-        if (mLayout != null) {
-            nullLayouts();
-            requestLayout();
-            invalidate();
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
         }
     }
 
@@ -6581,7 +6587,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         } else {
             // Dynamic width, so we have no choice but to request a new
             // view layout with a new text layout.
-
             nullLayouts();
             requestLayout();
             invalidate();
@@ -7070,12 +7075,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * @attr ref android.R.styleable#TextView_ellipsize
      */
     public void setEllipsize(TextUtils.TruncateAt where) {
-        mEllipsize = where;
+        // TruncateAt is an enum. != comparison is ok between these singleton objects.
+        if (mEllipsize != where) {
+            mEllipsize = where;
 
-        if (mLayout != null) {
-            nullLayouts();
-            requestLayout();
-            invalidate();
+            if (mLayout != null) {
+                nullLayouts();
+                requestLayout();
+                invalidate();
+            }
         }
     }
 
