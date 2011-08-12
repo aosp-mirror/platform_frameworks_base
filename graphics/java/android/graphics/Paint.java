@@ -70,16 +70,16 @@ public class Paint {
      */
     public  int         mBidiFlags = BIDI_DEFAULT_LTR;
     
-    private static final Style[] sStyleArray = {
+    static final Style[] sStyleArray = {
         Style.FILL, Style.STROKE, Style.FILL_AND_STROKE
     };
-    private static final Cap[] sCapArray = {
+    static final Cap[] sCapArray = {
         Cap.BUTT, Cap.ROUND, Cap.SQUARE
     };
-    private static final Join[] sJoinArray = {
+    static final Join[] sJoinArray = {
         Join.MITER, Join.ROUND, Join.BEVEL
     };
-    private static final Align[] sAlignArray = {
+    static final Align[] sAlignArray = {
         Align.LEFT, Align.CENTER, Align.RIGHT
     };
 
@@ -103,7 +103,7 @@ public class Paint {
     public static final int DEV_KERN_TEXT_FLAG  = 0x100;
 
     // we use this when we first create a paint
-    private static final int DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG;
+    static final int DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG;
 
     /**
      * Bidi flag to set LTR paragraph direction.

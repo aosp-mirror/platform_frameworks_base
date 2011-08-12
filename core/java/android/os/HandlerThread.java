@@ -21,9 +21,9 @@ package android.os;
  * used to create handler classes. Note that start() must still be called.
  */
 public class HandlerThread extends Thread {
-    private int mPriority;
-    private int mTid = -1;
-    private Looper mLooper;
+    int mPriority;
+    int mTid = -1;
+    Looper mLooper;
 
     public HandlerThread(String name) {
         super(name);

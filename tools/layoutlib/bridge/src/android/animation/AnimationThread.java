@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge.impl;
+package android.animation;
 
 import com.android.ide.common.rendering.api.IAnimationListener;
 import com.android.ide.common.rendering.api.RenderSession;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.Result.Status;
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.impl.RenderSessionImpl;
 
 import android.animation.ValueAnimator;
 import android.os.Handler;

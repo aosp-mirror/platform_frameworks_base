@@ -143,5 +143,5 @@ class XmlPullAttributes implements AttributeSet {
         return getAttributeResourceValue(null, "style", 0);
     }
 
-    private XmlPullParser mParser;
+    /*package*/ XmlPullParser mParser;
 }

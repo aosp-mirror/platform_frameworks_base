@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge.android;
+package android.view;
 
 import com.android.ide.common.rendering.api.IProjectCallback;
 import com.android.ide.common.rendering.api.LayoutLog;
@@ -22,6 +22,8 @@ import com.android.ide.common.rendering.api.MergeCookie;
 import com.android.ide.common.rendering.api.ResourceReference;
 import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.layoutlib.bridge.Bridge;
+import com.android.layoutlib.bridge.android.BridgeContext;
+import com.android.layoutlib.bridge.android.BridgeXmlBlockParser;
 import com.android.layoutlib.bridge.impl.ParserFactory;
 import com.android.resources.ResourceType;
 import com.android.util.Pair;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.layoutlib.bridge.android;
+package android.content.res;
 
 import com.android.layoutlib.bridge.Bridge;
 
@@ -30,7 +30,7 @@ public class BridgeAssetManager extends AssetManager {
      * <p/>
      * {@link Bridge} calls this method after setting up a new bridge.
      */
-    /*package*/ public static AssetManager initSystem() {
+    public static AssetManager initSystem() {
         if (!(AssetManager.sSystem instanceof BridgeAssetManager)) {
             // Note that AssetManager() creates a system AssetManager and we override it
             // with our BridgeAssetManager.

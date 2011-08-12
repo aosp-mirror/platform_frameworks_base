@@ -95,10 +95,11 @@ public final class CreateInfo implements ICreateInfo {
     /**
      * The list of methods to rewrite as delegates.
      */
-    private final static String[] DELEGATE_METHODS = new String[] {
+    public final static String[] DELEGATE_METHODS = new String[] {
         "android.app.Fragment#instantiate", //(Landroid/content/Context;Ljava/lang/String;Landroid/os/Bundle;)Landroid/app/Fragment;",
         "android.content.res.Resources$Theme#obtainStyledAttributes",
         "android.content.res.Resources$Theme#resolveAttribute",
+        "android.content.res.TypedArray#getValueAt",
         "android.graphics.BitmapFactory#finishDecode",
         "android.os.Handler#sendMessageAtTime",
         "android.os.HandlerThread#run",
@@ -116,7 +117,7 @@ public final class CreateInfo implements ICreateInfo {
     /**
      * The list of classes on which to delegate all native methods.
      */
-    private final static String[] DELEGATE_CLASS_NATIVES = new String[] {
+    public final static String[] DELEGATE_CLASS_NATIVES = new String[] {
         "android.animation.PropertyValuesHolder",
         "android.graphics.AvoidXfermode",
         "android.graphics.Bitmap",

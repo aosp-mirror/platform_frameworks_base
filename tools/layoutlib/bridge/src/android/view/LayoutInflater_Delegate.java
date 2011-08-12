@@ -16,7 +16,6 @@
 
 package android.view;
 
-import com.android.layoutlib.bridge.android.BridgeInflater;
 import com.android.tools.layoutlib.annotations.LayoutlibDelegate;
 
 import org.xmlpull.v1.XmlPullParser;

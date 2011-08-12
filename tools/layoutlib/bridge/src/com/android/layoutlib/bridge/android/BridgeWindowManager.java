@@ -456,9 +456,7 @@ public class BridgeWindowManager implements IWindowManager {
         return null;
     }
 
-    @Override
     public int getPreferredOptionsPanelGravity() throws RemoteException {
         return Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
     }
-
 }

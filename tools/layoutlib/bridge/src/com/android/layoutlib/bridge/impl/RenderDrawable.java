@@ -23,17 +23,13 @@ import com.android.ide.common.rendering.api.ResourceValue;
 import com.android.ide.common.rendering.api.Result;
 import com.android.ide.common.rendering.api.Result.Status;
 import com.android.layoutlib.bridge.android.BridgeContext;
-import com.android.layoutlib.bridge.android.BridgeWindow;
-import com.android.layoutlib.bridge.android.BridgeWindowSession;
 import com.android.resources.ResourceType;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap_Delegate;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.view.View;
-import android.view.View.AttachInfo;
+import android.view.AttachInfo_Accessor;
 import android.view.View.MeasureSpec;
 import android.widget.FrameLayout;
 
@@ -82,13 +78,7 @@ public class RenderDrawable extends RenderAction<DrawableParams> {
             content.setBackgroundDrawable(d);
 
             // set the AttachInfo on the root view.
-            AttachInfo info = new AttachInfo(new BridgeWindowSession(), new BridgeWindow(),
-                    new Handler(), null);
-            info.mHasWindowFocus = true;
-            info.mWindowVisibility = View.VISIBLE;
-            info.mInTouchMode = false; // this is so that we can display selections.
-            info.mHardwareAccelerated = false;
-            content.dispatchAttachedToWindow(info, 0);
+            AttachInfo_Accessor.setAttachInfo(content);
 
 
             // measure
@@ -102,7 +92,7 @@ public class RenderDrawable extends RenderAction<DrawableParams> {
             content.layout(0, 0, w, h);
 
             // preDraw setup
-            content.mAttachInfo.mTreeObserver.dispatchOnPreDraw();
+            AttachInfo_Accessor.dispatchOnPreDraw(content);
 
             // draw into a new image
             BufferedImage image = getImage(w, h);

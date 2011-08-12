@@ -77,7 +77,7 @@ public class Resources {
     private static final int ID_OTHER = 0x01000004;
 
     private static final Object mSync = new Object();
-    private static Resources mSystem = null;
+    /*package*/ static Resources mSystem = null;
     
     // Information about preloaded resources.  Note that they are not
     // protected by a lock, because while preloading in zygote we are all

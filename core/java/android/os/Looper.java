@@ -54,7 +54,7 @@ public class Looper {
     private static final String TAG = "Looper";
 
     // sThreadLocal.get() will return null unless you've called prepare().
-    private static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();
+    static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();
 
     final MessageQueue mQueue;
     final Thread mThread;

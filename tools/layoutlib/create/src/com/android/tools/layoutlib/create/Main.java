@@ -165,6 +165,8 @@ public class Main {
             return false;
         }
 
+        sOptions.generatePublicAccess = false;
+
         return true;
     }
 }
