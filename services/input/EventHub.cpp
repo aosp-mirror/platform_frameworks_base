@@ -312,6 +312,8 @@ int32_t EventHub::getSwitchState(int32_t deviceId, int32_t sw) const {
 }
 
 status_t EventHub::getAbsoluteAxisValue(int32_t deviceId, int32_t axis, int32_t* outValue) const {
+    *outValue = 0;
+
     if (axis >= 0 && axis <= ABS_MAX) {
         AutoMutex _l(mLock);
 
@@ -328,7 +330,6 @@ status_t EventHub::getAbsoluteAxisValue(int32_t deviceId, int32_t axis, int32_t*
             return OK;
         }
     }
-    *outValue = 0;
     return -1;
 }
 
