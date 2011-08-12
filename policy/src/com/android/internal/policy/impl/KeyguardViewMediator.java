@@ -1138,12 +1138,13 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 }
             }
 
-            // if the keyguard is shown, allow the status bar to open
-            // only if the keyguard is insecure and is covered by another window
-            boolean enable = !mShowing || (mHidden && !isSecure());
+            // if the keyguard is shown, allow the status bar to open only if the keyguard is
+            // insecure and (is covered by another window OR this feature is enabled in general)
+            boolean enable = !mShowing
+                || ((ENABLE_STATUS_BAR_IN_KEYGUARD || mHidden) && !isSecure());
             mStatusBarManager.disable(enable ?
                          StatusBarManager.DISABLE_NONE :
-                         ( (ENABLE_STATUS_BAR_IN_KEYGUARD ? 0 : StatusBarManager.DISABLE_EXPAND)
+                         ( StatusBarManager.DISABLE_EXPAND
                          | StatusBarManager.DISABLE_NAVIGATION
                          | StatusBarManager.DISABLE_CLOCK));
         }
