@@ -58,6 +58,19 @@ void Allocation::updateCache() {
 }
 
 Allocation::~Allocation() {
+    if (mHal.state.hasReferences &&
+        (mHal.state.hasFaces || mHal.state.hasMipmaps)) {
+        LOGE("Cube/mip allocation with references unsupported, memory not cleaned up!");
+    }
+
+    uint32_t elemCount = mHal.state.dimensionX;
+    if (mHal.state.dimensionY > 1) {
+        elemCount *= mHal.state.dimensionY;
+    }
+    if (mHal.state.dimensionZ > 1) {
+        elemCount *= mHal.state.dimensionZ;
+    }
+    decRefs(getPtr(), elemCount, 0);
     mRSC->mHal.funcs.allocation.destroy(mRSC, this);
 }
 
@@ -270,6 +283,9 @@ void Allocation::incRefs(const void *ptr, size_t ct, size_t startOff) const {
 }
 
 void Allocation::decRefs(const void *ptr, size_t ct, size_t startOff) const {
+    if (!mHal.state.hasReferences || !getIsScript()) {
+        return;
+    }
     const uint8_t *p = static_cast<const uint8_t *>(ptr);
     const Element *e = mHal.state.type->getElement();
     uint32_t stride = e->getSizeBytes();
