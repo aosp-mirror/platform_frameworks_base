@@ -366,9 +366,9 @@ public class Display {
     // Following fields are initialized from native code
     private int         mPixelFormat;
     private float       mRefreshRate;
-    private float       mDensity;
-    private float       mDpiX;
-    private float       mDpiY;
+    /*package*/ float   mDensity;
+    /*package*/ float   mDpiX;
+    /*package*/ float   mDpiY;
     
     private final Point mTmpPoint = new Point();
     private final DisplayMetrics mTmpMetrics = new DisplayMetrics();

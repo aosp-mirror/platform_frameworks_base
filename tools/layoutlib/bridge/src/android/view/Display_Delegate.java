@@ -46,31 +46,17 @@ public class Display_Delegate {
     }
 
     @LayoutlibDelegate
-    /** @hide Returns the actual screen size, not including any decor. */
-    /*package*/ static int getRealWidth(Display theDisplay) {
-        // always dynamically query for the current window manager
-        return RenderAction.getCurrentContext().getIWindowManager().getMetrics().widthPixels;
-    }
-
-    @LayoutlibDelegate
-    /** @hide Returns the actual screen size, not including any decor. */
-    /*package*/ static int getRealHeight(Display theDisplay) {
-        // always dynamically query for the current window manager
-        return RenderAction.getCurrentContext().getIWindowManager().getMetrics().heightPixels;
-    }
-
-    @LayoutlibDelegate
     /** @hide special for when we are faking the screen size. */
     /*package*/ static int getRawWidth(Display theDisplay) {
         // same as real since we're not faking compatibility mode.
-        return getRealWidth(theDisplay);
+        return RenderAction.getCurrentContext().getIWindowManager().getMetrics().widthPixels;
     }
 
     @LayoutlibDelegate
     /** @hide special for when we are faking the screen size. */
     /*package*/ static int getRawHeight(Display theDisplay) {
         // same as real since we're not faking compatibility mode.
-        return getRealHeight(theDisplay);
+        return RenderAction.getCurrentContext().getIWindowManager().getMetrics().heightPixels;
     }
 
     @LayoutlibDelegate

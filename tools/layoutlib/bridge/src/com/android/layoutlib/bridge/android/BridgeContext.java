@@ -33,8 +33,6 @@ import com.android.util.Pair;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -65,7 +63,7 @@ import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
-import android.view.LayoutInflater;
+import android.view.BridgeInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,7 +85,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Custom implementation of Context/Activity to handle non compiled resources.
  */
-public final class BridgeContext extends Activity {
+public final class BridgeContext extends Context {
 
     private Resources mSystemResources;
     private final HashMap<View, Object> mViewKeyMap = new HashMap<View, Object>();
@@ -97,8 +95,9 @@ public final class BridgeContext extends Activity {
     private final Configuration mConfig;
     private final ApplicationInfo mApplicationInfo;
     private final IProjectCallback mProjectCallback;
-
     private final BridgeWindowManager mIWindowManager;
+
+    private Resources.Theme mTheme;
 
     private final Map<Object, Map<String, String>> mDefaultPropMaps =
         new IdentityHashMap<Object, Map<String,String>>();
@@ -138,9 +137,6 @@ public final class BridgeContext extends Activity {
         mConfig = config;
 
         mIWindowManager = new BridgeWindowManager(mConfig, metrics, Surface.ROTATION_0);
-
-        mFragments.mCurState = Fragment.CREATED;
-        mFragments.mActivity = this;
 
         mApplicationInfo = new ApplicationInfo();
         mApplicationInfo.targetSdkVersion = targetSdkVersion;
@@ -393,13 +389,6 @@ public final class BridgeContext extends Activity {
         }
 
         return Pair.of(null, false);
-    }
-
-    // ------------- Activity Methods
-
-    @Override
-    public LayoutInflater getLayoutInflater() {
-        return mBridgeInflater;
     }
 
     // ------------ Context methods
@@ -1275,7 +1264,7 @@ public final class BridgeContext extends Activity {
 
     @Override
     public Context getApplicationContext() {
-        throw new UnsupportedOperationException();
+        return this;
     }
 
     @Override
@@ -1287,5 +1276,11 @@ public final class BridgeContext extends Activity {
     @Override
     public boolean isRestricted() {
         return false;
+    }
+
+    @Override
+    public File getObbDir() {
+        Bridge.getLog().error(LayoutLog.TAG_UNSUPPORTED, "OBB not supported", null);
+        return null;
     }
 }

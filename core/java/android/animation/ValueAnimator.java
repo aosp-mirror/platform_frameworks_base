@@ -54,8 +54,8 @@ public class ValueAnimator extends Animator {
      * Messages sent to timing handler: START is sent when an animation first begins, FRAME is sent
      * by the handler to itself to process the next animation frame
      */
-    private static final int ANIMATION_START = 0;
-    private static final int ANIMATION_FRAME = 1;
+    static final int ANIMATION_START = 0;
+    static final int ANIMATION_FRAME = 1;
 
     /**
      * Values used with internal variable mPlayingState to indicate the current state of an

@@ -25,7 +25,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.res.XmlResourceParser;
 import android.util.AttributeSet;
-import android.util.XmlPullAttributes;
+import android.util.BridgeXmlPullAttributes;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,12 +34,12 @@ import java.io.Reader;
 /**
  * {@link BridgeXmlBlockParser} reimplements most of android.xml.XmlBlock.Parser.
  * It delegates to both an instance of {@link XmlPullParser} and an instance of
- * {@link XmlPullAttributes} (for the {@link AttributeSet} part).
+ * XmlPullAttributes (for the {@link AttributeSet} part).
  */
 public class BridgeXmlBlockParser implements XmlResourceParser {
 
     private final XmlPullParser mParser;
-    private final XmlPullAttributes mAttrib;
+    private final BridgeXmlPullAttributes mAttrib;
     private final BridgeContext mContext;
     private final boolean mPlatformFile;
 

@@ -35,8 +35,9 @@ import android.content.res.Configuration;
 import android.os.HandlerThread_Delegate;
 import android.os.Looper;
 import android.util.DisplayMetrics;
-import android.view.ViewConfiguration;
+import android.view.ViewConfiguration_Accessor;
 import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodManager_Accessor;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -248,10 +249,10 @@ public abstract class RenderAction<T extends RenderParams> extends FrameworkReso
         HandlerThread_Delegate.cleanUp(sCurrentContext);
 
         // clear the stored ViewConfiguration since the map is per density and not per context.
-        ViewConfiguration.sConfigurations.clear();
+        ViewConfiguration_Accessor.clearConfigurations();
 
         // remove the InputMethodManager
-        InputMethodManager.mInstance = null;
+        InputMethodManager_Accessor.resetInstance();
 
         sCurrentContext = null;
 

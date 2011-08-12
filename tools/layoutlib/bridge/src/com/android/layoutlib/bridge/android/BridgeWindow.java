@@ -26,10 +26,9 @@ import android.view.DragEvent;
 import android.view.IWindow;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View.AttachInfo;
 
 /**
- * Implementation of {@link IWindow} to pass to the {@link AttachInfo}.
+ * Implementation of {@link IWindow} to pass to the AttachInfo.
  */
 public final class BridgeWindow implements IWindow {
 

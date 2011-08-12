@@ -75,9 +75,9 @@ public abstract class LayoutInflater {
     private Factory2 mPrivateFactory;
     private Filter mFilter;
 
-    private final Object[] mConstructorArgs = new Object[2];
+    final Object[] mConstructorArgs = new Object[2];
 
-    private static final Class<?>[] mConstructorSignature = new Class[] {
+    static final Class<?>[] mConstructorSignature = new Class[] {
             Context.class, AttributeSet.class};
 
     private static final HashMap<String, Constructor<? extends View>> sConstructorMap =
@@ -705,7 +705,7 @@ public abstract class LayoutInflater {
      * Recursive method used to descend down the xml hierarchy and instantiate
      * views, instantiate their children, and then call onFinishInflate().
      */
-    private void rInflate(XmlPullParser parser, View parent, final AttributeSet attrs,
+    void rInflate(XmlPullParser parser, View parent, final AttributeSet attrs,
             boolean finishInflate) throws XmlPullParserException, IOException {
 
         final int depth = parser.getDepth();

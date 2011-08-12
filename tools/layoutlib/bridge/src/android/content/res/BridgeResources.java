@@ -214,7 +214,15 @@ public final class BridgeResources extends Resources {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            return value.getSecond().getValue();
+            ResourceValue resValue = value.getSecond();
+
+            assert resValue != null;
+            if (resValue != null) {
+                String v = resValue.getValue();
+                if (v != null) {
+                    return v;
+                }
+            }
         }
 
         // id was not found or not resolved. Throw a NotFoundException.
@@ -318,20 +326,24 @@ public final class BridgeResources extends Resources {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            String v = value.getSecond().getValue();
+            ResourceValue resValue = value.getSecond();
 
-            if (v != null) {
-                if (v.equals(BridgeConstants.MATCH_PARENT) ||
-                        v.equals(BridgeConstants.FILL_PARENT)) {
-                    return LayoutParams.MATCH_PARENT;
-                } else if (v.equals(BridgeConstants.WRAP_CONTENT)) {
-                    return LayoutParams.WRAP_CONTENT;
-                }
+            assert resValue != null;
+            if (resValue != null) {
+                String v = resValue.getValue();
+                if (v != null) {
+                    if (v.equals(BridgeConstants.MATCH_PARENT) ||
+                            v.equals(BridgeConstants.FILL_PARENT)) {
+                        return LayoutParams.MATCH_PARENT;
+                    } else if (v.equals(BridgeConstants.WRAP_CONTENT)) {
+                        return LayoutParams.WRAP_CONTENT;
+                    }
 
-                if (ResourceHelper.parseFloatAttribute(
-                        value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
-                        mTmpValue.type == TypedValue.TYPE_DIMENSION) {
-                    return mTmpValue.getDimension(getDisplayMetrics());
+                    if (ResourceHelper.parseFloatAttribute(
+                            value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
+                            mTmpValue.type == TypedValue.TYPE_DIMENSION) {
+                        return mTmpValue.getDimension(getDisplayMetrics());
+                    }
                 }
             }
         }
@@ -348,14 +360,18 @@ public final class BridgeResources extends Resources {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            String v = value.getSecond().getValue();
+            ResourceValue resValue = value.getSecond();
 
-            if (v != null) {
-                if (ResourceHelper.parseFloatAttribute(
-                        value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
-                        mTmpValue.type == TypedValue.TYPE_DIMENSION) {
-                    return TypedValue.complexToDimensionPixelOffset(mTmpValue.data,
-                            getDisplayMetrics());
+            assert resValue != null;
+            if (resValue != null) {
+                String v = resValue.getValue();
+                if (v != null) {
+                    if (ResourceHelper.parseFloatAttribute(
+                            value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
+                            mTmpValue.type == TypedValue.TYPE_DIMENSION) {
+                        return TypedValue.complexToDimensionPixelOffset(mTmpValue.data,
+                                getDisplayMetrics());
+                    }
                 }
             }
         }
@@ -372,14 +388,18 @@ public final class BridgeResources extends Resources {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
         if (value != null) {
-            String v = value.getSecond().getValue();
+            ResourceValue resValue = value.getSecond();
 
-            if (v != null) {
-                if (ResourceHelper.parseFloatAttribute(
-                        value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
-                        mTmpValue.type == TypedValue.TYPE_DIMENSION) {
-                    return TypedValue.complexToDimensionPixelSize(mTmpValue.data,
-                            getDisplayMetrics());
+            assert resValue != null;
+            if (resValue != null) {
+                String v = resValue.getValue();
+                if (v != null) {
+                    if (ResourceHelper.parseFloatAttribute(
+                            value.getFirst(), v, mTmpValue, true /*requireUnit*/) &&
+                            mTmpValue.type == TypedValue.TYPE_DIMENSION) {
+                        return TypedValue.complexToDimensionPixelSize(mTmpValue.data,
+                                getDisplayMetrics());
+                    }
                 }
             }
         }
@@ -395,17 +415,24 @@ public final class BridgeResources extends Resources {
     public int getInteger(int id) throws NotFoundException {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
-        if (value != null && value.getSecond().getValue() != null) {
-            String v = value.getSecond().getValue();
-            int radix = 10;
-            if (v.startsWith("0x")) {
-                v = v.substring(2);
-                radix = 16;
-            }
-            try {
-                return Integer.parseInt(v, radix);
-            } catch (NumberFormatException e) {
-                // return exception below
+        if (value != null) {
+            ResourceValue resValue = value.getSecond();
+
+            assert resValue != null;
+            if (resValue != null) {
+                String v = resValue.getValue();
+                if (v != null) {
+                    int radix = 10;
+                    if (v.startsWith("0x")) {
+                        v = v.substring(2);
+                        radix = 16;
+                    }
+                    try {
+                        return Integer.parseInt(v, radix);
+                    } catch (NumberFormatException e) {
+                        // return exception below
+                    }
+                }
             }
         }
 
@@ -420,9 +447,16 @@ public final class BridgeResources extends Resources {
     public boolean getBoolean(int id) throws NotFoundException {
         Pair<String, ResourceValue> value = getResourceValue(id, mPlatformResourceFlag);
 
-        if (value != null && value.getSecond().getValue() != null) {
-            String v = value.getSecond().getValue();
-            return Boolean.parseBoolean(v);
+        if (value != null) {
+            ResourceValue resValue = value.getSecond();
+
+            assert resValue != null;
+            if (resValue != null) {
+                String v = resValue.getValue();
+                if (v != null) {
+                    return Boolean.parseBoolean(v);
+                }
+            }
         }
 
         // id was not found or not resolved. Throw a NotFoundException.

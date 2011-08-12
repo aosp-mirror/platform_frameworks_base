@@ -68,4 +68,28 @@ public class SystemClock_Delegate {
     /*package*/ static long currentThreadTimeMillis() {
         return System.currentTimeMillis();
     }
+
+    /**
+     * Returns microseconds running in the current thread.
+     *
+     * @return elapsed microseconds in the thread
+     *
+     * @hide
+     */
+    @LayoutlibDelegate
+    /*package*/ static long currentThreadTimeMicro() {
+        return System.currentTimeMillis() * 1000;
+    }
+
+    /**
+     * Returns current wall time in  microseconds.
+     *
+     * @return elapsed microseconds in wall time
+     *
+     * @hide
+     */
+    @LayoutlibDelegate
+    /*package*/ static long currentTimeMicro() {
+        return elapsedRealtime() * 1000;
+    }
 }

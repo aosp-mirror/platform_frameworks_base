@@ -93,7 +93,7 @@ public final class Bitmap implements Parcelable {
 
         This can be called from JNI code.
     */
-    private Bitmap(int nativeBitmap, byte[] buffer, boolean isMutable, byte[] ninePatchChunk,
+    /*package*/ Bitmap(int nativeBitmap, byte[] buffer, boolean isMutable, byte[] ninePatchChunk,
             int density) {
         if (nativeBitmap == 0) {
             throw new RuntimeException("internal error: native bitmap is 0");
