@@ -651,6 +651,8 @@
         <attr name="actionModeCloseButtonStyle" format="reference" />
         <!-- Background drawable to use for action mode UI -->
         <attr name="actionModeBackground" format="reference" />
+        <!-- Background drawable to use for action mode UI in the lower split bar -->
+        <attr name="actionModeSplitBackground" format="reference" />
         <!-- Drawable to use for the close action mode button -->
         <attr name="actionModeCloseDrawable" format="reference" />
 
@@ -5273,6 +5275,8 @@
         <attr name="subtitleTextStyle" />
         <!-- Specifies a background for the action mode bar. -->
         <attr name="background" />
+        <!-- Specifies a background for the split action mode bar. -->
+        <attr name="backgroundSplit" />
         <!-- Specifies a fixed height for the action mode bar. -->
         <attr name="height" />
     </declare-styleable>

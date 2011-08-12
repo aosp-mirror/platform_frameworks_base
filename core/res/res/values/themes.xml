@@ -287,7 +287,8 @@ please see themes_device_defaults.xml.
         <item name="actionDropDownStyle">@android:style/Widget.Spinner.DropDown</item>
         <item name="actionButtonStyle">@android:style/Widget.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.ActionButton.Overflow</item>
-        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_dark</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_top_holo_dark</item>
+        <item name="actionModeSplitBackground">@null</item>
         <item name="actionModeCloseDrawable">@android:drawable/ic_menu_close_clear_cancel</item>
         <item name="actionModeCutDrawable">@android:drawable/ic_menu_cut_holo_dark</item>
         <item name="actionModeCopyDrawable">@android:drawable/ic_menu_copy_holo_dark</item>
@@ -430,7 +431,8 @@ please see themes_device_defaults.xml.
         <item name="actionModeShareDrawable">@android:drawable/ic_menu_share_holo_light</item>
         <item name="actionModeFindDrawable">@android:drawable/ic_menu_find_holo_light</item>
         <item name="actionModeWebSearchDrawable">@android:drawable/ic_menu_search_holo_light</item>
-        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_light</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_top_holo_light</item>
+        <item name="actionModeSplitBackground">@android:drawable/cab_background_bottom_holo_light</item>
 
         <!-- SearchView attributes -->
         <item name="searchDropdownBackground">@android:drawable/search_dropdown_light</item>
@@ -719,22 +721,26 @@ please see themes_device_defaults.xml.
 
     <!-- Theme for the search input bar. -->
     <style name="Theme.SearchBar" parent="Theme.Holo.Light.Panel">
-        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_light</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_top_holo_light</item>
+        <item name="actionModeSplitBackground">@android:drawable/cab_background_bottom_holo_light</item>
     </style>
 
     <style name="Theme.Holo.SearchBar" parent="Theme.Holo.Panel">
-        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_dark</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_top_holo_dark</item>
+        <item name="actionModeSplitBackground">@android:drawable/cab_background_bottom_holo_light</item>
     </style>
 
     <style name="Theme.Holo.Light.SearchBar" parent="Theme.Holo.Light.Panel">
-        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_light</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_top_holo_light</item>
+        <item name="actionModeSplitBackground">@android:drawable/cab_background_bottom_holo_light</item>
     </style>
 
     <!-- Theme for the search input bar when doing global search. The only
          difference from non-global search is that we do not dim the background. -->
     <style name="Theme.GlobalSearchBar" parent="Theme.Panel">
         <item name="windowContentOverlay">@null</item>
-        <item name="actionModeBackground">@android:drawable/cab_background_opaque_holo_light</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_top_holo_light</item>
+        <item name="actionModeSplitBackground">@android:drawable/cab_background_bottom_holo_light</item>
     </style>
 
     <!-- Menu Themes -->
@@ -1072,8 +1078,9 @@ please see themes_device_defaults.xml.
         <item name="actionDropDownStyle">@android:style/Widget.Holo.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@android:style/Widget.Holo.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
-        <item name="actionModeBackground">@android:drawable/cab_background_holo_dark</item>
-        <item name="actionModeCloseDrawable">@android:drawable/cab_ic_close_holo</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_top_holo_dark</item>
+        <item name="actionModeSplitBackground">@android:drawable/cab_background_bottom_holo_dark</item>
+        <item name="actionModeCloseDrawable">@android:drawable/ic_cab_done_holo_dark</item>
         <item name="actionBarTabStyle">@style/Widget.Holo.ActionBar.TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.Holo.ActionBar.TabBar</item>
         <item name="actionBarTabTextStyle">@style/Widget.Holo.ActionBar.TabText</item>
@@ -1373,8 +1380,9 @@ please see themes_device_defaults.xml.
         <item name="actionDropDownStyle">@android:style/Widget.Holo.Light.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@android:style/Widget.Holo.Light.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.Light.ActionButton.Overflow</item>
-        <item name="actionModeBackground">@android:drawable/cab_background_holo_light</item>
-        <item name="actionModeCloseDrawable">@android:drawable/cab_ic_close_holo</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_top_holo_light</item>
+        <item name="actionModeSplitBackground">@android:drawable/cab_background_bottom_holo_light</item>
+        <item name="actionModeCloseDrawable">@android:drawable/ic_cab_done_holo_light</item>
         <item name="actionBarTabStyle">@style/Widget.Holo.Light.ActionBar.TabView</item>
         <item name="actionBarTabBarStyle">@style/Widget.Holo.Light.ActionBar.TabBar</item>
         <item name="actionBarTabTextStyle">@style/Widget.Holo.Light.ActionBar.TabText</item>
@@ -1438,8 +1446,9 @@ please see themes_device_defaults.xml.
         <item name="actionDropDownStyle">@android:style/Widget.Holo.Spinner.DropDown.ActionBar</item>
         <item name="actionButtonStyle">@android:style/Widget.Holo.ActionButton</item>
         <item name="actionOverflowButtonStyle">@android:style/Widget.Holo.ActionButton.Overflow</item>
-        <item name="actionModeBackground">@android:drawable/cab_background_holo_dark</item>
-        <item name="actionModeCloseDrawable">@android:drawable/cab_ic_close_holo</item>
+        <item name="actionModeBackground">@android:drawable/cab_background_top_holo_dark</item>
+        <item name="actionModeSplitBackground">@android:drawable/cab_background_bottom_holo_dark</item>
+        <item name="actionModeCloseDrawable">@android:drawable/ic_cab_done_holo_dark</item>
         <item name="homeAsUpIndicator">@android:drawable/ic_ab_back_holo_dark</item>
         <item name="actionBarTabStyle">@style/Widget.Holo.Light.ActionBar.TabView.Inverse</item>
         <item name="actionBarTabBarStyle">@style/Widget.Holo.Light.ActionBar.TabBar.Inverse</item>
