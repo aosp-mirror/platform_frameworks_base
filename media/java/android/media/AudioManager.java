@@ -1777,27 +1777,6 @@ public class AudioManager {
 
     /**
      * @hide
-     * Returns the current remote control client flags describing what information has changed.
-     * The flags are reset everytime this method is called with a valid rcClientId.
-     * @param rcClientId the counter value that matches the extra
-     *     {@link AudioManager#EXTRA_REMOTE_CONTROL_CLIENT} in the
-     *     {@link AudioManager#REMOTE_CONTROL_CLIENT_CHANGED} event
-     * @return the "information changed" flags from the current IRemoteControlClient from
-     *     which information to display on the remote control can be retrieved,
-     *     or 0 if rcClientId doesn't match the current generation counter.
-     */
-    public int getRemoteControlClientInformationChangedFlags(int rcClientId) {
-        IAudioService service = getService();
-        try {
-            return service.getRemoteControlClientInformationChangedFlags(rcClientId);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Dead object in getRemoteControlClientInformationChangedFlags "+e);
-            return 0;
-        }
-    }
-
-    /**
-     * @hide
      * Definitions of constants to be used in {@link android.media.IRemoteControlClient}.
      */
     public final class RemoteControlParameters {
@@ -1845,6 +1824,15 @@ public class AudioManager {
      */
     public static final String EXTRA_REMOTE_CONTROL_CLIENT =
             "android.media.EXTRA_REMOTE_CONTROL_CLIENT";
+
+    /**
+     * @hide
+     * The flags describing what information has changed in the current remote control client.
+     *
+     * @see #REMOTE_CONTROL_CLIENT_CHANGED_ACTION
+     */
+    public static final String EXTRA_REMOTE_CONTROL_CLIENT_INFO_CHANGED =
+            "android.media.EXTRA_REMOTE_CONTROL_CLIENT_INFO_CHANGED";
 
     /**
      * @hide
