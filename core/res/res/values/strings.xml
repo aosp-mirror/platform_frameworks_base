@@ -1291,10 +1291,11 @@
       create network sockets.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_writeApnSettings">write Access Point Name settings</string>
+    <string name="permlab_writeApnSettings">change/intercept network settings and traffic</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeApnSettings">Allows an application to modify the APN
-        settings, such as Proxy and Port of any APN.</string>
+    <string name="permdesc_writeApnSettings">Allows an application to change network settings and to intercept and inspect all network traffic, 
+      for example to change the proxy and port of any APN. Malicious applications could monitor, redirect, or modify network 
+      packets without your knowledge.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_changeNetworkState">change network connectivity</string>
