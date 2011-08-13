@@ -20,6 +20,7 @@ import android.text.GraphicsOperations;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
+import android.util.DisplayMetrics;
 
 /**
  * The Paint class holds the style and color information about how to draw
@@ -104,6 +105,16 @@ public class Paint {
 
     // we use this when we first create a paint
     static final int DEFAULT_PAINT_FLAGS = DEV_KERN_TEXT_FLAG;
+
+    /**
+     * Option for {@link #setHinting}: disable hinting.
+     */
+    public static final int HINTING_OFF = 0x0;
+
+    /**
+     * Option for {@link #setHinting}: enable hinting.
+     */
+    public static final int HINTING_ON = 0x1;
 
     /**
      * Bidi flag to set LTR paragraph direction.
@@ -333,6 +344,8 @@ public class Paint {
     public Paint(int flags) {
         mNativePaint = native_init();
         setFlags(flags | DEFAULT_PAINT_FLAGS);
+        setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
+                ? HINTING_OFF : HINTING_ON);
         mCompatScaling = mInvCompatScaling = 1;
     }
 
@@ -367,6 +380,8 @@ public class Paint {
     public void reset() {
         native_reset(mNativePaint);
         setFlags(DEFAULT_PAINT_FLAGS);
+        setHinting(DisplayMetrics.DENSITY_DEVICE >= DisplayMetrics.DENSITY_TV
+                ? HINTING_OFF : HINTING_ON);
         mHasCompatScaling = false;
         mCompatScaling = mInvCompatScaling = 1;
         mBidiFlags = BIDI_DEFAULT_LTR;
@@ -444,6 +459,18 @@ public class Paint {
      * @param flags The new flag bits for the paint
      */
     public native void setFlags(int flags);
+
+    /**
+     * Return the paint's hinting mode.  Returns either
+     * {@link #HINTING_OFF} or {@link #HINTING_ON}.
+     */
+    public native int getHinting();
+
+    /**
+     * Set the paint's hinting mode.  May be either
+     * {@link #HINTING_OFF} or {@link #HINTING_ON}.
+     */
+    public native void setHinting(int mode);
 
     /**
      * Helper for getFlags(), returning true if ANTI_ALIAS_FLAG bit is set

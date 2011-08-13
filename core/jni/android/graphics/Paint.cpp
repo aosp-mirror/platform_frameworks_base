@@ -15,6 +15,10 @@
 ** limitations under the License.
 */
 
+#define LOG_TAG "Paint"
+
+#include <utils/Log.h>
+
 #include "jni.h"
 #include "GraphicsJNI.h"
 #include <android_runtime/AndroidRuntime.h>
@@ -50,8 +54,6 @@ static jclass   gFontMetricsInt_class;
 static JMetricsID gFontMetricsInt_fieldID;
 
 static void defaultSettingsForAndroid(SkPaint* paint) {
-    // looks best we decided
-    paint->setHinting(SkPaint::kSlight_Hinting);
     // utf16 is required for java
     paint->setTextEncoding(SkPaint::kUTF16_TextEncoding);
 }
@@ -94,6 +96,18 @@ public:
     static void setFlags(JNIEnv* env, jobject paint, jint flags) {
         NPE_CHECK_RETURN_VOID(env, paint);
         GraphicsJNI::getNativePaint(env, paint)->setFlags(flags);
+    }
+
+    static jint getHinting(JNIEnv* env, jobject paint) {
+        NPE_CHECK_RETURN_ZERO(env, paint);
+        return GraphicsJNI::getNativePaint(env, paint)->getHinting()
+                == SkPaint::kNo_Hinting ? 0 : 1;
+    }
+
+    static void setHinting(JNIEnv* env, jobject paint, jint mode) {
+        NPE_CHECK_RETURN_VOID(env, paint);
+        GraphicsJNI::getNativePaint(env, paint)->setHinting(
+                mode == 0 ? SkPaint::kNo_Hinting : SkPaint::kSlight_Hinting);
     }
 
     static void setAntiAlias(JNIEnv* env, jobject paint, jboolean aa) {
@@ -833,6 +847,8 @@ static JNINativeMethod methods[] = {
     {"native_set","(II)V", (void*) SkPaintGlue::assign},
     {"getFlags","()I", (void*) SkPaintGlue::getFlags},
     {"setFlags","(I)V", (void*) SkPaintGlue::setFlags},
+    {"getHinting","()I", (void*) SkPaintGlue::getHinting},
+    {"setHinting","(I)V", (void*) SkPaintGlue::setHinting},
     {"setAntiAlias","(Z)V", (void*) SkPaintGlue::setAntiAlias},
     {"setSubpixelText","(Z)V", (void*) SkPaintGlue::setSubpixelText},
     {"setLinearText","(Z)V", (void*) SkPaintGlue::setLinearText},
