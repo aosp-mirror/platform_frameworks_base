@@ -1798,7 +1798,9 @@ public final class ViewRootImpl extends Handler implements ViewParent,
                     currentDirty = null;
                 }
 
-                mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this, currentDirty);
+                if (mAttachInfo.mHardwareRenderer.draw(mView, mAttachInfo, this, currentDirty)) {
+                    mPreviousDirty.set(0, 0, mWidth, mHeight);
+                }
             }
 
             if (animating) {

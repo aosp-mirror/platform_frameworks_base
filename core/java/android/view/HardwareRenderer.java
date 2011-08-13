@@ -199,8 +199,10 @@ public abstract class HardwareRenderer {
      * @param attachInfo AttachInfo tied to the specified view.
      * @param callbacks Callbacks invoked when drawing happens.
      * @param dirty The dirty rectangle to update, can be null.
+     * 
+     * @return true if the dirty rect was ignored, false otherwise
      */
-    abstract void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
+    abstract boolean draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
             Rect dirty);
 
     /**
@@ -757,7 +759,7 @@ public abstract class HardwareRenderer {
         }
 
         @Override
-        void draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
+        boolean draw(View view, View.AttachInfo attachInfo, HardwareDrawCallbacks callbacks,
                 Rect dirty) {
             if (canDraw()) {
                 if (!hasDirtyRegions()) {
@@ -825,8 +827,12 @@ public abstract class HardwareRenderer {
 
                     sEgl.eglSwapBuffers(sEglDisplay, mEglSurface);
                     checkEglErrors();
+
+                    return dirty == null;
                 }
             }
+
+            return false;
         }
 
         /**
