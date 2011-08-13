@@ -2619,7 +2619,7 @@
     <!-- See SIM_REMOVED_DIALOG.  This is the title of that dialog. -->
     <string name="sim_removed_title">SIM card removed</string>
     <!-- See SIM_REMOVED_DIALOG.  This is the message of that dialog. -->
-    <string name="sim_removed_message">The mobile network will be unavailable until you replace the SIM card.</string>
+    <string name="sim_removed_message">The mobile network will be unavailable until you restart with a valid SIM card inserted.</string>
     <!-- See SIM_REMOVED_DIALOG.  This is the button of that dialog. -->
     <string name="sim_done_button">Done</string>
     <!-- See SIM_ADDED_DIALOG.  This is the title of that dialog. -->
