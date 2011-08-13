@@ -38,7 +38,7 @@
         <LinearLayout
             android:id="@id/closeButton"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:orientation="horizontal"
             android:focusable="true"
             android:background="?android:attr/selectableItemBackground">
@@ -51,9 +51,10 @@
 
             <ImageView
                 android:id="@+id/search_app_icon"
-                android:layout_height="48dip"
-                android:layout_width="48dip"
+                android:layout_height="32dip"
+                android:layout_width="32dip"
                 android:layout_gravity="center_vertical"
+                android:scaleType="centerInside"
             />
 
         </LinearLayout>
