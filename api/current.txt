@@ -8216,6 +8216,7 @@ package android.graphics {
     method public int getFontMetricsInt(android.graphics.Paint.FontMetricsInt);
     method public android.graphics.Paint.FontMetricsInt getFontMetricsInt();
     method public float getFontSpacing();
+    method public int getHinting();
     method public android.graphics.MaskFilter getMaskFilter();
     method public android.graphics.PathEffect getPathEffect();
     method public android.graphics.Rasterizer getRasterizer();
@@ -8262,6 +8263,7 @@ package android.graphics {
     method public void setFakeBoldText(boolean);
     method public void setFilterBitmap(boolean);
     method public void setFlags(int);
+    method public void setHinting(int);
     method public void setLinearText(boolean);
     method public android.graphics.MaskFilter setMaskFilter(android.graphics.MaskFilter);
     method public android.graphics.PathEffect setPathEffect(android.graphics.PathEffect);
@@ -8287,6 +8289,8 @@ package android.graphics {
     field public static final int DITHER_FLAG = 4; // 0x4
     field public static final int FAKE_BOLD_TEXT_FLAG = 32; // 0x20
     field public static final int FILTER_BITMAP_FLAG = 2; // 0x2
+    field public static final int HINTING_OFF = 0; // 0x0
+    field public static final int HINTING_ON = 1; // 0x1
     field public static final int LINEAR_TEXT_FLAG = 64; // 0x40
     field public static final int STRIKE_THRU_TEXT_FLAG = 16; // 0x10
     field public static final int SUBPIXEL_TEXT_FLAG = 128; // 0x80
