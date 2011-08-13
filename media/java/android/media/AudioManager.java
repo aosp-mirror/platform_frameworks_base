@@ -1061,10 +1061,13 @@ public class AudioManager {
     }
 
     /**
-     * Checks whether audio routing to the wired headset is on or off.
+     * Checks whether a wired headset is connected or not.
+     * <p>This is not a valid indication that audio playback is
+     * actually over the wired headset as audio routing depends on other conditions.
      *
-     * @return true if audio is being routed to/from wired headset;
+     * @return true if a wired headset is connected.
      *         false if otherwise
+     * @deprecated Use only to check is a headset is connected or not.
      */
     public boolean isWiredHeadsetOn() {
         if (AudioSystem.getDeviceConnectionState(DEVICE_OUT_WIRED_HEADSET,"")
