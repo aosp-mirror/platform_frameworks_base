@@ -197,6 +197,8 @@ static void dumpstate() {
     dump_file(NULL, "/sys/class/leds/lcd-backlight/registers");
     printf("\n");
 
+    run_command("LIST OF OPEN FILES", 10, "su", "root", "lsof", NULL);
+
 #ifdef BOARD_HAS_DUMPSTATE
     printf("========================================================\n");
     printf("== Board\n");
