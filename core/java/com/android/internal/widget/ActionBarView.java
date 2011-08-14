@@ -462,9 +462,10 @@ public class ActionBarView extends AbsActionBarView {
         mTitle = title;
         if (mTitleView != null) {
             mTitleView.setText(title);
-            mTitleLayout.setVisibility(mExpandedActionView != null &&
+            final boolean visible = mExpandedActionView == null &&
                     (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0 &&
-                    (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle)) ? VISIBLE : GONE);
+                    (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle));
+            mTitleLayout.setVisibility(visible ? VISIBLE : GONE);
         }
         if (mLogoNavItem != null) {
             mLogoNavItem.setTitle(title);
@@ -480,9 +481,10 @@ public class ActionBarView extends AbsActionBarView {
         if (mSubtitleView != null) {
             mSubtitleView.setText(subtitle);
             mSubtitleView.setVisibility(subtitle != null ? VISIBLE : GONE);
-            mTitleLayout.setVisibility(mExpandedActionView != null &&
+            final boolean visible = mExpandedActionView == null &&
                     (mDisplayOptions & ActionBar.DISPLAY_SHOW_TITLE) != 0 &&
-                    (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle)) ? VISIBLE : GONE);
+                    (!TextUtils.isEmpty(mTitle) || !TextUtils.isEmpty(mSubtitle));
+            mTitleLayout.setVisibility(visible ? VISIBLE : GONE);
         }
     }
 
@@ -1349,6 +1351,7 @@ public class ActionBarView extends AbsActionBarView {
 
             removeView(mExpandedActionView);
             removeView(mExpandedHomeLayout);
+            mExpandedActionView = null;
             if ((mDisplayOptions & ActionBar.DISPLAY_SHOW_HOME) != 0) {
                 mHomeLayout.setVisibility(VISIBLE);
             }
@@ -1368,7 +1371,6 @@ public class ActionBarView extends AbsActionBarView {
             if (mCustomNavView != null && (mDisplayOptions & ActionBar.DISPLAY_SHOW_CUSTOM) != 0) {
                 mCustomNavView.setVisibility(VISIBLE);
             }
-            mExpandedActionView = null;
             mExpandedHomeLayout.setIcon(null);
             mCurrentExpandedItem = null;
             requestLayout();
