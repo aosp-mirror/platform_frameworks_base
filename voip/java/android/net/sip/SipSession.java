@@ -63,6 +63,9 @@ public final class SipSession {
         /** When an OPTIONS request is sent. */
         public static final int PINGING = 9;
 
+        /** When ending a call. @hide */
+        public static final int ENDING_CALL = 10;
+
         /** Not defined. */
         public static final int NOT_DEFINED = 101;
 
