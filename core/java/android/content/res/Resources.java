@@ -134,18 +134,24 @@ public class Resources {
     /** @hide */
     public static int selectDefaultTheme(int curTheme, int targetSdkVersion) {
         return selectSystemTheme(curTheme, targetSdkVersion,
-                com.android.internal.R.style.Theme, com.android.internal.R.style.Theme_Holo);
+                com.android.internal.R.style.Theme,
+                com.android.internal.R.style.Theme_Holo,
+                com.android.internal.R.style.Theme_DeviceDefault);
     }
     
     /** @hide */
-    public static int selectSystemTheme(int curTheme, int targetSdkVersion, int orig, int holo) {
+    public static int selectSystemTheme(int curTheme, int targetSdkVersion,
+            int orig, int holo, int deviceDefault) {
         if (curTheme != 0) {
             return curTheme;
         }
         if (targetSdkVersion < Build.VERSION_CODES.HONEYCOMB) {
             return orig;
         }
-        return holo;
+        if (targetSdkVersion < Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            return holo;
+        }
+        return deviceDefault;
     }
     
     /**

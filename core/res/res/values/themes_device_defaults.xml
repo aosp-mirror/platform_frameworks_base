@@ -420,4 +420,8 @@ easier.
     <style name="Theme.DeviceDefault.Light.SearchBar" parent="Theme.DeviceDefault.Light.SearchBar">
 
     </style>
+
+    <style name="Theme.DeviceDefault.Dialog.NoFrame" parent="Theme.Holo.Dialog.NoFrame">
+    </style>
+
 </resources>
