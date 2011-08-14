@@ -360,6 +360,8 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
 
     if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_AUXILIARY) {
         jdescConnect = env->NewStringUTF("Auxiliary");
+    } else if ((desc.flags & EFFECT_FLAG_TYPE_MASK) == EFFECT_FLAG_TYPE_PRE_PROC) {
+        jdescConnect = env->NewStringUTF("Pre Processing");
     } else {
         jdescConnect = env->NewStringUTF("Insert");
     }
