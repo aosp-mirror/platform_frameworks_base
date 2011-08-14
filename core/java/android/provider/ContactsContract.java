@@ -2890,8 +2890,6 @@ public final class ContactsContract {
      * values.put(StreamItems.TEXT, "Breakfasted at Tiffanys");
      * values.put(StreamItems.TIMESTAMP, timestamp);
      * values.put(StreamItems.COMMENTS, "3 people reshared this");
-     * values.put(StreamItems.ACTION, action);
-     * values.put(StreamItems.ACTION_URI, actionUri);
      * Uri streamItemUri = getContentResolver().insert(
      *     Uri.withAppendedPath(ContentUris.withAppendedId(RawContacts.CONTENT_URI, rawContactId),
      *         RawContacts.StreamItems.CONTENT_DIRECTORY), values);
@@ -2905,8 +2903,6 @@ public final class ContactsContract {
      * values.put(StreamItems.TEXT, "Breakfasted at Tiffanys");
      * values.put(StreamItems.TIMESTAMP, timestamp);
      * values.put(StreamItems.COMMENTS, "3 people reshared this");
-     * values.put(StreamItems.ACTION, action);
-     * values.put(StreamItems.ACTION_URI, actionUri);
      * Uri streamItemUri = getContentResolver().insert(StreamItems.CONTENT_URI, values);
      * long streamItemId = ContentUris.parseId(streamItemUri);
      * </dd>
@@ -2924,8 +2920,6 @@ public final class ContactsContract {
      * values.clear();
      * values.put(StreamItemPhotos.SORT_INDEX, 1);
      * values.put(StreamItemPhotos.PHOTO, photoData);
-     * values.put(StreamItemPhotos.ACTION, action);
-     * values.put(StreamItemPhotos.ACTION_URI, actionUri);
      * getContentResolver().insert(Uri.withAppendedPath(
      *     ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId),
      *     StreamItems.StreamItemPhotos.CONTENT_DIRECTORY), values);
@@ -2938,8 +2932,6 @@ public final class ContactsContract {
      * values.put(StreamItemPhotos.STREAM_ITEM_ID, streamItemId);
      * values.put(StreamItemPhotos.SORT_INDEX, 1);
      * values.put(StreamItemPhotos.PHOTO, photoData);
-     * values.put(StreamItemPhotos.ACTION, action);
-     * values.put(StreamItemPhotos.ACTION_URI, actionUri);
      * getContentResolver().insert(StreamItems.CONTENT_PHOTO_URI, values);
      * </pre>
      * Note that this latter form allows the insertion of a stream item and its
@@ -3081,16 +3073,56 @@ public final class ContactsContract {
         public static final String RES_PACKAGE = "res_package";
 
         /**
-         * The resource ID of the icon for the source of the stream item.
-         * This resource should be scoped by the {@link #RES_PACKAGE}.
-         * <P>Type: NUMBER</P>
+         * The account type to which the raw_contact of this item is associated. See
+         * {@link RawContacts#ACCOUNT_TYPE}
+         *
+         * <p>TYPE: text</p>
+         * <p>read-only</p>
+         */
+        public static final String ACCOUNT_TYPE = "account_type";
+
+        /**
+         * The account name to which the raw_contact of this item is associated. See
+         * {@link RawContacts#ACCOUNT_NAME}
+         *
+         * <p>TYPE: text</p>
+         * <p>read-only</p>
+         */
+        public static final String ACCOUNT_NAME = "account_name";
+
+        /**
+         * The data set within the account that the raw_contact of this row belongs to. This allows
+         * multiple sync adapters for the same account type to distinguish between
+         * each others' data.
+         * {@link RawContacts#DATA_SET}
+         *
+         * <P>Type: TEXT</P>
+         * <p>read-only</p>
+         */
+        public static final String DATA_SET = "data_set";
+
+        /**
+         * The source_id of the raw_contact that this row belongs to.
+         * {@link RawContacts#SOURCE_ID}
+         *
+         * <P>Type: TEXT</P>
+         * <p>read-only</p>
+         */
+        public static final String RAW_CONTACT_SOURCE_ID = "raw_contact_source_id";
+
+        /**
+         * The resource name of the icon for the source of the stream item.
+         * This resource should be scoped by the {@link #RES_PACKAGE}. As this can only reference
+         * drawables, the "@drawable/" prefix must be omitted.
+         * <P>Type: TEXT</P>
          */
         public static final String RES_ICON = "icon";
 
         /**
-         * The resource ID of the label describing the source of the status update, e.g. "Google
-         * Talk".  This resource should be scoped by the {@link #RES_PACKAGE}.
-         * <p>Type: NUMBER</p>
+         * The resource name of the label describing the source of the status update, e.g. "Google
+         * Talk". This resource should be scoped by the {@link #RES_PACKAGE}. As this can only
+         * reference strings, the "@string/" prefix must be omitted.
+         * <p>Type: TEXT</p>
          */
         public static final String RES_LABEL = "label";
 
@@ -3136,18 +3168,14 @@ public final class ContactsContract {
          */
         public static final String COMMENTS = "comments";
 
-        /**
-         * The activity action to execute when the item is tapped.
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACTION = "action";
-
-        /**
-         * The URI that is launched when the item is pressed. May be handled by
-         * the source app, but could also reference a website (e.g. YouTube).
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACTION_URI = "action_uri";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC1 = "stream_item_sync1";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC2 = "stream_item_sync2";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC3 = "stream_item_sync3";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC4 = "stream_item_sync4";
     }
 
     /**
@@ -3171,8 +3199,6 @@ public final class ContactsContract {
      * ContentValues values = new ContentValues();
      * values.put(StreamItemPhotos.SORT_INDEX, 1);
      * values.put(StreamItemPhotos.PHOTO, photoData);
-     * values.put(StreamItemPhotos.ACTION, action);
-     * values.put(StreamItemPhotos.ACTION_URI, actionUri);
      * Uri photoUri = getContentResolver().insert(Uri.withAppendedPath(
      *     ContentUris.withAppendedId(StreamItems.CONTENT_URI, streamItemId)
      *     StreamItems.StreamItemPhotos#CONTENT_DIRECTORY), values);
@@ -3186,8 +3212,6 @@ public final class ContactsContract {
      * values.put(StreamItemPhotos.STREAM_ITEM_ID, streamItemId);
      * values.put(StreamItemPhotos.SORT_INDEX, 1);
      * values.put(StreamItemPhotos.PHOTO, photoData);
-     * values.put(StreamItemPhotos.ACTION, action);
-     * values.put(StreamItemPhotos.ACTION_URI, actionUri);
      * Uri photoUri = getContentResolver().insert(StreamItems.CONTENT_PHOTO_URI, values);
      * long photoId = ContentUris.parseId(photoUri);
      * </pre>
@@ -3353,18 +3377,14 @@ public final class ContactsContract {
          */
         public static final String PHOTO_URI = "photo_uri";
 
-        /**
-         * The activity action to execute when the photo is tapped.
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACTION = "action";
-
-        /**
-         * The URI that is launched when the photo is pressed. May be handled by
-         * the source app, but could also reference a website (e.g. YouTube).
-         * <P>Type: TEXT</P>
-         */
-        public static final String ACTION_URI = "action_uri";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC1 = "stream_item_photo_sync1";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC2 = "stream_item_photo_sync2";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC3 = "stream_item_photo_sync3";
+        /** Generic column for use by sync adapters. */
+        public static final String SYNC4 = "stream_item_photo_sync4";
     }
 
     /**
@@ -6494,28 +6514,6 @@ public final class ContactsContract {
          * Type: TEXT
          */
         public static final String NOTES = "notes";
-
-        /**
-         * The Activity action to open the group in the source app (e.g.
-         * {@link Intent#ACTION_VIEW}). Can be NULL if the group does not have a dedicated viewer.
-         * This is used in conjunction with {@link #ACTION_URI}: In order to show an "Open in
-         * (sourceapp)"-button, both of these fields must be set
-         * <p>
-         * Type: TEXT
-         */
-        public static final String ACTION = "action";
-
-
-        /**
-         * Uri to open the group in the source app.
-         * Can be NULL if the group does not have a dedicated viewer.
-         * This is used in conjunction with {@link #ACTION}: In order to show an "Open in
-         * (sourceapp)"-button, both of these fields must be set
-         * <p>
-         * Type: TEXT
-         */
-        public static final String ACTION_URI = "action_uri";
-
 
         /**
          * The ID of this group if it is a System Group, i.e. a group that has a special meaning
