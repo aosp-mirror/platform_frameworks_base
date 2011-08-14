@@ -1516,7 +1516,7 @@ please see styles_device_defaults.xml.
         <item name="android:paddingBottom">0dip</item>
         <item name="divider">?android:attr/dividerVertical</item>
         <item name="showDividers">middle</item>
-        <item name="dividerPadding">8dip</item>
+        <item name="dividerPadding">12dip</item>
         <item name="background">@null</item>
     </style>
 

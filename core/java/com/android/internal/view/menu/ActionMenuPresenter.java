@@ -162,7 +162,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         final ActionMenuView menuView = (ActionMenuView) mMenuView;
         ActionMenuItemView actionItemView = (ActionMenuItemView) itemView;
         actionItemView.setItemInvoker(menuView);
-        if (false) actionItemView.setExpandedFormat(menuView.isExpandedFormat());
     }
 
     @Override
@@ -174,7 +173,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
     public void updateMenuView(boolean cleared) {
         super.updateMenuView(cleared);
 
-        if (mReserveOverflow && mMenu.getNonActionItems().size() > 0) {
+        final boolean hasOverflow = mReserveOverflow && mMenu.getNonActionItems().size() > 0;
+        if (hasOverflow) {
             if (mOverflowButton == null) {
                 mOverflowButton = new OverflowMenuButton(mContext);
             }
@@ -189,6 +189,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
         } else if (mOverflowButton != null && mOverflowButton.getParent() == mMenuView) {
             ((ViewGroup) mMenuView).removeView(mOverflowButton);
         }
+
+        ((ActionMenuView) mMenuView).setOverflowReserved(mReserveOverflow);
     }
 
     @Override

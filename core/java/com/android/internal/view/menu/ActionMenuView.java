@@ -115,17 +115,26 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         int maxChildHeight = 0;
         int maxCellsUsed = 0;
         int expandableItemCount = 0;
+        int visibleItemCount = 0;
+        boolean hasOverflow = false;
 
-        if (mReserveOverflow) cellsRemaining--;
+        // This is used as a bitfield to locate the smallest items present. Assumes childCount < 64.
+        long smallestItemsAt = 0;
 
         final int childCount = getChildCount();
         for (int i = 0; i < childCount; i++) {
             final View child = getChildAt(i);
+            if (child.getVisibility() == GONE) continue;
+
+            visibleItemCount++;
+
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
             lp.expanded = false;
             lp.extraPixels = 0;
             lp.cellsUsed = 0;
             lp.expandable = false;
+            lp.leftMargin = 0;
+            lp.rightMargin = 0;
 
             // Overflow always gets 1 cell. No more, no less.
             final int cellsAvailable = lp.isOverflowButton ? 1 : cellsRemaining;
@@ -135,16 +144,17 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
             maxCellsUsed = Math.max(maxCellsUsed, cellsUsed);
             if (lp.expandable) expandableItemCount++;
+            if (lp.isOverflowButton) hasOverflow = true;
 
             cellsRemaining -= cellsUsed;
             maxChildHeight = Math.max(maxChildHeight, child.getMeasuredHeight());
+            if (cellsUsed == 1) smallestItemsAt |= (1 << i);
         }
 
         // Divide space for remaining cells if we have items that can expand.
         // Try distributing whole leftover cells to smaller items first.
 
         boolean needsExpansion = false;
-        long smallestExpandableItemsAt = 0;
         while (expandableItemCount > 0 && cellsRemaining > 0) {
             int minCells = Integer.MAX_VALUE;
             long minCellsAt = 0; // Bit locations are indices of relevant child views
@@ -170,7 +180,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             if (minCellsItemCount > cellsRemaining) break; // Couldn't expand anything evenly. Stop.
 
             // Items that get expanded will always be in the set of smallest items when we're done.
-            smallestExpandableItemsAt |= minCellsAt;
+            smallestItemsAt |= minCellsAt;
 
             for (int i = 0; i < childCount; i++) {
                 if ((minCellsAt & (1 << i)) == 0) continue;
@@ -186,22 +196,58 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         }
 
         // Divide any space left that wouldn't divide along cell boundaries
-        // evenly among the smallest multi-cell (expandable) items.
+        // evenly among the smallest items
 
-        if (cellsRemaining > 0 && smallestExpandableItemsAt != 0) {
-            final int expandCount = Long.bitCount(smallestExpandableItemsAt);
-            final int extraPixels = cellsRemaining * cellSize / expandCount;
+        final boolean singleItem = !hasOverflow && visibleItemCount == 1;
+        if (cellsRemaining > 0 && smallestItemsAt != 0 &&
+                (cellsRemaining < visibleItemCount - 1 || singleItem)) {
+            float expandCount = Long.bitCount(smallestItemsAt);
+
+            if (!singleItem) {
+                // The items at the far edges may only expand by half in order to pin to either side.
+                if ((smallestItemsAt & 1) != 0) {
+                    expandCount -= 0.5f;
+                }
+                if ((smallestItemsAt & (1 << (childCount - 1))) != 0) {
+                    expandCount -= 0.5f;
+                }
+            }
+
+            final int extraPixels = (int) (cellsRemaining * cellSize / expandCount);
 
             for (int i = 0; i < childCount; i++) {
-                if ((smallestExpandableItemsAt & (1 << i)) == 0) continue;
+                if ((smallestItemsAt & (1 << i)) == 0) continue;
 
                 final View child = getChildAt(i);
                 final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-                lp.extraPixels = extraPixels;
-                lp.expanded = true;
+                if (child instanceof ActionMenuItemView) {
+                    // If this is one of our views, expand and measure at the larger size.
+                    lp.extraPixels = extraPixels;
+                    lp.expanded = true;
+                    if (i == 0) {
+                        // First item gets part of its new padding pushed out of sight.
+                        // The last item will get this implicitly from layout.
+                        lp.leftMargin = -extraPixels / 2;
+                    }
+                    needsExpansion = true;
+                } else if (lp.isOverflowButton) {
+                    lp.extraPixels = extraPixels;
+                    lp.expanded = true;
+                    lp.rightMargin = -extraPixels / 2;
+                    needsExpansion = true;
+                } else {
+                    // If we don't know what it is, give it some margins instead
+                    // and let it center within its space. We still want to pin
+                    // against the edges.
+                    if (i != 0) {
+                        lp.leftMargin = extraPixels / 2;
+                    }
+                    if (i != childCount - 1) {
+                        lp.rightMargin = extraPixels / 2;
+                    }
+                }
             }
 
-            needsExpansion = true;
             cellsRemaining = 0;
         }
 
@@ -301,7 +347,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 }
 
                 int height = v.getMeasuredHeight();
-                int r = getWidth() - getPaddingRight();
+                int r = getWidth() - getPaddingRight() - p.rightMargin;
                 int l = r - overflowWidth;
                 int t = midVertical - (height / 2);
                 int b = t + height;
@@ -320,8 +366,20 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             }
         }
 
+        if (childCount == 1 && !hasOverflow) {
+            // Center a single child
+            final View v = getChildAt(0);
+            final int width = v.getMeasuredWidth();
+            final int height = v.getMeasuredHeight();
+            final int midHorizontal = (right - left) / 2;
+            final int l = midHorizontal - width / 2;
+            final int t = midVertical - height / 2;
+            v.layout(l, t, l + width, t + height);
+            return;
+        }
+
         final int spacerCount = nonOverflowCount - (hasOverflow ? 0 : 1);
-        final int spacerSize = spacerCount > 0 ? widthRemaining / spacerCount : 0;
+        final int spacerSize = Math.max(0, spacerCount > 0 ? widthRemaining / spacerCount : 0);
 
         int startLeft = getPaddingLeft();
         for (int i = 0; i < childCount; i++) {
@@ -334,7 +392,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
             startLeft += lp.leftMargin;
             int width = v.getMeasuredWidth();
             int height = v.getMeasuredHeight();
-            int t = midVertical - (height / 2);
+            int t = midVertical - height / 2;
             v.layout(startLeft, t, startLeft + width, t + height);
             startLeft += width + lp.rightMargin + spacerSize;
         }
