@@ -2580,6 +2580,7 @@ public class AudioService extends IAudioService.Stub {
         public IBinder mSourceRef = null;
         public String mClientId;
         public int mFocusChangeType;
+        public AudioFocusDeathHandler mHandler;
         public String mPackageName;
         public int mCallingUid;
 
@@ -2587,14 +2588,22 @@ public class AudioService extends IAudioService.Stub {
         }
 
         public FocusStackEntry(int streamType, int duration,
-                IAudioFocusDispatcher afl, IBinder source, String id, String pn, int uid) {
+                IAudioFocusDispatcher afl, IBinder source, String id, AudioFocusDeathHandler hdlr,
+                String pn, int uid) {
             mStreamType = streamType;
             mFocusDispatcher = afl;
             mSourceRef = source;
             mClientId = id;
             mFocusChangeType = duration;
+            mHandler = hdlr;
             mPackageName = pn;
             mCallingUid = uid;
+        }
+
+        public void unlinkToDeath() {
+            if (mSourceRef != null && mHandler != null) {
+                mSourceRef.unlinkToDeath(mHandler, 0);
+            }
         }
     }
 
@@ -2630,7 +2639,8 @@ public class AudioService extends IAudioService.Stub {
         if (!mFocusStack.empty() && mFocusStack.peek().mClientId.equals(clientToRemove))
         {
             //Log.i(TAG, "   removeFocusStackEntry() removing top of stack");
-            mFocusStack.pop();
+            FocusStackEntry fse = mFocusStack.pop();
+            fse.unlinkToDeath();
             if (signal) {
                 // notify the new top of the stack it gained focus
                 notifyTopOfAudioFocusStack();
@@ -2649,6 +2659,7 @@ public class AudioService extends IAudioService.Stub {
                     Log.i(TAG, " AudioFocus  abandonAudioFocus(): removing entry for "
                             + fse.mClientId);
                     stackIterator.remove();
+                    fse.unlinkToDeath();
                 }
             }
         }
@@ -2764,26 +2775,26 @@ public class AudioService extends IAudioService.Stub {
             // focus requester might already be somewhere below in the stack, remove it
             removeFocusStackEntry(clientId, false);
 
+            // handle the potential premature death of the new holder of the focus
+            // (premature death == death before abandoning focus)
+            // Register for client death notification
+            AudioFocusDeathHandler afdh = new AudioFocusDeathHandler(cb);
+            try {
+                cb.linkToDeath(afdh, 0);
+            } catch (RemoteException e) {
+                // client has already died!
+                Log.w(TAG, "AudioFocus  requestAudioFocus() could not link to "+cb+" binder death");
+            }
+
             // push focus requester at the top of the audio focus stack
             mFocusStack.push(new FocusStackEntry(mainStreamType, focusChangeHint, fd, cb,
-                    clientId, callingPackageName, Binder.getCallingUid()));
+                    clientId, afdh, callingPackageName, Binder.getCallingUid()));
 
             // there's a new top of the stack, let the remote control know
             synchronized(mRCStack) {
                 checkUpdateRemoteControlDisplay(RC_INFO_ALL);
             }
         }//synchronized(mAudioFocusLock)
-
-        // handle the potential premature death of the new holder of the focus
-        // (premature death == death before abandoning focus)
-        // Register for client death notification
-        AudioFocusDeathHandler afdh = new AudioFocusDeathHandler(cb);
-        try {
-            cb.linkToDeath(afdh, 0);
-        } catch (RemoteException e) {
-            // client has already died!
-            Log.w(TAG, "AudioFocus  requestAudioFocus() could not link to "+cb+" binder death");
-        }
 
         return AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
     }
