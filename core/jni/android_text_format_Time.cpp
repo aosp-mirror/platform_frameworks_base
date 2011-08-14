@@ -69,7 +69,7 @@ static inline bool java2time(JNIEnv* env, Time* t, jobject o)
     t->t.tm_yday = env->GetIntField(o, g_ydayField);
     t->t.tm_isdst = env->GetIntField(o, g_isdstField);
     t->t.tm_gmtoff = env->GetLongField(o, g_gmtoffField);
-    bool allDay = env->GetIntField(o, g_allDayField);
+    bool allDay = env->GetBooleanField(o, g_allDayField);
     if (allDay &&
 	((t->t.tm_sec !=0) || (t->t.tm_min != 0) || (t->t.tm_hour != 0))) {
         char msg[100];
@@ -162,7 +162,7 @@ static jstring android_text_format_Time_format2445(JNIEnv* env, jobject This)
 {
     Time t;
     if (!java2time(env, &t, This)) return env->NewStringUTF("");
-    bool allDay = env->GetIntField(This, g_allDayField);
+    bool allDay = env->GetBooleanField(This, g_allDayField);
     
     if (!allDay) {
         ACQUIRE_TIMEZONE(This, t)
