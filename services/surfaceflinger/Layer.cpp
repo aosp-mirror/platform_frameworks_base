@@ -191,14 +191,13 @@ void Layer::setGeometry(hwc_layer_t* hwcl)
      * 1) buffer orientation/flip/mirror
      * 2) state transformation (window manager)
      * 3) layer orientation (screen orientation)
+     * mOrientation is already the composition of (2) and (3)
      * (NOTE: the matrices are multiplied in reverse order)
      */
 
     const Transform bufferOrientation(mCurrentTransform);
-    const Transform& stateTransform(s.transform);
     const Transform layerOrientation(mOrientation);
-
-    const Transform tr(layerOrientation * stateTransform * bufferOrientation);
+    const Transform tr(layerOrientation * bufferOrientation);
 
     // this gives us only the "orientation" component of the transform
     const uint32_t finalTransform = tr.getOrientation();
