@@ -16391,8 +16391,6 @@ package android.provider {
   }
 
   protected static abstract interface ContactsContract.GroupsColumns {
-    field public static final java.lang.String ACTION = "action";
-    field public static final java.lang.String ACTION_URI = "action_uri";
     field public static final java.lang.String AUTO_ADD = "auto_add";
     field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String DELETED = "deleted";
@@ -16589,12 +16587,14 @@ package android.provider {
   }
 
   protected static abstract interface ContactsContract.StreamItemPhotosColumns {
-    field public static final java.lang.String ACTION = "action";
-    field public static final java.lang.String ACTION_URI = "action_uri";
     field public static final java.lang.String PHOTO_FILE_ID = "photo_file_id";
     field public static final java.lang.String PHOTO_URI = "photo_uri";
     field public static final java.lang.String SORT_INDEX = "sort_index";
     field public static final java.lang.String STREAM_ITEM_ID = "stream_item_id";
+    field public static final java.lang.String SYNC1 = "stream_item_photo_sync1";
+    field public static final java.lang.String SYNC2 = "stream_item_photo_sync2";
+    field public static final java.lang.String SYNC3 = "stream_item_photo_sync3";
+    field public static final java.lang.String SYNC4 = "stream_item_photo_sync4";
   }
 
   public static final class ContactsContract.StreamItems implements android.provider.BaseColumns android.provider.ContactsContract.StreamItemsColumns {
@@ -16609,13 +16609,19 @@ package android.provider {
   }
 
   protected static abstract interface ContactsContract.StreamItemsColumns {
-    field public static final java.lang.String ACTION = "action";
-    field public static final java.lang.String ACTION_URI = "action_uri";
+    field public static final java.lang.String ACCOUNT_NAME = "account_name";
+    field public static final java.lang.String ACCOUNT_TYPE = "account_type";
     field public static final java.lang.String COMMENTS = "comments";
+    field public static final java.lang.String DATA_SET = "data_set";
     field public static final java.lang.String RAW_CONTACT_ID = "raw_contact_id";
+    field public static final java.lang.String RAW_CONTACT_SOURCE_ID = "raw_contact_source_id";
     field public static final java.lang.String RES_ICON = "icon";
     field public static final java.lang.String RES_LABEL = "label";
     field public static final java.lang.String RES_PACKAGE = "res_package";
+    field public static final java.lang.String SYNC1 = "stream_item_sync1";
+    field public static final java.lang.String SYNC2 = "stream_item_sync2";
+    field public static final java.lang.String SYNC3 = "stream_item_sync3";
+    field public static final java.lang.String SYNC4 = "stream_item_sync4";
     field public static final java.lang.String TEXT = "text";
     field public static final java.lang.String TIMESTAMP = "timestamp";
   }
