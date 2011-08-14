@@ -19,18 +19,10 @@
 
 <set xmlns:android="http://schemas.android.com/apk/res/android"
     android:detachWallpaper="true" android:shareInterpolator="false">
-    <scale
-        android:fromXScale="0.9" android:toXScale="1.0"
-        android:fromYScale="0.9" android:toYScale="1.0"
-        android:pivotX="50%p" android:pivotY="50%p"
-        android:fillEnabled="true" android:fillBefore="true"
-        android:interpolator="@interpolator/decelerate_cubic"
-        android:startOffset="@android:integer/config_mediumAnimTime"
-        android:duration="@android:integer/config_mediumAnimTime" />
     <alpha
         android:fromAlpha="0" android:toAlpha="1.0"
         android:fillEnabled="true" android:fillBefore="true"
         android:interpolator="@interpolator/decelerate_quad"
-        android:startOffset="@android:integer/config_mediumAnimTime"
-        android:duration="@android:integer/config_mediumAnimTime"/>
+        android:startOffset="@android:integer/config_shortAnimTime"
+        android:duration="300"/>
 </set>
