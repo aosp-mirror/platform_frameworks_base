@@ -37,7 +37,7 @@ public:
 
     // Plays back commands from the client.
     // Returns true if any commands were processed.
-    bool playCoreCommands(Context *con, bool waitForCommand);
+    bool playCoreCommands(Context *con, bool waitForCommand, uint64_t timeToWait);
 
     //LocklessCommandFifo mToCore;
 

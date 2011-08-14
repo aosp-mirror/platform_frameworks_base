@@ -31,7 +31,10 @@ public:
     bool init();
 
     void set();
-    void wait();
+
+    // returns true if the signal occured
+    // false for timeout
+    bool wait(uint64_t timeout = 0);
 
 protected:
     bool mSet;
