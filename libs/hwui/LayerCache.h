@@ -119,10 +119,6 @@ private:
             mHeight = uint32_t(ceilf(layerHeight / float(LAYER_SIZE)) * LAYER_SIZE);
         }
 
-        LayerEntry(const LayerEntry& entry):
-            mLayer(entry.mLayer), mWidth(entry.mWidth), mHeight(entry.mHeight) {
-        }
-
         LayerEntry(Layer* layer):
             mLayer(layer), mWidth(layer->getWidth()), mHeight(layer->getHeight()) {
         }

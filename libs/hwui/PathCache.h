@@ -41,10 +41,6 @@ struct PathCacheEntry: public ShapeCacheEntry {
         path = NULL;
     }
 
-    PathCacheEntry(const PathCacheEntry& entry): ShapeCacheEntry(entry) {
-        path = entry.path;
-    }
-
     bool lessThan(const ShapeCacheEntry& r) const {
         const PathCacheEntry& rhs = (const PathCacheEntry&) r;
         LTE_INT(path) {
