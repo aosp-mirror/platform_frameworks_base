@@ -2853,6 +2853,8 @@ package android.app {
     method public void setMessage(java.lang.CharSequence);
     method public void setView(android.view.View);
     method public void setView(android.view.View, int, int, int, int);
+    field public static final int THEME_DEVICE_DEFAULT_DARK = 4; // 0x4
+    field public static final int THEME_DEVICE_DEFAULT_LIGHT = 5; // 0x5
     field public static final int THEME_HOLO_DARK = 2; // 0x2
     field public static final int THEME_HOLO_LIGHT = 3; // 0x3
     field public static final int THEME_TRADITIONAL = 1; // 0x1

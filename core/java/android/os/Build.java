@@ -287,6 +287,15 @@ public class Build {
          * {@link android.R.attr#hardwareAccelerated android:hardwareAccelerated}
          * to turn it off if needed, although this is strongly discouraged since
          * it will result in poor performance on larger screen devices.
+         * <li> The default theme for applications is now the "device default" theme:
+         *      {@link android.R.style#Theme_DeviceDefault}. This may be the
+         *      holo dark theme or a different dark theme defined by the specific device.
+         *      The {@link android.R.style#Theme_Holo} family must not be modified
+         *      for a device to be considered compatible. Applications that explicitly
+         *      request a theme from the Holo family will be guaranteed that these themes
+         *      will not change character within the same platform version. Applications
+         *      that wish to blend in with the device should use a theme from the
+         *      {@link android.R.style#Theme_DeviceDefault} family.
          * </ul>
          */
         public static final int ICE_CREAM_SANDWICH = CUR_DEVELOPMENT;

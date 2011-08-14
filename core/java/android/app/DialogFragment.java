@@ -204,7 +204,7 @@ public class DialogFragment extends Fragment
     public void setStyle(int style, int theme) {
         mStyle = style;
         if (mStyle == STYLE_NO_FRAME || mStyle == STYLE_NO_INPUT) {
-            mTheme = com.android.internal.R.style.Theme_Holo_Dialog_NoFrame;
+            mTheme = com.android.internal.R.style.Theme_DeviceDefault_Dialog_NoFrame;
         }
         if (theme != 0) {
             mTheme = theme;
