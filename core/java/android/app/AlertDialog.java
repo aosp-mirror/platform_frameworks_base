@@ -75,6 +75,18 @@ public class AlertDialog extends Dialog implements DialogInterface {
      * the holographic alert theme with a light background.
      */
     public static final int THEME_HOLO_LIGHT = 3;
+
+    /**
+     * Special theme constant for {@link #AlertDialog(Context, int)}: use
+     * the device's default alert theme with a dark background.
+     */
+    public static final int THEME_DEVICE_DEFAULT_DARK = 4;
+
+    /**
+     * Special theme constant for {@link #AlertDialog(Context, int)}: use
+     * the device's default alert theme with a dark background.
+     */
+    public static final int THEME_DEVICE_DEFAULT_LIGHT = 5;
     
     protected AlertDialog(Context context) {
         this(context, resolveDialogTheme(context, 0), true);
@@ -113,6 +125,10 @@ public class AlertDialog extends Dialog implements DialogInterface {
             return com.android.internal.R.style.Theme_Holo_Dialog_Alert;
         } else if (resid == THEME_HOLO_LIGHT) {
             return com.android.internal.R.style.Theme_Holo_Light_Dialog_Alert;
+        } else if (resid == THEME_DEVICE_DEFAULT_DARK) {
+            return com.android.internal.R.style.Theme_DeviceDefault_Dialog_Alert;
+        } else if (resid == THEME_DEVICE_DEFAULT_LIGHT) {
+            return com.android.internal.R.style.Theme_DeviceDefault_Light_Dialog_Alert;
         } else if (resid >= 0x01000000) {   // start of real resource IDs.
             return resid;
         } else {
