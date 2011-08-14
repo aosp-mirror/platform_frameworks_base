@@ -8736,6 +8736,12 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
+        if (mDisplay == null || !mPolicy.isScreenOn()) {
+            // No need to freeze the screen before the system is ready or if
+            // the screen is off.
+            return;
+        }
+
         mScreenFrozenLock.acquire();
 
         mDisplayFrozen = true;

@@ -1689,7 +1689,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                     return HierarchicalUri.readFrom(in);
             }
 
-            throw new AssertionError("Unknown URI type: " + type);
+            throw new IllegalArgumentException("Unknown URI type: " + type);
         }
 
         public Uri[] newArray(int size) {
@@ -1996,7 +1996,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                 parcel.writeInt(Representation.DECODED);
                 parcel.writeString(decoded);
             } else {
-                throw new AssertionError();
+                throw new IllegalArgumentException("Neither encoded nor decoded");
             }
         }
     }
@@ -2037,7 +2037,8 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                 case Representation.DECODED:
                     return fromDecoded(parcel.readString());
                 default:
-                    throw new AssertionError();
+                    throw new IllegalArgumentException("Unknown representation: "
+                            + representation);
             }
         }
 
@@ -2221,7 +2222,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                 case Representation.DECODED:
                     return fromDecoded(parcel.readString());
                 default:
-                    throw new AssertionError();
+                    throw new IllegalArgumentException("Bad representation: " + representation);
             }
         }
 
