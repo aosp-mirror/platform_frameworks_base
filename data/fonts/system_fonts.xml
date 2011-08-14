@@ -55,15 +55,15 @@
         </fileset>
     </family>
 
-	<family>
-		<nameset>
-			<name>Droid Sans</name>
-		</nameset>
-		<fileset>
-			<file>DroidSans.ttf</file>
-			<file>DroidSans-Bold.ttf</file>
-		</fileset>
-	</family>
+    <family>
+        <nameset>
+            <name>Droid Sans</name>
+        </nameset>
+        <fileset>
+            <file>DroidSans.ttf</file>
+            <file>DroidSans-Bold.ttf</file>
+        </fileset>
+    </family>
 
     <family>
         <nameset>
