@@ -5118,7 +5118,9 @@ void AudioFlinger::purgeStaleEffects_l() {
         sp<PlaybackThread> t = mPlaybackThreads.valueAt(i);
         for (size_t j = 0; j < t->mEffectChains.size(); j++) {
             sp<EffectChain> ec = t->mEffectChains[j];
-            chains.push(ec);
+            if (ec->sessionId() > AUDIO_SESSION_OUTPUT_MIX) {
+                chains.push(ec);
+            }
         }
     }
     for (size_t i = 0; i < mRecordThreads.size(); i++) {
