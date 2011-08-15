@@ -322,6 +322,12 @@ class BluetoothEventLoop {
             intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
             mContext.sendBroadcast(intent, BLUETOOTH_PERM);
         } else if (name.equals("Pairable") || name.equals("Discoverable")) {
+            adapterProperties.setProperty(name, propValues[1]);
+
+            if (name.equals("Discoverable")) {
+                mBluetoothState.sendMessage(BluetoothAdapterStateMachine.SCAN_MODE_CHANGED);
+            }
+
             String pairable = name.equals("Pairable") ? propValues[1] :
                 adapterProperties.getProperty("Pairable");
             String discoverable = name.equals("Discoverable") ? propValues[1] :
@@ -330,16 +336,6 @@ class BluetoothEventLoop {
             // This shouldn't happen, unless Adapter Properties are null.
             if (pairable == null || discoverable == null)
                 return;
-
-            adapterProperties.setProperty(name, propValues[1]);
-
-            if (name.equals("Pairable")) {
-                if (pairable.equals("true")) {
-                    mBluetoothState.sendMessage(BluetoothAdapterStateMachine.BECAME_PAIRABLE);
-                } else {
-                    mBluetoothState.sendMessage(BluetoothAdapterStateMachine.BECAME_NON_PAIRABLE);
-                }
-            }
 
             int mode = BluetoothService.bluezStringToScanMode(
                     pairable.equals("true"),
@@ -377,10 +373,11 @@ class BluetoothEventLoop {
                 mBluetoothService.updateBluetoothState(value);
             }
         } else if (name.equals("Powered")) {
+            mBluetoothState.sendMessage(BluetoothAdapterStateMachine.POWER_STATE_CHANGED,
+                propValues[1].equals("true") ? new Boolean(true) : new Boolean(false));
             // bluetoothd has restarted, re-read all our properties.
             // Note: bluez only sends this property change when it restarts.
-            if (propValues[1].equals("true"))
-                onRestartRequired();
+            onRestartRequired();
         } else if (name.equals("DiscoverableTimeout")) {
             adapterProperties.setProperty(name, propValues[1]);
         }

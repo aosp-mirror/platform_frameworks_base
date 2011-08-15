@@ -437,7 +437,21 @@ public class BluetoothService extends IBluetooth.Stub {
      * power off Bluetooth
      */
     synchronized void shutoffBluetooth() {
+        if (mAdapterSdpHandles != null) removeReservedServiceRecordsNative(mAdapterSdpHandles);
+        setBluetoothTetheringNative(false, BluetoothPanProfileHandler.NAP_ROLE,
+                BluetoothPanProfileHandler.NAP_BRIDGE);
         tearDownNativeDataNative();
+    }
+
+    /**
+     * Data clean up after Bluetooth shutoff
+     */
+    synchronized void cleanNativeAfterShutoffBluetooth() {
+        // Ths method is called after shutdown of event loop in the Bluetooth shut down
+        // procedure
+
+        // the adapter property could be changed before event loop is stoped, clear it again
+        mAdapterProperties.clear();
         disableNative();
         if (mRestart) {
             mRestart = false;
@@ -743,26 +757,6 @@ public class BluetoothService extends IBluetooth.Stub {
     public synchronized boolean setScanMode(int mode, int duration) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS,
                                                 "Need WRITE_SECURE_SETTINGS permission");
-        return setScanMode(mode, duration, true);
-    }
-
-    /**
-     * @param on true set the local Bluetooth module to be connectable
-     *                but not dicoverable
-     *           false set the local Bluetooth module to be not connectable
-     *                 and not dicoverable
-     */
-    /*package*/ synchronized void switchConnectable(boolean on) {
-        if (on) {
-            // 0 is a dummy value, does not apply for SCAN_MODE_CONNECTABLE
-            setScanMode(BluetoothAdapter.SCAN_MODE_CONNECTABLE, 0, false);
-        } else {
-            // 0 is a dummy value, does not apply for SCAN_MODE_NONE
-            setScanMode(BluetoothAdapter.SCAN_MODE_NONE, 0, false);
-        }
-    }
-
-    private synchronized boolean setScanMode(int mode, int duration, boolean allowOnlyInOnState) {
         boolean pairable;
         boolean discoverable;
 
@@ -785,17 +779,31 @@ public class BluetoothService extends IBluetooth.Stub {
             return false;
         }
 
-        if (allowOnlyInOnState) {
-            setPropertyBoolean("Discoverable", discoverable);
-            setPropertyBoolean("Pairable", pairable);
-        } else {
-            // allowed to set the property through native layer directly
-            setAdapterPropertyBooleanNative("Discoverable", discoverable ? 1 : 0);
-            // do setting pairable after setting discoverable since the adapter
-            // state machine uses pairable event for state change
-            setAdapterPropertyBooleanNative("Pairable", pairable ? 1 : 0);
-        }
+        setPropertyBoolean("Discoverable", discoverable);
+        setPropertyBoolean("Pairable", pairable);
         return true;
+    }
+
+    /**
+     * @param on true set the local Bluetooth module to be connectable
+     *                The dicoverability is recovered to what it was before
+     *                switchConnectable(false) call
+     *           false set the local Bluetooth module to be not connectable
+     *                 and not dicoverable
+     */
+    /*package*/ synchronized void switchConnectable(boolean on) {
+        setAdapterPropertyBooleanNative("Powered", on ? 1 : 0);
+    }
+
+    /*package*/ synchronized void setPairable() {
+        String pairableString = getProperty("Pairable", false);
+        if (pairableString == null) {
+            Log.e(TAG, "null pairableString");
+            return;
+        }
+        if (pairableString.equals("false")) {
+            setAdapterPropertyBooleanNative("Pairable", 1);
+        }
     }
 
     /*package*/ synchronized String getProperty(String name, boolean checkState) {
