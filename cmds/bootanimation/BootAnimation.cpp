@@ -37,7 +37,6 @@
 #include <ui/Region.h>
 #include <ui/DisplayInfo.h>
 #include <ui/FramebufferNativeWindow.h>
-#include <ui/EGLUtils.h>
 
 #include <surfaceflinger/ISurfaceComposer.h>
 #include <surfaceflinger/ISurfaceComposerClient.h>
@@ -222,6 +221,9 @@ status_t BootAnimation::readyToRun() {
 
     // initialize opengl and egl
     const EGLint attribs[] = {
+            EGL_RED_SIZE,   8,
+            EGL_GREEN_SIZE, 8,
+            EGL_BLUE_SIZE,  8,
             EGL_DEPTH_SIZE, 0,
             EGL_NONE
     };
@@ -234,7 +236,7 @@ status_t BootAnimation::readyToRun() {
     EGLDisplay display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
 
     eglInitialize(display, 0, 0);
-    EGLUtils::selectConfigForNativeWindow(display, attribs, s.get(), &config);
+    eglChooseConfig(display, attribs, &config, 1, &numConfigs);
     surface = eglCreateWindowSurface(display, config, s.get(), NULL);
     context = eglCreateContext(display, config, NULL, NULL);
     eglQuerySurface(display, surface, EGL_WIDTH, &w);
