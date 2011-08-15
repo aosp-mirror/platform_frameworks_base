@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"הצג התראות"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"הסר"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"בדיקה"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"אין התראות"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"מתבצע"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"התראות"</string>
@@ -62,18 +60,16 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"שינוי מרחק מתצוגה לתאימות"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"כאשר יישום מיועד למסך קטן יותר, פקד של מרחק מתצוגה יופיע ליד השעון."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"צילום המסך נשמר בגלריה"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"אין אפשרות לשמור את צילום המסך. ייתכן שנעשה שימוש באמצעי אחסון חיצוני."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"אפשרויות העברת קבצים ב-USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"טען כנגן מדיה (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"טען כמצלמה (PTP)"</string>
     <string name="installer_cd_button_title" msgid="8485631662288445893">"התקן את יישום העברת הקבצים של Android עבור Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"הקודם"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"דף הבית"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"בית"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"תפריט"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"החלף לחצן של שיטת קלט."</string>
+    <string name="accessibility_recent" msgid="3027675523629738534">"יישומים אחרונים"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"לחצן החלפת שיטת קלט."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"לחצן מרחק מתצוגה של תאימות."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"שנה מרחק מתצוגה של מסך קטן לגדול יותר."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth מחובר."</string>
@@ -83,7 +79,7 @@
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"שני פסים של סוללה."</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"שלושה פסים של סוללה."</string>
     <string name="accessibility_battery_full" msgid="8909122401720158582">"סוללה מלאה."</string>
-    <string name="accessibility_no_phone" msgid="4894708937052611281">"אין טלפון"</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"אין טלפון."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"פס אחד של טלפון."</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"שני פסים של טלפון."</string>
     <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"שלושה פסים של טלפון."</string>
@@ -108,33 +104,23 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"אין כרטיס SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"שיתוף אינטרנט בין ניידים של Bluetooth"</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"מצב טיסה"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"סוללה <xliff:g id="NUMBER">%d</xliff:g> אחוזים."</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> אחוזים של סוללה."</string>
     <string name="accessibility_settings_button" msgid="7913780116850379698">"לחצן הגדרות."</string>
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"לחצן ההתראות"</string>
-    <string name="accessibility_remove_notification" msgid="4883990503785778699">"הסר התראה"</string>
-    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"ה-GPS מופעל."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"רכישת GPS."</string>
+    <string name="accessibility_remove_notification" msgid="4883990503785778699">"הסר התראה."</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS מופעל."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"השגת GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter מופעל"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"צלצול ורטט."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"צלצול שקט."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"נתוני 2G-3G מושבתים"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"נתוני 4G מושבתים"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"נתונים לנייד מושבתים"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"הנתונים מושבתים"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"הגעת למגבלת השימוש בנתונים שצוינה."\n\n"ייתכן שתחויב בתשלום לספק על שימוש נוסף בנתונים."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"הפעל מחדש את הנתונים"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"אין חיבור לאינטרנט"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi מחובר"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"מחפש GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"מיקום מוגדר על ידי GPS"</string>
 </resources>

@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Pokaži obvestila"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Odstrani"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Preverite"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ni obvestil"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Trenutno"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obvestila"</string>
@@ -62,18 +60,16 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Povečava združljivosti"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Če je program izdelan za manjše zaslone, se ob uri pokaže kontrolnik za povečavo."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Posnetek zaslona je shranjen v galerijo"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Posnetka zaslona ni mogoče shraniti. Zunanja shramba je morda v uporabi."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Možnosti prenosa datotek prek USB-ja"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Vpni kot predvajalnik (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Vpni kot fotoaparat (PTP)"</string>
     <string name="installer_cd_button_title" msgid="8485631662288445893">"Namestite program Android File Transfer za Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Nazaj"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Domača stran"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Začetni zaslon"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Meni"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Gumb za preklo načina vnosa."</string>
+    <string name="accessibility_recent" msgid="3027675523629738534">"Nedavni programi"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Gumb za preklop načina vnosa."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Gumb povečave za združljivost."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Povečava manjšega na večji zaslon."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Povezava Bluetooth vzpostavljena."</string>
@@ -117,24 +113,14 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter omogočen."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Zvonjenje z vibriranjem."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Zvonjenje izklopljeno."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Podatki 2G-3G so onemogočeni"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Podatki 4G so onemogočeni"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilni podatki so onemogočeni"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Podatki onemogočeni"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Dosežena je določena omejitev porabe podatkov."\n\n"Dodatno porabo podatkov vam lahko operater zaračuna."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Znova omogoči podatke"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ni internetne povez."</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi povezan"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Iskanje GPS-a"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokacija nastavljena z GPS-om"</string>
 </resources>

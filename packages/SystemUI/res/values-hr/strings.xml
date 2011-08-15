@@ -24,9 +24,7 @@
     <string name="status_bar_do_not_disturb_button" msgid="5812628897510997853">"Ne uznemiravaj"</string>
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Prikaži obavijesti"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Ukloni"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Pregledati"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
+    <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Provjeri"</string>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bez obavijesti"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"U tijeku"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obavijesti"</string>
@@ -62,40 +60,38 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Kompatibilni zum"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Kada je aplikacija dizajnirana za manji zaslon, kontrole zumiranja prikazuju se pored sata."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Snimak zaslona spremljen u Galeriju"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Ne mogu spremiti snimak zaslona. Možda se upotrebljava vanjska pohrana."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcije USB prijenosa datoteka"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Učitaj kao media player (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Učitaj kao fotoaparat (PTP)"</string>
     <string name="installer_cd_button_title" msgid="8485631662288445893">"Instalacija aplikacije Android File Transfer za Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Natrag"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Početna stranica"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Početna"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Izbornik"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
+    <string name="accessibility_recent" msgid="3027675523629738534">"Nedavne aplikacije"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Gumb za promjenu načina unosa."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Gumb za kompatibilnost zumiranja."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zumiranje manjeg zaslona na veći."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth povezan."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth isključen."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"Nema baterije."</string>
-    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Baterija jedan stupac."</string>
-    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Baterija dva stupca."</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Baterija jedna linija."</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Baterija dvije linije."</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Baterija tri stupca."</string>
     <string name="accessibility_battery_full" msgid="8909122401720158582">"Baterija je puna."</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"Nema telefona."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Telefonski signal jedan stupac."</string>
-    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Telefonski signal dva stupca."</string>
-    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Telefonski signal tri stupca."</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Telefonski signal dvije linije."</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Telefonski signal tri linije."</string>
     <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Telefonski signal pun."</string>
     <string name="accessibility_no_data" msgid="4791966295096867555">"Nema podataka."</string>
     <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Podatkovni signal jedan stupac."</string>
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Podatkovni signal dva stupca."</string>
-    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Podatkovni signal tri stupca."</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Podatkovni signal tri linije."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Podatkovni signal pun."</string>
     <string name="accessibility_no_wifi" msgid="4017628918351949575">"Nema WiFi signala."</string>
     <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"WiFi signal jedan stupac."</string>
-    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"WiFi dva stupca."</string>
+    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"WiFi signal dvije linije."</string>
     <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"WiFi tri stupca."</string>
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"WiFi signal pun."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
@@ -111,30 +107,20 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterija <xliff:g id="NUMBER">%d</xliff:g> posto."</string>
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Gumb postavki."</string>
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Gumb obavijesti."</string>
-    <string name="accessibility_remove_notification" msgid="4883990503785778699">"Ukloni obavijesti."</string>
+    <string name="accessibility_remove_notification" msgid="4883990503785778699">"Ukloni obavijest."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS omogućen."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Dohvaćanje GPS-a."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter omogućen."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibracija softvera zvona."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Softver zvona utišan."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G podaci su onemogućeni"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G podaci su onemogućeni"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilni podaci su onemogućeni"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Podaci su onemogućeni"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Dosegnuto je navedeno ograničenje upotrebe podataka."\n\n"Dodatna upotreba podataka može se naplaćivati."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Ponovo omogući podatke"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Nema internetske veze"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi povezan"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Traženje GPS-a"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Lokaciju utvrdio GPS"</string>
 </resources>

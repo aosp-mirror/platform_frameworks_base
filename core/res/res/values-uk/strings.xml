@@ -195,6 +195,10 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Дозволяє програмі отримувати й обробляти повідомлення екстрених служб. Цей дозвіл доступний лише для системних програм."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"надсил. SMS повідом."</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Дозволяє програмі надсил. SMS повідомл. Шкідливі програми можуть спричин. збитки, надсилаючи повідомлення без вашого підтвердження."</string>
+    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <skip />
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <skip />
     <string name="permlab_readSms" msgid="4085333708122372256">"читати SMS або MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Дозволяє програмі читати SMS повідомлення, збережені в пристрої чи SIM-карті. Шкідливі програми можуть читати ваші конфіденц. повідомл."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Дозволяє програмі зчитувати SMS повідомлення, збереж. у вашому тел. чи SIM-карті. Шкідливі прогр. можуть зчит. ваші конфіденційні повід."</string>
@@ -264,6 +268,10 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Дозволяє власнику прив\'язувати до інтерфейсу верхнього рівня методу введення. Ніколи не потрібний для звичайних програм."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"прив’язати до текстової служби"</string>
     <string name="permdesc_bindTextService" msgid="172508880651909350">"Дозволяє власникові прив’язувати до інтерфейсу верхнього рівня текстової служби (напр. SpellCheckerService). Ніколи не застосовується для звичайних програм."</string>
+    <!-- no translation found for permlab_bindVpnService (4708596021161473255) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVpnService (6011554199384584151) -->
+    <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"прив\'зати до фон. мал."</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Дозволяє власнику прив\'язувати до інтерфейсу верхнього рівня фон. малюнка. Ніколи не потрібний для звичайних програм."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"прив\'язувати до служби віджетів"</string>
@@ -321,15 +329,19 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"запис. контактні дані"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Дозволяє програмі змінювати контактні дані (адреси), збереж. в пристрої. Шкідливі програми можуть використ. це для видалення чи зміни ваших контактних даних."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Дозволяє програмі змінювати контактні дані (адресу), збереж. в телефоні. Шкідливі програми можуть використ. це для видалення чи зміни ваших контактних даних."</string>
-    <string name="permlab_readProfile" msgid="2211941946684590103">"читання даних профілю"</string>
-    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"Дозволяє програмі читати всю особисту інформацію профілю. Шкідливі програми можуть використовувати це для вашої ідентифікації та надсилання особистої інформації іншим людям."</string>
-    <string name="permlab_writeProfile" msgid="6561668046361989220">"записувати дані профілю"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"Дозволяє програмі змінювати особисту інформацію профілю. Шкідливі програми можуть використовувати це для видалення чи зміни даних вашого профілю."</string>
-    <string name="permlab_readCalendar" msgid="6898987798303840534">"читати події календаря"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Дозволяє програмі зчитувати всі події календаря, збережені в пристрої. Шкідливі програми можуть використовувати це для надсилання ваших подій календаря іншим людям."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Дозволяє програмі зчитувати всі події календаря, збережені у вашому телефоні. Шкідливі програми можуть використ-ти це для надсилання подій календаря іншим людям."</string>
-    <string name="permlab_writeCalendar" msgid="3894879352594904361">"дод. чи змін. події календаря та надсил. ел. листи гостям"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Дозволяє програмі дод. чи змін. події у вашому календарі, який може надсилати ел. листи гостям. Шкідливі прогр. можуть викор. це, щоб видаляти чи змін. події вашого календаря або надсилати ел. листи гостям."</string>
+    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
+    <skip />
+    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"читати події календаря"</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Дозволяє програмі зчитувати всі події календаря, збережені в пристрої. Шкідливі програми можуть використовувати це для надсилання ваших подій календаря іншим людям."</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Дозволяє програмі зчитувати всі події календаря, збережені в пристрої. Шкідливі програми можуть використовувати це для надсилання ваших подій календаря іншим людям."</string>
+    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"дод. чи змін. події календаря та надсил. ел. листи гостям"</string>
+    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Дозволяє програмі дод. чи змін. події у вашому календарі, який може надсилати ел. листи гостям. Шкідливі прогр. можуть викор. це, щоб видаляти чи змін. події вашого календаря або надсилати ел. листи гостям."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"фіктивні джер. місцезн. для тестув."</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Створ. фіктивні джерела місцезн. для тестув. Шкідливі прогр. можуть використ. це для заміни місцезн. і/чи статусу, отрим. від дійсних джерел місцезн., таких як GPS або моб. операторів."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"отр. дост. до додат. команд пров. місцезн."</string>
@@ -439,8 +451,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Дозволяє програмі переглядати стани всіх мереж."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"повний дост. до Інтерн."</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Дозволяє програмі створювати сокети мережі."</string>
-    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"запис. налашт. імені точки доступу"</string>
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Дозволяє програмі змінювати налаштування APN, такі як проксі чи порт будь-якого APN."</string>
+    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"запис. налашт. імені точки доступу"</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Дозволяє програмі змінювати налаштування APN, такі як проксі чи порт будь-якого APN."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"змінюв. підключення до мережі"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Дозволяє програмі змінювати стан підключення до мережі."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Змінити з\'єднання прив\'язки"</string>
@@ -839,9 +851,7 @@
     <string name="cut" msgid="3092569408438626261">"Виріз."</string>
     <string name="copy" msgid="2681946229533511987">"Копіюв."</string>
     <string name="paste" msgid="5629880836805036433">"Вставити"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Немає що вставити"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="replace" msgid="8333608224471746584">"Замінити"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Копіюв. URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Вибрати текст..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Вибір тексту"</string>
@@ -864,15 +874,21 @@
     <string name="chooseActivity" msgid="1009246475582238425">"Виберіть дію"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Виберіть програму для пристрою USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Жодна програма не може виконати цю дію."</string>
-    <string name="aerr_title" msgid="653922989522758100">"Помилка!"</string>
-    <string name="aerr_application" msgid="4683614104336409186">"Програма <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) несподівано зупинилася. Спробуйте ще."</string>
-    <string name="aerr_process" msgid="1551785535966089511">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> несподівано зупинився. Спробуйте ще."</string>
-    <string name="anr_title" msgid="3100070910664756057">"Помилка!"</string>
-    <string name="anr_activity_application" msgid="3538242413112507636">"Дія <xliff:g id="ACTIVITY">%1$s</xliff:g> (у програмі <xliff:g id="APPLICATION">%2$s</xliff:g>) не відповідає."</string>
-    <string name="anr_activity_process" msgid="5420826626009561014">"Дія <xliff:g id="ACTIVITY">%1$s</xliff:g> (у процесі <xliff:g id="PROCESS">%2$s</xliff:g>) не відповідає."</string>
-    <string name="anr_application_process" msgid="4185842666452210193">"Програма <xliff:g id="APPLICATION">%1$s</xliff:g> (у процесі <xliff:g id="PROCESS">%2$s</xliff:g>) не відповідає."</string>
-    <string name="anr_process" msgid="1246866008169975783">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> не відповідає."</string>
-    <string name="force_close" msgid="3653416315450806396">"Примус. закр."</string>
+    <string name="aerr_title" msgid="1905800560317137752"></string>
+    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <skip />
+    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <skip />
+    <string name="anr_title" msgid="4351948481459135709"></string>
+    <!-- no translation found for anr_activity_application (8339738283149696827) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (7018289416670457797) -->
+    <skip />
+    <!-- no translation found for anr_application_process (7208175830253210526) -->
+    <skip />
+    <!-- no translation found for anr_process (306819947562555821) -->
+    <skip />
+    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"Примус. закр."</string>
     <string name="report" msgid="4060218260984795706">"Повідом."</string>
     <string name="wait" msgid="7147118217226317732">"Чекати"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Програму переадресовано"</string>
@@ -901,17 +917,15 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Гучн. сповіщ."</string>
     <string name="volume_notification" msgid="2422265656744276715">"Гучність сповіщень"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Гучність"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
     <skip />
-    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
     <skip />
-    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
     <skip />
-    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
     <skip />
-    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
-    <skip />
-    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
     <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Мелодія за умовч."</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Мелодія за умовч. (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -926,8 +940,10 @@
     <item quantity="one" msgid="1634101450343277345">"Відкрита Wi-Fi мережа доступна"</item>
     <item quantity="other" msgid="7915895323644292768">"Відкриті Wi-Fi мережі доступні"</item>
   </plurals>
-    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Мережа Wi-Fi була вимкнена"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Мережа Wi-Fi була тимчасово вимкнена через погане з’єднання."</string>
+    <!-- no translation found for wifi_watchdog_network_disabled (7904214231651546347) -->
+    <skip />
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (2517058131278770509) -->
+    <skip />
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Почати операцію Wi-Fi Direct. Це вимкне Wi-Fi-операцію клієнт/точка доступу."</string>
     <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Не вдалося запустити Wi-Fi Direct"</string>
@@ -941,7 +957,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Скасувати"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM-карту вилучено"</string>
-    <string name="sim_removed_message" msgid="2064255102770489459">"Мобільна мережа буде недоступною, поки ви не заміните SIM-карту."</string>
+    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"Мобільна мережа буде недоступною, поки ви не заміните SIM-карту."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM-карту додано"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"Щоб отримати доступ до мобільної мережі, потрібно перезапустити пристрій."</string>
@@ -1096,22 +1112,14 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Вибрати обліковий запис"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Додати"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Відняти"</string>
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"перевірено"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"не перевірено"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"вибрано"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"не вибрано"</string>
+    <string name="switch_on" msgid="551417728476977311">"увімк."</string>
+    <string name="switch_off" msgid="7249798614327155088">"вимкн."</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"натиснуто"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"не натиснуто"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Перейти на головну"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Перейти вгору"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Інші варіанти"</string>
@@ -1125,14 +1133,10 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Дані 4G вимкнено"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Мобільне передав. даних вимкнено"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"торкніться, щоб увімкнути"</string>
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Перевищено ліміт даних 2G–3G"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Перевищено ліміт даних 4G"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Перевищено ліміт мобільних даних"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> понад указаний ліміт."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Сертифікат безпеки"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Цей сертифікат дійсний."</string>
     <string name="issued_to" msgid="454239480274921032">"Кому видано:"</string>

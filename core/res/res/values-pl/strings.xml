@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Wykonano kod funkcji."</string>
     <string name="fcError" msgid="3327560126588500777">"Problem z połączeniem lub nieprawidłowy kod funkcji."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Strona sieci Web zawiera błąd."</string>
+    <string name="httpError" msgid="6603022914760066338">"Wystąpił błąd sieci."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Nie można odszukać adresu URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Schemat uwierzytelniania strony nie jest obsługiwany."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Nieudane uwierzytelnianie."</string>
@@ -195,6 +195,10 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Umożliwia aplikacji odbiór i przetwarzanie wiadomości pochodzących z emisji alarmowych. To pozwolenie jest dostępne tylko dla aplikacji systemowych."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"wysyłanie wiadomości SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Pozwól aplikacjom na wysyłanie wiadomości SMS. Szkodliwe aplikacje mogą generować koszty, wysyłając wiadomości bez wiedzy użytkownika."</string>
+    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <skip />
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <skip />
     <string name="permlab_readSms" msgid="4085333708122372256">"czytanie wiadomości SMS lub MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Zezwala aplikacji na odczyt wiadomości SMS przechowywanych w tablecie lub na karcie SIM. Złośliwe aplikacje mogą odczytywać poufne wiadomości."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Pozwala aplikacji na czytanie wiadomości SMS zapisanych w telefonie lub na karcie SIM. Szkodliwe aplikacje mogą czytać poufne wiadomości."</string>
@@ -264,6 +268,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Pozwala na powiązanie wybranego sposobu wprowadzania tekstu z interfejsem najwyższego poziomu. To uprawnienie nie powinno być nigdy wymagane przez zwykłe aplikacje."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"powiąż z usługą SMS"</string>
     <string name="permdesc_bindTextService" msgid="172508880651909350">"Zezwala posiadaczowi na utworzenie powiązania z interfejsem najwyższego poziomu usługi tekstowej (np. SpellCheckerService). Opcja nie powinna być nigdy potrzebna w przypadku zwykłych aplikacji."</string>
+    <string name="permlab_bindVpnService" msgid="4708596021161473255">"tworzenie powiązania z usługą VPN"</string>
+    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Zezwala na tworzenie powiązania z interfejsem najwyższego poziomu usługi VPN. Nie powinno być nigdy potrzebne w przypadku zwykłych aplikacji."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"powiązanie z tapetą"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Umożliwia posiadaczowi powiązać interfejs najwyższego poziomu dla tapety. Nie powinno być nigdy potrzebne w przypadku zwykłych aplikacji."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"powiązanie z usługą widżetów"</string>
@@ -321,15 +327,19 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"zapisywanie danych kontaktowych"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Zezwala aplikacji na modyfikowanie danych kontaktowych (adresów) zapisanych w tablecie. Złośliwe aplikacje mogą wykorzystać tę możliwość w celu usunięcia lub zmodyfikowania danych kontaktowych."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Pozwala aplikacji na zmianę danych kontaktowych (adresowych) zapisanych w telefonie. Szkodliwe aplikacje mogą to wykorzystać, aby usunąć lub zmienić dane kontaktowe."</string>
-    <string name="permlab_readProfile" msgid="2211941946684590103">"odczyt danych profilu"</string>
-    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"Zezwala aplikacji na odczyt wszystkich informacji z Twojego profilu osobistego. Złośliwe aplikacje mogą wykorzystać tę możliwość w celu zidentyfikowania Cię i wysłania Twoich informacji osobistych do innych osób."</string>
-    <string name="permlab_writeProfile" msgid="6561668046361989220">"zapis danych profilu"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"Zezwala aplikacji na modyfikowanie informacji w Twoim profilu osobistym. Złośliwe aplikacje mogą wykorzystać tę możliwość w celu usunięcia lub zmodyfikowania danych profilu."</string>
-    <string name="permlab_readCalendar" msgid="6898987798303840534">"odczytywanie wydarzeń w kalendarzu"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Zezwala aplikacji na odczyt wszystkich wydarzeń z kalendarza zapisanych w tablecie. Złośliwe aplikacje mogą wykorzystać tę możliwość w celu wysłania wydarzeń z kalendarza do innych osób."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Pozwala aplikacji na odczytywanie wszystkich wydarzeń z kalendarza, zapisanych w telefonie. Szkodliwe aplikacje mogą to wykorzystać do rozsyłania wydarzeń z kalendarza do innych ludzi."</string>
-    <string name="permlab_writeCalendar" msgid="3894879352594904361">"dodawanie i modyfikowanie wydarzeń w kalendarzu oraz wysyłanie wiadomości e-mail do gości"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Zezwala aplikacji na dodawanie i zmianę wydarzeń w kalendarzu, co może powodować wysyłanie wiadomości e-mail do gości. Złośliwe aplikacje mogą używać tego uprawnienia do usuwania i modyfikowania wydarzeń w kalendarzu oraz do wysyłania wiadomości e-mail do gości."</string>
+    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
+    <skip />
+    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"odczytywanie wydarzeń w kalendarzu"</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Zezwala aplikacji na odczyt wszystkich wydarzeń z kalendarza zapisanych w tablecie. Złośliwe aplikacje mogą wykorzystać tę możliwość w celu wysłania wydarzeń z kalendarza do innych osób."</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Zezwala aplikacji na odczyt wszystkich wydarzeń z kalendarza zapisanych w tablecie. Złośliwe aplikacje mogą wykorzystać tę możliwość w celu wysłania wydarzeń z kalendarza do innych osób."</string>
+    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"dodawanie i modyfikowanie wydarzeń w kalendarzu oraz wysyłanie wiadomości e-mail do gości"</string>
+    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Zezwala aplikacji na dodawanie i zmianę wydarzeń w kalendarzu, co może powodować wysyłanie wiadomości e-mail do gości. Złośliwe aplikacje mogą używać tego uprawnienia do usuwania i modyfikowania wydarzeń w kalendarzu oraz do wysyłania wiadomości e-mail do gości."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"udawanie źródeł położenia dla testów"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Tworzenie pozorowanych źródeł ustalania położenia dla testów. Szkodliwe aplikacje mogą to wykorzystać, aby zastąpić prawdziwe położenie i/lub stan zwracany przez prawdziwe źródła, takie jak GPS lub dostawcy usługi sieciowej."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"dostęp do dodatkowych poleceń dostawcy informacji o lokalizacji"</string>
@@ -439,8 +449,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Pozwala aplikacji na wyświetlanie stanu wszystkich sieci."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"pełen dostęp do internetu"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Pozwala aplikacji na tworzenie gniazd sieciowych."</string>
-    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"zapisywanie ustawień nazwy punktu dostępowego (APN, Access Point Name)"</string>
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Pozwala aplikacji na zmianę ustawień APN, takich jak serwer proxy oraz port dowolnego APN."</string>
+    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"zapisywanie ustawień nazwy punktu dostępowego (APN, Access Point Name)"</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Pozwala aplikacji na zmianę ustawień APN, takich jak serwer proxy oraz port dowolnego APN."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"zmienianie połączeń sieci"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Zezwala aplikacji na zmianę stanu łączności sieciowej."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Zmiana łączności powiązanej"</string>
@@ -720,10 +730,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Umożliwia aplikacji modyfikowanie historii lub zakładek przeglądarki zapisanych w telefonie. Złośliwe aplikacje mogą używać tej opcji do usuwania lub modyfikowania danych przeglądarki."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"ustaw alarm w budziku"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Umożliwia aplikacji ustawienie alarmu w zainstalowanej aplikacji budzika. W niektórych aplikacjach budzika funkcja ta może nie być zaimplementowana."</string>
-    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
-    <skip />
-    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
-    <skip />
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"dodawanie poczty głosowej"</string>
+    <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Zezwala aplikacji na dodawanie wiadomości do skrzynki odbiorczej poczty głosowej."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Modyfikowanie uprawnień przeglądarki dotyczących lokalizacji geograficznej"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Zezwala aplikacji na modyfikowanie uprawnień przeglądarki dotyczących lokalizacji geograficznej. Złośliwe aplikacje mogą używać tej opcji do wysyłania informacji o lokalizacji do dowolnych witryn internetowych."</string>
     <string name="save_password_message" msgid="767344687139195790">"Czy chcesz, aby zapamiętać to hasło w przeglądarce?"</string>
@@ -839,9 +847,7 @@
     <string name="cut" msgid="3092569408438626261">"Wytnij"</string>
     <string name="copy" msgid="2681946229533511987">"Kopiuj"</string>
     <string name="paste" msgid="5629880836805036433">"Wklej"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Schowek jest pusty"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="replace" msgid="8333608224471746584">"Zastąp"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Kopiuj adres URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Zaznacz tekst"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Zaznaczanie tekstu"</string>
@@ -864,15 +870,21 @@
     <string name="chooseActivity" msgid="1009246475582238425">"Wybierz czynność"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Wybierz aplikację dla urządzenia USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Żadna z aplikacji nie może wykonać tej czynności."</string>
-    <string name="aerr_title" msgid="653922989522758100">"Przepraszamy!"</string>
-    <string name="aerr_application" msgid="4683614104336409186">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> (proces <xliff:g id="PROCESS">%2$s</xliff:g>) została niespodziewanie zatrzymana. Spróbuj ponownie."</string>
-    <string name="aerr_process" msgid="1551785535966089511">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> został niespodziewanie zatrzymany. Spróbuj ponownie."</string>
-    <string name="anr_title" msgid="3100070910664756057">"Przepraszamy!"</string>
-    <string name="anr_activity_application" msgid="3538242413112507636">"Działanie <xliff:g id="ACTIVITY">%1$s</xliff:g> (w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>) nie odpowiada."</string>
-    <string name="anr_activity_process" msgid="5420826626009561014">"Działanie <xliff:g id="ACTIVITY">%1$s</xliff:g> (w procesie <xliff:g id="PROCESS">%2$s</xliff:g>) nie odpowiada."</string>
-    <string name="anr_application_process" msgid="4185842666452210193">"Aplikacja <xliff:g id="APPLICATION">%1$s</xliff:g> (w procesie <xliff:g id="PROCESS">%2$s</xliff:g>) nie odpowiada."</string>
-    <string name="anr_process" msgid="1246866008169975783">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> nie odpowiada."</string>
-    <string name="force_close" msgid="3653416315450806396">"Wymuś zamknięcie"</string>
+    <string name="aerr_title" msgid="1905800560317137752"></string>
+    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <skip />
+    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <skip />
+    <string name="anr_title" msgid="4351948481459135709"></string>
+    <!-- no translation found for anr_activity_application (8339738283149696827) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (7018289416670457797) -->
+    <skip />
+    <!-- no translation found for anr_application_process (7208175830253210526) -->
+    <skip />
+    <!-- no translation found for anr_process (306819947562555821) -->
+    <skip />
+    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"Wymuś zamknięcie"</string>
     <string name="report" msgid="4060218260984795706">"Zgłoś"</string>
     <string name="wait" msgid="7147118217226317732">"Czekaj"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplikacja przekierowana"</string>
@@ -901,17 +913,15 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Głośność alarmu"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Głośność powiadomienia"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Głośność"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
     <skip />
-    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
     <skip />
-    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
     <skip />
-    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
     <skip />
-    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
-    <skip />
-    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
     <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Dzwonek domyślny"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Dzwonek domyślny (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -926,8 +936,8 @@
     <item quantity="one" msgid="1634101450343277345">"Otwórz dostępne sieci Wi-Fi"</item>
     <item quantity="other" msgid="7915895323644292768">"Otwórz dostępne sieci Wi-Fi"</item>
   </plurals>
-    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Sieć Wi-Fi została wyłączona."</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Sieć Wi-Fi została tymczasowo wyłączona z powodu niskiej jakości połączenia."</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Nie można połączyć się z siecią Wi-Fi."</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"ma powolne połączenie internetowe."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Rozpocznij pracę w trybie Wi-Fi Direct. Spowoduje to wyłączenie trybu klienta lub punktu dostępu Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Nie można uruchomić Wi-Fi Direct."</string>
@@ -941,7 +951,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Anuluj"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Karta SIM wyjęta"</string>
-    <string name="sim_removed_message" msgid="2064255102770489459">"Sieć komórkowa będzie niedostępna, dopóki nie włożysz w powrotem karty SIM."</string>
+    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"Sieć komórkowa będzie niedostępna, dopóki nie włożysz w powrotem karty SIM."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Gotowe"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Dodano kartę SIM"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"Musisz ponownie uruchomić urządzenie, aby korzystać z sieci komórkowej."</string>
@@ -1096,22 +1106,14 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Wybierz konto"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Zwiększ"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Zmniejsz"</string>
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"zaznaczono"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"nie zaznaczono"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"wybrano"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"nie wybrano"</string>
+    <string name="switch_on" msgid="551417728476977311">"włączono"</string>
+    <string name="switch_off" msgid="7249798614327155088">"wyłączono"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"naciśnięto"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"nie naciśnięto"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Przejdź do strony głównej"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Przejdź wyżej"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Więcej opcji"</string>
@@ -1125,14 +1127,10 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Wyłączono transmisję danych 4G"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Wyłączono komórkową transm. danych"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"dotknij, aby włączyć"</string>
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Przekroczono limit danych 2G/3G"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Przekroczono limit danych 4G"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Przekroczono limit danych komór."</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> ponad określony limit"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certyfikat zabezpieczeń"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Certyfikat jest ważny."</string>
     <string name="issued_to" msgid="454239480274921032">"Wystawiony dla:"</string>

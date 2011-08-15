@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Visa aviseringar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Ta bort"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Kontrollera"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Inga aviseringar"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Pågående"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Meddelanden"</string>
@@ -62,8 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom i kompatibilitetsläge"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"När en app är anpassad för en mindre skärm visas ett zoomreglage vid klockan."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Skärmdumpen sparades i galleriet"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Det gick inte att spara skärmdumpen. Extern lagring kanske används."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Överföringsalternativ"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Montera som mediaspelare (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montera som kamera (PTP)"</string>
@@ -71,10 +68,9 @@
     <string name="accessibility_back" msgid="567011538994429120">"Tillbaka"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Startsida"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Meny"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Knappen växla inmatningsmetod."</string>
-    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Knappen kompatibilitetszoom."</string>
+    <string name="accessibility_recent" msgid="3027675523629738534">"Senaste apparna"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Knapp för byte av inmatningsmetod."</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Knapp för kompatibilitetszoom."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zooma mindre skärm till större."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth ansluten."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth har kopplats från."</string>
@@ -110,31 +106,21 @@
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flygplansläge"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Knappen Inställningar."</string>
-    <string name="accessibility_notifications_button" msgid="2933903195211483438">"Knappen Aviseringar."</string>
-    <string name="accessibility_remove_notification" msgid="4883990503785778699">"Ta bort avisering."</string>
+    <string name="accessibility_notifications_button" msgid="2933903195211483438">"Knapp för meddelanden."</string>
+    <string name="accessibility_remove_notification" msgid="4883990503785778699">"Ta bort meddelandet"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS aktiverad."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS erhålls."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Tar emot GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter aktiverad."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibrerande ringsignal."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Tyst ringsignal."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Data via 2G-3G har inaktiverats"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Data via 4G har inaktiverats"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobildata har inaktiverats"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Data har inaktiverats"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Den angivna gränsen för dataanvändning har nåtts."\n" "\n"Ytterligare dataanvändning kan medföra operatörsavgifter."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Återaktivera data"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ingen anslutning"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi-ansluten"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Sökning efter GPS pågår"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Platsen har identifierats av GPS"</string>
 </resources>
