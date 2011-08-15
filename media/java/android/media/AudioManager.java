@@ -1830,6 +1830,17 @@ public class AudioManager {
 
     /**
      * @hide
+     * The media button event receiver associated with the IRemoteControlClient.
+     * The {@link android.content.ComponentName} value of the event receiver can be retrieved with
+     * {@link android.content.ComponentName#unflattenFromString(String)}
+     *
+     * @see #REMOTE_CONTROL_CLIENT_CHANGED_ACTION
+     */
+    public static final String EXTRA_REMOTE_CONTROL_EVENT_RECEIVER =
+            "android.media.EXTRA_REMOTE_CONTROL_EVENT_RECEIVER";
+
+    /**
+     * @hide
      * The flags describing what information has changed in the current remote control client.
      *
      * @see #REMOTE_CONTROL_CLIENT_CHANGED_ACTION
