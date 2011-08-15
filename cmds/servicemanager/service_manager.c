@@ -46,6 +46,7 @@ static struct {
     { AID_RADIO, "isms" },
     { AID_RADIO, "iphonesubinfo" },
     { AID_RADIO, "simphonebook" },
+    { AID_MEDIA, "aah.common_clock" },
 };
 
 void *svcmgr_handle;
