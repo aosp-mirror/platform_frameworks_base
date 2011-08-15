@@ -135,7 +135,9 @@ page.title=USB Host
       devices that you want to filter. The following list describes the attributes of
       <code>&lt;usb-device&gt;</code>. In general, use vendor and product ID if you want to filter
       for a specific device and use class, subclass, and protocol if you want to filter for a group
-      of USB devices, such as mass storage devices or digital cameras.</p>
+      of USB devices, such as mass storage devices or digital cameras. You can specify none or
+      all of these attributes. Specifying no attributes matches every USB device, so only do this
+      if your application requires it:</p>
 
       <ul>
         <li><code>vendor-id</code></li>
@@ -179,14 +181,13 @@ page.title=USB Host
 </pre>
 
   <p>In this case, the following resource file should be saved in
-  <code>res/xml/device_filter.xml</code> and specifies that any USB device with the corresponding
-  vendor ID and product ID should be filtered. These IDs are specific to the device and are
-  specified by the device's manufacturer:</p>
+  <code>res/xml/device_filter.xml</code> and specifies that any USB device with the specified
+  attributes should be filtered:</p>
   <pre>
 &lt;?xml version="1.0" encoding="utf-8"?&gt;
 
 &lt;resources&gt;
-    &lt;usb-device vendor-id="1234" product-id="5678" /&gt;
+    &lt;usb-device vendor-id="1234" product-id="5678" class="255" subclass="66" protocol="1" /&gt;
 &lt;/resources&gt;
 </pre>
 
