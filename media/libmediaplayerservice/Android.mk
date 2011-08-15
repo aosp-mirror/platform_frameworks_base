@@ -29,7 +29,8 @@ LOCAL_SHARED_LIBRARIES :=     		\
 	libstagefright_omx    			\
 	libstagefright_foundation       \
 	libgui                          \
-	libdl
+	libdl                           \
+	libaah_rtp
 
 LOCAL_STATIC_LIBRARIES := \
         libstagefright_rtsp                     \
