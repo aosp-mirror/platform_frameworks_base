@@ -449,6 +449,8 @@ public class ListPopupWindow {
         if (popupBackground != null) {
             popupBackground.getPadding(mTempRect);
             mDropDownWidth = mTempRect.left + mTempRect.right + width;
+        } else {
+            setWidth(width);
         }
     }
 
