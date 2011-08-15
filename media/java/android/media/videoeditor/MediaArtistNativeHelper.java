@@ -3781,72 +3781,62 @@ class MediaArtistNativeHelper {
      * @param startMs The starting time in ms
      * @param endMs The end time in ms
      * @param thumbnailCount The number of frames to be extracted
+     * @param indices The indices of thumbnails wanted
+     * @param callback The callback used to pass back the bitmaps
      * from startMs to endMs
      *
      * @return The frames as bitmaps in bitmap array
      **/
-    Bitmap[] getPixelsList(String filename, int width, int height, long startMs, long endMs,
-            int thumbnailCount) {
-        int[] rgb888 = null;
-        int thumbnailSize = 0;
-        Bitmap tempBitmap = null;
-
+    void getPixelsList(String filename, final int width, final int height,
+            long startMs, long endMs, int thumbnailCount, int[] indices,
+            final MediaItem.GetThumbnailListCallback callback) {
         /* Make width and height as even */
         final int newWidth = (width + 1) & 0xFFFFFFFE;
         final int newHeight = (height + 1) & 0xFFFFFFFE;
-        thumbnailSize = newWidth * newHeight * 4;
+        final int thumbnailSize = newWidth * newHeight;
 
         /* Create a temp bitmap for resized thumbnails */
-        if ((newWidth != width) || (newHeight != height)) {
-            tempBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
-        }
-        int i = 0;
-        int deltaTime = (int)(endMs - startMs) / thumbnailCount;
-        Bitmap[] bitmaps = null;
+        final Bitmap tempBitmap =
+                (newWidth != width || newHeight != height)
+                ? Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888)
+                : null;
 
-        try {
-            // This may result in out of Memory Error
-            rgb888 = new int[thumbnailSize * thumbnailCount];
-            bitmaps = new Bitmap[thumbnailCount];
-        } catch (Throwable e) {
-            // Allocating to new size with Fixed count
-            try {
-                rgb888 = new int[thumbnailSize * MAX_THUMBNAIL_PERMITTED];
-                bitmaps = new Bitmap[MAX_THUMBNAIL_PERMITTED];
-                thumbnailCount = MAX_THUMBNAIL_PERMITTED;
-            } catch (Throwable ex) {
-                throw new RuntimeException("Memory allocation fails, thumbnail count too large: "
-                        + thumbnailCount);
+        final int[] rgb888 = new int[thumbnailSize];
+        final IntBuffer tmpBuffer = IntBuffer.allocate(thumbnailSize);
+        nativeGetPixelsList(filename, rgb888, newWidth, newHeight,
+                thumbnailCount, startMs, endMs, indices,
+                new NativeGetPixelsListCallback() {
+            public void onThumbnail(int index) {
+                Bitmap bitmap = Bitmap.createBitmap(
+                        width, height, Bitmap.Config.ARGB_8888);
+                tmpBuffer.put(rgb888, 0, thumbnailSize);
+                tmpBuffer.rewind();
+
+                if ((newWidth == width) && (newHeight == height)) {
+                    bitmap.copyPixelsFromBuffer(tmpBuffer);
+                } else {
+                    /* Copy the out rgb buffer to temp bitmap */
+                    tempBitmap.copyPixelsFromBuffer(tmpBuffer);
+
+                    /* Create a canvas to resize */
+                    final Canvas canvas = new Canvas(bitmap);
+                    canvas.drawBitmap(tempBitmap,
+                            new Rect(0, 0, newWidth, newHeight),
+                            new Rect(0, 0, width, height), sResizePaint);
+
+                    canvas.setBitmap(null);
+                }
+                callback.onThumbnail(bitmap, index);
             }
-        }
-        IntBuffer tmpBuffer = IntBuffer.allocate(thumbnailSize);
-        nativeGetPixelsList(filename, rgb888, newWidth, newHeight, deltaTime, thumbnailCount,
-                startMs, endMs);
-
-        for (; i < thumbnailCount; i++) {
-            bitmaps[i] = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-            tmpBuffer.put(rgb888, (i * thumbnailSize), thumbnailSize);
-            tmpBuffer.rewind();
-
-            if ((newWidth == width) && (newHeight == height)) {
-                bitmaps[i].copyPixelsFromBuffer(tmpBuffer);
-            } else {
-                /* Copy the out rgb buffer to temp bitmap */
-                tempBitmap.copyPixelsFromBuffer(tmpBuffer);
-
-                /* Create a canvas to resize */
-                final Canvas canvas = new Canvas(bitmaps[i]);
-                canvas.drawBitmap(tempBitmap, new Rect(0, 0, newWidth, newHeight),
-                                              new Rect(0, 0, width, height), sResizePaint);
-                canvas.setBitmap(null);
-            }
-        }
+        });
 
         if (tempBitmap != null) {
             tempBitmap.recycle();
         }
+    }
 
-        return bitmaps;
+    interface NativeGetPixelsListCallback {
+        public void onThumbnail(int index);
     }
 
     /**
@@ -3957,8 +3947,9 @@ class MediaArtistNativeHelper {
     private native int nativeGetPixels(String fileName, int[] pixelArray, int width, int height,
             long timeMS);
 
-    private native int nativeGetPixelsList(String fileName, int[] pixelArray, int width, int height,
-            int timeMS, int nosofTN, long startTimeMs, long endTimeMs);
+    private native int nativeGetPixelsList(String fileName, int[] pixelArray,
+            int width, int height, int nosofTN, long startTimeMs, long endTimeMs,
+            int[] indices, NativeGetPixelsListCallback callback);
 
     /**
      * Releases the JNI and cleans up the core native module.. Should be called

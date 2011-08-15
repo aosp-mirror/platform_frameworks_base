@@ -26,9 +26,6 @@
 
 #define VIDEO_BROWSER_BGR565
 
-
-#define VIDEO_BROWSER_PREDECODE_TIME 2000    /* In miliseconds */
-
 /*---------------------------- MACROS ----------------------------*/
 #define CHECK_PTR(fct, p, err, errValue) \
 { \

@@ -182,10 +182,11 @@ static int videoEditor_getPixelsList(
                                      jintArray                pixelArray,
                                      M4OSA_UInt32             width,
                                      M4OSA_UInt32             height,
-                                     M4OSA_UInt32             deltatimeMS,
                                      M4OSA_UInt32             noOfThumbnails,
-                                     M4OSA_UInt32             startTime,
-                                     M4OSA_UInt32             endTime);
+                                     jlong                    startTime,
+                                     jlong                    endTime,
+                                     jintArray                indexArray,
+                                     jobject                  callback);
 
 static void
 videoEditor_startPreview(
@@ -288,7 +289,7 @@ static JNINativeMethod gManualEditMethods[] = {
                                 (void *)videoEditor_release            },
     {"nativeGetPixels",         "(Ljava/lang/String;[IIIJ)I",
                                 (void*)videoEditor_getPixels               },
-    {"nativeGetPixelsList",     "(Ljava/lang/String;[IIIIIJJ)I",
+    {"nativeGetPixelsList",     "(Ljava/lang/String;[IIIIJJ[ILandroid/media/videoeditor/MediaArtistNativeHelper$NativeGetPixelsListCallback;)I",
                                 (void*)videoEditor_getPixelsList           },
     {"getMediaProperties",
     "(Ljava/lang/String;)Landroid/media/videoeditor/MediaArtistNativeHelper$Properties;",
@@ -2150,75 +2151,72 @@ static int videoEditor_getPixels(
 }
 
 static int videoEditor_getPixelsList(
-                JNIEnv*                     env,
-                jobject                     thiz,
-                jstring                     path,
-                jintArray                 pixelArray,
-                M4OSA_UInt32             width,
-                M4OSA_UInt32             height,
-                M4OSA_UInt32             deltatimeMS,
+                JNIEnv*                 env,
+                jobject                 thiz,
+                jstring                 path,
+                jintArray               pixelArray,
+                M4OSA_UInt32            width,
+                M4OSA_UInt32            height,
                 M4OSA_UInt32            noOfThumbnails,
-                M4OSA_UInt32                startTime,
-                M4OSA_UInt32                endTime)
+                jlong                   startTime,
+                jlong                   endTime,
+                jintArray               indexArray,
+                jobject                 callback)
 {
 
-    M4OSA_ERR           err;
+    M4OSA_ERR           err = M4NO_ERROR;
     M4OSA_Context       mContext = M4OSA_NULL;
-    jint*               m_dst32;
-    M4OSA_UInt32        timeMS = startTime;
-    int                 arrayOffset = 0;
-
-
-
-    // Add a text marker (the condition must always be true).
-    ADD_TEXT_MARKER_FUN(NULL != env)
 
     const char *pString = env->GetStringUTFChars(path, NULL);
     if (pString == M4OSA_NULL) {
-        if (env != NULL) {
-            jniThrowException(env, "java/lang/RuntimeException", "Input string null");
-        }
+        jniThrowException(env, "java/lang/RuntimeException", "Input string null");
         return M4ERR_ALLOC;
     }
 
     err = ThumbnailOpen(&mContext,(const M4OSA_Char*)pString, M4OSA_FALSE);
     if (err != M4NO_ERROR || mContext == M4OSA_NULL) {
-        if (env != NULL) {
-            jniThrowException(env, "java/lang/RuntimeException", "ThumbnailOpen failed");
-        }
+        jniThrowException(env, "java/lang/RuntimeException", "ThumbnailOpen failed");
         if (pString != NULL) {
             env->ReleaseStringUTFChars(path, pString);
         }
         return err;
     }
 
-    m_dst32 = env->GetIntArrayElements(pixelArray, NULL);
+    jlong duration = (endTime - startTime);
+    M4OSA_UInt32 tolerance = duration / (2 * noOfThumbnails);
+    jint* m_dst32 = env->GetIntArrayElements(pixelArray, NULL);
+    jint* indices = env->GetIntArrayElements(indexArray, NULL);
+    jsize len = env->GetArrayLength(indexArray);
 
-    M4OSA_UInt32 tolerance = deltatimeMS / 2;
-    do {
-        err = ThumbnailGetPixels32(mContext, ((M4OSA_Int32 *)m_dst32 + arrayOffset),
-            width,height,&timeMS, tolerance);
-        if (err != M4NO_ERROR ) {
-            if (env != NULL) {
-                jniThrowException(env, "java/lang/RuntimeException",\
-                    "ThumbnailGetPixels32 failed");
-            }
-            return err;
+    jclass cls = env->GetObjectClass(callback);
+    jmethodID mid = env->GetMethodID(cls, "onThumbnail", "(I)V");
+
+    for (int i = 0; i < len; i++) {
+        int k = indices[i];
+        M4OSA_UInt32 timeMS = startTime;
+        timeMS += (2 * k + 1) * duration / (2 * noOfThumbnails);
+        err = ThumbnailGetPixels32(mContext, ((M4OSA_Int32 *)m_dst32),
+            width, height, &timeMS, tolerance);
+        if (err != M4NO_ERROR) {
+            break;
         }
-        timeMS += deltatimeMS;
-        arrayOffset += (width * height * 4);
-        noOfThumbnails--;
-    } while(noOfThumbnails > 0);
+        env->CallVoidMethod(callback, mid, (jint)k);
+    }
 
     env->ReleaseIntArrayElements(pixelArray, m_dst32, 0);
+    env->ReleaseIntArrayElements(indexArray, indices, 0);
 
     ThumbnailClose(mContext);
     if (pString != NULL) {
         env->ReleaseStringUTFChars(path, pString);
     }
 
-    return err;
+    if (err != M4NO_ERROR) {
+        jniThrowException(env, "java/lang/RuntimeException",\
+                "ThumbnailGetPixels32 failed");
+    }
 
+    return err;
 }
 
 static M4OSA_ERR

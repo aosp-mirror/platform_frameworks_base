@@ -293,8 +293,12 @@ public class MediaVideoItem extends MediaItem {
      * {@inheritDoc}
      */
     @Override
-    public Bitmap[] getThumbnailList(int width, int height, long startMs,
-            long endMs, int thumbnailCount) throws IOException {
+    public void getThumbnailList(int width, int height,
+                                 long startMs, long endMs,
+                                 int thumbnailCount,
+                                 int[] indices,
+                                 GetThumbnailListCallback callback)
+                                 throws IOException {
         if (startMs > endMs) {
             throw new IllegalArgumentException("Start time is greater than end time");
         }
@@ -307,14 +311,8 @@ public class MediaVideoItem extends MediaItem {
             throw new IllegalArgumentException("Invalid dimension");
         }
 
-        if (startMs == endMs) {
-            final Bitmap[] bitmap = new Bitmap[1];
-            bitmap[0] = mMANativeHelper.getPixels(super.getFilename(), width, height,startMs);
-            return bitmap;
-        }
-
-        return mMANativeHelper.getPixelsList(super.getFilename(), width,
-                height,startMs,endMs,thumbnailCount);
+        mMANativeHelper.getPixelsList(super.getFilename(), width,
+                height, startMs, endMs, thumbnailCount, indices, callback);
     }
 
     /*

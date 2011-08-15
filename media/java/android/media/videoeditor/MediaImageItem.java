@@ -616,17 +616,18 @@ public class MediaImageItem extends MediaItem {
      * {@inheritDoc}
      */
     @Override
-    public Bitmap[] getThumbnailList(int width, int height, long startMs, long endMs,
-        int thumbnailCount) throws IOException {
+    public void getThumbnailList(int width, int height,
+                                 long startMs, long endMs,
+                                 int thumbnailCount,
+                                 int[] indices,
+                                 GetThumbnailListCallback callback)
+                                 throws IOException {
         //KenBurns was not applied on this.
         if (getGeneratedImageClip() == null) {
             final Bitmap thumbnail = scaleImage(mFilename, width, height);
-            final Bitmap[] thumbnailArray = new Bitmap[thumbnailCount];
-            for (int i = 0; i < thumbnailCount; i++) {
-                thumbnailArray[i] = thumbnail;
+            for (int i = 0; i < indices.length; i++) {
+                callback.onThumbnail(thumbnail, i);
             }
-
-            return thumbnailArray;
         } else {
             if (startMs > endMs) {
                 throw new IllegalArgumentException("Start time is greater than end time");
@@ -636,15 +637,8 @@ public class MediaImageItem extends MediaItem {
                 throw new IllegalArgumentException("End time is greater than file duration");
             }
 
-            if (startMs == endMs) {
-                Bitmap[] bitmap = new Bitmap[1];
-                bitmap[0] = mMANativeHelper.getPixels(getGeneratedImageClip(),
-                    width, height,startMs);
-                return bitmap;
-            }
-
-            return mMANativeHelper.getPixelsList(getGeneratedImageClip(), width,
-                height,startMs,endMs,thumbnailCount);
+            mMANativeHelper.getPixelsList(getGeneratedImageClip(), width,
+                height, startMs, endMs, thumbnailCount, indices, callback);
         }
     }
 
