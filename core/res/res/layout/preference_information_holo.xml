@@ -22,6 +22,7 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
+    android:paddingLeft="@dimen/preference_item_padding_side"
     android:paddingRight="?android:attr/scrollbarSize">
 
     <LinearLayout
@@ -35,17 +36,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            />
+            android:paddingRight="@dimen/preference_item_padding_inner" />
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dip"
-        android:layout_marginRight="6sp"
-        android:layout_marginTop="6sp"
-        android:layout_marginBottom="6sp"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:paddingRight="@dimen/preference_item_padding_inner"
+        android:paddingTop="6dip"
+        android:paddingBottom="6dip">
 
         <TextView android:id="@+android:id/title"
             android:layout_width="wrap_content"
@@ -64,7 +64,7 @@
             android:maxLines="2" />
 
     </RelativeLayout>
-    
+
     <!-- Preference should place its actual preference widget here. -->
     <LinearLayout android:id="@+android:id/widget_frame"
         android:layout_width="wrap_content"

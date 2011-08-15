@@ -22,6 +22,7 @@
     android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical"
+    android:paddingLeft="@dimen/preference_item_padding_side"
     android:paddingRight="?android:attr/scrollbarSize">
 
     <LinearLayout
@@ -36,18 +37,17 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:minWidth="48dp"
-            />
+            android:paddingRight="@dimen/preference_item_padding_inner" />
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dip"
-        android:layout_marginRight="8dip"
-        android:layout_marginTop="6dip"
-        android:layout_marginBottom="6dip"
-        android:layout_weight="1">
-    
+        android:layout_weight="1"
+        android:paddingRight="@dimen/preference_item_padding_inner"
+        android:paddingTop="6dip"
+        android:paddingBottom="6dip">
+
         <TextView android:id="@+android:id/title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
