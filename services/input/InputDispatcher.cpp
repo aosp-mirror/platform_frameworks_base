@@ -666,6 +666,9 @@ void InputDispatcher::releaseInboundEventLocked(EventEntry* entry) {
 #endif
         setInjectionResultLocked(entry, INPUT_EVENT_INJECTION_FAILED);
     }
+    if (entry == mNextUnblockedEvent) {
+        mNextUnblockedEvent = NULL;
+    }
     entry->release();
 }
 
