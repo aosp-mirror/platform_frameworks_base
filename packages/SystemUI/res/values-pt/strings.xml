@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Mostrar notificações"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Remover"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Inspecionar"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Sem notificações"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Em andamento"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificações"</string>
@@ -62,8 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom em modo de compatibilidade"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Quando um aplicativo é desenvolvido para uma tela menor, um controle de zoom é exibido perto do relógio."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"A captura de tela foi salva na Galeria"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Não foi possível salvar a captura de tela. Armazenamento externo pode estar em uso."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opções transf. arq. por USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Conectar como media player (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montar como uma câmera (PTP)"</string>
@@ -71,10 +68,9 @@
     <string name="accessibility_back" msgid="567011538994429120">"Voltar"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Página inicial"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
+    <string name="accessibility_recent" msgid="3027675523629738534">"Aplicações recentes"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Alterar botão do método de entrada."</string>
-    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Compatibilidade do botão de zoom."</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botão de zoom da compatibilidade."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Aumentar a tela com zoom."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth conectado."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth desconectado."</string>
@@ -91,50 +87,40 @@
     <string name="accessibility_no_data" msgid="4791966295096867555">"Nenhum dado."</string>
     <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Uma barra de sinal de dados."</string>
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Duas barras de sinal de dados."</string>
-    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Três barras de sinal de dados."</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Três barras do sinal de dados."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Sinal de dados cheio."</string>
-    <string name="accessibility_no_wifi" msgid="4017628918351949575">"Sem WiFi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Uma barra de sinal WiFi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Duas barras de sinal WiFi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Três barras de sinal WiFi."</string>
-    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Sinal do WiFi cheio."</string>
+    <string name="accessibility_no_wifi" msgid="4017628918351949575">"Sem Wi-Fi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Uma barra de sinal Wi-Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Duas barras de sinal Wi-Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Três barras de sinal Wi-Fi."</string>
+    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Sinal do Wi-Fi cheio."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
     <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
-    <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"WiFi"</string>
+    <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Sem SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Vínculo Bluetooth."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo para avião."</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo de avião."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria em <xliff:g id="NUMBER">%d</xliff:g>%."</string>
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Botão Configurações."</string>
-    <string name="accessibility_notifications_button" msgid="2933903195211483438">"Botão de notificação."</string>
+    <string name="accessibility_notifications_button" msgid="2933903195211483438">"Botão de notificações."</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Remover notificação."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS ativado."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Aquisição de GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTYpewriter ativado."</string>
-    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibrar campainha."</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibração da campainha."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Campainha silenciosa."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Dados 2G e 3G desativados"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Dados 4G desativados"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Dados móveis desativados"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dados desativados"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"O limite de uso de dados especificado foi alcançado."\n\n"O uso de dados adicionais poderá gerar cobranças da operadora."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Reativar dados"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sem conexão à Internet"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectado"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Local definido por GPS"</string>
 </resources>

@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Mostrar notificações"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Remover"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Inspecionar"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Sem notificações"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Em curso"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificações"</string>
@@ -71,8 +69,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Anterior"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Página inicial"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
+    <string name="accessibility_recent" msgid="3027675523629738534">"Aplicações recentes"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Alternar botão de método de introdução."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botão zoom de compatibilidade."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom menor para ecrã maior."</string>
@@ -117,18 +114,12 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter ativado."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Campainha em vibração."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Campainha em silêncio."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Os dados 2G-3G estão desativados"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Os dados 4G estão desativados"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Os dados móveis estão desativados"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dados desativados"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"O limite de utilização de dados especificado foi atingido."\n\n"A utilização de dados adicionais poderá estar sujeita a tarifas por parte do operador."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Reativar dados"</string>
     <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
     <skip />
     <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->

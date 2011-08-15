@@ -195,6 +195,10 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Permite aplicaţiei să primească şi să proceseze mesajele difuzate de urgenţă. Această permisiune este disponibil numai pentru aplicaţiile sistemului."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"trimitere mesaje SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Permite aplicaţiei să trimită mesaje SMS. Aplicaţiile rău-intenţionate ar putea să vă genereze costuri, deoarece trimit mesaje fără confirmarea dvs."</string>
+    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <skip />
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <skip />
     <string name="permlab_readSms" msgid="4085333708122372256">"citire mesaje SMS sau MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Permite aplicaţiei să citească mesajele SMS stocate pe computerul tablet PC sau pe cardul SIM. Aplicaţiile rău-intenţionate ar putea să vă citească mesajele confidenţiale."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Permite aplicaţiei să citească mesajele SMS stocate pe telefon sau pe cardul SIM. Aplicaţiile rău-intenţionate ar putea să vă citească mesajele confidenţiale."</string>
@@ -264,6 +268,10 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Permite deţinătorului să se conecteze la interfaţa de nivel superior a unei metode de intrare. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"conectare la un serviciu text"</string>
     <string name="permdesc_bindTextService" msgid="172508880651909350">"Permite deţinătorului să se conecteze la o interfaţă de nivel superior a unui serviciu text (de ex., SpellCheckerService). Nu ar trebui să fie necesară pentru aplicaţiile obişnuite."</string>
+    <!-- no translation found for permlab_bindVpnService (4708596021161473255) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVpnService (6011554199384584151) -->
+    <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"conectare la o imagine de fundal"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Permite proprietarului să se conecteze la interfaţa de nivel superior a unei imagini de fundal. Nu ar trebui să fie niciodată necesară pentru aplicaţiile obişnuite."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"conectare la un serviciu widget"</string>
@@ -321,15 +329,19 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"scriere date de contact"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Permite unei aplicaţii să modifice datele de contact (adresele) stocate pe computerul tablet PC. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a şterge sau a modifica datele dvs. de contact."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Permite unei aplicaţii să modifice datele de contact (adresele) stocate pe telefon. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a şterge sau a modifica datele dvs. de contact."</string>
-    <string name="permlab_readProfile" msgid="2211941946684590103">"citeşte datele de profil"</string>
-    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"Permite unei aplicaţii să citească toate informaţiile din profilul dvs. personal. Aplicaţiile rău-intenţionate pot utiliza această permisiune pentru a vă identifica şi a trimite informaţiile dvs. personale altor persoane."</string>
-    <string name="permlab_writeProfile" msgid="6561668046361989220">"scrie datele de profil"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"Permite unei aplicaţii să modifice informaţiile din profilul dvs. personal. Aplicaţiile rău-intenţionate pot folosi această permisiune pentru a şterge sau a modifica datele de profil."</string>
-    <string name="permlab_readCalendar" msgid="6898987798303840534">"citire evenimente din calendar"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Permite unei aplicaţii să citească toate evenimentele din calendar stocate pe computerul tablet PC. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a trimite evenimentele din calendar către alte persoane."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Permite unei aplicaţii să citească toate evenimentele din calendar stocate pe telefon. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a trimite evenimentele din calendar către alte persoane."</string>
-    <string name="permlab_writeCalendar" msgid="3894879352594904361">"adăugare sau modificare de evenimente în calendar şi trimitere e-mailuri către invitaţi"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Permite unei aplicaţii să adauge sau să modifice evenimentele din calendar, prin care se pot trimite mesaje de e-mail către invitaţi. Aplicaţiile rău-intenţionate ar putea să utilizeze această aplicaţie pentru a şterge sau a modifica evenimentele din calendar ori pentru a trimite mesaje de e-mail către invitaţi."</string>
+    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
+    <skip />
+    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"citire evenimente din calendar"</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Permite unei aplicaţii să citească toate evenimentele din calendar stocate pe computerul tablet PC. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a trimite evenimentele din calendar către alte persoane."</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Permite unei aplicaţii să citească toate evenimentele din calendar stocate pe computerul tablet PC. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a trimite evenimentele din calendar către alte persoane."</string>
+    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"adăugare sau modificare de evenimente în calendar şi trimitere e-mailuri către invitaţi"</string>
+    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Permite unei aplicaţii să adauge sau să modifice evenimentele din calendar, prin care se pot trimite mesaje de e-mail către invitaţi. Aplicaţiile rău-intenţionate ar putea să utilizeze această aplicaţie pentru a şterge sau a modifica evenimentele din calendar ori pentru a trimite mesaje de e-mail către invitaţi."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"surse de locaţii pentru testare"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Creează surse de locaţii pentru testare. Aplicaţiile rău-intenţionate ar putea să utilizeze această permisiune pentru a înlocui locaţia şi/sau starea returnată de sursele de locaţii reale, cum ar fi furnizorii GPS sau de reţea."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"accesare comenzi suplimentare ale furnizorului locaţiei"</string>
@@ -439,8 +451,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Permite unei aplicaţii să vizualizeze starea tuturor reţelelor."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"acces complet la Internet"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Permite unei aplicaţii să creeze socluri de reţea."</string>
-    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"scriere setări pentru numele punctelor de acces"</string>
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Permite unei aplicaţii să modifice setările APN, cum ar fi proxy-ul sau portul oricărui APN."</string>
+    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"scriere setări pentru numele punctelor de acces"</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Permite unei aplicaţii să modifice setările APN, cum ar fi proxy-ul sau portul oricărui APN."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"modificare conectivitate în reţea"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Permite unei aplicaţii să modifice starea conectivităţii la reţea."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Modificare conectivitate tethering"</string>
@@ -839,9 +851,7 @@
     <string name="cut" msgid="3092569408438626261">"Decupaţi"</string>
     <string name="copy" msgid="2681946229533511987">"Copiaţi"</string>
     <string name="paste" msgid="5629880836805036433">"Inseraţi"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Nimic de inserat"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="replace" msgid="8333608224471746584">"Înlocuiţi"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Copiaţi adresa URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Selectaţi text..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Selectare text"</string>
@@ -864,15 +874,21 @@
     <string name="chooseActivity" msgid="1009246475582238425">"Selectaţi o acţiune"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Selectaţi o aplicaţie pentru dispozitivul USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Această acţiune nu poate fi efectuată de nicio aplicaţie."</string>
-    <string name="aerr_title" msgid="653922989522758100">"Ne pare rău!"</string>
-    <string name="aerr_application" msgid="4683614104336409186">"Aplicaţia <xliff:g id="APPLICATION">%1$s</xliff:g> (procesul <xliff:g id="PROCESS">%2$s</xliff:g>) s-a oprit în mod neaşteptat. Încercaţi din nou."</string>
-    <string name="aerr_process" msgid="1551785535966089511">"Procesul <xliff:g id="PROCESS">%1$s</xliff:g> s-a oprit în mod neaşteptat. Încercaţi din nou."</string>
-    <string name="anr_title" msgid="3100070910664756057">"Ne pare rău!"</string>
-    <string name="anr_activity_application" msgid="3538242413112507636">"Activitatea <xliff:g id="ACTIVITY">%1$s</xliff:g> (din aplicaţia <xliff:g id="APPLICATION">%2$s</xliff:g>) nu răspunde."</string>
-    <string name="anr_activity_process" msgid="5420826626009561014">"Activitatea <xliff:g id="ACTIVITY">%1$s</xliff:g> (din procesul <xliff:g id="PROCESS">%2$s</xliff:g>) nu răspunde."</string>
-    <string name="anr_application_process" msgid="4185842666452210193">"Aplicaţia <xliff:g id="APPLICATION">%1$s</xliff:g> (din procesul <xliff:g id="PROCESS">%2$s</xliff:g>) nu răspunde."</string>
-    <string name="anr_process" msgid="1246866008169975783">"Procesul <xliff:g id="PROCESS">%1$s</xliff:g> nu răspunde."</string>
-    <string name="force_close" msgid="3653416315450806396">"Forţaţi închiderea"</string>
+    <string name="aerr_title" msgid="1905800560317137752"></string>
+    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <skip />
+    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <skip />
+    <string name="anr_title" msgid="4351948481459135709"></string>
+    <!-- no translation found for anr_activity_application (8339738283149696827) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (7018289416670457797) -->
+    <skip />
+    <!-- no translation found for anr_application_process (7208175830253210526) -->
+    <skip />
+    <!-- no translation found for anr_process (306819947562555821) -->
+    <skip />
+    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"Forţaţi închiderea"</string>
     <string name="report" msgid="4060218260984795706">"Raportaţi"</string>
     <string name="wait" msgid="7147118217226317732">"Aşteptaţi"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplicaţie redirecţionată"</string>
@@ -901,17 +917,15 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Volum alarmă"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Volum notificare"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volum"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
     <skip />
-    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
     <skip />
-    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
     <skip />
-    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
     <skip />
-    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
-    <skip />
-    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
     <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Ton de apel prestabilit"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Ton de apel prestabilit (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -926,8 +940,10 @@
     <item quantity="one" msgid="1634101450343277345">"Reţea Wi-Fi deschisă disponibilă"</item>
     <item quantity="other" msgid="7915895323644292768">"Reţele Wi-Fi deschise disponibile"</item>
   </plurals>
-    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"O reţea Wi-Fi a fost dezactivată"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"O reţea Wi-Fi a fost dezactivată temporar din cauza conectivităţii slabe."</string>
+    <!-- no translation found for wifi_watchdog_network_disabled (7904214231651546347) -->
+    <skip />
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (2517058131278770509) -->
+    <skip />
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Porniţi funcţionarea Wi-Fi Direct. Acest lucru va dezactiva funcţionarea clientului/hotspotului Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Wi-Fi Direct nu a putut porni"</string>
@@ -941,7 +957,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Anulaţi"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Card SIM eliminat"</string>
-    <string name="sim_removed_message" msgid="2064255102770489459">"Reţea mobilă va fi indisponibilă până la înlocuirea cardului SIM."</string>
+    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"Reţea mobilă va fi indisponibilă până la înlocuirea cardului SIM."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Terminat"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Card SIM adăugat"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"Trebuie să reporniţi dispozitivul pentru a accesa reţeaua de telefonie mobilă."</string>
@@ -1096,22 +1112,14 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Selectaţi un cont"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Incrementaţi"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Decrementaţi"</string>
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"bifată"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"nebifată"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"selectat"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"neselectat"</string>
+    <string name="switch_on" msgid="551417728476977311">"activat"</string>
+    <string name="switch_off" msgid="7249798614327155088">"dezactivată"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"apăsat"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"neapăsat"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Navigaţi la ecranul de pornire"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Navigaţi în sus"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Mai multe opţiuni"</string>
@@ -1125,14 +1133,10 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Datele 4G au fost dezactivate"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Datele mobile au fost dezactiv."</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"atingeţi pentru activare"</string>
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"S-a depăşit limita de date 2G-3G"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"S-a depăşit limita de date 4G"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"S-a depăşit lim. de date mobile"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> peste limita specificată"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Certificat de securitate"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Certificatul este valid."</string>
     <string name="issued_to" msgid="454239480274921032">"Emis către:"</string>

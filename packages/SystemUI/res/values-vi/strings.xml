@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Hiển thị thông báo"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Xóa"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Kiểm tra"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Không có thông báo nào"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Đang diễn ra"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Thông báo"</string>
@@ -62,8 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Thu phóng tương thích"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Khi ứng dụng được thiết kế cho một màn hình nhỏ hơn, điều khiển thu phóng sẽ xuất hiện bên cạnh đồng hồ."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Đã lưu ảnh chụp màn hình vào Thư viện"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Không thể lưu ảnh chụp màn hình. Bộ nhớ ngoài có thể đang được sử dụng."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Tùy chọn truyền tệp USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Gắn như một trình phát đa phương tiện (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Gắn như một máy ảnh (PTP)"</string>
@@ -71,8 +68,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Quay lại"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Trang chủ"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Trình đơn"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
+    <string name="accessibility_recent" msgid="3027675523629738534">"Các ứng dụng gần đây"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Nút chuyển phương thức nhập."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Nút thu phóng khả năng tương thích."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Thu phóng màn hình lớn hơn hoặc nhỏ hơn."</string>
@@ -117,24 +113,14 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Đã bật TeleTypewriter."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Chuông rung."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Chuông im lặng."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Đã tắt dữ liệu 2G-3G"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Đã tắt dữ liệu 4G"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Dữ liệu di động bị vô hiệu hóa"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dữ liệu đã bị vô hiệu hóa"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Đã đạt tới giới hạn sử dụng dữ liệu được chỉ định."\n\n"Nhà cung cấp có thể tính phí cho việc sử dụng thêm dữ liệu."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Bật lại dữ liệu"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ko có k.nối Internet"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Đã kết nối Wi-Fi"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Đang tìm kiếm GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Vị trí đặt bởi GPS"</string>
 </resources>

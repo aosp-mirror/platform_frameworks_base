@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Показване на известията"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Премахване"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Инспектиране"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Няма известия"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"В момента"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Известия"</string>
@@ -62,8 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Промяна на мащаба за съвместимост"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Когато дадено приложение е създадено за по-малък екран, до часовника ще се покаже управление за промяна на мащаба."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Екранната снимка е запазена в галерията"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Екранната снимка не можа да бъде запазена. Възможно е външното хранилище да се използва."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Опции за пренос на файлове чрез USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Свързване като медиен плейър (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Свързване като камера (PTP)"</string>
@@ -71,18 +68,17 @@
     <string name="accessibility_back" msgid="567011538994429120">"Назад"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Начало"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Меню"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
+    <string name="accessibility_recent" msgid="3027675523629738534">"Скорошни приложения"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Бутон за превключване на метода на въвеждане."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Бутон за промяна на мащаба с цел съвместимост."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Промяна на мащаба на екрана от по-малък до по-голям."</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth се свърза."</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth се изключи."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth е включен."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth е изключен."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"Няма батерия."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Батерията е с една чертичка."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Батерията е с две чертички."</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Батерията е с три чертички."</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"Батерията е заредена."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Батерията е пълна."</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"Няма телефон."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Телефонът е с една чертичка."</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Телефонът е с две чертички."</string>
@@ -113,28 +109,18 @@
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Бутон за известия."</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Премахване на известие."</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS е активиран."</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Получаване на GPS."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS се придобива."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter бе активиран."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Вибрира при звънене."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Звънене в тих режим."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G данните са деактивирани"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G данните са деактивирани"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Мобилните данни са деактивирани"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Трафикът на данни е деактивиран"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Определеният лимит за използване на данни е достигнат."\n\n"Допълнителната употреба може да доведе до таксуване от оператора."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Активиране на данните отново"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Няма връзка с интернет"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: Има връзка"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Търси се GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Местоположението е зададено от GPS"</string>
 </resources>

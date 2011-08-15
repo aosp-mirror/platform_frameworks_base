@@ -155,8 +155,7 @@
     <string name="fcError" msgid="3327560126588500777">"Tatizo la muunganisho au msimbo batili wa kipengele."</string>
     <!-- no translation found for httpErrorOk (1191919378083472204) -->
     <skip />
-    <!-- no translation found for httpError (6603022914760066338) -->
-    <skip />
+    <string name="httpError" msgid="6603022914760066338">"Kosa la mtandao limetokea."</string>
     <!-- no translation found for httpErrorLookup (4517085806977851374) -->
     <skip />
     <!-- no translation found for httpErrorUnsupportedAuthScheme (2781440683514730227) -->
@@ -292,6 +291,10 @@
     <!-- no translation found for permlab_sendSms (5600830612147671529) -->
     <skip />
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Huruhusu programu kutuma ujumbe wa SMS. Programu hasidi huenda zikakugharimu pesa kwa kutuma ujumbe bila uthibitisho wako."</string>
+    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <skip />
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <skip />
     <!-- no translation found for permlab_readSms (4085333708122372256) -->
     <skip />
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Huruhusu programu kusoma SMS zilizohifadhiwa kwenye kompyuta yako ndogo au kadi ya SIM. Huenda programu hasidi zikasoma SMS zako za siri."</string>
@@ -389,6 +392,8 @@
     <skip />
     <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
     <skip />
+    <string name="permlab_bindVpnService" msgid="4708596021161473255">"funga kwa huduma ya VPN"</string>
+    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Huruhusu kishikiliaji kufunga kusano cha kiwango cha juu cha huduma ya Vpn. Haipaswi kamwe kuhitajika kwa programu za kawaida."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"funga kwa pazia"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Huruhusu kishikiliaji kufunga kiolesura cha kiwango cha juu cha pazia. Haipaswi kuhitajika kwa programu za kawaida za kompyuta."</string>
     <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
@@ -467,19 +472,19 @@
     <skip />
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Huruhusu programu kurekebisha data ya anwani (anwani) iliyohifadhiwa kwenye kompyuta yako ndogo. Programu hasidi zinaweza kutumia hii ili kufuta au kurekebisha data yako ya anwani."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Huruhusu programu kurekebisha data ya anwani iliyohifadhiwa kwenye simu yako. Programu mbaya za kompyuta zinaweza kutumia hii ili kufuta au kurekebisha data ya anwani yako."</string>
-    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
+    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
     <skip />
-    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
+    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
     <skip />
-    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
+    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
     <skip />
-    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
+    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
     <skip />
-    <string name="permlab_readCalendar" msgid="6898987798303840534">"soma matukio ya kalenda"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Huruhusu programu kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kompyuta yako ndogo. Programu hasidi zinaweza kutumia hii ili kutuma data yako kwa watu wengine."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Huruhusu programu kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye simu yako. Programu mbaya za kompyuta zinaweza kutumia hii ili kutuma matukio yako ya kalenda kwa watu wengine."</string>
-    <string name="permlab_writeCalendar" msgid="3894879352594904361">"ongeza au rekebisha matukio ya kalenda na tuma barua pepe kwa wageni"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Inaruhusu programu kwa kuongeza au kubadilisha matukio kwenye kalenda yako, ambayo inaweza kutuma barua pepe kwa wageni. Programu hasidi zinaweza kutumia hii kwa kuzima au kubadilisha matukio ya kalenda kwa kutuma barua pepe kwa wageni."</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"soma matukio ya kalenda pamoja na maelezo ya siri"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Huruhusu programu kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye kompyuta yako ndogo, pamoja na za marafiki au wafanyakazi wenza. Programu hasidi yenye kibali hiki kinaweza kuchukua maelezo ya kibinagsi kutoka kwa kalenda hizi bila ufahamu wa mmiliki."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Huruhusu programu kusoma matukio yote ya kalenda yaliyohifadhiwa kwenye simu yako, pamoja na za marafiki au marafiki wenza. Programu hasidi yenye kibali hiki inaweza kuchukua maelezo ya kibinafsi kutoka kwa kalenda hizi bila ufahamu wa mmiliki."</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"ongeza au rekebisha matukio ya kalenda na utume barua pepe kwa wageni bila ufahamu wa mmiliki"</string>
+    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Huruhusu programu kutuma mialiko ya tukio kama mmiliki wa kalenda na kuongeza, kuondoa, kubadilisha matukio ambayo unaweza kuyarekebisha kwenye kifaa chako, pamoja na zile za marafiki au marafiki wenza. Programu hasidi yenye kibali hiki inaweza kutuma barua pepe taka ambazo zinaonekana zinatoka kwa mmiliki wa kalenda, kurekebisha matukio bila ufahamu wa mmiliki, au kuongeza matukio laghai."</string>
     <!-- no translation found for permlab_accessMockLocation (8688334974036823330) -->
     <skip />
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Unda vyanzo vya mahali pa jaribio ili kujaribu. Programu mbaya za kompyuta zinaweza kutumia hii ili kuandikiza mahali na/au hali iliyorejeshwa na vyanzo halisi vya mahali kama vile watoa huduma za GPS au Mtandao."</string>
@@ -616,9 +621,9 @@
     <!-- no translation found for permlab_createNetworkSockets (9121633680349549585) -->
     <skip />
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Huruhusu programu kuunda soketi za mtandao."</string>
-    <!-- no translation found for permlab_writeApnSettings (7823599210086622545) -->
+    <!-- no translation found for permlab_writeApnSettings (505660159675751896) -->
     <skip />
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Huruhusu programu kurekebisha mipangilio ya APN, kama vile Mbadala na Kituo cha APN yoyote."</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Huruhusu programu kurekebisha mipangilio ya APN, kama vile Mbadala na Kituo cha APN yoyote."</string>
     <!-- no translation found for permlab_changeNetworkState (958884291454327309) -->
     <skip />
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Huruhusu programu kubadilisha hali ya uunganishaji wa mtandao."</string>
@@ -962,10 +967,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Huruhusu programu kurekebisha historia au alamisho za Kivinjari zilizohifadhiwa kwenye simu yako. Programu mbaya za kompyuta zinaweza kutumia hii ili kufuta au kurekebisha data ya Kivinjari chako."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"weka kengele kwenye saa ya kengele"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Huruhusu programu kuweka kengele kwenye programu iliyosakinishwa ya saa ya kengele. Baadhi ya programu zasaa ya kengele hazingeweza kurekebisha kipengele hiki."</string>
-    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
-    <skip />
-    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
-    <skip />
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"ongeza barua ya sauti"</string>
+    <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Huruhusu programu kuongeza ujumbe kwa kisanduku pokezi chako cha barua ya sauti."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Rekebisha vibali vya Kivinjari cha eneo la jiografia"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Huruhusu programu kwa kurekebisha vibali vya Kivinjari cha eneo la jeo. Programu hasidi zinaweza kutumia hii kwa kuruhusu utumaji wa habari ya eneo kwa tovuti mbadala."</string>
     <!-- no translation found for save_password_message (767344687139195790) -->
@@ -1113,9 +1116,7 @@
     <skip />
     <!-- no translation found for paste (5629880836805036433) -->
     <skip />
-    <string name="pasteDisabled" msgid="7259254654641456570">"Hakuna cha kubandika"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="replace" msgid="8333608224471746584">"Badilisha"</string>
     <!-- no translation found for copyUrl (2538211579596067402) -->
     <skip />
     <string name="selectTextMode" msgid="6738556348861347240">"Chagua maandishi"</string>
@@ -1152,22 +1153,15 @@
     <skip />
     <!-- no translation found for noApplications (1691104391758345586) -->
     <skip />
-    <!-- no translation found for aerr_title (653922989522758100) -->
-    <skip />
-    <string name="aerr_application" msgid="4683614104336409186">"Mchakato wa <xliff:g id="APPLICATION">%1$s</xliff:g> (mchakato<xliff:g id="PROCESS">%2$s</xliff:g>) umekoma bila kutarajiwa. Tafadhali jaribu tena."</string>
-    <string name="aerr_process" msgid="1551785535966089511">"Mchakato wa <xliff:g id="PROCESS">%1$s</xliff:g> umekoma bila kutarajiwa. Tafadhali jaribu tena."</string>
-    <!-- no translation found for anr_title (3100070910664756057) -->
-    <skip />
-    <!-- no translation found for anr_activity_application (3538242413112507636) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (5420826626009561014) -->
-    <skip />
-    <!-- no translation found for anr_application_process (4185842666452210193) -->
-    <skip />
-    <!-- no translation found for anr_process (1246866008169975783) -->
-    <skip />
-    <!-- no translation found for force_close (3653416315450806396) -->
-    <skip />
+    <string name="aerr_title" msgid="1905800560317137752"></string>
+    <string name="aerr_application" msgid="7918612738900928051">"<xliff:g id="APPLICATION">%1$s</xliff:g> imekoma kwa makosa."</string>
+    <string name="aerr_process" msgid="3473655047134111582">"Mchakato <xliff:g id="PROCESS">%1$s</xliff:g> umekomeshwa kwa makosa."</string>
+    <string name="anr_title" msgid="4351948481459135709"></string>
+    <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> haijibu. "\n" "\n" Je, ungependa kuifunga?"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"Shughuli <xliff:g id="ACTIVITY">%1$s</xliff:g>haijibu. "\n" "\n" Je, ungependa kuifunga?"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"<xliff:g id="APPLICATION">%1$s</xliff:g> haijibu. Je, ungependa kuifunga?"</string>
+    <string name="anr_process" msgid="306819947562555821">"Mchakato <xliff:g id="PROCESS">%1$s</xliff:g> haijibu. "\n" "\n" Je, ungependa kuifunga?"</string>
+    <string name="force_close" msgid="8346072094521265605">"Sawa"</string>
     <string name="report" msgid="4060218260984795706">"Ripoti"</string>
     <!-- no translation found for wait (7147118217226317732) -->
     <skip />
@@ -1205,17 +1199,15 @@
     <string name="volume_notification" msgid="2422265656744276715">"Sauti ya notisi"</string>
     <!-- no translation found for volume_unknown (1400219669770445902) -->
     <skip />
-    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
     <skip />
-    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
     <skip />
-    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
     <skip />
-    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
     <skip />
-    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
-    <skip />
-    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
     <skip />
     <!-- no translation found for ringtone_default (3789758980357696936) -->
     <skip />
@@ -1234,10 +1226,8 @@
     <item quantity="one" msgid="1634101450343277345">"Fungua mtandao wa Wi-Fi unaopatikana"</item>
     <item quantity="other" msgid="7915895323644292768">"Fungua mitandao ya Wi-Fi inayopatikana"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Haikuweza kuunganisha kwa Mtandao-Hewa"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"ina muunganisho duni wa tovuti."</string>
     <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
     <skip />
     <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
@@ -1262,7 +1252,7 @@
     <skip />
     <!-- no translation found for sim_removed_title (6227712319223226185) -->
     <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
+    <!-- no translation found for sim_removed_message (2333164559970958645) -->
     <skip />
     <!-- no translation found for sim_done_button (827949989369963775) -->
     <skip />
@@ -1441,22 +1431,14 @@
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
     <skip />
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"imeangaliwa"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"haijakaguliwa"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"Iliyochaguliwa"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"Haijachaguliwa"</string>
+    <string name="switch_on" msgid="551417728476977311">"Mnamo"</string>
+    <string name="switch_off" msgid="7249798614327155088">"zima"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"iliyobonyezwa"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"Haijabonyezwa"</string>
     <!-- no translation found for action_bar_home_description (5293600496601490216) -->
     <skip />
     <!-- no translation found for action_bar_up_description (2237496562952152589) -->
@@ -1483,14 +1465,10 @@
     <skip />
     <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
     <skip />
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Kikomo cha data ya 2G-3G kimezidishwa"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Kikomo cha data cha 4G kimezidishwa"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Kikomo cha data ya ya kifaa cha mkononi kimezidishwa"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> juu ya kikomo kilichobainishwa"</string>
     <!-- no translation found for ssl_certificate (6510040486049237639) -->
     <skip />
     <!-- no translation found for ssl_certificate_is_valid (6825263250774569373) -->

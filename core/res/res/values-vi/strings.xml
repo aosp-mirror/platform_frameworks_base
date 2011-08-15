@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Mã tính năng đã hoàn tất."</string>
     <string name="fcError" msgid="3327560126588500777">"Sự cố kết nối hoặc mã tính năng không hợp lệ."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"OK"</string>
-    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Trang Web có lỗi."</string>
+    <string name="httpError" msgid="6603022914760066338">"Đã xảy ra lỗi mạng."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Không thể tìm thấy URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Không hỗ trợ lược đồ xác thực trang web."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Xác thực không thành công."</string>
@@ -195,6 +195,10 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Cho phép ứng dụng truy xuất và xử lý các thư phát khẩn cấp. Quyền này chỉ khả dụng đối với các ứng dụng hệ thống."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"gửi tin nhắn SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Cho phép ứng dụng gửi tin nhắn SMS. Các ứng dụng độc hại có thể khiến bạn tốn tiền bằng cách gửi tin nhắn mà không cần xác nhận của bạn."</string>
+    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <skip />
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <skip />
     <string name="permlab_readSms" msgid="4085333708122372256">"đọc SMS hoặc MMS"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Cho phép ứng dụng đọc tin nhắn SMS được lưu trữ trên máy tính bảng hoặc thẻ SIM của bạn. Các ứng dụng độc hại có thể đọc tin nhắn bí mật của bạn."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Cho phép ứng dụng đọc tin nhắn SMS được lưu trữ trên điện thoại hoặc thẻ SIM của bạn. Các ứng dụng độc hại có thể đọc tin nhắn bí mật của bạn."</string>
@@ -264,6 +268,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Cho phép chủ nhân ràng buộc với giao diện cấp cao nhất của phương thức nhập. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"liên kết với dịch vụ văn bản"</string>
     <string name="permdesc_bindTextService" msgid="172508880651909350">"Cho phép chủ sở hữu nối kết với giao diện cấp cao nhất của dịch vụ văn bản (ví dụ: SpellCheckerService). Không nên sử dụng cho các ứng dụng thông thường."</string>
+    <string name="permlab_bindVpnService" msgid="4708596021161473255">"liên kết với dịch vụ VPN"</string>
+    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Cho phép chủ nhân liên kết với giao diện cấp cao nhất của dịch vụ Vpn. Không cần thiết đối với ứng dụng thông thường."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"liên kết với hình nền"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Cho phép chủ nhân ràng buộc với giao diện cấp cao nhất của hình nền. Không cần thiết cho các ứng dụng thông thường."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"liên kết với dịch vụ tiện ích con"</string>
@@ -321,15 +327,19 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"ghi dữ liệu liên hệ"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Cho phép ứng dụng sửa đổi dữ liệu (địa chỉ) liên hệ được lưu trữ trên máy tính bảng của bạn. Các ứng dụng độc hại có thể sử dụng quyền này để xóa hoặc sửa đổi dữ liệu liên hệ của bạn."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Cho phép ứng dụng sửa đổi dữ liệu liên hệ (địa chỉ) được lưu trữ trên điện thoại của bạn. Các ứng dụng độc hại có thể sử dụng quyền này để xoá hoặc sửa đổi dữ liệu liên hệ của bạn."</string>
-    <string name="permlab_readProfile" msgid="2211941946684590103">"đọc dữ liệu tiểu sử"</string>
-    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"Cho phép ứng dụng đọc tất cả các thông tin tiểu sử cá nhân của bạn. Các ứng dụng độc hại có thể lợi dụng quyền này để nhận dạng bạn và gửi thông tin cá nhân của bạn cho người khác."</string>
-    <string name="permlab_writeProfile" msgid="6561668046361989220">"ghi dữ liệu tiểu sử"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"Cho phép ứng dụng sửa đổi thông tin tiểu sử cá nhân của bạn. Các ứng dụng độc hại có thể lợi dụng quyền này để xóa hoặc sửa đổi dữ liệu tiểu sử của bạn."</string>
-    <string name="permlab_readCalendar" msgid="6898987798303840534">"Đọc sự kiện lịch"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Cho phép ứng dụng đọc tất cả các sự kiện lịch được lưu trữ trên máy tính bảng của bạn. Các ứng dụng độc hại có thể sử dụng quyền này để gửi các sự kiện lịch của bạn cho những người khác."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Cho phép ứng dụng đọc tất cả các sự kiện lịch được lưu trữ trên điện thoại của bạn. Các ứng dụng độc hại có thể sử dụng quyền này để gửi các sự kiện lịch của bạn cho những người khác."</string>
-    <string name="permlab_writeCalendar" msgid="3894879352594904361">"thêm hoặc sửa đổi các sự kiện lịch và gửi email cho khách"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Cho phép ứng dụng thêm hoặc thay đổi các sự kiện trên lịch của bạn, có thể gửi email cho khách. Các ứng dụng độc hại có thể sử dụng quyền này để xoá hoặc sửa đổi các sự kiện lịch của bạn hoặc gửi email cho khách."</string>
+    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
+    <skip />
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"đọc các sự kiện lịch và thông tin bí mật"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Cho phép ứng dụng đọc tất cả các sự kiện lịch được lưu trữ trên máy tính bảng của bạn, bao gồm các sự kiện của bạn bè hoặc đồng nghiệp. Ứng dụng độc hại có quyền này có thể trích xuất thông tin cá nhân từ những lịch này mà chủ sở hữu không hề biết."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Cho phép ứng dụng đọc tất cả các sự kiện lịch được lưu trữ trên điện thoại của bạn, bao gồm các sự kiện của bạn bè hoặc đồng nghiệp. Ứng dụng độc hại có quyền này có thể trích xuất thông tin cá nhân từ những lịch này mà chủ sở hữu không hề biết."</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"thêm hoặc sửa đổi các sự kiện lịch và gửi email cho khách mà chủ sở hữu không hề biết"</string>
+    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Cho phép ứng dụng gửi lời mời sự kiện với tư cách chủ sở hữu lịch và thêm, xóa, thay đổi các sự kiện mà bạn có thể sửa đổi trên thiết bị của mình, bao gồm các sự kiện của bạn bè hoặc đồng nghiệp. Ứng dụng độc hại có quyền này có thể gửi email spam mà có vẻ đến từ chủ sở hữu lịch, sửa đổi các sự kiện mà chủ sở hữu không hề biết hoặc thêm những sự kiện giả mạo."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"các nguồn vị trí mô phỏng cho thử nghiệm"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Tạo nguồn vị trí mô phỏng cho thử nghiệm. Các ứng dụng độc hại có thể sử dụng quyền này để ghi đè vị trí và/hoặc trạng thái được trả về bởi các nguồn vị trí thực như nhà cung cấp GPS hoặc Mạng."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"truy cập vào các lệnh của nhà cung cấp vị trí bổ sung"</string>
@@ -439,8 +449,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Cho phép ứng dụng xem trạng thái của tất cả các mạng."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"quyền truy cập Internet đầy đủ"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Cho phép ứng dụng tạo các cổng mạng."</string>
-    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"ghi cài đặt Tên Điểm Truy cập"</string>
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Cho phép ứng dụng sửa đổi cài đặt APN, chẳng hạn như Proxy và Cổng của bất kỳ APN nào."</string>
+    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"ghi cài đặt Tên Điểm Truy cập"</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Cho phép ứng dụng sửa đổi cài đặt APN, chẳng hạn như Proxy và Cổng của bất kỳ APN nào."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"thay đổi kết nối mạng"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Cho phép ứng dụng thay đổi trạng thái kết nối mạng."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Thay đổi kết nối được dùng làm điểm truy cập Internet"</string>
@@ -720,10 +730,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Cho phép ứng dụng sửa đổi lịch sử hoặc dấu trang của Trình duyệt được lưu trữ trên điện thoại của bạn. Các ứng dụng độc hại có thể sử dụng quyền này để xoá hoặc sửa đổi dữ liệu Trình duyệt của bạn."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"đặt báo thức trong đồng hồ báo thức"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Cho phép ứng dụng đặt báo thức trong ứng dụng đồng hồ báo thức được cài đặt. Một số ứng dụng đồng hồ báo thức có thể không sử dụng tính năng này."</string>
-    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
-    <skip />
-    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
-    <skip />
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"thêm thư thoại"</string>
+    <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Cho phép ứng dụng thêm thông báo vào hộp thư thoại đến của bạn."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Sửa đổi quyền về vị trí địa lý của Trình duyệt"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Cho phép ứng dụng sửa đổi các quyền về vị trí địa lý của Trình duyệt. Các ứng dụng độc hại có thể sử dụng quyền này để cho phép gửi thông tin vị trí đến trang web bất kỳ."</string>
     <string name="save_password_message" msgid="767344687139195790">"Bạn có muốn trình duyệt nhớ mật khẩu này không?"</string>
@@ -839,9 +847,7 @@
     <string name="cut" msgid="3092569408438626261">"Cắt"</string>
     <string name="copy" msgid="2681946229533511987">"Sao chép"</string>
     <string name="paste" msgid="5629880836805036433">"Dán"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Không có gì để dán"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="replace" msgid="8333608224471746584">"Thay thế"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Sao chép URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Chọn văn bản..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Lựa chọn văn bản"</string>
@@ -864,15 +870,15 @@
     <string name="chooseActivity" msgid="1009246475582238425">"Chọn tác vụ"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Chọn ứng dụng cho thiết bị USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Không ứng dụng nào có thể thực hiện tác vụ này."</string>
-    <string name="aerr_title" msgid="653922989522758100">"Rất tiếc!"</string>
-    <string name="aerr_application" msgid="4683614104336409186">"Ứng dụng <xliff:g id="APPLICATION">%1$s</xliff:g> (quá trình <xliff:g id="PROCESS">%2$s</xliff:g>) đã dừng đột ngột. Vui lòng thử lại."</string>
-    <string name="aerr_process" msgid="1551785535966089511">"Quá trình <xliff:g id="PROCESS">%1$s</xliff:g> đã dừng đột ngột. Vui lòng thử lại."</string>
-    <string name="anr_title" msgid="3100070910664756057">"Rất tiếc!"</string>
-    <string name="anr_activity_application" msgid="3538242413112507636">"Hoạt động <xliff:g id="ACTIVITY">%1$s</xliff:g> (trong ứng dụng <xliff:g id="APPLICATION">%2$s</xliff:g>) không có phản hồi."</string>
-    <string name="anr_activity_process" msgid="5420826626009561014">"Hoạt động <xliff:g id="ACTIVITY">%1$s</xliff:g> (đang xử lý <xliff:g id="PROCESS">%2$s</xliff:g>) không có phản hồi."</string>
-    <string name="anr_application_process" msgid="4185842666452210193">"Ứng dụng <xliff:g id="APPLICATION">%1$s</xliff:g> (đang xử lý <xliff:g id="PROCESS">%2$s</xliff:g>) không có phản hồi."</string>
-    <string name="anr_process" msgid="1246866008169975783">"Quá trình <xliff:g id="PROCESS">%1$s</xliff:g> không có phản hồi."</string>
-    <string name="force_close" msgid="3653416315450806396">"Buộc đóng"</string>
+    <string name="aerr_title" msgid="1905800560317137752"></string>
+    <string name="aerr_application" msgid="7918612738900928051">"<xliff:g id="APPLICATION">%1$s</xliff:g> đã dừng do lỗi."</string>
+    <string name="aerr_process" msgid="3473655047134111582">"Quá trình <xliff:g id="PROCESS">%1$s</xliff:g> đã dừng do lỗi."</string>
+    <string name="anr_title" msgid="4351948481459135709"></string>
+    <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> không phản hồi."\n\n"Bạn có muốn đóng ứng dụng này không?"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"Hoạt động <xliff:g id="ACTIVITY">%1$s</xliff:g> không phản hồi."\n\n"Bạn có muốn đóng hoạt động này không?"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"<xliff:g id="APPLICATION">%1$s</xliff:g> không phản hồi. Bạn có muốn đóng ứng dụng này không?"</string>
+    <string name="anr_process" msgid="306819947562555821">"Quá trình <xliff:g id="PROCESS">%1$s</xliff:g> không phản hồi."\n\n"Bạn có muốn đóng quá trình này không?"</string>
+    <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Báo cáo"</string>
     <string name="wait" msgid="7147118217226317732">"Đợi"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Ứng dụng đã được chuyển hướng"</string>
@@ -901,17 +907,15 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Âm lượng báo thức"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Âm lượng thông báo"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Âm lượng"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
     <skip />
-    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
     <skip />
-    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
     <skip />
-    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
     <skip />
-    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
-    <skip />
-    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
     <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Nhạc chuông mặc định"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Nhạc chuông mặc định (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -926,8 +930,8 @@
     <item quantity="one" msgid="1634101450343277345">"Mở mạng Wi-Fi khả dụng"</item>
     <item quantity="other" msgid="7915895323644292768">"Mở mạng Wi-Fi khả dụng"</item>
   </plurals>
-    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Mạng Wi-Fi đã bị vô hiệu"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Mạng Wi-Fi đã tạm thời bị vô hiệu do kết nối lỗi."</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Không thể kết nối với Wi-Fi"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"có kết nối internet kém."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Bắt đầu hoạt động Wi-Fi Direct. Điều này sẽ tắt hoạt động của ứng dụng khách/điểm phát sóng Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Không thể khởi động Wi-Fi Direct"</string>
@@ -941,7 +945,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Hủy"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"Đã xóa thẻ SIM"</string>
-    <string name="sim_removed_message" msgid="2064255102770489459">"Mạng di động sẽ không khả dụng cho đến khi bạn thay thế thẻ SIM."</string>
+    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"Mạng di động sẽ không khả dụng cho đến khi bạn thay thế thẻ SIM."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Xong"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"Đã thêm thẻ SIM"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"Bạn phải khởi động lại thiết bị của mình để truy cập mạng di động."</string>
@@ -1096,22 +1100,14 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Chọn tài khoản"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Tăng dần"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Giảm dần"</string>
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"đã chọn"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"chưa chọn"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"đã chọn"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"chưa được chọn"</string>
+    <string name="switch_on" msgid="551417728476977311">"bật"</string>
+    <string name="switch_off" msgid="7249798614327155088">"tắt"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"đã nhấn"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"chưa được nhấn"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Điều hướng về trang chủ"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Điều hướng lên trên"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Tùy chọn khác"</string>
@@ -1125,14 +1121,10 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G dữ liệu bị vô hiệu hóa"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Dữ liệu di động bị vô hiệu hóa"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"chạm để bật"</string>
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Đã vượt quá g.hạn dữ liệu 2G-3G"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Đã vượt quá giới hạn 4G dữ liệu"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Đã vượt quá giới hạn dữ liệu di động"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> vượt quá giới hạn chỉ định"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Chứng chỉ bảo mật"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Chứng chỉ này hợp lệ."</string>
     <string name="issued_to" msgid="454239480274921032">"Cấp cho:"</string>
