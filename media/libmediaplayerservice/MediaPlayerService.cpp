@@ -68,6 +68,11 @@
 
 #include <OMX.h>
 
+namespace android {
+sp<MediaPlayerBase> createAAH_TXPlayer();
+sp<MediaPlayerBase> createAAH_RXPlayer();
+}
+
 namespace {
 using android::media::Metadata;
 using android::status_t;
@@ -622,6 +627,14 @@ player_type getPlayerType(const char* url)
         }
     }
 
+    if (!strncasecmp("aahRX://", url, 8)) {
+        return AAH_RX_PLAYER;
+    }
+
+    if (!strncasecmp("aahTX://", url, 8)) {
+        return AAH_TX_PLAYER;
+    }
+
     // use MidiFile for MIDI extensions
     int lenURL = strlen(url);
     for (int i = 0; i < NELEM(FILE_EXTS); ++i) {
@@ -657,6 +670,14 @@ static sp<MediaPlayerBase> createPlayer(player_type playerType, void* cookie,
         case TEST_PLAYER:
             LOGV("Create Test Player stub");
             p = new TestPlayerStub();
+            break;
+        case AAH_RX_PLAYER:
+            LOGV(" create A@H RX Player");
+            p = createAAH_RXPlayer();
+            break;
+        case AAH_TX_PLAYER:
+            LOGV(" create A@H TX Player");
+            p = createAAH_TXPlayer();
             break;
         default:
             LOGE("Unknown player type: %d", playerType);
@@ -1005,9 +1026,21 @@ status_t MediaPlayerService::Client::setLooping(int loop)
 status_t MediaPlayerService::Client::setVolume(float leftVolume, float rightVolume)
 {
     LOGV("[%d] setVolume(%f, %f)", mConnId, leftVolume, rightVolume);
-    // TODO: for hardware output, call player instead
-    Mutex::Autolock l(mLock);
-    if (mAudioOutput != 0) mAudioOutput->setVolume(leftVolume, rightVolume);
+
+    // for hardware output, call player instead
+    sp<MediaPlayerBase> p = getPlayer();
+    {
+      Mutex::Autolock l(mLock);
+      if (p != 0 && p->hardwareOutput()) {
+          MediaPlayerHWInterface* hwp =
+                  reinterpret_cast<MediaPlayerHWInterface*>(p.get());
+          return hwp->setVolume(leftVolume, rightVolume);
+      } else {
+          if (mAudioOutput != 0) mAudioOutput->setVolume(leftVolume, rightVolume);
+          return NO_ERROR;
+      }
+    }
+
     return NO_ERROR;
 }
 
