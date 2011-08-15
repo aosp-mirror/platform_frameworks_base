@@ -39,9 +39,7 @@ import java.util.StringTokenizer;
  * for the SLBassBoostItf interface. Please refer to this specification for more details.
  * <p>To attach the BassBoost to a particular AudioTrack or MediaPlayer, specify the audio session
  * ID of this AudioTrack or MediaPlayer when constructing the BassBoost.
- * If the audio session ID 0 is specified, the BassBoost applies to the main audio output mix.
- * <p>Creating a BassBoost on the output mix (audio session 0) requires permission
- * {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}
+ * <p>NOTE: attaching a BassBoost to the global audio output mix by use of session 0 is deprecated.
  * <p>See {@link android.media.MediaPlayer#getAudioSessionId()} for details on audio sessions.
  * <p>See {@link android.media.audiofx.AudioEffect} class for more details on
  * controlling audio effects.
@@ -89,9 +87,8 @@ public class BassBoost extends AudioEffect {
      * engine. As the same engine can be shared by several applications, this parameter indicates
      * how much the requesting application needs control of effect parameters. The normal priority
      * is 0, above normal is a positive number, below normal a negative number.
-     * @param audioSession system wide unique audio session identifier. If audioSession
-     *  is not 0, the BassBoost will be attached to the MediaPlayer or AudioTrack in the
-     *  same audio session. Otherwise, the BassBoost will apply to the output mix.
+     * @param audioSession system wide unique audio session identifier. The BassBoost will be
+     * attached to the MediaPlayer or AudioTrack in the same audio session.
      *
      * @throws java.lang.IllegalStateException
      * @throws java.lang.IllegalArgumentException
@@ -102,6 +99,10 @@ public class BassBoost extends AudioEffect {
     throws IllegalStateException, IllegalArgumentException,
            UnsupportedOperationException, RuntimeException {
         super(EFFECT_TYPE_BASS_BOOST, EFFECT_TYPE_NULL, priority, audioSession);
+
+        if (audioSession == 0) {
+            Log.w(TAG, "WARNING: attaching a BassBoost to global output mix is deprecated!");
+        }
 
         int[] value = new int[1];
         checkStatus(getParameter(PARAM_STRENGTH_SUPPORTED, value));

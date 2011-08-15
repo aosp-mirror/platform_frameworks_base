@@ -40,13 +40,11 @@ import java.util.UUID;
  *   <li> {@link android.media.audiofx.PresetReverb}</li>
  *   <li> {@link android.media.audiofx.EnvironmentalReverb}</li>
  * </ul>
- * <p>If the audio effect is to be applied to a specific AudioTrack or MediaPlayer instance,
+ * <p>To apply the audio effect to a specific AudioTrack or MediaPlayer instance,
  * the application must specify the audio session ID of that instance when creating the AudioEffect.
  * (see {@link android.media.MediaPlayer#getAudioSessionId()} for details on audio sessions).
- * To apply an effect to the global audio output mix, session 0 must be specified when creating the
- * AudioEffect.
- * <p>Creating an effect on the output mix (audio session 0) requires permission
- * {@link android.Manifest.permission#MODIFY_AUDIO_SETTINGS}
+ * <p>NOTE: attaching insert effects (equalizer, bass boost, virtualizer) to the global audio output
+ * mix by use of session 0 is deprecated.
  * <p>Creating an AudioEffect object will create the corresponding effect engine in the audio
  * framework if no instance of the same effect type exists in the specified audio session.
  * If one exists, this instance will be used.
@@ -356,10 +354,9 @@ public class AudioEffect {
      *            how much the requesting application needs control of effect
      *            parameters. The normal priority is 0, above normal is a
      *            positive number, below normal a negative number.
-     * @param audioSession system wide unique audio session identifier. If audioSession
-     *            is not 0, the effect will be attached to the MediaPlayer or
-     *            AudioTrack in the same audio session. Otherwise, the effect
-     *            will apply to the output mix.
+     * @param audioSession system wide unique audio session identifier.
+     *            The effect will be attached to the MediaPlayer or AudioTrack in
+     *            the same audio session.
      *
      * @throws java.lang.IllegalArgumentException
      * @throws java.lang.UnsupportedOperationException
