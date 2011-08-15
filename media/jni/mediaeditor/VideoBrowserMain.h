@@ -133,7 +133,8 @@ M4OSA_ERR videoBrowserCleanUp(M4OSA_Context pContext) ;
 *                                     this function with the reached time
 * @return       M4NO_ERROR / M4ERR_PARAMETER / M4ERR_STATE / M4ERR_ALLOC
 ******************************************************************************/
-M4OSA_ERR videoBrowserPrepareFrame(M4OSA_Context pContext, M4OSA_UInt32* pTime);
+M4OSA_ERR videoBrowserPrepareFrame(M4OSA_Context pContext, M4OSA_UInt32* pTime,
+        M4OSA_UInt32 tolerance);
 
 /******************************************************************************
 * @brief        This function sets the size and the position of the display.

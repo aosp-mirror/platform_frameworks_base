@@ -763,7 +763,7 @@ static int videoEditor_renderPreviewFrame(JNIEnv* pEnv,
             ClipProperties.uiVideoWidth,
             pContext->pEditSettings->pClipList[iCurrentClipIndex]->\
             ClipProperties.uiVideoHeight,
-            &tnTimeMs);
+            &tnTimeMs, 0);
         if (result != M4NO_ERROR) {
             free(pixelArray);
             ThumbnailClose(tnContext);
@@ -991,7 +991,7 @@ static int videoEditor_renderMediaItemPreviewFrame(JNIEnv* pEnv,
 
     result = ThumbnailGetPixels16(tnContext, (M4OSA_Int16 *)pixelArray,
                                                 frameWidth,
-                                                frameHeight, &timeMs);
+                                                frameHeight, &timeMs, 0);
     if (result != M4NO_ERROR) {
         free(pixelArray);
         ThumbnailClose(tnContext);
@@ -2132,7 +2132,7 @@ static int videoEditor_getPixels(
 
     m_dst32 = env->GetIntArrayElements(pixelArray, NULL);
 
-    err = ThumbnailGetPixels32(mContext, (M4OSA_Int32 *)m_dst32, width,height,&timeMS);
+    err = ThumbnailGetPixels32(mContext, (M4OSA_Int32 *)m_dst32, width,height,&timeMS,0);
     if (err != M4NO_ERROR ) {
         if (env != NULL) {
             jniThrowException(env, "java/lang/RuntimeException",\
@@ -2194,9 +2194,10 @@ static int videoEditor_getPixelsList(
 
     m_dst32 = env->GetIntArrayElements(pixelArray, NULL);
 
+    M4OSA_UInt32 tolerance = deltatimeMS / 2;
     do {
         err = ThumbnailGetPixels32(mContext, ((M4OSA_Int32 *)m_dst32 + arrayOffset),
-            width,height,&timeMS);
+            width,height,&timeMS, tolerance);
         if (err != M4NO_ERROR ) {
             if (env != NULL) {
                 jniThrowException(env, "java/lang/RuntimeException",\
