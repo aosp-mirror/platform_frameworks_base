@@ -79,7 +79,8 @@ status_t AudioTrack::getMinFrameCount(
 // ---------------------------------------------------------------------------
 
 AudioTrack::AudioTrack()
-    : mStatus(NO_INIT)
+    : mStatus(NO_INIT),
+      mIsTimed(false)
 {
 }
 
@@ -94,7 +95,8 @@ AudioTrack::AudioTrack(
         void* user,
         int notificationFrames,
         int sessionId)
-    : mStatus(NO_INIT)
+    : mStatus(NO_INIT),
+      mIsTimed(false)
 {
     mStatus = set(streamType, sampleRate, format, channelMask,
             frameCount, flags, cbf, user, notificationFrames,
@@ -112,7 +114,8 @@ AudioTrack::AudioTrack(
         void* user,
         int notificationFrames,
         int sessionId)
-    : mStatus(NO_INIT)
+    : mStatus(NO_INIT),
+      mIsTimed(false)
 {
     mStatus = set(streamType, sampleRate, format, channelMask,
             0, flags, cbf, user, notificationFrames,
@@ -520,6 +523,10 @@ status_t AudioTrack::setSampleRate(int rate)
 {
     int afSamplingRate;
 
+    if (mIsTimed) {
+        return INVALID_OPERATION;
+    }
+
     if (AudioSystem::getOutputSamplingRate(&afSamplingRate, mStreamType) != NO_ERROR) {
         return NO_INIT;
     }
@@ -533,6 +540,10 @@ status_t AudioTrack::setSampleRate(int rate)
 
 uint32_t AudioTrack::getSampleRate()
 {
+    if (mIsTimed) {
+        return INVALID_OPERATION;
+    }
+
     AutoMutex lock(mLock);
     return mCblk->sampleRate;
 }
@@ -556,6 +567,10 @@ status_t AudioTrack::setLoop_l(uint32_t loopStart, uint32_t loopEnd, int loopCou
         cblk->loopCount = 0;
         mLoopCount = 0;
         return NO_ERROR;
+    }
+
+    if (mIsTimed) {
+        return INVALID_OPERATION;
     }
 
     if (loopStart >= loopEnd ||
@@ -641,6 +656,8 @@ status_t AudioTrack::getPositionUpdatePeriod(uint32_t *updatePeriod)
 
 status_t AudioTrack::setPosition(uint32_t position)
 {
+    if (mIsTimed) return INVALID_OPERATION;
+
     AutoMutex lock(mLock);
     Mutex::Autolock _l(mCblk->lock);
 
@@ -790,6 +807,7 @@ status_t AudioTrack::createTrack_l(
                                                       ((uint16_t)flags) << 16,
                                                       sharedBuffer,
                                                       output,
+                                                      mIsTimed,
                                                       &mSessionId,
                                                       &status);
 
@@ -958,6 +976,7 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
 {
 
     if (mSharedBuffer != 0) return INVALID_OPERATION;
+    if (mIsTimed) return INVALID_OPERATION;
 
     if (ssize_t(userSize) < 0) {
         // sanity-check. user is most-likely passing an error code.
@@ -1016,6 +1035,36 @@ ssize_t AudioTrack::write(const void* buffer, size_t userSize)
     } while (userSize >= frameSz);
 
     return written;
+}
+
+// -------------------------------------------------------------------------
+
+TimedAudioTrack::TimedAudioTrack() {
+    mIsTimed = true;
+}
+
+status_t TimedAudioTrack::allocateTimedBuffer(size_t size, sp<IMemory>* buffer)
+{
+    return mAudioTrack->allocateTimedBuffer(size, buffer);
+}
+
+status_t TimedAudioTrack::queueTimedBuffer(const sp<IMemory>& buffer,
+                                           int64_t pts)
+{
+    // restart track if it was disabled by audioflinger due to previous underrun
+    if (mActive && (mCblk->flags & CBLK_DISABLED_MSK)) {
+        mCblk->flags &= ~CBLK_DISABLED_ON;
+        LOGW("queueTimedBuffer() track %p disabled, restarting", this);
+        mAudioTrack->start();
+    }
+
+    return mAudioTrack->queueTimedBuffer(buffer, pts);
+}
+
+status_t TimedAudioTrack::setMediaTimeTransform(const LinearTransform& xform,
+                                                TargetTimeline target)
+{
+    return mAudioTrack->setMediaTimeTransform(xform, target);
 }
 
 // -------------------------------------------------------------------------
@@ -1434,4 +1483,3 @@ bool audio_track_cblk_t::tryLock()
 // -------------------------------------------------------------------------
 
 }; // namespace android
-

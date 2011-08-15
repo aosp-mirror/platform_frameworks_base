@@ -8,7 +8,8 @@ LOCAL_SRC_FILES:=               \
     AudioResampler.cpp.arm      \
     AudioResamplerSinc.cpp.arm  \
     AudioResamplerCubic.cpp.arm \
-    AudioPolicyService.cpp
+    AudioPolicyService.cpp      \
+    AudioBufferProvider.cpp
 
 LOCAL_C_INCLUDES := \
     system/media/audio_effects/include
@@ -22,7 +23,8 @@ LOCAL_SHARED_LIBRARIES := \
     libhardware_legacy \
     libeffects \
     libdl \
-    libpowermanager
+    libpowermanager \
+    libaah_timesrv_client
 
 LOCAL_STATIC_LIBRARIES := \
     libcpustats \

@@ -118,7 +118,8 @@ AudioResampler::AudioResampler(int bitDepth, int inChannelCount,
         int32_t sampleRate) :
     mBitDepth(bitDepth), mChannelCount(inChannelCount),
             mSampleRate(sampleRate), mInSampleRate(sampleRate), mInputIndex(0),
-            mPhaseFraction(0) {
+            mPhaseFraction(0), mLocalTimeFreq(0),
+            mPTS(AudioBufferProvider::kInvalidPTS) {
     // sanity check on format
     if ((bitDepth != 16) ||(inChannelCount < 1) || (inChannelCount > 2)) {
         LOGE("Unsupported sample format, %d bits, %d channels", bitDepth,
@@ -150,6 +151,23 @@ void AudioResampler::setVolume(int16_t left, int16_t right) {
     // TODO: Implement anti-zipper filter
     mVolume[0] = left;
     mVolume[1] = right;
+}
+
+void AudioResampler::setLocalTimeFreq(uint64_t freq) {
+    mLocalTimeFreq = freq;
+}
+
+void AudioResampler::setPTS(int64_t pts) {
+    mPTS = pts;
+}
+
+int64_t AudioResampler::calculateOutputPTS(int outputFrameIndex) {
+
+    if (mPTS == AudioBufferProvider::kInvalidPTS) {
+        return AudioBufferProvider::kInvalidPTS;
+    } else {
+        return mPTS + ((outputFrameIndex * mLocalTimeFreq) / mSampleRate);
+    }
 }
 
 void AudioResampler::reset() {
@@ -198,7 +216,8 @@ void AudioResamplerOrder1::resampleStereo16(int32_t* out, size_t outFrameCount,
         // buffer is empty, fetch a new one
         while (mBuffer.frameCount == 0) {
             mBuffer.frameCount = inFrameCount;
-            provider->getNextBuffer(&mBuffer);
+            provider->getNextBuffer(&mBuffer,
+                                    calculateOutputPTS(outputIndex / 2));
             if (mBuffer.raw == NULL) {
                 goto resampleStereo16_exit;
             }
@@ -292,7 +311,8 @@ void AudioResamplerOrder1::resampleMono16(int32_t* out, size_t outFrameCount,
         // buffer is empty, fetch a new one
         while (mBuffer.frameCount == 0) {
             mBuffer.frameCount = inFrameCount;
-            provider->getNextBuffer(&mBuffer);
+            provider->getNextBuffer(&mBuffer,
+                                    calculateOutputPTS(outputIndex / 2));
             if (mBuffer.raw == NULL) {
                 mInputIndex = inputIndex;
                 mPhaseFraction = phaseFraction;
@@ -602,4 +622,3 @@ void AudioResamplerOrder1::AsmStereo16Loop(int16_t *in, int32_t* maxOutPt, int32
 // ----------------------------------------------------------------------------
 }
 ; // namespace android
-
