@@ -6249,15 +6249,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
                     }
 
                     // Walk up the hierarchy to determine if we're inside a scrolling container.
-                    boolean isInScrollingContainer = false;
-                    ViewParent p = getParent();
-                    while (p != null && p instanceof ViewGroup) {
-                        if (((ViewGroup) p).shouldDelayChildPressedState()) {
-                            isInScrollingContainer = true;
-                            break;
-                        }
-                        p = p.getParent();
-                    }
+                    boolean isInScrollingContainer = isInScrollingContainer();
 
                     // For views inside a scrolling container, delay the pressed feedback for
                     // a short period in case this is a scroll.
@@ -6303,6 +6295,20 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             return true;
         }
 
+        return false;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isInScrollingContainer() {
+        ViewParent p = getParent();
+        while (p != null && p instanceof ViewGroup) {
+            if (((ViewGroup) p).shouldDelayChildPressedState()) {
+                return true;
+            }
+            p = p.getParent();
+        }
         return false;
     }
 
