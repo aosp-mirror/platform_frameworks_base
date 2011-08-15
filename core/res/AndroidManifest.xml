@@ -122,6 +122,15 @@
         android:label="@string/permlab_sendSms"
         android:description="@string/permdesc_sendSms" />
 
+    <!-- Allows an application to send SMS messages via the Messaging app with no user
+         input or confirmation.
+         @hide -->
+    <permission android:name="android.permission.SEND_SMS_NO_CONFIRMATION"
+        android:permissionGroup="android.permission-group.COST_MONEY"
+        android:protectionLevel="signatureOrSystem"
+        android:label="@string/permlab_sendSmsNoConfirmation"
+        android:description="@string/permdesc_sendSmsNoConfirmation" />
+
     <!-- Allows an application to initiate a phone call without going through
          the Dialer user interface for the user to confirm the call
          being placed. -->
@@ -1413,7 +1422,7 @@
         android:description="@string/permdesc_modifyNetworkAccounting"
         android:protectionLevel="signatureOrSystem" />
 
-    <!-- C2DM permission. 
+    <!-- C2DM permission.
          @hide Used internally.
      -->
     <permission android:name="android.intent.category.MASTER_CLEAR.permission.C2D_MESSAGE"
