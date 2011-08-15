@@ -139,6 +139,11 @@ import com.android.internal.widget.EditableInputConnection;
 
 import org.xmlpull.v1.XmlPullParserException;
 
+import com.android.internal.util.FastMath;
+import com.android.internal.widget.EditableInputConnection;
+
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.BreakIterator;
@@ -220,6 +225,7 @@ import java.util.HashMap;
  * @attr ref android.R.styleable#TextView_imeActionLabel
  * @attr ref android.R.styleable#TextView_imeActionId
  * @attr ref android.R.styleable#TextView_editorExtras
+ * @attr ref android.R.styleable#TextView_suggestionsEnabled
  */
 @RemoteView
 public class TextView extends View implements ViewTreeObserver.OnPreDrawListener {
@@ -9418,7 +9424,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     }
 
     void showSuggestions() {
-        if (!mSuggestionsEnabled || !isTextEditable()) return;
+        if (!isSuggestionsEnabled() || !isTextEditable()) return;
 
         if (mSuggestionsPopupWindow == null) {
             mSuggestionsPopupWindow = new SuggestionsPopupWindow();
@@ -9445,18 +9451,41 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * user double taps on these parts of the text. No suggestions are displayed when this value is
      * false. Use {@link #setSuggestionsEnabled(boolean)} to change this value.
      *
+     * Note that suggestions are only enabled for a subset of input types. In addition to setting
+     * this flag to <code>true</code> using {@link #setSuggestionsEnabled(boolean)} or the
+     * <code>android:suggestionsEnabled</code> xml attribute, this method will return
+     * <code>true</code> only if the class of your input type is {@link InputType#TYPE_CLASS_TEXT}.
+     * In addition, the type variation must also be one of
+     * {@link InputType#TYPE_TEXT_VARIATION_NORMAL},
+     * {@link InputType#TYPE_TEXT_VARIATION_EMAIL_SUBJECT},
+     * {@link InputType#TYPE_TEXT_VARIATION_LONG_MESSAGE},
+     * {@link InputType#TYPE_TEXT_VARIATION_SHORT_MESSAGE} or
+     * {@link InputType#TYPE_TEXT_VARIATION_WEB_EDIT_TEXT}.
+     *
      * @return true if the suggestions popup window is enabled.
      *
      * @attr ref android.R.styleable#TextView_suggestionsEnabled
      */
     public boolean isSuggestionsEnabled() {
-        return mSuggestionsEnabled;
+        if (!mSuggestionsEnabled) return false;
+        if ((mInputType & InputType.TYPE_MASK_CLASS) != InputType.TYPE_CLASS_TEXT) return false;
+        final int variation =
+                mInputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION);
+        if (variation == EditorInfo.TYPE_TEXT_VARIATION_NORMAL ||
+                variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_SUBJECT ||
+                variation == EditorInfo.TYPE_TEXT_VARIATION_LONG_MESSAGE ||
+                variation == EditorInfo.TYPE_TEXT_VARIATION_SHORT_MESSAGE ||
+                variation == EditorInfo.TYPE_TEXT_VARIATION_WEB_EDIT_TEXT) return true;
+
+        return false;
     }
 
     /**
      * Enables or disables the suggestion popup. See {@link #isSuggestionsEnabled()}.
      *
      * @param enabled Whether or not suggestions are enabled.
+     *
+     * @attr ref android.R.styleable#TextView_suggestionsEnabled
      */
     public void setSuggestionsEnabled(boolean enabled) {
         mSuggestionsEnabled = enabled;
@@ -9728,10 +9757,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         @Override
         public void show() {
-            mPasteTextView.setVisibility(canPaste() ? View.VISIBLE : View.GONE);
-            mReplaceTextView.setVisibility(mSuggestionsEnabled ? View.VISIBLE : View.GONE);
+            boolean canPaste = canPaste();
+            boolean suggestionsEnabled = isSuggestionsEnabled();
+            mPasteTextView.setVisibility(canPaste ? View.VISIBLE : View.GONE);
+            mReplaceTextView.setVisibility(suggestionsEnabled ? View.VISIBLE : View.GONE);
 
-            if (!canPaste() && !mSuggestionsEnabled) return;
+            if (!canPaste && !suggestionsEnabled) return;
 
             super.show();
         }
