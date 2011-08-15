@@ -48,8 +48,6 @@ public final class InputChannel implements Parcelable {
     @SuppressWarnings("unused")
     private int mPtr; // used by native code
     
-    private boolean mDisposeAfterWriteToParcel;
-    
     private static native InputChannel[] nativeOpenInputChannelPair(String name);
     
     private native void nativeDispose(boolean finalized);
@@ -117,13 +115,12 @@ public final class InputChannel implements Parcelable {
      * as an out parameter in a binder call.
      * @param other The other input channel instance.
      */
-    public void transferToBinderOutParameter(InputChannel outParameter) {
+    public void transferTo(InputChannel outParameter) {
         if (outParameter == null) {
             throw new IllegalArgumentException("outParameter must not be null");
         }
         
         nativeTransferTo(outParameter);
-        outParameter.mDisposeAfterWriteToParcel = true;
     }
 
     public int describeContents() {
@@ -145,7 +142,7 @@ public final class InputChannel implements Parcelable {
         
         nativeWriteToParcel(out);
         
-        if (mDisposeAfterWriteToParcel) {
+        if ((flags & PARCELABLE_WRITE_RETURN_VALUE) != 0) {
             dispose();
         }
     }
