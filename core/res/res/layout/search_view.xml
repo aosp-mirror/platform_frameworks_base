@@ -48,6 +48,7 @@
         android:background="?android:attr/selectableItemBackground"
         android:src="?android:attr/searchViewSearchIcon"
         style="?android:attr/actionButtonStyle"
+        android:contentDescription="@string/searchview_description_search"
     />
 
     <LinearLayout
@@ -99,6 +100,7 @@
                 android:dropDownAnchor="@id/search_edit_frame"
                 android:dropDownVerticalOffset="0dip"
                 android:dropDownHorizontalOffset="0dip"
+                android:contentDescription="@string/searchview_description_query"
             />
 
             <ImageView
@@ -111,6 +113,7 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:src="?android:attr/searchViewCloseIcon"
                 android:focusable="true"
+                android:contentDescription="@string/searchview_description_clear"
             />
 
         </LinearLayout>
@@ -133,6 +136,7 @@
                 android:src="?android:attr/searchViewGoIcon"
                 android:visibility="gone"
                 android:focusable="true"
+                android:contentDescription="@string/searchview_description_submit"
             />
 
             <ImageView
@@ -146,6 +150,7 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:visibility="gone"
                 android:focusable="true"
+                android:contentDescription="@string/searchview_description_voice"
             />
         </LinearLayout>
     </LinearLayout>
