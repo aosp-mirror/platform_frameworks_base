@@ -195,6 +195,21 @@ public class Am {
                 }
                 intent.putExtra(key, list);
                 hasIntentInfo = true;
+            } else if (opt.equals("--ef")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                intent.putExtra(key, Float.valueOf(value));
+                hasIntentInfo = true;
+            } else if (opt.equals("--efa")) {
+                String key = nextArgRequired();
+                String value = nextArgRequired();
+                String[] strings = value.split(",");
+                float[] list = new float[strings.length];
+                for (int i = 0; i < strings.length; i++) {
+                    list[i] = Float.valueOf(strings[i]);
+                }
+                intent.putExtra(key, list);
+                hasIntentInfo = true;
             } else if (opt.equals("--ez")) {
                 String key = nextArgRequired();
                 String value = nextArgRequired();
@@ -1221,9 +1236,11 @@ public class Am {
                 "    [--ez <EXTRA_KEY> <EXTRA_BOOLEAN_VALUE> ...]\n" +
                 "    [--ei <EXTRA_KEY> <EXTRA_INT_VALUE> ...]\n" +
                 "    [--el <EXTRA_KEY> <EXTRA_LONG_VALUE> ...]\n" +
+                "    [--ef <EXTRA_KEY> <EXTRA_FLOAT_VALUE> ...]\n" +
                 "    [--eu <EXTRA_KEY> <EXTRA_URI_VALUE> ...]\n" +
                 "    [--eia <EXTRA_KEY> <EXTRA_INT_VALUE>[,<EXTRA_INT_VALUE...]]\n" +
                 "    [--ela <EXTRA_KEY> <EXTRA_LONG_VALUE>[,<EXTRA_LONG_VALUE...]]\n" +
+                "    [--efa <EXTRA_KEY> <EXTRA_FLOAT_VALUE>[,<EXTRA_FLOAT_VALUE...]]\n" +
                 "    [-n <COMPONENT>] [-f <FLAGS>]\n" +
                 "    [--grant-read-uri-permission] [--grant-write-uri-permission]\n" +
                 "    [--debug-log-resolution] [--exclude-stopped-packages]\n" +
