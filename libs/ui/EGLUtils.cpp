@@ -24,8 +24,6 @@
 
 #include <EGL/egl.h>
 
-#include <system/graphics.h>
-
 #include <private/ui/android_natives_priv.h>
 
 // ----------------------------------------------------------------------------
@@ -69,49 +67,31 @@ status_t EGLUtils::selectConfigForPixelFormat(
         return BAD_VALUE;
     
     // Get all the "potential match" configs...
-    if (eglChooseConfig(dpy, attrs, 0, 0, &numConfigs) == EGL_FALSE)
+    if (eglGetConfigs(dpy, NULL, 0, &numConfigs) == EGL_FALSE)
         return BAD_VALUE;
 
-    if (numConfigs) {
-        EGLConfig* const configs = new EGLConfig[numConfigs];
-        if (eglChooseConfig(dpy, attrs, configs, numConfigs, &n) == EGL_FALSE) {
-            delete [] configs;
-            return BAD_VALUE;
-        }
-
-        bool hasAlpha = false;
-        switch (format) {
-            case HAL_PIXEL_FORMAT_RGBA_8888:
-            case HAL_PIXEL_FORMAT_BGRA_8888:
-            case HAL_PIXEL_FORMAT_RGBA_5551:
-            case HAL_PIXEL_FORMAT_RGBA_4444:
-                hasAlpha = true;
-                break;
-        }
-
-        // The first config is guaranteed to over-satisfy the constraints
-        EGLConfig config = configs[0];
-
-        // go through the list and skip configs that over-satisfy our needs
-        int i;
-        for (i=0 ; i<n ; i++) {
-            if (!hasAlpha) {
-                EGLint alphaSize;
-                eglGetConfigAttrib(dpy, configs[i], EGL_ALPHA_SIZE, &alphaSize);
-                if (alphaSize > 0) {
-                    continue;
-                }
-            }
+    EGLConfig* const configs = (EGLConfig*)malloc(sizeof(EGLConfig)*numConfigs);
+    if (eglChooseConfig(dpy, attrs, configs, numConfigs, &n) == EGL_FALSE) {
+        free(configs);
+        return BAD_VALUE;
+    }
+    
+    int i;
+    EGLConfig config = NULL;
+    for (i=0 ; i<n ; i++) {
+        EGLint nativeVisualId = 0;
+        eglGetConfigAttrib(dpy, configs[i], EGL_NATIVE_VISUAL_ID, &nativeVisualId);
+        if (nativeVisualId>0 && format == nativeVisualId) {
             config = configs[i];
             break;
         }
+    }
 
-        delete [] configs;
-
-        if (i<n) {
-            *outConfig = config;
-            return NO_ERROR;
-        }
+    free(configs);
+    
+    if (i<n) {
+        *outConfig = config;
+        return NO_ERROR;
     }
 
     return NAME_NOT_FOUND;
