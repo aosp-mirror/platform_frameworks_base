@@ -60,12 +60,12 @@ class AppErrorDialog extends BaseErrorDialog {
 
         setCancelable(false);
 
-        setButton(DialogInterface.BUTTON_NEGATIVE,
+        setButton(DialogInterface.BUTTON_POSITIVE,
                 res.getText(com.android.internal.R.string.force_close),
                 mHandler.obtainMessage(FORCE_QUIT));
 
         if (app.errorReportReceiver != null) {
-            setButton(DialogInterface.BUTTON_POSITIVE,
+            setButton(DialogInterface.BUTTON_NEGATIVE,
                     res.getText(com.android.internal.R.string.report),
                     mHandler.obtainMessage(FORCE_QUIT_AND_REPORT));
         }
