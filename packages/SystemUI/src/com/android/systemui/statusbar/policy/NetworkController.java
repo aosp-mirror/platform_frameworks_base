@@ -79,11 +79,11 @@ public class NetworkController extends BroadcastReceiver {
     String mNetworkNameDefault;
     String mNetworkNameSeparator;
     int mPhoneSignalIconId;
-    int mDataDirectionIconId;
-    int mDataDirectionOverlayIconId;
+    int mDataDirectionIconId; // data + data direction on phones
     int mDataSignalIconId;
     int mDataTypeIconId;
     boolean mDataActive;
+    int mMobileActivityIconId; // overlay arrows for data direction
 
     String mContentDescriptionPhoneSignal;
     String mContentDescriptionWifi;
@@ -97,6 +97,7 @@ public class NetworkController extends BroadcastReceiver {
     int mWifiLevel;
     String mWifiSsid;
     int mWifiIconId = 0;
+    int mWifiActivityIconId = 0; // overlay arrows for wifi direction
     int mWifiActivity = WifiManager.DATA_ACTIVITY_NONE;
 
     // bluetooth
@@ -221,8 +222,17 @@ public class NetworkController extends BroadcastReceiver {
         mLabelViews.add(v);
     }
 
-    public void addSignalCluster(SignalCluster v) {
-        mSignalClusters.add(v);
+    public void addSignalCluster(SignalCluster cluster) {
+        mSignalClusters.add(cluster);
+        cluster.setWifiIndicators(
+                mWifiEnabled,
+                mWifiIconId,
+                mWifiActivityIconId);
+        cluster.setMobileDataIndicators(
+                hasMobileDataFeature(),
+                mPhoneSignalIconId,
+                mMobileActivityIconId,
+                mDataTypeIconId);
     }
 
     public void setStackedMode(boolean stacked) {
@@ -670,7 +680,7 @@ public class NetworkController extends BroadcastReceiver {
             if (mDataAndWifiStacked) {
                 mWifiIconId = 0;
             } else {
-                mWifiIconId = WifiIcons.WIFI_SIGNAL_STRENGTH[0][0];
+                mWifiIconId = mWifiEnabled ? WifiIcons.WIFI_SIGNAL_STRENGTH[0][0] : 0;
             }
             mContentDescriptionWifi = mContext.getString(R.string.accessibility_no_wifi);
         }
@@ -735,85 +745,93 @@ public class NetworkController extends BroadcastReceiver {
 
     // ===== Update the views =======================================================
 
-    // figure out what to show- there should be one connected network or nothing
-    // General order of preference is: wifi, 3G than bluetooth. This might vary by product.
     void refreshViews() {
         Context context = mContext;
 
-        int combinedSignalIconId;
-        int dataDirectionOverlayIconId = 0,
-            wifiActivityIconId = 0,
-            mobileActivityIconId = 0;
-        int dataTypeIconId;
-        String label;
+        int combinedSignalIconId = 0;
+        int combinedActivityIconId = 0;
+        String label = "";
         int N;
 
-        if (mWifiConnected) {
-            if (mWifiSsid == null) {
-                label = context.getString(R.string.status_bar_settings_signal_meter_wifi_nossid);
-            } else {
-                label = mWifiSsid;
-                switch (mWifiActivity) {
-                    case WifiManager.DATA_ACTIVITY_IN:
-                        dataDirectionOverlayIconId = R.drawable.stat_sys_wifi_in;
-                        break;
-                    case WifiManager.DATA_ACTIVITY_OUT:
-                        dataDirectionOverlayIconId = R.drawable.stat_sys_wifi_out;
-                        break;
-                    case WifiManager.DATA_ACTIVITY_INOUT:
-                        dataDirectionOverlayIconId = R.drawable.stat_sys_wifi_inout;
-                        break;
-                    case WifiManager.DATA_ACTIVITY_NONE:
-                        break;
-                }
-                wifiActivityIconId = dataDirectionOverlayIconId;
-            }
-            combinedSignalIconId = mWifiIconId;
-            mContentDescriptionCombinedSignal = mContentDescriptionWifi;
-            dataTypeIconId = 0;
-        } else if (mDataConnected) {
+        if (mDataConnected) {
             label = mNetworkName;
             combinedSignalIconId = mDataSignalIconId;
             switch (mDataActivity) {
                 case TelephonyManager.DATA_ACTIVITY_IN:
-                    dataDirectionOverlayIconId = R.drawable.stat_sys_signal_in;
+                    mMobileActivityIconId = R.drawable.stat_sys_signal_in;
                     break;
                 case TelephonyManager.DATA_ACTIVITY_OUT:
-                    dataDirectionOverlayIconId = R.drawable.stat_sys_signal_out;
+                    mMobileActivityIconId = R.drawable.stat_sys_signal_out;
                     break;
                 case TelephonyManager.DATA_ACTIVITY_INOUT:
-                    dataDirectionOverlayIconId = R.drawable.stat_sys_signal_inout;
+                    mMobileActivityIconId = R.drawable.stat_sys_signal_inout;
                     break;
                 default:
-                    dataDirectionOverlayIconId = 0;
+                    mMobileActivityIconId = 0;
                     break;
             }
-            mobileActivityIconId = dataDirectionOverlayIconId;
-            combinedSignalIconId = mDataSignalIconId;
+
+            combinedActivityIconId = mMobileActivityIconId;
+            combinedSignalIconId = mDataSignalIconId; // set by updateDataIcon()
             mContentDescriptionCombinedSignal = mContentDescriptionDataType;
-            dataTypeIconId = mDataTypeIconId;
-        } else if (mBluetoothTethered) {
+        }
+        
+        if (mWifiConnected) {
+            if (mWifiSsid == null) {
+                label = context.getString(R.string.status_bar_settings_signal_meter_wifi_nossid);
+                mWifiActivityIconId = 0; // no wifis, no bits
+            } else {
+                label = mWifiSsid;
+                switch (mWifiActivity) {
+                    case WifiManager.DATA_ACTIVITY_IN:
+                        mWifiActivityIconId = R.drawable.stat_sys_wifi_in;
+                        break;
+                    case WifiManager.DATA_ACTIVITY_OUT:
+                        mWifiActivityIconId = R.drawable.stat_sys_wifi_out;
+                        break;
+                    case WifiManager.DATA_ACTIVITY_INOUT:
+                        mWifiActivityIconId = R.drawable.stat_sys_wifi_inout;
+                        break;
+                    case WifiManager.DATA_ACTIVITY_NONE:
+                        break;
+                }
+            }
+
+            combinedActivityIconId = mWifiActivityIconId;
+            combinedSignalIconId = mWifiIconId; // set by updateWifiIcons()
+            mContentDescriptionCombinedSignal = mContentDescriptionWifi;
+        }
+
+        if (mBluetoothTethered) {
             label = mContext.getString(R.string.bluetooth_tethered);
             combinedSignalIconId = mBluetoothTetherIconId;
             mContentDescriptionCombinedSignal = mContext.getString(
                     R.string.accessibility_bluetooth_tether);
-            dataTypeIconId = 0;
-        } else if (mAirplaneMode &&
+        }
+        
+        if (mAirplaneMode &&
                 (mServiceState == null || (!hasService() && !mServiceState.isEmergencyOnly()))) {
             // Only display the flight-mode icon if not in "emergency calls only" mode.
             label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
-            combinedSignalIconId = R.drawable.stat_sys_signal_flightmode;
             mContentDescriptionCombinedSignal = mContext.getString(
                     R.string.accessibility_airplane_mode);
-            dataTypeIconId = R.drawable.stat_sys_signal_flightmode; // was 0;
-        } else {
+            
+            // look again; your radios are now airplanes
+            mPhoneSignalIconId = mDataSignalIconId = R.drawable.stat_sys_signal_flightmode;
+            mDataTypeIconId = 0;
+
+            combinedSignalIconId = mDataSignalIconId;
+        }
+        else if (!mDataConnected && !mWifiConnected && !mBluetoothTethered) {
+            // pretty much totally disconnected
+
             label = context.getString(R.string.status_bar_settings_signal_meter_disconnected);
             // On devices without mobile radios, we want to show the wifi icon
             combinedSignalIconId =
                 hasMobileDataFeature() ? mDataSignalIconId : mWifiIconId;
             mContentDescriptionCombinedSignal = hasMobileDataFeature()
                 ? mContentDescriptionDataType : mContentDescriptionWifi;
-            dataTypeIconId = 0;
+            mDataTypeIconId = 0;
         }
 
         if (DEBUG) {
@@ -825,7 +843,7 @@ public class NetworkController extends BroadcastReceiver {
                     + " combinedSignalIconId=0x"
                     + Integer.toHexString(combinedSignalIconId)
                     + "/" + getResourceName(combinedSignalIconId)
-                    + " dataDirectionOverlayIconId=0x" + Integer.toHexString(dataDirectionOverlayIconId)
+                    + " combinedActivityIconId=0x" + Integer.toHexString(combinedActivityIconId)
                     + " mAirplaneMode=" + mAirplaneMode
                     + " mDataActivity=" + mDataActivity
                     + " mPhoneSignalIconId=0x" + Integer.toHexString(mPhoneSignalIconId)
@@ -837,21 +855,21 @@ public class NetworkController extends BroadcastReceiver {
         }
 
         if (mLastPhoneSignalIconId          != mPhoneSignalIconId
-         || mLastDataDirectionOverlayIconId != dataDirectionOverlayIconId
+         || mLastDataDirectionOverlayIconId != combinedActivityIconId
          || mLastWifiIconId                 != mWifiIconId
-         || mLastDataTypeIconId             != dataTypeIconId)
+         || mLastDataTypeIconId             != mDataTypeIconId)
         {
             // NB: the mLast*s will be updated later
             for (SignalCluster cluster : mSignalClusters) {
                 cluster.setWifiIndicators(
                         mWifiEnabled,
                         mWifiIconId,
-                        wifiActivityIconId);
+                        mWifiActivityIconId);
                 cluster.setMobileDataIndicators(
                         hasMobileDataFeature(),
                         mPhoneSignalIconId,
-                        mobileActivityIconId,
-                        dataTypeIconId);
+                        mMobileActivityIconId,
+                        mDataTypeIconId);
             }
         }
 
@@ -905,35 +923,35 @@ public class NetworkController extends BroadcastReceiver {
         }
 
         // the data network type overlay
-        if (mLastDataTypeIconId != dataTypeIconId) {
-            mLastDataTypeIconId = dataTypeIconId;
+        if (mLastDataTypeIconId != mDataTypeIconId) {
+            mLastDataTypeIconId = mDataTypeIconId;
             N = mDataTypeIconViews.size();
             for (int i=0; i<N; i++) {
                 final ImageView v = mDataTypeIconViews.get(i);
-                if (dataTypeIconId == 0) {
+                if (mDataTypeIconId == 0) {
                     v.setVisibility(View.INVISIBLE);
                 } else {
                     v.setVisibility(View.VISIBLE);
-                    v.setImageResource(dataTypeIconId);
+                    v.setImageResource(mDataTypeIconId);
                     v.setContentDescription(mContentDescriptionDataType);
                 }
             }
         }
 
         // the data direction overlay
-        if (mLastDataDirectionOverlayIconId != dataDirectionOverlayIconId) {
+        if (mLastDataDirectionOverlayIconId != combinedActivityIconId) {
             if (DEBUG) {
-                Slog.d(TAG, "changing data overlay icon id to " + dataDirectionOverlayIconId);
+                Slog.d(TAG, "changing data overlay icon id to " + combinedActivityIconId);
             }
-            mLastDataDirectionOverlayIconId = dataDirectionOverlayIconId;
+            mLastDataDirectionOverlayIconId = combinedActivityIconId;
             N = mDataDirectionOverlayIconViews.size();
             for (int i=0; i<N; i++) {
                 final ImageView v = mDataDirectionOverlayIconViews.get(i);
-                if (dataDirectionOverlayIconId == 0) {
+                if (combinedActivityIconId == 0) {
                     v.setVisibility(View.INVISIBLE);
                 } else {
                     v.setVisibility(View.VISIBLE);
-                    v.setImageResource(dataDirectionOverlayIconId);
+                    v.setImageResource(combinedActivityIconId);
                     v.setContentDescription(mContentDescriptionDataType);
                 }
             }
