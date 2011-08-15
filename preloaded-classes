@@ -975,7 +975,7 @@ com.google.android.gles_jni.EGLDisplayImpl
 com.google.android.gles_jni.EGLImpl
 com.google.android.gles_jni.EGLSurfaceImpl
 com.google.android.gles_jni.GLImpl
-com.google.i18n.phonenumbers.PhoneNumberUtil
+com.android.i18n.phonenumbers.PhoneNumberUtil
 dalvik.system.BlockGuard
 dalvik.system.BlockGuard$1
 dalvik.system.BlockGuard$2

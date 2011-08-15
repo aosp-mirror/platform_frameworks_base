@@ -16,8 +16,8 @@
 
 package android.telephony;
 
-import com.google.i18n.phonenumbers.AsYouTypeFormatter;
-import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.android.i18n.phonenumbers.AsYouTypeFormatter;
+import com.android.i18n.phonenumbers.PhoneNumberUtil;
 
 import android.telephony.PhoneNumberUtils;
 import android.text.Editable;
