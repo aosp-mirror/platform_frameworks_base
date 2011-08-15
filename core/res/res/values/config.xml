@@ -89,7 +89,7 @@
 
     <!-- Whether dialogs should close automatically when the user touches outside
          of them.  This should not normally be modified. -->
-    <bool name="config_closeDialogWhenTouchOutside">false</bool>
+    <bool name="config_closeDialogWhenTouchOutside">true</bool>
 
     <!-- The duration (in milliseconds) that the radio will scan for a signal
          when there's no network connection. If the scan doesn't timeout, use zero -->
@@ -396,7 +396,7 @@
          If unlock screen is disabled, the puk should be unlocked through Emergency Dialer -->
     <bool name="config_enable_puk_unlock_screen">false</bool>
 
-    <!-- Control the behavior when the user long presses the power button.
+    <!-- Control the behavior when the user long presses the home button.
             0 - Nothing
             1 - Recent apps dialog
             2 - Recent apps view in SystemUI
