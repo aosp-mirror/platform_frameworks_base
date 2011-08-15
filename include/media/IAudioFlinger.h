@@ -54,6 +54,7 @@ public:
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
                                 int output,
+                                bool isTimed,
                                 int *sessionId,
                                 status_t *status) = 0;
 

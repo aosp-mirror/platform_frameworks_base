@@ -38,8 +38,15 @@ public:
     };
 
     virtual ~AudioBufferProvider() {}
-    
-    virtual status_t getNextBuffer(Buffer* buffer) = 0;
+
+    // value representing an invalid presentation timestamp
+    static const int64_t kInvalidPTS;
+
+    // pts is the local time when the next sample yielded by getNextBuffer
+    // will be rendered.
+    // Pass kInvalidPTS if the PTS is unknown or not applicable.
+    virtual status_t getNextBuffer(Buffer* buffer, int64_t pts) = 0;
+
     virtual void releaseBuffer(Buffer* buffer) = 0;
 };
 

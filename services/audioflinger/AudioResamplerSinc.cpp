@@ -204,7 +204,8 @@ void AudioResamplerSinc::resample(int32_t* out, size_t outFrameCount,
         // buffer is empty, fetch a new one
         while (buffer.frameCount == 0) {
             buffer.frameCount = inFrameCount;
-            provider->getNextBuffer(&buffer);
+            provider->getNextBuffer(&buffer,
+                                    calculateOutputPTS(outputIndex / 2));
             if (buffer.raw == NULL) {
                 goto resample_exit;
             }
@@ -355,4 +356,3 @@ void AudioResamplerSinc::interpolate(
 
 // ----------------------------------------------------------------------------
 }; // namespace android
-

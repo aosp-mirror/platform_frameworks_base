@@ -90,6 +90,7 @@ public:
                                 uint32_t flags,
                                 const sp<IMemory>& sharedBuffer,
                                 int output,
+                                bool isTimed,
                                 int *sessionId,
                                 status_t *status)
     {
@@ -105,6 +106,7 @@ public:
         data.writeInt32(flags);
         data.writeStrongBinder(sharedBuffer->asBinder());
         data.writeInt32(output);
+        data.writeInt32(isTimed);
         int lSessionId = 0;
         if (sessionId != NULL) {
             lSessionId = *sessionId;
@@ -684,11 +686,12 @@ status_t BnAudioFlinger::onTransact(
             uint32_t flags = data.readInt32();
             sp<IMemory> buffer = interface_cast<IMemory>(data.readStrongBinder());
             int output = data.readInt32();
+            bool isTimed = data.readInt32();
             int sessionId = data.readInt32();
             status_t status;
             sp<IAudioTrack> track = createTrack(pid,
                     streamType, sampleRate, format,
-                    channelCount, bufferCount, flags, buffer, output, &sessionId, &status);
+                    channelCount, bufferCount, flags, buffer, output, isTimed, &sessionId, &status);
             reply->writeInt32(sessionId);
             reply->writeInt32(status);
             reply->writeStrongBinder(track->asBinder());

@@ -49,6 +49,10 @@ public:
     virtual void init() = 0;
     virtual void setSampleRate(int32_t inSampleRate);
     virtual void setVolume(int16_t left, int16_t right);
+    virtual void setLocalTimeFreq(uint64_t freq);
+
+    // set the PTS of the next buffer output by the resampler
+    virtual void setPTS(int64_t pts);
 
     virtual void resample(int32_t* out, size_t outFrameCount,
             AudioBufferProvider* provider) = 0;
@@ -72,6 +76,8 @@ protected:
     AudioResampler(const AudioResampler&);
     AudioResampler& operator=(const AudioResampler&);
 
+    int64_t calculateOutputPTS(int outputFrameIndex);
+
     int32_t mBitDepth;
     int32_t mChannelCount;
     int32_t mSampleRate;
@@ -86,6 +92,8 @@ protected:
     size_t mInputIndex;
     int32_t mPhaseIncrement;
     uint32_t mPhaseFraction;
+    uint64_t mLocalTimeFreq;
+    int64_t mPTS;
 };
 
 // ----------------------------------------------------------------------------
