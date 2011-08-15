@@ -27,8 +27,6 @@
     <skip />
     <!-- no translation found for status_bar_recent_inspect_item_title (4906947311448880529) -->
     <skip />
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <!-- no translation found for status_bar_no_notifications_title (4755261167193833213) -->
     <skip />
     <!-- no translation found for status_bar_ongoing_events_title (1682504513316879202) -->
@@ -101,8 +99,7 @@
     <skip />
     <!-- no translation found for accessibility_menu (316839303324695949) -->
     <skip />
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
+    <string name="accessibility_recent" msgid="3027675523629738534">"Onlangse programme"</string>
     <!-- no translation found for accessibility_ime_switch_button (5032926134740456424) -->
     <skip />
     <!-- no translation found for accessibility_compatibility_zoom_button (8461115318742350699) -->
@@ -191,18 +188,12 @@
     <skip />
     <!-- no translation found for accessibility_ringer_silent (9061243307939135383) -->
     <skip />
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G-data gedeaktiveer"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G data gedeaktiveer"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobieldata gedeaktiveer"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Data gedeaktiveer"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Die gespesifiseerde datagebruiklimiet is bereik. "\n\n" Addisionele datagebruik kan lei tot diensverskafferkostes."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Heraktiveer data"</string>
     <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
     <skip />
     <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->

@@ -195,6 +195,10 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"للسماح للتطبيق بتلقي رسائل بث الطوارئ ومعالجتها. يتاح هذا الإذن لتطبيقات النظام فقط."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"إرسال رسائل قصيرة SMS"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"للسماح للتطبيق بإرسال رسائل قصيرة SMS. قد تكلفك التطبيقات الضارة المال من خلال إرسال رسائل بدون تأكيدك."</string>
+    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <skip />
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <skip />
     <string name="permlab_readSms" msgid="4085333708122372256">"قراءة الرسائل القصيرة SMS أو رسائل الوسائط المتعددة"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"للسماح للتطبيق بقراءة الرسائل القصيرة SMS المخزنة على الجهاز اللوحي أو بطاقة SIM. يمكن للتطبيقات الضارة قراءة رسائلك السرية."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"للسماح للتطبيق بقراءة الرسائل القصيرة SMS المخزنة على الهاتف أو بطاقة SIM. قد تقرأ التطبيقات الضارة رسائلك السرية."</string>
@@ -264,6 +268,10 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لطريقة الإرسال. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"الالتزام بخدمة إدخال النصوص"</string>
     <string name="permdesc_bindTextService" msgid="172508880651909350">"للسماح للمالك بالالتزام بواجهة المستوى العلوي لخدمة إدخال النصوص (على سبيل المثال، SpellCheckerService). لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
+    <!-- no translation found for permlab_bindVpnService (4708596021161473255) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVpnService (6011554199384584151) -->
+    <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"الالتزام بخلفية ما"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"للسماح للمالك بالالتزام بواجهة المستوى العلوي للخلفية. لا يجب استخدامه على الإطلاق للتطبيقات العادية."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"الالتزام بخدمة أداة"</string>
@@ -321,15 +329,19 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"كتابة بيانات جهة الاتصال"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"للسماح للتطبيق بتعديل بيانات جهة الاتصال (العنوان) المخزنة على الجهاز اللوحي. يمكن أن تستخدم التطبيقات الضارة ذلك لمحو بيانات جهة الاتصال أو تعديلها."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"للسماح لتطبيق ما بتعديل بيانات (عنوان) جهة الاتصال المخزّنة في هاتفك. يمكن أن تستخدم التطبيقات الضارة ذلك لمسح بيانات جهة الاتصال أو تعديلها."</string>
-    <string name="permlab_readProfile" msgid="2211941946684590103">"قراءة بيانات الملف الشخصي"</string>
-    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"للسماح لتطبيق بقراءة جميع معلوماتك الشخصية في الملف الشخصي. ويمكن أن تستخدم التطبيقات الضارة هذه الإمكانية للتعرف على هويتك وإرسال معلوماتك الشخصية إلى أشخاص آخرين."</string>
-    <string name="permlab_writeProfile" msgid="6561668046361989220">"كتابة بيانات الملف الشخصي"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"للسماح لتطبيق بتعديل معلوماتك الشخصية في الملف الشخصي. يمكن للتطبيقات الضارة استخدام هذه الإمكانية لمسح أو تعديل بيانات ملفك الشخصي."</string>
-    <string name="permlab_readCalendar" msgid="6898987798303840534">"قراءة أحداث التقويم"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"للسماح لتطبيق ما بقراءة كل أحداث التقويم المخزنة على الجهاز اللوحي. ويمكن للتطبيقات الضارة استخدام ذلك لإرسال أحداث التقويم إلى أشخاص آخرين."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"للسماح لتطبيق ما بقراءة جميع أحداث التقويم المخزّنة في هاتفك. يمكن أن تستخدم التطبيقات الضارة هذا لإرسال أحداث تقويمك إلى أشخاص آخرين."</string>
-    <string name="permlab_writeCalendar" msgid="3894879352594904361">"إضافة أحداث تقويم أو تعديلها وإرسال رسالة إلكترونية إلى الضيوف"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"للسماح لتطبيق ما بإضافة أحداث أو تغييرها في تقويمك، مما قد يؤدي إلى إرسال رسائل إلكترونية إلى الضيوف. يمكن أن تستخدم التطبيقات الضارة ذلك لمسح أحداث تقويمك أو تعديلها أو لإرسال رسائل إلكترونية إلى الضيوف."</string>
+    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
+    <skip />
+    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"قراءة أحداث التقويم"</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"للسماح لتطبيق ما بقراءة كل أحداث التقويم المخزنة على الجهاز اللوحي. ويمكن للتطبيقات الضارة استخدام ذلك لإرسال أحداث التقويم إلى أشخاص آخرين."</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"للسماح لتطبيق ما بقراءة كل أحداث التقويم المخزنة على الجهاز اللوحي. ويمكن للتطبيقات الضارة استخدام ذلك لإرسال أحداث التقويم إلى أشخاص آخرين."</string>
+    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"إضافة أحداث تقويم أو تعديلها وإرسال رسالة إلكترونية إلى الضيوف"</string>
+    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"للسماح لتطبيق ما بإضافة أحداث أو تغييرها في تقويمك، مما قد يؤدي إلى إرسال رسائل إلكترونية إلى الضيوف. يمكن أن تستخدم التطبيقات الضارة ذلك لمسح أحداث تقويمك أو تعديلها أو لإرسال رسائل إلكترونية إلى الضيوف."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"مصادر مواقع وهمية للاختبار"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"إنشاء مصادر مواقع وهمية للاختبار. قد تستخدم التطبيقات الضارة هذا لتجاوز الموقع و/أو الحالة المُرجَعة بواسطة مصادر مواقع حقيقية مثل موفري خدمة الشبكة أو GPS."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"الدخول إلى المزيد من أوامر موفر الموقع"</string>
@@ -439,8 +451,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"للسماح لتطبيق ما بعرض حالة جميع الشبكات."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"دخول كامل إلى الإنترنت"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"للسماح لتطبيق ما بإنشاء مقابس للشبكة."</string>
-    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"كتابة إعدادات اسم نقطة الدخول"</string>
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"للسماح لتطبيق ما بتعديل إعدادات APN، مثل الخادم الوكيل ومنفذ أي APN."</string>
+    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"كتابة إعدادات اسم نقطة الدخول"</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"للسماح لتطبيق ما بتعديل إعدادات APN، مثل الخادم الوكيل ومنفذ أي APN."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"تغيير اتصال الشبكة"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"للسماح لتطبيق ما بتغيير حالة اتصال الشبكة."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"تغيير الاتصال المقيد"</string>
@@ -839,9 +851,7 @@
     <string name="cut" msgid="3092569408438626261">"قص"</string>
     <string name="copy" msgid="2681946229533511987">"نسخ"</string>
     <string name="paste" msgid="5629880836805036433">"لصق"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"ليس هناك شيء للصقه"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="replace" msgid="8333608224471746584">"استبدال"</string>
     <string name="copyUrl" msgid="2538211579596067402">"نسخ عنوان URL"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"تحديد نص..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"تحديد النص"</string>
@@ -864,15 +874,21 @@
     <string name="chooseActivity" msgid="1009246475582238425">"تحديد إجراء"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"تحديد تطبيق لجهاز USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"ليس هناك تطبيقات يمكنها تنفيذ هذا الإجراء."</string>
-    <string name="aerr_title" msgid="653922989522758100">"عذرًا!"</string>
-    <string name="aerr_application" msgid="4683614104336409186">"توقف التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> (العملية <xliff:g id="PROCESS">%2$s</xliff:g>) على نحو غير متوقع. الرجاء المحاولة مرة أخرى."</string>
-    <string name="aerr_process" msgid="1551785535966089511">"توقفت العملية <xliff:g id="PROCESS">%1$s</xliff:g> على نحو غير متوقع. الرجاء المحاولة مرة أخرى."</string>
-    <string name="anr_title" msgid="3100070910664756057">"عذرًا!"</string>
-    <string name="anr_activity_application" msgid="3538242413112507636">"النشاط <xliff:g id="ACTIVITY">%1$s</xliff:g> (في التطبيق <xliff:g id="APPLICATION">%2$s</xliff:g>) لا يستجيب."</string>
-    <string name="anr_activity_process" msgid="5420826626009561014">"النشاط <xliff:g id="ACTIVITY">%1$s</xliff:g> (في العملية <xliff:g id="PROCESS">%2$s</xliff:g>) غير مستجيب."</string>
-    <string name="anr_application_process" msgid="4185842666452210193">"التطبيق <xliff:g id="APPLICATION">%1$s</xliff:g> (في العملية <xliff:g id="PROCESS">%2$s</xliff:g>) غير مستجيب."</string>
-    <string name="anr_process" msgid="1246866008169975783">"العملية <xliff:g id="PROCESS">%1$s</xliff:g> غير مستجيبة."</string>
-    <string name="force_close" msgid="3653416315450806396">"فرض الإغلاق"</string>
+    <string name="aerr_title" msgid="1905800560317137752"></string>
+    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <skip />
+    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <skip />
+    <string name="anr_title" msgid="4351948481459135709"></string>
+    <!-- no translation found for anr_activity_application (8339738283149696827) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (7018289416670457797) -->
+    <skip />
+    <!-- no translation found for anr_application_process (7208175830253210526) -->
+    <skip />
+    <!-- no translation found for anr_process (306819947562555821) -->
+    <skip />
+    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"فرض الإغلاق"</string>
     <string name="report" msgid="4060218260984795706">"إرسال تقرير"</string>
     <string name="wait" msgid="7147118217226317732">"انتظار"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"تمت إعادة توجيه التطبيق"</string>
@@ -901,17 +917,15 @@
     <string name="volume_alarm" msgid="1985191616042689100">"مستوى صوت المنبّه"</string>
     <string name="volume_notification" msgid="2422265656744276715">"مستوى صوت التنبيه"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"مستوى الصوت"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
     <skip />
-    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
     <skip />
-    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
     <skip />
-    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
     <skip />
-    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
-    <skip />
-    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
     <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"نغمة الرنين الافتراضية"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"نغمة الرنين الافتراضية (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -926,12 +940,14 @@
     <item quantity="one" msgid="1634101450343277345">"هناك شبكة Wi-Fi مفتوحة متاحة"</item>
     <item quantity="other" msgid="7915895323644292768">"هناك شبكات Wi-Fi مفتوحة متاحة"</item>
   </plurals>
-    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"تم تعطيل شبكة Wi-Fi."</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"تم تعطيل شبكة Wi-Fi مؤقتًا بسبب اتصال خاطئ."</string>
+    <!-- no translation found for wifi_watchdog_network_disabled (7904214231651546347) -->
+    <skip />
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (2517058131278770509) -->
+    <skip />
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"اتصال Wi-Fi مباشر"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"ابدأ تشغيل اتصالWi-Fi المباشر. يؤدي ذلك إلى إيقاف تشغيل عميل/نقطة اتصال Wi-Fi."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"ابدأ تشغيل اتصال Wi-Fi المباشر. يؤدي ذلك إلى إيقاف تشغيل عميل/نقطة اتصال Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"أخفق بدء اتصال Wi-Fi مباشر."</string>
-    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"هناك طلب اتصال Wi-Fi مباشر من <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. انقر على موافق للقبول."</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"هناك طلب إعداد اتصال Wi-Fi مباشر من <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. انقر على \"موافق\" للقبول."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"هناك طلب إعداد اتصال Wi-Fi مباشر من <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. أدخل رقم التعريف الشخصي للبدء."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"يجب إدخال رقم التعريف الشخصي لـ WPS‏ <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> في الجهاز النظير <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> حتى يبدأ إعداد الاتصال."</string>
     <string name="select_character" msgid="3365550120617701745">"إدراج حرف"</string>
@@ -941,7 +957,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"موافق"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"إلغاء"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"تمت إزالة بطاقة SIM"</string>
-    <string name="sim_removed_message" msgid="2064255102770489459">"لن تكون شبكة الجوال متاحة حتى يتم تركيب بطاقة SIM."</string>
+    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"لن تكون شبكة الجوال متاحة حتى يتم تركيب بطاقة SIM."</string>
     <string name="sim_done_button" msgid="827949989369963775">"تم"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"تمت إضافة بطاقة SIM"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"يجب إعادة تشغيل الجهاز للدخول إلى شبكة الجوال."</string>
@@ -1096,22 +1112,14 @@
     <string name="choose_account_label" msgid="4191313562041125787">"حدد حسابًا."</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"زيادة"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"تناقص"</string>
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"محدد"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"لم يتم التحديد"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"محدد"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"غير محدد"</string>
+    <string name="switch_on" msgid="551417728476977311">"تشغيل"</string>
+    <string name="switch_off" msgid="7249798614327155088">"إيقاف"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"مضغوط."</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"غير مضغوط."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"التنقل إلى الشاشة الرئيسية"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"التنقل إلى أعلى"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"المزيد من الخيارات"</string>
@@ -1125,14 +1133,10 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"تم تعطيل بيانات شبكة الجيل الرابع"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"تم تعطيل بيانات الجوال"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"انقر للتمكين."</string>
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"تم تجاوز حد بيانات شبكتي 2G-3G"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"تم تجاوز حد بيانات الجيل الرابع"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"تم تجاوز حد بيانات الجوال"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> فوق الحد المحدد"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"شهادة الأمان"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"هذه الشهادة صالحة."</string>
     <string name="issued_to" msgid="454239480274921032">"إصدار لـ:"</string>
@@ -1150,5 +1154,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"عرض الكل..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"تحديد نشاط"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"مشاركة مع..."</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"تم قفل الجهاز."</string>
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"تم تأمين الجهاز."</string>
 </resources>

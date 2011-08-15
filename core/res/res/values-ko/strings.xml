@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"기능 코드가 완료되었습니다."</string>
     <string name="fcError" msgid="3327560126588500777">"연결에 문제가 있거나 기능 코드가 잘못되었습니다."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"확인"</string>
-    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"웹페이지에 오류가 있습니다."</string>
+    <string name="httpError" msgid="6603022914760066338">"네트워크 오류가 발생했습니다."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"URL을 찾을 수 없습니다."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"사이트 인증 스키마가 지원되지 않습니다."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"인증에 실패했습니다."</string>
@@ -195,6 +195,10 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"애플리케이션이 긴급 방송 메시지를 수신하고 처리할 수 있도록 합니다. 이 권한은 시스템 애플리케이션에만 사용할 수 있습니다."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMS 메시지 보내기"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"애플리케이션이 SMS 메시지를 보낼 수 있도록 합니다. 이 경우 악성 애플리케이션이 사용자의 확인 없이 메시지를 전송하여 요금을 부과할 수 있습니다."</string>
+    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <skip />
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <skip />
     <string name="permlab_readSms" msgid="4085333708122372256">"SMS 또는 MMS 읽기"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"애플리케이션이 태블릿 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 기밀 메시지를 읽을 수도 있습니다."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"애플리케이션이 휴대전화 또는 SIM 카드에 저장된 SMS 메시지를 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 기밀 메시지를 읽을 수 있습니다."</string>
@@ -263,7 +267,9 @@
     <string name="permlab_bindInputMethod" msgid="3360064620230515776">"입력 방법 연결"</string>
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"권한을 가진 프로그램이 입력 방법에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"텍스트 서비스 연결"</string>
-    <string name="permdesc_bindTextService" msgid="172508880651909350">"사용자가 텍스트 서비스(예: SpellCheckerService)의 최상위 인터페이스에 바인딩할 수 있게 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
+    <string name="permdesc_bindTextService" msgid="172508880651909350">"권한을 가진 프로그램이 텍스트 서비스(예: SpellCheckerService)에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 애플리케이션에는 필요하지 않습니다."</string>
+    <string name="permlab_bindVpnService" msgid="4708596021161473255">"VPN 서비스와 연결"</string>
+    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"권한을 가진 프로그램이 VPN 서비스에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 애플리케이션에는 필요하지 않습니다."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"배경화면 연결"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"권한을 가진 프로그램이 배경화면에 대한 최상위 인터페이스를 사용하도록 합니다. 일반 애플리케이션에는 절대로 필요하지 않습니다."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"위젯 서비스와 연결"</string>
@@ -321,15 +327,19 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"연락처 데이터 작성"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"애플리케이션이 태블릿에 저장된 연락처(주소) 데이터를 수정할 수 있도록 합니다. 이 경우 악성 애플리케이션이 연락처 데이터를 지우거나 수정할 수 있습니다."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"애플리케이션이 휴대전화에 저장된 연락처(주소) 데이터를 수정할 수 있도록 합니다. 이 경우 악성 애플리케이션이 연락처 데이터를 지우거나 수정할 수 있습니다."</string>
-    <string name="permlab_readProfile" msgid="2211941946684590103">"프로필 데이터 읽기"</string>
-    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"애플리케이션이 개인 프로필 정보를 모두 읽을 수 있도록 합니다. 이렇게 하면 악성 애플리케이션이 이 정보를 사용하여 사용자를 식별하고 개인 정보를 다른 사용자에게 보낼 수 있습니다."</string>
-    <string name="permlab_writeProfile" msgid="6561668046361989220">"프로필 데이터 작성"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"애플리케이션이 개인 프로필 정보를 수정할 수 있도록 허용합니다. 이렇게 하면 악성 애플리케이션이 이 정보를 사용하여 프로필 데이터를 지우거나 수정할 수 있습니다."</string>
-    <string name="permlab_readCalendar" msgid="6898987798303840534">"캘린더 일정 읽기"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"애플리케이션이 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 캘린더 일정을 다른 사람에게 보낼 수 있습니다."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"애플리케이션이 휴대전화에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 캘린더 일정을 다른 사람에게 보낼 수 있습니다."</string>
-    <string name="permlab_writeCalendar" msgid="3894879352594904361">"캘린더 일정 추가/수정 및 참석자에게 이메일 전송"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"애플리케이션이 캘린더에 일정을 추가하거나 변경할 수 있도록 합니다. 이렇게 하면 참석자에게 이메일을 보낼 수 있습니다. 악성 애플리케이션이 이를 사용하여 캘린더 일정을 삭제, 수정하거나 참석자에게 이메일을 보낼 수 있습니다."</string>
+    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
+    <skip />
+    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"캘린더 일정 읽기"</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"애플리케이션이 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 캘린더 일정을 다른 사람에게 보낼 수 있습니다."</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"애플리케이션이 태블릿에 저장된 모든 캘린더 일정을 읽을 수 있도록 합니다. 이 경우 악성 애플리케이션이 캘린더 일정을 다른 사람에게 보낼 수 있습니다."</string>
+    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"캘린더 일정 추가/수정 및 참석자에게 이메일 전송"</string>
+    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"애플리케이션이 캘린더에 일정을 추가하거나 변경할 수 있도록 합니다. 이렇게 하면 참석자에게 이메일을 보낼 수 있습니다. 악성 애플리케이션이 이를 사용하여 캘린더 일정을 삭제, 수정하거나 참석자에게 이메일을 보낼 수 있습니다."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"테스트를 위해 위치 정보제공자로 가장"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"테스트용 가짜 위치 정보 제공자를 만듭니다. 단, 악성 애플리케이션이 이 기능을 이용하여 GPS, 네트워크 공급자 같은 실제 위치 정보제공자에서 반환한 위치 및/또는 상태를 덮어쓸 수 있습니다."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"추가 위치 제공업체 명령에 액세스"</string>
@@ -439,8 +449,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"애플리케이션이 모든 네트워크의 상태를 볼 수 있도록 합니다."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"인터넷에 최대한 액세스"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"애플리케이션이 네트워크 소켓을 만들 수 있도록 합니다."</string>
-    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"액세스포인트 이름(APN) 설정 쓰기"</string>
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"애플리케이션이 APN의 프록시 및 포트 같은 APN 설정을 수정할 수 있도록 합니다."</string>
+    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"액세스포인트 이름(APN) 설정 쓰기"</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"애플리케이션이 APN의 프록시 및 포트 같은 APN 설정을 수정할 수 있도록 합니다."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"네트워크 연결 변경"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"애플리케이션이 네트워크 연결 상태를 변경할 수 있도록 합니다."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"테러링 연결 변경"</string>
@@ -720,10 +730,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"애플리케이션이 휴대전화에 저장된 브라우저 기록 또는 북마크를 수정할 수 있도록 허용합니다. 이 경우 악성 애플리케이션이 브라우저의 데이터를 지우거나 수정할 수 있습니다."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"알람 시계에 알람 설정"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"실치된 알람 시계 애플리케이션에 알람을 설정하도록 허용합니다. 일부 알람 시계 애플리케이션은 이 기능을 구현하지 않을 수 있습니다."</string>
-    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
-    <skip />
-    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
-    <skip />
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"음성사서함 추가"</string>
+    <string name="permdesc_addVoicemail" msgid="4828507394878206682">"애플리케이션이 음성사서함 받은편지함에 메시지를 추가하도록 허용합니다."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"브라우저 위치 정보 수정 권한"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"애플리케이션이 브라우저의 위치 정보 권한을 수정할 수 있도록 합니다. 악성 애플리케이션이 이를 사용하여 임의의 웹사이트에 위치 정보를 보낼 수도 있습니다."</string>
     <string name="save_password_message" msgid="767344687139195790">"브라우저에 이 비밀번호를 저장하시겠습니까?"</string>
@@ -839,9 +847,7 @@
     <string name="cut" msgid="3092569408438626261">"잘라내기"</string>
     <string name="copy" msgid="2681946229533511987">"복사"</string>
     <string name="paste" msgid="5629880836805036433">"붙여넣기"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"붙여넣을 내용이 없습니다."</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="replace" msgid="8333608224471746584">"바꾸기"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URL 복사"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"텍스트 선택..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"텍스트 선택"</string>
@@ -864,26 +870,29 @@
     <string name="chooseActivity" msgid="1009246475582238425">"작업 선택"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"USB 기기에 대한 애플리케이션 선택"</string>
     <string name="noApplications" msgid="1691104391758345586">"작업을 수행할 수 있는 애플리케이션이 없습니다."</string>
-    <string name="aerr_title" msgid="653922989522758100">"죄송합니다."</string>
-    <string name="aerr_application" msgid="4683614104336409186">"<xliff:g id="APPLICATION">%1$s</xliff:g> 애플리케이션(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 예상치 않게 중지되었습니다. 다시 시도해 주세요."</string>
-    <string name="aerr_process" msgid="1551785535966089511">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 예상치 않게 중지되었습니다. 다시 시도해 주세요."</string>
-    <string name="anr_title" msgid="3100070910664756057">"죄송합니다."</string>
-    <string name="anr_activity_application" msgid="3538242413112507636">"<xliff:g id="APPLICATION">%2$s</xliff:g> 활동(<xliff:g id="ACTIVITY">%1$s</xliff:g> 애플리케이션)이 응답하지 않습니다."</string>
-    <string name="anr_activity_process" msgid="5420826626009561014">"<xliff:g id="ACTIVITY">%1$s</xliff:g> 활동(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 응답하지 않습니다."</string>
-    <string name="anr_application_process" msgid="4185842666452210193">"<xliff:g id="APPLICATION">%1$s</xliff:g> 애플리케이션(<xliff:g id="PROCESS">%2$s</xliff:g> 프로세스)이 응답하지 않습니다."</string>
-    <string name="anr_process" msgid="1246866008169975783">"<xliff:g id="PROCESS">%1$s</xliff:g> 프로세스가 응답하지 않습니다."</string>
-    <string name="force_close" msgid="3653416315450806396">"닫기"</string>
+    <string name="aerr_title" msgid="1905800560317137752"></string>
+    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <skip />
+    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <skip />
+    <string name="anr_title" msgid="4351948481459135709"></string>
+    <!-- no translation found for anr_activity_application (8339738283149696827) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (7018289416670457797) -->
+    <skip />
+    <!-- no translation found for anr_application_process (7208175830253210526) -->
+    <skip />
+    <!-- no translation found for anr_process (306819947562555821) -->
+    <skip />
+    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"닫기"</string>
     <string name="report" msgid="4060218260984795706">"신고"</string>
     <string name="wait" msgid="7147118217226317732">"대기"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"애플리케이션 리디렉션됨"</string>
     <string name="launch_warning_replace" msgid="6202498949970281412">"<xliff:g id="APP_NAME">%1$s</xliff:g>이(가) 실행 중입니다."</string>
     <string name="launch_warning_original" msgid="188102023021668683">"원래 <xliff:g id="APP_NAME">%1$s</xliff:g>을(를) 실행했습니다."</string>
-    <!-- no translation found for screen_compat_mode_scale (3202955667675944499) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_show (4013878876486655892) -->
-    <skip />
-    <!-- no translation found for screen_compat_mode_hint (2953716574198046484) -->
-    <skip />
+    <string name="screen_compat_mode_scale" msgid="3202955667675944499">"배율"</string>
+    <string name="screen_compat_mode_show" msgid="4013878876486655892">"항상 표시"</string>
+    <string name="screen_compat_mode_hint" msgid="2953716574198046484">"설정 &gt; 애플리케이션 &gt; 애플리케이션 관리로 이동하여 이 모드를 다시 사용하도록 설정합니다."</string>
     <string name="smv_application" msgid="295583804361236288">"애플리케이션 <xliff:g id="APPLICATION">%1$s</xliff:g>(프로세스 <xliff:g id="PROCESS">%2$s</xliff:g>)이(가) 자체 시행 StrictMode 정책을 위반했습니다."</string>
     <string name="smv_process" msgid="5120397012047462446">"프로세스(<xliff:g id="PROCESS">%1$s</xliff:g>)가 자체 시행 StrictMode 정책을 위반했습니다."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> 실행 중"</string>
@@ -904,17 +913,15 @@
     <string name="volume_alarm" msgid="1985191616042689100">"알람 볼륨"</string>
     <string name="volume_notification" msgid="2422265656744276715">"알림 볼륨"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"볼륨"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
     <skip />
-    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
     <skip />
-    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
     <skip />
-    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
     <skip />
-    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
-    <skip />
-    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
     <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"기본 벨소리"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"기본 벨소리(<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -929,10 +936,10 @@
     <item quantity="one" msgid="1634101450343277345">"개방형 Wi-Fi 네트워크 사용 가능"</item>
     <item quantity="other" msgid="7915895323644292768">"개방형 Wi-Fi 네트워크 사용 가능"</item>
   </plurals>
-    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Wi-Fi 네트워크가 사용중지되었습니다."</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Wi-Fi 네트워크가 잘못된 연결로 인해 일시적으로 사용중지되었습니다."</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Wi-Fi에 연결할 수 없습니다"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"인터넷 연결 상태가 좋지 않습니다."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Wi-Fi Direct 작업을 시작합니다. 이 작업으로 Wi-Fi 클라이언트/핫스팟 작업이 사용중지됩니다."</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Wi-Fi Direct 작업을 시작합니다. 이 작업을 하면 Wi-Fi 클라이언트/핫스팟 작업이 중지됩니다."</string>
     <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Wi-Fi Direct를 시작하지 못했습니다."</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>에서 Wi-Fi Direct 연결 설정을 요청합니다. 수락하려면 확인을 클릭하세요."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>에서 Wi-Fi Direct 연결 설정을 요청합니다. 계속 진행하려면 PIN을 입력하세요."</string>
@@ -943,18 +950,12 @@
     <string name="sms_control_message" msgid="1289331457999236205">"여러 개의 SMS 메시지를 보내는 중입니다. 계속하려면 \'확인\'을 선택하고 전송을 중지하려면 \'취소\'를 선택하세요."</string>
     <string name="sms_control_yes" msgid="2532062172402615953">"확인"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"취소"</string>
-    <!-- no translation found for sim_removed_title (6227712319223226185) -->
-    <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
-    <skip />
-    <!-- no translation found for sim_done_button (827949989369963775) -->
-    <skip />
-    <!-- no translation found for sim_added_title (3719670512889674693) -->
-    <skip />
-    <!-- no translation found for sim_added_message (1209265974048554242) -->
-    <skip />
-    <!-- no translation found for sim_restart_button (4722407842815232347) -->
-    <skip />
+    <string name="sim_removed_title" msgid="6227712319223226185">"SIM 카드 제거됨"</string>
+    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"SIM 카드를 교체해야 모바일 네트워크를 사용할 수 있습니다."</string>
+    <string name="sim_done_button" msgid="827949989369963775">"완료"</string>
+    <string name="sim_added_title" msgid="3719670512889674693">"SIM 카드 추가됨"</string>
+    <string name="sim_added_message" msgid="1209265974048554242">"모바일 네트워크에 액세스하려면 기기를 다시 시작해야 합니다."</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"다시 시작"</string>
     <string name="time_picker_dialog_title" msgid="8349362623068819295">"시간 설정"</string>
     <string name="date_picker_dialog_title" msgid="5879450659453782278">"날짜 설정"</string>
     <string name="date_time_set" msgid="5777075614321087758">"설정"</string>
@@ -1105,22 +1106,14 @@
     <string name="choose_account_label" msgid="4191313562041125787">"계정 선택"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"올리기"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"줄이기"</string>
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"선택됨"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"선택 안함"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"선택됨"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"선택 안함"</string>
+    <string name="switch_on" msgid="551417728476977311">"설정"</string>
+    <string name="switch_off" msgid="7249798614327155088">"해제"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"누름"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"누르지 않음"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"홈 탐색"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"위로 탐색"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"옵션 더보기"</string>
@@ -1134,14 +1127,10 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G 데이터 사용중지됨"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"모바일 데이터 사용중지됨"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"사용하려면 누르세요."</string>
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G 데이터 제한을 초과했습니다."</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G의 데이터 제한을 초과했습니다."</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"모바일 데이터 제한을 초과했습니다."</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g>가 지정된 한도를 초과했습니다."</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"보안 인증서"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"유효한 인증서입니다."</string>
     <string name="issued_to" msgid="454239480274921032">"발급 대상:"</string>
@@ -1159,5 +1148,5 @@
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"전체 보기..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"활동 선택"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"공유 대상..."</string>
-    <string name="status_bar_device_locked" msgid="3092703448690669768">"기기 잠김"</string>
+    <string name="status_bar_device_locked" msgid="3092703448690669768">"기기가 잠겼습니다."</string>
 </resources>

@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Mostrar notificaciones"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Eliminar"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Inspeccionar"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"No hay notificaciones"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Continuo"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificaciones"</string>
@@ -62,8 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom de compatibilidad"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Cuando una aplicación fue diseñada para una pantalla más pequeña, aparece un control de zoom junto al reloj."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Captura de pantalla guardada en la Galería"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"No se pudo guardar la captura de pantalla. Es posible que el almacenamiento externo esté en uso."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opciones de transferencia de archivos por USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Activar como reproductor de medios (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Activar como cámara (PTP)"</string>
@@ -71,8 +68,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Atrás"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Página principal"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menú"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
+    <string name="accessibility_recent" msgid="3027675523629738534">"Aplicaciones recientes"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botón Cambiar método de entrada"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botón de zoom de compatibilidad"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom de pantalla más pequeña a más grande"</string>
@@ -117,24 +113,14 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter habilitado"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Timbre vibrar"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Timbre silencio"</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Se inhabilitaron los datos 2G/3G."</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Se inhabilitaron los datos 4G."</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Se inhabilitaron los datos móviles."</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Se inhabilitaron los datos."</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Se alcanzó el límite de datos que se permiten usar."\n\n"El operador puede cobrarte por el uso adicional de datos."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Volver a habilitar los datos"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sin conexión a Internet"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectado"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"La ubicación se estableció por GPS"</string>
 </resources>

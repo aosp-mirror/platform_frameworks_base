@@ -195,6 +195,10 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"緊急放送メッセージの取得と処理をアプリケーションに許可します。これはシステムアプリケーションのみ利用できる権限です。"</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"SMSメッセージの送信"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"SMSメッセージの送信をアプリケーションに許可します。悪意のあるアプリケーションが確認なしでメッセージを送信し、料金が発生する恐れがあります。"</string>
+    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <skip />
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <skip />
     <string name="permlab_readSms" msgid="4085333708122372256">"SMSの読み取り"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"タブレットやSIMカードに保存されているSMSメッセージの読み取りをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、機密メッセージが読み取られる恐れがあります。"</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"携帯電話やSIMカードに保存したSMSメッセージの読み取りをアプリケーションに許可します。悪意のあるアプリケーションが機密メッセージを読み取る恐れがあります。"</string>
@@ -264,6 +268,10 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"入力方法のトップレベルインターフェースに関連付けることを所有者に許可します。通常のアプリケーションにはまったく必要ありません。"</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"テキストサービスにバインド"</string>
     <string name="permdesc_bindTextService" msgid="172508880651909350">"テキストサービス（SpellCheckerServiceなど）のトップレベルインターフェースへのバインドを所有者に許可します。通常のアプリケーションでは不要です。"</string>
+    <!-- no translation found for permlab_bindVpnService (4708596021161473255) -->
+    <skip />
+    <!-- no translation found for permdesc_bindVpnService (6011554199384584151) -->
+    <skip />
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"壁紙にバインド"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"壁紙のトップレベルインターフェースへのバインドを所有者に許可します。通常のアプリケーションでは不要です。"</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"ウィジェットサービスにバインド"</string>
@@ -321,15 +329,19 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"連絡先データの書き込み"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"タブレットに保存されている連絡先（アドレス）データの変更をアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、連絡先データが消去または変更される恐れがあります。"</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"端末に保存した連絡先（アドレス）データの変更をアプリケーションに許可します。悪意のあるアプリケーションが連絡先データを消去/変更する恐れがあります。"</string>
-    <string name="permlab_readProfile" msgid="2211941946684590103">"プロフィールデータの読み取り"</string>
-    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"アプリケーションによる個人の全プロフィール情報の読み取りを許可します。この場合、悪意のあるアプリケーションによって身元が特定されたり個人情報が第三者に転送されたりする危険があります。"</string>
-    <string name="permlab_writeProfile" msgid="6561668046361989220">"プロフィールデータの書き込み"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"アプリケーションによる個人のプロフィール情報の変更を許可します。この場合、悪意のあるアプリケーションによってプロフィールデータが消去または変更される危険があります。"</string>
-    <string name="permlab_readCalendar" msgid="6898987798303840534">"カレンダーの予定の読み取り"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"タブレットに保存されているカレンダーの予定の読み取りをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、カレンダーの予定が他人に送信される恐れがあります。"</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"端末に保存したカレンダーの予定の読み取りをアプリケーションに許可します。悪意のあるアプリケーションがカレンダーの予定を他人に送信する恐れがあります。"</string>
-    <string name="permlab_writeCalendar" msgid="3894879352594904361">"カレンダーの予定の追加や変更を行い、ゲストにメールを送信する"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"カレンダーの予定の追加や変更をアプリケーションに許可します。ゲストにメールが送信される場合もあります。悪意のあるアプリケーションがこの機能を利用し、イベントを削除または変更したりゲストにメールを送信したりする可能性があります。"</string>
+    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
+    <skip />
+    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"カレンダーの予定の読み取り"</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"タブレットに保存されているカレンダーの予定の読み取りをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、カレンダーの予定が他人に送信される恐れがあります。"</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"タブレットに保存されているカレンダーの予定の読み取りをアプリケーションに許可します。この許可を悪意のあるアプリケーションに利用されると、カレンダーの予定が他人に送信される恐れがあります。"</string>
+    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"カレンダーの予定の追加や変更を行い、ゲストにメールを送信する"</string>
+    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"カレンダーの予定の追加や変更をアプリケーションに許可します。ゲストにメールが送信される場合もあります。悪意のあるアプリケーションがこの機能を利用し、イベントを削除または変更したりゲストにメールを送信したりする可能性があります。"</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"仮の位置情報でテスト"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"テスト用に仮の位置情報源を作成します。これにより悪意のあるアプリケーションが、GPS、ネットワークプロバイダなどから返される本当の位置情報や状況を改ざんする恐れがあります。"</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"位置情報提供者の追加コマンドアクセス"</string>
@@ -439,8 +451,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"すべてのネットワーク状態の表示をアプリケーションに許可します。"</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"完全なインターネットアクセス"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"ネットワークソケットの作成をアプリケーションに許可します。"</string>
-    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"アクセスポイント名設定の書き込み"</string>
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"APNのプロキシやポートなどのAPN設定の変更をアプリケーションに許可します。"</string>
+    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"アクセスポイント名設定の書き込み"</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"APNのプロキシやポートなどのAPN設定の変更をアプリケーションに許可します。"</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"ネットワーク接続の変更"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"ネットワークの接続状態の変更をアプリケーションに許可します。"</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"テザリング接続の変更"</string>
@@ -839,9 +851,7 @@
     <string name="cut" msgid="3092569408438626261">"切り取り"</string>
     <string name="copy" msgid="2681946229533511987">"コピー"</string>
     <string name="paste" msgid="5629880836805036433">"貼り付け"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"クリップボードが空です"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="replace" msgid="8333608224471746584">"変更"</string>
     <string name="copyUrl" msgid="2538211579596067402">"URLをコピー"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"テキストを選択..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"テキスト選択"</string>
@@ -864,15 +874,21 @@
     <string name="chooseActivity" msgid="1009246475582238425">"操作の選択"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"USBデバイス用アプリケーションを選択"</string>
     <string name="noApplications" msgid="1691104391758345586">"この操作を実行できるアプリケーションはありません。"</string>
-    <string name="aerr_title" msgid="653922989522758100">"エラー"</string>
-    <string name="aerr_application" msgid="4683614104336409186">"<xliff:g id="APPLICATION">%1$s</xliff:g>（<xliff:g id="PROCESS">%2$s</xliff:g>）が予期せず停止しました。やり直してください。"</string>
-    <string name="aerr_process" msgid="1551785535966089511">"<xliff:g id="PROCESS">%1$s</xliff:g>が予期せず停止しました。やり直してください。"</string>
-    <string name="anr_title" msgid="3100070910664756057">"エラー"</string>
-    <string name="anr_activity_application" msgid="3538242413112507636">"<xliff:g id="ACTIVITY">%1$s</xliff:g>（<xliff:g id="APPLICATION">%2$s</xliff:g>）は応答していません。"</string>
-    <string name="anr_activity_process" msgid="5420826626009561014">"<xliff:g id="ACTIVITY">%1$s</xliff:g>（プロセス: <xliff:g id="PROCESS">%2$s</xliff:g>）は応答していません。"</string>
-    <string name="anr_application_process" msgid="4185842666452210193">"<xliff:g id="APPLICATION">%1$s</xliff:g>（<xliff:g id="PROCESS">%2$s</xliff:g>）は応答していません。"</string>
-    <string name="anr_process" msgid="1246866008169975783">"<xliff:g id="PROCESS">%1$s</xliff:g>は応答していません。"</string>
-    <string name="force_close" msgid="3653416315450806396">"強制終了"</string>
+    <string name="aerr_title" msgid="1905800560317137752"></string>
+    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <skip />
+    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <skip />
+    <string name="anr_title" msgid="4351948481459135709"></string>
+    <!-- no translation found for anr_activity_application (8339738283149696827) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (7018289416670457797) -->
+    <skip />
+    <!-- no translation found for anr_application_process (7208175830253210526) -->
+    <skip />
+    <!-- no translation found for anr_process (306819947562555821) -->
+    <skip />
+    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"強制終了"</string>
     <string name="report" msgid="4060218260984795706">"レポート"</string>
     <string name="wait" msgid="7147118217226317732">"待機"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"アプリのリダイレクト"</string>
@@ -901,17 +917,15 @@
     <string name="volume_alarm" msgid="1985191616042689100">"アラームの音量"</string>
     <string name="volume_notification" msgid="2422265656744276715">"通知音量"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"音量"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
     <skip />
-    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
     <skip />
-    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
     <skip />
-    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
     <skip />
-    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
-    <skip />
-    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
     <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"プリセット着信音"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"端末の基本着信音（<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -926,14 +940,16 @@
     <item quantity="one" msgid="1634101450343277345">"Wi-Fiオープンネットワークが利用できます"</item>
     <item quantity="other" msgid="7915895323644292768">"Wi-Fiオープンネットワークが利用できます"</item>
   </plurals>
-    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Wi-Fiネットワークが無効になりました"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"接続の不具合によりWi-Fiネットワークは一時的に無効になりました。"</string>
+    <!-- no translation found for wifi_watchdog_network_disabled (7904214231651546347) -->
+    <skip />
+    <!-- no translation found for wifi_watchdog_network_disabled_detailed (2517058131278770509) -->
+    <skip />
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
-    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Wi-Fi Directの操作を開始します。これによりWi-Fiクライアント/アクセスポイントの操作がオフになります。"</string>
+    <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Wi-Fi Directの操作を開始します。これによりWi-Fiクライアント/アクセスポイントの操作がOFFになります。"</string>
     <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Wi-Fi Directを開始できませんでした"</string>
-    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>からのWi-Fi Direct接続設定リクエスト。[OK]をクリックして受け入れます。"</string>
-    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>からのWi-Fi Direct接続設定リクエスト。PINを入力して続行します。"</string>
-    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"接続設定を続行するには、ピアデバイス<xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>でWPS PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>を入力する必要があります"</string>
+    <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>からのWi-Fi Direct接続設定リクエスト。受け入れるには[OK]をクリックします。"</string>
+    <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"<xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>からのWi-Fi Direct接続設定リクエスト。続行するにはPINを入力します。"</string>
+    <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"接続設定を続けるには、ピアデバイス<xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>でWPS PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g>を入力する必要があります"</string>
     <string name="select_character" msgid="3365550120617701745">"文字を挿入"</string>
     <string name="sms_control_default_app_name" msgid="7630529934366549163">"不明なアプリケーション"</string>
     <string name="sms_control_title" msgid="7296612781128917719">"SMSメッセージの送信中"</string>
@@ -941,7 +957,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"OK"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"キャンセル"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIMカードが取り外されました"</string>
-    <string name="sim_removed_message" msgid="2064255102770489459">"モバイルネットワークはSIMカードを交換するまで利用できません。"</string>
+    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"モバイルネットワークはSIMカードを交換するまで利用できません。"</string>
     <string name="sim_done_button" msgid="827949989369963775">"完了"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIMカードが追加されました"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"モバイルネットワークにアクセスするには端末を再起動する必要があります。"</string>
@@ -1096,22 +1112,14 @@
     <string name="choose_account_label" msgid="4191313562041125787">"アカウントを選択"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"増やす"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"減らす"</string>
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"ON"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"OFF"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"ON"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"選択されていません"</string>
+    <string name="switch_on" msgid="551417728476977311">"ON"</string>
+    <string name="switch_off" msgid="7249798614327155088">"OFF"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"ON"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"OFF"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"ホームへ移動"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"上へ移動"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"その他のオプション"</string>
@@ -1125,14 +1133,10 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4Gデータが無効になりました"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"モバイルデータが無効になりました"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"有効にするにはタップしてください"</string>
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G～3Gデータの上限を超えました"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4Gデータの上限を超えました"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"モバイルデータの上限を超えました"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"指定した上限を<xliff:g id="SIZE">%s</xliff:g>超えました"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"セキュリティ証明書"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"証明書は有効です。"</string>
     <string name="issued_to" msgid="454239480274921032">"発行先:"</string>

@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Afişaţi notificări"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Eliminaţi"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Inspectaţi"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nicio notificare"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"În desfăşurare"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificări"</string>
@@ -62,8 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom de compatibilitate"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Atunci când o aplicaţie a fost concepută pentru un ecran mai mic, o comandă pentru mărire/micşorare va apărea alături de ceas."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Captura de ecran a fost salvată în Galerie"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Captura de ecran nu a putut fi salvată. Este posibil să fie utilizată stocarea externă."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opţiuni pentru transferul de fişiere prin USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Montaţi ca player media (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montaţi drept cameră foto (PTP)"</string>
@@ -71,8 +68,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"Înapoi"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Ecranul de pornire"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Meniu"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
+    <string name="accessibility_recent" msgid="3027675523629738534">"Aplicaţii recente"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Buton pentru comutarea metodei de introducere."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Buton zoom pentru compatibilitate."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Faceţi zoom de la o imagine mai mică la una mai mare."</string>
@@ -82,7 +78,7 @@
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Baterie: o bară."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Baterie: două bare."</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Baterie: trei bare."</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"Baterie încărcată complet."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Baterie: complet."</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"Nu există semnal pentru telefon."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Semnal pentru telefon: o bară."</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Semnal pentru telefon: două bare."</string>
@@ -94,9 +90,9 @@
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Semnal pentru date: trei bare."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Semnal pentru date: complet."</string>
     <string name="accessibility_no_wifi" msgid="4017628918351949575">"Nu există semnal Wi-Fi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Wi-Fi: o bară."</string>
+    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Semnal Wi-Fi: o bară."</string>
     <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Semnal Wi-Fi: două bare."</string>
-    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Wi-Fi: trei bare."</string>
+    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Semnal Wi-Fi: trei bare."</string>
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Semnal Wi-Fi: complet."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
@@ -106,7 +102,7 @@
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Niciun card SIM."</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tethering prin Bluetooth."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Conectarea ca modem prin Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mod Avion."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterie: <xliff:g id="NUMBER">%d</xliff:g> procente."</string>
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Butonul Setări."</string>
@@ -117,24 +113,14 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter activat."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibrare sonerie."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Sonerie silenţioasă."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Datele 2G-3G au fost dezactivate"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Datele 4G au fost dezactivate"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Datele mobile au fost dezactivate"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Utilizare date dezactivată"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"A fost atinsă limita specificată de utilizare a datelor."\n\n"Utilizarea unor date suplimentare poate atrage costuri impuse de operator."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Reactivaţi datele"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Fără conex. internet"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi conectat"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Se caută GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Locaţie setată prin GPS"</string>
 </resources>

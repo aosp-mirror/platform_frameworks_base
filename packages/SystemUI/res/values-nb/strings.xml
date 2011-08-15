@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Vis varslinger"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Fjern"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Inspiser"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Ingen varslinger"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Aktiviteter"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Varslinger"</string>
@@ -62,8 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Kompatibilitets-zooming"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Når en app er utformet for en mindre skjerm, vises det en zoomkontroll ved klokken."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Skjermdump ble lagret i galleriet"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Kunne ikke lagre skjermdump. Det kan hende at ekstern lagring er i bruk."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Altern. for USB-filoverføring"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Sett inn som mediespiller (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Sett inn som kamera (PTP)"</string>
@@ -71,18 +68,17 @@
     <string name="accessibility_back" msgid="567011538994429120">"Tilbake"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Startside"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Meny"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
+    <string name="accessibility_recent" msgid="3027675523629738534">"Nyere applikasjoner"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Bytt knapp for inndatametode."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Zoomknapp for kompatibilitet."</string>
-    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom mindre til større skjerm."</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom fra mindre til større skjerm."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth er tilkoblet."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth frakoblet."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"Uten batteri."</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Batteri – én stolpe."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Batteri – to stolper."</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Batteri – tre stolper."</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"Batteri er fullt."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Batteriet er fullt."</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"Ingen telefon."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Telefon – én stolpe."</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Telefon – to stolper."</string>
@@ -96,45 +92,35 @@
     <string name="accessibility_no_wifi" msgid="4017628918351949575">"Ingen Wi-Fi."</string>
     <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Wi-Fi – én stolpe."</string>
     <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Wi-Fi – to stolper."</string>
-    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"WiFi – tre stolper."</string>
-    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"WiFi-signal er fullt."</string>
+    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Wi-Fi – tre stolper."</string>
+    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Wi-Fi-signal er fullt."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"Uten SIM"</string>
-    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-tilknytning"</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"Uten SIM."</string>
+    <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Bluetooth-deling."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Flymodus."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri – <xliff:g id="NUMBER">%d</xliff:g> prosent."</string>
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Innstillinger-knapp."</string>
-    <string name="accessibility_notifications_button" msgid="2933903195211483438">"Varslingsknapp."</string>
+    <string name="accessibility_notifications_button" msgid="2933903195211483438">"Knapp for varslinger"</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Fjern varsling."</string>
-    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS aktivert."</string>
+    <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS er aktivert."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Henting av GPS-signal."</string>
-    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter aktivert."</string>
+    <string name="accessibility_tty_enabled" msgid="4613200365379426561">"TeleTypewriter er aktivert."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibreringsmodus."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Stille modus."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G-data er deaktivert"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G-data er deaktivert"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobildata er deaktivert"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Data deaktivert"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Den angitte databruksgrensen er nådd."\n\n"Ytterligere databruk kan medføre høyere kostnader hos leverandøren."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Aktiver data på nytt"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Ingen Internett-forbindelse"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi tilkoblet"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Søker etter GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Posisjon angitt av GPS"</string>
 </resources>

@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Zobraziť upozornenia"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Odstrániť"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Skontrolovať"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Žiadne upozornenia"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Prebiehajúce"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Upozornenia"</string>
@@ -62,8 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Kompatibilné priblíženie"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Ak je aplikácia navrhnutá pre menšiu obrazovku, zobrazí sa vedľa hodín ovládací prvok priblíženia."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Snímka obrazovky bola uložená do Galérie"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Snímku obrazovky sa nepodarilo uložiť. Externý ukladací priestor sa možno práve používa."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Možnosti prenosu súborov USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Pripojiť ako prehrávač médií (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Pripojiť ako fotoaparát (PTP)"</string>
@@ -71,32 +68,31 @@
     <string name="accessibility_back" msgid="567011538994429120">"Späť"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Plocha"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
+    <string name="accessibility_recent" msgid="3027675523629738534">"Nedávne aplikácie"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Tlačidlo prepnutia metódy vstupu."</string>
-    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Tlačidlo priblíženia kompatibility."</string>
-    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zväčšiť menšie na väčšiu obrazovku."</string>
-    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Rozhranie Bluetooth je pripojené."</string>
-    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Rozhranie Bluetooth je odpojené."</string>
+    <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Tlačidlo úpravy veľkosti z dôvodu kompatibility."</string>
+    <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zväčšiť menší obrázok na väčšiu obrazovku."</string>
+    <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth pripojené."</string>
+    <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth je odpojené."</string>
     <string name="accessibility_no_battery" msgid="358343022352820946">"Žiadna batéria."</string>
-    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Jeden stĺpec batérie."</string>
-    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Dva stĺpce batérie."</string>
-    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Tri stĺpce batérie."</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"Plná batéria."</string>
-    <string name="accessibility_no_phone" msgid="4894708937052611281">"Žiadna telefóna sieť."</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Jedna čiarka batérie."</string>
+    <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Dve čiarky batérie."</string>
+    <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Tri čiarky batérie."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Batéria je nabitá."</string>
+    <string name="accessibility_no_phone" msgid="4894708937052611281">"Žiadna telefónna sieť."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Jeden stĺpec signálu telefónnej siete."</string>
-    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Dva stĺpce signálu telefónnej siete."</string>
-    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Tri stĺpce signálu telefónnej siete."</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Dve čiarky signálu telefónnej siete."</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Tri čiarky signálu telefónnej siete."</string>
     <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Plný signál telefónnej siete."</string>
     <string name="accessibility_no_data" msgid="4791966295096867555">"Žiadna dátová sieť."</string>
-    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Jeden stĺpec signálu dátovej siete."</string>
-    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dva stĺpce signálu dátovej siete."</string>
-    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Tri stĺpce signálu dátovej siete."</string>
+    <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Jedna čiarka signálu dátovej siete."</string>
+    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dve čiarky signálu dátovej siete."</string>
+    <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Tri čiarky signálu dátovej siete."</string>
     <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Plný signál dátovej siete."</string>
     <string name="accessibility_no_wifi" msgid="4017628918351949575">"Žiadna sieť Wi-Fi."</string>
-    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Jeden stĺpec signálu siete Wi-Fi."</string>
-    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Dva stĺpce signálu siete Wi-Fi."</string>
-    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Tri stĺpce signálu siete Wi-Fi."</string>
+    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Jedna čiarka signálu siete Wi-Fi."</string>
+    <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Dve čiarky signálu siete Wi-Fi."</string>
+    <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Tri čiarky signálu siete Wi-Fi."</string>
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Plný signál siete Wi-Fi."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
@@ -107,7 +103,7 @@
     <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Žiadna karta SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Zdieľanie dátového pripojenia cez Bluetooth."</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim V lietadle"</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim V lietadle."</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batéria <xliff:g id="NUMBER">%d</xliff:g> %"</string>
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Tlačidlo Nastavenia."</string>
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Tlačidlo upozornení."</string>
@@ -117,24 +113,14 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Rozhranie TeleTypewriter je povolené."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibračné zvonenie."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Tiché zvonenie."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Dátové prenosy 2G a 3G sú zakázané"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Dátové prenosy 4G sú zakázané"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Mobilné dátové prenosy sú zakázané"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dátové prenosy sú zakázané"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Dosiahli ste stanovené obmedzenie dátových prenosov."\n\n"Za ďalšie používanie dátových prenosov vám operátor môže účtovať poplatky."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Znova povoliť dátové prenosy"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Bez prip. na Internet"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: pripojené"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Vyhľadávanie satelitov GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Poloha nastavená pomocou GPS"</string>
 </resources>

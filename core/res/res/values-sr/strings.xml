@@ -107,7 +107,7 @@
     <string name="fcComplete" msgid="3118848230966886575">"Кôд функције је извршен."</string>
     <string name="fcError" msgid="3327560126588500777">"Проблеми са везом или неважећи кôд функције."</string>
     <string name="httpErrorOk" msgid="1191919378083472204">"Потврди"</string>
-    <!-- outdated translation 2567300624552921790 -->     <string name="httpError" msgid="6603022914760066338">"Веб страница садржи грешку."</string>
+    <string name="httpError" msgid="6603022914760066338">"Дошло је до грешке на мрежи."</string>
     <string name="httpErrorLookup" msgid="4517085806977851374">"Није било могуће пронаћи URL адресу."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="2781440683514730227">"Шема потврде идентитета сајта није подржана."</string>
     <string name="httpErrorAuth" msgid="7293960746955020542">"Потврда идентитета није успела."</string>
@@ -195,6 +195,10 @@
     <string name="permdesc_receiveEmergencyBroadcast" msgid="7118393393716546131">"Дозвољава апликацији да прима и обрађује поруке хитног преноса. Ова дозвола је доступна само за системске апликације."</string>
     <string name="permlab_sendSms" msgid="5600830612147671529">"слање SMS порука"</string>
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Омогућава да апликација шаље SMS поруке. Злонамерне апликације могу да шаљу поруке без ваше потврде, што ће вам створити трошкове."</string>
+    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <skip />
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <skip />
     <string name="permlab_readSms" msgid="4085333708122372256">"читање SMS или MMS порука"</string>
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Омогућава апликацији да чита SMS поруке сачуване на таблету или SIM картици. Злонамерне апликације могу да читају ваше поверљиве поруке."</string>
     <string name="permdesc_readSms" product="default" msgid="3002170087197294591">"Омогућава да апликација чита SMS поруке сачуване на телефону или SIM картици. Злонамерне апликације могу да читају поверљиву преписку."</string>
@@ -264,6 +268,8 @@
     <string name="permdesc_bindInputMethod" msgid="3734838321027317228">"Омогућава власнику да се обавеже на интерфејс методе уноса највишег нивоа. Обичне апликације никада не би требало да је користе."</string>
     <string name="permlab_bindTextService" msgid="7358378401915287938">"обавезивање на текстуалну услугу"</string>
     <string name="permdesc_bindTextService" msgid="172508880651909350">"Омогућава власнику да се обавеже на интерфејс текстуалне услуге највишег нивоа (нпр. SpellCheckerService). Обичне апликације никада не би требало да је користе."</string>
+    <string name="permlab_bindVpnService" msgid="4708596021161473255">"везивање за VPN услугу"</string>
+    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Омогућава власнику да се обавеже на интерфејс VPN услуге највишег нивоа. За обичне апликације ово никада не би требало да буде потребно."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"обавезивање на позадину"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Омогућава власнику да се обавеже на интерфејс позадине највишег нивоа. Обичне апликације никада не би требало да је користе."</string>
     <string name="permlab_bindRemoteViews" msgid="5697987759897367099">"обавезивање на услугу виџета"</string>
@@ -321,15 +327,19 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"уписивање података о контактима"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Омогућава апликацији да измени податке о контакту (адресу) сачуване на таблету. Злонамерне апликације на тај начин могу да избришу или измене податке о контакту."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Омогућава да апликација измени податке о контакту (адреси) сачуване на телефону. Злонамерне апликације могу то да злоупотребе и да избришу или измене податке о контакту."</string>
-    <string name="permlab_readProfile" msgid="2211941946684590103">"читање података о профилу"</string>
-    <string name="permdesc_readProfile" product="default" msgid="4732942280141331352">"Омогућава да апликација чита све личне податке о профилу. Злонамерне апликације могу то да искористе да би утврдиле ваш идентитет и послале личне информације другим људима."</string>
-    <string name="permlab_writeProfile" msgid="6561668046361989220">"писање података о профилу"</string>
-    <string name="permdesc_writeProfile" product="default" msgid="8040643023682531996">"Омогућава да апликација мења личне податке о профилу. Злонамерне апликације могу то да искористе да би избрисале или измениле податке о профилу."</string>
-    <string name="permlab_readCalendar" msgid="6898987798303840534">"читање догађаја из календара"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Омогућава апликацији да чита све догађаје из календара сачуване на таблету. Злонамерне апликације то могу да злоупотребе и пошаљу ваше догађаје из календара другим особама."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Омогућава да апликација чита све догађаје из календара сачуване на телефону. Злонамерне апликације могу то да злоупотребе и искористе за слање догађаја из календара другим људима."</string>
-    <string name="permlab_writeCalendar" msgid="3894879352594904361">"додавање и измена догађаја из календара и слање порука е-поште гостима"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Омогућава да апликација додаје или мења догађаје у календару, услед чега гостима могу да се шаљу поруке е-поште. Злонамерне апликације могу на основу тога да избришу или измене догађаје из календара или да шаљу поруке е-поште гостима."</string>
+    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
+    <skip />
+    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
+    <skip />
+    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
+    <skip />
+    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
+    <skip />
+    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"читање догађаја из календара"</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Омогућава апликацији да чита све догађаје из календара сачуване на таблету. Злонамерне апликације то могу да злоупотребе и пошаљу ваше догађаје из календара другим особама."</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Омогућава апликацији да чита све догађаје из календара сачуване на таблету. Злонамерне апликације то могу да злоупотребе и пошаљу ваше догађаје из календара другим особама."</string>
+    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"додавање и измена догађаја из календара и слање порука е-поште гостима"</string>
+    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Омогућава да апликација додаје или мења догађаје у календару, услед чега гостима могу да се шаљу поруке е-поште. Злонамерне апликације могу на основу тога да избришу или измене догађаје из календара или да шаљу поруке е-поште гостима."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"лажни извори локација у сврхе тестирања"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Прави лажне изворе локације у сврхе тестирања. Злонамерне апликације могу то да злоупотребе и искористе да замене локацију и/или статус који пријављују прави извори локације, као што су GPS или добављачи мреже."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"приступ додатним командама добављача локације"</string>
@@ -439,8 +449,8 @@
     <string name="permdesc_accessNetworkState" msgid="558721128707712766">"Омогућава да апликација види статус свих мрежа."</string>
     <string name="permlab_createNetworkSockets" msgid="9121633680349549585">"потпуни приступ Интернету"</string>
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Омогућава да апликација прави мрежне прикључке."</string>
-    <string name="permlab_writeApnSettings" msgid="7823599210086622545">"уписивање подешавања назива приступне тачке"</string>
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Омогућава да апликација мења подешавања назива приступне тачке, као што су прокси и порт било ког назива приступне тачке."</string>
+    <!-- outdated translation 7823599210086622545 -->     <string name="permlab_writeApnSettings" msgid="505660159675751896">"уписивање подешавања назива приступне тачке"</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Омогућава да апликација мења подешавања назива приступне тачке, као што су прокси и порт било ког назива приступне тачке."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"промена везе са мрежом"</string>
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Омогућава да апликација мења статус везе са мрежом."</string>
     <string name="permlab_changeTetherState" msgid="2702121155761140799">"Промена повезивања са Интернетом преко мобилног уређаја"</string>
@@ -720,10 +730,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Омогућава да апликација измени историју и обележиваче у прегледачу сачуване на телефону. Злонамерне апликације могу то да злоупотребе и да избришу или измене податке у прегледачу."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"подешавање аларма у будилнику"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Дозвољава да апликација подеси аларм у инсталираној апликацији будилника. Неке апликације будилника можда не примењују ову функцију."</string>
-    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
-    <skip />
-    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
-    <skip />
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"додавање говорне поште"</string>
+    <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Омогућава апликацији да додаје поруке у ваше пријемно сандуче говорне поште."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Измена дозвола за географске локације прегледача"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Омогућава да апликација измени дозволе за утврђивање географске локације у прегледачу. Злонамерне апликације то могу да злоупотребе и искористе за слање информација о локацији насумичним веб сајтовима."</string>
     <string name="save_password_message" msgid="767344687139195790">"Желите ли да прегледач запамти ову лозинку?"</string>
@@ -839,9 +847,7 @@
     <string name="cut" msgid="3092569408438626261">"Исеци"</string>
     <string name="copy" msgid="2681946229533511987">"Копирај"</string>
     <string name="paste" msgid="5629880836805036433">"Налепи"</string>
-    <string name="pasteDisabled" msgid="7259254654641456570">"Ништа није копирано"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="replace" msgid="8333608224471746584">"Замени"</string>
     <string name="copyUrl" msgid="2538211579596067402">"Копирај URL адресу"</string>
     <string name="selectTextMode" msgid="6738556348861347240">"Изабери текст..."</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"Избор текста"</string>
@@ -864,15 +870,21 @@
     <string name="chooseActivity" msgid="1009246475582238425">"Избор радње"</string>
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Избор апликације за USB уређај"</string>
     <string name="noApplications" msgid="1691104391758345586">"Ниједна апликација не може да изврши ову радњу."</string>
-    <string name="aerr_title" msgid="653922989522758100">"Жао нам је!"</string>
-    <string name="aerr_application" msgid="4683614104336409186">"Апликација <xliff:g id="APPLICATION">%1$s</xliff:g> (процес <xliff:g id="PROCESS">%2$s</xliff:g>) је неочекивано заустављена. Покушајте поново."</string>
-    <string name="aerr_process" msgid="1551785535966089511">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> је неочекивано заустављен. Покушајте поново."</string>
-    <string name="anr_title" msgid="3100070910664756057">"Жао нам је!"</string>
-    <string name="anr_activity_application" msgid="3538242413112507636">"Нема одзива активности <xliff:g id="ACTIVITY">%1$s</xliff:g> (у апликацији <xliff:g id="APPLICATION">%2$s</xliff:g>)."</string>
-    <string name="anr_activity_process" msgid="5420826626009561014">"Нема одзива активности <xliff:g id="ACTIVITY">%1$s</xliff:g> (у процесу <xliff:g id="PROCESS">%2$s</xliff:g>)."</string>
-    <string name="anr_application_process" msgid="4185842666452210193">"Нема одзива апликације <xliff:g id="APPLICATION">%1$s</xliff:g> (у процесу <xliff:g id="PROCESS">%2$s</xliff:g>)."</string>
-    <string name="anr_process" msgid="1246866008169975783">"Нема одзива процеса <xliff:g id="PROCESS">%1$s</xliff:g>."</string>
-    <string name="force_close" msgid="3653416315450806396">"Принудно затвори"</string>
+    <string name="aerr_title" msgid="1905800560317137752"></string>
+    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <skip />
+    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <skip />
+    <string name="anr_title" msgid="4351948481459135709"></string>
+    <!-- no translation found for anr_activity_application (8339738283149696827) -->
+    <skip />
+    <!-- no translation found for anr_activity_process (7018289416670457797) -->
+    <skip />
+    <!-- no translation found for anr_application_process (7208175830253210526) -->
+    <skip />
+    <!-- no translation found for anr_process (306819947562555821) -->
+    <skip />
+    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"Принудно затвори"</string>
     <string name="report" msgid="4060218260984795706">"Пријави"</string>
     <string name="wait" msgid="7147118217226317732">"Сачекај"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Апликација је преусмерена"</string>
@@ -901,17 +913,15 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Јачина звука аларма"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Јачина звука за обавештења"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Јачина звука"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
     <skip />
-    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
     <skip />
-    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
     <skip />
-    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
     <skip />
-    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
-    <skip />
-    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
     <skip />
     <string name="ringtone_default" msgid="3789758980357696936">"Подразумевани звук звона"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Подразумевани звук звона (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -926,8 +936,8 @@
     <item quantity="one" msgid="1634101450343277345">"Доступна је отворена Wi-Fi мрежа"</item>
     <item quantity="other" msgid="7915895323644292768">"Доступне су отворене Wi-Fi мреже"</item>
   </plurals>
-    <string name="wifi_watchdog_network_disabled" msgid="6398650124751302012">"Wi-Fi мрежа је онемогућена"</string>
-    <string name="wifi_watchdog_network_disabled_detailed" msgid="4659127251774069612">"Wi-Fi мрежа је привремено онемогућена због лоше везе."</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Није било могуће повезати се са Wi-Fi мрежом"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"има лошу интернет везу."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Покрените Wi-Fi Direct. Тиме ћете искључити клијента/хотспот за Wi-Fi."</string>
     <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Покретање Wi-Fi Direct везе није успело"</string>
@@ -941,7 +951,7 @@
     <string name="sms_control_yes" msgid="2532062172402615953">"Потврди"</string>
     <string name="sms_control_no" msgid="1715320703137199869">"Откажи"</string>
     <string name="sim_removed_title" msgid="6227712319223226185">"SIM картица је уклоњена"</string>
-    <string name="sim_removed_message" msgid="2064255102770489459">"Мобилна мрежа ће бити недоступна док не замените SIM картицу."</string>
+    <!-- outdated translation 2064255102770489459 -->     <string name="sim_removed_message" msgid="2333164559970958645">"Мобилна мрежа ће бити недоступна док не замените SIM картицу."</string>
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картица је додата"</string>
     <string name="sim_added_message" msgid="1209265974048554242">"Морате поново да покренете уређај да бисте могли да приступите мобилној мрежи."</string>
@@ -1096,22 +1106,14 @@
     <string name="choose_account_label" msgid="4191313562041125787">"Избор налога"</string>
     <string name="number_picker_increment_button" msgid="4830170763103463443">"Повећање"</string>
     <string name="number_picker_decrement_button" msgid="2576606679160067262">"Смањење"</string>
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"потврђено"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"није потврђено"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"изабрано"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"није изабрано"</string>
+    <string name="switch_on" msgid="551417728476977311">"укључено"</string>
+    <string name="switch_off" msgid="7249798614327155088">"искључено"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"притиснуто"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"није притиснуто"</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Кретање до Почетне"</string>
     <string name="action_bar_up_description" msgid="2237496562952152589">"Кретање нагоре"</string>
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"Још опција"</string>
@@ -1125,14 +1127,10 @@
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G подаци су онемогућени"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Подаци мобилне мреже су онемогућени"</string>
     <string name="data_usage_limit_body" msgid="2182247539226163759">"додирните да бисте омогућили"</string>
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Прекорачен пренос 2G-3G података"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Прекорачење преноса 4G података"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Прек. прен. под. за мобил. уређ."</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> преко наведеног ограничења"</string>
     <string name="ssl_certificate" msgid="6510040486049237639">"Безбедносни сертификат"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Овај сертификат је важећи."</string>
     <string name="issued_to" msgid="454239480274921032">"Издато за:"</string>

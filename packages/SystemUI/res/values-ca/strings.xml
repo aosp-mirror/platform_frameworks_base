@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"Mostra notificacions"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"Elimina"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"Inspecciona"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Cap notificació"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Continu"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notificacions"</string>
@@ -62,8 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom de compatibilitat"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Quan una aplicació s\'hagi dissenyat per a una pantalla més petita, apareixerà un control de zoom al costat del rellotge."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Captura de pantalla desada a la galeria"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"No s\'ha pogut desar la captura de pantalla. És possible que l\'emmagatzematge extern estigui en ús."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcions transf. fitxers USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Munta com a reproductor multimèdia (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Munta com a càmera (PTP)"</string>
@@ -71,44 +68,43 @@
     <string name="accessibility_back" msgid="567011538994429120">"Enrere"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Pàgina d\'inici"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menú"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
-    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botó de canvi del mètode d\'introducció."</string>
+    <string name="accessibility_recent" msgid="3027675523629738534">"Aplicacions recents"</string>
+    <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Botó de canvi del mètode d\'entrada."</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Botó de zoom de compatibilitat."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Amplia menys com més gran sigui la pantalla."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth connectat."</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth desconnectat."</string>
-    <string name="accessibility_no_battery" msgid="358343022352820946">"No hi ha bateria"</string>
-    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Bateria: una barra"</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"No hi ha bateria."</string>
+    <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Bateria: una barra."</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Bateria: dues barres."</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Bateria: tres barres."</string>
-    <string name="accessibility_battery_full" msgid="8909122401720158582">"Bateria completa."</string>
+    <string name="accessibility_battery_full" msgid="8909122401720158582">"Bateria carregada."</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"No hi ha senyal de telèfon."</string>
     <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Senyal de telèfon: una barra"</string>
     <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Senyal de telèfon: dues barres."</string>
     <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Senyal de telèfon: tres barres."</string>
-    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Senyal de telèfon: completa."</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Senyal de telèfon: complet."</string>
     <string name="accessibility_no_data" msgid="4791966295096867555">"Senyal de dades: no n\'hi ha"</string>
     <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Senyal de dades: una barra."</string>
-    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Senyal de dades: dos barres."</string>
+    <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Senyal de dades: dues barres."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Senyal de dades: tres barres."</string>
-    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Senyal de dades: completa."</string>
-    <string name="accessibility_no_wifi" msgid="4017628918351949575">"Senyal Wi-Fi: no n\'hi ha."</string>
-    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Senyal Wi-Fi: un barra."</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Senyal de dades: complet."</string>
+    <string name="accessibility_no_wifi" msgid="4017628918351949575">"Senyal Wi-Fi: no n\'hi ha"</string>
+    <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Senyal Wi-Fi: una barra."</string>
     <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Senyal Wi-Fi: dues barres."</string>
     <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Senyal Wi-Fi: tres barres."</string>
-    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Senyal Wi-Fi: completa."</string>
+    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Senyal Wi-Fi: complet."</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Vora"</string>
     <string name="accessibility_data_connection_wifi" msgid="1127208787254436420">"Wi-Fi"</string>
     <string name="accessibility_no_sim" msgid="8274017118472455155">"No hi ha cap targeta SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Connexió Bluetooth mitjançant dispositiu portàtil"</string>
-    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode d\'avió"</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria: <xliff:g id="NUMBER">%d</xliff:g>%."</string>
+    <string name="accessibility_airplane_mode" msgid="834748999790763092">"Mode d\'avió."</string>
+    <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria: <xliff:g id="NUMBER">%d</xliff:g> %."</string>
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Botó Configuració."</string>
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Botó de notificacions."</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Elimina la notificació."</string>
@@ -117,24 +113,14 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Teletip activat."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Vibració del so de trucada."</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"So de trucada en silenci."</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Dades 2G-3G desactivades"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Dades 4G desactivades"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Dades mòbils desactivades"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Dades desactivades"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"S\'ha assolit el límit d\'ús de dades especificat."\n\n"Si s\'utilitzen més dades, l\'operador hi podria aplicar càrrecs."</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Torna a activar les dades"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"No hi ha connexió a Internet"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi: connectada"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"S\'està cercant un GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"S\'ha establert la ubicació per GPS"</string>
 </resources>

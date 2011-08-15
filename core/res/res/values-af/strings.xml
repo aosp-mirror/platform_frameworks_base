@@ -155,8 +155,7 @@
     <string name="fcError" msgid="3327560126588500777">"Verbindingsprobleem of ongeldige kenmerk-kode."</string>
     <!-- no translation found for httpErrorOk (1191919378083472204) -->
     <skip />
-    <!-- no translation found for httpError (6603022914760066338) -->
-    <skip />
+    <string name="httpError" msgid="6603022914760066338">"\'n Netwerkfout het voorgekom."</string>
     <!-- no translation found for httpErrorLookup (4517085806977851374) -->
     <skip />
     <!-- no translation found for httpErrorUnsupportedAuthScheme (2781440683514730227) -->
@@ -292,6 +291,10 @@
     <!-- no translation found for permlab_sendSms (5600830612147671529) -->
     <skip />
     <string name="permdesc_sendSms" msgid="1946540351763502120">"Laat program toe om SMS-boodskappe te stuur. Kwaadwillige programme kan jou geld kos deur boodskappe sonder jou bevestiging te stuur."</string>
+    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <skip />
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <skip />
     <!-- no translation found for permlab_readSms (4085333708122372256) -->
     <skip />
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"Laat program toe om SMS-boodskappe te lees wat op jou tablet of SIM-kaart gestoor is. Kwaadwillige programme kan dalk jou vertroulike boodskappe lees."</string>
@@ -389,6 +392,8 @@
     <skip />
     <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
     <skip />
+    <string name="permlab_bindVpnService" msgid="4708596021161473255">"bind aan \'n VPN-diens"</string>
+    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"Laat die houer toe om aan die topvlak-koppelvlak van \'n VPN-diens te bind. Behoort nooit vir gewone programme nodig te wees nie."</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"bind aan \'n muurpapier"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"Stel die houer toe om aan die topvlak-koppelvlak van \'n muurpapier te bind. Behoort vir gewone programme nooit nodig te wees nie."</string>
     <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
@@ -467,19 +472,19 @@
     <skip />
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Laat \'n program toe om die kontak- (adres) data te wysig wat op jou tablet gestoor is. Kwaadwillige programme kan dit gebruik om jou kontakdata uit te vee of te wysig."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Laat \'n program toe om die kontakdata (adresse) te wysig wat op jou foon gestoor is. Kwaadwillige programme kan dit gebruik om jou kontakdata uit te vee of dit te wysig."</string>
-    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
+    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
     <skip />
-    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
+    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
     <skip />
-    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
+    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
     <skip />
-    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
+    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
     <skip />
-    <string name="permlab_readCalendar" msgid="6898987798303840534">"lees kalendergebeure"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"Laat \'n program toe om al die kalendergebeurtenisse te lees wat op jou tablet gestoor is. Kwaadwillige programme kan dit gebruik om jou kalendergebeurtenisse na ander mense te stuur."</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"Laat \'n program toe om al die kalendergebeurtenisse te lees wat op jou foon gestoor is. Kwaadwillige programme kan dit gebruik om jou kalendergebeurtenisse na ander mense te stuur."</string>
-    <string name="permlab_writeCalendar" msgid="3894879352594904361">"wysig of voeg kalendergebeurtenisse by en stuur e-pos aan gaste"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"Laat \'n program toe om gebeurtenisse op jou kalender te wysig of by te voeg, wat \'n e-pos na gaste kan stuur. Kwaadwillige programme kan dit gebruik om jou kalendergebeurtenisse uit te vee of te wysig of e-pos aan gaste te stuur."</string>
+    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"lees kalendergebeure"</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Laat \'n program toe om al die kalendergebeurtenisse te lees wat op jou tablet gestoor is. Kwaadwillige programme kan dit gebruik om jou kalendergebeurtenisse na ander mense te stuur."</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Laat \'n program toe om al die kalendergebeurtenisse te lees wat op jou tablet gestoor is. Kwaadwillige programme kan dit gebruik om jou kalendergebeurtenisse na ander mense te stuur."</string>
+    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"wysig of voeg kalendergebeurtenisse by en stuur e-pos aan gaste"</string>
+    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Laat \'n program toe om gebeurtenisse op jou kalender te wysig of by te voeg, wat \'n e-pos na gaste kan stuur. Kwaadwillige programme kan dit gebruik om jou kalendergebeurtenisse uit te vee of te wysig of e-pos aan gaste te stuur."</string>
     <!-- no translation found for permlab_accessMockLocation (8688334974036823330) -->
     <skip />
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Skep skynligging-bronne vir die toets. Kwaadwillige programme kan dit gebruik om die ligging en/of status te oorheers wat deur regteligging-bronne soos GPS of netwerkverskaffers opgehaal word."</string>
@@ -616,9 +621,9 @@
     <!-- no translation found for permlab_createNetworkSockets (9121633680349549585) -->
     <skip />
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"Laat \'n program toe om netwerksokke te skep."</string>
-    <!-- no translation found for permlab_writeApnSettings (7823599210086622545) -->
+    <!-- no translation found for permlab_writeApnSettings (505660159675751896) -->
     <skip />
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"Laat \'n program toe om die APN-instellings te wysig, soos die instaanbediener en poort van enige APN."</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"Laat \'n program toe om die APN-instellings te wysig, soos die instaanbediener en poort van enige APN."</string>
     <!-- no translation found for permlab_changeNetworkState (958884291454327309) -->
     <skip />
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"Laat \'n program toe om die status van netwerk-konnektiwiteit te verander."</string>
@@ -962,10 +967,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"Laat \'n program toe om die blaaier se geskiedenis of gestoorde boekmerke op die foon te wysig. Kwaadwillige programme kan dit gebruik om jou blaaier se data uit te vee of dit te wysig."</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"stel alarm in wekker"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"Laat die program toe om \'n alarm te stel in \'n geïnstalleerde wekkerprogram. Sommige wekkerprogramme sal dalk nie hierdie kenmerk implementeer nie."</string>
-    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
-    <skip />
-    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
-    <skip />
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"voeg stemboodskap by"</string>
+    <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Laat die program toe om boodskappe by jou stemboodskappe se inkassie te voeg."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Wysig blaaier se geoligging-toestemmings"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Laat \'n program toe om die blaaier se geoligging-toestemmings te wysig. Kwaadwillige programme kan dit gebruik om liggingsinligting na arbitrêre webwerwe te stuur."</string>
     <!-- no translation found for save_password_message (767344687139195790) -->
@@ -1113,9 +1116,7 @@
     <skip />
     <!-- no translation found for paste (5629880836805036433) -->
     <skip />
-    <string name="pasteDisabled" msgid="7259254654641456570">"Niks om te plak nie"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="replace" msgid="8333608224471746584">"Vervang"</string>
     <!-- no translation found for copyUrl (2538211579596067402) -->
     <skip />
     <string name="selectTextMode" msgid="6738556348861347240">"Kies teks..."</string>
@@ -1152,21 +1153,21 @@
     <skip />
     <!-- no translation found for noApplications (1691104391758345586) -->
     <skip />
-    <!-- no translation found for aerr_title (653922989522758100) -->
+    <string name="aerr_title" msgid="1905800560317137752"></string>
+    <!-- no translation found for aerr_application (7918612738900928051) -->
     <skip />
-    <string name="aerr_application" msgid="4683614104336409186">"Die program <xliff:g id="APPLICATION">%1$s</xliff:g> (proses <xliff:g id="PROCESS">%2$s</xliff:g>) het onverwags gestop. Probeer asseblief weer."</string>
-    <string name="aerr_process" msgid="1551785535966089511">"Die proses <xliff:g id="PROCESS">%1$s</xliff:g>het onverwags gestop. Probeer asseblief weer."</string>
-    <!-- no translation found for anr_title (3100070910664756057) -->
+    <!-- no translation found for aerr_process (3473655047134111582) -->
     <skip />
-    <!-- no translation found for anr_activity_application (3538242413112507636) -->
+    <string name="anr_title" msgid="4351948481459135709"></string>
+    <!-- no translation found for anr_activity_application (8339738283149696827) -->
     <skip />
-    <!-- no translation found for anr_activity_process (5420826626009561014) -->
+    <!-- no translation found for anr_activity_process (7018289416670457797) -->
     <skip />
-    <!-- no translation found for anr_application_process (4185842666452210193) -->
+    <!-- no translation found for anr_application_process (7208175830253210526) -->
     <skip />
-    <!-- no translation found for anr_process (1246866008169975783) -->
+    <!-- no translation found for anr_process (306819947562555821) -->
     <skip />
-    <!-- no translation found for force_close (3653416315450806396) -->
+    <!-- no translation found for force_close (8346072094521265605) -->
     <skip />
     <string name="report" msgid="4060218260984795706">"Verslag"</string>
     <!-- no translation found for wait (7147118217226317732) -->
@@ -1205,17 +1206,15 @@
     <string name="volume_notification" msgid="2422265656744276715">"Kennisgewing-volume"</string>
     <!-- no translation found for volume_unknown (1400219669770445902) -->
     <skip />
-    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
     <skip />
-    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
     <skip />
-    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
     <skip />
-    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
     <skip />
-    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
-    <skip />
-    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
     <skip />
     <!-- no translation found for ringtone_default (3789758980357696936) -->
     <skip />
@@ -1234,10 +1233,8 @@
     <item quantity="one" msgid="1634101450343277345">"Oop Wi-Fi-netwerke beskikbaar"</item>
     <item quantity="other" msgid="7915895323644292768">"Oop Wi-Fi-netwerke beskikbaar"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Kon nie aan Wi-Fikoppel nie"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"het \'n swak internetverbinding."</string>
     <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
     <skip />
     <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
@@ -1262,7 +1259,7 @@
     <skip />
     <!-- no translation found for sim_removed_title (6227712319223226185) -->
     <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
+    <!-- no translation found for sim_removed_message (2333164559970958645) -->
     <skip />
     <!-- no translation found for sim_done_button (827949989369963775) -->
     <skip />
@@ -1441,22 +1438,14 @@
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
     <skip />
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"gekontroleer"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"nie gekontroleer nie"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"gekies"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"nie gekies nie"</string>
+    <string name="switch_on" msgid="551417728476977311">"aan"</string>
+    <string name="switch_off" msgid="7249798614327155088">"af"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"gedruk"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"nie gedruk nie"</string>
     <!-- no translation found for action_bar_home_description (5293600496601490216) -->
     <skip />
     <!-- no translation found for action_bar_up_description (2237496562952152589) -->
@@ -1483,14 +1472,10 @@
     <skip />
     <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
     <skip />
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G-datalimiet oorskry"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G-datalimiet oorskry"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Mobiele datalimiet oorskry"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> meer as gespesifiseerde limiet"</string>
     <!-- no translation found for ssl_certificate (6510040486049237639) -->
     <skip />
     <!-- no translation found for ssl_certificate_is_valid (6825263250774569373) -->

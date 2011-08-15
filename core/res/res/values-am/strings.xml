@@ -155,8 +155,7 @@
     <string name="fcError" msgid="3327560126588500777">"የተያያዥ ችግር ወይም  ትክከል ያልሆነኮድ ባህሪ።"</string>
     <!-- no translation found for httpErrorOk (1191919378083472204) -->
     <skip />
-    <!-- no translation found for httpError (6603022914760066338) -->
-    <skip />
+    <string name="httpError" msgid="6603022914760066338">"የአውታረ መረብ ስህተት ተከስቷል።"</string>
     <!-- no translation found for httpErrorLookup (4517085806977851374) -->
     <skip />
     <!-- no translation found for httpErrorUnsupportedAuthScheme (2781440683514730227) -->
@@ -292,6 +291,10 @@
     <!-- no translation found for permlab_sendSms (5600830612147671529) -->
     <skip />
     <string name="permdesc_sendSms" msgid="1946540351763502120">"ተንኮል አዘል ትግበራዎች ያለእርስዎ ማረጋገጫ  ገንዘብ የሚያስወጣዎትንመልዕክቶች እየላኩ ነው።SMS መልዕክቶች ለመላክ ትግበራ ይፈቅዳል።"</string>
+    <!-- no translation found for permlab_sendSmsNoConfirmation (4781483105951730228) -->
+    <skip />
+    <!-- no translation found for permdesc_sendSmsNoConfirmation (4477752891276276168) -->
+    <skip />
     <!-- no translation found for permlab_readSms (4085333708122372256) -->
     <skip />
     <string name="permdesc_readSms" product="tablet" msgid="5836710350295631545">"ትግበራ በጡባዊዎ ወይም  SIM  ካርድዎ ላይ SMS  መልዕክቶችን ለማንበብ  ይፈቅዳል። ተንኮል አዘል ትግበራዎች ሚስጥራዊ መልዕክቶችዎን ሊያነቡ ይችላሉ።"</string>
@@ -389,6 +392,8 @@
     <skip />
     <!-- no translation found for permdesc_bindTextService (172508880651909350) -->
     <skip />
+    <string name="permlab_bindVpnService" msgid="4708596021161473255">"ለVPN አገልግሎት ተገዛ"</string>
+    <string name="permdesc_bindVpnService" msgid="6011554199384584151">"ያዡ ግቤት ሜተዱን ወደ ከፍተኛ-ደረጃ ልጣፍ ለመጠረዝ ይፈቅዳል። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <string name="permlab_bindWallpaper" msgid="8716400279937856462">"በልጣፍ ጠርዝ"</string>
     <string name="permdesc_bindWallpaper" msgid="5287754520361915347">"ያዡ ግቤት ሜተዱን ወደ ከፍተኛ-ደረጃ ልጣፍ ለመጠረዝ ይፈቅዳል። ለመደበኛ ትግበራዎች በፍፁም አያስፈልግም።"</string>
     <!-- no translation found for permlab_bindRemoteViews (5697987759897367099) -->
@@ -467,19 +472,19 @@
     <skip />
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"ትግበራ በጡባዊዎ ላይ የተከማቸውንዕውቂያ(አድራሻ) ውሂብ ለመቀየር ይፈቅዳል። ተንኮል አዘል ትግበራዎች ውሂብዎን ለማጥፋት ወይም ለመቀየር ይህንመጠቀም ይችላሉ።"</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"ትግበራ በስልክዎ ላይ የተከማቸውንዕውቂያ(አድራሻ) ሁሉ ውሂብ ለመቀየር ይፈቅዳል። ተንኮል አዘል ትግበራዎች ውሂብዎን ለማጥፋት ወይም ለመቀየር ይህንመጠቀም ይችላሉ።"</string>
-    <!-- no translation found for permlab_readProfile (2211941946684590103) -->
+    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
     <skip />
-    <!-- no translation found for permdesc_readProfile (4732942280141331352) -->
+    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
     <skip />
-    <!-- no translation found for permlab_writeProfile (6561668046361989220) -->
+    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
     <skip />
-    <!-- no translation found for permdesc_writeProfile (8040643023682531996) -->
+    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
     <skip />
-    <string name="permlab_readCalendar" msgid="6898987798303840534">"የቀን መቁጠሪያ ክስተቶችን አንበብ"</string>
-    <string name="permdesc_readCalendar" product="tablet" msgid="5905870265734599678">"ትግበራ በጡባዊዎ ላይ የተከማቹትንሁሉ ንም የቀን መቁጠሪያ ክስተቶች  ለማንበብ ይፈቅዳል። ተንኮል አዘል ትግበራዎች የቀን መቁጠሪያዎን ለሌላ ሰው ለመላክ ይህን መጠቀም ይችላሉ።"</string>
-    <string name="permdesc_readCalendar" product="default" msgid="5533029139652095734">"ትግበራ በስልክዎ ላይ የተከማቹትን የቀን መቁጠሪያ ክስተቶች ሁሉ ለማንበብ ይፈቅዳል። ተንኮል አዘል ትግበራዎች የቀን መቁጠሪያዎን ለሌላ ሰው ለመላክ ይህን መጠቀም ይችላሉ።"</string>
-    <string name="permlab_writeCalendar" msgid="3894879352594904361">"አክል ወይም የቀን መቁጠሪያ ክስተቶችን ቀይር እና ለ እንግዶች ኢሜይል ላክ"</string>
-    <string name="permdesc_writeCalendar" msgid="2988871373544154221">"ትግበራ በቀን መቁጠሪያዎ ላይ ያለን ክስተት፣ ለተጋባዦች ኢሜይል ሊልክ ይችላል፣ ለማከል እና ለመለወጥ ይፈቅዳል። ተንኮል አዘል ትግበራዎች ይህን በመጠቀም የካላንደርዎን ክስተቶች ለማጥፋት ወይም ለመቀየር ይጠቀማሉ ወይም ለተጋባዦች ኢመይል ይልካሉ።"</string>
+    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"የቀን መቁጠሪያ ክስተቶችን አንበብ"</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"ትግበራ በጡባዊዎ ላይ የተከማቹትንሁሉ ንም የቀን መቁጠሪያ ክስተቶች  ለማንበብ ይፈቅዳል። ተንኮል አዘል ትግበራዎች የቀን መቁጠሪያዎን ለሌላ ሰው ለመላክ ይህን መጠቀም ይችላሉ።"</string>
+    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"ትግበራ በጡባዊዎ ላይ የተከማቹትንሁሉ ንም የቀን መቁጠሪያ ክስተቶች  ለማንበብ ይፈቅዳል። ተንኮል አዘል ትግበራዎች የቀን መቁጠሪያዎን ለሌላ ሰው ለመላክ ይህን መጠቀም ይችላሉ።"</string>
+    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"አክል ወይም የቀን መቁጠሪያ ክስተቶችን ቀይር እና ለ እንግዶች ኢሜይል ላክ"</string>
+    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"ትግበራ በቀን መቁጠሪያዎ ላይ ያለን ክስተት፣ ለተጋባዦች ኢሜይል ሊልክ ይችላል፣ ለማከል እና ለመለወጥ ይፈቅዳል። ተንኮል አዘል ትግበራዎች ይህን በመጠቀም የካላንደርዎን ክስተቶች ለማጥፋት ወይም ለመቀየር ይጠቀማሉ ወይም ለተጋባዦች ኢመይል ይልካሉ።"</string>
     <!-- no translation found for permlab_accessMockLocation (8688334974036823330) -->
     <skip />
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"ለሙከራ አስቂኝ ሥፍራፍጠር። ተንኮል አዘል ትግበራዎች ሥፍራውን ለማገድ እና/ወይም በGPS  ወይም የአውታረ መረብ አቅራቢዎች የእውነተኛውን ሥፍራ ሁኔታ ይዘው ከተመለሱ መጠቀም ይችላሉ።"</string>
@@ -616,9 +621,9 @@
     <!-- no translation found for permlab_createNetworkSockets (9121633680349549585) -->
     <skip />
     <string name="permdesc_createNetworkSockets" msgid="4593339106921772192">"የአውታረመረብ ሶኬቶችን ለመፍጠር  ትግበራይፈቅዳል።"</string>
-    <!-- no translation found for permlab_writeApnSettings (7823599210086622545) -->
+    <!-- no translation found for permlab_writeApnSettings (505660159675751896) -->
     <skip />
-    <string name="permdesc_writeApnSettings" msgid="7443433457842966680">"ትግበራ እንደAPN ማንኛውም ወደቦች እና የእጅ አዙርለቀይር የAPN  ቅንብሮችን ይፈቅዳል።"</string>
+    <!-- outdated translation 7443433457842966680 -->     <string name="permdesc_writeApnSettings" msgid="2369786339323021771">"ትግበራ እንደAPN ማንኛውም ወደቦች እና የእጅ አዙርለቀይር የAPN  ቅንብሮችን ይፈቅዳል።"</string>
     <!-- no translation found for permlab_changeNetworkState (958884291454327309) -->
     <skip />
     <string name="permdesc_changeNetworkState" msgid="4199958910396387075">"ትግበራ የአውታረ መረብ ተያያዥነት ሁኔታ ለመለወጥ ይፈቅዳል።"</string>
@@ -962,10 +967,8 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="945571990357114950">"ትግበራ በስልክዎ ላይ የተከማቹትንታሪኮች እና ዕልባቶች ለመቀየር ይፈቅዳል። ተንኮል አዘል ትግበራዎች የቀን መቁጠሪያዎን ለማጥፋት ወይም ለመቀየር ይህን መጠቀም ይችላሉ።"</string>
     <string name="permlab_setAlarm" msgid="5924401328803615165">"በማንቂያ ሰዓት ውስጥ ማንቂያ አዘጋጅ"</string>
     <string name="permdesc_setAlarm" msgid="5966966598149875082">"ትግበራ በተጫነ የማንቂያ ሰዓት ትግበራ ማንቂያ ለማዘጋጀትይፈቅዳል። አንዳንድ የማንቂያ ሰዓት ትግበራዎች ይህን ገፅታ ላይተገብሩ ይችላሉ።"</string>
-    <!-- no translation found for permlab_addVoicemail (5525660026090959044) -->
-    <skip />
-    <!-- no translation found for permdesc_addVoicemail (4828507394878206682) -->
-    <skip />
+    <string name="permlab_addVoicemail" msgid="5525660026090959044">"የድምፅ መልዕክት አክል"</string>
+    <string name="permdesc_addVoicemail" msgid="4828507394878206682">"ትግበራ ወደ ድምፅ መልዕክት የገቢ መልዕክትዎ መልዕክቶች ለማከል ይፈቅዳል።"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"የአሳሽ ገፀ ሥፍራ ፍቃዶችን ቀይር"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"ትግበራ የአሳሹን ገፀ ሥፍራ ፈቃዶች ለመቀየር ይፈቅዳል። ተንኮል አዘል ትግበራዎች ይህን በመጠቀም የሥፍራ መረጃን ወደ ድረ ገፆች ለመላክ ይችላሉ።"</string>
     <!-- no translation found for save_password_message (767344687139195790) -->
@@ -1113,9 +1116,7 @@
     <skip />
     <!-- no translation found for paste (5629880836805036433) -->
     <skip />
-    <string name="pasteDisabled" msgid="7259254654641456570">"ምንም የሚለጠፍ የለም"</string>
-    <!-- no translation found for replace (8333608224471746584) -->
-    <skip />
+    <string name="replace" msgid="8333608224471746584">"ተካ"</string>
     <!-- no translation found for copyUrl (2538211579596067402) -->
     <skip />
     <string name="selectTextMode" msgid="6738556348861347240">"ፅሁፍ ምረጥ"</string>
@@ -1152,21 +1153,21 @@
     <skip />
     <!-- no translation found for noApplications (1691104391758345586) -->
     <skip />
-    <!-- no translation found for aerr_title (653922989522758100) -->
+    <string name="aerr_title" msgid="1905800560317137752"></string>
+    <!-- no translation found for aerr_application (7918612738900928051) -->
     <skip />
-    <string name="aerr_application" msgid="4683614104336409186">"የትግበራው <xliff:g id="APPLICATION">%1$s</xliff:g>( ሂደት<xliff:g id="PROCESS">%2$s</xliff:g>) ሳይጠበቅ ቆሟል። እባክዎ እንደገና ይሞክሩ።"</string>
-    <string name="aerr_process" msgid="1551785535966089511">"<xliff:g id="PROCESS">%1$s</xliff:g> ሂደቱ ሳይጠበቅ ቆምዋል። እባክዎ እንደገና ይሞክሩ።"</string>
-    <!-- no translation found for anr_title (3100070910664756057) -->
+    <!-- no translation found for aerr_process (3473655047134111582) -->
     <skip />
-    <!-- no translation found for anr_activity_application (3538242413112507636) -->
+    <string name="anr_title" msgid="4351948481459135709"></string>
+    <!-- no translation found for anr_activity_application (8339738283149696827) -->
     <skip />
-    <!-- no translation found for anr_activity_process (5420826626009561014) -->
+    <!-- no translation found for anr_activity_process (7018289416670457797) -->
     <skip />
-    <!-- no translation found for anr_application_process (4185842666452210193) -->
+    <!-- no translation found for anr_application_process (7208175830253210526) -->
     <skip />
-    <!-- no translation found for anr_process (1246866008169975783) -->
+    <!-- no translation found for anr_process (306819947562555821) -->
     <skip />
-    <!-- no translation found for force_close (3653416315450806396) -->
+    <!-- no translation found for force_close (8346072094521265605) -->
     <skip />
     <string name="report" msgid="4060218260984795706">"ሪፖርት"</string>
     <!-- no translation found for wait (7147118217226317732) -->
@@ -1205,17 +1206,15 @@
     <string name="volume_notification" msgid="2422265656744276715">"ማሳወቂያ ክፍልፍል"</string>
     <!-- no translation found for volume_unknown (1400219669770445902) -->
     <skip />
-    <!-- no translation found for volume_icon_description_bluetooth (1903463583678473070) -->
+    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
     <skip />
-    <!-- no translation found for volume_icon_description_ringer (4730973146425102943) -->
+    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
     <skip />
-    <!-- no translation found for volume_icon_description_incall (4245391921367914422) -->
+    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
     <skip />
-    <!-- no translation found for volume_icon_description_media (5376060645294131085) -->
+    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
     <skip />
-    <!-- no translation found for volume_icon_description_notification (373288343560012393) -->
-    <skip />
-    <!-- no translation found for volume_panel_more_description (4168104985675856835) -->
+    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
     <skip />
     <!-- no translation found for ringtone_default (3789758980357696936) -->
     <skip />
@@ -1234,10 +1233,8 @@
     <item quantity="one" msgid="1634101450343277345">"አውታረ መረብ ሲኖር Wi-Fi ክፈት"</item>
     <item quantity="other" msgid="7915895323644292768">"አውታረ መረቦች ሲኖሩ Wi-Fi ክፈት"</item>
   </plurals>
-    <!-- no translation found for wifi_watchdog_network_disabled (6398650124751302012) -->
-    <skip />
-    <!-- no translation found for wifi_watchdog_network_disabled_detailed (4659127251774069612) -->
-    <skip />
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"ወደ Wi-Fi ለማያያዝ አልተቻለም"</string>
+    <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"ደካማ የበይነ መረብ ተያያዥ አለው።"</string>
     <!-- no translation found for wifi_p2p_dialog_title (97611782659324517) -->
     <skip />
     <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
@@ -1262,7 +1259,7 @@
     <skip />
     <!-- no translation found for sim_removed_title (6227712319223226185) -->
     <skip />
-    <!-- no translation found for sim_removed_message (2064255102770489459) -->
+    <!-- no translation found for sim_removed_message (2333164559970958645) -->
     <skip />
     <!-- no translation found for sim_done_button (827949989369963775) -->
     <skip />
@@ -1441,22 +1438,14 @@
     <skip />
     <!-- no translation found for number_picker_decrement_button (2576606679160067262) -->
     <skip />
-    <!-- no translation found for checkbox_checked (7222044992652711167) -->
-    <skip />
-    <!-- no translation found for checkbox_not_checked (5174639551134444056) -->
-    <skip />
-    <!-- no translation found for radiobutton_selected (8603599808486581511) -->
-    <skip />
-    <!-- no translation found for radiobutton_not_selected (2908760184307722393) -->
-    <skip />
-    <!-- no translation found for switch_on (551417728476977311) -->
-    <skip />
-    <!-- no translation found for switch_off (7249798614327155088) -->
-    <skip />
-    <!-- no translation found for togglebutton_pressed (4180411746647422233) -->
-    <skip />
-    <!-- no translation found for togglebutton_not_pressed (4495147725636134425) -->
-    <skip />
+    <string name="checkbox_checked" msgid="7222044992652711167">"ታይቷል"</string>
+    <string name="checkbox_not_checked" msgid="5174639551134444056">"አልተፈተሸም"</string>
+    <string name="radiobutton_selected" msgid="8603599808486581511">"የተመረጠ"</string>
+    <string name="radiobutton_not_selected" msgid="2908760184307722393">"አልተመረጠም"</string>
+    <string name="switch_on" msgid="551417728476977311">"በ:"</string>
+    <string name="switch_off" msgid="7249798614327155088">"ውጪ"</string>
+    <string name="togglebutton_pressed" msgid="4180411746647422233">"ተጭኗል"</string>
+    <string name="togglebutton_not_pressed" msgid="4495147725636134425">"አልተጫነም።"</string>
     <!-- no translation found for action_bar_home_description (5293600496601490216) -->
     <skip />
     <!-- no translation found for action_bar_up_description (2237496562952152589) -->
@@ -1483,14 +1472,10 @@
     <skip />
     <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
     <skip />
-    <!-- no translation found for data_usage_3g_limit_snoozed_title (7026739121138005231) -->
-    <skip />
-    <!-- no translation found for data_usage_4g_limit_snoozed_title (1106562779311209039) -->
-    <skip />
-    <!-- no translation found for data_usage_mobile_limit_snoozed_title (279240572165412168) -->
-    <skip />
-    <!-- no translation found for data_usage_limit_snoozed_body (2932736326652880660) -->
-    <skip />
+    <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G የውሂብ ወሰን አልፏል"</string>
+    <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ውሂብ ወሰን አልፏል"</string>
+    <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"የተንቀሳቃሽ ውሂብ ወሰን አልፏል"</string>
+    <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> ከተወሰነለት በላይ"</string>
     <!-- no translation found for ssl_certificate (6510040486049237639) -->
     <skip />
     <!-- no translation found for ssl_certificate_is_valid (6825263250774569373) -->

@@ -25,8 +25,6 @@
     <string name="status_bar_please_disturb_button" msgid="3345398298841572813">"แสดงการแจ้งเตือน"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6561944127804037619">"นำออก"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="4906947311448880529">"ตรวจสอบ"</string>
-    <!-- no translation found for status_bar_date_formatter (7518819808535663629) -->
-    <skip />
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"ไม่มีการแจ้งเตือน"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ดำเนินอยู่"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"การแจ้งเตือน"</string>
@@ -62,8 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"ความเข้ากันได้ของการย่อ/ขยาย"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"สำหรับแอปพลิเคชันที่ออกแบบมาสำหรับหน้าจอขนาดเล็ก ตัวควบคุมการย่อ/ขยายจะปรากฏขึ้นข้างนาฬิกา"</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"บันทึกภาพหน้าจอในแกลเลอรีแล้ว"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"ไม่สามารถบันทึกภาพหน้าจอ ที่จัดเก็บข้อมูลภายนอกอาจมีการใช้งานอยู่"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"ตัวเลือกการถ่ายโอนไฟล์ USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ต่อเชื่อมเป็นโปรแกรมเล่นสื่อ (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ต่อเชื่อมเป็นกล้องถ่ายรูป (PTP)"</string>
@@ -71,8 +68,7 @@
     <string name="accessibility_back" msgid="567011538994429120">"ย้อนกลับ"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"หน้าแรก"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"เมนู"</string>
-    <!-- no translation found for accessibility_recent (3027675523629738534) -->
-    <skip />
+    <string name="accessibility_recent" msgid="3027675523629738534">"แอปพลิเคชันล่าสุด"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"ปุ่มสลับวิธีการป้อนข้อมูล"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"ปุ่มซูมที่ใช้งานร่วมกันได้"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"ซูมหน้าจอให้มีขนาดใหญ่ขึ้น"</string>
@@ -117,24 +113,14 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"เปิดใช้งาน TeleTypewriter อยู่"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"เสียงเรียกเข้าแบบสั่น"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"เสียงเรียกเข้าแบบปิดเสียง"</string>
-    <!-- no translation found for data_usage_disabled_dialog_3g_title (5257833881698644687) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_4g_title (4789143363492682629) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_mobile_title (1046047248844821202) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_title (2086815304858964954) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog (6524467913290900042) -->
-    <skip />
-    <!-- no translation found for data_usage_disabled_dialog_enable (7729772039208664606) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"ปิดใช้งานข้อมูล 2G-3G แล้ว"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"ปิดใช้งานข้อมูล 4G แล้ว"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"ปิดใช้งานข้อมูลมือถือแล้ว"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"ข้อมูลถูกปิดใช้งาน"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"ถึงขีดจำกัดการใช้ข้อมูลที่ระบุแล้ว"\n\n"การใช้ข้อมูลเพิ่มเติมอาจมีค่าใช้จ่ายที่เรียกเก็บโดยผู้ให้บริการ"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"เปิดใช้งานข้อมูลอีกครั้ง"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"ไม่มีอินเทอร์เน็ต"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"เชื่อมต่อ Wi-Fi แล้ว"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"กำลังค้นหา GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"ตำแหน่งที่กำหนดโดย GPS"</string>
 </resources>
