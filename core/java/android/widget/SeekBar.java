@@ -104,6 +104,7 @@ public class SeekBar extends AbsSeekBar {
     
     @Override
     void onStartTrackingTouch() {
+        super.onStartTrackingTouch();
         if (mOnSeekBarChangeListener != null) {
             mOnSeekBarChangeListener.onStartTrackingTouch(this);
         }
@@ -111,6 +112,7 @@ public class SeekBar extends AbsSeekBar {
     
     @Override
     void onStopTrackingTouch() {
+        super.onStopTrackingTouch();
         if (mOnSeekBarChangeListener != null) {
             mOnSeekBarChangeListener.onStopTrackingTouch(this);
         }
