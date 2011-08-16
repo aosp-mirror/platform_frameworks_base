@@ -22,6 +22,9 @@
 
 using namespace android;
 
+static nsecs_t sStartTime = 0;
+
+
 int receiver(int fd, int events, void* data)
 {
     sp<SensorEventQueue> q((SensorEventQueue*)data);
@@ -32,7 +35,7 @@ int receiver(int fd, int events, void* data)
 
     while ((n = q->read(buffer, 8)) > 0) {
         for (int i=0 ; i<n ; i++) {
-            if (buffer[i].type == Sensor::TYPE_GYROSCOPE) {
+            if (buffer[i].type == Sensor::TYPE_ACCELEROMETER) {
                 printf("time=%lld, value=<%5.1f,%5.1f,%5.1f>\n",
                         buffer[i].timestamp,
                         buffer[i].acceleration.x,
@@ -43,9 +46,11 @@ int receiver(int fd, int events, void* data)
             if (oldTimeStamp) {
                 float t = float(buffer[i].timestamp - oldTimeStamp) / s2ns(1);
                 printf("%f ms (%f Hz)\n", t*1000, 1.0/t);
+            } else {
+                float t = float(buffer[i].timestamp - sStartTime) / s2ns(1);
+                printf("first event: %f ms\n", t*1000);
             }
             oldTimeStamp = buffer[i].timestamp;
-
         }
     }
     if (n<0 && n != -EAGAIN) {
@@ -66,12 +71,15 @@ int main(int argc, char** argv)
     sp<SensorEventQueue> q = mgr.createEventQueue();
     printf("queue=%p\n", q.get());
 
-    Sensor const* accelerometer = mgr.getDefaultSensor(Sensor::TYPE_GYROSCOPE);
+    Sensor const* accelerometer = mgr.getDefaultSensor(Sensor::TYPE_ACCELEROMETER);
     printf("accelerometer=%p (%s)\n",
             accelerometer, accelerometer->getName().string());
+
+    sStartTime = systemTime();
+
     q->enableSensor(accelerometer);
 
-    q->setEventRate(accelerometer, ms2ns(10));
+    q->setEventRate(accelerometer, ms2ns(200));
 
     sp<Looper> loop = new Looper(false);
     loop->addFd(q->getFd(), 0, ALOOPER_EVENT_INPUT, receiver, q.get());
