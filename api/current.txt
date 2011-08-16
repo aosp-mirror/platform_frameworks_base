@@ -23471,6 +23471,7 @@ package android.view {
     method public abstract void setTitleColor(int);
     method public void setType(int);
     method public void setUiOptions(int);
+    method public void setUiOptions(int, int);
     method public abstract void setVolumeControlStream(int);
     method public void setWindowAnimations(int);
     method public void setWindowManager(android.view.WindowManager, android.os.IBinder, java.lang.String);
