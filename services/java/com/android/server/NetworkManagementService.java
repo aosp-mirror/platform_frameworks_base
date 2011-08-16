@@ -68,7 +68,7 @@ import libcore.io.IoUtils;
 /**
  * @hide
  */
-class NetworkManagementService extends INetworkManagementService.Stub {
+class NetworkManagementService extends INetworkManagementService.Stub implements Watchdog.Monitor {
     private static final String TAG = "NetworkManagementService";
     private static final boolean DBG = false;
     private static final String NETD_TAG = "NetdConnector";
@@ -139,7 +139,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     /** Set of UIDs with active reject rules. */
     private SparseBooleanArray mUidRejectOnQuota = new SparseBooleanArray();
 
-    private boolean mBandwidthControlEnabled;
+    private volatile boolean mBandwidthControlEnabled;
 
     /**
      * Constructs a new NetworkManagementService instance
@@ -162,6 +162,9 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         mConnector = new NativeDaemonConnector(
                 new NetdCallbackReceiver(), "netd", 10, NETD_TAG);
         mThread = new Thread(mConnector, NETD_TAG);
+
+        // Add ourself to the Watchdog monitors.
+        Watchdog.getInstance().addMonitor(this);
     }
 
     public static NetworkManagementService create(Context context) throws InterruptedException {
@@ -185,14 +188,12 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     public void systemReady() {
-
         // only enable bandwidth control when support exists, and requested by
         // system setting.
         final boolean hasKernelSupport = new File("/proc/net/xt_qtaguid/ctrl").exists();
         final boolean shouldEnable =
                 Settings.Secure.getInt(mContext.getContentResolver(), NETSTATS_ENABLED, 1) != 0;
 
-        mBandwidthControlEnabled = false;
         if (hasKernelSupport && shouldEnable) {
             Slog.d(TAG, "enabling bandwidth control");
             try {
@@ -288,7 +289,7 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     /**
      * Let us know the daemon is connected
      */
-    protected void onConnected() {
+    protected void onDaemonConnected() {
         if (DBG) Slog.d(TAG, "onConnected");
         mConnectedSignal.countDown();
     }
@@ -299,13 +300,12 @@ class NetworkManagementService extends INetworkManagementService.Stub {
     //
 
     class NetdCallbackReceiver implements INativeDaemonConnectorCallbacks {
+        /** {@inheritDoc} */
         public void onDaemonConnected() {
-            NetworkManagementService.this.onConnected();
-            new Thread() {
-                public void run() {
-                }
-            }.start();
+            NetworkManagementService.this.onDaemonConnected();
         }
+
+        /** {@inheritDoc} */
         public boolean onEvent(int code, String raw, String[] cooked) {
             switch (code) {
             case NetdResponseCode.InterfaceChange:
@@ -1554,6 +1554,13 @@ class NetworkManagementService extends INetworkManagementService.Stub {
         } catch (NativeDaemonConnectorException e) {
             throw new IllegalStateException(
                     "Error communicating with native daemon to flush interface " + iface, e);
+        }
+    }
+
+    /** {@inheritDoc} */
+    public void monitor() {
+        if (mConnector != null) {
+            mConnector.monitor();
         }
     }
 }
