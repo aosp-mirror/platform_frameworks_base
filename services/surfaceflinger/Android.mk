@@ -5,6 +5,7 @@ LOCAL_SRC_FILES:= \
     Layer.cpp 								\
     LayerBase.cpp 							\
     LayerDim.cpp 							\
+    DdmConnection.cpp						\
     DisplayHardware/DisplayHardware.cpp 	\
     DisplayHardware/DisplayHardwareBase.cpp \
     DisplayHardware/HWComposer.cpp 			\
@@ -35,6 +36,9 @@ LOCAL_SHARED_LIBRARIES := \
 	libbinder \
 	libui \
 	libgui
+
+# this is only needed for DDMS debugging
+LOCAL_SHARED_LIBRARIES += libdvm libandroid_runtime
 
 LOCAL_C_INCLUDES := \
 	$(call include-path-for, corecg graphics)
