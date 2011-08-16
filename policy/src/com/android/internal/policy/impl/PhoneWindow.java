@@ -235,6 +235,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     }
 
     @Override
+    public void setUiOptions(int uiOptions, int mask) {
+        mUiOptions = (mUiOptions & ~mask) | (uiOptions & mask);
+    }
+
+    @Override
     public void setContentView(int layoutResID) {
         if (mContentParent == null) {
             installDecor();

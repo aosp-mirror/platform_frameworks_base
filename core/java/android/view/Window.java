@@ -1219,4 +1219,12 @@ public abstract class Window {
      * @param uiOptions Flags specifying extra options for this window.
      */
     public void setUiOptions(int uiOptions) { }
+
+    /**
+     * Set extra options that will influence the UI for this window.
+     * Only the bits filtered by mask will be modified.
+     * @param uiOptions Flags specifying extra options for this window.
+     * @param mask Flags specifying which options should be modified. Others will remain unchanged.
+     */
+    public void setUiOptions(int uiOptions, int mask) { }
 }
