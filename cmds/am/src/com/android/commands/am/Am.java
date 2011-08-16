@@ -28,6 +28,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
 import android.content.Intent;
+import android.content.pm.IPackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
@@ -44,8 +46,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
 
 public class Am {
 
@@ -56,6 +58,7 @@ public class Am {
 
     private boolean mDebugOption = false;
     private boolean mWaitOption = false;
+    private boolean mStopOption = false;
 
     private String mProfileFile;
     private boolean mProfileAutoStop;
@@ -77,7 +80,7 @@ public class Am {
             showUsage();
             System.err.println("Error: " + e.getMessage());
         } catch (Exception e) {
-            System.err.println(e.toString());
+            e.printStackTrace(System.err);
             System.exit(1);
         }
     }
@@ -129,6 +132,8 @@ public class Am {
 
         mDebugOption = false;
         mWaitOption = false;
+        mStopOption = false;
+        mProfileFile = null;
         Uri data = null;
         String type = null;
 
@@ -258,6 +263,8 @@ public class Am {
             } else if (opt.equals("--start-profiler")) {
                 mProfileFile = nextArgRequired();
                 mProfileAutoStop = false;
+            } else if (opt.equals("-S")) {
+                mStopOption = true;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -266,23 +273,43 @@ public class Am {
         }
         intent.setDataAndType(data, type);
 
-        String uri = nextArg();
-        if (uri != null) {
-            Intent oldIntent = intent;
-            intent = Intent.parseUri(uri, 0);
-            if (oldIntent.getAction() != null) {
-                intent.setAction(oldIntent.getAction());
+        String arg = nextArg();
+        if (arg != null) {
+            Intent baseIntent;
+            if (arg.indexOf(':') >= 0) {
+                // The argument is a URI.  Fully parse it, and use that result
+                // to fill in any data not specified so far.
+                baseIntent = Intent.parseUri(arg, Intent.URI_INTENT_SCHEME);
+            } else if (arg.indexOf('/') >= 0) {
+                // The argument is a component name.  Build an Intent to launch
+                // it.
+                baseIntent = new Intent(Intent.ACTION_MAIN);
+                baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                baseIntent.setComponent(ComponentName.unflattenFromString(arg));
+            } else {
+                // Assume the argument is a package name.
+                baseIntent = new Intent(Intent.ACTION_MAIN);
+                baseIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                baseIntent.setPackage(arg);
             }
-            if (oldIntent.getData() != null || oldIntent.getType() != null) {
-                intent.setDataAndType(oldIntent.getData(), oldIntent.getType());
-            }
-            Set cats = oldIntent.getCategories();
-            if (cats != null) {
-                Iterator it = cats.iterator();
-                while (it.hasNext()) {
-                    intent.addCategory((String)it.next());
+            Bundle extras = intent.getExtras();
+            intent.replaceExtras((Bundle)null);
+            Bundle uriExtras = baseIntent.getExtras();
+            baseIntent.replaceExtras((Bundle)null);
+            if (intent.getAction() != null && baseIntent.getCategories() != null) {
+                HashSet<String> cats = new HashSet<String>(baseIntent.getCategories());
+                for (String c : cats) {
+                    baseIntent.removeCategory(c);
                 }
             }
+            intent.fillIn(baseIntent, Intent.FILL_IN_COMPONENT);
+            if (extras == null) {
+                extras = uriExtras;
+            } else if (uriExtras != null) {
+                uriExtras.putAll(extras);
+                extras = uriExtras;
+            }
+            intent.replaceExtras(extras);
             hasIntentInfo = true;
         }
 
@@ -301,6 +328,41 @@ public class Am {
 
     private void runStart() throws Exception {
         Intent intent = makeIntent();
+
+        String mimeType = intent.getType();
+        if (mimeType == null && intent.getData() != null
+                && "content".equals(intent.getData().getScheme())) {
+            mimeType = mAm.getProviderMimeType(intent.getData());
+        }
+
+        if (mStopOption) {
+            String packageName;
+            if (intent.getComponent() != null) {
+                packageName = intent.getComponent().getPackageName();
+            } else {
+                IPackageManager pm = IPackageManager.Stub.asInterface(
+                        ServiceManager.getService("package"));
+                if (pm == null) {
+                    System.err.println("Error: Package manager not running; aborting");
+                    return;
+                }
+                List<ResolveInfo> activities = pm.queryIntentActivities(intent, mimeType, 0);
+                if (activities == null || activities.size() <= 0) {
+                    System.err.println("Error: Intent does not match any activities: "
+                            + intent);
+                    return;
+                } else if (activities.size() > 1) {
+                    System.err.println("Error: Intent matches multiple activities; can't stop: "
+                            + intent);
+                    return;
+                }
+                packageName = activities.get(0).activityInfo.packageName;
+            }
+            System.out.println("Stopping: " + packageName);
+            mAm.forceStopPackage(packageName);
+            Thread.sleep(250);
+        }
+
         System.out.println("Starting: " + intent);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
@@ -319,16 +381,15 @@ public class Am {
             }
         }
 
-        // XXX should do something to determine the MIME type.
         IActivityManager.WaitResult result = null;
         int res;
         if (mWaitOption) {
-            result = mAm.startActivityAndWait(null, intent, intent.getType(),
+            result = mAm.startActivityAndWait(null, intent, mimeType,
                         null, 0, null, null, 0, false, mDebugOption,
                         mProfileFile, fd, mProfileAutoStop);
             res = result.result;
         } else {
-            res = mAm.startActivity(null, intent, intent.getType(),
+            res = mAm.startActivity(null, intent, mimeType,
                     null, 0, null, null, 0, false, mDebugOption,
                     mProfileFile, fd, mProfileAutoStop);
         }
@@ -1103,7 +1164,7 @@ public class Am {
     private static void showUsage() {
         System.err.println(
                 "usage: am [subcommand] [options]\n" +
-                "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>] <INTENT>\n" +
+                "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>] [-S] <INTENT>\n" +
                 "       am startservice <INTENT>\n" +
                 "       am force-stop <PACKAGE>\n" +
                 "       am broadcast <INTENT>\n" +
@@ -1121,6 +1182,7 @@ public class Am {
                 "    -W: wait for launch to complete\n" +
                 "    --start-profiler <FILE>: start profiler and send results to <FILE>\n" +
                 "    -P <FILE>: like above, but profiling stops when app goes idle\n" +
+                "    -S: force stop the target app before starting the activity\n" +
                 "\n" +
                 "am startservice: start a Service.\n" +
                 "\n" +
@@ -1175,7 +1237,7 @@ public class Am {
                 "    [--activity-single-top] [--activity-clear-task]\n" +
                 "    [--activity-task-on-home]\n" +
                 "    [--receiver-registered-only] [--receiver-replace-pending]\n" +
-                "    [<URI>]\n"
+                "    [<URI> | <PACKAGE> | <COMPONENT>]\n"
                 );
     }
 }
