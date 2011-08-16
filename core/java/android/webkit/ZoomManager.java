@@ -709,10 +709,14 @@ class ZoomManager {
 
         final WebSettings settings = mWebView.getSettings();
         final PackageManager pm = context.getPackageManager();
-        mSupportMultiTouch = pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)
+        mSupportMultiTouch = 
+                (pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH)
+                 || pm.hasSystemFeature(PackageManager.FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT))
                 && settings.supportZoom() && settings.getBuiltInZoomControls();
-        mAllowPanAndScale = pm.hasSystemFeature(
-                PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT);
+        mAllowPanAndScale =
+                pm.hasSystemFeature(PackageManager.FEATURE_TOUCHSCREEN_MULTITOUCH_DISTINCT)
+                || pm.hasSystemFeature(PackageManager.FEATURE_FAKETOUCH_MULTITOUCH_DISTINCT);
+
         if (mSupportMultiTouch && (mScaleDetector == null)) {
             mScaleDetector = new ScaleGestureDetector(context, new ScaleDetectorListener());
         } else if (!mSupportMultiTouch && (mScaleDetector != null)) {
