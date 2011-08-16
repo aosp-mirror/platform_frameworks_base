@@ -637,6 +637,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     private boolean mIsAttached;
 
     /**
+     * Track the item count from the last time we handled a data change.
+     */
+    private int mLastHandledItemCount;
+
+    /**
      * Interface definition for a callback to be invoked when the list or grid
      * has been scrolled.
      */
@@ -1829,10 +1834,10 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
         // Check if our previous measured size was at a point where we should scroll later.
         if (mTranscriptMode == TRANSCRIPT_MODE_NORMAL) {
             final int childCount = getChildCount();
-            final int listBottom = getBottom() - getPaddingBottom();
+            final int listBottom = getHeight() - getPaddingBottom();
             final View lastChild = getChildAt(childCount - 1);
             final int lastBottom = lastChild != null ? lastChild.getBottom() : listBottom;
-            mForceTranscriptScroll = mFirstPosition + childCount >= mOldItemCount &&
+            mForceTranscriptScroll = mFirstPosition + childCount >= mLastHandledItemCount &&
                     lastBottom <= listBottom;
         }
     }
@@ -4744,6 +4749,8 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
     @Override
     protected void handleDataChanged() {
         int count = mItemCount;
+        int lastHandledItemCount = mLastHandledItemCount;
+        mLastHandledItemCount = mItemCount;
         if (count > 0) {
 
             int newPos;
@@ -4765,10 +4772,11 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                         return;
                     }
                     final int childCount = getChildCount();
-                    final int listBottom = getBottom() - getPaddingBottom();
+                    final int listBottom = getHeight() - getPaddingBottom();
                     final View lastChild = getChildAt(childCount - 1);
                     final int lastBottom = lastChild != null ? lastChild.getBottom() : listBottom;
-                    if (mFirstPosition + childCount >= mOldItemCount && lastBottom <= listBottom) {
+                    if (mFirstPosition + childCount >= lastHandledItemCount &&
+                            lastBottom <= listBottom) {
                         mLayoutMode = LAYOUT_FORCE_BOTTOM;
                         return;
                     }
