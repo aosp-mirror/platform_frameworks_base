@@ -104,6 +104,7 @@ $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framew
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/core/java/android/nfc)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/APPS/SystemUI_intermediates)
 $(call add-clean-step, rm -rf $(OUT_DIR)/target/common/R/com/android/systemui/R.java)
+$(call add-clean-step, rm -rf $(OUT_DIR)/target/common/obj/JAVA_LIBRARIES/framework_intermediates/src/media/java/android/media/IAudioService.P)
 # ************************************************
 # NEWER CLEAN STEPS MUST BE AT THE END OF THE LIST
 # ************************************************

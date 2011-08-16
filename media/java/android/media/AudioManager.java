@@ -21,6 +21,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.content.ComponentName;
 import android.content.Context;
 import android.database.ContentObserver;
+import android.graphics.Bitmap;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -1715,29 +1716,103 @@ public class AudioManager {
     }
 
     /**
+     * Acts as a proxy between AudioService and the RemoteControlClient
+     */
+    private IRemoteControlClientDispatcher mRcClientDispatcher =
+            new IRemoteControlClientDispatcher.Stub() {
+
+        public String getMetadataStringForClient(String clientName, int field) {
+            RemoteControlClient realClient;
+            synchronized(mRcClientMap) {
+                realClient = mRcClientMap.get(clientName);
+            }
+            if (realClient != null) {
+                return realClient.getMetadataString(field);
+            } else {
+                return null;
+            }
+        }
+
+        public int getPlaybackStateForClient(String clientName) {
+            RemoteControlClient realClient;
+            synchronized(mRcClientMap) {
+                realClient = mRcClientMap.get(clientName);
+            }
+            if (realClient != null) {
+                return realClient.getPlaybackState();
+            } else {
+                return 0;
+            }
+        }
+
+        public int getTransportControlFlagsForClient(String clientName) {
+            RemoteControlClient realClient;
+            synchronized(mRcClientMap) {
+                realClient = mRcClientMap.get(clientName);
+            }
+            if (realClient != null) {
+                return realClient.getTransportControlFlags();
+            } else {
+                return 0;
+            }
+        }
+
+        public Bitmap getAlbumArtForClient(String clientName, int maxWidth, int maxHeight) {
+            RemoteControlClient realClient;
+            synchronized(mRcClientMap) {
+                realClient = mRcClientMap.get(clientName);
+            }
+            if (realClient != null) {
+                return realClient.getAlbumArt(maxWidth, maxHeight);
+            } else {
+                return null;
+            }
+        }
+    };
+
+    private HashMap<String, RemoteControlClient> mRcClientMap =
+            new HashMap<String, RemoteControlClient>();
+
+    private String getIdForRcClient(RemoteControlClient client) {
+        // client is guaranteed to be non-null
+        return client.toString();
+    }
+
+    /**
      * @hide
-     * Registers the remote control client for providing information to display on the remotes.
+     * Registers the remote control client for providing information to display on the remote
+     * controls.
      * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
      *      that will receive the media button intent, and associated with the remote control
      *      client. This method has no effect if
      *      {@link #registerMediaButtonEventReceiver(ComponentName)} hasn't been called
      *      with the same eventReceiver, or if
      *      {@link #unregisterMediaButtonEventReceiver(ComponentName)} has been called.
-     * @param rcClient the client associated with the event receiver, responsible for providing
-     *      the information to display on the remote control.
+     * @param rcClient the remote control client associated with the event receiver, responsible
+     *      for providing the information to display on the remote control.
      */
     public void registerRemoteControlClient(ComponentName eventReceiver,
-            IRemoteControlClient rcClient) {
-        if (eventReceiver == null) {
+            RemoteControlClient rcClient) {
+        if ((eventReceiver == null) || (rcClient == null)) {
             return;
+        }
+        String clientKey = getIdForRcClient(rcClient);
+        synchronized(mRcClientMap) {
+            if (mRcClientMap.containsKey(clientKey)) {
+                return;
+            }
+            mRcClientMap.put(clientKey, rcClient);
         }
         IAudioService service = getService();
         try {
-            service.registerRemoteControlClient(eventReceiver, rcClient,
+            service.registerRemoteControlClient(eventReceiver, mRcClientDispatcher, clientKey,
                     // used to match media button event receiver and audio focus
                     mContext.getPackageName());
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in registerRemoteControlClient"+e);
+            synchronized(mRcClientMap) {
+                mRcClientMap.remove(clientKey);
+            }
         }
     }
 
@@ -1748,17 +1823,28 @@ public class AudioManager {
      * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
      *      that receives the media button intent, and associated with the remote control
      *      client.
-     * @see #registerRemoteControlClient(ComponentName)
-
+     * @param rcClient the remote control client to unregister
+     * @see #registerRemoteControlClient(ComponentName, RemoteControlClient)
      */
-    public void unregisterRemoteControlClient(ComponentName eventReceiver) {
-        if (eventReceiver == null) {
+    public void unregisterRemoteControlClient(ComponentName eventReceiver,
+            RemoteControlClient rcClient) {
+        if ((eventReceiver == null) || (rcClient == null)) {
             return;
         }
         IAudioService service = getService();
         try {
-            // unregistering a IRemoteControlClient is equivalent to setting it to null
-            service.registerRemoteControlClient(eventReceiver, null, mContext.getPackageName());
+            // remove locally
+            boolean unregister = true;
+            synchronized(mRcClientMap) {
+                if (mRcClientMap.remove(getIdForRcClient(rcClient)) == null) {
+                    unregister = false;
+                }
+            }
+            if (unregister) {
+                // unregistering a RemoteControlClient is equivalent to setting it to null
+                service.registerRemoteControlClient(eventReceiver, null, null,
+                        mContext.getPackageName());
+            }
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in unregisterRemoteControlClient"+e);
         }
@@ -1767,175 +1853,21 @@ public class AudioManager {
     /**
      * @hide
      * Returns the current remote control client.
-     * @param rcClientId the counter value that matches the extra
-     *     {@link AudioManager#EXTRA_REMOTE_CONTROL_CLIENT} in the
+     * @param rcClientId the generation counter that matches the extra
+     *     {@link AudioManager#EXTRA_REMOTE_CONTROL_CLIENT_GENERATION} in the
      *     {@link AudioManager#REMOTE_CONTROL_CLIENT_CHANGED} event
-     * @return the current IRemoteControlClient from which information to display on the remote
+     * @return the current RemoteControlClient from which information to display on the remote
      *     control can be retrieved, or null if rcClientId doesn't match the current generation
      *     counter.
      */
-    public IRemoteControlClient getRemoteControlClient(int rcClientId) {
+    public IRemoteControlClientDispatcher getRemoteControlClientDispatcher(int rcClientId) {
         IAudioService service = getService();
         try {
-            return service.getRemoteControlClient(rcClientId);
+            return service.getRemoteControlClientDispatcher(rcClientId);
         } catch (RemoteException e) {
             Log.e(TAG, "Dead object in getRemoteControlClient "+e);
             return null;
         }
-    }
-
-    /**
-     * @hide
-     * Definitions of constants to be used in {@link android.media.IRemoteControlClient}.
-     */
-    public final class RemoteControlParameters {
-        /**
-         * Playback state of an IRemoteControlClient which is stopped.
-         *
-         * @see android.media.IRemoteControlClient#getPlaybackState()
-         */
-        public final static int PLAYSTATE_STOPPED            = 1;
-        /**
-         * Playback state of an IRemoteControlClient which is paused.
-         *
-         * @see android.media.IRemoteControlClient#getPlaybackState()
-         */
-        public final static int PLAYSTATE_PAUSED             = 2;
-        /**
-         * Playback state of an IRemoteControlClient which is playing media.
-         *
-         * @see android.media.IRemoteControlClient#getPlaybackState()
-         */
-        public final static int PLAYSTATE_PLAYING            = 3;
-        /**
-         * Playback state of an IRemoteControlClient which is fast forwarding in the media
-         *    it is currently playing.
-         *
-         * @see android.media.IRemoteControlClient#getPlaybackState()
-         */
-        public final static int PLAYSTATE_FAST_FORWARDING    = 4;
-        /**
-         * Playback state of an IRemoteControlClient which is fast rewinding in the media
-         *    it is currently playing.
-         *
-         * @see android.media.IRemoteControlClient#getPlaybackState()
-         */
-        public final static int PLAYSTATE_REWINDING          = 5;
-        /**
-         * Playback state of an IRemoteControlClient which is skipping to the next
-         *    logical chapter (such as a song in a playlist) in the media it is currently playing.
-         *
-         * @see android.media.IRemoteControlClient#getPlaybackState()
-         */
-        public final static int PLAYSTATE_SKIPPING_FORWARDS  = 6;
-        /**
-         * Playback state of an IRemoteControlClient which is skipping back to the previous
-         *    logical chapter (such as a song in a playlist) in the media it is currently playing.
-         *
-         * @see android.media.IRemoteControlClient#getPlaybackState()
-         */
-        public final static int PLAYSTATE_SKIPPING_BACKWARDS = 7;
-        /**
-         * Playback state of an IRemoteControlClient which is buffering data to play before it can
-         *    start or resume playback.
-         *
-         * @see android.media.IRemoteControlClient#getPlaybackState()
-         */
-        public final static int PLAYSTATE_BUFFERING          = 8;
-        /**
-         * Playback state of an IRemoteControlClient which cannot perform any playback related
-         *    operation because of an internal error. Examples of such situations are no network
-         *    connectivity when attempting to stream data from a server, or expired user credentials
-         *    when trying to play subscription-based content.
-         *
-         * @see android.media.IRemoteControlClient#getPlaybackState()
-         */
-        public final static int PLAYSTATE_ERROR              = 9;
-
-        /**
-         * Flag indicating an IRemoteControlClient makes use of the "previous" media key.
-         *
-         * @see android.media.IRemoteControlClient#getTransportControlFlags()
-         * @see android.view.KeyEvent#KEYCODE_MEDIA_PREVIOUS
-         */
-        public final static int FLAG_KEY_MEDIA_PREVIOUS = 1 << 0;
-        /**
-         * Flag indicating an IRemoteControlClient makes use of the "rewing" media key.
-         *
-         * @see android.media.IRemoteControlClient#getTransportControlFlags()
-         * @see android.view.KeyEvent#KEYCODE_MEDIA_REWIND
-         */
-        public final static int FLAG_KEY_MEDIA_REWIND = 1 << 1;
-        /**
-         * Flag indicating an IRemoteControlClient makes use of the "play" media key.
-         *
-         * @see android.media.IRemoteControlClient#getTransportControlFlags()
-         * @see android.view.KeyEvent#KEYCODE_MEDIA_PLAY
-         */
-        public final static int FLAG_KEY_MEDIA_PLAY = 1 << 2;
-        /**
-         * Flag indicating an IRemoteControlClient makes use of the "play/pause" media key.
-         *
-         * @see android.media.IRemoteControlClient#getTransportControlFlags()
-         * @see android.view.KeyEvent#KEYCODE_MEDIA_PLAY_PAUSE
-         */
-        public final static int FLAG_KEY_MEDIA_PLAY_PAUSE = 1 << 3;
-        /**
-         * Flag indicating an IRemoteControlClient makes use of the "pause" media key.
-         *
-         * @see android.media.IRemoteControlClient#getTransportControlFlags()
-         * @see android.view.KeyEvent#KEYCODE_MEDIA_PAUSE
-         */
-        public final static int FLAG_KEY_MEDIA_PAUSE = 1 << 4;
-        /**
-         * Flag indicating an IRemoteControlClient makes use of the "stop" media key.
-         *
-         * @see android.media.IRemoteControlClient#getTransportControlFlags()
-         * @see android.view.KeyEvent#KEYCODE_MEDIA_STOP
-         */
-        public final static int FLAG_KEY_MEDIA_STOP = 1 << 5;
-        /**
-         * Flag indicating an IRemoteControlClient makes use of the "fast forward" media key.
-         *
-         * @see android.media.IRemoteControlClient#getTransportControlFlags()
-         * @see android.view.KeyEvent#KEYCODE_MEDIA_FAST_FORWARD
-         */
-        public final static int FLAG_KEY_MEDIA_FAST_FORWARD = 1 << 6;
-        /**
-         * Flag indicating an IRemoteControlClient makes use of the "next" media key.
-         *
-         * @see android.media.IRemoteControlClient#getTransportControlFlags()
-         * @see android.view.KeyEvent#KEYCODE_MEDIA_NEXT
-         */
-        public final static int FLAG_KEY_MEDIA_NEXT = 1 << 7;
-
-        /**
-         * Flag used to signal that the metadata exposed by the IRemoteControlClient has changed.
-         *
-         * @see #notifyRemoteControlInformationChanged(ComponentName, int)
-         */
-        public final static int FLAG_INFORMATION_CHANGED_METADATA = 1 << 0;
-        /**
-         * Flag used to signal that the transport control buttons supported by the
-         * IRemoteControlClient have changed.
-         * This can for instance happen when playback is at the end of a playlist, and the "next"
-         * operation is not supported anymore.
-         *
-         * @see #notifyRemoteControlInformationChanged(ComponentName, int)
-         */
-        public final static int FLAG_INFORMATION_CHANGED_KEY_MEDIA = 1 << 1;
-        /**
-         * Flag used to signal that the playback state of the IRemoteControlClient has changed.
-         *
-         * @see #notifyRemoteControlInformationChanged(ComponentName, int)
-         */
-        public final static int FLAG_INFORMATION_CHANGED_PLAYSTATE = 1 << 2;
-        /**
-         * Flag used to signal that the album art for the IRemoteControlClient has changed.
-         *
-         * @see #notifyRemoteControlInformationChanged(ComponentName, int)
-         */
-        public final static int FLAG_INFORMATION_CHANGED_ALBUM_ART = 1 << 3;
     }
 
     /**
@@ -1952,16 +1884,27 @@ public class AudioManager {
 
     /**
      * @hide
-     * The IRemoteControlClient monotonically increasing generation counter.
+     * The IRemoteControlClientDispatcher monotonically increasing generation counter.
      *
      * @see #REMOTE_CONTROL_CLIENT_CHANGED_ACTION
      */
-    public static final String EXTRA_REMOTE_CONTROL_CLIENT =
-            "android.media.EXTRA_REMOTE_CONTROL_CLIENT";
+    public static final String EXTRA_REMOTE_CONTROL_CLIENT_GENERATION =
+            "android.media.EXTRA_REMOTE_CONTROL_CLIENT_GENERATION";
 
     /**
      * @hide
-     * The media button event receiver associated with the IRemoteControlClient.
+     * The name of the RemoteControlClient.
+     * This String is passed as the client name when calling methods from the
+     * IRemoteControlClientDispatcher interface.
+     *
+     * @see #REMOTE_CONTROL_CLIENT_CHANGED_ACTION
+     */
+    public static final String EXTRA_REMOTE_CONTROL_CLIENT_NAME =
+            "android.media.EXTRA_REMOTE_CONTROL_CLIENT_NAME";
+
+    /**
+     * @hide
+     * The media button event receiver associated with the RemoteControlClient.
      * The {@link android.content.ComponentName} value of the event receiver can be retrieved with
      * {@link android.content.ComponentName#unflattenFromString(String)}
      *
@@ -1992,10 +1935,10 @@ public class AudioManager {
      * @param infoFlag the type of information that has changed since this method was last called,
      *      or the event receiver was registered. Use one or multiple of the following flags to
      *      describe what changed:
-     *      {@link RemoteControlParameters#FLAG_INFORMATION_CHANGED_METADATA},
-     *      {@link RemoteControlParameters#FLAG_INFORMATION_CHANGED_KEY_MEDIA},
-     *      {@link RemoteControlParameters#FLAG_INFORMATION_CHANGED_PLAYSTATE},
-     *      {@link RemoteControlParameters#FLAG_INFORMATION_CHANGED_ALBUM_ART}.
+     *      {@link RemoteControlClient#FLAG_INFORMATION_CHANGED_METADATA},
+     *      {@link RemoteControlClient#FLAG_INFORMATION_CHANGED_KEY_MEDIA},
+     *      {@link RemoteControlClient#FLAG_INFORMATION_CHANGED_PLAYSTATE},
+     *      {@link RemoteControlClient#FLAG_INFORMATION_CHANGED_ALBUM_ART}.
      */
     public void notifyRemoteControlInformationChanged(ComponentName eventReceiver, int infoFlag) {
         IAudioService service = getService();

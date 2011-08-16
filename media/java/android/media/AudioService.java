@@ -34,6 +34,7 @@ import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnErrorListener;
+import android.media.IRemoteControlClientDispatcher;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -2165,7 +2166,7 @@ public class AudioService extends IAudioService.Stub {
                     // TODO remove log before release
                     Log.i(TAG, "Clear remote control display");
                     Intent clearIntent = new Intent(AudioManager.REMOTE_CONTROL_CLIENT_CHANGED);
-                    // no extra means no IRemoteControlClient, which is a request to clear
+                    // no extra means no IRemoteControlClientDispatcher, which is a request to clear
                     clearIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                     mContext.sendBroadcast(clearIntent);
                     break;
@@ -2185,7 +2186,8 @@ public class AudioService extends IAudioService.Stub {
                             Log.i(TAG, "Display/update remote control ");
                             Intent rcClientIntent = new Intent(
                                     AudioManager.REMOTE_CONTROL_CLIENT_CHANGED);
-                            rcClientIntent.putExtra(AudioManager.EXTRA_REMOTE_CONTROL_CLIENT,
+                            rcClientIntent.putExtra(
+                                    AudioManager.EXTRA_REMOTE_CONTROL_CLIENT_GENERATION,
                                     mCurrentRcClientGen);
                             rcClientIntent.putExtra(
                                     AudioManager.EXTRA_REMOTE_CONTROL_CLIENT_INFO_CHANGED,
@@ -2193,6 +2195,9 @@ public class AudioService extends IAudioService.Stub {
                             rcClientIntent.putExtra(
                                     AudioManager.EXTRA_REMOTE_CONTROL_EVENT_RECEIVER,
                                     rcse.mReceiverComponent.flattenToString());
+                            rcClientIntent.putExtra(
+                                    AudioManager.EXTRA_REMOTE_CONTROL_CLIENT_NAME,
+                                    rcse.mRcClientName);
                             rcClientIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                             mContext.sendBroadcast(rcClientIntent);
                         }
@@ -2888,14 +2893,14 @@ public class AudioService extends IAudioService.Stub {
      * This object may be null.
      * Access protected by mCurrentRcLock.
      */
-    private IRemoteControlClient mCurrentRcClient = null;
+    private IRemoteControlClientDispatcher mCurrentRcClient = null;
 
     private final static int RC_INFO_NONE = 0;
     private final static int RC_INFO_ALL =
-        AudioManager.RemoteControlParameters.FLAG_INFORMATION_CHANGED_ALBUM_ART |
-        AudioManager.RemoteControlParameters.FLAG_INFORMATION_CHANGED_KEY_MEDIA |
-        AudioManager.RemoteControlParameters.FLAG_INFORMATION_CHANGED_METADATA |
-        AudioManager.RemoteControlParameters.FLAG_INFORMATION_CHANGED_PLAYSTATE;
+        RemoteControlClient.FLAG_INFORMATION_CHANGED_ALBUM_ART |
+        RemoteControlClient.FLAG_INFORMATION_CHANGED_KEY_MEDIA |
+        RemoteControlClient.FLAG_INFORMATION_CHANGED_METADATA |
+        RemoteControlClient.FLAG_INFORMATION_CHANGED_PLAYSTATE;
 
     /**
      * A monotonically increasing generation counter for mCurrentRcClient.
@@ -2907,13 +2912,13 @@ public class AudioService extends IAudioService.Stub {
     /**
      * Returns the current remote control client.
      * @param rcClientId the counter value that matches the extra
-     *     {@link AudioManager#EXTRA_REMOTE_CONTROL_CLIENT} in the
+     *     {@link AudioManager#EXTRA_REMOTE_CONTROL_CLIENT_GENERATION} in the
      *     {@link AudioManager#REMOTE_CONTROL_CLIENT_CHANGED} event
-     * @return the current IRemoteControlClient from which information to display on the remote
-     *     control can be retrieved, or null if rcClientId doesn't match the current generation
-     *     counter.
+     * @return the current IRemoteControlClientDispatcher from which information to display on the
+     *     remote control can be retrieved, or null if rcClientId doesn't match the current
+     *     generation counter.
      */
-    public IRemoteControlClient getRemoteControlClient(int rcClientId) {
+    public IRemoteControlClientDispatcher getRemoteControlClientDispatcher(int rcClientId) {
         synchronized(mCurrentRcLock) {
             if (rcClientId == mCurrentRcClientGen) {
                 return mCurrentRcClient;
@@ -2940,7 +2945,7 @@ public class AudioService extends IAudioService.Stub {
             Log.w(TAG, "  RemoteControlClient died");
             // remote control client died, make sure the displays don't use it anymore
             //  by setting its remote control client to null
-            registerRemoteControlClient(mRcEventReceiver, null, null/*ignored*/);
+            registerRemoteControlClient(mRcEventReceiver, null, null, null/*ignored*/);
         }
 
         public IBinder getBinder() {
@@ -2952,10 +2957,11 @@ public class AudioService extends IAudioService.Stub {
         /** the target for the ACTION_MEDIA_BUTTON events */
         public ComponentName mReceiverComponent;// always non null
         public String mCallingPackageName;
+        public String mRcClientName;
         public int mCallingUid;
 
         /** provides access to the information to display on the remote control */
-        public IRemoteControlClient mRcClient;
+        public IRemoteControlClientDispatcher mRcClient;
         public RcClientDeathHandler mRcClientDeathHandler;
 
         public RemoteControlStackEntry(ComponentName r) {
@@ -3210,7 +3216,7 @@ public class AudioService extends IAudioService.Stub {
 
     /** see AudioManager.registerRemoteControlClient(ComponentName eventReceiver, ...) */
     public void registerRemoteControlClient(ComponentName eventReceiver,
-            IRemoteControlClient rcClient, String callingPackageName) {
+            IRemoteControlClientDispatcher rcClient, String clientName, String callingPackageName) {
         synchronized(mAudioFocusLock) {
             synchronized(mRCStack) {
                 // store the new display information
@@ -3226,8 +3232,10 @@ public class AudioService extends IAudioService.Stub {
                         // save the new remote control client
                         rcse.mRcClient = rcClient;
                         rcse.mCallingPackageName = callingPackageName;
+                        rcse.mRcClientName = clientName;
                         rcse.mCallingUid = Binder.getCallingUid();
                         if (rcClient == null) {
+                            rcse.mRcClientDeathHandler = null;
                             break;
                         }
                         // monitor the new client's death
