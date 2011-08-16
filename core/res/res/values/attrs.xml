@@ -152,6 +152,18 @@
         <!-- Text color, typeface, size, and style for small text inside of a popup menu. -->
         <attr name="textAppearanceSmallPopupMenu" format="reference" />
 
+        <!-- The underline color and thickness for easy correct suggestion -->
+        <attr name="textAppearanceEasyCorrectSuggestion" format="reference" />
+
+        <!-- The underline color and thickness for misspelled suggestion -->
+        <attr name="textAppearanceMisspelledSuggestion" format="reference" />
+
+        <!--  The underline color -->
+        <attr name="textUnderlineColor" format="reference|color" />
+        <!--  The underline thickness, expressed as a percentage of the default underline thickness
+              (i.e., 100 means default thickness, and 200 means double thickness). -->
+        <attr name="textUnderlineThicknessPercentage" format="reference|integer" />
+
         <!-- EditText text foreground color. -->
         <attr name="editTextColor" format="reference|color" />
         <!-- EditText background drawable. -->
@@ -3135,6 +3147,10 @@
         <attr name="suggestionsEnabled" />
         <!-- Present the text in ALL CAPS. This may use a small-caps form when available. -->
         <attr name="textAllCaps" />
+    </declare-styleable>
+    <declare-styleable name="SuggestionSpan">
+        <attr name="textUnderlineColor" />
+        <attr name="textUnderlineThicknessPercentage" />
     </declare-styleable>
     <!-- An <code>input-extras</code> is a container for extra data to supply to
          an input method.  Contains

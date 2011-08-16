@@ -20730,7 +20730,7 @@ package android.text.style {
     method public void writeToParcel(android.os.Parcel, int);
   }
 
-  public class SuggestionSpan implements android.text.ParcelableSpan {
+  public class SuggestionSpan extends android.text.style.CharacterStyle implements android.text.ParcelableSpan {
     ctor public SuggestionSpan(android.content.Context, java.lang.String[], int);
     ctor public SuggestionSpan(java.util.Locale, java.lang.String[], int);
     ctor public SuggestionSpan(android.content.Context, java.util.Locale, java.lang.String[], int, java.lang.Class<?>);
@@ -20740,10 +20740,12 @@ package android.text.style {
     method public java.lang.String getLocale();
     method public int getSpanTypeId();
     method public java.lang.String[] getSuggestions();
+    method public void updateDrawState(android.text.TextPaint);
     method public void writeToParcel(android.os.Parcel, int);
     field public static final java.lang.String ACTION_SUGGESTION_PICKED = "android.text.style.SUGGESTION_PICKED";
     field public static final android.os.Parcelable.Creator CREATOR;
-    field public static final int FLAG_VERBATIM = 1; // 0x1
+    field public static final int FLAG_EASY_CORRECT = 1; // 0x1
+    field public static final int FLAG_MISSPELLED = 2; // 0x2
     field public static final int SUGGESTIONS_MAX_SIZE = 5; // 0x5
     field public static final java.lang.String SUGGESTION_SPAN_PICKED_AFTER = "after";
     field public static final java.lang.String SUGGESTION_SPAN_PICKED_BEFORE = "before";
