@@ -1780,14 +1780,20 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         mCurrentLinkProperties[netType] = newLp;
         boolean resetDns = updateRoutes(newLp, curLp, mNetConfigs[netType].isDefault());
 
-        if (doReset || resetMask != 0 || resetDns) {
+        if (resetMask != 0 || resetDns) {
             LinkProperties linkProperties = mNetTrackers[netType].getLinkProperties();
             if (linkProperties != null) {
                 String iface = linkProperties.getInterfaceName();
                 if (TextUtils.isEmpty(iface) == false) {
-                    if (doReset || resetMask != 0) {
+                    if (resetMask != 0) {
                         if (DBG) log("resetConnections(" + iface + ", " + resetMask + ")");
                         NetworkUtils.resetConnections(iface, resetMask);
+
+                        // Tell VPN the interface is down. It is a temporary
+                        // but effective fix to make VPN aware of the change.
+                        if ((resetMask & NetworkUtils.RESET_IPV4_ADDRESSES) != 0) {
+                            mVpn.interfaceStatusChanged(iface, false);
+                        }
                     }
                     if (resetDns) {
                         if (DBG) log("resetting DNS cache for " + iface);
