@@ -1751,17 +1751,25 @@ please see styles_device_defaults.xml.
         <item name="android:button">@android:drawable/btn_star_holo_dark</item>
     </style>
 
-    <!-- The holo style for smaller screens actually uses the non-holo layout,
-         which is more compact.  values-xlarge defines an alternative version
-         for the real holo look on a large screen. -->
     <style name="Widget.Holo.TabWidget" parent="Widget.TabWidget">
-        <item name="android:textAppearance">@style/TextAppearance.Holo.Widget.TabWidget</item>
         <item name="android:tabStripLeft">@null</item>
         <item name="android:tabStripRight">@null</item>
         <item name="android:tabStripEnabled">false</item>
-        <item name="android:divider">@null</item>
-        <item name="android:gravity">left|center_vertical</item>
+        <item name="android:divider">?android:attr/dividerVertical</item>
+        <item name="android:showDividers">middle</item>
+        <item name="android:dividerPadding">8dip</item>
+        <item name="android:measureWithLargestChild">true</item>
         <item name="android:tabLayout">@android:layout/tab_indicator_holo</item>
+    </style>
+
+    <style name="Widget.Holo.Tab" parent="Widget.Holo.ActionBar.TabView">
+        <item name="android:layout_width">0dip</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:minWidth">80dip</item>
+    </style>
+
+    <style name="Widget.Holo.TabText" parent="Widget.Holo.ActionBar.TabText">
+        <item name="android:maxWidth">180dip</item>
     </style>
 
     <style name="Widget.Holo.WebTextView" parent="Widget.WebTextView">
@@ -1847,9 +1855,6 @@ please see styles_device_defaults.xml.
         <item name="android:paddingRight">16dip</item>
     </style>
 
-    <style name="Widget.Holo.Tab" parent="Widget.Holo.ActionBar.TabView">
-    </style>
-
     <style name="Widget.Holo.ActionBar.TabBar" parent="Widget.ActionBar.TabBar">
         <item name="android:divider">?android:attr/actionBarDivider</item>
         <item name="android:showDividers">middle</item>
@@ -1862,6 +1867,8 @@ please see styles_device_defaults.xml.
         <item name="android:textSize">12sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:textAllCaps">true</item>
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:maxLines">2</item>
     </style>
 
     <style name="Widget.Holo.ActionMode" parent="Widget.ActionMode">
