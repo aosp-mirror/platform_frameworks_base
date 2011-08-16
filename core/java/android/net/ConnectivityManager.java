@@ -260,11 +260,18 @@ public class ConnectivityManager {
      */
     public static final int TYPE_MOBILE_CBS  = 12;
 
-    /** {@hide} */
-    public static final int MAX_RADIO_TYPE   = TYPE_MOBILE_CBS;
+    /**
+     * A Wi-Fi p2p connection. Only requesting processes will have access to
+     * the peers connected.
+     * {@hide}
+     */
+    public static final int TYPE_WIFI_P2P    = 13;
 
     /** {@hide} */
-    public static final int MAX_NETWORK_TYPE = TYPE_MOBILE_CBS;
+    public static final int MAX_RADIO_TYPE   = TYPE_WIFI_P2P;
+
+    /** {@hide} */
+    public static final int MAX_NETWORK_TYPE = TYPE_WIFI_P2P;
 
     public static final int DEFAULT_NETWORK_PREFERENCE = TYPE_WIFI;
 
@@ -303,6 +310,8 @@ public class ConnectivityManager {
                 return "MOBILE_IMS";
             case TYPE_MOBILE_CBS:
                 return "MOBILE_CBS";
+            case TYPE_WIFI_P2P:
+                return "WIFI_P2P";
             default:
                 return Integer.toString(type);
         }

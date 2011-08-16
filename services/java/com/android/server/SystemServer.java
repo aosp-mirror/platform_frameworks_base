@@ -111,6 +111,7 @@ class ServerThread extends Thread {
         NetworkPolicyManagerService networkPolicy = null;
         ConnectivityService connectivity = null;
         WifiP2pService wifiP2p = null;
+        WifiService wifi = null;
         IPackageManager pm = null;
         Context context = null;
         WindowManagerService wm = null;
@@ -308,6 +309,15 @@ class ServerThread extends Thread {
                 ServiceManager.addService(Context.WIFI_P2P_SERVICE, wifiP2p);
             } catch (Throwable e) {
                 Slog.e(TAG, "Failure starting Wi-Fi P2pService", e);
+            }
+
+           try {
+                Slog.i(TAG, "Wi-Fi Service");
+                wifi = new WifiService(context);
+                ServiceManager.addService(Context.WIFI_SERVICE, wifi);
+                wifi.checkAndStartWifi();
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting Wi-Fi Service", e);
             }
 
             try {

@@ -116,6 +116,7 @@
         <item>"mobile_fota,10,0,2,60000,true"</item>
         <item>"mobile_ims,11,0,2,60000,true"</item>
         <item>"mobile_cbs,12,0,2,60000,true"</item>
+        <item>"wifi_p2p,13,1,0,-1,true"</item>
     </string-array>
 
     <!-- Array of ConnectivityManager.TYPE_xxxx constants for networks that may only
