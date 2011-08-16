@@ -627,12 +627,33 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int width = MeasureSpec.getSize(widthMeasureSpec);
 
-        if ((widthMode == MeasureSpec.AT_MOST || widthMode == MeasureSpec.EXACTLY) && mMaxWidth > 0
-                && width > mMaxWidth) {
-            super.onMeasure(MeasureSpec.makeMeasureSpec(mMaxWidth, widthMode), heightMeasureSpec);
-        } else {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        switch (widthMode) {
+        case MeasureSpec.AT_MOST:
+            // If there is an upper limit, don't exceed maximum width (explicit or implicit)
+            if (mMaxWidth > 0) {
+                width = Math.min(mMaxWidth, width);
+            } else {
+                width = Math.min(getPreferredWidth(), width);
+            }
+            break;
+        case MeasureSpec.EXACTLY:
+            // If an exact width is specified, still don't exceed any specified maximum width
+            if (mMaxWidth > 0) {
+                width = Math.min(mMaxWidth, width);
+            }
+            break;
+        case MeasureSpec.UNSPECIFIED:
+            // Use maximum width, if specified, else preferred width
+            width = mMaxWidth > 0 ? mMaxWidth : getPreferredWidth();
+            break;
         }
+        widthMode = MeasureSpec.EXACTLY;
+        super.onMeasure(MeasureSpec.makeMeasureSpec(width, widthMode), heightMeasureSpec);
+    }
+
+    private int getPreferredWidth() {
+        return getContext().getResources()
+                .getDimensionPixelSize(R.dimen.search_view_preferred_width);
     }
 
     private void updateViewsVisibility(final boolean collapsed) {
@@ -695,7 +716,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         // Should we show the close button? It is not shown if there's no focus,
         // field is not iconified by default and there is no text in it.
         final boolean showClose = hasText || (mIconifiedByDefault && !mExpandedInActionView);
-        mCloseButton.setVisibility(showClose ? VISIBLE : INVISIBLE);
+        mCloseButton.setVisibility(showClose ? VISIBLE : GONE);
         mCloseButton.getDrawable().setState(hasText ? ENABLED_STATE_SET : EMPTY_STATE_SET);
     }
 
@@ -991,7 +1012,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
      */
     private void updateVoiceButton(boolean empty) {
         int visibility = GONE;
-        if (mVoiceButtonEnabled && !isIconified() && (empty || !mSubmitButtonEnabled)) {
+        if (mVoiceButtonEnabled && !isIconified() && empty) {
             visibility = VISIBLE;
             mSubmitButton.setVisibility(GONE);
         }

@@ -105,7 +105,7 @@
 
             <ImageView
                 android:id="@+id/search_close_btn"
-                android:layout_width="@dimen/dropdownitem_icon_width"
+                android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:paddingLeft="8dip"
                 android:paddingRight="8dip"
