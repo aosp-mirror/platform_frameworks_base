@@ -41,11 +41,11 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
+import android.content.pm.ManifestDigest;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
@@ -935,6 +935,27 @@ final class ApplicationPackageManager extends PackageManager {
                                String installerPackageName) {
         try {
             mPM.installPackage(packageURI, observer, flags, installerPackageName);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    @Override
+    public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
+            int flags, String installerPackageName, Uri verificationURI,
+            ManifestDigest manifestDigest) {
+        try {
+            mPM.installPackageWithVerification(packageURI, observer, flags, installerPackageName,
+                    verificationURI, manifestDigest);
+        } catch (RemoteException e) {
+            // Should never happen!
+        }
+    }
+
+    @Override
+    public void verifyPendingInstall(int id, boolean verified, String failureMessage) {
+        try {
+            mPM.verifyPendingInstall(id, verified, failureMessage);
         } catch (RemoteException e) {
             // Should never happen!
         }

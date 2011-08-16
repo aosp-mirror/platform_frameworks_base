@@ -1530,6 +1530,18 @@ public class Intent implements Parcelable, Cloneable {
     public static final String ACTION_PACKAGE_FIRST_LAUNCH = "android.intent.action.PACKAGE_FIRST_LAUNCH";
 
     /**
+     * Broadcast Action: Sent to the system package verifier when a package
+     * needs to be verified. The data contains the package URI.
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     * </p>
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PACKAGE_NEEDS_VERIFICATION = "android.intent.action.PACKAGE_NEEDS_VERIFICATION";
+
+    /**
      * Broadcast Action: Resources for a set of packages (which were
      * previously unavailable) are currently
      * available since the media on which they exist is available.

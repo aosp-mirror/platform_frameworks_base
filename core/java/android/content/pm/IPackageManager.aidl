@@ -30,6 +30,7 @@ import android.content.pm.IPackageMoveObserver;
 import android.content.pm.IPackageStatsObserver;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.ManifestDigest;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
 import android.content.pm.PermissionGroupInfo;
@@ -346,4 +347,10 @@ interface IPackageManager {
 
     UserInfo createUser(in String name, int flags);
     boolean removeUser(int userId);
+
+    void installPackageWithVerification(in Uri packageURI, in IPackageInstallObserver observer,
+            int flags, in String installerPackageName, in Uri verificationURI,
+            in ManifestDigest manifestDigest);
+
+    void verifyPendingInstall(int id, boolean verified, in String message);
 }

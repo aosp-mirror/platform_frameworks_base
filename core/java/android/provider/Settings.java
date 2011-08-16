@@ -3960,6 +3960,12 @@ public final class Settings {
         public static final String WEB_AUTOFILL_QUERY_URL =
             "web_autofill_query_url";
 
+        /** Whether package verification is enabled. {@hide} */
+        public static final String PACKAGE_VERIFIER_ENABLE = "verifier_enable";
+
+        /** Timeout for package verification. {@hide} */
+        public static final String PACKAGE_VERIFIER_TIMEOUT = "verifier_timeout";
+
         /**
          * @hide
          */

@@ -38,6 +38,7 @@ import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.backup.IBackupManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.IIntentReceiver;
@@ -69,6 +70,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
+import android.content.pm.ManifestDigest;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
@@ -187,6 +189,17 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_UPDATE_TIME = 1<<6;
 
     static final int REMOVE_CHATTY = 1<<16;
+
+    /**
+     * Whether verification is enabled by default.
+     */
+    private static final boolean DEFAULT_VERIFY_ENABLE = true;
+
+    /**
+     * The default maximum time to wait for the verification agent to return in
+     * milliseconds.
+     */
+    private static final long DEFAULT_VERIFICATION_TIMEOUT = 60 * 1000;
 
     static final String DEFAULT_CONTAINER_PACKAGE = "com.android.defcontainer";
 
@@ -333,6 +346,12 @@ public class PackageManagerService extends IPackageManager.Stub {
     // Broadcast actions that are only available to the system.
     final HashSet<String> mProtectedBroadcasts = new HashSet<String>();
 
+    /** List of packages waiting for verification. */
+    final SparseArray<InstallArgs> mPendingVerification = new SparseArray<InstallArgs>();
+
+    /** Token for keys in mPendingVerification. */
+    private int mPendingVerificationToken = 0;
+
     boolean mSystemReady;
     boolean mSafeMode;
     boolean mHasSystemUidErrors;
@@ -364,6 +383,8 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int UPDATED_MEDIA_STATUS = 12;
     static final int WRITE_SETTINGS = 13;
     static final int WRITE_STOPPED_PACKAGES = 14;
+    static final int PACKAGE_VERIFIED = 15;
+    static final int CHECK_PENDING_VERIFICATION = 16;
 
     static final int WRITE_SETTINGS_DELAY = 10*1000;  // 10 seconds
 
@@ -444,10 +465,10 @@ public class PackageManagerService extends IPackageManager.Stub {
         void doHandleMessage(Message msg) {
             switch (msg.what) {
                 case INIT_COPY: {
-                    if (DEBUG_SD_INSTALL) Log.i(TAG, "init_copy");
+                    if (DEBUG_INSTALL) Slog.i(TAG, "init_copy");
                     HandlerParams params = (HandlerParams) msg.obj;
                     int idx = mPendingInstalls.size();
-                    if (DEBUG_SD_INSTALL) Log.i(TAG, "idx=" + idx);
+                    if (DEBUG_INSTALL) Slog.i(TAG, "idx=" + idx);
                     // If a bind was already initiated we dont really
                     // need to do anything. The pending install
                     // will be processed later on.
@@ -474,7 +495,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     break;
                 }
                 case MCS_BOUND: {
-                    if (DEBUG_SD_INSTALL) Log.i(TAG, "mcs_bound");
+                    if (DEBUG_INSTALL) Slog.i(TAG, "mcs_bound");
                     if (msg.obj != null) {
                         mContainerService = (IMediaContainerService) msg.obj;
                     }
@@ -525,8 +546,8 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     break;
                 }
-                case MCS_RECONNECT : {
-                    if (DEBUG_SD_INSTALL) Log.i(TAG, "mcs_reconnect");
+                case MCS_RECONNECT: {
+                    if (DEBUG_INSTALL) Slog.i(TAG, "mcs_reconnect");
                     if (mPendingInstalls.size() > 0) {
                         if (mBound) {
                             disconnectService();
@@ -543,27 +564,31 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     break;
                 }
-                case MCS_UNBIND : {
+                case MCS_UNBIND: {
                     // If there is no actual work left, then time to unbind.
-                    if (DEBUG_SD_INSTALL) Log.i(TAG, "mcs_unbind");
-                    if (mPendingInstalls.size() == 0) {
+                    if (DEBUG_INSTALL) Slog.i(TAG, "mcs_unbind");
+
+                    if (mPendingInstalls.size() == 0 && mPendingVerification.size() == 0) {
                         if (mBound) {
+                            if (DEBUG_INSTALL) Slog.i(TAG, "calling disconnectService()");
+
                             disconnectService();
                         }
-                    } else {
+                    } else if (mPendingInstalls.size() > 0) {
                         // There are more pending requests in queue.
                         // Just post MCS_BOUND message to trigger processing
                         // of next pending install.
                         mHandler.sendEmptyMessage(MCS_BOUND);
                     }
+
                     break;
                 }
                 case MCS_GIVE_UP: {
-                    if (DEBUG_SD_INSTALL) Log.i(TAG, "mcs_giveup too many retries");
+                    if (DEBUG_INSTALL) Slog.i(TAG, "mcs_giveup too many retries");
                     mPendingInstalls.remove(0);
                     break;
                 }
-                case SEND_PENDING_BROADCAST : {
+                case SEND_PENDING_BROADCAST: {
                     String packages[];
                     ArrayList<String> components[];
                     int size = 0;
@@ -707,6 +732,52 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                     Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
                 } break;
+                case CHECK_PENDING_VERIFICATION: {
+                    final int verificationId = msg.arg1;
+                    final InstallArgs args = mPendingVerification.get(verificationId);
+
+                    if (args != null) {
+                        Slog.i(TAG, "Validation timed out for " + args.packageURI.toString());
+                        mPendingVerification.remove(verificationId);
+
+                        int ret = PackageManager.INSTALL_FAILED_VERIFICATION_TIMEOUT;
+                        processPendingInstall(args, ret);
+
+                        mHandler.sendEmptyMessage(MCS_UNBIND);
+                    }
+
+                    break;
+                }
+                case PACKAGE_VERIFIED: {
+                    final int verificationId = msg.arg1;
+                    final boolean verified = msg.arg2 == 1 ? true : false;
+
+                    final InstallArgs args = mPendingVerification.get(verificationId);
+                    if (args == null) {
+                        Slog.w(TAG, "Invalid validation token " + verificationId + " received");
+                        break;
+                    }
+
+                    mPendingVerification.remove(verificationId);
+
+                    int ret;
+                    if (verified) {
+                        ret = PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
+                        try {
+                            ret = args.copyApk(mContainerService, true);
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Could not contact the ContainerService");
+                        }
+                    } else {
+                        ret = PackageManager.INSTALL_FAILED_VERIFICATION_FAILURE;
+                    }
+
+                    processPendingInstall(args, ret);
+
+                    mHandler.sendEmptyMessage(MCS_UNBIND);
+
+                    break;
+                }
             }
         }
     }
@@ -4693,12 +4764,45 @@ public class PackageManagerService extends IPackageManager.Stub {
     public void installPackage(
             final Uri packageURI, final IPackageInstallObserver observer, final int flags,
             final String installerPackageName) {
-        mContext.enforceCallingOrSelfPermission(
-                android.Manifest.permission.INSTALL_PACKAGES, null);
+        installPackageWithVerification(packageURI, observer, flags, installerPackageName, null,
+                null);
+    }
 
-        Message msg = mHandler.obtainMessage(INIT_COPY);
-        msg.obj = new InstallParams(packageURI, observer, flags,
-                installerPackageName);
+    @Override
+    public void installPackageWithVerification(Uri packageURI, IPackageInstallObserver observer,
+            int flags, String installerPackageName, Uri verificationURI,
+            ManifestDigest manifestDigest) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.INSTALL_PACKAGES, null);
+
+        final int uid = Binder.getCallingUid();
+
+        final int filteredFlags;
+
+        if (uid == Process.SHELL_UID || uid == 0) {
+            if (DEBUG_INSTALL) {
+                Slog.v(TAG, "Install from ADB");
+            }
+            filteredFlags = flags | PackageManager.INSTALL_FROM_ADB;
+        } else {
+            filteredFlags = flags & ~PackageManager.INSTALL_FROM_ADB;
+        }
+
+        final Message msg = mHandler.obtainMessage(INIT_COPY);
+        msg.obj = new InstallParams(packageURI, observer, filteredFlags, installerPackageName,
+                verificationURI, manifestDigest);
+        mHandler.sendMessage(msg);
+    }
+
+    @Override
+    public void verifyPendingInstall(int id, boolean verified, String message)
+            throws RemoteException {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.PACKAGE_VERIFICATION_AGENT, null);
+
+        final Message msg = mHandler.obtainMessage(PACKAGE_VERIFIED);
+        msg.arg1 = id;
+        msg.arg2 = verified ? 1 : 0;
+        msg.obj = message;
         mHandler.sendMessage(msg);
     }
 
@@ -4711,6 +4815,28 @@ public class PackageManagerService extends IPackageManager.Stub {
 
         final Message msg = mHandler.obtainMessage(POST_INSTALL, token, 0);
         mHandler.sendMessage(msg);
+    }
+
+    /**
+     * Get the verification agent timeout.
+     *
+     * @return verification timeout in milliseconds
+     */
+    private long getVerificationTimeout() {
+        return android.provider.Settings.Secure.getLong(mContext.getContentResolver(),
+                android.provider.Settings.Secure.PACKAGE_VERIFIER_TIMEOUT,
+                DEFAULT_VERIFICATION_TIMEOUT);
+    }
+
+    /**
+     * Check whether or not package verification has been enabled.
+     *
+     * @return true if verification should be performed
+     */
+    private boolean isVerificationEnabled() {
+        return android.provider.Settings.Secure.getInt(mContext.getContentResolver(),
+                android.provider.Settings.Secure.PACKAGE_VERIFIER_ENABLE,
+                DEFAULT_VERIFY_ENABLE ? 1 : 0) == 1 ? true : false;
     }
 
     public void setInstallerPackageName(String targetPackage, String installerPackageName) {
@@ -4856,15 +4982,21 @@ public class PackageManagerService extends IPackageManager.Stub {
         });
     }
 
-    abstract class HandlerParams {
-        final static int MAX_RETRIES = 4;
-        int retry = 0;
+    private abstract class HandlerParams {
+        private static final int MAX_RETRIES = 4;
+
+        /**
+         * Number of times startCopy() has been attempted and had a non-fatal
+         * error.
+         */
+        private int mRetries = 0;
+
         final boolean startCopy() {
             boolean res;
             try {
-                if (DEBUG_SD_INSTALL) Log.i(TAG, "startCopy");
-                retry++;
-                if (retry > MAX_RETRIES) {
+                if (DEBUG_INSTALL) Slog.i(TAG, "startCopy");
+
+                if (++mRetries > MAX_RETRIES) {
                     Slog.w(TAG, "Failed to invoke remote methods on default container service. Giving up");
                     mHandler.sendEmptyMessage(MCS_GIVE_UP);
                     handleServiceError();
@@ -4874,7 +5006,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                     res = true;
                 }
             } catch (RemoteException e) {
-                if (DEBUG_SD_INSTALL) Log.i(TAG, "Posting install MCS_RECONNECT");
+                if (DEBUG_INSTALL) Slog.i(TAG, "Posting install MCS_RECONNECT");
                 mHandler.sendEmptyMessage(MCS_RECONNECT);
                 res = false;
             }
@@ -4883,10 +5015,11 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         final void serviceError() {
-            if (DEBUG_SD_INSTALL) Log.i(TAG, "serviceError");
+            if (DEBUG_INSTALL) Slog.i(TAG, "serviceError");
             handleServiceError();
             handleReturnCode();
         }
+
         abstract void handleStartCopy() throws RemoteException;
         abstract void handleServiceError();
         abstract void handleReturnCode();
@@ -4969,15 +5102,20 @@ public class PackageManagerService extends IPackageManager.Stub {
         int flags;
         final Uri packageURI;
         final String installerPackageName;
+        final Uri verificationURI;
+        final ManifestDigest manifestDigest;
         private InstallArgs mArgs;
         private int mRet;
+
         InstallParams(Uri packageURI,
                 IPackageInstallObserver observer, int flags,
-                String installerPackageName) {
+                String installerPackageName, Uri verificationURI, ManifestDigest manifestDigest) {
             this.packageURI = packageURI;
             this.flags = flags;
             this.observer = observer;
             this.installerPackageName = installerPackageName;
+            this.verificationURI = verificationURI;
+            this.manifestDigest = manifestDigest;
         }
 
         private int installLocationPolicy(PackageInfoLite pkgLite, int flags) {
@@ -5102,13 +5240,70 @@ public class PackageManagerService extends IPackageManager.Stub {
                     }
                 }
             }
-            // Create the file args now.
-            mArgs = createInstallArgs(this);
+
+            final InstallArgs args = createInstallArgs(this);
             if (ret == PackageManager.INSTALL_SUCCEEDED) {
-                // Create copy only if we are not in an erroneous state.
-                // Remote call to initiate copy using temporary file
-                ret = mArgs.copyApk(mContainerService, true);
+                /*
+                 * Determine if we have any installed package verifiers. If we
+                 * do, then we'll defer to them to verify the packages.
+                 */
+                final Intent verification = new Intent(Intent.ACTION_PACKAGE_NEEDS_VERIFICATION,
+                        packageURI);
+                verification.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                final List<ResolveInfo> receivers = queryIntentReceivers(verification, null,
+                        PackageManager.GET_DISABLED_COMPONENTS);
+                if (isVerificationEnabled() && receivers.size() > 0) {
+                    if (DEBUG_INSTALL) {
+                        Slog.d(TAG, "Found " + receivers.size() + " verifiers for intent "
+                                + verification.toString());
+                    }
+
+                    final int verificationId = mPendingVerificationToken++;
+
+                    verification.putExtra(PackageManager.EXTRA_VERIFICATION_ID, verificationId);
+
+                    verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALLER_PACKAGE,
+                            installerPackageName);
+
+                    verification.putExtra(PackageManager.EXTRA_VERIFICATION_INSTALL_FLAGS, flags);
+
+                    if (verificationURI != null) {
+                        verification.putExtra(PackageManager.EXTRA_VERIFICATION_URI,
+                                verificationURI);
+                    }
+
+                    mPendingVerification.append(verificationId, args);
+
+                    /*
+                     * Send the intent to the registered verification agents,
+                     * but only start the verification timeout after the target
+                     * BroadcastReceivers have run.
+                     */
+                    mContext.sendOrderedBroadcast(verification,
+                            android.Manifest.permission.PACKAGE_VERIFICATION_AGENT,
+                            new BroadcastReceiver() {
+                                @Override
+                                public void onReceive(Context context, Intent intent) {
+                                    final Message msg = mHandler
+                                            .obtainMessage(CHECK_PENDING_VERIFICATION);
+                                    msg.arg1 = verificationId;
+                                    mHandler.sendMessageDelayed(msg, getVerificationTimeout());
+                                }
+                            },
+                            null, 0, null, null);
+                } else {
+                    // Create copy only if we are not in an erroneous state.
+                    // Remote call to initiate copy using temporary file
+                    mArgs = args;
+                    ret = args.copyApk(mContainerService, true);
+                }
+            } else {
+                // There was an error, so let the processPendingInstall() break
+                // the bad news... uh, through a call in handleReturnCode()
+                mArgs = args;
             }
+
             mRet = ret;
         }
 
@@ -5233,14 +5428,15 @@ public class PackageManagerService extends IPackageManager.Stub {
         final int flags;
         final Uri packageURI;
         final String installerPackageName;
+        final ManifestDigest manifestDigest;
 
-        InstallArgs(Uri packageURI,
-                IPackageInstallObserver observer, int flags,
-                String installerPackageName) {
+        InstallArgs(Uri packageURI, IPackageInstallObserver observer, int flags,
+                String installerPackageName, ManifestDigest manifestDigest) {
             this.packageURI = packageURI;
             this.flags = flags;
             this.observer = observer;
             this.installerPackageName = installerPackageName;
+            this.manifestDigest = manifestDigest;
         }
 
         abstract void createCopyFile();
@@ -5265,12 +5461,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         boolean created = false;
 
         FileInstallArgs(InstallParams params) {
-            super(params.packageURI, params.observer,
-                    params.flags, params.installerPackageName);
+            super(params.packageURI, params.observer, params.flags, params.installerPackageName,
+                    params.manifestDigest);
         }
 
         FileInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath) {
-            super(null, null, 0, null);
+            super(null, null, 0, null, null);
             File codeFile = new File(fullCodePath);
             installDir = codeFile.getParentFile();
             codeFileName = fullCodePath;
@@ -5279,7 +5475,7 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         FileInstallArgs(Uri packageURI, String pkgName, String dataDir) {
-            super(packageURI, null, 0, null);
+            super(packageURI, null, 0, null, null);
             installDir = isFwdLocked() ? mDrmAppPrivateInstallDir : mAppInstallDir;
             String apkName = getNextCodePath(null, pkgName, ".apk");
             codeFileName = new File(installDir, apkName + ".apk").getPath();
@@ -5509,12 +5705,12 @@ public class PackageManagerService extends IPackageManager.Stub {
         String libraryPath;
 
         SdInstallArgs(InstallParams params) {
-            super(params.packageURI, params.observer,
-                    params.flags, params.installerPackageName);
+            super(params.packageURI, params.observer, params.flags, params.installerPackageName,
+                    params.manifestDigest);
         }
 
         SdInstallArgs(String fullCodePath, String fullResourcePath, String nativeLibraryPath) {
-            super(null, null, PackageManager.INSTALL_EXTERNAL, null);
+            super(null, null, PackageManager.INSTALL_EXTERNAL, null, null);
             // Extract cid from fullCodePath
             int eidx = fullCodePath.lastIndexOf("/");
             String subStr1 = fullCodePath.substring(0, eidx);
@@ -5524,13 +5720,13 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
 
         SdInstallArgs(String cid) {
-            super(null, null, PackageManager.INSTALL_EXTERNAL, null);
+            super(null, null, PackageManager.INSTALL_EXTERNAL, null, null);
             this.cid = cid;
             setCachePath(PackageHelper.getSdDir(cid));
         }
 
         SdInstallArgs(Uri packageURI, String cid) {
-            super(packageURI, null, PackageManager.INSTALL_EXTERNAL, null);
+            super(packageURI, null, PackageManager.INSTALL_EXTERNAL, null, null);
             this.cid = cid;
         }
 
@@ -6152,6 +6348,26 @@ public class PackageManagerService extends IPackageManager.Stub {
             res.returnCode = pp.getParseError();
             return;
         }
+
+        /* If the installer passed in a manifest digest, compare it now. */
+        if (args.manifestDigest != null) {
+            if (DEBUG_INSTALL) {
+                final String parsedManifest = pkg.manifestDigest == null ? "null"
+                        : pkg.manifestDigest.toString();
+                Slog.d(TAG, "Comparing manifests: " + args.manifestDigest.toString() + " vs. "
+                        + parsedManifest);
+            }
+
+            if (!args.manifestDigest.equals(pkg.manifestDigest)) {
+                res.returnCode = PackageManager.INSTALL_FAILED_PACKAGE_CHANGED;
+                return;
+            }
+        } else if (DEBUG_INSTALL) {
+            final String parsedManifest = pkg.manifestDigest == null
+                    ? "null" : pkg.manifestDigest.toString();
+            Slog.d(TAG, "manifestDigest was not present, but parser got: " + parsedManifest);
+        }
+
         // Get rid of all references to package scan path via parser.
         pp = null;
         String oldCodePath = null;

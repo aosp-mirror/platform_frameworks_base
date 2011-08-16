@@ -2181,6 +2181,22 @@
         Browser\'s geolocation permissions. Malicious applications
         can use this to allow sending location information to arbitrary web sites.</string>
 
+    <!-- Title of an application permission which allows the application to verify whether
+         a different package is able to be installed by some internal logic. [CHAR LIMIT=40] -->
+    <string name="permlab_packageVerificationAgent">verify packages</string>
+    <!-- Description of an application permission which allows the application to verify whether
+         a different package is able to be installed by some internal heuristic. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_packageVerificationAgent">Allows the application to verify a package is
+        installable.</string>
+
+    <!-- Title of an application permission which allows the application to verify whether
+         a different package is able to be installed by some internal heuristic. [CHAR LIMIT=40] -->
+    <string name="permlab_bindPackageVerifier">bind to a package verifier</string>
+    <!-- Description of an application permission which allows the application to verify whether
+         a different package is able to be installed by some internal heuristic. [CHAR LIMIT=NONE] -->
+    <string name="permdesc_bindPackageVerifier">Allows the holder to make requests of
+        package verifiers. Should never be needed for normal applications.</string>
+
     <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Text in the save password dialog, asking if the browser should remember a password. -->
     <string name="save_password_message">Do you want the browser to remember this password?</string>
     <!-- If the user enters a password in a form on a website, a dialog will come up asking if they want to save the password. Button in the save password dialog, saying not to remember this password. -->
