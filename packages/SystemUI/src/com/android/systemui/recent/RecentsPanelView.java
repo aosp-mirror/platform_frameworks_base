@@ -56,7 +56,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
@@ -64,6 +63,7 @@ import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
 import com.android.systemui.R;
 import com.android.systemui.statusbar.StatusBar;
@@ -73,7 +73,7 @@ import com.android.systemui.statusbar.tablet.TabletStatusBar;
 
 public class RecentsPanelView extends RelativeLayout
         implements OnItemClickListener, RecentsCallback, StatusBarPanel, Animator.AnimatorListener {
-    static final String TAG = "RecentsListView";
+    static final String TAG = "RecentsPanelView";
     static final boolean DEBUG = TabletStatusBar.DEBUG || PhoneStatusBar.DEBUG || false;
     private static final int DISPLAY_TASKS = 20;
     private static final int MAX_TASKS = DISPLAY_TASKS + 1; // allow extra for non-apps
@@ -178,7 +178,7 @@ public class RecentsPanelView extends RelativeLayout
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder holder;
             if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.status_bar_recent_item, null);
+                convertView = mInflater.inflate(R.layout.status_bar_recent_item, parent, false);
                 holder = new ViewHolder();
                 holder.thumbnailView = convertView.findViewById(R.id.app_thumbnail);
                 holder.thumbnailViewImage = (ImageView) convertView.findViewById(
@@ -245,6 +245,18 @@ public class RecentsPanelView extends RelativeLayout
             setFocusableInTouchMode(true);
             requestFocus();
         }
+    }
+
+    public void handleShowBackground(boolean show) {
+        if (show) {
+            mRecentsScrim.setBackgroundResource(R.drawable.status_bar_recents_background);
+        } else {
+            mRecentsScrim.setBackgroundDrawable(null);
+        }
+    }
+
+    public boolean isRecentsVisible() {
+        return getVisibility() == VISIBLE;
     }
 
     public void onAnimationCancel(Animator animation) {
@@ -332,12 +344,7 @@ public class RecentsPanelView extends RelativeLayout
         mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mRecentsContainer = (ViewGroup) findViewById(R.id.recents_container);
         mListAdapter = new ActivityDescriptionAdapter(mContext);
-        if (mRecentsContainer instanceof RecentsListView) {
-            RecentsListView listView = (RecentsListView) mRecentsContainer;
-            listView.setAdapter(mListAdapter);
-            listView.setOnItemClickListener(this);
-            listView.setCallback(this);
-        } else if (mRecentsContainer instanceof RecentsHorizontalScrollView){
+        if (mRecentsContainer instanceof RecentsHorizontalScrollView){
             RecentsHorizontalScrollView scrollView
                     = (RecentsHorizontalScrollView) mRecentsContainer;
             scrollView.setAdapter(mListAdapter);
@@ -349,7 +356,7 @@ public class RecentsPanelView extends RelativeLayout
             scrollView.setCallback(this);
         }
         else {
-            throw new IllegalArgumentException("missing RecentsListView/RecentsScrollView");
+            throw new IllegalArgumentException("missing Recents[Horizontal]ScrollView");
         }
 
 
@@ -381,6 +388,14 @@ public class RecentsPanelView extends RelativeLayout
         if (DEBUG) Log.v(TAG, "onVisibilityChanged(" + changedView + ", " + visibility + ")");
         if (visibility == View.VISIBLE && changedView == this) {
             refreshApplicationList();
+        }
+
+        if (mRecentsContainer instanceof RecentsHorizontalScrollView) {
+            ((RecentsHorizontalScrollView) mRecentsContainer).onRecentsVisibilityChanged();
+        } else if (mRecentsContainer instanceof RecentsVerticalScrollView) {
+            ((RecentsVerticalScrollView) mRecentsContainer).onRecentsVisibilityChanged();
+        } else {
+            throw new IllegalArgumentException("missing Recents[Horizontal]ScrollView");
         }
     }
 

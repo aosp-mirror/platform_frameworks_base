@@ -20,6 +20,7 @@ import android.animation.LayoutTransition;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.database.DataSetObserver;
+import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -41,6 +42,8 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     private RecentsCallback mCallback;
     protected int mLastScrollPosition;
     private SwipeHelper mSwipeHelper;
+    private RecentsScrollViewPerformanceHelper mPerformanceHelper;
+
     private OnLongClickListener mOnLongClick = new OnLongClickListener() {
         public boolean onLongClick(View v) {
             final View anchorView = v.findViewById(R.id.app_description);
@@ -49,15 +52,12 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         }
     };
 
-    public RecentsHorizontalScrollView(Context context) {
-        this(context, null);
-    }
-
     public RecentsHorizontalScrollView(Context context, AttributeSet attrs) {
         super(context, attrs, 0);
         float densityScale = getResources().getDisplayMetrics().density;
         float pagingTouchSlop = ViewConfiguration.get(mContext).getScaledPagingTouchSlop();
         mSwipeHelper = new SwipeHelper(SwipeHelper.Y, this, densityScale, pagingTouchSlop);
+        mPerformanceHelper = RecentsScrollViewPerformanceHelper.create(context, attrs, this, false);
     }
 
     private int scrollPositionOfMostRecent() {
@@ -71,7 +71,11 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
             view.setLongClickable(true);
             view.setOnLongClickListener(mOnLongClick);
 
-            final View thumbnail = getChildContentView(view);
+            if (mPerformanceHelper != null) {
+                mPerformanceHelper.addViewCallback(view);
+            }
+
+            final View thumbnail = view.findViewById(R.id.app_thumbnail);
             // thumbnail is set to clickable in the layout file
             thumbnail.setOnClickListener(new OnClickListener() {
                 public void onClick(View v) {
@@ -139,7 +143,60 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
     }
 
     public View getChildContentView(View v) {
-        return v.findViewById(R.id.app_thumbnail);
+        return v.findViewById(R.id.recent_item);
+    }
+
+    @Override
+    protected void onLayout (boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (mPerformanceHelper != null) {
+            mPerformanceHelper.onLayoutCallback();
+        }
+    }
+
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+
+        if (mPerformanceHelper != null) {
+            int paddingLeft = mPaddingLeft;
+            final boolean offsetRequired = isPaddingOffsetRequired();
+            if (offsetRequired) {
+                paddingLeft += getLeftPaddingOffset();
+            }
+
+            int left = mScrollX + paddingLeft;
+            int right = left + mRight - mLeft - mPaddingRight - paddingLeft;
+            int top = mScrollY + getFadeTop(offsetRequired);
+            int bottom = top + getFadeHeight(offsetRequired);
+
+            if (offsetRequired) {
+                right += getRightPaddingOffset();
+                bottom += getBottomPaddingOffset();
+            }
+            mPerformanceHelper.drawCallback(canvas,
+                    left, right, top, bottom, mScrollX, mScrollY,
+                    0, 0,
+                    getLeftFadingEdgeStrength(), getRightFadingEdgeStrength());
+        }
+    }
+
+    @Override
+    public int getVerticalFadingEdgeLength() {
+        if (mPerformanceHelper != null) {
+            return mPerformanceHelper.getVerticalFadingEdgeLengthCallback();
+        } else {
+            return super.getVerticalFadingEdgeLength();
+        }
+    }
+
+    @Override
+    public int getHorizontalFadingEdgeLength() {
+        if (mPerformanceHelper != null) {
+            return mPerformanceHelper.getHorizontalFadingEdgeLengthCallback();
+        } else {
+            return super.getHorizontalFadingEdgeLength();
+        }
     }
 
     @Override
@@ -150,6 +207,14 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         final int leftPadding = mContext.getResources()
             .getDimensionPixelOffset(R.dimen.status_bar_recents_thumbnail_left_margin);
         setOverScrollEffectPadding(leftPadding, 0);
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        if (mPerformanceHelper != null) {
+            mPerformanceHelper.onAttachedToWindowCallback(
+                    mCallback, mLinearLayout, isHardwareAccelerated());
+        }
     }
 
     @Override
@@ -192,6 +257,12 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
         });
     }
 
+    public void onRecentsVisibilityChanged() {
+        if (mPerformanceHelper != null) {
+            mPerformanceHelper.updateShowBackground();
+        }
+    }
+
     @Override
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
@@ -220,6 +291,9 @@ public class RecentsHorizontalScrollView extends HorizontalScrollView
 
     @Override
     public void setLayoutTransition(LayoutTransition transition) {
+        if (mPerformanceHelper != null) {
+            mPerformanceHelper.setLayoutTransitionCallback(transition);
+        }
         // The layout transition applies to our embedded LinearLayout
         mLinearLayout.setLayoutTransition(transition);
     }
