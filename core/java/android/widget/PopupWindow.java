@@ -1065,9 +1065,10 @@ public class PopupWindow {
     private boolean findDropDownPosition(View anchor, WindowManager.LayoutParams p,
             int xoff, int yoff) {
 
+        final int anchorHeight = anchor.getHeight();
         anchor.getLocationInWindow(mDrawingLocation);
         p.x = mDrawingLocation[0] + xoff;
-        p.y = mDrawingLocation[1] + anchor.getHeight() + yoff;
+        p.y = mDrawingLocation[1] + anchorHeight + yoff;
         
         boolean onTop = false;
 
@@ -1076,9 +1077,12 @@ public class PopupWindow {
         anchor.getLocationOnScreen(mScreenLocation);
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
+
+        int screenY = mScreenLocation[1] + anchorHeight + yoff;
         
         final View root = anchor.getRootView();
-        if (p.y + mPopupHeight > displayFrame.bottom || p.x + mPopupWidth - root.getWidth() > 0) {
+        if (screenY + mPopupHeight > displayFrame.bottom ||
+                p.x + mPopupWidth - root.getWidth() > 0) {
             // if the drop down disappears at the bottom of the screen. we try to
             // scroll a parent scrollview or move the drop down back up on top of
             // the edit box
