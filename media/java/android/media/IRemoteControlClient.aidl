@@ -19,7 +19,12 @@ package android.media;
 import android.graphics.Bitmap;
 
 /**
- * {@hide}
+ * @hide
+ * Interface for an object that exposes information meant to be consumed by remote controls
+ * capable of displaying metadata, album art and media transport control buttons.
+ * Such a remote control client object is associated with a media button event receiver
+ * when registered through
+ * {@link AudioManager#registerRemoteControlClient(ComponentName, IRemoteControlClient)}.
  */
 interface IRemoteControlClient
 {
@@ -41,36 +46,49 @@ interface IRemoteControlClient
      *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_TITLE},
      *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_WRITER},
      *      {@link android.media.MediaMetadataRetriever#METADATA_KEY_YEAR}.
-     * @return null if the given field is not supported, or the String matching the metadata field.
+     * @return null if the requested field is not supported, or the String matching the
+     *       metadata field.
      */
     String getMetadataString(int field);
 
     /**
-     * Returns the current playback state.
+     * Called by a remote control to retrieve the current playback state.
      * @return one of the following values:
-     *       {@link android.media.AudioManager.RemoteControl#PLAYSTATE_STOPPED},
-     *       {@link android.media.AudioManager.RemoteControl#PLAYSTATE_PAUSED},
-     *       {@link android.media.AudioManager.RemoteControl#PLAYSTATE_PLAYING},
-     *       {@link android.media.AudioManager.RemoteControl#PLAYSTATE_FAST_FORWARDING},
-     *       {@link android.media.AudioManager.RemoteControl#PLAYSTATE_REWINDING},
-     *       {@link android.media.AudioManager.RemoteControl#PLAYSTATE_SKIPPING_FORWARDS},
-     *       {@link android.media.AudioManager.RemoteControl#PLAYSTATE_SKIPPING_BACKWARDS},
-     *       {@link android.media.AudioManager.RemoteControl#PLAYSTATE_BUFFERING}.
+     *       {@link android.media.AudioManager.RemoteControlParameters#PLAYSTATE_STOPPED},
+     *       {@link android.media.AudioManager.RemoteControlParameters#PLAYSTATE_PAUSED},
+     *       {@link android.media.AudioManager.RemoteControlParameters#PLAYSTATE_PLAYING},
+     *       {@link android.media.AudioManager.RemoteControlParameters#PLAYSTATE_FAST_FORWARDING},
+     *       {@link android.media.AudioManager.RemoteControlParameters#PLAYSTATE_REWINDING},
+     *       {@link android.media.AudioManager.RemoteControlParameters#PLAYSTATE_SKIPPING_FORWARDS},
+     *       {@link android.media.AudioManager.RemoteControlParameters#PLAYSTATE_SKIPPING_BACKWARDS},
+     *       {@link android.media.AudioManager.RemoteControlParameters#PLAYSTATE_BUFFERING},
+     *       {@link android.media.AudioManager.RemoteControlParameters#PLAYSTATE_ERROR}.
      */
     int getPlaybackState();
 
     /**
-     * Returns the flags for the media transport control buttons this client supports.
-     * @see {@link android.media.AudioManager.RemoteControl#FLAG_KEY_MEDIA_PREVIOUS},
-     *      {@link android.media.AudioManager.RemoteControl#FLAG_KEY_MEDIA_REWIND},
-     *      {@link android.media.AudioManager.RemoteControl#FLAG_KEY_MEDIA_PLAY},
-     *      {@link android.media.AudioManager.RemoteControl#FLAG_KEY_MEDIA_PLAY_PAUSE},
-     *      {@link android.media.AudioManager.RemoteControl#FLAG_KEY_MEDIA_PAUSE},
-     *      {@link android.media.AudioManager.RemoteControl#FLAG_KEY_MEDIA_STOP},
-     *      {@link android.media.AudioManager.RemoteControl#FLAG_KEY_MEDIA_FAST_FORWARD},
-     *      {@link android.media.AudioManager.RemoteControl#FLAG_KEY_MEDIA_NEXT}
+     * Called by a remote control to retrieve the flags for the media transport control buttons
+     * that this client supports.
+     * @see {@link android.media.AudioManager.RemoteControlParameters#FLAG_KEY_MEDIA_PREVIOUS},
+     *      {@link android.media.AudioManager.RemoteControlParameters#FLAG_KEY_MEDIA_REWIND},
+     *      {@link android.media.AudioManager.RemoteControlParameters#FLAG_KEY_MEDIA_PLAY},
+     *      {@link android.media.AudioManager.RemoteControlParameters#FLAG_KEY_MEDIA_PLAY_PAUSE},
+     *      {@link android.media.AudioManager.RemoteControlParameters#FLAG_KEY_MEDIA_PAUSE},
+     *      {@link android.media.AudioManager.RemoteControlParameters#FLAG_KEY_MEDIA_STOP},
+     *      {@link android.media.AudioManager.RemoteControlParameters#FLAG_KEY_MEDIA_FAST_FORWARD},
+     *      {@link android.media.AudioManager.RemoteControlParameters#FLAG_KEY_MEDIA_NEXT}
      */
     int getTransportControlFlags();
 
-    Bitmap getAlbumArt(int width, int height);
+    /**
+     * Called by a remote control to retrieve the album art picture at the requested size.
+     * Note that returning a bitmap smaller than the maximum requested dimension is accepted
+     * and it will be scaled as needed, but exceeding the maximum dimensions may produce
+     * unspecified results, such as the image being cropped or simply not being displayed.
+     * @param maxWidth the maximum width of the requested bitmap expressed in pixels.
+     * @param maxHeight the maximum height of the requested bitmap expressed in pixels.
+     * @return the bitmap for the album art, or null if there isn't any.
+     * @see android.graphics.Bitmap
+     */
+    Bitmap getAlbumArt(int maxWidth, int maxHeight);
 }
