@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.ManifestDigest;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
@@ -289,11 +290,19 @@ public abstract class PackageManager {
     public static final int INSTALL_EXTERNAL = 0x00000008;
 
     /**
-    * Flag parameter for {@link #installPackage} to indicate that this
-    * package has to be installed on the sdcard.
-    * @hide
-    */
-   public static final int INSTALL_INTERNAL = 0x00000010;
+     * Flag parameter for {@link #installPackage} to indicate that this package
+     * has to be installed on the sdcard.
+     * @hide
+     */
+    public static final int INSTALL_INTERNAL = 0x00000010;
+
+    /**
+     * Flag parameter for {@link #installPackage} to indicate that this install
+     * was initiated via ADB.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FROM_ADB = 0x00000020;
 
     /**
      * Flag parameter for
@@ -481,6 +490,30 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_FAILED_MEDIA_UNAVAILABLE = -20;
+
+    /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the new package couldn't be installed because the verification timed out.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_VERIFICATION_TIMEOUT = -21;
+
+    /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the new package couldn't be installed because the verification did not succeed.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_VERIFICATION_FAILURE = -22;
+
+    /**
+     * Installation return code: this is passed to the {@link IPackageInstallObserver} by
+     * {@link #installPackage(android.net.Uri, IPackageInstallObserver, int)} if
+     * the package changed from what the calling program expected.
+     * @hide
+     */
+    public static final int INSTALL_FAILED_PACKAGE_CHANGED = -23;
 
     /**
      * Installation parse return code: this is passed to the {@link IPackageInstallObserver} by
@@ -995,35 +1028,63 @@ public abstract class PackageManager {
             = "android.content.pm.CLEAN_EXTERNAL_STORAGE";
 
     /**
+     * Extra field name for the URI to a verification file. Passed to a package
+     * verifier.
+     *
+     * @hide
+     */
+    public static final String EXTRA_VERIFICATION_URI = "android.content.pm.extra.VERIFICATION_URI";
+
+    /**
+     * Extra field name for the ID of a package pending verification. Passed to
+     * a package verifier and is used to call back to
+     * {@link PackageManager#verifyPendingInstall(int, boolean)}
+     *
+     * @hide
+     */
+    public static final String EXTRA_VERIFICATION_ID = "android.content.pm.extra.VERIFICATION_ID";
+
+    /**
+     * Extra field name for the package identifier which is trying to install
+     * the package.
+     *
+     * @hide
+     */
+    public static final String EXTRA_VERIFICATION_INSTALLER_PACKAGE
+            = "android.content.pm.extra.VERIFICATION_INSTALLER_PACKAGE";
+
+    /**
+     * Extra field name for the requested install flags for a package pending
+     * verification. Passed to a package verifier.
+     *
+     * @hide
+     */
+    public static final String EXTRA_VERIFICATION_INSTALL_FLAGS
+            = "android.content.pm.extra.VERIFICATION_INSTALL_FLAGS";
+
+    /**
      * Retrieve overall information about an application package that is
      * installed on the system.
-     *
-     * <p>Throws {@link NameNotFoundException} if a package with the given
-     * name can not be found on the system.
+     * <p>
+     * Throws {@link NameNotFoundException} if a package with the given name can
+     * not be found on the system.
      *
      * @param packageName The full name (i.e. com.google.apps.contacts) of the
-     *                    desired package.
-
+     *            desired package.
      * @param flags Additional option flags. Use any combination of
-     * {@link #GET_ACTIVITIES},
-     * {@link #GET_GIDS},
-     * {@link #GET_CONFIGURATIONS},
-     * {@link #GET_INSTRUMENTATION},
-     * {@link #GET_PERMISSIONS},
-     * {@link #GET_PROVIDERS},
-     * {@link #GET_RECEIVERS},
-     * {@link #GET_SERVICES},
-     * {@link #GET_SIGNATURES},
-     * {@link #GET_UNINSTALLED_PACKAGES} to modify the data returned.
-     *
-     * @return Returns a PackageInfo object containing information about the package.
-     *         If flag GET_UNINSTALLED_PACKAGES is set and  if the package is not
-     *         found in the list of installed applications, the package information is
-     *         retrieved from the list of uninstalled applications(which includes
-     *         installed applications as well as applications
-     *         with data directory ie applications which had been
+     *            {@link #GET_ACTIVITIES}, {@link #GET_GIDS},
+     *            {@link #GET_CONFIGURATIONS}, {@link #GET_INSTRUMENTATION},
+     *            {@link #GET_PERMISSIONS}, {@link #GET_PROVIDERS},
+     *            {@link #GET_RECEIVERS}, {@link #GET_SERVICES},
+     *            {@link #GET_SIGNATURES}, {@link #GET_UNINSTALLED_PACKAGES} to
+     *            modify the data returned.
+     * @return Returns a PackageInfo object containing information about the
+     *         package. If flag GET_UNINSTALLED_PACKAGES is set and if the
+     *         package is not found in the list of installed applications, the
+     *         package information is retrieved from the list of uninstalled
+     *         applications(which includes installed applications as well as
+     *         applications with data directory ie applications which had been
      *         deleted with DONT_DELTE_DATA flag set).
-     *
      * @see #GET_ACTIVITIES
      * @see #GET_GIDS
      * @see #GET_CONFIGURATIONS
@@ -1034,7 +1095,6 @@ public abstract class PackageManager {
      * @see #GET_SERVICES
      * @see #GET_SIGNATURES
      * @see #GET_UNINSTALLED_PACKAGES
-     *
      */
     public abstract PackageInfo getPackageInfo(String packageName, int flags)
             throws NameNotFoundException;
@@ -2059,6 +2119,46 @@ public abstract class PackageManager {
     public abstract void installPackage(
             Uri packageURI, IPackageInstallObserver observer, int flags,
             String installerPackageName);
+
+    /**
+     * Similar to
+     * {@link #installPackage(Uri, IPackageInstallObserver, int, String)} but
+     * with an extra verification file provided.
+     *
+     * @param packageURI The location of the package file to install. This can
+     *            be a 'file:' or a 'content:' URI.
+     * @param observer An observer callback to get notified when the package
+     *            installation is complete.
+     *            {@link IPackageInstallObserver#packageInstalled(String, int)}
+     *            will be called when that happens. observer may be null to
+     *            indicate that no callback is desired.
+     * @param flags - possible values: {@link #INSTALL_FORWARD_LOCK},
+     *            {@link #INSTALL_REPLACE_EXISTING}, {@link #INSTALL_ALLOW_TEST}
+     *            .
+     * @param installerPackageName Optional package name of the application that
+     *            is performing the installation. This identifies which market
+     *            the package came from.
+     * @param verificationURI The location of the supplementary verification
+     *            file. This can be a 'file:' or a 'content:' URI.
+     * @hide
+     */
+    public abstract void installPackageWithVerification(Uri packageURI,
+            IPackageInstallObserver observer, int flags, String installerPackageName,
+            Uri verificationURI, ManifestDigest manifestDigest);
+
+    /**
+     * Allows a package listening to the
+     * {@link Intent#ACTION_PACKAGE_NEEDS_VERIFICATION package verification
+     * broadcast} to respond to the package manager.
+     *
+     * @param id pending package identifier as passed via the
+     *            {@link PackageManager#EXTRA_VERIFICATION_ID} Intent extra
+     * @param verified whether the package was verified as valid
+     * @param failureMessage if verification was false, this is the error
+     *            message that may be shown to the user
+     * @hide
+     */
+    public abstract void verifyPendingInstall(int id, boolean verified, String failureMessage);
 
     /**
      * Change the installer associated with a given package.  There are limitations
