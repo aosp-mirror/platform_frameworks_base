@@ -22,8 +22,6 @@
     android:id="@+id/search_bar"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="8dip"
-    android:paddingRight="8dip"
     android:orientation="horizontal"
     >
 
@@ -59,6 +57,8 @@
         android:layout_gravity="center_vertical"
         android:layout_marginTop="4dip"
         android:layout_marginBottom="4dip"
+        android:layout_marginLeft="8dip"
+        android:layout_marginRight="8dip"
         android:orientation="horizontal">
 
         <ImageView
