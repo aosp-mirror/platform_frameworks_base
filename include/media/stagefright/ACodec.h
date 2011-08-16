@@ -36,6 +36,7 @@ struct ACodec : public AHierarchicalStateMachine {
         kWhatShutdownCompleted   = 'scom',
         kWhatFlushCompleted      = 'fcom',
         kWhatOutputFormatChanged = 'outC',
+        kWhatError               = 'erro',
     };
 
     ACodec();
@@ -58,7 +59,6 @@ private:
     struct OutputPortSettingsChangedState;
     struct ExecutingToIdleState;
     struct IdleToLoadedState;
-    struct ErrorState;
     struct FlushingState;
 
     enum {
@@ -102,7 +102,6 @@ private:
     sp<OutputPortSettingsChangedState> mOutputPortSettingsChangedState;
     sp<ExecutingToIdleState> mExecutingToIdleState;
     sp<IdleToLoadedState> mIdleToLoadedState;
-    sp<ErrorState> mErrorState;
     sp<FlushingState> mFlushingState;
 
     AString mComponentName;

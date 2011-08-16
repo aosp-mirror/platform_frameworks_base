@@ -111,7 +111,7 @@ private:
     void onPause();
     void onResume();
 
-    void notifyEOS(bool audio);
+    void notifyEOS(bool audio, status_t finalResult);
     void notifyFlushComplete(bool audio);
     void notifyPosition();
 

@@ -200,6 +200,22 @@ void NuPlayer::Renderer::signalAudioSinkChanged() {
 void NuPlayer::Renderer::onDrainAudioQueue() {
 
     for (;;) {
+        if (mAudioQueue.empty()) {
+            break;
+        }
+
+        QueueEntry *entry = &*mAudioQueue.begin();
+
+        if (entry->mBuffer == NULL) {
+            // EOS
+
+            notifyEOS(true /* audio */, entry->mFinalResult);
+
+            mAudioQueue.erase(mAudioQueue.begin());
+            entry = NULL;
+            return;
+        }
+
         uint32_t numFramesPlayed;
         CHECK_EQ(mAudioSink->getPosition(&numFramesPlayed), (status_t)OK);
 
@@ -211,22 +227,6 @@ void NuPlayer::Renderer::onDrainAudioQueue() {
 
         if (numBytesAvailableToWrite == 0) {
             break;
-        }
-
-        if (mAudioQueue.empty()) {
-            break;
-        }
-
-        QueueEntry *entry = &*mAudioQueue.begin();
-
-        if (entry->mBuffer == NULL) {
-            // EOS
-
-            notifyEOS(true /* audio */);
-
-            mAudioQueue.erase(mAudioQueue.begin());
-            entry = NULL;
-            return;
         }
 
         if (entry->mOffset == 0) {
@@ -330,7 +330,7 @@ void NuPlayer::Renderer::onDrainVideoQueue() {
     if (entry->mBuffer == NULL) {
         // EOS
 
-        notifyEOS(false /* audio */);
+        notifyEOS(false /* audio */, entry->mFinalResult);
 
         mVideoQueue.erase(mVideoQueue.begin());
         entry = NULL;
@@ -352,10 +352,11 @@ void NuPlayer::Renderer::onDrainVideoQueue() {
     notifyPosition();
 }
 
-void NuPlayer::Renderer::notifyEOS(bool audio) {
+void NuPlayer::Renderer::notifyEOS(bool audio, status_t finalResult) {
     sp<AMessage> notify = mNotify->dup();
     notify->setInt32("what", kWhatEOS);
     notify->setInt32("audio", static_cast<int32_t>(audio));
+    notify->setInt32("finalResult", finalResult);
     notify->post();
 }
 
