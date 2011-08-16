@@ -243,6 +243,18 @@ please see styles_device_defaults.xml.
         <item name="android:textStyle">bold</item>
     </style>
 
+    <style name="TextAppearance.Suggestion">
+        <item name="android:textUnderlineThicknessPercentage">200</item>
+    </style>
+
+    <style name="TextAppearance.EasyCorrectSuggestion" parent="TextAppearance.Suggestion">
+        <item name="android:textUnderlineColor">@color/holo_blue_dark</item>
+    </style>
+
+    <style name="TextAppearance.MisspelledSuggestion" parent="TextAppearance.Suggestion">
+        <item name="android:textUnderlineColor">@color/holo_red_light</item>
+    </style>
+
     <!-- Widget Styles -->
 
     <style name="Widget">

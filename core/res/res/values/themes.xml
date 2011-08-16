@@ -88,7 +88,10 @@ please see themes_device_defaults.xml.
         <item name="textAppearanceSmallInverse">@android:style/TextAppearance.Small.Inverse</item>
         <item name="textAppearanceSearchResultTitle">@android:style/TextAppearance.SearchResult.Title</item>
         <item name="textAppearanceSearchResultSubtitle">@android:style/TextAppearance.SearchResult.Subtitle</item>
-        
+
+        <item name="textAppearanceEasyCorrectSuggestion">@android:style/TextAppearance.EasyCorrectSuggestion</item>
+        <item name="textAppearanceMisspelledSuggestion">@android:style/TextAppearance.MisspelledSuggestion</item>
+
         <item name="textAppearanceButton">@android:style/TextAppearance.Widget.Button</item>
         
         <item name="editTextColor">?android:attr/textColorPrimaryInverse</item>

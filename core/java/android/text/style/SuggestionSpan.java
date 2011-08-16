@@ -17,10 +17,13 @@
 package android.text.style;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
 import android.text.ParcelableSpan;
+import android.text.TextPaint;
 import android.text.TextUtils;
 import android.widget.TextView;
 
@@ -34,22 +37,35 @@ import java.util.Locale;
  * display a popup dialog listing suggestion replacement for that text. The user can then replace
  * the original text by one of the suggestions.
  *
- * These spans should typically be created by the input method to privide correction and alternates
+ * These spans should typically be created by the input method to provide correction and alternates
  * for the text.
  *
  * @see TextView#setSuggestionsEnabled(boolean)
  */
-public class SuggestionSpan implements ParcelableSpan {
+public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
+
     /**
-     * Flag for indicating that the input is verbatim. TextView refers to this flag to determine
-     * how it displays a word with SuggestionSpan.
+     * Sets this flag if the suggestions should be easily accessible with few interactions.
+     * This flag should be set for every suggestions that the user is likely to use.
      */
-    public static final int FLAG_VERBATIM = 0x0001;
+    public static final int FLAG_EASY_CORRECT = 0x0001;
+
+    /**
+     * Sets this flag if the suggestions apply to a misspelled word/text. This type of suggestion is
+     * rendered differently to highlight the error.
+     */
+    public static final int FLAG_MISSPELLED = 0x0002;
 
     public static final String ACTION_SUGGESTION_PICKED = "android.text.style.SUGGESTION_PICKED";
     public static final String SUGGESTION_SPAN_PICKED_AFTER = "after";
     public static final String SUGGESTION_SPAN_PICKED_BEFORE = "before";
     public static final String SUGGESTION_SPAN_PICKED_HASHCODE = "hashcode";
+
+    /**
+     * The default underline thickness as a percentage of the system's default underline thickness
+     * (i.e., 100 means the default thickness, and 200 is a double thickness).
+     */
+    private static final int DEFAULT_UNDERLINE_PERCENTAGE = 100;
 
     public static final int SUGGESTIONS_MAX_SIZE = 5;
 
@@ -65,6 +81,11 @@ public class SuggestionSpan implements ParcelableSpan {
     private final String mLocaleString;
     private final String mNotificationTargetClassName;
     private final int mHashCode;
+
+    private float mMisspelledUnderlineThickness;
+    private int mMisspelledUnderlineColor;
+    private float mEasyCorrectUnderlineThickness;
+    private int mEasyCorrectUnderlineColor;
 
     /*
      * TODO: If switching IME is required, needs to add parameters for ids of InputMethodInfo
@@ -107,6 +128,7 @@ public class SuggestionSpan implements ParcelableSpan {
         } else {
             mLocaleString = locale.toString();
         }
+
         if (notificationTargetClass != null) {
             mNotificationTargetClassName = notificationTargetClass.getCanonicalName();
         } else {
@@ -114,6 +136,36 @@ public class SuggestionSpan implements ParcelableSpan {
         }
         mHashCode = hashCodeInternal(
                 mFlags, mSuggestions, mLocaleString, mNotificationTargetClassName);
+
+        initStyle(context);
+    }
+
+    private void initStyle(Context context) {
+        // Read the colors. We need to store the color and the underline thickness, as the span
+        // does not have access to the context when it is read from a parcel.
+        TypedArray typedArray;
+
+        typedArray = context.obtainStyledAttributes(null,
+                com.android.internal.R.styleable.SuggestionSpan,
+                com.android.internal.R.attr.textAppearanceEasyCorrectSuggestion, 0);
+
+        mEasyCorrectUnderlineThickness = getThicknessPercentage(typedArray,
+                com.android.internal.R.styleable.SuggestionSpan_textUnderlineThicknessPercentage);
+        mEasyCorrectUnderlineColor = typedArray.getColor(
+                com.android.internal.R.styleable.SuggestionSpan_textUnderlineColor, Color.BLACK);
+
+        typedArray = context.obtainStyledAttributes(null,
+                com.android.internal.R.styleable.SuggestionSpan,
+                com.android.internal.R.attr.textAppearanceMisspelledSuggestion, 0);
+        mMisspelledUnderlineThickness = getThicknessPercentage(typedArray,
+                com.android.internal.R.styleable.SuggestionSpan_textUnderlineThicknessPercentage);
+        mMisspelledUnderlineColor = typedArray.getColor(
+                com.android.internal.R.styleable.SuggestionSpan_textUnderlineColor, Color.BLACK);
+    }
+
+    private static float getThicknessPercentage(TypedArray typedArray, int index) {
+        int value  = typedArray.getInteger(index, DEFAULT_UNDERLINE_PERCENTAGE);
+        return value / 100.0f;
     }
 
     public SuggestionSpan(Parcel src) {
@@ -122,6 +174,10 @@ public class SuggestionSpan implements ParcelableSpan {
         mLocaleString = src.readString();
         mNotificationTargetClassName = src.readString();
         mHashCode = src.readInt();
+        mEasyCorrectUnderlineColor = src.readInt();
+        mEasyCorrectUnderlineThickness = src.readFloat();
+        mMisspelledUnderlineColor = src.readInt();
+        mMisspelledUnderlineThickness = src.readFloat();
     }
 
     /**
@@ -167,6 +223,10 @@ public class SuggestionSpan implements ParcelableSpan {
         dest.writeString(mLocaleString);
         dest.writeString(mNotificationTargetClassName);
         dest.writeInt(mHashCode);
+        dest.writeInt(mEasyCorrectUnderlineColor);
+        dest.writeFloat(mEasyCorrectUnderlineThickness);
+        dest.writeInt(mMisspelledUnderlineColor);
+        dest.writeFloat(mMisspelledUnderlineThickness);
     }
 
     @Override
@@ -205,4 +265,13 @@ public class SuggestionSpan implements ParcelableSpan {
             return new SuggestionSpan[size];
         }
     };
+
+    @Override
+    public void updateDrawState(TextPaint tp) {
+        if ((getFlags() & FLAG_MISSPELLED) != 0) {
+            tp.setUnderlineText(true, mMisspelledUnderlineColor, mMisspelledUnderlineThickness);
+        } else if ((getFlags() & FLAG_EASY_CORRECT) != 0) {
+            tp.setUnderlineText(true, mEasyCorrectUnderlineColor, mEasyCorrectUnderlineThickness);
+        }
+    }
 }
