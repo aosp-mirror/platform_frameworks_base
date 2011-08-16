@@ -1743,7 +1743,13 @@ public class AudioManager {
 
     /**
      * @hide
-     * @param eventReceiver
+     * Unregisters the remote control client that was providing information to display on the
+     * remotes.
+     * @param eventReceiver identifier of a {@link android.content.BroadcastReceiver}
+     *      that receives the media button intent, and associated with the remote control
+     *      client.
+     * @see #registerRemoteControlClient(ComponentName)
+
      */
     public void unregisterRemoteControlClient(ComponentName eventReceiver) {
         if (eventReceiver == null) {
@@ -1783,27 +1789,152 @@ public class AudioManager {
      * Definitions of constants to be used in {@link android.media.IRemoteControlClient}.
      */
     public final class RemoteControlParameters {
+        /**
+         * Playback state of an IRemoteControlClient which is stopped.
+         *
+         * @see android.media.IRemoteControlClient#getPlaybackState()
+         */
         public final static int PLAYSTATE_STOPPED            = 1;
+        /**
+         * Playback state of an IRemoteControlClient which is paused.
+         *
+         * @see android.media.IRemoteControlClient#getPlaybackState()
+         */
         public final static int PLAYSTATE_PAUSED             = 2;
+        /**
+         * Playback state of an IRemoteControlClient which is playing media.
+         *
+         * @see android.media.IRemoteControlClient#getPlaybackState()
+         */
         public final static int PLAYSTATE_PLAYING            = 3;
+        /**
+         * Playback state of an IRemoteControlClient which is fast forwarding in the media
+         *    it is currently playing.
+         *
+         * @see android.media.IRemoteControlClient#getPlaybackState()
+         */
         public final static int PLAYSTATE_FAST_FORWARDING    = 4;
+        /**
+         * Playback state of an IRemoteControlClient which is fast rewinding in the media
+         *    it is currently playing.
+         *
+         * @see android.media.IRemoteControlClient#getPlaybackState()
+         */
         public final static int PLAYSTATE_REWINDING          = 5;
+        /**
+         * Playback state of an IRemoteControlClient which is skipping to the next
+         *    logical chapter (such as a song in a playlist) in the media it is currently playing.
+         *
+         * @see android.media.IRemoteControlClient#getPlaybackState()
+         */
         public final static int PLAYSTATE_SKIPPING_FORWARDS  = 6;
+        /**
+         * Playback state of an IRemoteControlClient which is skipping back to the previous
+         *    logical chapter (such as a song in a playlist) in the media it is currently playing.
+         *
+         * @see android.media.IRemoteControlClient#getPlaybackState()
+         */
         public final static int PLAYSTATE_SKIPPING_BACKWARDS = 7;
+        /**
+         * Playback state of an IRemoteControlClient which is buffering data to play before it can
+         *    start or resume playback.
+         *
+         * @see android.media.IRemoteControlClient#getPlaybackState()
+         */
         public final static int PLAYSTATE_BUFFERING          = 8;
+        /**
+         * Playback state of an IRemoteControlClient which cannot perform any playback related
+         *    operation because of an internal error. Examples of such situations are no network
+         *    connectivity when attempting to stream data from a server, or expired user credentials
+         *    when trying to play subscription-based content.
+         *
+         * @see android.media.IRemoteControlClient#getPlaybackState()
+         */
+        public final static int PLAYSTATE_ERROR              = 9;
 
+        /**
+         * Flag indicating an IRemoteControlClient makes use of the "previous" media key.
+         *
+         * @see android.media.IRemoteControlClient#getTransportControlFlags()
+         * @see android.view.KeyEvent#KEYCODE_MEDIA_PREVIOUS
+         */
         public final static int FLAG_KEY_MEDIA_PREVIOUS = 1 << 0;
+        /**
+         * Flag indicating an IRemoteControlClient makes use of the "rewing" media key.
+         *
+         * @see android.media.IRemoteControlClient#getTransportControlFlags()
+         * @see android.view.KeyEvent#KEYCODE_MEDIA_REWIND
+         */
         public final static int FLAG_KEY_MEDIA_REWIND = 1 << 1;
+        /**
+         * Flag indicating an IRemoteControlClient makes use of the "play" media key.
+         *
+         * @see android.media.IRemoteControlClient#getTransportControlFlags()
+         * @see android.view.KeyEvent#KEYCODE_MEDIA_PLAY
+         */
         public final static int FLAG_KEY_MEDIA_PLAY = 1 << 2;
+        /**
+         * Flag indicating an IRemoteControlClient makes use of the "play/pause" media key.
+         *
+         * @see android.media.IRemoteControlClient#getTransportControlFlags()
+         * @see android.view.KeyEvent#KEYCODE_MEDIA_PLAY_PAUSE
+         */
         public final static int FLAG_KEY_MEDIA_PLAY_PAUSE = 1 << 3;
+        /**
+         * Flag indicating an IRemoteControlClient makes use of the "pause" media key.
+         *
+         * @see android.media.IRemoteControlClient#getTransportControlFlags()
+         * @see android.view.KeyEvent#KEYCODE_MEDIA_PAUSE
+         */
         public final static int FLAG_KEY_MEDIA_PAUSE = 1 << 4;
+        /**
+         * Flag indicating an IRemoteControlClient makes use of the "stop" media key.
+         *
+         * @see android.media.IRemoteControlClient#getTransportControlFlags()
+         * @see android.view.KeyEvent#KEYCODE_MEDIA_STOP
+         */
         public final static int FLAG_KEY_MEDIA_STOP = 1 << 5;
+        /**
+         * Flag indicating an IRemoteControlClient makes use of the "fast forward" media key.
+         *
+         * @see android.media.IRemoteControlClient#getTransportControlFlags()
+         * @see android.view.KeyEvent#KEYCODE_MEDIA_FAST_FORWARD
+         */
         public final static int FLAG_KEY_MEDIA_FAST_FORWARD = 1 << 6;
+        /**
+         * Flag indicating an IRemoteControlClient makes use of the "next" media key.
+         *
+         * @see android.media.IRemoteControlClient#getTransportControlFlags()
+         * @see android.view.KeyEvent#KEYCODE_MEDIA_NEXT
+         */
         public final static int FLAG_KEY_MEDIA_NEXT = 1 << 7;
 
+        /**
+         * Flag used to signal that the metadata exposed by the IRemoteControlClient has changed.
+         *
+         * @see #notifyRemoteControlInformationChanged(ComponentName, int)
+         */
         public final static int FLAG_INFORMATION_CHANGED_METADATA = 1 << 0;
+        /**
+         * Flag used to signal that the transport control buttons supported by the
+         * IRemoteControlClient have changed.
+         * This can for instance happen when playback is at the end of a playlist, and the "next"
+         * operation is not supported anymore.
+         *
+         * @see #notifyRemoteControlInformationChanged(ComponentName, int)
+         */
         public final static int FLAG_INFORMATION_CHANGED_KEY_MEDIA = 1 << 1;
+        /**
+         * Flag used to signal that the playback state of the IRemoteControlClient has changed.
+         *
+         * @see #notifyRemoteControlInformationChanged(ComponentName, int)
+         */
         public final static int FLAG_INFORMATION_CHANGED_PLAYSTATE = 1 << 2;
+        /**
+         * Flag used to signal that the album art for the IRemoteControlClient has changed.
+         *
+         * @see #notifyRemoteControlInformationChanged(ComponentName, int)
+         */
         public final static int FLAG_INFORMATION_CHANGED_ALBUM_ART = 1 << 3;
     }
 
