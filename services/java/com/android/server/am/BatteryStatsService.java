@@ -478,6 +478,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub {
                 } else if ("-h".equals(arg)) {
                     dumpHelp(pw);
                     return;
+                } else if ("-a".equals(arg)) {
+                    // fall through
                 } else {
                     pw.println("Unknown option: " + arg);
                     dumpHelp(pw);
