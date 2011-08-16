@@ -17,6 +17,7 @@
 package com.android.test.hwui;
 
 import android.app.Activity;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -33,6 +34,7 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
     private Camera mCamera;
     private TextureView mTextureView;
     private FrameLayout mContent;
+    private Matrix mMatrix = new Matrix();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,8 +84,6 @@ public class TextureViewActivity extends Activity implements TextureView.Surface
         }
 
         mCamera.startPreview();
-
-        mTextureView.setCameraDistance(5000);
     }
 
     @Override

@@ -18,6 +18,7 @@ package android.view;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 
 /**
  * A hardware layer can be used to render graphics operations into a hardware
@@ -150,4 +151,11 @@ abstract class HardwareLayer {
         mHeight = height;
         mOpaque = isOpaque;
     }
+
+    /**
+     * Sets an optional transform on this layer.
+     * 
+     * @param matrix The transform to apply to the layer.
+     */
+    abstract void setTransform(Matrix matrix);
 }
