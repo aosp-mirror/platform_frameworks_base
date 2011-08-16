@@ -46,9 +46,9 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * {@link WifiWatchdogStateMachine} monitors the initial connection to a Wi-Fi
@@ -79,7 +79,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
     private static final int LOW_SIGNAL_CUTOFF = 1;
 
     private static final long DEFAULT_DNS_CHECK_SHORT_INTERVAL_MS = 2 * 60 * 1000;
-    private static final long DEFAULT_DNS_CHECK_LONG_INTERVAL_MS = 10 * 60 * 1000;
+    private static final long DEFAULT_DNS_CHECK_LONG_INTERVAL_MS = 30 * 60 * 1000;
     private static final long DEFAULT_WALLED_GARDEN_INTERVAL_MS = 30 * 60 * 1000;
 
     private static final int DEFAULT_MAX_SSID_BLACKLISTS = 7;
@@ -661,26 +661,34 @@ public class WifiWatchdogStateMachine extends StateMachine {
     }
 
     class DnsCheckingState extends State {
-        int dnsCheckSuccesses = 0;
-        int dnsCheckTries = 0;
-        String dnsCheckLogStr = "";
-        Set<Integer> ids = new HashSet<Integer>();
+        List<InetAddress> mDnsList;
+        int[] dnsCheckSuccesses;
+        String dnsCheckLogStr;
+        String[] dnsResponseStrs;
+        /** Keeps track of active dns pings.  Map is from pingID to index in mDnsList */
+        HashMap<Integer, Integer> idDnsMap = new HashMap<Integer, Integer>();
 
         @Override
         public void enter() {
-            dnsCheckSuccesses = 0;
-            dnsCheckTries = 0;
-            ids.clear();
-            InetAddress dns = mDnsPinger.getDns();
+            mDnsList = mDnsPinger.getDnsList();
+            int numDnses = mDnsList.size();
+            dnsCheckSuccesses = new int[numDnses];
+            dnsResponseStrs = new String[numDnses];
+            for (int i = 0; i < numDnses; i++)
+                dnsResponseStrs[i] = "";
+
             if (DBG) {
-                Slog.d(WWSM_TAG, "Starting DNS pings at " + SystemClock.elapsedRealtime());
                 dnsCheckLogStr = String.format("Pinging %s on ssid [%s]: ",
-                        mDnsPinger.getDns(), mConnectionInfo.getSSID());
+                        mDnsList, mConnectionInfo.getSSID());
+                Slog.d(WWSM_TAG, dnsCheckLogStr);
             }
 
+            idDnsMap.clear();
             for (int i=0; i < mNumDnsPings; i++) {
-                ids.add(mDnsPinger.pingDnsAsync(dns, mDnsPingTimeoutMs,
-                        DNS_INTRATEST_PING_INTERVAL * i));
+                for (int j = 0; j < numDnses; j++) {
+                    idDnsMap.put(mDnsPinger.pingDnsAsync(mDnsList.get(j), mDnsPingTimeoutMs,
+                            DNS_INTRATEST_PING_INTERVAL * i), j);
+                }
             }
         }
 
@@ -693,25 +701,22 @@ public class WifiWatchdogStateMachine extends StateMachine {
             int pingID = msg.arg1;
             int pingResponseTime = msg.arg2;
 
-            if (!ids.contains(pingID)) {
+            Integer dnsServerId = idDnsMap.get(pingID);
+            if (dnsServerId == null) {
                 Slog.w(WWSM_TAG, "Received a Dns response with unknown ID!");
                 return HANDLED;
             }
-            ids.remove(pingID);
-            dnsCheckTries++;
+
+            idDnsMap.remove(pingID);
             if (pingResponseTime >= 0)
-                dnsCheckSuccesses++;
+                dnsCheckSuccesses[dnsServerId]++;
 
             if (DBG) {
                 if (pingResponseTime >= 0) {
-                    dnsCheckLogStr += "|" + pingResponseTime;
+                    dnsResponseStrs[dnsServerId] += "|" + pingResponseTime;
                 } else {
-                    dnsCheckLogStr += "|x";
+                    dnsResponseStrs[dnsServerId] += "|x";
                 }
-            }
-
-            if (VDBG) {
-                Slog.v(WWSM_TAG, dnsCheckLogStr);
             }
 
             /**
@@ -723,10 +728,10 @@ public class WifiWatchdogStateMachine extends StateMachine {
              * Our final success count will be at least this big, so we're
              * guaranteed to succeed.
              */
-            if (dnsCheckSuccesses >= mMinDnsResponses) {
+            if (dnsCheckSuccesses[dnsServerId] >= mMinDnsResponses) {
                 // DNS CHECKS OK, NOW WALLED GARDEN
                 if (DBG) {
-                    Slog.d(WWSM_TAG, dnsCheckLogStr + "|  SUCCESS");
+                    Slog.d(WWSM_TAG, makeLogString() + "  SUCCESS");
                 }
 
                 if (!shouldCheckWalledGarden()) {
@@ -748,14 +753,9 @@ public class WifiWatchdogStateMachine extends StateMachine {
                 return HANDLED;
             }
 
-            /**
-             * Our final count will be at most the current count plus the
-             * remaining pings - we're guaranteed to fail.
-             */
-            int remainingChecks = mNumDnsPings - dnsCheckTries;
-            if (remainingChecks + dnsCheckSuccesses < mMinDnsResponses) {
+            if (idDnsMap.isEmpty()) {
                 if (DBG) {
-                    Slog.d(WWSM_TAG, dnsCheckLogStr + "|  FAILURE");
+                    Slog.d(WWSM_TAG, makeLogString() + "  FAILURE");
                 }
                 transitionTo(mDnsCheckFailureState);
                 return HANDLED;
@@ -764,11 +764,17 @@ public class WifiWatchdogStateMachine extends StateMachine {
             return HANDLED;
         }
 
+        private String makeLogString() {
+            String logStr = dnsCheckLogStr;
+            for (String respStr : dnsResponseStrs)
+                logStr += " [" + respStr + "]";
+            return logStr;
+        }
+
         @Override
         public void exit() {
             mDnsPinger.cancelPings();
         }
-
 
         private boolean shouldCheckWalledGarden() {
             if (!mWalledGardenTestEnabled) {
@@ -809,7 +815,8 @@ public class WifiWatchdogStateMachine extends StateMachine {
         int checkGuard = 0;
         Long lastCheckTime = null;
 
-        int curPingID = 0;
+        /** Keeps track of dns pings.  Map is from pingID to InetAddress used for ping */
+        HashMap<Integer, InetAddress> pingInfoMap = new HashMap<Integer, InetAddress>();
 
         @Override
         public void enter() {
@@ -817,7 +824,7 @@ public class WifiWatchdogStateMachine extends StateMachine {
             signalUnstable = false;
             checkGuard++;
             unstableSignalChecks = false;
-            curPingID = 0;
+            pingInfoMap.clear();
             triggerSingleDnsCheck();
         }
 
@@ -853,32 +860,37 @@ public class WifiWatchdogStateMachine extends StateMachine {
                         return HANDLED;
                     }
                     lastCheckTime = SystemClock.elapsedRealtime();
-                    curPingID = mDnsPinger.pingDnsAsync(mDnsPinger.getDns(),
-                            mDnsPingTimeoutMs, 0);
+                    pingInfoMap.clear();
+                    for (InetAddress curDns: mDnsPinger.getDnsList()) {
+                        pingInfoMap.put(mDnsPinger.pingDnsAsync(curDns, mDnsPingTimeoutMs, 0),
+                                curDns);
+                    }
                     return HANDLED;
                 case DnsPinger.DNS_PING_RESULT:
-                    if ((short) msg.arg1 != curPingID) {
-                        if (VDBG) {
-                            Slog.v(WWSM_TAG, "Received non-matching DnsPing w/ id: " +
-                                    msg.arg1);
-                        }
+                    InetAddress curDnsServer = pingInfoMap.get(msg.arg1);
+                    if (curDnsServer == null) {
                         return HANDLED;
                     }
+                    pingInfoMap.remove(msg.arg1);
                     int responseTime = msg.arg2;
                     if (responseTime >= 0) {
                         if (VDBG) {
-                            Slog.v(WWSM_TAG, "Ran a single DNS ping. Response time: "
-                                    + responseTime);
+                            Slog.v(WWSM_TAG, "Single DNS ping OK. Response time: "
+                                    + responseTime + " from DNS " + curDnsServer);
                         }
+                        pingInfoMap.clear();
 
                         checkGuard++;
                         unstableSignalChecks = false;
                         triggerSingleDnsCheck();
                     } else {
-                        if (DBG) {
-                            Slog.d(WWSM_TAG, "Single dns ping failure. Starting full checks.");
+                        if (pingInfoMap.isEmpty()) {
+                            if (DBG) {
+                                Slog.d(WWSM_TAG, "Single dns ping failure. All dns servers failed, "
+                                        + "starting full checks.");
+                            }
+                            transitionTo(mDnsCheckingState);
                         }
-                        transitionTo(mDnsCheckingState);
                     }
                     return HANDLED;
             }
