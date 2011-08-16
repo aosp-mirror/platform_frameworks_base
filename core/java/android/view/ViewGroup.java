@@ -3038,7 +3038,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      * {@hide}
      */
     @Override
-    protected View findViewByPredicateTraversal(Predicate<View> predicate) {
+    protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
         if (predicate.apply(this)) {
             return this;
         }
@@ -3049,7 +3049,7 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         for (int i = 0; i < len; i++) {
             View v = where[i];
 
-            if ((v.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
+            if (v != childToSkip && (v.mPrivateFlags & IS_ROOT_NAMESPACE) == 0) {
                 v = v.findViewByPredicate(predicate);
 
                 if (v != null) {
