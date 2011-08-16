@@ -14658,6 +14658,7 @@ package android.os {
     method public int describeContents();
     method public int detachFd();
     method public static android.os.ParcelFileDescriptor dup(java.io.FileDescriptor) throws java.io.IOException;
+    method public android.os.ParcelFileDescriptor dup() throws java.io.IOException;
     method public static android.os.ParcelFileDescriptor fromDatagramSocket(java.net.DatagramSocket);
     method public static android.os.ParcelFileDescriptor fromFd(int) throws java.io.IOException;
     method public static android.os.ParcelFileDescriptor fromSocket(java.net.Socket);
