@@ -138,6 +138,12 @@ class PackageSignatures {
                                     "Error in package manager settings: <cert> "
                                        + "index " + index + " is not a number at "
                                        + parser.getPositionDescription());
+                        } catch (IllegalArgumentException e) {
+                            PackageManagerService.reportSettingsProblem(Log.WARN,
+                                    "Error in package manager settings: <cert> "
+                                       + "index " + index + " has an invalid signature at "
+                                       + parser.getPositionDescription() + ": "
+                                       + e.getMessage());
                         }
                     } else {
                         PackageManagerService.reportSettingsProblem(Log.WARN,
