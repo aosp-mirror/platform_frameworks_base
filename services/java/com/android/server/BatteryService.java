@@ -498,7 +498,7 @@ class BatteryService extends Binder {
             return;
         }
 
-        if (args == null || args.length == 0) {
+        if (args == null || args.length == 0 || "-a".equals(args[0])) {
             synchronized (this) {
                 pw.println("Current Battery Service state:");
                 pw.println("  AC powered: " + mAcOnline);
