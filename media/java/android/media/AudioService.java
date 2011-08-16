@@ -17,6 +17,7 @@
 package android.media;
 
 import android.app.ActivityManagerNative;
+import android.app.KeyguardManager;
 import android.bluetooth.BluetoothA2dp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -309,6 +310,8 @@ public class AudioService extends IAudioService.Stub {
     private static final int NOTIFICATION_VOLUME_DELAY_MS = 5000;
     // previous volume adjustment direction received by checkForRingerModeChange()
     private int mPrevVolDirection = AudioManager.ADJUST_SAME;
+    // Keyguard manager proxy
+    private KeyguardManager mKeyguardManager;
 
     ///////////////////////////////////////////////////////////////////////////
     // Construction
@@ -492,8 +495,10 @@ public class AudioService extends IAudioService.Stub {
             streamType = getActiveStreamType(suggestedStreamType);
         }
 
-        // Don't play sound on other streams
-        if (streamType != AudioSystem.STREAM_RING && (flags & AudioManager.FLAG_PLAY_SOUND) != 0) {
+        // Play sounds on STREAM_RING only and if lock screen is not on.
+        if ((flags & AudioManager.FLAG_PLAY_SOUND) != 0 &&
+                ((STREAM_VOLUME_ALIAS[streamType] != AudioSystem.STREAM_RING) ||
+                 (mKeyguardManager != null && mKeyguardManager.isKeyguardLocked()))) {
             flags &= ~AudioManager.FLAG_PLAY_SOUND;
         }
 
@@ -2513,6 +2518,8 @@ public class AudioService extends IAudioService.Stub {
                 sendMsg(mAudioHandler, MSG_LOAD_SOUND_EFFECTS, SHARED_MSG, SENDMSG_NOOP,
                         0, 0, null, 0);
 
+                mKeyguardManager =
+                    (KeyguardManager)mContext.getSystemService(Context.KEYGUARD_SERVICE);
                 mScoConnectionState = AudioManager.SCO_AUDIO_STATE_ERROR;
                 resetBluetoothSco();
                 getBluetoothHeadset();
