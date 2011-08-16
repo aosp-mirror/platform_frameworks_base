@@ -197,14 +197,14 @@ class BackupManagerService extends IBackupManager.Stub {
         = new SparseArray<HashSet<ApplicationInfo>>();
     // set of backup services that have pending changes
     class BackupRequest {
-        public ApplicationInfo appInfo;
+        public String packageName;
 
-        BackupRequest(ApplicationInfo app) {
-            appInfo = app;
+        BackupRequest(String pkgName) {
+            packageName = pkgName;
         }
 
         public String toString() {
-            return "BackupRequest{app=" + appInfo + "}";
+            return "BackupRequest{pkg=" + packageName + "}";
         }
     }
     // Backups that we haven't started yet.  Keys are package names.
@@ -877,6 +877,7 @@ class BackupManagerService extends IBackupManager.Stub {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_PACKAGE_ADDED);
         filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
+        filter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         filter.addDataScheme("package");
         mContext.registerReceiver(mBroadcastReceiver, filter);
         // Register for events related to sdcard installation.
@@ -1174,7 +1175,8 @@ class BackupManagerService extends IBackupManager.Stub {
             Bundle extras = intent.getExtras();
             String pkgList[] = null;
             if (Intent.ACTION_PACKAGE_ADDED.equals(action) ||
-                    Intent.ACTION_PACKAGE_REMOVED.equals(action)) {
+                    Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
+                    Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
                 Uri uri = intent.getData();
                 if (uri == null) {
                     return;
@@ -1183,8 +1185,14 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (pkgName != null) {
                     pkgList = new String[] { pkgName };
                 }
-                added = Intent.ACTION_PACKAGE_ADDED.equals(action);
-                replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
+                if (Intent.ACTION_PACKAGE_REPLACED.equals(action)) {
+                    // use the existing "add with replacement" logic
+                    if (MORE_DEBUG) Slog.d(TAG, "PACKAGE_REPLACED, updating package " + pkgName);
+                    added = replacing = true;
+                } else {
+                    added = Intent.ACTION_PACKAGE_ADDED.equals(action);
+                    replacing = extras.getBoolean(Intent.EXTRA_REPLACING, false);
+                }
             } else if (Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE.equals(action)) {
                 added = true;
                 pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
@@ -1192,6 +1200,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 added = false;
                 pkgList = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
             }
+
             if (pkgList == null || pkgList.length == 0) {
                 return;
             }
@@ -1665,9 +1674,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (status == BackupConstants.TRANSPORT_OK) {
                     PackageManagerBackupAgent pmAgent = new PackageManagerBackupAgent(
                             mPackageManager, allAgentPackages());
-                    BackupRequest pmRequest = new BackupRequest(new ApplicationInfo());
-                    pmRequest.appInfo.packageName = PACKAGE_MANAGER_SENTINEL;
-                    status = processOneBackup(pmRequest,
+                    status = processOneBackup(PACKAGE_MANAGER_SENTINEL,
                             IBackupAgent.Stub.asInterface(pmAgent.onBind()), mTransport);
                 }
 
@@ -1716,7 +1723,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (status != BackupConstants.TRANSPORT_OK) {
                     Slog.w(TAG, "Backup pass unsuccessful, restaging");
                     for (BackupRequest req : mQueue) {
-                        dataChangedImpl(req.appInfo.packageName);
+                        dataChangedImpl(req.packageName);
                     }
 
                     // We also want to reset the backup schedule based on whatever
@@ -1750,9 +1757,11 @@ class BackupManagerService extends IBackupManager.Stub {
                 // Verify that the requested app exists; it might be something that
                 // requested a backup but was then uninstalled.  The request was
                 // journalled and rather than tamper with the journal it's safer
-                // to sanity-check here.
+                // to sanity-check here.  This also gives us the classname of the
+                // package's backup agent.
+                PackageInfo pkg;
                 try {
-                    mPackageManager.getPackageInfo(request.appInfo.packageName, 0);
+                    pkg = mPackageManager.getPackageInfo(request.packageName, 0);
                 } catch (NameNotFoundException e) {
                     Slog.d(TAG, "Package does not exist; skipping");
                     continue;
@@ -1760,11 +1769,11 @@ class BackupManagerService extends IBackupManager.Stub {
 
                 IBackupAgent agent = null;
                 try {
-                    mWakelock.setWorkSource(new WorkSource(request.appInfo.uid));
-                    agent = bindToAgentSynchronous(request.appInfo,
+                    mWakelock.setWorkSource(new WorkSource(pkg.applicationInfo.uid));
+                    agent = bindToAgentSynchronous(pkg.applicationInfo,
                             IApplicationThread.BACKUP_MODE_INCREMENTAL);
                     if (agent != null) {
-                        int result = processOneBackup(request, agent, transport);
+                        int result = processOneBackup(request.packageName, agent, transport);
                         if (result != BackupConstants.TRANSPORT_OK) return result;
                     }
                 } catch (SecurityException ex) {
@@ -1772,7 +1781,7 @@ class BackupManagerService extends IBackupManager.Stub {
                     Slog.d(TAG, "error in bind/backup", ex);
                 } finally {
                     try {  // unbind even on timeout, just in case
-                        mActivityManager.unbindBackupAgent(request.appInfo);
+                        mActivityManager.unbindBackupAgent(pkg.applicationInfo);
                     } catch (RemoteException e) {}
                 }
             }
@@ -1782,9 +1791,8 @@ class BackupManagerService extends IBackupManager.Stub {
             return BackupConstants.TRANSPORT_OK;
         }
 
-        private int processOneBackup(BackupRequest request, IBackupAgent agent,
+        private int processOneBackup(String packageName, IBackupAgent agent,
                 IBackupTransport transport) {
-            final String packageName = request.appInfo.packageName;
             if (DEBUG) Slog.d(TAG, "processOneBackup doBackup() on " + packageName);
 
             File savedStateName = new File(mStateDir, packageName);
@@ -4207,7 +4215,7 @@ class BackupManagerService extends IBackupManager.Stub {
                 if (app.packageName.equals(packageName)) {
                     // Add the caller to the set of pending backups.  If there is
                     // one already there, then overwrite it, but no harm done.
-                    BackupRequest req = new BackupRequest(app);
+                    BackupRequest req = new BackupRequest(packageName);
                     if (mPendingBackups.put(app.packageName, req) == null) {
                         // Journal this request in case of crash.  The put()
                         // operation returned null when this package was not already
@@ -4218,7 +4226,7 @@ class BackupManagerService extends IBackupManager.Stub {
                             int numKeys = mPendingBackups.size();
                             Slog.d(TAG, "Now awaiting backup for " + numKeys + " participants:");
                             for (BackupRequest b : mPendingBackups.values()) {
-                                Slog.d(TAG, "    + " + b + " agent=" + b.appInfo.backupAgentName);
+                                Slog.d(TAG, "    + " + b);
                             }
                         }
                     }
