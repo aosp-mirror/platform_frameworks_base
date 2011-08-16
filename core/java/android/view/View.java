@@ -4898,22 +4898,22 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         switch (direction) {
             case FOCUS_LEFT:
                 if (mNextFocusLeftId == View.NO_ID) return null;
-                return findViewShouldExist(root, mNextFocusLeftId);
+                return findViewInsideOutShouldExist(root, mNextFocusLeftId);
             case FOCUS_RIGHT:
                 if (mNextFocusRightId == View.NO_ID) return null;
-                return findViewShouldExist(root, mNextFocusRightId);
+                return findViewInsideOutShouldExist(root, mNextFocusRightId);
             case FOCUS_UP:
                 if (mNextFocusUpId == View.NO_ID) return null;
-                return findViewShouldExist(root, mNextFocusUpId);
+                return findViewInsideOutShouldExist(root, mNextFocusUpId);
             case FOCUS_DOWN:
                 if (mNextFocusDownId == View.NO_ID) return null;
-                return findViewShouldExist(root, mNextFocusDownId);
+                return findViewInsideOutShouldExist(root, mNextFocusDownId);
             case FOCUS_FORWARD:
                 if (mNextFocusForwardId == View.NO_ID) return null;
-                return findViewShouldExist(root, mNextFocusForwardId);
+                return findViewInsideOutShouldExist(root, mNextFocusForwardId);
             case FOCUS_BACKWARD: {
                 final int id = mID;
-                return root.findViewByPredicate(new Predicate<View>() {
+                return root.findViewByPredicateInsideOut(this, new Predicate<View>() {
                     @Override
                     public boolean apply(View t) {
                         return t.mNextFocusForwardId == id;
@@ -4924,8 +4924,14 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
         return null;
     }
 
-    private static View findViewShouldExist(View root, int childViewId) {
-        View result = root.findViewById(childViewId);
+    private View findViewInsideOutShouldExist(View root, final int childViewId) {
+        View result = root.findViewByPredicateInsideOut(this, new Predicate<View>() {
+            @Override
+            public boolean apply(View t) {
+                return t.mID == childViewId;
+            }
+        });
+
         if (result == null) {
             Log.w(VIEW_LOG_TAG, "couldn't find next focus view specified "
                     + "by user for id " + childViewId);
@@ -11746,9 +11752,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
     /**
      * {@hide}
      * @param predicate The predicate to evaluate.
+     * @param childToSkip If not null, ignores this child during the recursive traversal.
      * @return The first view that matches the predicate or null.
      */
-    protected View findViewByPredicateTraversal(Predicate<View> predicate) {
+    protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
         if (predicate.apply(this)) {
             return this;
         }
@@ -11792,7 +11799,41 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * @return The first view that matches the predicate or null.
      */
     public final View findViewByPredicate(Predicate<View> predicate) {
-        return findViewByPredicateTraversal(predicate);
+        return findViewByPredicateTraversal(predicate, null);
+    }
+
+    /**
+     * {@hide}
+     * Look for a child view that matches the specified predicate,
+     * starting with the specified view and its descendents and then
+     * recusively searching the ancestors and siblings of that view
+     * until this view is reached.
+     *
+     * This method is useful in cases where the predicate does not match
+     * a single unique view (perhaps multiple views use the same id)
+     * and we are trying to find the view that is "closest" in scope to the
+     * starting view.
+     *
+     * @param start The view to start from.
+     * @param predicate The predicate to evaluate.
+     * @return The first view that matches the predicate or null.
+     */
+    public final View findViewByPredicateInsideOut(View start, Predicate<View> predicate) {
+        View childToSkip = null;
+        for (;;) {
+            View view = start.findViewByPredicateTraversal(predicate, childToSkip);
+            if (view != null || start == this) {
+                return view;
+            }
+
+            ViewParent parent = start.getParent();
+            if (parent == null || !(parent instanceof View)) {
+                return null;
+            }
+
+            childToSkip = start;
+            start = (View) parent;
+        }
     }
 
     /**

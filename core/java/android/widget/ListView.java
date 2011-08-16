@@ -3545,16 +3545,16 @@ public class ListView extends AbsListView {
      * First look in our children, then in any header and footer views that may be scrolled off.
      */
     @Override
-    protected View findViewByPredicateTraversal(Predicate<View> predicate) {
+    protected View findViewByPredicateTraversal(Predicate<View> predicate, View childToSkip) {
         View v;
-        v = super.findViewByPredicateTraversal(predicate);
+        v = super.findViewByPredicateTraversal(predicate, childToSkip);
         if (v == null) {
-            v = findViewByPredicateInHeadersOrFooters(mHeaderViewInfos, predicate);
+            v = findViewByPredicateInHeadersOrFooters(mHeaderViewInfos, predicate, childToSkip);
             if (v != null) {
                 return v;
             }
 
-            v = findViewByPredicateInHeadersOrFooters(mFooterViewInfos, predicate);
+            v = findViewByPredicateInHeadersOrFooters(mFooterViewInfos, predicate, childToSkip);
             if (v != null) {
                 return v;
             }
@@ -3568,7 +3568,7 @@ public class ListView extends AbsListView {
      * the predicate.
      */
     View findViewByPredicateInHeadersOrFooters(ArrayList<FixedViewInfo> where,
-            Predicate<View> predicate) {
+            Predicate<View> predicate, View childToSkip) {
         if (where != null) {
             int len = where.size();
             View v;
@@ -3576,7 +3576,7 @@ public class ListView extends AbsListView {
             for (int i = 0; i < len; i++) {
                 v = where.get(i).view;
 
-                if (!v.isRootNamespace()) {
+                if (v != childToSkip && !v.isRootNamespace()) {
                     v = v.findViewByPredicate(predicate);
 
                     if (v != null) {
