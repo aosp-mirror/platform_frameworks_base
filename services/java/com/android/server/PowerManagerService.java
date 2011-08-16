@@ -50,6 +50,7 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.WorkSource;
 import android.provider.Settings.SettingNotFoundException;
 import android.provider.Settings;
@@ -158,6 +159,7 @@ public class PowerManagerService extends IPowerManager.Stub
 
     private boolean mDoneBooting = false;
     private boolean mBootCompleted = false;
+    private boolean mHeadless = false;
     private int mStayOnConditions = 0;
     private final int[] mBroadcastQueue = new int[] { -1, -1, -1 };
     private final int[] mBroadcastWhy = new int[3];
@@ -503,6 +505,7 @@ public class PowerManagerService extends IPowerManager.Stub
         mButtonLight = lights.getLight(LightsService.LIGHT_ID_BUTTONS);
         mKeyboardLight = lights.getLight(LightsService.LIGHT_ID_KEYBOARD);
         mAttentionLight = lights.getLight(LightsService.LIGHT_ID_ATTENTION);
+        mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
 
         nativeInit();
         synchronized (mLocks) {
@@ -1768,9 +1771,11 @@ public class PowerManagerService extends IPowerManager.Stub
     }
     
     private void updateNativePowerStateLocked() {
-        nativeSetPowerState(
-                (mPowerState & SCREEN_ON_BIT) != 0,
-                (mPowerState & SCREEN_BRIGHT) == SCREEN_BRIGHT);
+        if (!mHeadless) {
+            nativeSetPowerState(
+                    (mPowerState & SCREEN_ON_BIT) != 0,
+                    (mPowerState & SCREEN_BRIGHT) == SCREEN_BRIGHT);
+        }
     }
 
     private int screenOffFinishedAnimatingLocked(int reason) {
@@ -2059,7 +2064,9 @@ public class PowerManagerService extends IPowerManager.Stub
             } else {
                 synchronized (mLocks) {
                     // we're turning off
-                    final boolean animate = animating && targetValue == Power.BRIGHTNESS_OFF;
+                    final boolean animate = animating
+                            && targetValue == Power.BRIGHTNESS_OFF
+                            && !mHeadless;
                     if (animate) {
                         // It's pretty scary to hold mLocks for this long, and we should
                         // redesign this, but it works for now.

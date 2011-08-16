@@ -256,7 +256,9 @@ public final class ActivityManagerService extends ActivityManagerNative
     static final String[] EMPTY_STRING_ARRAY = new String[0];
 
     public ActivityStack mMainStack;
-    
+
+    private final boolean mHeadless;
+
     /**
      * Description of a request to start a new activity, which has been held
      * due to app switches being disabled.
@@ -1365,6 +1367,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         
         mUsageStatsService = new UsageStatsService(new File(
                 systemDir, "usagestats").toString());
+        mHeadless = "1".equals(SystemProperties.get("ro.config.headless", "0"));
 
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
@@ -1900,6 +1903,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     boolean startHomeActivityLocked() {
+        if (mHeadless) return false;
+
         if (mFactoryTest == SystemServer.FACTORY_TEST_LOW_LEVEL
                 && mTopAction == null) {
             // We are running in factory test mode, but unable to find
@@ -3629,7 +3634,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             if (hr.app == null && app.info.uid == hr.info.applicationInfo.uid
                     && processName.equals(hr.processName)) {
                 try {
-                    if (mMainStack.realStartActivityLocked(hr, app, true, true)) {
+                    if (mHeadless) {
+                        Slog.e(TAG, "Starting activities not supported on headless device: " + hr);
+                    } else if (mMainStack.realStartActivityLocked(hr, app, true, true)) {
                         didSomething = true;
                     }
                 } catch (Exception e) {
@@ -12520,6 +12527,9 @@ public final class ActivityManagerService extends ActivityManagerNative
      */
     public boolean updateConfigurationLocked(Configuration values,
             ActivityRecord starting, boolean persistent) {
+        // do nothing if we are headless
+        if (mHeadless) return true;
+
         int changes = 0;
         
         boolean kept = true;
