@@ -253,13 +253,6 @@ public class UsbDeviceManager {
             }
         };
 
-        private static final int NOTIFICATION_NONE = 0;
-        private static final int NOTIFICATION_MTP = 1;
-        private static final int NOTIFICATION_PTP = 2;
-        private static final int NOTIFICATION_INSTALLER = 3;
-        private static final int NOTIFICATION_ACCESSORY = 4;
-        private static final int NOTIFICATION_ADB = 5;
-
         public UsbHandler(Looper looper) {
             super(looper);
             try {
@@ -536,27 +529,18 @@ public class UsbDeviceManager {
 
         private void updateUsbNotification() {
             if (mNotificationManager == null || !mUseUsbNotification) return;
-            int id = NOTIFICATION_NONE;
+            int id = 0;
             Resources r = mContext.getResources();
-            CharSequence title = null;
             if (mConnected) {
                 if (containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_MTP)) {
-                    title = r.getText(
-                        com.android.internal.R.string.usb_mtp_notification_title);
-                    id = NOTIFICATION_MTP;
+                    id = com.android.internal.R.string.usb_mtp_notification_title;
                 } else if (containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_PTP)) {
-                    title = r.getText(
-                        com.android.internal.R.string.usb_ptp_notification_title);
-                    id = NOTIFICATION_PTP;
+                    id = com.android.internal.R.string.usb_ptp_notification_title;
                 } else if (containsFunction(mCurrentFunctions,
                         UsbManager.USB_FUNCTION_MASS_STORAGE)) {
-                    title = r.getText(
-                        com.android.internal.R.string.usb_cd_installer_notification_title);
-                    id = NOTIFICATION_INSTALLER;
+                    id = com.android.internal.R.string.usb_cd_installer_notification_title;
                 } else if (containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_ACCESSORY)) {
-                    title = r.getText(
-                        com.android.internal.R.string.usb_accessory_notification_title);
-                    id = NOTIFICATION_ACCESSORY;
+                    id = com.android.internal.R.string.usb_accessory_notification_title;
                 } else {
                     // There is a different notification for USB tethering so we don't need one here
                     if (!containsFunction(mCurrentFunctions, UsbManager.USB_FUNCTION_RNDIS)) {
@@ -566,13 +550,14 @@ public class UsbDeviceManager {
             }
             if (id != mUsbNotificationId) {
                 // clear notification if title needs changing
-                if (mUsbNotificationId != NOTIFICATION_NONE) {
+                if (mUsbNotificationId != 0) {
                     mNotificationManager.cancel(mUsbNotificationId);
-                    mUsbNotificationId = NOTIFICATION_NONE;
+                    mUsbNotificationId = 0;
                 }
-                if (id != NOTIFICATION_NONE) {
+                if (id != 0) {
                     CharSequence message = r.getText(
                             com.android.internal.R.string.usb_notification_message);
+                    CharSequence title = r.getText(id);
 
                     Notification notification = new Notification();
                     notification.icon = com.android.internal.R.drawable.stat_sys_data_usb;
@@ -600,13 +585,13 @@ public class UsbDeviceManager {
 
         private void updateAdbNotification() {
             if (mNotificationManager == null) return;
+            final int id = com.android.internal.R.string.adb_active_notification_title;
             if (mAdbEnabled && mConnected) {
                 if ("0".equals(SystemProperties.get("persist.adb.notify"))) return;
 
                 if (!mAdbNotificationShown) {
                     Resources r = mContext.getResources();
-                    CharSequence title = r.getText(
-                            com.android.internal.R.string.adb_active_notification_title);
+                    CharSequence title = r.getText(id);
                     CharSequence message = r.getText(
                             com.android.internal.R.string.adb_active_notification_message);
 
@@ -629,11 +614,11 @@ public class UsbDeviceManager {
                             intent, 0);
                     notification.setLatestEventInfo(mContext, title, message, pi);
                     mAdbNotificationShown = true;
-                    mNotificationManager.notify(NOTIFICATION_ADB, notification);
+                    mNotificationManager.notify(id, notification);
                 }
             } else if (mAdbNotificationShown) {
                 mAdbNotificationShown = false;
-                mNotificationManager.cancel(NOTIFICATION_ADB);
+                mNotificationManager.cancel(id);
             }
         }
 
