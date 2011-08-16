@@ -265,7 +265,6 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
     // INetworkManagementEventObserver.Stub
     @Override
     public void interfaceLinkStateChanged(String interfaze, boolean up) {
-        interfaceStatusChanged(interfaze, up);
     }
 
     // INetworkManagementEventObserver.Stub
@@ -280,6 +279,9 @@ public class Vpn extends INetworkManagementEventObserver.Stub {
             if (mConnection != null) {
                 mContext.unbindService(mConnection);
                 mConnection = null;
+            } else if (mLegacyVpnRunner != null) {
+                mLegacyVpnRunner.exit();
+                mLegacyVpnRunner = null;
             }
         }
     }
