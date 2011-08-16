@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2008 The Android Open Source Project
+<!-- Copyright (C) 2011 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,27 +14,23 @@
      limitations under the License.
 -->
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="58dp"
-    android:layout_weight="0"
-    android:paddingBottom="8dp"
-    android:background="@android:drawable/tab_indicator_holo">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="?android:attr/actionBarSize"
+    android:orientation="horizontal"
+    style="@android:style/Widget.Holo.Tab">
 
-    <ImageView android:id="@+id/icon"
+    <ImageView
+        android:id="@android:id/icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingLeft="3dp"
-        android:paddingRight="3dp"
-        android:layout_centerHorizontal="true" />
+        android:layout_gravity="center_vertical"
+        android:visibility="gone" />
 
-    <TextView android:id="@+id/title"
+    <TextView
+        android:id="@android:id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:paddingLeft="3dp"
-        android:paddingRight="3dp"
-        style="?android:attr/tabWidgetStyle" />
-    
-</RelativeLayout>
+        android:layout_gravity="center_vertical"
+        style="@android:style/Widget.Holo.TabText" />
+
+</LinearLayout>
