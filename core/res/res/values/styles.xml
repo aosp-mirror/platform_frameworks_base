@@ -1772,6 +1772,8 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Holo.DropDownItem" parent="Widget.DropDownItem">
         <item name="android:textAppearance">@style/TextAppearance.Holo.Widget.DropDownItem</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
     </style>
 
     <style name="Widget.Holo.DropDownItem.Spinner">
@@ -1779,6 +1781,8 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Holo.TextView.SpinnerItem" parent="Widget.TextView.SpinnerItem">
         <item name="android:textAppearance">@style/TextAppearance.Holo.Widget.TextView.SpinnerItem</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
     </style>
 
     <style name="Widget.Holo.KeyboardView" parent="Widget.KeyboardView">

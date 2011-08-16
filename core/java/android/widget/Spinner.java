@@ -714,14 +714,27 @@ public class Spinner extends AbsSpinner implements OnClickListener {
 
         @Override
         public void show() {
+            final int spinnerPaddingLeft = Spinner.this.getPaddingLeft();
             if (mDropDownWidth == WRAP_CONTENT) {
-                setWidth(Math.max(measureContentWidth((SpinnerAdapter) mAdapter, getBackground()),
-                        Spinner.this.getWidth()));
+                final int spinnerWidth = Spinner.this.getWidth();
+                final int spinnerPaddingRight = Spinner.this.getPaddingRight();
+                setContentWidth(Math.max(
+                        measureContentWidth((SpinnerAdapter) mAdapter, getBackground()),
+                        spinnerWidth - spinnerPaddingLeft - spinnerPaddingRight));
             } else if (mDropDownWidth == MATCH_PARENT) {
-                setWidth(Spinner.this.getWidth());
+                final int spinnerWidth = Spinner.this.getWidth();
+                final int spinnerPaddingRight = Spinner.this.getPaddingRight();
+                setContentWidth(spinnerWidth - spinnerPaddingLeft - spinnerPaddingRight);
             } else {
-                setWidth(mDropDownWidth);
+                setContentWidth(mDropDownWidth);
             }
+            final Drawable background = getBackground();
+            int bgOffset = 0;
+            if (background != null) {
+                background.getPadding(mTempRect);
+                bgOffset = -mTempRect.left;
+            }
+            setHorizontalOffset(bgOffset + spinnerPaddingLeft);
             setInputMethodMode(ListPopupWindow.INPUT_METHOD_NOT_NEEDED);
             super.show();
             getListView().setChoiceMode(ListView.CHOICE_MODE_SINGLE);
