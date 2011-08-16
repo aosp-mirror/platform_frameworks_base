@@ -468,7 +468,7 @@ public class PhoneStatusBar extends StatusBar {
                     | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
                     | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                     | WindowManager.LayoutParams.FLAG_SLIPPERY,
-                PixelFormat.TRANSLUCENT);
+                PixelFormat.OPAQUE);
 
         lp.setTitle("NavigationBar");
         switch (rotation) {
