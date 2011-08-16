@@ -329,7 +329,7 @@ please see themes_device_defaults.xml.
         <item name="searchViewSearchIcon">@android:drawable/ic_search</item>
         <item name="searchViewGoIcon">@android:drawable/ic_go</item>
         <item name="searchViewVoiceIcon">@android:drawable/ic_voice_search</item>
-        <item name="searchViewEditQuery">@android:drawable/ic_commit</item>
+        <item name="searchViewEditQuery">@android:drawable/ic_commit_search_api_holo_dark</item>
         <item name="searchViewEditQueryBackground">?attr/selectableItemBackground</item>
 
         <item name="searchDialogTheme">@style/Theme.SearchBar</item>
