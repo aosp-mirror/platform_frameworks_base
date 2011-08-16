@@ -1,0 +1,528 @@
+page.title=Android Developer Tools
+@jd:body
+
+  <div id="qv-wrapper">
+    <div id="qv">
+      <h2>In this document</h2>
+
+      <ol>
+        <li><a href="#tools">SDK Tools Integration</a></li>
+
+        <li><a href="#editors">Code Editors</a>
+          <ol>
+            <li><a href="#resource-linking">Resource linking enhancements</a></li>
+          </ol>
+        </li>
+
+        <li><a href="#graphical-editor">Graphical Layout Editor</a>
+          <ol>
+            <li><a href="#canvas">Canvas and outline view</a></li>
+            <li><a href="#palette">Palette</a></li>
+            <li><a href="#config-chooser">Configuration chooser</a></li>
+          </ol>
+        </li>
+
+        <li><a href="#refactoring">Layout Factoring Support</a></li>
+
+      </ol>
+
+      <h2>Related videos</h2>
+
+      <ol>
+        <li><a href="{@docRoot}videos/index.html#v=Oq05KqjXTvs">Android Developer Tools
+            Google I/O Session</a>
+        </li>
+      </ol>
+
+      <h2>See also</h2>
+
+      <ol>
+        <li><a href="http://tools.android.com/recent">Android Tools change blog</a></li>
+      </ol>
+    </div>
+  </div>
+
+  <p>ADT (Android Developer Tools) is a plugin for Eclipse that provides a suite of
+  tools that are integrated with the Eclipse IDE. It offers you access to many features that help
+  you develop Android applications quickly. ADT
+  provides GUI access to many of the command line SDK tools as well as a UI design tool for rapid
+  prototyping, designing, and building of your application's user interface.</p>
+
+  <p>Because ADT is a plugin for Eclipse, you get the functionality of a well-established IDE,
+  along with Android-specific features that are bundled with ADT. The following
+  describes important features of Eclipse and ADT:</p>
+
+  <dl>
+    <dt><strong>Integrated Android project creation, building, packaging, installation, and
+    debugging</strong></dt>
+
+    <dd>ADT integrates many development workflow tasks into Eclipse, making it easy for you to
+    rapidly develop and test your Android applications.</dd>
+
+    <dt><strong>SDK Tools integration</strong></dt>
+
+    <dd>Many of the <a href="#tools">SDK tools</a> are integrated into Eclipse's menus,
+    perspectives, or as a part of background processes ran by ADT.</dd>
+
+    <dt><strong>Java programming language and XML editors</strong></dt>
+
+    <dd>The Java programming language editor contains common IDE features such as compile time
+    syntax checking, auto-completion, and integrated documentation for the Android framework APIs.
+    ADT also provides custom XML editors that let you
+    edit Android-specific XML files in a form-based UI. A graphical layout editor lets you design
+    user interfaces with a drag and drop interface.</dd>
+
+    <dt><strong>Integrated documentation for Android framework APIs</strong></dt>
+    <dd>You can access documentation by hovering over classes, methods, or variables.</dd>
+  </dl>
+
+  <p>You can find the most up-to-date and more detailed information about changes and new features
+on the <a  href="http://tools.android.com/recent">Recent Changes</a> page at the Android  Tools
+Project site.</p>
+
+  <h2 id="tools">SDK Tools Integration</h2>
+
+  <div class="sidebox-wrapper">
+    <div class="sidebox">
+      <h2>Need help designing icons?</h2>
+  <p>The <a href="http://android-ui-utils.googlecode.com/hg/asset-studio/dist/index.html">Android
+      Asset Studio</a> is a web-based tool that lets you generate icons from existing images,
+    clipart, or text. It also generates the icons with different DPIs for different screen sizes and
+    types.</p>
+
+    </div>
+  </div>
+
+  <p>Many of the tools that you can start or run from the command line are integrated into ADT.
+  They include:</p>
+
+  <ul>
+    <li><a href="{@docRoot}guide/developing/debugging/debugging-tracing.html">Traceview</a>:
+    Allows you to profile your program's execution
+    (<strong>Window &gt; Open Perspective &gt; Traceview</strong>). </li>
+
+    <li><a href="{@docRoot}guide/developing/tools/android.html">android</a>: Provides access to
+    the Android SDK and AVD Manager. Other <code>android</code> features such as creating or
+    updating projects (application and library) are integrated throughout the Eclipse IDE
+    (<strong>Window &gt; Android SDK and AVD Manager</strong>). </li>
+
+    <li><a href="{@docRoot}guide/developing/debugging/debugging-ui.html#HierarchyViewer">Hierarchy
+    Viewer</a>: Allows you to visualize your application's view hierarchy to find inefficiencies
+    (<strong>Window &gt; Open Perspective &gt; Hierarchy Viewer</strong>).</li>
+
+    <li><a href="{@docRoot}guide/developing/debugging/debugging-ui.html#pixelperfect">Pixel
+    Perfect</a>: Allows you to closely examine your UI to help with designing and building.
+    (<strong>Window &gt; Open Perspective &gt; Pixel Perfect</strong>).</li>
+
+    <li><a href="{@docRoot}guide/developing/debugging/ddms.html">DDMS</a>: Provides
+    debugging features including: screen capturing, thread and heap information, and logcat
+    (<strong>Window &gt; Open Perspective &gt; DDMS</strong>).</li>
+
+    <li><a href="{@docRoot}guide/developing/tools/adb.html">adb</a>: Provides access to
+      a device from your development system. Some features of
+    <code>adb</code> are integrated into ADT such as project installation (Eclipse run menu),
+    file transfer, device enumeration, and logcat (DDMS). You must access the more advanced
+    features of <code>adb</code>, such as shell commands, from the command line.</li>
+
+    <li><a href="{@docRoot}guide/developing/tools/proguard.html">ProGuard</a>: Allows code obfuscation,
+    shrinking, and optimization. ADT integrates ProGuard as part of the build, if you <a href=
+    "{@docRoot}guide/developing/tools/proguard.html#enabling">enable it</a>.</li>
+  </ul>
+
+<h2 id="editors">Code Editors</h2>
+
+  <p>In addition to Eclipse's standard editor features, ADT provides custom XML editors to help
+  you create and edit Android manifests, resources, menus, and layouts in a form-based or graphical
+  mode. Double-clicking on an XML file in Eclipse's package explorer opens the
+  appropriate XML editor.
+
+    <div class="sidebox-wrapper">
+    <div class="sidebox">
+      <h2>Google I/O Session Video</h2>
+      <p>View the segment on the <a href=
+      "http://www.youtube.com/watch?v=Oq05KqjXTvs#t=30m50s">XML editors</a> for more
+      information.</p>
+    </div>
+  </div>
+
+  <p class="note"><strong>Note:</strong> You can edit Android-specific XML files (such as a layout
+or manifest) in both a graphical mode and also an XML markup mode. You can switch between
+these modes with the pair of tabs at the bottom of each custom XML editor.</p>
+
+  <p>In addition, some special file types that don't have custom editors, such as drawables, animations,
+  and color files offer editing enhancements such as XML tag completion.</p>
+
+<p>ADT provides the following custom, form-based XML editors:</p>
+
+  <dl>
+
+    <dt><strong>Graphical Layout Editor</strong></dt>
+
+    <dd>Edit and design your XML layout files with a drag and drop interface. The layout editor
+    renders your interface as well, offering you a preview as you design your layouts. This editor
+    is invoked when you open an XML file with a view declared (usually declared in
+    <code>res/layout</code>. For more information, see <a href="#graphical-editor">Graphical Layout
+    Editor</a>.</dd>
+
+    <dt><strong>Android Manifest Editor</strong></dt>
+
+    <dd>Edit Android manifests with a simple graphical interface. This editor is invoked
+    when you open an <code>AndroidManifest.xml</code> file.</dd>
+
+    <dt><strong>Menu Editor</strong></dt>
+
+    <dd>Edit menu groups and items with a simple graphical interface. This editor is
+    invoked when you open an XML file with a <code>&lt;menu&gt;</code> declared (usually located in
+    the <code>res/menu</code> folder).</dd>
+
+    <dt><strong>Resources Editor</strong></dt>
+
+    <dd>Edit resources with a simple graphical interface. This editor is invoked when
+    you open an XML file with a <code>&lt;resources&gt;</code> tag declared.</dd>
+
+    <dt><strong>XML Resources Editor</strong></dt>
+
+    <dd>Edit XML resources with a simple graphical interface. This editor is invoked
+    when you open an XML file.</dd>
+  </dl>
+
+
+  <h3 id="resource-linking">Resource linking enhancements</h3>
+  <p>In addition to the normal code editing features of Eclipse, ADT provides enhancements to the Android
+  development experience that allow you to quickly jump to declarations of various types of resources such
+  as strings or layout files. You can access these enhancements by holding down the control key and
+  clicking on the following items:
+
+      <ul>
+
+        <li>A resource identifier, such as <code>R.id.button1</code>, jumps
+        to the XML definition of the view.</li>
+
+        <li>A declaration in the <code>R.java</code> file, such as <code>public
+        static final int Button01=0x7f050000"</code>, jumps to the corresponding XML definition.</li>
+
+        <li>An activity or service definition in your manifest, such as
+        <code>&lt;activity android:name=".TestActivity"&gt;</code>, jumps to the corresponding Java class. You can
+        jump from an activity definition (or service definition) into the corresponding Java class.</li>
+
+        <li>You can jump to any value definition (e.g. <code>@string:foo</code>), regardless of
+which XML file
+        "foo" is defined in.</li>
+
+        <li>Any file-based declaration, such as <code>@layout/bar</code>, opens the file.</li>
+
+        <li>Non-XML resources, such as <code>@drawable/icon</code>, launches
+        Eclipse's default application for the given file type, which in this case is an
+        image.</li>
+
+        <li><code>@android</code> namespace resources opens the resources found in
+        the SDK install area.</li>
+
+        <li>Custom views in XML layouts, such as <code>&lt;foo.bar.MyView&gt;&lt;/foo.bar.MyView&gt;</code>,
+        or <code>&lt;view class="foo.bar.MyView"&gt;</code>) jump to the corresponding custom view classes.</li>
+
+        <li>An XML attribute such as <code>@android:string/ok</code> or <code>android.R.string.id</code> in Java code
+        opens the file that declares the strings. The XML tab opens when doing this, not
+        the form-based editor.</li>
+
+      </ul>
+
+  <h2 id="graphical-editor">Graphical Layout Editor</h2>
+
+  <p>ADT provides many features to allow you to design and build your application's user interface.
+  Many of these features are in the graphical layout editor, which you can access by opening one of
+  your application's XML layout files in Eclipse.
+  </p>
+
+  <p>The graphical layout editor is the main screen that you use to visually design and build your
+  UI. It is split up into the following parts:</p>
+
+  <dl>
+    <dt><strong>Canvas</strong></dt>
+
+    <dd>In the middle of the editor is the canvas. It provides the rendered view of your
+    layout and supports dragging and dropping of UI widgets
+    directly from the palette. You can select the platform version used to render the items in
+    the canvas. Each platform version has its own look and feel, which might be the similar to or
+    radically different from another platform version. The canvas renders the appropriate look
+    and feel for the currently selected platform version.
+    This platform version does not need to be the same as the version that your
+    application targets.
+
+    <p>The canvas also provides
+    context-sensitive actions in the layout actions bar, such as adjusting layout margins and
+orientation.
+    The layout actions bar displays available actions depending on the selected UI element in the
+    canvas.</p>
+    </dd>
+
+    <dt><strong>Outline</strong></dt>
+
+    <dd>On the right side of the editor is the outline view. It displays a hierarchical
+    view of your layout where you can do things such as reorder of views. The outline
+    view exposes similar functionality as the canvas but displays your layout in an ordered
+    list instead of a rendered preview.</dd>
+
+    <dt><strong>Palette</strong></dt>
+
+    <dd>On the left side of the editor is the palette. It provides a set of widgets that
+    you can drag onto the canvas. The palette shows rendered previews of the
+    widgets for easy lookup of desired UI widgets.</dd>
+
+    <dt><strong>Configuration Chooser</strong></dt>
+
+    <dd>At the top of the editor is the configuration chooser.
+    It provides options to change a layout's rendering mode or screen type.</dd>
+  </dl>
+
+  <img src="{@docRoot}images/layout_editor.png" alt="graphical layout editor screenshot"
+  height="500" id="layout-editor" name="layout-editor">
+
+  <p class="img-caption"><strong>Figure 1.</strong> Graphical layout editor</p>
+
+  <h3 id="canvas">Canvas and outline view</h3>
+
+  <div class="sidebox-wrapper">
+    <div class="sidebox">
+      <h2>Google I/O Session Video</h2>
+
+      <p>View the segment on the <a href=
+      "http://www.youtube.com/watch?v=Oq05KqjXTvs#t=7m16s">canvas and outline view</a> and the
+      <a href="http://www.youtube.com/watch?v=Oq05KqjXTvs#t=11m43s">layout actions bar</a>
+      for more information.
+      </p>
+    </div>
+  </div>
+
+  <p>The canvas is the area where you can drag and drop UI widgets from the palette to design your
+  layout. The canvas offers a rendered preview of your layout depending on factors such as the
+  selected platform version, screen orientation, and currently selected theme that you specify in
+  the <a href="#configuration-chooser">configuration chooser</a>. You can also drag and drop
+  items into the outline view, which displays your layout in a hierarchical list. The outline view
+  exposes much of the same functionality as the canvas but offers another method of organization
+  that is beneficial for ordering and quickly selecting items. When you right-click a specific item
+  in the canvas or outline view, you can access a context-sensitive menu that lets you modify the
+  following attributes of the layout or view:</p>
+
+  <dl>
+    <dt><strong>View and layout properties</strong></dt>
+
+    <dd>
+      When you right-click a view or layout in the canvas or outline view, it brings up a
+      context-sensitive menu that lets you set things such as:
+
+      <ul>
+        <li>ID of the view or layout</li>
+
+        <li>Text of the view</li>
+
+        <li>Layout width</li>
+
+        <li>Layout height</li>
+
+        <li>Properties such as alpha or clickable</li>
+      </ul>
+    </dd>
+
+    <dt><strong>Animation preview and creation</strong></dt>
+
+    <dd>
+      If your layout or view is animated, you can preview the animation directly in the canvas
+      (when you select Android 3.0 or later as the platform version in the configuration chooser).
+      Right-click an item in the canvas and select <strong>Play Animation</strong>. If
+      animation is not associated with item, an option is available in the menu to create one.
+
+      <p>View the segment on the <a href=
+      "http://www.youtube.com/watch?v=Oq05KqjXTvs#t=28m30s">animation features</a> for more
+      information.</p>
+    </dd>
+
+    <dt><strong>Extract as Include</strong></dt>
+
+    <dd>You can extract parts of a current layout into its own layout file,
+    which you can then include in any layout with a single line of XML. See <a href=
+    "#extract-as-include">Layout Refactoring Support</a> for more information.</dd>
+  </dl>
+
+  <h4>Other canvas features</h4>
+
+  <p>The canvas has additional features not available in the outline view:</p>
+
+  <ul>
+
+    <li>Edit views with the layout actions bar: The context-sensitive layout actions bar allows you to
+    edit how a view is laid out in your UI. The available actions depend on the currently
+    selected view and its parent layout. Some common actions include
+    toggling the fill mode of the view and specifying margins. For instance, if you select a
+    {@link android.widget.Button}
+    in a {@link android.widget.LinearLayout}, you see actions related to the {@link
+android.widget.LinearLayout}, such as a toggle to switch
+    between horizontal and vertical layout, and a toggle to control whether its children are
+    aligned along their text baseline. You will also see toolbar actions to control the individual
+    layout attributes of the child, such as whether the child should stretch out to match its
+    parent's width and height, a dropdown action to set the child's layout gravity, a button to open
+    a margin editor, and a layout weight editor.</li>
+
+    <li>Edit a nested layout in its current context: If you are editing a layout
+    that includes another layout, you can edit the included layout in the layout that included
+    it.</li>
+
+    <li>Preview drag and drop location: When you drag and drop a UI widget onto the canvas, ruler
+    markers appear showing you the approximate location of the UI widget depending on the
+    type of layout, such as {@link android.widget.RelativeLayout} or {@link
+    android.widget.LinearLayout}.</li>
+
+    <li>Preview animations: You can preview view and layout animations when you select Android 2.1
+    or later for the platform version in the configuration bar.</li>
+
+    <li>Render layouts in real-time: Layouts are rendered as accurately as possible according to
+    the platform version, including the appropriate system and action bars.</li>
+
+    <li>Support for fragments: Fragments can be rendered in the same screen as the layout that
+    includes the fragments.</li>
+
+  </ul>
+
+  <img src="{@docRoot}images/canvas.png" alt="screenshot of the canvas" height="553">
+
+  <p class="img-caption"><strong>Figure 2.</strong> Canvas portion of the layout editor showing
+  a rendered preview of an application</p>
+
+  <img src=
+  "{@docRoot}images/layout_outline.png" alt="screenshot of the outline view" height="185">
+
+  <p class="img-caption"><strong>Figure 3.</strong> Outline view showing current layout's structure</p>
+
+  <h3 id="palette">Palette</h3>
+
+  <div class="sidebox-wrapper">
+    <div class="sidebox">
+      <h2>Google I/O Session Video</h2>
+
+      <p>View the segment on the <a href=
+      "http://www.youtube.com/watch?v=Oq05KqjXTvs#t=7m53s">palette</a> for more information.</p>
+    </div>
+  </div>
+
+  <p>The palette contains the UI widgets that you can drag and drop onto the canvas and add to your
+  layout. The pallete categorizes the widgets and shows rendered previews
+  for easier lookup. The main features of the palette include:</p>
+
+  <ul>
+    <li>Different modes of rendered previews include: icons only, icons and text, tiny previews,
+    small previews, and previews (rendered in real size). Previews are only available for layouts
+    rendered with the latest revisions of Android 2.1 (API Level 7) or later.</li>
+
+    <li>Custom views in your project or library projects are added under custom views
+    category.</li>
+
+    <li>Arrange UI widgets alphabetically or by category.</li>
+  </ul>
+  <img src="{@docRoot}images/palette.png" alt="palette screenshot" height="566">
+
+  <p class="img-caption"><strong>Figure 4.</strong> Palette showing available UI widgets</p>
+
+  <h3 id="config-chooser">Configuration chooser</h3>
+
+  <div class="sidebox-wrapper">
+    <div class="sidebox">
+      <h2>Google I/O Session Video</h2>
+
+      <p>View the segment on the <a href=
+      "http://www.youtube.com/watch?v=Oq05KqjXTvs#t=12m51s">configuration chooser</a> for more
+      information.</p>
+    </div>
+  </div>
+
+
+  <p>The configuration chooser allows you to create and configure different configurations of
+  a layout for different situations, such as one for landscape and one for portrait mode. You can
+  set the following options for each configuration of a layout:
+  </p>
+      <ul>
+        <li>Screen type combo box: Predefined screen settings for common device configurations. You
+        can also create your own by selecting <strong>Custom...</strong>.</li>
+
+        <li>Screen orientation combo box: Portrait or Landscape screen orientation.</li>
+
+        <li>Theme combo box: Predefined themes or a custom theme that you have created.</li>
+
+        <li>Platform combo box: Platform version used to render the canvas and palette as well as
+        displaying appropriate themes.</li>
+
+        <li>Custom layout combo boxes: The locale, dock, and time of day combo boxes let you select
+        different versions of the same layout depending on the device's current state. You can
+        create a new version of a layout with the <strong>Create</strong> button.</li>
+      </ul>
+
+      <img src="{@docRoot}images/layout_bar.png" alt=
+  "configuration chooser screenshot" height="50" id="configuration-chooser" name="configuration chooser">
+
+  <p class="img-caption"><strong>Figure 5.</strong> Configuration chooser</p>
+
+  <h2 id="refactoring">Layout Refactoring Support</h2>
+
+  <div class="sidebox-wrapper">
+    <div class="sidebox">
+      <h2>Google I/O Session Video</h2>
+
+      <p>View the segment on <a href=
+      "http://www.youtube.com/watch?v=Oq05KqjXTvs#t=18m00s">refactoring features</a> for a rundown
+of the more important refactoring features.</p>
+
+    </div>
+  </div>
+
+  <p>In both the graphical and XML layout editor, there are many features that help you quickly
+  refactor your layouts. The following list describes the major refactoring support:</p>
+
+  <dl>
+
+    <dt><strong>Change layout</strong></dt>
+    <dd>This lets you change the layout on the fly and re-renders the canvas for you.
+    You can apply this refactoring to any layout and the layout is converted to the new type if
+    possible. In many cases, the opening and closing tags of the layout's XML element are changed
+    along with things such as ID attributes and their references. However, for some supported
+    types, ADT attempts to preserve the layout, such as changing a {@link
+    android.widget.LinearLayout} to a {@link android.widget.RelativeLayout}.</dd>
+
+    <dt><strong>Change widget</strong></dt>
+    <dd>This lets you select one or more widgets and converts them to a new widget type. In
+    addition to changing the element name, it also removes any
+    attributes that are not supported by the new widget type and adds in any mandatory attributes
+    required by the new widget type. If the current ID of a widget includes the
+    current widget type in its ID (such as a <code>&lt;Button&gt;</code> widget named
+    <code>"button1"</code>), then the ID is changed to match the new widget type and all
+    references are updated.</dd>
+
+    <dt id="extract-as-include"><strong>Extract as include</strong></dt>
+    <dd>This lets you extract views inside of an existing layout into their own separate layout
+    file. An <code>include</code> tag that points to the newly created layout file is inserted
+    into the existing layout file. Right-click the view or layout and select <strong>Extract as
+    Include...</strong>.</dd>
+
+    <dt><strong>Extract string</strong></dt>
+    <dd>Extract strings from either XML or Java files into their own separate resource file.</dd>
+
+    <dt><strong>Extract style</strong></dt>
+    <dd>Extract style-related attributes from a layout and define them in a new
+    <code>styles.xml</code> file. You can select multiple views and this refactoring extracts all
+    of the same styles into one style and assigns that style to all the views that use it.</dd>
+
+    <dt><strong>Wrap-in container</strong></dt>
+    <dd>This lets you select one or more sibling elements and wrap them in a new container. This
+    can be applied to the root element as well, in which case the namespace declaration attributes
+    will be transferred to the new root. This refactoring also transfers <code>layout_</code>
+    attribute references to the new root, For example, suppose you have a {@link android.widget.RelativeLayout}.
+    If other widgets have layout constraints pointing to your widget, wrapping the widget causes
+    these constraints to point to the parent instead.</dd>
+
+    <dt><strong>Quick Assistant</strong></dt>
+    <dd>Provides refactoring suggestions depending on the current context. Press
+    <strong>Ctrl-1</strong> (or <strong>Cmd-1</strong> on
+    Mac) in an editor, and Eclipse provides a list of possible refactorings depending on the
+    context. The Quick Assistant provides fast access to all of the above refactorings, where applicable.
+    For example, if you are editing an XML value and decide you want to extract it out
+    as a string, place the text cursor in the string and press Ctrl-1 to see the refactoring context
+    menu.</dd>
+  </dl>
