@@ -124,9 +124,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int requestCode = data.readInt();
             boolean onlyIfNeeded = data.readInt() != 0;
             boolean debug = data.readInt() != 0;
+            String profileFile = data.readString();
+            ParcelFileDescriptor profileFd = data.readInt() != 0
+                    ? data.readFileDescriptor() : null;
+            boolean autoStopProfiler = data.readInt() != 0;
             int result = startActivity(app, intent, resolvedType,
                     grantedUriPermissions, grantedMode, resultTo, resultWho,
-                    requestCode, onlyIfNeeded, debug);
+                    requestCode, onlyIfNeeded, debug, profileFile, profileFd, autoStopProfiler);
             reply.writeNoException();
             reply.writeInt(result);
             return true;
@@ -146,9 +150,13 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             int requestCode = data.readInt();
             boolean onlyIfNeeded = data.readInt() != 0;
             boolean debug = data.readInt() != 0;
+            String profileFile = data.readString();
+            ParcelFileDescriptor profileFd = data.readInt() != 0
+                    ? data.readFileDescriptor() : null;
+            boolean autoStopProfiler = data.readInt() != 0;
             WaitResult result = startActivityAndWait(app, intent, resolvedType,
                     grantedUriPermissions, grantedMode, resultTo, resultWho,
-                    requestCode, onlyIfNeeded, debug);
+                    requestCode, onlyIfNeeded, debug, profileFile, profileFd, autoStopProfiler);
             reply.writeNoException();
             result.writeToParcel(reply, 0);
             return true;
@@ -349,8 +357,9 @@ public abstract class ActivityManagerNative extends Binder implements IActivityM
             if (data.readInt() != 0) {
                 config = Configuration.CREATOR.createFromParcel(data);
             }
+            boolean stopProfiling = data.readInt() != 0;
             if (token != null) {
-                activityIdle(token, config);
+                activityIdle(token, config, stopProfiling);
             }
             reply.writeNoException();
             return true;
@@ -1572,7 +1581,8 @@ class ActivityManagerProxy implements IActivityManager
             String resolvedType, Uri[] grantedUriPermissions, int grantedMode,
             IBinder resultTo, String resultWho,
             int requestCode, boolean onlyIfNeeded,
-            boolean debug) throws RemoteException {
+            boolean debug, String profileFile, ParcelFileDescriptor profileFd,
+            boolean autoStopProfiler) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -1586,6 +1596,14 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(requestCode);
         data.writeInt(onlyIfNeeded ? 1 : 0);
         data.writeInt(debug ? 1 : 0);
+        data.writeString(profileFile);
+        if (profileFd != null) {
+            data.writeInt(1);
+            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        } else {
+            data.writeInt(0);
+        }
+        data.writeInt(autoStopProfiler ? 1 : 0);
         mRemote.transact(START_ACTIVITY_TRANSACTION, data, reply, 0);
         reply.readException();
         int result = reply.readInt();
@@ -1597,7 +1615,8 @@ class ActivityManagerProxy implements IActivityManager
             String resolvedType, Uri[] grantedUriPermissions, int grantedMode,
             IBinder resultTo, String resultWho,
             int requestCode, boolean onlyIfNeeded,
-            boolean debug) throws RemoteException {
+            boolean debug, String profileFile, ParcelFileDescriptor profileFd,
+            boolean autoStopProfiler) throws RemoteException {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
         data.writeInterfaceToken(IActivityManager.descriptor);
@@ -1611,6 +1630,14 @@ class ActivityManagerProxy implements IActivityManager
         data.writeInt(requestCode);
         data.writeInt(onlyIfNeeded ? 1 : 0);
         data.writeInt(debug ? 1 : 0);
+        data.writeString(profileFile);
+        if (profileFd != null) {
+            data.writeInt(1);
+            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        } else {
+            data.writeInt(0);
+        }
+        data.writeInt(autoStopProfiler ? 1 : 0);
         mRemote.transact(START_ACTIVITY_AND_WAIT_TRANSACTION, data, reply, 0);
         reply.readException();
         WaitResult result = WaitResult.CREATOR.createFromParcel(reply);
@@ -1829,7 +1856,8 @@ class ActivityManagerProxy implements IActivityManager
         data.recycle();
         reply.recycle();
     }
-    public void activityIdle(IBinder token, Configuration config) throws RemoteException
+    public void activityIdle(IBinder token, Configuration config, boolean stopProfiling)
+            throws RemoteException
     {
         Parcel data = Parcel.obtain();
         Parcel reply = Parcel.obtain();
@@ -1841,6 +1869,7 @@ class ActivityManagerProxy implements IActivityManager
         } else {
             data.writeInt(0);
         }
+        data.writeInt(stopProfiling ? 1 : 0);
         mRemote.transact(ACTIVITY_IDLE_TRANSACTION, data, reply, IBinder.FLAG_ONEWAY);
         reply.readException();
         data.recycle();

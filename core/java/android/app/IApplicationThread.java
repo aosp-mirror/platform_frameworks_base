@@ -55,7 +55,8 @@ public interface IApplicationThread extends IInterface {
     void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
             ActivityInfo info, CompatibilityInfo compatInfo, Bundle state,
             List<ResultInfo> pendingResults,
-    		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward)
+		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
+		String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
     		throws RemoteException;
     void scheduleRelaunchActivity(IBinder token, List<ResultInfo> pendingResults,
             List<Intent> pendingNewIntents, int configChanges,
@@ -86,7 +87,8 @@ public interface IApplicationThread extends IInterface {
     static final int DEBUG_ON = 1;
     static final int DEBUG_WAIT = 2;
     void bindApplication(String packageName, ApplicationInfo info, List<ProviderInfo> providers,
-            ComponentName testName, String profileName, Bundle testArguments, 
+            ComponentName testName, String profileName, ParcelFileDescriptor profileFd,
+            boolean autoStopProfiler, Bundle testArguments,
             IInstrumentationWatcher testWatcher, int debugMode, boolean restrictedBackupMode,
             Configuration config, CompatibilityInfo compatInfo, Map<String, IBinder> services,
             Bundle coreSettings) throws RemoteException;

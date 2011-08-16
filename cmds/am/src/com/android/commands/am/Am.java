@@ -57,6 +57,9 @@ public class Am {
     private boolean mDebugOption = false;
     private boolean mWaitOption = false;
 
+    private String mProfileFile;
+    private boolean mProfileAutoStop;
+
     // These are magic strings understood by the Eclipse plugin.
     private static final String FATAL_ERROR_CODE = "Error type 1";
     private static final String NO_SYSTEM_ERROR_CODE = "Error type 2";
@@ -249,6 +252,12 @@ public class Am {
                 mDebugOption = true;
             } else if (opt.equals("-W")) {
                 mWaitOption = true;
+            } else if (opt.equals("-P")) {
+                mProfileFile = nextArgRequired();
+                mProfileAutoStop = true;
+            } else if (opt.equals("--start-profiler")) {
+                mProfileFile = nextArgRequired();
+                mProfileAutoStop = false;
             } else {
                 System.err.println("Error: Unknown option: " + opt);
                 showUsage();
@@ -294,16 +303,34 @@ public class Am {
         Intent intent = makeIntent();
         System.out.println("Starting: " + intent);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        ParcelFileDescriptor fd = null;
+
+        if (mProfileFile != null) {
+            try {
+                fd = ParcelFileDescriptor.open(
+                        new File(mProfileFile),
+                        ParcelFileDescriptor.MODE_CREATE |
+                        ParcelFileDescriptor.MODE_TRUNCATE |
+                        ParcelFileDescriptor.MODE_READ_WRITE);
+            } catch (FileNotFoundException e) {
+                System.err.println("Error: Unable to open file: " + mProfileFile);
+                return;
+            }
+        }
+
         // XXX should do something to determine the MIME type.
         IActivityManager.WaitResult result = null;
         int res;
         if (mWaitOption) {
             result = mAm.startActivityAndWait(null, intent, intent.getType(),
-                        null, 0, null, null, 0, false, mDebugOption);
+                        null, 0, null, null, 0, false, mDebugOption,
+                        mProfileFile, fd, mProfileAutoStop);
             res = result.result;
         } else {
             res = mAm.startActivity(null, intent, intent.getType(),
-                    null, 0, null, null, 0, false, mDebugOption);
+                    null, 0, null, null, 0, false, mDebugOption,
+                    mProfileFile, fd, mProfileAutoStop);
         }
         PrintStream out = mWaitOption ? System.out : System.err;
         boolean launched = false;
@@ -483,7 +510,7 @@ public class Am {
             wall = "--wall".equals(nextOption());
             process = nextArgRequired();
         } else if ("stop".equals(cmd)) {
-            process = nextArgRequired();
+            process = nextArg();
         } else {
             // Compatibility with old syntax: process is specified first.
             process = cmd;
@@ -1076,14 +1103,14 @@ public class Am {
     private static void showUsage() {
         System.err.println(
                 "usage: am [subcommand] [options]\n" +
-                "usage: am start [-D] [-W] <INTENT>\n" +
+                "usage: am start [-D] [-W] [-P <FILE>] [--start-profiler <FILE>] <INTENT>\n" +
                 "       am startservice <INTENT>\n" +
                 "       am force-stop <PACKAGE>\n" +
                 "       am broadcast <INTENT>\n" +
-                "       am instrument [-r] [-e <NAME> <VALUE>] [-p] [-w]\n" +
+                "       am instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]\n" +
                 "               [--no-window-animation] <COMPONENT>\n" +
                 "       am profile [looper] start <PROCESS> <FILE>\n" +
-                "       am profile [looper] stop <PROCESS>\n" +
+                "       am profile [looper] stop [<PROCESS>]\n" +
                 "       am dumpheap [flags] <PROCESS> <FILE>\n" +
                 "       am monitor [--gdb <port>]\n" +
                 "       am screen-compat [on|off] <PACKAGE>\n" +
@@ -1092,6 +1119,8 @@ public class Am {
                 "am start: start an Activity.  Options are:\n" +
                 "    -D: enable debugging\n" +
                 "    -W: wait for launch to complete\n" +
+                "    --start-profiler <FILE>: start profiler and send results to <FILE>\n" +
+                "    -P <FILE>: like above, but profiling stops when app goes idle\n" +
                 "\n" +
                 "am startservice: start a Service.\n" +
                 "\n" +
