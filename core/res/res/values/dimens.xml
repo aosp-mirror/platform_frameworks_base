@@ -125,6 +125,9 @@
     <!-- Minimum width of the search view text entry area. -->
     <dimen name="search_view_text_min_width">160dip</dimen>
 
+    <!-- Preferred width of the search view. -->
+    <dimen name="search_view_preferred_width">320dip</dimen>
+
     <!-- Dialog title height -->
     <dimen name="alert_dialog_title_height">64dip</dimen>
     <!-- Dialog button bar height -->
@@ -155,12 +158,12 @@
     <dimen name="default_gap">16dip</dimen>
 
     <!-- Text padding for dropdown items -->
-    <dimen name="dropdownitem_text_padding_left">6dip</dimen>
+    <dimen name="dropdownitem_text_padding_left">8dip</dimen>
 
     <!-- Text padding for dropdown items -->
-    <dimen name="dropdownitem_text_padding_right">6dip</dimen>
+    <dimen name="dropdownitem_text_padding_right">8dip</dimen>
 
     <!-- Width of the icon in a dropdown list -->
-    <dimen name="dropdownitem_icon_width">48dip</dimen>
+    <dimen name="dropdownitem_icon_width">32dip</dimen>
 
 </resources>
