@@ -738,6 +738,12 @@ public final class ActivityManagerService extends ActivityManagerNative
     boolean mOrigWaitForDebugger = false;
     boolean mAlwaysFinishActivities = false;
     IActivityController mController = null;
+    String mProfileApp = null;
+    ProcessRecord mProfileProc = null;
+    String mProfileFile;
+    ParcelFileDescriptor mProfileFd;
+    int mProfileType = 0;
+    boolean mAutoStopProfiler = false;
 
     final RemoteCallbackList<IActivityWatcher> mWatchers
             = new RemoteCallbackList<IActivityWatcher>();
@@ -2090,22 +2096,24 @@ public final class ActivityManagerService extends ActivityManagerNative
     public final int startActivity(IApplicationThread caller,
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo,
-            String resultWho, int requestCode, boolean onlyIfNeeded,
-            boolean debug) {
+            String resultWho, int requestCode, boolean onlyIfNeeded, boolean debug,
+            String profileFile, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
         return mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 grantedUriPermissions, grantedMode, resultTo, resultWho,
-                requestCode, onlyIfNeeded, debug, null, null);
+                requestCode, onlyIfNeeded, debug, profileFile, profileFd, autoStopProfiler,
+                null, null);
     }
 
     public final WaitResult startActivityAndWait(IApplicationThread caller,
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo,
-            String resultWho, int requestCode, boolean onlyIfNeeded,
-            boolean debug) {
+            String resultWho, int requestCode, boolean onlyIfNeeded, boolean debug,
+            String profileFile, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
         WaitResult res = new WaitResult();
         mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 grantedUriPermissions, grantedMode, resultTo, resultWho,
-                requestCode, onlyIfNeeded, debug, res, null);
+                requestCode, onlyIfNeeded, debug, profileFile, profileFd, autoStopProfiler,
+                res, null);
         return res;
     }
     
@@ -2116,7 +2124,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             boolean debug, Configuration config) {
         return mMainStack.startActivityMayWait(caller, -1, intent, resolvedType,
                 grantedUriPermissions, grantedMode, resultTo, resultWho,
-                requestCode, onlyIfNeeded, debug, null, config);
+                requestCode, onlyIfNeeded, debug, null, null, false, null, config);
     }
 
     public int startActivityIntentSender(IApplicationThread caller,
@@ -2255,7 +2263,8 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
 
         return mMainStack.startActivityMayWait(null, uid, intent, resolvedType,
-                null, 0, resultTo, resultWho, requestCode, onlyIfNeeded, false, null, null);
+                null, 0, resultTo, resultWho, requestCode, onlyIfNeeded, false,
+                null, null, false, null, null);
     }
 
     public final int startActivities(IApplicationThread caller,
@@ -2541,6 +2550,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         cleanUpApplicationRecordLocked(app, restarting, allowRestart, -1);
         if (!restarting) {
             mLruProcesses.remove(app);
+        }
+
+        if (mProfileProc == app) {
+            clearProfilerLocked();
         }
 
         // Just in case...
@@ -3549,7 +3562,16 @@ public final class ActivityManagerService extends ActivityManagerNative
                     mWaitForDebugger = mOrigWaitForDebugger;
                 }
             }
-            
+            String profileFile = app.instrumentationProfileFile;
+            ParcelFileDescriptor profileFd = null;
+            boolean profileAutoStop = false;
+            if (mProfileApp != null && mProfileApp.equals(processName)) {
+                mProfileProc = app;
+                profileFile = mProfileFile;
+                profileFd = mProfileFd;
+                profileAutoStop = mAutoStopProfiler;
+            }
+
             // If the app is being launched for restore or full backup, set it up specially
             boolean isRestrictedBackupMode = false;
             if (mBackupTarget != null && mBackupAppName.equals(processName)) {
@@ -3569,8 +3591,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             ApplicationInfo appInfo = app.instrumentationInfo != null
                     ? app.instrumentationInfo : app.info;
             app.compat = compatibilityInfoForPackageLocked(appInfo);
+            if (profileFd != null) {
+                profileFd = profileFd.dup();
+            }
             thread.bindApplication(processName, appInfo, providers,
-                    app.instrumentationClass, app.instrumentationProfileFile,
+                    app.instrumentationClass, profileFile, profileFd, profileAutoStop,
                     app.instrumentationArguments, app.instrumentationWatcher, testMode, 
                     isRestrictedBackupMode || !normalMode,
                     mConfiguration, app.compat, getCommonServicesLocked(),
@@ -3697,9 +3722,22 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
-    public final void activityIdle(IBinder token, Configuration config) {
+    public final void activityIdle(IBinder token, Configuration config, boolean stopProfiling) {
         final long origId = Binder.clearCallingIdentity();
-        mMainStack.activityIdleInternal(token, false, config);
+        ActivityRecord r = mMainStack.activityIdleInternal(token, false, config);
+        if (stopProfiling) {
+            synchronized (this) {
+                if (mProfileProc == r.app) {
+                    if (mProfileFd != null) {
+                        try {
+                            mProfileFd.close();
+                        } catch (IOException e) {
+                        }
+                        clearProfilerLocked();
+                    }
+                }
+            }
+        }
         Binder.restoreCallingIdentity(origId);
     }
 
@@ -6147,6 +6185,30 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    void setProfileApp(ApplicationInfo app, String processName, String profileFile,
+            ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
+        synchronized (this) {
+            boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
+            if (!isDebuggable) {
+                if ((app.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
+                    throw new SecurityException("Process not debuggable: " + app.packageName);
+                }
+            }
+            mProfileApp = processName;
+            mProfileFile = profileFile;
+            if (mProfileFd != null) {
+                try {
+                    mProfileFd.close();
+                } catch (IOException e) {
+                }
+                mProfileFd = null;
+            }
+            mProfileFd = profileFd;
+            mProfileType = 0;
+            mAutoStopProfiler = autoStopProfiler;
+        }
+    }
+
     public void setAlwaysFinish(boolean enabled) {
         enforceCallingPermission(android.Manifest.permission.SET_ALWAYS_FINISH,
                 "setAlwaysFinish()");
@@ -7885,6 +7947,13 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  mDebugApp=" + mDebugApp + "/orig=" + mOrigDebugApp
                     + " mDebugTransient=" + mDebugTransient
                     + " mOrigWaitForDebugger=" + mOrigWaitForDebugger);
+        }
+        if (mProfileApp != null || mProfileProc != null || mProfileFile != null
+                || mProfileFd != null) {
+            pw.println("  mProfileApp=" + mProfileApp + " mProfileProc=" + mProfileProc);
+            pw.println("  mProfileFile=" + mProfileFile + " mProfileFd=" + mProfileFd);
+            pw.println("  mProfileType=" + mProfileType + " mAutoStopProfiler="
+                    + mAutoStopProfiler);
         }
         if (mAlwaysFinishActivities || mController != null) {
             pw.println("  mAlwaysFinishActivities=" + mAlwaysFinishActivities
@@ -13577,6 +13646,37 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    private void stopProfilerLocked(ProcessRecord proc, String path, int profileType) {
+        if (proc == null || proc == mProfileProc) {
+            proc = mProfileProc;
+            path = mProfileFile;
+            profileType = mProfileType;
+            clearProfilerLocked();
+        }
+        if (proc == null) {
+            return;
+        }
+        try {
+            proc.thread.profilerControl(false, path, null, profileType);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Process disappeared");
+        }
+    }
+
+    private void clearProfilerLocked() {
+        if (mProfileFd != null) {
+            try {
+                mProfileFd.close();
+            } catch (IOException e) {
+            }
+        }
+        mProfileApp = null;
+        mProfileProc = null;
+        mProfileFile = null;
+        mProfileType = 0;
+        mAutoStopProfiler = false;
+    }
+
     public boolean profileControl(String process, boolean start,
             String path, ParcelFileDescriptor fd, int profileType) throws RemoteException {
 
@@ -13589,42 +13689,58 @@ public final class ActivityManagerService extends ActivityManagerNative
                     throw new SecurityException("Requires permission "
                             + android.Manifest.permission.SET_ACTIVITY_WATCHER);
                 }
-                
+
                 if (start && fd == null) {
                     throw new IllegalArgumentException("null fd");
                 }
-                
+
                 ProcessRecord proc = null;
-                try {
-                    int pid = Integer.parseInt(process);
-                    synchronized (mPidsSelfLocked) {
-                        proc = mPidsSelfLocked.get(pid);
+                if (process != null) {
+                    try {
+                        int pid = Integer.parseInt(process);
+                        synchronized (mPidsSelfLocked) {
+                            proc = mPidsSelfLocked.get(pid);
+                        }
+                    } catch (NumberFormatException e) {
                     }
-                } catch (NumberFormatException e) {
-                }
-                
-                if (proc == null) {
-                    HashMap<String, SparseArray<ProcessRecord>> all
-                            = mProcessNames.getMap();
-                    SparseArray<ProcessRecord> procs = all.get(process);
-                    if (procs != null && procs.size() > 0) {
-                        proc = procs.valueAt(0);
+
+                    if (proc == null) {
+                        HashMap<String, SparseArray<ProcessRecord>> all
+                                = mProcessNames.getMap();
+                        SparseArray<ProcessRecord> procs = all.get(process);
+                        if (procs != null && procs.size() > 0) {
+                            proc = procs.valueAt(0);
+                        }
                     }
                 }
-                
-                if (proc == null || proc.thread == null) {
+
+                if (start && (proc == null || proc.thread == null)) {
                     throw new IllegalArgumentException("Unknown process: " + process);
                 }
-                
-                boolean isDebuggable = "1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"));
-                if (!isDebuggable) {
-                    if ((proc.info.flags&ApplicationInfo.FLAG_DEBUGGABLE) == 0) {
-                        throw new SecurityException("Process not debuggable: " + proc);
+
+                if (start) {
+                    stopProfilerLocked(null, null, 0);
+                    setProfileApp(proc.info, proc.processName, path, fd, false);
+                    mProfileProc = proc;
+                    mProfileType = profileType;
+                    try {
+                        fd = fd.dup();
+                    } catch (IOException e) {
+                        fd = null;
+                    }
+                    proc.thread.profilerControl(start, path, fd, profileType);
+                    fd = null;
+                    mProfileFd = null;
+                } else {
+                    stopProfilerLocked(proc, path, profileType);
+                    if (fd != null) {
+                        try {
+                            fd.close();
+                        } catch (IOException e) {
+                        }
                     }
                 }
-            
-                proc.thread.profilerControl(start, path, fd, profileType);
-                fd = null;
+
                 return true;
             }
         } catch (RemoteException e) {
