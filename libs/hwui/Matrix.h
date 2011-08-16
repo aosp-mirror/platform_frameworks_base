@@ -112,6 +112,7 @@ public:
 
     bool isPureTranslate();
     bool isSimple();
+    bool isIdentity();
 
     bool changesBounds();
 
@@ -128,6 +129,7 @@ public:
 
 private:
     bool mSimpleMatrix;
+    bool mIsIdentity;
 
     inline float get(int i, int j) const {
         return data[i * 4 + j];

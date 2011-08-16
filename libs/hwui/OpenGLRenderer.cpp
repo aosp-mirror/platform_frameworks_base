@@ -627,6 +627,12 @@ void OpenGLRenderer::composeLayer(sp<Snapshot> current, sp<Snapshot> previous) {
 void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     float alpha = layer->getAlpha() / 255.0f;
 
+    mat4& transform = layer->getTransform();
+    if (!transform.isIdentity()) {
+        save(0);
+        mSnapshot->transform->multiply(transform);
+    }
+
     setupDraw();
     if (layer->getRenderTarget() == GL_TEXTURE_2D) {
         setupDrawWithTexture();
@@ -663,6 +669,10 @@ void OpenGLRenderer::drawTextureLayer(Layer* layer, const Rect& rect) {
     glDrawArrays(GL_TRIANGLE_STRIP, 0, gMeshCount);
 
     finishDrawTexture();
+
+    if (!transform.isIdentity()) {
+        restore();
+    }
 }
 
 void OpenGLRenderer::composeLayerRect(Layer* layer, const Rect& rect, bool swap) {

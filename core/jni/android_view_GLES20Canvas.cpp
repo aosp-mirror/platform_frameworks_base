@@ -683,6 +683,12 @@ static void android_view_GLES20Canvas_updateTextureLayer(JNIEnv* env, jobject cl
     LayerRenderer::updateTextureLayer(layer, width, height, isOpaque, renderTarget, transform);
 }
 
+static void android_view_GLES20Canvas_setTextureLayerTransform(JNIEnv* env, jobject clazz,
+        Layer* layer, SkMatrix* matrix) {
+
+    layer->getTransform().load(*matrix);
+}
+
 static void android_view_GLES20Canvas_destroyLayer(JNIEnv* env, jobject clazz, Layer* layer) {
     LayerRenderer::destroyLayer(layer);
 }
@@ -827,6 +833,7 @@ static JNINativeMethod gMethods[] = {
     { "nCreateTextureLayer",     "(Z[I)I",     (void*) android_view_GLES20Canvas_createTextureLayer },
     { "nUpdateTextureLayer",     "(IIIZLandroid/graphics/SurfaceTexture;)V",
                                                (void*) android_view_GLES20Canvas_updateTextureLayer },
+    { "nSetTextureLayerTransform", "(II)V",    (void*) android_view_GLES20Canvas_setTextureLayerTransform },
     { "nDestroyLayer",           "(I)V",       (void*) android_view_GLES20Canvas_destroyLayer },
     { "nDestroyLayerDeferred",   "(I)V",       (void*) android_view_GLES20Canvas_destroyLayerDeferred },
     { "nDrawLayer",              "(IIFFI)V",   (void*) android_view_GLES20Canvas_drawLayer },

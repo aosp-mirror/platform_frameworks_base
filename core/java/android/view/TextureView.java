@@ -19,6 +19,7 @@ package android.view;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
@@ -103,6 +104,9 @@ public class TextureView extends View {
     private SurfaceTextureListener mListener;
 
     private boolean mOpaque = true;
+
+    private final Matrix mMatrix = new Matrix();
+    private boolean mMatrixChanged;
 
     private final Object[] mLock = new Object[0];
     private boolean mUpdateLayer;
@@ -312,6 +316,11 @@ public class TextureView extends View {
 
         applyUpdate();
 
+        if (mMatrixChanged) {
+            mLayer.setTransform(mMatrix);
+            mMatrixChanged = false;
+        }
+
         return mLayer;
     }
 
@@ -355,6 +364,50 @@ public class TextureView extends View {
         if (mListener != null) {
             mListener.onSurfaceTextureUpdated(mSurface);
         }
+    }
+
+    /**
+     * <p>Sets the transform to associate with this texture view.
+     * The specified transform applies to the underlying surface
+     * texture and does not affect the size or position of the view
+     * itself, only of its content.</p>
+     * 
+     * <p>Some transforms might prevent the content from drawing
+     * all the pixels contained within this view's bounds. In such
+     * situations, make sure this texture view is not marked opaque.</p>
+     * 
+     * @param transform The transform to apply to the content of
+     *        this view.
+     * 
+     * @see #getTransform(android.graphics.Matrix) 
+     * @see #isOpaque() 
+     * @see #setOpaque(boolean) 
+     */
+    public void setTransform(Matrix transform) {
+        mMatrix.set(transform);
+        mMatrixChanged = true;
+        invalidate();
+    }
+
+    /**
+     * Returns the transform associated with this texture view.
+     * 
+     * @param transform The {@link Matrix} in which to copy the current
+     *        transform. Can be null.
+     * 
+     * @return The specified matrix if not null or a new {@link Matrix}
+     *         instance otherwise.
+     *         
+     * @see #setTransform(android.graphics.Matrix) 
+     */
+    public Matrix getTransform(Matrix transform) {
+        if (transform == null) {
+            transform = new Matrix();
+        }
+
+        transform.set(mMatrix);
+
+        return transform;
     }
 
     /**

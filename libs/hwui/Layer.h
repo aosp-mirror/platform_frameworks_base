@@ -203,6 +203,10 @@ struct Layer {
         return texTransform;
     }
 
+    inline mat4& getTransform() {
+        return transform;
+    }
+
     /**
      * Bounds of the layer.
      */
@@ -281,6 +285,11 @@ private:
      * Optional texture coordinates transform.
      */
     mat4 texTransform;
+
+    /**
+     * Optional transform.
+     */
+    mat4 transform;
 
 }; // struct Layer
 

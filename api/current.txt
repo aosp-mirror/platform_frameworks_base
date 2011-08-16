@@ -22478,12 +22478,14 @@ package android.view {
     method public android.graphics.Bitmap getBitmap(android.graphics.Bitmap);
     method public android.graphics.SurfaceTexture getSurfaceTexture();
     method public android.view.TextureView.SurfaceTextureListener getSurfaceTextureListener();
+    method public android.graphics.Matrix getTransform(android.graphics.Matrix);
     method public boolean isAvailable();
     method public android.graphics.Canvas lockCanvas();
     method public android.graphics.Canvas lockCanvas(android.graphics.Rect);
     method protected final void onDraw(android.graphics.Canvas);
     method public void setOpaque(boolean);
     method public void setSurfaceTextureListener(android.view.TextureView.SurfaceTextureListener);
+    method public void setTransform(android.graphics.Matrix);
     method public void unlockCanvasAndPost(android.graphics.Canvas);
   }
 
