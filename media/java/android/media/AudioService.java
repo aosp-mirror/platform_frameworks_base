@@ -2167,8 +2167,10 @@ public class AudioService extends IAudioService.Stub {
 
                 case MSG_RCDISPLAY_UPDATE:
                     synchronized(mCurrentRcLock) {
+                        // msg.obj is guaranteed to be non null
+                        RemoteControlStackEntry rcse = (RemoteControlStackEntry)msg.obj;
                         if ((mCurrentRcClient == null) ||
-                                (!mCurrentRcClient.equals((IRemoteControlClient)msg.obj))) {
+                                (!mCurrentRcClient.equals(rcse.mRcClient))) {
                             // the remote control display owner has changed between the
                             // the message to update the display was sent, and the time it
                             // gets to be processed (now)
@@ -2183,6 +2185,9 @@ public class AudioService extends IAudioService.Stub {
                             rcClientIntent.putExtra(
                                     AudioManager.EXTRA_REMOTE_CONTROL_CLIENT_INFO_CHANGED,
                                     msg.arg1);
+                            rcClientIntent.putExtra(
+                                    AudioManager.EXTRA_REMOTE_CONTROL_EVENT_RECEIVER,
+                                    rcse.mReceiverComponent.flattenToString());
                             rcClientIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
                             mContext.sendBroadcast(rcClientIntent);
                         }
@@ -3131,7 +3136,7 @@ public class AudioService extends IAudioService.Stub {
             mCurrentRcClient = rcse.mRcClient;
         }
         mAudioHandler.sendMessage( mAudioHandler.obtainMessage(MSG_RCDISPLAY_UPDATE,
-                infoFlagsAboutToBeUsed /* arg1 */, 0, rcse.mRcClient /* obj */) );
+                infoFlagsAboutToBeUsed /* arg1 */, 0, rcse /* obj, != null */) );
     }
 
     /**
