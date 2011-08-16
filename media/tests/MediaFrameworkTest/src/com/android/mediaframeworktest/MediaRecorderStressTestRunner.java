@@ -16,8 +16,7 @@
 
 package com.android.mediaframeworktest;
 
-import android.media.EncoderCapabilities.AudioEncoderCap;
-import android.media.EncoderCapabilities.VideoEncoderCap;
+import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.test.InstrumentationTestRunner;
@@ -29,20 +28,21 @@ import junit.framework.TestSuite;
 
 public class MediaRecorderStressTestRunner extends InstrumentationTestRunner {
 
-    public static List<VideoEncoderCap> videoEncoders = MediaProfileReader.getVideoEncoders();
-    public static  List<AudioEncoderCap> audioEncoders = MediaProfileReader.getAudioEncoders();
-
-    //Get the first capability as the default
-    public static VideoEncoderCap videoEncoder = videoEncoders.get(0);
-    public static AudioEncoderCap audioEncoder = audioEncoders.get(0);
+    // MediaRecorder stress test sets one of the cameras as the video source. As
+    // a result, we should make sure that the encoding parameters as input to
+    // the test must be supported by the corresponding camera.
+    public static int mCameraId = 0;
+    public static int mProfileQuality = CamcorderProfile.QUALITY_HIGH;
+    public static CamcorderProfile profile =
+                        CamcorderProfile.get(mCameraId, mProfileQuality);
 
     public static int mIterations = 100;
-    public static int mVideoEncoder = videoEncoder.mCodec;
-    public static int mAudioEncdoer = audioEncoder.mCodec;
-    public static int mFrameRate = videoEncoder.mMaxFrameRate;
-    public static int mVideoWidth = videoEncoder.mMaxFrameWidth;
-    public static int mVideoHeight = videoEncoder.mMaxFrameHeight;
-    public static int mBitRate = audioEncoder.mMaxBitRate;
+    public static int mVideoEncoder = profile.videoCodec;
+    public static int mAudioEncdoer = profile.audioCodec;
+    public static int mFrameRate = profile.videoFrameRate;
+    public static int mVideoWidth = profile.videoFrameWidth;
+    public static int mVideoHeight = profile.videoFrameHeight;
+    public static int mBitRate = profile.videoBitRate;
     public static boolean mRemoveVideo = true;
     public static int mDuration = 10000;
 
