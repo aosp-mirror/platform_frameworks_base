@@ -718,7 +718,9 @@ public abstract class HardwareRenderer {
                 if (!createSurface(holder)) {
                     return;
                 }
-                setEnabled(true);                
+                if (mCanvas != null) {
+                    setEnabled(true);
+                }
             }
         }
 
