@@ -1778,15 +1778,26 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             }
         }
         mCurrentLinkProperties[netType] = newLp;
-        updateRoutes(newLp, curLp, mNetConfigs[netType].isDefault());
+        boolean resetDns = updateRoutes(newLp, curLp, mNetConfigs[netType].isDefault());
 
-        if (doReset || resetMask != 0) {
+        if (doReset || resetMask != 0 || resetDns) {
             LinkProperties linkProperties = mNetTrackers[netType].getLinkProperties();
             if (linkProperties != null) {
                 String iface = linkProperties.getInterfaceName();
                 if (TextUtils.isEmpty(iface) == false) {
-                    if (DBG) log("resetConnections(" + iface + ", " + resetMask + ")");
-                    NetworkUtils.resetConnections(iface, resetMask);
+                    if (doReset || resetMask != 0) {
+                        if (DBG) log("resetConnections(" + iface + ", " + resetMask + ")");
+                        NetworkUtils.resetConnections(iface, resetMask);
+                    }
+                    if (resetDns) {
+                        if (DBG) log("resetting DNS cache for " + iface);
+                        try {
+                            mNetd.flushInterfaceDnsCache(iface);
+                        } catch (Exception e) {
+                            // never crash - catch them all
+                            loge("Exception resetting dns cache: " + e);
+                        }
+                    }
                 }
             }
         }
@@ -1808,8 +1819,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
      * is a noop.
      * Uses isLinkDefault to determine if default routes should be set or conversely if
      * host routes should be set to the dns servers
+     * returns a boolean indicating the routes changed
      */
-    private void updateRoutes(LinkProperties newLp, LinkProperties curLp, boolean isLinkDefault) {
+    private boolean updateRoutes(LinkProperties newLp, LinkProperties curLp,
+            boolean isLinkDefault) {
         Collection<RouteInfo> routesToAdd = null;
         CompareResult<InetAddress> dnsDiff = new CompareResult<InetAddress>();
         CompareResult<RouteInfo> routeDiff = new CompareResult<RouteInfo>();
@@ -1821,6 +1834,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
             routeDiff.added = newLp.getRoutes();
             dnsDiff.added = newLp.getDnses();
         }
+
+        boolean routesChanged = (routeDiff.removed.size() != 0 || routeDiff.added.size() != 0);
 
         for (RouteInfo r : routeDiff.removed) {
             if (isLinkDefault || ! r.isDefaultRoute()) {
@@ -1849,15 +1864,7 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         if (!isLinkDefault) {
             // handle DNS routes
-            if (routeDiff.removed.size() == 0 && routeDiff.added.size() == 0) {
-                // no change in routes, check for change in dns themselves
-                for (InetAddress oldDns : dnsDiff.removed) {
-                    removeRouteToAddress(curLp, oldDns);
-                }
-                for (InetAddress newDns : dnsDiff.added) {
-                    addRouteToAddress(newLp, newDns);
-                }
-            } else {
+            if (routesChanged) {
                 // routes changed - remove all old dns entries and add new
                 if (curLp != null) {
                     for (InetAddress oldDns : curLp.getDnses()) {
@@ -1869,8 +1876,17 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                         addRouteToAddress(newLp, newDns);
                     }
                 }
+            } else {
+                // no change in routes, check for change in dns themselves
+                for (InetAddress oldDns : dnsDiff.removed) {
+                    removeRouteToAddress(curLp, oldDns);
+                }
+                for (InetAddress newDns : dnsDiff.added) {
+                    addRouteToAddress(newLp, newDns);
+                }
             }
         }
+        return routesChanged;
     }
 
 
