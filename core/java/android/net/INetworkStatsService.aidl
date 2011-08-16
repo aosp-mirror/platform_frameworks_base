@@ -26,7 +26,7 @@ interface INetworkStatsService {
     /** Return historical network layer stats for traffic that matches template. */
     NetworkStatsHistory getHistoryForNetwork(in NetworkTemplate template, int fields);
     /** Return historical network layer stats for specific UID traffic that matches template. */
-    NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid, int tag, int fields);
+    NetworkStatsHistory getHistoryForUid(in NetworkTemplate template, int uid, int set, int tag, int fields);
 
     /** Return network layer usage summary for traffic that matches template. */
     NetworkStats getSummaryForNetwork(in NetworkTemplate template, long start, long end);
@@ -38,6 +38,8 @@ interface INetworkStatsService {
     /** Increment data layer count of operations performed for UID and tag. */
     void incrementOperationCount(int uid, int tag, int operationCount);
 
+    /** Mark given UID as being in foreground for stats purposes. */
+    void setUidForeground(int uid, boolean uidForeground);
     /** Force update of statistics. */
     void forceUpdate();
 

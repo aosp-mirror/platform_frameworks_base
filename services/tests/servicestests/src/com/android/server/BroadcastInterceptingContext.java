@@ -28,7 +28,10 @@ import com.google.common.util.concurrent.AbstractFuture;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * {@link ContextWrapper} that can attach listeners for upcoming
@@ -60,6 +63,15 @@ public class BroadcastInterceptingContext extends ContextWrapper {
                 }
             } else {
                 return false;
+            }
+        }
+
+        @Override
+        public Intent get() throws InterruptedException, ExecutionException {
+            try {
+                return get(5, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                throw new RuntimeException(e);
             }
         }
     }
@@ -122,6 +134,11 @@ public class BroadcastInterceptingContext extends ContextWrapper {
 
     @Override
     public void sendStickyBroadcast(Intent intent) {
+        sendBroadcast(intent);
+    }
+
+    @Override
+    public void sendBroadcast(Intent intent, String receiverPermission) {
         sendBroadcast(intent);
     }
 

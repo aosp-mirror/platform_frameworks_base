@@ -42,7 +42,13 @@ public class NetworkStats implements Parcelable {
     public static final String IFACE_ALL = null;
     /** {@link #uid} value when UID details unavailable. */
     public static final int UID_ALL = -1;
-    /** {@link #tag} value for without tag. */
+    /** {@link #set} value when all sets combined. */
+    public static final int SET_ALL = -1;
+    /** {@link #set} value where background data is accounted. */
+    public static final int SET_DEFAULT = 0;
+    /** {@link #set} value where foreground data is accounted. */
+    public static final int SET_FOREGROUND = 1;
+    /** {@link #tag} value for total data across all tags. */
     public static final int TAG_NONE = 0;
 
     /**
@@ -53,6 +59,7 @@ public class NetworkStats implements Parcelable {
     private int size;
     private String[] iface;
     private int[] uid;
+    private int[] set;
     private int[] tag;
     private long[] rxBytes;
     private long[] rxPackets;
@@ -63,6 +70,7 @@ public class NetworkStats implements Parcelable {
     public static class Entry {
         public String iface;
         public int uid;
+        public int set;
         public int tag;
         public long rxBytes;
         public long rxPackets;
@@ -71,17 +79,19 @@ public class NetworkStats implements Parcelable {
         public long operations;
 
         public Entry() {
-            this(IFACE_ALL, UID_ALL, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
+            this(IFACE_ALL, UID_ALL, SET_DEFAULT, TAG_NONE, 0L, 0L, 0L, 0L, 0L);
         }
 
         public Entry(long rxBytes, long rxPackets, long txBytes, long txPackets, long operations) {
-            this(IFACE_ALL, UID_ALL, TAG_NONE, rxBytes, rxPackets, txBytes, txPackets, operations);
+            this(IFACE_ALL, UID_ALL, SET_DEFAULT, TAG_NONE, rxBytes, rxPackets, txBytes, txPackets,
+                    operations);
         }
 
-        public Entry(String iface, int uid, int tag, long rxBytes, long rxPackets, long txBytes,
-                long txPackets, long operations) {
+        public Entry(String iface, int uid, int set, int tag, long rxBytes, long rxPackets,
+                long txBytes, long txPackets, long operations) {
             this.iface = iface;
             this.uid = uid;
+            this.set = set;
             this.tag = tag;
             this.rxBytes = rxBytes;
             this.rxPackets = rxPackets;
@@ -96,6 +106,7 @@ public class NetworkStats implements Parcelable {
         this.size = 0;
         this.iface = new String[initialSize];
         this.uid = new int[initialSize];
+        this.set = new int[initialSize];
         this.tag = new int[initialSize];
         this.rxBytes = new long[initialSize];
         this.rxPackets = new long[initialSize];
@@ -109,6 +120,7 @@ public class NetworkStats implements Parcelable {
         size = parcel.readInt();
         iface = parcel.createStringArray();
         uid = parcel.createIntArray();
+        set = parcel.createIntArray();
         tag = parcel.createIntArray();
         rxBytes = parcel.createLongArray();
         rxPackets = parcel.createLongArray();
@@ -123,6 +135,7 @@ public class NetworkStats implements Parcelable {
         dest.writeInt(size);
         dest.writeStringArray(iface);
         dest.writeIntArray(uid);
+        dest.writeIntArray(set);
         dest.writeIntArray(tag);
         dest.writeLongArray(rxBytes);
         dest.writeLongArray(rxPackets);
@@ -131,15 +144,18 @@ public class NetworkStats implements Parcelable {
         dest.writeLongArray(operations);
     }
 
-    public NetworkStats addValues(String iface, int uid, int tag, long rxBytes, long rxPackets,
-            long txBytes, long txPackets) {
-        return addValues(iface, uid, tag, rxBytes, rxPackets, txBytes, txPackets, 0L);
+    // @VisibleForTesting
+    public NetworkStats addIfaceValues(
+            String iface, long rxBytes, long rxPackets, long txBytes, long txPackets) {
+        return addValues(
+                iface, UID_ALL, SET_DEFAULT, TAG_NONE, rxBytes, rxPackets, txBytes, txPackets, 0L);
     }
 
-    public NetworkStats addValues(String iface, int uid, int tag, long rxBytes, long rxPackets,
-            long txBytes, long txPackets, long operations) {
-        return addValues(
-                new Entry(iface, uid, tag, rxBytes, rxPackets, txBytes, txPackets, operations));
+    // @VisibleForTesting
+    public NetworkStats addValues(String iface, int uid, int set, int tag, long rxBytes,
+            long rxPackets, long txBytes, long txPackets, long operations) {
+        return addValues(new Entry(
+                iface, uid, set, tag, rxBytes, rxPackets, txBytes, txPackets, operations));
     }
 
     /**
@@ -151,6 +167,7 @@ public class NetworkStats implements Parcelable {
             final int newLength = Math.max(iface.length, 10) * 3 / 2;
             iface = Arrays.copyOf(iface, newLength);
             uid = Arrays.copyOf(uid, newLength);
+            set = Arrays.copyOf(set, newLength);
             tag = Arrays.copyOf(tag, newLength);
             rxBytes = Arrays.copyOf(rxBytes, newLength);
             rxPackets = Arrays.copyOf(rxPackets, newLength);
@@ -161,6 +178,7 @@ public class NetworkStats implements Parcelable {
 
         iface[size] = entry.iface;
         uid[size] = entry.uid;
+        set[size] = entry.set;
         tag[size] = entry.tag;
         rxBytes[size] = entry.rxBytes;
         rxPackets[size] = entry.rxPackets;
@@ -179,6 +197,7 @@ public class NetworkStats implements Parcelable {
         final Entry entry = recycle != null ? recycle : new Entry();
         entry.iface = iface[i];
         entry.uid = uid[i];
+        entry.set = set[i];
         entry.tag = tag[i];
         entry.rxBytes = rxBytes[i];
         entry.rxPackets = rxPackets[i];
@@ -201,19 +220,26 @@ public class NetworkStats implements Parcelable {
         return iface.length;
     }
 
+    @Deprecated
     public NetworkStats combineValues(String iface, int uid, int tag, long rxBytes, long rxPackets,
             long txBytes, long txPackets, long operations) {
         return combineValues(
-                new Entry(iface, uid, tag, rxBytes, rxPackets, txBytes, txPackets, operations));
+                iface, uid, SET_DEFAULT, tag, rxBytes, rxPackets, txBytes, txPackets, operations);
+    }
+
+    public NetworkStats combineValues(String iface, int uid, int set, int tag, long rxBytes,
+            long rxPackets, long txBytes, long txPackets, long operations) {
+        return combineValues(new Entry(
+                iface, uid, set, tag, rxBytes, rxPackets, txBytes, txPackets, operations));
     }
 
     /**
      * Combine given values with an existing row, or create a new row if
-     * {@link #findIndex(String, int, int)} is unable to find match. Can also be
-     * used to subtract values from existing rows.
+     * {@link #findIndex(String, int, int, int)} is unable to find match. Can
+     * also be used to subtract values from existing rows.
      */
     public NetworkStats combineValues(Entry entry) {
-        final int i = findIndex(entry.iface, entry.uid, entry.tag);
+        final int i = findIndex(entry.iface, entry.uid, entry.set, entry.tag);
         if (i == -1) {
             // only create new entry when positive contribution
             addValues(entry);
@@ -230,9 +256,10 @@ public class NetworkStats implements Parcelable {
     /**
      * Find first stats index that matches the requested parameters.
      */
-    public int findIndex(String iface, int uid, int tag) {
+    public int findIndex(String iface, int uid, int set, int tag) {
         for (int i = 0; i < size; i++) {
-            if (Objects.equal(iface, this.iface[i]) && uid == this.uid[i] && tag == this.tag[i]) {
+            if (Objects.equal(iface, this.iface[i]) && uid == this.uid[i] && set == this.set[i]
+                    && tag == this.tag[i]) {
                 return i;
             }
         }
@@ -246,7 +273,7 @@ public class NetworkStats implements Parcelable {
      */
     public void spliceOperationsFrom(NetworkStats stats) {
         for (int i = 0; i < size; i++) {
-            final int j = stats.findIndex(IFACE_ALL, uid[i], tag[i]);
+            final int j = stats.findIndex(IFACE_ALL, uid[i], set[i], tag[i]);
             if (j == -1) {
                 operations[i] = 0;
             } else {
@@ -332,10 +359,11 @@ public class NetworkStats implements Parcelable {
         for (int i = 0; i < size; i++) {
             entry.iface = iface[i];
             entry.uid = uid[i];
+            entry.set = set[i];
             entry.tag = tag[i];
 
             // find remote row that matches, and subtract
-            final int j = value.findIndex(entry.iface, entry.uid, entry.tag);
+            final int j = value.findIndex(entry.iface, entry.uid, entry.set, entry.tag);
             if (j == -1) {
                 // newly appearing row, return entire value
                 entry.rxBytes = rxBytes[i];
@@ -377,13 +405,37 @@ public class NetworkStats implements Parcelable {
             pw.print(prefix);
             pw.print("  iface="); pw.print(iface[i]);
             pw.print(" uid="); pw.print(uid[i]);
-            pw.print(" tag=0x"); pw.print(Integer.toHexString(tag[i]));
+            pw.print(" set="); pw.print(setToString(set[i]));
+            pw.print(" tag="); pw.print(tagToString(tag[i]));
             pw.print(" rxBytes="); pw.print(rxBytes[i]);
             pw.print(" rxPackets="); pw.print(rxPackets[i]);
             pw.print(" txBytes="); pw.print(txBytes[i]);
             pw.print(" txPackets="); pw.print(txPackets[i]);
             pw.print(" operations="); pw.println(operations[i]);
         }
+    }
+
+    /**
+     * Return text description of {@link #set} value.
+     */
+    public static String setToString(int set) {
+        switch (set) {
+            case SET_ALL:
+                return "ALL";
+            case SET_DEFAULT:
+                return "DEFAULT";
+            case SET_FOREGROUND:
+                return "FOREGROUND";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    /**
+     * Return text description of {@link #tag} value.
+     */
+    public static String tagToString(int tag) {
+        return "0x" + Integer.toHexString(tag);
     }
 
     @Override

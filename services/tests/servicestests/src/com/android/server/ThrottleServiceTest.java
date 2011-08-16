@@ -16,6 +16,9 @@
 
 package com.android.server;
 
+import static android.net.NetworkStats.SET_DEFAULT;
+import static android.net.NetworkStats.TAG_NONE;
+import static android.net.NetworkStats.UID_ALL;
 import static org.easymock.EasyMock.createMock;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
@@ -289,7 +292,7 @@ public class ThrottleServiceTest extends AndroidTestCase {
     public void expectGetInterfaceCounter(long rx, long tx) throws Exception {
         // TODO: provide elapsedRealtime mock to match TimeAuthority
         final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(), 1);
-        stats.addValues(TEST_IFACE, NetworkStats.UID_ALL, NetworkStats.TAG_NONE, rx, 0L, tx, 0L, 0);
+        stats.addValues(TEST_IFACE, UID_ALL, SET_DEFAULT, TAG_NONE, rx, 0L, tx, 0L, 0);
 
         expect(mMockNMService.getNetworkStatsSummary()).andReturn(stats).atLeastOnce();
     }
