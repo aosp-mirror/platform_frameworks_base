@@ -285,21 +285,6 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct ACodec::ErrorState : public ACodec::BaseState {
-    ErrorState(ACodec *codec);
-
-protected:
-    virtual bool onMessageReceived(const sp<AMessage> &msg);
-    virtual void stateEntered();
-
-    virtual bool onOMXEvent(OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2);
-
-private:
-    DISALLOW_EVIL_CONSTRUCTORS(ErrorState);
-};
-
-////////////////////////////////////////////////////////////////////////////////
-
 struct ACodec::FlushingState : public ACodec::BaseState {
     FlushingState(ACodec *codec);
 
@@ -335,7 +320,6 @@ ACodec::ACodec()
 
     mExecutingToIdleState = new ExecutingToIdleState(this);
     mIdleToLoadedState = new IdleToLoadedState(this);
-    mErrorState = new ErrorState(this);
     mFlushingState = new FlushingState(this);
 
     mPortEOS[kPortIndexInput] = mPortEOS[kPortIndexOutput] = false;
@@ -594,7 +578,10 @@ status_t ACodec::cancelBufferToNativeWindow(BufferInfo *info) {
 
 ACodec::BufferInfo *ACodec::dequeueBufferFromNativeWindow() {
     ANativeWindowBuffer *buf;
-    CHECK_EQ(mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf), 0);
+    if (mNativeWindow->dequeueBuffer(mNativeWindow.get(), &buf) != 0) {
+        LOGE("dequeueBuffer failed.");
+        return NULL;
+    }
 
     for (size_t i = mBuffers[kPortIndexOutput].size(); i-- > 0;) {
         BufferInfo *info =
@@ -1263,10 +1250,12 @@ bool ACodec::BaseState::onOMXEvent(
         return false;
     }
 
-    LOGE("[%s] ERROR(0x%08lx, 0x%08lx)",
-         mCodec->mComponentName.c_str(), data1, data2);
+    LOGE("[%s] ERROR(0x%08lx)", mCodec->mComponentName.c_str(), data1);
 
-    mCodec->changeState(mCodec->mErrorState);
+    sp<AMessage> notify = mCodec->mNotify->dup();
+    notify->setInt32("what", ACodec::kWhatError);
+    notify->setInt32("omx-error", data1);
+    notify->post();
 
     return true;
 }
@@ -1595,13 +1584,15 @@ void ACodec::BaseState::onOutputBufferDrained(const sp<AMessage> &msg) {
                     info = mCodec->dequeueBufferFromNativeWindow();
                 }
 
-                LOGV("[%s] calling fillBuffer %p",
-                     mCodec->mComponentName.c_str(), info->mBufferID);
+                if (info != NULL) {
+                    LOGV("[%s] calling fillBuffer %p",
+                         mCodec->mComponentName.c_str(), info->mBufferID);
 
-                CHECK_EQ(mCodec->mOMX->fillBuffer(mCodec->mNode, info->mBufferID),
-                         (status_t)OK);
+                    CHECK_EQ(mCodec->mOMX->fillBuffer(mCodec->mNode, info->mBufferID),
+                             (status_t)OK);
 
-                info->mStatus = BufferInfo::OWNED_BY_COMPONENT;
+                    info->mStatus = BufferInfo::OWNED_BY_COMPONENT;
+                }
             }
             break;
         }
@@ -1642,6 +1633,7 @@ bool ACodec::UninitializedState::onMessageReceived(const sp<AMessage> &msg) {
             notify->post();
 
             handled = true;
+            break;
         }
 
         case ACodec::kWhatFlush:
@@ -1651,6 +1643,7 @@ bool ACodec::UninitializedState::onMessageReceived(const sp<AMessage> &msg) {
             notify->post();
 
             handled = true;
+            break;
         }
 
         default:
@@ -1696,7 +1689,16 @@ void ACodec::UninitializedState::onSetup(
         node = NULL;
     }
 
-    CHECK(node != NULL);
+    if (node == NULL) {
+        LOGE("Unable to instantiate a decoder for type '%s'.", mime.c_str());
+
+        sp<AMessage> notify = mCodec->mNotify->dup();
+        notify->setInt32("what", ACodec::kWhatError);
+        notify->setInt32("omx-error", OMX_ErrorComponentNotFound);
+        notify->post();
+
+        return;
+    }
 
     sp<AMessage> notify = new AMessage(kWhatOMXMessage, mCodec->id());
     observer->setNotificationMessage(notify);
@@ -2232,26 +2234,6 @@ bool ACodec::IdleToLoadedState::onOMXEvent(
         default:
             return BaseState::onOMXEvent(event, data1, data2);
     }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-ACodec::ErrorState::ErrorState(ACodec *codec)
-    : BaseState(codec) {
-}
-
-bool ACodec::ErrorState::onMessageReceived(const sp<AMessage> &msg) {
-    return BaseState::onMessageReceived(msg);
-}
-
-void ACodec::ErrorState::stateEntered() {
-    LOGV("[%s] Now in ErrorState", mCodec->mComponentName.c_str());
-}
-
-bool ACodec::ErrorState::onOMXEvent(
-        OMX_EVENTTYPE event, OMX_U32 data1, OMX_U32 data2) {
-    LOGV("EVENT(%d, 0x%08lx, 0x%08lx)", event, data1, data2);
-    return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

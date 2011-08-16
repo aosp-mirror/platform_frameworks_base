@@ -340,6 +340,11 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 }
 
                 finishFlushIfPossible();
+            } else if (what == ACodec::kWhatError) {
+                LOGE("Received error from %s decoder, aborting playback.",
+                     audio ? "audio" : "video");
+
+                mRenderer->queueEOS(audio, UNKNOWN_ERROR);
             } else {
                 CHECK_EQ((int)what, (int)ACodec::kWhatDrainThisBuffer);
 
@@ -358,13 +363,24 @@ void NuPlayer::onMessageReceived(const sp<AMessage> &msg) {
                 int32_t audio;
                 CHECK(msg->findInt32("audio", &audio));
 
+                int32_t finalResult;
+                CHECK(msg->findInt32("finalResult", &finalResult));
+
                 if (audio) {
                     mAudioEOS = true;
                 } else {
                     mVideoEOS = true;
                 }
 
-                LOGV("reached %s EOS", audio ? "audio" : "video");
+                if (finalResult == ERROR_END_OF_STREAM) {
+                    LOGV("reached %s EOS", audio ? "audio" : "video");
+                } else {
+                    LOGE("%s track encountered an error (0x%08x)",
+                         audio ? "audio" : "video", finalResult);
+
+                    notifyListener(
+                            MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, finalResult);
+                }
 
                 if ((mAudioEOS || mAudioDecoder == NULL)
                         && (mVideoEOS || mVideoDecoder == NULL)) {
