@@ -348,6 +348,7 @@ public class PhoneStatusBar extends StatusBar {
         final SignalClusterView signalCluster = 
                 (SignalClusterView)sb.findViewById(R.id.signal_cluster);
         mNetworkController.addSignalCluster(signalCluster);
+        signalCluster.setNetworkController(mNetworkController);
 
         // Recents Panel
         updateRecentsPanel();
