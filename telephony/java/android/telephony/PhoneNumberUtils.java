@@ -122,6 +122,17 @@ public class PhoneNumberUtils
         return c == PAUSE || c == WAIT;
     }
 
+    private static boolean
+    isPause (char c){
+        return c == 'p'||c == 'P';
+    }
+
+    private static boolean
+    isToneWait (char c){
+        return c == 'w'||c == 'W';
+    }
+
+
     /** Returns true if ch is not dialable or alpha char */
     private static boolean isSeparator(char ch) {
         return !isDialable(ch) && !(('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z'));
@@ -275,6 +286,32 @@ public class PhoneNumberUtils
             }
         }
 
+        return ret.toString();
+    }
+
+    /**
+     * Converts pause and tonewait pause characters
+     * to Android representation.
+     * RFC 3601 says pause is 'p' and tonewait is 'w'.
+     * @hide
+     */
+    public static String convertPreDial(String phoneNumber) {
+        if (phoneNumber == null) {
+            return null;
+        }
+        int len = phoneNumber.length();
+        StringBuilder ret = new StringBuilder(len);
+
+        for (int i = 0; i < len; i++) {
+            char c = phoneNumber.charAt(i);
+
+            if (isPause(c)) {
+                c = PAUSE;
+            } else if (isToneWait(c)) {
+                c = WAIT;
+            }
+            ret.append(c);
+        }
         return ret.toString();
     }
 
