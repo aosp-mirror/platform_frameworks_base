@@ -129,6 +129,16 @@ public class ParcelFileDescriptor implements Parcelable {
     }
 
     /**
+     * Create a new ParcelFileDescriptor that is a dup of the existing
+     * FileDescriptor.  This obeys standard POSIX semantics, where the
+     * new file descriptor shared state such as file position with the
+     * original file descriptor.
+     */
+    public ParcelFileDescriptor dup() throws IOException {
+        return dup(getFileDescriptor());
+    }
+
+    /**
      * Create a new ParcelFileDescriptor from a raw native fd.  The new
      * ParcelFileDescriptor holds a dup of the original fd passed in here,
      * so you must still close that fd as well as the new ParcelFileDescriptor.

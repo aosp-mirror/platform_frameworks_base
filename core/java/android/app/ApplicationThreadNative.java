@@ -138,8 +138,12 @@ public abstract class ApplicationThreadNative extends Binder
             List<Intent> pi = data.createTypedArrayList(Intent.CREATOR);
             boolean notResumed = data.readInt() != 0;
             boolean isForward = data.readInt() != 0;
+            String profileName = data.readString();
+            ParcelFileDescriptor profileFd = data.readInt() != 0
+                    ? data.readFileDescriptor() : null;
+            boolean autoStopProfiler = data.readInt() != 0;
             scheduleLaunchActivity(intent, b, ident, info, compatInfo, state, ri, pi,
-                    notResumed, isForward);
+                    notResumed, isForward, profileName, profileFd, autoStopProfiler);
             return true;
         }
         
@@ -255,6 +259,9 @@ public abstract class ApplicationThreadNative extends Binder
             ComponentName testName = (data.readInt() != 0)
                 ? new ComponentName(data) : null;
             String profileName = data.readString();
+            ParcelFileDescriptor profileFd = data.readInt() != 0
+                    ? data.readFileDescriptor() : null;
+            boolean autoStopProfiler = data.readInt() != 0;
             Bundle testArgs = data.readBundle();
             IBinder binder = data.readStrongBinder();
             IInstrumentationWatcher testWatcher = IInstrumentationWatcher.Stub.asInterface(binder);
@@ -265,7 +272,7 @@ public abstract class ApplicationThreadNative extends Binder
             HashMap<String, IBinder> services = data.readHashMap(null);
             Bundle coreSettings = data.readBundle();
             bindApplication(packageName, info,
-                            providers, testName, profileName,
+                            providers, testName, profileName, profileFd, autoStopProfiler,
                             testArgs, testWatcher, testMode, restrictedBackupMode,
                             config, compatInfo, services, coreSettings);
             return true;
@@ -624,7 +631,8 @@ class ApplicationThreadProxy implements IApplicationThread {
     public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,
             ActivityInfo info, CompatibilityInfo compatInfo, Bundle state,
             List<ResultInfo> pendingResults,
-    		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward)
+		List<Intent> pendingNewIntents, boolean notResumed, boolean isForward,
+		String profileName, ParcelFileDescriptor profileFd, boolean autoStopProfiler)
     		throws RemoteException {
         Parcel data = Parcel.obtain();
         data.writeInterfaceToken(IApplicationThread.descriptor);
@@ -638,6 +646,14 @@ class ApplicationThreadProxy implements IApplicationThread {
         data.writeTypedList(pendingNewIntents);
         data.writeInt(notResumed ? 1 : 0);
         data.writeInt(isForward ? 1 : 0);
+        data.writeString(profileName);
+        if (profileFd != null) {
+            data.writeInt(1);
+            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        } else {
+            data.writeInt(0);
+        }
+        data.writeInt(autoStopProfiler ? 1 : 0);
         mRemote.transact(SCHEDULE_LAUNCH_ACTIVITY_TRANSACTION, data, null,
                 IBinder.FLAG_ONEWAY);
         data.recycle();
@@ -793,8 +809,9 @@ class ApplicationThreadProxy implements IApplicationThread {
     }
 
     public final void bindApplication(String packageName, ApplicationInfo info,
-            List<ProviderInfo> providers, ComponentName testName,
-            String profileName, Bundle testArgs, IInstrumentationWatcher testWatcher, int debugMode,
+            List<ProviderInfo> providers, ComponentName testName, String profileName,
+            ParcelFileDescriptor profileFd, boolean autoStopProfiler, Bundle testArgs,
+            IInstrumentationWatcher testWatcher, int debugMode,
             boolean restrictedBackupMode, Configuration config, CompatibilityInfo compatInfo,
             Map<String, IBinder> services, Bundle coreSettings) throws RemoteException {
         Parcel data = Parcel.obtain();
@@ -809,6 +826,13 @@ class ApplicationThreadProxy implements IApplicationThread {
             testName.writeToParcel(data, 0);
         }
         data.writeString(profileName);
+        if (profileFd != null) {
+            data.writeInt(1);
+            profileFd.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);
+        } else {
+            data.writeInt(0);
+        }
+        data.writeInt(autoStopProfiler ? 1 : 0);
         data.writeBundle(testArgs);
         data.writeStrongInterface(testWatcher);
         data.writeInt(debugMode);

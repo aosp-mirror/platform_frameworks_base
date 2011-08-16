@@ -56,6 +56,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -64,6 +65,7 @@ import android.util.Log;
 import android.util.Slog;
 import android.view.WindowManagerPolicy;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -561,12 +563,31 @@ final class ActivityStack {
             r.forceNewConfig = false;
             showAskCompatModeDialogLocked(r);
             r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
+            String profileFile = null;
+            ParcelFileDescriptor profileFd = null;
+            boolean profileAutoStop = false;
+            if (mService.mProfileApp != null && mService.mProfileApp.equals(app.processName)) {
+                if (mService.mProfileProc == null || mService.mProfileProc == app) {
+                    mService.mProfileProc = app;
+                    profileFile = mService.mProfileFile;
+                    profileFd = mService.mProfileFd;
+                    profileAutoStop = mService.mAutoStopProfiler;
+                }
+            }
             app.hasShownUi = true;
             app.pendingUiClean = true;
+            if (profileFd != null) {
+                try {
+                    profileFd = profileFd.dup();
+                } catch (IOException e) {
+                    profileFd = null;
+                }
+            }
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r,
                     System.identityHashCode(r),
                     r.info, r.compat, r.icicle, results, newIntents, !andResume,
-                    mService.isNextTransitionForward());
+                    mService.isNextTransitionForward(), profileFile, profileFd,
+                    profileAutoStop);
             
             if ((app.info.flags&ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
                 // This may be a heavy-weight process!  Note that the package
@@ -2669,7 +2690,8 @@ final class ActivityStack {
         return START_SUCCESS;
     }
 
-    ActivityInfo resolveActivity(Intent intent, String resolvedType, boolean debug) {
+    ActivityInfo resolveActivity(Intent intent, String resolvedType, boolean debug,
+            String profileFile, ParcelFileDescriptor profileFd, boolean autoStopProfiler) {
         // Collect information about the target of the Intent.
         ActivityInfo aInfo;
         try {
@@ -2697,6 +2719,13 @@ final class ActivityStack {
                     mService.setDebugApp(aInfo.processName, true, false);
                 }
             }
+
+            if (profileFile != null) {
+                if (!aInfo.processName.equals("system")) {
+                    mService.setProfileApp(aInfo.applicationInfo, aInfo.processName,
+                            profileFile, profileFd, autoStopProfiler);
+                }
+            }
         }
         return aInfo;
     }
@@ -2705,7 +2734,8 @@ final class ActivityStack {
             Intent intent, String resolvedType, Uri[] grantedUriPermissions,
             int grantedMode, IBinder resultTo,
             String resultWho, int requestCode, boolean onlyIfNeeded,
-            boolean debug, WaitResult outResult, Configuration config) {
+            boolean debug, String profileFile, ParcelFileDescriptor profileFd,
+            boolean autoStopProfiler, WaitResult outResult, Configuration config) {
         // Refuse possible leaked file descriptors
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
@@ -2717,7 +2747,8 @@ final class ActivityStack {
         intent = new Intent(intent);
 
         // Collect information about the target of the Intent.
-        ActivityInfo aInfo = resolveActivity(intent, resolvedType, debug);
+        ActivityInfo aInfo = resolveActivity(intent, resolvedType, debug,
+                profileFile, profileFd, autoStopProfiler);
 
         synchronized (mService) {
             int callingPid;
@@ -2903,7 +2934,8 @@ final class ActivityStack {
                     intent = new Intent(intent);
 
                     // Collect information about the target of the Intent.
-                    ActivityInfo aInfo = resolveActivity(intent, resolvedTypes[i], false);
+                    ActivityInfo aInfo = resolveActivity(intent, resolvedTypes[i], false,
+                            null, null, false);
 
                     if (mMainStack && aInfo != null && (aInfo.applicationInfo.flags
                             & ApplicationInfo.FLAG_CANT_SAVE_STATE) != 0) {
@@ -3069,9 +3101,11 @@ final class ActivityStack {
         return stops;
     }
 
-    final void activityIdleInternal(IBinder token, boolean fromTimeout,
+    final ActivityRecord activityIdleInternal(IBinder token, boolean fromTimeout,
             Configuration config) {
         if (localLOGV) Slog.v(TAG, "Activity idle: " + token);
+
+        ActivityRecord res = null;
 
         ArrayList<ActivityRecord> stops = null;
         ArrayList<ActivityRecord> finishes = null;
@@ -3092,6 +3126,7 @@ final class ActivityStack {
             int index = indexOfTokenLocked(token);
             if (index >= 0) {
                 ActivityRecord r = mHistory.get(index);
+                res = r;
 
                 if (fromTimeout) {
                     reportActivityLaunchedLocked(fromTimeout, r, -1, -1);
@@ -3207,6 +3242,8 @@ final class ActivityStack {
         if (enableScreen) {
             mService.enableScreenAfterBoot();
         }
+
+        return res;
     }
 
     /**
