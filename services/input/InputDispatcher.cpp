@@ -3193,10 +3193,12 @@ void InputDispatcher::setInputWindows(const Vector<sp<InputWindowHandle> >& inpu
                 LOGD("Focus left window: %s",
                         mFocusedWindowHandle->name.string());
 #endif
-                CancelationOptions options(CancelationOptions::CANCEL_NON_POINTER_EVENTS,
-                        "focus left window");
-                synthesizeCancelationEventsForInputChannelLocked(
-                        mFocusedWindowHandle->inputChannel, options);
+                if (mFocusedWindowHandle->inputChannel != NULL) {
+                    CancelationOptions options(CancelationOptions::CANCEL_NON_POINTER_EVENTS,
+                            "focus left window");
+                    synthesizeCancelationEventsForInputChannelLocked(
+                            mFocusedWindowHandle->inputChannel, options);
+                }
             }
             if (newFocusedWindowHandle != NULL) {
 #if DEBUG_FOCUS
@@ -3213,10 +3215,12 @@ void InputDispatcher::setInputWindows(const Vector<sp<InputWindowHandle> >& inpu
 #if DEBUG_FOCUS
                 LOGD("Touched window was removed: %s", touchedWindow.windowHandle->name.string());
 #endif
-                CancelationOptions options(CancelationOptions::CANCEL_POINTER_EVENTS,
-                        "touched window was removed");
-                synthesizeCancelationEventsForInputChannelLocked(
-                        touchedWindow.windowHandle->inputChannel, options);
+                if (touchedWindow.windowHandle->inputChannel != NULL) {
+                    CancelationOptions options(CancelationOptions::CANCEL_POINTER_EVENTS,
+                            "touched window was removed");
+                    synthesizeCancelationEventsForInputChannelLocked(
+                            touchedWindow.windowHandle->inputChannel, options);
+                }
                 mTouchState.windows.removeAt(i--);
             }
         }
