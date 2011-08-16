@@ -139,11 +139,6 @@ import com.android.internal.widget.EditableInputConnection;
 
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.android.internal.util.FastMath;
-import com.android.internal.widget.EditableInputConnection;
-
-import org.xmlpull.v1.XmlPullParserException;
-
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.text.BreakIterator;
@@ -7966,8 +7961,12 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     startSelectionActionMode();
                 } else {
                     hideControllers();
-                    if (hasInsertionController() && !selectAllGotFocus && mText.length() > 0) {
-                        getInsertionController().show();
+                    if (!selectAllGotFocus && mText.length() > 0) {
+                        if (isCursorInsideEasyCorrectionSpan()) {
+                            showSuggestions();
+                        } else if (hasInsertionController()) {
+                            getInsertionController().show();
+                        }
                     }
                 }
             }
@@ -7978,6 +7977,22 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         return superResult;
+    }
+
+    /**
+     * @return <code>true</code> if the cursor is inside an {@link SuggestionSpan} with
+     * {@link SuggestionSpan#FLAG_EASY_CORRECT} set.
+     */
+    private boolean isCursorInsideEasyCorrectionSpan() {
+        Spannable spannable = (Spannable) TextView.this.mText;
+        SuggestionSpan[] suggestionSpans = spannable.getSpans(getSelectionStart(),
+                getSelectionEnd(), SuggestionSpan.class);
+        for (int i = 0; i < suggestionSpans.length; i++) {
+            if ((suggestionSpans[i].getFlags() & SuggestionSpan.FLAG_EASY_CORRECT) != 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
