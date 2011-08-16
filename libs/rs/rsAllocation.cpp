@@ -252,6 +252,7 @@ Allocation *Allocation::createFromStream(Context *rsc, IStream *stream) {
 
     Allocation *alloc = Allocation::createAllocation(rsc, type, RS_ALLOCATION_USAGE_SCRIPT);
     alloc->setName(name.string(), name.size());
+    type->decUserRef();
 
     uint32_t count = dataSize / type->getElementSizeBytes();
 
@@ -307,12 +308,12 @@ void Allocation::resize1D(Context *rsc, uint32_t dimX) {
         return;
     }
 
-    Type *t = mHal.state.type->cloneAndResize1D(rsc, dimX);
+    ObjectBaseRef<Type> t = mHal.state.type->cloneAndResize1D(rsc, dimX);
     if (dimX < oldDimX) {
         decRefs(getPtr(), oldDimX - dimX, dimX);
     }
-    rsc->mHal.funcs.allocation.resize(rsc, this, t, mHal.state.hasReferences);
-    mHal.state.type.set(t);
+    rsc->mHal.funcs.allocation.resize(rsc, this, t.get(), mHal.state.hasReferences);
+    mHal.state.type.set(t.get());
     updateCache();
 }
 

@@ -28,18 +28,17 @@ class ProgramStoreState;
 
 class ProgramStore : public ProgramBase {
 public:
-    ProgramStore(Context *,
-                 bool colorMaskR, bool colorMaskG, bool colorMaskB, bool colorMaskA,
-                 bool depthMask, bool ditherEnable,
-                 RsBlendSrcFunc srcFunc, RsBlendDstFunc destFunc,
-                 RsDepthFunc depthFunc);
-    virtual ~ProgramStore();
-
     virtual void setup(const Context *, ProgramStoreState *);
 
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_STORE; }
     static ProgramStore *createFromStream(Context *rsc, IStream *stream);
+    static ObjectBaseRef<ProgramStore> getProgramStore(Context *,
+                                                       bool colorMaskR, bool colorMaskG,
+                                                       bool colorMaskB, bool colorMaskA,
+                                                       bool depthMask, bool ditherEnable,
+                                                       RsBlendSrcFunc srcFunc, RsBlendDstFunc destFunc,
+                                                       RsDepthFunc depthFunc);
 
     void init();
 
@@ -66,6 +65,15 @@ public:
     Hal mHal;
 
 protected:
+    virtual void preDestroy() const;
+    virtual ~ProgramStore();
+
+private:
+    ProgramStore(Context *,
+                 bool colorMaskR, bool colorMaskG, bool colorMaskB, bool colorMaskA,
+                 bool depthMask, bool ditherEnable,
+                 RsBlendSrcFunc srcFunc, RsBlendDstFunc destFunc,
+                 RsDepthFunc depthFunc);
 };
 
 class ProgramStoreState {
@@ -77,6 +85,9 @@ public:
 
     ObjectBaseRef<ProgramStore> mDefault;
     ObjectBaseRef<ProgramStore> mLast;
+
+    // Cache of all existing store programs.
+    Vector<ProgramStore *> mStorePrograms;
 };
 
 }

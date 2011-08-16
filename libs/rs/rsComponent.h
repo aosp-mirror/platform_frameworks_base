@@ -32,9 +32,7 @@ public:
 
     void set(RsDataType dt, RsDataKind dk, bool norm, uint32_t vecSize=1);
 
-    String8 getGLSLType() const;
     void dumpLOGV(const char *prefix) const;
-
 
     RsDataType getType() const {return mType;}
     RsDataKind getKind() const {return mKind;}

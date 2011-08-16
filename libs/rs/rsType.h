@@ -62,14 +62,20 @@ public:
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_TYPE; }
     static Type *createFromStream(Context *rsc, IStream *stream);
 
-    bool isEqual(const Type *other) const;
+    ObjectBaseRef<Type> cloneAndResize1D(Context *rsc, uint32_t dimX) const;
+    ObjectBaseRef<Type> cloneAndResize2D(Context *rsc, uint32_t dimX, uint32_t dimY) const;
 
-    Type * cloneAndResize1D(Context *rsc, uint32_t dimX) const;
-    Type * cloneAndResize2D(Context *rsc, uint32_t dimX, uint32_t dimY) const;
+    static ObjectBaseRef<Type> getTypeRef(Context *rsc, const Element *e,
+                                          uint32_t dimX, uint32_t dimY, uint32_t dimZ,
+                                          bool dimLOD, bool dimFaces);
 
-    static Type * getType(Context *rsc, const Element *e,
-                      uint32_t dimX, uint32_t dimY, uint32_t dimZ,
-                      bool dimLOD, bool dimFaces);
+    static Type* getType(Context *rsc, const Element *e,
+                         uint32_t dimX, uint32_t dimY, uint32_t dimZ,
+                         bool dimLOD, bool dimFaces) {
+        ObjectBaseRef<Type> type = getTypeRef(rsc, e, dimX, dimY, dimZ, dimLOD, dimFaces);
+        type->incUserRef();
+        return type.get();
+    }
 
 protected:
     struct LOD {
@@ -105,7 +111,7 @@ protected:
     uint32_t mLODCount;
 
 protected:
-    virtual void preDestroy();
+    virtual void preDestroy() const;
     virtual ~Type();
 
 private:

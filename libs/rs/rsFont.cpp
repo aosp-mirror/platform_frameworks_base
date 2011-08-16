@@ -490,49 +490,47 @@ void FontState::initRenderState() {
     shaderString.append("  gl_FragColor = col;\n");
     shaderString.append("}\n");
 
-    const Element *colorElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 4);
-    const Element *gammaElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 1);
-    mRSC->mStateElement.elementBuilderBegin();
-    mRSC->mStateElement.elementBuilderAdd(colorElem, "Color", 1);
-    mRSC->mStateElement.elementBuilderAdd(gammaElem, "Gamma", 1);
-    const Element *constInput = mRSC->mStateElement.elementBuilderCreate(mRSC);
+    ObjectBaseRef<const Element> colorElem = Element::createRef(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 4);
+    ObjectBaseRef<const Element> gammaElem = Element::createRef(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 1);
+    Element::Builder builder;
+    builder.add(colorElem.get(), "Color", 1);
+    builder.add(gammaElem.get(), "Gamma", 1);
+    ObjectBaseRef<const Element> constInput = builder.create(mRSC);
 
-    Type *inputType = Type::getType(mRSC, constInput, 1, 0, 0, false, false);
+    ObjectBaseRef<Type> inputType = Type::getTypeRef(mRSC, constInput.get(), 1, 0, 0, false, false);
 
     uint32_t tmp[4];
     tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
-    tmp[1] = (uint32_t)inputType;
+    tmp[1] = (uint32_t)inputType.get();
     tmp[2] = RS_PROGRAM_PARAM_TEXTURE_TYPE;
     tmp[3] = RS_TEXTURE_2D;
 
-    mFontShaderFConstant.set(Allocation::createAllocation(mRSC, inputType,
+    mFontShaderFConstant.set(Allocation::createAllocation(mRSC, inputType.get(),
                                             RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS));
     ProgramFragment *pf = new ProgramFragment(mRSC, shaderString.string(),
                                               shaderString.length(), tmp, 4);
     mFontShaderF.set(pf);
     mFontShaderF->bindAllocation(mRSC, mFontShaderFConstant.get(), 0);
 
-    Sampler *sampler = new Sampler(mRSC, RS_SAMPLER_NEAREST, RS_SAMPLER_NEAREST,
-                                      RS_SAMPLER_CLAMP, RS_SAMPLER_CLAMP, RS_SAMPLER_CLAMP);
-    mFontSampler.set(sampler);
-    mFontShaderF->bindSampler(mRSC, 0, sampler);
+    mFontSampler.set(Sampler::getSampler(mRSC, RS_SAMPLER_NEAREST, RS_SAMPLER_NEAREST,
+                                         RS_SAMPLER_CLAMP, RS_SAMPLER_CLAMP, RS_SAMPLER_CLAMP).get());
+    mFontShaderF->bindSampler(mRSC, 0, mFontSampler.get());
 
-    ProgramStore *fontStore = new ProgramStore(mRSC, true, true, true, true,
-                                               false, false,
-                                               RS_BLEND_SRC_SRC_ALPHA,
-                                               RS_BLEND_DST_ONE_MINUS_SRC_ALPHA,
-                                               RS_DEPTH_FUNC_ALWAYS);
-    mFontProgramStore.set(fontStore);
+    mFontProgramStore.set(ProgramStore::getProgramStore(mRSC, true, true, true, true,
+                                                        false, false,
+                                                        RS_BLEND_SRC_SRC_ALPHA,
+                                                        RS_BLEND_DST_ONE_MINUS_SRC_ALPHA,
+                                                        RS_DEPTH_FUNC_ALWAYS).get());
     mFontProgramStore->init();
 }
 
 void FontState::initTextTexture() {
-    const Element *alphaElem = Element::create(mRSC, RS_TYPE_UNSIGNED_8, RS_KIND_PIXEL_A, true, 1);
+    ObjectBaseRef<const Element> alphaElem = Element::createRef(mRSC, RS_TYPE_UNSIGNED_8, RS_KIND_PIXEL_A, true, 1);
 
     // We will allocate a texture to initially hold 32 character bitmaps
-    Type *texType = Type::getType(mRSC, alphaElem, 1024, 256, 0, false, false);
+    ObjectBaseRef<Type> texType = Type::getTypeRef(mRSC, alphaElem.get(), 1024, 256, 0, false, false);
 
-    Allocation *cacheAlloc = Allocation::createAllocation(mRSC, texType,
+    Allocation *cacheAlloc = Allocation::createAllocation(mRSC, texType.get(),
                                 RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_TEXTURE);
     mTextTexture.set(cacheAlloc);
     mTextTexture->syncAll(mRSC, RS_ALLOCATION_USAGE_SCRIPT);
@@ -557,11 +555,11 @@ void FontState::initTextTexture() {
 // Avoid having to reallocate memory and render quad by quad
 void FontState::initVertexArrayBuffers() {
     // Now lets write index data
-    const Element *indexElem = Element::create(mRSC, RS_TYPE_UNSIGNED_16, RS_KIND_USER, false, 1);
+    ObjectBaseRef<const Element> indexElem = Element::createRef(mRSC, RS_TYPE_UNSIGNED_16, RS_KIND_USER, false, 1);
     uint32_t numIndicies = mMaxNumberOfQuads * 6;
-    Type *indexType = Type::getType(mRSC, indexElem, numIndicies, 0, 0, false, false);
+    ObjectBaseRef<Type> indexType = Type::getTypeRef(mRSC, indexElem.get(), numIndicies, 0, 0, false, false);
 
-    Allocation *indexAlloc = Allocation::createAllocation(mRSC, indexType,
+    Allocation *indexAlloc = Allocation::createAllocation(mRSC, indexType.get(),
                                                           RS_ALLOCATION_USAGE_SCRIPT |
                                                           RS_ALLOCATION_USAGE_GRAPHICS_VERTEX);
     uint16_t *indexPtr = (uint16_t*)indexAlloc->getPtr();
@@ -582,19 +580,19 @@ void FontState::initVertexArrayBuffers() {
 
     indexAlloc->sendDirty(mRSC);
 
-    const Element *posElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 3);
-    const Element *texElem = Element::create(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 2);
+    ObjectBaseRef<const Element> posElem = Element::createRef(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 3);
+    ObjectBaseRef<const Element> texElem = Element::createRef(mRSC, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 2);
 
-    mRSC->mStateElement.elementBuilderBegin();
-    mRSC->mStateElement.elementBuilderAdd(posElem, "position", 1);
-    mRSC->mStateElement.elementBuilderAdd(texElem, "texture0", 1);
-    const Element *vertexDataElem = mRSC->mStateElement.elementBuilderCreate(mRSC);
+    Element::Builder builder;
+    builder.add(posElem.get(), "position", 1);
+    builder.add(texElem.get(), "texture0", 1);
+    ObjectBaseRef<const Element> vertexDataElem = builder.create(mRSC);
 
-    Type *vertexDataType = Type::getType(mRSC, vertexDataElem,
-                                         mMaxNumberOfQuads * 4,
-                                         0, 0, false, false);
+    ObjectBaseRef<Type> vertexDataType = Type::getTypeRef(mRSC, vertexDataElem.get(),
+                                                          mMaxNumberOfQuads * 4,
+                                                          0, 0, false, false);
 
-    Allocation *vertexAlloc = Allocation::createAllocation(mRSC, vertexDataType,
+    Allocation *vertexAlloc = Allocation::createAllocation(mRSC, vertexDataType.get(),
                                                            RS_ALLOCATION_USAGE_SCRIPT);
     mTextMeshPtr = (float*)vertexAlloc->getPtr();
 

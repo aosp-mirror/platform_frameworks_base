@@ -97,18 +97,18 @@ void ProgramFragmentState::init(Context *rsc) {
     shaderString.append("  gl_FragColor = col;\n");
     shaderString.append("}\n");
 
-    const Element *colorElem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 4);
-    rsc->mStateElement.elementBuilderBegin();
-    rsc->mStateElement.elementBuilderAdd(colorElem, "Color", 1);
-    const Element *constInput = rsc->mStateElement.elementBuilderCreate(rsc);
+    ObjectBaseRef<const Element> colorElem = Element::createRef(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 4);
+    Element::Builder builder;
+    builder.add(colorElem.get(), "Color", 1);
+    ObjectBaseRef<const Element> constInput = builder.create(rsc);
 
-    Type *inputType = Type::getType(rsc, constInput, 1, 0, 0, false, false);
+    ObjectBaseRef<Type> inputType = Type::getTypeRef(rsc, constInput.get(), 1, 0, 0, false, false);
 
     uint32_t tmp[2];
     tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
-    tmp[1] = (uint32_t)inputType;
+    tmp[1] = (uint32_t)inputType.get();
 
-    Allocation *constAlloc = Allocation::createAllocation(rsc, inputType,
+    Allocation *constAlloc = Allocation::createAllocation(rsc, inputType.get(),
                               RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS);
     ProgramFragment *pf = new ProgramFragment(rsc, shaderString.string(),
                                               shaderString.length(), tmp, 2);

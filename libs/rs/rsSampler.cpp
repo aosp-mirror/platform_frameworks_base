@@ -48,6 +48,15 @@ Sampler::~Sampler() {
     mRSC->mHal.funcs.sampler.destroy(mRSC, this);
 }
 
+void Sampler::preDestroy() const {
+    for (uint32_t ct = 0; ct < mRSC->mStateSampler.mAllSamplers.size(); ct++) {
+        if (mRSC->mStateSampler.mAllSamplers[ct] == this) {
+            mRSC->mStateSampler.mAllSamplers.removeAt(ct);
+            break;
+        }
+    }
+}
+
 void Sampler::bindToContext(SamplerState *ss, uint32_t slot) {
     ss->mSamplers[slot].set(this);
     mBoundSlot = slot;
@@ -66,6 +75,39 @@ Sampler *Sampler::createFromStream(Context *rsc, IStream *stream) {
     return NULL;
 }
 
+ObjectBaseRef<Sampler> Sampler::getSampler(Context *rsc,
+                                           RsSamplerValue magFilter,
+                                           RsSamplerValue minFilter,
+                                           RsSamplerValue wrapS,
+                                           RsSamplerValue wrapT,
+                                           RsSamplerValue wrapR,
+                                           float aniso) {
+    ObjectBaseRef<Sampler> returnRef;
+    ObjectBase::asyncLock();
+    for (uint32_t ct = 0; ct < rsc->mStateSampler.mAllSamplers.size(); ct++) {
+        Sampler *existing = rsc->mStateSampler.mAllSamplers[ct];
+        if (existing->mHal.state.magFilter != magFilter) continue;
+        if (existing->mHal.state.minFilter != minFilter ) continue;
+        if (existing->mHal.state.wrapS != wrapS) continue;
+        if (existing->mHal.state.wrapT != wrapT) continue;
+        if (existing->mHal.state.wrapR != wrapR) continue;
+        if (existing->mHal.state.aniso != aniso) continue;
+        returnRef.set(existing);
+        ObjectBase::asyncUnlock();
+        return returnRef;
+    }
+    ObjectBase::asyncUnlock();
+
+    Sampler *s = new Sampler(rsc, magFilter, minFilter, wrapS, wrapT, wrapR, aniso);
+    returnRef.set(s);
+
+    ObjectBase::asyncLock();
+    rsc->mStateSampler.mAllSamplers.push(s);
+    ObjectBase::asyncUnlock();
+
+    return returnRef;
+}
+
 ////////////////////////////////
 
 namespace android {
@@ -78,9 +120,10 @@ RsSampler rsi_SamplerCreate(Context * rsc,
                             RsSamplerValue wrapT,
                             RsSamplerValue wrapR,
                             float aniso) {
-    Sampler * s = new Sampler(rsc, magFilter, minFilter, wrapS, wrapT, wrapR, aniso);
+    ObjectBaseRef<Sampler> s = Sampler::getSampler(rsc, magFilter, minFilter,
+                                                   wrapS, wrapT, wrapR, aniso);
     s->incUserRef();
-    return s;
+    return s.get();
 }
 
 }}

@@ -37,6 +37,15 @@ ProgramRaster::ProgramRaster(Context *rsc, bool pointSmooth,
     rsc->mHal.funcs.raster.init(rsc, this);
 }
 
+void ProgramRaster::preDestroy() const {
+    for (uint32_t ct = 0; ct < mRSC->mStateRaster.mRasterPrograms.size(); ct++) {
+        if (mRSC->mStateRaster.mRasterPrograms[ct] == this) {
+            mRSC->mStateRaster.mRasterPrograms.removeAt(ct);
+            break;
+        }
+    }
+}
+
 ProgramRaster::~ProgramRaster() {
     mRSC->mHal.funcs.raster.destroy(mRSC, this);
 }
@@ -65,8 +74,8 @@ ProgramRasterState::~ProgramRasterState() {
 }
 
 void ProgramRasterState::init(Context *rsc) {
-    ProgramRaster *pr = new ProgramRaster(rsc, false, false, false, 1.f, RS_CULL_BACK);
-    mDefault.set(pr);
+    mDefault.set(ProgramRaster::getProgramRaster(rsc, false, false,
+                                                 false, 1.f, RS_CULL_BACK).get());
 }
 
 void ProgramRasterState::deinit(Context *rsc) {
@@ -74,19 +83,47 @@ void ProgramRasterState::deinit(Context *rsc) {
     mLast.clear();
 }
 
+ObjectBaseRef<ProgramRaster> ProgramRaster::getProgramRaster(Context *rsc,
+                                                             bool pointSmooth,
+                                                             bool lineSmooth,
+                                                             bool pointSprite,
+                                                             float lineWidth,
+                                                             RsCullMode cull) {
+    ObjectBaseRef<ProgramRaster> returnRef;
+    ObjectBase::asyncLock();
+    for (uint32_t ct = 0; ct < rsc->mStateRaster.mRasterPrograms.size(); ct++) {
+        ProgramRaster *existing = rsc->mStateRaster.mRasterPrograms[ct];
+        if (existing->mHal.state.pointSmooth != pointSmooth) continue;
+        if (existing->mHal.state.lineSmooth != lineSmooth) continue;
+        if (existing->mHal.state.pointSprite != pointSprite) continue;
+        if (existing->mHal.state.lineWidth != lineWidth) continue;
+        if (existing->mHal.state.cull != cull) continue;
+        returnRef.set(existing);
+        ObjectBase::asyncUnlock();
+        return returnRef;
+    }
+    ObjectBase::asyncUnlock();
+
+    ProgramRaster *pr = new ProgramRaster(rsc, pointSmooth,
+                                          lineSmooth, pointSprite, lineWidth, cull);
+    returnRef.set(pr);
+
+    ObjectBase::asyncLock();
+    rsc->mStateRaster.mRasterPrograms.push(pr);
+    ObjectBase::asyncUnlock();
+
+    return returnRef;
+}
+
 namespace android {
 namespace renderscript {
 
-RsProgramRaster rsi_ProgramRasterCreate(Context * rsc,
-                                      bool pointSmooth,
-                                      bool lineSmooth,
-                                      bool pointSprite,
-                                      float lineWidth,
-                                      RsCullMode cull) {
-    ProgramRaster *pr = new ProgramRaster(rsc, pointSmooth,
-                                          lineSmooth, pointSprite, lineWidth, cull);
+RsProgramRaster rsi_ProgramRasterCreate(Context * rsc, bool pointSmooth, bool lineSmooth,
+                                        bool pointSprite, float lineWidth, RsCullMode cull) {
+    ObjectBaseRef<ProgramRaster> pr = ProgramRaster::getProgramRaster(rsc, pointSmooth, lineSmooth,
+                                                                      pointSprite, lineWidth, cull);
     pr->incUserRef();
-    return pr;
+    return pr.get();
 }
 
 }

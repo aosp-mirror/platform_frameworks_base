@@ -240,6 +240,7 @@ void * Context::threadProc(void *vrsc) {
         rsc->setProgramStore(NULL);
         rsc->mStateFont.init(rsc);
         rsc->setFont(NULL);
+        rsc->mStateSampler.init(rsc);
         rsc->mFBOCache.init(rsc);
     }
 
@@ -301,6 +302,7 @@ void Context::destroyWorkerThreadResources() {
          mStateFragment.deinit(this);
          mStateFragmentStore.deinit(this);
          mStateFont.deinit(this);
+         mStateSampler.deinit(this);
          mFBOCache.deinit(this);
     }
     //LOGV("destroyWorkerThreadResources 2");
