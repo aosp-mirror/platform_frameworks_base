@@ -205,10 +205,6 @@ public class TrafficStats {
      * @param operationCount Number of operations to increment count by.
      */
     public static void incrementOperationCount(int tag, int operationCount) {
-        if (operationCount < 0) {
-            throw new IllegalArgumentException("operation count can only be incremented");
-        }
-
         final INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
         final int uid = android.os.Process.myUid();

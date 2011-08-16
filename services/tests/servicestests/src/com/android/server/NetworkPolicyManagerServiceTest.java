@@ -29,8 +29,6 @@ import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.NetworkPolicyManager.computeLastCycleBoundary;
 import static android.net.NetworkPolicyManager.computeNextCycleBoundary;
-import static android.net.NetworkStats.TAG_NONE;
-import static android.net.NetworkStats.UID_ALL;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
 import static com.android.server.net.NetworkPolicyManagerService.TYPE_LIMIT;
@@ -282,6 +280,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         Future<Void> future;
 
         expectSetUidNetworkRules(UID_A, false);
+        expectSetUidForeground(UID_A, true);
         future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, true);
@@ -290,6 +289,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // push strict policy for foreground uid, verify ALLOW rule
         expectSetUidNetworkRules(UID_A, false);
+        expectSetUidForeground(UID_A, true);
         future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
@@ -299,6 +299,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         // now turn screen off and verify REJECT rule
         expect(mPowerManager.isScreenOn()).andReturn(false).atLeastOnce();
         expectSetUidNetworkRules(UID_A, true);
+        expectSetUidForeground(UID_A, false);
         future = expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mServiceContext.sendBroadcast(new Intent(Intent.ACTION_SCREEN_OFF));
@@ -308,6 +309,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         // and turn screen back on, verify ALLOW rule restored
         expect(mPowerManager.isScreenOn()).andReturn(true).atLeastOnce();
         expectSetUidNetworkRules(UID_A, false);
+        expectSetUidForeground(UID_A, true);
         future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mServiceContext.sendBroadcast(new Intent(Intent.ACTION_SCREEN_ON));
@@ -319,6 +321,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         Future<Void> future;
 
         expectSetUidNetworkRules(UID_A, false);
+        expectSetUidForeground(UID_A, true);
         future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, true);
@@ -327,6 +330,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // POLICY_NONE should RULE_ALLOW in foreground
         expectSetUidNetworkRules(UID_A, false);
+        expectSetUidForeground(UID_A, true);
         future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mService.setUidPolicy(UID_A, POLICY_NONE);
@@ -335,6 +339,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // POLICY_NONE should RULE_ALLOW in background
         expectSetUidNetworkRules(UID_A, false);
+        expectSetUidForeground(UID_A, false);
         future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, false);
@@ -347,6 +352,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // POLICY_REJECT should RULE_ALLOW in background
         expectSetUidNetworkRules(UID_A, true);
+        expectSetUidForeground(UID_A, false);
         future = expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
@@ -355,6 +361,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // POLICY_REJECT should RULE_ALLOW in foreground
         expectSetUidNetworkRules(UID_A, false);
+        expectSetUidForeground(UID_A, true);
         future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, true);
@@ -363,6 +370,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // POLICY_REJECT should RULE_REJECT in background
         expectSetUidNetworkRules(UID_A, true);
+        expectSetUidForeground(UID_A, false);
         future = expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, false);
@@ -375,6 +383,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // POLICY_NONE should have RULE_ALLOW in background
         expectSetUidNetworkRules(UID_A, false);
+        expectSetUidForeground(UID_A, false);
         future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mProcessObserver.onForegroundActivitiesChanged(PID_1, UID_A, false);
@@ -384,6 +393,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // adding POLICY_REJECT should cause RULE_REJECT
         expectSetUidNetworkRules(UID_A, true);
+        expectSetUidForeground(UID_A, false);
         future = expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
@@ -392,6 +402,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // removing POLICY_REJECT should return us to RULE_ALLOW
         expectSetUidNetworkRules(UID_A, false);
+        expectSetUidForeground(UID_A, false);
         future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         mService.setUidPolicy(UID_A, POLICY_NONE);
@@ -503,7 +514,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // pretend that 512 bytes total have happened
         stats = new NetworkStats(elapsedRealtime, 1)
-                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 256L, 2L, 256L, 2L, 11);
+                .addIfaceValues(TEST_IFACE, 256L, 2L, 256L, 2L);
         expect(mStatsService.getSummaryForNetwork(sTemplateWifi, TIME_FEB_15, TIME_MAR_10))
                 .andReturn(stats).atLeastOnce();
 
@@ -527,6 +538,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // POLICY_REJECT should RULE_REJECT in background
         expectSetUidNetworkRules(UID_A, true);
+        expectSetUidForeground(UID_A, false);
         future = expectRulesChanged(UID_A, RULE_REJECT_METERED);
         replay();
         mService.setUidPolicy(UID_A, POLICY_REJECT_METERED_BACKGROUND);
@@ -535,6 +547,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
 
         // uninstall should clear RULE_REJECT
         expectSetUidNetworkRules(UID_A, false);
+        expectSetUidForeground(UID_A, false);
         future = expectRulesChanged(UID_A, RULE_ALLOW_ALL);
         replay();
         final Intent intent = new Intent(ACTION_UID_REMOVED);
@@ -579,7 +592,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         elapsedRealtime += MINUTE_IN_MILLIS;
         currentTime = TIME_MAR_10 + elapsedRealtime;
         stats = new NetworkStats(elapsedRealtime, 1)
-                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 0L, 0L, 0L, 0L, 0);
+                .addIfaceValues(TEST_IFACE, 0L, 0L, 0L, 0L);
         state = new NetworkState[] { buildWifi() };
 
         {
@@ -606,7 +619,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         elapsedRealtime += MINUTE_IN_MILLIS;
         currentTime = TIME_MAR_10 + elapsedRealtime;
         stats = new NetworkStats(elapsedRealtime, 1)
-                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 1536L, 15L, 0L, 0L, 11);
+                .addIfaceValues(TEST_IFACE, 1536L, 15L, 0L, 0L);
 
         {
             expectTime(currentTime);
@@ -627,7 +640,7 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
         elapsedRealtime += MINUTE_IN_MILLIS;
         currentTime = TIME_MAR_10 + elapsedRealtime;
         stats = new NetworkStats(elapsedRealtime, 1)
-                .addValues(TEST_IFACE, UID_ALL, TAG_NONE, 5120L, 512L, 0L, 0L, 22);
+                .addIfaceValues(TEST_IFACE, 5120L, 512L, 0L, 0L);
 
         {
             expectTime(currentTime);
@@ -735,6 +748,11 @@ public class NetworkPolicyManagerServiceTest extends AndroidTestCase {
     private void expectSetUidNetworkRules(int uid, boolean rejectOnQuotaInterfaces)
             throws Exception {
         mNetworkManager.setUidNetworkRules(uid, rejectOnQuotaInterfaces);
+        expectLastCall().atLeastOnce();
+    }
+
+    private void expectSetUidForeground(int uid, boolean uidForeground) throws Exception {
+        mStatsService.setUidForeground(uid, uidForeground);
         expectLastCall().atLeastOnce();
     }
 
