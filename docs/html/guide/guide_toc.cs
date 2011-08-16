@@ -569,6 +569,7 @@
           </a></div>
         <ul>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/adb.html">adb</a></li>
+          <li><a href="<?cs var:toroot ?>guide/developing/tools/adt.html">ADT</a> <span class="new">new!</span></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/android.html">android</a></li>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/bmgr.html">bmgr</a>
           <li><a href="<?cs var:toroot ?>guide/developing/tools/dmtracedump.html">dmtracedump</a></li>
