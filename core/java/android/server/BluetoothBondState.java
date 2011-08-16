@@ -134,7 +134,6 @@ class BluetoothBondState {
     /** reason is ignored unless state == BOND_NOT_BONDED */
     public synchronized void setBondState(String address, int state, int reason) {
         if (DBG) Log.d(TAG, "setBondState " + "address" + " " + state + "reason: " + reason);
-        if (!mService.isEnabled()) return;
 
         int oldState = getBondState(address);
         if (oldState == state) {
@@ -459,16 +458,26 @@ class BluetoothBondState {
         //   intent reach them. But that left a small time gap that could reject
         //   incoming connection due to undefined priorities.
         if (state == BluetoothDevice.BOND_BONDED) {
-            if (mA2dpProxy.getPriority(remoteDevice) == BluetoothProfile.PRIORITY_UNDEFINED) {
+            if (mA2dpProxy != null &&
+                  mA2dpProxy.getPriority(remoteDevice) == BluetoothProfile.PRIORITY_UNDEFINED) {
                 mA2dpProxy.setPriority(remoteDevice, BluetoothProfile.PRIORITY_ON);
             }
 
-            if (mHeadsetProxy.getPriority(remoteDevice) == BluetoothProfile.PRIORITY_UNDEFINED) {
+            if (mHeadsetProxy != null &&
+                  mHeadsetProxy.getPriority(remoteDevice) == BluetoothProfile.PRIORITY_UNDEFINED) {
                 mHeadsetProxy.setPriority(remoteDevice, BluetoothProfile.PRIORITY_ON);
             }
         } else if (state == BluetoothDevice.BOND_NONE) {
-            mA2dpProxy.setPriority(remoteDevice, BluetoothProfile.PRIORITY_UNDEFINED);
-            mHeadsetProxy.setPriority(remoteDevice, BluetoothProfile.PRIORITY_UNDEFINED);
+            if (mA2dpProxy != null) {
+                mA2dpProxy.setPriority(remoteDevice, BluetoothProfile.PRIORITY_UNDEFINED);
+            }
+            if (mHeadsetProxy != null) {
+                mHeadsetProxy.setPriority(remoteDevice, BluetoothProfile.PRIORITY_UNDEFINED);
+            }
+        }
+
+        if (mA2dpProxy == null || mHeadsetProxy == null) {
+            Log.e(TAG, "Proxy is null:" + mA2dpProxy + ":" + mHeadsetProxy);
         }
     }
 
