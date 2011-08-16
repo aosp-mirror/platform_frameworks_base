@@ -6068,6 +6068,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                  int ellipsisWidth, boolean bringIntoView) {
         stopMarquee();
 
+        // Update "old" cached values
+        mOldMaximum = mMaximum;
+        mOldMaxMode = mMaxMode;
+
         mHighlightPathBogus = true;
 
         if (w < 0) {
@@ -6129,7 +6133,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 0, mTransformed.length(),
                                 mTextPaint, w, alignment, mTextDir, mSpacingMult,
                                 mSpacingAdd, mIncludePad, mEllipsize,
-                                ellipsisWidth);
+                                ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
                 } else {
                     mLayout = new StaticLayout(mTransformed, mTextPaint,
                             w, alignment, mTextDir, mSpacingMult, mSpacingAdd,
@@ -6140,7 +6144,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             0, mTransformed.length(),
                             mTextPaint, w, alignment, mTextDir, mSpacingMult,
                             mSpacingAdd, mIncludePad, mEllipsize,
-                            ellipsisWidth);
+                            ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
             } else {
                 mLayout = new StaticLayout(mTransformed, mTextPaint,
                         w, alignment, mTextDir, mSpacingMult, mSpacingAdd,
@@ -6195,7 +6199,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                                 0, mHint.length(),
                                 mTextPaint, hintWidth, alignment, mTextDir, mSpacingMult,
                                 mSpacingAdd, mIncludePad, mEllipsize,
-                                ellipsisWidth);
+                                ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
                 } else {
                     mHintLayout = new StaticLayout(mHint, mTextPaint,
                             hintWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
@@ -6206,7 +6210,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                             0, mHint.length(),
                             mTextPaint, hintWidth, alignment, mTextDir, mSpacingMult,
                             mSpacingAdd, mIncludePad, mEllipsize,
-                            ellipsisWidth);
+                            ellipsisWidth, mMaxMode == LINES ? mMaximum : Integer.MAX_VALUE);
             } else {
                 mHintLayout = new StaticLayout(mHint, mTextPaint,
                         hintWidth, alignment, mTextDir, mSpacingMult, mSpacingAdd,
@@ -6411,25 +6415,34 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (mHorizontallyScrolling) want = VERY_WIDE;
 
         int hintWant = want;
-        int hintWidth = mHintLayout == null ? hintWant : mHintLayout.getWidth();
+        int hintWidth = (mHintLayout == null) ? hintWant : mHintLayout.getWidth();
 
         if (mLayout == null) {
             makeNewLayout(want, hintWant, boring, hintBoring,
                           width - getCompoundPaddingLeft() - getCompoundPaddingRight(), false);
-        } else if ((mLayout.getWidth() != want) || (hintWidth != hintWant) ||
-                   (mLayout.getEllipsizedWidth() !=
-                        width - getCompoundPaddingLeft() - getCompoundPaddingRight())) {
-            if (mHint == null && mEllipsize == null &&
-                    want > mLayout.getWidth() &&
-                    (mLayout instanceof BoringLayout ||
-                            (fromexisting && des >= 0 && des <= want))) {
-                mLayout.increaseWidthTo(want);
-            } else {
-                makeNewLayout(want, hintWant, boring, hintBoring,
-                              width - getCompoundPaddingLeft() - getCompoundPaddingRight(), false);
-            }
         } else {
-            // Width has not changed.
+            final boolean layoutChanged = (mLayout.getWidth() != want) ||
+                    (hintWidth != hintWant) ||
+                    (mLayout.getEllipsizedWidth() !=
+                            width - getCompoundPaddingLeft() - getCompoundPaddingRight());
+
+            final boolean widthChanged = (mHint == null) &&
+                    (mEllipsize == null) &&
+                    (want > mLayout.getWidth()) &&
+                    (mLayout instanceof BoringLayout || (fromexisting && des >= 0 && des <= want));
+
+            final boolean maximumChanged = (mMaxMode != mOldMaxMode) || (mMaximum != mOldMaximum);
+
+            if (layoutChanged || maximumChanged) {
+                if (!maximumChanged && widthChanged) {
+                    mLayout.increaseWidthTo(want);
+                } else {
+                    makeNewLayout(want, hintWant, boring, hintBoring,
+                            width - getCompoundPaddingLeft() - getCompoundPaddingRight(), false);
+                }
+            } else {
+                // Nothing has changed
+            }
         }
 
         if (heightMode == MeasureSpec.EXACTLY) {
@@ -6489,7 +6502,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         desired += pad;
-        layout.setMaximumVisibleLineCount(0);
 
         if (mMaxMode == LINES) {
             /*
@@ -6498,7 +6510,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
              */
             if (cap) {
                 if (linecount > mMaximum) {
-                    layout.setMaximumVisibleLineCount(mMaximum);
                     desired = layout.getLineTop(mMaximum);
 
                     if (dr != null) {
@@ -7105,6 +7116,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
      * want to {@link #setSingleLine} or {@link #setHorizontallyScrolling}
      * to constrain the text to a single line.  Use <code>null</code>
      * to turn off ellipsizing.
+     *
+     * If {@link #setMaxLines} has been used to set two or more lines,
+     * {@link TextUtils.TruncateAt#END} and {@link TextUtils.TruncateAt#MARQUEE}
+     * are only supported (other ellipsizing types will not do anything).
      *
      * @attr ref android.R.styleable#TextView_ellipsize
      */
@@ -10877,6 +10892,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private int                     mMaxMode = LINES;
     private int                     mMinimum = 0;
     private int                     mMinMode = LINES;
+
+    private int                     mOldMaximum = mMaximum;
+    private int                     mOldMaxMode = mMaxMode;
 
     private int                     mMaxWidth = Integer.MAX_VALUE;
     private int                     mMaxWidthMode = PIXELS;

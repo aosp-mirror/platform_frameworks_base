@@ -125,6 +125,9 @@ class TextLine {
         mLen = limit - start;
         mDir = dir;
         mDirections = directions;
+        if (mDirections == null) {
+            throw new IllegalArgumentException("Directions cannot be null");
+        }
         mHasTabs = hasTabs;
         mSpanned = null;
 

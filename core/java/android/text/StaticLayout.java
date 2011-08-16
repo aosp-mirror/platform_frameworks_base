@@ -23,6 +23,7 @@ import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
 import android.text.style.LineHeightSpan;
 import android.text.style.MetricAffectingSpan;
 import android.text.style.TabStopSpan;
+import android.util.Log;
 
 import com.android.internal.util.ArrayUtils;
 
@@ -37,6 +38,8 @@ import com.android.internal.util.ArrayUtils;
  * Canvas.drawText()} directly.</p>
  */
 public class StaticLayout extends Layout {
+
+    static final String TAG = "StaticLayout";
 
     public StaticLayout(CharSequence source, TextPaint paint,
                         int width,
@@ -75,7 +78,7 @@ public class StaticLayout extends Layout {
             float spacingmult, float spacingadd,
             boolean includepad) {
         this(source, bufstart, bufend, paint, outerwidth, align, textDir,
-                spacingmult, spacingadd, includepad, null, 0);
+                spacingmult, spacingadd, includepad, null, 0, Integer.MAX_VALUE);
 }
 
     public StaticLayout(CharSequence source, int bufstart, int bufend,
@@ -86,7 +89,7 @@ public class StaticLayout extends Layout {
             TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
         this(source, bufstart, bufend, paint, outerwidth, align,
                 TextDirectionHeuristics.FIRSTSTRONG_LTR,
-                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth);
+                spacingmult, spacingadd, includepad, ellipsize, ellipsizedWidth, Integer.MAX_VALUE);
     }
 
     /**
@@ -97,7 +100,7 @@ public class StaticLayout extends Layout {
                         Alignment align, TextDirectionHeuristic textDir,
                         float spacingmult, float spacingadd,
                         boolean includepad,
-                        TextUtils.TruncateAt ellipsize, int ellipsizedWidth) {
+                        TextUtils.TruncateAt ellipsize, int ellipsizedWidth, int maxLines) {
         super((ellipsize == null)
                 ? source
                 : (source instanceof Spanned)
@@ -130,6 +133,7 @@ public class StaticLayout extends Layout {
         mLines = new int[ArrayUtils.idealIntArraySize(2 * mColumns)];
         mLineDirections = new Directions[
                              ArrayUtils.idealIntArraySize(2 * mColumns)];
+        mMaximumVisibleLineCount = maxLines;
 
         mMeasured = MeasuredText.obtain();
 
@@ -141,8 +145,8 @@ public class StaticLayout extends Layout {
         mFontMetricsInt = null;
     }
 
-    /* package */ StaticLayout(boolean ellipsize) {
-        super(null, null, 0, null, 0, 0);
+    /* package */ StaticLayout(CharSequence text) {
+        super(text, null, 0, null, 0, 0);
 
         mColumns = COLUMNS_ELLIPSIZE;
         mLines = new int[ArrayUtils.idealIntArraySize(2 * mColumns)];
@@ -394,6 +398,7 @@ public class StaticLayout extends Layout {
                                 okBottom = fitBottom;
                         }
                     } else {
+                            final boolean moreChars = (j + 1 < spanEnd);
                             if (ok != here) {
                                 // Log.e("text", "output ok " + here + " to " +ok);
 
@@ -411,7 +416,7 @@ public class StaticLayout extends Layout {
                                         ok == bufEnd, includepad, trackpad,
                                         chs, widths, paraStart,
                                         ellipsize, ellipsizedWidth, okWidth,
-                                        paint);
+                                        paint, moreChars);
 
                                 here = ok;
                             } else if (fit != here) {
@@ -427,7 +432,7 @@ public class StaticLayout extends Layout {
                                         fit == bufEnd, includepad, trackpad,
                                         chs, widths, paraStart,
                                         ellipsize, ellipsizedWidth, fitWidth,
-                                        paint);
+                                        paint, moreChars);
 
                                 here = fit;
                             } else {
@@ -449,7 +454,7 @@ public class StaticLayout extends Layout {
                                         trackpad,
                                         chs, widths, paraStart,
                                         ellipsize, ellipsizedWidth,
-                                        widths[here - paraStart], paint);
+                                        widths[here - paraStart], paint, moreChars);
 
                                 here = here + 1;
                             }
@@ -472,10 +477,13 @@ public class StaticLayout extends Layout {
                             width = restWidth;
                         }
                     }
+                    if (mLineCount >= mMaximumVisibleLineCount) {
+                        break;
+                    }
                 }
             }
 
-            if (paraEnd != here) {
+            if (paraEnd != here && mLineCount < mMaximumVisibleLineCount) {
                 if ((fitTop | fitBottom | fitDescent | fitAscent) == 0) {
                     paint.getFontMetricsInt(fm);
 
@@ -496,7 +504,7 @@ public class StaticLayout extends Layout {
                         needMultiply, paraStart, chdirs, dir, easy,
                         paraEnd == bufEnd, includepad, trackpad,
                         chs, widths, paraStart,
-                        ellipsize, ellipsizedWidth, w, paint);
+                        ellipsize, ellipsizedWidth, w, paint, paraEnd != bufEnd);
             }
 
             paraStart = paraEnd;
@@ -505,7 +513,8 @@ public class StaticLayout extends Layout {
                 break;
         }
 
-        if (bufEnd == bufStart || source.charAt(bufEnd - 1) == CHAR_NEW_LINE) {
+        if ((bufEnd == bufStart || source.charAt(bufEnd - 1) == CHAR_NEW_LINE) &&
+                mLineCount < mMaximumVisibleLineCount) {
             // Log.e("text", "output last " + bufEnd);
 
             paint.getFontMetricsInt(fm);
@@ -519,7 +528,7 @@ public class StaticLayout extends Layout {
                     needMultiply, bufEnd, null, DEFAULT_DIR, true,
                     true, includepad, trackpad,
                     null, null, bufStart,
-                    ellipsize, ellipsizedWidth, 0, paint);
+                    ellipsize, ellipsizedWidth, 0, paint, false);
         }
     }
 
@@ -624,7 +633,7 @@ public class StaticLayout extends Layout {
                       boolean includePad, boolean trackPad,
                       char[] chs, float[] widths, int widthStart,
                       TextUtils.TruncateAt ellipsize, float ellipsisWidth,
-                      float textWidth, TextPaint paint) {
+                      float textWidth, TextPaint paint, boolean moreChars) {
         int j = mLineCount;
         int off = j * mColumns;
         int want = off + mColumns + TOP;
@@ -722,9 +731,10 @@ public class StaticLayout extends Layout {
 
         // If ellipsize is in marquee mode, do not apply ellipsis on the first line
         if (ellipsize != null && (ellipsize != TextUtils.TruncateAt.MARQUEE || j != 0)) {
+            boolean forceEllipsis = moreChars && (mLineCount + 1 == mMaximumVisibleLineCount);
             calculateEllipsis(start, end, widths, widthStart,
                     ellipsisWidth, ellipsize, j,
-                    textWidth, paint);
+                    textWidth, paint, forceEllipsis);
         }
 
         mLineCount++;
@@ -734,9 +744,9 @@ public class StaticLayout extends Layout {
     private void calculateEllipsis(int lineStart, int lineEnd,
                                    float[] widths, int widthStart,
                                    float avail, TextUtils.TruncateAt where,
-                                   int line, float textWidth, TextPaint paint) {
-
-        if (textWidth <= avail) {
+                                   int line, float textWidth, TextPaint paint,
+                                   boolean forceEllipsis) {
+        if (textWidth <= avail && !forceEllipsis) {
             // Everything fits!
             mLines[mColumns * line + ELLIPSIS_START] = 0;
             mLines[mColumns * line + ELLIPSIS_COUNT] = 0;
@@ -744,25 +754,33 @@ public class StaticLayout extends Layout {
         }
 
         float ellipsisWidth = paint.measureText(HORIZONTAL_ELLIPSIS);
-        int ellipsisStart, ellipsisCount;
+        int ellipsisStart = 0;
+        int ellipsisCount = 0;
         int len = lineEnd - lineStart;
 
+        // We only support start ellipsis on a single line
         if (where == TextUtils.TruncateAt.START) {
-            float sum = 0;
-            int i;
+            if (mMaximumVisibleLineCount == 1) {
+                float sum = 0;
+                int i;
 
-            for (i = len; i >= 0; i--) {
-                float w = widths[i - 1 + lineStart - widthStart];
+                for (i = len; i >= 0; i--) {
+                    float w = widths[i - 1 + lineStart - widthStart];
 
-                if (w + sum + ellipsisWidth > avail) {
-                    break;
+                    if (w + sum + ellipsisWidth > avail) {
+                        break;
+                    }
+
+                    sum += w;
                 }
 
-                sum += w;
+                ellipsisStart = 0;
+                ellipsisCount = i;
+            } else {
+                if (Log.isLoggable(TAG, Log.WARN)) {
+                    Log.w(TAG, "Start Ellipsis only supported with one line");
+                }
             }
-
-            ellipsisStart = 0;
-            ellipsisCount = i;
         } else if (where == TextUtils.TruncateAt.END || where == TextUtils.TruncateAt.MARQUEE) {
             float sum = 0;
             int i;
@@ -779,34 +797,45 @@ public class StaticLayout extends Layout {
 
             ellipsisStart = i;
             ellipsisCount = len - i;
-        } else /* where = TextUtils.TruncateAt.MIDDLE */ {
-            float lsum = 0, rsum = 0;
-            int left = 0, right = len;
+            if (forceEllipsis && ellipsisCount == 0 && i > 0) {
+                ellipsisStart = i - 1;
+                ellipsisCount = 1;
+            }
+        } else {
+            // where = TextUtils.TruncateAt.MIDDLE We only support middle ellipsis on a single line
+            if (mMaximumVisibleLineCount == 1) {
+                float lsum = 0, rsum = 0;
+                int left = 0, right = len;
 
-            float ravail = (avail - ellipsisWidth) / 2;
-            for (right = len; right >= 0; right--) {
-                float w = widths[right - 1 + lineStart - widthStart];
+                float ravail = (avail - ellipsisWidth) / 2;
+                for (right = len; right >= 0; right--) {
+                    float w = widths[right - 1 + lineStart - widthStart];
 
-                if (w + rsum > ravail) {
-                    break;
+                    if (w + rsum > ravail) {
+                        break;
+                    }
+
+                    rsum += w;
                 }
 
-                rsum += w;
-            }
+                float lavail = avail - ellipsisWidth - rsum;
+                for (left = 0; left < right; left++) {
+                    float w = widths[left + lineStart - widthStart];
 
-            float lavail = avail - ellipsisWidth - rsum;
-            for (left = 0; left < right; left++) {
-                float w = widths[left + lineStart - widthStart];
+                    if (w + lsum > lavail) {
+                        break;
+                    }
 
-                if (w + lsum > lavail) {
-                    break;
+                    lsum += w;
                 }
 
-                lsum += w;
+                ellipsisStart = left;
+                ellipsisCount = right - left;
+            } else {
+                if (Log.isLoggable(TAG, Log.WARN)) {
+                    Log.w(TAG, "Middle Ellipsis only supported with one line");
+                }
             }
-
-            ellipsisStart = left;
-            ellipsisCount = right - left;
         }
 
         mLines[mColumns * line + ELLIPSIS_START] = ellipsisStart;
@@ -916,14 +945,6 @@ public class StaticLayout extends Layout {
         return mEllipsizedWidth;
     }
 
-    /**
-     * @hide
-     */
-    @Override
-    public void setMaximumVisibleLineCount(int lineCount) {
-        mMaximumVisibleLineCount = lineCount;
-    }
-    
     void prepare() {
         mMeasured = MeasuredText.obtain();
     }
@@ -949,7 +970,7 @@ public class StaticLayout extends Layout {
 
     private int[] mLines;
     private Directions[] mLineDirections;
-    private int mMaximumVisibleLineCount = 0;
+    private int mMaximumVisibleLineCount = Integer.MAX_VALUE;
 
     private static final int START_MASK = 0x1FFFFFFF;
     private static final int DIR_SHIFT  = 30;

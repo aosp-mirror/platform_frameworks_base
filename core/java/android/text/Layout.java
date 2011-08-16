@@ -880,6 +880,10 @@ public abstract class Layout {
             }
         }
         Directions directions = getLineDirections(line);
+        // Returned directions can actually be null
+        if (directions == null) {
+            return 0f;
+        }
         int dir = getParagraphDirection(line);
 
         TextLine tl = TextLine.obtain();
@@ -1780,17 +1784,6 @@ public abstract class Layout {
             return ss;
         }
     }
-
-    /**
-     * Inform this layout that not all of its lines will be displayed, because a maximum number of
-     * lines has been set on the associated TextView.
-     *
-     * A non strictly positive value means that all lines are displayed.
-     *
-     * @param lineCount number of visible lines
-     * @hide
-     */
-    public void setMaximumVisibleLineCount(int lineCount) {}
 
     private CharSequence mText;
     private TextPaint mPaint;
