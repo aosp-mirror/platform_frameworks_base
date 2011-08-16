@@ -79,6 +79,7 @@ static void dumpstate() {
     dump_file("VMALLOC INFO", "/proc/vmallocinfo");
     dump_file("SLAB INFO", "/proc/slabinfo");
     dump_file("ZONEINFO", "/proc/zoneinfo");
+    dump_file("PAGETYPEINFO", "/proc/pagetypeinfo");
 
     if (screenshot_path[0]) {
         LOGI("taking screenshot\n");
