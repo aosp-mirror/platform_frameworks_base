@@ -6455,6 +6455,37 @@ public final class ContactsContract {
                 }
             }
         }
+
+        /**
+         * A data kind representing an Identity related to the contact.
+         * <p>
+         * This can be used as a signal by the aggregator to combine raw contacts into
+         * contacts, e.g. if two contacts have Identity rows with
+         * the same NAMESPACE and IDENTITY values the aggregator can know that they refer
+         * to the same person.
+         * </p>
+         */
+        public static final class Identity implements DataColumnsWithJoins {
+            /**
+             * This utility class cannot be instantiated
+             */
+            private Identity() {}
+
+            /** MIME type used when storing this in data table. */
+            public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/identity";
+
+            /**
+             * The identity string.
+             * <P>Type: TEXT</P>
+             */
+            public static final String IDENTITY = DataColumns.DATA1;
+
+            /**
+             * The namespace of the identity string, e.g. "com.google"
+             * <P>Type: TEXT</P>
+             */
+            public static final String NAMESPACE = DataColumns.DATA2;
+        }
     }
 
     /**
