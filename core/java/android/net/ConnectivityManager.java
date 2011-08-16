@@ -21,6 +21,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.os.Binder;
+import android.os.Build.VERSION_CODES;
 import android.os.RemoteException;
 
 import java.net.InetAddress;
@@ -494,16 +495,19 @@ public class ConnectivityManager {
      * <p>
      * All applications that have background services that use the network
      * should listen to {@link #ACTION_BACKGROUND_DATA_SETTING_CHANGED}.
+     * <p>
+     * As of {@link VERSION_CODES#ICE_CREAM_SANDWICH}, availability of
+     * background data depends on several combined factors, and this method will
+     * always return {@code true}. Instead, when background data is unavailable,
+     * {@link #getActiveNetworkInfo()} will now appear disconnected.
      *
      * @return Whether background data usage is allowed.
      */
+    @Deprecated
     public boolean getBackgroundDataSetting() {
-        try {
-            return mService.getBackgroundDataSetting();
-        } catch (RemoteException e) {
-            // Err on the side of safety
-            return false;
-        }
+        // assume that background data is allowed; final authority is
+        // NetworkInfo which may be blocked.
+        return true;
     }
 
     /**
@@ -516,11 +520,9 @@ public class ConnectivityManager {
      * @see #getBackgroundDataSetting()
      * @hide
      */
+    @Deprecated
     public void setBackgroundDataSetting(boolean allowBackgroundData) {
-        try {
-            mService.setBackgroundDataSetting(allowBackgroundData);
-        } catch (RemoteException e) {
-        }
+        // ignored
     }
 
     /**

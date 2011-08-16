@@ -3073,7 +3073,7 @@
     <!-- Notification title when mobile data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
     <string name="data_usage_mobile_limit_title">Mobile data disabled</string>
     <!-- Notification body when data usage has exceeded limit threshold, and has been disabled. [CHAR LIMIT=32] -->
-    <string name="data_usage_limit_body">tap to enable</string>
+    <string name="data_usage_limit_body">Touch to enable</string>
 
     <!-- Notification title when 2G-3G data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_3g_limit_snoozed_title">2G-3G data limit exceeded</string>
@@ -3083,6 +3083,11 @@
     <string name="data_usage_mobile_limit_snoozed_title">Mobile data limit exceeded</string>
     <!-- Notification body when data usage has exceeded limit threshold. [CHAR LIMIT=32] -->
     <string name="data_usage_limit_snoozed_body"><xliff:g id="size" example="3.8GB">%s</xliff:g> over specified limit</string>
+
+    <!-- Notification title when background data usage is limited. [CHAR LIMIT=32] -->
+    <string name="data_usage_restricted_title">Background data restricted</string>
+    <!-- Notification body when background data usage is limited. [CHAR LIMIT=32] -->
+    <string name="data_usage_restricted_body">Touch to remove restriction</string>
 
     <!-- SSL Certificate dialogs -->
     <!-- Title for an SSL Certificate dialog -->

@@ -11400,7 +11400,7 @@ package android.net {
     method public android.net.NetworkInfo getActiveNetworkInfo();
     method public android.net.NetworkQuotaInfo getActiveNetworkQuotaInfo();
     method public android.net.NetworkInfo[] getAllNetworkInfo();
-    method public boolean getBackgroundDataSetting();
+    method public deprecated boolean getBackgroundDataSetting();
     method public android.net.NetworkInfo getNetworkInfo(int);
     method public int getNetworkPreference();
     method public static boolean isNetworkTypeValid(int);
@@ -17049,7 +17049,7 @@ package android.provider {
     field public static final java.lang.String ALLOWED_GEOLOCATION_ORIGINS = "allowed_geolocation_origins";
     field public static final java.lang.String ALLOW_MOCK_LOCATION = "mock_location";
     field public static final java.lang.String ANDROID_ID = "android_id";
-    field public static final java.lang.String BACKGROUND_DATA = "background_data";
+    field public static final deprecated java.lang.String BACKGROUND_DATA = "background_data";
     field public static final java.lang.String BLUETOOTH_ON = "bluetooth_on";
     field public static final android.net.Uri CONTENT_URI;
     field public static final java.lang.String DATA_ROAMING = "data_roaming";
