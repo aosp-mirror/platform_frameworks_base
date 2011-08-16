@@ -109,6 +109,13 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
         // Divide the view into cells.
         final int cellCount = widthSize / mMinCellSize;
         final int cellSizeRemaining = widthSize % mMinCellSize;
+
+        if (cellCount == 0) {
+            // Give up, nothing fits.
+            setMeasuredDimension(widthSize, 0);
+            return;
+        }
+
         final int cellSize = mMinCellSize + cellSizeRemaining / cellCount;
 
         int cellsRemaining = cellCount;
@@ -213,7 +220,8 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
                 }
             }
 
-            final int extraPixels = (int) (cellsRemaining * cellSize / expandCount);
+            final int extraPixels = expandCount > 0 ?
+                    (int) (cellsRemaining * cellSize / expandCount) : 0;
 
             for (int i = 0; i < childCount; i++) {
                 if ((smallestItemsAt & (1 << i)) == 0) continue;
