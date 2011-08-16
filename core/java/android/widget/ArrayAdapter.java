@@ -206,13 +206,9 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
     public void addAll(T ... items) {
         synchronized (mLock) {
             if (mOriginalValues != null) {
-                for (T item : items) {
-                    mOriginalValues.add(item);
-                }
+                Collections.addAll(mOriginalValues, items);
             } else {
-                for (T item : items) {
-                    mObjects.add(item);
-                }
+                Collections.addAll(mObjects, items);
             }
         }
         if (mNotifyOnChange) notifyDataSetChanged();
@@ -462,18 +458,22 @@ public class ArrayAdapter<T> extends BaseAdapter implements Filterable {
             }
 
             if (prefix == null || prefix.length() == 0) {
+                ArrayList<T> list;
                 synchronized (mLock) {
-                    ArrayList<T> list = new ArrayList<T>(mOriginalValues);
-                    results.values = list;
-                    results.count = list.size();
+                    list = new ArrayList<T>(mOriginalValues);
                 }
+                results.values = list;
+                results.count = list.size();
             } else {
                 String prefixString = prefix.toString().toLowerCase();
 
-                final ArrayList<T> values = mOriginalValues;
-                final int count = values.size();
+                ArrayList<T> values;
+                synchronized (mLock) {
+                    values = new ArrayList<T>(mOriginalValues);
+                }
 
-                final ArrayList<T> newValues = new ArrayList<T>(count);
+                final int count = values.size();
+                final ArrayList<T> newValues = new ArrayList<T>();
 
                 for (int i = 0; i < count; i++) {
                     final T value = values.get(i);
