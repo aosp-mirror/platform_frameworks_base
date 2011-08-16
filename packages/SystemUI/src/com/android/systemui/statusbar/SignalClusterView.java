@@ -18,6 +18,7 @@ package com.android.systemui.statusbar;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Slog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -32,7 +33,15 @@ public class SignalClusterView
         extends LinearLayout 
         implements NetworkController.SignalCluster {
 
+    static final boolean DEBUG = false;
+    static final String TAG = "SignalClusterView";
+    
     NetworkController mNC;
+
+    private boolean mWifiVisible = false;
+    private int mWifiStrengthId = 0, mWifiActivityId = 0;
+    private boolean mMobileVisible = false;
+    private int mMobileStrengthId = 0, mMobileActivityId = 0, mMobileTypeId = 0;
 
     ViewGroup mWifiGroup, mMobileGroup;
     ImageView mWifi, mMobile, mWifiActivity, mMobileActivity, mMobileType;
@@ -50,6 +59,7 @@ public class SignalClusterView
     }
 
     public void setNetworkController(NetworkController nc) {
+        if (DEBUG) Slog.d(TAG, "NetworkController=" + nc);
         mNC = nc;
     }
 
@@ -64,37 +74,74 @@ public class SignalClusterView
         mMobile         = (ImageView) findViewById(R.id.mobile_signal);
         mMobileActivity = (ImageView) findViewById(R.id.mobile_inout);
         mMobileType     = (ImageView) findViewById(R.id.mobile_type);
+
+        apply();
     }
 
     @Override
     protected void onDetachedFromWindow() {
+        mWifiGroup      = null;
+        mWifi           = null;
+        mWifiActivity   = null;
+        mMobileGroup    = null;
+        mMobile         = null;
+        mMobileActivity = null;
+        mMobileType     = null;
+
         super.onDetachedFromWindow();
     }
 
     public void setWifiIndicators(boolean visible, int strengthIcon, int activityIcon) {
-        if (mWifiGroup == null) return;
+        mWifiVisible = visible;
+        mWifiStrengthId = strengthIcon;
+        mWifiActivityId = activityIcon;
 
-        if (visible) {
-            mWifiGroup.setVisibility(View.VISIBLE);
-            mWifi.setImageResource(strengthIcon);
-            mWifiActivity.setImageResource(activityIcon);
-        } else {
-            mWifiGroup.setVisibility(View.GONE);
-        }
+        apply();
     }
 
     public void setMobileDataIndicators(boolean visible, int strengthIcon, int activityIcon,
             int typeIcon) {
-        if (mMobileGroup == null) return;
+        mMobileVisible = visible;
+        mMobileStrengthId = strengthIcon;
+        mMobileActivityId = activityIcon;
+        mMobileTypeId = typeIcon;
 
-        if (visible) {
+        apply();
+    }
+
+    // Run after each indicator change.
+    private void apply() {
+        if (mWifiGroup == null) return;
+
+        if (mWifiVisible) {
+            mWifiGroup.setVisibility(View.VISIBLE);
+            mWifi.setImageResource(mWifiStrengthId);
+            mWifiActivity.setImageResource(mWifiActivityId);
+        } else {
+            mWifiGroup.setVisibility(View.GONE);
+        }
+
+        if (DEBUG) Slog.d(TAG,
+                String.format("wifi: %s sig=%d act=%d",
+                    (mWifiVisible ? "VISIBLE" : "GONE"),
+                    mWifiStrengthId, mWifiActivityId));
+
+        if (mMobileVisible) {
             mMobileGroup.setVisibility(View.VISIBLE);
-            mMobile.setImageResource(strengthIcon);
-            mMobileActivity.setImageResource(activityIcon);
-            mMobileType.setImageResource(typeIcon);
+            mMobile.setImageResource(mMobileStrengthId);
+            mMobileActivity.setImageResource(mMobileActivityId);
+            mMobileType.setImageResource(mMobileTypeId);
         } else {
             mMobileGroup.setVisibility(View.GONE);
         }
+
+        if (DEBUG) Slog.d(TAG,
+                String.format("mobile: %s sig=%d act=%d typ=%d",
+                    (mMobileVisible ? "VISIBLE" : "GONE"),
+                    mMobileStrengthId, mMobileActivityId, mMobileTypeId));
+
+        mMobileType.setVisibility(
+                !mWifiVisible ? View.VISIBLE : View.GONE);
     }
 }
 
