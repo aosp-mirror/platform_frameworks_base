@@ -574,6 +574,8 @@ void AwesomePlayer::reset_l() {
         mStats.mTracks.clear();
     }
 
+    mWatchForAudioSeekComplete = false;
+    mWatchForAudioEOS = false;
 }
 
 void AwesomePlayer::notifyListener_l(int msg, int ext1, int ext2) {
