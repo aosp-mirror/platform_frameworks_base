@@ -51,6 +51,7 @@ void Matrix4::loadIdentity() {
     data[kTranslateZ]   = 0.0f;
     data[kPerspective2] = 1.0f;
 
+    mIsIdentity = true;
     mSimpleMatrix = true;
 }
 
@@ -71,14 +72,21 @@ bool Matrix4::isSimple() {
     return mSimpleMatrix;
 }
 
+bool Matrix4::isIdentity() {
+    return mIsIdentity;
+}
+
 void Matrix4::load(const float* v) {
     memcpy(data, v, sizeof(data));
+    // TODO: Do something smarter here
     mSimpleMatrix = false;
+    mIsIdentity = false;
 }
 
 void Matrix4::load(const Matrix4& v) {
     memcpy(data, v.data, sizeof(data));
     mSimpleMatrix = v.mSimpleMatrix;
+    mIsIdentity = v.mIsIdentity;
 }
 
 void Matrix4::load(const SkMatrix& v) {
@@ -99,6 +107,7 @@ void Matrix4::load(const SkMatrix& v) {
     data[kScaleZ] = 1.0f;
 
     mSimpleMatrix = (v.getType() <= (SkMatrix::kScale_Mask | SkMatrix::kTranslate_Mask));
+    mIsIdentity = v.isIdentity();
 }
 
 void Matrix4::copyTo(SkMatrix& v) const {
@@ -148,6 +157,7 @@ void Matrix4::loadInverse(const Matrix4& v) {
             v.data[kSkewX] * v.data[kSkewY]) * scale;
 
     mSimpleMatrix = v.mSimpleMatrix;
+    mIsIdentity = v.mIsIdentity;
 }
 
 void Matrix4::copyTo(float* v) const {
@@ -166,20 +176,27 @@ void Matrix4::multiply(float v) {
     for (int i = 0; i < 16; i++) {
         data[i] *= v;
     }
+    mIsIdentity = false;
 }
 
 void Matrix4::loadTranslate(float x, float y, float z) {
     loadIdentity();
+
     data[kTranslateX] = x;
     data[kTranslateY] = y;
     data[kTranslateZ] = z;
+
+    mIsIdentity = false;
 }
 
 void Matrix4::loadScale(float sx, float sy, float sz) {
     loadIdentity();
+
     data[kScaleX] = sx;
     data[kScaleY] = sy;
     data[kScaleZ] = sz;
+
+    mIsIdentity = false;
 }
 
 void Matrix4::loadSkew(float sx, float sy) {
@@ -198,6 +215,7 @@ void Matrix4::loadSkew(float sx, float sy) {
     data[kPerspective2] = 1.0f;
 
     mSimpleMatrix = false;
+    mIsIdentity = false;
 }
 
 void Matrix4::loadRotate(float angle, float x, float y, float z) {
@@ -238,6 +256,7 @@ void Matrix4::loadRotate(float angle, float x, float y, float z) {
     data[kScaleZ] = z * z * nc +  c;
 
     mSimpleMatrix = false;
+    mIsIdentity = false;
 }
 
 void Matrix4::loadMultiply(const Matrix4& u, const Matrix4& v) {
@@ -262,16 +281,20 @@ void Matrix4::loadMultiply(const Matrix4& u, const Matrix4& v) {
     }
 
     mSimpleMatrix = u.mSimpleMatrix && v.mSimpleMatrix;
+    mIsIdentity = false;
 }
 
 void Matrix4::loadOrtho(float left, float right, float bottom, float top, float near, float far) {
     loadIdentity();
+
     data[kScaleX] = 2.0f / (right - left);
     data[kScaleY] = 2.0f / (top - bottom);
     data[kScaleZ] = -2.0f / (far - near);
     data[kTranslateX] = -(right + left) / (right - left);
     data[kTranslateY] = -(top + bottom) / (top - bottom);
     data[kTranslateZ] = -(far + near) / (far - near);
+
+    mIsIdentity = false;
 }
 
 #define MUL_ADD_STORE(a, b, c) a = (a) * (b) + (c)

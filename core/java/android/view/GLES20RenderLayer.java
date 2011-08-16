@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 
 /**
  * An OpenGL ES 2.0 implementation of {@link HardwareLayer}. This
@@ -86,5 +87,12 @@ class GLES20RenderLayer extends GLES20Layer {
             ((GLES20Canvas) currentCanvas).interrupt();
         }
         return getCanvas();
+    }
+
+    /**
+     * Ignored
+     */
+    @Override
+    void setTransform(Matrix matrix) {
     }
 }

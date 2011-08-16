@@ -17,6 +17,7 @@
 package android.view;
 
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 
 /**
@@ -74,5 +75,10 @@ class GLES20TextureLayer extends GLES20Layer {
     void update(int width, int height, boolean isOpaque) {
         super.update(width, height, isOpaque);
         GLES20Canvas.nUpdateTextureLayer(mLayer, width, height, isOpaque, mSurface);
+    }
+
+    @Override
+    void setTransform(Matrix matrix) {
+        GLES20Canvas.nSetTextureLayerTransform(mLayer, matrix.native_instance);
     }
 }
