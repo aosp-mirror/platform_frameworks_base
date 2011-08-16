@@ -468,14 +468,10 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         for (int netType : mPriorityList) {
             switch (mNetConfigs[netType].radio) {
             case ConnectivityManager.TYPE_WIFI:
-                if (DBG) log("Starting Wifi Service.");
-                WifiStateTracker wst = new WifiStateTracker();
-                WifiService wifiService = new WifiService(context);
-                ServiceManager.addService(Context.WIFI_SERVICE, wifiService);
-                wifiService.checkAndStartWifi();
-                mNetTrackers[ConnectivityManager.TYPE_WIFI] = wst;
-                wst.startMonitoring(context, mHandler);
-                break;
+                mNetTrackers[netType] = new WifiStateTracker(netType,
+                        mNetConfigs[netType].name);
+                mNetTrackers[netType].startMonitoring(context, mHandler);
+               break;
             case ConnectivityManager.TYPE_MOBILE:
                 mNetTrackers[netType] = new MobileDataStateTracker(netType,
                         mNetConfigs[netType].name);
@@ -882,15 +878,8 @@ public class ConnectivityService extends IConnectivityManager.Stub {
 
         FeatureUser f = new FeatureUser(networkType, feature, binder);
 
-        // TODO - move this into the MobileDataStateTracker
-        int usedNetworkType = networkType;
-        if(networkType == ConnectivityManager.TYPE_MOBILE) {
-            usedNetworkType = convertFeatureToNetworkType(feature);
-            if (usedNetworkType < 0) {
-                loge("Can't match any netTracker!");
-                usedNetworkType = networkType;
-            }
-        }
+        // TODO - move this into individual networktrackers
+        int usedNetworkType = convertFeatureToNetworkType(networkType, feature);
 
         if (mProtectedNetworks.contains(usedNetworkType)) {
             enforceConnectivityInternalPermission();
@@ -900,7 +889,6 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         if (network != null) {
             Integer currentPid = new Integer(getCallingPid());
             if (usedNetworkType != networkType) {
-                NetworkStateTracker radio = mNetTrackers[networkType];
                 NetworkInfo ni = network.getNetworkInfo();
 
                 if (ni.isAvailable() == false) {
@@ -1046,14 +1034,9 @@ public class ConnectivityService extends IConnectivityManager.Stub {
                 }
             }
 
-            // TODO - move to MobileDataStateTracker
-            int usedNetworkType = networkType;
-            if (networkType == ConnectivityManager.TYPE_MOBILE) {
-                usedNetworkType = convertFeatureToNetworkType(feature);
-                if (usedNetworkType < 0) {
-                    usedNetworkType = networkType;
-                }
-            }
+            // TODO - move to individual network trackers
+            int usedNetworkType = convertFeatureToNetworkType(networkType, feature);
+
             tracker =  mNetTrackers[usedNetworkType];
             if (tracker == null) {
                 if (DBG) log("ignoring - no known tracker for net type " + usedNetworkType);
@@ -2672,25 +2655,38 @@ public class ConnectivityService extends IConnectivityManager.Stub {
         Slog.e(TAG, s);
     }
 
-    int convertFeatureToNetworkType(String feature){
-        int networkType = -1;
-        if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
-            networkType = ConnectivityManager.TYPE_MOBILE_MMS;
-        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
-            networkType = ConnectivityManager.TYPE_MOBILE_SUPL;
-        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN) ||
-                TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
-            networkType = ConnectivityManager.TYPE_MOBILE_DUN;
-        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_HIPRI)) {
-            networkType = ConnectivityManager.TYPE_MOBILE_HIPRI;
-        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_FOTA)) {
-            networkType = ConnectivityManager.TYPE_MOBILE_FOTA;
-        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_IMS)) {
-            networkType = ConnectivityManager.TYPE_MOBILE_IMS;
-        } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_CBS)) {
-            networkType = ConnectivityManager.TYPE_MOBILE_CBS;
+    int convertFeatureToNetworkType(int networkType, String feature) {
+        int usedNetworkType = networkType;
+
+        if(networkType == ConnectivityManager.TYPE_MOBILE) {
+            if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_MMS)) {
+                usedNetworkType = ConnectivityManager.TYPE_MOBILE_MMS;
+            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_SUPL)) {
+                usedNetworkType = ConnectivityManager.TYPE_MOBILE_SUPL;
+            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN) ||
+                    TextUtils.equals(feature, Phone.FEATURE_ENABLE_DUN_ALWAYS)) {
+                usedNetworkType = ConnectivityManager.TYPE_MOBILE_DUN;
+            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_HIPRI)) {
+                usedNetworkType = ConnectivityManager.TYPE_MOBILE_HIPRI;
+            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_FOTA)) {
+                usedNetworkType = ConnectivityManager.TYPE_MOBILE_FOTA;
+            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_IMS)) {
+                usedNetworkType = ConnectivityManager.TYPE_MOBILE_IMS;
+            } else if (TextUtils.equals(feature, Phone.FEATURE_ENABLE_CBS)) {
+                usedNetworkType = ConnectivityManager.TYPE_MOBILE_CBS;
+            } else {
+                Slog.e(TAG, "Can't match any mobile netTracker!");
+            }
+        } else if (networkType == ConnectivityManager.TYPE_WIFI) {
+            if (TextUtils.equals(feature, "p2p")) {
+                usedNetworkType = ConnectivityManager.TYPE_WIFI_P2P;
+            } else {
+                Slog.e(TAG, "Can't match any wifi netTracker!");
+            }
+        } else {
+            Slog.e(TAG, "Unexpected network type");
         }
-        return networkType;
+        return usedNetworkType;
     }
 
     private static <T> T checkNotNull(T value, String message) {

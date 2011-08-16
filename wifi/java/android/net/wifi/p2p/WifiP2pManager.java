@@ -19,13 +19,17 @@ package android.net.wifi.p2p;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.IConnectivityManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.WorkSource;
 import android.os.Messenger;
+import android.util.Log;
 
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
@@ -98,6 +102,22 @@ public class WifiP2pManager {
     public static final String EXTRA_NETWORK_INFO = "networkInfo";
 
     /**
+     * The lookup key for a {@link android.net.LinkProperties} object associated with the
+     * network. Retrieve with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
+     * @hide
+     */
+    public static final String EXTRA_LINK_PROPERTIES = "linkProperties";
+
+    /**
+     * The lookup key for a {@link android.net.LinkCapabilities} object associated with the
+     * network. Retrieve with
+     * {@link android.content.Intent#getParcelableExtra(String)}.
+     * @hide
+     */
+    public static final String EXTRA_LINK_CAPABILITIES = "linkCapabilities";
+
+    /**
      * Broadcast intent action indicating that the available peer list has changed
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
@@ -114,9 +134,6 @@ public class WifiP2pManager {
         "android.net.wifi.PICK_WIFI_P2P_NETWORK";
 
     IWifiP2pManager mService;
-
-    /* For communication with WifiP2pService */
-    private AsyncChannel mAsyncChannel = new AsyncChannel();
 
     /* AsyncChannel notifications to apps */
     public static final int HANDLER_CONNECTION = AsyncChannel.CMD_CHANNEL_HALF_CONNECTED;
@@ -194,18 +211,35 @@ public class WifiP2pManager {
     }
 
     /**
-     * Registers the application handler with the Wi-Fi framework.
-     * This function must be the first to be called before any p2p control
-     * or query operations can be performed.
+     * A channel that connects the application handler to the Wifi framework.
+     * All p2p operations are performed on a channel.
+     */
+    public class Channel {
+        Channel(AsyncChannel c) {
+            mAsyncChannel = c;
+        }
+        AsyncChannel mAsyncChannel;
+    }
+
+    /**
+     * Registers the application handler with the Wi-Fi framework. This function
+     * must be the first to be called before any p2p control or query operations can be performed.
      * @param srcContext is the context of the source
      * @param srcHandler is the handler on which the source receives messages
-     * @return {@code true} if the operation succeeded
+     * @return Channel instance that is necessary for performing p2p operations
      */
-    public boolean connectHandler(Context srcContext, Handler srcHandler) {
+    public Channel initialize(Context srcContext, Handler srcHandler) {
         Messenger messenger = getMessenger();
-        if (messenger == null) return false;
-        return mAsyncChannel.connectSync(srcContext, srcHandler, messenger)
-                == AsyncChannel.STATUS_SUCCESSFUL;
+        if (messenger == null) return null;
+
+        AsyncChannel asyncChannel = new AsyncChannel();
+        Channel c = new Channel(asyncChannel);
+        if (asyncChannel.connectSync(srcContext, srcHandler, messenger)
+                == AsyncChannel.STATUS_SUCCESSFUL) {
+            return c;
+        } else {
+            return null;
+        }
     }
 
     public boolean isP2pSupported() {
@@ -220,16 +254,18 @@ public class WifiP2pManager {
      * Sends in a request to the system to enable p2p. This will pop up a dialog
      * to the user and upon authorization will enable p2p.
      */
-    public void enableP2p() {
-        mAsyncChannel.sendMessage(ENABLE_P2P);
+    public void enableP2p(Channel c) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(ENABLE_P2P);
     }
 
     /**
      * Sends in a request to the system to disable p2p. This will pop up a dialog
      * to the user and upon authorization will enable p2p.
      */
-    public void disableP2p() {
-        mAsyncChannel.sendMessage(DISABLE_P2P);
+    public void disableP2p(Channel c) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(DISABLE_P2P);
     }
 
     /**
@@ -238,29 +274,33 @@ public class WifiP2pManager {
      * A dialog to the user is thrown to request his permission since it can
      * have a significant impact on power consumption
      */
-     public void setListenState(int timeout) {
-        mAsyncChannel.sendMessage(START_LISTEN_MODE, timeout);
+     public void setListenState(Channel c, int timeout) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(START_LISTEN_MODE, timeout);
      }
 
     /**
      * Initiates peer discovery
      */
-    public void discoverPeers() {
-        mAsyncChannel.sendMessage(DISCOVER_PEERS);
+    public void discoverPeers(Channel c) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(DISCOVER_PEERS);
     }
 
     /**
      * Initiates peer discovery with a timeout
      */
-    public void discoverPeers(int timeout) {
-        mAsyncChannel.sendMessage(DISCOVER_PEERS, timeout);
+    public void discoverPeers(Channel c, int timeout) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(DISCOVER_PEERS, timeout);
     }
 
     /**
      * Cancel any existing peer discovery operation
      */
-    public void cancelPeerDiscovery() {
-        mAsyncChannel.sendMessage(CANCEL_DISCOVER_PEERS);
+    public void cancelPeerDiscovery(Channel c) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(CANCEL_DISCOVER_PEERS);
     }
 
     /**
@@ -268,47 +308,53 @@ public class WifiP2pManager {
      *
      * @param peer Configuration described in a {@link WifiP2pConfig} object.
      */
-    public void connect(WifiP2pConfig config) {
-        mAsyncChannel.sendMessage(CONNECT, config);
+    public void connect(Channel c, WifiP2pConfig config) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(CONNECT, config);
     }
 
     /**
      * Cancel any ongoing negotiation or disconnect from an existing group
      */
-    public void disconnect() {
-        mAsyncChannel.sendMessage(CANCEL_CONNECT);
+    public void disconnect(Channel c) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(CANCEL_CONNECT);
     }
 
     /**
      * Create a p2p group. This is essentially an access point that can accept
      * client connections.
      */
-    public void createGroup() {
-        mAsyncChannel.sendMessage(CREATE_GROUP);
+    public void createGroup(Channel c) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(CREATE_GROUP);
     }
 
     /**
      * Remove the current group. This also removes the p2p interface created
      * during group formation.
      */
-    public void removeGroup() {
-        mAsyncChannel.sendMessage(REMOVE_GROUP);
+    public void removeGroup(Channel c) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(REMOVE_GROUP);
     }
 
     /**
      * Request current p2p settings. This returns a RESPONSE_SETTINGS on the source
      * handler.
      */
-    public void requestP2pSettings() {
-        mAsyncChannel.sendMessage(REQUEST_SETTINGS);
+    public void requestP2pSettings(Channel c) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(REQUEST_SETTINGS);
     }
 
     /**
      * Request the list of peers. This returns a RESPONSE_PEERS on the source
      * handler.
      */
-    public void requestPeers() {
-        mAsyncChannel.sendMessage(REQUEST_PEERS);
+    public void requestPeers(Channel c) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(REQUEST_PEERS);
     }
 
     /**
@@ -322,8 +368,9 @@ public class WifiP2pManager {
      * Request device connection status. This returns a RESPONSE_CONNECTION_STATUS on
      * the source handler.
      */
-    public void requestConnectionStatus() {
-        mAsyncChannel.sendMessage(REQUEST_CONNECTION_STATUS);
+    public void requestConnectionStatus(Channel c) {
+        if (c == null) return;
+        c.mAsyncChannel.sendMessage(REQUEST_CONNECTION_STATUS);
     }
 
 
@@ -341,4 +388,38 @@ public class WifiP2pManager {
             return null;
         }
     }
+
+
+    /**
+     * Setup DNS connectivity on the current process to the connected Wi-Fi p2p peers
+     *
+     * @return -1 on failure
+     * @hide
+     */
+    public int startPeerCommunication() {
+        IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+        IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
+        try {
+            return cm.startUsingNetworkFeature(ConnectivityManager.TYPE_WIFI, "p2p", new Binder());
+        } catch (RemoteException e) {
+            return -1;
+        }
+    }
+
+    /**
+     * Tear down connectivity to the connected Wi-Fi p2p peers
+     *
+     * @return -1 on failure
+     * @hide
+     */
+    public int stopPeerCommunication() {
+        IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+        IConnectivityManager cm = IConnectivityManager.Stub.asInterface(b);
+        try {
+            return cm.stopUsingNetworkFeature(ConnectivityManager.TYPE_WIFI, "p2p");
+        } catch (RemoteException e) {
+            return -1;
+        }
+    }
+
 }
