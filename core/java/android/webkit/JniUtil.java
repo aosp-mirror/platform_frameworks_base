@@ -16,6 +16,7 @@
 
 package android.webkit;
 
+import android.app.ActivityManager;
 import android.content.Context;
 import android.net.Uri;
 import android.provider.Settings;
@@ -174,6 +175,17 @@ class JniUtil {
         return Settings.Secure.getString(sContext.getContentResolver(),
                 Settings.Secure.WEB_AUTOFILL_QUERY_URL);
     }
+
+    private static boolean canSatisfyMemoryAllocation(long bytesRequested) {
+        checkInitialized();
+        ActivityManager manager = (ActivityManager) sContext.getSystemService(
+                Context.ACTIVITY_SERVICE);
+        ActivityManager.MemoryInfo memInfo = new ActivityManager.MemoryInfo();
+        manager.getMemoryInfo(memInfo);
+        long leftToAllocate = memInfo.availMem - memInfo.threshold;
+        return !memInfo.lowMemory && bytesRequested < leftToAllocate;
+    }
+
 
     private static native boolean nativeUseChromiumHttpStack();
 }
