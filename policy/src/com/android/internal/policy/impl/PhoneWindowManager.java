@@ -2868,7 +2868,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // or orientation sensor disabled
             //or case.unspecified
             if (mHdmiPlugged) {
-                return Surface.ROTATION_0;
+                return mLandscapeRotation;
             } else if (mLidOpen == LID_OPEN) {
                 return mLidOpenRotation;
             } else if (mDockMode == Intent.EXTRA_DOCK_STATE_CAR && mCarDockRotation >= 0) {
