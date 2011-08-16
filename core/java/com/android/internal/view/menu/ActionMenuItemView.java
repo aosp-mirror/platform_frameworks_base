@@ -18,19 +18,23 @@ package com.android.internal.view.menu;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 /**
  * @hide
  */
 public class ActionMenuItemView extends LinearLayout
-        implements MenuView.ItemView, View.OnClickListener, ActionMenuView.ActionMenuChildView {
+        implements MenuView.ItemView, View.OnClickListener, View.OnLongClickListener,
+        ActionMenuView.ActionMenuChildView {
     private static final String TAG = "ActionMenuItemView";
 
     private MenuItemImpl mItemData;
@@ -65,7 +69,9 @@ public class ActionMenuItemView extends LinearLayout
         mTextButton = (Button) findViewById(com.android.internal.R.id.textButton);
         mImageButton.setOnClickListener(this);
         mTextButton.setOnClickListener(this);
+        mImageButton.setOnLongClickListener(this);
         setOnClickListener(this);
+        setOnLongClickListener(this);
     }
 
     public MenuItemImpl getItemData() {
@@ -169,5 +175,36 @@ public class ActionMenuItemView extends LinearLayout
 
     public boolean needsDividerAfter() {
         return hasText();
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (hasText()) {
+            // Don't show the cheat sheet for items that already show text.
+            return false;
+        }
+
+        final int[] screenPos = new int[2];
+        final Rect displayFrame = new Rect();
+        getLocationOnScreen(screenPos);
+        getWindowVisibleDisplayFrame(displayFrame);
+
+        final Context context = getContext();
+        final int width = getWidth();
+        final int height = getHeight();
+        final int midy = screenPos[1] + height / 2;
+        final int screenWidth = context.getResources().getDisplayMetrics().widthPixels;
+
+        Toast cheatSheet = Toast.makeText(context, mItemData.getTitle(), Toast.LENGTH_SHORT);
+        if (midy < displayFrame.height()) {
+            // Show along the top; follow action buttons
+            cheatSheet.setGravity(Gravity.TOP | Gravity.RIGHT,
+                    screenWidth - screenPos[0] - width / 2, height);
+        } else {
+            // Show along the bottom center
+            cheatSheet.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, height);
+        }
+        cheatSheet.show();
+        return true;
     }
 }
