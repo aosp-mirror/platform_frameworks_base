@@ -3145,6 +3145,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
 
         public boolean hasPanelItems() {
             if (shownPanelView == null) return false;
+            if (createdPanelView != null) return true;
 
             if (isCompact || isInExpandedMode) {
                 return listMenuPresenter.getAdapter().getCount() > 0;
