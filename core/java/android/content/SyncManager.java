@@ -1573,8 +1573,11 @@ public class SyncManager implements OnAccountsUpdateListener {
                     final Long periodInSeconds = info.periodicSyncs.get(i).second;
                     // find when this periodic sync was last scheduled to run
                     final long lastPollTimeAbsolute = status.getPeriodicSyncTime(i);
-                    // compute when this periodic sync should next run
-                    long nextPollTimeAbsolute = lastPollTimeAbsolute + periodInSeconds * 1000;
+                    // compute when this periodic sync should next run - this can be in the future
+                    // for example if the user changed the time, synced and changed back.
+                    final long nextPollTimeAbsolute = lastPollTimeAbsolute > nowAbsolute
+                            ? nowAbsolute
+                            : lastPollTimeAbsolute + periodInSeconds * 1000;
                     // if it is ready to run then schedule it and mark it as having been scheduled
                     if (nextPollTimeAbsolute <= nowAbsolute) {
                         final Pair<Long, Long> backoff =
