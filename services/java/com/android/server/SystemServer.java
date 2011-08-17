@@ -397,15 +397,17 @@ class ServerThread extends Thread {
                 reportWtf("starting ThrottleService", e);
             }
 
-            try {
-                /*
-                 * NotificationManagerService is dependant on MountService,
-                 * (for media / usb notifications) so we must start MountService first.
-                 */
-                Slog.i(TAG, "Mount Service");
-                ServiceManager.addService("mount", new MountService(context));
-            } catch (Throwable e) {
-                reportWtf("starting Mount Service", e);
+            if (!"0".equals(SystemProperties.get("system_init.startmountservice"))) {
+                try {
+                    /*
+                     * NotificationManagerService is dependant on MountService,
+                     * (for media / usb notifications) so we must start MountService first.
+                     */
+                    Slog.i(TAG, "Mount Service");
+                    ServiceManager.addService("mount", new MountService(context));
+                } catch (Throwable e) {
+                    reportWtf("starting Mount Service", e);
+                }
             }
 
             try {
@@ -467,11 +469,13 @@ class ServerThread extends Thread {
                 reportWtf("starting Wallpaper Service", e);
             }
 
-            try {
-                Slog.i(TAG, "Audio Service");
-                ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
-            } catch (Throwable e) {
-                reportWtf("starting Audio Service", e);
+            if (!"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
+                try {
+                    Slog.i(TAG, "Audio Service");
+                    ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
+                } catch (Throwable e) {
+                    reportWtf("starting Audio Service", e);
+                }
             }
 
             try {
