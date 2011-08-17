@@ -40,6 +40,19 @@ class FBOCache;
 
 typedef void *(*RsHalSymbolLookupFunc)(void *usrptr, char const *symbolName);
 
+typedef struct {
+    const void *in;
+    void *out;
+    const void *usr;
+    size_t usr_len;
+    uint32_t x;
+    uint32_t y;
+    uint32_t z;
+    uint32_t lod;
+    RsAllocationCubemapFace face;
+    uint32_t ar[16];
+} RsForEachStubParamStruct;
+
 /**
  * Script management functions
  */
