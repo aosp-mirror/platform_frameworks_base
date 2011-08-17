@@ -817,11 +817,10 @@ class AppWidgetService extends IAppWidgetService.Stub
     }
 
     Provider lookupProviderLocked(ComponentName provider) {
-        final String className = provider.getClassName();
         final int N = mInstalledProviders.size();
         for (int i=0; i<N; i++) {
             Provider p = mInstalledProviders.get(i);
-            if (p.info.provider.equals(provider) || className.equals(p.info.oldName)) {
+            if (p.info.provider.equals(provider)) {
                 return p;
             }
         }
@@ -1006,11 +1005,6 @@ class AppWidgetService extends IAppWidgetService.Stub
 
             p = new Provider();
             AppWidgetProviderInfo info = p.info = new AppWidgetProviderInfo();
-            // If metaData was null, we would have returned earlier when getting
-            // the parser No need to do the check here
-            info.oldName = activityInfo.metaData.getString(
-                    AppWidgetManager.META_DATA_APPWIDGET_OLD_NAME);
-
             info.provider = component;
             p.uid = activityInfo.applicationInfo.uid;
 
