@@ -9159,6 +9159,7 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             mPrivateFlags &= ~AWAKEN_SCROLL_BARS_ON_ATTACH;
         }
         jumpDrawablesToCurrentState();
+        // Order is important here: LayoutDirection should be resolved before Padding and TextDirection
         resolveLayoutDirectionIfNeeded();
         resolvePadding();
         resolveTextDirection();
@@ -9178,6 +9179,10 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
 
         // Clear any previous layout direction resolution
         mPrivateFlags2 &= ~LAYOUT_DIRECTION_RESOLVED_RTL;
+
+        // Reset also TextDirection as a change into LayoutDirection may impact the selected
+        // TextDirectionHeuristic
+        resetResolvedTextDirection();
 
         // Set resolved depending on layout direction
         switch (getLayoutDirection()) {
