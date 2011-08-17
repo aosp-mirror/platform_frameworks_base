@@ -66,20 +66,34 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
 
     private void update() {
         mLinearLayout.removeAllViews();
+        // Once we can clear the data associated with individual item views,
+        // we can get rid of the removeAllViews() and the code below will
+        // recycle them.
         for (int i = 0; i < mAdapter.getCount(); i++) {
-            final View view = mAdapter.getView(i, null, mLinearLayout);
-            view.setClickable(true);
-            view.setOnLongClickListener(mOnLongClick);
+            View old = null;
+            if (i < mLinearLayout.getChildCount()) {
+                old = mLinearLayout.getChildAt(i);
+                old.setVisibility(View.VISIBLE);
+            }
+            final View view = mAdapter.getView(i, old, mLinearLayout);
 
-            final View thumbnail = getChildContentView(view);
-            // thumbnail is set to clickable in the layout file
-            thumbnail.setOnClickListener(new OnClickListener() {
-                public void onClick(View v) {
-                    mCallback.handleOnClick(view);
-                }
-            });
+            if (old == null) {
+                view.setClickable(true);
+                view.setOnLongClickListener(mOnLongClick);
 
-            mLinearLayout.addView(view);
+                final View thumbnail = getChildContentView(view);
+                // thumbnail is set to clickable in the layout file
+                thumbnail.setOnClickListener(new OnClickListener() {
+                    public void onClick(View v) {
+                        mCallback.handleOnClick(view);
+                    }
+                });
+
+                mLinearLayout.addView(view);
+            }
+        }
+        for (int i = mAdapter.getCount(); i < mLinearLayout.getChildCount(); i++) {
+            mLinearLayout.getChildAt(i).setVisibility(View.GONE);
         }
         // Scroll to end after layout.
         post(new Runnable() {
@@ -128,8 +142,9 @@ public class RecentsVerticalScrollView extends ScrollView implements SwipeHelper
         final float y = ev.getY() + getScrollY();
         for (int i = 0; i < mLinearLayout.getChildCount(); i++) {
             View item = mLinearLayout.getChildAt(i);
-            if (x >= item.getLeft() && x < item.getRight()
-                && y >= item.getTop() && y < item.getBottom()) {
+            if (item.getVisibility() == View.VISIBLE
+                    && x >= item.getLeft() && x < item.getRight()
+                    && y >= item.getTop() && y < item.getBottom()) {
                 return item;
             }
         }

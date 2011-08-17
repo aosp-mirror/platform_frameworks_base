@@ -69,6 +69,7 @@ import java.util.Date;
 class SaveImageInBackgroundData {
     Context context;
     Bitmap image;
+    Runnable finisher;
     int result;
 }
 
@@ -141,6 +142,7 @@ class SaveImageInBackgroundTask extends AsyncTask<SaveImageInBackgroundData, Voi
             Toast.makeText(params.context, R.string.screenshot_saving_toast,
                     Toast.LENGTH_SHORT).show();
         }
+        params.finisher.run();
     };
 }
 
@@ -231,11 +233,9 @@ class GlobalScreenshot {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
                     | WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED_SYSTEM
-                    | WindowManager.LayoutParams.FLAG_KEEP_SURFACE_WHILE_ANIMATING
                     | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                     | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
                 PixelFormat.TRANSLUCENT);
-        mWindowLayoutParams.token = new Binder();
         mWindowLayoutParams.setTitle("ScreenshotAnimation");
         mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mDisplay = mWindowManager.getDefaultDisplay();
@@ -244,10 +244,11 @@ class GlobalScreenshot {
     /**
      * Creates a new worker thread and saves the screenshot to the media store.
      */
-    private void saveScreenshotInWorkerThread() {
+    private void saveScreenshotInWorkerThread(Runnable finisher) {
         SaveImageInBackgroundData data = new SaveImageInBackgroundData();
         data.context = mContext;
         data.image = mScreenBitmap;
+        data.finisher = finisher;
         new SaveImageInBackgroundTask().execute(data);
     }
 
@@ -269,7 +270,7 @@ class GlobalScreenshot {
     /**
      * Takes a screenshot of the current display and shows an animation.
      */
-    void takeScreenshot() {
+    void takeScreenshot(Runnable finisher) {
         // We need to orient the screenshot correctly (and the Surface api seems to take screenshots
         // only in the natural orientation of the device :!)
         mDisplay.getRealMetrics(mDisplayMetrics);
@@ -302,18 +303,19 @@ class GlobalScreenshot {
         if (mScreenBitmap == null) {
             Toast.makeText(mContext, R.string.screenshot_failed_toast,
                     Toast.LENGTH_SHORT).show();
+            finisher.run();
             return;
         }
 
         // Start the post-screenshot animation
-        startAnimation();
+        startAnimation(finisher);
     }
 
 
     /**
      * Starts the animation after taking the screenshot
      */
-    private void startAnimation() {
+    private void startAnimation(final Runnable finisher) {
         // Add the view for the animation
         mScreenshotView.setImageBitmap(mScreenBitmap);
         mScreenshotLayout.requestFocus();
@@ -332,8 +334,7 @@ class GlobalScreenshot {
             @Override
             public void onAnimationEnd(Animator animation) {
                 // Save the screenshot once we have a bit of time now
-                saveScreenshotInWorkerThread();
-
+                saveScreenshotInWorkerThread(finisher);
                 mWindowManager.removeView(mScreenshotLayout);
             }
         });
