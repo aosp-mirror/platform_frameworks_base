@@ -18,9 +18,7 @@ package android.media;
 
 import android.content.ComponentName;
 import android.media.IAudioFocusDispatcher;
-import android.media.IRemoteControlClient;
-import android.net.Uri;
-import android.os.Bundle;
+import android.media.IRemoteControlClientDispatcher;
 
 /**
  * {@hide}
@@ -91,9 +89,10 @@ interface IAudioService {
     void unregisterMediaButtonEventReceiver(in ComponentName eventReceiver);
 
     void registerRemoteControlClient(in ComponentName eventReceiver,
-           in IRemoteControlClient rcClient, in String callingPackageName);
+           in IRemoteControlClientDispatcher rcClient, in String clientName,
+           in String callingPackageName);
 
-    IRemoteControlClient getRemoteControlClient(in int rcClientId);
+    IRemoteControlClientDispatcher getRemoteControlClientDispatcher(in int rcClientId);
 
     void notifyRemoteControlInformationChanged(in ComponentName eventReceiver, int infoFlag);
 
