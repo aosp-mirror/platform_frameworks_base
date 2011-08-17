@@ -12663,13 +12663,15 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
      * Request that the visibility of the status bar be changed.
      * @param visibility  Bitwise-or of flags {@link #SYSTEM_UI_FLAG_LOW_PROFILE} or
      * {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}.
+     *
+     * This value will be re-applied immediately, even if the flags have not changed, so a view may
+     * easily reassert a particular SystemUiVisibility condition even if the system UI itself has
+     * since countermanded the original request.
      */
     public void setSystemUiVisibility(int visibility) {
-        if (visibility != mSystemUiVisibility) {
-            mSystemUiVisibility = visibility;
-            if (mParent != null && mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
-                mParent.recomputeViewAttributes(this);
-            }
+        mSystemUiVisibility = visibility;
+        if (mParent != null && mAttachInfo != null && !mAttachInfo.mRecomputeGlobalAttributes) {
+            mParent.recomputeViewAttributes(this);
         }
     }
 
