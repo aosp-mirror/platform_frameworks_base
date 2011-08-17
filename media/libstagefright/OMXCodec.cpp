@@ -3199,9 +3199,16 @@ void OMXCodec::setState(State newState) {
 }
 
 status_t OMXCodec::waitForBufferFilled_l() {
+
+    if (mIsEncoder) {
+        // For timelapse video recording, the timelapse video recording may
+        // not send an input frame for a _long_ time. Do not use timeout
+        // for video encoding.
+        return mBufferFilled.wait(mLock);
+    }
     status_t err = mBufferFilled.waitRelative(mLock, kBufferFilledEventTimeOutUs);
     if (err != OK) {
-        LOGE("Timed out waiting for buffers from video encoder: %d/%d",
+        CODEC_LOGE("Timed out waiting for output buffers: %d/%d",
             countBuffersWeOwn(mPortBuffers[kPortIndexInput]),
             countBuffersWeOwn(mPortBuffers[kPortIndexOutput]));
     }
