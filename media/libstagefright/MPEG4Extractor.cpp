@@ -1687,6 +1687,11 @@ status_t MPEG4Extractor::verifyTrack(Track *track) {
         }
     }
 
+    if (!track->sampleTable->isValid()) {
+        // Make sure we have all the metadata we need.
+        return ERROR_MALFORMED;
+    }
+
     return OK;
 }
 
