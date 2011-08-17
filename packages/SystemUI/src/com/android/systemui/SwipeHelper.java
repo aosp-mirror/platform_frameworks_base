@@ -30,7 +30,7 @@ import android.view.View;
 
 public class SwipeHelper {
     static final String TAG = "com.android.systemui.SwipeHelper";
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private static final boolean DEBUG_INVALIDATE = false;
     private static final boolean SLOW_ANIMATIONS = false; // DEBUG;
 
@@ -142,7 +142,7 @@ public class SwipeHelper {
     // invalidate a rectangle relative to the view's coordinate system all the way up the view
     // hierarchy
     public static void invalidateGlobalRegion(View view, RectF childBounds) {
-        childBounds.offset(view.getX(), view.getY());
+        //childBounds.offset(view.getTranslationX(), view.getTranslationY());
         if (DEBUG_INVALIDATE)
             Log.v(TAG, "-------------");
         while (view.getParent() != null && view.getParent() instanceof View) {

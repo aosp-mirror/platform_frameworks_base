@@ -49,6 +49,8 @@ import com.android.systemui.R;
 public class KeyButtonView extends ImageView {
     private static final String TAG = "StatusBar.KeyButtonView";
 
+    final float GLOW_MAX_SCALE_FACTOR = 1.8f;
+
     IWindowManager mWindowManager;
     long mDownTime;
     boolean mSending;
@@ -159,17 +161,22 @@ public class KeyButtonView extends ImageView {
         mGlowScale = x;
         final float w = getWidth();
         final float h = getHeight();
-        if (x < 1.0f) {
+        if (GLOW_MAX_SCALE_FACTOR <= 1.0f) {
+            // this only works if we know the glow will never leave our bounds
             invalidate();
         } else {
-            final float rx = (w * (x - 1.0f)) / 2.0f;
-            final float ry = (h * (x - 1.0f)) / 2.0f;
+            final float rx = (w * (GLOW_MAX_SCALE_FACTOR - 1.0f)) / 2.0f + 1.0f;
+            final float ry = (h * (GLOW_MAX_SCALE_FACTOR - 1.0f)) / 2.0f + 1.0f;
             com.android.systemui.SwipeHelper.invalidateGlobalRegion(
                     this,
                     new RectF(getLeft() - rx,
                               getTop() - ry,
                               getRight() + rx,
                               getBottom() + ry));
+
+            // also invalidate our immediate parent to help avoid situations where nearby glows
+            // interfere
+            ((View)getParent()).invalidate();
         }
     }
 
@@ -183,7 +190,7 @@ public class KeyButtonView extends ImageView {
                     setDrawingAlpha(1f);
                     as.playTogether(
                         ObjectAnimator.ofFloat(this, "glowAlpha", 1f),
-                        ObjectAnimator.ofFloat(this, "glowScale", 1.8f)
+                        ObjectAnimator.ofFloat(this, "glowScale", GLOW_MAX_SCALE_FACTOR)
                     );
                     as.setDuration(50);
                 } else {

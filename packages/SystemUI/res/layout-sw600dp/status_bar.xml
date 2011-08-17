@@ -44,24 +44,23 @@
                 />
 
             <!-- navigation controls -->
-            <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
-                android:layout_width="80dip"
-                android:layout_height="match_parent"
-                android:src="@drawable/ic_sysbar_back"
-                android:layout_alignParentLeft="true"
-                systemui:keyCode="4"
-                android:contentDescription="@string/accessibility_back"
-                systemui:glowBackground="@drawable/ic_sysbar_highlight"
-                />
             <LinearLayout
                 android:id="@+id/navigationArea"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_toRightOf="@+id/back"
+                android:layout_alignParentLeft="true"
                 android:orientation="horizontal"
                 android:clipChildren="false"
                 android:clipToPadding="false"
                 >
+                <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/back"
+                    android:layout_width="80dip"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_sysbar_back"
+                    systemui:keyCode="4"
+                    android:contentDescription="@string/accessibility_back"
+                    systemui:glowBackground="@drawable/ic_sysbar_highlight"
+                    />
                 <com.android.systemui.statusbar.policy.KeyButtonView android:id="@+id/home"
                     android:layout_width="80dip"
                     android:layout_height="match_parent"
