@@ -3033,9 +3033,6 @@
     <!-- Description of the not pressed state of a ToggleButton. [CHAR LIMIT=NONE] -->
     <string name="togglebutton_not_pressed">not pressed</string>
 
-    <!-- Announce that a headset is required to hear keyboard keys while typing a password. [CHAR LIMIT=NONE] -->
-    <string name="keyboard_headset_required_to_hear_password">Key. Headset required to hear keys while typing a password.</string>
-
     <!-- Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] -->
     <string name="action_bar_home_description">Navigate home</string>
     <!-- Content description for the action bar "up" affordance. [CHAR LIMIT=NONE] -->
