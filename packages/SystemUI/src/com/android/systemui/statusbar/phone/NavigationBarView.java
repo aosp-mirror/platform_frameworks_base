@@ -29,6 +29,7 @@ import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Surface;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
@@ -67,6 +68,7 @@ public class NavigationBarView extends LinearLayout {
 
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
+
         mHidden = false;
 
         mDisplay = ((WindowManager)context.getSystemService(
@@ -129,6 +131,11 @@ public class NavigationBarView extends LinearLayout {
                                                 ? findViewById(R.id.rot90)
                                                 : findViewById(R.id.rot270);
 
+        for (View v : mRotatedViews) {
+            // this helps avoid drawing artifacts with glowing navigation keys 
+            ViewGroup group = (ViewGroup) v.findViewById(R.id.nav_buttons);
+            group.setMotionEventSplittingEnabled(false);
+        }
         mCurrentView = mRotatedViews[Surface.ROTATION_0];
     }
 

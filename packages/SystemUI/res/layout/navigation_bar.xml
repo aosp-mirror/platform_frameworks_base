@@ -37,6 +37,7 @@
             android:orientation="horizontal"
             android:clipChildren="false"
             android:clipToPadding="false"
+            android:id="@+id/nav_buttons"
             >
 
             <!-- navigation controls -->
@@ -118,6 +119,7 @@
             android:orientation="vertical"
             android:clipChildren="false"
             android:clipToPadding="false"
+            android:id="@+id/nav_buttons"
             >
             
             <!-- navigation controls -->
