@@ -27,6 +27,8 @@ import android.os.Message;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -46,6 +48,8 @@ class HTML5Audio extends Handler
 
     // The C++ MediaPlayerPrivateAndroid object.
     private int mNativePointer;
+    // The private status of the view that created this player
+    private boolean mIsPrivate;
 
     private static int IDLE        =  0;
     private static int INITIALIZED =  1;
@@ -63,6 +67,9 @@ class HTML5Audio extends Handler
 
     // Timer thread -> UI thread
     private static final int TIMEUPDATE = 100;
+
+    private static final String COOKIE = "Cookie";
+    private static final String HIDE_URL_LOGS = "x-hide-urls-from-log";
 
     // The spec says the timer should fire every 250 ms or less.
     private static final int TIMEUPDATE_PERIOD = 250;  // ms
@@ -138,10 +145,11 @@ class HTML5Audio extends Handler
     /**
      * @param nativePtr is the C++ pointer to the MediaPlayerPrivate object.
      */
-    public HTML5Audio(int nativePtr) {
+    public HTML5Audio(WebViewCore webViewCore, int nativePtr) {
         // Save the native ptr
         mNativePointer = nativePtr;
         resetMediaPlayer();
+        mIsPrivate = webViewCore.getWebView().isPrivateBrowsingEnabled();
     }
 
     private void resetMediaPlayer() {
@@ -169,7 +177,17 @@ class HTML5Audio extends Handler
             if (mState != IDLE) {
                 resetMediaPlayer();
             }
-            mMediaPlayer.setDataSource(url);
+            String cookieValue = CookieManager.getInstance().getCookie(url, mIsPrivate);
+            Map<String, String> headers = new HashMap<String, String>();
+
+            if (cookieValue != null) {
+                headers.put(COOKIE, cookieValue);
+            }
+            if (mIsPrivate) {
+                headers.put(HIDE_URL_LOGS, "true");
+            }
+
+            mMediaPlayer.setDataSource(url, headers);
             mState = INITIALIZED;
             mMediaPlayer.prepareAsync();
         } catch (IOException e) {
