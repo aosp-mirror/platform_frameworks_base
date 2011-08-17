@@ -156,7 +156,7 @@ inline String16& String16::operator+=(const String16& other)
 
 inline String16 String16::operator+(const String16& other) const
 {
-    String16 tmp;
+    String16 tmp(*this);
     tmp += other;
     return tmp;
 }
