@@ -447,12 +447,8 @@ M4OSA_ERR videoBrowserPrepareFrame(M4OSA_Context pContext, M4OSA_UInt32* pTime,
     VideoBrowserContext* pC = (VideoBrowserContext*)pContext;
     M4OSA_ERR err = M4NO_ERROR;
     M4OSA_UInt32 targetTime = 0;
-    M4OSA_UInt32 jumpTime = 0;
     M4_MediaTime timeMS = 0;
-    M4OSA_Int32 rapTime = 0;
-    M4OSA_Bool isBackward = M4OSA_FALSE;
     M4OSA_Bool bJumpNeeded = M4OSA_FALSE;
-
 
     /*--- Sanity checks ---*/
     CHECK_PTR(videoBrowserPrepareFrame, pContext, err, M4ERR_PARAMETER);
@@ -472,16 +468,11 @@ M4OSA_ERR videoBrowserPrepareFrame(M4OSA_Context pContext, M4OSA_UInt32* pTime,
         goto videoBrowserPrepareFrame_cleanUp;
     }
 
-    /*--- Check the duration ---*/
-    /*--- If we jump backward, we need to jump ---*/
-    if (targetTime < pC->m_currentCTS)
-    {
-        isBackward = M4OSA_TRUE;
-        bJumpNeeded = M4OSA_TRUE;
-    }
-    /*--- If we jumpt to a time greater than "currentTime" + "predecodeTime"
-          we need to jump ---*/
-    else if (targetTime > (pC->m_currentCTS + VIDEO_BROWSER_PREDECODE_TIME))
+    // If we jump backward or forward to a time greater than current position by
+    // 85ms (~ 2 frames), we want to jump.
+    if (pC->m_currentCTS == 0 ||
+        targetTime < pC->m_currentCTS ||
+        targetTime > (pC->m_currentCTS + 85))
     {
         bJumpNeeded = M4OSA_TRUE;
     }
