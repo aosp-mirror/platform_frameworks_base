@@ -1,0 +1,532 @@
+page.title=OpenGL ES 1.0
+parent.title=Tutorials
+parent.link=../../browser.html?tag=tutorial
+@jd:body
+
+
+<div id="qv-wrapper">
+  <div id="qv">
+    <h2>In this document</h2>
+    
+    <ol>
+      <li><a href="#creating">Create an Activity with GLSurfaceView</a></li>
+      <li>
+        <a href="#drawing">Draw a Shape on GLSurfaceView</a>
+        <ol>
+          <li><a href="#define-triangle">Define a Triangle</a></li>
+          <li><a href="#draw-triangle">Draw the Triangle</a></li>
+        </ol>
+      </li>
+      <li><a href="#projection-and-views">Apply Projection and Camera Views</a></li>
+      <li><a href="#motion">Add Motion</a></li>
+      <li><a href="#touch">Respond to Touch Events</a></li>
+    </ol>
+    <h2 id="code-samples-list">Related Samples</h2>
+    <ol>
+      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
+index.html">API Demos - graphics</a></li>
+      <li><a
+        href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
+GLSurfaceViewActivity.html">OpenGL ES 1.0 Sample</a></li>
+      <li><a href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
+TouchRotateActivity.html">TouchRotateActivity</a></li>
+    </ol>
+    <h2>See also</h2>
+    <ol>
+      <li><a href="{@docRoot}guide/topics/graphics/opengl.html">3D with OpenGL</a></li>
+      <li><a href="{@docRoot}resources/tutorials/opengl/opengl-es20.html">OpenGL
+ES 2.0</a></li>
+    </ol>
+    </div>
+  </div>
+
+<p>This tutorial shows you how to create a simple Android application that uses the OpenGL ES 1.0
+API to perform some basic graphics operations. You'll learn how to:</p>
+
+<ul>
+  <li>Create an activity using {@link android.opengl.GLSurfaceView} and {@link
+android.opengl.GLSurfaceView.Renderer}</li>
+  <li>Create and draw a graphic object</li>
+  <li>Define a projection to correct for screen geometry</li>
+  <li>Define a camera view</li>
+  <li>Rotate a graphic object</li>
+  <li>Make graphics touch-interactive</li>
+</ul>
+
+<p>The Android framework supports both the OpenGL ES 1.0/1.1 and OpenGL ES 2.0 APIs. You should
+carefully consider which version of the OpenGL ES API (1.0/1.1 or 2.0) is most appropriate for your
+needs. For more information, see
+<a href="{@docRoot}guide/topics/graphics/opengl.html#choosing-version">Choosing an OpenGL API
+Version</a>. If you would prefer to use OpenGL ES 2.0, see the <a
+href="{@docRoot}resources/tutorials/opengl/opengl-es20.jd">OpenGL ES 2.0 tutorial</a>.</p>
+
+<p>Before you start, you should understand how to create a basic Android application. If you do not
+know how to create an app, follow the <a href="{@docRoot}resources/tutorials/hello-world.html">Hello
+World Tutorial</a> to familiarize yourself with the process.</p>
+
+<h2 id="creating">Create an Activity with GLSurfaceView</h2>
+
+<p>To get started using OpenGL, you must implement both a {@link android.opengl.GLSurfaceView} and a
+{@link android.opengl.GLSurfaceView.Renderer}. The {@link android.opengl.GLSurfaceView} is the main
+view type for applications that use OpenGL and the {@link android.opengl.GLSurfaceView.Renderer}
+controls what is drawn within that view. (For more information about these classes, see the <a
+href="{@docRoot}guide/topics/graphics/opengl.html">3D with OpenGL</a> document.)</p>
+
+<p>To create an activity using {@code GLSurfaceView}:</p>
+  
+<ol>
+  <li>Start a new Android project that targets Android 1.6 (API Level 4) or higher.
+  </li>
+  <li>Name the project <strong>HelloOpenGLES10</strong> and make sure it includes an activity called
+{@code HelloOpenGLES10}.
+  </li> 
+  <li>Modify the {@code HelloOpenGLES10} class as follows:
+<pre>
+package com.example.android.apis.graphics;
+
+import android.app.Activity;
+import android.content.Context;
+import android.opengl.GLSurfaceView;
+import android.os.Bundle;
+
+public class HelloOpenGLES10 extends Activity {
+  
+    private GLSurfaceView mGLView;
+  
+    &#64;Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        // Create a GLSurfaceView instance and set it
+        // as the ContentView for this Activity.
+        mGLView = new HelloOpenGLES10SurfaceView(this);
+        setContentView(mGLView);
+    }
+    
+    &#64;Override
+    protected void onPause() {
+        super.onPause();
+        // The following call pauses the rendering thread.
+        // If your OpenGL application is memory intensive,
+        // you should consider de-allocating objects that
+        // consume significant memory here.
+        mGLView.onPause();
+    }
+    
+    &#64;Override
+    protected void onResume() {
+        super.onResume();
+        // The following call resumes a paused rendering thread.
+        // If you de-allocated graphic objects for onPause()
+        // this is a good place to re-allocate them.
+        mGLView.onResume();
+    }
+}
+  
+class HelloOpenGLES10SurfaceView extends GLSurfaceView {
+
+    public HelloOpenGLES10SurfaceView(Context context){
+        super(context);
+        
+        // Set the Renderer for drawing on the GLSurfaceView
+        setRenderer(new HelloOpenGLES10Renderer());
+    }
+}
+</pre>
+  <p class="note"><strong>Note:</strong> You will get a compile error for the {@code
+HelloOpenGLES10Renderer} class reference. That's expected; you will fix this error in the next step.
+  </p>
+  
+  <p>As shown above, this activity uses a single {@link android.opengl.GLSurfaceView} for its
+view. Notice that this activity implements crucial lifecycle callbacks for pausing and resuming its
+work.</p>
+
+  <p>The {@code HelloOpenGLES10SurfaceView} class in this example code above is just a thin wrapper
+for an instance of {@link android.opengl.GLSurfaceView} and is not strictly necessary for this
+example. However, if you want your application to monitor and respond to touch screen
+events&#8212;and we are guessing you do&#8212;you must extend {@link android.opengl.GLSurfaceView}
+to add touch event listeners, which you will learn how to do in the <a href="#touch">Reponding to
+Touch Events</a> section.</p>
+
+  <p>In order to draw graphics in the {@link android.opengl.GLSurfaceView}, you must define an
+implementation of {@link android.opengl.GLSurfaceView.Renderer}. In the next step, you create
+a renderer class to complete this OpenGL application.</p>
+  </li>
+
+  <li>Create a new file for the following class {@code HelloOpenGLES10Renderer}, which implements
+the {@link android.opengl.GLSurfaceView.Renderer} interface:
+
+<pre>
+package com.example.android.apis.graphics;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+import android.opengl.GLSurfaceView;
+
+public class HelloOpenGLES10Renderer implements GLSurfaceView.Renderer {
+
+    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+        // Set the background frame color
+        gl.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    }
+    
+    public void onDrawFrame(GL10 gl) {
+        // Redraw background color
+        gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+    }
+    
+    public void onSurfaceChanged(GL10 gl, int width, int height) {
+        gl.glViewport(0, 0, width, height);
+    }
+  
+}
+</pre>
+  <p>This minimal implementation of {@link android.opengl.GLSurfaceView.Renderer} provides the
+code structure needed to use OpenGL drawing methods:
+<ul>
+  <li>{@link
+    android.opengl.GLSurfaceView.Renderer#onSurfaceCreated(javax.microedition.khronos.opengles.GL10,
+    javax.microedition.khronos.egl.EGLConfig) onSurfaceCreated()} is called once to set up the
+{@link android.opengl.GLSurfaceView}
+environment.</li>
+  <li>{@link
+        android.opengl.GLSurfaceView.Renderer#onDrawFrame(javax.microedition.khronos.opengles.GL10)
+        onDrawFrame()} is called for each redraw of the {@link
+android.opengl.GLSurfaceView}.</li>
+  <li>{@link
+    android.opengl.GLSurfaceView.Renderer#onSurfaceChanged(javax.microedition.khronos.opengles.GL10,
+    int, int) onSurfaceChanged()} is called if the geometry of the {@link
+android.opengl.GLSurfaceView} changes, for example when the device's screen orientation
+changes.</li>
+</ul>
+  </p>
+  <p>For more information about these methods, see the <a
+href="{@docRoot}guide/topics/graphics/opengl.html">3D with OpenGL</a> document.
+</p>
+  </li>
+</ol>
+
+<p>The code example above creates a simple Android application that displays a grey screen using
+OpenGL ES 1.0 calls. While this application does not do anything very interesting, by creating these
+classes, you have layed the foundation needed to start drawing graphic elements with OpenGL ES
+1.0.</p>
+
+<p>If you are familiar with the OpenGL ES APIs, these classes should give you enough information
+to use the OpenGL ES 1.0 API and create graphics. However, if you need a bit more help getting
+started with OpenGL, head on to the next sections for a few more hints.</p>
+
+<h2 id="drawing">Draw a Shape on GLSurfaceView</h2>
+
+<p>Once you have implemented a {@link android.opengl.GLSurfaceView.Renderer}, the next step is to
+draw something with it. This section shows you how to define and draw a triangle.</p>
+
+<h3 id="define-triangle">Define a Triangle</h3>
+
+<p>OpenGL allows you to define objects using coordinates in three-dimensional space. So, before you
+  can draw a triangle, you must define its coordinates. In OpenGL, the typical way to do this is to
+  define a vertex array for the coordinates.</p>
+  
+<p>By default, OpenGL ES assumes a coordinate system where [0,0,0] (X,Y,Z) specifies the center of
+  the {@link android.opengl.GLSurfaceView} frame, [1,1,0] is the top right corner of the frame and 
+[-1,-1,0] is  bottom left corner of the frame.</p> 
+
+<p>To define a vertex array for a triangle:</p>
+
+<ol>
+  <li>In your {@code HelloOpenGLES10Renderer} class, add new member variable to contain the
+vertices of a triangle shape:
+<pre>
+    private FloatBuffer triangleVB;
+</pre>
+  </li>
+
+  <li>Create a method, {@code initShapes()} which populates this member variable:
+<pre>
+    private void initShapes(){
+    
+        float triangleCoords[] = {
+            // X, Y, Z
+            -0.5f, -0.25f, 0,
+             0.5f, -0.25f, 0,
+             0.0f,  0.559016994f, 0
+        }; 
+        
+        // initialize vertex Buffer for triangle  
+        ByteBuffer vbb = ByteBuffer.allocateDirect(
+                // (# of coordinate values * 4 bytes per float)
+                triangleCoords.length * 4); 
+        vbb.order(ByteOrder.nativeOrder());// use the device hardware's native byte order
+        triangleVB = vbb.asFloatBuffer();  // create a floating point buffer from the ByteBuffer
+        triangleVB.put(triangleCoords);    // add the coordinates to the FloatBuffer
+        triangleVB.position(0);            // set the buffer to read the first coordinate
+    
+    }
+</pre>
+    <p>This method defines a two-dimensional triangle with three equal sides.</p>
+  </li>
+  <li>Modify your {@code onSurfaceCreated()} method to initialize your triangle: 
+    <pre>
+    public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+    
+        // Set the background frame color
+        gl.glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+        
+        // initialize the triangle vertex array
+        initShapes();
+    }
+</pre>
+  <p class="caution"><strong>Caution:</strong> Shapes and other static objects should be initialized
+    once in your {@code onSurfaceCreated()} method for best performance. Avoid initializing the
+    new objects in {@code onDrawFrame()}, as this causes the system to re-create the objects
+    for every frame redraw and slows down your application.
+  </p>
+  </li>
+
+</ol>
+
+<p>You have now defined a triangle shape, but if you run the application, nothing appears. What?!
+You also have to tell OpenGL to draw the triangle, which you'll do in the next section.
+</p>
+
+
+<h3 id="draw-triangle">Draw the Triangle</h3>
+
+<p>Before you can draw your triangle, you must tell OpenGL that you are using vertex arrays. After
+that setup step, you can call the drawing APIs to display the triangle.</p>
+
+<p>To draw the triangle:</p>
+  
+<ol>
+  <li>Add the {@code glEnableClientState()} method to the end of {@code onSurfaceCreated()} to
+enable vertex arrays.
+<pre>
+        // Enable use of vertex arrays
+        gl.glEnableClientState(GL10.GL_VERTEX_ARRAY);
+</pre>
+    <p>At this point, you are ready to draw the triangle object in the OpenGL view.</p>
+  </li>
+  
+  <li>Add the following code to the end of your {@code onDrawFrame()} method to draw the triangle.
+<pre>
+        // Draw the triangle
+        gl.glColor4f(0.63671875f, 0.76953125f, 0.22265625f, 0.0f);
+        gl.glVertexPointer(3, GL10.GL_FLOAT, 0, triangleVB);
+        gl.glDrawArrays(GL10.GL_TRIANGLES, 0, 3);
+</pre>
+  </li>
+  <li id="squashed-triangle">Run the app! Your application should look something like this:
+  </li>
+</ol>
+    
+<img src="{@docRoot}images/opengl/helloopengl-es10-1.png">
+<p class="img-caption">
+  <strong>Figure 1.</strong> Triangle drawn without a projection or camera view.
+</p>
+
+<p>There are a few problems with this example. First of all, it is not going to impress your
+friends. Secondly, the triangle is a bit squashed and changes shape when you change the screen
+orientation of the device. The reason the shape is skewed is due to the fact that the object is
+being rendered in a frame which is not perfectly square. You'll fix that problem using a projection
+and camera view in the next section.</p>
+
+<p>Lastly, because the triangle is stationary, the system is redrawing the object repeatedly in
+exactly the same place, which is not the most efficient use of the OpenGL graphics pipeline. In the
+<a href="#motion">Add Motion</a> section, you'll make this shape rotate and justify
+this use of processing power.</p>
+
+<h2 id="projection-and-views">Apply Projection and Camera View</h2>
+
+<p>One of the basic problems in displaying graphics is that Android device displays are typically
+not square and, by default, OpenGL happily maps a perfectly square, uniform coordinate
+system onto your typically non-square screen. To solve this problem, you can apply an OpenGL
+projection mode and camera view (eye point) to transform the coordinates of your graphic objects
+so they have the correct proportions on any display. For more information about OpenGL coordinate
+mapping, see <a href="{@docRoot}guide/topics/graphics/opengl.html#coordinate-mapping">Coordinate
+Mapping for Drawn Objects</a>.</p>
+
+<p>To apply projection and camera view transformations to your triangle:
+</p>
+<ol>
+  <li>Modify your {@code onSurfaceChanged()} method to enable {@link
+    javax.microedition.khronos.opengles.GL10#GL_PROJECTION GL10.GL_PROJECTION} mode, calculate the
+    screen ratio and apply the ratio as a transformation of the object coordinates.
+<pre>
+  public void onSurfaceChanged(GL10 gl, int width, int height) {
+      gl.glViewport(0, 0, width, height);
+      
+      // make adjustments for screen ratio
+      float ratio = (float) width / height;
+      gl.glMatrixMode(GL10.GL_PROJECTION);        // set matrix to projection mode
+      gl.glLoadIdentity();                        // reset the matrix to its default state
+      gl.glFrustumf(-ratio, ratio, -1, 1, 3, 7);  // apply the projection matrix
+  }  
+</pre>
+  </li>
+
+  <li>Next, modify your {@code onDrawFrame()} method to apply the {@link
+javax.microedition.khronos.opengles.GL10#GL_MODELVIEW GL_MODELVIEW} mode and set
+a view point using {@link android.opengl.GLU#gluLookAt(javax.microedition.khronos.opengles.GL10,
+float, float, float, float, float, float, float, float, float) GLU.gluLookAt()}.
+<pre>
+    public void onDrawFrame(GL10 gl) {
+        // Redraw background color
+        gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
+        
+        // Set GL_MODELVIEW transformation mode
+        gl.glMatrixMode(GL10.GL_MODELVIEW);
+        gl.glLoadIdentity();   // reset the matrix to its default state
+        
+        // When using GL_MODELVIEW, you must set the view point
+        GLU.gluLookAt(gl, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);        
+        
+        // Draw the triangle
+        ...
+    }
+</pre>
+  </li>
+  <li>Run the updated application and you should see something like this:</li>
+</ol>
+
+<img src="{@docRoot}images/opengl/helloopengl-es10-2.png">
+<p class="img-caption">
+  <strong>Figure 2.</strong> Triangle drawn with a projection and camera view applied.
+</p>
+
+<p>Now that you have applied this transformation, the triangle has three equal sides, instead of the
+<a href="#squashed-triangle">squashed triangle</a> in the earlier version.</p>
+
+<h2 id="motion">Add Motion</h2>
+
+<p>While it may be an interesting exercise to create static graphic objects with OpenGL ES, chances
+are you want at least <em>some</em> of your objects to move. In this section, you'll add motion to
+your triangle by rotating it.</p>
+
+<p>To add rotation to your triangle:</p>
+<ol>
+  <li>Modify your {@code onDrawFrame()} method to rotate the triangle object:
+<pre>
+    public void onDrawFrame(GL10 gl) {
+        ...    
+        // When using GL_MODELVIEW, you must set the view point
+        GLU.gluLookAt(gl, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);        
+    
+        // Create a rotation for the triangle
+        long time = SystemClock.uptimeMillis() % 4000L;
+        float angle = 0.090f * ((int) time);
+        gl.glRotatef(angle, 0.0f, 0.0f, 1.0f);        
+        
+        // Draw the triangle
+        ...
+    }
+</pre>
+  </li>
+  <li>Run the application and your triangle should rotate around its center.</li>
+</ol>
+
+
+<h2 id="touch">Respond to Touch Events</h2>
+<p>Making objects move according to a preset program like the rotating triangle  is useful for
+getting some attention, but what if you want to have users interact with your OpenGL graphics? In
+this section, you'll learn how listen for touch events to let users interact with objects in your
+{@code HelloOpenGLES10SurfaceView}.</p>
+  
+<p>The key to making your OpenGL application touch interactive is expanding your implementation of
+{@link android.opengl.GLSurfaceView} to override the {@link 
+android.view.View#onTouchEvent(android.view.MotionEvent) onTouchEvent()} to listen for touch events.
+Before you do that, however, you'll modify the renderer class to expose the rotation angle of the
+triangle. Afterwards, you'll modify the {@code HelloOpenGLES10SurfaceView} to process touch events
+and pass that data to your renderer.</p>
+
+<p>To make your triangle rotate in response to touch events:</p>
+
+<ol>
+  <li>Modify your {@code HelloOpenGLES10Renderer} class to include a new, public member so that
+your {@code HelloOpenGLES10SurfaceView} class is able to pass new rotation values your renderer:
+<pre>
+    public float mAngle;
+</pre>  
+  </li>
+  <li>In your {@code onDrawFrame()} method, comment out the code that generates an angle and
+replace the {@code angle} variable with {@code mAngle}.
+<pre>
+        // Create a rotation for the triangle (Boring! Comment this out:)
+        // long time = SystemClock.uptimeMillis() % 4000L;
+        // float angle = 0.090f * ((int) time);
+
+        // Use the mAngle member as the rotation value
+        gl.glRotatef(mAngle, 0.0f, 0.0f, 1.0f); 
+</pre>
+  </li>
+  <li>In your {@code HelloOpenGLES10SurfaceView} class, add the following member variables.
+<pre>
+    private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
+    private HelloOpenGLES10Renderer mRenderer;
+    private float mPreviousX;
+    private float mPreviousY;
+</pre>
+  </li>
+  <li>In the constructor method for {@code HelloOpenGLES10SurfaceView}, set the {@code mRenderer}
+member so you have a handle to pass in rotation input and set the render mode to {@link
+android.opengl.GLSurfaceView#RENDERMODE_WHEN_DIRTY}.
+<pre>
+    public HelloOpenGLES10SurfaceView(Context context){
+        super(context);
+        // set the mRenderer member
+        mRenderer = new HelloOpenGLES10Renderer();
+        setRenderer(mRenderer);
+        
+        // Render the view only when there is a change
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+    }
+</pre>
+  </li>
+  <li>In your {@code HelloOpenGLES10SurfaceView} class, override the {@link
+android.view.View#onTouchEvent(android.view.MotionEvent) onTouchEvent()} method to listen for touch
+events and pass them to your renderer.
+<pre>
+    &#64;Override 
+    public boolean onTouchEvent(MotionEvent e) {
+        // MotionEvent reports input details from the touch screen
+        // and other input controls. In this case, you are only
+        // interested in events where the touch position changed.
+
+        float x = e.getX();
+        float y = e.getY();
+        
+        switch (e.getAction()) {
+            case MotionEvent.ACTION_MOVE:
+    
+                float dx = x - mPreviousX;
+                float dy = y - mPreviousY;
+    
+                // reverse direction of rotation above the mid-line
+                if (y &gt; getHeight() / 2) {
+                  dx = dx * -1 ;
+                }
+    
+                // reverse direction of rotation to left of the mid-line
+                if (x &lt; getWidth() / 2) {
+                  dy = dy * -1 ;
+                }
+              
+                mRenderer.mAngle += (dx + dy) * TOUCH_SCALE_FACTOR;
+                requestRender();
+        }
+
+        mPreviousX = x;
+        mPreviousY = y;
+        return true;
+    } 
+</pre>
+  <p class="note"><strong>Note:</strong> Touch events return pixel coordinates which <em>are not the
+same</em> as OpenGL coordinates. Touch coordinate [0,0] is the bottom-left of the screen and the
+highest value [max_X, max_Y] is the top-right corner of the screen. To match touch events to OpenGL
+graphic objects, you must translate touch coordinates into OpenGL coordinates.</p>
+  </li>
+  <li>Run the application and drag your finger or cursor around the screen to rotate the
+triangle.</li>
+</ol>
+<p>For another example of OpenGL touch event functionality, see <a
+href="{@docRoot}resources/samples/ApiDemos/src/com/example/android/apis/graphics/
+TouchRotateActivity.html">TouchRotateActivity</a>.</p>
