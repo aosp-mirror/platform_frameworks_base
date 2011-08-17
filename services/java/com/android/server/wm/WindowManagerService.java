@@ -6573,8 +6573,10 @@ public class WindowManagerService extends IWindowManager.Stub
                     }
                     synchronized (mWindowMap) {
                         // !!! TODO: ANR the drag-receiving app
-                        mDragState.mDragResult = false;
-                        mDragState.endDragLw();
+                        if (mDragState != null) {
+                            mDragState.mDragResult = false;
+                            mDragState.endDragLw();
+                        }
                     }
                     break;
                 }
