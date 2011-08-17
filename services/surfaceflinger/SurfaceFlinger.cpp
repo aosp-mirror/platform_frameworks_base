@@ -47,6 +47,7 @@
 
 #include "clz.h"
 #include "GLExtensions.h"
+#include "DdmConnection.h"
 #include "Layer.h"
 #include "LayerDim.h"
 #include "SurfaceFlinger.h"
@@ -90,6 +91,7 @@ SurfaceFlinger::SurfaceFlinger()
         mFreezeDisplayTime(0),
         mDebugRegion(0),
         mDebugBackground(0),
+        mDebugDDMS(0),
         mDebugDisableHWC(0),
         mDebugInSwapBuffers(0),
         mLastSwapBufferTime(0),
@@ -108,13 +110,22 @@ void SurfaceFlinger::init()
 
     // debugging stuff...
     char value[PROPERTY_VALUE_MAX];
+
     property_get("debug.sf.showupdates", value, "0");
     mDebugRegion = atoi(value);
+
     property_get("debug.sf.showbackground", value, "0");
     mDebugBackground = atoi(value);
 
+    property_get("debug.sf.ddms", value, "0");
+    mDebugDDMS = atoi(value);
+    if (mDebugDDMS) {
+        DdmConnection::start(getServiceName());
+    }
+
     LOGI_IF(mDebugRegion,       "showupdates enabled");
     LOGI_IF(mDebugBackground,   "showbackground enabled");
+    LOGI_IF(mDebugDDMS,         "DDMS debugging enabled");
 }
 
 SurfaceFlinger::~SurfaceFlinger()
