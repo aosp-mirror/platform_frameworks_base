@@ -25,6 +25,7 @@ import android.content.res.Resources;
 import android.os.ServiceManager;
 import android.util.AttributeSet;
 import android.util.Slog;
+import android.view.animation.AccelerateInterpolator;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -47,6 +48,8 @@ public class NavigationBarView extends LinearLayout {
 
     final static boolean NAVBAR_ALWAYS_AT_RIGHT = true;
 
+    final static boolean ANIMATE_HIDE_TRANSITION = false; // turned off because it introduces unsightly delay when videos goes to full screen
+
     protected IStatusBarService mBarService;
     final Display mDisplay;
     View mCurrentView = null;
@@ -56,7 +59,7 @@ public class NavigationBarView extends LinearLayout {
     int mBarSize;
     boolean mVertical;
 
-    boolean mHidden;
+    boolean mHidden, mLowProfile;
     boolean mEnabled = true;
 
     public View getRecentsButton() {
@@ -87,12 +90,79 @@ public class NavigationBarView extends LinearLayout {
         mCurrentView.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
     }
 
+    View.OnTouchListener mLightsOutListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent ev) {
+            if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+                // even though setting the systemUI visibility below will turn these views
+                // on, we need them to come up faster so that they can catch this motion
+                // event
+                setLowProfile(false, false);
+
+                try {
+                    mBarService.setSystemUiVisibility(0);
+                } catch (android.os.RemoteException ex) {
+                }
+            }
+            return false;
+        }
+    };
+
+    public void setLowProfile(final boolean lightsOut) {
+        setLowProfile(lightsOut, true);
+    }
+
+    public void setLowProfile(final boolean lightsOut, final boolean animate) {
+        if (lightsOut == mLowProfile) return;
+
+        mLowProfile = lightsOut;
+
+        if (DEBUG) Slog.d(TAG, "setting lights " + (lightsOut?"out":"on"));
+
+        final View navButtons = mCurrentView.findViewById(R.id.nav_buttons);
+        final View lowLights = mCurrentView.findViewById(R.id.lights_out);
+
+        if (!animate) {
+            lowLights.setVisibility(View.GONE);
+            navButtons.setAlpha(1f);
+        } else {
+            navButtons.animate()
+                .alpha(lightsOut ? 0f : 1f)
+                .setDuration(lightsOut ? 600 : 200)
+                .start();
+
+            lowLights.setOnTouchListener(mLightsOutListener);
+            lowLights.setAlpha(0f);
+            lowLights.setVisibility(View.VISIBLE);
+            lowLights.animate()
+                .alpha(lightsOut ? 1f : 0f)
+                .setStartDelay(lightsOut ? 500 : 0)
+                .setDuration(lightsOut ? 1000 : 300)
+                .setInterpolator(new AccelerateInterpolator(2.0f))
+                .setListener(lightsOut ? null : new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator _a) {
+                        lowLights.setVisibility(View.GONE);
+                    }
+                })
+                .start();
+        }
+    }
+
     public void setHidden(final boolean hide) {
         if (hide == mHidden) return;
 
         mHidden = hide;
         Slog.d(TAG,
             (hide ? "HIDING" : "SHOWING") + " navigation bar");
+
+        // bring up the lights no matter what
+        setLowProfile(false);
+
+        if (!ANIMATE_HIDE_TRANSITION) {
+            setVisibility(hide ? View.GONE : View.VISIBLE);
+            return;
+        }
 
         float oldAlpha = mCurrentView.getAlpha();
         if (DEBUG) {
@@ -147,8 +217,10 @@ public class NavigationBarView extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
-        // immediately bring up the lights
-        setHidden(false);
+        try {
+            mBarService.setSystemUiVisibility(0);
+        } catch (android.os.RemoteException ex) {
+        }
         return false; // pass it on
     }
 
