@@ -497,6 +497,8 @@ public class TabletStatusBar extends StatusBar implements
         mRecentButton = mNavigationArea.findViewById(R.id.recent_apps);
         mRecentButton.setOnClickListener(mOnClickListener);
         mNavigationArea.setLayoutTransition(mBarContentsLayoutTransition);
+        // no multi-touch on the nav buttons
+        mNavigationArea.setMotionEventSplittingEnabled(false);
 
         // The bar contents buttons
         mFeedbackIconArea = (ViewGroup)sb.findViewById(R.id.feedbackIconArea);
@@ -966,11 +968,11 @@ public class TabletStatusBar extends StatusBar implements
         if ((diff & StatusBarManager.DISABLE_BACK) != 0) {
             if ((state & StatusBarManager.DISABLE_BACK) != 0) {
                 Slog.i(TAG, "DISABLE_BACK: yes");
-                mBackButton.setVisibility(View.INVISIBLE);
+                mBackButton.setEnabled(false);
                 mInputMethodSwitchButton.setScreenLocked(true);
             } else {
                 Slog.i(TAG, "DISABLE_BACK: no");
-                mBackButton.setVisibility(View.VISIBLE);
+                mBackButton.setEnabled(true);
                 mInputMethodSwitchButton.setScreenLocked(false);
             }
         }
