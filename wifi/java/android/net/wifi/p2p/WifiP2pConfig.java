@@ -46,8 +46,10 @@ public class WifiP2pConfig implements Parcelable {
      * This is an integer value between 0 and 15 where 0 indicates the least
      * inclination to be a group owner and 15 indicates the highest inclination
      * to be a group owner.
+     *
+     * A value of -1 indicates the system can choose an appropriate value.
      */
-    public int groupOwnerIntent;
+    public int groupOwnerIntent = -1;
 
     public boolean isPersistent;
 
