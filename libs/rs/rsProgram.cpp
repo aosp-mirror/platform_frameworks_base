@@ -116,7 +116,7 @@ void Program::bindAllocation(Context *rsc, Allocation *alloc, uint32_t slot) {
             rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind allocation");
             return;
         }
-        if (!alloc->getType()->isEqual(mHal.state.constantTypes[slot].get())) {
+        if (alloc->getType() != mHal.state.constantTypes[slot].get()) {
             LOGE("Attempt to bind alloc at slot %u, on shader id %u, but types mismatch",
                  slot, (uint32_t)this);
             rsc->setError(RS_ERROR_BAD_SHADER, "Cannot bind allocation");

@@ -114,7 +114,10 @@ public:
     }
 
     ObjectBaseRef & operator= (const ObjectBaseRef &ref) {
-        return ObjectBaseRef(ref);
+        if (&ref != this) {
+            set(ref);
+        }
+        return *this;
     }
 
     ~ObjectBaseRef() {

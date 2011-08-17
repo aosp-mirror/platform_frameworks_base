@@ -41,6 +41,15 @@ ProgramStore::ProgramStore(Context *rsc,
     mHal.state.depthFunc = depthFunc;
 }
 
+void ProgramStore::preDestroy() const {
+    for (uint32_t ct = 0; ct < mRSC->mStateFragmentStore.mStorePrograms.size(); ct++) {
+        if (mRSC->mStateFragmentStore.mStorePrograms[ct] == this) {
+            mRSC->mStateFragmentStore.mStorePrograms.removeAt(ct);
+            break;
+        }
+    }
+}
+
 ProgramStore::~ProgramStore() {
     mRSC->mHal.funcs.store.destroy(mRSC, this);
 }
@@ -71,14 +80,58 @@ ProgramStoreState::ProgramStoreState() {
 ProgramStoreState::~ProgramStoreState() {
 }
 
+ObjectBaseRef<ProgramStore> ProgramStore::getProgramStore(Context *rsc,
+                                                          bool colorMaskR,
+                                                          bool colorMaskG,
+                                                          bool colorMaskB,
+                                                          bool colorMaskA,
+                                                          bool depthMask, bool ditherEnable,
+                                                          RsBlendSrcFunc srcFunc,
+                                                          RsBlendDstFunc destFunc,
+                                                          RsDepthFunc depthFunc) {
+    ObjectBaseRef<ProgramStore> returnRef;
+    ObjectBase::asyncLock();
+    for (uint32_t ct = 0; ct < rsc->mStateFragmentStore.mStorePrograms.size(); ct++) {
+        ProgramStore *existing = rsc->mStateFragmentStore.mStorePrograms[ct];
+        if (existing->mHal.state.ditherEnable != ditherEnable) continue;
+        if (existing->mHal.state.colorRWriteEnable != colorMaskR) continue;
+        if (existing->mHal.state.colorGWriteEnable != colorMaskG) continue;
+        if (existing->mHal.state.colorBWriteEnable != colorMaskB) continue;
+        if (existing->mHal.state.colorAWriteEnable != colorMaskA) continue;
+        if (existing->mHal.state.blendSrc != srcFunc) continue;
+        if (existing->mHal.state.blendDst != destFunc) continue;
+        if (existing->mHal.state.depthWriteEnable != depthMask) continue;
+        if (existing->mHal.state.depthFunc != depthFunc) continue;
+
+        returnRef.set(existing);
+        ObjectBase::asyncUnlock();
+        return returnRef;
+    }
+    ObjectBase::asyncUnlock();
+
+    ProgramStore *pfs = new ProgramStore(rsc,
+                                         colorMaskR, colorMaskG, colorMaskB, colorMaskA,
+                                         depthMask, ditherEnable,
+                                         srcFunc, destFunc, depthFunc);
+    returnRef.set(pfs);
+
+    pfs->init();
+
+    ObjectBase::asyncLock();
+    rsc->mStateFragmentStore.mStorePrograms.push(pfs);
+    ObjectBase::asyncUnlock();
+
+    return returnRef;
+}
+
+
+
 void ProgramStoreState::init(Context *rsc) {
-    ProgramStore *ps = new ProgramStore(rsc,
-                                        true, true, true, true,
-                                        true, true,
-                                        RS_BLEND_SRC_ONE, RS_BLEND_DST_ZERO,
-                                        RS_DEPTH_FUNC_LESS);
-    ps->init();
-    mDefault.set(ps);
+    mDefault.set(ProgramStore::getProgramStore(rsc,
+                                               true, true, true, true,
+                                               true, true,
+                                               RS_BLEND_SRC_ONE, RS_BLEND_DST_ZERO,
+                                               RS_DEPTH_FUNC_LESS).get());
 }
 
 void ProgramStoreState::deinit(Context *rsc) {
@@ -96,13 +149,14 @@ RsProgramStore rsi_ProgramStoreCreate(Context *rsc,
                                       RsBlendSrcFunc srcFunc, RsBlendDstFunc destFunc,
                                       RsDepthFunc depthFunc) {
 
-    ProgramStore *pfs = new ProgramStore(rsc,
-                                         colorMaskR, colorMaskG, colorMaskB, colorMaskA,
-                                         depthMask, ditherEnable,
-                                         srcFunc, destFunc, depthFunc);
-    pfs->init();
-    pfs->incUserRef();
-    return pfs;
+
+    ObjectBaseRef<ProgramStore> ps = ProgramStore::getProgramStore(rsc,
+                                                                   colorMaskR, colorMaskG,
+                                                                   colorMaskB, colorMaskA,
+                                                                   depthMask, ditherEnable,
+                                                                   srcFunc, destFunc, depthFunc);
+    ps->incUserRef();
+    return ps.get();
 }
 
 }
