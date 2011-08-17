@@ -34,6 +34,8 @@ class SampleTable : public RefBase {
 public:
     SampleTable(const sp<DataSource> &source);
 
+    bool isValid() const;
+
     // type can be 'stco' or 'co64'.
     status_t setChunkOffsetParams(
             uint32_t type, off64_t data_offset, size_t data_size);
