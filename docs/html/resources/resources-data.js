@@ -782,6 +782,26 @@ var ANDROID_RESOURCES = [
     }
   },
   {
+    tags: ['tutorial', 'gl', 'new'],
+    path: 'tutorials/opengl/opengl-es10.html',
+    title: {
+      en: 'OpenGL ES 1.0'
+    },
+    description: {
+      en: 'The basics of implementing an application using the OpenGL ES 1.0 APIs.'
+    }
+  },
+  {
+    tags: ['tutorial', 'gl', 'new'],
+    path: 'tutorials/opengl/opengl-es20.html',
+    title: {
+      en: 'OpenGL ES 2.0'
+    },
+    description: {
+      en: 'The basics of implementing an application using the OpenGL ES 2.0 APIs.'
+    }
+  },
+  {
     tags: ['tutorial', 'testing'],
     path: 'tutorials/testing/helloandroid_test.html',
     title: {
