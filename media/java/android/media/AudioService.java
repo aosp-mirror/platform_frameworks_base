@@ -516,6 +516,10 @@ public class AudioService extends IAudioService.Stub {
              (!mVoiceCapable && streamType != AudioSystem.STREAM_VOICE_CALL &&
                streamType != AudioSystem.STREAM_BLUETOOTH_SCO) ||
                 (mVoiceCapable && streamType == AudioSystem.STREAM_RING)) {
+            //  do not vibrate if already in silent mode
+            if (mRingerMode != AudioManager.RINGER_MODE_NORMAL) {
+                flags &= ~AudioManager.FLAG_VIBRATE;
+            }
             // Check if the ringer mode changes with this volume adjustment. If
             // it does, it will handle adjusting the volume, so we won't below
             adjustVolume = checkForRingerModeChange(oldIndex, direction);
