@@ -275,7 +275,7 @@ private:
         enum BufferState {
             // FREE indicates that the buffer is not currently being used and
             // will not be used in the future until it gets dequeued and
-            // subseqently queued by the client.
+            // subsequently queued by the client.
             FREE = 0,
 
             // DEQUEUED indicates that the buffer has been dequeued by the
