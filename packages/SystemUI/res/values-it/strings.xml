@@ -104,7 +104,9 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Nessuna SIM presente."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tethering Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modalità aereo."</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteria: <xliff:g id="NUMBER">%d</xliff:g>%."</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
+    <skip />
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Pulsante Impostazioni."</string>
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Pulsante per le notifiche."</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Rimuovi la notifica."</string>
