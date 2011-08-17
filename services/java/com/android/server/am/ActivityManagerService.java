@@ -10739,8 +10739,10 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (DEBUG_SERVICE) Slog.v(TAG, "unbindFinished in " + r
                         + " at " + b + ": apps="
                         + (b != null ? b.apps.size() : 0));
+
+                boolean inStopping = mStoppingServices.contains(r);
                 if (b != null) {
-                    if (b.apps.size() > 0) {
+                    if (b.apps.size() > 0 && !inStopping) {
                         // Applications have already bound since the last
                         // unbind, so just rebind right here.
                         requestServiceBindingLocked(r, b, true);
@@ -10751,7 +10753,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     }
                 }
 
-                serviceDoneExecutingLocked(r, mStoppingServices.contains(r));
+                serviceDoneExecutingLocked(r, inStopping);
 
                 Binder.restoreCallingIdentity(origId);
             }
