@@ -348,15 +348,17 @@ class ServerThread extends Thread {
               Slog.e(TAG, "Failure starting Accessibility Manager", e);
             }
 
-            try {
-                /*
-                 * NotificationManagerService is dependant on MountService,
-                 * (for media / usb notifications) so we must start MountService first.
-                 */
-                Slog.i(TAG, "Mount Service");
-                ServiceManager.addService("mount", new MountService(context));
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Mount Service", e);
+            if (!"0".equals(SystemProperties.get("system_init.startmountservice"))) {
+                try {
+                    /*
+                     * NotificationManagerService is dependant on MountService,
+                     * (for media / usb notifications) so we must start MountService first.
+                     */
+                    Slog.i(TAG, "Mount Service");
+                    ServiceManager.addService("mount", new MountService(context));
+                } catch (Throwable e) {
+                    Slog.e(TAG, "Failure starting Mount Service", e);
+                }
             }
 
             try {
@@ -418,11 +420,13 @@ class ServerThread extends Thread {
                 Slog.e(TAG, "Failure starting Wallpaper Service", e);
             }
 
-            try {
-                Slog.i(TAG, "Audio Service");
-                ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
-            } catch (Throwable e) {
-                Slog.e(TAG, "Failure starting Audio Service", e);
+            if (!"0".equals(SystemProperties.get("system_init.startaudioservice"))) {
+                try {
+                    Slog.i(TAG, "Audio Service");
+                    ServiceManager.addService(Context.AUDIO_SERVICE, new AudioService(context));
+                } catch (Throwable e) {
+                    Slog.e(TAG, "Failure starting Audio Service", e);
+                }
             }
 
             try {
