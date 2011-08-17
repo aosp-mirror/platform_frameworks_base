@@ -131,11 +131,9 @@ LOCAL_SHARED_LIBRARIES += \
         libdl            \
 
 LOCAL_STATIC_LIBRARIES += \
-        libstagefright_chromium_http \
-        libwebcore              \
-        libchromium_net \
+        libstagefright_chromium_http
 
-LOCAL_SHARED_LIBRARIES += libstlport
+LOCAL_SHARED_LIBRARIES += libstlport libchromium_net
 include external/stlport/libstlport.mk
 
 LOCAL_CPPFLAGS += -DCHROMIUM_AVAILABLE=1
