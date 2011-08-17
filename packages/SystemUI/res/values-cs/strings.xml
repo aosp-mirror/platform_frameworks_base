@@ -104,7 +104,9 @@
     <string name="accessibility_no_sim" msgid="8274017118472455155">"Žádná karta SIM."</string>
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tethering přes Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Režim V letadle."</string>
-    <string name="accessibility_battery_level" msgid="7451474187113371965">"Stav baterie: <xliff:g id="NUMBER">%d</xliff:g> %."</string>
+    <!-- String.format failed for translation -->
+    <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
+    <skip />
     <string name="accessibility_settings_button" msgid="7913780116850379698">"Tlačítko Nastavení."</string>
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Tlačítko upozornění."</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Odebrat oznámení"</string>
