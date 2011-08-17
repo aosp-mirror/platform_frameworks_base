@@ -182,6 +182,7 @@ typedef struct {
     const Allocation * ain;
     Allocation * aout;
     const void * usr;
+    size_t usrLen;
 
     uint32_t mSliceSize;
     volatile int mSliceNum;
@@ -209,6 +210,10 @@ typedef int (*rs_t)(const void *, void *, const void *, uint32_t, uint32_t, uint
 
 static void wc_xy(void *usr, uint32_t idx) {
     MTLaunchStruct *mtls = (MTLaunchStruct *)usr;
+    RsForEachStubParamStruct p;
+    memset(&p, 0, sizeof(p));
+    p.usr = mtls->usr;
+    p.usr_len = mtls->usrLen;
 
     while (1) {
         uint32_t slice = (uint32_t)android_atomic_inc(&mtls->mSliceNum);
@@ -221,13 +226,15 @@ static void wc_xy(void *usr, uint32_t idx) {
 
         //LOGE("usr idx %i, x %i,%i  y %i,%i", idx, mtls->xStart, mtls->xEnd, yStart, yEnd);
         //LOGE("usr ptr in %p,  out %p", mtls->ptrIn, mtls->ptrOut);
-        for (uint32_t y = yStart; y < yEnd; y++) {
-            uint32_t offset = mtls->dimX * y;
+        for (p.y = yStart; p.y < yEnd; p.y++) {
+            uint32_t offset = mtls->dimX * p.y;
             uint8_t *xPtrOut = mtls->ptrOut + (mtls->eStrideOut * offset);
             const uint8_t *xPtrIn = mtls->ptrIn + (mtls->eStrideIn * offset);
 
-            for (uint32_t x = mtls->xStart; x < mtls->xEnd; x++) {
-                ((rs_t)mtls->script->mHal.info.root) (xPtrIn, xPtrOut, mtls->usr, x, y, 0, 0);
+            for (p.x = mtls->xStart; p.x < mtls->xEnd; p.x++) {
+                p.in = xPtrIn;
+                p.out = xPtrOut;
+                ((rs_t)mtls->script->mHal.info.root) (p.in, p.out, p.usr, p.x, p.y, 0, 0);
                 xPtrIn += mtls->eStrideIn;
                 xPtrOut += mtls->eStrideOut;
             }
@@ -237,6 +244,10 @@ static void wc_xy(void *usr, uint32_t idx) {
 
 static void wc_x(void *usr, uint32_t idx) {
     MTLaunchStruct *mtls = (MTLaunchStruct *)usr;
+    RsForEachStubParamStruct p;
+    memset(&p, 0, sizeof(p));
+    p.usr = mtls->usr;
+    p.usr_len = mtls->usrLen;
 
     while (1) {
         uint32_t slice = (uint32_t)android_atomic_inc(&mtls->mSliceNum);
@@ -251,8 +262,10 @@ static void wc_x(void *usr, uint32_t idx) {
         //LOGE("usr ptr in %p,  out %p", mtls->ptrIn, mtls->ptrOut);
         uint8_t *xPtrOut = mtls->ptrOut + (mtls->eStrideOut * xStart);
         const uint8_t *xPtrIn = mtls->ptrIn + (mtls->eStrideIn * xStart);
-        for (uint32_t x = xStart; x < xEnd; x++) {
-            ((rs_t)mtls->script->mHal.info.root) (xPtrIn, xPtrOut, mtls->usr, x, 0, 0, 0);
+        for (p.x = xStart; p.x < xEnd; p.x++) {
+            p.in = xPtrIn;
+            p.out = xPtrOut;
+            ((rs_t)mtls->script->mHal.info.root) (p.in, p.out, p.usr, p.x, 0, 0, 0);
             xPtrIn += mtls->eStrideIn;
             xPtrOut += mtls->eStrideOut;
         }
@@ -325,6 +338,7 @@ void rsdScriptInvokeForEach(const Context *rsc,
     mtls.aout = aout;
     mtls.script = s;
     mtls.usr = usr;
+    mtls.usrLen = usrLen;
     mtls.mSliceSize = 10;
     mtls.mSliceNum = 0;
 
@@ -351,18 +365,25 @@ void rsdScriptInvokeForEach(const Context *rsc,
 
         //LOGE("launch 1");
     } else {
+        RsForEachStubParamStruct p;
+        memset(&p, 0, sizeof(p));
+        p.usr = mtls.usr;
+        p.usr_len = mtls.usrLen;
+
         //LOGE("launch 3");
-        for (uint32_t ar = mtls.arrayStart; ar < mtls.arrayEnd; ar++) {
-            for (uint32_t z = mtls.zStart; z < mtls.zEnd; z++) {
-                for (uint32_t y = mtls.yStart; y < mtls.yEnd; y++) {
-                    uint32_t offset = mtls.dimX * mtls.dimY * mtls.dimZ * ar +
-                                      mtls.dimX * mtls.dimY * z +
-                                      mtls.dimX * y;
+        for (p.ar[0] = mtls.arrayStart; p.ar[0] < mtls.arrayEnd; p.ar[0]++) {
+            for (p.z = mtls.zStart; p.z < mtls.zEnd; p.z++) {
+                for (p.y = mtls.yStart; p.y < mtls.yEnd; p.y++) {
+                    uint32_t offset = mtls.dimX * mtls.dimY * mtls.dimZ * p.ar[0] +
+                                      mtls.dimX * mtls.dimY * p.z +
+                                      mtls.dimX * p.y;
                     uint8_t *xPtrOut = mtls.ptrOut + (mtls.eStrideOut * offset);
                     const uint8_t *xPtrIn = mtls.ptrIn + (mtls.eStrideIn * offset);
 
-                    for (uint32_t x = mtls.xStart; x < mtls.xEnd; x++) {
-                        ((rs_t)s->mHal.info.root) (xPtrIn, xPtrOut, usr, x, y, z, ar);
+                    for (p.x = mtls.xStart; p.x < mtls.xEnd; p.x++) {
+                        p.in = xPtrIn;
+                        p.out = xPtrOut;
+                        ((rs_t)s->mHal.info.root) (p.in, p.out, p.usr, p.x, p.y, p.z, p.ar[0]);
                         xPtrIn += mtls.eStrideIn;
                         xPtrOut += mtls.eStrideOut;
                     }
