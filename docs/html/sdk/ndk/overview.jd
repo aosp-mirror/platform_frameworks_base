@@ -457,7 +457,8 @@ adb install bin/NativeActivity-debug.apk
 
     <li>Mac OS X 10.4.8 or later (x86 only)</li>
 
-    <li>Linux (32- or 64-bit, tested on Linux Ubuntu Dapper Drake)</li>
+    <li>Linux (32 or 64-bit; Ubuntu 8.04, or other Linux distributions using GLibc 2.7 or
+later)</li>
   </ul>
 
   <h4>Required development tools</h4>
