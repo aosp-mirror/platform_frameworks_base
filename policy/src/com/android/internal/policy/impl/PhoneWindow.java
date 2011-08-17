@@ -759,7 +759,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
         if (mPanelChordingKey != 0) {
             mPanelChordingKey = 0;
 
-            if (event.isCanceled()) {
+            if (event.isCanceled() || (mDecor != null && mDecor.mActionMode != null)) {
                 return;
             }
             
