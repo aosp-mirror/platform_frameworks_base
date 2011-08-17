@@ -225,7 +225,7 @@
     <!-- Displayed when a web request failed because there was a connection error. -->
     <string name="httpErrorConnect">The connection to the server was unsuccessful.</string>
     <!-- Displayed when a web request failed because there was an input or output error. -->
-    <string name="httpErrorIO">The server failed to communicate. Try again later.</string>
+    <string name="httpErrorIO">The server couldn\'t communicate. Try again later.</string>
     <!-- Displayed when a web request failed because the request timed out -->
     <string name="httpErrorTimeout">The connection to the server timed out.</string>
     <!-- Displayed when a web request failed because the site tried to redirect us one too many times -->
@@ -2500,10 +2500,10 @@
     <!-- Title of the alert when an application has crashed. -->
     <string name="aerr_title"></string>
     <!-- Text of the alert that is displayed when an application has crashed. -->
-    <string name="aerr_application"><xliff:g id="application">%1$s</xliff:g> has stopped by mistake.</string>
+    <string name="aerr_application">Unfortunately, <xliff:g id="application">%1$s</xliff:g> has stopped.</string>
     <!-- Text of the alert that is displayed when an application has crashed. -->
-    <string name="aerr_process">The process <xliff:g id="process">%1$s</xliff:g> has
-        stopped by mistake.</string>
+    <string name="aerr_process">Unfortunately, the process <xliff:g id="process">%1$s</xliff:g> has
+        stopped.</string>
     <!-- Title of the alert when an application is not responding. -->
     <string name="anr_title"></string>
     <!-- Text of the alert that is displayed when an application is not responding. -->
@@ -2629,7 +2629,7 @@
     <!-- Wi-Fi p2p dialog title-->
     <string name="wifi_p2p_dialog_title">Wi-Fi Direct</string>
     <string name="wifi_p2p_turnon_message">Start Wi-Fi Direct operation. This will turn off Wi-Fi client/hotspot operation.</string>
-    <string name="wifi_p2p_failed_message">Failed to start Wi-Fi Direct</string>
+    <string name="wifi_p2p_failed_message">Couldn\'t start Wi-Fi Direct</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message">Wi-Fi Direct connection setup request from <xliff:g id="p2p_device_address">%1$s</xliff:g>. Click OK to accept. </string>
     <string name="wifi_p2p_pin_go_negotiation_request_message">Wi-Fi Direct connection setup request from <xliff:g id="p2p_device_address">%1$s</xliff:g>. Enter pin to proceed. </string>
     <string name="wifi_p2p_pin_display_message">WPS pin <xliff:g id="p2p_wps_pin">%1$s</xliff:g> needs to be entered on the peer device <xliff:g id="p2p_client_address">%2$s</xliff:g> for connection setup to proceed </string>
@@ -2728,7 +2728,7 @@
     <!-- USB_STORAGE_KILL_STORAGE_USERS dialog message text -->
     <string name="dlg_confirm_kill_storage_users_text">If you turn on USB storage, some applications you are using will stop and may be unavailable until you turn off USB storage.</string>
     <!-- USB_STORAGE_ERROR dialog  dialog-->
-    <string name="dlg_error_title">USB operation failed</string>
+    <string name="dlg_error_title">USB operation unsuccessful</string>
     <!-- USB_STORAGE_ERROR dialog  ok button-->
     <string name="dlg_ok">OK</string>
 
@@ -2982,9 +2982,9 @@
     <!-- Text for progress dialog while erasing SD card [CHAR LIMIT=NONE] -->
     <string name="progress_erasing" product="default">Erasing SD card...</string>
     <!-- Text for message to user that an error happened when formatting USB storage [CHAR LIMIT=NONE] -->
-    <string name="format_error" product="nosdcard">Failed to erase USB storage.</string>
+    <string name="format_error" product="nosdcard">Couldn\'t erase USB storage.</string>
     <!-- Text for message to user that an error happened when formatting SD card [CHAR LIMIT=NONE] -->
-    <string name="format_error" product="default">Failed to erase SD card.</string>
+    <string name="format_error" product="default">Couldn\'t erase SD card.</string>
     <!-- Text for message to user that SD card has been removed while in use [CHAR LIMIT=NONE] -->
     <string name="media_bad_removal">SD card was removed before being unmounted.</string>
     <!-- Text for message to user USB storage is currently being checked [CHAR LIMIT=NONE] -->
