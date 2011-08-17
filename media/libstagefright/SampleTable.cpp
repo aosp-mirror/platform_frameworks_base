@@ -84,6 +84,13 @@ SampleTable::~SampleTable() {
     mSampleIterator = NULL;
 }
 
+bool SampleTable::isValid() const {
+    return mChunkOffsetOffset >= 0
+        && mSampleToChunkOffset >= 0
+        && mSampleSizeOffset >= 0
+        && mTimeToSample != NULL;
+}
+
 status_t SampleTable::setChunkOffsetParams(
         uint32_t type, off64_t data_offset, size_t data_size) {
     if (mChunkOffsetOffset >= 0) {
