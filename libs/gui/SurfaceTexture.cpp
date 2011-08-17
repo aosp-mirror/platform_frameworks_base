@@ -482,17 +482,16 @@ status_t SurfaceTexture::queueBuffer(int buf, int64_t timestamp,
         mSlots[buf].mScalingMode = mNextScalingMode;
         mSlots[buf].mTimestamp = timestamp;
         mDequeueCondition.signal();
+
+        *outWidth = mDefaultWidth;
+        *outHeight = mDefaultHeight;
+        *outTransform = 0;
     } // scope for the lock
 
     // call back without lock held
     if (listener != 0) {
         listener->onFrameAvailable();
     }
-
-    *outWidth = mDefaultWidth;
-    *outHeight = mDefaultHeight;
-    *outTransform = 0;
-
     return OK;
 }
 
