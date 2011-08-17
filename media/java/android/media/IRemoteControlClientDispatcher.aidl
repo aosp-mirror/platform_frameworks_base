@@ -20,13 +20,11 @@ import android.graphics.Bitmap;
 
 /**
  * @hide
- * Interface for an object that exposes information meant to be consumed by remote controls
- * capable of displaying metadata, album art and media transport control buttons.
- * Such a remote control client object is associated with a media button event receiver
- * when registered through
- * {@link AudioManager#registerRemoteControlClient(ComponentName, IRemoteControlClient)}.
+ * Interface registered by AudioManager to dispatch remote control information requests
+ * to the RemoteControlClient implementation. This is used by AudioService.
+ * {@see AudioManager#registerRemoteControlClient(ComponentName, RemoteControlClient)}.
  */
-interface IRemoteControlClient
+interface IRemoteControlClientDispatcher
 {
     /**
      * Called by a remote control to retrieve a String of information to display.
@@ -49,7 +47,7 @@ interface IRemoteControlClient
      * @return null if the requested field is not supported, or the String matching the
      *       metadata field.
      */
-    String getMetadataString(int field);
+    String getMetadataStringForClient(String clientName, int field);
 
     /**
      * Called by a remote control to retrieve the current playback state.
@@ -64,7 +62,7 @@ interface IRemoteControlClient
      *       {@link android.media.AudioManager.RemoteControlParameters#PLAYSTATE_BUFFERING},
      *       {@link android.media.AudioManager.RemoteControlParameters#PLAYSTATE_ERROR}.
      */
-    int getPlaybackState();
+    int getPlaybackStateForClient(String clientName);
 
     /**
      * Called by a remote control to retrieve the flags for the media transport control buttons
@@ -78,7 +76,7 @@ interface IRemoteControlClient
      *      {@link android.media.AudioManager.RemoteControlParameters#FLAG_KEY_MEDIA_FAST_FORWARD},
      *      {@link android.media.AudioManager.RemoteControlParameters#FLAG_KEY_MEDIA_NEXT}
      */
-    int getTransportControlFlags();
+    int getTransportControlFlagsForClient(String clientName);
 
     /**
      * Called by a remote control to retrieve the album art picture at the requested size.
@@ -90,5 +88,5 @@ interface IRemoteControlClient
      * @return the bitmap for the album art, or null if there isn't any.
      * @see android.graphics.Bitmap
      */
-    Bitmap getAlbumArt(int maxWidth, int maxHeight);
+    Bitmap getAlbumArtForClient(String clientName, int maxWidth, int maxHeight);
 }
