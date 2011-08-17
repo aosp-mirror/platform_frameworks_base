@@ -60,8 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Yhteensopivuustilan zoomaus"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Jos sovellus on suunniteltu pienemmälle näytölle, kellon viereen tulee näkyviin zoomaussäädin."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Kuvakaappaus on tallennettu galleriaan"</string>
-    <!-- no translation found for screenshot_failed_toast (1990979819772906912) -->
-    <skip />
+    <!-- outdated translation 655180965533683356 -->     <string name="screenshot_failed_toast" msgid="1990979819772906912">"Kuvakaappausta ei voitu tallentaa"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-tiedostonsiirtoasetukset"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Käytä mediasoittimena (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Käytä kamerana (PTP)"</string>
