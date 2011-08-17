@@ -9499,8 +9499,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     public boolean isSuggestionsEnabled() {
         if (!mSuggestionsEnabled) return false;
         if ((mInputType & InputType.TYPE_MASK_CLASS) != InputType.TYPE_CLASS_TEXT) return false;
-        final int variation =
-                mInputType & (EditorInfo.TYPE_MASK_CLASS | EditorInfo.TYPE_MASK_VARIATION);
+        final int variation = mInputType & EditorInfo.TYPE_MASK_VARIATION;
         if (variation == EditorInfo.TYPE_TEXT_VARIATION_NORMAL ||
                 variation == EditorInfo.TYPE_TEXT_VARIATION_EMAIL_SUBJECT ||
                 variation == EditorInfo.TYPE_TEXT_VARIATION_LONG_MESSAGE ||
