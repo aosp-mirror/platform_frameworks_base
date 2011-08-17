@@ -21,14 +21,13 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Paint.Align;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
-import android.graphics.Region.Op;
 import android.graphics.Typeface;
+import android.graphics.Paint.Align;
+import android.graphics.Region.Op;
 import android.graphics.drawable.Drawable;
 import android.inputmethodservice.Keyboard.Key;
-import android.media.AudioManager;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -40,8 +39,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup.LayoutParams;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityManager;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 
@@ -178,6 +175,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     private boolean mShowTouchPoints = true;
     private int mPopupPreviewX;
     private int mPopupPreviewY;
+    private int mWindowY;
 
     private int mLastX;
     private int mLastY;
@@ -244,11 +242,7 @@ public class KeyboardView extends View implements View.OnClickListener {
     private boolean mKeyboardChanged;
     /** The canvas for the above mutable keyboard bitmap */
     private Canvas mCanvas;
-    /** The accessibility manager for accessibility support */
-    private AccessibilityManager mAccessibilityManager;
-    /** The audio manager for accessibility support */
-    private AudioManager mAudioManager;
-
+    
     Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -368,10 +362,6 @@ public class KeyboardView extends View implements View.OnClickListener {
         mSwipeThreshold = (int) (500 * getResources().getDisplayMetrics().density);
         mDisambiguateSwipe = getResources().getBoolean(
                 com.android.internal.R.bool.config_swipeDisambiguation);
-
-        mAccessibilityManager = AccessibilityManager.getInstance(context);
-        mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-
         resetMultiTap();
         initGestureDetector();
     }
@@ -816,7 +806,6 @@ public class KeyboardView extends View implements View.OnClickListener {
                 }
                 mKeyboardActionListener.onKey(code, codes);
                 mKeyboardActionListener.onRelease(code);
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED, (char) code);
             }
             mLastSentIndex = index;
             mLastTapTime = eventTime;
@@ -846,18 +835,12 @@ public class KeyboardView extends View implements View.OnClickListener {
         final Key[] keys = mKeys;
         if (oldKeyIndex != mCurrentKeyIndex) {
             if (oldKeyIndex != NOT_A_KEY && keys.length > oldKeyIndex) {
-                Key oldKey = keys[oldKeyIndex];
-                oldKey.onReleased(mCurrentKeyIndex == NOT_A_KEY);
+                keys[oldKeyIndex].onReleased(mCurrentKeyIndex == NOT_A_KEY);
                 invalidateKey(oldKeyIndex);
-                final char character = (char) oldKey.codes[0];
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_EXIT, character);
             }
             if (mCurrentKeyIndex != NOT_A_KEY && keys.length > mCurrentKeyIndex) {
-                Key newKey = keys[mCurrentKeyIndex];
-                newKey.onPressed();
+                keys[mCurrentKeyIndex].onPressed();
                 invalidateKey(mCurrentKeyIndex);
-                final char character = (char) newKey.codes[0];
-                sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER, character);
             }
         }
         // If key changed and preview is on ...
@@ -955,21 +938,6 @@ public class KeyboardView extends View implements View.OnClickListener {
                     mPopupPreviewX, mPopupPreviewY);
         }
         mPreviewText.setVisibility(VISIBLE);
-    }
-
-    private void sendAccessibilityEvent(int eventType, char character) {
-        if (mAccessibilityManager.isEnabled()) {
-            AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
-            onInitializeAccessibilityEvent(event);
-            // Add text only if a headset is used to avoid leaking passwords.
-            if (mAudioManager.isBluetoothA2dpOn() || mAudioManager.isWiredHeadsetOn()) {
-                event.getText().add(String.valueOf(character));
-            } else {
-                event.getText().add(mContext.getString(
-                        R.string.keyboard_headset_required_to_hear_password));
-            }
-            mAccessibilityManager.sendAccessibilityEvent(event);
-        }
     }
 
     /**
@@ -1106,49 +1074,11 @@ public class KeyboardView extends View implements View.OnClickListener {
         return false;
     }
 
-    @Override
-    public boolean dispatchHoverEvent(MotionEvent event) {
-        // If touch exploring is enabled we ignore touch events and transform
-        // the stream of hover events as touch events. This allows one consistent
-        // event stream to drive the keyboard since during touch exploring the
-        // first touch generates only hover events and tapping on the same
-        // location generates hover and touch events.
-        if (mAccessibilityManager.isEnabled()
-                && mAccessibilityManager.isTouchExplorationEnabled()
-                && event.getPointerCount() == 1) {
-            final int action = event.getAction();
-            switch (action) {
-                case MotionEvent.ACTION_HOVER_ENTER:
-                    event.setAction(MotionEvent.ACTION_DOWN);
-                    break;
-                case MotionEvent.ACTION_HOVER_MOVE:
-                    event.setAction(MotionEvent.ACTION_MOVE);
-                    break;
-                case MotionEvent.ACTION_HOVER_EXIT:
-                    event.setAction(MotionEvent.ACTION_UP);
-                    break;
-            }
-            onTouchEventInternal(event);
-            return true;
-        }
-        return super.dispatchHoverEvent(event);
-    }
+    private long mOldEventTime;
+    private boolean mUsedVelocity;
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        // If touch exploring is enabled we ignore touch events and transform
-        // the stream of hover events as touch events. This allows one consistent
-        // event stream to drive the keyboard since during touch exploring the
-        // first touch generates only hover events and tapping on the same
-        // location generates hover and touch events.
-        if (mAccessibilityManager.isEnabled()
-                && mAccessibilityManager.isTouchExplorationEnabled()) {
-            return true;
-        }
-        return onTouchEventInternal(event);
-    }
-
-    public boolean onTouchEventInternal(MotionEvent me) {
+    public boolean onTouchEvent(MotionEvent me) {
         // Convert multi-pointer up/down events to single up/down events to 
         // deal with the typical multi-pointer behavior of two-thumb typing
         final int pointerCount = me.getPointerCount();
@@ -1196,6 +1126,7 @@ public class KeyboardView extends View implements View.OnClickListener {
             touchY += mVerticalCorrection;
         final int action = me.getAction();
         final long eventTime = me.getEventTime();
+        mOldEventTime = eventTime;
         int keyIndex = getKeyIndices(touchX, touchY, null);
         mPossiblePoly = possiblePoly;
 
