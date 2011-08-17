@@ -16,7 +16,11 @@
 
 <resources>
     <declare-styleable name="KeyButtonView">
+        <!-- key code to send when pressed; if absent or 0, no key is sent -->
         <attr name="keyCode" format="integer" />
+        <!-- does this button generate longpress / repeat events? -->
+        <attr name="keyRepeat" format="boolean" />
+        <!-- drawable to use for a swelling, glowing background on press -->
         <attr name="glowBackground" format="reference" />
     </declare-styleable>
     <declare-styleable name="ToggleSlider">
