@@ -373,8 +373,7 @@ public class ActionBarView extends AbsActionBarView {
             mActionMenuPresenter.setExpandedActionViewsExclusive(
                     getResources().getBoolean(
                     com.android.internal.R.bool.action_bar_expanded_action_views_exclusive));
-            builder.addMenuPresenter(mActionMenuPresenter);
-            builder.addMenuPresenter(mExpandedMenuPresenter);
+            configPresenters(builder);
             menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             final ViewGroup oldParent = (ViewGroup) menuView.getParent();
             if (oldParent != null && oldParent != this) {
@@ -390,8 +389,7 @@ public class ActionBarView extends AbsActionBarView {
             mActionMenuPresenter.setItemLimit(Integer.MAX_VALUE);
             // Span the whole width
             layoutParams.width = LayoutParams.MATCH_PARENT;
-            builder.addMenuPresenter(mActionMenuPresenter);
-            builder.addMenuPresenter(mExpandedMenuPresenter);
+            configPresenters(builder);
             menuView = (ActionMenuView) mActionMenuPresenter.getMenuView(this);
             if (mSplitView != null) {
                 final ViewGroup oldParent = (ViewGroup) menuView.getParent();
@@ -405,6 +403,18 @@ public class ActionBarView extends AbsActionBarView {
             }
         }
         mMenuView = menuView;
+    }
+
+    private void configPresenters(MenuBuilder builder) {
+        if (builder != null) {
+            builder.addMenuPresenter(mActionMenuPresenter);
+            builder.addMenuPresenter(mExpandedMenuPresenter);
+        } else {
+            mActionMenuPresenter.initForMenu(mContext, null);
+            mExpandedMenuPresenter.initForMenu(mContext, null);
+            mActionMenuPresenter.updateMenuView(true);
+            mExpandedMenuPresenter.updateMenuView(true);
+        }
     }
 
     public boolean hasExpandedActionView() {
@@ -1263,12 +1273,15 @@ public class ActionBarView extends AbsActionBarView {
             // Make sure the expanded item we have is still there.
             if (mCurrentExpandedItem != null) {
                 boolean found = false;
-                final int count = mMenu.size();
-                for (int i = 0; i < count; i++) {
-                    final MenuItem item = mMenu.getItem(i);
-                    if (item == mCurrentExpandedItem) {
-                        found = true;
-                        break;
+
+                if (mMenu != null) {
+                    final int count = mMenu.size();
+                    for (int i = 0; i < count; i++) {
+                        final MenuItem item = mMenu.getItem(i);
+                        if (item == mCurrentExpandedItem) {
+                            found = true;
+                            break;
+                        }
                     }
                 }
 
