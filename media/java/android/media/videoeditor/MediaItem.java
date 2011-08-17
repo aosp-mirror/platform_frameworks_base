@@ -564,15 +564,41 @@ public abstract class MediaItem {
      * @param startMs The start of time range in milliseconds
      * @param endMs The end of the time range in milliseconds
      * @param thumbnailCount The thumbnail count
-     *
-     * @return The array of Bitmaps
+     * @param indices The indices of the thumbnails wanted
+     * @param callback The callback used to pass back the bitmaps
      *
      * @throws IOException if a file error occurs
      */
-    public abstract Bitmap[] getThumbnailList(int width, int height,
-                                              long startMs, long endMs,
-                                              int thumbnailCount)
-                                              throws IOException;
+    public abstract void getThumbnailList(int width, int height,
+                                          long startMs, long endMs,
+                                          int thumbnailCount,
+                                          int[] indices,
+                                          GetThumbnailListCallback callback)
+                                          throws IOException;
+
+    public interface GetThumbnailListCallback {
+        public void onThumbnail(Bitmap bitmap, int index);
+    }
+
+    // This is for compatibility, only used in tests.
+    public Bitmap[] getThumbnailList(int width, int height,
+                                     long startMs, long endMs,
+                                     int thumbnailCount)
+                                     throws IOException {
+        final Bitmap[] bitmaps = new Bitmap[thumbnailCount];
+        int[] indices = new int[thumbnailCount];
+        for (int i = 0; i < thumbnailCount; i++) {
+            indices[i] = i;
+        }
+        getThumbnailList(width, height, startMs, endMs,
+                thumbnailCount, indices, new GetThumbnailListCallback() {
+            public void onThumbnail(Bitmap bitmap, int index) {
+                bitmaps[index] = bitmap;
+            }
+        });
+
+        return bitmaps;
+    }
 
     /*
      * {@inheritDoc}
