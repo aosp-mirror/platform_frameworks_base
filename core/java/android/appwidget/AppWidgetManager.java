@@ -184,16 +184,6 @@ public class AppWidgetManager {
      */
     public static final String META_DATA_APPWIDGET_PROVIDER = "android.appwidget.provider";
 
-    /**
-     * Field for the manifest meta-data tag used to indicate any previous name for the
-     * app widget receiver.
-     *
-     * @see AppWidgetProviderInfo
-     *
-     * @hide Pending API approval
-     */
-    public static final String META_DATA_APPWIDGET_OLD_NAME = "android.appwidget.oldName";
-
     static WeakHashMap<Context, WeakReference<AppWidgetManager>> sManagerCache =
         new WeakHashMap<Context, WeakReference<AppWidgetManager>>();
     static IAppWidgetService sService;

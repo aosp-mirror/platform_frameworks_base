@@ -138,17 +138,6 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int icon;
 
     /**
-     * The previous name, if any, of the app widget receiver. If not supplied, it will be
-     * ignored.
-     *
-     * <p>This field corresponds to the <code>&lt;meta-data /&gt;</code> with the name
-     * <code>android.appwidget.oldName</code>.
-     * 
-     * @hide Pending API approval
-     */
-    public String oldName;
-
-    /**
      * The view id of the AppWidget subview which should be auto-advanced by the widget's host.
      *
      * <p>This field corresponds to the <code>android:autoAdvanceViewId</code> attribute in
