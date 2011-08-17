@@ -146,7 +146,6 @@ public:
     void deinit(Context *rsc);
 
     ObjectBaseRef<Font> mDefault;
-    ObjectBaseRef<Font> mLast;
 
     void renderText(const char *text, uint32_t len, int32_t x, int32_t y,
                     uint32_t startIndex = 0, int numGlyphs = -1,

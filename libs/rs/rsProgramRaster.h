@@ -27,19 +27,17 @@ class ProgramRasterState;
 
 class ProgramRaster : public ProgramBase {
 public:
-    ProgramRaster(Context *rsc,
-                  bool pointSmooth,
-                  bool lineSmooth,
-                  bool pointSprite,
-                  float lineWidth,
-                  RsCullMode cull);
-    virtual ~ProgramRaster();
-
     virtual void setup(const Context *, ProgramRasterState *);
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_PROGRAM_RASTER; }
     static ProgramRaster *createFromStream(Context *rsc, IStream *stream);
 
+    static ObjectBaseRef<ProgramRaster> getProgramRaster(Context *rsc,
+                                                         bool pointSmooth,
+                                                         bool lineSmooth,
+                                                         bool pointSprite,
+                                                         float lineWidth,
+                                                         RsCullMode cull);
     struct Hal {
         mutable void *drv;
 
@@ -55,6 +53,17 @@ public:
     Hal mHal;
 
 protected:
+    virtual void preDestroy() const;
+    virtual ~ProgramRaster();
+
+private:
+    ProgramRaster(Context *rsc,
+                  bool pointSmooth,
+                  bool lineSmooth,
+                  bool pointSprite,
+                  float lineWidth,
+                  RsCullMode cull);
+
 };
 
 class ProgramRasterState {
@@ -66,6 +75,9 @@ public:
 
     ObjectBaseRef<ProgramRaster> mDefault;
     ObjectBaseRef<ProgramRaster> mLast;
+
+    // Cache of all existing raster programs.
+    Vector<ProgramRaster *> mRasterPrograms;
 };
 
 

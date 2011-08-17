@@ -68,7 +68,7 @@ void FileA3D::parseHeader(IStream *headerStream) {
     for (uint32_t i = 0; i < numIndexEntries; i ++) {
         A3DIndexEntry *entry = new A3DIndexEntry();
         headerStream->loadString(&entry->mObjectName);
-        LOGV("Header data, entry name = %s", entry->mObjectName.string());
+        //LOGV("Header data, entry name = %s", entry->mObjectName.string());
         entry->mType = (RsA3DClassID)headerStream->loadU32();
         if (mUse64BitOffsets){
             entry->mOffset = headerStream->loadOffset();
@@ -369,7 +369,7 @@ RsObjectBase rsaFileA3DGetEntryByIndex(RsContext con, uint32_t index, RsFile fil
     }
 
     ObjectBase *obj = fa3d->initializeFromEntry(index);
-    LOGV("Returning object with name %s", obj->getName());
+    //LOGV("Returning object with name %s", obj->getName());
 
     return obj;
 }

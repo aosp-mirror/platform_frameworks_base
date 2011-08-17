@@ -127,6 +127,7 @@ ObjDestroy {
 	}
 
 ElementCreate {
+        direct
 	param RsDataType mType
 	param RsDataKind mKind
 	param bool mNormalized
@@ -135,6 +136,7 @@ ElementCreate {
 	}
 
 ElementCreate2 {
+        direct
 	param const RsElement * elements
 	param const char ** names
 	param const uint32_t * arraySize
@@ -226,6 +228,7 @@ AllocationCopy2DRange {
 	}
 
 SamplerCreate {
+    direct
     param RsSamplerValue magFilter
     param RsSamplerValue minFilter
     param RsSamplerValue wrapS
@@ -311,6 +314,7 @@ ScriptCCreate {
 
 
 ProgramStoreCreate {
+	direct
 	param bool colorMaskR
 	param bool colorMaskG
 	param bool colorMaskB
@@ -324,6 +328,7 @@ ProgramStoreCreate {
 	}
 
 ProgramRasterCreate {
+	direct
 	param bool pointSmooth
 	param bool lineSmooth
 	param bool pointSprite
@@ -352,12 +357,14 @@ ProgramBindSampler {
 	}
 
 ProgramFragmentCreate {
+	direct
 	param const char * shaderText
 	param const uint32_t * params
 	ret RsProgramFragment
 	}
 
 ProgramVertexCreate {
+	direct
 	param const char * shaderText
 	param const uint32_t * params
 	ret RsProgramVertex

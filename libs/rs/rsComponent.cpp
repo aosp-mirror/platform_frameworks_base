@@ -176,36 +176,6 @@ bool Component::isReference() const {
     return (mType >= RS_TYPE_ELEMENT);
 }
 
-String8 Component::getGLSLType() const {
-    if (mType == RS_TYPE_SIGNED_32) {
-        switch (mVectorSize) {
-        case 1: return String8("int");
-        case 2: return String8("ivec2");
-        case 3: return String8("ivec3");
-        case 4: return String8("ivec4");
-        }
-    }
-    if (mType == RS_TYPE_FLOAT_32) {
-        switch (mVectorSize) {
-        case 1: return String8("float");
-        case 2: return String8("vec2");
-        case 3: return String8("vec3");
-        case 4: return String8("vec4");
-        }
-    }
-    if ((mType == RS_TYPE_MATRIX_4X4) && (mVectorSize == 1)) {
-        return String8("mat4");
-    }
-    if ((mType == RS_TYPE_MATRIX_3X3) && (mVectorSize == 1)) {
-        return String8("mat3");
-    }
-    if ((mType == RS_TYPE_MATRIX_2X2) && (mVectorSize == 1)) {
-        return String8("mat2");
-    }
-    return String8();
-}
-
-
 static const char * gTypeBasicStrings[] = {
     "NONE",
     "F16",

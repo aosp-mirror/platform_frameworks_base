@@ -30,16 +30,13 @@ class SamplerState;
 
 class Sampler : public ObjectBase {
 public:
-    Sampler(Context *,
-            RsSamplerValue magFilter,
-            RsSamplerValue minFilter,
-            RsSamplerValue wrapS,
-            RsSamplerValue wrapT,
-            RsSamplerValue wrapR,
-            float aniso = 1.0f);
-
-    virtual ~Sampler();
-
+    static ObjectBaseRef<Sampler> getSampler(Context *,
+                                             RsSamplerValue magFilter,
+                                             RsSamplerValue minFilter,
+                                             RsSamplerValue wrapS,
+                                             RsSamplerValue wrapT,
+                                             RsSamplerValue wrapR,
+                                             float aniso = 1.0f);
     void bindToContext(SamplerState *, uint32_t slot);
     void unbindFromContext(SamplerState *);
 
@@ -65,14 +62,33 @@ public:
 protected:
     int32_t mBoundSlot;
 
+    virtual void preDestroy() const;
+    virtual ~Sampler();
+
 private:
     Sampler(Context *);
+    Sampler(Context *,
+            RsSamplerValue magFilter,
+            RsSamplerValue minFilter,
+            RsSamplerValue wrapS,
+            RsSamplerValue wrapT,
+            RsSamplerValue wrapR,
+            float aniso = 1.0f);
 };
 
 
 class SamplerState {
 public:
     ObjectBaseRef<Sampler> mSamplers[RS_MAX_SAMPLER_SLOT];
+    void init(Context *rsc) {
+    }
+    void deinit(Context *rsc) {
+        for (uint32_t i = 0; i < RS_MAX_SAMPLER_SLOT; i ++) {
+            mSamplers[i].clear();
+        }
+    }
+    // Cache of all existing raster programs.
+    Vector<Sampler *> mAllSamplers;
 };
 
 }

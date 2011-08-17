@@ -28,8 +28,17 @@ namespace renderscript {
 // An element is a group of Components that occupies one cell in a structure.
 class Element : public ObjectBase {
 public:
-    ~Element();
-
+    class Builder {
+    public:
+        void add(const Element *e, const char *nameStr, uint32_t arraySize);
+        ObjectBaseRef<const Element> create(Context *rsc);
+    private:
+        Vector<ObjectBaseRef<const Element> > mBuilderElementRefs;
+        Vector<const Element *> mBuilderElements;
+        Vector<const char*> mBuilderNameStrings;
+        Vector<size_t> mBuilderNameLengths;
+        Vector<uint32_t> mBuilderArrays;
+    };
     uint32_t getGLType() const;
     uint32_t getGLFormat() const;
 
@@ -55,23 +64,44 @@ public:
     RsDataKind getKind() const {return mComponent.getKind();}
     uint32_t getBits() const {return mBits;}
 
-    String8 getGLSLType(uint32_t indent=0) const;
-
     void dumpLOGV(const char *prefix) const;
     virtual void serialize(OStream *stream) const;
     virtual RsA3DClassID getClassId() const { return RS_A3D_CLASS_ID_ELEMENT; }
     static Element *createFromStream(Context *rsc, IStream *stream);
 
-    static const Element * create(Context *rsc, RsDataType dt, RsDataKind dk,
-                            bool isNorm, uint32_t vecSize);
-    static const Element * create(Context *rsc, size_t count, const Element **,
-                            const char **, const size_t * lengths, const uint32_t *asin);
+    static ObjectBaseRef<const Element> createRef(Context *rsc,
+                                                  RsDataType dt,
+                                                  RsDataKind dk,
+                                                  bool isNorm,
+                                                  uint32_t vecSize);
+    static ObjectBaseRef<const Element> createRef(Context *rsc, size_t count,
+                                                  const Element **,
+                                                  const char **,
+                                                  const size_t * lengths,
+                                                  const uint32_t *asin);
+
+    static const Element* create(Context *rsc,
+                                 RsDataType dt,
+                                 RsDataKind dk,
+                                 bool isNorm,
+                                 uint32_t vecSize) {
+        ObjectBaseRef<const Element> elem = createRef(rsc, dt, dk, isNorm, vecSize);
+        elem->incUserRef();
+        return elem.get();
+    }
+    static const Element* create(Context *rsc, size_t count,
+                                 const Element **ein,
+                                 const char **nin,
+                                 const size_t * lengths,
+                                 const uint32_t *asin) {
+        ObjectBaseRef<const Element> elem = createRef(rsc, count, ein, nin, lengths, asin);
+        elem->incUserRef();
+        return elem.get();
+    }
 
     void incRefs(const void *) const;
     void decRefs(const void *) const;
     bool getHasReferences() const {return mHasReference;}
-
-    bool isEqual(const Element *other) const;
 
 protected:
     // deallocate any components that are part of this element.
@@ -88,12 +118,15 @@ protected:
     bool mHasReference;
 
 
+    virtual ~Element();
     Element(Context *);
 
     Component mComponent;
     uint32_t mBits;
 
     void compute();
+
+    virtual void preDestroy() const;
 };
 
 

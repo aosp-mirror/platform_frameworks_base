@@ -150,26 +150,30 @@ ProgramVertexState::~ProgramVertexState() {
 }
 
 void ProgramVertexState::init(Context *rsc) {
-    const Element *matrixElem = Element::create(rsc, RS_TYPE_MATRIX_4X4, RS_KIND_USER, false, 1);
-    const Element *f2Elem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 2);
-    const Element *f3Elem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 3);
-    const Element *f4Elem = Element::create(rsc, RS_TYPE_FLOAT_32, RS_KIND_USER, false, 4);
+    ObjectBaseRef<const Element> matrixElem = Element::createRef(rsc, RS_TYPE_MATRIX_4X4,
+                                                                 RS_KIND_USER, false, 1);
+    ObjectBaseRef<const Element> f2Elem = Element::createRef(rsc, RS_TYPE_FLOAT_32,
+                                                             RS_KIND_USER, false, 2);
+    ObjectBaseRef<const Element> f3Elem = Element::createRef(rsc, RS_TYPE_FLOAT_32,
+                                                             RS_KIND_USER, false, 3);
+    ObjectBaseRef<const Element> f4Elem = Element::createRef(rsc, RS_TYPE_FLOAT_32,
+                                                             RS_KIND_USER, false, 4);
 
-    rsc->mStateElement.elementBuilderBegin();
-    rsc->mStateElement.elementBuilderAdd(matrixElem, "MV", 1);
-    rsc->mStateElement.elementBuilderAdd(matrixElem, "P", 1);
-    rsc->mStateElement.elementBuilderAdd(matrixElem, "TexMatrix", 1);
-    rsc->mStateElement.elementBuilderAdd(matrixElem, "MVP", 1);
-    const Element *constInput = rsc->mStateElement.elementBuilderCreate(rsc);
+    Element::Builder constBuilder;
+    constBuilder.add(matrixElem.get(), "MV", 1);
+    constBuilder.add(matrixElem.get(), "P", 1);
+    constBuilder.add(matrixElem.get(), "TexMatrix", 1);
+    constBuilder.add(matrixElem.get(), "MVP", 1);
+    ObjectBaseRef<const Element> constInput = constBuilder.create(rsc);
 
-    rsc->mStateElement.elementBuilderBegin();
-    rsc->mStateElement.elementBuilderAdd(f4Elem, "position", 1);
-    rsc->mStateElement.elementBuilderAdd(f4Elem, "color", 1);
-    rsc->mStateElement.elementBuilderAdd(f3Elem, "normal", 1);
-    rsc->mStateElement.elementBuilderAdd(f2Elem, "texture0", 1);
-    const Element *attrElem = rsc->mStateElement.elementBuilderCreate(rsc);
+    Element::Builder inputBuilder;
+    inputBuilder.add(f4Elem.get(), "position", 1);
+    inputBuilder.add(f4Elem.get(), "color", 1);
+    inputBuilder.add(f3Elem.get(), "normal", 1);
+    inputBuilder.add(f2Elem.get(), "texture0", 1);
+    ObjectBaseRef<const Element> attrElem = inputBuilder.create(rsc);
 
-    Type *inputType = Type::getType(rsc, constInput, 1, 0, 0, false, false);
+    ObjectBaseRef<Type> inputType = Type::getTypeRef(rsc, constInput.get(), 1, 0, 0, false, false);
 
     String8 shaderString(RS_SHADER_INTERNAL);
     shaderString.append("varying vec4 varColor;\n");
@@ -183,13 +187,13 @@ void ProgramVertexState::init(Context *rsc) {
 
     uint32_t tmp[4];
     tmp[0] = RS_PROGRAM_PARAM_CONSTANT;
-    tmp[1] = (uint32_t)inputType;
+    tmp[1] = (uint32_t)inputType.get();
     tmp[2] = RS_PROGRAM_PARAM_INPUT;
-    tmp[3] = (uint32_t)attrElem;
+    tmp[3] = (uint32_t)attrElem.get();
 
     ProgramVertex *pv = new ProgramVertex(rsc, shaderString.string(),
                                           shaderString.length(), tmp, 4);
-    Allocation *alloc = Allocation::createAllocation(rsc, inputType,
+    Allocation *alloc = Allocation::createAllocation(rsc, inputType.get(),
                               RS_ALLOCATION_USAGE_SCRIPT | RS_ALLOCATION_USAGE_GRAPHICS_CONSTANTS);
     pv->bindAllocation(rsc, alloc, 0);
 
