@@ -173,7 +173,8 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
     public void updateMenuView(boolean cleared) {
         super.updateMenuView(cleared);
 
-        final boolean hasOverflow = mReserveOverflow && mMenu.getNonActionItems().size() > 0;
+        final boolean hasOverflow = mReserveOverflow && mMenu != null &&
+                mMenu.getNonActionItems().size() > 0;
         if (hasOverflow) {
             if (mOverflowButton == null) {
                 mOverflowButton = new OverflowMenuButton(mContext);

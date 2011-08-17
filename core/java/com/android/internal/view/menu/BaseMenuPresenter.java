@@ -74,20 +74,24 @@ public abstract class BaseMenuPresenter implements MenuPresenter {
      * Reuses item views when it can
      */
     public void updateMenuView(boolean cleared) {
-        mMenu.flagActionItems();
-        ArrayList<MenuItemImpl> visibleItems = mMenu.getVisibleItems();
-        final int itemCount = visibleItems.size();
         final ViewGroup parent = (ViewGroup) mMenuView;
+        if (parent == null) return;
+
         int childIndex = 0;
-        for (int i = 0; i < itemCount; i++) {
-            MenuItemImpl item = visibleItems.get(i);
-            if (shouldIncludeItem(childIndex, item)) {
-                final View convertView = parent.getChildAt(childIndex);
-                final View itemView = getItemView(item, convertView, parent);
-                if (itemView != convertView) {
-                    addItemView(itemView, childIndex);
+        if (mMenu != null) {
+            mMenu.flagActionItems();
+            ArrayList<MenuItemImpl> visibleItems = mMenu.getVisibleItems();
+            final int itemCount = visibleItems.size();
+            for (int i = 0; i < itemCount; i++) {
+                MenuItemImpl item = visibleItems.get(i);
+                if (shouldIncludeItem(childIndex, item)) {
+                    final View convertView = parent.getChildAt(childIndex);
+                    final View itemView = getItemView(item, convertView, parent);
+                    if (itemView != convertView) {
+                        addItemView(itemView, childIndex);
+                    }
+                    childIndex++;
                 }
-                childIndex++;
             }
         }
 
