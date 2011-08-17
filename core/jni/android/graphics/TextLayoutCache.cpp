@@ -360,31 +360,7 @@ void TextLayoutCacheValue::setupShaperItem(HB_ShaperItem* shaperItem, HB_FontRec
     shaperItem->item.length = count;
     shaperItem->item.bidiLevel = isRTL;
 
-    ssize_t nextCodePoint = 0;
-    uint32_t codePoint = utf16_to_code_point(chars, count, &nextCodePoint);
-
-    HB_Script script = code_point_to_script(codePoint);
-
-    if (script == HB_Script_Inherited) {
-#if DEBUG_GLYPHS
-        LOGD("Cannot find a correct script for code point=%d "
-                " Need to look at the next code points.", codePoint);
-#endif
-        while (script == HB_Script_Inherited && nextCodePoint < count) {
-            codePoint = utf16_to_code_point(chars, count, &nextCodePoint);
-            script = code_point_to_script(codePoint);
-        }
-    }
-
-    if (script == HB_Script_Inherited) {
-#if DEBUG_GLYPHS
-        LOGD("Cannot find a correct script from the text."
-                " Need to select a default script depending on the passed text direction.");
-#endif
-        script = isRTL ? HB_Script_Arabic : HB_Script_Common;
-    }
-
-    shaperItem->item.script = script;
+    shaperItem->item.script = isRTL ? HB_Script_Arabic : HB_Script_Common;
 
     shaperItem->string = chars;
     shaperItem->stringLength = contextCount;
