@@ -36,6 +36,10 @@
 #include <utils/Log.h>
 #include <utils/String8.h>
 
+
+#define ALLOW_DEQUEUE_CURRENT_BUFFER    false
+
+
 namespace android {
 
 // Transform matrices
@@ -294,9 +298,22 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
             if (state == BufferSlot::DEQUEUED) {
                 dequeuedCount++;
             }
-            if (state == BufferSlot::FREE /*|| i == mCurrentTexture*/) {
-                foundSync = i;
-                if (i != mCurrentTexture) {
+
+            // if buffer is FREE it CANNOT be current
+            LOGW_IF((state == BufferSlot::FREE) && (mCurrentTexture==i),
+                    "dequeueBuffer: buffer %d is both FREE and current!", i);
+
+            if (ALLOW_DEQUEUE_CURRENT_BUFFER) {
+                if (state == BufferSlot::FREE || i == mCurrentTexture) {
+                    foundSync = i;
+                    if (i != mCurrentTexture) {
+                        found = i;
+                        break;
+                    }
+                }
+            } else {
+                if (state == BufferSlot::FREE) {
+                    foundSync = i;
                     found = i;
                     break;
                 }
@@ -325,7 +342,7 @@ status_t SurfaceTexture::dequeueBuffer(int *outBuf, uint32_t w, uint32_t h,
         }
 
         // we're in synchronous mode and didn't find a buffer, we need to wait
-        // for for some buffers to be consumed
+        // for some buffers to be consumed
         tryAgain = mSynchronousMode && (foundSync == INVALID_BUFFER_SLOT);
         if (tryAgain) {
             mDequeueCondition.wait(mMutex);
@@ -846,6 +863,7 @@ void SurfaceTexture::freeBufferLocked(int i) {
 void SurfaceTexture::freeAllBuffersLocked() {
     LOGW_IF(!mQueue.isEmpty(),
             "freeAllBuffersLocked called but mQueue is not empty");
+    mCurrentTexture = INVALID_BUFFER_SLOT;
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         freeBufferLocked(i);
     }
@@ -859,6 +877,7 @@ void SurfaceTexture::freeAllBuffersExceptHeadLocked() {
         Fifo::iterator front(mQueue.begin());
         head = *front;
     }
+    mCurrentTexture = INVALID_BUFFER_SLOT;
     for (int i = 0; i < NUM_BUFFER_SLOTS; i++) {
         if (i != head) {
             freeBufferLocked(i);
