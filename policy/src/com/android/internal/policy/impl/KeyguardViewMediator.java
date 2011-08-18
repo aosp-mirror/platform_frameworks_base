@@ -1142,6 +1142,10 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
             // insecure and (is covered by another window OR this feature is enabled in general)
             boolean enable = !mShowing
                 || ((ENABLE_STATUS_BAR_IN_KEYGUARD || mHidden) && !isSecure());
+            if (DEBUG) {
+                Log.d(TAG, "adjustStatusBarLocked: mShowing=" + mShowing + " mHidden=" + mHidden
+                    + " isSecure=" + isSecure() + " --> enable=" + enable);
+            }
             mStatusBarManager.disable(enable ?
                          StatusBarManager.DISABLE_NONE :
                          ( StatusBarManager.DISABLE_EXPAND
