@@ -131,6 +131,24 @@ struct NotifySwitchArgs : public NotifyArgs {
 };
 
 
+/* Describes a device reset event, such as when a device is added,
+ * reconfigured, or removed. */
+struct NotifyDeviceResetArgs : public NotifyArgs {
+    nsecs_t eventTime;
+    int32_t deviceId;
+
+    inline NotifyDeviceResetArgs() { }
+
+    NotifyDeviceResetArgs(nsecs_t eventTime, int32_t deviceId);
+
+    NotifyDeviceResetArgs(const NotifyDeviceResetArgs& other);
+
+    virtual ~NotifyDeviceResetArgs() { }
+
+    virtual void notify(const sp<InputListenerInterface>& listener) const;
+};
+
+
 /*
  * The interface used by the InputReader to notify the InputListener about input events.
  */
@@ -144,6 +162,7 @@ public:
     virtual void notifyKey(const NotifyKeyArgs* args) = 0;
     virtual void notifyMotion(const NotifyMotionArgs* args) = 0;
     virtual void notifySwitch(const NotifySwitchArgs* args) = 0;
+    virtual void notifyDeviceReset(const NotifyDeviceResetArgs* args) = 0;
 };
 
 
@@ -162,6 +181,7 @@ public:
     virtual void notifyKey(const NotifyKeyArgs* args);
     virtual void notifyMotion(const NotifyMotionArgs* args);
     virtual void notifySwitch(const NotifySwitchArgs* args);
+    virtual void notifyDeviceReset(const NotifyDeviceResetArgs* args);
 
     void flush();
 

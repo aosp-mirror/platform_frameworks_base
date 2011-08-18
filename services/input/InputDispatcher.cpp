@@ -401,6 +401,14 @@ void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) {
         break;
     }
 
+    case EventEntry::TYPE_DEVICE_RESET: {
+        DeviceResetEntry* typedEntry =
+                static_cast<DeviceResetEntry*>(mPendingEvent);
+        done = dispatchDeviceResetLocked(currentTime, typedEntry);
+        dropReason = DROP_REASON_NOT_DROPPED; // device resets are never dropped
+        break;
+    }
+
     case EventEntry::TYPE_KEY: {
         KeyEntry* typedEntry = static_cast<KeyEntry*>(mPendingEvent);
         if (isAppSwitchDue) {
@@ -724,6 +732,19 @@ bool InputDispatcher::dispatchConfigurationChangedLocked(
     CommandEntry* commandEntry = postCommandLocked(
             & InputDispatcher::doNotifyConfigurationChangedInterruptible);
     commandEntry->eventTime = entry->eventTime;
+    return true;
+}
+
+bool InputDispatcher::dispatchDeviceResetLocked(
+        nsecs_t currentTime, DeviceResetEntry* entry) {
+#if DEBUG_OUTBOUND_EVENT_DETAILS
+    LOGD("dispatchDeviceReset - eventTime=%lld, deviceId=%d", entry->eventTime, entry->deviceId);
+#endif
+
+    CancelationOptions options(CancelationOptions::CANCEL_ALL_EVENTS,
+            "device was reset");
+    options.deviceId = entry->deviceId;
+    synthesizeCancelationEventsForAllConnectionsLocked(options);
     return true;
 }
 
@@ -2921,6 +2942,25 @@ void InputDispatcher::notifySwitch(const NotifySwitchArgs* args) {
             args->switchCode, args->switchValue, policyFlags);
 }
 
+void InputDispatcher::notifyDeviceReset(const NotifyDeviceResetArgs* args) {
+#if DEBUG_INBOUND_EVENT_DETAILS
+    LOGD("notifyDeviceReset - eventTime=%lld, deviceId=%d",
+            args->eventTime, args->deviceId);
+#endif
+
+    bool needWake;
+    { // acquire lock
+        AutoMutex _l(mLock);
+
+        DeviceResetEntry* newEntry = new DeviceResetEntry(args->eventTime, args->deviceId);
+        needWake = enqueueInboundEventLocked(newEntry);
+    } // release lock
+
+    if (needWake) {
+        mLooper->wake();
+    }
+}
+
 int32_t InputDispatcher::injectInputEvent(const InputEvent* event,
         int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis,
         uint32_t policyFlags) {
@@ -4016,6 +4056,17 @@ InputDispatcher::ConfigurationChangedEntry::~ConfigurationChangedEntry() {
 }
 
 
+// --- InputDispatcher::DeviceResetEntry ---
+
+InputDispatcher::DeviceResetEntry::DeviceResetEntry(nsecs_t eventTime, int32_t deviceId) :
+        EventEntry(TYPE_DEVICE_RESET, eventTime, 0),
+        deviceId(deviceId) {
+}
+
+InputDispatcher::DeviceResetEntry::~DeviceResetEntry() {
+}
+
+
 // --- InputDispatcher::KeyEntry ---
 
 InputDispatcher::KeyEntry::KeyEntry(nsecs_t eventTime,
@@ -4407,6 +4458,10 @@ bool InputDispatcher::InputState::shouldCancelKey(const KeyMemento& memento,
         return false;
     }
 
+    if (options.deviceId != -1 && memento.deviceId != options.deviceId) {
+        return false;
+    }
+
     switch (options.mode) {
     case CancelationOptions::CANCEL_ALL_EVENTS:
     case CancelationOptions::CANCEL_NON_POINTER_EVENTS:
@@ -4420,6 +4475,10 @@ bool InputDispatcher::InputState::shouldCancelKey(const KeyMemento& memento,
 
 bool InputDispatcher::InputState::shouldCancelMotion(const MotionMemento& memento,
         const CancelationOptions& options) {
+    if (options.deviceId != -1 && memento.deviceId != options.deviceId) {
+        return false;
+    }
+
     switch (options.mode) {
     case CancelationOptions::CANCEL_ALL_EVENTS:
         return true;

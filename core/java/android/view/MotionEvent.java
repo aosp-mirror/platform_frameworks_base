@@ -619,6 +619,11 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * indicates that the major axis of contact is oriented to the left.
      * The full range is from -PI/2 radians (finger pointing fully left) to PI/2 radians
      * (finger pointing fully right).
+     * <li>For a stylus, the orientation indicates the direction in which the stylus
+     * is pointing in relation to the vertical axis of the current orientation of the screen.
+     * The range is from -PI radians to PI radians, where 0 is pointing up,
+     * -PI/2 radians is pointing left, -PI or PI radians is pointing down, and PI/2 radians
+     * is pointing right.  See also {@link #AXIS_TILT}.
      * </ul>
      * </p>
      *
@@ -883,8 +888,8 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * <p>
      * <ul>
      * <li>For a stylus, reports the distance of the stylus from the screen.
-     * The value is nominally measured in millimeters where 0.0 indicates direct contact
-     * and larger values indicate increasing distance from the surface.
+     * A value of 0.0 indicates direct contact and larger values indicate increasing
+     * distance from the surface.
      * </ul>
      * </p>
      *
@@ -894,6 +899,24 @@ public final class MotionEvent extends InputEvent implements Parcelable {
      * @see InputDevice#getMotionRange
      */
     public static final int AXIS_DISTANCE = 24;
+
+    /**
+     * Axis constant: Tilt axis of a motion event.
+     * <p>
+     * <ul>
+     * <li>For a stylus, reports the tilt angle of the stylus in radians where
+     * 0 radians indicates that the stylus is being held perpendicular to the
+     * surface, and PI/2 radians indicates that the stylus is being held flat
+     * against the surface.
+     * </ul>
+     * </p>
+     *
+     * @see #getAxisValue(int, int)
+     * @see #getHistoricalAxisValue(int, int, int)
+     * @see MotionEvent.PointerCoords#getAxisValue(int, int)
+     * @see InputDevice#getMotionRange
+     */
+    public static final int AXIS_TILT = 25;
 
     /**
      * Axis constant: Generic 1 axis of a motion event.
@@ -1104,6 +1127,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
         names.append(AXIS_GAS, "AXIS_GAS");
         names.append(AXIS_BRAKE, "AXIS_BRAKE");
         names.append(AXIS_DISTANCE, "AXIS_DISTANCE");
+        names.append(AXIS_TILT, "AXIS_TILT");
         names.append(AXIS_GENERIC_1, "AXIS_GENERIC_1");
         names.append(AXIS_GENERIC_2, "AXIS_GENERIC_2");
         names.append(AXIS_GENERIC_3, "AXIS_GENERIC_3");
