@@ -2363,7 +2363,7 @@ please see styles_device_defaults.xml.
 
     <style name="Widget.Holo.PreferenceFrameLayout">
         <item name="android:borderTop">0dip</item>
-        <item name="android:borderBottom">@dimen/preference_fragment_padding_side</item>
+        <item name="android:borderBottom">@dimen/preference_fragment_padding_bottom</item>
         <item name="android:borderLeft">@dimen/preference_fragment_padding_side</item>
         <item name="android:borderRight">@dimen/preference_fragment_padding_side</item>
     </style>
