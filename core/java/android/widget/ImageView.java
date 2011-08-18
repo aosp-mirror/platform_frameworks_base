@@ -83,7 +83,6 @@ public class ImageView extends View {
     // Avoid allocations...
     private RectF mTempSrc = new RectF();
     private RectF mTempDst = new RectF();
-    private float[] mTempPoints;
 
     private boolean mCropToPadding;
 
@@ -347,29 +346,13 @@ public class ImageView extends View {
         if (mDrawable != drawable) {
             mResource = 0;
             mUri = null;
+
             int oldWidth = mDrawableWidth;
             int oldHeight = mDrawableHeight;
+
             updateDrawable(drawable);
 
-            boolean needsLayout;
-            if (mScaleType == ScaleType.CENTER) {
-                needsLayout = mDrawableWidth != oldWidth || mDrawableHeight != oldHeight;
-            } else {
-                if (mTempPoints == null) {
-                    mTempPoints = new float[4];
-                }
-                float[] points = mTempPoints;
-                points[0] = oldWidth;
-                points[1] = oldHeight;
-                points[2] = mDrawableWidth;
-                points[3] = mDrawableHeight;
-                if (!mMatrix.isIdentity()) {
-                    mMatrix.mapPoints(points);
-                }
-                needsLayout = points[0] != points[2] || points[1] != points[3];
-            }
-
-            if (needsLayout) {
+            if (oldWidth != mDrawableWidth || oldHeight != mDrawableHeight) {
                 requestLayout();
             }
             invalidate();
@@ -621,6 +604,8 @@ public class ImageView extends View {
             mDrawableHeight = d.getIntrinsicHeight();
             applyColorMod();
             configureBounds();
+        } else {
+            mDrawableWidth = mDrawableHeight = -1;
         }
     }
 
@@ -679,14 +664,14 @@ public class ImageView extends View {
             h = mDrawableHeight;
             if (w <= 0) w = 1;
             if (h <= 0) h = 1;
-            
+
             // We are supposed to adjust view bounds to match the aspect
             // ratio of our drawable. See if that is possible.
             if (mAdjustViewBounds) {
                 resizeWidth = widthSpecMode != MeasureSpec.EXACTLY;
                 resizeHeight = heightSpecMode != MeasureSpec.EXACTLY;
                 
-                desiredAspect = (float)w/(float)h;
+                desiredAspect = (float) w / (float) h;
             }
         }
         
@@ -705,13 +690,11 @@ public class ImageView extends View {
             */
 
             // Get the max possible width given our constraints
-            widthSize = resolveAdjustedSize(w + pleft + pright,
-                                                 mMaxWidth, widthMeasureSpec);
-            
+            widthSize = resolveAdjustedSize(w + pleft + pright, mMaxWidth, widthMeasureSpec);
+
             // Get the max possible height given our constraints
-            heightSize = resolveAdjustedSize(h + ptop + pbottom,
-                                                mMaxHeight, heightMeasureSpec);
-            
+            heightSize = resolveAdjustedSize(h + ptop + pbottom, mMaxHeight, heightMeasureSpec);
+
             if (desiredAspect != 0.0f) {
                 // See what our actual aspect ratio is
                 float actualAspect = (float)(widthSize - pleft - pright) /
@@ -723,9 +706,8 @@ public class ImageView extends View {
                     
                     // Try adjusting width to be proportional to height
                     if (resizeWidth) {
-                        int newWidth = (int)(desiredAspect *
-                                            (heightSize - ptop - pbottom))
-                                            + pleft + pright;
+                        int newWidth = (int)(desiredAspect * (heightSize - ptop - pbottom)) +
+                                pleft + pright;
                         if (newWidth <= widthSize) {
                             widthSize = newWidth;
                             done = true;
@@ -734,8 +716,8 @@ public class ImageView extends View {
                     
                     // Try adjusting height to be proportional to width
                     if (!done && resizeHeight) {
-                        int newHeight = (int)((widthSize - pleft - pright)
-                                            / desiredAspect) + ptop + pbottom;
+                        int newHeight = (int)((widthSize - pleft - pright) / desiredAspect) +
+                                ptop + pbottom;
                         if (newHeight <= heightSize) {
                             heightSize = newHeight;
                         }
@@ -859,7 +841,7 @@ public class ImageView extends View {
                 if (dwidth <= vwidth && dheight <= vheight) {
                     scale = 1.0f;
                 } else {
-                    scale = Math.min((float) vwidth / (float) dwidth, 
+                    scale = Math.min((float) vwidth / (float) dwidth,
                             (float) vheight / (float) dheight);
                 }
                 
@@ -874,8 +856,7 @@ public class ImageView extends View {
                 mTempDst.set(0, 0, vwidth, vheight);
                 
                 mDrawMatrix = mMatrix;
-                mDrawMatrix.setRectToRect(mTempSrc, mTempDst,
-                                          scaleTypeToScaleToFit(mScaleType));
+                mDrawMatrix.setRectToRect(mTempSrc, mTempDst, scaleTypeToScaleToFit(mScaleType));
             }
         }
     }
