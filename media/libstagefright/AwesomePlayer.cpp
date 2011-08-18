@@ -548,7 +548,7 @@ void AwesomePlayer::reset_l() {
     mVideoTimeUs = 0;
 
     mSeeking = NO_SEEK;
-    mSeekNotificationSent = false;
+    mSeekNotificationSent = true;
     mSeekTimeUs = 0;
 
     mUri.setTo("");
@@ -1204,7 +1204,6 @@ void AwesomePlayer::setNativeWindow_l(const sp<ANativeWindow> &native) {
 
     if (mLastVideoTimeUs >= 0) {
         mSeeking = SEEK;
-        mSeekNotificationSent = true;
         mSeekTimeUs = mLastVideoTimeUs;
         modifyFlags((AT_EOS | AUDIO_AT_EOS | VIDEO_AT_EOS), CLEAR);
     }
@@ -1305,8 +1304,10 @@ void AwesomePlayer::OnRTSPSeekDoneWrapper(void *cookie) {
 }
 
 void AwesomePlayer::onRTSPSeekDone() {
-    notifyListener_l(MEDIA_SEEK_COMPLETE);
-    mSeekNotificationSent = true;
+    if (!mSeekNotificationSent) {
+        notifyListener_l(MEDIA_SEEK_COMPLETE);
+        mSeekNotificationSent = true;
+    }
 }
 
 status_t AwesomePlayer::seekTo_l(int64_t timeUs) {
