@@ -820,7 +820,12 @@ void AwesomePlayer::onStreamDone() {
         return;
     }
 
-    if (mFlags & (LOOPING | AUTO_LOOPING)) {
+    if ((mFlags & LOOPING)
+            || ((mFlags & AUTO_LOOPING)
+                && (mAudioSink == NULL || mAudioSink->realtime()))) {
+        // Don't AUTO_LOOP if we're being recorded, since that cannot be
+        // turned off and recording would go on indefinitely.
+
         seekTo_l(0);
 
         if (mVideoSource != NULL) {
