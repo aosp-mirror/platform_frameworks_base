@@ -1807,7 +1807,9 @@ public class WebSettings {
      * @hide
      */
     public void setProperty(String key, String value) {
-        mWebView.nativeSetProperty(key, value);
+        if (mWebView.nativeSetProperty(key, value)) {
+            mWebView.contentInvalidateAll();
+        }
     }
 
     /**

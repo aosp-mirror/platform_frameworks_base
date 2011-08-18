@@ -9278,6 +9278,6 @@ public class WebView extends AbsoluteLayout
      */
     private native boolean  nativeScrollLayer(int layer, int newX, int newY);
     private native int      nativeGetBackgroundColor();
-    native void     nativeSetProperty(String key, String value);
+    native boolean  nativeSetProperty(String key, String value);
     native String   nativeGetProperty(String key);
 }
