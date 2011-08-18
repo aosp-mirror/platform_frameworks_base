@@ -589,8 +589,6 @@ public abstract class PreferenceActivity extends ListActivity implements
             mPreferenceManager.setOnPreferenceTreeClickListener(this);
         }
 
-        getListView().setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-
         // see if we should show Back/Next buttons
         Intent intent = getIntent();
         if (intent.getBooleanExtra(EXTRA_PREFS_SHOW_BUTTON_BAR, false)) {

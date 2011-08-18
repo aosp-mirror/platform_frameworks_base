@@ -32,10 +32,18 @@
         android:paddingBottom="@dimen/preference_fragment_padding_bottom"
         android:paddingLeft="@dimen/preference_fragment_padding_side"
         android:paddingRight="@dimen/preference_fragment_padding_side"
+        android:scrollbarStyle="@integer/preference_fragment_scrollbarStyle"
         android:clipToPadding="false"
         android:drawSelectorOnTop="false"
         android:cacheColorHint="@android:color/transparent"
         android:scrollbarAlwaysDrawVerticalTrack="true" />
+
+    <TextView android:id="@android:id/empty"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="@dimen/preference_fragment_padding_side"
+        android:gravity="center"
+        android:visibility="gone" />
 
     <RelativeLayout android:id="@+id/button_bar"
         android:layout_height="wrap_content"

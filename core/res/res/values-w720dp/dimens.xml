@@ -29,4 +29,9 @@
         This helps in aligning titles when some items have icons and some don't. When space is
         at a premium, we don't pre-allocate any space. -->
     <dimen name="preference_icon_minWidth">56dp</dimen>
+
+    <dimen name="preference_screen_header_padding_side">0dip</dimen>
+
+    <integer name="preference_screen_header_scrollbarStyle">0x0</integer> <!-- insideOverlay -->
+    <integer name="preference_fragment_scrollbarStyle">0x0</integer> <!-- insideOverlay -->
 </resources>

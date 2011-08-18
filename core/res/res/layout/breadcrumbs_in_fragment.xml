@@ -13,10 +13,10 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
+
 <!-- This layout disables breadcrumbs in the fragment area and causes PreferenceActivity to
     put the breadcrumbs in the action bar. -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:orientation="vertical"
-        android:layout_height="@dimen/preference_fragment_padding_side"
-        android:layout_width="match_parent">
-</LinearLayout>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dip"
+    android:layout_height="0dip"
+    android:visibility="gone" />
