@@ -158,9 +158,6 @@ public class WifiP2pDevice implements Parcelable {
             return;
         }
 
-        Pattern p = Pattern.compile("(?:[0-9a-f]{2}:){5}[0-9a-f]{2}", Pattern.CASE_INSENSITIVE);
-        if (p.matcher(tokens[1]).matches()) interfaceAddress = tokens[1];
-
         for (String token : tokens) {
             String[] nameValue = token.split("=");
             if (nameValue.length != 2) continue;
@@ -177,6 +174,7 @@ public class WifiP2pDevice implements Parcelable {
 
             if (nameValue[0].equals("name")) {
                 deviceName = trimQuotes(nameValue[1]);
+                continue;
             }
 
             if (nameValue[0].equals("config_methods")) {
@@ -213,9 +211,7 @@ public class WifiP2pDevice implements Parcelable {
         if (other == null || other.deviceAddress == null) {
             return (deviceAddress == null);
         }
-        //STOPSHIP: fix later
-        //return other.deviceAddress.equals(deviceAddress);
-        return other.deviceAddress.startsWith(deviceAddress.substring(0,8));
+        return other.deviceAddress.equals(deviceAddress);
     }
 
     public String toString() {

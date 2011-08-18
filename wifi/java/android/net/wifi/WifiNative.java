@@ -304,4 +304,28 @@ public class WifiNative {
         return doBooleanCommand("P2P_INVITE group=" + group.getInterface()
                 + " peer=" + deviceAddress + " go_dev_addr=" + group.getOwner().deviceAddress);
     }
+
+    public static String p2pGetInterfaceAddress(String deviceAddress) {
+        if (deviceAddress == null) return null;
+
+        //  "p2p_peer deviceAddress" returns a multi-line result containing
+        //      intended_addr=fa:7b:7a:42:82:13
+        String peerInfo = p2pPeer(deviceAddress);
+        if (peerInfo == null) return null;
+        String[] tokens= peerInfo.split("\n");
+
+        for (String token : tokens) {
+            //TODO: update from interface_addr when wpa_supplicant implementation is fixed
+            if (token.startsWith("intended_addr=")) {
+                String[] nameValue = token.split("=");
+                if (nameValue.length != 2) break;
+                return nameValue[1];
+            }
+        }
+        return null;
+    }
+
+    public static String p2pPeer(String deviceAddress) {
+        return doStringCommand("P2P_PEER " + deviceAddress);
+    }
 }
