@@ -1208,7 +1208,10 @@ public class NumberPicker extends LinearLayout {
         float textGapCount = selectorIndices.length - 1;
         int selectorTextGapHeight = (int) (totalTextGapHeight / textGapCount + 0.5f);
         mSelectorElementHeight = mTextSize + selectorTextGapHeight;
-        mInitialScrollOffset = mTextSize - 3 * (mSelectorElementHeight % 2);
+        // Ensure that the middle item is positioned the same as the text in mInputText
+        int editTextTextPosition = mInputText.getBaseline() + mInputText.getTop();
+        mInitialScrollOffset = editTextTextPosition -
+                (mSelectorElementHeight * SELECTOR_MIDDLE_ITEM_INDEX);
         mCurrentScrollOffset = mInitialScrollOffset;
         updateInputTextView();
     }
