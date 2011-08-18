@@ -1546,7 +1546,9 @@ int doPackage(Bundle* bundle)
     assets = new AaptAssets();
 
     // Set up the resource gathering in assets if we're going to generate
-    // dependency files
+    // dependency files. Every time we encounter a resource while slurping
+    // the tree, we'll add it to these stores so we have full resource paths
+    // to write to a dependency file.
     if (bundle->getGenDependencies()) {
         sp<FilePathStore> resPathStore = new FilePathStore;
         assets->setFullResPaths(resPathStore);
@@ -1577,15 +1579,20 @@ int doPackage(Bundle* bundle)
         goto bail;
     }
 
+    // If we've been asked to generate a dependency file, do that here
     if (bundle->getGenDependencies()) {
+        // If this is the packaging step, generate the dependency file next to
+        // the output apk (e.g. bin/resources.ap_.d)
         if (outputAPKFile) {
             dependencyFile = String8(outputAPKFile);
-            // Strip the extension and add new one
-            dependencyFile = dependencyFile.getBasePath();
+            // Add the .d extension to the dependency file.
             dependencyFile.append(".d");
         } else {
+            // Else if this is the R.java dependency generation step,
+            // generate the dependency file in the R.java package subdirectory
+            // e.g. gen/com/foo/app/R.java.d
             dependencyFile = String8(bundle->getRClassDir());
-            dependencyFile.appendPath("R.d");
+            dependencyFile.appendPath("R.java.d");
         }
         // Make sure we have a clean dependency file to start with
         fp = fopen(dependencyFile, "w");
@@ -1595,13 +1602,18 @@ int doPackage(Bundle* bundle)
     // Write out R.java constants
     if (assets->getPackage() == assets->getSymbolsPrivatePackage()) {
         if (bundle->getCustomPackage() == NULL) {
+            // Write the R.java file into the appropriate class directory
+            // e.g. gen/com/foo/app/R.java
             err = writeResourceSymbols(bundle, assets, assets->getPackage(), true);
-            // Copy R.java for libraries
+            // If we have library files, we're going to write our R.java file into
+            // the appropriate class directory for those libraries as well.
+            // e.g. gen/com/foo/app/lib/R.java
             if (bundle->getExtraPackages() != NULL) {
                 // Split on colon
                 String8 libs(bundle->getExtraPackages());
                 char* packageString = strtok(libs.lockBuffer(libs.length()), ":");
                 while (packageString != NULL) {
+                    // Write the R.java file out with the correct package name
                     err = writeResourceSymbols(bundle, assets, String8(packageString), true);
                     packageString = strtok(NULL, ":");
                 }
@@ -1640,6 +1652,10 @@ int doPackage(Bundle* bundle)
         }
     }
 
+    // If we've been asked to generate a dependency file, we need to finish up here.
+    // the writeResourceSymbols and writeAPK functions have already written the target
+    // half of the dependency file, now we need to write the prerequisites. (files that
+    // the R.java file or .ap_ file depend on)
     if (bundle->getGenDependencies()) {
         // Now that writeResourceSymbols or writeAPK has taken care of writing
         // the targets to our dependency file, we'll write the prereqs
@@ -1647,7 +1663,8 @@ int doPackage(Bundle* bundle)
         fprintf(fp, " : ");
         bool includeRaw = (outputAPKFile != NULL);
         err = writeDependencyPreReqs(bundle, assets, fp, includeRaw);
-        // Also manually add the AndroidManifeset since it's a non-asset
+        // Also manually add the AndroidManifeset since it's not under res/ or assets/
+        // and therefore was not added to our pathstores during slurping
         fprintf(fp, "%s \\\n", bundle->getAndroidManifestFile());
         fclose(fp);
     }
