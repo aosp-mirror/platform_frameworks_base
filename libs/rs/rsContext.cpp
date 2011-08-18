@@ -252,10 +252,11 @@ void * Context::threadProc(void *vrsc) {
     while (!rsc->mExit) {
         uint64_t waitTime = 0;
         uint64_t now = rsc->getTime();
-        if (now < targetTime) {
-            waitTime = targetTime - now;
-        } else {
-            doWait = false;
+        if (!doWait) {
+            if (now < targetTime) {
+                waitTime = targetTime - now;
+                doWait = true;
+            }
         }
 
         mDraw |= rsc->mIO.playCoreCommands(rsc, doWait, waitTime);
@@ -265,7 +266,7 @@ void * Context::threadProc(void *vrsc) {
         if (mDraw && rsc->mIsGraphicsContext) {
             uint64_t delay = rsc->runRootScript() * 1000000;
             targetTime = rsc->getTime() + delay;
-            doWait = delay != 0;
+            doWait = (delay == 0);
 
             if (rsc->props.mLogVisual) {
                 rsc->displayDebugStats();
