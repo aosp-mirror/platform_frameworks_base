@@ -20,11 +20,16 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
+import android.test.suitebuilder.annotation.SmallTest;
+
+import java.util.List;
 
 /** Unit test for SettingsProvider. */
 public class SettingsProviderTest extends AndroidTestCase {
@@ -191,4 +196,49 @@ public class SettingsProviderTest extends AndroidTestCase {
         assertEquals("test1,test2",
                 Settings.Secure.getString(r, Settings.Secure.LOCATION_PROVIDERS_ALLOWED));
      }
+
+     @SmallTest
+     public void testSettings() {
+        assertCanBeHandled(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_ADD_ACCOUNT));
+        assertCanBeHandled(new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_APN_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+                .setData(Uri.parse("package:" + getContext().getPackageName())));
+        assertCanBeHandled(new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_APPLICATION_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_DATA_ROAMING_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_DATE_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_DEVICE_INFO_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_DISPLAY_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_LOCALE_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_MANAGE_ALL_APPLICATIONS_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_MEMORY_CARD_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_NETWORK_OPERATOR_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_PRIVACY_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_QUICK_LAUNCH_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_SEARCH_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_SECURITY_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_SOUND_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_SYNC_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_SYSTEM_UPDATE_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_USER_DICTIONARY_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_WIFI_IP_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_WIFI_SETTINGS));
+        assertCanBeHandled(new Intent(Settings.ACTION_WIRELESS_SETTINGS));
+    }
+
+    private void assertCanBeHandled(final Intent intent) {
+        PackageManager packageManager = mContext.getPackageManager();
+        List<ResolveInfo> resolveInfoList = packageManager.queryIntentActivities(intent, 0);
+        assertNotNull(resolveInfoList);
+        // one or more activity can handle this intent.
+        assertTrue(resolveInfoList.size() > 0);
+    }
 }
