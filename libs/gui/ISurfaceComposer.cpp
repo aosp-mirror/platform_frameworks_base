@@ -31,6 +31,8 @@
 
 #include <ui/DisplayInfo.h>
 
+#include <gui/ISurfaceTexture.h>
+
 #include <utils/Log.h>
 
 // ---------------------------------------------------------------------------
@@ -166,35 +168,36 @@ public:
         return reply.readInt32();
     }
 
-    virtual bool authenticateSurface(const sp<ISurface>& surface) const
+    virtual bool authenticateSurfaceTexture(
+            const sp<ISurfaceTexture>& surfaceTexture) const
     {
         Parcel data, reply;
         int err = NO_ERROR;
         err = data.writeInterfaceToken(
                 ISurfaceComposer::getInterfaceDescriptor());
         if (err != NO_ERROR) {
-            LOGE("ISurfaceComposer::authenticateSurface: error writing "
+            LOGE("ISurfaceComposer::authenticateSurfaceTexture: error writing "
                     "interface descriptor: %s (%d)", strerror(-err), -err);
             return false;
         }
-        err = data.writeStrongBinder(surface->asBinder());
+        err = data.writeStrongBinder(surfaceTexture->asBinder());
         if (err != NO_ERROR) {
-            LOGE("ISurfaceComposer::authenticateSurface: error writing strong "
-                    "binder to parcel: %s (%d)", strerror(-err), -err);
+            LOGE("ISurfaceComposer::authenticateSurfaceTexture: error writing "
+                    "strong binder to parcel: %s (%d)", strerror(-err), -err);
             return false;
         }
         err = remote()->transact(BnSurfaceComposer::AUTHENTICATE_SURFACE, data,
                 &reply);
         if (err != NO_ERROR) {
-            LOGE("ISurfaceComposer::authenticateSurface: error performing "
-                    "transaction: %s (%d)", strerror(-err), -err);
+            LOGE("ISurfaceComposer::authenticateSurfaceTexture: error "
+                    "performing transaction: %s (%d)", strerror(-err), -err);
             return false;
         }
         int32_t result = 0;
         err = reply.readInt32(&result);
         if (err != NO_ERROR) {
-            LOGE("ISurfaceComposer::authenticateSurface: error retrieving "
-                    "result: %s (%d)", strerror(-err), -err);
+            LOGE("ISurfaceComposer::authenticateSurfaceTexture: error "
+                    "retrieving result: %s (%d)", strerror(-err), -err);
             return false;
         }
         return result != 0;
@@ -291,8 +294,9 @@ status_t BnSurfaceComposer::onTransact(
         } break;
         case AUTHENTICATE_SURFACE: {
             CHECK_INTERFACE(ISurfaceComposer, data, reply);
-            sp<ISurface> surface = interface_cast<ISurface>(data.readStrongBinder());
-            int32_t result = authenticateSurface(surface) ? 1 : 0;
+            sp<ISurfaceTexture> surfaceTexture =
+                    interface_cast<ISurfaceTexture>(data.readStrongBinder());
+            int32_t result = authenticateSurfaceTexture(surfaceTexture) ? 1 : 0;
             reply->writeInt32(result);
         } break;
         default:

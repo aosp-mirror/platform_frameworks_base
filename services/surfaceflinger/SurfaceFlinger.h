@@ -171,7 +171,7 @@ public:
     virtual status_t                    freezeDisplay(DisplayID dpy, uint32_t flags);
     virtual status_t                    unfreezeDisplay(DisplayID dpy, uint32_t flags);
     virtual int                         setOrientation(DisplayID dpy, int orientation, uint32_t flags);
-    virtual bool                        authenticateSurface(const sp<ISurface>& surface) const;
+    virtual bool                        authenticateSurfaceTexture(const sp<ISurfaceTexture>& surface) const;
 
     virtual status_t captureScreen(DisplayID dpy,
             sp<IMemoryHeap>* heap,

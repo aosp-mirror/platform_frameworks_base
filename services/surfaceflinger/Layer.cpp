@@ -133,6 +133,11 @@ sp<ISurface> Layer::createSurface()
     return sur;
 }
 
+wp<IBinder> Layer::getSurfaceTextureBinder() const
+{
+    return mSurfaceTexture->asBinder();
+}
+
 status_t Layer::setBuffers( uint32_t w, uint32_t h,
                             PixelFormat format, uint32_t flags)
 {

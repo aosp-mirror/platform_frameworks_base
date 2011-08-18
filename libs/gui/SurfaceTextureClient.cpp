@@ -18,6 +18,8 @@
 //#define LOG_NDEBUG 0
 
 #include <gui/SurfaceTextureClient.h>
+#include <surfaceflinger/ISurfaceComposer.h>
+#include <surfaceflinger/SurfaceComposerClient.h>
 
 #include <utils/Log.h>
 
@@ -234,7 +236,15 @@ int SurfaceTextureClient::query(int what, int* value) const {
                 }
                 break;
             case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
-                *value = 0;
+                {
+                    sp<ISurfaceComposer> composer(
+                            ComposerService::getComposerService());
+                    if (composer->authenticateSurfaceTexture(mSurfaceTexture)) {
+                        *value = 1;
+                    } else {
+                        *value = 0;
+                    }
+                }
                 return NO_ERROR;
             case NATIVE_WINDOW_CONCRETE_TYPE:
                 *value = NATIVE_WINDOW_SURFACE_TEXTURE_CLIENT;

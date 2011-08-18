@@ -74,6 +74,9 @@ public:
     virtual bool isProtected() const;
     virtual void onRemoved();
 
+    // LayerBaseClient interface
+    virtual wp<IBinder> getSurfaceTextureBinder() const;
+
     // only for debugging
     inline const sp<FreezeLock>&  getFreezeLock() const { return mFreezeLock; }
 
