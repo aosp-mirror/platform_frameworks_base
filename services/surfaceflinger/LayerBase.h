@@ -288,6 +288,7 @@ public:
 
             sp<ISurface> getSurface();
             wp<IBinder> getSurfaceBinder() const;
+            virtual wp<IBinder> getSurfaceTextureBinder() const;
 
     virtual sp<LayerBaseClient> getLayerBaseClient() const {
         return const_cast<LayerBaseClient*>(this); }
