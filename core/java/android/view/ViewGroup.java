@@ -5012,7 +5012,9 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
      */
     public void requestTransitionStart(LayoutTransition transition) {
         ViewRootImpl viewAncestor = getViewRootImpl();
-        viewAncestor.requestTransitionStart(transition);
+        if (viewAncestor != null) {
+            viewAncestor.requestTransitionStart(transition);
+        }
     }
 
     @Override
