@@ -97,6 +97,9 @@ class MountService extends IMountService.Stub
     private static final boolean DEBUG_EVENTS = false;
     private static final boolean DEBUG_OBB = false;
 
+    // Disable this since it messes up long-running cryptfs operations.
+    private static final boolean WATCHDOG_ENABLE = false;
+
     private static final String TAG = "MountService";
 
     private static final String VOLD_TAG = "VoldConnector";
@@ -1182,8 +1185,10 @@ class MountService extends IMountService.Stub
         Thread thread = new Thread(mConnector, VOLD_TAG);
         thread.start();
 
-        // Add ourself to the Watchdog monitors.
-        Watchdog.getInstance().addMonitor(this);
+        // Add ourself to the Watchdog monitors if enabled.
+        if (WATCHDOG_ENABLE) {
+            Watchdog.getInstance().addMonitor(this);
+        }
     }
 
     /**
