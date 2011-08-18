@@ -9036,15 +9036,6 @@ public class WebView extends AbsoluteLayout
     }
 
     /**
-     * Enable expanded tiles bound for smoother scrolling.
-     *
-     * @hide only used by the Browser
-     */
-    public void setExpandedTileBounds(boolean enabled) {
-        nativeSetExpandedTileBounds(enabled);
-    }
-
-    /**
      * Set the time to wait between passing touches to WebCore. See also the
      * TOUCH_SENT_INTERVAL member for further discussion.
      *
@@ -9273,7 +9264,6 @@ public class WebView extends AbsoluteLayout
     static final int NO_LEFTEDGE = -1;
     native int nativeGetBlockLeftEdge(int x, int y, float scale);
 
-    private native void     nativeSetExpandedTileBounds(boolean enabled);
     private native void     nativeUseHardwareAccelSkia(boolean enabled);
 
     // Returns a pointer to the scrollable LayerAndroid at the given point.
