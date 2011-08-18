@@ -156,7 +156,7 @@ public class ActivityChooserView extends ViewGroup implements ActivityChooserMod
      * @param attrs A collection of attributes.
      */
     public ActivityChooserView(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.actionButtonStyle);
+        this(context, attrs, 0);
     }
 
     /**
