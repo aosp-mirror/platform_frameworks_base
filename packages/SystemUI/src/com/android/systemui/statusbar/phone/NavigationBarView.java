@@ -57,6 +57,7 @@ public class NavigationBarView extends LinearLayout {
     boolean mVertical;
 
     boolean mHidden;
+    boolean mEnabled = true;
 
     public View getRecentsButton() {
         return mCurrentView.findViewById(R.id.recent_apps);
@@ -79,6 +80,11 @@ public class NavigationBarView extends LinearLayout {
         final Resources res = mContext.getResources();
         mBarSize = res.getDimensionPixelSize(R.dimen.navigation_bar_size);
         mVertical = false;
+    }
+
+    public void setEnabled(final boolean enable) {
+        mEnabled = enable;
+        mCurrentView.setVisibility(enable ? View.VISIBLE : View.INVISIBLE);
     }
 
     public void setHidden(final boolean hide) {

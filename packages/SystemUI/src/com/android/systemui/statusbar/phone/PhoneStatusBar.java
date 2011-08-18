@@ -1048,12 +1048,30 @@ public class PhoneStatusBar extends StatusBar {
         final int diff = state ^ old;
         mDisabled = state;
 
+        if (DEBUG) {
+            Slog.d(TAG, String.format("disable: 0x%08x -> 0x%08x (diff: 0x%08x)",
+                old, state, diff));
+        }
+
         if ((diff & StatusBarManager.DISABLE_EXPAND) != 0) {
             if ((state & StatusBarManager.DISABLE_EXPAND) != 0) {
                 Slog.d(TAG, "DISABLE_EXPAND: yes");
                 animateCollapse();
             }
         }
+
+        if ((diff & StatusBarManager.DISABLE_NAVIGATION) != 0) {
+            if ((state & StatusBarManager.DISABLE_NAVIGATION) != 0) {
+                Slog.d(TAG, "DISABLE_NAVIGATION: yes");
+
+                // close recents if it's visible
+                mHandler.removeMessages(MSG_CLOSE_RECENTS_PANEL);
+                mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
+            }
+
+            mNavigationBarView.setEnabled((state & StatusBarManager.DISABLE_NAVIGATION) == 0);
+        }
+
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
             if ((state & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
                 Slog.d(TAG, "DISABLE_NOTIFICATION_ICONS: yes");
