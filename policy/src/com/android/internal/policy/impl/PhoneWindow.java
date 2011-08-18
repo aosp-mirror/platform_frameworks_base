@@ -386,8 +386,10 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                     // Ditch the menu created above
                     st.menu = null;
 
-                    // Don't show it in the action bar either
-                    mActionBar.setMenu(null, mActionMenuPresenterCallback);
+                    if (mActionBar != null) {
+                        // Don't show it in the action bar either
+                        mActionBar.setMenu(null, mActionMenuPresenterCallback);
+                    }
 
                     return false;
                 }
@@ -409,9 +411,11 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
 
             if (!cb.onPreparePanel(st.featureId, st.createdPanelView, st.menu)) {
-                // The app didn't want to show the menu for now but it still exists.
-                // Clear it out of the action bar.
-                mActionBar.setMenu(null, mActionMenuPresenterCallback);
+                if (mActionBar != null) {
+                    // The app didn't want to show the menu for now but it still exists.
+                    // Clear it out of the action bar.
+                    mActionBar.setMenu(null, mActionMenuPresenterCallback);
+                }
                 st.menu.startDispatchingItemsChanged();
                 return false;
             }
