@@ -115,7 +115,8 @@ public final class NetworkManagementSocketTagger extends SocketTagger {
 
     private void unTagSocketFd(FileDescriptor fd) throws IOException {
         int fdNum = fd.getInt$();
-        if (fdNum == -1) return;
+        final SocketTags options = threadSocketTags.get();
+        if (fdNum == -1 || (options.statsTag == -1 && options.statsUid == -1)) return;
         String cmd = "u " + fdNum;
         internalModuleCtrl(cmd);
     }
