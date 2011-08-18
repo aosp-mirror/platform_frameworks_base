@@ -1958,10 +1958,12 @@ status_t writeResourceSymbols(Bundle* bundle, const sp<AaptAssets>& assets,
         }
         fclose(fp);
 
+        // If we were asked to generate a dependency file, we'll go ahead and add this R.java
+        // as a target in the dependency file right next to it.
         if (bundle->getGenDependencies()) {
             // Add this R.java to the dependency file
             String8 dependencyFile(bundle->getRClassDir());
-            dependencyFile.appendPath("R.d");
+            dependencyFile.appendPath("R.java.d");
 
             fp = fopen(dependencyFile.string(), "a");
             fprintf(fp,"%s \\\n", dest.string());
