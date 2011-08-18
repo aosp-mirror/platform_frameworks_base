@@ -544,6 +544,10 @@ wp<IBinder> LayerBaseClient::getSurfaceBinder() const {
     return mClientSurfaceBinder;
 }
 
+wp<IBinder> LayerBaseClient::getSurfaceTextureBinder() const {
+    return 0;
+}
+
 void LayerBaseClient::dump(String8& result, char* buffer, size_t SIZE) const
 {
     LayerBase::dump(result, buffer, SIZE);

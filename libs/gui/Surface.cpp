@@ -342,9 +342,6 @@ sp<IBinder> Surface::asBinder() const {
 
 int Surface::query(int what, int* value) const {
     switch (what) {
-    case NATIVE_WINDOW_QUEUES_TO_WINDOW_COMPOSER:
-        *value = 1;
-        return NO_ERROR;
     case NATIVE_WINDOW_CONCRETE_TYPE:
         *value = NATIVE_WINDOW_SURFACE;
         return NO_ERROR;

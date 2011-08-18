@@ -132,9 +132,10 @@ public:
     virtual status_t turnElectronBeamOff(int32_t mode) = 0;
     virtual status_t turnElectronBeamOn(int32_t mode) = 0;
 
-    /* verify that an ISurface was created by SurfaceFlinger.
+    /* verify that an ISurfaceTexture was created by SurfaceFlinger.
      */
-    virtual bool authenticateSurface(const sp<ISurface>& surface) const = 0;
+    virtual bool authenticateSurfaceTexture(
+            const sp<ISurfaceTexture>& surface) const = 0;
 };
 
 // ----------------------------------------------------------------------------
