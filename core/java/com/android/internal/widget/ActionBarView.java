@@ -1036,6 +1036,8 @@ public class ActionBarView extends AbsActionBarView {
                 } else if (centeredLeft + navWidth > menuLeft) {
                     hgravity = Gravity.RIGHT;
                 }
+            } else if (gravity == -1) {
+                hgravity = Gravity.LEFT;
             }
 
             int xpos = 0;
@@ -1051,8 +1053,14 @@ public class ActionBarView extends AbsActionBarView {
                     break;
             }
 
+            int vgravity = gravity & Gravity.VERTICAL_GRAVITY_MASK;
+
+            if (gravity == -1) {
+                vgravity = Gravity.CENTER_VERTICAL;
+            }
+
             int ypos = 0;
-            switch (gravity & Gravity.VERTICAL_GRAVITY_MASK) {
+            switch (vgravity) {
                 case Gravity.CENTER_VERTICAL:
                     final int paddedTop = getPaddingTop();
                     final int paddedBottom = mBottom - mTop - getPaddingBottom();
