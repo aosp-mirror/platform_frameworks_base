@@ -59,6 +59,7 @@
 #include <cutils/properties.h>
 
 #define USE_SURFACE_ALLOC 1
+#define FRAME_DROP_FREQ 0
 
 namespace android {
 
@@ -1523,14 +1524,29 @@ status_t AwesomePlayer::initVideoDecoder(uint32_t flags) {
     }
 
     if (mVideoSource != NULL) {
-        Mutex::Autolock autoLock(mStatsLock);
-        TrackStat *stat = &mStats.mTracks.editItemAt(mStats.mVideoTrackIndex);
-
-        const char *component;
+        const char *componentName;
         CHECK(mVideoSource->getFormat()
-                ->findCString(kKeyDecoderComponent, &component));
+                ->findCString(kKeyDecoderComponent, &componentName));
 
-        stat->mDecoderName = component;
+        {
+            Mutex::Autolock autoLock(mStatsLock);
+            TrackStat *stat = &mStats.mTracks.editItemAt(mStats.mVideoTrackIndex);
+
+            stat->mDecoderName = componentName;
+        }
+
+        static const char *kPrefix = "OMX.Nvidia.";
+        static const char *kSuffix = ".decode";
+        static const size_t kSuffixLength = strlen(kSuffix);
+
+        size_t componentNameLength = strlen(componentName);
+
+        if (!strncmp(componentName, kPrefix, strlen(kPrefix))
+                && componentNameLength >= kSuffixLength
+                && !strcmp(&componentName[
+                    componentNameLength - kSuffixLength], kSuffix)) {
+            modifyFlags(SLOW_DECODER_HACK, SET);
+        }
     }
 
     return mVideoSource != NULL ? OK : UNKNOWN_ERROR;
@@ -1710,6 +1726,7 @@ void AwesomePlayer::onVideoEvent() {
 
     if (mFlags & FIRST_FRAME) {
         modifyFlags(FIRST_FRAME, CLEAR);
+        mSinceLastDropped = 0;
         mTimeSourceDeltaUs = ts->getRealTimeUs() - timeUs;
     }
 
@@ -1756,18 +1773,28 @@ void AwesomePlayer::onVideoEvent() {
 
         if (latenessUs > 40000) {
             // We're more than 40ms late.
-            LOGV("we're late by %lld us (%.2f secs), dropping frame",
+            LOGV("we're late by %lld us (%.2f secs)",
                  latenessUs, latenessUs / 1E6);
-            mVideoBuffer->release();
-            mVideoBuffer = NULL;
 
+            if (!(mFlags & SLOW_DECODER_HACK)
+                    || mSinceLastDropped > FRAME_DROP_FREQ)
             {
-                Mutex::Autolock autoLock(mStatsLock);
-                ++mStats.mNumVideoFramesDropped;
-            }
+                LOGV("we're late by %lld us (%.2f secs) dropping "
+                     "one after %d frames",
+                     latenessUs, latenessUs / 1E6, mSinceLastDropped);
 
-            postVideoEvent_l();
-            return;
+                mSinceLastDropped = 0;
+                mVideoBuffer->release();
+                mVideoBuffer = NULL;
+
+                {
+                    Mutex::Autolock autoLock(mStatsLock);
+                    ++mStats.mNumVideoFramesDropped;
+                }
+
+                postVideoEvent_l();
+                return;
+            }
         }
 
         if (latenessUs < -10000) {
@@ -1786,6 +1813,7 @@ void AwesomePlayer::onVideoEvent() {
     }
 
     if (mVideoRenderer != NULL) {
+        mSinceLastDropped++;
         mVideoRenderer->render(mVideoBuffer);
     }
 
