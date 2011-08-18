@@ -259,6 +259,17 @@ public class TextUtils {
     }
 
     /**
+     * Returns list of multiple {@link CharSequence} joined into a single
+     * {@link CharSequence} separated by localized delimiter such as ", ".
+     *
+     * @hide
+     */
+    public static CharSequence join(Iterable<CharSequence> list) {
+        final CharSequence delimiter = Resources.getSystem().getText(R.string.list_delimeter);
+        return join(delimiter, list);
+    }
+
+    /**
      * Returns a string containing the tokens joined by delimiters.
      * @param tokens an array objects to be joined. Strings will be formed from
      *     the objects by calling object.toString().

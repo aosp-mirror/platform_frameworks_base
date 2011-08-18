@@ -3153,4 +3153,7 @@
     <!-- Description of for the status bar's icon that the device is locked for accessibility. [CHAR LIMIT=NONE] -->
     <string name="status_bar_device_locked">Device locked.</string>
 
+    <!-- Delimeter used between each item in a textual list; for example "Alpha, Beta". [CHAR LIMIT=3] -->
+    <string name="list_delimeter">", "</string>
+
 </resources>
