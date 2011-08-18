@@ -277,10 +277,19 @@ public class LayerDrawable extends Drawable implements Drawable.Callback {
      */
     public boolean setDrawableByLayerId(int id, Drawable drawable) {
         final ChildDrawable[] layers = mLayerState.mChildren;
-        drawable.setCallback(this);
         
         for (int i = mLayerState.mNum - 1; i >= 0; i--) {
             if (layers[i].mId == id) {
+                if (layers[i].mDrawable != null) {
+                    if (drawable != null) {
+                        Rect bounds = layers[i].mDrawable.getBounds();
+                        drawable.setBounds(bounds);
+                    }
+                    layers[i].mDrawable.setCallback(null);
+                }
+                if (drawable != null) {
+                    drawable.setCallback(this);
+                }
                 layers[i].mDrawable = drawable;
                 return true;
             }

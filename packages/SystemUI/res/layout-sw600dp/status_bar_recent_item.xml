@@ -32,8 +32,14 @@
         android:layout_marginLeft="@dimen/status_bar_recents_thumbnail_left_margin"
         android:scaleType="center"
         android:clickable="true"
-        android:background="@drawable/recents_thumbnail_layers"
-    />
+        android:background="@drawable/recents_thumbnail_bg"
+        android:foreground="@drawable/recents_thumbnail_overlay">
+        <ImageView android:id="@+id/app_thumbnail_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="invisible"
+        />
+    </FrameLayout>
 
     <ImageView android:id="@+id/app_icon"
         android:layout_width="wrap_content"
