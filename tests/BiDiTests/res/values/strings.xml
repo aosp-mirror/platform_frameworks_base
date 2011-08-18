@@ -27,6 +27,7 @@
     <string name="textview_text">This is a text for a TextView</string>
     <string name="textview_ltr_text">This is a text for a LTR TextView</string>
     <string name="textview_rtl_text">This is a text for a RTL TextView</string>
+    <string name="textview_default_text">This is a text for a default TextView</string>
     <string name="edittext_text">mmmmmmmmmmmmmmmmmmmmmmmm</string>
     <string name="normal_text">Normal String</string>
     <string name="normal_long_text">mmmmmmmmmmmmmmmmmmmmmmmm</string>
