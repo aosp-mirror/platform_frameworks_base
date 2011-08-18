@@ -474,9 +474,6 @@ status_t OMXNodeInstance::useGraphicBuffer(
         return useGraphicBuffer2_l(portIndex, graphicBuffer, buffer);
     }
 
-    LOGW("Falling back to the deprecated useAndroidNativeBuffer support.  You "
-        "should switch to the useAndroidNativeBuffer2 extension.");
-
     OMX_ERRORTYPE err = OMX_GetExtensionIndex(
             mHandle,
             const_cast<OMX_STRING>("OMX.google.android.index.useAndroidNativeBuffer"),
