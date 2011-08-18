@@ -2699,7 +2699,6 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 
                 if (!haveBg) {
-                    Slog.i(TAG, "Low Memory: No more background processes.");
                     EventLog.writeEvent(EventLogTags.AM_LOW_MEMORY, mLruProcesses.size());
                     long now = SystemClock.uptimeMillis();
                     for (int i=mLruProcesses.size()-1; i>=0; i--) {
