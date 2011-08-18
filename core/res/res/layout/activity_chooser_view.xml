@@ -22,7 +22,8 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:gravity="center"
-    style="?android:attr/actionButtonStyle">
+    style="?android:attr/actionButtonStyle"
+    android:padding="0dip">
 
     <FrameLayout
         android:id="@+id/default_activity_button"
@@ -31,7 +32,7 @@
         android:layout_gravity="center"
         android:focusable="true"
         android:addStatesFromChildren="true"
-        android:background="?android:attr/selectableItemBackground">
+        android:background="?android:attr/actionBarItemBackground">
 
         <ImageView android:id="@+id/image"
             android:layout_width="32dip"
@@ -53,7 +54,7 @@
         android:layout_gravity="center"
         android:focusable="true"
         android:addStatesFromChildren="true"
-        android:background="?android:attr/selectableItemBackground">
+        android:background="?android:attr/actionBarItemBackground">
 
         <ImageView android:id="@+id/image"
             android:layout_width="32dip"
