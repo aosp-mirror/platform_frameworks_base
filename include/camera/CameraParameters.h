@@ -597,13 +597,24 @@ public:
     // CameraHardwareInterface.autoFocus in this mode.
     static const char FOCUS_MODE_EDOF[];
     // Continuous auto focus mode intended for video recording. The camera
-    // continuously tries to focus. This is ideal for shooting video.
-    // Applications still can call CameraHardwareInterface.takePicture in this
-    // mode but the subject may not be in focus. Auto focus starts when the
-    // parameter is set. Applications should not call
-    // CameraHardwareInterface.autoFocus in this mode. To stop continuous focus,
-    // applications should change the focus mode to other modes.
+    // continuously tries to focus. This is the best choice for video
+    // recording because the focus changes smoothly . Applications still can
+    // call CameraHardwareInterface.takePicture in this mode but the subject may
+    // not be in focus. Auto focus starts when the parameter is set.
+    // Applications should not call CameraHardwareInterface.autoFocus in this
+    // mode. To stop continuous focus, applications should change the focus mode
+    // to other modes.
     static const char FOCUS_MODE_CONTINUOUS_VIDEO[];
+    // Continuous auto focus mode intended for taking pictures. The camera
+    // continuously tries to focus. The speed of focus change is more aggressive
+    // than FOCUS_MODE_CONTINUOUS_VIDEO. Auto focus starts when the parameter is
+    // set. If applications call autoFocus in this mode, the focus callback will
+    // immediately return with a boolean that indicates the focus is sharp or
+    // not. The apps can then decide if they want to take a picture immediately
+    // or to change the focus mode to auto, and run a full autofocus cycle. To
+    // stop continuous focus, applications should change the focus mode to other
+    // modes.
+    static const char FOCUS_MODE_CONTINUOUS_PICTURE[];
 
 private:
     DefaultKeyedVector<String8,String8>    mMap;
