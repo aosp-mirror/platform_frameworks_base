@@ -1220,9 +1220,7 @@ public class TabletStatusBar extends StatusBar implements
 
     private View.OnClickListener mOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
-            if (v == mNotificationTrigger) {
-                onClickNotificationTrigger();
-            } else if (v == mRecentButton) {
+            if (v == mRecentButton) {
                 onClickRecentButton();
             } else if (v == mInputMethodSwitchButton) {
                 onClickInputMethodSwitchButton();
@@ -1231,17 +1229,6 @@ public class TabletStatusBar extends StatusBar implements
             }
         }
     };
-
-    public void onClickNotificationTrigger() {
-        if (DEBUG) Slog.d(TAG, "clicked notification icons; disabled=" + mDisabled);
-        if ((mDisabled & StatusBarManager.DISABLE_EXPAND) == 0) {
-            int msg = !mNotificationPanel.isShowing()
-                ? MSG_OPEN_NOTIFICATION_PANEL
-                : MSG_CLOSE_NOTIFICATION_PANEL;
-            mHandler.removeMessages(msg);
-            mHandler.sendEmptyMessage(msg);
-        }
-    }
 
     public void onClickRecentButton() {
         if (DEBUG) Slog.d(TAG, "clicked recent apps; disabled=" + mDisabled);
@@ -1374,6 +1361,11 @@ public class TabletStatusBar extends StatusBar implements
 //                        event.getY(),
 //                        mInitialTouchX,
 //                        mInitialTouchY));
+
+            if ((mDisabled & StatusBarManager.DISABLE_EXPAND) != 0) {
+                return true;
+            }
+
             final int action = event.getAction();
             switch (action) {
                 case MotionEvent.ACTION_DOWN:
