@@ -2499,7 +2499,7 @@ videoEditor_init(
             //initialize the first char. so that strcat works.
             M4OSA_Char *ptmpChar = (M4OSA_Char*)pContext->initParams.pTempPath;
             ptmpChar[0] = 0x00;
-            strncat((char *)pContext->initParams.pTempPath, (const char *)tmpString, 
+            strncat((char *)pContext->initParams.pTempPath, (const char *)tmpString,
                 (size_t)strlen((const char *)tmpString));
             strncat((char *)pContext->initParams.pTempPath, (const char *)"/", (size_t)1);
             free(tmpString);
@@ -2631,7 +2631,8 @@ M4OSA_ERR videoEditor_processClip(
     ManualEditState    completionState  = ManualEditState_OPENED;
     ManualEditState    errorState       = ManualEditState_ANALYZING_ERROR;
 
-    // While analyzing progress goes from 0 to 50
+    // While analyzing progress goes from 0 to 10 (except Kenburn clip
+    // generation, which goes from 0 to 50)
     progressBase     = 0;
 
     // Set the text rendering function.
@@ -2667,6 +2668,7 @@ M4OSA_ERR videoEditor_processClip(
     // Check if a task is being performed.
     // ??? ADD STOPPING MECHANISM
     LOGV("videoEditor_processClip Entering processing loop");
+    M4OSA_UInt8 prevReportedProgress = 0;
     while((result == M4NO_ERROR)
         &&(pContext->state!=ManualEditState_SAVED)
         &&(pContext->state!=ManualEditState_STOPPING)) {
@@ -2674,19 +2676,35 @@ M4OSA_ERR videoEditor_processClip(
             // Perform the next processing step.
             //LOGV("LVME_processClip Entering M4xVSS_Step()");
             result = M4xVSS_Step(pContext->engineContext, &progress);
-            //LOGV("LVME_processClip M4xVSS_Step() returned 0x%x", (unsigned int)result);
 
-            // Log the the 1 % .. 100 % progress after processing.
-            progress = progressBase + progress/2;
-            if (progress != lastProgress)
-            {
-                // Send a progress notification.
-                LOGV("videoEditor_processClip ITEM %d Progress indication %d",
-                    unuseditemID, progress);
-                pEnv->CallVoidMethod(pContext->engine,
-                    pContext->onProgressUpdateMethodId,
-                    unuseditemID, progress);
-                lastProgress = progress;
+            if (progress != prevReportedProgress) {
+                prevReportedProgress = progress;
+                // Log the 1 % .. 100 % progress after processing.
+                if (M4OSA_TRUE ==
+                    pContext->pEditSettings->pClipList[0]->xVSS.isPanZoom) {
+                    // For KenBurn clip generation, return 0 to 50
+                    // for Analysis phase and 50 to 100 for Saving phase
+                    progress = progressBase + progress/2;
+                } else {
+                    // For export/transition clips, 0 to 10 for Analysis phase
+                    // and 10 to 100 for Saving phase
+                    if (ManualEditState_INITIALIZED == pContext->state) {
+                        progress = 0.1*progress;
+                    } else {
+                        progress = progressBase + 0.9*progress;
+                    }
+                }
+
+                if (progress > lastProgress)
+                {
+                    // Send a progress notification.
+                    LOGV("videoEditor_processClip ITEM %d Progress indication %d",
+                        unuseditemID, progress);
+                    pEnv->CallVoidMethod(pContext->engine,
+                        pContext->onProgressUpdateMethodId,
+                        unuseditemID, progress);
+                    lastProgress = progress;
+                }
             }
 
             // Check if processing has been completed.
@@ -2719,20 +2737,26 @@ M4OSA_ERR videoEditor_processClip(
                     completionResult = M4VSS3GPP_WAR_SAVING_DONE;
                     errorState       = ManualEditState_SAVING_ERROR;
 
-                    // While saving progress goes from 50 to 100
-                    progressBase     = 50;
+                    // While saving, progress goes from 10 to 100
+                    // except for Kenburn clip which goes from 50 to 100
+                    if (M4OSA_TRUE ==
+                            pContext->pEditSettings->pClipList[0]->xVSS.isPanZoom) {
+                        progressBase = 50;
+                    } else {
+                        progressBase     = 10;
+                    }
                 }
                 // Check if we encoding is ongoing
                 else if (pContext->state == ManualEditState_SAVED) {
-                    if (progress != 100) {
-                        // Send a progress notification.
-                        progress = 100;
-                        LOGI("videoEditor_processClip ITEM %d Last progress indication %d",
-                            unuseditemID, progress);
-                        pEnv->CallVoidMethod(pContext->engine,
-                            pContext->onProgressUpdateMethodId,
-                            unuseditemID, progress);
-                    }
+
+                    // Send a progress notification.
+                    progress = 100;
+                    LOGV("videoEditor_processClip ITEM %d Last progress indication %d",
+                        unuseditemID, progress);
+                    pEnv->CallVoidMethod(pContext->engine,
+                        pContext->onProgressUpdateMethodId,
+                        unuseditemID, progress);
+
 
                     // Stop the encoding.
                     LOGV("videoEditor_processClip Calling M4xVSS_SaveStop()");
