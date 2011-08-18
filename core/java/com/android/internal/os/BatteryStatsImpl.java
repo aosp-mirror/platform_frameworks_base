@@ -67,12 +67,13 @@ public final class BatteryStatsImpl extends BatteryStats {
     private static final String TAG = "BatteryStatsImpl";
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_HISTORY = false;
+    private static final boolean USE_OLD_HISTORY = false;   // for debugging.
 
     // In-memory Parcel magic number, used to detect attempts to unmarshall bad data
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    private static final int VERSION = 60;
+    private static final int VERSION = 61 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // Maximum number of items we will record in the history.
     private static final int MAX_HISTORY_ITEMS = 2000;
@@ -1285,6 +1286,10 @@ public final class BatteryStatsImpl extends BatteryStats {
     void addHistoryRecordLocked(long curTime) {
         addHistoryBufferLocked(curTime);
 
+        if (!USE_OLD_HISTORY) {
+            return;
+        }
+
         if (!mHaveBatteryLevel || !mRecordingHistory) {
             return;
         }
@@ -1363,12 +1368,15 @@ public final class BatteryStatsImpl extends BatteryStats {
 
     void clearHistoryLocked() {
         if (DEBUG_HISTORY) Slog.i(TAG, "********** CLEARING HISTORY!");
-        if (mHistory != null) {
-            mHistoryEnd.next = mHistoryCache;
-            mHistoryCache = mHistory;
-            mHistory = mHistoryLastEnd = mHistoryEnd = null;
+        if (USE_OLD_HISTORY) {
+            if (mHistory != null) {
+                mHistoryEnd.next = mHistoryCache;
+                mHistoryCache = mHistory;
+                mHistory = mHistoryLastEnd = mHistoryEnd = null;
+            }
+            mNumHistoryItems = 0;
         }
-        mNumHistoryItems = 0;
+
         mHistoryBaseTime = 0;
         mLastHistoryTime = 0;
 
@@ -4863,7 +4871,9 @@ public final class BatteryStatsImpl extends BatteryStats {
         }
 
         long now = SystemClock.elapsedRealtime();
-        addHistoryRecordLocked(now, HistoryItem.CMD_START);
+        if (USE_OLD_HISTORY) {
+            addHistoryRecordLocked(now, HistoryItem.CMD_START);
+        }
         addHistoryBufferLocked(now, HistoryItem.CMD_START);
     }
 
@@ -4923,6 +4933,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     void readOldHistory(Parcel in) {
+        if (!USE_OLD_HISTORY) {
+            return;
+        }
         mHistory = mHistoryEnd = mHistoryCache = null;
         long time;
         while (in.dataAvail() > 0 && (time=in.readLong()) >= 0) {
@@ -4952,6 +4965,9 @@ public final class BatteryStatsImpl extends BatteryStats {
     }
 
     void writeOldHistory(Parcel out) {
+        if (!USE_OLD_HISTORY) {
+            return;
+        }
         HistoryItem rec = mHistory;
         while (rec != null) {
             if (rec.time >= 0) rec.writeToParcel(out, 0);
