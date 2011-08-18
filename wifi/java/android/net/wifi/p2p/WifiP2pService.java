@@ -767,10 +767,10 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                     notifyP2pProvDiscPinRequest((WifiP2pDevice) message.obj);
                     break;
                 case WifiP2pManager.WPS_PBC:
-                    WifiNative.p2pWpsPbc();
+                    WifiNative.wpsPbc();
                     break;
                 case WifiP2pManager.WPS_PIN:
-                    WifiNative.p2pWpsPin((String) message.obj);
+                    WifiNative.wpsPin((String) message.obj);
                     break;
                 default:
                     return NOT_HANDLED;

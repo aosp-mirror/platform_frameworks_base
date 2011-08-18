@@ -203,70 +203,42 @@ public class WifiNative {
 
     private native static boolean doBooleanCommand(String command);
 
-    //STOPSHIP: remove this after native interface works and replace all
-    //calls to doBooleanTempCommand() with doBooleanCommand()
-    private static boolean doBooleanTempCommand(String command) {
-        try {
-            String str = "/system/bin/wpa_cli " + command;
-            Log.e("WifiNative", "===> " + str);
-            Runtime.getRuntime()
-                .exec(str).waitFor();
-        } catch (Exception e) {
-            Log.e("WifiNative", "exception with doBooleanTempCommand");
-            return false;
-        }
-        return true;
-    }
-
-    private static String doStringTempCommand(String command) {
-        String lines[] = null;
-        try {
-            String str = "/system/bin/wpa_cli " + command;
-            Log.e("WifiNative", "===> " + str);
-            Process p = Runtime.getRuntime()
-                .exec(str);
-            InputStream in = p.getInputStream();
-            p.waitFor();
-            byte[] bytes=new byte[in.available()];
-            in.read(bytes);
-            String s = new String(bytes);
-            Log.e("WifiNative", "====> doString: " + s);
-            lines = s.split("\\r?\\n");
-        } catch (Exception e) {
-            Log.e("WifiNative", "exception with doBooleanTempCommand");
-            return null;
-        }
-        return lines[1];
-    }
-
     private native static int doIntCommand(String command);
 
     private native static String doStringCommand(String command);
 
+    public static boolean wpsPbc() {
+        return doBooleanCommand("WPS_PBC");
+    }
+
+    public static boolean wpsPin(String pin) {
+        return doBooleanCommand("WPS_PIN any " + pin);
+    }
+
     public static boolean p2pFind() {
-        return doBooleanTempCommand("p2p_find");
+        return doBooleanCommand("P2P_FIND");
     }
 
     public static boolean p2pFind(int timeout) {
         if (timeout <= 0) {
             return p2pFind();
         }
-        return doBooleanTempCommand("p2p_find " + timeout);
+        return doBooleanCommand("P2P_FIND " + timeout);
     }
 
     public static boolean p2pListen() {
-        return doBooleanTempCommand("p2p_listen");
+        return doBooleanCommand("P2P_LISTEN");
     }
 
     public static boolean p2pListen(int timeout) {
         if (timeout <= 0) {
             return p2pListen();
         }
-        return doBooleanTempCommand("p2p_listen " + timeout);
+        return doBooleanCommand("P2P_LISTEN " + timeout);
     }
 
     public static boolean p2pFlush() {
-        return doBooleanTempCommand("p2p_flush");
+        return doBooleanCommand("P2P_FLUSH");
     }
 
     /* p2p_connect <peer device address> <pbc|pin|PIN#> [label|display|keypad]
@@ -300,41 +272,36 @@ public class WifiNative {
         if (config.isPersistent) args.add("persistent");
         if (config.joinExistingGroup) args.add("join");
 
-        args.add("go_intent=" + config.groupOwnerIntent);
+        int groupOwnerIntent = config.groupOwnerIntent;
+        if (groupOwnerIntent < 0 || groupOwnerIntent > 15) {
+            groupOwnerIntent = 3; //default value
+        }
+        args.add("go_intent=" + groupOwnerIntent);
         if (config.channel > 0) args.add("freq=" + config.channel);
 
-        String command = "p2p_connect ";
+        String command = "P2P_CONNECT ";
         for (String s : args) command += s + " ";
 
-        return doStringTempCommand(command);
+        return doStringCommand(command);
     }
 
     public static boolean p2pGroupAdd() {
-        return doBooleanTempCommand("p2p_group_add");
+        return doBooleanCommand("P2P_GROUP_ADD");
     }
 
     public static boolean p2pGroupRemove(String iface) {
         if (iface == null) return false;
-        return doBooleanTempCommand("p2p_group_remove " + iface);
+        return doBooleanCommand("P2P_GROUP_REMOVE " + iface);
     }
 
     public static boolean p2pReject(String deviceAddress) {
-        return doBooleanTempCommand("p2p_reject " + deviceAddress);
+        return doBooleanCommand("P2P_REJECT " + deviceAddress);
     }
 
     /* Invite a peer to a group */
     public static boolean p2pInvite(WifiP2pGroup group, String deviceAddress) {
         if (group == null || deviceAddress == null) return false;
-        return doBooleanTempCommand("p2p_invite group=" + group.getInterface()
+        return doBooleanCommand("P2P_INVITE group=" + group.getInterface()
                 + " peer=" + deviceAddress + " go_dev_addr=" + group.getOwner().deviceAddress);
     }
-
-    public static boolean p2pWpsPbc() {
-        return doBooleanTempCommand("wps_pbc");
-    }
-
-    public static boolean p2pWpsPin(String pin) {
-        return doBooleanTempCommand("wps_pin any " + pin);
-    }
-
 }
