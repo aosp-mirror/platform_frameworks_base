@@ -91,6 +91,7 @@ public class PhoneStatusBar extends StatusBar {
     static final String TAG = "PhoneStatusBar";
     public static final boolean DEBUG = false;
     public static final boolean SPEW = false;
+    public static final boolean DUMPTRUCK = true; // extra dumpsys info
 
     // additional instrumentation for testing purposes; intended to be left on during development
     public static final boolean CHATTY = DEBUG || true;
@@ -1699,26 +1700,28 @@ public class PhoneStatusBar extends StatusBar {
             pw.println("  mScrollView: " + viewInfo(mScrollView)
                     + " scroll " + mScrollView.getScrollX() + "," + mScrollView.getScrollY());
         }
-        /*
-        synchronized (mNotificationData) {
-            int N = mNotificationData.ongoingCount();
-            pw.println("  ongoingCount.size=" + N);
-            for (int i=0; i<N; i++) {
-                StatusBarNotification n = mNotificationData.getOngoing(i);
-                pw.println("    [" + i + "] key=" + n.key + " view=" + n.view);
-                pw.println("           data=" + n.data);
-            }
-            N = mNotificationData.latestCount();
-            pw.println("  ongoingCount.size=" + N);
-            for (int i=0; i<N; i++) {
-                StatusBarNotification n = mNotificationData.getLatest(i);
-                pw.println("    [" + i + "] key=" + n.key + " view=" + n.view);
-                pw.println("           data=" + n.data);
-            }
-        }
-        */
 
-        if (false) {
+        if (DUMPTRUCK) {
+            synchronized (mNotificationData) {
+                int N = mNotificationData.size();
+                pw.println("  notification icons: " + N);
+                for (int i=0; i<N; i++) {
+                    NotificationData.Entry e = mNotificationData.get(i);
+                    pw.println("    [" + i + "] key=" + e.key + " icon=" + e.icon);
+                    StatusBarNotification n = e.notification;
+                    pw.println("         pkg=" + n.pkg + " id=" + n.id + " priority=" + n.priority);
+                    pw.println("         notification=" + n.notification);
+                    pw.println("         tickerText=\"" + n.notification.tickerText + "\"");
+                }
+            }
+
+            int N = mStatusIcons.getChildCount();
+            pw.println("  system icons: " + N);
+            for (int i=0; i<N; i++) {
+                StatusBarIconView ic = (StatusBarIconView) mStatusIcons.getChildAt(i);
+                pw.println("    [" + i + "] icon=" + ic);
+            }
+            
             pw.println("see the logcat for a dump of the views we have created.");
             // must happen on ui thread
             mHandler.post(new Runnable() {

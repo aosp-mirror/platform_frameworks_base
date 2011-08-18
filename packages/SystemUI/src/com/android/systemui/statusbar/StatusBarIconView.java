@@ -59,13 +59,17 @@ public class StatusBarIconView extends AnimatedImageView {
         mNotification = notification;
         setContentDescription(notification);
 
-        final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
-        final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
-        final float scale = (float)imageBounds / (float)outerBounds;
-        setScaleX(scale);
-        setScaleY(scale);
-        final float alpha = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
-        setAlpha(alpha);
+        // We do not resize and scale system icons (on the right), only notification icons (on the
+        // left).
+        if (notification != null) {
+            final int outerBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_size);
+            final int imageBounds = res.getDimensionPixelSize(R.dimen.status_bar_icon_drawing_size);
+            final float scale = (float)imageBounds / (float)outerBounds;
+            setScaleX(scale);
+            setScaleY(scale);
+            final float alpha = res.getFraction(R.dimen.status_bar_icon_drawing_alpha, 1, 1);
+            setAlpha(alpha);
+        }
     }
 
     private static boolean streq(String a, String b) {
@@ -246,5 +250,10 @@ public class StatusBarIconView extends AnimatedImageView {
                 setContentDescription(tickerText);
             }
         }
+    }
+
+    public String toString() {
+        return "StatusBarIconView(slot=" + mSlot + " icon=" + mIcon 
+            + " notification=" + mNotification + ")";
     }
 }
