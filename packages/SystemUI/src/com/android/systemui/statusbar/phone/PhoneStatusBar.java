@@ -316,8 +316,8 @@ public class PhoneStatusBar extends StatusBar {
         mPile = (ViewGroup)expanded.findViewById(R.id.latestItems);
         mExpandedContents = mPile; // was: expanded.findViewById(R.id.notificationLinearLayout);
         mNoNotificationsTitle = (TextView)expanded.findViewById(R.id.noNotificationsTitle);
-        mNoNotificationsTitle.setAlpha(0f);
-        mNoNotificationsTitle.setVisibility(View.VISIBLE);
+        mNoNotificationsTitle.setVisibility(View.GONE); // disabling for now
+
         mClearButton = expanded.findViewById(R.id.clear_all_button);
         mClearButton.setOnClickListener(mClearButtonListener);
         mClearButton.setAlpha(0f);
@@ -1026,6 +1026,7 @@ public class PhoneStatusBar extends StatusBar {
             mClearButton.setAlpha(clearable ? 1.0f : 0.0f);
         }
 
+        /*
         if (mNoNotificationsTitle.isShown()) {
             if (any != (mNoNotificationsTitle.getAlpha() == 0.0f)) {
                 ObjectAnimator a = ObjectAnimator.ofFloat(mNoNotificationsTitle, "alpha",
@@ -1037,6 +1038,7 @@ public class PhoneStatusBar extends StatusBar {
         } else {
             mNoNotificationsTitle.setAlpha(any ? 0.0f : 0.75f);
         }
+        */
     }
 
 
