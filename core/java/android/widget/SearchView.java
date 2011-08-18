@@ -35,6 +35,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.InputType;
@@ -135,6 +136,12 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
             if (imm != null) {
                 imm.showSoftInputUnchecked(0, null);
             }
+        }
+    };
+
+    private Runnable mUpdateDrawableStateRunnable = new Runnable() {
+        public void run() {
+            updateFocusedState();
         }
     };
 
@@ -624,6 +631,12 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        // Let the standard measurements take effect in iconified state.
+        if (isIconified()) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            return;
+        }
+
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int width = MeasureSpec.getSize(widthMeasureSpec);
 
@@ -720,9 +733,21 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         mCloseButton.getDrawable().setState(hasText ? ENABLED_STATE_SET : EMPTY_STATE_SET);
     }
 
-    private void updateFocusedState(boolean focused) {
+    private void postUpdateFocusedState() {
+        post(mUpdateDrawableStateRunnable);
+    }
+
+    private void updateFocusedState() {
+        boolean focused = mQueryTextView.hasFocus();
         mSearchPlate.getBackground().setState(focused ? FOCUSED_STATE_SET : EMPTY_STATE_SET);
         mSubmitArea.getBackground().setState(focused ? FOCUSED_STATE_SET : EMPTY_STATE_SET);
+        invalidate();
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        removeCallbacks(mUpdateDrawableStateRunnable);
+        super.onDetachedFromWindow();
     }
 
     private void setImeVisibility(final boolean visible) {
@@ -1118,15 +1143,19 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
 
     void onTextFocusChanged() {
         updateViewsVisibility(isIconified());
-        updateFocusedState(mQueryTextView.hasFocus());
+        // Delayed update to make sure that the focus has settled down and window focus changes
+        // don't affect it. A synchronous update was not working.
+        postUpdateFocusedState();
         if (mQueryTextView.hasFocus()) {
             forceSuggestionQuery();
         }
     }
 
     @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+
+        postUpdateFocusedState();
     }
 
     /**
