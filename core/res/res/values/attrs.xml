@@ -5264,9 +5264,9 @@
         <!-- Specifies a background drawable for the action bar. -->
         <attr name="background" />
         <!-- Specifies a background drawable for a second stacked row of the action bar. -->
-        <attr name="backgroundStacked" format="reference" />
+        <attr name="backgroundStacked" format="reference|color" />
         <!-- Specifies a background drawable for the bottom component of a split action bar. -->
-        <attr name="backgroundSplit" format="reference" />
+        <attr name="backgroundSplit" format="reference|color" />
         <!-- Specifies a layout for custom navigation. Overrides navigationMode. -->
         <attr name="customNavigationLayout" format="reference" />
         <!-- Specifies a fixed height. -->
