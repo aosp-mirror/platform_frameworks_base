@@ -141,6 +141,8 @@ private:
 
         TEXT_RUNNING        = 0x10000,
         TEXTPLAYER_STARTED  = 0x20000,
+
+        SLOW_DECODER_HACK   = 0x40000,
     };
 
     mutable Mutex mLock;
@@ -181,6 +183,7 @@ private:
 
     uint32_t mFlags;
     uint32_t mExtractorFlags;
+    uint32_t mSinceLastDropped;
 
     int64_t mTimeSourceDeltaUs;
     int64_t mVideoTimeUs;
