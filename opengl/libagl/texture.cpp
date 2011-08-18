@@ -633,7 +633,7 @@ void generateMipmap(ogles_context_t* c, GLint level)
 static void texParameterx(
         GLenum target, GLenum pname, GLfixed param, ogles_context_t* c)
 {
-    if (target != GL_TEXTURE_2D) {
+    if (target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES) {
         ogles_error(c, GL_INVALID_ENUM);
         return;
     }
@@ -866,7 +866,7 @@ void glActiveTexture(GLenum texture)
 void glBindTexture(GLenum target, GLuint texture)
 {
     ogles_context_t* c = ogles_context_t::get();
-    if (target != GL_TEXTURE_2D) {
+    if (target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES) {
         ogles_error(c, GL_INVALID_ENUM);
         return;
     }
@@ -1012,7 +1012,7 @@ void glTexParameteriv(
         GLenum target, GLenum pname, const GLint* params)
 {
     ogles_context_t* c = ogles_context_t::get();
-    if (target != GGL_TEXTURE_2D) {
+    if (target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES) {
         ogles_error(c, GL_INVALID_ENUM);
         return;
     }
@@ -1605,7 +1605,7 @@ void glDrawTexxOES(GLfixed x, GLfixed y, GLfixed z, GLfixed w, GLfixed h) {
 void glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOES image)
 {
     ogles_context_t* c = ogles_context_t::get();
-    if (target != GL_TEXTURE_2D) {
+    if (target != GL_TEXTURE_2D && target != GL_TEXTURE_EXTERNAL_OES) {
         ogles_error(c, GL_INVALID_ENUM);
         return;
     }
