@@ -10728,42 +10728,29 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         return mInBatchEditControllers;
     }
 
-    private class TextViewDirectionHeuristic extends TextDirectionHeuristicImpl {
-        private TextViewDirectionHeuristic(TextDirectionAlgorithm algorithm) {
-            super(algorithm);
-        }
-        @Override
-        protected boolean defaultIsRtl() {
-            return getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL;
-        }
-    }
-
-    /**
-     * Resolve the text direction.
-     *
-     * Text direction of paragraphs in a TextView is determined using a heuristic. If the correct
-     * text direction cannot be determined by the heuristic, the view's resolved layout direction
-     * determines the direction.
-     *
-     * This heuristic and result is applied individually to each paragraph in a TextView, based on
-     * the text and style content of that paragraph. Paragraph text styles can also be used to force
-     * a particular direction.
-     */
     @Override
     protected void resolveTextDirection() {
+        // Always need to resolve layout direction first
+        final boolean defaultIsRtl = (getResolvedLayoutDirection() == LAYOUT_DIRECTION_RTL);
+
+        // Then resolve text direction on the parent
         super.resolveTextDirection();
 
+        // Now, we can select the heuristic
         int textDir = getResolvedTextDirection();
         switch (textDir) {
             default:
             case TEXT_DIRECTION_FIRST_STRONG:
-                mTextDir = new TextViewDirectionHeuristic(FirstStrong.INSTANCE);
+                mTextDir = (defaultIsRtl ? TextDirectionHeuristics.FIRSTSTRONG_RTL :
+                        TextDirectionHeuristics.FIRSTSTRONG_LTR);
                 break;
             case TEXT_DIRECTION_ANY_RTL:
-                mTextDir = new TextViewDirectionHeuristic(AnyStrong.INSTANCE_RTL);
+                mTextDir = (defaultIsRtl ? TextDirectionHeuristics.ANYRTL_RTL:
+                        TextDirectionHeuristics.ANYRTL_LTR);
                 break;
             case TEXT_DIRECTION_CHAR_COUNT:
-                mTextDir = new TextViewDirectionHeuristic(CharCount.INSTANCE_DEFAULT);
+                mTextDir = (defaultIsRtl ? TextDirectionHeuristics.CHARCOUNT_RTL:
+                        TextDirectionHeuristics.CHARCOUNT_LTR);
                 break;
             case TEXT_DIRECTION_LTR:
                 mTextDir = TextDirectionHeuristics.LTR;
@@ -10772,7 +10759,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 mTextDir = TextDirectionHeuristics.RTL;
                 break;
         }
-
     }
 
     /**

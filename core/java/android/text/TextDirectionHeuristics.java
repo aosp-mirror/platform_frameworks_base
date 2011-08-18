@@ -1,4 +1,18 @@
-// Copyright 2011 Google Inc. All Rights Reserved.
+/*
+ * Copyright (C) 2011 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 package android.text;
 
@@ -36,12 +50,12 @@ public class TextDirectionHeuristics {
         new TextDirectionHeuristicInternal(FirstStrong.INSTANCE, true);
 
     /**
-     * If the text contains any strong right to left non-format character, determines
-     * that the direction is right to left, falling back to left to right if it
+     * If the text contains any strong left to right non-format character, determines
+     * that the direction is left to right, falling back to left to right if it
      * finds none.
      */
-    public static final TextDirectionHeuristic ANYRTL_LTR =
-        new TextDirectionHeuristicInternal(AnyStrong.INSTANCE_RTL, false);
+    public static final TextDirectionHeuristic ANYLTR_LTR =
+        new TextDirectionHeuristicInternal(AnyStrong.INSTANCE_LTR, false);
 
     /**
      * If the text contains any strong left to right non-format character, determines
@@ -50,6 +64,22 @@ public class TextDirectionHeuristics {
      */
     public static final TextDirectionHeuristic ANYLTR_RTL =
         new TextDirectionHeuristicInternal(AnyStrong.INSTANCE_LTR, true);
+
+    /**
+     * If the text contains any strong right to left non-format character, determines
+     * that the direction is right to left, falling back to left to right if it
+     * finds none.
+     */
+    public static final TextDirectionHeuristic ANYRTL_LTR =
+        new TextDirectionHeuristicInternal(AnyStrong.INSTANCE_RTL, false);
+
+    /**
+     * If the text contains any strong right to left non-format character, determines
+     * that the direction is right to left, falling back to right to left if it
+     * finds none.
+     */
+    public static final TextDirectionHeuristic ANYRTL_RTL =
+        new TextDirectionHeuristicInternal(AnyStrong.INSTANCE_RTL, true);
 
     /**
      * Examines only the strong directional non-format characters, and if either
@@ -90,19 +120,6 @@ public class TextDirectionHeuristics {
          * Return true if the default text direction is rtl.
          */
         abstract protected boolean defaultIsRtl();
-
-        @Override
-        public boolean isRtl(CharSequence text, int start, int end) {
-            if (text == null || start < 0 || end < start || text.length() < end) {
-                throw new IllegalArgumentException();
-            }
-            if (mAlgorithm == null) {
-                return defaultIsRtl();
-            }
-            text = text.subSequence(start, end);
-            char[] chars = text.toString().toCharArray();
-            return doCheck(chars, 0, chars.length);
-        }
 
         @Override
         public boolean isRtl(char[] chars, int start, int count) {

@@ -280,7 +280,7 @@ public class BoringLayout extends Layout implements TextUtils.EllipsizeCallback 
                 }
             }
 
-            if (textDir.isRtl(temp, 0, n)) {
+            if (textDir != null && textDir.isRtl(temp, 0, n)) {
                boring = false;
                break outer;
             }
