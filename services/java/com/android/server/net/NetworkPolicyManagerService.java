@@ -89,6 +89,7 @@ import android.os.IPowerManager;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.text.format.Formatter;
 import android.text.format.Time;
@@ -168,6 +169,12 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     private static final String ATTR_UID = "uid";
     private static final String ATTR_POLICY = "policy";
 
+    private static final String TAG_ALLOW_BACKGROUND = TAG + ":allowBackground";
+
+    // @VisibleForTesting
+    public static final String ACTION_ALLOW_BACKGROUND =
+            "com.android.server.action.ACTION_ALLOW_BACKGROUND";
+
     private static final long TIME_CACHE_MAX_AGE = DAY_IN_MILLIS;
 
     private static final int MSG_RULES_CHANGED = 0x1;
@@ -185,8 +192,8 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
     private final Object mRulesLock = new Object();
 
-    private boolean mScreenOn;
-    private boolean mRestrictBackground;
+    private volatile boolean mScreenOn;
+    private volatile boolean mRestrictBackground;
 
     /** Defined network policies. */
     private HashMap<NetworkTemplate, NetworkPolicy> mNetworkPolicy = Maps.newHashMap();
@@ -265,6 +272,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
             if (mRestrictBackground) {
                 updateRulesForRestrictBackgroundLocked();
+                updateNotificationsLocked();
             }
         }
 
@@ -308,6 +316,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final IntentFilter statsFilter = new IntentFilter(ACTION_NETWORK_STATS_UPDATED);
         mContext.registerReceiver(
                 mStatsReceiver, statsFilter, READ_NETWORK_USAGE_HISTORY, mHandler);
+
+        // listen for restrict background changes from notifications
+        final IntentFilter allowFilter = new IntentFilter(ACTION_ALLOW_BACKGROUND);
+        mContext.registerReceiver(mAllowReceiver, allowFilter, MANAGE_NETWORK_POLICY, mHandler);
 
     }
 
@@ -398,6 +410,20 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             synchronized (mRulesLock) {
                 updateNotificationsLocked();
             }
+        }
+    };
+
+    /**
+     * Receiver that watches for {@link Notification} control of
+     * {@link #mRestrictBackground}.
+     */
+    private BroadcastReceiver mAllowReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // on background handler thread, and verified MANAGE_NETWORK_POLICY
+            // permission above.
+
+            setRestrictBackground(false);
         }
     };
 
@@ -493,6 +519,13 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 cancelNotification(policy, TYPE_LIMIT_SNOOZED);
                 notifyUnderLimitLocked(policy.template);
             }
+        }
+
+        // ongoing notification when restricting background data
+        if (mRestrictBackground) {
+            enqueueRestrictedNotification(TAG_ALLOW_BACKGROUND);
+        } else {
+            cancelNotification(TAG_ALLOW_BACKGROUND);
         }
     }
 
@@ -614,16 +647,52 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     /**
-     * Cancel any notification for combined {@link NetworkPolicy} and specific
-     * type, like {@link #TYPE_LIMIT}.
+     * Show ongoing notification to reflect that {@link #mRestrictBackground}
+     * has been enabled.
      */
-    private void cancelNotification(NetworkPolicy policy, int type) {
-        final String tag = buildNotificationTag(policy, type);
+    private void enqueueRestrictedNotification(String tag) {
+        final Resources res = mContext.getResources();
+        final Notification.Builder builder = new Notification.Builder(mContext);
+
+        final CharSequence title = res.getText(R.string.data_usage_restricted_title);
+        final CharSequence body = res.getString(R.string.data_usage_restricted_body);
+
+        builder.setOnlyAlertOnce(true);
+        builder.setOngoing(true);
+        builder.setSmallIcon(R.drawable.ic_menu_info_details);
+        builder.setTicker(title);
+        builder.setContentTitle(title);
+        builder.setContentText(body);
+
+        final Intent intent = buildAllowBackgroundDataIntent();
+        builder.setContentIntent(
+                PendingIntent.getBroadcast(mContext, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT));
 
         // TODO: move to NotificationManager once we can mock it
         try {
             final String packageName = mContext.getPackageName();
-            mNotifManager.cancelNotificationWithTag(packageName, tag, 0x0);
+            final int[] idReceived = new int[1];
+            mNotifManager.enqueueNotificationWithTag(packageName, tag,
+                    0x0, builder.getNotification(), idReceived);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "problem during enqueueNotification: " + e);
+        }
+    }
+
+    /**
+     * Cancel any notification for combined {@link NetworkPolicy} and specific
+     * type, like {@link #TYPE_LIMIT}.
+     */
+    private void cancelNotification(NetworkPolicy policy, int type) {
+        cancelNotification(buildNotificationTag(policy, type));
+    }
+
+    private void cancelNotification(String tag) {
+        // TODO: move to NotificationManager once we can mock it
+        try {
+            final String packageName = mContext.getPackageName();
+            mNotifManager.cancelNotificationWithTag(
+                    packageName, tag, 0x0);
         } catch (RemoteException e) {
             Slog.w(TAG, "problem during enqueueNotification: " + e);
         }
@@ -731,15 +800,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             final boolean hasLimit = policy.limitBytes != LIMIT_DISABLED;
             final boolean hasWarning = policy.warningBytes != WARNING_DISABLED;
 
-            if (hasLimit || hasWarning) {
-                final long quotaBytes;
-                if (hasLimit) {
-                    // remaining "quota" is based on usage in current cycle
-                    quotaBytes = Math.max(0, policy.limitBytes - total);
-                } else {
-                    // to track warning alert later, use a high quota
-                    quotaBytes = Long.MAX_VALUE;
-                }
+            if (hasLimit) {
+                // remaining "quota" is based on usage in current cycle
+                final long quotaBytes = Math.max(0, policy.limitBytes - total);
 
                 if (ifaces.length > 1) {
                     // TODO: switch to shared quota once NMS supports
@@ -751,16 +814,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     if (quotaBytes > 0) {
                         setInterfaceQuota(iface, quotaBytes);
                         newMeteredIfaces.add(iface);
-                    }
-                }
-            }
-
-            if (hasWarning) {
-                final long alertBytes = Math.max(0, policy.warningBytes - total);
-                for (String iface : ifaces) {
-                    removeInterfaceAlert(iface);
-                    if (alertBytes > 0) {
-                        setInterfaceAlert(iface, alertBytes);
                     }
                 }
             }
@@ -839,11 +892,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                             mRestrictBackground = readBooleanAttribute(
                                     in, ATTR_RESTRICT_BACKGROUND);
                         } else {
-                            try {
-                                mRestrictBackground = !mConnManager.getBackgroundDataSetting();
-                            } catch (RemoteException e) {
-                                mRestrictBackground = false;
-                            }
+                            mRestrictBackground = false;
                         }
 
                     } else if (TAG_NETWORK_POLICY.equals(tag)) {
@@ -879,12 +928,29 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
 
         } catch (FileNotFoundException e) {
             // missing policy is okay, probably first boot
+            upgradeLegacyBackgroundData();
         } catch (IOException e) {
             Slog.e(TAG, "problem reading network stats", e);
         } catch (XmlPullParserException e) {
             Slog.e(TAG, "problem reading network stats", e);
         } finally {
             IoUtils.closeQuietly(fis);
+        }
+    }
+
+    /**
+     * Upgrade legacy background data flags, notifying listeners of one last
+     * change to always-true.
+     */
+    private void upgradeLegacyBackgroundData() {
+        mRestrictBackground = Settings.Secure.getInt(
+                mContext.getContentResolver(), Settings.Secure.BACKGROUND_DATA, 1) != 1;
+
+        // kick off one last broadcast if restricted
+        if (mRestrictBackground) {
+            final Intent broadcast = new Intent(
+                    ConnectivityManager.ACTION_BACKGROUND_DATA_SETTING_CHANGED);
+            mContext.sendBroadcast(broadcast);
         }
     }
 
@@ -1057,6 +1123,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         synchronized (mRulesLock) {
             mRestrictBackground = restrictBackground;
             updateRulesForRestrictBackgroundLocked();
+            updateNotificationsLocked();
             writePolicyLocked();
         }
     }
@@ -1418,6 +1485,10 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         final TelephonyManager telephony = (TelephonyManager) mContext.getSystemService(
                 Context.TELEPHONY_SERVICE);
         return telephony.getSubscriberId();
+    }
+
+    private static Intent buildAllowBackgroundDataIntent() {
+        return new Intent(ACTION_ALLOW_BACKGROUND);
     }
 
     private static Intent buildNetworkOverLimitIntent(NetworkTemplate template) {

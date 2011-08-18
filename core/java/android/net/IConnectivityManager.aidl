@@ -63,10 +63,6 @@ interface IConnectivityManager
 
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
 
-    boolean getBackgroundDataSetting();
-
-    void setBackgroundDataSetting(boolean allowBackgroundData);
-
     boolean getMobileDataEnabled();
 
     void setMobileDataEnabled(boolean enabled);

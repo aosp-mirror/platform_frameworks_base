@@ -3081,6 +3081,7 @@ public final class Settings {
          * Whether background data usage is allowed by the user. See
          * ConnectivityManager for more info.
          */
+        @Deprecated
         public static final String BACKGROUND_DATA = "background_data";
 
         /**
