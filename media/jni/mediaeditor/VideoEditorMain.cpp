@@ -1797,7 +1797,7 @@ videoEditor_populateSettings(
         }
 
         fid = pEnv->GetFieldID(audioSettingClazz,"bRemoveOriginal","Z");
-        pContext->mAudioSettings->bRemoveOriginal = pEnv->GetIntField(audioSettingObject,fid);
+        pContext->mAudioSettings->bRemoveOriginal = pEnv->GetBooleanField(audioSettingObject,fid);
         M4OSA_TRACE1_1("bRemoveOriginal = %d",pContext->mAudioSettings->bRemoveOriginal);
 
         fid = pEnv->GetFieldID(audioSettingClazz,"channels","I");
@@ -1816,7 +1816,7 @@ videoEditor_populateSettings(
 
         fid = pEnv->GetFieldID(audioSettingClazz,"startMs","J");
         pContext->mAudioSettings->uiAddCts
-            = pEnv->GetIntField(audioSettingObject,fid);
+            = pEnv->GetLongField(audioSettingObject,fid);
         M4OSA_TRACE1_1("uiAddCts = %d",pContext->mAudioSettings->uiAddCts);
 
         fid = pEnv->GetFieldID(audioSettingClazz,"volume","I");
@@ -1826,17 +1826,17 @@ videoEditor_populateSettings(
 
         fid = pEnv->GetFieldID(audioSettingClazz,"loop","Z");
         pContext->mAudioSettings->bLoop
-            = pEnv->GetIntField(audioSettingObject,fid);
+            = pEnv->GetBooleanField(audioSettingObject,fid);
         M4OSA_TRACE1_1("bLoop = %d",pContext->mAudioSettings->bLoop);
 
         fid = pEnv->GetFieldID(audioSettingClazz,"beginCutTime","J");
         pContext->mAudioSettings->beginCutMs
-            = pEnv->GetIntField(audioSettingObject,fid);
+            = pEnv->GetLongField(audioSettingObject,fid);
         M4OSA_TRACE1_1("begin cut time = %d",pContext->mAudioSettings->beginCutMs);
 
         fid = pEnv->GetFieldID(audioSettingClazz,"endCutTime","J");
         pContext->mAudioSettings->endCutMs
-            = pEnv->GetIntField(audioSettingObject,fid);
+            = pEnv->GetLongField(audioSettingObject,fid);
         M4OSA_TRACE1_1("end cut time = %d",pContext->mAudioSettings->endCutMs);
 
         fid = pEnv->GetFieldID(audioSettingClazz,"fileType","I");
@@ -3397,6 +3397,7 @@ static int videoEditor_generateAudioWaveFormSync (JNIEnv*  pEnv, jobject thiz,
     M4OSA_ERR result = M4NO_ERROR;
     ManualEditContext* pContext = M4OSA_NULL;
     bool needToBeLoaded = true;
+    const char *pPCMFilePath, *pStringOutAudioGraphFile;
 
     VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEO_EDITOR",
         "videoEditor_generateAudioWaveFormSync() ");
@@ -3411,20 +3412,20 @@ static int videoEditor_generateAudioWaveFormSync (JNIEnv*  pEnv, jobject thiz,
     VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEO_EDITOR",
         "videoEditor_generateAudioWaveFormSync Retrieving pStringOutAudioGraphFile");
 
-    const char *pPCMFilePath = pEnv->GetStringUTFChars(pcmfilePath, NULL);
+    pPCMFilePath = pEnv->GetStringUTFChars(pcmfilePath, NULL);
     if (pPCMFilePath == M4OSA_NULL) {
-        if (pEnv != NULL) {
-            jniThrowException(pEnv, "java/lang/RuntimeException",
-                "Input string PCMFilePath is null");
-        }
+        jniThrowException(pEnv, "java/lang/RuntimeException",
+            "Input string PCMFilePath is null");
+        result = M4ERR_PARAMETER;
+        goto out;
     }
 
-    const char *pStringOutAudioGraphFile = pEnv->GetStringUTFChars(outGraphfilePath, NULL);
+    pStringOutAudioGraphFile = pEnv->GetStringUTFChars(outGraphfilePath, NULL);
     if (pStringOutAudioGraphFile == M4OSA_NULL) {
-        if (pEnv != NULL) {
-            jniThrowException(pEnv, "java/lang/RuntimeException",
-                "Input string outGraphfilePath is null");
-        }
+        jniThrowException(pEnv, "java/lang/RuntimeException",
+            "Input string outGraphfilePath is null");
+        result = M4ERR_PARAMETER;
+        goto out2;
     }
 
     VIDEOEDIT_LOG_API(ANDROID_LOG_INFO, "VIDEO_EDITOR",
@@ -3439,14 +3440,14 @@ static int videoEditor_generateAudioWaveFormSync (JNIEnv*  pEnv, jobject thiz,
         (M4OSA_UInt32)frameDuration,
         pContext);
 
-    if (pStringOutAudioGraphFile != NULL) {
-        pEnv->ReleaseStringUTFChars(outGraphfilePath, pStringOutAudioGraphFile);
-    }
+    pEnv->ReleaseStringUTFChars(outGraphfilePath, pStringOutAudioGraphFile);
 
+out2:
     if (pPCMFilePath != NULL) {
         pEnv->ReleaseStringUTFChars(pcmfilePath, pPCMFilePath);
     }
 
+out:
     VIDEOEDIT_LOG_FUNCTION(ANDROID_LOG_INFO, "VIDEO_EDITOR",
         "videoEditor_generateAudioWaveFormSync pContext->bSkipState ");
 
