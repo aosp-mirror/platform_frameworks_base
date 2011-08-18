@@ -2070,10 +2070,8 @@ public final class WebViewCore {
             if (!core.getSettings().enableSmoothTransition()) return;
 
             synchronized (core) {
+                core.nativeSetIsPaused(true);
                 core.mDrawIsPaused = true;
-                if (core.mDrawIsScheduled) {
-                    core.mEventHub.removeMessages(EventHub.WEBKIT_DRAW);
-                }
             }
         }
 
@@ -2082,15 +2080,14 @@ public final class WebViewCore {
     static void resumeUpdatePicture(WebViewCore core) {
         if (core != null) {
             // if mDrawIsPaused is true, ignore the setting, continue to resume
-            if (!core.mDrawIsPaused
-                    && !core.getSettings().enableSmoothTransition()) return;
+            if (!core.mDrawIsPaused)
+                return;
 
             synchronized (core) {
+                core.nativeSetIsPaused(false);
                 core.mDrawIsPaused = false;
                 // always redraw on resume to reenable gif animations
                 core.mDrawIsScheduled = false;
-                core.nativeContentInvalidateAll();
-                core.contentDraw();
             }
         }
     }
@@ -2127,7 +2124,6 @@ public final class WebViewCore {
             // only fire an event if this is our first request
             if (mDrawIsScheduled) return;
             mDrawIsScheduled = true;
-            if (mDrawIsPaused) return;
             mEventHub.sendMessage(Message.obtain(null, EventHub.WEBKIT_DRAW));
         }
     }
@@ -2789,6 +2785,7 @@ public final class WebViewCore {
         return mDeviceOrientationService;
     }
 
+    private native void nativeSetIsPaused(boolean isPaused);
     private native void nativePause();
     private native void nativeResume();
     private native void nativeFreeMemory();
