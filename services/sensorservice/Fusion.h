@@ -37,7 +37,7 @@ class Fusion {
     vec3_t  x1;
 
     /*
-     * the predicated covariance matrix is made of 4 3x3 sub-matrices and it
+     * the predicated covariance matrix is made of 4 3x3 sub-matrices and it is
      * semi-definite positive.
      *
      * P = | P00  P10 | = | P00  P10 |
@@ -74,7 +74,7 @@ private:
     enum { ACC=0x1, MAG=0x2, GYRO=0x4 };
     bool checkInitComplete(int, const vec3_t& w, float d = 0);
     void initFusion(const vec4_t& q0, float dT);
-    bool checkState(const vec3_t& v);
+    void checkState();
     void predict(const vec3_t& w, float dT);
     void update(const vec3_t& z, const vec3_t& Bi, float sigma);
     static mat34_t getF(const vec4_t& p);
