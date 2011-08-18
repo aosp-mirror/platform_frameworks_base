@@ -4340,6 +4340,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             res.labelRes = info.labelRes;
             res.nonLocalizedLabel = info.nonLocalizedLabel;
             res.icon = info.icon;
+            res.system = isSystemApp(res.activityInfo.applicationInfo);
             return res;
         }
 
@@ -4512,6 +4513,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             res.labelRes = info.labelRes;
             res.nonLocalizedLabel = info.nonLocalizedLabel;
             res.icon = info.icon;
+            res.system = isSystemApp(res.serviceInfo.applicationInfo);
             return res;
         }
 
@@ -4569,7 +4571,13 @@ public class PackageManagerService extends IPackageManager.Stub {
             v1 = r1.match;
             v2 = r2.match;
             //System.out.println("Comparing: m1=" + m1 + " m2=" + m2);
-            return (v1 > v2) ? -1 : ((v1 < v2) ? 1 : 0);
+            if (v1 != v2) {
+                return (v1 > v2) ? -1 : 1;
+            }
+            if (r1.system != r2.system) {
+                return r1.system ? -1 : 1;
+            }
+            return 0;
         }
     };
 

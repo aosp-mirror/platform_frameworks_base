@@ -12018,6 +12018,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             while (mParallelBroadcasts.size() > 0) {
                 r = mParallelBroadcasts.remove(0);
                 r.dispatchTime = SystemClock.uptimeMillis();
+                r.dispatchClockTime = System.currentTimeMillis();
                 final int N = r.receivers.size();
                 if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Processing parallel broadcast "
                         + r);
@@ -12156,7 +12157,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             r.receiverTime = SystemClock.uptimeMillis();
             if (recIdx == 0) {
                 r.dispatchTime = r.receiverTime;
-
+                r.dispatchClockTime = System.currentTimeMillis();
                 if (DEBUG_BROADCAST_LIGHT) Slog.v(TAG, "Processing ordered broadcast "
                         + r);
             }
@@ -12217,7 +12218,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 skip = true;
             }
-            if (r.callingUid != Process.SYSTEM_UID &&
+            if (info.activityInfo.applicationInfo.uid != Process.SYSTEM_UID &&
                 r.requiredPermission != null) {
                 try {
                     perm = AppGlobals.getPackageManager().

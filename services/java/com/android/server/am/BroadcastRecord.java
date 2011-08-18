@@ -29,6 +29,7 @@ import android.util.PrintWriterPrinter;
 import android.util.TimeUtils;
 
 import java.io.PrintWriter;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -47,6 +48,7 @@ class BroadcastRecord extends Binder {
     final List receivers;   // contains BroadcastFilter and ResolveInfo
     IIntentReceiver resultTo; // who receives final result if non-null
     long dispatchTime;      // when dispatch started on this set of receivers
+    long dispatchClockTime; // the clock time the dispatch started
     long receiverTime;      // when current receiver started for timeouts.
     long finishTime;        // when we finished the broadcast.
     int resultCode;         // current result code value.
@@ -91,6 +93,8 @@ class BroadcastRecord extends Binder {
         if (requiredPermission != null) {
             pw.print(prefix); pw.print("requiredPermission="); pw.println(requiredPermission);
         }
+        pw.print(prefix); pw.print("dispatchClockTime=");
+                pw.println(new Date(dispatchClockTime));
         pw.print(prefix); pw.print("dispatchTime=");
                 TimeUtils.formatDuration(dispatchTime, now, pw);
         if (finishTime != 0) {
