@@ -314,14 +314,14 @@ public class MediaScanner
 
     // WARNING: Bulk inserts sounded like a great idea and gave us a good performance improvement,
     // but unfortunately it also introduced a number of bugs.  Many of those bugs were fixed,
-    // but (at least) two problems are still outstanding:
+    // but (at least) one problem is still outstanding:
     //
-    // 1) Bulk inserts broke the code that sets the default ringtones on first boot
-    // 2) Bulk inserts broke file based playlists in the case where the playlist is processed
-    //    at the same time the files in the playlist are inserted in the database
+    // - Bulk inserts broke the code that sets the default ringtones, notifications, and alarms
+    //   on first boot
     //
-    // These problems might be solvable by moving the logic to the media provider instead,
-    // but for now we are disabling bulk inserts until we have solid fixes for these problems.
+    // This problem might be solvable by moving the logic to the media provider or disabling bulk
+    // inserts only for those cases. For now, we are disabling bulk inserts until we have a solid
+    // fix for this problem.
     private static final boolean ENABLE_BULK_INSERTS = false;
 
     // used when scanning the image database so we know whether we have to prune
@@ -1439,7 +1439,22 @@ public class MediaScanner
         }
 
         try {
-        // OK, now we need to add this to the database
+            // check rowid is set. Rowid may be missing if it is inserted by bulkInsert().
+            if (bestMatch.mRowId == 0) {
+                Cursor c = mMediaProvider.query(mAudioUri, ID_PROJECTION,
+                        MediaStore.Files.FileColumns.DATA + "=?",
+                        new String[] { bestMatch.mPath }, null);
+                if (c != null) {
+                    if (c.moveToNext()) {
+                        bestMatch.mRowId = c.getLong(0);
+                    }
+                    c.close();
+                }
+                if (bestMatch.mRowId == 0) {
+                    return false;
+                }
+            }
+            // OK, now we are ready to add this to the database
             values.clear();
             values.put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, Integer.valueOf(index));
             values.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, Long.valueOf(bestMatch.mRowId));
