@@ -585,7 +585,7 @@ public final class MenuItemImpl implements MenuItem {
     public MenuItem setActionProvider(ActionProvider actionProvider) {
         mActionView = null;
         mActionProvider = actionProvider;
-        mMenu.onItemsChanged(false);
+        mMenu.onItemsChanged(true); // Measurement can be changed
         return this;
     }
 

@@ -391,7 +391,6 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
                 final boolean inGroup = seenGroups.get(groupId);
                 boolean isAction = (maxActions > 0 || inGroup) && widthLimit > 0 &&
                         (!mStrictWidthLimit || cellsRemaining > 0);
-                maxActions--;
 
                 if (isAction) {
                     View v = getItemView(item, mScrapActionButtonView, parent);
@@ -430,10 +429,14 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
                     for (int j = 0; j < i; j++) {
                         MenuItemImpl areYouMyGroupie = visibleItems.get(j);
                         if (areYouMyGroupie.getGroupId() == groupId) {
+                            // Give back the action slot
+                            if (areYouMyGroupie.isActionButton()) maxActions++;
                             areYouMyGroupie.setIsActionButton(false);
                         }
                     }
                 }
+
+                if (isAction) maxActions--;
 
                 item.setIsActionButton(isAction);
             }

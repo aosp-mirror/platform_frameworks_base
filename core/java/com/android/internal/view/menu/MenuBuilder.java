@@ -567,7 +567,7 @@ public class MenuBuilder implements Menu {
             }
         }
 
-        if (changedAtLeastOneItem) onItemsChanged(false);
+        if (changedAtLeastOneItem) onItemsChanged(true);
     }
 
     public void setGroupEnabled(int group, boolean enabled) {
@@ -929,6 +929,7 @@ public class MenuBuilder implements Menu {
      * 
      * @param structureChanged true if the menu structure changed,
      *                         false if only item properties changed.
+     *                         (Visibility is a structural property since it affects layout.)
      */
     void onItemsChanged(boolean structureChanged) {
         if (!mPreventDispatchingItemsChanged) {
@@ -971,7 +972,7 @@ public class MenuBuilder implements Menu {
     void onItemVisibleChanged(MenuItemImpl item) {
         // Notify of items being changed
         mIsVisibleItemsStale = true;
-        onItemsChanged(false);
+        onItemsChanged(true);
     }
     
     /**
@@ -981,7 +982,7 @@ public class MenuBuilder implements Menu {
     void onItemActionRequestChanged(MenuItemImpl item) {
         // Notify of items being changed
         mIsActionItemsStale = true;
-        onItemsChanged(false);
+        onItemsChanged(true);
     }
     
     ArrayList<MenuItemImpl> getVisibleItems() {
