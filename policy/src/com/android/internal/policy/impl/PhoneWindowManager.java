@@ -41,6 +41,8 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.LocalPowerManager;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -2396,22 +2398,67 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    ServiceConnection mScreenshotConnection = null;
+    Runnable mScreenshotTimeout = null;
+
+    void finishScreenshot(ServiceConnection conn) {
+        if (mScreenshotConnection == conn) {
+            mContext.unbindService(conn);
+            mScreenshotConnection = null;
+            if (mScreenshotTimeout != null) {
+                mHandler.removeCallbacks(mScreenshotTimeout);
+                mScreenshotTimeout = null;
+            }
+        }
+    }
+
     private void takeScreenshot() {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
+                if (mScreenshotConnection != null) {
+                    return;
+                }
                 ComponentName cn = new ComponentName("com.android.systemui",
                         "com.android.systemui.screenshot.TakeScreenshotService");
                 Intent intent = new Intent();
                 intent.setComponent(cn);
                 ServiceConnection conn = new ServiceConnection() {
                     @Override
-                    public void onServiceConnected(ComponentName name, IBinder service) {}
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        if (mScreenshotConnection != this) {
+                            return;
+                        }
+                        Messenger messenger = new Messenger(service);
+                        Message msg = Message.obtain(null, 1);
+                        final ServiceConnection myConn = this;
+                        Handler h = new Handler(mHandler.getLooper()) {
+                            @Override
+                            public void handleMessage(Message msg) {
+                                finishScreenshot(myConn);
+                            }
+                        };
+                        msg.replyTo = new Messenger(h);
+                        try {
+                            messenger.send(msg);
+                        } catch (RemoteException e) {
+                        }
+                    }
                     @Override
                     public void onServiceDisconnected(ComponentName name) {}
                 };
-                mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE);
-                mContext.unbindService(conn);
+                if (mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE)) {
+                    mScreenshotConnection = conn;
+                    mScreenshotTimeout = new Runnable() {
+                        @Override public void run() {
+                            if (mScreenshotConnection != null) {
+                                finishScreenshot(mScreenshotConnection);
+                            }
+                        }
+
+                    };
+                    mHandler.postDelayed(mScreenshotTimeout, 10000);
+                }
             }
         });
     }
