@@ -128,20 +128,23 @@ typedef struct
  * Structure to hold media properties from native layer
  */
 typedef struct {
-    M4OSA_UInt32                        uiClipDuration;
-    VideoEditClasses_FileType         FileType;
-    M4VIDEOEDITING_VideoFormat          VideoStreamType;
-    M4OSA_UInt32                        uiClipVideoDuration;
-    M4OSA_UInt32                        uiVideoBitrate;
-    M4OSA_UInt32                        uiVideoWidth;
-    M4OSA_UInt32                        uiVideoHeight;
-    M4OSA_Float                         fAverageFrameRate;
-    M4VIDEOEDITING_VideoProfileAndLevel ProfileAndLevel;
-    M4VIDEOEDITING_AudioFormat          AudioStreamType;
-    M4OSA_UInt32                        uiClipAudioDuration;
-    M4OSA_UInt32                        uiAudioBitrate;
-    M4OSA_UInt32                        uiNbChannels;
-    M4OSA_UInt32                        uiSamplingFrequency;
+    M4OSA_UInt32 uiClipDuration;
+    VideoEditClasses_FileType  FileType;
+    M4VIDEOEDITING_VideoFormat VideoStreamType;
+    M4OSA_UInt32 uiClipVideoDuration;
+    M4OSA_UInt32 uiVideoBitrate;
+    M4OSA_UInt32 uiVideoWidth;
+    M4OSA_UInt32 uiVideoHeight;
+    M4OSA_Float  fAverageFrameRate;
+    M4OSA_UInt32 uiVideoProfile; /**< H263 or MPEG-4 or H264 profile(from core decoder) */
+    M4OSA_UInt32 uiVideoLevel;   /**< H263 or MPEG-4 or H264 level*/
+    M4OSA_Bool bProfileSupported;
+    M4OSA_Bool bLevelSupported;
+    M4VIDEOEDITING_AudioFormat AudioStreamType;
+    M4OSA_UInt32 uiClipAudioDuration;
+    M4OSA_UInt32 uiAudioBitrate;
+    M4OSA_UInt32 uiNbChannels;
+    M4OSA_UInt32 uiSamplingFrequency;
 } VideoEditPropClass_Properties;
 
 typedef struct
@@ -154,7 +157,10 @@ typedef struct
     jfieldID width;
     jfieldID height;
     jfieldID averageFrameRate;
-    jfieldID profileAndLevel;
+    jfieldID profile;
+    jfieldID level;
+    jfieldID profileSupported;
+    jfieldID levelSupported;
     jfieldID audioFormat;
     jfieldID audioDuration;
     jfieldID audioBitrate;
@@ -192,6 +198,8 @@ typedef struct
     jfieldID outputFile;
     jfieldID videoFrameSize;
     jfieldID videoFormat;
+    jfieldID videoProfile;
+    jfieldID videoLevel;
     jfieldID audioFormat;
     jfieldID audioSamplingFreq;
     jfieldID maxFileSize;

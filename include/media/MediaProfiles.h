@@ -140,6 +140,19 @@ public:
     int getVideoEditorCapParamByName(const char *name) const;
 
     /**
+     * Returns the value for the given param name for the video editor export codec format
+     * param or -1 if error.
+     * Supported param name are:
+     * videoeditor.export.profile - export video profile
+     * videoeditor.export.level - export video level
+     * Supported param codec are:
+     * 1 for h263
+     * 2 for h264
+     * 3 for mpeg4
+     */
+    int getVideoEditorExportParamByName(const char *name, int codec) const;
+
+    /**
      * Returns the audio encoders supported.
      */
     Vector<audio_encoder> getAudioEncoders() const;
@@ -332,7 +345,14 @@ private:
         int mCameraId;
         Vector<int> mLevels;
     };
-
+    struct ExportVideoProfile {
+        ExportVideoProfile(int codec, int profile, int level)
+            :mCodec(codec),mProfile(profile),mLevel(level) {}
+        ~ExportVideoProfile() {}
+        int mCodec;
+        int mProfile;
+        int mLevel;
+    };
     struct VideoEditorCap {
         VideoEditorCap(int inFrameWidth, int inFrameHeight,
             int outFrameWidth, int outFrameHeight)
@@ -374,6 +394,7 @@ private:
     static AudioEncoderCap* createAudioEncoderCap(const char **atts);
     static VideoEditorCap* createVideoEditorCap(
                 const char **atts, MediaProfiles *profiles);
+    static ExportVideoProfile* createExportVideoProfile(const char **atts);
 
     static CamcorderProfile* createCamcorderProfile(
                 int cameraId, const char **atts, Vector<int>& cameraIds);
@@ -418,6 +439,8 @@ private:
     static void createDefaultImageEncodingQualityLevels(MediaProfiles *profiles);
     static void createDefaultImageDecodingMaxMemory(MediaProfiles *profiles);
     static void createDefaultVideoEditorCap(MediaProfiles *profiles);
+    static void createDefaultExportVideoProfiles(MediaProfiles *profiles);
+
     static VideoEncoderCap* createDefaultH263VideoEncoderCap();
     static VideoEncoderCap* createDefaultM4vVideoEncoderCap();
     static AudioEncoderCap* createDefaultAmrNBEncoderCap();
@@ -475,6 +498,7 @@ private:
     RequiredProfiles *mRequiredProfileRefs;
     Vector<int>              mCameraIds;
     VideoEditorCap* mVideoEditorCap;
+    Vector<ExportVideoProfile*> mVideoEditorExportProfiles;
 };
 
 }; // namespace android

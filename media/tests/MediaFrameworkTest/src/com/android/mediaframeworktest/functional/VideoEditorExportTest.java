@@ -166,7 +166,7 @@ public class VideoEditorExportTest extends
             + mediaImageItem6.getDuration();
         mVideoEditorHelper.validateExport(mVideoEditor, outFilename,
             MediaProperties.HEIGHT_720, 0, storyBoardDuration,
-            MediaProperties.VCODEC_H264BP, MediaProperties.ACODEC_AAC_LC);
+            MediaProperties.VCODEC_H264, MediaProperties.ACODEC_AAC_LC);
         mVideoEditorHelper.checkDeleteExistingFile(outFilename);
     }
 
@@ -294,7 +294,7 @@ public class VideoEditorExportTest extends
             + mediaImageItem6.getDuration();
         mVideoEditorHelper.validateExport(mVideoEditor, outFilename,
             MediaProperties.HEIGHT_720, 0, storyBoardDuration,
-            MediaProperties.VCODEC_H264BP, MediaProperties.ACODEC_AAC_LC);
+            MediaProperties.VCODEC_H264, MediaProperties.ACODEC_AAC_LC);
         mVideoEditorHelper.checkDeleteExistingFile(outFilename);
     }
 
@@ -352,7 +352,7 @@ public class VideoEditorExportTest extends
         }
         mVideoEditorHelper.validateExport(mVideoEditor, outFilename,
             MediaProperties.HEIGHT_720, 0, mediaImageItem.getDuration(),
-            MediaProperties.VCODEC_H264BP, MediaProperties.ACODEC_AAC_LC);
+            MediaProperties.VCODEC_H264, MediaProperties.ACODEC_AAC_LC);
         mVideoEditorHelper.checkDeleteExistingFile(outFilename);
     }
 
@@ -412,7 +412,7 @@ public class VideoEditorExportTest extends
         mVideoEditorHelper.validateExport(mVideoEditor, outFilename,
             MediaProperties.HEIGHT_720, 0, (mediaVideoItem.getTimelineDuration() +
             mediaImageItem.getDuration()),
-            MediaProperties.VCODEC_H264BP, MediaProperties.ACODEC_AAC_LC);
+            MediaProperties.VCODEC_H264, MediaProperties.ACODEC_AAC_LC);
 
         mVideoEditorHelper.checkDeleteExistingFile(outFilename);
     }
@@ -531,7 +531,7 @@ public class VideoEditorExportTest extends
             + mediaItem6.getTimelineDuration() - transition5And6.getDuration();
         mVideoEditorHelper.validateExport(mVideoEditor, outFilename,
             MediaProperties.HEIGHT_720, 0, storyBoardDuration,
-            MediaProperties.VCODEC_H264BP, MediaProperties.ACODEC_AAC_LC);
+            MediaProperties.VCODEC_H264, MediaProperties.ACODEC_AAC_LC);
         mVideoEditorHelper.checkDeleteExistingFile(outFilename);
     }
 
@@ -693,7 +693,7 @@ public class VideoEditorExportTest extends
 
         mVideoEditorHelper.validateExport(mVideoEditor, outFilename,
             MediaProperties.HEIGHT_144, 0, storyBoardDuration,
-            MediaProperties.VCODEC_H264BP, MediaProperties.ACODEC_AAC_LC);
+            MediaProperties.VCODEC_H264, MediaProperties.ACODEC_AAC_LC);
          mVideoEditorHelper.checkDeleteExistingFile(outFilename);
     }
 
@@ -730,7 +730,7 @@ public class VideoEditorExportTest extends
         }
         mVideoEditorHelper.validateExport(mVideoEditor, outFilename,
             MediaProperties.HEIGHT_720, 0, mediaItem1.getDuration(),
-            MediaProperties.VCODEC_H264BP, MediaProperties.ACODEC_AAC_LC);
+            MediaProperties.VCODEC_H264, MediaProperties.ACODEC_AAC_LC);
         mVideoEditorHelper.checkDeleteExistingFile(outFilename);
     }
 
@@ -814,7 +814,7 @@ public class VideoEditorExportTest extends
         mVideoEditorHelper.validateExport(mVideoEditor, outFilename,
             MediaProperties.HEIGHT_720, 0,
             (mediaVideoItem.getDuration()+ mediaVideoItem1.getDuration()),
-            MediaProperties.VCODEC_H264BP, MediaProperties.ACODEC_AAC_LC);
+            MediaProperties.VCODEC_H264, MediaProperties.ACODEC_AAC_LC);
         mVideoEditorHelper.checkDeleteExistingFile(outFilename);
     }
 }

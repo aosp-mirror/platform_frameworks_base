@@ -366,7 +366,7 @@ public class VideoEditorPerformance extends
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
         final int outHeight = MediaProperties.HEIGHT_480;
         final int outBitrate = MediaProperties.BITRATE_256K;
-        final int outVcodec = MediaProperties.VCODEC_H264BP;
+        final int outVcodec = MediaProperties.VCODEC_H264;
         final String[] loggingInfo = new String[1];
         final String outFilename = mVideoEditorHelper
             .createRandomFile(mVideoEditor.getPath() + "/") + ".3gp";
@@ -639,11 +639,12 @@ public class VideoEditorPerformance extends
         final int renderingMode = MediaItem.RENDERING_MODE_BLACK_BORDER;
         final int aspectRatio = MediaProperties.ASPECT_RATIO_3_2;
         final int fileType = MediaProperties.FILE_MP4;
-        final int videoCodecType = MediaProperties.VCODEC_H264BP;
+        final int videoCodecType = MediaProperties.VCODEC_H264;
         final int duration = 77366;
         final int videoBitrate = 3169971;
         final int fps = 30;
-        final int videoProfile = MediaProperties.H264_PROFILE_0_LEVEL_1_3;
+        final int videoProfile = MediaProperties.H264Profile.H264ProfileBaseline;
+        final int videoLevel = MediaProperties.H264Level.H264Level13;
         final int width = 1080;
         final int height = MediaProperties.HEIGHT_720;
         int timeTaken = 0;
@@ -665,6 +666,8 @@ public class VideoEditorPerformance extends
                     duration, mediaVideoItem.getDuration());
                 assertEquals("Video Profile ",
                     videoProfile, mediaVideoItem.getVideoProfile());
+                assertEquals("Video Level ",
+                    videoLevel, mediaVideoItem.getVideoLevel());
                 assertEquals("Video height ",
                     height, mediaVideoItem.getHeight());
                 assertEquals("Video width ",
