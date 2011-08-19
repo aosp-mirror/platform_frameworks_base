@@ -19,6 +19,7 @@ package com.android.internal.view.menu;
 import com.android.internal.view.menu.ActionMenuView.ActionMenuChildView;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -107,6 +108,16 @@ public class ActionMenuPresenter extends BaseMenuPresenter {
 
         // Drop a scrap view as it may no longer reflect the proper context/config.
         mScrapActionButtonView = null;
+    }
+
+    public void onConfigurationChanged(Configuration newConfig) {
+        if (!mMaxItemsSet) {
+            mMaxItems = mContext.getResources().getInteger(
+                    com.android.internal.R.integer.max_action_buttons);
+            if (mMenu != null) {
+                mMenu.onItemsChanged(true);
+            }
+        }
     }
 
     public void setWidthLimit(int width, boolean strict) {

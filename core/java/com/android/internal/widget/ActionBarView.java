@@ -259,6 +259,9 @@ public class ActionBarView extends AbsActionBarView {
                 com.android.internal.R.attr.actionBarStyle, 0);
         setContentHeight(a.getLayoutDimension(R.styleable.ActionBar_height, 0));
         a.recycle();
+        if (mActionMenuPresenter != null) {
+            mActionMenuPresenter.onConfigurationChanged(newConfig);
+        }
     }
 
     @Override
