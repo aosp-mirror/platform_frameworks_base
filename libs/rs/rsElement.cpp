@@ -284,6 +284,15 @@ void Element::decRefs(const void *ptr) const {
     }
 }
 
+Element::Builder::Builder() {
+    const uint32_t initialCapacity = 32;
+    mBuilderElementRefs.setCapacity(initialCapacity);
+    mBuilderElements.setCapacity(initialCapacity);
+    mBuilderNameStrings.setCapacity(initialCapacity);
+    mBuilderNameLengths.setCapacity(initialCapacity);
+    mBuilderArrays.setCapacity(initialCapacity);
+}
+
 void Element::Builder::add(const Element *e, const char *nameStr, uint32_t arraySize) {
     mBuilderElementRefs.push(ObjectBaseRef<const Element>(e));
     mBuilderElements.push(e);
@@ -303,40 +312,11 @@ ObjectBaseRef<const Element> Element::Builder::create(Context *rsc) {
 
 
 ElementState::ElementState() {
-    const uint32_t initialCapacity = 32;
-    mBuilderElements.setCapacity(initialCapacity);
-    mBuilderNameStrings.setCapacity(initialCapacity);
-    mBuilderNameLengths.setCapacity(initialCapacity);
-    mBuilderArrays.setCapacity(initialCapacity);
 }
 
 ElementState::~ElementState() {
     rsAssert(!mElements.size());
 }
-
-void ElementState::elementBuilderBegin() {
-    mBuilderElements.clear();
-    mBuilderNameStrings.clear();
-    mBuilderNameLengths.clear();
-    mBuilderArrays.clear();
-}
-
-void ElementState::elementBuilderAdd(const Element *e, const char *nameStr, uint32_t arraySize) {
-    mBuilderElements.push(e);
-    mBuilderNameStrings.push(nameStr);
-    mBuilderNameLengths.push(strlen(nameStr));
-    mBuilderArrays.push(arraySize);
-
-}
-
-const Element *ElementState::elementBuilderCreate(Context *rsc) {
-    return Element::create(rsc, mBuilderElements.size(),
-                           &(mBuilderElements.editArray()[0]),
-                           &(mBuilderNameStrings.editArray()[0]),
-                           mBuilderNameLengths.editArray(),
-                           mBuilderArrays.editArray());
-}
-
 
 /////////////////////////////////////////
 //
