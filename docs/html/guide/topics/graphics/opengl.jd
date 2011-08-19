@@ -14,7 +14,7 @@ parent.link=index.html
         </ol>
       <li><a href="#manifest">Declaring OpenGL Requirements</a></li>
       </li>
-      <li><a href="#coordinate-mapping">Coordinate Mapping for Drawn Objects</a>  
+      <li><a href="#coordinate-mapping">Mapping Coordinates for Drawn Objects</a>  
         <ol>
           <li><a href="#proj-es1">Projection and camera in ES 1.0</a></li>
           <li><a href="#proj-es1">Projection and camera in ES 2.0</a></li>
@@ -197,9 +197,9 @@ shown below.
   installed on devices that do not support OpenGL ES 2.0.</p>
   </li>
   <li><strong>Texture compression requirements</strong> - If your application uses texture
-compression formats that are not supported by all devices, you must declare them in your manifest
-file using <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">
-{@code &lt;supports-gl-texture&gt;}</a>. For more information about available texture compression
+compression formats, you must declare the formats your application supports in your manifest file
+using <a href="{@docRoot}guide/topics/manifest/supports-gl-texture-element.html">{@code
+&lt;supports-gl-texture&gt;}</a>. For more information about available texture compression
 formats, see <a href="#textures">Texture compression support</a>. 
 
 <p>Declaring texture compression requirements in your manifest hides your application from users
@@ -212,7 +212,7 @@ Android Market and texture compression filtering</a> section of the {@code
 </ul>
 
 
-<h2 id="coordinate-mapping">Coordinate Mapping for Drawn Objects</h2>
+<h2 id="coordinate-mapping">Mapping Coordinates for Drawn Objects</h2>
 
 <p>One of the basic problems in displaying graphics on Android devices is that their screens can
 vary in size and shape. OpenGL assumes a square, uniform coordinate system and, by default, happily
@@ -241,9 +241,11 @@ adding them to the OpenGL environment.</p>
 <ol>
 <li><strong>Projection matrix</strong> - Create a projection matrix using the geometry of the
 device screen in order to recalculate object coordinates so they are drawn with correct proportions.
-The following example code demonstrates how to modify the {@code onSurfaceChanged()} method of a
-{@link android.opengl.GLSurfaceView.Renderer} implementation to create a projection matrix based on
-the screen's aspect ratio and apply it to the OpenGL rendering environment.
+The following example code demonstrates how to modify the {@link
+android.opengl.GLSurfaceView.Renderer#onSurfaceChanged(javax.microedition.khronos.opengles.GL10,
+int, int) onSurfaceChanged()} method of a {@link android.opengl.GLSurfaceView.Renderer}
+implementation to create a projection matrix based on the screen's aspect ratio and apply it to the
+OpenGL rendering environment.
 
 <pre>
   public void onSurfaceChanged(GL10 gl, int width, int height) {
@@ -260,11 +262,13 @@ the screen's aspect ratio and apply it to the OpenGL rendering environment.
 
 <li><strong>Camera transformation matrix</strong> - Once you have adjusted the coordinate system
 using a projection matrix, you must also apply a camera view. The following example code shows how
-to modify the {@code onDrawFrame()} method of a {@link android.opengl.GLSurfaceView.Renderer}
-implementation to apply a model view and use the {@link
-android.opengl.GLU#gluLookAt(javax.microedition.khronos.opengles.GL10, float, float, float, float,
-float, float, float, float, float) GLU.gluLookAt()} utility to create a viewing tranformation which
-simulates a camera position.
+to modify the {@link        
+android.opengl.GLSurfaceView.Renderer#onDrawFrame(javax.microedition.khronos.opengles.GL10)
+onDrawFrame()} method of a {@link android.opengl.GLSurfaceView.Renderer}
+implementation to apply a model view and use the
+{@link android.opengl.GLU#gluLookAt(javax.microedition.khronos.opengles.GL10, float, float, float,
+float, float, float, float, float, float) GLU.gluLookAt()} utility to create a viewing tranformation
+which simulates a camera position.
 
 <pre>
     public void onDrawFrame(GL10 gl) {
@@ -320,8 +324,10 @@ independently.</p>
 </li>
 <li><strong>Access the shader matrix</strong> - After creating a hook in your vertex shaders to
 apply projection and camera view, you can then access that variable to apply projection and
-camera viewing matrices. The following code shows how to modify the {@code onSurfaceCreated()}
-method of a {@link android.opengl.GLSurfaceView.Renderer} implementation to access the matrix
+camera viewing matrices. The following code shows how to modify the {@link
+android.opengl.GLSurfaceView.Renderer#onSurfaceCreated(javax.microedition.khronos.opengles.GL10,
+javax.microedition.khronos.egl.EGLConfig) onSurfaceCreated()} method of a {@link
+android.opengl.GLSurfaceView.Renderer} implementation to access the matrix
 variable defined in the vertex shader above.
 
 <pre>
@@ -334,9 +340,13 @@ variable defined in the vertex shader above.
 </li>
 <li><strong>Create projection and camera viewing matrices</strong> - Generate the projection and
 viewing matrices to be applied the graphic objects. The following example code shows how to modify
-the {@code onSurfaceCreated()} and {@code onSurfaceChanged()} methods of a {@link
-android.opengl.GLSurfaceView.Renderer} implementation to create camera view matrix and a projection
-matrix based on the screen aspect ratio of the device.
+the {@link    
+android.opengl.GLSurfaceView.Renderer#onSurfaceCreated(javax.microedition.khronos.opengles.GL10,
+javax.microedition.khronos.egl.EGLConfig) onSurfaceCreated()} and {@link
+android.opengl.GLSurfaceView.Renderer#onSurfaceChanged(javax.microedition.khronos.opengles.GL10,
+int, int) onSurfaceChanged()} methods of a {@link android.opengl.GLSurfaceView.Renderer}
+implementation to create camera view matrix and a projection matrix based on the screen aspect ratio
+of the device.
 
 <pre>
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -358,9 +368,11 @@ matrix based on the screen aspect ratio of the device.
 
 <li><strong>Apply projection and camera viewing matrices</strong> - To apply the projection and
 camera view transformations, multiply the matrices together and then set them into the vertex
-shader. The following example code shows how modify the {@code onDrawFrame()} method of a {@link
-android.opengl.GLSurfaceView.Renderer} implementation to combine the projection matrix and camera
-view created in the code above and then apply it to the graphic objects to be rendered by OpenGL.
+shader. The following example code shows how modify the {@link
+android.opengl.GLSurfaceView.Renderer#onDrawFrame(javax.microedition.khronos.opengles.GL10)
+onDrawFrame()} method of a {@link android.opengl.GLSurfaceView.Renderer} implementation to combine
+the projection matrix and camera view created in the code above and then apply it to the graphic
+objects to be rendered by OpenGL.
   
 <pre>
     public void onDrawFrame(GL10 unused) {
