@@ -422,8 +422,8 @@ not square and, by default, OpenGL happily maps a perfectly square, uniform coor
 system onto your typically non-square screen. To solve this problem, you can apply an OpenGL
 projection mode and camera view (eye point) to transform the coordinates of your graphic objects
 so they have the correct proportions on any display. For more information about OpenGL coordinate
-mapping, see <a href="{@docRoot}guide/topics/graphics/opengl.html#coordinate-mapping">Coordinate
-Mapping for Drawn Objects</a>.</p>
+mapping, see <a href="{@docRoot}guide/topics/graphics/opengl.html#coordinate-mapping">Mapping
+Coordinates for Drawn Objects</a>.</p>
 
 <p>To apply projection and camera view transformations to your triangle:
 </p>
