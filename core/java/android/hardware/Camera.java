@@ -2406,13 +2406,16 @@ public class Camera {
         }
 
         /**
-         * Sets the white balance.
+         * Sets the white balance. Changing the setting will release the
+         * auto-white balance lock.
          *
          * @param value new white balance.
          * @see #getWhiteBalance()
+         * @see #setAutoWhiteBalanceLock()
          */
         public void setWhiteBalance(String value) {
             set(KEY_WHITE_BALANCE, value);
+            set(KEY_AUTO_WHITEBALANCE_LOCK, FALSE);
         }
 
         /**
@@ -2823,6 +2826,9 @@ public class Camera {
          * set the lock to false. However, the lock can be re-enabled before
          * preview is re-started to keep the same white balance parameters.</p>
          *
+         * <p> Changing the white balance mode with {@link #setWhiteBalance}
+         * will release the auto-white balance lock if it is set.</p>
+         *
          * <p>Exposure compensation, in conjunction with re-enabling the AE and
          * AWB locks after each still capture, can be used to capture an
          * exposure-bracketed burst of images, for example. Auto-white balance
@@ -2845,6 +2851,7 @@ public class Camera {
          *        auto-white balance routine is free to run normally.
          *
          * @see #getAutoWhiteBalanceLock()
+         * @see #setWhiteBalance(String)
          */
         public void setAutoWhiteBalanceLock(boolean toggle) {
             set(KEY_AUTO_WHITEBALANCE_LOCK, toggle ? TRUE : FALSE);
