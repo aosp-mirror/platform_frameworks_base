@@ -1074,7 +1074,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     int uid = msg.arg1;
                     boolean restart = (msg.arg2 == 1);
                     String pkg = (String) msg.obj;
-                    forceStopPackageLocked(pkg, uid, restart, false, true);
+                    forceStopPackageLocked(pkg, uid, restart, false, true, false);
                 }
             } break;
             case FINALIZE_PENDING_INTENT_MSG: {
@@ -3086,7 +3086,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                     return;
                 }
                 killPackageProcessesLocked(packageName, pkgUid,
-                        ProcessList.SECONDARY_SERVER_ADJ, false, true, true);
+                        ProcessList.SECONDARY_SERVER_ADJ, false, true, true, false);
             }
         } finally {
             Binder.restoreCallingIdentity(callingId);
@@ -3244,7 +3244,7 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private void forceStopPackageLocked(final String packageName, int uid) {
-        forceStopPackageLocked(packageName, uid, false, false, true);
+        forceStopPackageLocked(packageName, uid, false, false, true, false);
         Intent intent = new Intent(Intent.ACTION_PACKAGE_RESTARTED,
                 Uri.fromParts("package", packageName, null));
         if (!mProcessesReady) {
@@ -3257,7 +3257,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
     
     private final boolean killPackageProcessesLocked(String packageName, int uid,
-            int minOomAdj, boolean callerWillRestart, boolean allowRestart, boolean doit) {
+            int minOomAdj, boolean callerWillRestart, boolean allowRestart, boolean doit,
+            boolean evenPersistent) {
         ArrayList<ProcessRecord> procs = new ArrayList<ProcessRecord>();
 
         // Remove all processes this package may have touched: all with the
@@ -3268,7 +3269,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             final int NA = apps.size();
             for (int ia=0; ia<NA; ia++) {
                 ProcessRecord app = apps.valueAt(ia);
-                if (app.persistent) {
+                if (app.persistent && !evenPersistent) {
                     // we don't kill persistent processes
                     continue;
                 }
@@ -3298,7 +3299,8 @@ public final class ActivityManagerService extends ActivityManagerNative
     }
 
     private final boolean forceStopPackageLocked(String name, int uid,
-            boolean callerWillRestart, boolean purgeCache, boolean doit) {
+            boolean callerWillRestart, boolean purgeCache, boolean doit,
+            boolean evenPersistent) {
         int i;
         int N;
 
@@ -3322,12 +3324,12 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
         
         boolean didSomething = killPackageProcessesLocked(name, uid, -100,
-                callerWillRestart, false, doit);
+                callerWillRestart, false, doit, evenPersistent);
         
         for (i=mMainStack.mHistory.size()-1; i>=0; i--) {
             ActivityRecord r = (ActivityRecord)mMainStack.mHistory.get(i);
             if (r.packageName.equals(name)
-                    && (r.app == null || !r.app.persistent)) {
+                    && (r.app == null || evenPersistent || !r.app.persistent)) {
                 if (!doit) {
                     return true;
                 }
@@ -3344,7 +3346,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         ArrayList<ServiceRecord> services = new ArrayList<ServiceRecord>();
         for (ServiceRecord service : mServices.values()) {
             if (service.packageName.equals(name)
-                    && (service.app == null || !service.app.persistent)) {
+                    && (service.app == null || evenPersistent || !service.app.persistent)) {
                 if (!doit) {
                     return true;
                 }
@@ -3757,7 +3759,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 if (pkgs != null) {
                     for (String pkg : pkgs) {
                         synchronized (ActivityManagerService.this) {
-                          if (forceStopPackageLocked(pkg, -1, false, false, false)) {
+                          if (forceStopPackageLocked(pkg, -1, false, false, false, false)) {
                               setResultCode(Activity.RESULT_OK);
                               return;
                           }
@@ -6178,7 +6180,7 @@ public final class ActivityManagerService extends ActivityManagerNative
             mDebugTransient = !persistent;
             if (packageName != null) {
                 final long origId = Binder.clearCallingIdentity();
-                forceStopPackageLocked(packageName, -1, false, false, true);
+                forceStopPackageLocked(packageName, -1, false, false, true, true);
                 Binder.restoreCallingIdentity(origId);
             }
         }
@@ -11256,7 +11258,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         String list[] = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST);
                         if (list != null && (list.length > 0)) {
                             for (String pkg : list) {
-                                forceStopPackageLocked(pkg, -1, false, true, true);
+                                forceStopPackageLocked(pkg, -1, false, true, true, false);
                             }
                             sendPackageBroadcastLocked(
                                     IApplicationThread.EXTERNAL_STORAGE_UNAVAILABLE, list);
@@ -11267,7 +11269,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                         if (data != null && (ssp=data.getSchemeSpecificPart()) != null) {
                             if (!intent.getBooleanExtra(Intent.EXTRA_DONT_KILL_APP, false)) {
                                 forceStopPackageLocked(ssp,
-                                        intent.getIntExtra(Intent.EXTRA_UID, -1), false, true, true);
+                                        intent.getIntExtra(Intent.EXTRA_UID, -1), false, true, true, false);
                             }
                             if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
                                 sendPackageBroadcastLocked(IApplicationThread.PACKAGE_REMOVED,
@@ -12364,7 +12366,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             final long origId = Binder.clearCallingIdentity();
-            forceStopPackageLocked(ii.targetPackage, -1, true, false, true);
+            // Instrumentation can kill and relaunch even persistent processes
+            forceStopPackageLocked(ii.targetPackage, -1, true, false, true, true);
             ProcessRecord app = addAppLocked(ai);
             app.instrumentationClass = className;
             app.instrumentationInfo = ai;
@@ -12419,7 +12422,7 @@ public final class ActivityManagerService extends ActivityManagerNative
         app.instrumentationProfileFile = null;
         app.instrumentationArguments = null;
 
-        forceStopPackageLocked(app.processName, -1, false, false, true);
+        forceStopPackageLocked(app.processName, -1, false, false, true, true);
     }
 
     public void finishInstrumentation(IApplicationThread target,
