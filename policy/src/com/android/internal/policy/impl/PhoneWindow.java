@@ -587,6 +587,13 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         } else if (!st.isInListMode()) {
             width = MATCH_PARENT;
+        } else if (st.createdPanelView != null) {
+            // If we already had a panel view, carry width=MATCH_PARENT through
+            // as we did above when it was created.
+            ViewGroup.LayoutParams lp = st.createdPanelView.getLayoutParams();
+            if (lp != null && lp.width == ViewGroup.LayoutParams.MATCH_PARENT) {
+                width = MATCH_PARENT;
+            }
         }
 
         st.isOpen = true;
