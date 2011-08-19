@@ -663,17 +663,20 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
             if (DBG) Slog.d(TAG, getName() + message.toString());
             switch (message.what) {
                 case WifiMonitor.AP_STA_CONNECTED_EVENT:
-                    String address = (String) message.obj;
-                    mGroup.addClient(address);
-                    updateDeviceStatus(address, Status.CONNECTED);
+                    //After a GO setup, STA connected event comes with interface address
+                    String interfaceAddress = (String) message.obj;
+                    String deviceAddress = getDeviceAddress(interfaceAddress);
+                    mGroup.addClient(deviceAddress);
+                    updateDeviceStatus(deviceAddress, Status.CONNECTED);
                     if (DBG) Slog.d(TAG, getName() + " ap sta connected");
                     sendP2pPeersChangedBroadcast();
                     break;
                 case WifiMonitor.AP_STA_DISCONNECTED_EVENT:
-                    address = (String) message.obj;
-                    updateDeviceStatus(address, Status.AVAILABLE);
-                    if (mGroup.removeClient(address)) {
-                        if (DBG) Slog.d(TAG, "Removed client " + address);
+                    interfaceAddress = (String) message.obj;
+                    deviceAddress = getDeviceAddress(interfaceAddress);
+                    updateDeviceStatus(deviceAddress, Status.AVAILABLE);
+                    if (mGroup.removeClient(deviceAddress)) {
+                        if (DBG) Slog.d(TAG, "Removed client " + deviceAddress);
                         if (mGroup.isClientListEmpty()) {
                             Slog.d(TAG, "Client list empty, killing p2p connection");
                             sendMessage(WifiP2pManager.REMOVE_GROUP);
@@ -682,7 +685,7 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
                             sendP2pPeersChangedBroadcast();
                         }
                     } else {
-                        if (DBG) Slog.d(TAG, "Failed to remove client " + address);
+                        if (DBG) Slog.d(TAG, "Failed to remove client " + deviceAddress);
                         for (WifiP2pDevice c : mGroup.getClientList()) {
                             if (DBG) Slog.d(TAG,"client " + c.deviceAddress);
                         }
@@ -1005,12 +1008,20 @@ public class WifiP2pService extends IWifiP2pManager.Stub {
 
     private void updateDeviceStatus(String deviceAddress, Status status) {
         for (WifiP2pDevice d : mPeers.getDeviceList()) {
-           // TODO: fix later
-           // if (d.deviceAddress.equals(deviceAddress)) {
-            if (d.deviceAddress.startsWith(deviceAddress.substring(0, 8))) {
+            if (d.deviceAddress.equals(deviceAddress)) {
                 d.status = status;
             }
         }
     }
+
+    private String getDeviceAddress(String interfaceAddress) {
+        for (WifiP2pDevice d : mPeers.getDeviceList()) {
+            if (interfaceAddress.equals(WifiNative.p2pGetInterfaceAddress(d.deviceAddress))) {
+                return d.deviceAddress;
+            }
+        }
+        return null;
+    }
+
     }
 }
