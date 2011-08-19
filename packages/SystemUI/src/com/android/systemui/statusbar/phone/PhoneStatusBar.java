@@ -284,6 +284,8 @@ public class PhoneStatusBar extends StatusBar {
                 mNavigationBarView = 
                     (NavigationBarView) View.inflate(context, R.layout.navigation_bar, null);
 
+                mNavigationBarView.setEnabled((mDisabled & StatusBarManager.DISABLE_NAVIGATION) == 0);
+
                 sb.setOnSystemUiVisibilityChangeListener(
                     new View.OnSystemUiVisibilityChangeListener() {
                         @Override
@@ -1072,7 +1074,9 @@ public class PhoneStatusBar extends StatusBar {
                 mHandler.sendEmptyMessage(MSG_CLOSE_RECENTS_PANEL);
             }
 
-            mNavigationBarView.setEnabled((state & StatusBarManager.DISABLE_NAVIGATION) == 0);
+            if (mNavigationBarView != null) {
+                mNavigationBarView.setEnabled((state & StatusBarManager.DISABLE_NAVIGATION) == 0);
+            }
         }
 
         if ((diff & StatusBarManager.DISABLE_NOTIFICATION_ICONS) != 0) {
