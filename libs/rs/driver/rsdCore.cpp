@@ -43,6 +43,7 @@ using namespace android::renderscript;
 
 static void Shutdown(Context *rsc);
 static void SetPriority(const Context *rsc, int32_t priority);
+static void initForEach(outer_foreach_t* forEachLaunch);
 
 static RsdHalFunctions FunctionTable = {
     rsdGLInit,
@@ -206,6 +207,8 @@ bool rsdHalInit(Context *rsc, uint32_t version_major, uint32_t version_minor) {
     rsdgThreadTLSKeyCount++;
     pthread_mutex_unlock(&rsdgInitMutex);
 
+    initForEach(dc->mForEachLaunch);
+
     dc->mTlsStruct.mContext = rsc;
     dc->mTlsStruct.mScript = NULL;
     int status = pthread_setspecific(rsdgThreadTLSKey, &dc->mTlsStruct);
@@ -287,4 +290,112 @@ void Shutdown(Context *rsc) {
 
 }
 
+static void rsdForEach17(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(const void *, uint32_t);
+    (*(fe*)vRoot)(p->in, p->y);
+}
+
+static void rsdForEach18(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(void *, uint32_t);
+    (*(fe*)vRoot)(p->out, p->y);
+}
+
+static void rsdForEach19(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(const void *, void *, uint32_t);
+    (*(fe*)vRoot)(p->in, p->out, p->y);
+}
+
+static void rsdForEach21(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(const void *, const void *, uint32_t);
+    (*(fe*)vRoot)(p->in, p->usr, p->y);
+}
+
+static void rsdForEach22(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(void *, const void *, uint32_t);
+    (*(fe*)vRoot)(p->out, p->usr, p->y);
+}
+
+static void rsdForEach23(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(const void *, void *, const void *, uint32_t);
+    (*(fe*)vRoot)(p->in, p->out, p->usr, p->y);
+}
+
+static void rsdForEach25(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(const void *, uint32_t, uint32_t);
+    (*(fe*)vRoot)(p->in, p->x, p->y);
+}
+
+static void rsdForEach26(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(void *, uint32_t, uint32_t);
+    (*(fe*)vRoot)(p->out, p->x, p->y);
+}
+
+static void rsdForEach27(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(const void *, void *, uint32_t, uint32_t);
+    (*(fe*)vRoot)(p->in, p->out, p->x, p->y);
+}
+
+static void rsdForEach29(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(const void *, const void *, uint32_t, uint32_t);
+    (*(fe*)vRoot)(p->in, p->usr, p->x, p->y);
+}
+
+static void rsdForEach30(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(void *, const void *, uint32_t, uint32_t);
+    (*(fe*)vRoot)(p->out, p->usr, p->x, p->y);
+}
+
+static void rsdForEach31(const void *vRoot,
+        const android::renderscript::RsForEachStubParamStruct *p) {
+    typedef void (*fe)(const void *, void *, const void *, uint32_t, uint32_t);
+    (*(fe*)vRoot)(p->in, p->out, p->usr, p->x, p->y);
+}
+
+
+static void initForEach(outer_foreach_t* forEachLaunch) {
+    rsAssert(forEachLaunch);
+    forEachLaunch[0x00] = NULL;
+    forEachLaunch[0x01] = rsdForEach31; // in
+    forEachLaunch[0x02] = rsdForEach30; //     out
+    forEachLaunch[0x03] = rsdForEach31; // in, out
+    forEachLaunch[0x04] = NULL;
+    forEachLaunch[0x05] = rsdForEach29;  // in,      usr
+    forEachLaunch[0x06] = rsdForEach30; //     out, usr
+    forEachLaunch[0x07] = rsdForEach31; // in, out, usr
+    forEachLaunch[0x08] = NULL;
+    forEachLaunch[0x09] = rsdForEach25; // in,           x
+    forEachLaunch[0x0a] = rsdForEach26; //     out,      x
+    forEachLaunch[0x0b] = rsdForEach27; // in, out,      x
+    forEachLaunch[0x0c] = NULL;
+    forEachLaunch[0x0d] = rsdForEach29; // in,      usr, x
+    forEachLaunch[0x0e] = rsdForEach30; //     out, usr, x
+    forEachLaunch[0x0f] = rsdForEach31; // in, out, usr, x
+    forEachLaunch[0x10] = NULL;
+    forEachLaunch[0x11] = rsdForEach17; // in               y
+    forEachLaunch[0x12] = rsdForEach18; //     out,         y
+    forEachLaunch[0x13] = rsdForEach19; // in, out,         y
+    forEachLaunch[0x14] = NULL;
+    forEachLaunch[0x15] = rsdForEach21; // in,      usr,    y
+    forEachLaunch[0x16] = rsdForEach22; //     out, usr,    y
+    forEachLaunch[0x17] = rsdForEach23; // in, out, usr,    y
+    forEachLaunch[0x18] = NULL;
+    forEachLaunch[0x19] = rsdForEach25; // in,           x, y
+    forEachLaunch[0x1a] = rsdForEach26; //     out,      x, y
+    forEachLaunch[0x1b] = rsdForEach27; // in, out,      x, y
+    forEachLaunch[0x1c] = NULL;
+    forEachLaunch[0x1d] = rsdForEach29; // in,      usr, x, y
+    forEachLaunch[0x1e] = rsdForEach30; //     out, usr, x, y
+    forEachLaunch[0x1f] = rsdForEach31; // in, out, usr, x, y
+}
 
