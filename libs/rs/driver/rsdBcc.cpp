@@ -45,6 +45,7 @@ struct DrvScript {
     InvokeFunc_t *mInvokeFunctions;
     void ** mFieldAddress;
     bool * mFieldIsObject;
+    const uint32_t *mExportForEachSignatureList;
 
     const uint8_t * mScriptText;
     uint32_t mScriptTextLength;
@@ -74,6 +75,7 @@ bool rsdScriptInit(const Context *rsc,
     size_t exportFuncCount = 0;
     size_t exportVarCount = 0;
     size_t objectSlotCount = 0;
+    size_t exportForEachSignatureCount = 0;
 
     DrvScript *drv = (DrvScript *)calloc(1, sizeof(DrvScript));
     if (drv == NULL) {
@@ -153,6 +155,10 @@ bool rsdScriptInit(const Context *rsc,
         }
     }
 
+    exportForEachSignatureCount = drv->ME->getExportForEachSignatureCount();
+    rsAssert(exportForEachSignatureCount <= 1);
+    drv->mExportForEachSignatureList = drv->ME->getExportForEachSignatureList();
+
     // Copy info over to runtime
     script->mHal.info.exportedFunctionCount = drv->ME->getExportFuncCount();
     script->mHal.info.exportedVariableCount = drv->ME->getExportVarCount();
@@ -179,6 +185,7 @@ error:
 typedef struct {
     Context *rsc;
     Script *script;
+    uint32_t sig;
     const Allocation * ain;
     Allocation * aout;
     const void * usr;
@@ -206,7 +213,7 @@ typedef struct {
     uint32_t dimZ;
     uint32_t dimArray;
 } MTLaunchStruct;
-typedef int (*rs_t)(const void *, void *, const void *, uint32_t, uint32_t, uint32_t, uint32_t);
+typedef void (*rs_t)(const void *, void *, const void *, uint32_t, uint32_t, uint32_t, uint32_t);
 
 static void wc_xy(void *usr, uint32_t idx) {
     MTLaunchStruct *mtls = (MTLaunchStruct *)usr;
@@ -214,6 +221,8 @@ static void wc_xy(void *usr, uint32_t idx) {
     memset(&p, 0, sizeof(p));
     p.usr = mtls->usr;
     p.usr_len = mtls->usrLen;
+    RsdHal * dc = (RsdHal *)mtls->rsc->mHal.drv;
+    uint32_t sig = mtls->sig;
 
     while (1) {
         uint32_t slice = (uint32_t)android_atomic_inc(&mtls->mSliceNum);
@@ -234,7 +243,7 @@ static void wc_xy(void *usr, uint32_t idx) {
             for (p.x = mtls->xStart; p.x < mtls->xEnd; p.x++) {
                 p.in = xPtrIn;
                 p.out = xPtrOut;
-                ((rs_t)mtls->script->mHal.info.root) (p.in, p.out, p.usr, p.x, p.y, 0, 0);
+                dc->mForEachLaunch[sig](&mtls->script->mHal.info.root, &p);
                 xPtrIn += mtls->eStrideIn;
                 xPtrOut += mtls->eStrideOut;
             }
@@ -248,6 +257,8 @@ static void wc_x(void *usr, uint32_t idx) {
     memset(&p, 0, sizeof(p));
     p.usr = mtls->usr;
     p.usr_len = mtls->usrLen;
+    RsdHal * dc = (RsdHal *)mtls->rsc->mHal.drv;
+    uint32_t sig = mtls->sig;
 
     while (1) {
         uint32_t slice = (uint32_t)android_atomic_inc(&mtls->mSliceNum);
@@ -265,7 +276,7 @@ static void wc_x(void *usr, uint32_t idx) {
         for (p.x = xStart; p.x < xEnd; p.x++) {
             p.in = xPtrIn;
             p.out = xPtrOut;
-            ((rs_t)mtls->script->mHal.info.root) (p.in, p.out, p.usr, p.x, 0, 0, 0);
+            dc->mForEachLaunch[sig](&mtls->script->mHal.info.root, &p);
             xPtrIn += mtls->eStrideIn;
             xPtrOut += mtls->eStrideOut;
         }
@@ -286,6 +297,10 @@ void rsdScriptInvokeForEach(const Context *rsc,
     MTLaunchStruct mtls;
     memset(&mtls, 0, sizeof(mtls));
 
+    DrvScript *drv = (DrvScript *)s->mHal.drv;
+    // We only support slot 0 (root) at this point in time.
+    rsAssert(slot == 0);
+    mtls.sig = drv->mExportForEachSignatureList[slot];
     if (ain) {
         mtls.dimX = ain->getType()->getDimX();
         mtls.dimY = ain->getType()->getDimY();
@@ -369,6 +384,7 @@ void rsdScriptInvokeForEach(const Context *rsc,
         memset(&p, 0, sizeof(p));
         p.usr = mtls.usr;
         p.usr_len = mtls.usrLen;
+        uint32_t sig = mtls.sig;
 
         //LOGE("launch 3");
         for (p.ar[0] = mtls.arrayStart; p.ar[0] < mtls.arrayEnd; p.ar[0]++) {
@@ -383,7 +399,7 @@ void rsdScriptInvokeForEach(const Context *rsc,
                     for (p.x = mtls.xStart; p.x < mtls.xEnd; p.x++) {
                         p.in = xPtrIn;
                         p.out = xPtrOut;
-                        ((rs_t)s->mHal.info.root) (p.in, p.out, p.usr, p.x, p.y, p.z, p.ar[0]);
+                        dc->mForEachLaunch[sig](&s->mHal.info.root, &p);
                         xPtrIn += mtls.eStrideIn;
                         xPtrOut += mtls.eStrideOut;
                     }

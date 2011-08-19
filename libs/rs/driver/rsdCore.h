@@ -27,6 +27,9 @@
 typedef void (* InvokeFunc_t)(void);
 typedef void (*WorkerCallback_t)(void *usr, uint32_t idx);
 
+typedef void (*outer_foreach_t)(const void *,
+    const android::renderscript::RsForEachStubParamStruct *);
+
 typedef struct RsdSymbolTableRec {
     const char * mName;
     void * mPtr;
@@ -56,6 +59,8 @@ typedef struct RsdHalRec {
     };
     Workers mWorkers;
     bool mExit;
+
+    outer_foreach_t mForEachLaunch[32];
 
     ScriptTLSStruct mTlsStruct;
 
