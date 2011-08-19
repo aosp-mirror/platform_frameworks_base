@@ -236,11 +236,8 @@
        <item>@drawable/spinner_dropdown_background_up</item>
        <item>@drawable/spinner_focused_holo_dark</item>
        <item>@drawable/spinner_focused_holo_light</item>
-       <item>@drawable/spinner_normal</item>
-       <item>@drawable/spinner_press</item>
        <item>@drawable/spinner_pressed_holo_dark</item>
        <item>@drawable/spinner_pressed_holo_light</item>
-       <item>@drawable/spinner_select</item>
        <item>@drawable/cab_background_bottom_holo_dark</item>
        <item>@drawable/cab_background_top_holo_light</item>
        <item>@drawable/cab_background_bottom_holo_light</item>
