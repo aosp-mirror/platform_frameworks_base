@@ -3394,8 +3394,6 @@ void TouchInputMapper::sync(nsecs_t when) {
                 pointerUsage = POINTER_USAGE_MOUSE;
             } else if (!mCurrentFingerIdBits.isEmpty() || isPointerDown(mCurrentButtonState)) {
                 pointerUsage = POINTER_USAGE_GESTURES;
-            } else {
-                pointerUsage = POINTER_USAGE_NONE;
             }
 
             dispatchPointerUsage(when, policyFlags, pointerUsage);
