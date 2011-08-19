@@ -34,14 +34,12 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.CollapsibleActionView;
 import android.view.Gravity;
@@ -52,7 +50,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.view.Window;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -88,7 +85,7 @@ public class ActionBarView extends AbsActionBarView {
     private int mContentHeight;
 
     private int mNavigationMode;
-    private int mDisplayOptions = ActionBar.DISPLAY_SHOW_HOME | ActionBar.DISPLAY_HOME_AS_UP;
+    private int mDisplayOptions = -1;
     private CharSequence mTitle;
     private CharSequence mSubtitle;
     private Drawable mIcon;
@@ -514,7 +511,7 @@ public class ActionBarView extends AbsActionBarView {
     }
 
     public void setDisplayOptions(int options) {
-        final int flagsChanged = options ^ mDisplayOptions;
+        final int flagsChanged = mDisplayOptions == -1 ? -1 : options ^ mDisplayOptions;
         mDisplayOptions = options;
 
         if ((flagsChanged & DISPLAY_RELAYOUT_MASK) != 0) {
@@ -737,8 +734,9 @@ public class ActionBarView extends AbsActionBarView {
         }
 
         addView(mTitleLayout);
-        if (mExpandedActionView != null) {
-            // Don't show while in expanded mode
+        if (mExpandedActionView != null ||
+                (TextUtils.isEmpty(mTitle) && TextUtils.isEmpty(mSubtitle))) {
+            // Don't show while in expanded mode or with empty text
             mTitleLayout.setVisibility(GONE);
         }
     }
