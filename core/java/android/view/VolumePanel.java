@@ -101,6 +101,8 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     /** Dialog's content view */
     private final View mView;
 
+    /** The visible portion of the volume overlay */
+    private final ViewGroup mPanel;
     /** Contains the sliders and their touchable icons */
     private final ViewGroup mSliderGroup;
     /** The button that expands the dialog to show all sliders */
@@ -173,10 +175,23 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
         View view = mView = inflater.inflate(R.layout.volume_adjust, null);
         mView.setOnTouchListener(new View.OnTouchListener() {
             public boolean onTouch(View v, MotionEvent event) {
+                // Dismiss the dialog if the user touches outside the visible area. This is not
+                // handled by the usual dialog dismissing code because there is a region above
+                // the panel (marginTop) that is still within the dialog.
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    int x = (int) event.getX();
+                    int y = (int) event.getY();
+                    if (x < mPanel.getLeft() || x > mPanel.getRight() || y < mPanel.getTop()
+                            || y > mPanel.getBottom()) {
+                        forceTimeout();
+                        return true;
+                    }
+                }
                 resetTimeout();
                 return true;
             }
         });
+        mPanel = (ViewGroup) mView.findViewById(R.id.visible_panel);
         mSliderGroup = (ViewGroup) mView.findViewById(R.id.slider_group);
         mMoreButton = (ImageView) mView.findViewById(R.id.expand_button);
         mDivider = (ImageView) mView.findViewById(R.id.expand_button_divider);
@@ -637,6 +652,11 @@ public class VolumePanel extends Handler implements OnSeekBarChangeListener, Vie
     private void resetTimeout() {
         removeMessages(MSG_TIMEOUT);
         sendMessageDelayed(obtainMessage(MSG_TIMEOUT), TIMEOUT_DELAY);
+    }
+
+    private void forceTimeout() {
+        removeMessages(MSG_TIMEOUT);
+        sendMessage(obtainMessage(MSG_TIMEOUT));
     }
 
     public void onProgressChanged(SeekBar seekBar, int progress,
