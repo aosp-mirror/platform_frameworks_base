@@ -261,6 +261,7 @@ public class TextureView extends View {
     @Override
     public final void draw(Canvas canvas) {
         applyUpdate();
+        applyTransformMatrix();
     }
 
     /**
@@ -315,11 +316,7 @@ public class TextureView extends View {
         }
 
         applyUpdate();
-
-        if (mMatrixChanged) {
-            mLayer.setTransform(mMatrix);
-            mMatrixChanged = false;
-        }
+        applyTransformMatrix();
 
         return mLayer;
     }
@@ -386,7 +383,7 @@ public class TextureView extends View {
     public void setTransform(Matrix transform) {
         mMatrix.set(transform);
         mMatrixChanged = true;
-        invalidate();
+        invalidateParentIfNeeded();
     }
 
     /**
@@ -408,6 +405,13 @@ public class TextureView extends View {
         transform.set(mMatrix);
 
         return transform;
+    }
+
+    private void applyTransformMatrix() {
+        if (mMatrixChanged) {
+            mLayer.setTransform(mMatrix);
+            mMatrixChanged = false;
+        }
     }
 
     /**
