@@ -50,36 +50,12 @@ public class TextDirectionHeuristics {
         new TextDirectionHeuristicInternal(FirstStrong.INSTANCE, true);
 
     /**
-     * If the text contains any strong left to right non-format character, determines
-     * that the direction is left to right, falling back to left to right if it
-     * finds none.
-     */
-    public static final TextDirectionHeuristic ANYLTR_LTR =
-        new TextDirectionHeuristicInternal(AnyStrong.INSTANCE_LTR, false);
-
-    /**
-     * If the text contains any strong left to right non-format character, determines
-     * that the direction is left to right, falling back to right to left if it
-     * finds none.
-     */
-    public static final TextDirectionHeuristic ANYLTR_RTL =
-        new TextDirectionHeuristicInternal(AnyStrong.INSTANCE_LTR, true);
-
-    /**
      * If the text contains any strong right to left non-format character, determines
      * that the direction is right to left, falling back to left to right if it
      * finds none.
      */
     public static final TextDirectionHeuristic ANYRTL_LTR =
         new TextDirectionHeuristicInternal(AnyStrong.INSTANCE_RTL, false);
-
-    /**
-     * If the text contains any strong right to left non-format character, determines
-     * that the direction is right to left, falling back to right to left if it
-     * finds none.
-     */
-    public static final TextDirectionHeuristic ANYRTL_RTL =
-        new TextDirectionHeuristicInternal(AnyStrong.INSTANCE_RTL, true);
 
     /**
      * Examines only the strong directional non-format characters, and if either

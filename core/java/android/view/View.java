@@ -9159,7 +9159,8 @@ public class View implements Drawable.Callback2, KeyEvent.Callback, Accessibilit
             mPrivateFlags &= ~AWAKEN_SCROLL_BARS_ON_ATTACH;
         }
         jumpDrawablesToCurrentState();
-        // Order is important here: LayoutDirection should be resolved before Padding and TextDirection
+        // Order is important here: LayoutDirection MUST be resolved before Padding
+        // and TextDirection
         resolveLayoutDirectionIfNeeded();
         resolvePadding();
         resolveTextDirection();
