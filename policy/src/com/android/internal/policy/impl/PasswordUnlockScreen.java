@@ -16,6 +16,8 @@
 
 package com.android.internal.policy.impl;
 
+import java.util.List;
+
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -27,18 +29,18 @@ import com.android.internal.widget.PasswordEntryKeyboardView;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.security.KeyStore;
-import android.telephony.TelephonyManager;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.method.DigitsKeyListener;
 import android.text.method.TextKeyListener;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -159,6 +161,68 @@ public class PasswordUnlockScreen extends LinearLayout implements KeyguardScreen
                 }
             }
         });
+
+        // If there's more than one IME, enable the IME switcher button
+        View switchImeButton = findViewById(R.id.switch_ime_button);
+        final InputMethodManager imm = (InputMethodManager) getContext().getSystemService(
+                Context.INPUT_METHOD_SERVICE);
+        if (switchImeButton != null && hasMultipleEnabledIMEsOrSubtypes(imm, false)) {
+            switchImeButton.setVisibility(View.VISIBLE);
+            switchImeButton.setOnClickListener(new OnClickListener() {
+                public void onClick(View v) {
+                    mCallback.pokeWakelock(); // Leave the screen on a bit longer
+                    imm.showInputMethodPicker();
+                }
+            });
+        }
+    }
+
+    /**
+     * Method adapted from com.android.inputmethod.latin.Utils
+     *
+     * @param imm The input method manager
+     * @param shouldIncludeAuxiliarySubtypes
+     * @return true if we have multiple IMEs to choose from
+     */
+    private boolean hasMultipleEnabledIMEsOrSubtypes(InputMethodManager imm,
+            final boolean shouldIncludeAuxiliarySubtypes) {
+        final List<InputMethodInfo> enabledImis = imm.getEnabledInputMethodList();
+
+        // Number of the filtered IMEs
+        int filteredImisCount = 0;
+
+        for (InputMethodInfo imi : enabledImis) {
+            // We can return true immediately after we find two or more filtered IMEs.
+            if (filteredImisCount > 1) return true;
+            final List<InputMethodSubtype> subtypes =
+                    imm.getEnabledInputMethodSubtypeList(imi, true);
+            // IMEs that have no subtypes should be counted.
+            if (subtypes.isEmpty()) {
+                ++filteredImisCount;
+                continue;
+            }
+
+            int auxCount = 0;
+            for (InputMethodSubtype subtype : subtypes) {
+                if (subtype.isAuxiliary()) {
+                    ++auxCount;
+                }
+            }
+            final int nonAuxCount = subtypes.size() - auxCount;
+
+            // IMEs that have one or more non-auxiliary subtypes should be counted.
+            // If shouldIncludeAuxiliarySubtypes is true, IMEs that have two or more auxiliary
+            // subtypes should be counted as well.
+            if (nonAuxCount > 0 || (shouldIncludeAuxiliarySubtypes && auxCount > 1)) {
+                ++filteredImisCount;
+                continue;
+            }
+        }
+
+        return filteredImisCount > 1
+        // imm.getEnabledInputMethodSubtypeList(null, false) will return the current IME's enabled
+        // input method subtype (The current IME should be LatinIME.)
+                || imm.getEnabledInputMethodSubtypeList(null, false).size() > 1;
     }
 
     @Override
