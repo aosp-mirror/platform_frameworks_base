@@ -48,6 +48,7 @@ static const float accSTDEV  = 0.05f;   // m/s^2 (measured 0.08 / CDD 0.05)
 static const float magSTDEV  = 0.5f;    // uT    (measured 0.7  / CDD 0.5)
 
 static const float FREE_FALL_THRESHOLD = 0.981f;
+static const float SYMMETRY_TOLERANCE = 1e-10f;
 
 // -----------------------------------------------------------------------
 
@@ -134,10 +135,13 @@ Fusion::Fusion() {
 
 void Fusion::init() {
     mInitState = 0;
+
     mGyroRate = 0;
+
     mCount[0] = 0;
     mCount[1] = 0;
     mCount[2] = 0;
+
     mData = 0;
 }
 
@@ -267,19 +271,16 @@ status_t Fusion::handleMag(const vec3_t& m) {
     return NO_ERROR;
 }
 
-bool Fusion::checkState(const vec3_t& v) {
-    if (isnanf(length(v))) {
-        LOGW("9-axis fusion diverged. reseting state.");
+void Fusion::checkState() {
+    // P needs to stay positive semidefinite or the fusion diverges. When we
+    // detect divergence, we reset the fusion.
+    // TODO(braun): Instead, find the reason for the divergence and fix it.
+
+    if (!isPositiveSemidefinite(P[0][0], SYMMETRY_TOLERANCE) ||
+        !isPositiveSemidefinite(P[1][1], SYMMETRY_TOLERANCE)) {
+        LOGW("Sensor fusion diverged; resetting state.");
         P = 0;
-        x1 = 0;
-        mInitState = 0;
-        mCount[0] = 0;
-        mCount[1] = 0;
-        mCount[2] = 0;
-        mData = 0;
-        return false;
     }
-    return true;
 }
 
 vec4_t Fusion::getAttitude() const {
@@ -327,6 +328,8 @@ void Fusion::predict(const vec3_t& w, float dT) {
     Phi[1][0] = wx*k0 - I33dT - wx2*(ilwe*ilwe*ilwe)*(lwedT-k1);
 
     P = Phi*P*transpose(Phi) + GQGt;
+
+    checkState();
 }
 
 void Fusion::update(const vec3_t& z, const vec3_t& Bi, float sigma) {
@@ -365,6 +368,8 @@ void Fusion::update(const vec3_t& z, const vec3_t& Bi, float sigma) {
     q += getF(q)*(0.5f*dq);
     x0 = normalize_quat(q);
     x1 += db;
+
+    checkState();
 }
 
 // -----------------------------------------------------------------------
