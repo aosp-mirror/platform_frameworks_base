@@ -419,7 +419,7 @@ status_t OMXNodeInstance::useGraphicBuffer2_l(
     def.nVersion.s.nStep = 0;
     def.nPortIndex = portIndex;
     OMX_ERRORTYPE err = OMX_GetParameter(mHandle, OMX_IndexParamPortDefinition, &def);
-    if (err != OK)
+    if (err != OMX_ErrorNone)
     {
         LOGE("%s::%d:Error getting OMX_IndexParamPortDefinition", __FUNCTION__, __LINE__);
         return err;
