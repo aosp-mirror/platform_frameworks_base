@@ -135,89 +135,118 @@ public class MediaProperties {
      *  Video codec types
      */
     public static final int VCODEC_H263 = 1;
-    public static final int VCODEC_MPEG4 = 2;
-    // 3 Value is used for MPEG4_EMP
-    public static final int VCODEC_H264BP = 4;
-    public static final int VCODEC_H264MP = 5;  // Unsupported
+    public static final int VCODEC_H264 = 2;
+    public static final int VCODEC_MPEG4 = 3;
 
     /**
      *  The array of supported video codecs
      */
     private static final int[] SUPPORTED_VCODECS = new int[] {
-        VCODEC_H264BP,
+        VCODEC_H264,
         VCODEC_H263,
         VCODEC_MPEG4,
     };
 
-    /* H.263 Profiles and levels */
-    public static final int     H263_PROFILE_0_LEVEL_10   = 0;
-    public static final int     H263_PROFILE_0_LEVEL_20   = 1;
-    public static final int     H263_PROFILE_0_LEVEL_30   = 2;
-    public static final int     H263_PROFILE_0_LEVEL_40   = 3;
-    public static final int     H263_PROFILE_0_LEVEL_45   = 4;
-    /* MPEG-4 Profiles and levels */
-    public static final int     MPEG4_SP_LEVEL_0          = 50;
-    public static final int     MPEG4_SP_LEVEL_0B         = 51;
-    public static final int     MPEG4_SP_LEVEL_1          = 52;
-    public static final int     MPEG4_SP_LEVEL_2          = 53;
-    public static final int     MPEG4_SP_LEVEL_3          = 54;
-    public static final int     MPEG4_SP_LEVEL_4A         = 55;
-    public static final int     MPEG4_SP_LEVEL_5          = 56;
-    /* AVC Profiles and levels */
-    public static final int     H264_PROFILE_0_LEVEL_1    = 150;
-    public static final int     H264_PROFILE_0_LEVEL_1B   = 151;
-    public static final int     H264_PROFILE_0_LEVEL_1_1  = 152;
-    public static final int     H264_PROFILE_0_LEVEL_1_2  = 153;
-    public static final int     H264_PROFILE_0_LEVEL_1_3  = 154;
-    public static final int     H264_PROFILE_0_LEVEL_2    = 155;
-    public static final int     H264_PROFILE_0_LEVEL_2_1  = 156;
-    public static final int     H264_PROFILE_0_LEVEL_2_2  = 157;
-    public static final int     H264_PROFILE_0_LEVEL_3    = 158;
-    public static final int     H264_PROFILE_0_LEVEL_3_1  = 159;
-    public static final int     H264_PROFILE_0_LEVEL_3_2  = 160;
-    public static final int     H264_PROFILE_0_LEVEL_4    = 161;
-    public static final int     H264_PROFILE_0_LEVEL_4_1  = 162;
-    public static final int     H264_PROFILE_0_LEVEL_4_2  = 163;
-    public static final int     H264_PROFILE_0_LEVEL_5    = 164;
-    public static final int     H264_PROFILE_0_LEVEL_5_1  = 165;
-    /* Unsupported profile and level */
-    public static final int     UNSUPPORTED_PROFILE_LEVEL = 255;
-
     /**
-     *  The array of supported video codec Profile and Levels
+     *  The H264 profile, the values are same as the one in OMX_Video.h
      */
-    private static final int[] SUPPORTED_VCODEC_PROFILE_LEVELS = new int[] {
-        H263_PROFILE_0_LEVEL_10,
-        H263_PROFILE_0_LEVEL_20,
-        H263_PROFILE_0_LEVEL_30,
-        H263_PROFILE_0_LEVEL_40,
-        H263_PROFILE_0_LEVEL_45,
-        MPEG4_SP_LEVEL_0,
-        MPEG4_SP_LEVEL_0B,
-        MPEG4_SP_LEVEL_1,
-        MPEG4_SP_LEVEL_2,
-        MPEG4_SP_LEVEL_3,
-        MPEG4_SP_LEVEL_4A,
-        MPEG4_SP_LEVEL_5,
-        H264_PROFILE_0_LEVEL_1,
-        H264_PROFILE_0_LEVEL_1B,
-        H264_PROFILE_0_LEVEL_1_1,
-        H264_PROFILE_0_LEVEL_1_2,
-        H264_PROFILE_0_LEVEL_1_3,
-        H264_PROFILE_0_LEVEL_2,
-        H264_PROFILE_0_LEVEL_2_1,
-        H264_PROFILE_0_LEVEL_2_2,
-        H264_PROFILE_0_LEVEL_3,
-        H264_PROFILE_0_LEVEL_3_1,
-        H264_PROFILE_0_LEVEL_3_2,
-        H264_PROFILE_0_LEVEL_4,
-        H264_PROFILE_0_LEVEL_4_1,
-        H264_PROFILE_0_LEVEL_4_2,
-        H264_PROFILE_0_LEVEL_5,
-        H264_PROFILE_0_LEVEL_5_1,
-        UNSUPPORTED_PROFILE_LEVEL
-    };
-
+    public final class H264Profile {
+        public static final int H264ProfileBaseline = 0x01; /**< Baseline profile */
+        public static final int H264ProfileMain     = 0x02; /**< Main profile */
+        public static final int H264ProfileExtended = 0x04; /**< Extended profile */
+        public static final int H264ProfileHigh     = 0x08; /**< High profile */
+        public static final int H264ProfileHigh10   = 0x10; /**< High 10 profile */
+        public static final int H264ProfileHigh422  = 0x20; /**< High 4:2:2 profile */
+        public static final int H264ProfileHigh444  = 0x40; /**< High 4:4:4 profile */
+        public static final int H264ProfileUnknown  = 0x7FFFFFFF;
+   }
+    /**
+     *  The H264 level, the values are same as the one in OMX_Video.h
+     */
+    public final class H264Level {
+        public static final int H264Level1   = 0x01; /**< Level 1 */
+        public static final int H264Level1b  = 0x02; /**< Level 1b */
+        public static final int H264Level11  = 0x04; /**< Level 1.1 */
+        public static final int H264Level12  = 0x08; /**< Level 1.2 */
+        public static final int H264Level13  = 0x10; /**< Level 1.3 */
+        public static final int H264Level2   = 0x20; /**< Level 2 */
+        public static final int H264Level21  = 0x40; /**< Level 2.1 */
+        public static final int H264Level22  = 0x80; /**< Level 2.2 */
+        public static final int H264Level3   = 0x100; /**< Level 3 */
+        public static final int H264Level31  = 0x200; /**< Level 3.1 */
+        public static final int H264Level32  = 0x400; /**< Level 3.2 */
+        public static final int H264Level4   = 0x800; /**< Level 4 */
+        public static final int H264Level41  = 0x1000; /**< Level 4.1 */
+        public static final int H264Level42  = 0x2000; /**< Level 4.2 */
+        public static final int H264Level5   = 0x4000; /**< Level 5 */
+        public static final int H264Level51  = 0x8000; /**< Level 5.1 */
+        public static final int H264LevelUnknown = 0x7FFFFFFF;
+    }
+    /**
+     *  The H263 profile, the values are same as the one in OMX_Video.h
+     */
+    public final class H263Profile {
+        public static final int H263ProfileBaseline            = 0x01;
+        public static final int H263ProfileH320Coding          = 0x02;
+        public static final int H263ProfileBackwardCompatible  = 0x04;
+        public static final int H263ProfileISWV2               = 0x08;
+        public static final int H263ProfileISWV3               = 0x10;
+        public static final int H263ProfileHighCompression     = 0x20;
+        public static final int H263ProfileInternet            = 0x40;
+        public static final int H263ProfileInterlace           = 0x80;
+        public static final int H263ProfileHighLatency       = 0x100;
+        public static final int H263ProfileUnknown          = 0x7FFFFFFF;
+    }
+    /**
+     *  The H263 level, the values are same as the one in OMX_Video.h
+     */
+    public final class H263Level {
+        public static final int H263Level10  = 0x01;
+        public static final int H263Level20  = 0x02;
+        public static final int H263Level30  = 0x04;
+        public static final int H263Level40  = 0x08;
+        public static final int H263Level45  = 0x10;
+        public static final int H263Level50  = 0x20;
+        public static final int H263Level60  = 0x40;
+        public static final int H263Level70  = 0x80;
+        public static final int H263LevelUnknown = 0x7FFFFFFF;
+    }
+    /**
+     *  The mpeg4 profile, the values are same as the one in OMX_Video.h
+     */
+    public final class MPEG4Profile {
+        public static final int MPEG4ProfileSimple           = 0x01;
+        public static final int MPEG4ProfileSimpleScalable   = 0x02;
+        public static final int MPEG4ProfileCore             = 0x04;
+        public static final int MPEG4ProfileMain             = 0x08;
+        public static final int MPEG4ProfileNbit             = 0x10;
+        public static final int MPEG4ProfileScalableTexture  = 0x20;
+        public static final int MPEG4ProfileSimpleFace       = 0x40;
+        public static final int MPEG4ProfileSimpleFBA        = 0x80;
+        public static final int MPEG4ProfileBasicAnimated    = 0x100;
+        public static final int MPEG4ProfileHybrid           = 0x200;
+        public static final int MPEG4ProfileAdvancedRealTime = 0x400;
+        public static final int MPEG4ProfileCoreScalable     = 0x800;
+        public static final int MPEG4ProfileAdvancedCoding   = 0x1000;
+        public static final int MPEG4ProfileAdvancedCore     = 0x2000;
+        public static final int MPEG4ProfileAdvancedScalable = 0x4000;
+        public static final int MPEG4ProfileAdvancedSimple   = 0x8000;
+        public static final int MPEG4ProfileUnknown          = 0x7FFFFFFF;
+    }
+    /**
+     *  The mpeg4 level, the values are same as the one in OMX_Video.h
+     */
+    public final class MPEG4Level {
+        public static final int MPEG4Level0  = 0x01; /**< Level 0 */
+        public static final int MPEG4Level0b = 0x02; /**< Level 0b */
+        public static final int MPEG4Level1  = 0x04; /**< Level 1 */
+        public static final int MPEG4Level2  = 0x08; /**< Level 2 */
+        public static final int MPEG4Level3  = 0x10; /**< Level 3 */
+        public static final int MPEG4Level4  = 0x20; /**< Level 4 */
+        public static final int MPEG4Level4a = 0x40; /**< Level 4a */
+        public static final int MPEG4Level5  = 0x80; /**< Level 5 */
+        public static final int MPEG4LevelUnknown = 0x7FFFFFFF;
+    }
     /**
      *  Audio codec types
      */
@@ -240,7 +269,6 @@ public class MediaProperties {
         ACODEC_AMRNB,
         ACODEC_AMRWB
     };
-
 
     /**
      *  Samples per frame for each audio codec

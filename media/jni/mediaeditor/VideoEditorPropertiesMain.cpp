@@ -248,7 +248,11 @@ jobject videoEditProp_getProperties(
                 pProperties->uiVideoWidth        = pClipProperties->uiVideoWidth;
                 pProperties->uiVideoHeight       = pClipProperties->uiVideoHeight;
                 pProperties->fAverageFrameRate   = pClipProperties->fAverageFrameRate;
-                pProperties->ProfileAndLevel     = pClipProperties->ProfileAndLevel;
+                pProperties->uiVideoProfile      = pClipProperties->uiVideoProfile;
+                pProperties->uiVideoLevel        = pClipProperties->uiVideoLevel;
+                // Set profile and level support to TRUE, pending check
+                pProperties->bProfileSupported   = M4OSA_TRUE;
+                pProperties->bLevelSupported     = M4OSA_TRUE;
                 pProperties->AudioStreamType     = pClipProperties->AudioStreamType;
                 pProperties->uiClipAudioDuration = pClipProperties->uiClipAudioDuration;
                 pProperties->uiAudioBitrate      = pClipProperties->uiAudioBitrate;
@@ -272,7 +276,8 @@ jobject videoEditProp_getProperties(
             pProperties->uiVideoWidth        = width;
             pProperties->uiVideoHeight       = height;
             pProperties->fAverageFrameRate   = 0.0f;
-            pProperties->ProfileAndLevel     = M4VIDEOEDITING_kProfile_and_Level_Out_Of_Range;
+            pProperties->uiVideoProfile = M4VIDEOEDITING_VIDEO_UNKNOWN_PROFILE;
+            pProperties->uiVideoLevel = M4VIDEOEDITING_VIDEO_UNKNOWN_LEVEL;
             pProperties->AudioStreamType     = M4VIDEOEDITING_kNoneAudio;
             pProperties->uiClipAudioDuration = 0;
             pProperties->uiAudioBitrate      = 0;
@@ -291,11 +296,13 @@ jobject videoEditProp_getProperties(
         }
     }
 
-    // Create a properties object.
-    videoEditPropClass_createProperties(&gotten, pEnv, pProperties, &properties);
+    if (M4NO_ERROR == result) {
+        // Create a properties object.
+        videoEditPropClass_createProperties(&gotten, pEnv, pProperties, &properties);
 
-    // Log the properties.
-    VIDEOEDIT_PROP_LOG_PROPERTIES(pProperties);
+        // Log the properties.
+        VIDEOEDIT_PROP_LOG_PROPERTIES(pProperties);
+    }
 
     // Free the properties.
     videoEditOsal_free(pProperties);

@@ -79,7 +79,8 @@ class MediaArtistNativeHelper {
     private boolean mRegenerateAudio = true;
 
     private String mExportFilename = null;
-
+    private int mExportVideoCodec = 0;
+    private int mExportAudioCodec = 0;
     private int mProgressToApp;
 
     private String mRenderPreviewOverlayFile;
@@ -765,113 +766,20 @@ class MediaArtistNativeHelper {
         /** No video present in output clip. Used to generate audio only clip */
         public static final int NO_VIDEO = 0;
 
-        /** H263 baseline format. */
+        /** H263 video format. */
         public static final int H263 = 1;
 
-        /** MPEG4 video Simple Profile format. */
-        public static final int MPEG4 = 2;
-
-        /** MPEG4 video Simple Profile format with support for EMP. */
-        public static final int MPEG4_EMP = 3;
-
         /** H264 video */
-        public static final int H264 = 4;
+        public static final int H264 = 2;
+
+        /** MPEG4 video format. */
+        public static final int MPEG4 = 3;
 
         /** No transcoding. Output video format is same as input video format */
         public static final int NULL_VIDEO = 254;
 
         /** Unsupported video format. */
         public static final int UNSUPPORTED = 255;
-    }
-
-    /** Defines video profiles and levels. */
-    public final class VideoProfile {
-        /** H263, Profile 0, Level 10. */
-        public static final int H263_PROFILE_0_LEVEL_10 = MediaProperties.H263_PROFILE_0_LEVEL_10;
-
-        /** H263, Profile 0, Level 20. */
-        public static final int H263_PROFILE_0_LEVEL_20 = MediaProperties.H263_PROFILE_0_LEVEL_20;
-
-        /** H263, Profile 0, Level 30. */
-        public static final int H263_PROFILE_0_LEVEL_30 = MediaProperties.H263_PROFILE_0_LEVEL_30;
-
-        /** H263, Profile 0, Level 40. */
-        public static final int H263_PROFILE_0_LEVEL_40 = MediaProperties.H263_PROFILE_0_LEVEL_40;
-
-        /** H263, Profile 0, Level 45. */
-        public static final int H263_PROFILE_0_LEVEL_45 = MediaProperties.H263_PROFILE_0_LEVEL_45;
-
-        /** MPEG4, Simple Profile, Level 0. */
-        public static final int MPEG4_SP_LEVEL_0 = MediaProperties.MPEG4_SP_LEVEL_0;
-
-        /** MPEG4, Simple Profile, Level 0B. */
-        public static final int MPEG4_SP_LEVEL_0B = MediaProperties.MPEG4_SP_LEVEL_0B;
-
-        /** MPEG4, Simple Profile, Level 1. */
-        public static final int MPEG4_SP_LEVEL_1 = MediaProperties.MPEG4_SP_LEVEL_1;
-
-        /** MPEG4, Simple Profile, Level 2. */
-        public static final int MPEG4_SP_LEVEL_2 = MediaProperties.MPEG4_SP_LEVEL_2;
-
-        /** MPEG4, Simple Profile, Level 3. */
-        public static final int MPEG4_SP_LEVEL_3 = MediaProperties.MPEG4_SP_LEVEL_3;
-
-        /** MPEG4, Simple Profile, Level 4A. */
-        public static final int MPEG4_SP_LEVEL_4A = MediaProperties.MPEG4_SP_LEVEL_4A;
-
-        /** MPEG4, Simple Profile, Level 0. */
-        public static final int MPEG4_SP_LEVEL_5 = MediaProperties.MPEG4_SP_LEVEL_5;
-
-        /** H264, Profile 0, Level 1. */
-        public static final int H264_PROFILE_0_LEVEL_1 = MediaProperties.H264_PROFILE_0_LEVEL_1;
-
-        /** H264, Profile 0, Level 1b. */
-        public static final int H264_PROFILE_0_LEVEL_1b = MediaProperties.H264_PROFILE_0_LEVEL_1B;
-
-        /** H264, Profile 0, Level 1.1 */
-        public static final int H264_PROFILE_0_LEVEL_1_1 = MediaProperties.H264_PROFILE_0_LEVEL_1_1;
-
-        /** H264, Profile 0, Level 1.2 */
-        public static final int H264_PROFILE_0_LEVEL_1_2 = MediaProperties.H264_PROFILE_0_LEVEL_1_2;
-
-        /** H264, Profile 0, Level 1.3 */
-        public static final int H264_PROFILE_0_LEVEL_1_3 = MediaProperties.H264_PROFILE_0_LEVEL_1_3;
-
-        /** H264, Profile 0, Level 2. */
-        public static final int H264_PROFILE_0_LEVEL_2 = MediaProperties.H264_PROFILE_0_LEVEL_2;
-
-        /** H264, Profile 0, Level 2.1 */
-        public static final int H264_PROFILE_0_LEVEL_2_1 = MediaProperties.H264_PROFILE_0_LEVEL_2_1;
-
-        /** H264, Profile 0, Level 2.2 */
-        public static final int H264_PROFILE_0_LEVEL_2_2 = MediaProperties.H264_PROFILE_0_LEVEL_2_2;
-
-        /** H264, Profile 0, Level 3. */
-        public static final int H264_PROFILE_0_LEVEL_3 = MediaProperties.H264_PROFILE_0_LEVEL_3;
-
-        /** H264, Profile 0, Level 3.1 */
-        public static final int H264_PROFILE_0_LEVEL_3_1 = MediaProperties.H264_PROFILE_0_LEVEL_3_1;
-
-        /** H264, Profile 0, Level 3.2 */
-        public static final int H264_PROFILE_0_LEVEL_3_2 = MediaProperties.H264_PROFILE_0_LEVEL_3_2;
-
-        /** H264, Profile 0, Level 4. */
-        public static final int H264_PROFILE_0_LEVEL_4 = MediaProperties.H264_PROFILE_0_LEVEL_4;
-
-        /** H264, Profile 0, Level 4.1 */
-        public static final int H264_PROFILE_0_LEVEL_4_1 = MediaProperties.H264_PROFILE_0_LEVEL_4_1;
-
-        /** H264, Profile 0, Level 4.2 */
-        public static final int H264_PROFILE_0_LEVEL_4_2 = MediaProperties.H264_PROFILE_0_LEVEL_4_2;
-
-        /** H264, Profile 0, Level 5. */
-        public static final int H264_PROFILE_0_LEVEL_5 = MediaProperties.H264_PROFILE_0_LEVEL_5;
-
-        /** H264, Profile 0, Level 5.1 */
-        public static final int H264_PROFILE_0_LEVEL_5_1 = MediaProperties.H264_PROFILE_0_LEVEL_5_1;
-
-        /** Profile out of range. */
-        public static final int OUT_OF_RANGE = MediaProperties.UNSUPPORTED_PROFILE_LEVEL;
     }
 
     /** Defines video frame sizes. */
@@ -1620,6 +1528,16 @@ class MediaArtistNativeHelper {
         public int videoFormat;
 
         /**
+         * Profile of the video stream in the output clip.
+         */
+        public int videoProfile;
+
+        /**
+         * Level of the video stream in the output clip.
+         */
+        public int videoLevel;
+
+        /**
          * Format of the audio stream in the output clip. See
          * {@link AudioFormat AudioFormat} for valid values.
          */
@@ -1723,10 +1641,28 @@ class MediaArtistNativeHelper {
         public float averageFrameRate;
 
         /**
-         * Profile and level of the video in the media.
+         * Profile of the video in the media.
          */
 
-        public int profileAndLevel;
+        public int profile;
+
+        /**
+         * Level of the video in the media.
+         */
+
+        public int level;
+
+        /**
+         * Is Video Profile supported.
+         */
+
+        public boolean profileSupported;
+
+        /**
+         * Is Video Level supported.
+         */
+
+        public boolean levelSupported;
 
         /**
          * Audio format.
@@ -2112,6 +2048,25 @@ class MediaArtistNativeHelper {
     }
 
     /**
+     * Sets the export audio codec
+     *
+     * @param export audio codec
+     *
+     */
+    void setAudioCodec(int codec) {
+        mExportAudioCodec = codec;
+    }
+    /**
+     * Sets the export video codec
+     *
+     * @param export video codec
+     *
+     */
+    void setVideoCodec(int codec) {
+        mExportVideoCodec = codec;
+    }
+
+    /**
      * Sets the audio regenerate flag
      *
      * @param flag The boolean to set the audio regenerate flag
@@ -2320,7 +2275,8 @@ class MediaArtistNativeHelper {
         int err = 0;
         EditSettings editSettings = null;
         String EffectClipPath = null;
-
+        int outVideoProfile = 0;
+        int outVideoLevel = 0;
         editSettings = new EditSettings();
 
         editSettings.clipSettingsArray = new ClipSettings[1];
@@ -2337,6 +2293,11 @@ class MediaArtistNativeHelper {
         if (tmpFile.exists()) {
             tmpFile.delete();
         }
+
+        outVideoProfile = VideoEditorProfile.getExportProfile(VideoFormat.H264);
+        outVideoLevel = VideoEditorProfile.getExportLevel(VideoFormat.H264);
+        editSettings.videoProfile = outVideoProfile;
+        editSettings.videoLevel= outVideoLevel;
 
         if (lMediaItem instanceof MediaVideoItem) {
             MediaVideoItem m = (MediaVideoItem)lMediaItem;
@@ -2399,6 +2360,8 @@ class MediaArtistNativeHelper {
     String generateKenBurnsClip(EditSettings e, MediaImageItem m) {
         String output = null;
         int err = 0;
+        int outVideoProfile = 0;
+        int outVideoLevel = 0;
 
         e.backgroundMusicSettings = null;
         e.transitionSettingsArray = null;
@@ -2409,6 +2372,11 @@ class MediaArtistNativeHelper {
         if (tmpFile.exists()) {
             tmpFile.delete();
         }
+
+        outVideoProfile = VideoEditorProfile.getExportProfile(VideoFormat.H264);
+        outVideoLevel = VideoEditorProfile.getExportLevel(VideoFormat.H264);
+        e.videoProfile = outVideoProfile;
+        e.videoLevel = outVideoLevel;
 
         e.outputFile = output;
         e.audioBitrate = Bitrate.BR_64_KBPS;
@@ -2496,8 +2464,15 @@ class MediaArtistNativeHelper {
             MediaItem m1, MediaItem m2,Transition t) {
         String outputFilename = null;
         int err = 0;
-
+        int outVideoProfile = 0;
+        int outVideoLevel = 0;
         outputFilename = String.format(mProjectPath + "/" + uniqueId + ".3gp");
+
+        outVideoProfile = VideoEditorProfile.getExportProfile(VideoFormat.H264);
+        outVideoLevel = VideoEditorProfile.getExportLevel(VideoFormat.H264);
+        e.videoProfile = outVideoProfile;
+        e.videoLevel = outVideoLevel;
+
         e.outputFile = outputFilename;
         e.audioBitrate = Bitrate.BR_64_KBPS;
         e.audioChannels = 2;
@@ -3275,7 +3250,7 @@ class MediaArtistNativeHelper {
                 retValue = MediaProperties.VCODEC_H263;
                 break;
             case VideoFormat.H264:
-                retValue = MediaProperties.VCODEC_H264BP;
+                retValue = MediaProperties.VCODEC_H264;
                 break;
             case VideoFormat.MPEG4:
                 retValue = MediaProperties.VCODEC_MPEG4;
@@ -3602,6 +3577,24 @@ class MediaArtistNativeHelper {
         mExportFilename = filePath;
         previewStoryBoard(mediaItemsList, mediaTransitionList, mediaBGMList,null);
         mExportProgressListener = listener;
+        int outVideoProfile = 0;
+        int outVideoLevel = 0;
+
+        /** Check the platform specific maximum export resolution */
+        VideoEditorProfile veProfile = VideoEditorProfile.get();
+        if (veProfile == null) {
+            throw new RuntimeException("Can't get the video editor profile");
+        }
+        final int maxOutputHeight = veProfile.maxOutputVideoFrameHeight;
+        final int maxOutputWidth = veProfile.maxOutputVideoFrameWidth;
+        if (height > maxOutputHeight) {
+            throw new IllegalArgumentException(
+                    "Unsupported export resolution. Supported maximum width:" +
+                    maxOutputWidth + " height:" + maxOutputHeight +
+                    " current height:" + height);
+        }
+        outVideoProfile = VideoEditorProfile.getExportProfile(mExportVideoCodec);
+        outVideoLevel = VideoEditorProfile.getExportLevel(mExportVideoCodec);
 
         mProgressToApp = 0;
 
@@ -3655,8 +3648,10 @@ class MediaArtistNativeHelper {
 
         int aspectRatio = mVideoEditor.getAspectRatio();
         mPreviewEditSettings.videoFrameSize = findVideoResolution(aspectRatio, height);
-        mPreviewEditSettings.videoFormat = VideoFormat.H264;
-        mPreviewEditSettings.audioFormat = AudioFormat.AAC;
+        mPreviewEditSettings.videoFormat = mExportVideoCodec;
+        mPreviewEditSettings.audioFormat = mExportAudioCodec;
+        mPreviewEditSettings.videoProfile = outVideoProfile;
+        mPreviewEditSettings.videoLevel = outVideoLevel;
         mPreviewEditSettings.audioSamplingFreq = AudioSamplingFrequency.FREQ_32000;
         mPreviewEditSettings.maxFileSize = 0;
         mPreviewEditSettings.audioChannels = 2;

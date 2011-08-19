@@ -396,7 +396,7 @@ public interface VideoEditor {
      *        supported for export purposes.
      * @param videoCodec The video codec to be used for the export. The video
      *        codec values are defined in the MediaProperties class (e.g.
-     *        VCODEC_H264BP). Note that not all video codec types are
+     *        VCODEC_H264). Note that not all video codec types are
      *        supported for export purposes.
      * @param listener The listener for progress notifications. Use null if
      *        export progress notifications are not needed.
