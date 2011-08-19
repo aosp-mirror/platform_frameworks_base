@@ -745,7 +745,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     }
 
     @Override
-    public void onDetachedFromWindow() {
+    protected void onDetachedFromWindow() {
         removeCallbacks(mUpdateDrawableStateRunnable);
         super.onDetachedFromWindow();
     }
