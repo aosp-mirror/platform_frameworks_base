@@ -572,8 +572,8 @@ public final class ActivityManagerService extends ActivityManagerNative
      * string containing the provider's implementation class and values are a
      * ContentProviderRecord object containing the data about it.
      */
-    final HashMap<String, ContentProviderRecord> mProvidersByClass
-            = new HashMap<String, ContentProviderRecord>();
+    final HashMap<ComponentName, ContentProviderRecord> mProvidersByClass
+            = new HashMap<ComponentName, ContentProviderRecord>();
 
     /**
      * List of content providers who have clients waiting for them.  The
@@ -5438,10 +5438,11 @@ public final class ActivityManagerService extends ActivityManagerNative
             for (int i=0; i<N; i++) {
                 ProviderInfo cpi =
                     (ProviderInfo)providers.get(i);
-                ContentProviderRecord cpr = mProvidersByClass.get(cpi.name);
+                ComponentName comp = new ComponentName(cpi.packageName, cpi.name);
+                ContentProviderRecord cpr = mProvidersByClass.get(comp);
                 if (cpr == null) {
                     cpr = new ContentProviderRecord(cpi, app.info);
-                    mProvidersByClass.put(cpi.name, cpr);
+                    mProvidersByClass.put(comp, cpr);
                 }
                 app.pubProviders.put(cpi.name, cpr);
                 app.addPackage(cpi.applicationInfo.packageName);
@@ -5606,8 +5607,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                     throw new IllegalArgumentException(
                             "Attempt to launch content provider before system ready");
                 }
-                
-                cpr = mProvidersByClass.get(cpi.name);
+
+                ComponentName comp = new ComponentName(cpi.packageName, cpi.name);
+                cpr = mProvidersByClass.get(comp);
                 final boolean firstClass = cpr == null;
                 if (firstClass) {
                     try {
@@ -5689,7 +5691,7 @@ public final class ActivityManagerService extends ActivityManagerNative
                 // Make sure the provider is published (the same provider class
                 // may be published under multiple names).
                 if (firstClass) {
-                    mProvidersByClass.put(cpi.name, cpr);
+                    mProvidersByClass.put(comp, cpr);
                 }
                 mProvidersByName.put(name, cpr);
 
@@ -5769,7 +5771,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                         " when removing content provider " + name);
             }
             //update content provider record entry info
-            ContentProviderRecord localCpr = mProvidersByClass.get(cpr.info.name);
+            ComponentName comp = new ComponentName(cpr.info.packageName, cpr.info.name);
+            ContentProviderRecord localCpr = mProvidersByClass.get(comp);
             if (DEBUG_PROVIDER) Slog.v(TAG, "Removing provider requested by "
                     + r.info.processName + " from process "
                     + localCpr.appInfo.processName);
@@ -5801,7 +5804,8 @@ public final class ActivityManagerService extends ActivityManagerNative
             }
 
             //update content provider record entry info
-            ContentProviderRecord localCpr = mProvidersByClass.get(cpr.info.name);
+            ComponentName comp = new ComponentName(cpr.info.packageName, cpr.info.name);
+            ContentProviderRecord localCpr = mProvidersByClass.get(comp);
             localCpr.externals--;
             if (localCpr.externals < 0) {
                 Slog.e(TAG, "Externals < 0 for content provider " + localCpr);
@@ -5835,7 +5839,8 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
                 ContentProviderRecord dst = r.pubProviders.get(src.info.name);
                 if (dst != null) {
-                    mProvidersByClass.put(dst.info.name, dst);
+                    ComponentName comp = new ComponentName(dst.info.packageName, dst.info.name);
+                    mProvidersByClass.put(comp, dst);
                     String names[] = dst.info.authority.split(";");
                     for (int j = 0; j < names.length; j++) {
                         mProvidersByName.put(names[j], dst);
@@ -7607,15 +7612,15 @@ public final class ActivityManagerService extends ActivityManagerNative
                 pw.println("    i[ntents]: pending intent state");
                 pw.println("    p[rocesses]: process state");
                 pw.println("    o[om]: out of memory management");
-                pw.println("    prov[iders]: content provider state");
-                pw.println("    s[ervices]: service state");
+                pw.println("    prov[iders] [COMP_SPEC ...]: content provider state");
+                pw.println("    s[ervices] [COMP_SPEC ...]: service state");
                 pw.println("    service [COMP_SPEC]: service client-side state");
+                pw.println("    all: dump all activities");
+                pw.println("    top: dump the top activity");
                 pw.println("  cmd may also be a COMP_SPEC to dump activities.");
-                pw.println("  COMP_SPEC may also be a component name (com.foo/.myApp),");
-                pw.println("    a partial substring in a component name, an");
-                pw.println("    ActivityRecord hex object identifier, or");
-                pw.println("    \"all\" for all objects, or");
-                pw.println("    \"top\" for the top activity.");
+                pw.println("  COMP_SPEC may be a component name (com.foo/.myApp),");
+                pw.println("    a partial substring in a component name, a");
+                pw.println("    hex object identifier.");
                 pw.println("  -a: include all available server state.");
                 pw.println("  -c: include client state.");
                 return;
@@ -8166,9 +8171,89 @@ public final class ActivityManagerService extends ActivityManagerNative
         }
     }
 
+    static class ItemMatcher {
+        ArrayList<ComponentName> components;
+        ArrayList<String> strings;
+        ArrayList<Integer> objects;
+        boolean all;
+        
+        ItemMatcher() {
+            all = true;
+        }
+
+        void build(String name) {
+            ComponentName componentName = ComponentName.unflattenFromString(name);
+            if (componentName != null) {
+                if (components == null) {
+                    components = new ArrayList<ComponentName>();
+                }
+                components.add(componentName);
+                all = false;
+            } else {
+                int objectId = 0;
+                // Not a '/' separated full component name; maybe an object ID?
+                try {
+                    objectId = Integer.parseInt(name, 16);
+                    if (objects == null) {
+                        objects = new ArrayList<Integer>();
+                    }
+                    objects.add(objectId);
+                    all = false;
+                } catch (RuntimeException e) {
+                    // Not an integer; just do string match.
+                    if (strings == null) {
+                        strings = new ArrayList<String>();
+                    }
+                    strings.add(name);
+                    all = false;
+                }
+            }
+        }
+
+        int build(String[] args, int opti) {
+            for (; opti<args.length; opti++) {
+                String name = args[opti];
+                if ("--".equals(name)) {
+                    return opti+1;
+                }
+                build(name);
+            }
+            return opti;
+        }
+
+        boolean match(Object object, ComponentName comp) {
+            if (all) {
+                return true;
+            }
+            if (components != null) {
+                for (int i=0; i<components.size(); i++) {
+                    if (components.get(i).equals(comp)) {
+                        return true;
+                    }
+                }
+            }
+            if (objects != null) {
+                for (int i=0; i<objects.size(); i++) {
+                    if (System.identityHashCode(object) == objects.get(i)) {
+                        return true;
+                    }
+                }
+            }
+            if (strings != null) {
+                String flat = comp.flattenToString();
+                for (int i=0; i<strings.size(); i++) {
+                    if (flat.contains(strings.get(i))) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+    }
+
     /**
      * There are three things that cmd can be:
-     *  - a flattened component name that matched an existing activity
+     *  - a flattened component name that matches an existing activity
      *  - the cmd arg isn't the flattened component name of an existing activity:
      *    dump all activity whose component contains the cmd as a substring
      *  - A hex number of the ActivityRecord object instance.
@@ -8191,29 +8276,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 }
             }
         } else {
-            ComponentName componentName = ComponentName.unflattenFromString(name);
-            int objectId = 0;
-            if (componentName == null) {
-                // Not a '/' separated full component name; maybe an object ID?
-                try {
-                    objectId = Integer.parseInt(name, 16);
-                    name = null;
-                    componentName = null;
-                } catch (RuntimeException e) {
-                }
-            }
+            ItemMatcher matcher = new ItemMatcher();
+            matcher.build(name);
 
             synchronized (this) {
                 for (ActivityRecord r1 : (ArrayList<ActivityRecord>)mMainStack.mHistory) {
-                    if (componentName != null) {
-                        if (r1.intent.getComponent().equals(componentName)) {
-                            activities.add(r1);
-                        }
-                    } else if (name != null) {
-                        if (r1.intent.getComponent().flattenToString().contains(name)) {
-                            activities.add(r1);
-                        }
-                    } else if (System.identityHashCode(r1) == objectId) {
+                    if (matcher.match(r1, r1.intent.getComponent())) {
                         activities.add(r1);
                     }
                 }
@@ -8404,6 +8472,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             int opti, boolean dumpAll, boolean dumpClient) {
         boolean needSep = false;
 
+        ItemMatcher matcher = new ItemMatcher();
+        matcher.build(args, opti);
+
         pw.println("ACTIVITY MANAGER SERVICES (dumpsys activity services)");
         if (mServices.size() > 0) {
             pw.println("  Active services:");
@@ -8412,6 +8483,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             needSep = false;
             while (it.hasNext()) {
                 ServiceRecord r = it.next();
+                if (!matcher.match(r, r.name)) {
+                    continue;
+                }
                 if (needSep) {
                     pw.println();
                 }
@@ -8457,6 +8531,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  Pending services:");
             for (int i=0; i<mPendingServices.size(); i++) {
                 ServiceRecord r = mPendingServices.get(i);
+                if (!matcher.match(r, r.name)) {
+                    continue;
+                }
                 pw.print("  * Pending "); pw.println(r);
                 r.dump(pw, "    ");
             }
@@ -8468,6 +8545,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  Restarting services:");
             for (int i=0; i<mRestartingServices.size(); i++) {
                 ServiceRecord r = mRestartingServices.get(i);
+                if (!matcher.match(r, r.name)) {
+                    continue;
+                }
                 pw.print("  * Restarting "); pw.println(r);
                 r.dump(pw, "    ");
             }
@@ -8479,6 +8559,9 @@ public final class ActivityManagerService extends ActivityManagerNative
             pw.println("  Stopping services:");
             for (int i=0; i<mStoppingServices.size(); i++) {
                 ServiceRecord r = mStoppingServices.get(i);
+                if (!matcher.match(r, r.name)) {
+                    continue;
+                }
                 pw.print("  * Stopping "); pw.println(r);
                 r.dump(pw, "    ");
             }
@@ -8494,8 +8577,12 @@ public final class ActivityManagerService extends ActivityManagerNative
                 while (it.hasNext()) {
                     ArrayList<ConnectionRecord> r = it.next();
                     for (int i=0; i<r.size(); i++) {
-                        pw.print("  * "); pw.println(r.get(i));
-                        r.get(i).dump(pw, "    ");
+                        ConnectionRecord cr = r.get(i);
+                        if (!matcher.match(cr.binding.service, cr.binding.service.name)) {
+                            continue;
+                        }
+                        pw.print("  * "); pw.println(cr);
+                        cr.dump(pw, "    ");
                     }
                 }
                 needSep = true;
@@ -8509,20 +8596,34 @@ public final class ActivityManagerService extends ActivityManagerNative
             int opti, boolean dumpAll) {
         boolean needSep = false;
 
+        ItemMatcher matcher = new ItemMatcher();
+        matcher.build(args, opti);
+
         pw.println("ACTIVITY MANAGER CONTENT PROVIDERS (dumpsys activity providers)");
         if (mProvidersByClass.size() > 0) {
             if (needSep) pw.println(" ");
             pw.println("  Published content providers (by class):");
-            Iterator<Map.Entry<String, ContentProviderRecord>> it
+            Iterator<Map.Entry<ComponentName, ContentProviderRecord>> it
                     = mProvidersByClass.entrySet().iterator();
             while (it.hasNext()) {
-                Map.Entry<String, ContentProviderRecord> e = it.next();
+                Map.Entry<ComponentName, ContentProviderRecord> e = it.next();
                 ContentProviderRecord r = e.getValue();
+                ComponentName comp = e.getKey();
+                String cls = comp.getClassName();
+                int end = cls.lastIndexOf('.');
+                if (end > 0 && end < (cls.length()-2)) {
+                    cls = cls.substring(end+1);
+                }
+                if (!matcher.match(r, comp)) {
+                    continue;
+                }
+                pw.print("  * "); pw.print(cls); pw.print(" (");
+                        pw.print(comp.flattenToShortString()); pw.print(")");
                 if (dumpAll) {
-                    pw.print("  * "); pw.println(r);
-                    r.dump(pw, "    ");
+                    pw.println();
+                    r.dump(pw, "      ");
                 } else {
-                    pw.print("  * "); pw.print(r.name.toShortString());
+                    pw.print("  * "); pw.print(e.getKey().flattenToShortString());
                     if (r.app != null) {
                         pw.println(":");
                         pw.print("      "); pw.println(r.app);
@@ -8543,6 +8644,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                 while (it.hasNext()) {
                     Map.Entry<String, ContentProviderRecord> e = it.next();
                     ContentProviderRecord r = e.getValue();
+                    if (!matcher.match(r, r.name)) {
+                        continue;
+                    }
                     pw.print("  "); pw.print(e.getKey()); pw.print(": ");
                             pw.println(r);
                 }
