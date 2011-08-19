@@ -247,6 +247,7 @@ private:
 protected:
                 // cached during validateVisibility()
                 int32_t         mOrientation;
+                Transform       mTransform;
                 GLfloat         mVertices[4][2];
                 Rect            mTransformedBounds;
                 int             mLeft;

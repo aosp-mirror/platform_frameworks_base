@@ -257,6 +257,7 @@ void LayerBase::validateVisibility(const Transform& planeTransform)
 
     // cache a few things...
     mOrientation = tr.getOrientation();
+    mTransform = tr;
     mTransformedBounds = tr.makeBounds(w, h);
     mLeft = tr.tx();
     mTop  = tr.ty();
