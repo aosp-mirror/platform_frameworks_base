@@ -34,6 +34,7 @@ public:
     Program(Context *, const char * shaderText, uint32_t shaderLength,
                        const uint32_t * params, uint32_t paramLength);
     virtual ~Program();
+    virtual bool freeChildren();
 
     void bindAllocation(Context *, Allocation *, uint32_t slot);
 
