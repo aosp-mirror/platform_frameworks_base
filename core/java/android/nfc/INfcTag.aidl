@@ -46,4 +46,6 @@ interface INfcTag
     int setTimeout(int technology, int timeout);
     int getTimeout(int technology);
     void resetTimeouts();
+    boolean canMakeReadOnly(int ndefType);
+    int getMaxTransceiveLength(int technology);
 }

@@ -334,9 +334,11 @@ public final class Ndef extends BasicTagTechnology {
      * @return true if it is possible to make this tag read-only
      */
     public boolean canMakeReadOnly() {
-        if (mNdefType == TYPE_1 || mNdefType == TYPE_2) {
-            return true;
-        } else {
+        INfcTag tagService = mTag.getTagService();
+        try {
+            return tagService.canMakeReadOnly(mNdefType);
+        } catch (RemoteException e) {
+            Log.e(TAG, "NFC service dead", e);
             return false;
         }
     }
