@@ -16,23 +16,20 @@
 
 package android.net.wifi;
 
-
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.net.LinkCapabilities;
-import android.net.NetworkInfo;
 import android.net.LinkProperties;
+import android.net.NetworkInfo;
 import android.net.NetworkStateTracker;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Slog;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Track the state of wifi for connectivity service.
@@ -43,6 +40,8 @@ public class WifiStateTracker implements NetworkStateTracker {
 
     private static final String NETWORKTYPE = "WIFI";
     private static final String TAG = "WifiStateTracker";
+
+    private static final boolean LOGV = true;
 
     private AtomicBoolean mTeardownRequested = new AtomicBoolean(false);
     private AtomicBoolean mPrivateDnsRouteSet = new AtomicBoolean(false);
@@ -135,11 +134,14 @@ public class WifiStateTracker implements NetworkStateTracker {
         return mNetworkInfo.isAvailable();
     }
 
-    /**
-     * @param enabled
-     */
-    public void setDataEnable(boolean enabled) {
-        android.util.Log.d(TAG, "setDataEnabled: IGNORING enabled=" + enabled);
+    @Override
+    public void setUserDataEnable(boolean enabled) {
+        Slog.w(TAG, "ignoring setUserDataEnable(" + enabled + ")");
+    }
+
+    @Override
+    public void setPolicyDataEnable(boolean enabled) {
+        Slog.w(TAG, "ignoring setPolicyDataEnable(" + enabled + ")");
     }
 
     /**

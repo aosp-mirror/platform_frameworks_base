@@ -19,7 +19,6 @@ package android.bluetooth;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfoInternal;
-import android.net.LinkAddress;
 import android.net.LinkCapabilities;
 import android.net.LinkProperties;
 import android.net.NetworkInfo;
@@ -30,7 +29,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
-import java.net.InetAddress;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -184,11 +182,14 @@ public class BluetoothTetheringDataTracker implements NetworkStateTracker {
         return -1;
     }
 
-    /**
-     * @param enabled
-     */
-    public void setDataEnable(boolean enabled) {
-        android.util.Log.d(TAG, "setDataEnabled: IGNORING enabled=" + enabled);
+    @Override
+    public void setUserDataEnable(boolean enabled) {
+        Log.w(TAG, "ignoring setUserDataEnable(" + enabled + ")");
+    }
+
+    @Override
+    public void setPolicyDataEnable(boolean enabled) {
+        Log.w(TAG, "ignoring setPolicyDataEnable(" + enabled + ")");
     }
 
     /**

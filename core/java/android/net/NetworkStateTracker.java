@@ -136,9 +136,17 @@ public interface NetworkStateTracker {
     public boolean isAvailable();
 
     /**
-     * @param enabled
+     * User control of data connection through this network, typically persisted
+     * internally.
      */
-    public void setDataEnable(boolean enabled);
+    public void setUserDataEnable(boolean enabled);
+
+    /**
+     * Policy control of data connection through this network, typically not
+     * persisted internally. Usually used when {@link NetworkPolicy#limitBytes}
+     * is passed.
+     */
+    public void setPolicyDataEnable(boolean enabled);
 
     /**
      * -------------------------------------------------------------
