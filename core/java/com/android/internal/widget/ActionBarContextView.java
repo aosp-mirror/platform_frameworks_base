@@ -25,6 +25,7 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
@@ -90,6 +91,14 @@ public class ActionBarContextView extends AbsActionBarView implements AnimatorLi
                 com.android.internal.R.styleable.ActionMode_backgroundSplit);
 
         a.recycle();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mActionMenuPresenter != null) {
+            mActionMenuPresenter.onConfigurationChanged(newConfig);
+        }
     }
 
     public void setHeight(int height) {
