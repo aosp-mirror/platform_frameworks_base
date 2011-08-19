@@ -50,8 +50,10 @@ public:
     void setName(const char *, uint32_t len);
 
     Context * getContext() const {return mRSC;}
+    virtual bool freeChildren();
 
     static void zeroAllUserRef(Context *rsc);
+    static void freeAllChildren(Context *rsc);
     static void dumpAll(Context *rsc);
 
     virtual void dumpLOGV(const char *prefix) const;

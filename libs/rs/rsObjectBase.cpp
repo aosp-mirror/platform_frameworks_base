@@ -81,6 +81,10 @@ void ObjectBase::incSysRef() const {
 void ObjectBase::preDestroy() const {
 }
 
+bool ObjectBase::freeChildren() {
+    return false;
+}
+
 bool ObjectBase::checkDelete(const ObjectBase *ref) {
     if (!ref) {
         return false;
@@ -208,6 +212,28 @@ void ObjectBase::zeroAllUserRef(Context *rsc) {
         } else {
             o = o->mNext;
             //LOGE("o next %p", o);
+        }
+    }
+
+    if (rsc->props.mLogObjects) {
+        LOGV("Objects remaining.");
+        dumpAll(rsc);
+    }
+}
+
+void ObjectBase::freeAllChildren(Context *rsc) {
+    if (rsc->props.mLogObjects) {
+        LOGV("Forcing release of all child objects.");
+    }
+
+    // This operation can be slow, only to be called during context cleanup.
+    ObjectBase * o = (ObjectBase *)rsc->mObjHead;
+    while (o) {
+        if (o->freeChildren()) {
+            // deleted ref to self and possibly others, restart from head.
+            o = (ObjectBase *)rsc->mObjHead;
+        } else {
+            o = (ObjectBase *)o->mNext;
         }
     }
 
