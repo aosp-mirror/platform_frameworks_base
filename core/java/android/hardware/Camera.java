@@ -1162,6 +1162,43 @@ public class Camera {
          * @see #startFaceDetection(int)
          */
         public int score;
+
+        /**
+         * An unique id per face while the face is visible to the tracker. If
+         * the face leaves the field-of-view and comes back, it will get a new
+         * id. This is an optional field, may not be supported on all devices.
+         * If not supported, id will always be set to -1. The optional fields
+         * are supported as a set. Either they are all valid, or none of them
+         * are.
+         */
+        public int id = -1;
+
+        /**
+         * The coordinates of the center of the left eye. The coordinates are in
+         * the same space as the ones for {@link #rect}. This is an optional
+         * field, may not be supported on all devices. If not supported, the
+         * value will always be set to null. The optional fields are supported
+         * as a set. Either they are all valid, or none of them are.
+         */
+        public Point leftEye = null;
+
+        /**
+         * The coordinates of the center of the right eye. The coordinates are
+         * in the same space as the ones for {@link #rect}.This is an optional
+         * field, may not be supported on all devices. If not supported, the
+         * value will always be set to null. The optional fields are supported
+         * as a set. Either they are all valid, or none of them are.
+         */
+        public Point rightEye = null;
+
+        /**
+         * The coordinates of the center of the mouth.  The coordinates are in
+         * the same space as the ones for {@link #rect}. This is an optional
+         * field, may not be supported on all devices. If not supported, the
+         * value will always be set to null. The optional fields are supported
+         * as a set. Either they are all valid, or none of them are.
+         */
+        public Point mouth = null;
     }
 
     // Error codes match the enum in include/ui/Camera.h

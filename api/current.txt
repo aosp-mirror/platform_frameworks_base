@@ -9235,7 +9235,11 @@ package android.hardware {
 
   public static class Camera.Face {
     ctor public Camera.Face();
+    field public int id;
+    field public android.graphics.Point leftEye;
+    field public android.graphics.Point mouth;
     field public android.graphics.Rect rect;
+    field public android.graphics.Point rightEye;
     field public int score;
   }
 
