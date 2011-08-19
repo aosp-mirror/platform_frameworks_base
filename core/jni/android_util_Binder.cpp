@@ -385,7 +385,8 @@ class JavaDeathRecipient : public IBinder::DeathRecipient
 {
 public:
     JavaDeathRecipient(JNIEnv* env, jobject object, const sp<DeathRecipientList>& list)
-        : mVM(jnienv_to_javavm(env)), mObject(env->NewGlobalRef(object)), mList(list)
+        : mVM(jnienv_to_javavm(env)), mObject(env->NewGlobalRef(object)),
+          mObjectWeak(NULL), mList(list)
     {
         // These objects manage their own lifetimes so are responsible for final bookkeeping.
         // The list holds a strong reference to this object.
@@ -398,16 +399,23 @@ public:
 
     void binderDied(const wp<IBinder>& who)
     {
-        JNIEnv* env = javavm_to_jnienv(mVM);
-
         LOGDEATH("Receiving binderDied() on JavaDeathRecipient %p\n", this);
+        if (mObject != NULL) {
+            JNIEnv* env = javavm_to_jnienv(mVM);
 
-        env->CallStaticVoidMethod(gBinderProxyOffsets.mClass,
-            gBinderProxyOffsets.mSendDeathNotice, mObject);
-        jthrowable excep = env->ExceptionOccurred();
-        if (excep) {
-            report_exception(env, excep,
-                "*** Uncaught exception returned from death notification!");
+            env->CallStaticVoidMethod(gBinderProxyOffsets.mClass,
+                    gBinderProxyOffsets.mSendDeathNotice, mObject);
+            jthrowable excep = env->ExceptionOccurred();
+            if (excep) {
+                report_exception(env, excep,
+                        "*** Uncaught exception returned from death notification!");
+            }
+
+            // Demote from strong ref to weak after binderDied() has been delivered,
+            // to allow the DeathRecipient and BinderProxy to be GC'd if no longer needed.
+            mObjectWeak = env->NewWeakGlobalRef(mObject);
+            env->DeleteGlobalRef(mObject);
+            mObject = NULL;
         }
     }
 
@@ -423,8 +431,17 @@ public:
     }
 
     bool matches(jobject obj) {
+        bool result;
         JNIEnv* env = javavm_to_jnienv(mVM);
-        return env->IsSameObject(obj, mObject);
+
+        if (mObject != NULL) {
+            result = env->IsSameObject(obj, mObject);
+        } else {
+            jobject me = env->NewLocalRef(mObjectWeak);
+            result = env->IsSameObject(obj, me);
+            env->DeleteLocalRef(me);
+        }
+        return result;
     }
 
 protected:
@@ -433,12 +450,17 @@ protected:
         //LOGI("Removing death ref: recipient=%p\n", mObject);
         android_atomic_dec(&gNumDeathRefs);
         JNIEnv* env = javavm_to_jnienv(mVM);
-        env->DeleteGlobalRef(mObject);
+        if (mObject != NULL) {
+            env->DeleteGlobalRef(mObject);
+        } else {
+            env->DeleteWeakGlobalRef(mObjectWeak);
+        }
     }
 
 private:
-    JavaVM* const   mVM;
-    jobject const   mObject;
+    JavaVM* const mVM;
+    jobject mObject;
+    jweak mObjectWeak; // will be a weak ref to the same VM-side DeathRecipient after binderDied()
     wp<DeathRecipientList> mList;
 };
 
@@ -512,7 +534,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
     if (val->checkSubclass(&gBinderOffsets)) {
         // One of our own!
         jobject object = static_cast<JavaBBinder*>(val.get())->object();
-        //printf("objectForBinder %p: it's our own %p!\n", val.get(), object);
+        LOGDEATH("objectForBinder %p: it's our own %p!\n", val.get(), object);
         return object;
     }
 
@@ -528,7 +550,7 @@ jobject javaObjectForIBinder(JNIEnv* env, const sp<IBinder>& val)
             LOGV("objectForBinder %p: found existing %p!\n", val.get(), res);
             return res;
         }
-        LOGV("Proxy object %p of IBinder %p no longer in working set!!!", object, val.get());
+        LOGDEATH("Proxy object %p of IBinder %p no longer in working set!!!", object, val.get());
         android_atomic_dec(&gNumProxyRefs);
         val->detachObject(&gBinderProxyOffsets);
         env->DeleteGlobalRef(object);
