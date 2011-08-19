@@ -1494,11 +1494,18 @@ public class PhoneStatusBar extends StatusBar {
 
     @Override // CommandQueue
     public void setSystemUiVisibility(int vis) {
-        if (vis != mSystemUiVisibility) {
+        final int old = mSystemUiVisibility;
+        final int diff = vis ^ old;
+
+        if (diff != 0) {
             mSystemUiVisibility = vis;
 
-            if (0 != (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE)) {
-                animateCollapse();
+            if (0 != (diff & View.SYSTEM_UI_FLAG_LOW_PROFILE)) {
+                final boolean lightsOut = (0 != (vis & View.SYSTEM_UI_FLAG_LOW_PROFILE));
+                if (lightsOut) {
+                    animateCollapse();
+                }
+                mNavigationBarView.setLowProfile(lightsOut);
             }
 
             notifyUiVisibilityChanged();
