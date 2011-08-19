@@ -278,6 +278,8 @@ static const KeycodeLabel AXES[] = {
     { "WHEEL", 21 },
     { "GAS", 22 },
     { "BRAKE", 23 },
+    { "DISTANCE", 24 },
+    { "TILT", 25 },
     { "GENERIC_1", 32 },
     { "GENERIC_2", 33 },
     { "GENERIC_3", 34 },
