@@ -113,7 +113,12 @@ public class ResolveInfo implements Parcelable {
      * containing the resolved component.
      */
     public String resolvePackageName;
-    
+
+    /**
+     * @hide Target comes from system process?
+     */
+    public boolean system;
+
     /**
      * Retrieve the current textual label associated with this resolution.  This
      * will call back on the given PackageManager to load the label from
@@ -261,6 +266,7 @@ public class ResolveInfo implements Parcelable {
         TextUtils.writeToParcel(nonLocalizedLabel, dest, parcelableFlags);
         dest.writeInt(icon);
         dest.writeString(resolvePackageName);
+        dest.writeInt(system ? 1 : 0);
     }
 
     public static final Creator<ResolveInfo> CREATOR
@@ -300,6 +306,7 @@ public class ResolveInfo implements Parcelable {
                 = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(source);
         icon = source.readInt();
         resolvePackageName = source.readString();
+        system = source.readInt() != 0;
     }
     
     public static class DisplayNameComparator
