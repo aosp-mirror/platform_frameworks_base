@@ -111,6 +111,9 @@ public class ActionBarImpl extends ActionBar {
                 mContentView.setTranslationY(0);
                 mContainerView.setTranslationY(0);
             }
+            if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
+                mSplitView.setVisibility(View.GONE);
+            }
             mContainerView.setVisibility(View.GONE);
             mContainerView.setTransitioning(false);
             mCurrentShowAnim = null;
@@ -540,6 +543,7 @@ public class ActionBarImpl extends ActionBar {
             }
             if (mSplitView != null && mContextDisplayMode == CONTEXT_DISPLAY_SPLIT) {
                 mSplitView.setAlpha(0);
+                mSplitView.setVisibility(View.VISIBLE);
                 b.with(ObjectAnimator.ofFloat(mSplitView, "alpha", 1));
             }
             anim.addListener(mShowListener);
