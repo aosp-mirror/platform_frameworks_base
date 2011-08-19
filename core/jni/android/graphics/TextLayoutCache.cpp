@@ -554,6 +554,15 @@ void TextLayoutCacheValue::computeValuesWithHarfbuzz(SkPaint* paint, const UChar
 #endif
 }
 
+static void logGlyphs(HB_ShaperItem shaperItem) {
+    LOGD("Got glyphs - count=%d", shaperItem.num_glyphs);
+    for (size_t i = 0; i < shaperItem.num_glyphs; i++) {
+        LOGD("      glyphs[%d]=%d - offset.x=%f offset.y=%f", i, shaperItem.glyphs[i],
+                HBFixedToFloat(shaperItem.offsets[i].x),
+                HBFixedToFloat(shaperItem.offsets[i].y));
+    }
+}
+
 void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UChar* chars,
         size_t start, size_t count, size_t contextCount, bool isRTL,
         jfloat* outAdvances, jfloat* outTotalAdvance,
@@ -570,6 +579,8 @@ void TextLayoutCacheValue::computeRunValuesWithHarfbuzz(SkPaint* paint, const UC
             shaperItem.kerning_applied);
     LOGD("         -- string= '%s'", String8(chars + start, count).string());
     LOGD("         -- isDevKernText=%d", paint->isDevKernText());
+
+    logGlyphs(shaperItem);
 #endif
 
     if (shaperItem.advances == NULL || shaperItem.num_glyphs == 0) {

@@ -64,14 +64,6 @@ enum {
     kDirection_Mask = 0x1
 };
 
-static void logGlyphs(sp<TextLayoutCacheValue> value) {
-    if (value == NULL) return;
-    LOGD("Got glyphs - count=%d", value->getGlyphsCount());
-    for (size_t i = 0; i < value->getGlyphsCount(); i++) {
-        LOGD("      glyphs[%d]=%d", i, value->getGlyphs()[i]);
-    }
-}
-
 class TextLayout {
 public:
 

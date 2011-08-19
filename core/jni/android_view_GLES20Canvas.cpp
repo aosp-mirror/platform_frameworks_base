@@ -472,9 +472,6 @@ static void renderText(OpenGLRenderer* renderer, const jchar* text, int count,
     value = new TextLayoutCacheValue();
     value->computeValues(paint, text, 0, count, count, flags);
 #endif
-#if DEBUG_GLYPHS
-    logGlyphs(value);
-#endif
     const jchar* glyphArray = value->getGlyphs();
     int glyphCount = value->getGlyphsCount();
     int bytesCount = glyphCount * sizeof(jchar);
@@ -504,9 +501,6 @@ static void renderTextRun(OpenGLRenderer* renderer, const jchar* text,
 #else
     value = new TextLayoutCacheValue();
     value->computeValues(paint, text, start, count, contextCount, flags);
-#endif
-#if DEBUG_GLYPHS
-    logGlyphs(value);
 #endif
     const jchar* glyphArray = value->getGlyphs();
     int glyphCount = value->getGlyphsCount();
