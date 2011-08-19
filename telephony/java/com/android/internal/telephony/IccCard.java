@@ -268,7 +268,6 @@ public abstract class IccCard {
     }
 
     public void supplyNetworkDepersonalization (String pin, Message onComplete) {
-        if(mDbg) log("Network Despersonalization: " + pin);
         mPhone.mCM.supplyNetworkDepersonalization(pin,
                 mHandler.obtainMessage(EVENT_PINPUK_DONE, onComplete));
     }
@@ -359,7 +358,6 @@ public abstract class IccCard {
       */
      public void changeIccLockPassword(String oldPassword, String newPassword,
              Message onComplete) {
-         if(mDbg) log("Change Pin1 old: " + oldPassword + " new: " + newPassword);
          mPhone.mCM.changeIccPin(oldPassword, newPassword,
                  mHandler.obtainMessage(EVENT_CHANGE_ICC_PASSWORD_DONE, onComplete));
 
@@ -378,7 +376,6 @@ public abstract class IccCard {
       */
      public void changeIccFdnPassword(String oldPassword, String newPassword,
              Message onComplete) {
-         if(mDbg) log("Change Pin2 old: " + oldPassword + " new: " + newPassword);
          mPhone.mCM.changeIccPin2(oldPassword, newPassword,
                  mHandler.obtainMessage(EVENT_CHANGE_ICC_PASSWORD_DONE, onComplete));
 
