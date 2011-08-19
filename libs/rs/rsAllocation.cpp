@@ -58,19 +58,7 @@ void Allocation::updateCache() {
 }
 
 Allocation::~Allocation() {
-    if (mHal.state.hasReferences &&
-        (mHal.state.hasFaces || mHal.state.hasMipmaps)) {
-        LOGE("Cube/mip allocation with references unsupported, memory not cleaned up!");
-    }
-
-    uint32_t elemCount = mHal.state.dimensionX;
-    if (mHal.state.dimensionY > 1) {
-        elemCount *= mHal.state.dimensionY;
-    }
-    if (mHal.state.dimensionZ > 1) {
-        elemCount *= mHal.state.dimensionZ;
-    }
-    decRefs(getPtr(), elemCount, 0);
+    freeChildrenUnlocked();
     mRSC->mHal.funcs.allocation.destroy(mRSC, this);
 }
 
@@ -297,6 +285,19 @@ void Allocation::decRefs(const void *ptr, size_t ct, size_t startOff) const {
         ct --;
         p += stride;
     }
+}
+
+void Allocation::freeChildrenUnlocked () {
+    decRefs(getPtr(), mHal.state.type->getSizeBytes() / mHal.state.type->getElementSizeBytes(), 0);
+}
+
+bool Allocation::freeChildren() {
+    if (mHal.state.hasReferences) {
+        incSysRef();
+        freeChildrenUnlocked();
+        return decSysRef();
+    }
+    return false;
 }
 
 void Allocation::copyRange1D(Context *rsc, const Allocation *src, int32_t srcOff, int32_t destOff, int32_t len) {

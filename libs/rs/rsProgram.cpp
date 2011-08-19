@@ -70,15 +70,8 @@ Program::Program(Context *rsc, const char * shaderText, uint32_t shaderLength,
 }
 
 Program::~Program() {
+    freeChildren();
 
-    for (uint32_t ct=0; ct < mHal.state.constantsCount; ct++) {
-        bindAllocation(NULL, NULL, ct);
-    }
-
-    for (uint32_t ct=0; ct < mHal.state.texturesCount; ct++) {
-        bindTexture(NULL, ct, NULL);
-        bindSampler(NULL, ct, NULL);
-    }
     delete[] mHal.state.textures;
     delete[] mHal.state.samplers;
     delete[] mHal.state.textureTargets;
@@ -88,6 +81,18 @@ Program::~Program() {
     mHal.state.inputElementsCount = 0;
     mHal.state.constantsCount = 0;
     mHal.state.texturesCount = 0;
+}
+
+bool Program::freeChildren() {
+    for (uint32_t ct=0; ct < mHal.state.constantsCount; ct++) {
+        bindAllocation(NULL, NULL, ct);
+    }
+
+    for (uint32_t ct=0; ct < mHal.state.texturesCount; ct++) {
+        bindTexture(NULL, ct, NULL);
+        bindSampler(NULL, ct, NULL);
+    }
+    return false;
 }
 
 void Program::initMemberVars() {

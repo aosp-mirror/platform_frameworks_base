@@ -116,6 +116,7 @@ public:
 
     void incRefs(const void *ptr, size_t ct, size_t startOff = 0) const;
     void decRefs(const void *ptr, size_t ct, size_t startOff = 0) const;
+    virtual bool freeChildren();
 
     void sendDirty(const Context *rsc) const;
     bool getHasGraphicsMipmaps() const {
@@ -127,6 +128,7 @@ protected:
     Vector<const Program *> mToDirtyList;
 
 private:
+    void freeChildrenUnlocked();
     Allocation(Context *rsc, const Type *, uint32_t usages, RsAllocationMipmapControl mc);
 };
 

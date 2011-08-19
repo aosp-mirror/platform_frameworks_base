@@ -312,6 +312,7 @@ void Context::destroyWorkerThreadResources() {
          mStateSampler.deinit(this);
          mFBOCache.deinit(this);
     }
+    ObjectBase::freeAllChildren(this);
     //LOGV("destroyWorkerThreadResources 2");
     mExit = true;
 }
