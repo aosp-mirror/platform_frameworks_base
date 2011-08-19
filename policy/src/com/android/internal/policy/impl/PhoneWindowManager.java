@@ -2398,10 +2398,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    final Object mScreenshotLock = new Object();
     ServiceConnection mScreenshotConnection = null;
     Runnable mScreenshotTimeout = null;
 
-    void finishScreenshot(ServiceConnection conn) {
+    void finishScreenshotLSS(ServiceConnection conn) {
         if (mScreenshotConnection == conn) {
             mContext.unbindService(conn);
             mScreenshotConnection = null;
@@ -2416,48 +2417,56 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (mScreenshotConnection != null) {
-                    return;
-                }
-                ComponentName cn = new ComponentName("com.android.systemui",
-                        "com.android.systemui.screenshot.TakeScreenshotService");
-                Intent intent = new Intent();
-                intent.setComponent(cn);
-                ServiceConnection conn = new ServiceConnection() {
-                    @Override
-                    public void onServiceConnected(ComponentName name, IBinder service) {
-                        if (mScreenshotConnection != this) {
-                            return;
-                        }
-                        Messenger messenger = new Messenger(service);
-                        Message msg = Message.obtain(null, 1);
-                        final ServiceConnection myConn = this;
-                        Handler h = new Handler(mHandler.getLooper()) {
-                            @Override
-                            public void handleMessage(Message msg) {
-                                finishScreenshot(myConn);
-                            }
-                        };
-                        msg.replyTo = new Messenger(h);
-                        try {
-                            messenger.send(msg);
-                        } catch (RemoteException e) {
-                        }
+                synchronized (mScreenshotLock) {
+                    if (mScreenshotConnection != null) {
+                        return;
                     }
-                    @Override
-                    public void onServiceDisconnected(ComponentName name) {}
-                };
-                if (mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE)) {
-                    mScreenshotConnection = conn;
-                    mScreenshotTimeout = new Runnable() {
-                        @Override public void run() {
-                            if (mScreenshotConnection != null) {
-                                finishScreenshot(mScreenshotConnection);
+                    ComponentName cn = new ComponentName("com.android.systemui",
+                            "com.android.systemui.screenshot.TakeScreenshotService");
+                    Intent intent = new Intent();
+                    intent.setComponent(cn);
+                    ServiceConnection conn = new ServiceConnection() {
+                        @Override
+                        public void onServiceConnected(ComponentName name, IBinder service) {
+                            synchronized (mScreenshotLock) {
+                                if (mScreenshotConnection != this) {
+                                    return;
+                                }
+                                Messenger messenger = new Messenger(service);
+                                Message msg = Message.obtain(null, 1);
+                                final ServiceConnection myConn = this;
+                                Handler h = new Handler(mHandler.getLooper()) {
+                                    @Override
+                                    public void handleMessage(Message msg) {
+                                        synchronized (mScreenshotLock) {
+                                            finishScreenshotLSS(myConn);
+                                        }
+                                    }
+                                };
+                                msg.replyTo = new Messenger(h);
+                                try {
+                                    messenger.send(msg);
+                                } catch (RemoteException e) {
+                                }
                             }
                         }
-
+                        @Override
+                        public void onServiceDisconnected(ComponentName name) {}
                     };
-                    mHandler.postDelayed(mScreenshotTimeout, 10000);
+                    if (mContext.bindService(intent, conn, Context.BIND_AUTO_CREATE)) {
+                        mScreenshotConnection = conn;
+                        mScreenshotTimeout = new Runnable() {
+                            @Override public void run() {
+                                synchronized (mScreenshotLock) {
+                                    if (mScreenshotConnection != null) {
+                                        finishScreenshotLSS(mScreenshotConnection);
+                                    }
+                                }
+                            }
+    
+                        };
+                        mHandler.postDelayed(mScreenshotTimeout, 10000);
+                    }
                 }
             }
         });
