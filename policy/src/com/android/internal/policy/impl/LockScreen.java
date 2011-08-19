@@ -23,7 +23,6 @@ import com.android.internal.widget.WaveView;
 import com.android.internal.widget.multiwaveview.MultiWaveView;
 
 import android.app.ActivityManager;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -46,6 +45,7 @@ import java.io.File;
  */
 class LockScreen extends LinearLayout implements KeyguardScreen {
 
+    private static final int ON_RESUME_PING_DELAY = 500; // delay first ping until the screen is on
     private static final boolean DBG = false;
     private static final String TAG = "LockScreen";
     private static final String ENABLE_MENU_KEY_FILE = "/data/local/enable_menu_key";
@@ -441,10 +441,16 @@ class LockScreen extends LinearLayout implements KeyguardScreen {
         mUnlockWidgetMethods.reset(false);
     }
 
+    private final Runnable mOnResumePing = new Runnable() {
+        public void run() {
+            mUnlockWidgetMethods.ping();
+        }
+    };
+
     /** {@inheritDoc} */
     public void onResume() {
         mStatusViewManager.onResume();
-        mUnlockWidgetMethods.ping();
+        postDelayed(mOnResumePing, ON_RESUME_PING_DELAY);
     }
 
     /** {@inheritDoc} */
