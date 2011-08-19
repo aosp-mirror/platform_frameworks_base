@@ -182,8 +182,6 @@ public:
 
     /* --- InputReaderPolicyInterface implementation --- */
 
-    virtual bool getDisplayInfo(int32_t displayId, bool external,
-            int32_t* width, int32_t* height, int32_t* orientation);
     virtual void getReaderConfiguration(InputReaderConfiguration* outConfig);
     virtual sp<PointerControllerInterface> obtainPointerController(int32_t deviceId);
 
@@ -273,7 +271,7 @@ NativeInputManager::NativeInputManager(jobject contextObj,
         mLocked.displayHeight = -1;
         mLocked.displayExternalWidth = -1;
         mLocked.displayExternalHeight = -1;
-        mLocked.displayOrientation = ROTATION_0;
+        mLocked.displayOrientation = DISPLAY_ORIENTATION_0;
 
         mLocked.systemUiVisibility = ASYSTEM_UI_VISIBILITY_STATUS_BAR_VISIBLE;
         mLocked.pointerSpeed = 0;
@@ -311,31 +309,42 @@ bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const c
 
 void NativeInputManager::setDisplaySize(int32_t displayId, int32_t width, int32_t height,
         int32_t externalWidth, int32_t externalHeight) {
+    bool changed = false;
     if (displayId == 0) {
-        { // acquire lock
-            AutoMutex _l(mLock);
+        AutoMutex _l(mLock);
 
-            if (mLocked.displayWidth != width || mLocked.displayHeight != height) {
-                mLocked.displayWidth = width;
-                mLocked.displayHeight = height;
+        if (mLocked.displayWidth != width || mLocked.displayHeight != height) {
+            changed = true;
+            mLocked.displayWidth = width;
+            mLocked.displayHeight = height;
 
-                sp<PointerController> controller = mLocked.pointerController.promote();
-                if (controller != NULL) {
-                    controller->setDisplaySize(width, height);
-                }
+            sp<PointerController> controller = mLocked.pointerController.promote();
+            if (controller != NULL) {
+                controller->setDisplaySize(width, height);
             }
+        }
 
+        if (mLocked.displayExternalWidth != externalWidth
+                || mLocked.displayExternalHeight != externalHeight) {
+            changed = true;
             mLocked.displayExternalWidth = externalWidth;
             mLocked.displayExternalHeight = externalHeight;
-        } // release lock
+        }
+    }
+
+    if (changed) {
+        mInputManager->getReader()->requestRefreshConfiguration(
+                InputReaderConfiguration::CHANGE_DISPLAY_INFO);
     }
 }
 
 void NativeInputManager::setDisplayOrientation(int32_t displayId, int32_t orientation) {
+    bool changed = false;
     if (displayId == 0) {
         AutoMutex _l(mLock);
 
         if (mLocked.displayOrientation != orientation) {
+            changed = true;
             mLocked.displayOrientation = orientation;
 
             sp<PointerController> controller = mLocked.pointerController.promote();
@@ -343,6 +352,11 @@ void NativeInputManager::setDisplayOrientation(int32_t displayId, int32_t orient
                 controller->setDisplayOrientation(orientation);
             }
         }
+    }
+
+    if (changed) {
+        mInputManager->getReader()->requestRefreshConfiguration(
+                InputReaderConfiguration::CHANGE_DISPLAY_INFO);
     }
 }
 
@@ -356,28 +370,6 @@ status_t NativeInputManager::registerInputChannel(JNIEnv* env,
 status_t NativeInputManager::unregisterInputChannel(JNIEnv* env,
         const sp<InputChannel>& inputChannel) {
     return mInputManager->getDispatcher()->unregisterInputChannel(inputChannel);
-}
-
-bool NativeInputManager::getDisplayInfo(int32_t displayId, bool external,
-        int32_t* width, int32_t* height, int32_t* orientation) {
-    bool result = false;
-    if (displayId == 0) {
-        AutoMutex _l(mLock);
-
-        if (mLocked.displayWidth > 0 && mLocked.displayHeight > 0) {
-            if (width) {
-                *width = external ? mLocked.displayExternalWidth : mLocked.displayWidth;
-            }
-            if (height) {
-                *height = external ? mLocked.displayExternalHeight : mLocked.displayHeight;
-            }
-            if (orientation) {
-                *orientation = mLocked.displayOrientation;
-            }
-            result = true;
-        }
-    }
-    return result;
 }
 
 void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outConfig) {
@@ -438,6 +430,12 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         outConfig->pointerVelocityControlParameters.scale = exp2f(mLocked.pointerSpeed
                 * POINTER_SPEED_EXPONENT);
         outConfig->pointerGesturesEnabled = mLocked.pointerGesturesEnabled;
+
+        outConfig->setDisplayInfo(0, false /*external*/,
+                mLocked.displayWidth, mLocked.displayHeight, mLocked.displayOrientation);
+        outConfig->setDisplayInfo(0, true /*external*/,
+                mLocked.displayExternalWidth, mLocked.displayExternalHeight,
+                mLocked.displayOrientation);
     } // release lock
 }
 

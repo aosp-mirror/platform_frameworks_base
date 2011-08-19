@@ -53,6 +53,9 @@ struct InputReaderConfiguration {
         // The pointer gesture control changed.
         CHANGE_POINTER_GESTURE_ENABLEMENT = 1 << 1,
 
+        // The display size or orientation changed.
+        CHANGE_DISPLAY_INFO = 1 << 2,
+
         // All devices must be reopened.
         CHANGE_MUST_REOPEN = 1 << 31,
     };
@@ -153,6 +156,26 @@ struct InputReaderConfiguration {
             pointerGestureSwipeMaxWidthRatio(0.25f),
             pointerGestureMovementSpeedRatio(0.8f),
             pointerGestureZoomSpeedRatio(0.3f) { }
+
+    bool getDisplayInfo(int32_t displayId, bool external,
+            int32_t* width, int32_t* height, int32_t* orientation) const;
+
+    void setDisplayInfo(int32_t displayId, bool external,
+            int32_t width, int32_t height, int32_t orientation);
+
+private:
+    struct DisplayInfo {
+        int32_t width;
+        int32_t height;
+        int32_t orientation;
+
+        DisplayInfo() :
+            width(-1), height(-1), orientation(DISPLAY_ORIENTATION_0) {
+        }
+    };
+
+    DisplayInfo mInternalDisplay;
+    DisplayInfo mExternalDisplay;
 };
 
 
@@ -174,22 +197,6 @@ protected:
     virtual ~InputReaderPolicyInterface() { }
 
 public:
-    /* Display orientations. */
-    enum {
-        ROTATION_0 = 0,
-        ROTATION_90 = 1,
-        ROTATION_180 = 2,
-        ROTATION_270 = 3
-    };
-
-    /* Gets information about the display with the specified id.
-     * If external is true, returns the size of the external mirrored
-     * counterpart of the specified display.
-     * Returns true if the display info is available, false otherwise.
-     */
-    virtual bool getDisplayInfo(int32_t displayId, bool external,
-            int32_t* width, int32_t* height, int32_t* orientation) = 0;
-
     /* Gets the input reader configuration. */
     virtual void getReaderConfiguration(InputReaderConfiguration* outConfig) = 0;
 
@@ -364,8 +371,8 @@ private:
     // low-level input event decoding and device management
     void processEventsLocked(const RawEvent* rawEvents, size_t count);
 
-    void addDeviceLocked(int32_t deviceId);
-    void removeDeviceLocked(int32_t deviceId);
+    void addDeviceLocked(nsecs_t when, int32_t deviceId);
+    void removeDeviceLocked(nsecs_t when, int32_t deviceId);
     void processEventsForDeviceLocked(int32_t deviceId, const RawEvent* rawEvents, size_t count);
     void timeoutExpiredLocked(nsecs_t when);
 
@@ -431,8 +438,8 @@ public:
 
     void dump(String8& dump);
     void addMapper(InputMapper* mapper);
-    void configure(const InputReaderConfiguration* config, uint32_t changes);
-    void reset();
+    void configure(nsecs_t when, const InputReaderConfiguration* config, uint32_t changes);
+    void reset(nsecs_t when);
     void process(const RawEvent* rawEvents, size_t count);
     void timeoutExpired(nsecs_t when);
 
@@ -447,8 +454,24 @@ public:
 
     void fadePointer();
 
+    void notifyReset(nsecs_t when);
+
     inline const PropertyMap& getConfiguration() { return mConfiguration; }
     inline EventHubInterface* getEventHub() { return mContext->getEventHub(); }
+
+    bool hasKey(int32_t code) {
+        return getEventHub()->hasScanCode(mId, code);
+    }
+
+    bool isKeyPressed(int32_t code) {
+        return getEventHub()->getScanCodeState(mId, code) == AKEY_STATE_DOWN;
+    }
+
+    int32_t getAbsoluteAxisValue(int32_t code) {
+        int32_t value;
+        getEventHub()->getAbsoluteAxisValue(mId, code, &value);
+        return value;
+    }
 
 private:
     InputReaderContext* mContext;
@@ -472,8 +495,8 @@ private:
 class CursorButtonAccumulator {
 public:
     CursorButtonAccumulator();
+    void reset(InputDevice* device);
 
-    void clearButtons();
     void process(const RawEvent* rawEvent);
 
     uint32_t getButtonState() const;
@@ -487,6 +510,8 @@ private:
     bool mBtnForward;
     bool mBtnExtra;
     bool mBtnTask;
+
+    void clearButtons();
 };
 
 
@@ -495,10 +520,32 @@ private:
 class CursorMotionAccumulator {
 public:
     CursorMotionAccumulator();
-    void configure(InputDevice* device);
+    void reset(InputDevice* device);
+
+    void process(const RawEvent* rawEvent);
+    void finishSync();
+
+    inline int32_t getRelativeX() const { return mRelX; }
+    inline int32_t getRelativeY() const { return mRelY; }
+
+private:
+    int32_t mRelX;
+    int32_t mRelY;
 
     void clearRelativeAxes();
+};
+
+
+/* Keeps track of cursor scrolling motions. */
+
+class CursorScrollAccumulator {
+public:
+    CursorScrollAccumulator();
+    void configure(InputDevice* device);
+    void reset(InputDevice* device);
+
     void process(const RawEvent* rawEvent);
+    void finishSync();
 
     inline bool haveRelativeVWheel() const { return mHaveRelWheel; }
     inline bool haveRelativeHWheel() const { return mHaveRelHWheel; }
@@ -516,6 +563,8 @@ private:
     int32_t mRelY;
     int32_t mRelWheel;
     int32_t mRelHWheel;
+
+    void clearRelativeAxes();
 };
 
 
@@ -524,8 +573,8 @@ class TouchButtonAccumulator {
 public:
     TouchButtonAccumulator();
     void configure(InputDevice* device);
+    void reset(InputDevice* device);
 
-    void clearButtons();
     void process(const RawEvent* rawEvent);
 
     uint32_t getButtonState() const;
@@ -542,6 +591,13 @@ private:
     bool mBtnToolFinger;
     bool mBtnToolPen;
     bool mBtnToolRubber;
+    bool mBtnToolBrush;
+    bool mBtnToolPencil;
+    bool mBtnToolAirbrush;
+    bool mBtnToolMouse;
+    bool mBtnToolLens;
+
+    void clearButtons();
 };
 
 
@@ -556,6 +612,8 @@ struct RawPointerAxes {
     RawAbsoluteAxisInfo toolMinor;
     RawAbsoluteAxisInfo orientation;
     RawAbsoluteAxisInfo distance;
+    RawAbsoluteAxisInfo tiltX;
+    RawAbsoluteAxisInfo tiltY;
     RawAbsoluteAxisInfo trackingId;
     RawAbsoluteAxisInfo slot;
 
@@ -577,6 +635,8 @@ struct RawPointerData {
         int32_t toolMinor;
         int32_t orientation;
         int32_t distance;
+        int32_t tiltX;
+        int32_t tiltY;
         int32_t toolType; // a fully decoded AMOTION_EVENT_TOOL_TYPE constant
         bool isHovering;
     };
@@ -637,14 +697,16 @@ class SingleTouchMotionAccumulator {
 public:
     SingleTouchMotionAccumulator();
 
-    void clearAbsoluteAxes();
     void process(const RawEvent* rawEvent);
+    void reset(InputDevice* device);
 
     inline int32_t getAbsoluteX() const { return mAbsX; }
     inline int32_t getAbsoluteY() const { return mAbsY; }
     inline int32_t getAbsolutePressure() const { return mAbsPressure; }
     inline int32_t getAbsoluteToolWidth() const { return mAbsToolWidth; }
     inline int32_t getAbsoluteDistance() const { return mAbsDistance; }
+    inline int32_t getAbsoluteTiltX() const { return mAbsTiltX; }
+    inline int32_t getAbsoluteTiltY() const { return mAbsTiltY; }
 
 private:
     int32_t mAbsX;
@@ -652,6 +714,10 @@ private:
     int32_t mAbsPressure;
     int32_t mAbsToolWidth;
     int32_t mAbsDistance;
+    int32_t mAbsTiltX;
+    int32_t mAbsTiltY;
+
+    void clearAbsoluteAxes();
 };
 
 
@@ -703,11 +769,10 @@ public:
     ~MultiTouchMotionAccumulator();
 
     void configure(size_t slotCount, bool usingSlotsProtocol);
+    void reset(InputDevice* device);
     void process(const RawEvent* rawEvent);
+    void finishSync();
 
-    void clearSlots(int32_t initialSlot);
-
-    inline bool isUsingSlotsProtocol() const { return mUsingSlotsProtocol; }
     inline size_t getSlotCount() const { return mSlotCount; }
     inline const Slot* getSlot(size_t index) const { return &mSlots[index]; }
 
@@ -716,12 +781,22 @@ private:
     Slot* mSlots;
     size_t mSlotCount;
     bool mUsingSlotsProtocol;
+
+    void clearSlots(int32_t initialSlot);
 };
 
 
 /* An input mapper transforms raw input events into cooked event data.
  * A single input device can have multiple associated input mappers in order to interpret
  * different classes of events.
+ *
+ * InputMapper lifecycle:
+ * - create
+ * - configure with 0 changes
+ * - reset
+ * - process, process, process (may occasionally reconfigure with non-zero changes or reset)
+ * - reset
+ * - destroy
  */
 class InputMapper {
 public:
@@ -739,8 +814,8 @@ public:
     virtual uint32_t getSources() = 0;
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
-    virtual void configure(const InputReaderConfiguration* config, uint32_t changes);
-    virtual void reset();
+    virtual void configure(nsecs_t when, const InputReaderConfiguration* config, uint32_t changes);
+    virtual void reset(nsecs_t when);
     virtual void process(const RawEvent* rawEvent) = 0;
     virtual void timeoutExpired(nsecs_t when);
 
@@ -788,8 +863,8 @@ public:
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
-    virtual void configure(const InputReaderConfiguration* config, uint32_t changes);
-    virtual void reset();
+    virtual void configure(nsecs_t when, const InputReaderConfiguration* config, uint32_t changes);
+    virtual void reset(nsecs_t when);
     virtual void process(const RawEvent* rawEvent);
 
     virtual int32_t getKeyCodeState(uint32_t sourceMask, int32_t keyCode);
@@ -800,8 +875,6 @@ public:
     virtual int32_t getMetaState();
 
 private:
-    Mutex mLock;
-
     struct KeyDown {
         int32_t keyCode;
         int32_t scanCode;
@@ -809,6 +882,8 @@ private:
 
     uint32_t mSource;
     int32_t mKeyboardType;
+
+    int32_t mOrientation; // orientation for dpad keys
 
     Vector<KeyDown> mKeyDowns; // keys that are down
     int32_t mMetaState;
@@ -827,8 +902,6 @@ private:
         int32_t associatedDisplayId;
         bool orientationAware;
     } mParameters;
-
-    void initialize();
 
     void configureParameters();
     void dumpParameters(String8& dump);
@@ -856,8 +929,8 @@ public:
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
-    virtual void configure(const InputReaderConfiguration* config, uint32_t changes);
-    virtual void reset();
+    virtual void configure(nsecs_t when, const InputReaderConfiguration* config, uint32_t changes);
+    virtual void reset(nsecs_t when);
     virtual void process(const RawEvent* rawEvent);
 
     virtual int32_t getScanCodeState(uint32_t sourceMask, int32_t scanCode);
@@ -882,6 +955,7 @@ private:
 
     CursorButtonAccumulator mCursorButtonAccumulator;
     CursorMotionAccumulator mCursorMotionAccumulator;
+    CursorScrollAccumulator mCursorScrollAccumulator;
 
     int32_t mSource;
     float mXScale;
@@ -898,12 +972,12 @@ private:
     VelocityControl mWheelXVelocityControl;
     VelocityControl mWheelYVelocityControl;
 
+    int32_t mOrientation;
+
     sp<PointerControllerInterface> mPointerController;
 
     int32_t mButtonState;
     nsecs_t mDownTime;
-
-    void initialize();
 
     void configureParameters();
     void dumpParameters(String8& dump);
@@ -920,8 +994,9 @@ public:
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
-    virtual void configure(const InputReaderConfiguration* config, uint32_t changes);
-    virtual void reset();
+    virtual void configure(nsecs_t when, const InputReaderConfiguration* config, uint32_t changes);
+    virtual void reset(nsecs_t when);
+    virtual void process(const RawEvent* rawEvent);
 
     virtual int32_t getKeyCodeState(uint32_t sourceMask, int32_t keyCode);
     virtual int32_t getScanCodeState(uint32_t sourceMask, int32_t scanCode);
@@ -932,6 +1007,10 @@ public:
     virtual void timeoutExpired(nsecs_t when);
 
 protected:
+    CursorButtonAccumulator mCursorButtonAccumulator;
+    CursorScrollAccumulator mCursorScrollAccumulator;
+    TouchButtonAccumulator mTouchButtonAccumulator;
+
     struct VirtualKey {
         int32_t keyCode;
         int32_t scanCode;
@@ -948,9 +1027,16 @@ protected:
         }
     };
 
-    // Input sources supported by the device.
-    uint32_t mTouchSource; // sources when reporting touch data
-    uint32_t mPointerSource; // sources when reporting pointer gestures
+    // Input sources and device mode.
+    uint32_t mSource;
+
+    enum DeviceMode {
+        DEVICE_MODE_DISABLED, // input is disabled
+        DEVICE_MODE_DIRECT, // direct mapping (touchscreen)
+        DEVICE_MODE_UNSCALED, // unscaled mapping (touchpad)
+        DEVICE_MODE_POINTER, // pointer mapping (pointer)
+    };
+    DeviceMode mDeviceMode;
 
     // The reader's configuration.
     InputReaderConfiguration mConfig;
@@ -1053,6 +1139,18 @@ protected:
     int32_t mCurrentButtonState;
     int32_t mLastButtonState;
 
+    // Scroll state.
+    int32_t mCurrentRawVScroll;
+    int32_t mCurrentRawHScroll;
+
+    // Id bits used to differentiate fingers, stylus and mouse tools.
+    BitSet32 mCurrentFingerIdBits; // finger or unknown
+    BitSet32 mLastFingerIdBits;
+    BitSet32 mCurrentStylusIdBits; // stylus or eraser
+    BitSet32 mLastStylusIdBits;
+    BitSet32 mCurrentMouseIdBits; // mouse or lens
+    BitSet32 mLastMouseIdBits;
+
     // True if we sent a HOVER_ENTER event.
     bool mSentHoverEnter;
 
@@ -1068,7 +1166,7 @@ protected:
     virtual void dumpParameters(String8& dump);
     virtual void configureRawPointerAxes();
     virtual void dumpRawPointerAxes(String8& dump);
-    virtual bool configureSurface();
+    virtual void configureSurface(nsecs_t when, bool* outResetNeeded);
     virtual void dumpSurface(String8& dump);
     virtual void configureVirtualKeys();
     virtual void dumpVirtualKeys(String8& dump);
@@ -1076,7 +1174,7 @@ protected:
     virtual void resolveCalibration();
     virtual void dumpCalibration(String8& dump);
 
-    void syncTouch(nsecs_t when, bool havePointerIds);
+    virtual void syncTouch(nsecs_t when, bool* outHavePointerIds) = 0;
 
 private:
     // The surface orientation and width and height set by configureSurface().
@@ -1102,16 +1200,21 @@ private:
 
     float mSizeScale;
 
+    float mOrientationCenter;
     float mOrientationScale;
 
     float mDistanceScale;
+
+    bool mHaveTilt;
+    float mTiltXCenter;
+    float mTiltXScale;
+    float mTiltYCenter;
+    float mTiltYScale;
 
     // Oriented motion ranges for input device info.
     struct OrientedRanges {
         InputDeviceInfo::MotionRange x;
         InputDeviceInfo::MotionRange y;
-
-        bool havePressure;
         InputDeviceInfo::MotionRange pressure;
 
         bool haveSize;
@@ -1130,6 +1233,22 @@ private:
 
         bool haveDistance;
         InputDeviceInfo::MotionRange distance;
+
+        bool haveTilt;
+        InputDeviceInfo::MotionRange tilt;
+
+        OrientedRanges() {
+            clear();
+        }
+
+        void clear() {
+            haveSize = false;
+            haveTouchSize = false;
+            haveToolSize = false;
+            haveOrientation = false;
+            haveDistance = false;
+            haveTilt = false;
+        }
     } mOrientedRanges;
 
     // Oriented dimensions and precision.
@@ -1146,13 +1265,13 @@ private:
         int32_t scanCode;
     } mCurrentVirtualKey;
 
-    // Scale factor for gesture based pointer movements.
-    float mPointerGestureXMovementScale;
-    float mPointerGestureYMovementScale;
+    // Scale factor for gesture or mouse based pointer movements.
+    float mPointerXMovementScale;
+    float mPointerYMovementScale;
 
     // Scale factor for gesture based zooming and other freeform motions.
-    float mPointerGestureXZoomScale;
-    float mPointerGestureYZoomScale;
+    float mPointerXZoomScale;
+    float mPointerYZoomScale;
 
     // The maximum swipe width.
     float mPointerGestureMaxSwipeWidth;
@@ -1162,6 +1281,14 @@ private:
         uint32_t lastPointerIndex : 8;
         uint64_t distance : 48; // squared distance
     };
+
+    enum PointerUsage {
+        POINTER_USAGE_NONE,
+        POINTER_USAGE_GESTURES,
+        POINTER_USAGE_STYLUS,
+        POINTER_USAGE_MOUSE,
+    };
+    PointerUsage mPointerUsage;
 
     struct PointerGesture {
         enum Mode {
@@ -1273,9 +1400,6 @@ private:
         // A velocity tracker for determining whether to switch active pointers during drags.
         VelocityTracker velocityTracker;
 
-        // Velocity control for pointer movements.
-        VelocityControl pointerVelocityControl;
-
         void reset() {
             firstTouchTime = LLONG_MIN;
             activeTouchId = -1;
@@ -1288,7 +1412,6 @@ private:
             velocityTracker.clear();
             resetTap();
             resetQuietTime();
-            pointerVelocityControl.reset();
         }
 
         void resetTap() {
@@ -1301,7 +1424,38 @@ private:
         }
     } mPointerGesture;
 
-    void initialize();
+    struct PointerSimple {
+        PointerCoords currentCoords;
+        PointerProperties currentProperties;
+        PointerCoords lastCoords;
+        PointerProperties lastProperties;
+
+        // True if the pointer is down.
+        bool down;
+
+        // True if the pointer is hovering.
+        bool hovering;
+
+        // Time the pointer last went down.
+        nsecs_t downTime;
+
+        void reset() {
+            currentCoords.clear();
+            currentProperties.clear();
+            lastCoords.clear();
+            lastProperties.clear();
+            down = false;
+            hovering = false;
+            downTime = 0;
+        }
+    } mPointerSimple;
+
+    // The pointer and scroll velocity controls.
+    VelocityControl mPointerVelocityControl;
+    VelocityControl mWheelXVelocityControl;
+    VelocityControl mWheelYVelocityControl;
+
+    void sync(nsecs_t when);
 
     bool consumeRawTouches(nsecs_t when, uint32_t policyFlags);
     void dispatchVirtualKey(nsecs_t when, uint32_t policyFlags,
@@ -1312,9 +1466,24 @@ private:
     void dispatchHoverEnterAndMove(nsecs_t when, uint32_t policyFlags);
     void cookPointerData();
 
+    void dispatchPointerUsage(nsecs_t when, uint32_t policyFlags, PointerUsage pointerUsage);
+    void abortPointerUsage(nsecs_t when, uint32_t policyFlags);
+
     void dispatchPointerGestures(nsecs_t when, uint32_t policyFlags, bool isTimeout);
+    void abortPointerGestures(nsecs_t when, uint32_t policyFlags);
     bool preparePointerGestures(nsecs_t when,
-            bool* outCancelPreviousGesture, bool* outFinishPreviousGesture, bool isTimeout);
+            bool* outCancelPreviousGesture, bool* outFinishPreviousGesture,
+            bool isTimeout);
+
+    void dispatchPointerStylus(nsecs_t when, uint32_t policyFlags);
+    void abortPointerStylus(nsecs_t when, uint32_t policyFlags);
+
+    void dispatchPointerMouse(nsecs_t when, uint32_t policyFlags);
+    void abortPointerMouse(nsecs_t when, uint32_t policyFlags);
+
+    void dispatchPointerSimple(nsecs_t when, uint32_t policyFlags,
+            bool down, bool hovering);
+    void abortPointerSimple(nsecs_t when, uint32_t policyFlags);
 
     // Dispatches a motion event.
     // If the changedId is >= 0 and the action is POINTER_DOWN or POINTER_UP, the
@@ -1346,20 +1515,15 @@ public:
     SingleTouchInputMapper(InputDevice* device);
     virtual ~SingleTouchInputMapper();
 
-    virtual void reset();
+    virtual void reset(nsecs_t when);
     virtual void process(const RawEvent* rawEvent);
 
 protected:
+    virtual void syncTouch(nsecs_t when, bool* outHavePointerIds);
     virtual void configureRawPointerAxes();
 
 private:
-    CursorButtonAccumulator mCursorButtonAccumulator;
-    TouchButtonAccumulator mTouchButtonAccumulator;
     SingleTouchMotionAccumulator mSingleTouchMotionAccumulator;
-
-    void clearState();
-
-    void sync(nsecs_t when);
 };
 
 
@@ -1368,24 +1532,19 @@ public:
     MultiTouchInputMapper(InputDevice* device);
     virtual ~MultiTouchInputMapper();
 
-    virtual void reset();
+    virtual void reset(nsecs_t when);
     virtual void process(const RawEvent* rawEvent);
 
 protected:
+    virtual void syncTouch(nsecs_t when, bool* outHavePointerIds);
     virtual void configureRawPointerAxes();
 
 private:
-    CursorButtonAccumulator mCursorButtonAccumulator;
-    TouchButtonAccumulator mTouchButtonAccumulator;
     MultiTouchMotionAccumulator mMultiTouchMotionAccumulator;
 
     // Specifies the pointer id bits that are in use, and their associated tracking id.
     BitSet32 mPointerIdBits;
     int32_t mPointerTrackingIdMap[MAX_POINTER_ID + 1];
-
-    void clearState();
-
-    void sync(nsecs_t when);
 };
 
 
@@ -1397,8 +1556,8 @@ public:
     virtual uint32_t getSources();
     virtual void populateDeviceInfo(InputDeviceInfo* deviceInfo);
     virtual void dump(String8& dump);
-    virtual void configure(const InputReaderConfiguration* config, uint32_t changes);
-    virtual void reset();
+    virtual void configure(nsecs_t when, const InputReaderConfiguration* config, uint32_t changes);
+    virtual void reset(nsecs_t when);
     virtual void process(const RawEvent* rawEvent);
 
 private:

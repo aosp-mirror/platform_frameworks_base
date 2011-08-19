@@ -381,6 +381,7 @@ public:
     virtual void notifyKey(const NotifyKeyArgs* args);
     virtual void notifyMotion(const NotifyMotionArgs* args);
     virtual void notifySwitch(const NotifySwitchArgs* args);
+    virtual void notifyDeviceReset(const NotifyDeviceResetArgs* args);
 
     virtual int32_t injectInputEvent(const InputEvent* event,
             int32_t injectorPid, int32_t injectorUid, int32_t syncMode, int32_t timeoutMillis,
@@ -424,6 +425,7 @@ private:
     struct EventEntry : Link<EventEntry> {
         enum {
             TYPE_CONFIGURATION_CHANGED,
+            TYPE_DEVICE_RESET,
             TYPE_KEY,
             TYPE_MOTION
         };
@@ -451,6 +453,15 @@ private:
 
     protected:
         virtual ~ConfigurationChangedEntry();
+    };
+
+    struct DeviceResetEntry : EventEntry {
+        int32_t deviceId;
+
+        DeviceResetEntry(nsecs_t eventTime, int32_t deviceId);
+
+    protected:
+        virtual ~DeviceResetEntry();
     };
 
     struct KeyEntry : EventEntry {
@@ -688,8 +699,11 @@ private:
         // The specific keycode of the key event to cancel, or -1 to cancel any key event.
         int32_t keyCode;
 
+        // The specific device id of events to cancel, or -1 to cancel events from any device.
+        int32_t deviceId;
+
         CancelationOptions(Mode mode, const char* reason) :
-                mode(mode), reason(reason), keyCode(-1) { }
+                mode(mode), reason(reason), keyCode(-1), deviceId(-1) { }
     };
 
     /* Tracks dispatched key and motion event state so that cancelation events can be
@@ -982,6 +996,8 @@ private:
     // Dispatch inbound events.
     bool dispatchConfigurationChangedLocked(
             nsecs_t currentTime, ConfigurationChangedEntry* entry);
+    bool dispatchDeviceResetLocked(
+            nsecs_t currentTime, DeviceResetEntry* entry);
     bool dispatchKeyLocked(
             nsecs_t currentTime, KeyEntry* entry,
             DropReason* dropReason, nsecs_t* nextWakeupTime);

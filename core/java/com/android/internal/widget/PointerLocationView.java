@@ -46,6 +46,7 @@ public class PointerLocationView extends View {
         
         // Most recent coordinates.
         private PointerCoords mCoords = new PointerCoords();
+        private int mToolType;
         
         // Most recent velocity.
         private float mXVelocity;
@@ -88,7 +89,7 @@ public class PointerLocationView extends View {
     private int mMaxNumPointers;
     private int mActivePointerId;
     private final ArrayList<PointerState> mPointers = new ArrayList<PointerState>();
-    private final PointerCoords mHoverCoords = new PointerCoords();
+    private final PointerCoords mTempCoords = new PointerCoords();
     
     private final VelocityTracker mVelocity;
     
@@ -306,22 +307,66 @@ public class PointerLocationView extends View {
                             ps.mCoords.toolMinor, ps.mCoords.orientation, mPaint);
 
                     // Draw the orientation arrow.
+                    float arrowSize = ps.mCoords.toolMajor * 0.7f;
+                    if (arrowSize < 20) {
+                        arrowSize = 20;
+                    }
                     mPaint.setARGB(255, pressureLevel, 255, 0);
-                    float orientationVectorX = (float) (Math.sin(-ps.mCoords.orientation)
-                            * ps.mCoords.toolMajor * 0.7);
-                    float orientationVectorY = (float) (Math.cos(-ps.mCoords.orientation)
-                            * ps.mCoords.toolMajor * 0.7);
-                    canvas.drawLine(
-                            ps.mCoords.x - orientationVectorX, ps.mCoords.y - orientationVectorY,
-                            ps.mCoords.x + orientationVectorX, ps.mCoords.y + orientationVectorY,
-                            mPaint);
+                    float orientationVectorX = (float) (Math.sin(ps.mCoords.orientation)
+                            * arrowSize);
+                    float orientationVectorY = (float) (-Math.cos(ps.mCoords.orientation)
+                            * arrowSize);
+                    if (ps.mToolType == MotionEvent.TOOL_TYPE_STYLUS
+                            || ps.mToolType == MotionEvent.TOOL_TYPE_ERASER) {
+                        // Show full circle orientation.
+                        canvas.drawLine(ps.mCoords.x, ps.mCoords.y,
+                                ps.mCoords.x + orientationVectorX,
+                                ps.mCoords.y + orientationVectorY,
+                                mPaint);
+                    } else {
+                        // Show half circle orientation.
+                        canvas.drawLine(
+                                ps.mCoords.x - orientationVectorX,
+                                ps.mCoords.y - orientationVectorY,
+                                ps.mCoords.x + orientationVectorX,
+                                ps.mCoords.y + orientationVectorY,
+                                mPaint);
+                    }
+
+                    // Draw the tilt point along the orientation arrow.
+                    float tiltScale = (float) Math.sin(
+                            ps.mCoords.getAxisValue(MotionEvent.AXIS_TILT));
+                    canvas.drawCircle(
+                            ps.mCoords.x + orientationVectorX * tiltScale,
+                            ps.mCoords.y + orientationVectorY * tiltScale,
+                            3.0f, mPaint);
                 }
             }
         }
     }
-    
-    private void logPointerCoords(int action, int index, MotionEvent.PointerCoords coords, int id,
-            int toolType, int buttonState) {
+
+    private void logMotionEvent(String type, MotionEvent event) {
+        final int action = event.getAction();
+        final int N = event.getHistorySize();
+        final int NI = event.getPointerCount();
+        for (int historyPos = 0; historyPos < N; historyPos++) {
+            for (int i = 0; i < NI; i++) {
+                final int id = event.getPointerId(i);
+                event.getHistoricalPointerCoords(i, historyPos, mTempCoords);
+                logCoords(type, action, i, mTempCoords, id,
+                        event.getToolType(i), event.getButtonState());
+            }
+        }
+        for (int i = 0; i < NI; i++) {
+            final int id = event.getPointerId(i);
+            event.getPointerCoords(i, mTempCoords);
+            logCoords(type, action, i, mTempCoords, id,
+                    event.getToolType(i), event.getButtonState());
+        }
+    }
+
+    private void logCoords(String type, int action, int index,
+            MotionEvent.PointerCoords coords, int id, int toolType, int buttonState) {
         final String prefix;
         switch (action & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
@@ -373,7 +418,7 @@ public class PointerLocationView extends View {
         }
 
         Log.i(TAG, mText.clear()
-                .append("Pointer ").append(id + 1)
+                .append(type).append(" id ").append(id + 1)
                 .append(": ")
                 .append(prefix)
                 .append(" (").append(coords.x, 3).append(", ").append(coords.y, 3)
@@ -384,6 +429,9 @@ public class PointerLocationView extends View {
                 .append(" ToolMajor=").append(coords.toolMajor, 3)
                 .append(" ToolMinor=").append(coords.toolMinor, 3)
                 .append(" Orientation=").append((float)(coords.orientation * 180 / Math.PI), 1)
+                .append("deg")
+                .append(" Tilt=").append((float)(
+                        coords.getAxisValue(MotionEvent.AXIS_TILT) * 180 / Math.PI), 1)
                 .append("deg")
                 .append(" Distance=").append(coords.getAxisValue(MotionEvent.AXIS_DISTANCE), 1)
                 .append(" VScroll=").append(coords.getAxisValue(MotionEvent.AXIS_VSCROLL), 1)
@@ -445,10 +493,10 @@ public class PointerLocationView extends View {
                 for (int i = 0; i < NI; i++) {
                     final int id = event.getPointerId(i);
                     final PointerState ps = mCurDown ? mPointers.get(id) : null;
-                    final PointerCoords coords = ps != null ? ps.mCoords : mHoverCoords;
+                    final PointerCoords coords = ps != null ? ps.mCoords : mTempCoords;
                     event.getHistoricalPointerCoords(i, historyPos, coords);
                     if (mPrintCoords) {
-                        logPointerCoords(action, i, coords, id,
+                        logCoords("Pointer", action, i, coords, id,
                                 event.getToolType(i), event.getButtonState());
                     }
                     if (ps != null) {
@@ -459,16 +507,17 @@ public class PointerLocationView extends View {
             for (int i = 0; i < NI; i++) {
                 final int id = event.getPointerId(i);
                 final PointerState ps = mCurDown ? mPointers.get(id) : null;
-                final PointerCoords coords = ps != null ? ps.mCoords : mHoverCoords;
+                final PointerCoords coords = ps != null ? ps.mCoords : mTempCoords;
                 event.getPointerCoords(i, coords);
                 if (mPrintCoords) {
-                    logPointerCoords(action, i, coords, id,
+                    logCoords("Pointer", action, i, coords, id,
                             event.getToolType(i), event.getButtonState());
                 }
                 if (ps != null) {
                     ps.addTrace(coords.x, coords.y);
                     ps.mXVelocity = mVelocity.getXVelocity(id);
                     ps.mYVelocity = mVelocity.getYVelocity(id);
+                    ps.mToolType = event.getToolType(i);
                 }
             }
 
@@ -515,11 +564,11 @@ public class PointerLocationView extends View {
         if ((source & InputDevice.SOURCE_CLASS_POINTER) != 0) {
             addPointerEvent(event);
         } else if ((source & InputDevice.SOURCE_CLASS_JOYSTICK) != 0) {
-            Log.i(TAG, "Joystick: " + event);
+            logMotionEvent("Joystick", event);
         } else if ((source & InputDevice.SOURCE_CLASS_POSITION) != 0) {
-            Log.i(TAG, "Position: " + event);
+            logMotionEvent("Position", event);
         } else {
-            Log.i(TAG, "Generic: " + event);
+            logMotionEvent("Generic", event);
         }
         return true;
     }
@@ -563,7 +612,7 @@ public class PointerLocationView extends View {
 
     @Override
     public boolean onTrackballEvent(MotionEvent event) {
-        Log.i(TAG, "Trackball: " + event);
+        logMotionEvent("Trackball", event);
         return true;
     }
     
