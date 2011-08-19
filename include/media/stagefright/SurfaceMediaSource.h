@@ -182,9 +182,9 @@ public:
 
 protected:
 
-    // freeAllBuffers frees the resources (both GraphicBuffer and EGLImage) for
+    // freeAllBuffersLocked frees the resources (both GraphicBuffer and EGLImage) for
     // all slots.
-    void freeAllBuffers();
+    void freeAllBuffersLocked();
     static bool isExternalFormat(uint32_t format);
 
 private:
@@ -337,8 +337,15 @@ private:
     // Set to a default of 30 fps if not specified by the client side
     int32_t mFrameRate;
 
-    // mStarted is a flag to check if the recording has started
-    bool mStarted;
+    // mStopped is a flag to check if the recording is going on
+    bool mStopped;
+
+    // mNumFramesReceived indicates the number of frames recieved from
+    // the client side
+    int mNumFramesReceived;
+    // mNumFramesEncoded indicates the number of frames passed on to the
+    // encoder
+    int mNumFramesEncoded;
 
     // mFrameAvailableCondition condition used to indicate whether there
     // is a frame available for dequeuing
