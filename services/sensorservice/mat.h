@@ -295,6 +295,29 @@ mat<TYPE, R, C> PURE transpose(const mat<TYPE, C, R>& m) {
     return r;
 }
 
+// Calculate the trace of a matrix
+template <typename TYPE, size_t C> static TYPE trace(const mat<TYPE, C, C>& m) {
+    TYPE t;
+    for (size_t i=0 ; i<C ; i++)
+        t += m[i][i];
+    return t;
+}
+
+// Test positive-semidefiniteness of a matrix
+template <typename TYPE, size_t C>
+static bool isPositiveSemidefinite(const mat<TYPE, C, C>& m, TYPE tolerance) {
+    for (size_t i=0 ; i<C ; i++)
+        if (m[i][i] < 0)
+            return false;
+
+    for (size_t i=0 ; i<C ; i++)
+      for (size_t j=i+1 ; j<C ; j++)
+          if (fabs(m[i][j] - m[j][i]) > tolerance)
+              return false;
+
+    return true;
+}
+
 // Transpose a vector
 template <
     template<typename T, size_t S> class VEC,
