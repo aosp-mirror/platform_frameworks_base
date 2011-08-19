@@ -26,7 +26,7 @@ import android.util.Log;
 
 public class ForwardService {
 
-    private ForwardServer fs8000, fs8080, fs8443;
+    private ForwardServer fs18000, fs8080, fs8443;
 
     private static ForwardService inst;
 
@@ -40,7 +40,7 @@ public class ForwardService {
     private ForwardService() {
         int addr = getForwardHostAddr();
         if (addr != -1) {
-            fs8000 = new ForwardServer(8000, addr, 8000);
+            fs18000 = new ForwardServer(18000, addr, 8000);
             fs8080 = new ForwardServer(8080, addr, 8080);
             fs8443 = new ForwardServer(8443, addr, 8443);
         }
@@ -55,8 +55,8 @@ public class ForwardService {
 
     public void startForwardService() {
         try {
-            if (fs8000 != null)
-                fs8000.start();
+            if (fs18000 != null)
+                fs18000.start();
             if (fs8080 != null)
                 fs8080.start();
             if (fs8443 != null)
@@ -68,9 +68,9 @@ public class ForwardService {
     }
 
     public void stopForwardService() {
-        if (fs8000 != null) {
-            fs8000.stop();
-            fs8000 = null;
+        if (fs18000 != null) {
+            fs18000.stop();
+            fs18000 = null;
         }
         if (fs8080 != null) {
             fs8080.stop();
