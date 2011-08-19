@@ -770,11 +770,7 @@ public:
         value->computeValues(paint, textArray, start, count, end, flags);
 #endif
 
-#if DEBUG_GLYPHS
-        logGlyphs(value);
-#endif
-
-    doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
+        doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
             x, y, flags, paint);
     }
 
@@ -792,10 +788,6 @@ public:
 #else
         value = new TextLayoutCacheValue();
         value->computeValues(paint, textArray, start, count, contextCount, flags);
-#endif
-
-#if DEBUG_GLYPHS
-        logGlyphs(value);
 #endif
 
         doDrawGlyphs(canvas, value->getGlyphs(), 0, value->getGlyphsCount(),
