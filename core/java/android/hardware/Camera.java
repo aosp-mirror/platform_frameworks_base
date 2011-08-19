@@ -1637,7 +1637,6 @@ public class Camera {
          * the focus mode to other modes.
          *
          * @see #FOCUS_MODE_CONTINUOUS_VIDEO
-         * @hide
          */
         public static final String FOCUS_MODE_CONTINUOUS_PICTURE = "continuous-picture";
 
