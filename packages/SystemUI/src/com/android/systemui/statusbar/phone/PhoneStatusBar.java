@@ -1505,7 +1505,9 @@ public class PhoneStatusBar extends StatusBar {
                 if (lightsOut) {
                     animateCollapse();
                 }
-                mNavigationBarView.setLowProfile(lightsOut);
+                if (mNavigationBarView != null) {
+                    mNavigationBarView.setLowProfile(lightsOut);
+                }
             }
 
             notifyUiVisibilityChanged();
