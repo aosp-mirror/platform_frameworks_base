@@ -73,6 +73,8 @@
     <string name="viewport_coverage">Coverage</string>
     <!-- Milliseconds taken to inval, and re-render the page [CHAR LIMIT=15] -->
     <string name="render_millis">RenderMillis</string>
+    <!-- Number of rendering stalls while running the test [CHAR LIMIT=15] -->
+    <string name="render_stalls">Stalls</string>
     <!-- Format string for stat value overlay [CHAR LIMIT=15] -->
     <string name="format_stat">%4.4f</string>
 
