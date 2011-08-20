@@ -1300,8 +1300,8 @@
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_writeApnSettings">change/intercept network settings and traffic</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_writeApnSettings">Allows an application to change network settings and to intercept and inspect all network traffic, 
-      for example to change the proxy and port of any APN. Malicious applications could monitor, redirect, or modify network 
+    <string name="permdesc_writeApnSettings">Allows an application to change network settings and to intercept and inspect all network traffic,
+      for example to change the proxy and port of any APN. Malicious applications could monitor, redirect, or modify network
       packets without your knowledge.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -1857,7 +1857,7 @@
         \n\nPlease try again in <xliff:g id="number">%d</xliff:g> seconds.
     </string>
 
-    <!-- For the unlock screen, Information message shown in dialog when user is almost at the limit
+    <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
          where they will be locked out and may have to enter an alternate username/password to unlock the phone -->
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet">
         You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
@@ -1865,13 +1865,44 @@
        you will be asked to unlock your tablet using your Google sign-in.\n\n
        Please try again in <xliff:g id="number">%d</xliff:g> seconds.
     </string>
-    <!-- For the unlock screen, Information message shown in dialog when user is almost at the limit
+
+    <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
          where they will be locked out and may have to enter an alternate username/password to unlock the phone -->
     <string name="lockscreen_failed_attempts_almost_glogin" product="default">
         You have incorrectly drawn your unlock pattern <xliff:g id="number">%d</xliff:g> times.
        After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
        you will be asked to unlock your phone using your Google sign-in.\n\n
        Please try again in <xliff:g id="number">%d</xliff:g> seconds.
+    </string>
+
+    <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
+         where the device will be wiped. -->
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet">
+       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%d</xliff:g> times.
+       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       the tablet will be reset to factory default and all user data will be lost.
+    </string>
+
+    <!-- For the unlock screen, informational message shown in dialog when user is almost at the limit
+         where the device will be wiped. -->
+    <string name="lockscreen_failed_attempts_almost_at_wipe" product="default">
+       You have incorrectly attempted to unlock the phone <xliff:g id="number">%d</xliff:g> times.
+       After <xliff:g id="number">%d</xliff:g> more unsuccessful attempts,
+       the phone will be reset to factory default and all user data will be lost.
+    </string>
+
+    <!-- For the unlock screen, informational message shown in dialog when user has exceeded the
+        maximum attempts and the device will now be wiped -->
+    <string name="lockscreen_failed_attempts_now_wiping" product="tablet">
+       You have incorrectly attempted to unlock the tablet <xliff:g id="number">%d</xliff:g> times.
+       The tablet will now be reset to factory default.
+    </string>
+
+    <!-- For the unlock screen, informational message shown in dialog when user has exceeded the
+        maximum attempts and the device will now be wiped -->
+    <string name="lockscreen_failed_attempts_now_wiping" product="default">
+       You have incorrectly attempted to unlock the phone <xliff:g id="number">%d</xliff:g> times.
+       The phone will now be reset to factory default.
     </string>
 
     <!-- On the unlock screen, countdown message shown while user is waiting to try again after too many

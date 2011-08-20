@@ -83,6 +83,13 @@ public class LockPatternUtils {
      */
     public static final long FAILED_ATTEMPT_COUNTDOWN_INTERVAL_MS = 1000L;
 
+
+    /**
+     * This dictates when we start telling the user that continued failed attempts will wipe
+     * their device.
+     */
+    public static final int FAILED_ATTEMPTS_BEFORE_WIPE_GRACE = 5;
+
     /**
      * The minimum number of dots in a valid pattern.
      */
@@ -93,7 +100,7 @@ public class LockPatternUtils {
      * attempt for it to be counted against the counts that affect
      * {@link #FAILED_ATTEMPTS_BEFORE_TIMEOUT} and {@link #FAILED_ATTEMPTS_BEFORE_RESET}
      */
-    public static final int MIN_PATTERN_REGISTER_FAIL = 3;
+    public static final int MIN_PATTERN_REGISTER_FAIL = MIN_LOCK_PATTERN_SIZE;
 
     private final static String LOCKOUT_PERMANENT_KEY = "lockscreen.lockedoutpermanently";
     private final static String LOCKOUT_ATTEMPT_DEADLINE = "lockscreen.lockoutattemptdeadline";
@@ -112,6 +119,7 @@ public class LockPatternUtils {
 
     private static final AtomicBoolean sHaveNonZeroPatternFile = new AtomicBoolean(false);
     private static final AtomicBoolean sHaveNonZeroPasswordFile = new AtomicBoolean(false);
+
     private static FileObserver sPasswordObserver;
 
     private static class PasswordFileObserver extends FileObserver {
