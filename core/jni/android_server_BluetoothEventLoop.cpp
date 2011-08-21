@@ -1026,7 +1026,7 @@ static DBusHandlerResult event_filter(DBusConnection *conn, DBusMessage *msg,
        }
        goto success;
     } else if (dbus_message_is_signal(msg,
-                                     "org.bluez.NetworkServer",
+                                     "org.bluez.HealthDevice",
                                      "ChannelDeleted")) {
 
        const char *c_path = dbus_message_get_path(msg);
