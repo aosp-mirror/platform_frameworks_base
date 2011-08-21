@@ -421,11 +421,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 modified = true;
             }
             if (modified) {
-                Slog.d(TAG, "onDataConnectionStateChanged(" + state + ", " + networkType + ")");
+                Slog.d(TAG, "onDataConnectionStateChanged(" + mDataConnectionState
+                        + ", " + mDataConnectionNetworkType + ")");
                 for (Record r : mRecords) {
                     if ((r.events & PhoneStateListener.LISTEN_DATA_CONNECTION_STATE) != 0) {
                         try {
-                            r.callback.onDataConnectionStateChanged(state, networkType);
+                            r.callback.onDataConnectionStateChanged(mDataConnectionState,
+                                    mDataConnectionNetworkType);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
