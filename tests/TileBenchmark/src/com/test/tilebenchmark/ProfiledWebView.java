@@ -17,6 +17,7 @@
 package com.test.tilebenchmark;
 
 import android.content.Context;
+import android.os.CountDownTimer;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.webkit.WebView;
@@ -27,10 +28,14 @@ import com.test.tilebenchmark.RunData.TileData;
 public class ProfiledWebView extends WebView {
     private int mSpeed;
 
-    private boolean isTesting = false;
-    private boolean isScrolling = false;
+    private boolean mIsTesting = false;
+    private boolean mIsScrolling = false;
     private ProfileCallback mCallback;
     private long mContentInvalMillis;
+    private boolean mHadToBeForced = false;
+    private int mTestCount = 0;
+    private static final int LOAD_STALL_MILLIS = 5000; // nr of millis after load,
+                                                       // before test is forced
 
     public ProfiledWebView(Context context) {
         super(context);
@@ -51,12 +56,12 @@ public class ProfiledWebView extends WebView {
 
     @Override
     protected void onDraw(android.graphics.Canvas canvas) {
-        if (isTesting && isScrolling) {
+        if (mIsTesting && mIsScrolling) {
             if (canScrollVertically(1)) {
                 scrollBy(0, mSpeed);
             } else {
                 stopScrollTest();
-                isScrolling = false;
+                mIsScrolling = false;
             }
         }
         super.onDraw(canvas);
@@ -68,13 +73,36 @@ public class ProfiledWebView extends WebView {
      * scrolling, invalidate all content and redraw it, measuring time taken.
      */
     public void startScrollTest(ProfileCallback callback, boolean autoScrolling) {
-        isScrolling = autoScrolling;
+        mIsScrolling = autoScrolling;
         mCallback = callback;
-        isTesting = false;
+        mIsTesting = false;
         mContentInvalMillis = System.currentTimeMillis();
         registerPageSwapCallback();
         contentInvalidateAll();
         invalidate();
+
+        mTestCount++;
+        final int testCount = mTestCount;
+
+        if (autoScrolling) {
+            // after a while, force it to start even if the pages haven't swapped
+            new CountDownTimer(LOAD_STALL_MILLIS, LOAD_STALL_MILLIS) {
+                @Override
+                public void onTick(long millisUntilFinished) {
+                }
+
+                @Override
+                public void onFinish() {
+                    if (testCount == mTestCount && !mIsTesting) {
+                        mHadToBeForced = true;
+                        Log.d("ProfiledWebView", "num " + testCount
+                                + " forcing a page swap with a scroll...");
+                        scrollBy(0, 1);
+                        invalidate(); // ensure a redraw so that auto-scrolling can occur
+                    }
+                }
+            }.start();
+        }
     }
 
     /*
@@ -87,7 +115,7 @@ public class ProfiledWebView extends WebView {
         super.pageSwapCallback();
         Log.d("ProfiledWebView", "REDRAW TOOK " + mContentInvalMillis
                 + "millis");
-        isTesting = true;
+        mIsTesting = true;
         invalidate(); // ensure a redraw so that auto-scrolling can occur
         tileProfilingStart();
     }
@@ -97,7 +125,7 @@ public class ProfiledWebView extends WebView {
      */
     public void stopScrollTest() {
         tileProfilingStop();
-        isTesting = false;
+        mIsTesting = false;
 
         if (mCallback == null) {
             tileProfilingClear();
@@ -105,8 +133,15 @@ public class ProfiledWebView extends WebView {
         }
 
         RunData data = new RunData(super.tileProfilingNumFrames());
+        // record the time spent (before scrolling) rendering the page
         data.singleStats.put(getResources().getString(R.string.render_millis),
                 (double)mContentInvalMillis);
+        // record if the page render timed out
+        Log.d("ProfiledWebView", "hadtobeforced = " + mHadToBeForced);
+        data.singleStats.put(getResources().getString(R.string.render_stalls),
+                             mHadToBeForced ? 1.0 : 0.0);
+        mHadToBeForced = false;
+
         for (int frame = 0; frame < data.frames.length; frame++) {
             data.frames[frame] = new TileData[
                     tileProfilingNumTilesInFrame(frame)];
