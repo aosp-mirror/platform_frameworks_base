@@ -1792,6 +1792,9 @@
   <public type="attr" name="actionBarItemBackground" />
   <public type="attr" name="actionModeSplitBackground" />
 
+  <public type="attr" name="textAppearanceListItem" />
+  <public type="attr" name="textAppearanceListItemSmall" />
+
   <public type="style" name="TextAppearance.SuggestionHighlight" />
 
   <public type="style" name="Theme.Holo.Light.DarkActionBar" />

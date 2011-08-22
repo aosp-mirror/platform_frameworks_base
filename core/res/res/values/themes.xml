@@ -122,6 +122,8 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemHeightSmall">?android:attr/listPreferredItemHeight</item>
         <item name="listPreferredItemHeightLarge">?android:attr/listPreferredItemHeight</item>
         <item name="dropdownListPreferredItemHeight">?android:attr/listPreferredItemHeight</item>
+        <item name="textAppearanceListItem">?android:attr/textAppearanceLarge</item>
+        <item name="textAppearanceListItemSmall">?android:attr/textAppearanceLarge</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -920,6 +922,7 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemHeightSmall">48dip</item>
         <item name="listPreferredItemHeightLarge">80dip</item>
         <item name="dropdownListPreferredItemHeight">?android:attr/listPreferredItemHeightSmall</item>
+        <item name="textAppearanceListItemSmall">?android:attr/textAppearanceMedium</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
@@ -1222,6 +1225,7 @@ please see themes_device_defaults.xml.
         <item name="listPreferredItemHeightSmall">48dip</item>
         <item name="listPreferredItemHeightLarge">80dip</item>
         <item name="dropdownListPreferredItemHeight">?android:attr/listPreferredItemHeightSmall</item>
+        <item name="textAppearanceListItemSmall">?android:attr/textAppearanceMedium</item>
 
         <!-- @hide -->
         <item name="searchResultListItemHeight">58dip</item>
