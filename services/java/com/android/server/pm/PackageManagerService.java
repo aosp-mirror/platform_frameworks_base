@@ -187,6 +187,7 @@ public class PackageManagerService extends IPackageManager.Stub {
     static final int SCAN_NEW_INSTALL = 1<<4;
     static final int SCAN_NO_PATHS = 1<<5;
     static final int SCAN_UPDATE_TIME = 1<<6;
+    static final int SCAN_DEFER_DEX = 1<<7;
 
     static final int REMOVE_CHATTY = 1<<16;
 
@@ -348,6 +349,9 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     /** List of packages waiting for verification. */
     final SparseArray<InstallArgs> mPendingVerification = new SparseArray<InstallArgs>();
+
+    final ArrayList<PackageParser.Package> mDeferredDexOpt =
+            new ArrayList<PackageParser.Package>();
 
     /** Token for keys in mPendingVerification. */
     private int mPendingVerificationToken = 0;
@@ -907,7 +911,7 @@ public class PackageManagerService extends IPackageManager.Stub {
 
             // Set flag to monitor and not change apk file paths when
             // scanning install directories.
-            int scanMode = SCAN_MONITOR | SCAN_NO_PATHS;
+            int scanMode = SCAN_MONITOR | SCAN_NO_PATHS | SCAN_DEFER_DEX;
             if (mNoDexOpt) {
                 Slog.w(TAG, "Running ENG build: no pre-dexopt!");
                 scanMode |= SCAN_NO_DEX;
@@ -2899,6 +2903,33 @@ public class PackageManagerService extends IPackageManager.Stub {
         }
     }
 
+    public void performBootDexOpt() {
+        ArrayList<PackageParser.Package> pkgs = null;
+        synchronized (mPackages) {
+            if (mDeferredDexOpt.size() > 0) {
+                pkgs = new ArrayList<PackageParser.Package>(mDeferredDexOpt);
+                mDeferredDexOpt.clear();
+            }
+        }
+        if (pkgs != null) {
+            for (int i=0; i<pkgs.size(); i++) {
+                try {
+                    ActivityManagerNative.getDefault().showBootMessage(
+                            mContext.getResources().getString(
+                                    com.android.internal.R.string.android_upgrading_apk,
+                                    i+1, pkgs.size()), true);
+                } catch (RemoteException e) {
+                }
+                PackageParser.Package p = pkgs.get(i);
+                synchronized (mInstallLock) {
+                    if (!p.mDidDexOpt) {
+                        performDexOptLI(p, false, false);
+                    }
+                }
+            }
+        }
+    }
+
     public boolean performDexOpt(String packageName) {
         enforceSystemOrRoot("Only the system can request dexopt be performed");
 
@@ -2914,25 +2945,32 @@ public class PackageManagerService extends IPackageManager.Stub {
             }
         }
         synchronized (mInstallLock) {
-            return performDexOptLI(p, false) == DEX_OPT_PERFORMED;
+            return performDexOptLI(p, false, false) == DEX_OPT_PERFORMED;
         }
     }
 
     static final int DEX_OPT_SKIPPED = 0;
     static final int DEX_OPT_PERFORMED = 1;
+    static final int DEX_OPT_DEFERRED = 2;
     static final int DEX_OPT_FAILED = -1;
 
-    private int performDexOptLI(PackageParser.Package pkg, boolean forceDex) {
+    private int performDexOptLI(PackageParser.Package pkg, boolean forceDex, boolean defer) {
         boolean performed = false;
         if ((pkg.applicationInfo.flags&ApplicationInfo.FLAG_HAS_CODE) != 0) {
             String path = pkg.mScanPath;
             int ret = 0;
             try {
                 if (forceDex || dalvik.system.DexFile.isDexOptNeeded(path)) {
-                    ret = mInstaller.dexopt(path, pkg.applicationInfo.uid,
-                            !isForwardLocked(pkg));
-                    pkg.mDidDexOpt = true;
-                    performed = true;
+                    if (!forceDex && defer) {
+                        mDeferredDexOpt.add(pkg);
+                        return DEX_OPT_DEFERRED;
+                    } else {
+                        Log.i(TAG, "Running dexopt on: " + pkg.applicationInfo.packageName);
+                        ret = mInstaller.dexopt(path, pkg.applicationInfo.uid,
+                                !isForwardLocked(pkg));
+                        pkg.mDidDexOpt = true;
+                        performed = true;
+                    }
                 }
             } catch (FileNotFoundException e) {
                 Slog.w(TAG, "Apk not found for dexopt: " + path);
@@ -3487,7 +3525,8 @@ public class PackageManagerService extends IPackageManager.Stub {
         pkg.mScanPath = path;
 
         if ((scanMode&SCAN_NO_DEX) == 0) {
-            if (performDexOptLI(pkg, forceDex) == DEX_OPT_FAILED) {
+            if (performDexOptLI(pkg, forceDex, (scanMode&SCAN_DEFER_DEX) != 0)
+                    == DEX_OPT_FAILED) {
                 mLastScanError = PackageManager.INSTALL_FAILED_DEXOPT;
                 return null;
             }

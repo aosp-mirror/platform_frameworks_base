@@ -7205,6 +7205,7 @@ package android.database.sqlite {
     ctor public SQLiteOpenHelper(android.content.Context, java.lang.String, android.database.sqlite.SQLiteDatabase.CursorFactory, int);
     ctor public SQLiteOpenHelper(android.content.Context, java.lang.String, android.database.sqlite.SQLiteDatabase.CursorFactory, int, android.database.DatabaseErrorHandler);
     method public synchronized void close();
+    method public java.lang.String getDatabaseName();
     method public synchronized android.database.sqlite.SQLiteDatabase getReadableDatabase();
     method public synchronized android.database.sqlite.SQLiteDatabase getWritableDatabase();
     method public abstract void onCreate(android.database.sqlite.SQLiteDatabase);
@@ -23503,6 +23504,7 @@ package android.view {
     method public abstract void setContentView(android.view.View);
     method public abstract void setContentView(android.view.View, android.view.ViewGroup.LayoutParams);
     method protected void setDefaultWindowFormat(int);
+    method public void setDimAmount(float);
     method public abstract void setFeatureDrawable(int, android.graphics.drawable.Drawable);
     method public abstract void setFeatureDrawableAlpha(int, int);
     method public abstract void setFeatureDrawableResource(int, int);

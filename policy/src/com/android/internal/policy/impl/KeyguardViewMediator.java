@@ -292,7 +292,8 @@ public class KeyguardViewMediator implements KeyguardViewCallback,
                 mKeyguardViewProperties, mUpdateMonitor);
 
         mUserPresentIntent = new Intent(Intent.ACTION_USER_PRESENT);
-        mUserPresentIntent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+        mUserPresentIntent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
+                | Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
 
         final ContentResolver cr = mContext.getContentResolver();
         mShowLockIcon = (Settings.System.getInt(cr, "show_status_bar_lock", 0) == 1);

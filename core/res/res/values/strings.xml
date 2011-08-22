@@ -2571,6 +2571,20 @@
     <string name="smv_process">The process <xliff:g id="process">%1$s</xliff:g> has
       has violated its self-enforced StrictMode policy.</string>
 
+    <!-- [CHAR LIMIT=40] Title of dialog that is shown when performing a system upgrade. -->
+    <string name="android_upgrading_title">Android is upgrading...</string>
+
+    <!-- [CHAR LIMIT=NONE] Message shown in upgrading dialog for each .apk that is optimized. -->
+    <string name="android_upgrading_apk">Optimizing application
+        <xliff:g id="number" example="123">%1$d</xliff:g> of
+        <xliff:g id="number" example="123">%2$d</xliff:g>.</string>
+
+    <!-- [CHAR LIMIT=NONE] Message to show in upgrading dialog when reached the point of starting apps. -->
+    <string name="android_upgrading_starting_apps">Starting applications.</string>
+
+    <!-- [CHAR LIMIT=NONE] Message to show in upgrading dialog when the bulk of the upgrade work is done. -->
+    <string name="android_upgrading_complete">Finishing boot.</string>
+
     <!-- Notification text to tell the user that a heavy-weight application is running. -->
     <string name="heavy_weight_notification"><xliff:g id="app">%1$s</xliff:g> running</string>
 

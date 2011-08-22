@@ -91,6 +91,7 @@ import android.os.Environment;
 import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IPermissionController;
 import android.os.Looper;
@@ -3755,6 +3756,10 @@ public final class ActivityManagerService extends ActivityManagerNative
         mWindowManager.enableScreenAfterBoot();
     }
 
+    public void showBootMessage(final CharSequence msg, final boolean always) {
+        mWindowManager.showBootMessage(msg, always);
+    }
+
     final void finishBooting() {
         IntentFilter pkgFilter = new IntentFilter();
         pkgFilter.addAction(Intent.ACTION_QUERY_PACKAGE_RESTART);
@@ -6453,7 +6458,9 @@ public final class ActivityManagerService extends ActivityManagerNative
         File fname = new File(systemDir, "called_pre_boots.dat");
         return fname;
     }
-    
+
+    static final int LAST_DONE_VERSION = 10000;
+
     private static ArrayList<ComponentName> readLastDonePreBootReceivers() {
         ArrayList<ComponentName> lastDoneReceivers = new ArrayList<ComponentName>();
         File file = getCalledPreBootReceiversFile();
@@ -6461,16 +6468,21 @@ public final class ActivityManagerService extends ActivityManagerNative
         try {
             fis = new FileInputStream(file);
             DataInputStream dis = new DataInputStream(new BufferedInputStream(fis, 2048));
-            int vers = dis.readInt();
-            String codename = dis.readUTF();
-            if (vers == android.os.Build.VERSION.SDK_INT
-                    && codename.equals(android.os.Build.VERSION.CODENAME)) {
-                int num = dis.readInt();
-                while (num > 0) {
-                    num--;
-                    String pkg = dis.readUTF();
-                    String cls = dis.readUTF();
-                    lastDoneReceivers.add(new ComponentName(pkg, cls));
+            int fvers = dis.readInt();
+            if (fvers == LAST_DONE_VERSION) {
+                String vers = dis.readUTF();
+                String codename = dis.readUTF();
+                String build = dis.readUTF();
+                if (android.os.Build.VERSION.RELEASE.equals(vers)
+                        && android.os.Build.VERSION.CODENAME.equals(codename)
+                        && android.os.Build.VERSION.INCREMENTAL.equals(build)) {
+                    int num = dis.readInt();
+                    while (num > 0) {
+                        num--;
+                        String pkg = dis.readUTF();
+                        String cls = dis.readUTF();
+                        lastDoneReceivers.add(new ComponentName(pkg, cls));
+                    }
                 }
             }
         } catch (FileNotFoundException e) {
@@ -6495,8 +6507,10 @@ public final class ActivityManagerService extends ActivityManagerNative
             Slog.i(TAG, "Writing new set of last done pre-boot receivers...");
             fos = new FileOutputStream(file);
             dos = new DataOutputStream(new BufferedOutputStream(fos, 2048));
-            dos.writeInt(android.os.Build.VERSION.SDK_INT);
+            dos.writeInt(LAST_DONE_VERSION);
+            dos.writeUTF(android.os.Build.VERSION.RELEASE);
             dos.writeUTF(android.os.Build.VERSION.CODENAME);
+            dos.writeUTF(android.os.Build.VERSION.INCREMENTAL);
             dos.writeInt(list.size());
             for (int i=0; i<list.size(); i++) {
                 dos.writeUTF(list.get(i).getPackageName());
@@ -6578,6 +6592,9 @@ public final class ActivityManagerService extends ActivityManagerNative
                                                 mDidUpdate = true;
                                             }
                                             writeLastDonePreBootReceivers(doneReceivers);
+                                            showBootMessage(mContext.getText(
+                                                    R.string.android_upgrading_complete),
+                                                    false);
                                             systemReady(goingCallback);
                                         }
                                     });

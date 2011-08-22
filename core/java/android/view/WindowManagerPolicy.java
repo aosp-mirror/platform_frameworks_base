@@ -871,6 +871,16 @@ public interface WindowManagerPolicy {
     public void systemReady();
 
     /**
+     * Show boot time message to the user.
+     */
+    public void showBootMessage(final CharSequence msg, final boolean always);
+
+    /**
+     * Hide the UI for showing boot messages, never to be displayed again.
+     */
+    public void hideBootMessages();
+
+    /**
      * Called when userActivity is signalled in the power manager.
      * This is safe to call from any thread, with any window manager locks held or not.
      */

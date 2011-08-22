@@ -50,6 +50,7 @@ import com.android.server.am.BatteryStatsService;
 import android.Manifest;
 import android.app.ActivityManagerNative;
 import android.app.IActivityManager;
+import android.app.ProgressDialog;
 import android.app.StatusBarManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.BroadcastReceiver;
@@ -410,6 +411,7 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mSafeMode;
     boolean mDisplayEnabled = false;
     boolean mSystemBooted = false;
+    boolean mShowingBootMessages = false;
     int mInitialDisplayWidth = 0;
     int mInitialDisplayHeight = 0;
     int mBaseDisplayWidth = 0;
@@ -4689,16 +4691,17 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
             mSystemBooted = true;
+            hideBootMessagesLocked();
         }
 
         performEnableScreen();
     }
 
-    public void enableScreenIfNeededLocked() {
+    void enableScreenIfNeededLocked() {
         if (mDisplayEnabled) {
             return;
         }
-        if (!mSystemBooted) {
+        if (!mSystemBooted && !mShowingBootMessages) {
             return;
         }
         mH.sendMessage(mH.obtainMessage(H.ENABLE_SCREEN));
@@ -4709,7 +4712,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (mDisplayEnabled) {
                 return;
             }
-            if (!mSystemBooted) {
+            if (!mSystemBooted && !mShowingBootMessages) {
                 return;
             }
 
@@ -4751,6 +4754,33 @@ public class WindowManagerService extends IWindowManager.Stub
         // Make sure the last requested orientation has been applied.
         setRotationUnchecked(WindowManagerPolicy.USE_LAST_ROTATION, false,
                 mLastRotationFlags | Surface.FLAGS_ORIENTATION_ANIMATION_DISABLE);
+    }
+
+    public void showBootMessage(final CharSequence msg, final boolean always) {
+        boolean first = false;
+        synchronized(mWindowMap) {
+            if (!mShowingBootMessages) {
+                if (!always) {
+                    return;
+                }
+                first = true;
+            }
+            if (mSystemBooted) {
+                return;
+            }
+            mShowingBootMessages = true;
+            mPolicy.showBootMessage(msg, always);
+        }
+        if (first) {
+            performEnableScreen();
+        }
+    }
+
+    public void hideBootMessagesLocked() {
+        if (mShowingBootMessages) {
+            mShowingBootMessages = false;
+            mPolicy.hideBootMessages();
+        }
     }
 
     public void setInTouchMode(boolean mode) {
@@ -6142,7 +6172,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return mSafeMode;
     }
 
-    public void systemReady() {
+    public void displayReady() {
         synchronized(mWindowMap) {
             if (mDisplay != null) {
                 throw new IllegalStateException("Display already initialized");
@@ -6171,12 +6201,14 @@ public class WindowManagerService extends IWindowManager.Stub
             mActivityManager.updateConfiguration(null);
         } catch (RemoteException e) {
         }
-
-        mPolicy.systemReady();
-
+        
         synchronized (mWindowMap) {
             readForcedDisplaySizeLocked();
         }
+    }
+
+    public void systemReady() {
+        mPolicy.systemReady();
     }
 
     // This is an animation that does nothing: it just immediately finishes

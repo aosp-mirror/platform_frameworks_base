@@ -127,6 +127,7 @@ public abstract class Window {
     private int mLocalFeatures = DEFAULT_FEATURES;
 
     private boolean mHaveWindowFormat = false;
+    private boolean mHaveDimAmount = false;
     private int mDefaultWindowFormat = PixelFormat.OPAQUE;
 
     private boolean mHasSoftInputMode = false;
@@ -745,6 +746,23 @@ public abstract class Window {
     }
 
     /**
+     * Set the amount of dim behind the window when using
+     * {@link WindowManager.LayoutParams#FLAG_DIM_BEHIND}.  This overrides
+     * the default dim amount of that is selected by the Window based on
+     * its theme.
+     *
+     * @param amount The new dim amount, from 0 for no dim to 1 for full dim.
+     */
+    public void setDimAmount(float amount) {
+        final WindowManager.LayoutParams attrs = getAttributes();
+        attrs.dimAmount = amount;
+        mHaveDimAmount = true;
+        if (mCallback != null) {
+            mCallback.onWindowAttributesChanged(attrs);
+        }
+    }
+
+    /**
      * Specify custom window attributes.  <strong>PLEASE NOTE:</strong> the
      * layout params you give here should generally be from values previously
      * retrieved with {@link #getAttributes()}; you probably do not want to
@@ -1191,6 +1209,11 @@ public abstract class Window {
                 mCallback.onWindowAttributesChanged(attrs);
             }
         }
+    }
+
+    /** @hide */
+    protected boolean haveDimAmount() {
+        return mHaveDimAmount;
     }
 
     public abstract void setChildDrawable(int featureId, Drawable drawable);

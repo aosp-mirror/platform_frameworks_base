@@ -100,6 +100,14 @@ public abstract class SQLiteOpenHelper {
     }
 
     /**
+     * Return the name of the SQLite database being opened, as given tp
+     * the constructor.
+     */
+    public String getDatabaseName() {
+        return mName;
+    }
+
+    /**
      * Create and/or open a database that will be used for reading and writing.
      * The first time this is called, the database will be opened and
      * {@link #onCreate}, {@link #onUpgrade} and/or {@link #onOpen} will be

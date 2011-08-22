@@ -320,7 +320,13 @@ interface IPackageManager {
     boolean isSafeMode();
     void systemReady();
     boolean hasSystemUidErrors();
-    
+
+    /**
+     * Ask the package manager to perform boot-time dex-opt of all
+     * existing packages.
+     */
+    void performBootDexOpt();
+
     /**
      * Ask the package manager to perform dex-opt (if needed) on the given
      * package, if it already hasn't done mode.  Only does this if running
