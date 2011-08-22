@@ -18401,6 +18401,7 @@ package android.service.wallpaper {
 
   public class WallpaperService.Engine {
     ctor public WallpaperService.Engine();
+    method protected void dump(java.lang.String, java.io.FileDescriptor, java.io.PrintWriter, java.lang.String[]);
     method public int getDesiredMinimumHeight();
     method public int getDesiredMinimumWidth();
     method public android.view.SurfaceHolder getSurfaceHolder();
