@@ -493,7 +493,8 @@ MatroskaExtractor::MatroskaExtractor(const sp<DataSource> &source)
     : mDataSource(source),
       mReader(new DataSourceReader(mDataSource)),
       mSegment(NULL),
-      mExtractedThumbnails(false) {
+      mExtractedThumbnails(false),
+      mIsWebm(false) {
     off64_t size;
     mIsLiveStreaming =
         (mDataSource->flags()
@@ -505,6 +506,10 @@ MatroskaExtractor::MatroskaExtractor(const sp<DataSource> &source)
     long long pos;
     if (ebmlHeader.Parse(mReader, pos) < 0) {
         return;
+    }
+
+    if (ebmlHeader.m_docType && !strcmp("webm", ebmlHeader.m_docType)) {
+        mIsWebm = true;
     }
 
     long long ret =
@@ -757,7 +762,10 @@ void MatroskaExtractor::findThumbnails() {
 
 sp<MetaData> MatroskaExtractor::getMetaData() {
     sp<MetaData> meta = new MetaData;
-    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_CONTAINER_MATROSKA);
+
+    meta->setCString(
+            kKeyMIMEType,
+            mIsWebm ? "video/webm" : MEDIA_MIMETYPE_CONTAINER_MATROSKA);
 
     return meta;
 }
