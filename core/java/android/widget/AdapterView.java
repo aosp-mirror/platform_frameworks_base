@@ -23,11 +23,11 @@ import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.SparseArray;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.SoundEffectConstants;
 import android.view.View;
 import android.view.ViewDebug;
 import android.view.ViewGroup;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.view.accessibility.AccessibilityEvent;
 
 
@@ -278,6 +278,7 @@ public abstract class AdapterView<T extends Adapter> extends ViewGroup {
      */
     public boolean performItemClick(View view, int position, long id) {
         view.sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);
+
         if (mOnItemClickListener != null) {
             playSoundEffect(SoundEffectConstants.CLICK);
             mOnItemClickListener.onItemClick(this, view, position, id);
