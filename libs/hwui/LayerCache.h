@@ -19,6 +19,7 @@
 
 #include "Debug.h"
 #include "Layer.h"
+#include "Properties.h"
 #include "utils/SortedList.h"
 
 namespace android {
@@ -27,11 +28,6 @@ namespace uirenderer {
 ///////////////////////////////////////////////////////////////////////////////
 // Defines
 ///////////////////////////////////////////////////////////////////////////////
-
-// Indicates whether to remove the biggest layers first, or the smaller ones
-#define LAYER_REMOVE_BIGGEST 0
-// Textures used by layers must have dimensions multiples of this number
-#define LAYER_SIZE 64
 
 // Debug
 #if DEBUG_LAYERS

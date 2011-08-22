@@ -162,7 +162,7 @@ bool LayerCache::put(Layer* layer) {
         // TODO: Use an LRU
         while (mSize + size > mMaxSize) {
             size_t position = 0;
-#if LAYER_REMOVE_BIGGEST
+#if LAYER_REMOVE_BIGGEST_FIRST
             position = mCache.size() - 1;
 #endif
             Layer* victim = mCache.itemAt(position).mLayer;
