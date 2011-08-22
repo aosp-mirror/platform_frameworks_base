@@ -98,6 +98,7 @@ class SipSessionGroup implements SipListener {
     private static final String THREAD_POOL_SIZE = "1";
     private static final int EXPIRY_TIME = 3600; // in seconds
     private static final int CANCEL_CALL_TIMER = 3; // in seconds
+    private static final int END_CALL_TIMER = 3; // in seconds
     private static final int KEEPALIVE_TIMEOUT = 3; // in seconds
     private static final int INCALL_KEEPALIVE_INTERVAL = 10; // in seconds
     private static final long WAKE_LOCK_HOLDING_TIME = 500; // in milliseconds
@@ -756,6 +757,9 @@ class SipSessionGroup implements SipListener {
                 case SipSession.State.IN_CALL:
                     processed = inCall(evt);
                     break;
+                case SipSession.State.ENDING_CALL:
+                    processed = endingCall(evt);
+                    break;
                 default:
                     processed = false;
                 }
@@ -1230,8 +1234,10 @@ class SipSessionGroup implements SipListener {
             // OK retransmission is handled in SipStack
             if (END_CALL == evt) {
                 // rfc3261#section-15.1.1
+                mState = SipSession.State.ENDING_CALL;
                 mSipHelper.sendBye(mDialog);
-                endCallNormally();
+                mProxy.onCallEnded(this);
+                startSessionTimer(END_CALL_TIMER);
                 return true;
             } else if (isRequestEvent(Request.INVITE, evt)) {
                 // got Re-INVITE
@@ -1256,6 +1262,28 @@ class SipSessionGroup implements SipListener {
                 return true;
             } else if (evt instanceof ResponseEvent) {
                 if (expectResponse(Request.NOTIFY, evt)) return true;
+            }
+            return false;
+        }
+
+        private boolean endingCall(EventObject evt) throws SipException {
+            if (expectResponse(Request.BYE, evt)) {
+                ResponseEvent event = (ResponseEvent) evt;
+                Response response = event.getResponse();
+
+                int statusCode = response.getStatusCode();
+                switch (statusCode) {
+                    case Response.UNAUTHORIZED:
+                    case Response.PROXY_AUTHENTICATION_REQUIRED:
+                        if (handleAuthentication(event)) {
+                            return true;
+                        } else {
+                            // can't authenticate; pass through to end session
+                        }
+                }
+                cancelSessionTimer();
+                reset();
+                return true;
             }
             return false;
         }
