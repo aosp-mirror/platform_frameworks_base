@@ -60,4 +60,7 @@
 
     <!-- gap on either side of status bar notification icons -->
     <dimen name="status_bar_icon_padding">0dp</dimen>
+
+    <!-- thickness (height) of dividers between each notification row -->
+    <dimen name="notification_divider_height">1dp</dimen>
 </resources>

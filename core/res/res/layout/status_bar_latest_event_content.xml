@@ -6,7 +6,7 @@
     <ImageView android:id="@+id/icon"
         android:layout_width="@dimen/notification_large_icon_width"
         android:layout_height="@dimen/notification_large_icon_height"
-        android:background="@drawable/notify_panel_notification_icon_bg"
+        android:background="@android:drawable/notify_panel_notification_icon_bg_tile"
         android:scaleType="center"
         />
     <include layout="@layout/status_bar_latest_event_content_large_icon" 

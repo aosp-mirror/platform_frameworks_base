@@ -17,5 +17,5 @@
 <bitmap
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:tileMode="repeat"
-    android:src="@*android:drawable/notify_panel_notification_icon_bg"
+    android:src="@android:drawable/notify_panel_notification_icon_bg"
     />

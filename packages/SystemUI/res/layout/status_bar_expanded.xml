@@ -28,14 +28,15 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="55dp"
+        android:layout_height="52dp"
         android:paddingTop="3dp"
         android:paddingBottom="5dp"
         android:paddingRight="3dp"
         >
         <com.android.systemui.statusbar.policy.DateView android:id="@+id/date"
             android:textAppearance="@android:style/TextAppearance.StatusBar.EventContent.Title"
-            android:textColor="@android:color/holo_blue_bright"
+            android:textColor="@android:color/holo_blue_light"
+            android:textStyle="normal"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
@@ -77,7 +78,7 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="3dp"
+        android:layout_height="2dp"
         android:background="@drawable/status_bar_hr"
         />
 
@@ -92,7 +93,7 @@
             android:textAppearance="@android:style/TextAppearance.Large"
             android:padding="8dp"
             android:layout_gravity="top"
-            android:gravity="center"
+            android:gravity="left"
             android:text="@string/status_bar_no_notifications_title"
             />
 
