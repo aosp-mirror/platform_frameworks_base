@@ -40,7 +40,6 @@
             android:layout_height="match_parent"
             android:paddingLeft="8dip"
             android:paddingRight="8dip"
-            android:background="@android:drawable/keyboard_accessory_bg_landscape"
         >
         
         <android.inputmethodservice.ExtractButton android:id="@+id/inputExtractAction"
