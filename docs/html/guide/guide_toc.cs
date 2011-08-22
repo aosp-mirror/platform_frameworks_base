@@ -268,9 +268,26 @@
 	        </ul>
   	  </li>
 
-      <li><a href="<?cs var:toroot ?>guide/topics/media/index.html">
-            <span class="en">Media</span>
-          </a></li>
+      <li class="toggle-list">
+          <div><a href="<?cs var:toroot ?>guide/topics/media/index.html">
+            <span class="en">Multimedia and Camera</span>
+          </a><span class="new">updated</span></div>
+          <ul>
+            <li><a href="<?cs var:toroot ?>guide/topics/media/mediaplayer.html">
+                  <span class="en">Media Playback</span></a>
+                </li>
+            <li><a href="<?cs var:toroot ?>guide/topics/media/jetplayer.html">
+                  <span class="en">JetPlayer</span></a>
+                </li>
+            <li><a href="<?cs var:toroot ?>guide/topics/media/camera.html">
+                  <span class="en">Camera</span></a>
+                  <span class="new">new!</span>
+                </li>
+            <li><a href="<?cs var:toroot ?>guide/topics/media/audio-capture.html">
+                  <span class="en">Audio Capture</span></a>
+                </li>
+          </ul>
+      </li>
       <li>
         <a href="<?cs var:toroot ?>guide/topics/clipboard/copy-paste.html">
             <span class="en">Copy and Paste</span>

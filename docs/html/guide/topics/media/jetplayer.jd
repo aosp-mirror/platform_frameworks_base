@@ -1,0 +1,70 @@
+page.title=JetPlayer
+parent.title=Multimedia and Camera 
+parent.link=index.html
+@jd:body
+
+    <div id="qv-wrapper">
+    <div id="qv">
+
+<h2>In this document</h2>
+<ol>
+<li><a href="#jetcontent">Playing JET content</a>
+</ol>
+
+<h2>Key classes</h2>
+<ol>
+<li>{@link android.media.JetPlayer}</li>
+</ol>
+
+<h2>Related Samples</h2>
+<ol>
+<li><a href="{@docRoot}resources/samples/JetBoy/index.html">JetBoy</a></li>
+</ol>
+
+<h2>See also</h2>
+<ol>
+<li><a href="{@docRoot}guide/topics/media/jet/jetcreator_manual.html">JetCreator User
+Manual</a></li>
+<li><a href="{@docRoot}guide/appendix/media-formats.html">Android Supported Media Formats</a></li>
+<li><a href="{@docRoot}guide/topics/data/data-storage.html">Data Storage</a></li>
+<li><a href="{@docRoot}guide/topics/media/mediaplayer.html">MediaPlayer</a></li>
+</ol>
+
+</div>
+</div>
+
+<p>The Android platform includes a JET engine that lets you add interactive playback of JET audio
+content in your applications. You can create JET content for interactive playback using the
+JetCreator authoring application that ships with the SDK. To play and manage JET content from your
+application, use the {@link android.media.JetPlayer JetPlayer} class.</p>
+
+
+<h2 id="jetcontent">Playing JET content</h2>
+
+<p>This section shows you how to write, set up and play JET content. For a description of JET
+concepts and instructions on how to use the JetCreator authoring tool, see the <a
+href="{@docRoot}guide/topics/media/jet/jetcreator_manual.html">JetCreator User
+Manual</a>. The tool is available on Windows, OS X, and Linux platforms (Linux does not
+support auditioning of imported assets like with the Windows and OS X versions).
+</p>
+
+<p>Here's an example of how to set up JET playback from a <code>.jet</code> file stored on the SD
+card:</p>
+
+<pre>
+JetPlayer jetPlayer = JetPlayer.getJetPlayer();
+jetPlayer.loadJetFile("/sdcard/level1.jet");
+byte segmentId = 0;
+
+// queue segment 5, repeat once, use General MIDI, transpose by -1 octave
+jetPlayer.queueJetSegment(5, -1, 1, -1, 0, segmentId++);
+// queue segment 2
+jetPlayer.queueJetSegment(2, -1, 0, 0, 0, segmentId++);
+
+jetPlayer.play();
+</pre>
+
+<a>The SDK includes an example application &mdash; JetBoy &mdash; that shows how to use {@link
+android.media.JetPlayer JetPlayer} to create an interactive music soundtrack in your game. It also
+illustrates how to use JET events to synchronize music and game logic. The application is located at
+<a href="{@docRoot}resources/samples/JetBoy/index.html">JetBoy</a>.</p>
