@@ -60,13 +60,13 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Kompatibilitätszoom"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Wenn eine App für einen kleineren Bildschirm ausgelegt ist, wird ein Zoom-Steuerelement neben der Uhr angezeigt."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Screenshot in Galerie gespeichert"</string>
-    <!-- outdated translation 655180965533683356 -->     <string name="screenshot_failed_toast" msgid="1990979819772906912">"Screenshot konnte nicht gespeichert werden."</string>
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"Screenshot konnte nicht gespeichert werden. Möglicherweise wird der externe Speicher gerade verwendet."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-Dateiübertragungsoptionen"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Als Medienplayer (MTP) bereitstellen"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Als Kamera (PTP) bereitstellen"</string>
     <string name="installer_cd_button_title" msgid="8485631662288445893">"App \"Android File Transfer\" für Mac installieren"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Zurück"</string>
-    <string name="accessibility_home" msgid="8217216074895377641">"Startseite"</string>
+    <string name="accessibility_home" msgid="8217216074895377641">"Startbildschirm"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menü"</string>
     <string name="accessibility_recent" msgid="3027675523629738534">"Zuletzt verwendete Anwendungen"</string>
     <string name="accessibility_ime_switch_button" msgid="5032926134740456424">"Schaltfläche zum Ändern der Eingabemethode"</string>
@@ -74,7 +74,7 @@
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Zoom auf einen größeren Bildschirm"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Mit Bluetooth verbunden"</string>
     <string name="accessibility_bluetooth_disconnected" msgid="7416648669976870175">"Bluetooth-Verbindung getrennt"</string>
-    <string name="accessibility_no_battery" msgid="358343022352820946">"Kein Akku"</string>
+    <string name="accessibility_no_battery" msgid="358343022352820946">"Akku leer"</string>
     <string name="accessibility_battery_one_bar" msgid="7774887721891057523">"Akku - ein Balken"</string>
     <string name="accessibility_battery_two_bars" msgid="8500650438735009973">"Akku - zwei Balken"</string>
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Akku - drei Balken"</string>
@@ -96,7 +96,7 @@
     <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Volle WLAN-Signalstärke"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3,5G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
@@ -119,12 +119,8 @@
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Daten deaktiviert"</string>
     <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Das für die Datennutzung festgelegte Limit wurde erreicht."\n\n"Eine weitere Datennutzung kann mit zusätzlichen Kosten vonseiten des Mobilfunkanbieters verbunden sein."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Daten erneut aktivieren"</string>
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Keine Internetverbindung"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"WLAN verbunden"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS wird gesucht"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Standort durch GPS festgelegt"</string>
 </resources>

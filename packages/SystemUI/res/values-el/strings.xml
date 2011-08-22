@@ -115,10 +115,10 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Το TeleTypewriter ενεργοποιήθηκε."</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Δόνηση ειδοποίησης ήχου"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Ήχος ειδοποίησης: Αθόρυβο."</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Τα δεδομένα 2G-3G απενεργοποιήθηκαν"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Απενεργοποιήθηκαν τα δεδομένα 2G-3G"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Τα δεδομένα 4G απενεργοποιήθηκαν"</string>
-    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Τα δεδομένα κινητής τηλεφωνίας απενεργοποιήθηκαν"</string>
-    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Τα δεδομένα απενεργοποιήθηκαν"</string>
+    <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Απενεργοποιήθηκαν τα δεδομένα κινητής τηλεφωνίας"</string>
+    <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Απενεργοποιήθηκαν τα δεδομένα"</string>
     <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Το καθορισμένο όριο χρήσης δεδομένων συμπληρώθηκε."\n\n"Πρόσθετη χρήση δεδομένων ενδέχεται να επιφέρει χρεώσεις από την εταιρεία κινητής τηλεφωνίας."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Εκ νέου ενεργοποίηση δεδομ."</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Χωρ. σύνδ. στο Διαδ."</string>

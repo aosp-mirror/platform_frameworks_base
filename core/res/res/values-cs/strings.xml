@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"Ověření nebylo úspěšné."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Ověření pomocí serveru proxy bylo neúspěšné."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Připojení k serveru bylo neúspěšné."</string>
-    <string name="httpErrorIO" msgid="5047872902739125260">"Komunikace se serverem se nezdařila. Opakujte akci později."</string>
+    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"Komunikace se serverem se nezdařila. Opakujte akci později."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Spojení se serverem vypršelo."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Stránka obsahuje příliš mnoho přesměrování serveru."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Protokol není podporován."</string>
@@ -327,19 +327,15 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"zápis dat kontaktů"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v tabletu. Škodlivé aplikace toto oprávnění mohou zneužít a vymazat či pozměnit kontaktní údaje."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Umožňuje aplikaci změnit kontaktní údaje (adresu) uložené v telefonu. Škodlivé aplikace mohou pomocí tohoto nastavení vymazat či pozměnit kontaktní údaje."</string>
-    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
-    <skip />
-    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"Čtení událostí v kalendáři"</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Umožňuje aplikaci číst všechny události kalendáře uložené v tabletu. Škodlivé aplikace toho mohou zneužít a odeslat události z vašeho kalendáře jiným lidem."</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Umožňuje aplikaci číst všechny události kalendáře uložené v tabletu. Škodlivé aplikace toho mohou zneužít a odeslat události z vašeho kalendáře jiným lidem."</string>
-    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"Přidávání nebo úprava událostí v kalendáři a odesílání e-mailů hostům"</string>
-    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Umožňuje aplikaci přidávat nebo měnit události v kalendáři, které budou odesílat e-maily hostům. Škodlivé aplikace mohou pomocí tohoto oprávnění mazat nebo upravovat události v kalendáři a odesílat e-maily hostům."</string>
+    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"číst údaje o profilu"</string>
+    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Umožňuje aplikaci číst veškeré soukromé údaje profilu. Škodlivé aplikace vás mohou pomocí tohoto nastavení identifikovat a posílat osobní informace dalším lidem."</string>
+    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"zapisovat údaje o profilu"</string>
+    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Umožňuje aplikaci upravovat osobní údaje v profilu. Škodlivé aplikace mohou pomocí tohoto nastavení mazat nebo upravovat údaje v profilu."</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"číst události kalendáře a důvěrné informace"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Povolí aplikaci číst všechny události kalendáře uložené ve vašem tabletu, včetně událostí vašich přátel a spolupracovníků. Škodlivá aplikace s tímto oprávněním může z těchto kalendářů extrahovat osobní údaje, aniž by o tom vlastník věděl."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Povolí aplikaci číst všechny události kalendáře uložené ve vašem telefonu, včetně událostí vašich přátel a spolupracovníků. Škodlivá aplikace s tímto oprávněním může z těchto kalendářů extrahovat osobní údaje, aniž by o tom vlastník věděl."</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"přidávat a upravovat události kalendáře a odesílat e-maily bez vědomí vlastníka"</string>
+    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Povolí aplikaci odesílat pozvánky na události jménem vlastníka kalendáře a přidávat, odebírat a měnit události, které můžete ve svém zařízení upravovat, včetně událostí přátel a spolupracovníků. Škodlivá aplikace s tímto oprávněním může odesílat spamové e-maily, které vypadají, jako kdyby je odeslal vlastník kalendáře, upravovat události bez vědomí vlastníka a přidávat do kalendáře falešné události."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"simulace zdrojů polohy pro účely testování"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Vytváří simulované zdroje polohy pro účely testování. Škodlivé aplikace mohou pomocí tohoto nastavení změnit polohu či stav vrácený zdroji skutečné polohy, jako je např. jednotka GPS či poskytovatelé sítě."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"přístup k dalším příkazům poskytovatele polohy"</string>
@@ -734,6 +730,14 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Umožňuje aplikaci přidávat zprávy do hlasové schránky."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Změnit oprávnění prohlížeče poskytovat informace o zeměpisné poloze"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Umožňuje aplikaci změnit oprávnění prohlížeče poskytovat informace o zeměpisné poloze. Škodlivé aplikace mohou toto nastavení použít k odesílání informací o umístění na libovolné webové stránky."</string>
+    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
+    <skip />
+    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
+    <skip />
+    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Chcete, aby si prohlížeč zapamatoval toto heslo?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Nyní ne"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Zapamatovat"</string>
@@ -746,6 +750,16 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"smazat"</string>
     <string name="search_go" msgid="8298016669822141719">"Hledat"</string>
+    <!-- no translation found for searchview_description_search (6749826639098512120) -->
+    <skip />
+    <!-- no translation found for searchview_description_query (5911778593125355124) -->
+    <skip />
+    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
+    <skip />
+    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
+    <skip />
+    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"před 1 měsícem"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Déle než před 1 měsícem"</string>
   <plurals name="num_seconds_ago">
@@ -871,20 +885,16 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Zvolte aplikaci pro zařízení USB"</string>
     <string name="noApplications" msgid="1691104391758345586">"Tuto činnost nemohou provádět žádné aplikace."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <!-- no translation found for aerr_application (932628488013092776) -->
     <skip />
-    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <!-- no translation found for aerr_process (4507058997035697579) -->
     <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8339738283149696827) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (7018289416670457797) -->
-    <skip />
-    <!-- no translation found for anr_application_process (7208175830253210526) -->
-    <skip />
-    <!-- no translation found for anr_process (306819947562555821) -->
-    <skip />
-    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"Ukončit aplikaci"</string>
+    <string name="anr_activity_application" msgid="8339738283149696827">"Aplikace <xliff:g id="APPLICATION">%2$s</xliff:g> nereaguje."\n\n"Chcete ji ukončit?"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"Aktivita <xliff:g id="ACTIVITY">%1$s</xliff:g> nereaguje."\n\n"Chcete ji ukončit?"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"Aplikace <xliff:g id="APPLICATION">%1$s</xliff:g> nereaguje. Chcete ji ukončit?"</string>
+    <string name="anr_process" msgid="306819947562555821">"Proces <xliff:g id="PROCESS">%1$s</xliff:g> nereaguje."\n\n"Chcete jej ukončit?"</string>
+    <string name="force_close" msgid="8346072094521265605">"OK"</string>
     <string name="report" msgid="4060218260984795706">"Nahlásit"</string>
     <string name="wait" msgid="7147118217226317732">"Počkat"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Aplikace přesměrována"</string>
@@ -913,16 +923,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Hlasitost budíku"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Hlasitost oznámení"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Hlasitost"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
-    <skip />
+    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Hlasitost zařízení Bluetooth. Klepnutím zapnete tichý režim."</string>
+    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Hlasitost vyzvánění. Klepnutím zapnete tichý režim."</string>
+    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Hlasitost volání. Klepnutím zapnete tichý režim."</string>
+    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"Hlasitost médií. Klepnutím zapnete tichý režim."</string>
+    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Hlasitost upozornění. Klepnutím zapnete tichý režim."</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Výchozí vyzváněcí tón"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Výchozí vyzváněcí tón (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Ticho"</string>
@@ -940,7 +945,7 @@
     <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"má pomalé připojení k internetu."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Přímé připojení sítě Wi-Fi"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Spustit provoz přímého připojení sítě Wi-Fi. Tato možnost vypne provoz sítě Wi-Fi v režimu klient/hotspot."</string>
-    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Přímé připojení sítě Wi-Fi se nepodařilo spustit"</string>
+    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Přímé připojení sítě Wi-Fi se nepodařilo spustit"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Žádost o nastavení přímého připojení sítě Wi-Fi z adresy <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Chcete-li žádost přijmout, klikněte na tlačítko OK."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Žádost o nastavení přímého připojení sítě Wi-Fi z adresy <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Pokračujte zadáním kódu PIN."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Chcete-li pokračovat v nastavení připojení, je potřeba zadat kód PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> ve sdíleném zařízení <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g>"</string>
@@ -981,7 +986,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Při vypínání úložiště USB došlo k problémům. Zkontrolujte, zda byl hostitel USB odpojen, a zkuste to znovu."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Zapnout úložiště USB"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Pokud zapnete úložiště USB, dojde k zastavení některých používaných aplikací. Tyto aplikace pravděpodobně nebudou k dispozici až do vypnutí úložiště USB."</string>
-    <string name="dlg_error_title" msgid="8048999973837339174">"Chyba operace na rozhraní USB"</string>
+    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"Chyba operace na rozhraní USB"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"OK"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Připojeno jako mediální zařízení"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Připojeno jako fotoaparát"</string>
@@ -1081,8 +1086,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"Odpojování karty SD..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Mazání úložiště USB..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Mazání karty SD..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Smazání úložiště USB se nezdařilo."</string>
-    <string name="format_error" product="default" msgid="1343380371925238343">"Smazání karty SD se nezdařilo."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Smazání úložiště USB se nezdařilo."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"Smazání úložiště USB se nezdařilo."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"Karta SD nebyla před odebráním odpojena."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Probíhá kontrola úložiště USB."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Probíhá kontrola karty SD."</string>
@@ -1126,11 +1131,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"Datové přenosy 2G a 3G zakázány"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"Datové přenosy 4G jsou zakázány"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Mobilní data jsou zakázána"</string>
-    <string name="data_usage_limit_body" msgid="2182247539226163759">"klepnutím povolíte"</string>
+    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"klepnutím povolíte"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Překročili jste limit dat 2G–3G."</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Překročili jste limit dat 4G."</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Překročili jste limit mob. dat."</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> nad stanoveným limitem"</string>
+    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
+    <skip />
+    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Certifikát zabezpečení"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Tento certifikát je platný."</string>
     <string name="issued_to" msgid="454239480274921032">"Vydáno pro:"</string>
@@ -1147,6 +1156,8 @@
     <string name="sha1_fingerprint" msgid="7930330235269404581">"Digitální otisk SHA-1:"</string>
     <string name="activity_chooser_view_see_all" msgid="180268188117163072">"Zobrazit vše..."</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Vybrat činnost"</string>
-    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Sdílet..."</string>
+    <string name="share_action_provider_share_with" msgid="1791316789651185229">"Sdílet s..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Zařízení je uzamčeno."</string>
+    <!-- no translation found for list_delimeter (3975117572185494152) -->
+    <skip />
 </resources>

@@ -166,7 +166,7 @@
     <skip />
     <!-- no translation found for httpErrorConnect (7623096283505770433) -->
     <skip />
-    <!-- no translation found for httpErrorIO (5047872902739125260) -->
+    <!-- no translation found for httpErrorIO (4270874999047767599) -->
     <skip />
     <!-- no translation found for httpErrorTimeout (4743403703762883954) -->
     <skip />
@@ -480,11 +480,11 @@
     <skip />
     <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
     <skip />
-    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"የቀን መቁጠሪያ ክስተቶችን አንበብ"</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"ትግበራ በጡባዊዎ ላይ የተከማቹትንሁሉ ንም የቀን መቁጠሪያ ክስተቶች  ለማንበብ ይፈቅዳል። ተንኮል አዘል ትግበራዎች የቀን መቁጠሪያዎን ለሌላ ሰው ለመላክ ይህን መጠቀም ይችላሉ።"</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"ትግበራ በጡባዊዎ ላይ የተከማቹትንሁሉ ንም የቀን መቁጠሪያ ክስተቶች  ለማንበብ ይፈቅዳል። ተንኮል አዘል ትግበራዎች የቀን መቁጠሪያዎን ለሌላ ሰው ለመላክ ይህን መጠቀም ይችላሉ።"</string>
-    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"አክል ወይም የቀን መቁጠሪያ ክስተቶችን ቀይር እና ለ እንግዶች ኢሜይል ላክ"</string>
-    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"ትግበራ በቀን መቁጠሪያዎ ላይ ያለን ክስተት፣ ለተጋባዦች ኢሜይል ሊልክ ይችላል፣ ለማከል እና ለመለወጥ ይፈቅዳል። ተንኮል አዘል ትግበራዎች ይህን በመጠቀም የካላንደርዎን ክስተቶች ለማጥፋት ወይም ለመቀየር ይጠቀማሉ ወይም ለተጋባዦች ኢመይል ይልካሉ።"</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"የቀን መቁጠሪያ ክስተቶች ተጨማሪ ሚስጥራዊ መረጃ አንብብ"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"ትግበራ በጡባዊዎ ላይ የተከማቸውን የቀን መቁጠሪያ ክስተቶች በሙሉ አብረው የሚሰሩትንም ሆነ የጓደኞችዎን ጨምሮ ለማንበብ ይፈቅዳል። ይህን ፈቃድ የያዘ ተንኮል አዘል ትግበራ ከባለቤቱ ዕውቅና ውጪ ከቀን አቆጣጠር ላይ የግል መረጃ ማውጣት ይችላል።\'"</string>
+    <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"ትግበራ በስልክዎ ላይ የተከማቸውን የቀን መቁጠሪያ ክስተቶች በሙሉ አብረው የሚሰሩትንም ሆነ የጓደኞችዎን ጨምሮ ለማንበብ ይፈቅዳል። ይህን ፈቃድ የያዘ ተንኮል አዘል ትግበራ ከባለቤቱ ዕውቅና ውጪ ከቀን አቆጣጠር ላይ የግል መረጃ ማውጣት ይችላል።\'"</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"የቀን መቁጠሪያ ክስተቶችን ቀይር ወይም አክል እና ለእንግዶች ከባለቤቱ ዕውቅና ውጪ ላክ።"</string>
+    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"ትግበራ እንደ ቀን መቁጠሪያ ባለቤት የክስተት ግብዣዎችን  እና በመሣሪያዎ ላይ መቀየር የሚችሉት ለማከል፣ ለማስወገድ፣ ክስተቶችን ለመለወጥ፣አብረው የሚሰሩትንም ሆነ ጓደኞችዎን ጨምሮ ለመላክ ይፈቅዳል። ይህን ፈቃድ የያዘ ተንኮል አዘል ትግበራ ከቀን መቁጠሪያ ባለቤት እንደመጡ በማስመሰል የማይፈለጉ ኢሜይሎችን ፣ ከባለቤቱ ዕውቅና ውጪ ክስተቶችን ሊቀይር ወይም አሳሳች ክስተቶችን በማከል ሊልክ ይችላል።"</string>
     <!-- no translation found for permlab_accessMockLocation (8688334974036823330) -->
     <skip />
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"ለሙከራ አስቂኝ ሥፍራፍጠር። ተንኮል አዘል ትግበራዎች ሥፍራውን ለማገድ እና/ወይም በGPS  ወይም የአውታረ መረብ አቅራቢዎች የእውነተኛውን ሥፍራ ሁኔታ ይዘው ከተመለሱ መጠቀም ይችላሉ።"</string>
@@ -971,6 +971,14 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"ትግበራ ወደ ድምፅ መልዕክት የገቢ መልዕክትዎ መልዕክቶች ለማከል ይፈቅዳል።"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"የአሳሽ ገፀ ሥፍራ ፍቃዶችን ቀይር"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"ትግበራ የአሳሹን ገፀ ሥፍራ ፈቃዶች ለመቀየር ይፈቅዳል። ተንኮል አዘል ትግበራዎች ይህን በመጠቀም የሥፍራ መረጃን ወደ ድረ ገፆች ለመላክ ይችላሉ።"</string>
+    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
+    <skip />
+    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
+    <skip />
+    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
+    <skip />
     <!-- no translation found for save_password_message (767344687139195790) -->
     <skip />
     <!-- no translation found for save_password_notnow (6389675316706699758) -->
@@ -994,6 +1002,16 @@
     <!-- no translation found for menu_delete_shortcut_label (3658178007202748164) -->
     <skip />
     <!-- no translation found for search_go (8298016669822141719) -->
+    <skip />
+    <!-- no translation found for searchview_description_search (6749826639098512120) -->
+    <skip />
+    <!-- no translation found for searchview_description_query (5911778593125355124) -->
+    <skip />
+    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
+    <skip />
+    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
+    <skip />
+    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
     <skip />
     <!-- no translation found for oneMonthDurationPast (7396384508953779925) -->
     <skip />
@@ -1154,21 +1172,16 @@
     <!-- no translation found for noApplications (1691104391758345586) -->
     <skip />
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <!-- no translation found for aerr_application (932628488013092776) -->
     <skip />
-    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <!-- no translation found for aerr_process (4507058997035697579) -->
     <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8339738283149696827) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (7018289416670457797) -->
-    <skip />
-    <!-- no translation found for anr_application_process (7208175830253210526) -->
-    <skip />
-    <!-- no translation found for anr_process (306819947562555821) -->
-    <skip />
-    <!-- no translation found for force_close (8346072094521265605) -->
-    <skip />
+    <string name="anr_activity_application" msgid="8339738283149696827">"<xliff:g id="APPLICATION">%2$s</xliff:g> ምላሽ እየሰጠ አይደለም። "\n\n"መዝጋት ይፈልጋሉ?"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"<xliff:g id="ACTIVITY">%1$s</xliff:g> እንቅስቃሴ ምላሽ እየሰጠ አይደለም።"\n\n" መዝጋት ይፈልጋሉ?"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"<xliff:g id="APPLICATION">%1$s</xliff:g> ምላሽ እየሰጠ አይደለም። መዝጋት ይፈልጋሉ?"</string>
+    <string name="anr_process" msgid="306819947562555821">" <xliff:g id="PROCESS">%1$s</xliff:g> ሂደት ምላሽ እየሰጠ አይደለም።"\n\n" መዝጋት ይፈልጋሉ?"</string>
+    <string name="force_close" msgid="8346072094521265605">"ይሁን"</string>
     <string name="report" msgid="4060218260984795706">"ሪፖርት"</string>
     <!-- no translation found for wait (7147118217226317732) -->
     <skip />
@@ -1206,16 +1219,11 @@
     <string name="volume_notification" msgid="2422265656744276715">"ማሳወቂያ ክፍልፍል"</string>
     <!-- no translation found for volume_unknown (1400219669770445902) -->
     <skip />
-    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
-    <skip />
+    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"የብሉቱዝ ድምፅ። ወደ ፀጥታ ሁነታ ለመቀየር ሁለቴ ንካ።"</string>
+    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"የስልክ ጥሪ ድምፅ፡ ወደ ፀጥታ ሁነታ ለመቀየር ሁለቴ ንካ።"</string>
+    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"የጥሪ ድምፅ. ወደ ፀጥታ ሁነታ ለመቀየር ሁለቴ ንካ።"</string>
+    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"የማህደረ መረጃ ድምፅ። ወደ ፀጥታ ሁነታ ለመቀየር ሁለቴ ንካ።"</string>
+    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"የማሳወቂያ ድምፅ። ወደ ፀጥታ ሁነታ ለመቀየር ሁለቴ ንካ።"</string>
     <!-- no translation found for ringtone_default (3789758980357696936) -->
     <skip />
     <!-- no translation found for ringtone_default_with_actual (8129563480895990372) -->
@@ -1239,7 +1247,7 @@
     <skip />
     <!-- no translation found for wifi_p2p_turnon_message (2804722042556269129) -->
     <skip />
-    <!-- no translation found for wifi_p2p_failed_message (6467545523417622335) -->
+    <!-- no translation found for wifi_p2p_failed_message (1820097493844848281) -->
     <skip />
     <!-- no translation found for wifi_p2p_pbc_go_negotiation_request_message (3170321684621420428) -->
     <skip />
@@ -1300,7 +1308,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"የ USB ማከማቻ ለማጥፋት ችግር ነበር። የ USB ጥገኛውን መንቀልዎን ለማረጋገጥ ይመልከቱ፣ ከዛም እንደገና ይሞክሩ።"</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"የUSB ማከማቻ አብራ"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"የUSB ማከማቻዎን ካበሩ፣ እየተጠቀሙባቸው ያሉ አንዳንድ ትግበራዎች ይቆማሉ እና የUSB ማከማቻ እስኪያጠፉ ድረስ ላይገኝ ይችላል።"</string>
-    <string name="dlg_error_title" msgid="8048999973837339174">"USB ክንውን አልተሳካም"</string>
+    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"USB ክንውን አልተሳካም"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"እሺ"</string>
     <!-- no translation found for usb_mtp_notification_title (3699913097391550394) -->
     <skip />
@@ -1410,8 +1418,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"የSD ካርድ በመ ንቀልላይ...."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"USB ማከማቻ በማጥፋት ላይ..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"SD ካርድ በማጥፋት ላይ..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"USB ማከማቻ ለማጥፋት ተስኗል።"</string>
-    <string name="format_error" product="default" msgid="1343380371925238343">"SD ካርድ ለማጥፋት ተስኗል"</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"USB ማከማቻ ለማጥፋት ተስኗል።"</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"USB ማከማቻ ለማጥፋት ተስኗል።"</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"ከመነቀሉ በፊት SD ካርድ ተወግዶ ነበር።"</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"USB ማከማቻ በአሁኑ ጊዜ ታይቷል።"</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"SD ካርድ በአሁኑ ጊዜ ታይቷል።"</string>
@@ -1470,12 +1478,16 @@
     <skip />
     <!-- no translation found for data_usage_mobile_limit_title (7869402519391631884) -->
     <skip />
-    <!-- no translation found for data_usage_limit_body (2182247539226163759) -->
+    <!-- no translation found for data_usage_limit_body (4313857592916426843) -->
     <skip />
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"2G-3G የውሂብ ወሰን አልፏል"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"4G ውሂብ ወሰን አልፏል"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"የተንቀሳቃሽ ውሂብ ወሰን አልፏል"</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> ከተወሰነለት በላይ"</string>
+    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
+    <skip />
+    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
+    <skip />
     <!-- no translation found for ssl_certificate (6510040486049237639) -->
     <skip />
     <!-- no translation found for ssl_certificate_is_valid (6825263250774569373) -->
@@ -1511,5 +1523,7 @@
     <!-- no translation found for share_action_provider_share_with (1791316789651185229) -->
     <skip />
     <!-- no translation found for status_bar_device_locked (3092703448690669768) -->
+    <skip />
+    <!-- no translation found for list_delimeter (3975117572185494152) -->
     <skip />
 </resources>

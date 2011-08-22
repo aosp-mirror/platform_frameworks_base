@@ -115,12 +115,12 @@
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"电传打字机已启用。"</string>
     <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"振铃器振动。"</string>
     <string name="accessibility_ringer_silent" msgid="9061243307939135383">"振铃器静音。"</string>
-    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"超出 2G-3G 数据量限制，已停用"</string>
-    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"超出 4G 数据量限制，已停用"</string>
+    <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"2G-3G 数据网络已停用"</string>
+    <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"4G 数据网络已停用"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"移动数据已停用"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"数据已停用"</string>
-    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"已达到指定的数据使用量上限。"\n\n"如果使用额外的数据，运营商可能会收取相应的费用。"</string>
-    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"重新启用数据连接"</string>
+    <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"已达到指定的数据流量上限。"\n\n"如果使用额外的数据流量，运营商可能会收取相应的费用。"</string>
+    <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"重新启用数据网络"</string>
     <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"未连接互联网"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi 已连接"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"正在搜索 GPS"</string>

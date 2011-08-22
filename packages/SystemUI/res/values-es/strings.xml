@@ -60,7 +60,7 @@
     <string name="compat_mode_help_header" msgid="7020175705401506719">"Zoom de compatibilidad"</string>
     <string name="compat_mode_help_body" msgid="4946726776359270040">"Si la aplicación se ha diseñado para una pantalla más pequeña, aparecerá un control de zoom junto al reloj."</string>
     <string name="screenshot_saving_toast" msgid="8592630119048713208">"Captura de pantalla guardada en la galería"</string>
-    <!-- outdated translation 655180965533683356 -->     <string name="screenshot_failed_toast" msgid="1990979819772906912">"No se ha podido guardar la captura de pantalla."</string>
+    <string name="screenshot_failed_toast" msgid="1990979819772906912">"No se ha podido guardar la captura de pantalla. Es posible que el almacenamiento externo esté en uso."</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opciones de transferencia de archivos por USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Activar como reproductor de medios (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Activar como cámara (PTP)"</string>
@@ -80,23 +80,23 @@
     <string name="accessibility_battery_three_bars" msgid="2302983330865040446">"Tres barras de batería"</string>
     <string name="accessibility_battery_full" msgid="8909122401720158582">"Batería completa"</string>
     <string name="accessibility_no_phone" msgid="4894708937052611281">"Sin teléfono"</string>
-    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Una barra de teléfono"</string>
-    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Dos barras de teléfono"</string>
-    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Tres barras de teléfono"</string>
-    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Señal de teléfono completa"</string>
+    <string name="accessibility_phone_one_bar" msgid="687699278132664115">"Una barra de cobertura"</string>
+    <string name="accessibility_phone_two_bars" msgid="8384905382804815201">"Dos barras de cobertura"</string>
+    <string name="accessibility_phone_three_bars" msgid="8521904843919971885">"Tres barras de cobertura"</string>
+    <string name="accessibility_phone_signal_full" msgid="6471834868580757898">"Cobertura al máximo"</string>
     <string name="accessibility_no_data" msgid="4791966295096867555">"Sin datos"</string>
     <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Una barra de datos"</string>
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Dos barras de datos"</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Tres barras de datos"</string>
-    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Señal de datos completa"</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Señal de datos al máximo"</string>
     <string name="accessibility_no_wifi" msgid="4017628918351949575">"Sin redes Wi-Fi"</string>
     <string name="accessibility_wifi_one_bar" msgid="1914343229091303434">"Una barra de Wi-Fi"</string>
     <string name="accessibility_wifi_two_bars" msgid="7869150535859760698">"Dos barras de Wi-Fi"</string>
     <string name="accessibility_wifi_three_bars" msgid="2665319332961356254">"Tres barras de Wi-Fi"</string>
-    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Señal de Wi-Fi completa"</string>
+    <string name="accessibility_wifi_signal_full" msgid="1275764416228473932">"Señal de Wi-Fi al máximo"</string>
     <string name="accessibility_data_connection_gprs" msgid="1606477224486747751">"GPRS"</string>
     <string name="accessibility_data_connection_3g" msgid="8628562305003568260">"3G"</string>
-    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5G"</string>
+    <string name="accessibility_data_connection_3.5g" msgid="8664845609981692001">"3.5 G"</string>
     <string name="accessibility_data_connection_4g" msgid="7741000750630089612">"4G"</string>
     <string name="accessibility_data_connection_cdma" msgid="6132648193978823023">"CDMA"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Tipo Edge"</string>
@@ -109,22 +109,18 @@
     <string name="accessibility_notifications_button" msgid="2933903195211483438">"Botón de notificaciones"</string>
     <string name="accessibility_remove_notification" msgid="4883990503785778699">"Eliminar notificación"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS habilitado"</string>
-    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Obteniendo GPS..."</string>
+    <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"Obteniendo ubicación..."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"Teletipo habilitado"</string>
-    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Timbre en vibración"</string>
-    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Timbre en silencio"</string>
+    <string name="accessibility_ringer_vibrate" msgid="666585363364155055">"Modo vibración"</string>
+    <string name="accessibility_ringer_silent" msgid="9061243307939135383">"Modo silencio"</string>
     <string name="data_usage_disabled_dialog_3g_title" msgid="5257833881698644687">"Datos 2G-3G inhabilitados"</string>
     <string name="data_usage_disabled_dialog_4g_title" msgid="4789143363492682629">"Datos 4G inhabilitados"</string>
     <string name="data_usage_disabled_dialog_mobile_title" msgid="1046047248844821202">"Datos móviles inhabilitados"</string>
     <string name="data_usage_disabled_dialog_title" msgid="2086815304858964954">"Datos inhabilitados"</string>
     <string name="data_usage_disabled_dialog" msgid="6524467913290900042">"Se ha alcanzado el límite de uso de datos especificado."\n\n"Se pueden aplicar cargos adicionales si utilizas más datos."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="7729772039208664606">"Volver a habilitar los datos"</string>
-    <!-- no translation found for status_bar_settings_signal_meter_disconnected (1940231521274147771) -->
-    <skip />
-    <!-- no translation found for status_bar_settings_signal_meter_wifi_nossid (6557486452774597820) -->
-    <skip />
-    <!-- no translation found for gps_notification_searching_text (8574247005642736060) -->
-    <skip />
-    <!-- no translation found for gps_notification_found_text (4619274244146446464) -->
-    <skip />
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Sin conexión a Internet"</string>
+    <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Con conexión Wi-Fi"</string>
+    <string name="gps_notification_searching_text" msgid="8574247005642736060">"Buscando GPS"</string>
+    <string name="gps_notification_found_text" msgid="4619274244146446464">"Ubicación definida por GPS"</string>
 </resources>

@@ -113,7 +113,7 @@
     <string name="httpErrorAuth" msgid="7293960746955020542">"Потврда идентитета није успела."</string>
     <string name="httpErrorProxyAuth" msgid="1788207010559081331">"Потврда идентитета преко прокси сервера није успела."</string>
     <string name="httpErrorConnect" msgid="7623096283505770433">"Успостављање везе са сервером није успело."</string>
-    <string name="httpErrorIO" msgid="5047872902739125260">"Покушај комуникације са сервером није успео. Покушајте поново касније."</string>
+    <!-- outdated translation 5047872902739125260 -->     <string name="httpErrorIO" msgid="4270874999047767599">"Покушај комуникације са сервером није успео. Покушајте поново касније."</string>
     <string name="httpErrorTimeout" msgid="4743403703762883954">"Веза са сервером је истекла."</string>
     <string name="httpErrorRedirectLoop" msgid="8679596090392779516">"Страница садржи превише веза за преусмеравање са сервера."</string>
     <string name="httpErrorUnsupportedScheme" msgid="5257172771607996054">"Протокол није подржан."</string>
@@ -327,19 +327,15 @@
     <string name="permlab_writeContacts" msgid="644616215860933284">"уписивање података о контактима"</string>
     <string name="permdesc_writeContacts" product="tablet" msgid="7782689510038568495">"Омогућава апликацији да измени податке о контакту (адресу) сачуване на таблету. Злонамерне апликације на тај начин могу да избришу или измене податке о контакту."</string>
     <string name="permdesc_writeContacts" product="default" msgid="3924383579108183601">"Омогућава да апликација измени податке о контакту (адреси) сачуване на телефону. Злонамерне апликације могу то да злоупотребе и да избришу или измене податке о контакту."</string>
-    <!-- no translation found for permlab_readProfile (6824681438529842282) -->
-    <skip />
-    <!-- no translation found for permdesc_readProfile (6335739730324727203) -->
-    <skip />
-    <!-- no translation found for permlab_writeProfile (4679878325177177400) -->
-    <skip />
-    <!-- no translation found for permdesc_writeProfile (6431297330378229453) -->
-    <skip />
-    <!-- outdated translation 6898987798303840534 -->     <string name="permlab_readCalendar" msgid="5972727560257612398">"читање догађаја из календара"</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Омогућава апликацији да чита све догађаје из календара сачуване на таблету. Злонамерне апликације то могу да злоупотребе и пошаљу ваше догађаје из календара другим особама."</string>
-    <!-- outdated translation 5905870265734599678 -->     <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Омогућава апликацији да чита све догађаје из календара сачуване на таблету. Злонамерне апликације то могу да злоупотребе и пошаљу ваше догађаје из календара другим особама."</string>
-    <!-- outdated translation 3894879352594904361 -->     <string name="permlab_writeCalendar" msgid="8438874755193825647">"додавање и измена догађаја из календара и слање порука е-поште гостима"</string>
-    <!-- outdated translation 2988871373544154221 -->     <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Омогућава да апликација додаје или мења догађаје у календару, услед чега гостима могу да се шаљу поруке е-поште. Злонамерне апликације могу на основу тога да избришу или измене догађаје из календара или да шаљу поруке е-поште гостима."</string>
+    <!-- outdated translation 2211941946684590103 -->     <string name="permlab_readProfile" msgid="6824681438529842282">"читање података о профилу"</string>
+    <!-- outdated translation 4732942280141331352 -->     <string name="permdesc_readProfile" product="default" msgid="6335739730324727203">"Омогућава да апликација чита све личне податке о профилу. Злонамерне апликације могу то да искористе да би утврдиле ваш идентитет и послале личне информације другим људима."</string>
+    <!-- outdated translation 6561668046361989220 -->     <string name="permlab_writeProfile" msgid="4679878325177177400">"писање података о профилу"</string>
+    <!-- outdated translation 8040643023682531996 -->     <string name="permdesc_writeProfile" product="default" msgid="6431297330378229453">"Омогућава да апликација мења личне податке о профилу. Злонамерне апликације могу то да искористе да би избрисале или измениле податке о профилу."</string>
+    <string name="permlab_readCalendar" msgid="5972727560257612398">"читање календарских догађаја и поверљивих информација"</string>
+    <string name="permdesc_readCalendar" product="tablet" msgid="5665520896961671949">"Дозвољава апликацији да чита све календарске догађаје сачуване на таблету, укључујући догађаје пријатеља или колега. Злонамерна апликација са овом дозволом може да издвоји личне информације из тих календара без знања власника."</string>
+    <string name="permdesc_readCalendar" product="default" msgid="2915879965326930312">"Дозвољава апликацији да чита све календарске догађаје сачуване на телефону, укључујући догађаје пријатеља или колега. Злонамерна апликација са овом дозволом може да издвоји личне информације из тих календара без знања власника."</string>
+    <string name="permlab_writeCalendar" msgid="8438874755193825647">"додавање или измена календарских догађаја и слање порука е-поште гостима без знања власника"</string>
+    <string name="permdesc_writeCalendar" msgid="5368129321997977226">"Дозвољава апликацији да шаље позивнице за догађаје као власник календара и додаје, уклања и мења догађаје које можете да измените на уређају, укључујући догађаје пријатеља или колега. Злонамерна апликација са овом дозволом може да шаље непожељне поруке е-поште које изгледају као да их шаљу власници календара, мења догађаје без знања власника или додаје лажне догађаје."</string>
     <string name="permlab_accessMockLocation" msgid="8688334974036823330">"лажни извори локација у сврхе тестирања"</string>
     <string name="permdesc_accessMockLocation" msgid="7648286063459727252">"Прави лажне изворе локације у сврхе тестирања. Злонамерне апликације могу то да злоупотребе и искористе да замене локацију и/или статус који пријављују прави извори локације, као што су GPS или добављачи мреже."</string>
     <string name="permlab_accessLocationExtraCommands" msgid="2836308076720553837">"приступ додатним командама добављача локације"</string>
@@ -734,6 +730,14 @@
     <string name="permdesc_addVoicemail" msgid="4828507394878206682">"Омогућава апликацији да додаје поруке у ваше пријемно сандуче говорне поште."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="4715212655598275532">"Измена дозвола за географске локације прегледача"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="4011908282980861679">"Омогућава да апликација измени дозволе за утврђивање географске локације у прегледачу. Злонамерне апликације то могу да злоупотребе и искористе за слање информација о локацији насумичним веб сајтовима."</string>
+    <!-- no translation found for permlab_packageVerificationAgent (5568139100645829117) -->
+    <skip />
+    <!-- no translation found for permdesc_packageVerificationAgent (6033195477325381106) -->
+    <skip />
+    <!-- no translation found for permlab_bindPackageVerifier (4187786793360326654) -->
+    <skip />
+    <!-- no translation found for permdesc_bindPackageVerifier (2409521927385789318) -->
+    <skip />
     <string name="save_password_message" msgid="767344687139195790">"Желите ли да прегледач запамти ову лозинку?"</string>
     <string name="save_password_notnow" msgid="6389675316706699758">"Не сада"</string>
     <string name="save_password_remember" msgid="6491879678996749466">"Запамти"</string>
@@ -746,6 +750,16 @@
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="3658178007202748164">"избриши"</string>
     <string name="search_go" msgid="8298016669822141719">"Претражи"</string>
+    <!-- no translation found for searchview_description_search (6749826639098512120) -->
+    <skip />
+    <!-- no translation found for searchview_description_query (5911778593125355124) -->
+    <skip />
+    <!-- no translation found for searchview_description_clear (1330281990951833033) -->
+    <skip />
+    <!-- no translation found for searchview_description_submit (2688450133297983542) -->
+    <skip />
+    <!-- no translation found for searchview_description_voice (2453203695674994440) -->
+    <skip />
     <string name="oneMonthDurationPast" msgid="7396384508953779925">"Пре месец дана"</string>
     <string name="beforeOneMonthDurationPast" msgid="909134546836499826">"Пре месец дана"</string>
   <plurals name="num_seconds_ago">
@@ -871,20 +885,16 @@
     <string name="chooseUsbActivity" msgid="7892597146032121735">"Избор апликације за USB уређај"</string>
     <string name="noApplications" msgid="1691104391758345586">"Ниједна апликација не може да изврши ову радњу."</string>
     <string name="aerr_title" msgid="1905800560317137752"></string>
-    <!-- no translation found for aerr_application (7918612738900928051) -->
+    <!-- no translation found for aerr_application (932628488013092776) -->
     <skip />
-    <!-- no translation found for aerr_process (3473655047134111582) -->
+    <!-- no translation found for aerr_process (4507058997035697579) -->
     <skip />
     <string name="anr_title" msgid="4351948481459135709"></string>
-    <!-- no translation found for anr_activity_application (8339738283149696827) -->
-    <skip />
-    <!-- no translation found for anr_activity_process (7018289416670457797) -->
-    <skip />
-    <!-- no translation found for anr_application_process (7208175830253210526) -->
-    <skip />
-    <!-- no translation found for anr_process (306819947562555821) -->
-    <skip />
-    <!-- outdated translation 3653416315450806396 -->     <string name="force_close" msgid="8346072094521265605">"Принудно затвори"</string>
+    <string name="anr_activity_application" msgid="8339738283149696827">"Апликација <xliff:g id="APPLICATION">%2$s</xliff:g> не реагује."\n\n"Да ли желите да је затворите?"</string>
+    <string name="anr_activity_process" msgid="7018289416670457797">"Активност <xliff:g id="ACTIVITY">%1$s</xliff:g> не реагује."\n\n"Да ли желите да је затворите?"</string>
+    <string name="anr_application_process" msgid="7208175830253210526">"Апликација <xliff:g id="APPLICATION">%1$s</xliff:g> не реагује. Да ли желите да је затворите?"</string>
+    <string name="anr_process" msgid="306819947562555821">"Процес <xliff:g id="PROCESS">%1$s</xliff:g> не реагује."\n\n"Да ли желите да га затворите?"</string>
+    <string name="force_close" msgid="8346072094521265605">"Потврди"</string>
     <string name="report" msgid="4060218260984795706">"Пријави"</string>
     <string name="wait" msgid="7147118217226317732">"Сачекај"</string>
     <string name="launch_warning_title" msgid="8323761616052121936">"Апликација је преусмерена"</string>
@@ -913,16 +923,11 @@
     <string name="volume_alarm" msgid="1985191616042689100">"Јачина звука аларма"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Јачина звука за обавештења"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Јачина звука"</string>
-    <!-- no translation found for volume_icon_description_bluetooth (6538894177255964340) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_ringer (3326003847006162496) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_incall (8890073218154543397) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_media (4217311719665194215) -->
-    <skip />
-    <!-- no translation found for volume_icon_description_notification (7044986546477282274) -->
-    <skip />
+    <!-- outdated translation 1903463583678473070 -->     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Јачина звука Bluetooth-а. Додирните да бисте укључили или искључили нечујни режим."</string>
+    <!-- outdated translation 4730973146425102943 -->     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Јачина звука мелодије звона. Додирните да бисте укључили или искључили нечујни режим."</string>
+    <!-- outdated translation 4245391921367914422 -->     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Јачина звука позива. Додирните да бисте укључили или искључили нечујни режим."</string>
+    <!-- outdated translation 5376060645294131085 -->     <string name="volume_icon_description_media" msgid="4217311719665194215">"Јачина звука медија. Додирните да бисте укључили или искључили нечујни режим."</string>
+    <!-- outdated translation 373288343560012393 -->     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Јачина звука обавештења. Додирните да бисте укључили или искључили нечујни режим."</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Подразумевани звук звона"</string>
     <string name="ringtone_default_with_actual" msgid="8129563480895990372">"Подразумевани звук звона (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
     <string name="ringtone_silent" msgid="4440324407807468713">"Нечујно"</string>
@@ -936,11 +941,11 @@
     <item quantity="one" msgid="1634101450343277345">"Доступна је отворена Wi-Fi мрежа"</item>
     <item quantity="other" msgid="7915895323644292768">"Доступне су отворене Wi-Fi мреже"</item>
   </plurals>
-    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Није било могуће повезати се са Wi-Fi мрежом"</string>
+    <string name="wifi_watchdog_network_disabled" msgid="7904214231651546347">"Није било могуће повезати са Wi-Fi мрежом"</string>
     <string name="wifi_watchdog_network_disabled_detailed" msgid="2517058131278770509">"има лошу интернет везу."</string>
     <string name="wifi_p2p_dialog_title" msgid="97611782659324517">"Wi-Fi Direct"</string>
     <string name="wifi_p2p_turnon_message" msgid="2804722042556269129">"Покрените Wi-Fi Direct. Тиме ћете искључити клијента/хотспот за Wi-Fi."</string>
-    <string name="wifi_p2p_failed_message" msgid="6467545523417622335">"Покретање Wi-Fi Direct везе није успело"</string>
+    <!-- outdated translation 6467545523417622335 -->     <string name="wifi_p2p_failed_message" msgid="1820097493844848281">"Покретање Wi-Fi Direct везе није успело"</string>
     <string name="wifi_p2p_pbc_go_negotiation_request_message" msgid="3170321684621420428">"Захтев за подешавање Wi-Fi Direct везе са адресе <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Кликните на Потврди да бисте прихватили."</string>
     <string name="wifi_p2p_pin_go_negotiation_request_message" msgid="5177412094633377308">"Захтев за подешавање Wi-Fi Direct везе са адресе <xliff:g id="P2P_DEVICE_ADDRESS">%1$s</xliff:g>. Унесите PIN да бисте наставили."</string>
     <string name="wifi_p2p_pin_display_message" msgid="2834049169114922902">"Потребно је да унесете WPS PIN <xliff:g id="P2P_WPS_PIN">%1$s</xliff:g> на равноправном уређају <xliff:g id="P2P_CLIENT_ADDRESS">%2$s</xliff:g> да би се наставило подешавање везе"</string>
@@ -981,7 +986,7 @@
     <string name="usb_storage_stop_error_message" msgid="143881914840412108">"Дошло је до проблема приликом искључивања USB складишта. Уверите се да сте уклонили USB хост, а затим покушајте поново."</string>
     <string name="dlg_confirm_kill_storage_users_title" msgid="963039033470478697">"Укључивање USB меморије"</string>
     <string name="dlg_confirm_kill_storage_users_text" msgid="3202838234780505886">"Ако укључите USB складиште, поједине апликације које користите престаће да раде и могу да постану недоступне док га поново не укључите."</string>
-    <string name="dlg_error_title" msgid="8048999973837339174">"Грешка са USB складиштем"</string>
+    <!-- outdated translation 8048999973837339174 -->     <string name="dlg_error_title" msgid="7323658469626514207">"Грешка са USB складиштем"</string>
     <string name="dlg_ok" msgid="7376953167039865701">"Потврди"</string>
     <string name="usb_mtp_notification_title" msgid="3699913097391550394">"Повезан као медијски уређај"</string>
     <string name="usb_ptp_notification_title" msgid="1960817192216064833">"Повезан као камера"</string>
@@ -1081,8 +1086,8 @@
     <string name="progress_unmounting" product="default" msgid="5556813978958789471">"У току је искључивање SD картице..."</string>
     <string name="progress_erasing" product="nosdcard" msgid="4183664626203056915">"Брисање USB меморије је у току..."</string>
     <string name="progress_erasing" product="default" msgid="2115214724367534095">"Брисање SD картице је у току..."</string>
-    <string name="format_error" product="nosdcard" msgid="4320339096529911637">"Брисање USB меморије није успело."</string>
-    <string name="format_error" product="default" msgid="1343380371925238343">"Брисање SD картице није успело."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="nosdcard" msgid="6299769563624776948">"Брисање USB меморије није успело."</string>
+    <!-- outdated translation 4320339096529911637 -->     <string name="format_error" product="default" msgid="7315248696644510935">"Брисање USB меморије није успело."</string>
     <string name="media_bad_removal" msgid="7960864061016603281">"SD картица није искључена пре него што је уклоњена."</string>
     <string name="media_checking" product="nosdcard" msgid="418188720009569693">"Тренутно је у току провера USB меморије."</string>
     <string name="media_checking" product="default" msgid="7334762503904827481">"Тренутно је у току провера SD картице."</string>
@@ -1126,11 +1131,15 @@
     <string name="data_usage_3g_limit_title" msgid="7093334419518706686">"2G-3G подаци су онемогућени"</string>
     <string name="data_usage_4g_limit_title" msgid="7636489436819470761">"4G подаци су онемогућени"</string>
     <string name="data_usage_mobile_limit_title" msgid="7869402519391631884">"Подаци мобилне мреже су онемогућени"</string>
-    <string name="data_usage_limit_body" msgid="2182247539226163759">"додирните да бисте омогућили"</string>
+    <!-- outdated translation 2182247539226163759 -->     <string name="data_usage_limit_body" msgid="4313857592916426843">"додирните да бисте омогућили"</string>
     <string name="data_usage_3g_limit_snoozed_title" msgid="7026739121138005231">"Прекорачен пренос 2G-3G података"</string>
     <string name="data_usage_4g_limit_snoozed_title" msgid="1106562779311209039">"Прекорачење преноса 4G података"</string>
     <string name="data_usage_mobile_limit_snoozed_title" msgid="279240572165412168">"Прек. прен. под. за мобил. уређ."</string>
     <string name="data_usage_limit_snoozed_body" msgid="2932736326652880660">"<xliff:g id="SIZE">%s</xliff:g> преко наведеног ограничења"</string>
+    <!-- no translation found for data_usage_restricted_title (5965157361036321914) -->
+    <skip />
+    <!-- no translation found for data_usage_restricted_body (5087354814839059798) -->
+    <skip />
     <string name="ssl_certificate" msgid="6510040486049237639">"Безбедносни сертификат"</string>
     <string name="ssl_certificate_is_valid" msgid="6825263250774569373">"Овај сертификат је важећи."</string>
     <string name="issued_to" msgid="454239480274921032">"Издато за:"</string>
@@ -1149,4 +1158,6 @@
     <string name="activity_chooser_view_dialog_title_default" msgid="3325054276356556835">"Избор активности"</string>
     <string name="share_action_provider_share_with" msgid="1791316789651185229">"Дељење са..."</string>
     <string name="status_bar_device_locked" msgid="3092703448690669768">"Уређај је закључан."</string>
+    <!-- no translation found for list_delimeter (3975117572185494152) -->
+    <skip />
 </resources>
